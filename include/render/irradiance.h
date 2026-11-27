@@ -21,10 +21,11 @@
 // tIrradianceInfob takes the same 0xA0 block (cPS2GraphicsMan::mIrradianceInfo); whether tIrradianceInfo is a base
 // or another name of this class is not known. What each vector holds is not known yet.
 struct cIrradiance {
-    t4Vector unk_000[10];           // 0x000 [U] ten quadwords, scaled / tinted / added component-wise (x, y, z, w)
+    t4Vector mVectors[10];          // 0x000 (name ours) [U] ten quadwords, scaled / tinted / added component-wise
+                                    //        (x, y, z, w)
 };
 
-CHECK_OFFSET(cIrradiance, unk_000, 0x000);
+CHECK_OFFSET(cIrradiance, mVectors, 0x000);
 CHECK_SIZE(cIrradiance, 0xA0);
 
 // tIrradianceInfo: the irradiance block the graphics manager is handed. [P] SetIrradiance__15cPS2GraphicsManRC15

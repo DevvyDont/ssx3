@@ -3539,9 +3539,9 @@ extern void* cFEStateNetConfig_vtbl[];
 
 /**
  * Constructs the network configuration state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
- * installs cFEStateNetConfig_vtbl and clears its fields: miSelectedSetting, miNumSettings, unk_6D8, unk_6DC,
- * mpLBAdapters, mpLBSettings, unk_6F0, mpMenuConfig, mpConfigRectangle, mpNoConfiguration, unk_700, mpustrPopupText and
- * the three mpustrAuthError entries.
+ * installs cFEStateNetConfig_vtbl and clears its fields: miSelectedSetting, miNumSettings, mbCancelled, mbPushLogin,
+ * mpLBAdapters, mpLBSettings, unk_6F0, mpMenuConfig, mpConfigRectangle, mpNoConfiguration, mbAuthFailed,
+ * mpustrPopupText and the three mpustrAuthError entries.
  *
  * @return @p self
  */
@@ -3551,15 +3551,15 @@ void* cFEStateNetConfig::cFEStateNetConfig1()
     miSelectedSetting = 0;
     VPTR_OF(cListNode, this) = cFEStateNetConfig_vtbl;
     miNumSettings = 0;
-    unk_6D8 = 0;
-    unk_6DC = 0;
+    mbCancelled = 0;
+    mbPushLogin = 0;
     mpLBAdapters = 0;
     mpLBSettings = 0;
     unk_6F0 = 0;
     mpMenuConfig = 0;
     mpConfigRectangle = 0;
     mpNoConfiguration = 0;
-    unk_700 = 0;
+    mbAuthFailed = 0;
     mpustrPopupText = 0;
     mpustrAuthError[0] = 0;
     mpustrAuthError[1] = 0;
@@ -5721,9 +5721,9 @@ extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
-struct sEntry14_20D0 {
+struct sEntry14_20D0 {   // a D_00441630 message group (names ours)
     int type;
-    int f4;
+    int start;
     char pad_0x8[0x14 - 0x8];
 };
 extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
@@ -5748,9 +5748,9 @@ extern "C" void func_001E20D0(int which, int flag)
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(35, 1);
-                    func_001E2FE0(tbl[35].f4 + 1, 0);
+                    func_001E2FE0(tbl[35].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[35].f4, 0);
+                    func_001E2FE0(tbl[35].start, 0);
                 }
             }
             break;
@@ -5759,9 +5759,9 @@ extern "C" void func_001E20D0(int which, int flag)
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(37, 1);
-                    func_001E2FE0(tbl[37].f4 + 1, 0);
+                    func_001E2FE0(tbl[37].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[37].f4, 0);
+                    func_001E2FE0(tbl[37].start, 0);
                 }
             }
             break;
@@ -5770,9 +5770,9 @@ extern "C" void func_001E20D0(int which, int flag)
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
                     func_001E3A78(39, 1);
-                    func_001E2FE0(tbl[39].f4 + 1, 0);
+                    func_001E2FE0(tbl[39].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[39].f4, 0);
+                    func_001E2FE0(tbl[39].start, 0);
                 }
             }
             break;
@@ -5789,9 +5789,9 @@ extern "C" bool func_001E3A30(int group);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
-struct sEntry14_2220 {
+struct sEntry14_2220 {   // a D_00441630 message group (names ours)
     int type;
-    int f4;
+    int start;
     char pad_0x8[0x14 - 0x8];
 };
 extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
@@ -5816,9 +5816,9 @@ extern "C" void func_001E2220(int which, int flag)
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(34, 1);
-                    func_001E2FE0(tbl[34].f4 + 1, 0);
+                    func_001E2FE0(tbl[34].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[34].f4, 0);
+                    func_001E2FE0(tbl[34].start, 0);
                 }
             }
             break;
@@ -5827,9 +5827,9 @@ extern "C" void func_001E2220(int which, int flag)
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(36, 1);
-                    func_001E2FE0(tbl[36].f4 + 1, 0);
+                    func_001E2FE0(tbl[36].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[36].f4, 0);
+                    func_001E2FE0(tbl[36].start, 0);
                 }
             }
             break;
@@ -5838,9 +5838,9 @@ extern "C" void func_001E2220(int which, int flag)
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
                     func_001E3A78(38, 1);
-                    func_001E2FE0(tbl[38].f4 + 1, 0);
+                    func_001E2FE0(tbl[38].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[38].f4, 0);
+                    func_001E2FE0(tbl[38].start, 0);
                 }
             }
             break;
@@ -6299,12 +6299,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool func_001E3A30(int group);
 
-struct sEntry14_2BB8 {
+struct sEntry14_2BB8 {   // a D_00441630 message group (names ours)
     int type;
-    int f4;
+    int start;
     int count;
-    int fC;
-    int f10;
+    int category;
+    int isFolder;
 };
 extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
 
@@ -6325,7 +6325,7 @@ extern "C" int func_001E2BB8(int type, int all)
     for (i = 0; i < 61; i++) {
         sEntry14_2BB8* groupEntry = &D_00441630_2BB8[i];
         if (groupEntry->type == type) {
-            if (all != 0 || (groupEntry->f10 != 0 && func_001E3A30(i) != 0)) {
+            if (all != 0 || (groupEntry->isFolder != 0 && func_001E3A30(i) != 0)) {
                 total += groupEntry->count;
             } else {
                 total += 1;
@@ -6367,12 +6367,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool func_001E3A30(int group);
 
-struct sEntry14_2C80 {
+struct sEntry14_2C80 {   // a D_00441630 message group (names ours)
     int type;
     int first;
     int count;
-    int fC;
-    int f10;
+    int category;
+    int isFolder;
 };
 extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
 
@@ -6397,7 +6397,7 @@ extern "C" int func_001E2C80(int type, int idx, int mode)
         sEntry14_2C80* groupEntry = &D_00441630_2C80[i];
         if (groupEntry->type == type) {
             int n;
-            if (mode == 0 || groupEntry->f10 == 0 || func_001E3A30(i) != 0) {
+            if (mode == 0 || groupEntry->isFolder == 0 || func_001E3A30(i) != 0) {
                 n = groupEntry->count;
             } else {
                 n = 1;
@@ -6429,8 +6429,8 @@ struct sPopupEntry14 {
     int type;
     int start;   // 0x4: the group's first message
     int count;   // 0x8: its message count
-    int field_0xC;
-    int field_0x10;
+    int category;   // 0xC: the category func_001E2D58 tests
+    int isFolder;   // 0x10
 };
 extern sPopupEntry14 D_00441630[];
 
@@ -6446,7 +6446,7 @@ extern "C" bool func_001E2D58(int category, int i)
 {
     sPopupEntry18* messageEntry = &D_004C6C08[i];
     sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
-    return groupEntry->field_0xC == category;
+    return groupEntry->category == category;
 }
 #endif
 
@@ -6494,10 +6494,10 @@ extern "C" int func_001E2DC0(int idx)
         int start = groupEntry->start;
         int count = groupEntry->count;
         if (start + count - 1 < idx) {
-            if (groupEntry->field_0xC == target->field_0xC) position += count;
+            if (groupEntry->category == target->category) position += count;
             i += count;
         } else {
-            if (groupEntry->field_0xC == target->field_0xC) position += idx - start + 1;
+            if (groupEntry->category == target->category) position += idx - start + 1;
             break;
         }
     }
@@ -6608,10 +6608,10 @@ struct sPopupList_2FE0 {
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupList_2FE0* func_001E39F8_list2FE0() __asm__("func_001E39F8");
 
-struct sPopupEntry18_2FE0 {
+struct sPopupEntry18_2FE0 {   // a D_004C6C08 message (names ours)
     int field_0x0;
-    int field_0x4;
-    int field_0x8;
+    int groupIndex;
+    int kind;
     char pad_0xC[0x18 - 0xC];
 };
 extern sPopupEntry18_2FE0 D_004C6C08_2FE0[] __asm__("D_004C6C08");
@@ -6633,7 +6633,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     sPopupList_2FE0* messageList = func_001E39F8_list2FE0();
     if (messageList->count == 25)
         func_001E31B8(0);
-    if (D_004C6C08_2FE0[id].field_0x8 == 1)
+    if (D_004C6C08_2FE0[id].kind == 1)
         flag = func_001E3100(id);
     messageList->entries[messageList->count].id = id;
     messageList->entries[messageList->count].flag = flag;
@@ -7298,15 +7298,15 @@ extern int D_004A20CC;
 
 struct sObj_3C00 {
     char pad_0x0[0x9C];
-    int a[8];   // 0x9C
-    int b[8];   // 0xBC
-    int c[8];   // 0xDC
-    int d[8];   // 0xFC
-    int e[8];   // 0x11C
+    int mpUnreadMail[8];    // 0x9C (cOVState_MESSAGECENTER's names)
+    int mpFAQIcon[8];       // 0xBC
+    int mpFrom[8];          // 0xDC
+    int mpSubject[8];       // 0xFC
+    int mpNumber[8];        // 0x11C
     char pad_0x13C[0x164 - 0x13C];
-    int h164;   // 0x164
-    int h168;   // 0x168
-    int h16C;   // 0x16C
+    int miFolderTex;        // 0x164
+    int miMinusFolderTex;   // 0x168
+    int miQuestionMarkTex;  // 0x16C
 };
 
 /**
@@ -7336,11 +7336,11 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     VPTR_OF(cListNode, self) = cOVState_MESSAGECENTER_vtbl;
     int i;
     for (i = 0; i < 8; i++) {
-        stateView->a[i] = 0;
-        stateView->b[i] = 0;
-        stateView->c[i] = 0;
-        stateView->d[i] = 0;
-        stateView->e[i] = 0;
+        stateView->mpUnreadMail[i] = 0;
+        stateView->mpFAQIcon[i] = 0;
+        stateView->mpFrom[i] = 0;
+        stateView->mpSubject[i] = 0;
+        stateView->mpNumber[i] = 0;
     }
     self->mpTotalMessagesLabel = 0;
     self->mpUnreadMessagesLabel = 0;
@@ -7354,17 +7354,17 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_folder);
-        stateView->h164 = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
+        stateView->miFolderTex = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_minus_folder);
-        stateView->h168 = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
+        stateView->miMinusFolderTex = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_questmark_b);
-        stateView->h16C = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
+        stateView->miQuestionMarkTex = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30(7) != 0)
@@ -7742,15 +7742,15 @@ extern char str_kT_BTNView[];
 extern char str_kT_BTNCollapse[];
 extern char str_kT_BTNExpand[];
 
-struct sEntry18_4458 {
+struct sEntry18_4458 {   // a D_004C6C08 message (names ours)
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
 extern sEntry18_4458 D_004C6C08_4458[] __asm__("D_004C6C08");
-struct sEntry14_4458 {
-    int field_0x0;
-    int field_0x4;
+struct sEntry14_4458 {   // a D_00441630 message group (names ours)
+    int type;
+    int start;
     char pad_0x8[0x14 - 0x8];
 };
 extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
@@ -7777,9 +7777,9 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
         if (self->mpButtonText1 != 0) {
             int id = func_001E2C80(4, -diff, 1);
             sEntry18_4458* messageEntry = &D_004C6C08_4458[id];
-            int groupIndex = messageEntry->field_0x4;
+            int groupIndex = messageEntry->groupIndex;
             sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
-            if (id == groupEntry->field_0x4) {
+            if (id == groupEntry->start) {
                 if (func_001E3A30(groupIndex))
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
                 else
@@ -8000,20 +8000,20 @@ extern char str_NoMessages[];
 
 struct sList_48B0 {
     char pad0[0x9C];
-    int a[8];       // 0x9C
-    int b[8];       // 0xBC
-    int c[8];       // 0xDC
-    int d[8];       // 0xFC
-    int e[8];       // 0x11C
+    int mpUnreadMail[8];    // 0x9C (cOVState_MESSAGECENTER's names)
+    int mpFAQIcon[8];       // 0xBC
+    int mpFrom[8];          // 0xDC
+    int mpSubject[8];       // 0xFC
+    int mpNumber[8];        // 0x11C
     char pad13C[0x144 - 0x13C];
-    char* menu;     // 0x144
+    char* mpMenu;           // 0x144
     char pad148[0x14C - 0x148];
-    int f14C;       // 0x14C
-    int f150;       // 0x150
-    int f154;       // 0x154
-    int f158;       // 0x158
+    int mpButtonSquare;     // 0x14C
+    int mpButtonText3;      // 0x150
+    int mpButtonCross;      // 0x154
+    int mpButtonText1;      // 0x158
     char pad15C[0x174 - 0x15C];
-    int scroll;     // 0x174
+    int mScrollOffset;      // 0x174
 };
 
 /**
@@ -8048,10 +8048,10 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
         cUIState_hideObjSafe_48B0(self, str_UnreadMailBitmaps);
         cUIState_hideObjSafe_48B0(self, str_MessageHighlights);
         cUIState_showObjSafe_48B0(self, str_NoMessages);
-        func_001E4840_48B0(self, self->f154);
-        func_001E4840_48B0(self, self->f158);
-        func_001E4840_48B0(self, self->f14C);
-        func_001E4840_48B0(self, self->f150);
+        func_001E4840_48B0(self, self->mpButtonCross);
+        func_001E4840_48B0(self, self->mpButtonText1);
+        func_001E4840_48B0(self, self->mpButtonSquare);
+        func_001E4840_48B0(self, self->mpButtonText3);
     } else {
         cUIState_showObjSafe_48B0(self, str_MessageNumbers);
         sel = total;
@@ -8059,11 +8059,11 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
         cUIState_showObjSafe_48B0(self, str_MessageSubjects);
         cUIState_showObjSafe_48B0(self, str_UnreadMailBitmaps);
         cUIState_hideObjSafe_48B0(self, str_NoMessages);
-        func_001E4878_48B0(self, self->f154);
-        func_001E4878_48B0(self, self->f158);
+        func_001E4878_48B0(self, self->mpButtonCross);
+        func_001E4878_48B0(self, self->mpButtonText1);
         for (int i = 0; i < 8; i++) {
             int n = i + 1;
-            int k = local - self->scroll - n;
+            int k = local - self->mScrollOffset - n;
             if (k >= 0) {
                 int messageIndex = func_001E3620_48B0(k);
                 func_001E4C78_48B0(self, k, i, messageIndex, func_001E3650_48B0(k));
@@ -8077,19 +8077,19 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
                 }
                 func_001E4C78_48B0(self, -1, i, faqMessage, (unsigned char)func_001E4B80_48B0(self, faqMessage));
             } else {
-                func_001E4840_48B0(self, self->a[i]);
-                func_001E4840_48B0(self, self->b[i]);
-                func_001E4840_48B0(self, self->c[i]);
-                func_001E4840_48B0(self, self->e[i]);
-                func_001E4840_48B0(self, self->d[i]);
+                func_001E4840_48B0(self, self->mpUnreadMail[i]);
+                func_001E4840_48B0(self, self->mpFAQIcon[i]);
+                func_001E4840_48B0(self, self->mpFrom[i]);
+                func_001E4840_48B0(self, self->mpNumber[i]);
+                func_001E4840_48B0(self, self->mpSubject[i]);
             }
         }
     }
-    unsigned char keep = self->menu[0x95];
-    cUIMenu_setScrollableMenu_48B0(self->menu, sel);
-    self->menu[0x95] = keep;
-    unsigned char scrollByte = self->scroll;
-    self->menu[0x98] = scrollByte;
+    unsigned char keep = self->mpMenu[0x95];
+    cUIMenu_setScrollableMenu_48B0(self->mpMenu, sel);
+    self->mpMenu[0x95] = keep;
+    unsigned char scrollByte = self->mScrollOffset;
+    self->mpMenu[0x98] = scrollByte;
 }
 #endif
 
@@ -8100,10 +8100,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4B80);
 extern int D_004A20C4;
 extern "C" int func_001E2DC0(int idx);
 
-struct sPopupEntry18_4B80 {
+struct sPopupEntry18_4B80 {   // a D_004C6C08 message (names ours)
     int field_0x0;
     int groupIndex;
-    int field_0x8;
+    int kind;
     char pad_0xC[0x18 - 0xC];
 };
 extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
@@ -8124,11 +8124,11 @@ extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
         return 0xFF;
     }
     sPopupEntry18_4B80* messageEntry = &D_004C6C08_4B80[idx];
-    if (messageEntry->field_0x8 == 1) {
+    if (messageEntry->kind == 1) {
         int position = func_001E2DC0(idx);
         int div = 1;
         sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
-        switch (groupEntry->field_0xC) {
+        switch (groupEntry->category) {
         case 3:
             div = 10;
             position = position / 2;
@@ -8163,22 +8163,24 @@ extern char str_dash[];
 extern char str_sp_gt[];
 extern char str_pct_d_d[];
 
+// a D_004C6C08 message (names ours, from use: its group, kind, sender and subject string)
 struct sEnt18_4C78 {
     int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
+    int groupIndex;
+    int kind;
+    int sender;
+    int subject;
     int f14;
 };
 extern sEnt18_4C78 D_004C6C08_4C78[] __asm__("D_004C6C08");
 
+// a D_00441630 message group (names ours)
 struct sEnt14_4C78 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
+    int type;
+    int start;
+    int count;
+    int category;
+    int isFolder;
 };
 extern sEnt14_4C78 D_00441630_4C78[] __asm__("D_00441630");
 
@@ -8193,31 +8195,31 @@ struct sObj_4C78 {
     int f4;
     sVEntry_4C78* vt;   // 0x08
     char padC[0xC];
-    int f18;            // 0x18
+    int mMiscData;      // 0x18 (cUIThing's)
     char pad1C[0x5C];
-    int f78;            // 0x78
-    int f7C;            // 0x7C
+    int mTextureID;     // 0x78 (cUIIcon's)
+    int mpTextureElem;  // 0x7C
 };
 
 struct sPopup_4C78 {
     char pad0[0x9C];
-    sObj_4C78* a9C[8];  // 0x9C
-    sObj_4C78* aBC[8];  // 0xBC
-    sObj_4C78* aDC[8];  // 0xDC
-    sObj_4C78* aFC[8];  // 0xFC
-    sObj_4C78* a11C[8]; // 0x11C
+    sObj_4C78* mpUnreadMail[8];     // 0x9C (cOVState_MESSAGECENTER's names)
+    sObj_4C78* mpFAQIcon[8];        // 0xBC
+    sObj_4C78* mpFrom[8];           // 0xDC
+    sObj_4C78* mpSubject[8];        // 0xFC
+    sObj_4C78* mpNumber[8];         // 0x11C
     char pad13C[0x28];
-    int f164;           // 0x164
-    int f168;           // 0x168
-    int f16C;           // 0x16C
+    int miFolderTex;                // 0x164
+    int miMinusFolderTex;           // 0x168
+    int miQuestionMarkTex;          // 0x16C
     char pad170[4];
-    int f174;           // 0x174
+    int mScrollOffset;              // 0x174
 };
 
-static inline void setTint_4C78(sObj_4C78* o, int v, int idx)
+static inline void setTexture_4C78(sObj_4C78* o, int elem, int textureId)
 {
-    o->f78 = idx;
-    o->f7C = v;
+    o->mTextureID = textureId;
+    o->mpTextureElem = elem;
 }
 
 static inline void show_4C78(sObj_4C78* o)
@@ -8246,35 +8248,35 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
     sPopup_4C78* self = (sPopup_4C78*)self_;
     char buf[16];
     sEnt18_4C78* messageEntry = &D_004C6C08_4C78[id];
-    sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->f4];
+    sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->groupIndex];
     char* messageList = (char*)func_001E39F8(self);
     if (idx == -1) {
-        if (groupEntry->f10 != 0) {
-            if (id == groupEntry->f4) {
-                if (func_001E3A30(messageEntry->f4) == 0)
-                    setTint_4C78(self->aBC[slot], self->f164, idx);
+        if (groupEntry->isFolder != 0) {
+            if (id == groupEntry->start) {
+                if (func_001E3A30(messageEntry->groupIndex) == 0)
+                    setTexture_4C78(self->mpFAQIcon[slot], self->miFolderTex, idx);
                 else
-                    setTint_4C78(self->aBC[slot], self->f168, idx);
+                    setTexture_4C78(self->mpFAQIcon[slot], self->miMinusFolderTex, idx);
             } else {
-                setTint_4C78(self->aBC[slot], self->f16C, idx);
+                setTexture_4C78(self->mpFAQIcon[slot], self->miQuestionMarkTex, idx);
             }
         }
-        func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
-        func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
+        func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+        func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
     } else {
         int mask = 1 << idx;
         if (*(int*)(messageList + 0xC8) & mask) {
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
         } else {
-            func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->a9C[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->aBC[slot]);
+            func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
         }
     }
-    if (self->a11C[slot] != 0) {
-        if (groupEntry->f10 != 0) {
-            if (id == groupEntry->f4) {
-                if (func_001E3A30(messageEntry->f4) == 0)
+    if (self->mpNumber[slot] != 0) {
+        if (groupEntry->isFolder != 0) {
+            if (id == groupEntry->start) {
+                if (func_001E3A30(messageEntry->groupIndex) == 0)
                     sprintf(buf, str_plus);
                 else
                     sprintf(buf, str_dash);
@@ -8282,21 +8284,21 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
                 sprintf(buf, str_sp_gt);
             }
         } else {
-            sprintf(buf, str_pct_d_d, self->f174 + slot + 1);
+            sprintf(buf, str_pct_d_d, self->mScrollOffset + slot + 1);
         }
-        cUIText_setAsciiString((cUIText*)self->a11C[slot], buf);
-        show_4C78(self->a11C[slot]);
+        cUIText_setAsciiString((cUIText*)self->mpNumber[slot], buf);
+        show_4C78(self->mpNumber[slot]);
     }
-    if (self->aDC[slot] != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)self->aDC[slot], func_001E2EA0(messageEntry->fC));
-        show_4C78(self->aDC[slot]);
-        self->aDC[slot]->f18 = id;
+    if (self->mpFrom[slot] != 0) {
+        cUIText_setUnicodeStringByID((cUIText*)self->mpFrom[slot], func_001E2EA0(messageEntry->sender));
+        show_4C78(self->mpFrom[slot]);
+        self->mpFrom[slot]->mMiscData = id;
     }
-    if (messageEntry->f8 == 1) {
+    if (messageEntry->kind == 1) {
         func_001E4F70((cOVState_MESSAGECENTER*)self, slot, id, sub);
-    } else if (self->aFC[slot] != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)self->aFC[slot], messageEntry->f10);
-        show_4C78(self->aFC[slot]);
+    } else if (self->mpSubject[slot] != 0) {
+        cUIText_setUnicodeStringByID((cUIText*)self->mpSubject[slot], messageEntry->subject);
+        show_4C78(self->mpSubject[slot]);
     }
 }
 #endif
@@ -8573,11 +8575,11 @@ void cOVState_ViewPopup::onWidgetCreate(cUIThing* widget)
 INCLUDE_ASM("fe/fepopupmisc", func_001E5428);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sPopupEntry18_5428 {
+struct sPopupEntry18_5428 {   // a D_004C6C08 message (names ours)
     int field_0x0;
     int groupIndex;
     char pad_0x8[0x4];
-    int field_0xC;
+    int sender;
     char pad_0x10[0x8];
 };
 extern sPopupEntry18_5428 D_004C6C08_5428[] __asm__("D_004C6C08");
@@ -8645,7 +8647,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
         }
     }
     if (self->mpFrom != 0) {
-        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(messageEntry->field_0xC));
+        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(messageEntry->sender));
     }
     func_001E55D0(self, self->miMessage);
     func_001E5780(self, self->miMessage);
@@ -8917,7 +8919,7 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
     int div = 1;
     sPopupEntry18* messageEntry = &D_004C6C08[idx];
     sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
-    switch (groupEntry->field_0xC) {
+    switch (groupEntry->category) {
     case 3:
         div = 10;
         position = position / 2;

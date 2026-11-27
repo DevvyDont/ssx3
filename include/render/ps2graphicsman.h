@@ -63,11 +63,11 @@ enum { kDMAC_VIF1 = 1 };
 enum { kGS_CSR_FIFO_MASK = 0xC000, kGS_CSR_FIFO_EMPTY = 0x4000 };
 
 // The GS's alpha scale: 0x80 is fully opaque (1.0) (name ours). [U] func_00382AF0 draws the filter pass with alpha
-// blending only when the filter alpha (cPS2GraphicsMan::unk_59F8) is not 0x80.
+// blending only when the filter alpha (cPS2GraphicsMan::mScreenAlpha) is not 0x80.
 enum { kGSAlphaOne = 0x80 };
 
 // SMODE2's FFMD bit, the field / frame read mode (names after Sony's libgraph SCE_GS_FIELD / SCE_GS_FRAME). [U]
-// func_0037BD98 keeps it in cPS2GraphicsMan::unk_5A46 for sceGsResetGraph; func_00382AF0 doubles the display height
+// func_0037BD98 keeps it in cPS2GraphicsMan::mFieldMode for sceGsResetGraph; func_00382AF0 doubles the display height
 // for an interlaced frame-mode display.
 enum { kGS_FFMD_FIELD = 0, kGS_FFMD_FRAME = 1 };
 
@@ -246,12 +246,17 @@ public:
     int NumDisplayModes;            // 0x59C4 [O] cPSPGraphicsMan; [P] GetNumDisplayModes (cPS2GraphicsMan_GetNumDisplayModes)
     int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (cPS2GraphicsMan_GetDisplayMode1); [R] Init stores -1
     tDisplayMode* DisplayModes;     // 0x59CC [O]; [P] GetScreenWidth/Height read [CurrentDisplayMode] (0xA4 each)
-    int unk_59D0;                   // 0x59D0 [R] Init; [U] func_0037BD98; [X] dither (DTHE)
+    int mDither;                    // 0x59D0 (name ours) [R] Init; [U] func_0037BD98 sets 1 for a 16-bit display
+                                    //        format, func_00382AF0 sends it as DTHE; [X] dither
     char unk_59D4[0xC];             // 0x59D4
-    unsigned long unk_59E0;         // 0x59E0 (64-bit: EE long) [U] func_0037C198 ld/sd; [X] dimx (DIMX)
+    unsigned long mDitherMatrix;    // 0x59E0 (name ours; 64-bit: EE long) [U] func_0037C198 packs the 4 x 4 dither
+                                    //        matrix into it (ld/sd), func_00382AF0 sends it as DIMX; [X] dimx
     int mFilterEnabled;             // 0x59E8 [P] EnableFilter/DisableFilter (cPS2GraphicsMan_EnableFilter/cPS2GraphicsMan_DisableFilter); [X] blitToDisplay
-    int unk_59EC[3];                // 0x59EC [U] func_0037C570; [X] brightness r, g, b
-    int unk_59F8;                   // 0x59F8 [U] func_0037C720 / func_0037C770; [X] alpha
+    int mBrightnessColour[3];       // 0x59EC (name ours) [U] func_0037C570 sets r, g, b (0..128), func_0037C638
+                                    //        returns them, func_00382AF0 colours the filter pass with them; [X]
+                                    //        brightness r, g, b
+    int mScreenAlpha;               // 0x59F8 (name ours) [U] func_0037C720 sets (1 - fade) * 128, func_0037C770
+                                    //        returns the fade, func_00382AF0 blends the filter pass with it; [X] alpha
     float mScreenBrightness;        // 0x59FC [P] Get/SetScreenBrightness (cPS2GraphicsMan_GetScreenBrightness/cPS2GraphicsMan_SetScreenBrightness)
     unsigned int mVifCursor;        // 0x5A00 [X] vifCursor; [U] draw slots append packets here
     unsigned int mVifHalfStart;     // 0x5A04 [X]; [R] Init
@@ -263,30 +268,39 @@ public:
     void* mpGifBuffRaw;             // 0x5A1C [X]; [R] Init: operator new(0x4CC40, "GifBuff")
     unsigned int mGifBuffBase;      // 0x5A20 [X]
     int mGifBuildIndex;             // 0x5A24 [X]
-    unsigned int unk_5A28;          // 0x5A28 [U] func_0037A260 / func_0037A430
-    unsigned long* unk_5A2C;        // 0x5A2C [U] func_0037A260 / func_0037A430
+    unsigned int mStripPacketStart; // 0x5A28 (name ours) [U] func_0037A260 keeps the strip packet's start (mVifCursor)
+                                    //        here, func_0037A430 queues the packet from it and clears it
+    unsigned long* mStripCursor;    // 0x5A2C (name ours) [U] the strip packet's write cursor: func_0037A260 writes the
+                                    //        headers through it, func_0037A430 ends the packet there and clears it
     int mFBWidth;                   // 0x5A30 [X] fbWidth; [U] func_0037BD98 (SetDisplayMode)
     int mFBHeight;                  // 0x5A34 [X] fbHeight
-    int unk_5A38;                   // 0x5A38 [U] func_0037BD98; [X] displayPsm
+    int mDisplayFormat;             // 0x5A38 (name ours) [U] func_0037BD98 stores the display buffer's pixel format,
+                                    //        func_00382AF0 sends it in DISPFB1; [X] displayPsm
     int mCurrentFBFormat;           // 0x5A3C [P] GetCurrentFBFormat / GetPSMFormat (cPS2GraphicsMan_GetCurrentFBFormat, cPS2GraphicsMan_GetPSMFormat)
     int mCurrentZBFormat;           // 0x5A40 [P] GetCurrentZBFormat (cPS2GraphicsMan_GetCurrentZBFormat; layout_xlate "seen")
-    short unk_5A44;                 // 0x5A44 [U] func_0037BD98 / func_00382AF0; [X] interlace
-    short unk_5A46;                 // 0x5A46 [X] ffmd
-    short unk_5A48;                 // 0x5A48 [X] omode
+    short mInterlace;               // 0x5A44 (name ours) [U] func_0037BD98 / func_00382AF0: SMODE2.INT; [X] interlace
+    short mFieldMode;               // 0x5A46 (name ours) [U] func_0037BD98 / func_00382AF0: SMODE2.FFMD; [X] ffmd
+    short mOutputMode;              // 0x5A48 (name ours) [U] func_0037BD98 stores 2, the sceGsResetGraph mode; [X]
+                                    //        omode
     char unk_5A4A[0x2];             // 0x5A4A padding
-    int unk_5A4C;                   // 0x5A4C [U] accessor cPS2GraphicsMan_GetDTV; [X] progressive
+    int mDTV;                       // 0x5A4C (name ours) [U] accessor cPS2GraphicsMan_GetDTV ([O] GetDTV);
+                                    //        func_0037BD98 stores tDisplayMode::mDTV; [X] progressive
     int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (cPS2GraphicsMan_GetFrameBufferWidth, by position; shift +0xC30); [X] fbw
-    int unk_5A54;                   // 0x5A54 [X] dispWidth
-    int unk_5A58;                   // 0x5A58 [X] dispHeight
-    int unk_5A5C;                   // 0x5A5C [U] accessor func_00395550; [X] dispFbw
-    int unk_5A60;                   // 0x5A60 [X] magv
-    int unk_5A64;                   // 0x5A64 [X] magh
-    int unk_5A68;                   // 0x5A68 [X] displayPages
-    int unk_5A6C;                   // 0x5A6C [X] drawPages
-    int unk_5A70;                   // 0x5A70 [X] zPages
+    int mDisplayWidth;              // 0x5A54 (name ours) [U] func_0037BD98: the display width; [X] dispWidth
+    int mDisplayHeight;             // 0x5A58 (name ours) [U] func_0037BD98: the display height; [X] dispHeight
+    int mDisplayBufferWidth;        // 0x5A5C (name ours) [U] accessor func_00395550; func_0037BD98: the display width
+                                    //        in 64-pixel units (DISPFB1.FBW); [X] dispFbw
+    int mMagV;                      // 0x5A60 (name ours) [U] DISPLAY1.MAGV (func_0037BD98 clears it); [X] magv
+    int mMagH;                      // 0x5A64 (name ours) [U] DISPLAY1.MAGH, from the display width; [X] magh
+    int mDisplayPages;              // 0x5A68 (name ours) [U] func_0037BD98: the display buffer's VRAM pages; [X]
+                                    //        displayPages
+    int mDrawPages;                 // 0x5A6C (name ours) [U] func_0037BD98: the draw buffer's VRAM pages; [X] drawPages
+    int mZBufferPages;              // 0x5A70 (name ours) [U] func_0037BD98: the z buffer's VRAM pages; [X] zPages
     int mCurrentFrameCount;         // 0x5A74 [P] getCurrentFrameCount (cPS2GraphicsMan_getCurrentFrameCount); [X] vsyncFlipCount
-    int unk_5A78;                   // 0x5A78 [X] fbp0
-    int unk_5A7C;                   // 0x5A7C [X] fbp1
+    int mDrawBufferPage;            // 0x5A78 (name ours) [U] func_0037BD98 allocates it with mDrawPages; func_00382AF0
+                                    //        draws into it (and shows mDisplayBufferPage) with the filter on, else
+                                    //        swaps the two every frame; [X] fbp0
+    int mDisplayBufferPage;         // 0x5A7C (name ours) [U] func_0037BD98 allocates it with mDisplayPages; [X] fbp1
     int mCurrentZBufferPage;        // 0x5A80 [P] GetCurrentZBufferPage (cPS2GraphicsMan_GetCurrentZBufferPage)
     int mCurrentFrameBufferPage;    // 0x5A84 [P] GetCurrentFrameBufferPage (cPS2GraphicsMan_GetCurrentFrameBufferPage)
     int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (cPS2GraphicsMan_GetDisplayBufferAddress)
@@ -558,12 +572,12 @@ CHECK_OFFSET(cPS2GraphicsMan, mNumViews, 0x59C0);
 CHECK_OFFSET(cPS2GraphicsMan, NumDisplayModes, 0x59C4);
 CHECK_OFFSET(cPS2GraphicsMan, CurrentDisplayMode, 0x59C8);
 CHECK_OFFSET(cPS2GraphicsMan, DisplayModes, 0x59CC);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59D0, 0x59D0);
+CHECK_OFFSET(cPS2GraphicsMan, mDither, 0x59D0);
 CHECK_OFFSET(cPS2GraphicsMan, unk_59D4, 0x59D4);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59E0, 0x59E0);
+CHECK_OFFSET(cPS2GraphicsMan, mDitherMatrix, 0x59E0);
 CHECK_OFFSET(cPS2GraphicsMan, mFilterEnabled, 0x59E8);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59EC, 0x59EC);
-CHECK_OFFSET(cPS2GraphicsMan, unk_59F8, 0x59F8);
+CHECK_OFFSET(cPS2GraphicsMan, mBrightnessColour, 0x59EC);
+CHECK_OFFSET(cPS2GraphicsMan, mScreenAlpha, 0x59F8);
 CHECK_OFFSET(cPS2GraphicsMan, mScreenBrightness, 0x59FC);
 CHECK_OFFSET(cPS2GraphicsMan, mVifCursor, 0x5A00);
 CHECK_OFFSET(cPS2GraphicsMan, mVifHalfStart, 0x5A04);
@@ -575,30 +589,30 @@ CHECK_OFFSET(cPS2GraphicsMan, mGifHalfStart, 0x5A18);
 CHECK_OFFSET(cPS2GraphicsMan, mpGifBuffRaw, 0x5A1C);
 CHECK_OFFSET(cPS2GraphicsMan, mGifBuffBase, 0x5A20);
 CHECK_OFFSET(cPS2GraphicsMan, mGifBuildIndex, 0x5A24);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A28, 0x5A28);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A2C, 0x5A2C);
+CHECK_OFFSET(cPS2GraphicsMan, mStripPacketStart, 0x5A28);
+CHECK_OFFSET(cPS2GraphicsMan, mStripCursor, 0x5A2C);
 CHECK_OFFSET(cPS2GraphicsMan, mFBWidth, 0x5A30);
 CHECK_OFFSET(cPS2GraphicsMan, mFBHeight, 0x5A34);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A38, 0x5A38);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayFormat, 0x5A38);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentFBFormat, 0x5A3C);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentZBFormat, 0x5A40);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A44, 0x5A44);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A46, 0x5A46);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A48, 0x5A48);
+CHECK_OFFSET(cPS2GraphicsMan, mInterlace, 0x5A44);
+CHECK_OFFSET(cPS2GraphicsMan, mFieldMode, 0x5A46);
+CHECK_OFFSET(cPS2GraphicsMan, mOutputMode, 0x5A48);
 CHECK_OFFSET(cPS2GraphicsMan, unk_5A4A, 0x5A4A);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A4C, 0x5A4C);
+CHECK_OFFSET(cPS2GraphicsMan, mDTV, 0x5A4C);
 CHECK_OFFSET(cPS2GraphicsMan, mFrameBufferWidth, 0x5A50);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A54, 0x5A54);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A58, 0x5A58);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A5C, 0x5A5C);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A60, 0x5A60);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A64, 0x5A64);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A68, 0x5A68);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A6C, 0x5A6C);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A70, 0x5A70);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayWidth, 0x5A54);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayHeight, 0x5A58);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayBufferWidth, 0x5A5C);
+CHECK_OFFSET(cPS2GraphicsMan, mMagV, 0x5A60);
+CHECK_OFFSET(cPS2GraphicsMan, mMagH, 0x5A64);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayPages, 0x5A68);
+CHECK_OFFSET(cPS2GraphicsMan, mDrawPages, 0x5A6C);
+CHECK_OFFSET(cPS2GraphicsMan, mZBufferPages, 0x5A70);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentFrameCount, 0x5A74);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A78, 0x5A78);
-CHECK_OFFSET(cPS2GraphicsMan, unk_5A7C, 0x5A7C);
+CHECK_OFFSET(cPS2GraphicsMan, mDrawBufferPage, 0x5A78);
+CHECK_OFFSET(cPS2GraphicsMan, mDisplayBufferPage, 0x5A7C);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentZBufferPage, 0x5A80);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentFrameBufferPage, 0x5A84);
 CHECK_OFFSET(cPS2GraphicsMan, mDisplayBufferAddress, 0x5A88);

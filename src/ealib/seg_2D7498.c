@@ -129,7 +129,16 @@ struct sSelSet { struct sSel ent[12]; unsigned char n; unsigned char ntbl; unsig
 struct sTblEnt { unsigned short a; unsigned short b; };
 /* A phrase template (a bank entry's variant): +0x4 holds its kind (low 2 bits) and slot count (>> 2); the slot list
    (word offsets of the slots' conditions) starts at +0x8. */
-struct sLayer { char pad[4]; unsigned char cnt; unsigned char n5; unsigned char n6; char pad7; unsigned char list[1]; };
+/* numVars / varOffset (names ours): [U] func_003D8E58 clears numVars variable words that start varOffset words after
+   the slot list; func_003D93C0 / func_003D95B8 test numVars. */
+struct sLayer {
+    char pad[4];
+    unsigned char cnt;
+    unsigned char numVars;
+    unsigned char varOffset;
+    char pad7;
+    unsigned char list[1];
+};
 /* A slot's condition: its table reference {id, argument index, kind} and up to 4 column rules. */
 struct sCond {
     unsigned short id; unsigned char idx; unsigned char mode; signed char n; char pad5[3];
@@ -1085,7 +1094,7 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", func_003D71D8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct R_71D8 { int f0; short h; char c; unsigned char d; int pad8; int fc; int arr[20]; };
+struct R_71D8 { int time; short h; char c; unsigned char d; int pad8; int fc; int arr[20]; };
 struct G_71D8 { int z[8]; int a[8]; int b[8]; int n; struct R_71D8 r[16]; };
 extern struct G_71D8 D_0044FFF8_71D8 __asm__("D_0044FFF8");
 extern int D_004A4840;
@@ -1106,7 +1115,7 @@ void func_003D71D8(void) {
     for (i = 0; i < 16; i++) {
         D_0044FFF8_71D8.r[i].c = 0;
         D_0044FFF8_71D8.r[i].h = 0;
-        D_0044FFF8_71D8.r[i].f0 = 0;
+        D_0044FFF8_71D8.r[i].time = 0;
         D_0044FFF8_71D8.r[i].fc = 0;
         D_0044FFF8_71D8.r[i].d = 0xFF;
         for (j = 19; j >= 0; j--) {
@@ -1122,8 +1131,16 @@ void func_003D71D8(void) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D72A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct H_72A0 { unsigned short h0; unsigned short h2; unsigned short h4; };
-struct R_72A0 { unsigned int f0; short h; unsigned char c; unsigned char d; short s8; struct H_72A0 *p; int arr[20]; };
+struct H_72A0 { unsigned short h0; unsigned short lifetime; unsigned short priority; };   /* names ours, from use */
+struct R_72A0 {
+    unsigned int time;
+    short h;
+    unsigned char c;
+    unsigned char d;
+    short isContinuation;
+    struct H_72A0 *p;
+    int arr[20];
+};
 struct G_72A0 { int z[8]; int a[8]; int b[8]; int n; struct R_72A0 r[16]; };
 extern struct G_72A0 D_0044FFF8_72A0 __asm__("D_0044FFF8");
 int func_003DB9A0(void);
@@ -1161,17 +1178,17 @@ int func_003D72A0(unsigned int priority, int channel, int keepLatest) {
     i = 0;
     now = func_003DB9A0();
     for (; i < 16; i++) {
-        if (D_0044FFF8_72A0.r[i].s8 == 0 && (lifetime = D_0044FFF8_72A0.r[i].p->h2) != 0 &&
-            lifetime < now - D_0044FFF8_72A0.r[i].f0 && skip != i) {
+        if (D_0044FFF8_72A0.r[i].isContinuation == 0 && (lifetime = D_0044FFF8_72A0.r[i].p->lifetime) != 0 &&
+            lifetime < now - D_0044FFF8_72A0.r[i].time && skip != i) {
             func_003D7C38(i);
             ret = i;
             goto out;
         }
     }
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_72A0.r[i].s8 == 0) {
+        if (D_0044FFF8_72A0.r[i].isContinuation == 0) {
             reqChannel = D_0044FFF8_72A0.r[i].d;
-            if (priority >= D_0044FFF8_72A0.r[i].p->h4 && reqChannel == channel && i != skip) {
+            if (priority >= D_0044FFF8_72A0.r[i].p->priority && reqChannel == channel && i != skip) {
                 D_0044FFF8_72A0.r[i].c = 0;
                 D_0044FFF8_72A0.z[reqChannel]--;
                 ret = i;
@@ -1427,7 +1444,16 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D7C38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct R_7C38 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; void *p; int arr[20]; };
+struct R_7C38 {
+    unsigned int time;
+    unsigned short h;
+    unsigned char c;
+    unsigned char d;
+    short isContinuation;
+    short next;
+    void *p;
+    int arr[20];
+};
 struct G_7C38 { int z[8]; int a[8]; int b[8]; int n; struct R_7C38 r[16]; };
 extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
 
@@ -1442,7 +1468,7 @@ extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
 void func_003D7C38(unsigned int reqIndex) {
     int channel;
     int j = -1;
-    if (reqIndex < 16 && D_0044FFF8_7C38.r[reqIndex].s8 == 0) {
+    if (reqIndex < 16 && D_0044FFF8_7C38.r[reqIndex].isContinuation == 0) {
         channel = D_0044FFF8_7C38.r[reqIndex].d;
         D_0044FFF8_7C38.r[reqIndex].c = 0;
         if (reqIndex == D_0044FFF8_7C38.b[channel]) {
@@ -1456,7 +1482,7 @@ void func_003D7C38(unsigned int reqIndex) {
             if ((unsigned int)j >= 16) {
                 break;
             }
-            if (D_0044FFF8_7C38.r[j].s8 != 0 && D_0044FFF8_7C38.r[j].c != 0) {
+            if (D_0044FFF8_7C38.r[j].isContinuation != 0 && D_0044FFF8_7C38.r[j].c != 0) {
                 if (j == D_0044FFF8_7C38.a[channel]) {
                     D_0044FFF8_7C38.a[channel] = -1;
                 }
@@ -1466,7 +1492,7 @@ void func_003D7C38(unsigned int reqIndex) {
                 j = -1;
             }
         }
-        if (D_0044FFF8_7C38.r[reqIndex].s8 == 0) {
+        if (D_0044FFF8_7C38.r[reqIndex].isContinuation == 0) {
             D_0044FFF8_7C38.z[channel]--;
         }
         if (D_0044FFF8_7C38.z[channel] < 0) {
@@ -1482,7 +1508,16 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D7D58);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct P_7D58 { char pad[9]; signed char b9; unsigned char ba; };
-struct R_7D58 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; struct P_7D58 *p; int arr[20]; };
+struct R_7D58 {
+    unsigned int time;
+    unsigned short h;
+    unsigned char c;
+    unsigned char d;
+    short isContinuation;
+    short next;
+    struct P_7D58 *p;
+    int arr[20];
+};
 struct G_7D58 { int z[8]; int a[8]; int b[8]; int n; struct R_7D58 r[16]; };
 extern struct G_7D58 D_0044FFF8_7D58 __asm__("D_0044FFF8");
 void func_003D7C38(unsigned int);
@@ -1503,7 +1538,7 @@ void func_003D7D58(int idx) {
     int channel;
     unsigned int reqTime;
     unsigned short reqSeq;
-    reqTime = D_0044FFF8_7D58.r[idx].f0;
+    reqTime = D_0044FFF8_7D58.r[idx].time;
     channel = D_0044FFF8_7D58.r[idx].d;
     reqSeq = D_0044FFF8_7D58.r[idx].h;
     D_0044FFF8_7D58.n = 0;
@@ -1511,10 +1546,11 @@ void func_003D7D58(int idx) {
         if (i == idx) {
             continue;
         }
-        if (D_0044FFF8_7D58.r[i].c == 0 || D_0044FFF8_7D58.r[i].d != channel || D_0044FFF8_7D58.r[i].s8 != 0) {
+        if (D_0044FFF8_7D58.r[i].c == 0 || D_0044FFF8_7D58.r[i].d != channel ||
+            D_0044FFF8_7D58.r[i].isContinuation != 0) {
             continue;
         }
-        otherTime = D_0044FFF8_7D58.r[i].f0;
+        otherTime = D_0044FFF8_7D58.r[i].time;
         otherSeq = D_0044FFF8_7D58.r[i].h;
         if (otherTime < reqTime || (otherTime == reqTime && otherSeq < reqSeq)) {
             if (((D_0044FFF8_7D58.r[i].p->ba >> 2) & 1) == 0) {
@@ -2230,14 +2266,14 @@ void func_003D8CB0(SPCHEVENT *optionSet, unsigned char *out) {
     int k;
     int i;
     int pick;
-    unsigned char *e;
+    unsigned char *option;
 
     for (i = 0; i < n; i++) {
         // ORIGINAL-PTR: an entry's variants lie at the word offsets its variant table gives (a variable-length
         // record), so they have no fixed member
-        e = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
-        w[i] = WEIGHT_8CB0(e);
-        total += WEIGHT_8CB0(e);
+        option = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
+        w[i] = WEIGHT_8CB0(option);
+        total += WEIGHT_8CB0(option);
     }
     k = 0;
     while (total > 0) {
@@ -2251,8 +2287,8 @@ void func_003D8CB0(SPCHEVENT *optionSet, unsigned char *out) {
         w[i] = 0;
     }
     for (i = 0; i < n; i++) {
-        e = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
-        if (WEIGHT_8CB0(e) == 0) {
+        option = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
+        if (WEIGHT_8CB0(option) == 0) {
             out[k++] = i;
         }
     }
@@ -2297,8 +2333,8 @@ int func_003D8E58(struct sSelSet *selSet, struct sLayer *phrase) {
 
     // ORIGINAL-PTR: a template's variable words follow its variable-length slot list, so their offset comes from
     // the slot count
-    tab = (int *)((unsigned char *)phrase + ((((phrase->cnt >> 2) + 3) & 0x7C) + 8) + phrase->n6 * 4);
-    for (varIndex = 0; varIndex < phrase->n5; varIndex++) {
+    tab = (int *)((unsigned char *)phrase + ((((phrase->cnt >> 2) + 3) & 0x7C) + 8) + phrase->varOffset * 4);
+    for (varIndex = 0; varIndex < phrase->numVars; varIndex++) {
         tab[varIndex] = 0;
     }
     for (i = 11; i >= 0; i--) {
@@ -2601,7 +2637,7 @@ int func_003D93C0(struct sLayer *phrase, struct sSelSet *selSet, int thr) {
             if (thr < pct) ok = 0;
         }
         if (ok) {
-            if (phrase->n5 != 0) {
+            if (phrase->numVars != 0) {
                 if (func_003D8E58(selSet, phrase) == 0) ok = 0;
             }
         }
@@ -2688,7 +2724,7 @@ int func_003D95B8(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLayer *phr
     int i;
     int n;
 
-    if (mode == 1 || phrase->n5 != 0) {
+    if (mode == 1 || phrase->numVars != 0) {
         shuffle_95B8(phrase, selSet);
         ok = func_003D93C0_95B8(phrase, selSet, mode != 2 ? thr : 0);
     } else {
@@ -2716,9 +2752,10 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D9830);
 extern unsigned char **D_004A4824_9830 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
 extern int D_004A4830_9830 __asm__("D_004A4830");
 extern int D_004A4838_9830 __asm__("D_004A4838");
-struct sFF90Msg { int id; int start; int len; SPCHKEY k; int f10; int f14; int f18; };
+/* regKey (func_003D81F0), tableSubId (the table's subId) and bankSubId (func_003D8330): names ours, from use */
+struct sFF90Msg { int id; int start; int len; SPCHKEY k; int regKey; int tableSubId; int bankSubId; };
 struct sFF90 {
-    int (*f00)(struct sFF90Msg *);                  /* func_003D9830 */
+    int (*play)(struct sFF90Msg *);                 /* func_003D9830 (name ours: the play callback) */
     int (*f04)(unsigned char *, int, int, int);     /* func_003DB208 */
     void (*f08)(void *, int, int, int);             /* func_003DAE48, func_003DB040 */
     int (*f0C)(SPCHKEY *);                     /* func_003D7EC8 */
@@ -2773,7 +2810,7 @@ int func_003D9830(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
     sum = 0;
     pct = 0;
     w34 = 0;
-    if (D_0044FF90_9830.f00 != 0) {
+    if (D_0044FF90_9830.play != 0) {
         func_003D8330(k, &w30);
         func_003D81F0(k, &w34);
         n = phrase[4] >> 2;
@@ -2798,10 +2835,10 @@ int func_003D9830(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
                     sum += rowInfo.len;
                     playMsg.len = rowInfo.len;
                     playMsg.k = *k;
-                    playMsg.f18 = w30;
-                    playMsg.f10 = w34;
-                    playMsg.f14 = ((SPCHTABLEHDR *)table)->subId;
-                    D_0044FF90_9830.f00(&playMsg);
+                    playMsg.bankSubId = w30;
+                    playMsg.regKey = w34;
+                    playMsg.tableSubId = ((SPCHTABLEHDR *)table)->subId;
+                    D_0044FF90_9830.play(&playMsg);
                     func_003D6EE8(table, y);
                 }
                 cnt--;
@@ -2822,8 +2859,21 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D9A40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Q9A40 { short a, b, c, d; };
-struct R9A40 { int f0; int f4; unsigned char b8; unsigned char b9; unsigned char ba; unsigned char bb; char pad[0x5C - 12]; };
-struct G9A40 { int f0, f4, f8; struct Q9A40 q[0x30]; struct R9A40 r[8]; };
+struct R9A40 {
+    int eventEntry;
+    int phrase;
+    unsigned char variantIdx;
+    unsigned char used;
+    unsigned char ba;
+    unsigned char bb;
+    char pad[0x5C - 12];
+};
+/* names ours (func_003D9AC8's use) */
+struct G9A40 {
+    int channel, phraseCount, lineCount;
+    struct Q9A40 q[0x30];
+    struct R9A40 r[8];
+};
 extern struct G9A40 D_00450700_9A40 __asm__("D_00450700");
 
 /**
@@ -2832,14 +2882,14 @@ extern struct G9A40 D_00450700_9A40 __asm__("D_00450700");
  */
 void func_003D9A40(void) {
     int i;
-    D_00450700_9A40.f0 = -1;
-    D_00450700_9A40.f4 = 0;
-    D_00450700_9A40.f8 = 0;
+    D_00450700_9A40.channel = -1;
+    D_00450700_9A40.phraseCount = 0;
+    D_00450700_9A40.lineCount = 0;
     for (i = 0; i < 8; i++) {
-        D_00450700_9A40.r[i].f0 = 0;
-        D_00450700_9A40.r[i].f4 = 0;
-        D_00450700_9A40.r[i].b8 = 0;
-        D_00450700_9A40.r[i].b9 = 0;
+        D_00450700_9A40.r[i].eventEntry = 0;
+        D_00450700_9A40.r[i].phrase = 0;
+        D_00450700_9A40.r[i].variantIdx = 0;
+        D_00450700_9A40.r[i].used = 0;
         D_00450700_9A40.r[i].bb = 0;
     }
     for (i = 0; i < 0x30; i++) {
@@ -2856,8 +2906,21 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D9AC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Q_9AC8 { short a, b, c, d; };
-struct R_9AC8 { int f0; unsigned char *f4; char b8; unsigned char b9; unsigned char ba; unsigned char bb; int data[20]; };
-struct G_9AC8 { int f0, f4, f8; struct Q_9AC8 q[0x30]; struct R_9AC8 r[8]; };
+struct R_9AC8 {
+    int eventEntry;
+    unsigned char *phrase;
+    char variantIdx;
+    unsigned char used;
+    unsigned char ba;
+    unsigned char bb;
+    int data[20];
+};
+/* names ours, from use */
+struct G_9AC8 {
+    int channel, phraseCount, lineCount;
+    struct Q_9AC8 q[0x30];
+    struct R_9AC8 r[8];
+};
 struct E_9AC8 { unsigned short x; unsigned short y; unsigned short z; unsigned char idx; unsigned char pad; };
 struct H_9AC8 { struct E_9AC8 ent[12]; char pad[2]; unsigned char tbl[1]; };
 extern struct G_9AC8 D_00450700_9AC8 __asm__("D_00450700");
@@ -2883,25 +2946,25 @@ void func_003D9AC8(struct H_9AC8 *selSet, int id, int eventEntry, unsigned char 
     int cnt;
     int j;
 
-    if (D_00450700_9AC8.f0 < 0 || D_00450700_9AC8.f0 == id) {
-        n = D_00450700_9AC8.f4++;
+    if (D_00450700_9AC8.channel < 0 || D_00450700_9AC8.channel == id) {
+        n = D_00450700_9AC8.phraseCount++;
         if (n < 8) {
-            D_00450700_9AC8.f0 = id;
-            D_00450700_9AC8.r[n].f0 = eventEntry;
-            D_00450700_9AC8.r[n].f4 = phrase;
-            D_00450700_9AC8.r[n].b8 = variantIdx;
+            D_00450700_9AC8.channel = id;
+            D_00450700_9AC8.r[n].eventEntry = eventEntry;
+            D_00450700_9AC8.r[n].phrase = phrase;
+            D_00450700_9AC8.r[n].variantIdx = variantIdx;
             for (i = 0; i < 20; i++) {
                 D_00450700_9AC8.r[n].data[i] = reqArgs[i];
             }
-            D_00450700_9AC8.r[n].b9 = 1;
+            D_00450700_9AC8.r[n].used = 1;
             cnt = phrase[4] >> 2;
-            j = D_00450700_9AC8.f8;
+            j = D_00450700_9AC8.lineCount;
             for (i = 0; i < cnt; i++) {
                 D_00450700_9AC8.q[j + i].a = selSet->ent[i].x;
                 D_00450700_9AC8.q[j + i].b = selSet->ent[i].y;
                 D_00450700_9AC8.q[j + i].c = selSet->tbl[selSet->ent[i].idx];
             }
-            D_00450700_9AC8.f8 += cnt;
+            D_00450700_9AC8.lineCount += cnt;
         }
     }
 }

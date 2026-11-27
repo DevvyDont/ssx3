@@ -74,8 +74,8 @@ struct cPS2BezierMan {
     char unk_0008[0x8];              // 0x0008 (no retail access found)
     cBezierCache mPatchCache;        // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the
                                      //        ctor and Init, func_003739D0 in Reset (render/beziercache.h; cPS2BezierMan_GetBezST
-                                     //        reads this + 0x1A0 = mPatchCache.unk_190, cPS2BezierMan_GetBezdST this + 0x320 =
-                                     //        mPatchCache.unk_310)
+                                     //        reads this + 0x1A0 = mPatchCache.mBasis, cPS2BezierMan_GetBezdST this +
+                                     //        0x320 = mPatchCache.mDBasis)
     char unk_0330[0xC];              // 0x0330 (no retail access found; the 0x32C-byte span before mNearLODcm ends here)
     float mNearLODcm;                // 0x033C [O]; [R] Init = 3000.0; [U] slots 5 / 7
     float mFarLODcm;                 // 0x0340 [O]; [R] Init = 15000.0; [U] slots 6 / 8

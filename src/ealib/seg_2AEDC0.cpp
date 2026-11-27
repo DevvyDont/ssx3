@@ -293,7 +293,7 @@ struct RCMP_FILESYSOPTS {
     int size;                           // 0x00 [O] FILESYSOPTS::size
     void* (*malloc)(char*, int, int);   // 0x04 [O] FILESYSOPTS::malloc
     int (*free)(void*);                 // 0x08 [O] FILESYSOPTS::free; [U] frees the loaded movie files
-    int settings[5];                    // 0x0C FILESYSOPTS's unk_0C .. REAL_filedevice (not read here)
+    int settings[5];                    // 0x0C FILESYSOPTS's cdMediaMode .. REAL_filedevice (not read here)
 };
 
 extern "C" void func_003AEE30(RCMP_AV_AUDIO* self, int flags);

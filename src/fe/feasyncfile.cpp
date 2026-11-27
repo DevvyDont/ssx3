@@ -1260,7 +1260,7 @@ extern char str_kT_POPUP279UserFound[];
 /**
  * Shows the "user found" popup for a find-player result event (type 227).
  *
- * Copies the event's persona name (+0x8) into mszFoundName and its online flag (+0x10) into unk_6D8, then shows a
+ * Copies the event's persona name (+0x8) into mszFoundName and its online flag (+0x10) into mbFoundOnline, then shows a
  * one-option popup titled "kT_POPUP279UserFound" whose option is the found name (layer 3, id 2057, handled by
  * func_001A4928).
  *
@@ -1269,7 +1269,7 @@ extern char str_kT_POPUP279UserFound[];
 extern "C" void func_001A4CE8(cFEStateNetMessenger* self, online_FindPlayerEvent* src)
 {
     cBXString_operatorE((char*)&self->mszFoundName, &src->mName);
-    self->unk_6D8 = src->mOnline;
+    self->mbFoundOnline = src->mOnline;
     cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
     int three = 3;
     cPopupInfo* sub = &popup->info;
@@ -3852,9 +3852,9 @@ extern char str_StlBlock[];
 
 class cFEVObj_001A8AE8 {
 public:
-    int field_0x0;
+    int mType;
     virtual void* v01();
-    virtual void* v02();
+    virtual void* clone();   // [P] online::Event::clone
 };
 
 struct sListNode1A8AE8 {
@@ -3893,7 +3893,7 @@ static inline sListIter1A8AE8 ListInsert1A8AE8(sListIter1A8AE8 pos, void* const&
 extern "C" void func_001A8AE8(cFEStateNet* self, cFEVObj_001A8AE8* obj)
 {
     if (obj != 0) {
-        void* item = obj->v02();
+        void* item = obj->clone();
         if (item != 0) {
             ListInsert1A8AE8((sListNode1A8AE8*)self->mMsgList.mpNode, item);
         }
@@ -3971,11 +3971,11 @@ public:
     virtual void v24();
     virtual void v25();
     virtual void v26();
-    virtual void v27();
+    virtual void pollBuddyMan();   // func_001AAB68 (name ours)
     virtual void v28();
     virtual void v29();
     virtual int isProcessingEvents();
-    virtual int v31(int msg, void* data);
+    virtual int handleNetEvent(int msg, void* data);   // func_001A8E40 (name ours)
 };
 
 class cMsg1A8B88 {
@@ -4016,9 +4016,9 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
             }
             if (st->isProcessingEvents() != 0) {
                 if ((unsigned int)(msg - 277) < 2) {
-                    st->v31(*data, data);
+                    st->handleNetEvent(*data, data);
                 } else {
-                    st->v31(277, 0);
+                    st->handleNetEvent(277, 0);
                 }
                 net->mEventPending = 0;
             } else {
@@ -4047,7 +4047,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
             do {
                 cMsg1A8B88* item = (cMsg1A8B88*)list->front();
                 list->pop_front();
-                st->v31(item->type, item);
+                st->handleNetEvent(item->type, item);
                 switch (item->type) {
                 case 236:
                     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 7);
@@ -4056,11 +4056,11 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
                 case 241:
                 case 274:
                 case 275:
-                    st->v27();
+                    st->pollBuddyMan();
                     break;
                 case 265:
                     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 8);
-                    st->v27();
+                    st->pollBuddyMan();
                     break;
                 }
                 delete item;
@@ -4068,7 +4068,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
         }
         return 0;
     }
-    st->v31(msg, data);
+    st->handleNetEvent(msg, data);
     return 0;
 }
 #endif
@@ -5609,7 +5609,7 @@ public:
     virtual void v26();
     virtual void v27();
     virtual void v28();
-    virtual int v29();
+    virtual int showsOnline();   // func_001DE870 (name ours, from func_001A8830)
 };
 
 
@@ -5627,7 +5627,7 @@ extern "C" void func_001AAB68(cFEStateNet* self)
     if (self->mpScreen == 0) {
         return;
     }
-    if (((cFEVObj_001AAB68*)self)->v29() == 0) {
+    if (((cFEVObj_001AAB68*)self)->showsOnline() == 0) {
         return;
     }
     unsigned int now = (unsigned int)cAppMan_TheAppMan->TimerTick;
@@ -8220,8 +8220,8 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual void v24(int on);
-    virtual void v25(int on);
+    virtual void setUseStaticColourListBox(int on);   // [O] cUIListBox::setUseStaticColour (its slot 24)
+    virtual void setUseStaticColourText(int on);      // [O] cUIText::setUseStaticColour (its slot 25)
 };
 
 static inline int IsHash1AE128(int id, char* name) { return id == GetHashValue32(name); }
@@ -8251,7 +8251,7 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
         obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_Textselectevent)) {
         item->mMiscData = 7;
-        obj->v25(1);
+        obj->setUseStaticColourText(1);
     } else if (IsHash1AE128(item->mHashName, str_PeakLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNPeakColon));
         obj->setVisible(1);
@@ -8266,9 +8266,9 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
     } else if (IsHash1AE128(item->mHashName, str_TextSubmit)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_CMNSubmit));
         item->mMiscData = 9;
-        obj->v25(1);
+        obj->setUseStaticColourText(1);
         obj->setVisible(1);
-        obj->v25(1);
+        obj->setUseStaticColourText(1);
     } else if (IsHash1AE128(item->mHashName, str_TextCancel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_BTNCancel));
         item->mMiscData = 10;
@@ -8277,7 +8277,7 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 1);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 0);
         obj->setVisible(1);
-        obj->v24(1);
+        obj->setUseStaticColourListBox(1);
         mpLBRankedGame = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxCPURiders)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNHUDNone), 0);
@@ -8286,26 +8286,26 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
         cUIListBox_addEntryByAsciiString(item, D_004A1508, 3);
         cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
         obj->setVisible(1);
-        obj->v24(1);
+        obj->setUseStaticColourListBox(1);
         mpLBCPURiders = (cUIListBox*)item;
         cUIListBox_setCurrentEntryByIndex(item, D_004A4E88_E128[4]);
     } else if (IsHash1AE128(item->mHashName, str_ListBoxPowerUps)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->setVisible(1);
-        obj->v24(1);
+        obj->setUseStaticColourListBox(1);
         mpLBPowerUps = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxMultipliers)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->setVisible(1);
-        obj->v24(1);
+        obj->setUseStaticColourListBox(1);
         mpLBMultipliers = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxPointicons)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->setVisible(1);
-        obj->v24(1);
+        obj->setUseStaticColourListBox(1);
         mpLBPointIcons = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_MenuChallenge)) {
         item->mAttr |= 0x80;
@@ -8324,12 +8324,15 @@ extern "C" int cUIListBox_getCurrentEntryData(void* a);
 
 
 
+// The race-option word 6 of cBERules_mRules: bits 6-8 are the challenge's "no icon" rules (the popup's yes/no lists
+// store 0 for yes). Names ours, after On Tour's cBERules accessors [O] getNoIconMultiplier / getNoIconPoints /
+// getNoIconPowerUp.
 struct sOpts1AE680 {
     char pad[0x18];
-    unsigned int f0 : 6;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
-    unsigned int b8 : 1;
+    unsigned int otherRules : 6;    // rules 4, 8, 1, 5, 6 and 9 (festateruleselect)
+    unsigned int noIconMultiplier : 1;
+    unsigned int noIconPoints : 1;
+    unsigned int noIconPowerUp : 1;
 };
 
 /**
@@ -8349,9 +8352,9 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         vt[1].fn(vthis(iface, vt[1]));
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
         sOpts1AE680* raceOptions = (sOpts1AE680*)((char*)&cBERules_mRules);
-        raceOptions->b6 = multipliers;
-        raceOptions->b8 = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
-        raceOptions->b7 = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
+        raceOptions->noIconMultiplier = multipliers;
+        raceOptions->noIconPowerUp = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
+        raceOptions->noIconPoints = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
         cBEInterface* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(self->mpLBCPURiders));
         sVEntry<int(void*)>* nvt = (sVEntry<int(void*)>*)VPTR_OF(cBEInterface, nr);
@@ -9176,13 +9179,13 @@ extern "C" void func_001AFA60(cUIScreen* screen, online_FindPlayerEvent* msg)
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextNumGames));
     if (uiText != 0) {
         int name = Loc1AFA60(str_kT_CMNGamesPlayed);
-        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, msg->mStats.unk_08);
+        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, msg->mStats.mGamesPlayed);
         cUIText_setUnicodeString(uiText, buf);
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerWinsRatio));
     if (uiText != 0) {
-        int gamesPlayed = msg->mStats.unk_08;
-        int wins = msg->mStats.unk_04;
+        int gamesPlayed = msg->mStats.mGamesPlayed;
+        int wins = msg->mStats.mWins;
         float pct = 0.0f;
         if (wins < gamesPlayed) {
             pct = (float)wins / (float)gamesPlayed * 100.0f;
@@ -9190,13 +9193,13 @@ extern "C" void func_001AFA60(cUIScreen* screen, online_FindPlayerEvent* msg)
             pct = 100.0f;
         }
         int name = Loc1AFA60(str_kT_CMNWinRatio);
-        usprintf_1AFA60(buf, str_pct_s_pct_d_pct_d_pct_02_2fpct_pct, name, st->unk_04, st->unk_08, fptodp(pct));
+        usprintf_1AFA60(buf, str_pct_s_pct_d_pct_d_pct_02_2fpct_pct, name, st->mWins, st->mGamesPlayed, fptodp(pct));
         cUIText_setUnicodeString(uiText, buf);
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerDisconnects));
     if (uiText != 0) {
         int name = Loc1AFA60(str_kT_CMNDisconnects);
-        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, st->unk_0C);
+        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, st->mDisconnects);
         cUIText_setUnicodeString(uiText, buf);
     }
     cBXString__cBXString(&nameStr, 2);
@@ -12153,12 +12156,13 @@ extern "C" int func_0025F248(void* self, int idx);
 extern "C" void func_0025F288(void* self, int idx, void* info);
 extern char str_PlayerListItempct_02d[];
 
+// tLobbyStats (online/lobbyman.h) with room to spare: its member names.
 struct sInfo1B3BF0 {
-    int f00;
-    int f04;
-    int f08;
-    int f0C;
-    int f10;
+    int mRank;
+    int mWins;
+    int mGamesPlayed;
+    int mDisconnects;
+    int mPing;
     int pad[3];
 };
 
@@ -12176,7 +12180,7 @@ struct sOwner1B3BF0 {
  *
  * Row i shows player miMenuScroll[0] + i. Its mpQualityIcon[i] is hidden past the end of the list or when the player's
  * user-list flag (bit 21, func_0025F248) is set; otherwise it is shown and drawn as meter i (func_001AAD50) from the
- * word at +0x10 of the player's record (func_0025F288). The "PlayerListItem%02d" name it formats for each row is not
+ * player's mPing (func_0025F288). The "PlayerListItem%02d" name it formats for each row is not
  * used.
  *
  * @param feStateChatRoom  the chat-room state (this)
@@ -12198,7 +12202,7 @@ extern "C" void func_001B3BF0(cFEStateChatRoom* feStateChatRoom)
                 self->items[i]->setVisible(0);
             } else {
                 func_0025F288(LobbyMan_mLobbyMan, idx, &info);
-                func_001AAD50(self->screen, i, info.f10);
+                func_001AAD50(self->screen, i, info.mPing);
             }
         } else {
             self->items[i]->setVisible(0);
@@ -12341,13 +12345,13 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, cUI
     cFEStateNet_cFEStateNet_3(mem, pEngine, 0);
     mem->miSelectedSetting = 0;
     mem->miNumSettings = 0;
-    mem->unk_6D8 = 0;
+    mem->mbCancelled = 0;
     mem->mpLBAdapters = 0;
     mem->mpLBSettings = 0;
     mem->mpMenuConfig = 0;
     mem->mpConfigRectangle = 0;
     mem->mpNoConfiguration = 0;
-    mem->unk_700 = 0;
+    mem->mbAuthFailed = 0;
     mem->mpustrPopupText = 0;
     mem->miState = 0;
     mem->mpustrAuthError[0] = 0;
@@ -13470,10 +13474,10 @@ static inline void* GetSession_001B55B0()
 /**
  * Handles the "connecting to ISP" popup (id 2062): Cancel disconnects; otherwise starts DNAS authentication.
  *
- * kONSCREENPOPUPOPTION0 or kONSCREENPOPUPPREV: sets unk_6D8, clears mpPairSettings' static flag, disconnects BuddyMan
- * (func_00261408), the lobby (func_0025B800) and the whole online session (func_002636F0(func_002591B8(), 0)) and
- * closes the popup. kONPOPUPDESTROY: unless it was cancelled (unk_6D8), pushes a cFEStateAuthDNAS popup (tag
- * "NetConfigAuthPopup", id 2074) on the screen's state stack; then clears unk_6D8. Every other event goes to
+ * kONSCREENPOPUPOPTION0 or kONSCREENPOPUPPREV: sets mbCancelled, clears mpPairSettings' static flag, disconnects
+ * BuddyMan (func_00261408), the lobby (func_0025B800) and the whole online session (func_002636F0(func_002591B8(), 0))
+ * and closes the popup. kONPOPUPDESTROY: unless it was cancelled (mbCancelled), pushes a cFEStateAuthDNAS popup (tag
+ * "NetConfigAuthPopup", id 2074) on the screen's state stack; then clears mbCancelled. Every other event goes to
  * cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
@@ -13485,7 +13489,7 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, cUIState* popup, unsigned
     case cUIState::kONSCREENPOPUPOPTION0:
     case cUIState::kONSCREENPOPUPPREV: {
         cUIThing* pairSettings = self->mpPairSettings;
-        self->unk_6D8 = 1;
+        self->mbCancelled = 1;
         pairSettings->setStatic(0);
         func_00261408(GetSession_001B55B0());
         func_0025B800(LobbyMan_mLobbyMan);
@@ -13494,12 +13498,12 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, cUIState* popup, unsigned
         break;
     }
     case cUIState::kONPOPUPDESTROY:
-        if (self->unk_6D8 == 0) {
+        if (self->mbCancelled == 0) {
             cFEStateAuthDNAS* authPopup = cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), self->mpEngine, self);
             authPopup->miMiscData = 2074;
             cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, authPopup);
         }
-        self->unk_6D8 = 0;
+        self->mbCancelled = 0;
         cFEStateNet_onPopupEvent(self, popup, cUIState::kONPOPUPDESTROY);
         break;
     default:
@@ -13599,11 +13603,11 @@ static inline void* GetSession_001B5830()
  * Handles the DNAS authentication popup (id 2074): on success opens the account memory-card popup, on failure the DNAS
  * error popup.
  *
- * kONSCREENPOPUPOPTION0 clears unk_700 and OPTION1 sets it (authentication failed). kONSCREENPOPUPPREV disconnects
+ * kONSCREENPOPUPOPTION0 clears mbAuthFailed and OPTION1 sets it (authentication failed). kONSCREENPOPUPPREV disconnects
  * BuddyMan (func_00261408), the lobby (func_0025B800) and the whole online session (func_002636F0(func_002591B8(), 0)),
- * sets unk_6D8 and clears mpPairSettings' static flag. On kONPOPUPDESTROY it pushes a cFEStateAuthDNASError
- * (mpustrAuthError [1], [2], [0]; id 2075) when unk_700 is set, else, unless cancelled, a cFEStateNetAccountMem popup
- * (mode 0, id 2092); both flags are then cleared. Every event also goes to cFEStateNet_onPopupEvent.
+ * sets mbCancelled and clears mpPairSettings' static flag. On kONPOPUPDESTROY it pushes a cFEStateAuthDNASError
+ * (mpustrAuthError [1], [2], [0]; id 2075) when mbAuthFailed is set, else, unless cancelled, a cFEStateNetAccountMem
+ * popup (mode 0, id 2092); both flags are then cleared. Every event also goes to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
@@ -13613,38 +13617,38 @@ extern "C" void func_001B5830(cFEStateNetConfig* self, cUIState* popup, unsigned
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
         cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        self->unk_700 = 0;
+        self->mbAuthFailed = 0;
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        self->unk_700 = 1;
+        self->mbAuthFailed = 1;
         cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPOPTION1);
         break;
     case cUIState::kONSCREENPOPUPPREV:
         func_00261408(GetSession_001B5830());
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
-        self->unk_6D8 = 1;
+        self->mbCancelled = 1;
         self->mpPairSettings->setStatic(0);
         cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPPREV);
         break;
     case cUIState::kONPOPUPDESTROY:
         cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONPOPUPDESTROY);
-        if (self->unk_700 != 0) {
+        if (self->mbAuthFailed != 0) {
             cUIState* nextPopup = (cUIState*)cFEStateAuthDNASError_cFEStateAuthDNASError(
                     (cFEStateAuthDNASError*)cMemMan_alloc(1768, str_cFEStateAuthDNASError, 0, 0), self->mpEngine,
                     self, self->mpustrAuthError[1], self->mpustrAuthError[2],
                     self->mpustrAuthError[0]);
             nextPopup->miMiscData = 2075;
             cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, nextPopup);
-        } else if (self->unk_6D8 == 0) {
+        } else if (self->mbCancelled == 0) {
             cUIState* nextPopup = (cUIState*)cFEStateNetAccountMem_cFEStateNetAccountMem(
                     (cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine,
                     self, 0, 0, 0);
             nextPopup->miMiscData = 2092;
             cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, nextPopup);
         }
-        self->unk_700 = 0;
-        self->unk_6D8 = 0;
+        self->mbAuthFailed = 0;
+        self->mbCancelled = 0;
         break;
     default:
         cFEStateNet_onPopupEvent_v(self, popup, kind);
@@ -13676,10 +13680,11 @@ extern const char str_cFEStateLogin[];
  * Handles the account memory-card popup (id 2092) on the network-configuration screen: continue to login, or
  * disconnect.
  *
- * kONSCREENPOPUPOPTION0 sets unk_6DC and kONPOPUPCREATE clears it. OPTION1 or kONSCREENPOPUPPREV disconnect BuddyMan
- * (func_00261408), the lobby (func_0025B800) and the whole online session (func_002636F0(func_002591B8(), 0)) and clear
- * mpPairSettings' static flag. On kONPOPUPDESTROY, when unk_6DC is set, pushes a new cFEStateLogin. Every event also
- * goes to cFEStateNet_onPopupEvent. The existing comment ("restarts the memory-card task") does not match the body.
+ * kONSCREENPOPUPOPTION0 sets mbPushLogin and kONPOPUPCREATE clears it. OPTION1 or kONSCREENPOPUPPREV disconnect
+ * BuddyMan (func_00261408), the lobby (func_0025B800) and the whole online session (func_002636F0(func_002591B8(), 0))
+ * and clear mpPairSettings' static flag. On kONPOPUPDESTROY, when mbPushLogin is set, pushes a new cFEStateLogin. Every
+ * event also goes to cFEStateNet_onPopupEvent. The existing comment ("restarts the memory-card task") does not match
+ * the body.
  *
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
@@ -13688,12 +13693,12 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, cUIState* popup, int even
 {
     switch (event) {
     case cUIState::kONPOPUPCREATE:
-        self->unk_6DC = 0;
+        self->mbPushLogin = 0;
         cFEStateNet_onPopupEvent_v(self, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION0:
         cFEStateNet_onPopupEvent_v(self, popup, event);
-        self->unk_6DC = 1;
+        self->mbPushLogin = 1;
         break;
     case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV: {
         cFEStateNet_onPopupEvent_v(self, popup, event);
@@ -13714,7 +13719,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, cUIState* popup, int even
         break;
     }
     case cUIState::kONPOPUPDESTROY:
-        if (self->unk_6DC != 0) {
+        if (self->mbPushLogin != 0) {
             func_001A8A40(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0,
                     0), self->mpEngine));
         }
@@ -16662,10 +16667,10 @@ extern char str_kT_CMNNo[];
  * Handles the account memory-card popup (id 2092) on account-creation step 1: continue to persona select, or ask to
  * save again.
  *
- * Options 0 and 1 and kONSCREENPOPUPPREV clear unk_6E8 and OPTION2 sets it (each also reaching
- * cFEStateNet_onPopupEvent). On kONPOPUPDESTROY, when unk_6E8 is set, closes it and shows the "kT_POPUP204SaveAccount"
- * Yes/No popup (id 2078, default 0, no back); otherwise pushes a new cFEStateSelectPersona without passing
- * kONPOPUPDESTROY on. unk_6E8 is then cleared.
+ * Options 0 and 1 and kONSCREENPOPUPPREV clear mbSaveAccount and OPTION2 sets it (each also reaching
+ * cFEStateNet_onPopupEvent). On kONPOPUPDESTROY, when mbSaveAccount is set, closes it and shows the
+ * "kT_POPUP204SaveAccount" Yes/No popup (id 2078, default 0, no back); otherwise pushes a new cFEStateSelectPersona
+ * without passing kONPOPUPDESTROY on. mbSaveAccount is then cleared.
  *
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
@@ -16674,15 +16679,15 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, cUIState* popup, int ev
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV:
-        self->unk_6E8 = 0;
+        self->mbSaveAccount = 0;
         cFEStateNet_onPopupEvent(self, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->unk_6E8 = 1;
+        self->mbSaveAccount = 1;
         cFEStateNet_onPopupEvent(self, popup, event);
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (self->unk_6E8 != 0) {
+        if (self->mbSaveAccount != 0) {
             cFEStateNet_onPopupEvent(self, popup, event);
             cScreenPopup* savePopup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             char* sub = (char*)&savePopup->info;
@@ -16699,7 +16704,7 @@ extern "C" void func_001B92C8(cFEStateCreateStep1* self, cUIState* popup, int ev
             func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
                     str_cFEStateSelectPersona, 0, 0), self->mpEngine));
         }
-        self->unk_6E8 = 0;
+        self->mbSaveAccount = 0;
         break;
     default:
         cFEStateNet_onPopupEvent(self, popup, event);
@@ -18058,12 +18063,12 @@ extern char str_kT_BTNCancel[];
  * Popup handler for the 0x82C popup of the account-creation screen: remembers whether option 2 was picked, then on
  * close either asks to save the account or logs in with it.
  *
- * Options 0 and 1 and kONSCREENPOPUPPREV clear unk_6D8, OPTION2 sets it; each also runs the default handler
- * cFEStateNet_onPopupEvent. On kONPOPUPDESTROY (closed) it runs cFEStateNet_onPopupEvent and then, with unk_6D8 set,
- * shows the yes/no popup "kT_POPUP204SaveAccount" (miMiscData 0x81F); otherwise it shows "kT_POPUP201Verify" with a
- * "kT_BTNCancel" option (miMiscData 0x80E), copies mpAccount->mName and mPassword into LobbyMan's user name and
- * password (LobbyMan + 0x48 / 0x4C) and sends the login request func_0025C610. unk_6D8 is cleared afterwards. Other
- * events only run cFEStateNet_onPopupEvent.
+ * Options 0 and 1 and kONSCREENPOPUPPREV clear mbSaveAccount, OPTION2 sets it; each also runs the default handler
+ * cFEStateNet_onPopupEvent. On kONPOPUPDESTROY (closed) it runs cFEStateNet_onPopupEvent and then, with mbSaveAccount
+ * set, shows the yes/no popup "kT_POPUP204SaveAccount" (miMiscData 0x81F); otherwise it shows "kT_POPUP201Verify" with
+ * a "kT_BTNCancel" option (miMiscData 0x80E), copies mpAccount->mName and mPassword into LobbyMan's user name and
+ * password (LobbyMan + 0x48 / 0x4C) and sends the login request func_0025C610. mbSaveAccount is cleared afterwards.
+ * Other events only run cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup that sent the event
  * @param event  the popup event
@@ -18072,16 +18077,16 @@ extern "C" void func_001BAED8(cFEStateCreateStep2* self, cUIState* popup, int ev
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV:
-        self->unk_6D8 = 0;
+        self->mbSaveAccount = 0;
         cFEStateNet_onPopupEvent_v(self, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->unk_6D8 = 1;
+        self->mbSaveAccount = 1;
         cFEStateNet_onPopupEvent_v(self, popup, event);
         break;
     case cUIState::kONPOPUPDESTROY:
         cFEStateNet_onPopupEvent_v(self, popup, event);
-        if (self->unk_6D8 != 0) {
+        if (self->mbSaveAccount != 0) {
             cScreenPopup* nextPopup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             char* sub = (char*)&nextPopup->info;
             nextPopup->info.meType = 2;
@@ -18105,7 +18110,7 @@ extern "C" void func_001BAED8(cFEStateCreateStep2* self, cUIState* popup, int ev
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mpAccount->mPassword);
             func_0025C610(LobbyMan_mLobbyMan);
         }
-        self->unk_6D8 = 0;
+        self->mbSaveAccount = 0;
         break;
     default:
         cFEStateNet_onPopupEvent_v(self, popup, event);

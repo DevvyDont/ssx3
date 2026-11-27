@@ -1203,35 +1203,36 @@ void FILESYS_cancelop(int ophandle) {
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
-   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   field names are FILE_FILEDEVICE's. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
 struct sFsCmdId {
     unsigned int id : 20;
     unsigned int type : 4;
-    unsigned int idx : 8;           /* index in gFileDevice.f28 */
+    unsigned int idx : 8;           /* index in gFileDevice.oplist */
 };
+/* Member names: FILE_FILEDEVICE's ([O], ealib/filesys.h) at the same offsets. */
 struct sAB0 {
-    int f00;                        /* number of commands */
-    int f04;                        /* number of open files */
-    int f08;                        /* highest priority run (also D_00519AB8) */
-    int f0C;                        /* commands queued */
-    int f10;               /* callback depth */
-    int f14[4];                     /* mutex (also D_00519AC4) */
-    struct FILEOPERATION_def *f24;             /* running */
-    struct FILEOPERATION_def *f28;             /* commands (also D_00519AD8) */
-    struct HANDLE_def *f2C;              /* open files */
-    struct FILEOPERATION_def *f30;             /* queue */
-    struct FILEBIG_def *f34;            /* archives (also D_00519AE4) */
-    int f38;                        /* (also pFileDeviceMem) */
+    int maxfileops;                 /* number of commands */
+    int maxopen;                    /* number of open files */
+    int minpriority;                /* highest priority run (also D_00519AB8) */
+    int numopsqueued;               /* commands queued */
+    int waitlevel;                  /* callback depth */
+    int mutex[4];                   /* mutex (also D_00519AC4) */
+    struct FILEOPERATION_def *exec;             /* running */
+    struct FILEOPERATION_def *oplist;           /* commands (also D_00519AD8) */
+    struct HANDLE_def *handlelist;              /* open files */
+    struct FILEOPERATION_def *opqhead;          /* queue */
+    struct FILEBIG_def *bigfilelist;            /* archives (also D_00519AE4) */
+    int pFileDeviceMem;             /* (also pFileDeviceMem) */
 };
 struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4) */
-    int f00[4];                     /* the mutex */
-    struct FILEOPERATION_def *f10;
-    struct FILEOPERATION_def *f14;
-    struct HANDLE_def *f18;
-    struct FILEOPERATION_def *f1C;             /* the queue (gFileDevice.f30) */
-    struct FILEBIG_def *f20;
-    int f24;
+    int mutex[4];                   /* the mutex */
+    struct FILEOPERATION_def *exec;
+    struct FILEOPERATION_def *oplist;
+    struct HANDLE_def *handlelist;
+    struct FILEOPERATION_def *opqhead;          /* the queue (gFileDevice.opqhead) */
+    struct FILEBIG_def *bigfilelist;
+    int pFileDeviceMem;
 };
 #endif
 
@@ -1624,7 +1625,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILE_addbigreadcallback);
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 struct sC10File { char *name; int a; int b; char *path; };   /* built-in file table entry (f20) */
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
-   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   field names are FILE_FILEDEVICE's. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
 extern int FILESYS_completeop_D8E8(int) __asm__("FILESYS_completeop");
 extern int BIG_typeofheader_D8E8(int) __asm__("BIG_typeofheader");
@@ -1966,7 +1967,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_ExecCommand);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
-   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   field names are FILE_FILEDEVICE's. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
 extern void MUTEX_lock_FX(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_FX(void *) __asm__("MUTEX_unlock");
@@ -2006,10 +2007,10 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
     struct HANDLE_def *hd;
     int mode;
     int found;
-    MUTEX_lock_FX(D_00519AC4.f00);
+    MUTEX_lock_FX(D_00519AC4.mutex);
     if (fileOp != 0) {
         struct FILEOPERATION_def *prev = 0;
-        fileOp->next = D_00519AC4.f1C;
+        fileOp->next = D_00519AC4.opqhead;
         while (fileOp->next != 0 && !(fileOp->priority < fileOp->next->priority)) {
             prev = fileOp->next;
             fileOp->next = prev->next;
@@ -2017,23 +2018,23 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
         if (prev != 0) {
             prev->next = fileOp;
         } else {
-            gFileDevice_DFA8.f30 = fileOp;
+            gFileDevice_DFA8.opqhead = fileOp;
         }
-        gFileDevice_DFA8.f0C++;
+        gFileDevice_DFA8.numopsqueued++;
     }
-    if (gFileDevice_DFA8.f24 != 0 || gFileDevice_DFA8.f10 != 0) {
-        MUTEX_unlock_FX(gFileDevice_DFA8.f14);
+    if (gFileDevice_DFA8.exec != 0 || gFileDevice_DFA8.waitlevel != 0) {
+        MUTEX_unlock_FX(gFileDevice_DFA8.mutex);
         return;
     }
-    fileOp = gFileDevice_DFA8.f30;
-    if (fileOp != 0 && fileOp->priority <= gFileDevice_DFA8.f08) {
-        gFileDevice_DFA8.f30 = fileOp->next;
-        gFileDevice_DFA8.f0C--;
+    fileOp = gFileDevice_DFA8.opqhead;
+    if (fileOp != 0 && fileOp->priority <= gFileDevice_DFA8.minpriority) {
+        gFileDevice_DFA8.opqhead = fileOp->next;
+        gFileDevice_DFA8.numopsqueued--;
     } else {
         fileOp = 0;
     }
-    gFileDevice_DFA8.f24 = fileOp;
-    MUTEX_unlock_FX(gFileDevice_DFA8.f14);
+    gFileDevice_DFA8.exec = fileOp;
+    MUTEX_unlock_FX(gFileDevice_DFA8.mutex);
     if (fileOp == 0) return;
     if (fileOp->cancelled != 0) {
         iFILESYS_CommandCompleteCallback_FX(0);
@@ -2074,7 +2075,7 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
             }
         }
         if (!found && (mode & 6)) {
-            for (n = gFileDevice_DFA8.f34; n != 0 && !found; n = n->next) {
+            for (n = gFileDevice_DFA8.bigfilelist; n != 0 && !found; n = n->next) {
                 if ((mode & 4) && strcmp_FX(n->handle->name, path)) continue;
                 if (BIG_locateentryz_FX(((int)n->header), file, 0, &x, &off)) {
                     found = 1;
@@ -2385,8 +2386,10 @@ void FILESYS_setmemcallbacks(int mallocFn, int freeFn) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_getopts);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct A_E928 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
-struct B_E928 { int f0, f4, f8, fC; };
+/* gFileSysOpts (FILESYSOPTS's names at these offsets) and the live CD settings D_00450C58 (func_003E4040's
+   CdCfg_4040 names, names ours). */
+struct A_E928 { int size, malloc, free, cdMediaMode, cdNameLen, useDisc, cdRoot, REAL_filedevice; };
+struct B_E928 { int root, namelen, mmode, useDisc; };
 extern struct B_E928 D_00450C58_E928 __asm__("D_00450C58");
 extern int REAL_filedevice_E928[] __asm__("REAL_filedevice");
 extern void MEM_clear_E928(int, int) __asm__("MEM_clear");
@@ -2405,10 +2408,10 @@ int FILESYS_getopts(int *opts) {
     if (n >= 37) {
         MEM_clear_E928(opts, n);
     }
-    gFileSysOpts_E928.f18 = D_00450C58_E928.f0;
-    gFileSysOpts_E928.f10 = D_00450C58_E928.f4;
-    gFileSysOpts_E928.f14 = D_00450C58_E928.fC != 0;
-    gFileSysOpts_E928.f1C = REAL_filedevice_E928[0];
+    gFileSysOpts_E928.cdRoot = D_00450C58_E928.root;
+    gFileSysOpts_E928.cdNameLen = D_00450C58_E928.namelen;
+    gFileSysOpts_E928.useDisc = D_00450C58_E928.useDisc != 0;
+    gFileSysOpts_E928.REAL_filedevice = REAL_filedevice_E928[0];
     MEM_copy_E928(opts, &gFileSysOpts_E928, n);
     return 1;
 }
@@ -2417,7 +2420,8 @@ int FILESYS_getopts(int *opts) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setopts);
 #ifdef SKIP_ASM
-struct B_E9B8 { int f0, f4, f8, fC; };
+/* The live CD settings (func_003E4040's CdCfg_4040 names, names ours). */
+struct B_E9B8 { int root, namelen, mmode, useDisc; };
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
 extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
@@ -2435,10 +2439,10 @@ int FILESYS_setopts(int *opts) {
         MEM_clear_E9B8(&gFileSysOpts, 36);
     }
     MEM_copy_E9B8(&gFileSysOpts, opts, *opts);
-    D_00450C58_E9B8.f0 = ((int)gFileSysOpts.unk_18);
-    D_00450C58_E9B8.f4 = gFileSysOpts.unk_10;
-    D_00450C58_E9B8.f8 = gFileSysOpts.unk_0C;
-    D_00450C58_E9B8.fC = gFileSysOpts.unk_14;
+    D_00450C58_E9B8.root = ((int)gFileSysOpts.cdRoot);
+    D_00450C58_E9B8.namelen = gFileSysOpts.cdNameLen;
+    D_00450C58_E9B8.mmode = gFileSysOpts.cdMediaMode;
+    D_00450C58_E9B8.useDisc = gFileSysOpts.useDisc;
     REAL_filedevice_E9B8[0] = ((int)gFileSysOpts.REAL_filedevice);
     return 1;
 }
@@ -3147,7 +3151,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; volatile int f1C; int pad2[4]; } E_F488;
+/* hlafile.cpp's REQUESTSTRUCTtag (0x30, ealib/hlafile.h): [O] member names at these offsets. */
+typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; volatile int fop; int pad2[4]; } E_F488;
 extern E_F488 *hlafile_request_F488 __asm__("hlafile_request");
 extern int numrequests_F488 __asm__("numrequests");
 extern E_F488 *freequeue_F488[2] __asm__("freequeue");
@@ -3176,7 +3181,7 @@ void ASYNCFILE_init(int n, int x) {
         for (i = 0; i < n; i++) {
             hlafile_request_F488[i].id = i;
             hlafile_request_F488[i].next = &hlafile_request_F488[i + 1];
-            hlafile_request_F488[i].f1C = 0;
+            hlafile_request_F488[i].fop = 0;
         }
         hlafile_request_F488[n - 1].next = 0;
     }
@@ -6826,7 +6831,8 @@ void func_003E3588(int alarmId, int alarmTime, int semaId) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E35B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct Cfg_35B0 { int f0, f4, f8, fc, f10, f14; } Cfg_35B0;
+/* The kernel's semaphore parameters (Sony's SemaParam; the field names are func_003E4040's SemaParam_4040's). */
+typedef struct Cfg_35B0 { int count, max_count, init_count, wait_threads, attr, option; } Cfg_35B0;
 extern void cb_35B0(void) __asm__("func_003E3588");
 extern void SetAlarm_35B0(int, void (*)(void), int) __asm__("SetAlarm");
 extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
@@ -6839,15 +6845,15 @@ extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
  */
 void func_003E35B0(unsigned short hsyncTicks) {
     Cfg_35B0 semaParam;
-    int temp_2;
+    int sema;
 
-    semaParam.f4 = 1;
-    semaParam.f8 = 0;
-    semaParam.f14 = 0;
-    temp_2 = CreateSema_35B0(&semaParam);
-    SetAlarm_35B0(hsyncTicks, cb_35B0, temp_2);
-    WaitSema(temp_2);
-    DeleteSema(temp_2);
+    semaParam.max_count = 1;
+    semaParam.init_count = 0;
+    semaParam.option = 0;
+    sema = CreateSema_35B0(&semaParam);
+    SetAlarm_35B0(hsyncTicks, cb_35B0, sema);
+    WaitSema(sema);
+    DeleteSema(sema);
 }
 #endif
 
@@ -7068,6 +7074,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
+/* Field names: func_003E4040's CdState_4040 view of the same record where they agree (names ours). */
 struct sC40Mode {                   /* the CD read mode handed to sceCdRead */
     unsigned char f00;
     unsigned char f01;
@@ -7075,25 +7082,25 @@ struct sC40Mode {                   /* the CD read mode handed to sceCdRead */
     unsigned char f03;
 };
 struct sC40Read {                   /* the read in progress */
-    int f00;                        /* bytes in this step */
-    int f04;                        /* bytes left */
-    int f08;
-    int f0C;                        /* sector */
-    int f10;                        /* sectors in this step */
-    int f14;                        /* destination */
-    char *f18;                      /* the file table (also D_00519C78) */
-    int *f1C;                       /* sector buffer (D_00519C80) */
+    int stepBytes;                  /* bytes in this step */
+    int restBytes;                  /* bytes left */
+    int ofs;                        /* offset of the data in the sector buffer */
+    int lba;                        /* sector */
+    int nsect;                      /* sectors in this step */
+    int buf;                        /* destination */
+    char *files;                    /* the file table (also D_00519C78) */
+    int *sector;                    /* sector buffer (D_00519C80) */
 };
 struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
-    int f00;                        /* flags */
-    int f04;                        /* number of files */
-    int f08;                        /* reader thread */
-    int f0C;                        /* semaphore (also D_00519C4C) */
-    int f10;
-    int f14;
-    int f18;
-    struct sC40Mode f1C;
-    struct sC40Read f20;
+    int flags;                      /* flags */
+    int count;                      /* number of files */
+    int tid;                        /* reader thread */
+    int sema;                       /* semaphore (also D_00519C4C) */
+    int retries;                    /* read retries left (func_003E3B00 restarts the read) */
+    int cached;                     /* the sector in the sector buffer */
+    int sorted;
+    struct sC40Mode mode;
+    struct sC40Read read;
 };
 extern struct sC40 D_00519C40;
 extern void func_003E3B00_3BE0(void) __asm__("func_003E3B00");
@@ -7113,50 +7120,50 @@ void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
  * (iFILESYS_CommandCompleteCallback(1)). Never returns.
  */
 void func_003E3BE0_impl(void) {
-    struct sC40Read *curRead = &D_00519C40.f20;
+    struct sC40Read *curRead = &D_00519C40.read;
 
     while (1) {
         int fl;
-        WaitSema(D_00519C40.f0C);
-        if (sceCdGetError_3618() != 0 || (D_00519C40.f00 & 8)) {
-            fl = D_00519C40.f00 & ~8;
-            D_00519C40.f00 = fl;
+        WaitSema(D_00519C40.sema);
+        if (sceCdGetError_3618() != 0 || (D_00519C40.flags & 8)) {
+            fl = D_00519C40.flags & ~8;
+            D_00519C40.flags = fl;
             if (fl & 2) {
-                if (--D_00519C40.f10 > 0) {
+                if (--D_00519C40.retries > 0) {
                     func_003E3B00_3BE0();
                 } else {
-                    D_00519C40.f00 = fl | 4;
+                    D_00519C40.flags = fl | 4;
                 }
             }
             continue;
         }
-        if (D_00519C40.f00 & 1) {
-            D_00519C40.f00 &= ~1;
-            D_00519C40.f14 = curRead->f0C;
-            MEM_copy_2190(curRead->f14, (int)D_00519C40.f20.f1C + curRead->f08, curRead->f00);
+        if (D_00519C40.flags & 1) {
+            D_00519C40.flags &= ~1;
+            D_00519C40.cached = curRead->lba;
+            MEM_copy_2190(curRead->buf, (int)D_00519C40.read.sector + curRead->ofs, curRead->stepBytes);
         }
-        if (curRead->f04 > 0) {
-            curRead->f14 += curRead->f00;
-            curRead->f08 = 0;
-            curRead->f0C += curRead->f10;
-            if (curRead->f04 < 0x800) {
-                curRead->f00 = curRead->f04;
-                D_00519C40.f00 |= 1;
-                curRead->f10 = 1;
-            } else if ((curRead->f14 & 0x3F) != 0) {
-                curRead->f00 = 0x800;
-                D_00519C40.f00 |= 1;
-                curRead->f10 = 1;
+        if (curRead->restBytes > 0) {
+            curRead->buf += curRead->stepBytes;
+            curRead->ofs = 0;
+            curRead->lba += curRead->nsect;
+            if (curRead->restBytes < 0x800) {
+                curRead->stepBytes = curRead->restBytes;
+                D_00519C40.flags |= 1;
+                curRead->nsect = 1;
+            } else if ((curRead->buf & 0x3F) != 0) {
+                curRead->stepBytes = 0x800;
+                D_00519C40.flags |= 1;
+                curRead->nsect = 1;
             } else {
-                int k = curRead->f04 & -0x800;
-                D_00519C40.f00 &= ~1;
-                curRead->f10 = k >> 11;
-                curRead->f00 = k;
+                int k = curRead->restBytes & -0x800;
+                D_00519C40.flags &= ~1;
+                curRead->nsect = k >> 11;
+                curRead->stepBytes = k;
             }
-            curRead->f04 -= curRead->f00;
+            curRead->restBytes -= curRead->stepBytes;
             func_003E3B00_3BE0();
         } else {
-            D_00519C40.f00 &= ~2;
+            D_00519C40.flags &= ~2;
             iFILESYS_CommandCompleteCallback_33B0(1);
         }
     }
@@ -7425,8 +7432,8 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     FlushCache_4040(0);
     D_00450C68 = gFileSysOpts.malloc(str_Named_Dir, n * 264, 0);
     MEM_clear_4040(D_00450C68, n * 264);
-    if ((struct EmbFile_4040*)gFileSysOpts.unk_20 != 0) {
-        builtinFile = (struct EmbFile_4040*)gFileSysOpts.unk_20;
+    if ((struct EmbFile_4040*)gFileSysOpts.builtinFiles != 0) {
+        builtinFile = (struct EmbFile_4040*)gFileSysOpts.builtinFiles;
         dirEntry = D_00450C68;
         while (*builtinFile->name != 0) {
             strcpy(path, builtinFile->path + 7);
@@ -9871,7 +9878,8 @@ void NetGameLinkDestroy(int *linkRef) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6878);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
+/* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
+struct S_6878 { int iopref; int statstate; char pad[0x158 - 8]; int statbuf; };
 
 /**
  * Completion routine of the asynchronous game-link status request (NetGameLinkStatus).
@@ -9881,19 +9889,20 @@ struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
  * argument, the reply words and the reply data; only the block (the last argument) is used.
  *
  * @param requestKey  the request key (unused)
- * @param a1  the callback argument (unused)
- * @param a2  a reply word (unused)
+ * @param requestFlags  the request flags (unused; as func_003F5A50's)
+ * @param replyWord10  reply word +0x10 (unused)
  * @param result  the reply's result word (unused)
  * @param replyData  the reply data address (unused)
  * @param replyLen  the reply data length (unused)
- * @param a6  a reply word (unused)
- * @param a7  a reply word (unused)
+ * @param replyWord8  reply word +0x8 (unused)
+ * @param replyWordC  reply word +0xC (unused)
  * @return 0
  */
-int func_003E6878(int requestKey, int a1, int a2, int result, int replyData, int replyLen, int a6, int a7, struct S_6878 *self) {
-    char *src = (char *)((self->f158 & 0x0FFFFFFF) | 0x20000000);
+int func_003E6878(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
+        int replyWord8, int replyWordC, struct S_6878 *self) {
+    char *src = (char *)((self->statbuf & 0x0FFFFFFF) | 0x20000000);
     __builtin_memcpy((char *)self + 8, src, 336);
-    self->f4 = 0;
+    self->statstate = 0;
     return 0;
 }
 #endif
@@ -9903,7 +9912,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-typedef struct { int f0; int f4; char pad8[0x150]; int f158; } G_6958;
+/* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
+typedef struct { int iopref; int statstate; char pad8[0x150]; int statbuf; } G_6958;
 extern int func_003F4C68_6958(int *, int, int, int, int, int, int, int, void *, void *) __asm__("func_003F4C68");
 extern int func_003F4C98_6958(int *, int, int) __asm__("func_003F4C98");
 extern int func_003E6878_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("func_003E6878");
@@ -9921,17 +9931,17 @@ extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
  */
 char *NetGameLinkStatus(G_6958 *self) {
     int was = 0;
-    if (self->f4 == -1) {
-        self->f4 = 0;
+    if (self->statstate == -1) {
+        self->statstate = 0;
         was = 1;
     }
-    if (self->f4 == 0) {
-        self->f4 = 1;
+    if (self->statstate == 0) {
+        self->statstate = 1;
         func_003F4C98_6958(D_0051EEA8_6958, 'gmlk', 'stat');
         if (was == 0) {
-            func_003F4C68_6958(D_0051EEA8_6958, 0, self->f0, 0, 0, 0, self->f158, 336, func_003E6878_6958, self);
+            func_003F4C68_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, func_003E6878_6958, self);
         } else {
-            func_003F4C68_6958(D_0051EEA8_6958, 1, self->f0, 0, 0, 0, self->f158, 336, (void *)1, 0);
+            func_003F4C68_6958(D_0051EEA8_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
             func_003E6878_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
         }
     }
@@ -10048,7 +10058,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkSend);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct { char b[4]; } U4_6C80;
-typedef struct { int id; char pad[0x170]; int f174; int f178; unsigned int f17C; } S_6C80;
+/* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
+typedef struct { int id; char pad[0x170]; int sendwindow; int sendpos; unsigned int sendreadpos; } S_6C80;
 extern int func_003F4C68_6C80(int *, int, int, int, char *, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_6C80(int *, int, int) __asm__("func_003F4C98");
 extern int D_0051EEC8_6C80[] __asm__("D_0051EEC8");
@@ -10070,10 +10081,10 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
         len = (msg[3] + 0x17) & 0x7FFC;
         *(short *)msg = len;
     }
-    readPos = *(U4_6C80 *)((self->f17C & 0x0FFFFFFF) | 0x20000000);
-    w = self->f178;
-    if (self->f174 - (w - *(int *)&readPos) < len) return 0;
-    self->f178 = w + len;
+    readPos = *(U4_6C80 *)((self->sendreadpos & 0x0FFFFFFF) | 0x20000000);
+    w = self->sendpos;
+    if (self->sendwindow - (w - *(int *)&readPos) < len) return 0;
+    self->sendpos = w + len;
     func_003F4C98_6C80(D_0051EEC8_6C80, 'gmlk', 'send');
     func_003F4C68_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
     return 1;
@@ -10488,7 +10499,10 @@ int func_003E7450_impl(char *block, int address, int payload, int payloadLen) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E74E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct S_7500 { volatile int f0; volatile int f4; int f8; int fC; char *f10; };   /* f0 length, f4 busy: set by this RPC callback */
+/* The ping block (names ours, from use): recvLen the reply length and busy the request-in-flight flag (set by this
+   RPC callback), sendTick the NetTick of the last request, iopref the IOP-side reference, respBuf the 2 KB reply
+   buffer. */
+struct S_7500 { volatile int recvLen; volatile int busy; int sendTick; int iopref; char *respBuf; };
 
 /**
  * Completion routine of the ping-response request sent by func_003E7500.
@@ -10498,20 +10512,21 @@ struct S_7500 { volatile int f0; volatile int f4; int f8; int fC; char *f10; }; 
  * unused.
  *
  * @param requestKey  the request key (unused)
- * @param a1  the callback argument (unused)
- * @param a2  a reply word (unused)
+ * @param requestFlags  the request flags (unused; as func_003F5A50's)
+ * @param replyWord10  reply word +0x10 (unused)
  * @param result  the reply's result word (unused)
  * @param replyData  the reply data address (unused)
  * @param replyLen  the reply data length (unused)
- * @param a6  a reply word (unused)
+ * @param replyWord8  reply word +0x8 (unused)
  * @param recvBytes  the number of response bytes received
  * @param out  the ping block
  * @return 0
  */
-int func_003E74E8(int requestKey, int a1, int a2, int result, int replyData, int replyLen, int a6, int recvBytes, struct S_7500 *out)
+int func_003E74E8(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
+        int replyWord8, int recvBytes, struct S_7500 *out)
 {
-    out->f0 = recvBytes;
-    out->f4 = 0;
+    out->recvLen = recvBytes;
+    out->busy = 0;
     return 0;
 }
 #endif
@@ -10548,35 +10563,35 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__
 int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *response) {
     int res = 0;
 
-    if (self->f0 > 0) {
-        *(U4_7500 *)&res = *(U4_7500 *)self->f10;
+    if (self->recvLen > 0) {
+        *(U4_7500 *)&res = *(U4_7500 *)self->respBuf;
         if (response != 0) {
             *response = res;
-            *(U4_7500 *)(response + 1) = *(U4_7500 *)(self->f10 + 4);
-            *(U4_7500 *)(response + 2) = *(U4_7500 *)(self->f10 + 8);
-            *(U4_7500 *)(response + 3) = *(U4_7500 *)(self->f10 + 12);
+            *(U4_7500 *)(response + 1) = *(U4_7500 *)(self->respBuf + 4);
+            *(U4_7500 *)(response + 2) = *(U4_7500 *)(self->respBuf + 8);
+            *(U4_7500 *)(response + 3) = *(U4_7500 *)(self->respBuf + 12);
         }
         if (bufLen != 0) {
-            if (self->f0 - 0x10 < *bufLen) {
-                *bufLen = self->f0 - 0x10;
+            if (self->recvLen - 0x10 < *bufLen) {
+                *bufLen = self->recvLen - 0x10;
             }
-            func_0041605C_7500(buf, self->f10 + 0x10, *bufLen);
+            func_0041605C_7500(buf, self->respBuf + 0x10, *bufLen);
         }
-        self->f0 = 0;
-        self->f8 = 0;
+        self->recvLen = 0;
+        self->sendTick = 0;
     }
-    if (self->f4 == 0 && self->f0 <= 0) {
-        if (self->f8 != 0) {
-            if (NetTick() - self->f8 < 6) return res;
+    if (self->busy == 0 && self->recvLen <= 0) {
+        if (self->sendTick != 0) {
+            if (NetTick() - self->sendTick < 6) return res;
         }
-        self->f8 = NetTick();
-        self->f4 = 1;
-        if (self->f0 == 0) {
-            InvalidDCache_7500(self->f10, self->f10 + 0x7FF);
-            self->f0 = -1;
+        self->sendTick = NetTick();
+        self->busy = 1;
+        if (self->recvLen == 0) {
+            InvalidDCache_7500(self->respBuf, self->respBuf + 0x7FF);
+            self->recvLen = -1;
         }
         func_003F4C98_7500(D_0051EEE8_7500, 'ping', 'resp');
-        func_003F4C68_7500(D_0051EEE8_7500, 1, self->fC, 0, 0, 0, self->f10, 0x800, func_003E74E8_7500, self);
+        func_003F4C68_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, func_003E74E8_7500, self);
     }
     return res;
 }
@@ -10802,7 +10817,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7BA0);
 extern int func_003EE620_7BA0(int) __asm__("func_003EE620");
 
 struct M_7BA0 { int type; int idx; int zero; int h; };
-struct S_7BA0 { int h; int f4; void (*fn)(void *, struct M_7BA0 *, int); int fC; int pad; };
+/* A list slot of LobbyApiRefT::mLists: {index, list, routine, context, ?} (names ours, as the header's). */
+struct S_7BA0 { int h; int list; void (*fn)(void *, struct M_7BA0 *, int); int context; int pad; };
 struct O_7BA0 { char pad[0x310]; struct S_7BA0 s[8]; };
 
 void func_003E7BA0_impl(struct O_7BA0 *self) __asm__("func_003E7BA0");
@@ -10818,13 +10834,13 @@ void func_003E7BA0_impl(struct O_7BA0 *self) {
     for (i = 0; i < 8; i++) {
         struct S_7BA0 *listSlot = &self->s[i];
         if (listSlot->h != 0 && listSlot->fn != 0) {
-            if (func_003EE620_7BA0(listSlot->f4) > 0) {
+            if (func_003EE620_7BA0(listSlot->list) > 0) {
                 struct M_7BA0 changeEvent;
-                changeEvent.h = listSlot->f4;
+                changeEvent.h = listSlot->list;
                 changeEvent.type = 2;
                 changeEvent.idx = i;
                 changeEvent.zero = 0;
-                listSlot->fn(self, &changeEvent, listSlot->fC);
+                listSlot->fn(self, &changeEvent, listSlot->context);
             }
         }
     }
@@ -10900,7 +10916,7 @@ void func_003E7C40(char *self) {
         cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20,
                                               str_empty_k);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
-            ev.unk_00 = 0;
+            ev.mType = 0;
             ev.mKind = 'ping';
             ev.mStatus = 0;
             ev.mpTagText = evbuf;
@@ -10936,7 +10952,7 @@ void func_003E7C40(char *self) {
     currentTick = func_003F5D88_7C40(*(int *)self);
     while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
-            ev.unk_00 = 0;
+            ev.mType = 0;
             ev.mKind = 'ping';
             ev.mStatus = -1;
             ev.mpTagText = evbuf;
@@ -11042,7 +11058,7 @@ void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
         pingRef = func_003E7340_7FF0();
         lobbyRef->mpDebugData = (void*)debugData;
         lobbyRef->mpDebugProc = (void (*)(void*, const char*))debugProc;
-        lobbyRef->unk_004 = (void*)pingRef;
+        lobbyRef->mpPing = (void*)pingRef;
         func_003E80C0_7FF0(lobbyRef);
     }
     return ((char*)lobbyRef);
@@ -11060,7 +11076,17 @@ extern int func_003EE9A0_80C0(int) __asm__("func_003EE9A0");
 extern void func_003F5738_80C0(int) __asm__("func_003F5738");
 
 struct E_80C0 { int a, b, c, d, e; };
-struct S_80C0 { int f0, f4, f8, fC; char pad[0x310 - 0x10]; struct E_80C0 e[8]; char pad2[0x53C - 0x3B0]; char *f53C; int f540; char pad3[0x54C - 0x544]; int f54C; };
+/* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
+struct S_80C0 {
+    int mpSession, mpPing, mEventFlags, mState;
+    char pad[0x310 - 0x10];
+    struct E_80C0 e[8];
+    char pad2[0x53C - 0x3B0];
+    char *mpRequests;
+    int mPingsOutstanding;
+    char pad3[0x54C - 0x544];
+    int mRequestId;
+};
 
 /**
  * Disconnects the lobby and clears its state.
@@ -11075,8 +11101,8 @@ struct S_80C0 { int f0, f4, f8, fC; char pad[0x310 - 0x10]; struct E_80C0 e[8]; 
 void func_003E80C0(struct S_80C0 *lobby) {
     int i, entryRef;
     char *request;
-    lobby->fC = 'offl';
-    func_003F5738_80C0(lobby->f0);
+    lobby->mState = 'offl';
+    func_003F5738_80C0(lobby->mpSession);
     for (i = 0; i < 8; i++) {
         if (lobby->e[i].a != 0) {
             while ((entryRef = func_003EE9A0_80C0(lobby->e[i].a)) != 0) {
@@ -11084,14 +11110,14 @@ void func_003E80C0(struct S_80C0 *lobby) {
             }
         }
     }
-    while (lobby->f53C != 0) {
-        request = lobby->f53C;
-        lobby->f53C = *(char **)(request + 0x40);
+    while (lobby->mpRequests != 0) {
+        request = lobby->mpRequests;
+        lobby->mpRequests = *(char **)(request + 0x40);
         func_00259210_80C0(request);
     }
     func_003E7F58_80C0(lobby);
-    lobby->f540 = 0;
-    lobby->f54C = 0;
+    lobby->mPingsOutstanding = 0;
+    lobby->mRequestId = 0;
 }
 #endif
 
@@ -11106,8 +11132,9 @@ extern void func_003E73E0_81C8(int) __asm__("func_003E73E0");
 extern void func_003F55B8_81C8(int) __asm__("func_003F55B8");
 extern void func_00259210_81C8(void *) __asm__("func_00259210");
 
-struct S_81C8 { int h; int f4; int pad[3]; };
-struct O_81C8 { int f0; int f4; char pad[0x310 - 8]; struct S_81C8 s[8]; };
+struct S_81C8 { int h; int list; int pad[3]; };
+/* LobbyApiRefT's member names at these offsets. */
+struct O_81C8 { int mpSession; int mpPing; char pad[0x310 - 8]; struct S_81C8 s[8]; };
 
 void func_003E81C8_impl(struct O_81C8 *self) __asm__("func_003E81C8");
 /**
@@ -11122,11 +11149,11 @@ void func_003E81C8_impl(struct O_81C8 *self) {
     for (i = 0; i < 8; i++) {
         if (self->s[i].h != 0) {
             func_003EE820_81C8(self->s[i].h);
-            func_003EE260_81C8(self->s[i].f4);
+            func_003EE260_81C8(self->s[i].list);
         }
     }
-    func_003E73E0_81C8(self->f4);
-    func_003F55B8_81C8(self->f0);
+    func_003E73E0_81C8(self->mpPing);
+    func_003F55B8_81C8(self->mpSession);
     func_00259210_81C8(self);
 }
 #endif
@@ -11169,7 +11196,16 @@ extern int func_003F5910_8260(int, int, int, void *, int) __asm__("func_003F5910
 extern int func_003F5D88_8260(int) __asm__("func_003F5D88");
 extern int D_00495F30_8260[] __asm__("D_00495F30");
 
-struct S_8260 { int f0, f4, f8, fC, f10, f14; char pad[0x34 - 0x18]; char f34[0x3B0 - 0x34]; int f3B0, f3B4; char f3B8; char pad2[0x50C - 0x3B9]; int f50C; };
+/* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
+struct S_8260 {
+    int mpSession, mpPing, mEventFlags, mState, mTimeout, mStateTime;
+    char pad[0x34 - 0x18];
+    char mTags[0x3B0 - 0x34];
+    int mPort, mAddress;
+    char mDownText;
+    char pad2[0x50C - 0x3B9];
+    int mPendingSnapshots;
+};
 
 /**
  * Starts connecting the lobby to a server.
@@ -11189,23 +11225,23 @@ struct S_8260 { int f0, f4, f8, fC, f10, f14; char pad[0x34 - 0x18]; char f34[0x
  */
 int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int callback, int context) {
     char buf[0x100];
-    lobby->f3B4 = serverAddr;
-    lobby->f3B0 = serverPort;
+    lobby->mAddress = serverAddr;
+    lobby->mPort = serverPort;
     func_003E7AC0_8260();
-    lobby->f50C = 0;
+    lobby->mPendingSnapshots = 0;
     func_003E7F58_8260(lobby);
     if (func_003E7718_8260(lobby, 'skey', callback, context) == 0) {
         return -1;
     }
-    func_003F5738_8260(lobby->f0);
-    func_003F5638_8260(lobby->f0, lobby->f3B4, lobby->f3B0);
-    func_003E76A8_8260(lobby, D_00495F30_8260, lobby->f3B4, lobby->f3B0);
-    cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->f34);
-    func_003F5910_8260(lobby->f0, 0x40646972, 0, buf, -1);
-    lobby->fC = 'rdir';
-    lobby->f10 = func_003F5D88_8260(lobby->f0) + 0x1D4C0;
-    lobby->f14 = func_003F5D88_8260(lobby->f0);
-    lobby->f3B8 = 0;
+    func_003F5738_8260(lobby->mpSession);
+    func_003F5638_8260(lobby->mpSession, lobby->mAddress, lobby->mPort);
+    func_003E76A8_8260(lobby, D_00495F30_8260, lobby->mAddress, lobby->mPort);
+    cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->mTags);
+    func_003F5910_8260(lobby->mpSession, 0x40646972, 0, buf, -1);
+    lobby->mState = 'rdir';
+    lobby->mTimeout = func_003F5D88_8260(lobby->mpSession) + 0x1D4C0;
+    lobby->mStateTime = func_003F5D88_8260(lobby->mpSession);
+    lobby->mDownText = 0;
     return 0;
 }
 #endif
@@ -11231,7 +11267,7 @@ extern char D_004A48C0[] __attribute__((aligned(8)));
 extern char D_004A48C8[];
 extern char D_004A48D0[];
 
-struct S_8368 { int h; int f4; int a; int b; int pad; };
+struct S_8368 { int h; int list; int a; int b; int pad; };
 struct O_8368 { int lobby; char pad[0x8]; int state; char pad2[0x300]; struct S_8368 s[8]; };
 
 /**
@@ -11267,7 +11303,7 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
             int state;
 
             self->s[i].h = func_003EE778_8368(1000, 2000);
-            self->s[i].f4 = func_003EE1E8_8368(100, 100, 0);
+            self->s[i].list = func_003EE1E8_8368(100, 100, 0);
             state = self->state;
             if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48C8);
@@ -11280,12 +11316,12 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
             int state;
 
             while ((entryRef = func_003EE9A0_8368(self->s[i].h)) != 0) {
-                func_00259210_8368(func_003EE480_8368(self->s[i].f4, entryRef));
+                func_00259210_8368(func_003EE480_8368(self->s[i].list, entryRef));
             }
             func_003EE820_8368(self->s[i].h);
             self->s[i].h = 0;
-            func_003EE260_8368(self->s[i].f4);
-            self->s[i].f4 = 0;
+            func_003EE260_8368(self->s[i].list);
+            self->s[i].list = 0;
             state = self->state;
             if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48D0);
@@ -11293,7 +11329,7 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
             }
         }
     }
-    return self->s[i].f4;
+    return self->s[i].list;
 }
 #endif
 
@@ -11305,7 +11341,7 @@ extern int func_003EE778_85B0(int, int) __asm__("func_003EE778");
 extern int func_003EE1E8_85B0(int, int, int) __asm__("func_003EE1E8");
 extern void func_003EE768_85B0(int, int) __asm__("func_003EE768");
 
-struct S_85B0 { int h; int f4; int a; int b; int pad; };
+struct S_85B0 { int h; int list; int a; int b; int pad; };
 struct O_85B0 { char pad[0x310]; struct S_85B0 s[8]; };
 
 int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm__("func_003E85B0");
@@ -11327,9 +11363,9 @@ int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int callback, int co
     self->s[i].a = callback;
     self->s[i].b = context;
     self->s[i].h = func_003EE778_85B0(1000, 2000);
-    self->s[i].f4 = func_003EE1E8_85B0(100, 100, 0);
-    func_003EE768_85B0(self->s[i].f4, self->s[i].h);
-    listRef = self->s[i].f4;
+    self->s[i].list = func_003EE1E8_85B0(100, 100, 0);
+    func_003EE768_85B0(self->s[i].list, self->s[i].h);
+    listRef = self->s[i].list;
     }
     return listRef;
 }
@@ -11415,7 +11451,7 @@ extern int func_003EEC88_8778(int, char *) __asm__("func_003EEC88");
 extern int func_003EE320_8778(int, void *) __asm__("func_003EE320");
 extern int func_003EEB30_8778(int, char *, int) __asm__("func_003EEB30");
 
-struct S_8778 { int h; int f4; int a; int b; int pad; };
+struct S_8778 { int h; int list; int a; int b; int pad; };
 struct O_8778 { char pad[0x310]; struct S_8778 s[8]; };
 struct B_8778 { char b[0xA8]; };
 
@@ -11445,7 +11481,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
             newRecord = func_002591E8_8778(312);
             memset_8778(newRecord, 0, 312);
             strcpy(newRecord + 8, record);
-            entryRef = func_003EE320_8778(self->s[3].f4, newRecord);
+            entryRef = func_003EE320_8778(self->s[3].list, newRecord);
             func_003EEB30_8778(self->s[3].h, newRecord + 8, entryRef);
             return 1;
         }
@@ -11457,7 +11493,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
             }
             newRecord = func_002591E8_8778(168);
             *(struct B_8778 *)newRecord = *(struct B_8778 *)record;
-            entryRef = func_003EE320_8778(self->s[i].f4, newRecord);
+            entryRef = func_003EE320_8778(self->s[i].list, newRecord);
             func_003EEB30_8778(self->s[i].h, newRecord + 8, entryRef);
             return 1;
         }
@@ -11476,7 +11512,7 @@ extern int func_003EED08_8968(int, int) __asm__("func_003EED08");
 extern void *func_003EE480_8968(int, int) __asm__("func_003EE480");
 extern void func_00259210_8968(void *) __asm__("func_00259210");
 
-struct S_8968 { int h; int f4; int a; int b; int pad; };
+struct S_8968 { int h; int list; int a; int b; int pad; };
 struct O_8968 { char pad[0x310]; struct S_8968 s[8]; };
 
 int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("func_003E8968");
@@ -11504,7 +11540,7 @@ int func_003E8968_impl(struct O_8968 *self, unsigned int i, int entryName) {
             return 0;
         }
         func_003EED08_8968(self->s[i].h, entryName);
-        func_00259210_8968(func_003EE480_8968(self->s[i].f4, entryRef));
+        func_00259210_8968(func_003EE480_8968(self->s[i].list, entryRef));
         return 1;
     }
     return -1;
@@ -11602,18 +11638,19 @@ extern char str_PASS_b[];
 extern char str_MASK[];
 extern char str_CHAN_b[];
 
-struct S_8B10 { int h; int f4; int a; int b; int pad; };
+struct S_8B10 { int h; int list; int a; int b; int pad; };
+/* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
 struct O_8B10 {
-    int f0, f4, f8, fC;
+    int mpSession, mpPing, mEventFlags, mState;
     char pad10[0x24 - 0x10];
-    char f24[0x10];
-    char f34[0x310 - 0x34];
+    char mSessionKey[0x10];
+    char mTags[0x310 - 0x34];
     struct S_8B10 s[8];
     char pad3B0[0x4B8 - 0x3B0];
-    int f4B8;
-    char f4BC[0x508 - 0x4BC];
-    int f508;
-    int f50C;
+    int mSess;
+    char mMask[0x508 - 0x4BC];
+    int mChannel;
+    int mPendingSnapshots;
 };
 
 /**
@@ -11641,7 +11678,7 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     int k;
     int entryRef;
 
-    st = self->fC;
+    st = self->mState;
     if (st != 'idle' && st != 'auth' && st != 'acct' && st != 'skey') {
         return -1;
     }
@@ -11651,15 +11688,15 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     }
     if (cmd == 'auth' || cmd == 'acct' || cmd == 'pass') {
         cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, tags);
-        func_003ECB00_8B10(buf, 0x200, self->f34);
+        func_003ECB00_8B10(buf, 0x200, self->mTags);
         cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F,
                                               str_empty_k);
-        if (self->f24[0] == 0) {
-            cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, str_PASS_b, self->f4BC, str + 1);
-            cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, str_MASK, self->f4B8);
+        if (self->mSessionKey[0] == 0) {
+            cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, str_PASS_b, self->mMask, str + 1);
+            cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, str_MASK, self->mSess);
         } else {
             str[0] = '~';
-            func_003F35D0_8B10(str + 1, 0x1F, str + 1, self->f24, 0x10, 0x10);
+            func_003F35D0_8B10(str + 1, 0x1F, str + 1, self->mSessionKey, 0x10, 0x10);
             cDirtysock_tag_TagFieldSetString_8B10(buf, 0x200, str_PASS_b, str);
         }
         tags = buf;
@@ -11668,13 +11705,13 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
         k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, str_CHAN_b), 0);
         if (k >= 4 && k < 8 && self->s[k].h != 0) {
             while ((entryRef = func_003EE9A0_8B10(self->s[k].h)) != 0) {
-                func_00259210_8B10(func_003EE480_8B10(self->s[k].f4, entryRef));
+                func_00259210_8B10(func_003EE480_8B10(self->s[k].list, entryRef));
             }
         }
-        self->f508 = 0;
-        self->f50C++;
+        self->mChannel = 0;
+        self->mPendingSnapshots++;
     }
-    func_003F5910_8B10(self->f0, cmd, 0, tags, -1);
+    func_003F5910_8B10(self->mpSession, cmd, 0, tags, -1);
     return *n;
 }
 #endif
@@ -11720,7 +11757,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8DC0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-typedef struct { int f0; int f4; int f8; int fC; char pad[0x530]; int f540; } S_8DC0;
+/* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
+typedef struct {
+    int mpSession; int mpPing; int mEventFlags; int mState; char pad[0x530]; int mPingsOutstanding;
+} S_8DC0;
 typedef struct { int id; int f4; int addr; int t; char pad[8]; char name[0x20]; } N_8DC0;
 extern N_8DC0 *func_003E7718_8DC0(S_8DC0 *, int, int, int) __asm__("func_003E7718");
 extern int func_003F5D88_8DC0(int) __asm__("func_003F5D88");
@@ -11750,20 +11790,20 @@ extern char str_ADDR_b_8DC0[] __asm__("str_ADDR_b");
 int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int callback, int context) {
     char buf[0x100];
     N_8DC0 *n;
-    int st = self->fC;
+    int st = self->mState;
     if (st != 'conn' && st != 'idle' && st != 'auth' && st != 'acct') return -1;
-    if (self->f4 == 0) return -2;
-    if (self->f540 >= 0x40) return -3;
+    if (self->mpPing == 0) return -2;
+    if (self->mPingsOutstanding >= 0x40) return -3;
     n = func_003E7718_8DC0(self, 'ping', callback, context);
     if (n == 0) return -4;
     n->addr = addr;
-    n->t = func_003F5D88_8DC0(self->f0) + x;
+    n->t = func_003F5D88_8DC0(self->mpSession) + x;
     strncpy_8DC0(n->name, name, 0x1F);
     buf[0] = 0;
     TagFieldSetString_8DC0(buf, 0x100, str_NAME_b_8DC0, name);
     TagFieldSetAddress_8DC0(buf, 0x100, str_ADDR_b_8DC0, addr);
-    func_003E7450_8DC0(self->f4, addr, buf, 0x100);
-    self->f540++;
+    func_003E7450_8DC0(self->mpPing, addr, buf, 0x100);
+    self->mPingsOutstanding++;
     return n->id;
 }
 #endif
@@ -11984,7 +12024,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9378);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct N_9378 { int f0; int f4; unsigned int f8; int fC; int f10; int f14; int f18; char name[1]; };
+/* A room record (func_003E95C8's Room_95C8; names ours, from the tags). */
+struct N_9378 { int id; int f4; unsigned int flags; int userLimit; int userCount; int userCountText; int flagText;
+    char name[1]; };
 extern char D_004A4888_9378[] __asm__("str_empty_k");
 extern int func_003EE620_9378(int) __asm__("func_003EE620");
 extern int func_003EE600(int, int);
@@ -12024,9 +12066,9 @@ int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int va
     for (; i < func_003EE558_9378(*(int *)(self + 0x314)); i++) {
         struct N_9378 *n = func_003EE560_9378(*(int *)(self + 0x314), i);
         int fullness;
-        if ((n->f8 & mask) != val) continue;
+        if ((n->flags & mask) != val) continue;
         if (strncmp(n->name, name, strlen(name)) != 0) continue;
-        fullness = n->f10 * 100 / n->fC;
+        fullness = n->userCount * 100 / n->userLimit;
         if (fullness < limit) {
             if (best < fullness) {
                 def = i;
@@ -12123,17 +12165,17 @@ struct Rec_95C8 {
     int ctx;
     struct Rec_95C8 *next;
 };
-struct Slot_95C8 { int h; int f4; int f8; int fC; int f10; };
+struct Slot_95C8 { int h; int list; int routine; int context; int spare; };
 struct Cb_95C8 { void (*fn)(void *, struct Ev_95C8 *, int); int ctx; };
 struct Sess_95C8 {                  /* 0x110 */
     char name[0x20];
     char self[0x20];
     char host[0x20];
     char oppo[0x20];
-    char p1[0x10];
-    char p2[0x10];
-    char p3[0x10];
-    char p4[0x10];
+    char player1[0x10];             /* the P1 .. P4 tags */
+    char player2[0x10];
+    char player3[0x10];
+    char player4[0x10];
     int addr;
     int from;
     int seed;
@@ -12144,10 +12186,10 @@ struct Room_95C8 {                  /* 0x68 */
     int id;
     int f04;
     int flags;
-    int f0C;
-    int f10;
-    char f14[4];
-    char f18[4];
+    int userLimit;                  /* the L tag (names ours, from the tags) */
+    int userCount;                  /* the T tag */
+    char userCountText[4];          /* userCount printed */
+    char flagText[4];               /* "No" / "Yes" from flags bit 0x10000 */
     char name[0x20];
     char host[0x20];
     char ping[8];
@@ -12157,49 +12199,49 @@ struct User_95C8 {                  /* 0x138 */
     int id;
     int flags;
     char name[0x20];
-    char f28[8];
+    char ping[8];                   /* the P tag (names ours, from the tags) */
     int addr;
-    int f34;
-    char f38[0x80];
-    char fB8[0x80];
+    int rank;                       /* the R tag (as Rank_95C8's; func_0025F288 reads it as the rank) */
+    char stats[0x80];               /* the S tag */
+    char extra[0x80];               /* the X tag */
 };
 struct Rank_95C8 {                  /* 0xA8 */
     int score;
-    int f04;
+    int rank;                       /* the R tag of a '+snp' entry, 0 for '+rnk' (names ours) */
     char name[0x20];
-    char f28[0x80];
+    char stats[0x80];               /* the S tag */
 };
 struct Lob_95C8 {
-    int f0;
-    int f4;
-    unsigned int f8;
-    int fC;
-    int f10;
-    int f14;
-    unsigned int f18;
-    unsigned int f1C;
-    int f20;
-    char f24[0x10];
-    char f34[0x100];
-    char f134[0x40];
-    char f174[0x40];
-    int f1B4;
-    int f1B8;
-    int f1BC;
-    char f1C0[0x40];
+    int mpSession;
+    int mpPing;
+    unsigned int mEventFlags;
+    int mState;
+    int mTimeout;
+    int mStateTime;
+    unsigned int mNextPingTime;
+    unsigned int mLastPing;
+    int mPingFailures;
+    char mSessionKey[0x10];
+    char mTags[0x100];
+    char mAccount[0x40];
+    char mPersona[0x40];
+    int mUserFlags;
+    int mRoomId;
+    int mRoomFlags;
+    char mRoomName[0x40];
     struct Sess_95C8 sess;
     struct Slot_95C8 s[8];
-    int f3B0;
-    int f3B4;
-    char f3B8[0x100];
-    int f4B8;
-    char f4BC[0x40];
-    int f4FC;
-    int f500;
-    int f504;
-    int f508;
-    int f50C;
-    int f510;
+    int mPort;
+    int mAddress;
+    char mDownText[0x100];
+    int mSess;
+    char mMask[0x40];
+    int mExternalAddr;
+    int mLocalAddr;
+    int mMore;
+    int mChannel;
+    int mPendingSnapshots;
+    int mSlots;
     struct Cb_95C8 cb[5];
 };
 
@@ -12329,34 +12371,34 @@ void func_003E95C8(struct Lob_95C8 *self)
     int entryRef;
     int id;
 
-    if (self->f0 == 0) {
+    if (self->mpSession == 0) {
         return;
     }
-    now = func_003F5D88_95C8(self->f0);
-    if (self->fC != 'offl') {
-        int diff = now - self->f14;
-        if (self->f14 != 0 && diff > 5000) {
-            self->f10 += diff;
+    now = func_003F5D88_95C8(self->mpSession);
+    if (self->mState != 'offl') {
+        int diff = now - self->mStateTime;
+        if (self->mStateTime != 0 && diff > 5000) {
+            self->mTimeout += diff;
         }
-        if ((int)(self->f10 - now) < 0) {
+        if ((int)(self->mTimeout - now) < 0) {
             func_003E7F70_95C8(self, 'time', 0x800);
         }
     }
-    self->f14 = now;
-    if (self->fC == 'term' || self->fC == 'offl') {
+    self->mStateTime = now;
+    if (self->mState == 'term' || self->mState == 'offl') {
         return;
     }
     func_003E7C40_95C8(self);
-    while ((len = func_003F5A70_95C8(self->f0, &kind, &code, &data)) >= 0) {
-        self->f10 = now + 60000;
+    while ((len = func_003F5A70_95C8(self->mpSession, &kind, &code, &data)) >= 0) {
+        self->mTimeout = now + 60000;
         if (kind == 0x7E706E67) {
-            if (self->f1C != 0xFFFFFFFF) {
+            if (self->mLastPing != 0xFFFFFFFF) {
                 TagDupl_95C8(buf, 0x100, data);
-                TagSetNumber_95C8(buf, 0x100, D_004A4908_95C8, self->f1C);
+                TagSetNumber_95C8(buf, 0x100, D_004A4908_95C8, self->mLastPing);
                 data = buf;
                 len = -1;
             }
-            func_003F5910_95C8(self->f0, kind, code, data, len);
+            func_003F5910_95C8(self->mpSession, kind, code, data, len);
         } else {
             ev.kind = kind;
             ev.code = code;
@@ -12369,51 +12411,51 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (rec.fn != 0) {
                 rec.fn(self, &ev, rec.ctx);
             }
-            if (self->fC == 'rdir') {
+            if (self->mState == 'rdir') {
                 if (kind == 0x40646972) {
-                    int port = func_003F57C8_95C8(self->f0, 'lprt');
-                    self->f500 = func_003F57C8_95C8(self->f0, 'ladr');
+                    int port = func_003F57C8_95C8(self->mpSession, 'lprt');
+                    self->mLocalAddr = func_003F57C8_95C8(self->mpSession, 'ladr');
                     if (TagFind_95C8(data, D_004A4910_95C8) == 0) {
-                        self->f3B4 = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
-                        self->f3B0 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4918_95C8), 0);
+                        self->mAddress = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
+                        self->mPort = TagGetNumber_95C8(TagFind_95C8(data, D_004A4918_95C8), 0);
                     }
-                    self->f4B8 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4920_95C8), 0);
-                    TagGetString_95C8(TagFind_95C8(data, str_MASK_95C8), self->f4BC, 0x40, D_004A4888_95C8);
-                    func_003F5738_95C8(self->f0);
-                    if (self->f3B4 != 0) {
-                        self->fC = 'conn';
+                    self->mSess = TagGetNumber_95C8(TagFind_95C8(data, D_004A4920_95C8), 0);
+                    TagGetString_95C8(TagFind_95C8(data, str_MASK_95C8), self->mMask, 0x40, D_004A4888_95C8);
+                    func_003F5738_95C8(self->mpSession);
+                    if (self->mAddress != 0) {
+                        self->mState = 'conn';
                         func_003E9590_95C8(self);
-                        func_003E76A8_95C8(self, D_00495F30_95C8, self->f3B4, self->f3B0);
-                        func_003F5638_95C8(self->f0, self->f3B4, self->f3B0);
+                        func_003E76A8_95C8(self, D_00495F30_95C8, self->mAddress, self->mPort);
+                        func_003F5638_95C8(self->mpSession, self->mAddress, self->mPort);
                         buf[0] = 0;
-                        TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->f500);
+                        TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->mLocalAddr);
                         TagSetNumber_95C8(buf, 0x100, D_004A4918_95C8, port);
-                        func_003F5910_95C8(self->f0, 'addr', 0, buf, -1);
+                        func_003F5910_95C8(self->mpSession, 'addr', 0, buf, -1);
                         break;
                     }
-                    TagGetString_95C8(TagFind_95C8(data, D_004A4928_95C8), self->f3B8, 0x100, D_004A4888_95C8);
-                    self->f8 |= 0x400;
+                    TagGetString_95C8(TagFind_95C8(data, D_004A4928_95C8), self->mDownText, 0x100, D_004A4888_95C8);
+                    self->mEventFlags |= 0x400;
                 }
                 kind = 0;
             }
             if (kind == -1 && code == -1) {
                 buf[0] = 0;
                 TagSetBinary_95C8(buf, 0x100, D_004A4930_95C8, D_00495FB0_95C8, 10);
-                func_003F5910_95C8(self->f0, 'skey', 0, buf, -1);
-                self->f504 = 1;
-                self->fC = 'skey';
+                func_003F5910_95C8(self->mpSession, 'skey', 0, buf, -1);
+                self->mMore = 1;
+                self->mState = 'skey';
                 kind = 'conn';
                 code = 0;
             }
-            if (self->fC == 'skey' && (kind == 'skey' || kind == 'sele') && code == 0) {
+            if (self->mState == 'skey' && (kind == 'skey' || kind == 'sele') && code == 0) {
                 if (kind == 'skey') {
-                    TagGetBinary_95C8(TagFind_95C8(data, D_004A4930_95C8), self->f24, 0x10);
+                    TagGetBinary_95C8(TagFind_95C8(data, D_004A4930_95C8), self->mSessionKey, 0x10);
                 }
-                self->f8 |= 1;
-                self->fC = 'idle';
+                self->mEventFlags |= 1;
+                self->mState = 'idle';
                 kind = 'conn';
                 code = 0;
-                self->f18 = now;
+                self->mNextPingTime = now;
                 if (self->cb[3].fn != 0) {
                     ev.type = 3;
                     ev.kind = 'conn';
@@ -12422,32 +12464,32 @@ void func_003E95C8(struct Lob_95C8 *self)
                     self->cb[3].fn(self, &ev, self->cb[3].ctx);
                 }
             }
-            if (kind == -1 && code == (int)0xFEFEFEFE && self->fC != 'conn') {
+            if (kind == -1 && code == (int)0xFEFEFEFE && self->mState != 'conn') {
                 func_003E7F70_95C8(self, 0xFEFEFEFE, 0x800);
             }
             if (code == 'auth') {
                 func_003E7F70_95C8(self, 'auth', 2);
             }
             if (kind == 'auth' && code == 0) {
-                self->fC = 'auth';
-                self->f8 |= 2;
-                TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->f134, 0x40, D_004A4888_95C8);
-                self->f4FC = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
+                self->mState = 'auth';
+                self->mEventFlags |= 2;
+                TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->mAccount, 0x40, D_004A4888_95C8);
+                self->mExternalAddr = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
             }
             if (kind == 'acct' && code == 0) {
-                self->fC = 'acct';
-                self->f8 |= 2;
+                self->mState = 'acct';
+                self->mEventFlags |= 2;
             }
-            if (kind == 'snap' && --self->f50C == 0 && code == 0) {
-                self->f508 = TagGetNumber_95C8(TagFind_95C8(data, str_CHAN_b_95C8), 0);
+            if (kind == 'snap' && --self->mPendingSnapshots == 0 && code == 0) {
+                self->mChannel = TagGetNumber_95C8(TagFind_95C8(data, str_CHAN_b_95C8), 0);
             }
             if (kind == 'sele' && code == 0) {
-                self->f504 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4938_95C8), 0);
-                self->f510 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4940_95C8), 0);
+                self->mMore = TagGetNumber_95C8(TagFind_95C8(data, D_004A4938_95C8), 0);
+                self->mSlots = TagGetNumber_95C8(TagFind_95C8(data, D_004A4940_95C8), 0);
             }
             if (kind == 'pers' && code == 0) {
-                TagGetString_95C8(TagFind_95C8(data, D_004A4948_95C8), self->f174, 0x40, D_004A4888_95C8);
-                self->f18 = now;
+                TagGetString_95C8(TagFind_95C8(data, D_004A4948_95C8), self->mPersona, 0x40, D_004A4888_95C8);
+                self->mNextPingTime = now;
             }
             if (kind == 0x2B736573) {
                 memset_95C8(&self->sess, 0, sizeof(self->sess));
@@ -12455,16 +12497,16 @@ void func_003E95C8(struct Lob_95C8 *self)
                 TagGetString_95C8(TagFind_95C8(data, D_004A4950_95C8), self->sess.self, 0x20, D_004A4888_95C8);
                 TagGetString_95C8(TagFind_95C8(data, D_004A4958_95C8), self->sess.host, 0x20, D_004A4888_95C8);
                 TagGetString_95C8(TagFind_95C8(data, D_004A4960_95C8), self->sess.oppo, 0x20, D_004A4888_95C8);
-                TagGetString_95C8(TagFind_95C8(data, D_004A4968_95C8), self->sess.p1, 0x10, D_004A4888_95C8);
-                TagGetString_95C8(TagFind_95C8(data, D_004A4970_95C8), self->sess.p2, 0x10, D_004A4888_95C8);
-                TagGetString_95C8(TagFind_95C8(data, D_004A4978_95C8), self->sess.p3, 0x10, D_004A4888_95C8);
-                TagGetString_95C8(TagFind_95C8(data, D_004A4980_95C8), self->sess.p4, 0x10, D_004A4888_95C8);
+                TagGetString_95C8(TagFind_95C8(data, D_004A4968_95C8), self->sess.player1, 0x10, D_004A4888_95C8);
+                TagGetString_95C8(TagFind_95C8(data, D_004A4970_95C8), self->sess.player2, 0x10, D_004A4888_95C8);
+                TagGetString_95C8(TagFind_95C8(data, D_004A4978_95C8), self->sess.player3, 0x10, D_004A4888_95C8);
+                TagGetString_95C8(TagFind_95C8(data, D_004A4980_95C8), self->sess.player4, 0x10, D_004A4888_95C8);
                 TagGetString_95C8(TagFind_95C8(data, D_004A4988_95C8), self->sess.auth, 0x40, D_004A4888_95C8);
                 self->sess.addr = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
                 self->sess.from = TagGetAddr_95C8(TagFind_95C8(data, D_004A4990_95C8), 0);
                 self->sess.seed = TagGetNumber_95C8(TagFind_95C8(data, D_004A4998_95C8), 0);
                 self->sess.when = TagGetTime_95C8(TagFind_95C8(data, D_004A49A0_95C8), 0);
-                self->f8 |= 0x200;
+                self->mEventFlags |= 0x200;
                 if (self->cb[4].fn != 0) {
                     ev.type = 4;
                     ev.kind = 'play';
@@ -12493,21 +12535,21 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (kind == 0x2B77686F) {
                 int room;
                 int count;
-                TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), self->f174, 0x40, D_004A4888_95C8);
-                self->f1B4 = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
+                TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), self->mPersona, 0x40, D_004A4888_95C8);
+                self->mUserFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
                 room = TagGetNumber_95C8(TagFind_95C8(data, D_004A49B8_95C8), 0);
                 count = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C0_95C8), 0);
-                if (room != self->f1B8) {
-                    self->f1B8 = room;
+                if (room != self->mRoomId) {
+                    self->mRoomId = room;
                     func_003E7B00_95C8(self, room, count);
-                    TagGetString_95C8(TagFind_95C8(data, D_004A49C8_95C8), self->f1C0, 0x40, D_004A4888_95C8);
-                    self->f1BC = TagGetFlags_95C8(TagFind_95C8(data, D_004A49D0_95C8), 0);
-                    self->f8 |= 8;
+                    TagGetString_95C8(TagFind_95C8(data, D_004A49C8_95C8), self->mRoomName, 0x40, D_004A4888_95C8);
+                    self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49D0_95C8), 0);
+                    self->mEventFlags |= 8;
                     if (self->s[1].h != 0) {
                         while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
                         }
-                        self->f8 |= 0x40;
+                        self->mEventFlags |= 0x40;
                     }
                 }
             }
@@ -12522,10 +12564,10 @@ void func_003E95C8(struct Lob_95C8 *self)
                         TagGetString_95C8(TagFind_95C8(data, D_004A49E0_95C8), roomRecord->host, 0x20, D_004A4888_95C8);
                         roomRecord->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), -1);
                         roomRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
-                        roomRecord->f10 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0);
-                        roomRecord->f0C = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F8_95C8), 0);
-                        sprintf_95C8(roomRecord->f14, D_004A4870_95C8, roomRecord->f10);
-                        strcpy(roomRecord->f18, (roomRecord->flags & 0x10000) ? D_004A4A00_95C8 : D_004A4A08_95C8);
+                        roomRecord->userCount = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0);
+                        roomRecord->userLimit = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F8_95C8), 0);
+                        sprintf_95C8(roomRecord->userCountText, D_004A4870_95C8, roomRecord->userCount);
+                        strcpy(roomRecord->flagText, (roomRecord->flags & 0x10000) ? D_004A4A00_95C8 : D_004A4A08_95C8);
                         roomRecord->ping[0] = 0;
                         len = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A10_95C8), -1);
                         if (len == 0) {
@@ -12535,24 +12577,25 @@ void func_003E95C8(struct Lob_95C8 *self)
                         }
                         entryRef = func_003EEEE8_95C8(self->s[0].h, roomRecord->id);
                         if (entryRef != 0) {
-                            struct Room_95C8 *old = func_003EE468_95C8(self->s[0].f4, entryRef);
+                            struct Room_95C8 *old = func_003EE468_95C8(self->s[0].list, entryRef);
                             if (old != 0 && old->ping[0] >= '0' && old->ping[0] <= '9') {
                                 strcpy(roomRecord->ping, old->ping);
                             }
                             func_00259210_95C8(old);
-                            func_003EE3E0_95C8(self->s[0].f4, entryRef, roomRecord);
+                            func_003EE3E0_95C8(self->s[0].list, entryRef, roomRecord);
                         } else {
-                            func_003EEDA0_95C8(self->s[0].h, roomRecord->id, func_003EE320_95C8(self->s[0].f4, roomRecord));
+                            func_003EEDA0_95C8(self->s[0].h, roomRecord->id, func_003EE320_95C8(self->s[0].list,
+                                    roomRecord));
                         }
                     } else {
                         entryRef = func_003EEEE8_95C8(self->s[0].h, id);
                         if (entryRef != 0) {
                             func_003EEF40_95C8(self->s[0].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[0].f4, entryRef));
-                            self->f8 |= 0x20;
+                            func_00259210_95C8(func_003EE480_95C8(self->s[0].list, entryRef));
+                            self->mEventFlags |= 0x20;
                         }
                     }
-                    self->f8 |= 0x20;
+                    self->mEventFlags |= 0x20;
                 }
             }
             if (kind == 0x2B706F70 && self->s[0].h != 0) {
@@ -12582,7 +12625,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                     if (*popCursor != 0) {
                         popCursor++;
                     }
-                    if (id != self->f1B8) {
+                    if (id != self->mRoomId) {
                         func_003E7B00_95C8(self, id, count);
                     }
                 }
@@ -12596,87 +12639,91 @@ void func_003E95C8(struct Lob_95C8 *self)
                         userRecord->id = id;
                         TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), userRecord->name, 0x20, D_004A4888_95C8);
                         userRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A10_95C8), userRecord->f28, 8, D_004A4888_95C8);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A10_95C8), userRecord->ping, 8, D_004A4888_95C8);
                         userRecord->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), userRecord->f38, 0x80, D_004A4888_95C8);
-                        userRecord->f34 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A38_95C8), userRecord->fB8, 0x80, D_004A4888_95C8);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), userRecord->stats, 0x80,
+                                D_004A4888_95C8);
+                        userRecord->rank = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A38_95C8), userRecord->extra, 0x80,
+                                D_004A4888_95C8);
                         entryRef = func_003EEEE8_95C8(self->s[1].h, userRecord->id);
                         if (entryRef != 0) {
-                            struct User_95C8 *old = func_003EE468_95C8(self->s[1].f4, entryRef);
+                            struct User_95C8 *old = func_003EE468_95C8(self->s[1].list, entryRef);
                             __builtin_memcpy(old, userRecord, sizeof(struct User_95C8));
-                            func_003EE3E0_95C8(self->s[1].f4, entryRef, old);
+                            func_003EE3E0_95C8(self->s[1].list, entryRef, old);
                             func_00259210_95C8(userRecord);
                             userRecord = old;
                         } else {
-                            func_003EEDA0_95C8(self->s[1].h, userRecord->id, func_003EE320_95C8(self->s[1].f4, userRecord));
+                            func_003EEDA0_95C8(self->s[1].h, userRecord->id, func_003EE320_95C8(self->s[1].list,
+                                    userRecord));
                         }
                         if (userRecord->flags & 0x200000) {
-                            self->f1B4 = userRecord->flags;
+                            self->mUserFlags = userRecord->flags;
                         }
                     } else {
                         entryRef = func_003EEEE8_95C8(self->s[1].h, id);
                         if (entryRef != 0) {
                             func_003EEF40_95C8(self->s[1].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
                         }
                     }
-                    func_003E7B00_95C8(self, self->f1B8, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
-                    self->f8 |= 0x40;
+                    func_003E7B00_95C8(self, self->mRoomId, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
+                    self->mEventFlags |= 0x40;
                 }
             }
             if (kind == 0x2B726E6B && self->s[2].h != 0) {
                 if (TagGetNumber_95C8(TagFind_95C8(data, D_004A4A40_95C8), 0) == -2) {
                     while ((entryRef = func_003EE9A0_95C8(self->s[2].h)) != 0) {
-                        func_00259210_95C8(func_003EE480_95C8(self->s[2].f4, entryRef));
+                        func_00259210_95C8(func_003EE480_95C8(self->s[2].list, entryRef));
                     }
                 } else {
                     struct Rank_95C8 *k = func_002591E8_95C8(sizeof(struct Rank_95C8));
-                    k->f04 = 0;
+                    k->rank = 0;
                     k->score = TagGetNumber_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
                     TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), k->name, 0x20, D_004A4888_95C8);
-                    TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), k->f28, 0x80, D_004A4888_95C8);
+                    TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), k->stats, 0x80, D_004A4888_95C8);
                     if (k->score >= 0x2000) {
                         k->score = 0x1FFF;
                     }
                     entryRef = func_003EEC88_95C8(self->s[2].h, k->name);
                     if (entryRef == 0 && k->score > 0) {
-                        func_003EEB30_95C8(self->s[2].h, k->name, func_003EE320_95C8(self->s[2].f4, k));
+                        func_003EEB30_95C8(self->s[2].h, k->name, func_003EE320_95C8(self->s[2].list, k));
                     } else if (entryRef != 0) {
                         if (k->score > 0) {
-                            struct Rank_95C8 *old = func_003EE468_95C8(self->s[2].f4, entryRef);
+                            struct Rank_95C8 *old = func_003EE468_95C8(self->s[2].list, entryRef);
                             __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                            func_003EE3E0_95C8(self->s[2].f4, entryRef, old);
+                            func_003EE3E0_95C8(self->s[2].list, entryRef, old);
                         } else {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[2].f4, func_003EED08_95C8(self->s[2].h, k->name)));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[2].list, func_003EED08_95C8(self->s[2].h,
+                                    k->name)));
                         }
                         func_00259210_95C8(k);
                     } else {
                         func_00259210_95C8(k);
                     }
                 }
-                self->f8 |= 0x80;
+                self->mEventFlags |= 0x80;
             }
-            if (kind == 0x2B736E70 && self->f508 >= 4 && self->f508 < 8 && self->s[self->f508].h != 0) {
+            if (kind == 0x2B736E70 && self->mChannel >= 4 && self->mChannel < 8 && self->s[self->mChannel].h != 0) {
                 struct Rank_95C8 *k = func_002591E8_95C8(sizeof(struct Rank_95C8));
-                k->f04 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
+                k->rank = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
                 k->score = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A10_95C8), 0);
                 TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), k->name, 0x20, D_004A4888_95C8);
-                TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), k->f28, 0x80, D_004A4888_95C8);
+                TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), k->stats, 0x80, D_004A4888_95C8);
                 if (k->score >= 0x2000) {
                     k->score = 0x1FFF;
                 }
-                entryRef = func_003EEC88_95C8(self->s[self->f508].h, k->name);
+                entryRef = func_003EEC88_95C8(self->s[self->mChannel].h, k->name);
                 if (entryRef == 0) {
-                    int ref = func_003EE320_95C8(self->s[self->f508].f4, k);
-                    func_003EEB30_95C8(self->s[self->f508].h, k->name, ref);
+                    int ref = func_003EE320_95C8(self->s[self->mChannel].list, k);
+                    func_003EEB30_95C8(self->s[self->mChannel].h, k->name, ref);
                 } else {
-                    struct Rank_95C8 *old = func_003EE468_95C8(self->s[self->f508].f4, entryRef);
+                    struct Rank_95C8 *old = func_003EE468_95C8(self->s[self->mChannel].list, entryRef);
                     __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                    func_003EE3E0_95C8(self->s[self->f508].f4, entryRef, old);
+                    func_003EE3E0_95C8(self->s[self->mChannel].list, entryRef, old);
                     func_00259210_95C8(k);
                 }
-                self->f8 |= 0x80;
+                self->mEventFlags |= 0x80;
             }
             if ((kind == 'move' || kind == 'room') && code == 0) {
                 int ident = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A48_95C8), -1);
@@ -12687,27 +12734,27 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (kind == 'move') {
                 int room = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A58_95C8), 0);
                 int count = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A60_95C8), 0);
-                if (room != self->f1B8) {
-                    self->f1B8 = room;
+                if (room != self->mRoomId) {
+                    self->mRoomId = room;
                     func_003E7B00_95C8(self, room, count);
-                    TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->f1C0, 0x40, D_004A4888_95C8);
-                    self->f1BC = TagGetFlags_95C8(TagFind_95C8(data, D_004A4A68_95C8), 0);
-                    self->f8 |= 8;
+                    TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->mRoomName, 0x40, D_004A4888_95C8);
+                    self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A4A68_95C8), 0);
+                    self->mEventFlags |= 8;
                     if (self->s[1].h != 0) {
                         while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
                         }
-                        self->f8 |= 0x40;
+                        self->mEventFlags |= 0x40;
                     }
                 }
             }
         }
-        func_003F5C38_95C8(self->f0, 0, 0, 0, 0);
+        func_003F5C38_95C8(self->mpSession, 0, 0, 0, 0);
     }
     func_003E7BA0_95C8(self);
-    if (self->f18 != 0 && self->f18 <= now) {
+    if (self->mNextPingTime != 0 && self->mNextPingTime <= now) {
         func_003E9590_95C8(self);
-        self->f18 = now + 30000;
+        self->mNextPingTime = now + 30000;
     }
 }
 #endif

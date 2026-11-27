@@ -1288,10 +1288,17 @@ struct cDynamicSprayFX {
     char unk_008[0x8];                  // 0x008
     float mPowderLevel;                 // 0x010 (name ours) [U] func_002DF3B0 clears it; func_002E1F70 moves it towards
                                         //       the surface's SnowBuildupAmount and fades the powder trail with it
-    char unk_014[0x8];                  // 0x014
+    float mHeadPuffAccum;               // 0x014 (name ours) [U] func_002E1120: grows by 18 to 24 a second while the
+                                        //       puffs blink on, each whole unit emits one puff; cleared above speed
+                                        //       1111.1
+    int mHeadPuffBlink;                 // 0x018 (name ours) [U] func_002E10B8 sets it; func_002E1120 toggles it every
+                                        //       mHeadPuffPeriod (puffs only while it is set)
     float mHeadPuffGlow;                // 0x01C (name ours) [U] func_002DF3B0 clears it; func_002E1120 steps it towards
                                         //       the anim's target and derives the head puffs' period and alpha from it
-    char unk_020[0x8];                  // 0x020
+    float mHeadPuffTimer;               // 0x020 (name ours) [U] func_002E10B8 clears it; func_002E1120 counts it up to
+                                        //       mHeadPuffPeriod
+    float mHeadPuffPeriod;              // 0x024 (name ours) [U] func_002E10B8: 0.4 to 0.5 at random; func_002E1120:
+                                        //       0.4 on, 0.4 to 1.0 off (by the glow)
     // Emitter indices (names ours). [U] func_002E1598 throws the slow-down burst from kEmitter_BigBurst on a surface
     // with ImpactLarge above strength 277.8 (it also reports the impact), else from kEmitter_SmallBurst (half the
     // level, a shorter throw).
@@ -1299,9 +1306,12 @@ struct cDynamicSprayFX {
     cDynamicColourEmitter* mEmitters;   // 0x028 (name ours) [R] ctor new cDynamicColourEmitter[10]
                                         //       ("DynamicSprayEmitter"), dtor delete[]; [U] func_002E2550 sets their
                                         //       m_enabled, func_002E26B8 re-runs emitters 5 and 6's setupEmitter
-    char unk_02C[0x14];                 // 0x02C 0x2C: the 10 spray settings (0xE8 bytes each: a tParticleData and 4
-                                        //       velocity scales; ctor "DynamicSprayData"; local view sSprayParams);
-                                        //       0x30: row 1 of the board bone's matrix (func_002DF920)
+    void* mSprayData;                   // 0x02C (name ours) the 10 spray settings (0xE8 bytes each: a
+                                        //       tParticleData and 4 velocity scales; ctor "DynamicSprayData"; local
+                                        //       view sSprayParams)
+    t4Vector mBoardUp;                  // 0x030 (name ours) [U] func_002DF920: row 1 of the board bone's matrix
+                                        //       (across mBoardForward and mBoardSide); func_002DFE88 / func_002E1F70
+                                        //       spray along it
     t4Vector mBoardSide;                // 0x040 (name ours) [U] func_002DF920: row 2 of the board bone's
                                         //       (mBoneBoardChild) SkelMatrices (cBoardTrailFX_update steps across
                                         //       the board along it); func_002DE398 scatters the emission point +-10
@@ -1309,7 +1319,9 @@ struct cDynamicSprayFX {
     t4Vector mBoardForward;             // 0x050 (name ours) [U] func_002DF920: row 0 of that matrix (the board's
                                         //       length); func_002DE398 scatters the emission point along it by the lean
                                         //       side
-    char unk_060[0x14];                 // 0x060
+    int mbReinitEmitters;               // 0x060 (name ours) [U] the ctor sets it; func_002DF920 re-initialises the
+                                        //       emitters (func_002DF448) while it is set; func_002DF448 clears it
+    char unk_064[0x10];                 // 0x064
     float mLastSpeed;                   // 0x074 (name ours) [U] func_002DF920: last frame's speed (the slow-down test);
                                         //       func_002DF3B0 clears it
     int mShedBone;                      // 0x078 (name ours) [U] func_002E2260 walks mBoneIndicies with it (wraps at
@@ -1322,10 +1334,32 @@ struct cDynamicSprayFX {
     char unk_084[0xC];                  // 0x084
     t4Vector mColour;                   // 0x090 (name ours) [U] func_002DF3B0: white; func_002DF920: the rider's render
                                         //       state colour doubled, alpha 1 (the emitters' colour)
-    char unk_0A0[0x40];                 // 0x0A0
+    t4Vector mBoardPos;                 // 0x0A0 (name ours) [U] func_002DF920: row 3 of the board bone's matrix (the
+                                        //       emitters' source point)
+    int mbSprayOn;                      // 0x0B0 (name ours) [U] func_002DF920: 1, cleared in the air, wiping out, on a
+                                        //       rail, in control state CS_Reset or in a NIS without board FX; the
+                                        //       emitters spray only while it is set
+    float mEdgeLean;                    // 0x0B4 (name ours) [U] func_002DF920: -mSlewed[0].cur *
+                                        //       (1 - |mSlewed[3].cur|), negated riding fakie; func_002DFE88 picks the
+                                        //       spray side by its sign
+    float mSpeed;                       // 0x0B8 (name ours) [U] func_002DF920: the length of the rider's velocity
+    float mAbsSpeed;                    // 0x0BC (name ours) [U] func_002DF920: |mSpeed|; the emitters scale with it
+    t4Vector mVelocityDir;              // 0x0C0 (name ours) [U] func_002DF920: the rider's mVelocity normalised
+    tSurfData* mpSurfData;              // 0x0D0 (name ours) [U] func_002DF920: the SurfPropCache record of the rider's
+                                        //       mSurfaceType; the emitters test its Particle* / Impact* switches
+    int mMotionState;                   // 0x0D4 (name ours) [U] func_002DF920: cRider_getMotionState; func_002E1598 /
+                                        //       func_002E2260 test MS_Wipeout
+    char unk_0D8[0x8];                  // 0x0D8
     float mBurstStrength;               // 0x0E0 (name ours) [U] func_002E23E0 keeps the strongest burst's strength;
                                         //       func_002E1598 plays it and decays it; func_002DF3B0 clears it
-    char unk_0E4[0x3C];                 // 0x0E4
+    char unk_0E4[0xC];                  // 0x0E4
+    t4Vector mBurstPos;                 // 0x0F0 (name ours) [U] func_002E23E0 stores the burst's point; func_002E1598
+                                        //       sprays from it and reports the impact there
+    t4Vector mBurstDir;                 // 0x100 (name ours) [U] func_002E23E0: the burst's direction (surface normal)
+    int mBurstSurface;                  // 0x110 (name ours) [U] func_002E23E0: the burst's surface type
+    int mbBurstIsSlowdown;              // 0x114 (name ours) [U] func_002E23E0: 1 for a slow-down spray, 0 for an
+                                        //       impact; func_002E1598 throws an impact's spray harder
+    char unk_118[0x8];                  // 0x118
     float mBurstAlpha;                  // 0x120 (name ours) [U] func_002DF3B0 0.5; func_002E1598 blends the burst
                                         //       colour's alpha with it
     int mIsPlayer;                      // 0x124 (name ours) [U] func_002E26B8: = (mRider->mViewIndex >= 0);
@@ -1341,17 +1375,35 @@ struct cDynamicSprayFX {
 CHECK_OFFSET(cDynamicSprayFX, mRider, 0x000);
 CHECK_OFFSET(cDynamicSprayFX, mShedAmount, 0x004);
 CHECK_OFFSET(cDynamicSprayFX, mPowderLevel, 0x010);
+CHECK_OFFSET(cDynamicSprayFX, mHeadPuffAccum, 0x014);
+CHECK_OFFSET(cDynamicSprayFX, mHeadPuffBlink, 0x018);
 CHECK_OFFSET(cDynamicSprayFX, mHeadPuffGlow, 0x01C);
+CHECK_OFFSET(cDynamicSprayFX, mHeadPuffTimer, 0x020);
+CHECK_OFFSET(cDynamicSprayFX, mHeadPuffPeriod, 0x024);
 CHECK_OFFSET(cDynamicSprayFX, mEmitters, 0x028);
-CHECK_OFFSET(cDynamicSprayFX, unk_02C, 0x02C);
+CHECK_OFFSET(cDynamicSprayFX, mSprayData, 0x02C);
+CHECK_OFFSET(cDynamicSprayFX, mBoardUp, 0x030);
 CHECK_OFFSET(cDynamicSprayFX, mBoardSide, 0x040);
 CHECK_OFFSET(cDynamicSprayFX, mBoardForward, 0x050);
+CHECK_OFFSET(cDynamicSprayFX, mbReinitEmitters, 0x060);
 CHECK_OFFSET(cDynamicSprayFX, mLastSpeed, 0x074);
 CHECK_OFFSET(cDynamicSprayFX, mShedBone, 0x078);
 CHECK_OFFSET(cDynamicSprayFX, mBoneIndicies, 0x07C);
 CHECK_OFFSET(cDynamicSprayFX, mBoneIndiciesValid, 0x080);
 CHECK_OFFSET(cDynamicSprayFX, mColour, 0x090);
+CHECK_OFFSET(cDynamicSprayFX, mBoardPos, 0x0A0);
+CHECK_OFFSET(cDynamicSprayFX, mbSprayOn, 0x0B0);
+CHECK_OFFSET(cDynamicSprayFX, mEdgeLean, 0x0B4);
+CHECK_OFFSET(cDynamicSprayFX, mSpeed, 0x0B8);
+CHECK_OFFSET(cDynamicSprayFX, mAbsSpeed, 0x0BC);
+CHECK_OFFSET(cDynamicSprayFX, mVelocityDir, 0x0C0);
+CHECK_OFFSET(cDynamicSprayFX, mpSurfData, 0x0D0);
+CHECK_OFFSET(cDynamicSprayFX, mMotionState, 0x0D4);
 CHECK_OFFSET(cDynamicSprayFX, mBurstStrength, 0x0E0);
+CHECK_OFFSET(cDynamicSprayFX, mBurstPos, 0x0F0);
+CHECK_OFFSET(cDynamicSprayFX, mBurstDir, 0x100);
+CHECK_OFFSET(cDynamicSprayFX, mBurstSurface, 0x110);
+CHECK_OFFSET(cDynamicSprayFX, mbBurstIsSlowdown, 0x114);
 CHECK_OFFSET(cDynamicSprayFX, mBurstAlpha, 0x120);
 CHECK_OFFSET(cDynamicSprayFX, mIsPlayer, 0x124);
 CHECK_OFFSET(cDynamicSprayFX, mLOD, 0x128);

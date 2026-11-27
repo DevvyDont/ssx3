@@ -63,9 +63,9 @@ struct tLightRecord {
     float m_fvWorldPos[3];          // 0x38 [O] tf3Vector; [U] CalcLightDist, CreateLights
     float m_fvMin[3];               // 0x44 [O] tf3Vector (the bound box)
     float m_fvMax[3];               // 0x50 [O] tf3Vector
-    float unk_05C;                  // 0x5C [O] anonymous union (spot cone); [U] GetIntensity: inner cosine; CreateLights:
-                                    //      cone angle = pi/2 - func_0031C128(it)
-    float unk_060;                  // 0x60 [O] anonymous union; [U] GetIntensity: outer cosine
+    float mSpotInnerCos;            // 0x5C (name ours) [O] anonymous union (spot cone); [U] GetIntensity: inner
+                                    //      cosine; CreateLights: cone angle = pi/2 - func_0031C128(it)
+    float mSpotOuterCos;            // 0x60 (name ours) [O] anonymous union; [U] GetIntensity: outer cosine
     signed char m_cDecayRate;       // 0x64 [O] char; [U] GetIntensity falloff power (1..3), CreateLights decay (lb)
     signed char m_cDropOff;         // 0x65 [O] char; [U] GetIntensity cone power, CreateLights dropoff (lb)
     char unk_066[0xA];              // 0x66 padding to the 0x70 record size
@@ -82,8 +82,8 @@ CHECK_OFFSET(tLightRecord, m_fvDirection, 0x2C);
 CHECK_OFFSET(tLightRecord, m_fvWorldPos, 0x38);
 CHECK_OFFSET(tLightRecord, m_fvMin, 0x44);
 CHECK_OFFSET(tLightRecord, m_fvMax, 0x50);
-CHECK_OFFSET(tLightRecord, unk_05C, 0x5C);
-CHECK_OFFSET(tLightRecord, unk_060, 0x60);
+CHECK_OFFSET(tLightRecord, mSpotInnerCos, 0x5C);
+CHECK_OFFSET(tLightRecord, mSpotOuterCos, 0x60);
 CHECK_OFFSET(tLightRecord, m_cDecayRate, 0x64);
 CHECK_OFFSET(tLightRecord, m_cDropOff, 0x65);
 CHECK_OFFSET(tLightRecord, unk_066, 0x66);

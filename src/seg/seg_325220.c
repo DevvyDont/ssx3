@@ -48,16 +48,30 @@ extern sRpcVer D_0052F2A8;      /* loadfile (follows D_0052F280) */
    Name ours. */
 #define IOP_NAME_SIZE 0xFC
 
-/* loadfile RPC (0x80000006) command block D_0052F080, 0x200 bytes, sent to D_0052F280 */
+/* loadfile RPC (0x80000006) command block D_0052F080, 0x200 bytes, sent to D_0052F280; each request's reply is read
+   back into it. One view per request kind; field names ours, from the senders. */
 typedef struct { char b[IOP_NAME_SIZE]; } sLfData;
-typedef struct { int f0; int f4; char n1[IOP_NAME_SIZE]; char n2[IOP_NAME_SIZE]; } sLfCmd;
+/* The module requests: a module id or IOP address, the argument length, a name and the arguments. */
+typedef struct { int id; int argLen; char name[IOP_NAME_SIZE]; char args[IOP_NAME_SIZE]; } sLfCmd;
+/* func_0042B840's load request: the argument length first, then the path and the arguments. */
+typedef struct { int argLen; int spare; char path[IOP_NAME_SIZE]; char args[IOP_NAME_SIZE]; } sLfLoadCmd;
+/* func_0042BAA8's ELF request: the path and the section name; the reply holds the entry point and gp. */
+typedef struct { int entry; int gp; char path[IOP_NAME_SIZE]; char section[IOP_NAME_SIZE]; } sLfElfCmd;
+/* The module requests' reply: the module id (or the word asked for) and the module's result. */
+typedef struct { int id; int result; } sLfReply;
 /* The value size of the loader's IOP memory get / set requests ([U] func_0042BBF8 and func_0042BCE8 move a byte,
    halfword or word for 0, 1 and 2; above 2 is refused). Names ours. */
 enum eIopValueSize { IOP_VALUE_BYTE = 0, IOP_VALUE_HALFWORD = 1, IOP_VALUE_WORD = 2 };
-typedef struct { union { unsigned char b; unsigned short h; int w; } f0; int f4; } sLfGetCmd;            /* 3 */
-typedef struct { int f0; int f4; union { unsigned char b; unsigned short h; unsigned w; } f8; } sLfSetCmd; /* 2 */
+/* get: the IOP address in, the value out; set: the address and the value. size is an eIopValueSize. */
+typedef struct { union { unsigned char b; unsigned short h; int w; } data; int size; } sLfGetCmd;        /* 3 */
+typedef struct {
+    int addr; int size; union { unsigned char b; unsigned short h; unsigned w; } value;
+} sLfSetCmd; /* 2 */
 typedef union {
     sLfCmd cmd;                 /* 6..10 and the name calls */
+    sLfLoadCmd load;            /* func_0042B840 */
+    sLfElfCmd elf;              /* func_0042BAA8 */
+    sLfReply reply;             /* the module requests' reply */
     sLfGetCmd get;
     sLfSetCmd set;
     sRpcVer ver;                /* 0xFF reply */
@@ -101,9 +115,15 @@ extern sRing *func_00424E00(int size);
 
 
 /* SIF RPC library state D_0052D680 (implementation side) */
-typedef struct { char pad[0x10]; int f10; int f14; int f18; char pad2[0x24]; } sSifRpcPkt;    /* 0x40-byte packet */
+/* 0x40-byte packet: the SIF command header, then slot (table index << 16 | state bits, bit 0 in use), pkt (its own
+   address) and rpc_id (the packet id). Names ours, as in sceSifCallRpc's view. */
+typedef struct { char header[0x10]; int slot; int pkt; int rpc_id; char rest[0x24]; } sSifRpcPkt;
 typedef struct sSifServer { int key; char pad[0x34]; struct sSifServer *next; } sSifServer;
-typedef struct sSifQueue { int f0; int f4; sSifServer *servers; int fC; int f10; struct sSifQueue *next; } sSifQueue;
+/* An RPC server queue: the serving thread, the active flag (set while sceSifGetNextRequest hands out requests), its
+   servers and the pending request list (head, tail). Names ours. */
+typedef struct sSifQueue {
+    int thread_id; int active; sSifServer *servers; int head; int tail; struct sSifQueue *next;
+} sSifQueue;
 typedef struct {
     int pid;                    /* last packet id */
     sSifRpcPkt *pkt_table;
@@ -125,8 +145,8 @@ extern sSifRpcState D_0052D680;
    thread func_00424AA0 calls WakeupThread, RotateThreadReadyQueue and SuspendThread for them). Names ours. */
 enum eWakeRequest { WAKE_REQUEST_WAKEUP = 0, WAKE_REQUEST_ROTATE_READY_QUEUE = 1, WAKE_REQUEST_SUSPEND = 2 };
 typedef struct {
-    int f0;
-    unsigned idx;
+    int readIdx;                /* the helper thread's read index (name ours) */
+    unsigned idx;               /* the write index */
     struct { char a; char b; } e[512];
 } sWakeQueue;
 extern sWakeQueue D_0052B3A8;
@@ -183,34 +203,73 @@ enum eFioRpcFunc {
     FIO_RPC_DEVCTL = 23, FIO_RPC_SYMLINK = 24, FIO_RPC_READLINK = 25, FIO_RPC_IOCTL2 = 26
 };
 
-/* fileio RPC send block D_0052D700: one packet layout per RPC function number (sent to D_0052EE00) */
-typedef struct { int f0; int f4; int f8; int fC; } sFioCmd4;                                    /* 15 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; } sFioFdCmd;                          /* 1, 10, 11 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; int f14; int f18; } sFioLseekCmd;    /* 4 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; } sFioReadCmd; /* 2 */
-typedef struct { int f0; int f4; int f8; int fC; unsigned f10; int f14; int f18; char data[16]; int f2C; } sFioWriteCmd; /* 3 */
-typedef struct { int f0; int f4; int f8; int fC; long f10; int f18; int f1C; } sFioLseek64Cmd;  /* 22 */
-typedef struct { int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; } sFioPathCmd;            /* 6, 8, 9, 16, 18, 21 */
-typedef struct { int f0; int f4; int f8; int fC; char name[FIO_BUFFER_SIZE]; } sFioPathModeCmd;           /* 7, 12 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; char name[FIO_BUFFER_SIZE]; } sFioPathArgCmd;   /* 19, 25 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; char name[FIO_BUFFER_SIZE]; int f414; } sFioOpenCmd; /* 0 */
+/* fileio RPC send block D_0052D700: one packet layout per RPC function number (sent to D_0052EE00). Every packet
+   starts with the same three words: the caller's semaphore (negated for a no-wait call once its D_00455188 entry is
+   taken), the address of its result word and the result size; func_00427590 reads them back from the reply. iopFd is
+   the IOP's descriptor from the slot, slot the slot's index in D_0052EC00. Field names ours, from the senders. */
+typedef struct { int sema; int resultAddr; int resultSize; int driverArg; } sFioCmd4;                     /* 15 */
+typedef struct { int sema; int resultAddr; int resultSize; int iopFd; int slot; } sFioFdCmd;              /* 1, 10 */
+typedef struct { int sema; int resultAddr; int resultSize; int iopFd; int direntBuf; } sFioDreadCmd;      /* 11 */
 typedef struct {
-    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE];
+    int sema; int resultAddr; int resultSize; int iopFd; int offset; int whence; int slot;
+} sFioLseekCmd; /* 4 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int iopFd; int buf; int size;
+    int spare;                  /* not written by sceRead */
+    int slot;
+} sFioReadCmd; /* 2 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int iopFd; unsigned buf; int size;
+    int dataLen;                /* the unaligned head bytes of buf copied into data */
+    char data[16];
+    int slot;
+} sFioWriteCmd; /* 3 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int iopFd; long offset; int whence; int slot;
+} sFioLseek64Cmd; /* 22 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; char name[FIO_BUFFER_SIZE];
+} sFioPathCmd; /* 6, 8, 9, 16, 18, 21 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int mode; char name[FIO_BUFFER_SIZE];
+} sFioPathModeCmd; /* 7 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int statBuf; char name[FIO_BUFFER_SIZE];
+} sFioGetstatCmd; /* 12 */
+typedef struct {
+    int sema; int resultAddr; int resultSize;
+    int spare;                  /* not written by sceSync */
+    int flag; char name[FIO_BUFFER_SIZE];
+} sFioSyncCmd; /* 19 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int bufLen; int buf; char name[FIO_BUFFER_SIZE];
+} sFioReadlinkCmd; /* 25 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; int flags; int mode; char name[FIO_BUFFER_SIZE]; int slot;
+} sFioOpenCmd; /* 0 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE];
 } sFioPath2Cmd; /* 17, 24 */
 typedef struct {
-    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
-    int fC0C;
+    int sema; int resultAddr; int resultSize; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE];
+    char data[FIO_BUFFER_SIZE];
+    int dataLen;
 } sFioFormatCmd; /* 14 */
 typedef struct {
-    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
-    int fC0C; int fC10;
+    int sema; int resultAddr; int resultSize; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE];
+    char data[FIO_BUFFER_SIZE];
+    int flag; int dataLen;
 } sFioMountCmd; /* 20 */
 typedef struct { int w[16]; } sFioStat;
-typedef struct { int f0; int f4; int f8; int fC; sFioStat v; char name[FIO_BUFFER_SIZE]; } sFioChstatCmd; /* 13 */
 typedef struct {
-    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
-    int f80C; int f810; int f814; int f818;
+    int sema; int resultAddr; int resultSize; int changeMask; sFioStat v; char name[FIO_BUFFER_SIZE];
+} sFioChstatCmd; /* 13 */
+typedef struct {
+    int sema; int resultAddr; int resultSize; char name[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
+    int command; int dataLen; int outBuf; int outLen;
 } sFioDevctlCmd; /* 23 */
+/* The same three words, the descriptor, the request, the output buffer and lengths and the input data; left with
+   offset names because sceIoctl's held form spells them. */
 typedef struct {
     int f0; int f4; int f8; int fC; int f10; char data[FIO_BUFFER_SIZE]; int f414; int f418; int f41C;
 } sFioIoctl2Cmd; /* 26 */
@@ -225,16 +284,16 @@ typedef union {
     sFioFormatCmd format;       /* 14 */
     sFioCmd4 adddrv;            /* 15 */
     sFioFdCmd dclose;           /* 10 */
-    sFioFdCmd dread;            /* 11 */
-    sFioPathModeCmd getstat;    /* 12 */
+    sFioDreadCmd dread;         /* 11 */
+    sFioGetstatCmd getstat;     /* 12 */
     sFioChstatCmd chstat;       /* 13 */
     sFioPath2Cmd rename;        /* 17 */
-    sFioPathArgCmd sync;        /* 19 */
+    sFioSyncCmd sync;           /* 19 */
     sFioMountCmd mount;         /* 20 */
     sFioLseek64Cmd lseek64;     /* 22 */
     sFioDevctlCmd devctl;       /* 23 */
     sFioPath2Cmd symlink;       /* 24 */
-    sFioPathArgCmd readlink;    /* 25 */
+    sFioReadlinkCmd readlink;   /* 25 */
     sFioIoctl2Cmd ioctl2;       /* 26 */
 } uFioCmd;
 extern uFioCmd D_0052D700;
@@ -453,27 +512,27 @@ extern int *__errno(void);
  * @return the previous break, or 0xFFFFFFFF
  */
 unsigned _sbrk(unsigned n) {
-    int s, st;
+    int intsOn, status;
     unsigned end;
-    MFC0_STATUS_4248(s);
-    s &= 0x10000;
-    if (s) {
+    MFC0_STATUS_4248(intsOn);
+    intsOn &= 0x10000;
+    if (intsOn) {
         do {
             DI_4248();
             SYNCP_4248();
-            MFC0_STATUS_4248(st);
-        } while (st & 0x10000);
+            MFC0_STATUS_4248(status);
+        } while (status & 0x10000);
     }
     end = D_0045516C + n;
     if (EndOfHeap() < end) {
         *__errno() = 12;
-        if (s) EI_4248();
+        if (intsOn) EI_4248();
         return 0xFFFFFFFF;
     }
     {
         unsigned old = D_0045516C;
         D_0045516C = end;
-        if (s) EI_4248();
+        if (intsOn) EI_4248();
         return old;
     }
 }
@@ -934,9 +993,9 @@ void func_00424AA0(sWakeQueue *wakeQueue) {
     unsigned char *entryThreads = (unsigned char *)&wakeQueue->e[0].b;
     for (;;) {
         WaitSema_i(D_0052B3A0);
-        i = wakeQueue->f0 & 0x1FF;
+        i = wakeQueue->readIdx & 0x1FF;
         j = i << 1;
-        wakeQueue->f0 = i + 1;
+        wakeQueue->readIdx = i + 1;
         switch (*(entryTypes + j)) {
         case WAKE_REQUEST_WAKEUP:
             WakeupThread(*(entryThreads + j));
@@ -1000,7 +1059,7 @@ int InitThread_i(void) {
         DeleteSema(D_0052B3A0);
         return -1;
     }
-    D_0052B3A8.f0 = 0;
+    D_0052B3A8.readIdx = 0;
     D_0052B3A8.idx = 0;
     StartThread(D_00455170, &D_0052B3A8);
     ChangeThreadPriority(GetThreadId(), 1);
@@ -1221,7 +1280,9 @@ void func_00424EA8(int cmd, int n, sTty *ttyState) {
 INCLUDE_ASM("seg/seg_325220", func_00425040);
 #ifdef SKIP_ASM
 /* DECI2 tty write: copy up to 256 bytes ('\n' -> "\r\n") into the uncached send packet and send it. */
-struct Pkt_5040 { short f0; short f2; short f4; char f6; char f7; int f8; };
+/* DECI2 send packet: the 8-byte DECI2 header (length, reserved, protocol, source and destination node) and a word
+   before the text (0; the text starts at +12). Names ours, from func_00425260's set-up. */
+struct Pkt_5040 { short length; short reserved; short protocol; char source; char destination; int textHeader; };
 extern char D_0052B900[];
 extern int f5040_send(int, char) __asm__("sceDeci2ReqSend");
 extern void f5040_poll(int) __asm__("sceDeci2Poll");
@@ -1262,8 +1323,8 @@ int func_00425040_d(char *buf, int len) {
             break;
     }
     D_0052B8D0.wlen = i + 12;
-    pkt->f0 = D_0052B8D0.wlen;
-    if (f5040_send(D_0052B8D0.fd, pkt->f7) < 0) {
+    pkt->length = D_0052B8D0.wlen;
+    if (f5040_send(D_0052B8D0.fd, pkt->destination) < 0) {
         D_0052B8D0.fC = 0;
         EIntr();
         return -1;
@@ -1312,7 +1373,8 @@ int func_00425190(int bufAddr, int n) {
 INCLUDE_ASM("seg/seg_325220", func_00425260);
 #ifdef SKIP_ASM
 // The binary re-reads fd right after storing it (sTty.fd is volatile).
-struct Pkt_5260 { short f0; short f2; short f4; char f6; char f7; int f8; };
+/* func_00425040's Pkt_5040 (names ours) */
+struct Pkt_5260 { short length; short reserved; short protocol; char source; char destination; int textHeader; };
 extern char D_0052B900[];
 extern char D_0052BA40[];
 extern void FlushCache(int);
@@ -1338,11 +1400,11 @@ int func_00425260(void) {
     D_0052B8D0.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
     sendPacket = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
     D_0052B8D0.wp = (char *)sendPacket;
-    sendPacket->f4 = 528;
-    sendPacket->f6 = 69;
-    sendPacket->f7 = 72;
-    sendPacket->f2 = 0;
-    sendPacket->f8 = 0;
+    sendPacket->protocol = 528;
+    sendPacket->source = 69;
+    sendPacket->destination = 72;
+    sendPacket->reserved = 0;
+    sendPacket->textHeader = 0;
     D_0052B8D0.ring = func_00424E00(0x100);
     return 1;
 }
@@ -1555,7 +1617,7 @@ void func_00425638_f(char *fmt, char *ap) __asm__("func_00425638");
  */
 void func_00425638_f(char *fmt, char *ap) {
     char buf[32];
-    char *pad;
+    char *zeroFill;
     char *printCursor;
     char *str;
     int lmod;
@@ -1567,7 +1629,7 @@ void func_00425638_f(char *fmt, char *ap) {
     int st;
     st = DIntr_p();
     while (*fmt) {
-        pad = 0;
+        zeroFill = 0;
         lmod = 0;
         if (*fmt == '%') {
         again:
@@ -1584,7 +1646,7 @@ void func_00425638_f(char *fmt, char *ap) {
                     } else {
                         fmt += 1;
                     }
-                    pad = &buf[31 - w];
+                    zeroFill = &buf[31 - w];
                     for (; w > 0; w--)
                         buf[31 - w] = '0';
                 }
@@ -1616,8 +1678,8 @@ void func_00425638_f(char *fmt, char *ap) {
                         unsignedValue >>= 3;
                     }
                 }
-                if (pad && pad < printCursor)
-                    printCursor = pad;
+                if (zeroFill && zeroFill < printCursor)
+                    printCursor = zeroFill;
                 while (*printCursor)
                     D_00455178(*printCursor++);
                 break;
@@ -1646,8 +1708,8 @@ void func_00425638_f(char *fmt, char *ap) {
                         unsignedValue >>= 4;
                     }
                 }
-                if (pad && pad < printCursor)
-                    printCursor = pad;
+                if (zeroFill && zeroFill < printCursor)
+                    printCursor = zeroFill;
                 while (*printCursor)
                     D_00455178(*printCursor++);
                 break;
@@ -1676,8 +1738,8 @@ void func_00425638_f(char *fmt, char *ap) {
                         signedValue = __divdi3(signedValue, 10);
                     }
                 }
-                if (pad && pad < printCursor)
-                    printCursor = pad;
+                if (zeroFill && zeroFill < printCursor)
+                    printCursor = zeroFill;
                 while (*printCursor)
                     D_00455178(*printCursor++);
                 break;
@@ -1702,8 +1764,8 @@ void func_00425638_f(char *fmt, char *ap) {
                         unsignedValue = __udivdi3(unsignedValue, 10);
                     }
                 }
-                if (pad && pad < printCursor)
-                    printCursor = pad;
+                if (zeroFill && zeroFill < printCursor)
+                    printCursor = zeroFill;
                 while (*printCursor)
                     D_00455178(*printCursor++);
                 break;
@@ -1752,19 +1814,19 @@ INCLUDE_ASM("seg/seg_325220", func_00425C28);
 #ifdef SKIP_ASM
 // not matched: varargs wrapper (a0 passes through, $5 = &spill at sp+0x58 passed as ap). hand-rolled va_start gives right sd $5..$11
 // but also emits swc1 $f12..$f18 saves (target has none) -> size mismatch (18 vs 14 insns).
-extern void func_00425638(int a0, char *ap);
+extern void func_00425638(int fmt, char *ap);
 /**
  * Prints formatted text through the current output routine D_00455178 (the serial port by default).
  *
  * Builds the argument pointer and calls func_00425638. The library's own diagnostics use it: func_00424AA0,
  * func_00424EA8 and func_004254D0.
  *
- * @param a0  the format
+ * @param fmt  the format
  */
-void func_00425C28(int a0, ...) {
+void func_00425C28(int fmt, ...) {
     char *ap;
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    func_00425638(a0, ap);
+    func_00425638(fmt, ap);
 }
 #endif
 
@@ -2041,18 +2103,19 @@ INCLUDE_ASM("seg/seg_325220", sceSifAddCmdHandler);
  * installs func_00426708, func_00426A98, func_00426C88 and func_00426820 for commands 0x80000008, 9, 0xA and 0xC;
  * SNDPLATFORM_init and func_00427A90 add their own.
  *
- * @param a0  the command id
+ * @param cmdId  the command id
  * @param handler  the handler
  * @param handlerData  the handler's data
  */
-void sceSifAddCmdHandler(int a0, int handler, int handlerData) {
-    int off = a0 << 3;
-    if (a0 < 0) {
-        a0 = (int)D_0052BCE4;
+void sceSifAddCmdHandler(int cmdId, int handler, int handlerData) {
+    int off = cmdId << 3;
+    /* cmdId is reused for the table base (a separate local changes the code) */
+    if (cmdId < 0) {
+        cmdId = (int)D_0052BCE4;
     } else {
-        a0 = (int)D_0052BCEC;
+        cmdId = (int)D_0052BCEC;
     }
-    off += a0;
+    off += cmdId;
     ((int *)off)[0] = handler;
     ((int *)off)[1] = handlerData;
 }
@@ -2066,16 +2129,17 @@ INCLUDE_ASM("seg/seg_325220", sceSifRemoveCmdHandler);
  *
  * Clears the handler pointer of the slot (id times 8). func_00400CB8 calls it.
  *
- * @param a0  the command id
+ * @param cmdId  the command id
  */
-void sceSifRemoveCmdHandler(int a0) {
-    int off = a0 << 3;
-    if (a0 < 0) {
-        a0 = (int)D_0052BCE4;
+void sceSifRemoveCmdHandler(int cmdId) {
+    int off = cmdId << 3;
+    /* cmdId is reused for the table base (a separate local changes the code) */
+    if (cmdId < 0) {
+        cmdId = (int)D_0052BCE4;
     } else {
-        a0 = (int)D_0052BCEC;
+        cmdId = (int)D_0052BCEC;
     }
-    off += a0;
+    off += cmdId;
     *(int *)off = 0;
 }
 #endif
@@ -2320,8 +2384,8 @@ sSifRpcPkt *f65D0(sSifRpcState *rpcState) {
     i = 0;
     packet = rpcState->pkt_table;
     while (i < n) {
-        if (!(packet->f10 & 1)) {
-            packet->f10 = (i << 16) | 5;
+        if (!(packet->slot & 1)) {
+            packet->slot = (i << 16) | 5;
             prevId = rpcState->pid;
             id = prevId + 1;
             rpcState->pid = id;
@@ -2332,8 +2396,8 @@ sSifRpcPkt *f65D0(sSifRpcState *rpcState) {
                 seq = id;
             }
             id = seq;
-            packet->f14 = (int)packet;
-            packet->f18 = id;
+            packet->pkt = (int)packet;
+            packet->rpc_id = id;
             EIntr();
             return packet;
         }
@@ -2401,8 +2465,9 @@ int func_004266C8(sSifRpcState *rpcState, int slot) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426708);
 #ifdef SKIP_ASM
-struct Q6708 { int f0; int pad4; int f8; char padC[0x10]; int f1C; int f20; int f24; };
-struct A6708 { char pad[0x1C]; struct Q6708 *q; unsigned f20; int f24; int f28; int f2C; };
+/* the client data (sSifClient) and the end packet; names ours, after sSifClient's */
+struct Q6708 { int packet; int pad4; int sema; char padC[0x10]; int end_function; int end_param; int server; };
+struct A6708 { char pad[0x1C]; struct Q6708 *client; unsigned request_cmd; int server; int buff; int cbuff; };
 extern void iSignalSema(int);
 extern void func_00426678_k(int) __asm__("func_00426678");
 void f6708(struct A6708 *a) __asm__("func_00426708");
@@ -2418,28 +2483,28 @@ void f6708(struct A6708 *a) __asm__("func_00426708");
  */
 void f6708(struct A6708 *endRequest) {
     struct Q6708 *clientData;
-    switch (endRequest->f20) {
+    switch (endRequest->request_cmd) {
     case 0x8000000A:
-        clientData = endRequest->q;
-        if (clientData->f1C != 0) {
-            ((void (*)(int))clientData->f1C)(clientData->f20);
+        clientData = endRequest->client;
+        if (clientData->end_function != 0) {
+            ((void (*)(int))clientData->end_function)(clientData->end_param);
         }
         break;
     case 0x80000009:
-        clientData = endRequest->q;
-        clientData->f24 = endRequest->f24;
-        ((int *)clientData)[5] = endRequest->f28;
-        ((int *)clientData)[6] = endRequest->f2C;
+        clientData = endRequest->client;
+        clientData->server = endRequest->server;
+        ((int *)clientData)[5] = endRequest->buff;
+        ((int *)clientData)[6] = endRequest->cbuff;
         break;
     case 0x8000000B:
         break;
     }
-    clientData = endRequest->q;
-    if (clientData->f8 >= 0) {
-        iSignalSema(clientData->f8);
+    clientData = endRequest->client;
+    if (clientData->sema >= 0) {
+        iSignalSema(clientData->sema);
     }
-    func_00426678_k(clientData->f0);
-    clientData->f0 = 0;
+    func_00426678_k(clientData->packet);
+    clientData->packet = 0;
 }
 #endif
 
@@ -2514,7 +2579,12 @@ void func_00426820(int *request, sSifRpcState *rpcState) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifGetOtherData);
 #ifdef SKIP_ASM
-struct S68F0 { struct S68F0 *f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; };
+/* The receive data (packet, pid, sema) and the request packet (pkt, rpc_id, client, src, dest, size) share this view;
+   names ours, after sSifClient and sSifRpcPkt. */
+struct S68F0 {
+    struct S68F0 *packet; int pid; int sema; int fC; int f10; int pkt; int rpc_id; int client; int src; int dest;
+    int size;
+};
 extern struct S68F0 *func_004265D0_p(sSifRpcState *) __asm__("func_004265D0");
 extern void func_00426678_j(struct S68F0 *) __asm__("func_00426678");
 extern int CreateSema_j(int *) __asm__("CreateSema");
@@ -2544,31 +2614,31 @@ int sceSifGetOtherData_d(struct S68F0 *receiveData, int srcAddr, int destAddr, i
     if (packet == 0) {
         return -1;
     }
-    receiveData->f0 = packet;
-    receiveData->f4 = packet->f18;
-    packet->f20 = srcAddr;
-    packet->f24 = destAddr;
-    packet->f28 = byteCount;
-    packet->f14 = (int)packet;
-    packet->f1C = (int)receiveData;
+    receiveData->packet = packet;
+    receiveData->pid = packet->rpc_id;
+    packet->src = srcAddr;
+    packet->dest = destAddr;
+    packet->size = byteCount;
+    packet->pkt = (int)packet;
+    packet->client = (int)receiveData;
     if (!(mode & 1)) {
         buf[1] = 1;
         buf[2] = 0;
-        receiveData->f8 = CreateSema_j(buf);
-        if (receiveData->f8 < 0) {
+        receiveData->sema = CreateSema_j(buf);
+        if (receiveData->sema < 0) {
             func_00426678_j(packet);
             return -3;
         }
         if (sceSifSendCmd_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
             func_00426678_j(packet);
-            DeleteSema(receiveData->f8);
+            DeleteSema(receiveData->sema);
             return -2;
         }
-        WaitSema_j(receiveData->f8);
-        DeleteSema(receiveData->f8);
+        WaitSema_j(receiveData->sema);
+        DeleteSema(receiveData->sema);
         return 0;
     }
-    receiveData->f8 = -1;
+    receiveData->sema = -1;
     if (sceSifSendCmd_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
         func_00426678_j(packet);
         return -2;
@@ -2644,7 +2714,12 @@ void func_00426A98(int *request, sSifRpcState *rpcState) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifBindRpc);
 #ifdef SKIP_ASM
-struct S6B48 { struct S6B48 *f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; };
+/* The client data (packet, pid, sema, command, server) and the bind packet (pkt, rpc_id, client, rpc_number) share
+   this view; names ours, after sSifClient and sSifRpcPkt. */
+struct S6B48 {
+    struct S6B48 *packet; int pid; int sema; int fC; int command; int pkt; int rpc_id; int client; int rpc_number;
+    int server;
+};
 extern struct S6B48 *func_004265D0(sSifRpcState *);
 extern void func_00426678_i(struct S6B48 *) __asm__("func_00426678");
 extern int CreateSema(int *);
@@ -2668,35 +2743,35 @@ int sceSifBindRpc_d(struct S6B48 *, int, int) __asm__("sceSifBindRpc");
 int sceSifBindRpc_d(struct S6B48 *client, int rpcNumber, int mode) {
     int buf[8];
     struct S6B48 *packet;
-    client->f10 = 0;
-    client->f24 = 0;
+    client->command = 0;
+    client->server = 0;
     packet = func_004265D0(&D_0052D680);
     if (packet == 0) {
         return -1;
     }
-    client->f0 = packet;
-    client->f4 = packet->f18;
-    packet->f20 = rpcNumber;
-    packet->f14 = (int)packet;
-    packet->f1C = (int)client;
+    client->packet = packet;
+    client->pid = packet->rpc_id;
+    packet->rpc_number = rpcNumber;
+    packet->pkt = (int)packet;
+    packet->client = (int)client;
     if (!(mode & 1)) {
         buf[1] = 1;
         buf[2] = 0;
-        client->f8 = CreateSema(buf);
-        if (client->f8 < 0) {
+        client->sema = CreateSema(buf);
+        if (client->sema < 0) {
             func_00426678_i(packet);
             return -3;
         }
         if (sceSifSendCmd(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
             func_00426678_i(packet);
-            DeleteSema(client->f8);
+            DeleteSema(client->sema);
             return -2;
         }
-        WaitSema_i(client->f8);
-        DeleteSema(client->f8);
+        WaitSema_i(client->sema);
+        DeleteSema(client->sema);
         return 0;
     }
-    client->f8 = -1;
+    client->sema = -1;
     if (sceSifSendCmd(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
         func_00426678_i(packet);
         return -2;
@@ -2708,40 +2783,42 @@ int sceSifBindRpc_d(struct S6B48 *client, int rpcNumber, int mode) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426C88);
 #ifdef SKIP_ASM
+/* the server queue (sSifQueue), the server data and the call packet; names ours, after sSifQueue, sSifClient and
+   sceSifCallRpc's view */
 struct B26C88 {
-    int f0;
-    int f4;
+    int thread_id;
+    int active;
     int pad8;
     int head;
     int tail;
 };
 struct E26C88 {
     int pad0[3];
-    int fC;
+    int size;
     int pad10[3];
-    int f1C;
-    int f20;
-    int f24;
-    int f28;
-    int f2C;
-    int f30;
-    int f34;
+    int client;
+    int pkt;
+    int rpc_number;
+    int recv;
+    int recv_size;
+    int rmode;
+    int slot;
     int pad38;
     int next;
     struct B26C88 *owner;
 };
 struct A26C88 {
     int pad0[4];
-    int f10;
-    int f14;
+    int slot;
+    int pkt;
     int pad18;
-    int f1C;
-    int f20;
-    int f24;
-    int f28;
-    int f2C;
-    int f30;
-    struct E26C88 *e;
+    int client;
+    int rpc_number;
+    int send_size;
+    int recv;
+    int recv_size;
+    int rmode;
+    struct E26C88 *server;
 };
 extern void iWakeupThread(int);
 /**
@@ -2755,7 +2832,7 @@ extern void iWakeupThread(int);
  * @param callRequest  the received call packet
  */
 void func_00426C88(struct A26C88 *callRequest) {
-    struct E26C88 *serverData = callRequest->e;
+    struct E26C88 *serverData = callRequest->server;
     struct B26C88 *rpcQueue = serverData->owner;
     if (rpcQueue->head == 0) {
         rpcQueue->head = (int)serverData;
@@ -2764,19 +2841,19 @@ void func_00426C88(struct A26C88 *callRequest) {
     }
     rpcQueue->tail = (int)serverData;
     {
-        int packetAddr = callRequest->f14;
-        int clientAddr = callRequest->f1C;
-        serverData->f20 = packetAddr;
-        serverData->f1C = clientAddr;
+        int packetAddr = callRequest->pkt;
+        int clientAddr = callRequest->client;
+        serverData->pkt = packetAddr;
+        serverData->client = clientAddr;
     }
-    serverData->f24 = callRequest->f20;
-    serverData->fC = callRequest->f24;
-    serverData->f28 = callRequest->f28;
-    serverData->f2C = callRequest->f2C;
-    serverData->f30 = callRequest->f30;
-    serverData->f34 = callRequest->f10;
-    if (rpcQueue->f0 >= 0 && rpcQueue->f4 == 0) {
-        iWakeupThread(rpcQueue->f0);
+    serverData->rpc_number = callRequest->rpc_number;
+    serverData->size = callRequest->send_size;
+    serverData->recv = callRequest->recv;
+    serverData->recv_size = callRequest->recv_size;
+    serverData->rmode = callRequest->rmode;
+    serverData->slot = callRequest->slot;
+    if (rpcQueue->thread_id >= 0 && rpcQueue->active == 0) {
+        iWakeupThread(rpcQueue->thread_id);
     }
 }
 #endif
@@ -2951,11 +3028,11 @@ void sceSifSetRpcQueue(sSifQueue *n, int threadId) {
     sSifQueue *lastQueue;
     sSifQueue *firstQueue;
     DIntr_r();
-    n->f0 = threadId;
-    n->f4 = 0;
+    n->thread_id = threadId;
+    n->active = 0;
     n->servers = 0;
-    n->fC = 0;
-    n->f10 = 0;
+    n->head = 0;
+    n->tail = 0;
     firstQueue = D_0052D680.queues;
     n->next = 0;
     if (firstQueue == 0) {
@@ -2973,8 +3050,13 @@ void sceSifSetRpcQueue(sSifQueue *n, int threadId) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifRegisterRpc);
 #ifdef SKIP_ASM
-struct N6FE0 { int f0; int f4; int f8; int fC; int f10; int f14; char pad[0x20]; struct N6FE0 *next; struct N6FE0 *f3C; struct S6FE0 *f40; };
-struct S6FE0 { int f0; int f4; struct N6FE0 *head; };
+/* the server data (next links the queue's servers, next_request its pending requests) and the queue (sSifQueue);
+   names ours */
+struct N6FE0 {
+    int id; int serve_func; int serve_buf; int size; int cancel_func; int cancel_buf; char pad[0x20];
+    struct N6FE0 *next; struct N6FE0 *next_request; struct S6FE0 *queue;
+};
+struct S6FE0 { int thread_id; int active; struct N6FE0 *head; };
 extern int DIntr_r(void) __asm__("DIntr");
 extern void EIntr(void);
 /**
@@ -2997,15 +3079,15 @@ void sceSifRegisterRpc(struct N6FE0 *n, int serverId, int serveFunc, int serveBu
     struct N6FE0 *lastServer;
     struct N6FE0 *firstServer;
     DIntr_r();
-    n->f3C = 0;
+    n->next_request = 0;
     n->next = 0;
-    n->f0 = serverId;
+    n->id = serverId;
     firstServer = serverQueue->head;
-    n->f4 = serveFunc;
-    n->f8 = serveBuf;
-    n->f10 = cancelFunc;
-    n->f14 = cancelBuf;
-    n->f40 = serverQueue;
+    n->serve_func = serveFunc;
+    n->serve_buf = serveBuf;
+    n->cancel_func = cancelFunc;
+    n->cancel_buf = cancelBuf;
+    n->queue = serverQueue;
     if (firstServer == 0) {
         serverQueue->head = n;
     } else {
@@ -3093,7 +3175,7 @@ sSifQueue *f7148(sSifQueue *x) {
 INCLUDE_ASM("seg/seg_325220", sceSifGetNextRequest);
 #ifdef SKIP_ASM
 struct N4271D8 { char pad[0x3C]; int next; };
-struct S4271D8 { char pad[4]; int f4; char pad2[4]; struct N4271D8 *head; };
+struct S4271D8 { char pad[4]; int active; char pad2[4]; struct N4271D8 *head; };   /* sSifQueue */
 extern void DIntr(void);
 extern void EIntr(void);
 /**
@@ -3111,10 +3193,10 @@ int sceSifGetNextRequest(int queueAddr) {
     DIntr();
     n = serverQueue->head;
     if (n == 0) {
-        serverQueue->f4 = 0;
+        serverQueue->active = 0;
     } else {
         struct N4271D8 *nextServer = (struct N4271D8 *)n->next;
-        serverQueue->f4 = 1;
+        serverQueue->active = 1;
         serverQueue->head = nextServer;
     }
     EIntr();
@@ -3341,7 +3423,10 @@ INCLUDE_ASM("seg/seg_325220", func_00427590);
 struct W7590 { char b[4]; };
 struct B7590 { char b[0x144]; };
 struct C7590 { char b[0x40]; };
-struct L7590 { int n1; int n2; char *d1; char *d2; unsigned char b1[64]; unsigned char b2[64]; };
+/* a read's unaligned head and tail fix-up (names ours) */
+struct L7590 {
+    int headLen; int tailLen; char *headDst; char *tailDst; unsigned char headBytes[64]; unsigned char tailBytes[64];
+};
 extern int D_00455208;
 extern void *func_0041605C(void *, void *, int);
 extern void iSignalSema(int);
@@ -3384,20 +3469,20 @@ void func_00427590(int *cmdPacket) {
         struct L7590 *readFixup = (struct L7590 *)(replyBuf + 0x14);
         char *fixupDst;
         char *fixupUncached;
-        if (readFixup->n1 > 0) {
-            fixupDst = readFixup->d1;
+        if (readFixup->headLen > 0) {
+            fixupDst = readFixup->headDst;
             fixupUncached = (char *)((int)fixupDst | 0x20000000);
-            for (i = 0; i < readFixup->n1; i++) {
-                unsigned char fixupByte = readFixup->b1[i];
+            for (i = 0; i < readFixup->headLen; i++) {
+                unsigned char fixupByte = readFixup->headBytes[i];
                 fixupUncached[i] = fixupByte;
                 fixupDst[i] = fixupByte;
             }
         }
-        if (readFixup->n2 > 0) {
-            fixupDst = readFixup->d2;
+        if (readFixup->tailLen > 0) {
+            fixupDst = readFixup->tailDst;
             fixupUncached = (char *)((int)fixupDst | 0x20000000);
-            for (i = 0; i < readFixup->n2; i++) {
-                unsigned char fixupByte = readFixup->b2[i];
+            for (i = 0; i < readFixup->tailLen; i++) {
+                unsigned char fixupByte = readFixup->tailBytes[i];
                 fixupUncached[i] = fixupByte;
                 fixupDst[i] = fixupByte;
             }
@@ -3727,16 +3812,16 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
         openCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     idx = fileSlot - D_0052EC00;
-    openCmd->fC = flags & 0x7FFFFFFF;
-    openCmd->f10 = mode;
+    openCmd->flags = flags & 0x7FFFFFFF;
+    openCmd->mode = mode;
     buf[1] = 1;
-    openCmd->f414 = idx;
+    openCmd->slot = idx;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    openCmd->f0 = sem;
-    openCmd->f4 = (int)&buf[8];
-    openCmd->f8 = 4;
+    openCmd->sema = sem;
+    openCmd->resultAddr = (int)&buf[8];
+    openCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 0, 0, &D_0052D700.open, 1048, D_0052E340, 4, 0, 0) < 0) {
         db0i(sem);
         func_004279B8();
@@ -3802,15 +3887,15 @@ int sceClose(int fileDesc) {
         func_004279B8();
         return -9;
     }
-    closeCmd->fC = fileSlot->f0;
+    closeCmd->iopFd = fileSlot->f0;
     buf[1] = 1;
-    closeCmd->f10 = fileSlot - D_0052EC00;
+    closeCmd->slot = fileSlot - D_0052EC00;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    closeCmd->f0 = sem;
-    closeCmd->f4 = (int)&buf[8];
-    closeCmd->f8 = 4;
+    closeCmd->sema = sem;
+    closeCmd->resultAddr = (int)&buf[8];
+    closeCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 1, 0, closeCmd, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -3882,19 +3967,19 @@ int sceLseek(int fileDesc, int offset, int whence)
     func_004279B8();
     return -9;
   }
-  lseekCmd->fC = fileSlot->f0;
-  lseekCmd->f10 = offset;
-  lseekCmd->f14 = whence;
-  lseekCmd->f18 = fileSlot - D_0052EC00;
+  lseekCmd->iopFd = fileSlot->f0;
+  lseekCmd->offset = offset;
+  lseekCmd->whence = whence;
+  lseekCmd->slot = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  lseekCmd->f8 = 4;
-  lseekCmd->f4 = (int) out;
+  lseekCmd->resultSize = 4;
+  lseekCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.lseek.f0 = sem;
+  D_0052D700.lseek.sema = sem;
   if (flags & 0x8000)
   {
     WaitSema_i(D_0045521C);
@@ -3902,8 +3987,8 @@ int sceLseek(int fileDesc, int offset, int whence)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
-        D_00455188[i] = lseekCmd->f0;
-        lseekCmd->f0 = -lseekCmd->f0;
+        D_00455188[i] = lseekCmd->sema;
+        lseekCmd->sema = -lseekCmd->sema;
         break;
       }
     }
@@ -3982,19 +4067,19 @@ int sceRead(int fileDesc, int readBuf, int readSize)
     func_004279B8();
     return -9;
   }
-  readCmd->fC = fileSlot->f0;
-  readCmd->f10 = readBuf;
-  readCmd->f14 = readSize;
-  readCmd->f1C = fileSlot - D_0052EC00;
+  readCmd->iopFd = fileSlot->f0;
+  readCmd->buf = readBuf;
+  readCmd->size = readSize;
+  readCmd->slot = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  readCmd->f8 = 4;
-  readCmd->f4 = (int) out;
+  readCmd->resultSize = 4;
+  readCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.read.f0 = sem;
+  D_0052D700.read.sema = sem;
   if (flags & 0x8000)
   {
     WaitSema_i(D_0045521C);
@@ -4002,8 +4087,8 @@ int sceRead(int fileDesc, int readBuf, int readSize)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
-        D_00455188[i] = readCmd->f0;
-        readCmd->f0 = -readCmd->f0;
+        D_00455188[i] = readCmd->sema;
+        readCmd->sema = -readCmd->sema;
         break;
       }
     }
@@ -4087,19 +4172,19 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
     func_004279B8();
     return -9;
   }
-  writeCmd->fC = fileSlot->f0;
-  writeCmd->f14 = writeSize;
-  writeCmd->f10 = writeBuf;
-  writeCmd->f2C = fileSlot - D_0052EC00;
+  writeCmd->iopFd = fileSlot->f0;
+  writeCmd->size = writeSize;
+  writeCmd->buf = writeBuf;
+  writeCmd->slot = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  writeCmd->f8 = 4;
-  writeCmd->f4 = (int) out;
+  writeCmd->resultSize = 4;
+  writeCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.write.f0 = sem;
+  D_0052D700.write.sema = sem;
   if (flags & 0x8000)
   {
     WaitSema_i(D_0045521C);
@@ -4107,8 +4192,8 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
-        D_00455188[i] = writeCmd->f0;
-        writeCmd->f0 = -writeCmd->f0;
+        D_00455188[i] = writeCmd->sema;
+        writeCmd->sema = -writeCmd->sema;
         break;
       }
     }
@@ -4127,7 +4212,7 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
   if (!(fl & 0x20000000))
     func_00426358(writeBuf, writeSize);
   writeBuf |= 0x20000000;
-  writeCmd->f18 = n;
+  writeCmd->dataLen = n;
   for (j = 0; j < n; j++)
     writeCmd->data[j] = ((char *) writeBuf)[j];
   if (sceSifCallRpc(&D_0052EE00, 3, 0, &D_0052D700.write, 0x30, D_0052E340, 4, 0, 0) < 0)
@@ -4399,9 +4484,9 @@ int func_00428E18_d(char *pathName, int rpcFunc) {
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    pathCmd->f4 = (int)&buf[8];
-    pathCmd->f0 = sem;
-    pathCmd->f8 = 4;
+    pathCmd->resultAddr = (int)&buf[8];
+    pathCmd->sema = sem;
+    pathCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, rpcFunc, 0, &D_0052D700.path, n + 13, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -4477,14 +4562,14 @@ int sceMkdir_d(char *dirPath, int dirMode) {
         mkdirCmd->name[FIO_BUFFER_SIZE - 1] = 0;
         n = FIO_BUFFER_SIZE - 1;
     }
-    mkdirCmd->fC = dirMode;
+    mkdirCmd->mode = dirMode;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    mkdirCmd->f4 = (int)&buf[8];
-    mkdirCmd->f0 = sem;
-    mkdirCmd->f8 = 4;
+    mkdirCmd->resultAddr = (int)&buf[8];
+    mkdirCmd->sema = sem;
+    mkdirCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 7, 0, &D_0052D700.mkdir, n + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -4586,14 +4671,14 @@ int sceFormat_d(char *devName, char *blockDev, char *data, int len) {
     for (i = 0; i < len; i++) {
         formatCmd->data[i] = data[i];
     }
-    formatCmd->fC0C = len;
+    formatCmd->dataLen = len;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    formatCmd->f4 = (int)&buf[8];
-    formatCmd->f0 = sem;
-    formatCmd->f8 = 4;
+    formatCmd->resultAddr = (int)&buf[8];
+    formatCmd->sema = sem;
+    formatCmd->resultSize = 4;
     func_00426358((int)&D_0052D700.format, 3088);
     if (sceSifCallRpc(&D_0052EE00, 0xE, 0, &D_0052D700.format, 3088, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
@@ -4640,14 +4725,14 @@ int func_00429420(int driverArg) {
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    adddrvCmd->fC = driverArg;
+    adddrvCmd->driverArg = driverArg;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    D_0052D700.adddrv.f0 = sem;
-    adddrvCmd->f4 = (int)&buf[8];
-    adddrvCmd->f8 = 4;
+    D_0052D700.adddrv.sema = sem;
+    adddrvCmd->resultAddr = (int)&buf[8];
+    adddrvCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 0xF, 0, &D_0052D700.adddrv, 0x10, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -4762,14 +4847,14 @@ int sceDclose(int dirDesc) {
         func_004279B8();
         return -9;
     }
-    dcloseCmd->fC = dirSlot->f0;
+    dcloseCmd->iopFd = dirSlot->f0;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    dcloseCmd->f0 = sem;
-    dcloseCmd->f4 = (int)&buf[8];
-    dcloseCmd->f8 = 4;
+    dcloseCmd->sema = sem;
+    dcloseCmd->resultAddr = (int)&buf[8];
+    dcloseCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 10, 0, dcloseCmd, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -4819,7 +4904,7 @@ int sceDread_d(int dirDesc, int direntBuf) {
     int sem;
     int accepted;
     sFioFile *dirSlot;
-    sFioFdCmd *dreadCmd = &D_0052D700.dread;
+    sFioDreadCmd *dreadCmd = &D_0052D700.dread;
     dirSlot = func_00427520(dirDesc);
     func_00427988_b(11);
     if (D_0045520C == 0) {
@@ -4830,15 +4915,15 @@ int sceDread_d(int dirDesc, int direntBuf) {
         func_004279B8();
         return -9;
     }
-    dreadCmd->fC = dirSlot->f0;
-    dreadCmd->f10 = direntBuf;
+    dreadCmd->iopFd = dirSlot->f0;
+    dreadCmd->direntBuf = direntBuf;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    dreadCmd->f0 = sem;
-    dreadCmd->f4 = (int)&buf[8];
-    dreadCmd->f8 = 4;
+    dreadCmd->sema = sem;
+    dreadCmd->resultAddr = (int)&buf[8];
+    dreadCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 11, 0, dreadCmd, 0x20, D_0052E340, 4, 0, 0) < 0) {
         WaitSema_i(sem);
         func_004279B8();
@@ -4882,7 +4967,7 @@ int sceGetstat(char *filePath, int statBuf) {
     int accepted;
     int i;
     unsigned char nameChar;
-    sFioPathModeCmd *getstatCmd = &D_0052D700.getstat;
+    sFioGetstatCmd *getstatCmd = &D_0052D700.getstat;
     func_00427988_b(0xC);
     if (D_0045520C == 0) {
         func_00427A90();
@@ -4901,14 +4986,14 @@ int sceGetstat(char *filePath, int statBuf) {
         getstatCmd->name[FIO_BUFFER_SIZE - 1] = 0;
         i = FIO_BUFFER_SIZE - 1;
     }
-    getstatCmd->fC = statBuf;
+    getstatCmd->statBuf = statBuf;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    getstatCmd->f4 = (int)&buf[8];
-    getstatCmd->f0 = sem;
-    getstatCmd->f8 = 4;
+    getstatCmd->resultAddr = (int)&buf[8];
+    getstatCmd->sema = sem;
+    getstatCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 0xC, 0, &D_0052D700.getstat, i + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -4976,14 +5061,14 @@ int sceChstat_d(char *filePath, sFioStat *src, int changeMask) {
         n = FIO_BUFFER_SIZE - 1;
     }
     chstatCmd->v = *src;
-    chstatCmd->fC = changeMask;
+    chstatCmd->changeMask = changeMask;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    chstatCmd->f0 = sem;
-    chstatCmd->f4 = (int)&buf[8];
-    chstatCmd->f8 = 4;
+    chstatCmd->sema = sem;
+    chstatCmd->resultAddr = (int)&buf[8];
+    chstatCmd->resultSize = 4;
     func_00426358((int)&D_0052D700.chstat, 1104);
     if (sceSifCallRpc(&D_0052EE00, 13, 0, &D_0052D700.chstat, n + 81, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
@@ -5060,9 +5145,9 @@ int sceRename_d(char *oldPath, char *newPath) {
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    renameCmd->f4 = (int)&buf[8];
-    renameCmd->f0 = sem;
-    renameCmd->f8 = 4;
+    renameCmd->resultAddr = (int)&buf[8];
+    renameCmd->sema = sem;
+    renameCmd->resultSize = 4;
     func_00426358((int)&D_0052D700.rename, 2060);
     if (sceSifCallRpc(&D_0052EE00, 17, 0, &D_0052D700.rename, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
@@ -5121,7 +5206,7 @@ int sceSync_d(char *devPath, int syncFlag) {
     int sem;
     int accepted;
     int n;
-    sFioPathArgCmd *syncCmd = &D_0052D700.sync;
+    sFioSyncCmd *syncCmd = &D_0052D700.sync;
     func_00427988_b(19);
     if (D_0045520C == 0) {
         func_00427A90();
@@ -5138,14 +5223,14 @@ int sceSync_d(char *devPath, int syncFlag) {
         syncCmd->name[FIO_BUFFER_SIZE - 1] = 0;
         n = FIO_BUFFER_SIZE - 1;
     }
-    syncCmd->f10 = syncFlag;
+    syncCmd->flag = syncFlag;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    syncCmd->f4 = (int)&buf[8];
-    syncCmd->f0 = sem;
-    syncCmd->f8 = 4;
+    syncCmd->resultAddr = (int)&buf[8];
+    syncCmd->sema = sem;
+    syncCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 19, 0, &D_0052D700.sync, 1044, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -5228,15 +5313,15 @@ int sceMount_d(char *fsDevice, char *blockDev, int mountFlag, char *data, int le
     for (i = 0; i < len; i++) {
         mountCmd->data[i] = data[i];
     }
-    mountCmd->fC10 = len;
-    mountCmd->fC0C = mountFlag;
+    mountCmd->dataLen = len;
+    mountCmd->flag = mountFlag;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    mountCmd->f4 = (int)&buf[8];
-    mountCmd->f0 = sem;
-    mountCmd->f8 = 4;
+    mountCmd->resultAddr = (int)&buf[8];
+    mountCmd->sema = sem;
+    mountCmd->resultSize = 4;
     func_00426358((int)&D_0052D700.mount, 3092);
     if (sceSifCallRpc(&D_0052EE00, 20, 0, &D_0052D700.mount, 3092, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
@@ -5313,18 +5398,18 @@ long sceLseek64(int fileDesc, long offset, int whence)
     func_004279B8();
     return -9;
   }
-  lseek64Cmd->fC = fileSlot->f0;
-  lseek64Cmd->f10 = offset;
-  lseek64Cmd->f18 = whence;
-  lseek64Cmd->f1C = fileSlot - D_0052EC00;
+  lseek64Cmd->iopFd = fileSlot->f0;
+  lseek64Cmd->offset = offset;
+  lseek64Cmd->whence = whence;
+  lseek64Cmd->slot = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
-  lseek64Cmd->f4 = (int) &res;
-  lseek64Cmd->f8 = 8;
+  lseek64Cmd->resultAddr = (int) &res;
+  lseek64Cmd->resultSize = 8;
   flags = fl;
-  D_0052D700.lseek64.f0 = sem;
+  D_0052D700.lseek64.sema = sem;
   if (flags & 0x8000)
   {
     WaitSema_i(D_0045521C);
@@ -5332,8 +5417,8 @@ long sceLseek64(int fileDesc, long offset, int whence)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
-        D_00455188[i] = lseek64Cmd->f0;
-        lseek64Cmd->f0 = -lseek64Cmd->f0;
+        D_00455188[i] = lseek64Cmd->sema;
+        lseek64Cmd->sema = -lseek64Cmd->sema;
         break;
       }
     }
@@ -5421,17 +5506,17 @@ int sceDevctl_d(char *devName, int devCmd, char *data, unsigned len, int outBuf,
     for (i = 0; i < len; i++) {
         devctlCmd->data[i] = data[i];
     }
-    devctlCmd->f810 = len;
-    devctlCmd->f80C = devCmd;
+    devctlCmd->dataLen = len;
+    devctlCmd->command = devCmd;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    devctlCmd->f818 = outLen;
-    devctlCmd->f4 = (int)&buf[8];
-    devctlCmd->f8 = 4;
-    devctlCmd->f814 = outBuf;
-    devctlCmd->f0 = sem;
+    devctlCmd->outLen = outLen;
+    devctlCmd->resultAddr = (int)&buf[8];
+    devctlCmd->resultSize = 4;
+    devctlCmd->outBuf = outBuf;
+    devctlCmd->sema = sem;
     func_00426358((int)&D_0052D700.devctl, 2076);
     if (sceSifCallRpc(&D_0052EE00, 23, 0, &D_0052D700.devctl, 2076, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
@@ -5507,9 +5592,9 @@ int sceSymlink_d(char *oldPath, char *linkPath) {
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    symlinkCmd->f4 = (int)&buf[8];
-    symlinkCmd->f0 = sem;
-    symlinkCmd->f8 = 4;
+    symlinkCmd->resultAddr = (int)&buf[8];
+    symlinkCmd->sema = sem;
+    symlinkCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 0x18, 0, &D_0052D700.symlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -5557,7 +5642,7 @@ int sceReadlink_d(char *linkPath, int targetBuf, unsigned len) {
     int sem;
     int accepted;
     int n;
-    sFioPathArgCmd *readlinkCmd = &D_0052D700.readlink;
+    sFioReadlinkCmd *readlinkCmd = &D_0052D700.readlink;
     func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
@@ -5576,16 +5661,16 @@ int sceReadlink_d(char *linkPath, int targetBuf, unsigned len) {
     if (len >= FIO_BUFFER_SIZE) {
         len = FIO_BUFFER_SIZE - 1;
     }
-    readlinkCmd->f10 = targetBuf;
-    readlinkCmd->fC = len;
+    readlinkCmd->buf = targetBuf;
+    readlinkCmd->bufLen = len;
     func_00426358(targetBuf, len);
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    readlinkCmd->f4 = (int)&buf[8];
-    readlinkCmd->f0 = sem;
-    readlinkCmd->f8 = 4;
+    readlinkCmd->resultAddr = (int)&buf[8];
+    readlinkCmd->sema = sem;
+    readlinkCmd->resultSize = 4;
     if (sceSifCallRpc(&D_0052EE00, 25, 0, &D_0052D700.readlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
@@ -5664,23 +5749,23 @@ INCLUDE_ASM("seg/seg_325220", func_0042AC10);
 /**
  * Sends heap-server request 4 with three words and returns the reply.
  *
- * When the heap server is bound (D_00455224 >= 0) it stores @p a1, @p a0 and @p a2, in that order, in D_0052EF40, sends
- * them (12 bytes) and returns the reply word D_0052EF00. No caller in this build.
+ * When the heap server is bound (D_00455224 >= 0) it stores @p firstWord, @p secondWord and @p thirdWord, in that
+ * order, in D_0052EF40, sends them (12 bytes) and returns the reply word D_0052EF00. No caller in this build.
  *
- * @param a0  second word of the request
- * @param a1  first word of the request
- * @param a2  third word of the request
+ * @param secondWord  second word of the request
+ * @param firstWord  first word of the request
+ * @param thirdWord  third word of the request
  * @return the reply (an IOP address), or 0 when unbound or the RPC fails
  */
-int func_0042AC10(int a0, int a1, int a2) {
+int func_0042AC10(int secondWord, int firstWord, int thirdWord) {
     int *rpcArgs;
     if (D_00455224 < 0) {
         return 0;
     }
     rpcArgs = &D_0052EF40;
-    rpcArgs[0] = a1;
-    rpcArgs[1] = a0;
-    rpcArgs[2] = a2;
+    rpcArgs[0] = firstWord;
+    rpcArgs[1] = secondWord;
+    rpcArgs[2] = thirdWord;
     if (sceSifCallRpc(&D_0052EEC0, 4, 0, rpcArgs, 0xC, &D_0052EF00, 4, 0, 0) >= 0) {
         return D_0052EF00;
     }
@@ -5992,23 +6077,23 @@ int func_0042B230_i(int modAddr, int argLen, sLfData *argBlock, int *resultOut) 
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = modAddr;
+    D_0052F080.cmd.id = modAddr;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
-            D_0052F080.cmd.f4 = 0xFC;
+            *(sLfData *)D_0052F080.cmd.args = *argBlock;
+            D_0052F080.cmd.argLen = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
-            D_0052F080.cmd.f4 = argLen;
+            func_0041605C(D_0052F080.cmd.args, argBlock, argLen);
+            D_0052F080.cmd.argLen = argLen;
         }
     } else {
-        D_0052F080.cmd.f4 = 0;
+        D_0052F080.cmd.argLen = 0;
     }
     if (sceSifCallRpc(&D_0052F280, 6, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    modId = D_0052F080.cmd.f0;
-    *resultOut = D_0052F080.cmd.f4;
+    modId = D_0052F080.reply.id;
+    *resultOut = D_0052F080.reply.result;
     return modId;
 }
 #endif
@@ -6040,23 +6125,23 @@ int sceSifStopModule_i(int modId, int argLen, sLfData *argBlock, int *resultOut)
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = modId;
+    D_0052F080.cmd.id = modId;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
-            D_0052F080.cmd.f4 = 0xFC;
+            *(sLfData *)D_0052F080.cmd.args = *argBlock;
+            D_0052F080.cmd.argLen = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
-            D_0052F080.cmd.f4 = argLen;
+            func_0041605C(D_0052F080.cmd.args, argBlock, argLen);
+            D_0052F080.cmd.argLen = argLen;
         }
     } else {
-        D_0052F080.cmd.f4 = 0;
+        D_0052F080.cmd.argLen = 0;
     }
     if (sceSifCallRpc(&D_0052F280, 7, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    replyId = D_0052F080.cmd.f0;
-    *resultOut = D_0052F080.cmd.f4;
+    replyId = D_0052F080.reply.id;
+    *resultOut = D_0052F080.reply.result;
     return replyId;
 }
 #endif
@@ -6082,11 +6167,11 @@ int sceSifUnloadModule(int modId) {
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = modId;
+    D_0052F080.cmd.id = modId;
     if (sceSifCallRpc(&D_0052F280, 8, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.cmd.f0;
+    return D_0052F080.reply.id;
 }
 #endif
 
@@ -6113,12 +6198,12 @@ int sceSifSearchModuleByName(char *modName) {
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, modName, IOP_NAME_SIZE);
-    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
+    strncpy(D_0052F080.cmd.name, modName, IOP_NAME_SIZE);
+    D_0052F080.cmd.name[IOP_NAME_SIZE - 1] = 0;
     if (sceSifCallRpc(&D_0052F280, 9, 0, &D_0052F080, 0x200, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.cmd.f0;
+    return D_0052F080.reply.id;
 }
 #endif
 
@@ -6142,11 +6227,11 @@ int func_0042B770(int iopAddr) {
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = iopAddr;
+    D_0052F080.cmd.id = iopAddr;
     if (sceSifCallRpc(&D_0052F280, 10, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.cmd.f0;
+    return D_0052F080.reply.id;
 }
 #endif
 
@@ -6222,25 +6307,25 @@ int func_0042B840_i(char *modPath, int argLen, sLfData *argBlock, int *resultOut
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, modPath, IOP_NAME_SIZE);
-    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
+    strncpy(D_0052F080.load.path, modPath, IOP_NAME_SIZE);
+    D_0052F080.load.path[IOP_NAME_SIZE - 1] = 0;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
-            D_0052F080.cmd.f0 = IOP_NAME_SIZE;
+            *(sLfData *)D_0052F080.load.args = *argBlock;
+            D_0052F080.load.argLen = IOP_NAME_SIZE;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
-            D_0052F080.cmd.f0 = argLen;
+            func_0041605C(D_0052F080.load.args, argBlock, argLen);
+            D_0052F080.load.argLen = argLen;
         }
     } else {
-        D_0052F080.cmd.n2[0] = 0;
-        D_0052F080.cmd.f0 = 0;
+        D_0052F080.load.args[0] = 0;
+        D_0052F080.load.argLen = 0;
     }
     if (sceSifCallRpc(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    modId = D_0052F080.cmd.f0;
-    *resultOut = D_0052F080.cmd.f4;
+    modId = D_0052F080.reply.id;
+    *resultOut = D_0052F080.reply.result;
     return modId;
 }
 #endif
@@ -6314,18 +6399,18 @@ int func_0042BAA8_i(char *elfPath, char *sectionName, int *execData, int rpcFunc
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, elfPath, IOP_NAME_SIZE);
-    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
-    strncpy(D_0052F080.cmd.n2, sectionName, IOP_NAME_SIZE);
-    D_0052F080.cmd.n2[IOP_NAME_SIZE - 1] = 0;
+    strncpy(D_0052F080.elf.path, elfPath, IOP_NAME_SIZE);
+    D_0052F080.elf.path[IOP_NAME_SIZE - 1] = 0;
+    strncpy(D_0052F080.elf.section, sectionName, IOP_NAME_SIZE);
+    D_0052F080.elf.section[IOP_NAME_SIZE - 1] = 0;
     if (sceSifCallRpc(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    if (D_0052F080.cmd.f0 == 0) {
+    if (D_0052F080.elf.entry == 0) {
         return 0xFFFEFFFD;
     }
-    execData[0] = D_0052F080.cmd.f0;
-    execData[1] = D_0052F080.cmd.f4;
+    execData[0] = D_0052F080.elf.entry;
+    execData[1] = D_0052F080.elf.gp;
     return 0;
 }
 #endif
@@ -6387,17 +6472,17 @@ int func_0042BBF8(int iopAddr, void *valueOut, unsigned valueType) {
     if (valueType > IOP_VALUE_WORD) {
         return 0xFFFEFFFE;
     }
-    D_0052F080.get.f0.w = iopAddr;
-    D_0052F080.get.f4 = valueType;
+    D_0052F080.get.data.w = iopAddr;
+    D_0052F080.get.size = valueType;
     if (sceSifCallRpc(&D_0052F280, 3, 0, &D_0052F080, 0x20, &D_0052F080, 0x20, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
     if (valueType == IOP_VALUE_BYTE) {
-        *(unsigned char *)valueOut = D_0052F080.get.f0.b;
+        *(unsigned char *)valueOut = D_0052F080.get.data.b;
     } else if (valueType == IOP_VALUE_HALFWORD) {
-        *(unsigned short *)valueOut = D_0052F080.get.f0.h;
+        *(unsigned short *)valueOut = D_0052F080.get.data.h;
     } else if (valueType == IOP_VALUE_WORD) {
-        *(int *)valueOut = D_0052F080.get.f0.w;
+        *(int *)valueOut = D_0052F080.get.data.w;
     } else {
         return 0xFFFEFFFE;
     }
@@ -6425,14 +6510,14 @@ int func_0042BCE8(int iopAddr, void *valueIn, int valueType) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
-    D_0052F080.set.f0 = iopAddr;
-    D_0052F080.set.f4 = valueType;
+    D_0052F080.set.addr = iopAddr;
+    D_0052F080.set.size = valueType;
     if (valueType == IOP_VALUE_BYTE) {
-        D_0052F080.set.f8.b = *(unsigned char *)valueIn;
+        D_0052F080.set.value.b = *(unsigned char *)valueIn;
     } else if (valueType == IOP_VALUE_HALFWORD) {
-        D_0052F080.set.f8.h = *(unsigned short *)valueIn;
+        D_0052F080.set.value.h = *(unsigned short *)valueIn;
     } else if (valueType == IOP_VALUE_WORD) {
-        D_0052F080.set.f8.w = *(unsigned *)valueIn;
+        D_0052F080.set.value.w = *(unsigned *)valueIn;
     } else {
         return 0xFFFEFFFE;
     }

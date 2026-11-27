@@ -62,9 +62,11 @@ struct cFEStateNetConfig : public cFEStateNet {
                                     //       selects it in mpLBAdapters; func_001B45E8 passes it to the connect call (func_002636A8)
     int miNumSettings;              // 0x6D4 [R] 0; [U] func_001B4CD8: cCommSystem_mNumNetConn clamped to 4, one list row each;
                                     //       cFEStateNetConfig_onWidgetListBox tests > 1
-    int unk_6D8;                    // 0x6D8 [R] 0; [U] func_001B55B0 / func_001B5830: 1 when the popup is cancelled (events 0xF/0x14);
-                                    //       on 0x16 they push "NetConfigAuthPopup" / cFEStateNetAccountMem only while it is 0, then clear it
-    int unk_6DC;                    // 0x6DC [U] func_001B5A58: 1 on event 0xF, 0 on 0x15; on 0x16 it pushes cFEStateLogin when set
+    int mbCancelled;                // 0x6D8 (name ours) [R] 0; [U] func_001B55B0 / func_001B5830: 1 when the popup is
+                                    //       cancelled (events 0xF/0x14); on 0x16 they push "NetConfigAuthPopup" /
+                                    //       cFEStateNetAccountMem only while it is 0, then clear it
+    int mbPushLogin;                // 0x6DC (name ours) [U] func_001B5A58: 1 on event 0xF, 0 on 0x15; on 0x16 it pushes
+                                    //       cFEStateLogin when set
     int miWaitFrames;               // 0x6E0 [R] -1; [U] func_001B4CD8 sets 15; onUpdate cFEStateNetConfig_onUpdate counts it down in state 5
     cUIListBox* mpLBAdapters;       // 0x6E4 [R] 0; [U] onWidgetCreate cFEStateNetConfig_onWidgetCreate: widget "LBAdapters"; func_001B4CD8 adds a row
                                     //       per configuration (cUIListBox_addEntryByAsciiString)
@@ -77,8 +79,8 @@ struct cFEStateNetConfig : public cFEStateNet {
     cUIThing* mpConfigRectangle;    // 0x6F8 [R] 0; [U] widget "configrectangle1"; func_001B5068 shows / hides it (slot 9)
     cUIThing* mpNoConfiguration;    // 0x6FC [R] 0; [U] widget "NoConfiguration"; func_001B5068 shows it when there is no
                                     //       configuration
-    int unk_700;                    // 0x700 [R] 0; [U] func_001B5830: 1 on event 0x10, 0 on 0xF; on 0x16 it pushes cFEStateAuthDNASError
-                                    //       (with mpustrAuthError) when set
+    int mbAuthFailed;               // 0x700 (name ours) [R] 0; [U] func_001B5830: 1 on event 0x10, 0 on 0xF; on 0x16 it
+                                    //       pushes cFEStateAuthDNASError (with mpustrAuthError) when set
     unsigned short* mpustrPopupText; // 0x704 [R] 0; [U] func_001B5E28 (slot 31) frees it and stores a heap copy of a
                                     //       unicode / ascii message (operator_new_tag + USTR_copy / strcpy1), then points the popup's message (+ 0xC4)
                                     //       at it; the destructor frees it
@@ -109,8 +111,8 @@ struct cFEStateNetConfig : public cFEStateNet {
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);
 CHECK_OFFSET(cFEStateNetConfig, miNumSettings, 0x6D4);
-CHECK_OFFSET(cFEStateNetConfig, unk_6D8, 0x6D8);
-CHECK_OFFSET(cFEStateNetConfig, unk_6DC, 0x6DC);
+CHECK_OFFSET(cFEStateNetConfig, mbCancelled, 0x6D8);
+CHECK_OFFSET(cFEStateNetConfig, mbPushLogin, 0x6DC);
 CHECK_OFFSET(cFEStateNetConfig, miWaitFrames, 0x6E0);
 CHECK_OFFSET(cFEStateNetConfig, mpLBAdapters, 0x6E4);
 CHECK_OFFSET(cFEStateNetConfig, mpLBSettings, 0x6E8);
@@ -119,7 +121,7 @@ CHECK_OFFSET(cFEStateNetConfig, unk_6F0, 0x6F0);
 CHECK_OFFSET(cFEStateNetConfig, mpMenuConfig, 0x6F4);
 CHECK_OFFSET(cFEStateNetConfig, mpConfigRectangle, 0x6F8);
 CHECK_OFFSET(cFEStateNetConfig, mpNoConfiguration, 0x6FC);
-CHECK_OFFSET(cFEStateNetConfig, unk_700, 0x700);
+CHECK_OFFSET(cFEStateNetConfig, mbAuthFailed, 0x700);
 CHECK_OFFSET(cFEStateNetConfig, mpustrPopupText, 0x704);
 CHECK_OFFSET(cFEStateNetConfig, miState, 0x708);
 CHECK_OFFSET(cFEStateNetConfig, miResult, 0x70C);

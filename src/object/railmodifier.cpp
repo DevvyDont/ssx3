@@ -496,14 +496,14 @@ struct sRmDir_C698 : t4Vector {
     }
 };
 
-// Power basis (t^3, t^2, t, w) of a cubic parameter, built up from t.
+// Power basis (u^3, u^2, u, w) of a cubic parameter u, built up from u.
 struct sRmPow_C698 : t4Vector {
-    sRmPow_C698(const float& t, const float& aw)
+    sRmPow_C698(const float& param, const float& aw)
     {
         w = aw;
-        z = t;
-        y = t * t;
-        x = t * y;
+        z = param;
+        y = param * param;
+        x = param * y;
     }
 };
 
@@ -628,7 +628,7 @@ static inline t4Vector vu0Add_C698(const t4Vector& a, const t4Vector& b)
 static inline float vu0Dot_C698(const t4Vector& a, const t4Vector& b)
 {
     float r;
-    int t;
+    int bits;
     __asm__(
         "lqc2      $vf3, %2\n"
         "lqc2      $vf5, %3\n"
@@ -639,7 +639,7 @@ static inline float vu0Dot_C698(const t4Vector& a, const t4Vector& b)
         "vmaddw.x  $vf4, $vf6, $vf4w\n"
         "qmfc2.ni  %1, $vf4\n"
         "mtc1      %1, %0\n"
-        : "=f"(r), "=&r"(t)
+        : "=f"(r), "=&r"(bits)
         : "m"(a), "m"(b));
     return r;
 }
@@ -648,7 +648,7 @@ static inline float vu0Dot_C698(const t4Vector& a, const t4Vector& b)
 static inline float vu0Length_C698(const t4Vector& v)
 {
     float r;
-    int t;
+    int bits;
     __asm__(
         "lqc2      $vf3, %2\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -660,7 +660,7 @@ static inline float vu0Length_C698(const t4Vector& v)
         "vwaitq\n"
         "cfc2.ni   %1, $vi22\n"
         "mtc1      %1, %0\n"
-        : "=f"(r), "=&r"(t)
+        : "=f"(r), "=&r"(bits)
         : "m"(v));
     return r;
 }
@@ -686,10 +686,10 @@ static inline t4Vector vu0Normal_C698(const t4Vector& v)
     return r;
 }
 
-// Point on a cubic segment at parameter t.
-static inline t4Vector evalSeg_C698(const sRmMat44* c, float t)
+// Point on a cubic segment at parameter param.
+static inline t4Vector evalSeg_C698(const sRmMat44* c, float param)
 {
-    sRmPow_C698 v(t, 1.0f);
+    sRmPow_C698 v(param, 1.0f);
     return vu0MtxMul_C698(c, v);
 }
 
@@ -701,10 +701,10 @@ static inline float fsAbs_C698(float x)
     return r;
 }
 
-// Tangent of a cubic segment at parameter t.
-static inline t4Vector evalTan_C698(const sRmMat44* c, float t)
+// Tangent of a cubic segment at parameter param.
+static inline t4Vector evalTan_C698(const sRmMat44* c, float param)
 {
-    sRmDir_C698 v(t * (3.0f * t), 2.0f * t, 1.0f);
+    sRmDir_C698 v(param * (3.0f * param), 2.0f * param, 1.0f);
     return vu0MtxMul_C698(c, v);
 }
 
@@ -766,9 +766,9 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
         t4Vector dir;
         sRmMat44 segMat;
         {
-            sRmMat44 t;
-            vu0MulMat_C698(&t, &mat, &(*(sRmMat44*)&seg->m_fmBasisMat));
-            vu0CopyMat_C698(&segMat, &t);
+            sRmMat44 product;
+            vu0MulMat_C698(&product, &mat, &(*(sRmMat44*)&seg->m_fmBasisMat));
+            vu0CopyMat_C698(&segMat, &product);
         }
         pos = evalSeg_C698(&segMat, tLo);
         float best = vu0Length_C698(vu0Sub_C698(*point, pos));
@@ -801,7 +801,7 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
         fc = vu0Length_C698(vu0Sub_C698(pos, *point));
         pos = evalSeg_C698(&segMat, td);
         fd = vu0Length_C698(vu0Sub_C698(pos, *point));
-        float t = td;
+        float hitT = td;
         float dist = fd;
         pos = evalSeg_C698(&segMat, tHi);
         fb = vu0Length_C698(vu0Sub_C698(pos, *point));
@@ -817,7 +817,7 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
                 float probeDist = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fc = fd;
                 fd = probeDist;
-                t = td;
+                hitT = td;
                 dist = fd;
             } else {
                 tHi = td;
@@ -827,7 +827,7 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
                 float probeDist = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fd = fc;
                 fc = probeDist;
-                t = tc;
+                hitT = tc;
                 dist = fc;
             }
         }
@@ -836,11 +836,11 @@ void cRailModifier::splineIntersect(t4Vector* box, t4Vector* box2, const t4Vecto
             *bestDist = dist;
             resetHit_C698(out);
             out->Ipos = pos;
-            out->Inorm = vu0Normal_C698(evalTan_C698(&segMat, t));
+            out->Inorm = vu0Normal_C698(evalTan_C698(&segMat, hitT));
             out->Stype = spline->m_eSurfaceType;
             (*(void**)&out->Inst) = (void*)Instance;
             out->Mesh = Mesh;
-            out->T = t;
+            out->T = hitT;
             (*(void**)&out->Spline) = spline;
             out->Patch = 0;
         }
@@ -2365,8 +2365,8 @@ struct sRailSelF218 {
     int index;              // 0x14
     char* owner;            // 0x18
     int count;              // 0x1c
-    int f20;
-    int f24;
+    int numTexFlipMaterials;    // 0x20 [O] NumTexFlipMaterials (the flip table's texture count)
+    int blockNumMaterials;      // 0x24 [O] MaterialBlock (its m_iNumMaterials)
     sRailOutF218* src[8];   // 0x28
     sRailOutF218 out[1];    // 0x48
 };
@@ -2389,19 +2389,19 @@ void cTexFlipModifier::setupTexFlip()
 {
     sRailSelF218* self = (sRailSelF218*)this;
     int i;
-    self->f20 = 0;
+    self->numTexFlipMaterials = 0;
     self->count = **(int**)(self->owner + 0x94);
     for (i = 0; i < self->count; i++) {
         sRailItemF218* item = *(sRailItemF218**)(*(char**)(self->owner + 0x94) + (i << 2) + 4);
         int* table = (int*)item->data;
         if (table != 0) {
-            self->f20 = *table;
+            self->numTexFlipMaterials = *table;
             break;
         }
     }
     sel_F218(self, self->index);
-    ms_F218(&self->f24, 0, 196);
-    self->f24 = self->count;
+    ms_F218(&self->blockNumMaterials, 0, 196);
+    self->blockNumMaterials = self->count;
     for (i = 0; i < self->count; i++) {
         sRailItemF218* item = *(sRailItemF218**)(*(char**)(self->owner + 0x94) + (i << 2) + 4);
         if (item->data != 0) {
@@ -2610,35 +2610,35 @@ struct sRmQuad_F6E8 {
     sRmQuad_F6E8(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
 } __attribute__((aligned(16)));
 
+// The make-data (names: [O] On Tour tAddUVScrollData, same offsets).
 struct sRmDesc_F6E8 {
-    int f0;         // 0x0
-    int f4;         // 0x4
-    float f8;       // 0x8
-    float fC;       // 0xC
-    float f10;      // 0x10
-    float f14;      // 0x14
-    float f18;      // 0x18
-    float f1C;      // 0x1C
-    float f20;      // 0x20
-    float f24;      // 0x24
-    float f28;      // 0x28
-    float f2C;      // 0x2C
+    int InstId;     // 0x0
+    int Type;       // 0x4
+    float UStart;   // 0x8
+    float VStart;   // 0xC
+    float UScroll;  // 0x10
+    float VScroll;  // 0x14
+    float TimeOn;   // 0x18
+    float TimeOff;  // 0x1C
+    float AngVel;   // 0x20
+    float AxisX;    // 0x24
+    float AxisY;    // 0x28
+    float AxisZ;    // 0x2C
 };
 
+// The modifier (names: cUVScrollModifier's, [O] cUVScrollModifierState).
 struct sRmState_F6E8 {
-    int f0;             // 0x0
-    int f4;             // 0x4
-    float f8;           // 0x8
-    float fC;           // 0xC
-    int f10;            // 0x10
-    float f14;          // 0x14
+    int Type;           // 0x0
+    int Time;           // 0x4
+    float TimeOn;       // 0x8
+    float TimeOff;      // 0xC
+    int Angle;          // 0x10
+    float AngVel;       // 0x14
     char pad_0x18[0x8];
-    sRmQuad_F6E8 q;     // 0x20
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    int f40;            // 0x40
+    sRmQuad_F6E8 Axis;  // 0x20
+    float UV[2];        // 0x30
+    float UVScroll[2];  // 0x38
+    int On;             // 0x40
 };
 
 /**
@@ -2653,18 +2653,18 @@ struct sRmState_F6E8 {
  */
 extern "C" void* cUVScrollModifier_cUVScrollModifier(sRmState_F6E8* self, sRmDesc_F6E8* scrollData)
 {
-    self->f40 = 1;
-    self->f0 = scrollData->f4;
-    self->f30 = scrollData->f8;
-    self->f34 = scrollData->fC;
-    self->f8 = scrollData->f18;
-    self->fC = scrollData->f1C;
-    self->f4 = 0;
-    self->f10 = 0;
-    self->f14 = scrollData->f20 * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
-    self->q = sRmQuad_F6E8(scrollData->f24, scrollData->f28, scrollData->f2C, 0.0f);
-    self->f38 = scrollData->f10;
-    self->f3C = scrollData->f14;
+    self->On = 1;
+    self->Type = scrollData->Type;
+    self->UV[0] = scrollData->UStart;
+    self->UV[1] = scrollData->VStart;
+    self->TimeOn = scrollData->TimeOn;
+    self->TimeOff = scrollData->TimeOff;
+    self->Time = 0;
+    self->Angle = 0;
+    self->AngVel = scrollData->AngVel * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
+    self->Axis = sRmQuad_F6E8(scrollData->AxisX, scrollData->AxisY, scrollData->AxisZ, 0.0f);
+    self->UVScroll[0] = scrollData->UScroll;
+    self->UVScroll[1] = scrollData->VScroll;
     return self;
 }
 #endif
@@ -7251,11 +7251,11 @@ INCLUDE_ASM("object/railmodifier", func_00361D48);
 /**
  * Returns the int at +0x10 of its argument. Nothing in retail calls it.
  *
- * @param arg0  the object to read
+ * @param object  the object to read (name ours)
  * @return that int
  */
-extern "C" int func_00361D48(void *arg0) {
-    return (*(int *)((char*)(arg0) + 0x10));
+extern "C" int func_00361D48(void *object) {
+    return (*(int *)((char*)(object) + 0x10));
 }
 #endif
 
@@ -8253,10 +8253,10 @@ static inline cDrawStateList* save_29B8(cPS2DeferManager* self, cPS2GraphicsMan*
 /**
  * Builds the defer manager's three preset draw states.
  *
- * Clears the static base (+0x57484) and resets the manager (func_00362CC8). Starting from sDrawState_s_defaultDrawState in the current
- * draw-state slot of cGraphicsMan_TheGraphicsMan, it edits the state bit fields three times and saves each copy into the draw-state
- * array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490. The base is then set to the count
- * so later resets keep them.
+ * Clears the static base (+0x57484) and resets the manager (func_00362CC8). Starting from sDrawState_s_defaultDrawState
+ * in the current draw-state slot of cGraphicsMan_TheGraphicsMan, it edits the state bit fields three times and saves
+ * each copy into the draw-state array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490
+ * (mpPresetStates). The base is then set to the count so later resets keep them.
  */
 extern "C" void func_003629B8(cPS2DeferManager* self)
 {
@@ -8273,9 +8273,9 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
     set0_29B8(ctx, 0x3C0, 6, 3);
     set1_29B8(ctx, 0x7C, 2, 1);
     set1_29B8(ctx, 0xF80, 7, 17);
-    self->unk_57488 = (cDrawStateList*)save_29B8((self), ctx);
+    self->mpPresetStates[0] = (cDrawStateList*)save_29B8((self), ctx);
     set1_29B8(ctx, 0xF80, 7, 2);
-    self->unk_5748C = (cDrawStateList*)save_29B8((self), ctx);
+    self->mpPresetStates[1] = (cDrawStateList*)save_29B8((self), ctx);
     set1_29B8(ctx, 0x7C, 2, 5);
     set1_29B8(ctx, 0xF80, 7, 3);
     set1_29B8(ctx, 0x3, 0, 1);
@@ -8283,7 +8283,7 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 3);
     set1_29B8(ctx, 0xFF000, 12, 92);
-    self->unk_57490 = (cDrawStateList*)save_29B8((self), ctx);
+    self->mpPresetStates[2] = (cDrawStateList*)save_29B8((self), ctx);
     self->mNumStaticStates = self->mUsedDrawStates;
 }
 #endif
@@ -8976,17 +8976,15 @@ extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int
 extern "C" void func_003627A8_4360(void* pkt, ulong** pp, int mode) __asm__("func_003627A8");
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 
+// A copy of sDrawState (its member names).
 struct sRmGsState4360 {
-    unsigned int w0;
-    unsigned int w1;
-    unsigned int w2;
-    unsigned int w3;
-    short tex[2];
+    unsigned int m_bitGroups[4];
+    short m_texid[2];
     sRmGsState4360()
     {
         unsigned int i;
         for (i = 0; i < 2; i++) {
-            tex[i] = -1;
+            m_texid[i] = -1;
         }
         memset(this, 0, 0x10);
     }
@@ -9021,18 +9019,22 @@ extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
     (*pp)[2] = 0;
     (*pp)[3] = (ulong)1 << 60;
     *pp += 4;
-    func_00364CD0(self, (st.w0 & 0x3C0) >> 6, 0, st.w3 & 0x3FFFFFFF, pp);
+    func_00364CD0(self, (st.m_bitGroups[0] & 0x3C0) >> 6, 0, st.m_bitGroups[3] & 0x3FFFFFFF, pp);
     pkt.count = 0;
     pkt.base = *pp;
     pkt.cur = *pp + 6;
-    func_003625C0((sGifPacket*)&pkt, (st.w0 & 0xC) >> 2, 0);
-    func_00362478((sGifPacket*)&pkt, (st.w1 & 0x7C) >> 2, (st.w0 >> 12) & 0xFF, 0);
-    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat, (st.w1 >> 22) & 1, 0);
-    func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 23) & 3, (st.w1 >> 20) & 3, (st.w1 & 0xFF000) >> 12, 0);
-    func_003625C0((sGifPacket*)&pkt, (st.w0 & 0x30) >> 4, 1);
-    func_00362478((sGifPacket*)&pkt, (st.w1 & 0xF80) >> 7, (st.w0 >> 20) & 0xFF, 1);
-    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat, (st.w1 >> 23) & 1, 1);
-    func_003626D8((sRmGsPacket*)&pkt, (st.w1 >> 25) & 3, (st.w1 >> 22) & 3, (st.w1 & 0xFF000) >> 12, 1);
+    func_003625C0((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0xC) >> 2, 0);
+    func_00362478((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0x7C) >> 2, (st.m_bitGroups[0] >> 12) & 0xFF, 0);
+    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+            (st.m_bitGroups[1] >> 22) & 1, 0);
+    func_003626D8((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 23) & 3, (st.m_bitGroups[1] >> 20) & 3,
+            (st.m_bitGroups[1] & 0xFF000) >> 12, 0);
+    func_003625C0((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0x30) >> 4, 1);
+    func_00362478((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0xF80) >> 7, (st.m_bitGroups[0] >> 20) & 0xFF, 1);
+    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+            (st.m_bitGroups[1] >> 23) & 1, 1);
+    func_003626D8((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 25) & 3, (st.m_bitGroups[1] >> 22) & 3,
+            (st.m_bitGroups[1] & 0xFF000) >> 12, 1);
     func_003627A8_4360(&pkt, pp, 1);
 }
 #endif
@@ -9074,23 +9076,23 @@ struct sV4_45B8 {
 #define VEC_EQ_45B8(a, b) \
     ((a).v[0] == (b).v[0] && (a).v[1] == (b).v[1] && (a).v[2] == (b).v[2] && (a).v[3] == (b).v[3])
 
-// One cached transform set (0x180 bytes).
+// One cached transform set (0x180 bytes; tDeferViewState's member names).
 struct sRailXf_45B8 {
-    sM44_45B8 m0;       // 0x000
-    sM44_45B8 m1;       // 0x040
-    sM44_45B8 m2;       // 0x080
-    sV4_45B8 v0;        // 0x0C0
-    sV4_45B8 v1;        // 0x0D0
-    sM44_45B8 key0;     // 0x0E0
-    sM44_45B8 key1;     // 0x120
-    sV4_45B8 key2;      // 0x160
-    sV4_45B8 key3;      // 0x170
+    sM44_45B8 mWorld;           // 0x000
+    sM44_45B8 mView;            // 0x040
+    sM44_45B8 mWorldView;       // 0x080
+    sV4_45B8 mGuardScale;       // 0x0C0
+    sV4_45B8 mGuardOffset;      // 0x0D0
+    sM44_45B8 mViewProj;        // 0x0E0 (key)
+    sM44_45B8 mWorldClip;       // 0x120 (key)
+    sV4_45B8 mScreenScale;      // 0x160 (key)
+    sV4_45B8 mScreenOffset;     // 0x170 (key)
 
     // Each compares one key of a cached entry against this probe; entry first.
-    int Key0Eq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, key0); }
-    int Key1Eq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, key1); }
-    int Key2Eq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, key2); }
-    int Key3Eq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, key3); }
+    int ViewProjEq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, mViewProj); }
+    int WorldClipEq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, mWorldClip); }
+    int ScreenScaleEq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, mScreenScale); }
+    int ScreenOffsetEq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, mScreenOffset); }
 };
 
 
@@ -9108,22 +9110,24 @@ extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
     int i;
     self->mActiveViewIndex = -1;
     for (i = 0; i < self->mIndexView; i++) {
-        if (in->Key0Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key0) && in->Key1Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key1) &&
-            in->Key2Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key2) && in->Key3Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key3)) {
+        if (in->ViewProjEq(((sRailXf_45B8*)&self->mViewStates[0])[i].mViewProj) &&
+            in->WorldClipEq(((sRailXf_45B8*)&self->mViewStates[0])[i].mWorldClip) &&
+            in->ScreenScaleEq(((sRailXf_45B8*)&self->mViewStates[0])[i].mScreenScale) &&
+            in->ScreenOffsetEq(((sRailXf_45B8*)&self->mViewStates[0])[i].mScreenOffset)) {
             self->mActiveViewIndex = i;
             break;
         }
     }
     if (self->mActiveViewIndex < 0) {
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m0 = in->m0;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m1 = in->m1;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m2 = in->m2;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].v0 = in->v0;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].v1 = in->v1;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key0 = in->key0;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key1 = in->key1;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key2 = in->key2;
-        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key3 = in->key3;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mWorld = in->mWorld;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mView = in->mView;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mWorldView = in->mWorldView;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mGuardScale = in->mGuardScale;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mGuardOffset = in->mGuardOffset;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mViewProj = in->mViewProj;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mWorldClip = in->mWorldClip;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mScreenScale = in->mScreenScale;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].mScreenOffset = in->mScreenOffset;
         self->mActiveViewIndex = self->mIndexView;
         self->mIndexView++;
     }
@@ -9405,9 +9409,9 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[0x1C] = 0;
             pk.p[29] = 0x6C2A020000000000;
             cPS2BezierMan* bezierMan = (cPS2BezierMan*)cBezierMan_TheBezierMan;
-            pk.p[0x1E] = ((ulong)(int)bezierMan->mPatchCache.unk_190[0] << 32) | 0x30000012;
+            pk.p[0x1E] = ((ulong)(int)bezierMan->mPatchCache.mBasis[0] << 32) | 0x30000012;
             pk.p[0x1F] = 0;
-            ulong ref2 = ((ulong)(int)bezierMan->mPatchCache.unk_310[0] << 32) | 0x30000012;
+            ulong ref2 = ((ulong)(int)bezierMan->mPatchCache.mDBasis[0] << 32) | 0x30000012;
             pk.p += 0x20;
             pk.p[0] = ref2;
             pk.p[1] = 0;
@@ -9704,38 +9708,43 @@ INCLUDE_ASM("object/railmodifier", func_00365E40);
 #ifdef SKIP_ASM
 extern "C" void func_003660A8(void* self, int idx);
 
+// A block node (sRailNode's names, below).
 struct sRailLinkE40 {
-    int flags;      // 0x0
-    int f4;         // 0x4
-    int prev;       // 0x8
-    int fC;         // 0xC
+    int flags;      // 0x0 the block address and its flag bits
+    int size;       // 0x4
+    int owner;      // 0x8
+    int prev;       // 0xC
     int next;       // 0x10
-    int f14;        // 0x14
-    int f18;        // 0x18
+    int sPrev;      // 0x14
+    int sNext;      // 0x18
 };
 
+// A size-class head (a node; only its size-list links are used).
 struct sRailSlotE40 {
     char pad_0x0[0x14];
-    int a;          // 0x14
-    int b;          // 0x18
+    int sPrev;      // 0x14
+    int sNext;      // 0x18
 };
 
 struct sRailModE40 {
     sRailLinkE40 store[0x124];  // 0x0
     sRailLinkE40* links;        // 0x1FF0
-    int f1FF4;                  // 0x1FF4
+    int heapSize;               // 0x1FF4
     sRailSlotE40 slotsA[17];    // 0x1FF8
     sRailSlotE40 slotsB[17];    // 0x21D4
+    // Two more head nodes (names ours, from use): the address list's (0x23B0; its next is the first block,
+    // func_00366548 / func_003669F0 walk from it) and the spare-link stack's (0x23CC; its next is the top,
+    // func_00365FE8 pops it).
     char pad_0x23B0[0xC];
-    int f23BC;                  // 0x23BC
-    int f23C0;                  // 0x23C0
-    int f23C4;                  // 0x23C4
-    int f23C8;                  // 0x23C8
+    int addrHeadPrev;           // 0x23BC
+    int addrHead;               // 0x23C0
+    int addrHeadSPrev;          // 0x23C4
+    int addrHeadSNext;          // 0x23C8
     char pad_0x23CC[0xC];
-    int f23D8;                  // 0x23D8
-    int f23DC;                  // 0x23DC
-    int f23E0;                  // 0x23E0
-    int f23E4;                  // 0x23E4
+    int spareHeadPrev;          // 0x23D8
+    int spareHead;              // 0x23DC
+    int spareHeadSPrev;         // 0x23E0
+    int spareHeadSNext;         // 0x23E4
     void* pool;                 // 0x23E8
 };
 
@@ -9755,33 +9764,33 @@ extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* poo
 {
     sRailModE40* self = (sRailModE40*)list;
     int i;
-    self->f1FF4 = heapSize;
+    self->heapSize = heapSize;
     self->links[0].flags = startAddr;
-    self->links[0].f4 = heapSize;
-    self->links[0].fC = -1;
-    self->links[0].next = -1;
+    self->links[0].size = heapSize;
     self->links[0].prev = -1;
+    self->links[0].next = -1;
+    self->links[0].owner = -1;
     for (i = 1; i < 291; i++) {
         self->links[i].flags &= ~1;
         self->links[i].next = i + 1;
     }
     self->links[291].next = -1;
     for (i = 0; i < 17; i++) {
-        self->slotsA[i].b = -1;
-        self->slotsA[i].a = -1;
-        self->slotsB[i].b = -1;
-        self->slotsB[i].a = -1;
+        self->slotsA[i].sNext = -1;
+        self->slotsA[i].sPrev = -1;
+        self->slotsB[i].sNext = -1;
+        self->slotsB[i].sPrev = -1;
     }
-    self->f23C0 = 0;
-    self->f23BC = -1;
-    self->f23C4 = -1;
-    self->f23C8 = -1;
+    self->addrHead = 0;
+    self->addrHeadPrev = -1;
+    self->addrHeadSPrev = -1;
+    self->addrHeadSNext = -1;
     func_003660A8(self, 0);
     self->pool = pool;
-    self->f23D8 = -1;
-    self->f23E0 = -1;
-    self->f23E4 = -1;
-    self->f23DC = 1;
+    self->spareHeadPrev = -1;
+    self->spareHeadSPrev = -1;
+    self->spareHeadSNext = -1;
+    self->spareHead = 1;
 }
 #endif
 
@@ -9841,11 +9850,11 @@ INCLUDE_ASM("object/railmodifier", func_00365FE8);
  * @return the link index
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Pop a link index off the free list headed at f23DC.
+// Pop a link index off the free list headed at spareHead.
 extern "C" int func_00365FE8(sRailModE40* self)
 {
-    int i = self->f23DC;
-    self->f23DC = self->links[i].next;
+    int i = self->spareHead;
+    self->spareHead = self->links[i].next;
     return i;
 }
 #endif
@@ -9856,7 +9865,8 @@ INCLUDE_ASM("object/railmodifier", func_00366008);
 struct sRailNode {
     int mBlockAddr;
     int mBlockSize;               // 0x04
-    int field_0x8;
+    int mOwner;                   // 0x08 (name ours) [U] the owning texture's index: func_00366CE0 stores it,
+                                  //      func_003663D8 clears that texture's block fields
     int mPrev;               // 0x0c
     int mNext;               // 0x10
     int mSPrev;              // 0x14
@@ -9867,7 +9877,7 @@ struct sRailNode {
     // [U] func_003660A8 files used blocks under heads 0x90000000 | class (list A) and free ones under 0xA0000000 |
     // class (list B); func_00366008, func_003660A8 and func_00366238 resolve a negative link through these bits.
     enum { kLinkEnd = -1, kHeadListMask = 0x70000000, kHeadListA = 0x10000000, kHeadListB = 0x20000000 };
-    // The field_0x8 value func_003663D8 treats as "no owner texture" (name ours): it clears the owner's block fields
+    // The mOwner value func_003663D8 treats as "no owner texture" (name ours): it clears the owner's block fields
     // for any other value (func_003662D0 gives a split-off block -1 instead).
     enum { kNoOwner = 0x7FFFFFFF };
 };
@@ -9875,7 +9885,7 @@ struct sRailNode {
 struct sRailNodeMan {
     char pad_0x0[0x1ff0];
     sRailNode* nodes;       // 0x1ff0
-    int field_0x1ff4;
+    int mHeapSize;          // 0x1ff4 (name ours) [U] func_00365E40 stores the heap size
     sRailNode headsA[17];   // 0x1ff8
     sRailNode headsB[18];   // 0x21d4
     char pad_0x23cc[0x10];
@@ -10044,7 +10054,7 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
         sRailNode* nn = &self->nodes[n];
         nn->mBlockAddr = node->mBlockAddr + size;
         nn->mBlockSize = node->mBlockSize - size;
-        nn->field_0x8 = -1;
+        nn->mOwner = -1;
         nn->mPrev = idx;
         int next = node->mNext;
         nn->mNext = next;
@@ -10077,8 +10087,8 @@ extern "C" void func_003663D8(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
     sRailNode* n = &self->nodes[idx];
-    if (n->field_0x8 != sRailNode::kNoOwner) {
-        tTexInfo* owner = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[n->field_0x8];
+    if (n->mOwner != sRailNode::kNoOwner) {
+        tTexInfo* owner = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[n->mOwner];
         if ((n->mBlockAddr >> 2) & 1) {
             owner->mCLUTAddr = -1;
             owner->mCLUTBlock = -1;
@@ -10113,14 +10123,14 @@ extern "C" void func_003663D8(void* selfp, int idx)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366548);
 #ifdef SKIP_ASM
-struct sRailLink6548 {
-    int flags;      // 0x0
-    int f4;
-    int prev;       // 0x8
-    int fC;
+struct sRailLink6548 {   // a block node (sRailNode's names)
+    int flags;      // 0x0 the block address and its flag bits
+    int size;       // 0x4
+    int owner;      // 0x8
+    int prev;       // 0xC
     int next;       // 0x10
-    int f14;
-    int f18;
+    int sPrev;      // 0x14
+    int sNext;      // 0x18
 };
 
 /**
@@ -10156,14 +10166,14 @@ extern "C" void func_00366548(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366618);
 #ifdef SKIP_ASM
-struct sRailLink6618 {
-    int flags;      // 0x0
-    int f4;
-    int prev;       // 0x8
-    int fC;
+struct sRailLink6618 {   // a block node (sRailNode's names)
+    int flags;      // 0x0 the block address and its flag bits
+    int size;       // 0x4
+    int owner;      // 0x8
+    int prev;       // 0xC
     int next;       // 0x10
-    int f14;
-    int f18;
+    int sPrev;      // 0x14
+    int sNext;      // 0x18
 };
 
 /**
@@ -10287,14 +10297,14 @@ extern "C" int func_003667F8(sRailNodeMan* self, int size)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366888);
 #ifdef SKIP_ASM
-struct sRailLink6888 {
-    int flags;      // 0x0
-    int f4;
-    int prev;       // 0x8
-    int fC;
+struct sRailLink6888 {   // a block node (sRailNode's names)
+    int flags;      // 0x0 the block address and its flag bits
+    int size;       // 0x4
+    int owner;      // 0x8
+    int prev;       // 0xC
     int next;       // 0x10
-    int f14;
-    int f18;
+    int sPrev;      // 0x14
+    int sNext;      // 0x18
 };
 
 /**
@@ -10311,7 +10321,7 @@ extern "C" int func_00366888(void* self)
     while (i >= 0) {
         sRailLink6888* links = *(sRailLink6888**)(heapBase + 0x1FF0);
         if (!(links[i].flags & 1)) {
-            int blockSize = links[i].f4;
+            int blockSize = links[i].size;
             if (blockSize >= best) {
                 best = blockSize;
                 idx = i;
@@ -10364,7 +10374,7 @@ extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB
         if ((n->mBlockAddr >> 1) & 1) {
             continue;
         }
-        int owner = n->field_0x8;
+        int owner = n->mOwner;
         if (owner == skipA || owner == skipB) {
             continue;
         }
@@ -10420,7 +10430,7 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
     sRailNode* StartPtr = &self->nodes[Start];
     if (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1)) {
         do {
-            if (((fl >> 1) & 1) == 0 && StartPtr->field_0x8 != skipA && StartPtr->field_0x8 != skipB) {
+            if (((fl >> 1) & 1) == 0 && StartPtr->mOwner != skipA && StartPtr->mOwner != skipB) {
                 break;
             }
             Start = StartPtr->mNext;
@@ -10437,7 +10447,7 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
                 best = cost;
                 bestIdx = Start;
             }
-            sRailPair* pr = &((sRailPair*)D_0053AB80)[StartPtr->field_0x8];
+            sRailPair* pr = &((sRailPair*)D_0053AB80)[StartPtr->mOwner];
             sum -= StartPtr->mBlockSize;
             if ((StartPtr->mBlockAddr & 1) && level < pr->a) {
                 cost -= StartPtr->mBlockSize * pr->b;
@@ -10445,12 +10455,13 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
             Start = StartPtr->mNext;
             StartPtr = &self->nodes[Start];
         } else {
-            if ((EndPtr->mBlockAddr & 1) && (((EndPtr->mBlockAddr >> 1) & 1) || EndPtr->field_0x8 == skipA || EndPtr->field_0x8 == skipB)) {
+            if ((EndPtr->mBlockAddr & 1) &&
+                (((EndPtr->mBlockAddr >> 1) & 1) || EndPtr->mOwner == skipA || EndPtr->mOwner == skipB)) {
                 Start = EndPtr->mNext;
                 StartPtr = &self->nodes[Start];
                 if (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1)) {
                     do {
-                        if (((fl >> 1) & 1) == 0 && StartPtr->field_0x8 != skipA && StartPtr->field_0x8 != skipB) {
+                        if (((fl >> 1) & 1) == 0 && StartPtr->mOwner != skipA && StartPtr->mOwner != skipB) {
                             break;
                         }
                         Start = StartPtr->mNext;
@@ -10462,7 +10473,7 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
                 sum = 0;
                 cost = 0;
             } else {
-                sRailPair* pr = &((sRailPair*)D_0053AB80)[EndPtr->field_0x8];
+                sRailPair* pr = &((sRailPair*)D_0053AB80)[EndPtr->mOwner];
                 sum += EndPtr->mBlockSize;
                 if ((EndPtr->mBlockAddr & 1) && level < pr->a) {
                     cost += EndPtr->mBlockSize * pr->b;
@@ -10531,7 +10542,7 @@ extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB,
         idx = func_003667F8(self, size);
         if (idx >= 0) {
             func_003662D0(self, idx, size);
-            self->nodes[idx].field_0x8 = owner;
+            self->nodes[idx].mOwner = owner;
             return idx;
         }
         if (!func_003668F8(self, size, owner, skipB, level)) {

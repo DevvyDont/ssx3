@@ -181,10 +181,10 @@ struct cChallenger {
     // 0x28..0x3B: the challenger's lobby stats, a tLobbyStats (online/lobbyman.h, 0x14) that the popup block-copies into
     // LobbyMan::mOpponentStats (view info[5]); written out as its five words with tLobbyStats' names.
     int mRank;                      // 0x28 [R] the 4th number after the signature ("rank"); [U] tLobbyStats::mRank
-    int unk_02C;                    // 0x2C [R] 1st number after the signature (tLobbyStats::unk_04, "STAT" field 2)
-    int unk_030;                    // 0x30 [R] 2nd number after it (tLobbyStats::unk_08, "STAT" fields 2 + 3 + 4)
-    int unk_034;                    // 0x34 [R] 3rd number after it (tLobbyStats::unk_0C, "STAT" field 6)
-    int unk_038;                    // 0x38 never written by func_00262AF0; copied by the popup as tLobbyStats::unk_10
+    int mWins;                      // 0x2C [R] 1st number after the signature (tLobbyStats::mWins, "STAT" field 2)
+    int mGamesPlayed;               // 0x30 [R] 2nd number after it (tLobbyStats::mGamesPlayed, "STAT" fields 2 + 3 + 4)
+    int mDisconnects;               // 0x34 [R] 3rd number after it (tLobbyStats::mDisconnects, "STAT" field 6)
+    int mPing;                      // 0x38 never written by func_00262AF0; copied by the popup as tLobbyStats::mPing
     void** mVtbl;                   // 0x3C [R] cChallenger_vtbl (func_00262AF0, the dtor); [U] func_00263018 deletes
                                     //      through slot 1 (flags 3)
 };
@@ -200,10 +200,10 @@ CHECK_OFFSET(cChallenger, mbPowerUps, 0x1C);
 CHECK_OFFSET(cChallenger, miNumberAI, 0x20);
 CHECK_OFFSET(cChallenger, mbPointIcons, 0x24);
 CHECK_OFFSET(cChallenger, mRank, 0x28);
-CHECK_OFFSET(cChallenger, unk_02C, 0x2C);
-CHECK_OFFSET(cChallenger, unk_030, 0x30);
-CHECK_OFFSET(cChallenger, unk_034, 0x34);
-CHECK_OFFSET(cChallenger, unk_038, 0x38);
+CHECK_OFFSET(cChallenger, mWins, 0x2C);
+CHECK_OFFSET(cChallenger, mGamesPlayed, 0x30);
+CHECK_OFFSET(cChallenger, mDisconnects, 0x34);
+CHECK_OFFSET(cChallenger, mPing, 0x38);
 CHECK_OFFSET(cChallenger, mVtbl, 0x3C);
 CHECK_SIZE(cChallenger, 0x40);
 

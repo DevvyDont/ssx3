@@ -3337,7 +3337,7 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezST);
  */
 int cPS2BezierMan::GetBezST()
 {
-    return ((int)mPatchCache.unk_190[0]);
+    return ((int)mPatchCache.mBasis[0]);
 }
 #endif
 //100%
@@ -3350,7 +3350,7 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezdST);
  */
 int cPS2BezierMan::GetBezdST()
 {
-    return ((int)mPatchCache.unk_310[0]);
+    return ((int)mPatchCache.mDBasis[0]);
 }
 #endif
 //100%
@@ -3892,14 +3892,14 @@ int cPS2GraphicsMan::GetNumDisplayModes()
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDTV__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the DTV setting held in unk_5A4C.
+ * Returns the DTV setting held in mDTV.
  *
- * @return the word at unk_5A4C
+ * @return the word at mDTV
  */
 int cPS2GraphicsMan_GetDTV(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return self->unk_5A4C;
+    return self->mDTV;
 }
 #endif
 
@@ -4285,16 +4285,16 @@ int cPS2GraphicsMan::GetDisplayBufferAddress()
 INCLUDE_ASM("render/font", func_00395550);
 #ifdef SKIP_ASM
 /**
- * Returns the graphics manager's word at +0x5A5C (unk_5A5C).
+ * Returns the graphics manager's word at +0x5A5C (mDisplayBufferWidth).
  *
  * A retail-only accessor: the preview's run of out-of-line accessors has nothing between the display-buffer and
  * frame-buffer-width ones.
  *
  * @param graphicsMan  the graphics manager
- * @return unk_5A5C
+ * @return mDisplayBufferWidth
  */
 extern "C" int func_00395550(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->unk_5A5C);
+    return (graphicsMan->mDisplayBufferWidth);
 }
 #endif
 //100%

@@ -93,28 +93,28 @@ CHECK_OFFSET(tDeferSortItem, mpBucket, 0x4);
 CHECK_SIZE(tDeferSortItem, 0x8);
 
 // One view state (0x180): the matrices and viewport constants a bucket's packets are drawn with. [U] func_003645B8
-// (view sRailXf_45B8) interns them, comparing 0xE0..0x17F; [X] "MatrixRecord" (member names below).
+// (view sRailXf_45B8) interns them, comparing 0xE0..0x17F; [X] "MatrixRecord" (the member names, m-prefixed).
 struct tDeferViewState {
-    t4Matrix unk_000;               // 0x000 [U] copied (m0); [X] world
-    t4Matrix unk_040;               // 0x040 [U] copied (m1); [X] view
-    t4Matrix unk_080;               // 0x080 [U] copied (m2); [X] worldView
-    t4Vector unk_0C0;               // 0x0C0 [U] copied (v0); [X] guardScale
-    t4Vector unk_0D0;               // 0x0D0 [U] copied (v1); [X] guardOffset
-    t4Matrix unk_0E0;               // 0x0E0 [U] compared + copied (key0); [X] viewProj
-    t4Matrix unk_120;               // 0x120 [U] compared + copied (key1); [X] worldClip
-    t4Vector unk_160;               // 0x160 [U] compared + copied (key2); [X] screenScale
-    t4Vector unk_170;               // 0x170 [U] compared + copied (key3); [X] screenOffset
+    t4Matrix mWorld;                // 0x000 [U] copied (m0); [X] world
+    t4Matrix mView;                 // 0x040 [U] copied (m1); [X] view
+    t4Matrix mWorldView;            // 0x080 [U] copied (m2); [X] worldView
+    t4Vector mGuardScale;           // 0x0C0 [U] copied (v0); [X] guardScale
+    t4Vector mGuardOffset;          // 0x0D0 [U] copied (v1); [X] guardOffset
+    t4Matrix mViewProj;             // 0x0E0 [U] compared + copied (key0); [X] viewProj
+    t4Matrix mWorldClip;            // 0x120 [U] compared + copied (key1); [X] worldClip
+    t4Vector mScreenScale;          // 0x160 [U] compared + copied (key2); [X] screenScale
+    t4Vector mScreenOffset;         // 0x170 [U] compared + copied (key3); [X] screenOffset
 };
 
-CHECK_OFFSET(tDeferViewState, unk_000, 0x000);
-CHECK_OFFSET(tDeferViewState, unk_040, 0x040);
-CHECK_OFFSET(tDeferViewState, unk_080, 0x080);
-CHECK_OFFSET(tDeferViewState, unk_0C0, 0x0C0);
-CHECK_OFFSET(tDeferViewState, unk_0D0, 0x0D0);
-CHECK_OFFSET(tDeferViewState, unk_0E0, 0x0E0);
-CHECK_OFFSET(tDeferViewState, unk_120, 0x120);
-CHECK_OFFSET(tDeferViewState, unk_160, 0x160);
-CHECK_OFFSET(tDeferViewState, unk_170, 0x170);
+CHECK_OFFSET(tDeferViewState, mWorld, 0x000);
+CHECK_OFFSET(tDeferViewState, mView, 0x040);
+CHECK_OFFSET(tDeferViewState, mWorldView, 0x080);
+CHECK_OFFSET(tDeferViewState, mGuardScale, 0x0C0);
+CHECK_OFFSET(tDeferViewState, mGuardOffset, 0x0D0);
+CHECK_OFFSET(tDeferViewState, mViewProj, 0x0E0);
+CHECK_OFFSET(tDeferViewState, mWorldClip, 0x120);
+CHECK_OFFSET(tDeferViewState, mScreenScale, 0x160);
+CHECK_OFFSET(tDeferViewState, mScreenOffset, 0x170);
 CHECK_SIZE(tDeferViewState, 0x180);
 
 // One view port / scissor rectangle (8): [U] func_00364B88 (view sRailKey4) interns them; func_00363C20 (view
@@ -143,9 +143,10 @@ struct cPS2DeferManager {
     cDrawStateList mDrawStates[0x400]; // 0x51484 [R] ctor (1024); [P] kMaxDrawStates 1024; [U] Find (sGlyphCache::entries)
     int mNumStaticStates;           // 0x57484 [U] func_003629B8 0, then the count after the 3 presets
                                     //         (sRmBatch_29B8::base); func_00362CC8 copies it to mUsedDrawStates
-    cDrawStateList* unk_57488;      // 0x57488 [U] func_003629B8: preset state a
-    cDrawStateList* unk_5748C;      // 0x5748C [U] func_003629B8: preset state b
-    cDrawStateList* unk_57490;      // 0x57490 [U] func_003629B8: preset state c
+    cDrawStateList* mpPresetStates[3]; // 0x57488 (name ours) [U] func_003629B8 saves the three presets (blend modes
+                                    //         1/17, 1/2, then 5/3 with alpha sort 1); cPS2GraphicsMan_RenderModel
+                                    //         picks [0], [2] or [1] by its flags (& 0x660000: 0 or 0x600000, 0x20000,
+                                    //         0x200000)
     int mUsedStates;                // 0x57494 [P] "mUsedStates < kMaxStates" (preview kMaxStates 2048) after a failed
                                     //         bucket Find; [U] func_00362CC8 0; func_00362DE8 appends at it (nNodes)
     tDeferBucket mBuckets[0x800];   // 0x57498 [R] ctor (2048 empty ctors); [U] func_00362DE8 (nodes)
@@ -187,9 +188,7 @@ CHECK_OFFSET(cPS2DeferManager, mSubmits, 0x00080);
 CHECK_OFFSET(cPS2DeferManager, mUsedDrawStates, 0x51480);
 CHECK_OFFSET(cPS2DeferManager, mDrawStates, 0x51484);
 CHECK_OFFSET(cPS2DeferManager, mNumStaticStates, 0x57484);
-CHECK_OFFSET(cPS2DeferManager, unk_57488, 0x57488);
-CHECK_OFFSET(cPS2DeferManager, unk_5748C, 0x5748C);
-CHECK_OFFSET(cPS2DeferManager, unk_57490, 0x57490);
+CHECK_OFFSET(cPS2DeferManager, mpPresetStates, 0x57488);
 CHECK_OFFSET(cPS2DeferManager, mUsedStates, 0x57494);
 CHECK_OFFSET(cPS2DeferManager, mBuckets, 0x57498);
 CHECK_OFFSET(cPS2DeferManager, unk_67498, 0x67498);

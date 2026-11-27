@@ -24,7 +24,7 @@
 //   [R] retail allocation and evaluation code (the functions above; their views sBzCache_2B78, sPtSys_37D0,
 //       sPtPools39D0, sPatchSet4518, sPMgr_47A0);
 //   [U] how retail code uses the member.
-// Members without an EA name keep unk_ names.
+// Members without an EA name are named from use and the allocation tags: "(name ours)".
 
 #include "layout.h"
 #include "bx/math3d.h"
@@ -37,29 +37,35 @@ struct cBezierCache {
                                      //       (word 8 = -1 when free)
     void* m6x6CacheRecord;           // 0x010 [P] "m6x6CacheRecord == NULL"; [R] "6x6CacheRecord"
     void* m8x8CacheRecord;           // 0x014 [P] "m8x8CacheRecord == NULL"; [R] "8x8CacheRecord"
-    void* unk_018[3];                // 0x018 [U] the three record tables again, indexed by patch size
-    int* unk_024[3];                 // 0x024 [R] the "4x4FreeList" / 6x6 / 8x8 buffers
-    int* unk_030[3];                 // 0x030 [U] free-list cursors, indexed by patch size
+    void* mCacheRecord[3];           // 0x018 (name ours, after the tags) [U] the three record tables again, indexed by
+                                     //       patch size
+    int* mFreeListBuffer[3];         // 0x024 (name ours) [R] the "4x4FreeList" / 6x6 / 8x8 buffers
+    int* mFreeList[3];               // 0x030 (name ours, after the tags) [U] the same free lists, indexed by patch
+                                     //       size (func_003747A0 pops mFreeList[Size][--mFreeListSP[Size]])
     int mFreeListSP[3];                  // 0x03C [U] free-list stack pointers (counts), indexed by patch size
-    t3Vector* unk_048[3];            // 0x048 [R] "4x4PosCache" / 6x6 / 8x8: n x n positions per record
-    t2Vector* unk_054[3];            // 0x054 [R] "4x4UVCache" / 6x6 / 8x8
-    t2Vector* unk_060[3];            // 0x060 [R] "4x4LMUVCache" / 6x6 / 8x8 (light-map UVs)
+    t3Vector* mPosCache[3];          // 0x048 (name ours, after the tags) [R] "4x4PosCache" / 6x6 / 8x8: n x n
+                                     //       positions per record
+    t2Vector* mUVCache[3];           // 0x054 (name ours, after the tags) [R] "4x4UVCache" / 6x6 / 8x8
+    t2Vector* mLMUVCache[3];         // 0x060 (name ours, after the tags) [R] "4x4LMUVCache" / 6x6 / 8x8 (light-map
+                                     //       UVs)
     char unk_06C[0x4];               // 0x06C padding (t4Vector alignment)
-    t4Vector unk_070[4];             // 0x070 [U] 4x4 basis table
-    t4Vector unk_0B0[6];             // 0x0B0 [U] 6x6 basis table
-    t4Vector unk_110[8];             // 0x110 [U] 8x8 basis table
-    t4Vector* unk_190[3];            // 0x190 [U] the three basis tables, indexed by patch size (cPS2BezierMan_GetBezST)
+    t4Vector m4x4Basis[4];           // 0x070 (name ours) [U] 4x4 basis table (t^3, t^2, t, 1)
+    t4Vector m6x6Basis[6];           // 0x0B0 (name ours) [U] 6x6 basis table
+    t4Vector m8x8Basis[8];           // 0x110 (name ours) [U] 8x8 basis table
+    t4Vector* mBasis[3];             // 0x190 (name ours) [U] the three basis tables, indexed by patch size
+                                     //       (cPS2BezierMan_GetBezST)
     int mPatchOrder[3];              // 0x19C (name ours) [U] the patch order per size (4, 6, 8): the grid side n
     int mNrmCacheSize[3];                  // 0x1A8 [R] normal-cache sizes per patch size
-    t3Vector* unk_1B4[3];            // 0x1B4 [R] "4x4NrmCache" / 6x6 / 8x8
-    int* unk_1C0[3];                 // 0x1C0 [R] "4x4FreeNrmList" / 6x6 / 8x8 buffers
-    int* unk_1CC[3];                 // 0x1CC [U] normal free-list cursors
+    t3Vector* mNrmCache[3];          // 0x1B4 (name ours, after the tags) [R] "4x4NrmCache" / 6x6 / 8x8
+    int* mFreeNrmListBuffer[3];      // 0x1C0 (name ours) [R] "4x4FreeNrmList" / 6x6 / 8x8 buffers
+    int* mFreeNrmList[3];            // 0x1CC (name ours, after the tags) [U] the same normal free lists, indexed by
+                                     //       patch size
     int mFreeNrmListSP[3];                  // 0x1D8 [U] normal free-list stack pointers
     char unk_1E4[0xC];               // 0x1E4 padding (t4Vector alignment)
-    t4Vector unk_1F0[4];             // 0x1F0 [U] 4x4 derivative basis table
-    t4Vector unk_230[6];             // 0x230 [U] 6x6 derivative basis table
-    t4Vector unk_290[8];             // 0x290 [U] 8x8 derivative basis table
-    t4Vector* unk_310[3];            // 0x310 [U] the three derivative tables, indexed by patch size
+    t4Vector m4x4DBasis[4];          // 0x1F0 (name ours) [U] 4x4 derivative basis table (3t^2, 2t, 1, 0)
+    t4Vector m6x6DBasis[6];          // 0x230 (name ours) [U] 6x6 derivative basis table
+    t4Vector m8x8DBasis[8];          // 0x290 (name ours) [U] 8x8 derivative basis table
+    t4Vector* mDBasis[3];            // 0x310 (name ours) [U] the three derivative tables, indexed by patch size
                                      //       (cPS2BezierMan_GetBezdST)
 };
 
@@ -67,27 +73,27 @@ CHECK_OFFSET(cBezierCache, mCacheSize, 0x000);
 CHECK_OFFSET(cBezierCache, m4x4CacheRecord, 0x00C);
 CHECK_OFFSET(cBezierCache, m6x6CacheRecord, 0x010);
 CHECK_OFFSET(cBezierCache, m8x8CacheRecord, 0x014);
-CHECK_OFFSET(cBezierCache, unk_018, 0x018);
-CHECK_OFFSET(cBezierCache, unk_024, 0x024);
-CHECK_OFFSET(cBezierCache, unk_030, 0x030);
+CHECK_OFFSET(cBezierCache, mCacheRecord, 0x018);
+CHECK_OFFSET(cBezierCache, mFreeListBuffer, 0x024);
+CHECK_OFFSET(cBezierCache, mFreeList, 0x030);
 CHECK_OFFSET(cBezierCache, mFreeListSP, 0x03C);
-CHECK_OFFSET(cBezierCache, unk_048, 0x048);
-CHECK_OFFSET(cBezierCache, unk_054, 0x054);
-CHECK_OFFSET(cBezierCache, unk_060, 0x060);
-CHECK_OFFSET(cBezierCache, unk_070, 0x070);
-CHECK_OFFSET(cBezierCache, unk_0B0, 0x0B0);
-CHECK_OFFSET(cBezierCache, unk_110, 0x110);
-CHECK_OFFSET(cBezierCache, unk_190, 0x190);
+CHECK_OFFSET(cBezierCache, mPosCache, 0x048);
+CHECK_OFFSET(cBezierCache, mUVCache, 0x054);
+CHECK_OFFSET(cBezierCache, mLMUVCache, 0x060);
+CHECK_OFFSET(cBezierCache, m4x4Basis, 0x070);
+CHECK_OFFSET(cBezierCache, m6x6Basis, 0x0B0);
+CHECK_OFFSET(cBezierCache, m8x8Basis, 0x110);
+CHECK_OFFSET(cBezierCache, mBasis, 0x190);
 CHECK_OFFSET(cBezierCache, mPatchOrder, 0x19C);
 CHECK_OFFSET(cBezierCache, mNrmCacheSize, 0x1A8);
-CHECK_OFFSET(cBezierCache, unk_1B4, 0x1B4);
-CHECK_OFFSET(cBezierCache, unk_1C0, 0x1C0);
-CHECK_OFFSET(cBezierCache, unk_1CC, 0x1CC);
+CHECK_OFFSET(cBezierCache, mNrmCache, 0x1B4);
+CHECK_OFFSET(cBezierCache, mFreeNrmListBuffer, 0x1C0);
+CHECK_OFFSET(cBezierCache, mFreeNrmList, 0x1CC);
 CHECK_OFFSET(cBezierCache, mFreeNrmListSP, 0x1D8);
-CHECK_OFFSET(cBezierCache, unk_1F0, 0x1F0);
-CHECK_OFFSET(cBezierCache, unk_230, 0x230);
-CHECK_OFFSET(cBezierCache, unk_290, 0x290);
-CHECK_OFFSET(cBezierCache, unk_310, 0x310);
+CHECK_OFFSET(cBezierCache, m4x4DBasis, 0x1F0);
+CHECK_OFFSET(cBezierCache, m6x6DBasis, 0x230);
+CHECK_OFFSET(cBezierCache, m8x8DBasis, 0x290);
+CHECK_OFFSET(cBezierCache, mDBasis, 0x310);
 CHECK_SIZE(cBezierCache, 0x320);
 
 #endif /* RENDER_BEZIERCACHE_H */

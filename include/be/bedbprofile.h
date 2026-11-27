@@ -318,8 +318,11 @@ struct cBECharProfileDB {
     int locLastHub;                 // 0x27C [O] eBELocationID (after the flags in both games); [R] init: 17 (sw 0x27C)
     short mDifficulty;              // 0x280 [O]; [R] init: 1; [U] cBENewPlayerInterface_getDifficultyLevel(which != 0)
     short mDifference;              // 0x282 [O]; [R] init: 0; [U] cBENewPlayerInterface_getDifficultyDifference(flag != 0)
-    short unk_284;                  // 0x284 [R] init: 1; [U] the second difficulty level (getDifficultyLevel(0))
-    short unk_286;                  // 0x286 [R] init: 0; [U] the second difficulty difference (getDifficultyDifference(0))
+    short mFreestyleDifficulty;     // 0x284 (name ours) [R] init: 1; [U] the second difficulty level
+                                    //       (getDifficultyLevel(0)); the scored three-heat events (cGMBigAirHandler's
+                                    //       raceFinish) move it, the timed races (cGMRaceHandler) move mDifficulty
+    short mFreestyleDifference;     // 0x286 (name ours) [R] init: 0; [U] the second difficulty difference
+                                    //       (getDifficultyDifference(0)), the scored events' win/loss streak
     short* mpBoltsMap;              // 0x288 [R] the ctor zeroes it; func_00151A88 allocates it ("Profile Bolts Map",
                                     //       one short per item id: the slot in mBolts or -1); the destructor frees it
     int mNumBolts;                  // 0x28C [U] func_00151A88: the character's item count; func_00151C20 / func_001515B8
@@ -331,8 +334,9 @@ struct cBECharProfileDB {
     tBETrackScore mScoreStats[26];  // 0xAD0 [O]; [R] init: 26 x {0, -1, 0, 0}; [U] getScoreStats / updateScoreStats
     tBEPeakMedals mPeakMainEventMedals[3]; // 0xBA0 [O]; [R] init clears 0x18 bytes; [U] updateMedalStats, beintplayer
     signed char mCareerHighlights[8]; // 0xBB8 [O]; [R] init clears 8; [U] the highlight levels (beintplayer)
-    signed char unk_BC0;            // 0xBC0 [U] the character this record belongs to: func_00151A88 stores k; init passes it
-                                    //       to func_001519E0 / func_00150558; the bolt-on helpers read it (19 loads)
+    signed char mCharacterID;       // 0xBC0 (name ours) [U] the character this record belongs to: func_00151A88 stores
+                                    //       k; init passes it to func_001519E0 / func_00150558; the bolt-on helpers
+                                    //       read it (19 loads)
     tBERelationDB mRelations[10];   // 0xBC1 [O] tBERelationDB; [U] func_001519E0 resets 10 (one per character);
                                     //       beintaggression's view sAggrCharProfile declares 16 (indexes stay < 10)
     tBEStatDB statDB;               // 0xBDF [O]; [R] init copies D_005308D9[k] (7 bytes); [U] "the seven attribute bytes"
@@ -340,12 +344,16 @@ struct cBECharProfileDB {
                                     //       careerStatDB, uberV2Unlocked, unlockedBoards/Skis/Skins, ... in this area)
     tRiderBest mRiderBest;          // 0xDE4 [O] tRiderBest (0x54: tStat eventStat[10], int comboLongestOverall); [R] init
                                     //       clears 84 bytes; [U] beintplayer's best-stats getter returns +0xDE4
-    int unk_E38[25][2];             // 0xE38 [R] init zeroes the first word of each pair; [U] func_00147908 (beintplayer)
-                                    //       returns it as the character's message list
-    unsigned int unk_F00;           // 0xF00 [R] init clears bits 0-24 (one per message)
-    signed char unk_F04;            // 0xF04 [R] init: 0
+    int mMessages[25][2];           // 0xE38 (name ours) [R] init zeroes the first word of each pair; [U] func_00147908
+                                    //       (beintplayer) returns it as the character's message list ({message id,
+                                    //       variant}: fepopupmisc's view sPopupList)
+    unsigned int mMessageReadBits;  // 0xF00 (name ours) [R] init clears bits 0-24 (one per message); [U] fepopupmisc
+                                    //       (sPopupList::mask): func_001E2FE0 clears a new message's bit, the message
+                                    //       center shows the unread icon while it is clear
+    signed char mNumMessages;       // 0xF04 (name ours) [R] init: 0; [U] sPopupList::count (func_001E2FE0 appends)
     char unk_F05[0x3];              // 0xF05 padding
-    unsigned int unk_F08[2];        // 0xF08 [R] init clears bits 0-60; [U] the message flags (func_00147980 / func_00147A30)
+    unsigned int mMessageGroupFlags[2]; // 0xF08 (name ours) [R] init clears bits 0-60; [U] the message flags, one per
+                                    //       message group (func_00147980 / func_00147A30; fepopupmisc's func_001E3A30)
     char unk_F10[0x18];             // 0xF10 no retail access seen
     unsigned char mAwardsReceived[4]; // 0xF28 [O]; [R] init MEM_fills 4; [U] cBERewardInterface_isAwardReceived's bits
     char unk_F2C[0x4];              // 0xF2C no retail access seen (On Tour aligns tRewardBits to 0x7A0 the same way)
@@ -365,8 +373,8 @@ CHECK_OFFSET(cBECharProfileDB, mMissions, 0x118);
 CHECK_OFFSET(cBECharProfileDB, locLastHub, 0x27C);
 CHECK_OFFSET(cBECharProfileDB, mDifficulty, 0x280);
 CHECK_OFFSET(cBECharProfileDB, mDifference, 0x282);
-CHECK_OFFSET(cBECharProfileDB, unk_284, 0x284);
-CHECK_OFFSET(cBECharProfileDB, unk_286, 0x286);
+CHECK_OFFSET(cBECharProfileDB, mFreestyleDifficulty, 0x284);
+CHECK_OFFSET(cBECharProfileDB, mFreestyleDifference, 0x286);
 CHECK_OFFSET(cBECharProfileDB, mpBoltsMap, 0x288);
 CHECK_OFFSET(cBECharProfileDB, mNumBolts, 0x28C);
 CHECK_OFFSET(cBECharProfileDB, mBolts, 0x290);
@@ -376,16 +384,16 @@ CHECK_OFFSET(cBECharProfileDB, mVisitLocFlags, 0xACC);
 CHECK_OFFSET(cBECharProfileDB, mScoreStats, 0xAD0);
 CHECK_OFFSET(cBECharProfileDB, mPeakMainEventMedals, 0xBA0);
 CHECK_OFFSET(cBECharProfileDB, mCareerHighlights, 0xBB8);
-CHECK_OFFSET(cBECharProfileDB, unk_BC0, 0xBC0);
+CHECK_OFFSET(cBECharProfileDB, mCharacterID, 0xBC0);
 CHECK_OFFSET(cBECharProfileDB, mRelations, 0xBC1);
 CHECK_OFFSET(cBECharProfileDB, statDB, 0xBDF);
 CHECK_OFFSET(cBECharProfileDB, unk_BE6, 0xBE6);
 CHECK_OFFSET(cBECharProfileDB, mRiderBest, 0xDE4);
-CHECK_OFFSET(cBECharProfileDB, unk_E38, 0xE38);
-CHECK_OFFSET(cBECharProfileDB, unk_F00, 0xF00);
-CHECK_OFFSET(cBECharProfileDB, unk_F04, 0xF04);
+CHECK_OFFSET(cBECharProfileDB, mMessages, 0xE38);
+CHECK_OFFSET(cBECharProfileDB, mMessageReadBits, 0xF00);
+CHECK_OFFSET(cBECharProfileDB, mNumMessages, 0xF04);
 CHECK_OFFSET(cBECharProfileDB, unk_F05, 0xF05);
-CHECK_OFFSET(cBECharProfileDB, unk_F08, 0xF08);
+CHECK_OFFSET(cBECharProfileDB, mMessageGroupFlags, 0xF08);
 CHECK_OFFSET(cBECharProfileDB, unk_F10, 0xF10);
 CHECK_OFFSET(cBECharProfileDB, mAwardsReceived, 0xF28);
 CHECK_OFFSET(cBECharProfileDB, unk_F2C, 0xF2C);

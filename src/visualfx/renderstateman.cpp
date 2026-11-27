@@ -921,7 +921,7 @@ public:
     virtual void v61();
     virtual void v62();
     virtual void v63();
-    virtual void v64(void* frame);
+    virtual void writeToReplayFrame(void* frame);   // slot 64 (name ours, from this caller)
 };
 
 /**
@@ -937,8 +937,8 @@ extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
     int i;
     for (i = 0; i < 6; i++) {
         tRenderState* stateEntry = &cRenderStateMan_m_state[i];
-        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->v64(frame);
-        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->v64(frame);
+        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->writeToReplayFrame(frame);
+        ((cRSMObjWF*)stateEntry->m_query[8]->m_data)->writeToReplayFrame(frame);
     }
 }
 #endif
@@ -1014,7 +1014,7 @@ public:
     virtual void v62();
     virtual void v63();
     virtual void v64();
-    virtual void v65(void* frame);
+    virtual void readFromReplayFrame(void* frame);  // slot 65 (name ours, from this caller)
 };
 
 /**
@@ -1030,8 +1030,8 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
     int i;
     for (i = 0; i < 6; i++) {
         tRenderState* entry = &cRenderStateMan_m_state[i];
-        ((cRSMObjRF*)entry->m_query[8]->m_data)->v65(frame);
-        ((cRSMObjRF*)entry->m_query[8]->m_data)->v65(frame);
+        ((cRSMObjRF*)entry->m_query[8]->m_data)->readFromReplayFrame(frame);
+        ((cRSMObjRF*)entry->m_query[8]->m_data)->readFromReplayFrame(frame);
     }
 }
 #endif
@@ -1881,8 +1881,8 @@ class cPS2AIVisualEffectsMan_update_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual void v02();
-    virtual void v03();
+    virtual void update();  // slot 2 (names ours, from cPS2AIVisualEffectsMan_update / _render)
+    virtual void render();  // slot 3
 };
 
 /**
@@ -1892,7 +1892,7 @@ public:
  */
 extern "C" void cPS2AIVisualEffectsMan_update(cPS2AIVisualEffectsMan_update_cObj** self)
 {
-    (*self)->v02();
+    (*self)->update();
 }
 #endif
 
@@ -1906,7 +1906,7 @@ INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_render);
  */
 extern "C" void cPS2AIVisualEffectsMan_render(cPS2AIVisualEffectsMan_update_cObj** self)
 {
-    (*self)->v03();
+    (*self)->render();
 }
 #endif
 

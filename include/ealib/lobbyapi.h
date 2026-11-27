@@ -30,7 +30,8 @@ struct LobbyApiRefT {
                                         //       (func_003F5738), func_003E8260 connects it (func_003F5638),
                                         //       func_003E8B10 / func_003E8DC0 send on it (func_003F5910); func_003E7C40
                                         //       reads it
-    void* unk_004;                      // 0x004 [R] create: func_003E7340(); [U] func_003E7C40 / func_003E8DC0 read it
+    void* mpPing;                       // 0x004 (name ours) [R] create: func_003E7340() (the ping block,
+                                        //       func_003E7500's view); [U] func_003E7C40 / func_003E8DC0 read it
     int mEventFlags;                    // 0x008 [U] func_003E7F70 ORs its flags in; func_003E8FB8 reads and updates
                                         //       them; func_003E95C8
     int mState;                         // 0x00C [U] FourCC state: 'offl' (func_003E80C0), 'rdir' (func_003E8260),
@@ -49,19 +50,21 @@ struct LobbyApiRefT {
     char mAccount[0x40];                // 0x134 [U] the account name from the login reply ('user' / 'acct' query,
                                         //       func_003E8A70)
     char mPersona[0x40];                // 0x174 [U] the persona ('pers' query, func_003E8A70)
-    int unk_1B4;                        // 0x1B4 [U] func_003E95C8 (sw)
-    int unk_1B8;                        // 0x1B8 [U] func_003E95C8 (lw / sw)
+    int mUserFlags;                     // 0x1B4 (name ours) [U] func_003E95C8: the '+who' reply's F flags, or the flags
+                                        //       of the own '+usr' record (bit 0x200000)
+    int mRoomId;                        // 0x1B8 (name ours) [U] func_003E95C8: the room id ('+who' RI, 'move' IDENT);
+                                        //       a change calls func_003E7B00
     int mRoomFlags;                     // 0x1BC [U] the room flags ('rflg' query, func_003E8F08); func_003E95C8 stores
                                         //       them
     char mRoomName[0x40];               // 0x1C0 [U] the room name ('room' query, func_003E8A70)
     char mGameSession[0xC0];            // 0x200 [U] the game-session record ('play' query, func_003E8A70) - continues
-                                        //       into 0x2C0..0x2CC
-    int unk_2C0;                        // 0x2C0 [U] func_003E95C8 (sw)
-    int unk_2C4;                        // 0x2C4 [U] func_003E95C8 (sw)
-    int unk_2C8;                        // 0x2C8 [U] func_003E95C8 (sw)
+                                        //       into 0x2C0..0x310 (func_003E95C8's Sess_95C8)
+    int mGameAddr;                      // 0x2C0 (name ours) [U] func_003E95C8: the '+ses' reply's ADDR
+    int mGameFrom;                      // 0x2C4 (name ours) [U] func_003E95C8: its FROM address
+    int mGameSeed;                      // 0x2C8 (name ours) [U] func_003E95C8: its SEED
     int mGameWhen;                      // 0x2CC [U] the game session's WHEN time: func_003E8A70 returns the record only
                                         //       when set; func_003E8AF8 ('play') clears it; func_003E95C8 stores it
-    char unk_2D0[0x40];                 // 0x2D0 no access seen
+    char mGameAuth[0x40];               // 0x2D0 (name ours) [U] func_003E95C8: its AUTH text
     int mLists[8][5];                   // 0x310 [U] 8 list slots of 0x14 bytes {index, list, routine, context, ?} (0
                                         //       rooms, 1 users, 2 ranks): func_003E8688 / func_003E8650 / func_003E80C0
                                         //       / func_003E7B00; func_003E7C40 uses slots 0-1 (+0x310 / +0x314 / +0x324
@@ -77,7 +80,8 @@ struct LobbyApiRefT {
     int mExternalAddr;                  // 0x4FC [U] 'extn' query (func_003E8F08); func_003E95C8
     int mLocalAddr;                     // 0x500 [U] 'locl' query (func_003E8F08); func_003E95C8
     int mMore;                          // 0x504 [U] 'more' query (func_003E8F08): the 'sele' reply's MORE
-    int unk_508;                        // 0x508 [U] func_003E8B10 clears it; func_003E95C8
+    int mChannel;                       // 0x508 (name ours) [U] func_003E8B10 clears it; func_003E95C8 stores the
+                                        //       'snap' reply's CHAN, the list slot (4..7) its '+snp' ranks go to
     int mPendingSnapshots;              // 0x50C [U] func_003E8260 0, func_003E8B10 counts; func_003E95C8
     int mSlots;                         // 0x510 [U] 'slot' query (func_003E8F08): the 'sele' reply's SLOTS
     int mEventProcs[5][2];              // 0x514 [U] five {routine, context} pairs set by func_003E8248 (LobbyMan's
@@ -93,7 +97,7 @@ struct LobbyApiRefT {
 };
 
 CHECK_OFFSET(LobbyApiRefT, mpSession, 0x000);
-CHECK_OFFSET(LobbyApiRefT, unk_004, 0x004);
+CHECK_OFFSET(LobbyApiRefT, mpPing, 0x004);
 CHECK_OFFSET(LobbyApiRefT, mEventFlags, 0x008);
 CHECK_OFFSET(LobbyApiRefT, mState, 0x00C);
 CHECK_OFFSET(LobbyApiRefT, mTimeout, 0x010);
@@ -105,16 +109,16 @@ CHECK_OFFSET(LobbyApiRefT, mSessionKey, 0x024);
 CHECK_OFFSET(LobbyApiRefT, mTags, 0x034);
 CHECK_OFFSET(LobbyApiRefT, mAccount, 0x134);
 CHECK_OFFSET(LobbyApiRefT, mPersona, 0x174);
-CHECK_OFFSET(LobbyApiRefT, unk_1B4, 0x1B4);
-CHECK_OFFSET(LobbyApiRefT, unk_1B8, 0x1B8);
+CHECK_OFFSET(LobbyApiRefT, mUserFlags, 0x1B4);
+CHECK_OFFSET(LobbyApiRefT, mRoomId, 0x1B8);
 CHECK_OFFSET(LobbyApiRefT, mRoomFlags, 0x1BC);
 CHECK_OFFSET(LobbyApiRefT, mRoomName, 0x1C0);
 CHECK_OFFSET(LobbyApiRefT, mGameSession, 0x200);
-CHECK_OFFSET(LobbyApiRefT, unk_2C0, 0x2C0);
-CHECK_OFFSET(LobbyApiRefT, unk_2C4, 0x2C4);
-CHECK_OFFSET(LobbyApiRefT, unk_2C8, 0x2C8);
+CHECK_OFFSET(LobbyApiRefT, mGameAddr, 0x2C0);
+CHECK_OFFSET(LobbyApiRefT, mGameFrom, 0x2C4);
+CHECK_OFFSET(LobbyApiRefT, mGameSeed, 0x2C8);
 CHECK_OFFSET(LobbyApiRefT, mGameWhen, 0x2CC);
-CHECK_OFFSET(LobbyApiRefT, unk_2D0, 0x2D0);
+CHECK_OFFSET(LobbyApiRefT, mGameAuth, 0x2D0);
 CHECK_OFFSET(LobbyApiRefT, mLists, 0x310);
 CHECK_OFFSET(LobbyApiRefT, mPort, 0x3B0);
 CHECK_OFFSET(LobbyApiRefT, mAddress, 0x3B4);
@@ -124,7 +128,7 @@ CHECK_OFFSET(LobbyApiRefT, mMask, 0x4BC);
 CHECK_OFFSET(LobbyApiRefT, mExternalAddr, 0x4FC);
 CHECK_OFFSET(LobbyApiRefT, mLocalAddr, 0x500);
 CHECK_OFFSET(LobbyApiRefT, mMore, 0x504);
-CHECK_OFFSET(LobbyApiRefT, unk_508, 0x508);
+CHECK_OFFSET(LobbyApiRefT, mChannel, 0x508);
 CHECK_OFFSET(LobbyApiRefT, mPendingSnapshots, 0x50C);
 CHECK_OFFSET(LobbyApiRefT, mSlots, 0x510);
 CHECK_OFFSET(LobbyApiRefT, mEventProcs, 0x514);
@@ -147,7 +151,8 @@ typedef struct LobbyApiMsgT LobbyApiMsgT;
 #endif
 
 struct LobbyApiMsgT {
-    int unk_00;                         // 0x0 [R] func_003E7F70: 3 (the event type)
+    int mType;                          // 0x0 [R] func_003E7F70: 3 (the event type); func_003E7C40's ping events 0
+                                        //     (name ours)
     int mKind;                          // 0x4 [R] the event kind, a FourCC ('disc'); [U] onchatmsg switches on it
                                         //     (name ours)
     int mStatus;                        // 0x8 [R] func_003E7F70: the reason code; [U] the handlers' status test (0 =
@@ -156,7 +161,7 @@ struct LobbyApiMsgT {
                                         //     func_003E7F70's event (name ours)
 };
 
-CHECK_OFFSET(LobbyApiMsgT, unk_00, 0x0);
+CHECK_OFFSET(LobbyApiMsgT, mType, 0x0);
 CHECK_OFFSET(LobbyApiMsgT, mKind, 0x4);
 CHECK_OFFSET(LobbyApiMsgT, mStatus, 0x8);
 CHECK_OFFSET(LobbyApiMsgT, mpTagText, 0xC);

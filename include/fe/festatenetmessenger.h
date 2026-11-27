@@ -61,7 +61,8 @@ struct cFEStateNetMessenger : public cFEStateNet {
     char* mszSearchName;            // 0x6D4 [R] cBXString (as above); [U] func_001A4810 stores the name typed in the
                                     //       keyboard and submits the find ("kT_POPUP231SubmittingFind",
                                     //       func_0025E6D0); func_001A4E28 prints it into "kT_POPUP279InvalidName"
-    int unk_6D8;                    // 0x6D8 [U] func_001A4CE8 copies the find result's word at + 0x10; no read seen
+    int mbFoundOnline;              // 0x6D8 (name ours) [U] func_001A4CE8 copies the find result's online flag
+                                    //       (online_FindPlayerEvent::mOnline); no read seen
     int mLastRefreshFrame;          // 0x6DC [R] 0; [U] onUpdate override cFEStateNetMessenger_onUpdate: when 1..59 frames have not
                                     //       passed since it (frame counter cAppMan_TheAppMan + 0x18) it only updates, else it
                                     //       stores the frame and rebuilds the list (func_001A6978)
@@ -121,7 +122,7 @@ struct cFEStateNetMessenger : public cFEStateNet {
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);
 CHECK_OFFSET(cFEStateNetMessenger, mszSearchName, 0x6D4);
-CHECK_OFFSET(cFEStateNetMessenger, unk_6D8, 0x6D8);
+CHECK_OFFSET(cFEStateNetMessenger, mbFoundOnline, 0x6D8);
 CHECK_OFFSET(cFEStateNetMessenger, mLastRefreshFrame, 0x6DC);
 CHECK_OFFSET(cFEStateNetMessenger, mszShownName, 0x6E0);
 CHECK_OFFSET(cFEStateNetMessenger, mNames, 0x6E4);

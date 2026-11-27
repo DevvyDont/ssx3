@@ -2068,15 +2068,15 @@ extern "C" t3Vector MakeParticleFunc(int n, luno_cLunoCArg *params) {
     } else {
         cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
         unsigned i;
-        tInstanceRecord *r;
+        tInstanceRecord *instance;
         if (!section)
-            r = 0;
+            instance = 0;
         else {
             i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc;
             tInstanceRecord *found = conv_D420(i);
-            r = found;
+            instance = found;
         }
-        obj = r;
+        obj = instance;
     }
     if (obj == 0) {
         operator_delete((int*)buf);
@@ -2084,9 +2084,9 @@ extern "C" t3Vector MakeParticleFunc(int n, luno_cLunoCArg *params) {
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
-        int r = checkActiveNode(activeNode, ATYPE_PARTICLE, buf);
-        if (r != 0) {
-            if (r > 0)
+        int checkResult = checkActiveNode(activeNode, ATYPE_PARTICLE, buf);
+        if (checkResult != 0) {
+            if (checkResult > 0)
                 operator_delete((int*)buf);
             return luno_gLunoNil_D420;
         }
@@ -5636,23 +5636,23 @@ extern "C" void* RiderInVolumeFunc(luno_cLunoVar* self, int n, luno_cLunoCArg *p
     } else {
         cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
         unsigned i;
-        tInstanceRecord *r;
+        tInstanceRecord *instance;
         if (!section)
-            r = 0;
+            instance = 0;
         else {
             i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc;
             tInstanceRecord *found = conv_1D78(i);
-            r = found;
+            instance = found;
         }
-        obj = r;
+        obj = instance;
     }
     if (obj) {
         int found = 1;
         cAI *ai = SSXApp->Game->AI;
         cRider *riderEntry = ai->Riders[cWScriptMan_TheWScriptMan->Being];
         cBeing *riderPart = riderEntry;
-        cRider *r = (cRider*)riderPart;
-        if (r->isIntersecting(obj)) {
+        cRider *rider = (cRider*)riderPart;
+        if (rider->isIntersecting(obj)) {
             self->Type = found;
             *luno_cLunoVar_castInt_1D78(self) = found;
             goto done;
@@ -6058,19 +6058,19 @@ extern WScriptNullType D_004A573C_2680 __asm__("D_004A573C");
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGamePathFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
+extern "C" cLunoValue* IsGamePathFunc(cLunoValue* ret, int n, luno_cLunoCArg* params) {
     if (D_004A5740_2680 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5738_2680 = -1;
         D_004A573C_2680 = WScriptNullType(D_004A573C_2680);
         D_004A5740_2680 = 1;
     }
-    int v[4];
+    int fields[4];
     int* vp;
-    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5738_2680, 8, D_004A3CD0_2680, n, e);
+    BIND_UNPACK_ARGS_1FBE38(vp, fields, &D_004A5738_2680, 8, D_004A3CD0_2680, n, params);
     BIND_SET_RESULT_1FBE38(ret, isGamePath(vp[0]));
     return ret;
 }
@@ -6116,19 +6116,19 @@ extern WScriptNullType D_004A574C_2778 __asm__("D_004A574C");
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGameModeFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
+extern "C" cLunoValue* IsGameModeFunc(cLunoValue* ret, int n, luno_cLunoCArg* params) {
     if (D_004A5750_2778 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5748_2778 = -1;
         D_004A574C_2778 = WScriptNullType(D_004A574C_2778);
         D_004A5750_2778 = 1;
     }
-    int v[4];
+    int fields[4];
     int* vp;
-    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5748_2778, 8, D_004A3CD8_2778, n, e);
+    BIND_UNPACK_ARGS_1FBE38(vp, fields, &D_004A5748_2778, 8, D_004A3CD8_2778, n, params);
     BIND_SET_RESULT_1FBE38(ret, isGameMode(vp[0]));
     return ret;
 }
@@ -6175,19 +6175,19 @@ extern WScriptNullType D_004A575C_2870 __asm__("D_004A575C");
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGameEventFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
+extern "C" cLunoValue* IsGameEventFunc(cLunoValue* ret, int n, luno_cLunoCArg* params) {
     if (D_004A5760_2870 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5758_2870 = -1;
         D_004A575C_2870 = WScriptNullType(D_004A575C_2870);
         D_004A5760_2870 = 1;
     }
-    int v[4];
+    int fields[4];
     int* vp;
-    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5758_2870, 8, D_004A3CE0_2870, n, e);
+    BIND_UNPACK_ARGS_1FBE38(vp, fields, &D_004A5758_2870, 8, D_004A3CE0_2870, n, params);
     BIND_SET_RESULT_1FBE38(ret, isGameEvent(vp[0]));
     return ret;
 }
@@ -6504,28 +6504,28 @@ extern "C" void* RiderActionFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* par
     }
     cRider* riderEntry = SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being];
     cBeing* riderIface = riderEntry;
-    cRider* d = (cRider*)riderIface;
+    cRider* rider = (cRider*)riderIface;
     int res;
     switch (vp[0]) {
-    case kRiderQuery_Wipeout: res = cRider_getMissionInt_2EF8(d, kMQ_Wipeout); break;
-    case kRiderQuery_Reset: res = cRider_getMissionInt_2EF8(d, kMQ_Reset); break;
-    case kRiderQuery_Air: res = cRider_getMissionInt_2EF8(d, kMQ_Air); break;
-    case kRiderQuery_Ground: res = cRider_getMissionInt_2EF8(d, kMQ_Ground); break;
-    case kRiderQuery_Railslide: res = cRider_getMissionInt_2EF8(d, kMQ_Railslide); break;
-    case kRiderQuery_GrabHeld: res = cRider_getMissionInt_2EF8(d, kMQ_GrabHeld); break;
-    case kRiderQuery_TweakHeld: res = cRider_getMissionInt_2EF8(d, kMQ_TweakHeld); break;
-    case kRiderQuery_UberHeld: res = cRider_getMissionInt_2EF8(d, kMQ_UberHeld); break;
-    case kRiderQuery_TotalPoints: res = cRider_getMissionInt_2EF8(d, kMQ_TotalPoints); break;
-    case kRiderQuery_NosePress: res = cRider_getMissionInt_2EF8(d, kMQ_NosePress); break;
-    case kRiderQuery_TailPress: res = cRider_getMissionInt_2EF8(d, kMQ_TailPress); break;
-    case kRiderQuery_Boosting: res = cRider_getMissionInt_2EF8(d, kMQ_Boosting); break;
-    case kRiderQuery_Stall: res = cRider_getMissionInt_2EF8(d, kMQ_Stall); break;
-    case kRiderQuery_OffAxis: res = cRider_getMissionInt_2EF8(d, kMQ_OffAxis); break;
-    case kRiderQuery_Inverted: res = cRider_getMissionInt_2EF8(d, kMQ_Inverted); break;
-    case kRiderQuery_NumPerfectLanding: res = cRider_getMissionInt_2EF8(d, kMQ_NumPerfectLanding); break;
-    case kRiderQuery_NumLastSecondLanding: res = cRider_getMissionInt_2EF8(d, kMQ_NumLastSecondLanding); break;
-    case kRiderQuery_TotalStylePoints: res = cRider_getMissionInt_2EF8(d, kMQ_TotalStylePoints); break;
-    case kRiderQuery_Punching: res = cRider_getMissionInt_2EF8(d, kMQ_Punching); break;
+    case kRiderQuery_Wipeout: res = cRider_getMissionInt_2EF8(rider, kMQ_Wipeout); break;
+    case kRiderQuery_Reset: res = cRider_getMissionInt_2EF8(rider, kMQ_Reset); break;
+    case kRiderQuery_Air: res = cRider_getMissionInt_2EF8(rider, kMQ_Air); break;
+    case kRiderQuery_Ground: res = cRider_getMissionInt_2EF8(rider, kMQ_Ground); break;
+    case kRiderQuery_Railslide: res = cRider_getMissionInt_2EF8(rider, kMQ_Railslide); break;
+    case kRiderQuery_GrabHeld: res = cRider_getMissionInt_2EF8(rider, kMQ_GrabHeld); break;
+    case kRiderQuery_TweakHeld: res = cRider_getMissionInt_2EF8(rider, kMQ_TweakHeld); break;
+    case kRiderQuery_UberHeld: res = cRider_getMissionInt_2EF8(rider, kMQ_UberHeld); break;
+    case kRiderQuery_TotalPoints: res = cRider_getMissionInt_2EF8(rider, kMQ_TotalPoints); break;
+    case kRiderQuery_NosePress: res = cRider_getMissionInt_2EF8(rider, kMQ_NosePress); break;
+    case kRiderQuery_TailPress: res = cRider_getMissionInt_2EF8(rider, kMQ_TailPress); break;
+    case kRiderQuery_Boosting: res = cRider_getMissionInt_2EF8(rider, kMQ_Boosting); break;
+    case kRiderQuery_Stall: res = cRider_getMissionInt_2EF8(rider, kMQ_Stall); break;
+    case kRiderQuery_OffAxis: res = cRider_getMissionInt_2EF8(rider, kMQ_OffAxis); break;
+    case kRiderQuery_Inverted: res = cRider_getMissionInt_2EF8(rider, kMQ_Inverted); break;
+    case kRiderQuery_NumPerfectLanding: res = cRider_getMissionInt_2EF8(rider, kMQ_NumPerfectLanding); break;
+    case kRiderQuery_NumLastSecondLanding: res = cRider_getMissionInt_2EF8(rider, kMQ_NumLastSecondLanding); break;
+    case kRiderQuery_TotalStylePoints: res = cRider_getMissionInt_2EF8(rider, kMQ_TotalStylePoints); break;
+    case kRiderQuery_Punching: res = cRider_getMissionInt_2EF8(rider, kMQ_Punching); break;
     default: res = 0; break;
     }
     self->Type = 1;
@@ -7729,12 +7729,12 @@ extern "C" t3Vector UpdateDisplayTrickFunc(int n, luno_cLunoCArg *params) {
     tUpdateDisplayTrickData *buf = &rec;
     MEM_copy_45B8(buf, &sDisplayTrickDefaults, sizeof(tUpdateDisplayTrickData));
     tTrickNameDef trick;
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int keywordType = D_00446650_45B8[idx];
-        setArgField(&v[idx], x, keywordType);
+        setArgField(&fields[idx], x, keywordType);
     }
     trick.rail = buf->Rail;
     trick.railSpin = buf->RailSpin;
@@ -7933,10 +7933,10 @@ extern "C" void* RiderHeightFunc(luno_cLunoVar* self, int n, luno_cLunoCArg *par
     if (obj) {
         cRider *rr = SSXApp->Game->AI->Riders[slot];
         cBeing *riderIface = rr;
-        cRider *d = (cRider*)riderIface;
+        cRider *rider = (cRider*)riderIface;
         float heightDiff;
-        if (d) {
-            float z = d->getPosition()->z;
+        if (rider) {
+            float z = rider->getPosition()->z;
             heightDiff = z - pos_4C50(obj).z;
         }
         else
@@ -8119,20 +8119,20 @@ int* luno_cLunoVar_castInt(void*);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector vSub_1FBE38(const t4Vector &a, const t4Vector &b) {
-    t4Vector r;
+    t4Vector result;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
         "vsub.xyzw $vf5, $vf3, $vf4\n"
         "sqc2      $vf5, %0\n"
-        : "=m"(r)
+        : "=m"(result)
         : "m"(a), "m"(b));
-    return r;
+    return result;
 }
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_1FBE38(const t4Vector &v) {
-    float r;
-    int t;
+    float length;
+    int bits;
     __asm__(
         "lqc2      $vf3, %2\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -8144,9 +8144,9 @@ static inline float vLen_1FBE38(const t4Vector &v) {
         "vwaitq\n"
         "cfc2.ni   %1, $vi22\n"
         "mtc1      %1, %0\n"
-        : "=f"(r), "=&r"(t)
+        : "=f"(length), "=&r"(bits)
         : "m"(v));
-    return r;
+    return length;
 }
 // True when the race slot (-1 = none) holds a rider that is not computer-controlled.
 // Defaults record of this camera-shake binding; keyword indexes the shake keyword table (the prototype asserts
@@ -8192,12 +8192,12 @@ extern "C" cLunoValue CameraShakeFunc(int n, luno_cLunoCArg *params) {
     tCameraShakeData *buf = &rec;
     rec.InstId = 0xFFFFFFFF;
     MEM_copy(buf, &sCameraShakeDefaults, sizeof(tCameraShakeData));
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int keywordType = D_00446690[idx];
-        setArgField(&v[idx], x, keywordType);
+        setArgField(&fields[idx], x, keywordType);
     }
     tInstanceRecord *obj = 0;
     if (buf->Proximity) {
@@ -8206,12 +8206,12 @@ extern "C" cLunoValue CameraShakeFunc(int n, luno_cLunoCArg *params) {
             obj = cWScriptMan_TheWScriptMan->Inst;
         } else {
             cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
-            tInstanceRecord *r;
+            tInstanceRecord *instance;
             if (!section)
-                r = 0;
+                instance = 0;
             else
-                r = refToObj_1FBE38(section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc);
-            obj = r;
+                instance = refToObj_1FBE38(section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc);
+            obj = instance;
         }
     }
     int being = cWScriptMan_TheWScriptMan->Being;
@@ -8225,19 +8225,19 @@ extern "C" cLunoValue CameraShakeFunc(int n, luno_cLunoCArg *params) {
                 const t4Vector *rp = game->AI->Players[i]->mRider->getPosition();
                 cInstanceNode *node = obj->m_pActiveNode;
                 const t4Matrix *rootTransform = node ? node->getRootTransform() : (const t4Matrix*)&obj->m_fmTransform;
-                t4Vector d = vSub_1FBE38(*rp, trans_50F0(rootTransform));
-                float dist = vLen_1FBE38(d);
-                cRider *r = game->AI->Players[i]->mRider;
-                int view = r->mViewIndex;
-                if (r->mIsLocal)
+                t4Vector delta = vSub_1FBE38(*rp, trans_50F0(rootTransform));
+                float dist = vLen_1FBE38(delta);
+                cRider *rider = game->AI->Players[i]->mRider;
+                int view = rider->mViewIndex;
+                if (rider->mIsLocal)
                     cCamera_shakeCamera(game->ViewMan->PlayerCamera[view], D_004A3BD8[keyword], 1.0f, dist * scale);
             }
         } else {
             for (int i = 0; i < np; i++) {
                 if (game->AI->Players[i]->mRider->getAIIndex() == being) {
-                    cRider *r = game->AI->Players[i]->mRider;
-                    int view = r->mViewIndex;
-                    if (r->mIsLocal)
+                    cRider *rider = game->AI->Players[i]->mRider;
+                    int view = rider->mViewIndex;
+                    if (rider->mIsLocal)
                         cCamera_shakeCamera(game->ViewMan->PlayerCamera[view], D_004A3BD8[keyword], 1.0f, 0.0f);
                     break;
                 }
@@ -8302,12 +8302,12 @@ extern "C" t3Vector AddMagnetFunc(int n, luno_cLunoCArg *params) {
     tAddMagnetData *buf = &rec;
     rec.InstId = 0xFFFFFFFF;
     MEM_copy_5478(buf, &sMagnetDefaults, sizeof(tAddMagnetData));
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int keywordType = D_004466A0_5478[idx];
-        setArgField(&v[idx], x, keywordType);
+        setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
     tInstanceRecord *obj;
@@ -8433,12 +8433,12 @@ extern "C" t3Vector AddHaloFunc(int n, luno_cLunoCArg *params) {
     tAddHaloData *buf = &rec;
     rec.InstId = 0xFFFFFFFF;
     MEM_copy_57C0(buf, &sHaloDefaults, sizeof(tAddHaloData));
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int keywordType = D_004466B0_57C0[idx];
-        setArgField(&v[idx], x, keywordType);
+        setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
     tInstanceRecord *obj;
@@ -8556,11 +8556,11 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, luno_cLunoCArg* params) {
     rec.InstId[7] = rec.InstId[6] = rec.InstId[5] = rec.InstId[4] = rec.InstId[3] = rec.InstId[2] = rec.InstId[1] =
             rec.InstId[0] = 0xFFFFFFFF;
     MEM_copy(vp, &sMiniAvalancheDefaults, sizeof(tMiniAvalancheData));
-    int *v = (int*)vp;
+    int *fields = (int*)vp;
     luno_cLunoCArg* x = params;
     for (int i = 0; i < n; i++, x++) {
         int k = x->Index;
-        setArgField(&v[k], x, D_004466D8_59A0[k]);
+        setArgField(&fields[k], x, D_004466D8_59A0[k]);
     }
     int avalancheId = vp->AvalancheId;
     int* type = vp->Type;
@@ -8809,12 +8809,12 @@ extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, luno_cLunoCArg *params) {
     tAddParticleData *buf = &rec;
     rec.InstId = 0xFFFFFFFF;
     MEM_copy_5F40(buf, &sAvalancheEmitterDefaults, sizeof(tAddParticleData));
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int keywordType = D_004467A0_5F40[idx];
-        setArgField(&v[idx], x, keywordType);
+        setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
     if (~id != 0) {
@@ -8872,10 +8872,10 @@ extern WScriptNullType D_004A5884_61B0 __asm__("D_004A5884");
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, luno_cLunoCArg *e) {
+extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, luno_cLunoCArg *params) {
     if (D_004A5888_61B0 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor's stack temp
         //       (lbu; sb 0(sp)).
@@ -8883,37 +8883,37 @@ extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, luno_cLunoCArg 
         D_004A5884_61B0 = WScriptNullType(D_004A5884_61B0);
         D_004A5888_61B0 = 1;
     }
-    int v[4];
+    int fields[4];
     int *vp;
-    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5880_61B0, 8, D_004A3DA8_61B0, n, e);
-    int r;
+    BIND_UNPACK_ARGS_1FBE38(vp, fields, &D_004A5880_61B0, 8, D_004A3DA8_61B0, n, params);
+    int enabled;
     switch (vp[0]) {
     case kIconType_Multiplier: {
         int flags = D_005308D0_61B0[0] >> 6;
-        r = 0;
+        enabled = 0;
         if ((flags & 1) == 0)
-            r++;
+            enabled++;
         break;
     }
     case kIconType_PowerUp: {
         int flags = D_005308D0_61B0[0] >> 8;
-        r = 0;
+        enabled = 0;
         if ((flags & 1) == 0)
-            r++;
+            enabled++;
         break;
     }
     case kIconType_Points: {
         int flags = D_005308D0_61B0[0] >> 7;
-        r = 0;
+        enabled = 0;
         if ((flags & 1) == 0)
-            r++;
+            enabled++;
         break;
     }
     default:
-        r = 1;
+        enabled = 1;
         break;
     }
-    BIND_SET_RESULT_1FBE38(ret, r);
+    BIND_SET_RESULT_1FBE38(ret, enabled);
     return ret;
 }
 #endif
@@ -9490,12 +9490,12 @@ extern "C" t3Vector MultiParticleFunc(int n, luno_cLunoCArg *params) {
     tMultiParticleData rec;
     tMultiParticleData *buf = &rec;
     MEM_copy_6A90(buf, &sMultiParticleDefaults, sizeof(tMultiParticleData));
-    int *v = (int*)buf;
+    int *fields = (int*)buf;
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
         int argType = D_00446890_6A90[idx];
-        setArgField(&v[idx], x, argType);
+        setArgField(&fields[idx], x, argType);
     }
     cMultiParticleMan_addParticle_6A90(cMultiParticleMan_TheMultiParticleMan_6A90, buf->Id, buf, buf->MaxInst);
     return luno_gLunoNil_6A90;
@@ -9806,19 +9806,27 @@ void cWScriptMission::processStart()
 INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processComplete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); };
+struct P_7240 {
+    int state;
+    char pad[0x58];
+    // vtable slots 1..18; the named ones [R] cWScriptMission_vtbl
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void processEnd(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
+    virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void missionPass();
+};
 int cWScriptMan_isProcessActive_7240(void*, void*) __asm__("cWScriptMan_isProcessActive__FPvT0");
 extern "C" void *cAudioInterface_bxAudio_7240(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_BigChallengeComplete_7240(void*) __asm__("cSSXAudio_BigChallengeComplete");
 /**
- * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
- * cSSXAudio_BigChallengeComplete on the sound system.
+ * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18 (processEnd,
+ * missionPass), then calls cSSXAudio_BigChallengeComplete on the sound system.
  */
 void cWScriptMission::processComplete()
 {
     if (cWScriptMan_isProcessActive_7240(Manager, ((P_7240*)this))) {
-        ((P_7240*)this)->v06();
-        ((P_7240*)this)->v18();
+        ((P_7240*)this)->processEnd();
+        ((P_7240*)this)->missionPass();
         cSSXAudio_BigChallengeComplete_7240(cAudioInterface_bxAudio_7240());
     }
 }
@@ -9827,7 +9835,13 @@ void cWScriptMission::processComplete()
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionRestart);
 #ifdef SKIP_ASM
-struct P_72B0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); };
+struct P_72B0 {
+    int state;
+    char pad[0x58];
+    // vtable slots 1..6; the named ones [R] cWScriptMission_vtbl
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void processStart(); virtual void v05();
+    virtual void processEnd();
+};
 /**
  * Restarts a mission script: ends it if it is running, then starts it again.
  *
@@ -9836,8 +9850,8 @@ struct P_72B0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(
  */
 extern "C" void cWScriptMission_missionRestart(P_72B0* self) {
     if (self->state == kTaskState_Update)
-        self->v06();
-    self->v04();
+        self->processEnd();
+    self->processStart();
 }
 #endif
 
@@ -9924,7 +9938,15 @@ extern "C" int cBEMissionInterface_isMissionAvailable_74C0(int, int) __asm__("cB
 extern "C" void cBEMissionInterface_setIsAvailable_74C0(int, int, int) __asm__("cBEMissionInterface_setIsAvailable");
 extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
 extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, char* scriptCode);
-struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
+struct P_74C0 {
+    int state;
+    char pad[0x58];
+    // vtable slots 1..20; the named ones [R] cWScriptMission_vtbl
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
+    virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void missionUpdateWorld();
+};
 /**
  * Handles a failed mission: makes it available again, runs the fail script and ends the process.
  *
@@ -9942,7 +9964,7 @@ void cWScriptMission::missionFail()
     if (failScript)
         cWScriptMan_runScriptCode(Manager, this, failScript);
     else
-        ((P_74C0*)this)->v20();
+        ((P_74C0*)this)->missionUpdateWorld();
     if (State == kTaskState_Update)
         cWScriptProcess_end_74C0(this);
 }

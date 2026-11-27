@@ -911,10 +911,10 @@ struct sBEFlagEntryB {
 struct sBEEntry38B {
     signed char group; // 0x0
     char pad_0x01[3];
-    short field_0x4;
-    short field_0x6;
+    short id;          // 0x4 (tBEBoltDef's names; the rest ours, from use)
+    short parentId;    // 0x6
     char pad_0x08[4];
-    short field_0xC;
+    short equipPoints; // 0xC
     char pad_0x0E[0x2A];
 };
 
@@ -938,14 +938,14 @@ extern "C" int func_0014B478(void* self, int profileIndex, int characterId)
     sBEEntry38B* boltDef = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, characterId);
     int i;
     for (i = 0; i < count; i++, boltDef++) {
-        short entryIndex = (charRecord->mpBoltsMap)[boltDef->field_0x4];
+        short entryIndex = (charRecord->mpBoltsMap)[boltDef->id];
         sBEFlagEntryB* flagEntry;
         if (entryIndex >= 0)
             flagEntry = (sBEFlagEntryB*)(&charRecord->mBolts[0]) + entryIndex;
         else
             flagEntry = 0;
         if (flagEntry->flags & 0x10)
-            sum += boltDef->field_0xC;
+            sum += boltDef->equipPoints;
     }
     return sum;
 }
@@ -968,10 +968,10 @@ extern "C" void cBEEconInterface_getMoney(void* iface, int a, int b);
 struct sBEEntry38_14B560 {
     signed char group;  // 0x0
     char pad_0x01[3];
-    short field_0x4;
-    short field_0x6;
+    short id;           // 0x4 (tBEBoltDef's names; parentId ours, from use)
+    short parentId;     // 0x6
     char pad_0x08[6];
-    short field_0xE;
+    short price;        // 0xE
     char pad_0x10[0x28];
 };
 struct sBETbl_14B560 {
@@ -1014,14 +1014,14 @@ extern "C" void func_0014B560(void* self, int profileIndex, int characterId, int
     sBEEntry38_14B560* boltDef = (sBEEntry38_14B560*)func_0014D998((sBELibTables*)func_0014BDB8_0(), characterId);
     int n = func_0014D988(func_0014BDB8_0(), characterId);
     for (int j = 0; j < n; j++, boltDef++) {
-        if (scale10_14B560(boltDef->field_0xE) == -key) {
-            func_00151C48(charRecord, boltDef->field_0x4, 1);
+        if (scale10_14B560(boltDef->price) == -key) {
+            func_00151C48(charRecord, boltDef->id, 1);
         }
     }
     sBETbl_14B560* tbl = (sBETbl_14B560*)func_0014BDB8_0();
     boltDef = entry_14B560(tbl, func_0014D448((sBEGroupTable*)tbl, characterId, key));
     if (flag) {
-        cBEEconInterface_reduceMoney(iface, profileIndex, characterId, scale10_14B560(boltDef->field_0xE));
+        cBEEconInterface_reduceMoney(iface, profileIndex, characterId, scale10_14B560(boltDef->price));
     } else {
         cBEEconInterface_getMoney(iface, profileIndex, characterId);
     }
@@ -1411,24 +1411,25 @@ extern const char str_BoltsFile[];
 struct sBEEnt_14BE70 {
     char pad0[0x14];
     char* name;         // 0x14
-    char* sub[4];       // 0x18
-    char* f28;          // 0x28
-    char* f2C;          // 0x2C
-    char* f30;          // 0x30
-    int f34;
+    char* lodPartNames[4];  // 0x18 (tBEBoltDef's names)
+    char* extraStrings[2];  // 0x28 (name ours) two more pool strings; no reader found
+    char* pictureName;      // 0x30
+    int flags;
 };
 struct sBELib_14BE70 {
     char* buf;                  // 0x0
     sBEEnt_14BE70* entries;     // 0x4
-    char* t8;                   // 0x8
-    char* tC;                   // 0xC
-    char* t10;                  // 0x10
+    // The tables after the definitions (names ours, from the loader's counts: the 12-byte records, the (bolt, bolt)
+    // pairs func_0014D068 reads and the item groups beintecon reads).
+    char* links;                // 0x8
+    char* pairs;                // 0xC
+    char* groups;               // 0x10
     char* strings;              // 0x14
-    int f18;
-    int n0;                     // 0x1C
-    int n1;                     // 0x20
-    int n2;                     // 0x24
-    int n3;                     // 0x28
+    int childTables;            // 0x18 func_0014C068's block
+    int numBolts;               // 0x1C
+    int numLinks;               // 0x20
+    int numPairs;               // 0x24
+    int numGroups;              // 0x28
 };
 
 
@@ -1456,33 +1457,37 @@ extern "C" void func_0014BE70(void* vself)
     kBolt_Num = *(int*)fileData;
     int numBolts = *(int*)(fileData + 4);
     self->entries = (sBEEnt_14BE70*)(fileData + 8);
-    self->n0 = numBolts;
+    self->numBolts = numBolts;
     int off = 8 + numBolts * 0x38;
     int numLinks = *(int*)(fileData + off);
     off += 4;
-    self->t8 = fileData + off;
-    self->n1 = numLinks;
+    self->links = fileData + off;
+    self->numLinks = numLinks;
     off += numLinks * 0xC;
     int numPairs = *(int*)(fileData + off);
     off += 4;
-    self->tC = fileData + off;
-    self->n2 = numPairs;
+    self->pairs = fileData + off;
+    self->numPairs = numPairs;
     off += numPairs * 8;
     int numGroups = *(int*)(fileData + off);
     off += 4;
-    self->t10 = fileData + off;
-    self->n3 = numGroups;
+    self->groups = fileData + off;
+    self->numGroups = numGroups;
     off += numGroups * 8;
     off += 4;
     self->strings = fileData + off;
     if (kBolt_Num & 1) kBolt_Num++;
-    for (int i = 0; i < self->n0; i++) {
+    for (int i = 0; i < self->numBolts; i++) {
         if (self->entries[i].name) self->entries[i].name = self->strings + ((int)self->entries[i].name - 1);
-        if (self->entries[i].f28) self->entries[i].f28 = self->strings + ((int)self->entries[i].f28 - 1);
-        if (self->entries[i].f2C) self->entries[i].f2C = self->strings + ((int)self->entries[i].f2C - 1);
-        if (self->entries[i].f30) self->entries[i].f30 = self->strings + ((int)self->entries[i].f30 - 1);
+        if (self->entries[i].extraStrings[0])
+            self->entries[i].extraStrings[0] = self->strings + ((int)self->entries[i].extraStrings[0] - 1);
+        if (self->entries[i].extraStrings[1])
+            self->entries[i].extraStrings[1] = self->strings + ((int)self->entries[i].extraStrings[1] - 1);
+        if (self->entries[i].pictureName)
+            self->entries[i].pictureName = self->strings + ((int)self->entries[i].pictureName - 1);
         for (int j = 0; j < 4; j++) {
-            if (self->entries[i].sub[j]) self->entries[i].sub[j] = self->strings + ((int)self->entries[i].sub[j] - 1);
+            if (self->entries[i].lodPartNames[j])
+                self->entries[i].lodPartNames[j] = self->strings + ((int)self->entries[i].lodPartNames[j] - 1);
         }
     }
 }
@@ -1494,11 +1499,11 @@ INCLUDE_ASM("be/belibrary", func_0014C068);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_child_bolts_data[];
 
-struct sBEEnt_14C068 {
-    signed char type;       // 0x0
+struct sBEEnt_14C068 {     // a bolt definition (sBEEntry38's names)
+    signed char group;      // 0x0
     char pad1[3];
-    short slot;             // 0x4
-    short group;            // 0x6
+    short id;               // 0x4
+    short parentId;         // 0x6
     char pad8[0x38 - 0x8];
 };
 
@@ -1507,7 +1512,7 @@ struct sBELib_14C068 {
     sBEEnt_14C068* entries;         // 0x4
     char pad8[0x18 - 0x8];
     unsigned short* table;          // 0x18
-    int n0;                         // 0x1C
+    int numBolts;                   // 0x1C
     char pad20[0x11C - 0x20];
     unsigned short* count[30];      // 0x11C
     unsigned short* first[30];      // 0x194
@@ -1545,16 +1550,16 @@ extern "C" void func_0014C068(sBELib_14C068* self)
         cursor += kBolt_Num;
         MEM_fill(self->index[i], 0, kBolt_Num * 2);
     }
-    for (int i = 0; i < self->n0; i++) {
-        self->index[self->entries[i].type][self->entries[i].slot] = i;
+    for (int i = 0; i < self->numBolts; i++) {
+        self->index[self->entries[i].group][self->entries[i].id] = i;
     }
     for (int i = 0; i < 30; i++) {
         MEM_fill(self->first[i], 0, kBolt_Num * 2);
         MEM_fill(self->count[i], 0, kBolt_Num * 2);
     }
-    for (int i = 0; i < self->n0; i++) {
-        int parentId = self->entries[i].group;
-        int charGroup = self->entries[i].type;
+    for (int i = 0; i < self->numBolts; i++) {
+        int parentId = self->entries[i].parentId;
+        int charGroup = self->entries[i].group;
         if (parentId != kNoBoltID) {
             self->count[charGroup][parentId]++;
             if (last != parentId) {
@@ -1574,8 +1579,9 @@ struct sBEEntry38 {
     signed char used;  // 0x1 [U] func_0014C590 sets it; the views' `used` (func_0014B2F8 / func_0014B378 take the
                        //     definitions where it is 0)
     char pad_0x02[2];
-    short field_0x4;
-    short field_0x6;
+    short id;          // 0x4 [U] the bolt id (tBEBoltDef::id); func_0014D448 looks a definition up by it
+    short parentId;    // 0x6 (name ours) [U] the parent bolt's id, kNoBoltID at the top level: func_0014D4C8 /
+                       //     func_0014D558 / func_0014D608 find a bolt's children by it, func_0014D908 walks up
     char pad_0x08[4];
     short equipPoints; // 0xC [U] func_0014C5D8 sets it; the equipped bolts' equip points are the sum of it
     char pad_0x0E[0x26];
@@ -1590,10 +1596,10 @@ struct sBEGroupTable {
     char pad_0x20[0xC];
     int groupCount[30]; // 0x2C
     int groupFirst[30]; // 0xA4
-    short* lookup_0x11C[30]; // 0x11C
+    short* childCount[30]; // 0x11C (name ours) [U] func_0014D4C8: per group, a parent bolt id's child count
     short* firstChildIndex[30]; // 0x194 [U] func_0014D558: per group, a parent bolt id's first child definition
     char pad_0x20C[0x4DC - 0x20C];
-    short* lookup_0x4DC[30]; // 0x4DC
+    short* idToIndex[30]; // 0x4DC (name ours) [U] func_0014D448: per group, a bolt id's definition index
 };
 
 /**
@@ -1973,16 +1979,16 @@ void cMemMan_free(void* p);
 struct sBELibData_14D240
 {
     void* buf;          // 0x0
-    int f4;             // 0x4
-    int f8;             // 0x8
-    int fC;             // 0xC
-    int f10;            // 0x10
-    int f14;            // 0x14
-    void* buf2;         // 0x18
-    int f1C;            // 0x1C
-    int f20;            // 0x20
-    int f24;            // 0x24
-    int f28;            // 0x28
+    int boltDefs;       // 0x4 (func_0014BE70's names)
+    int links;          // 0x8
+    int pairs;          // 0xC
+    int groups;         // 0x10
+    int strings;        // 0x14
+    void* childTables;  // 0x18
+    int numBolts;       // 0x1C
+    int numLinks;       // 0x20
+    int numPairs;       // 0x24
+    int numGroups;      // 0x28
     int tab[11][30];    // 0x2C
 };
 
@@ -1998,15 +2004,15 @@ extern "C" void func_0014D240(void* self)
     if (boltDB->buf)
         cMemMan_free(boltDB->buf);
     boltDB->buf = 0;
-    boltDB->f4 = 0;
-    boltDB->f8 = 0;
-    boltDB->fC = 0;
-    boltDB->f10 = 0;
-    boltDB->f14 = 0;
-    boltDB->f1C = 0;
-    boltDB->f20 = 0;
-    boltDB->f24 = 0;
-    boltDB->f28 = 0;
+    boltDB->boltDefs = 0;
+    boltDB->links = 0;
+    boltDB->pairs = 0;
+    boltDB->groups = 0;
+    boltDB->strings = 0;
+    boltDB->numBolts = 0;
+    boltDB->numLinks = 0;
+    boltDB->numPairs = 0;
+    boltDB->numGroups = 0;
     MEM_fill(boltDB->tab[0], 0, sizeof(boltDB->tab[0]));
     MEM_fill(boltDB->tab[1], 0, sizeof(boltDB->tab[1]));
     MEM_fill(boltDB->tab[2], 0, sizeof(boltDB->tab[2]));
@@ -2018,9 +2024,9 @@ extern "C" void func_0014D240(void* self)
     MEM_fill(boltDB->tab[8], 0, sizeof(boltDB->tab[8]));
     MEM_fill(boltDB->tab[9], 0, sizeof(boltDB->tab[9]));
     MEM_fill(boltDB->tab[10], 0, sizeof(boltDB->tab[10]));
-    if (boltDB->buf2)
-        cMemMan_free(boltDB->buf2);
-    boltDB->buf2 = 0;
+    if (boltDB->childTables)
+        cMemMan_free(boltDB->childTables);
+    boltDB->childTables = 0;
 }
 #endif
 
@@ -2102,13 +2108,13 @@ INCLUDE_ASM("be/belibrary", func_0014D448);
  */
 extern "C" int func_0014D448(sBEGroupTable* self, int groupId, int key)
 {
-    short* lookup = self->lookup_0x4DC[groupId];
+    short* lookup = self->idToIndex[groupId];
     if (lookup == 0) {
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
         for (; i < end; i++, boltDef++) {
-            if (boltDef->field_0x4 == key) {
+            if (boltDef->id == key) {
                 return i;
             }
         }
@@ -2133,16 +2139,16 @@ INCLUDE_ASM("be/belibrary", func_0014D4C8);
  */
 extern "C" int func_0014D4C8(sBEGroupTable* self, int groupId, int key)
 {
-    short* lookup = self->lookup_0x11C[groupId];
+    short* lookup = self->childCount[groupId];
     if (lookup == 0) {
         int n = 0;
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
         for (; i < end; boltDef++, i++) {
-            if (boltDef->field_0x6 == key) {
+            if (boltDef->parentId == key) {
                 n++;
-            } else if (boltDef->field_0x6 > key) {
+            } else if (boltDef->parentId > key) {
                 break;
             }
         }
@@ -2173,13 +2179,13 @@ extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int groupId, int key)
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
         for (; i < end; i++, boltDef++) {
-            if (boltDef->field_0x6 == key) {
+            if (boltDef->parentId == key) {
                 return boltDef;
             }
         }
         return 0;
     }
-    if (self->lookup_0x11C[groupId][key] <= 0) {
+    if (self->childCount[groupId][key] <= 0) {
         return 0;
     }
     return &self->entries[lookup[key]];
@@ -2207,34 +2213,34 @@ INCLUDE_ASM("be/belibrary", func_0014D608);
 extern "C" int func_0014D608(sBEGroupTable* self, int groupId, int key, sBEEntry38** out, int depth, int all)
 {
     int count = 0;
-    if (key == kNoBoltID || self->lookup_0x11C[groupId] == 0) {
+    if (key == kNoBoltID || self->childCount[groupId] == 0) {
         int i = self->groupFirst[groupId];
         int end = i + self->groupCount[groupId];
         sBEEntry38* boltDef = &self->entries[i];
         for (; i < end; i++, boltDef++) {
-            if (boltDef->field_0x6 == key) {
+            if (boltDef->parentId == key) {
                 *out++ = boltDef;
                 count++;
                 if (depth != 0) {
                     if (!(boltDef->flags & 0x20) || all) {
-                        int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
+                        int childCount = func_0014D608(self, groupId, boltDef->id, out, depth - 1, all);
                         count += childCount;
                         out += childCount;
                     }
                 }
-            } else if (key < boltDef->field_0x6) {
+            } else if (key < boltDef->parentId) {
                 return count;
             }
         }
     } else {
         sBEEntry38* boltDef = func_0014D558(self, groupId, key);
-        int n = self->lookup_0x11C[groupId][key];
+        int n = self->childCount[groupId][key];
         for (int j = 0; j < n; j++, boltDef++) {
             *out++ = boltDef;
             count++;
             if (depth != 0) {
                 if (!(boltDef->flags & 0x20) || all) {
-                    int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
+                    int childCount = func_0014D608(self, groupId, boltDef->id, out, depth - 1, all);
                     count += childCount;
                     out += childCount;
                 }
@@ -2320,11 +2326,11 @@ extern "C" int func_0014D908(sBEGroupTable* self, sBEEntry38* boltDef, int key)
 {
     if (boltDef == 0)
         return 0;
-    if (boltDef->field_0x6 == key)
+    if (boltDef->parentId == key)
         return 1;
-    if (boltDef->field_0x6 == kNoBoltID)
+    if (boltDef->parentId == kNoBoltID)
         return 0;
-    int i = func_0014D448(self, boltDef->group, boltDef->field_0x6);
+    int i = func_0014D448(self, boltDef->group, boltDef->parentId);
     sBEEntry38* parent;
     if (i < 0)
         parent = 0;
@@ -2354,10 +2360,10 @@ INCLUDE_ASM("be/belibrary", func_0014D998);
 #ifdef SKIP_ASM
 struct sBELibTables {
     char pad_0x00[4];
-    char* field_0x4;
-    char pad_0x8[4];
-    char* field_0xC;
-    char* field_0x10;
+    char* boltDefs;     // 0x4 (func_0014BE70's names)
+    char* links;        // 0x8
+    char* pairs;        // 0xC
+    char* groups;       // 0x10
     char pad_0x14[0x2C - 0x14];
     int count0[30]; // 0x2C
     int index0[30]; // 0xA4
@@ -2381,7 +2387,7 @@ extern "C" void* func_0014D998(sBELibTables* self, int i)
     if (self->count0[i] <= 0) {
         return 0;
     }
-    return self->field_0x4 + self->index0[i] * 0x38;
+    return self->boltDefs + self->index0[i] * 0x38;
 }
 #endif
 
@@ -2401,7 +2407,7 @@ extern "C" void* func_0014D9D0(sBELibTables* self, int i)
     if (self->count0[i] <= 0) {
         return 0;
     }
-    return self->field_0x4 + self->index0[i] * 0x38;
+    return self->boltDefs + self->index0[i] * 0x38;
 }
 #endif
 
@@ -2659,7 +2665,7 @@ INCLUDE_ASM("be/belibrary", func_0014DC10);
 extern "C" void* func_0014DC10(sBELibTables* self, int i)
 {
     if (self->count1[i] > 0) {
-        return self->field_0xC + self->index1[i] * 8;
+        return self->pairs + self->index1[i] * 8;
     }
     return 0;
 }
@@ -2694,7 +2700,7 @@ INCLUDE_ASM("be/belibrary", func_0014DC50);
 extern "C" void* func_0014DC50(sBELibTables* self, int i)
 {
     if (self->count2[i] > 0) {
-        return self->field_0x10 + self->index2[i] * 8;
+        return self->groups + self->index2[i] * 8;
     }
     return 0;
 }

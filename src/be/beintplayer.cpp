@@ -19,7 +19,7 @@ extern void* cBENewPlayerInterface_vtbl[16];
 
 struct cBENewPlayerInterfaceCtor {
     char pad_0x00[8];
-    int field_0x8;
+    int bIsActive;          // 0x8 (cBEInterface's)
     void* vtable;
 };
 
@@ -29,14 +29,14 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_cBENewPlayerInterface__FP25c
 /**
  * Constructs the back end's player interface and resets its player records and controller assignments.
  *
- * Zeroes the word at +0x8, stores the vtable, then calls cBENewPlayerInterface_discard() and
+ * Zeroes bIsActive (+0x8), stores the vtable, then calls cBENewPlayerInterface_discard() and
  * cBENewPlayerInterface_defaultCtrl().
  *
  * @return @p self
  */
 cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPlayerInterfaceCtor* self)
 {
-    self->field_0x8 = 0;
+    self->bIsActive = 0;
     self->vtable = cBENewPlayerInterface_vtbl;
     ((cBENewPlayerInterface*)self)->cBENewPlayerInterface::discard();
     ((cBENewPlayerInterface*)self)->defaultCtrl();
@@ -1503,7 +1503,7 @@ extern "C" void* func_00147908(cBENewPlayerInterface* self, int index)
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profile][charId];
-    return (char*)&charRecord->unk_E38[0][0];
+    return (char*)&charRecord->mMessages[0][0];
 }
 #endif
 
@@ -1515,7 +1515,8 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
- * Tests message flag @p bit of a rider's character: bit @p bit of the bit array unk_F08 of its character record.
+ * Tests message flag @p bit of a rider's character: bit @p bit of the bit array mMessageGroupFlags of its character
+ * record.
  *
  * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].cCharacterID;
  * the word is @p bit / 32 and the mask 1 << @p bit (shift taken mod 32). No range check.
@@ -1531,7 +1532,7 @@ extern "C" bool func_00147980(cBENewPlayerInterface* self, int index, int bit)
     int charId = cBENewPlayerInterface_tempPlayers[id].cCharacterID;
     int mask = 1 << bit;
     // The profile's row first, then the character: retail adds the profile offset before the character's.
-    return ((*(cBELibrary_profileLib + profile))[charId].unk_F08[bit / 32] & mask) != 0;
+    return ((*(cBELibrary_profileLib + profile))[charId].mMessageGroupFlags[bit / 32] & mask) != 0;
 }
 #endif
 
@@ -1629,10 +1630,10 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * Sets a difficulty level of the first profile's current character and resets its win/loss streak.
  *
  * The character is cBELibrary_getCharacterID(0) in profile 0 of cBELibrary_profileLib. With @p flag set, stores
- * @p value in mDifficulty and clears mDifference; otherwise the pair unk_284 / unk_286.
+ * @p value in mDifficulty and clears mDifference; otherwise the pair mFreestyleDifficulty / mFreestyleDifference.
  *
  * @param value  the level, 0-2 (func_00147D20 caps it at 2)
- * @param flag  picks the pair: nonzero mDifficulty, 0 unk_284
+ * @param flag  picks the pair: nonzero mDifficulty, 0 mFreestyleDifficulty
  */
 void cBENewPlayerInterface::setDifficultyLevel(int value, int flag)
 {
@@ -1641,8 +1642,8 @@ void cBENewPlayerInterface::setDifficultyLevel(int value, int flag)
         cBELibrary_profileLib[0][charId].mDifficulty = value;
         cBELibrary_profileLib[0][charId].mDifference = 0;
     } else {
-        cBELibrary_profileLib[0][charId].unk_284 = value;
-        cBELibrary_profileLib[0][charId].unk_286 = 0;
+        cBELibrary_profileLib[0][charId].mFreestyleDifficulty = value;
+        cBELibrary_profileLib[0][charId].mFreestyleDifference = 0;
     }
 }
 #endif
@@ -1655,9 +1656,9 @@ int cBELibrary_getCharacterID(int);
 /**
  * Returns a difficulty level of the first profile's current character (cBELibrary_getCharacterID(0), profile 0).
  *
- * mDifficulty of the character record when @p which is set, else unk_284.
+ * mDifficulty of the character record when @p which is set, else mFreestyleDifficulty.
  *
- * @param which  picks the pair: nonzero mDifficulty, 0 unk_284 (cComputer passes game mode == 0)
+ * @param which  picks the pair: nonzero mDifficulty, 0 mFreestyleDifficulty (cComputer passes game mode == 0)
  * @return the level, 0-2
  */
 short cBENewPlayerInterface::getDifficultyLevel(int which)
@@ -1669,7 +1670,7 @@ short cBENewPlayerInterface::getDifficultyLevel(int which)
     }
     else
     {
-        return cBELibrary_profileLib[0][charId].unk_284;
+        return cBELibrary_profileLib[0][charId].mFreestyleDifficulty;
     }
 }
 #endif
@@ -1702,8 +1703,8 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     }
     else
     {
-        level = cBELibrary_profileLib[profile][charId].unk_284;
-        difference = cBELibrary_profileLib[profile][charId].unk_286;
+        level = cBELibrary_profileLib[profile][charId].mFreestyleDifficulty;
+        difference = cBELibrary_profileLib[profile][charId].mFreestyleDifference;
     }
     difference++;
     if (difference >= 2)
@@ -1718,8 +1719,8 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
     }
     else
     {
-        cBELibrary_profileLib[profile][charId].unk_284 = level;
-        cBELibrary_profileLib[profile][charId].unk_286 = difference;
+        cBELibrary_profileLib[profile][charId].mFreestyleDifficulty = level;
+        cBELibrary_profileLib[profile][charId].mFreestyleDifference = difference;
     }
 }
 #endif
@@ -1752,8 +1753,8 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     }
     else
     {
-        level = cBELibrary_profileLib[profile][charId].unk_284;
-        difference = cBELibrary_profileLib[profile][charId].unk_286;
+        level = cBELibrary_profileLib[profile][charId].mFreestyleDifficulty;
+        difference = cBELibrary_profileLib[profile][charId].mFreestyleDifference;
     }
     difference--;
     if (difference < -1)
@@ -1768,8 +1769,8 @@ extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
     }
     else
     {
-        cBELibrary_profileLib[profile][charId].unk_284 = level;
-        cBELibrary_profileLib[profile][charId].unk_286 = difference;
+        cBELibrary_profileLib[profile][charId].mFreestyleDifficulty = level;
+        cBELibrary_profileLib[profile][charId].mFreestyleDifference = difference;
     }
 }
 #endif
@@ -1783,10 +1784,10 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
 /**
  * Returns the win/loss streak beside a difficulty level of the first profile's current character.
  *
- * mDifference (when @p flag is set) or unk_286 of the record of cBELibrary_getCharacterID(0) in profile 0; the win
- * and loss counters func_00147D20 and func_00147E18 move it.
+ * mDifference (when @p flag is set) or mFreestyleDifference of the record of cBELibrary_getCharacterID(0) in profile 0;
+ * the win and loss counters func_00147D20 and func_00147E18 move it.
  *
- * @param flag  picks the pair: nonzero mDifference, 0 unk_286
+ * @param flag  picks the pair: nonzero mDifference, 0 mFreestyleDifference
  * @return the streak, -1 to 1
  */
 short cBENewPlayerInterface::getDifficultyDifference(int flag)
@@ -1794,7 +1795,7 @@ short cBENewPlayerInterface::getDifficultyDifference(int flag)
     int charId = cBELibrary_getCharacterID(0);
     short result;
     if (flag == 0) {
-        result = cBELibrary_profileLib[0][charId].unk_286;
+        result = cBELibrary_profileLib[0][charId].mFreestyleDifference;
     } else {
         result = cBELibrary_profileLib[0][charId].mDifference;
     }

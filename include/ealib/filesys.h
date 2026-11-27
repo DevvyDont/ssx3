@@ -107,32 +107,38 @@ CHECK_SIZE(FILEOPERATION_def, 0x30);
 // the caller's; On Tour 0x1C): gFileSysOpts [O] (On Tour `FILESYSOPTS gFileSysOpts`; the unit's view sC10). [O] member
 // names for size / malloc / free / REAL_filedevice; retail orders the rest differently (On Tour: powercallback 0x0C,
 // REAL_filedevice 0x10, DemoCdRoot 0x14, UseDisc 0x18), so only the members with a retail use that matches On Tour's
-// meaning are named. [U] FILESYS_getopts / FILESYS_setopts mirror 0x0C / 0x10 / 0x14 / 0x18 into the live settings
-// D_00450C58 and 0x1C into the REAL_filedevice global; iFILE_addbigreadcallback allocates and frees the archive header
-// through malloc / free (also the splat symbols D_00450C14 / D_00450C18).
+// meaning carry its names; the others are named from use (names ours). [U] FILESYS_getopts / FILESYS_setopts mirror
+// 0x0C / 0x10 / 0x14 / 0x18 into the live settings D_00450C58 and 0x1C into the REAL_filedevice global;
+// iFILE_addbigreadcallback allocates and frees the archive header through malloc / free (also the splat symbols
+// D_00450C14 / D_00450C18).
 struct FILESYSOPTS {
     int size;                           // 0x00 [O]; [U] the record's byte count (getopts / setopts read it first)
     void* (*malloc)(char*, int, int);   // 0x04 [O]; [U] iFILE_addbigreadcallback: (name, size, memflags)
     int (*free)(void*);                 // 0x08 [O]; [U] iFILE_addbigreadcallback frees a header buffer
-    int unk_0C;                         // 0x0C [U] setopts: D_00450C58 + 0x8
-    int unk_10;                         // 0x10 [U] get / setopts: D_00450C58 + 0x4
-    int unk_14;                         // 0x14 [U] get / setopts: D_00450C58 + 0xC (getopts stores it as a 0 / 1 flag)
-    char* unk_18;                       // 0x18 [U] get / setopts: D_00450C58 + 0x0, the root prefix file names are
-                                        //       matched against
+    int cdMediaMode;                    // 0x0C (name ours) [U] setopts: D_00450C58 + 0x8, the CD media mode that
+                                        //       func_003E3618 / func_003E3D78 / func_003E4040 pass to sceCdMmode
+                                        //       (FILESYS_initadr builds the disc directory when it is set)
+    int cdNameLen;                      // 0x10 (name ours) [U] get / setopts: D_00450C58 + 0x4, the disc directory
+                                        //       entry's name size (FILESYS_overhead, func_003E39A8 and func_003E4040
+                                        //       size each entry as it + 0xC)
+    int useDisc;                        // 0x14 (name ours; a bool like On Tour's UseDisc) [U] get / setopts:
+                                        //       D_00450C58 + 0xC (getopts stores it as a 0 / 1 flag); no other reader
+    char* cdRoot;                       // 0x18 (name ours) [U] get / setopts: D_00450C58 + 0x0, the root prefix file
+                                        //       names are matched against (func_003E4040 lists the disc from it)
     char* REAL_filedevice;              // 0x1C [O] (0x10 there); [U] getopts / setopts copy it to and from the global
                                         //       REAL_filedevice (the host-device prefix)
-    void* unk_20;                       // 0x20 [U] the built-in file table ({name, ?, ?, path} records, a 0 name ends
-                                        //       it); retail-only
+    void* builtinFiles;                 // 0x20 (name ours) [U] the built-in file table ({name, ?, ?, path} records, a 0
+                                        //       name ends it; func_003E4040 lists the disc from it); retail-only
 };
 
 CHECK_OFFSET(FILESYSOPTS, malloc, 0x04);
 CHECK_OFFSET(FILESYSOPTS, free, 0x08);
-CHECK_OFFSET(FILESYSOPTS, unk_0C, 0x0C);
-CHECK_OFFSET(FILESYSOPTS, unk_10, 0x10);
-CHECK_OFFSET(FILESYSOPTS, unk_14, 0x14);
-CHECK_OFFSET(FILESYSOPTS, unk_18, 0x18);
+CHECK_OFFSET(FILESYSOPTS, cdMediaMode, 0x0C);
+CHECK_OFFSET(FILESYSOPTS, cdNameLen, 0x10);
+CHECK_OFFSET(FILESYSOPTS, useDisc, 0x14);
+CHECK_OFFSET(FILESYSOPTS, cdRoot, 0x18);
 CHECK_OFFSET(FILESYSOPTS, REAL_filedevice, 0x1C);
-CHECK_OFFSET(FILESYSOPTS, unk_20, 0x20);
+CHECK_OFFSET(FILESYSOPTS, builtinFiles, 0x20);
 CHECK_SIZE(FILESYSOPTS, 0x24);
 
 extern FILESYSOPTS gFileSysOpts; // 0x00450C10: the file system's options (FILESYS_getopts / FILESYS_setopts copy it)

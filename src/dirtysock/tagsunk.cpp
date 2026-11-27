@@ -244,7 +244,7 @@ extern char str_StlBlock_b[];
 /**
  * Constructs the lobby manager in already-allocated memory and returns it.
  *
- * Zeroes the state words and handles (mState, mServerAddr, mAuthenticated, mLoggedIn, mDisconnected, unk_014,
+ * Zeroes the state words and handles (mState, mServerAddr, mAuthenticated, mLoggedIn, mDisconnected, mbUseCachedAddr,
  * mHaveCPAT, mFindingPlayer, mpLobbyApi, mpHostLookup, the three list handles, mNumPersonas, mpConfig, mRankSlot,
  * unk_0FC, mpSlotTag, the 29 mRankSnapshot slots), sets every string field (mUserName, mPassword, mPersonas[4],
  * mPersona through mAuth) to the shared empty cBXString, builds mServerName as "ps2ssx04.ea.com", allocates the empty
@@ -263,7 +263,7 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     self_->mAuthenticated = 0;
     self_->mLoggedIn = 0;
     self_->mDisconnected = 0;
-    self_->unk_014 = 0;
+    self_->mbUseCachedAddr = 0;
     self_->mHaveCPAT = 0;
     self_->mFindingPlayer = 0;
     self_->mUserName = (char*)cBXString_EmptyString_94D0;
@@ -1487,8 +1487,8 @@ static inline void closeConn_AC50(char* self)
  *   'time', clears mFindingPlayer and releases the lookup.
  *
  * Outside mState 25 it also shuts down an active game connection (func_00263BA8(..., 0)) or else closes comm channel 0
- * if open. When mLoggedIn it refreshes the room and user lists (func_003EE620), and it counts mTimeout and unk_0E4 down
- * by the frame time. Always: updates BuddyMan (func_00261490), then pops every mEventList event, hands it to
+ * if open. When mLoggedIn it refreshes the room and user lists (func_003EE620), and it counts mTimeout and mCountdown
+ * down by the frame time. Always: updates BuddyMan (func_00261490), then pops every mEventList event, hands it to
  * func_0017D260() and deletes it through its virtual destructor (slot 1, flags 3). cRealFE_update calls it.
  */
 extern "C" void func_0025AC50(LobbyMan* self)
@@ -1626,7 +1626,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
         }
         cSSXApp* app = SSXApp;
         self->mTimeout -= app->TimerPeriod;
-        self->unk_0E4 -= app->TimerPeriod;
+        self->mCountdown -= app->TimerPeriod;
     }
     func_00261490(BuddyMan_mBuddyMan);
     while (((sMsgListAC50*)(&self->mEventList))->first() != (sMsgListNodeAC50*)self->mEventList.mpHead) {
@@ -1753,9 +1753,9 @@ static inline sMsgListIterB6D8 sMsgListB6D8_insert(sMsgListIterB6D8 pos, void* c
 /**
  * Starts connecting the lobby manager to the lobby server.
  *
- * Creates the LobbyApi first if needed (func_0025A948) and stores @p conn in unk_014. With @p conn set it reuses the
- * address cached in D_004A3018: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects on port
- * 11000 (func_003E8260, reply thunk func_00268BA8). Otherwise it enters mState 2 and starts a host lookup of
+ * Creates the LobbyApi first if needed (func_0025A948) and stores @p conn in mbUseCachedAddr. With @p conn set it
+ * reuses the address cached in D_004A3018: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects
+ * on port 11000 (func_003E8260, reply thunk func_00268BA8). Otherwise it enters mState 2 and starts a host lookup of
  * mServerName with SocketLookup() into mpHostLookup (func_0025AC50() polls it). Either way posts a type-200 event.
  *
  * @param conn  nonzero to connect to the cached server address, 0 to look the server name up first
@@ -1764,7 +1764,7 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
 {
     if (self->mpLobbyApi == 0)
         func_0025A948(self);
-    self->unk_014 = conn;
+    self->mbUseCachedAddr = conn;
     if (conn != 0) {
         int serverAddr = D_004A3018;
         *(int*)self = 3;
@@ -3016,10 +3016,10 @@ static inline void post_D048(char* self, void* msg)
  * Handles the reply to the persona's 'onln' stats request and fills mStats.
  *
  * Sets mState to 1. On success it decodes the "STAT" field with the "l*" template (cDirtysock_tag_TagFieldGetStructure)
- * and stores mStats.unk_04 = item 2, mStats.unk_08 = items 2 + 3 + 4, mStats.unk_0C = item 6, mStats.mRank = the "R"
- * number (default 0) and mStats.unk_10 = -1, then requests news item 0 with func_0025E0C8() (no event is posted).
- * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the
- * LobbyApi callback thunk func_00268CC0.
+ * and stores mStats.mWins = item 2, mStats.mGamesPlayed = items 2 + 3 + 4, mStats.mDisconnects = item 6, mStats.mRank =
+ * the "R" number (default 0) and mStats.mPing = -1, then requests news item 0 with func_0025E0C8() (no event is
+ * posted). Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
+ * from the LobbyApi callback thunk func_00268CC0.
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
@@ -3032,12 +3032,12 @@ extern "C" void func_0025D048(LobbyMan* self, LobbyApiMsgT* msg)
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_STAT), buf, 0x100,
                                           str_empty_i);
         cDirtysock_tag_TagFieldGetStructure(buf, st, 0x40, str_l);
-        self->mStats.unk_04 = st[2];
-        self->mStats.unk_08 = st[2] + st[3] + st[4];
-        self->mStats.unk_0C = st[6];
+        self->mStats.mWins = st[2];
+        self->mStats.mGamesPlayed = st[2] + st[3] + st[4];
+        self->mStats.mDisconnects = st[6];
         self->mStats.mRank =
             cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
-        self->mStats.unk_10 = -1;
+        self->mStats.mPing = -1;
         func_0025E0C8(self, 0);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
@@ -4115,7 +4115,7 @@ extern char str_SEQN[];
 struct sDsSlotSessE420 {
     int active;                  // 0x0
     char pad_0x04[0x3C];
-    int f40;                     // 0x40
+    int mRequestId;              // 0x40 (LobbyMan's)
     char pad_0x44[0x10];
     void* ctx;                   // 0x54
     char pad_0x58[0xF8 - 0x58];
@@ -4158,7 +4158,7 @@ extern "C" void func_0025E420(LobbyMan* self_, int start, int range, int prevSlo
     func_003E8D70(self->ctx, self->limitB[prevSlot]);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608((LobbyMan*)self, self->active, 'snap', buf, (int)func_00268E00, 20.0f);
-    self->limitB[self->slot] = self->f40;
+    self->limitB[self->slot] = self->mRequestId;
 }
 #endif
 
@@ -4890,19 +4890,21 @@ extern "C" void* func_003EE560(void*);
 extern "C" int atoi(const char* s);
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
 
+// A room user record (LobbyApi's '+usr' record, func_003E95C8's User_95C8; names ours, from its tags).
 struct sDsPeerK2 {
     char pad_0x00[0x28];
-    char name[0xC];      // 0x28
-    int addr;            // 0x34
-    char record[1];      // 0x38
+    char ping[0xC];      // 0x28 the "P" text
+    int rank;            // 0x34 the "R" number
+    char record[1];      // 0x38 the "S" stats record
 };
 
+// tLobbyStats (online/lobbyman.h): its member names.
 struct sDsPeerInfoK2 {
-    int addr;            // 0x0
-    int a;               // 0x4
-    int total;           // 0x8
-    int b;               // 0xC
-    int nameLen;         // 0x10
+    int mRank;           // 0x0
+    int mWins;           // 0x4
+    int mGamesPlayed;    // 0x8
+    int mDisconnects;    // 0xC
+    int mPing;           // 0x10
 };
 
 /**
@@ -4924,17 +4926,17 @@ extern "C" void func_0025F288(LobbyMan* self, int userIndex, sDsPeerInfoK2* out)
         sDsPeerK2* userEntry = (sDsPeerK2*)func_003EE560(self->mpUserList);
         if (userEntry != 0 && userEntry->record != 0) {
             rec = userEntry->record;
-            out->addr = userEntry->addr;
-            out->nameLen = atoi(userEntry->name);
+            out->mRank = userEntry->rank;
+            out->mPing = atoi(userEntry->ping);
         } else {
-            out->addr = 0;
+            out->mRank = 0;
             rec = 0;
-            out->nameLen = 0;
+            out->mPing = 0;
         }
         cDirtysock_tag_TagFieldGetStructure(rec, st, 0x40, str_l);
-        out->a = st[2];
-        out->total = st[2] + st[3] + st[4];
-        out->b = st[6];
+        out->mWins = st[2];
+        out->mGamesPlayed = st[2] + st[3] + st[4];
+        out->mDisconnects = st[6];
     }
 }
 #endif
@@ -5120,8 +5122,8 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__
  * It then formats "%s %d %d %d %d %d %d %d %d %s %d %d %d %d" into a 64-byte buffer: "challenge", the location id
  * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent,
  * cBENetworkInterface_networkOpt.bIsRankedGame, bits 0x40 and 0x100 of D_005308D0, iNumberAI, bit 0x80 of D_005308D0,
- * cCommSystem_getSignature(), then mStats.unk_04, unk_08, unk_0C and mRank. func_0025FB80() sends it to mOpponent, and
- * mState becomes 22. The first cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
+ * cCommSystem_getSignature(), then mStats.mWins, mGamesPlayed, mDisconnects and mRank. func_0025FB80() sends it to
+ * mOpponent, and mState becomes 22. The first cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
  *
  * @param name  the challenged persona
  * @param matchType    the game kind, kept in mMatchType
@@ -5147,7 +5149,7 @@ extern "C" void func_0025F4C0_impl(char* vself, const char* name, int matchType)
     char buf[0x40];
     sprintf(buf, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b, str_challenge, locationID, event, track, y, multipliers, powerUps, ai, pointIcons,
             cCommSystem_getSignature_F4C0(cCommSystem_mCommSystem),
-            (self)->mStats.unk_04, (self)->mStats.unk_08, (self)->mStats.unk_0C, (self)->mStats.mRank);
+            (self)->mStats.mWins, (self)->mStats.mGamesPlayed, (self)->mStats.mDisconnects, (self)->mStats.mRank);
     func_0025FB80_v(self, (int)self->mOpponent, buf);
     *(int*)self = 22;
 }
@@ -5689,47 +5691,42 @@ static inline void postMsg(char* self, int type)
 }
 
 // One rider's race statistics (cBENetworkInterface_networkOpt + 0x330 / + 0x3DC).
-struct sRaceStats {
-    int f00;                        // 0x00
-    int f04;                        // 0x04
-    int f08;                        // 0x08
+struct sRaceStats {                 // tRiderStats (ai/ridermetrix.h; [O] names)
+    int SpinDegs;                   // 0x00
+    int FlipDegs;                   // 0x04
+    int NumGrabs;                   // 0x08
     int pad_0x0C;
-    int f10;                        // 0x10
-    int f14;                        // 0x14
-    int f18;                        // 0x18
+    int NumRails;                   // 0x10
+    int NumTricksLanded;            // 0x14
+    int NumUberTricks;              // 0x18
     int pad_0x1C[2];
-    int f24;                        // 0x24
-    int f28;                        // 0x28
-    int f2C;                        // 0x2C
-    int f30;                        // 0x30
-    int f34;                        // 0x34
-    int f38;                        // 0x38
-    int f3C;                        // 0x3C
-    int f40;                        // 0x40
-    float f44;                      // 0x44
-    float f48;                      // 0x48
-    float f4C;                      // 0x4C
-    float f50;                      // 0x50
-    float f54;                      // 0x54
-    float f58;                      // 0x58
+    int NumResets;                  // 0x24
+    int NumWipeouts;                // 0x28
+    int NumFrags;                   // 0x2C
+    int NumDeaths;                  // 0x30
+    int NumMultipliers;             // 0x34
+    int NumComboChainLinks;         // 0x38
+    int NumPerfectLandingBonus;     // 0x3C
+    int NumLastSecondLandingBonus;  // 0x40
+    float AirTime;                  // 0x44
+    float GrabTime;                 // 0x48
+    float RailDist;                 // 0x4C
+    float BiggestAirTime;           // 0x50
+    float BiggestGrabTime;          // 0x54
+    float BiggestRailDist;          // 0x58
     int pad_0x5C;
-    float f60;                      // 0x60
-    float f64;                      // 0x64
-    float f68;                      // 0x68
-    float f6C;                      // 0x6C
-    int f70;                        // 0x70
-    int f74;                        // 0x74
-    int f78;                        // 0x78
-    int f7C;                        // 0x7C
-    int f80;                        // 0x80
-    int f84;                        // 0x84
+    float MaxSpeedCPS;              // 0x60
+    float MaxAvgSpeedCPS;           // 0x64
+    float SumSpeedCPS;              // 0x68
+    float SumTick;                  // 0x6C
+    int TricksAtLevel[6];           // 0x70
     int pad_0x88[2];
-    int f90;                        // 0x90
+    int BestTrickPoints;            // 0x90
     int pad_0x94[2];
-    int f9C;                        // 0x9C
+    int TotalPoints;                // 0x9C
     int pad_0xA0;
-    int fA4;                        // 0xA4
-    int fA8;                        // 0xA8
+    int TotalPointsLostToWipeouts;  // 0xA4
+    int TotalPointsLostToResets;    // 0xA8
 };
 
 
@@ -6015,40 +6012,40 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
         cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM0, D_00536640[myIdx]);
     else
         cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCORE0, D_00536640[myIdx]);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SPINDEG0, mine->f00);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FLIPDEG0, mine->f04);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMGRAB0, mine->f08);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRAIL0, mine->f10);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMTLAN0, mine->f14);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMUTRI0, mine->f18);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRESE0, mine->f24);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMWIPE0, mine->f28);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMFRAG0, mine->f2C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMDEAD0, mine->f30);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAY0, mine->f34);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL0, mine->f38);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB0, mine->f3C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB0, mine->f40);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME0, fptoui(mine->f44));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM0, fptoui(mine->f48));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS0, fptoui(mine->f4C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM0, fptoui(mine->f50));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI0, fptoui(mine->f54));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI0, fptoui(mine->f58));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE0, fptoui(mine->f60));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP0, fptoui(mine->f64));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE0, fptoui(mine->f68));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK0, fptoui(mine->f6C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL10, mine->f70);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL20, mine->f74);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL30, mine->f78);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL40, mine->f7C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL50, mine->f80);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL60, mine->f84);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BESTRPO0, mine->f90);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_POINTS0, mine->f9C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI0, mine->fA4);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE0, mine->fA8);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SPINDEG0, mine->SpinDegs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FLIPDEG0, mine->FlipDegs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMGRAB0, mine->NumGrabs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRAIL0, mine->NumRails);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMTLAN0, mine->NumTricksLanded);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMUTRI0, mine->NumUberTricks);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRESE0, mine->NumResets);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMWIPE0, mine->NumWipeouts);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMFRAG0, mine->NumFrags);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMDEAD0, mine->NumDeaths);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAY0, mine->NumMultipliers);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL0, mine->NumComboChainLinks);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB0, mine->NumPerfectLandingBonus);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB0, mine->NumLastSecondLandingBonus);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME0, fptoui(mine->AirTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM0, fptoui(mine->GrabTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS0, fptoui(mine->RailDist));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM0, fptoui(mine->BiggestAirTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI0, fptoui(mine->BiggestGrabTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI0, fptoui(mine->BiggestRailDist));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE0, fptoui(mine->MaxSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP0, fptoui(mine->MaxAvgSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE0, fptoui(mine->SumSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK0, fptoui(mine->SumTick));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL10, mine->TricksAtLevel[0]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL20, mine->TricksAtLevel[1]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL30, mine->TricksAtLevel[2]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL40, mine->TricksAtLevel[3]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL50, mine->TricksAtLevel[4]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL60, mine->TricksAtLevel[5]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BESTRPO0, mine->BestTrickPoints);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_POINTS0, mine->TotalPoints);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI0, mine->TotalPointsLostToWipeouts);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE0, mine->TotalPointsLostToResets);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CHARACTER1, oppChar);
     if (ranked == 0)
         cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM1, D_00536640[oppIdx]);
@@ -6058,40 +6055,40 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_QUIT1, oppTime);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CHEAT1, oppScore);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DISC1, oppQuitTime);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SPINDEG1, opp->f00);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FLIPDEG1, opp->f04);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMGRAB1, opp->f08);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRAIL1, opp->f10);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMTLAN1, opp->f14);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMUTRI1, opp->f18);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRESE1, opp->f24);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMWIPE1, opp->f28);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMFRAG1, opp->f2C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMDEAD1, opp->f30);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAY1, opp->f34);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL1, opp->f38);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB1, opp->f3C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB1, opp->f40);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME1, fptoui(opp->f44));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM1, fptoui(opp->f48));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS1, fptoui(opp->f4C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM1, fptoui(opp->f50));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI1, fptoui(opp->f54));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI1, fptoui(opp->f58));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE1, fptoui(opp->f60));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP1, fptoui(opp->f64));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE1, fptoui(opp->f68));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK1, fptoui(opp->f6C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL11, opp->f70);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL21, opp->f74);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL31, opp->f78);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL41, opp->f7C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL51, opp->f80);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL61, opp->f84);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BESTRPO1, opp->f90);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_POINTS1, opp->f9C);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI1, opp->fA4);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE1, opp->fA8);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SPINDEG1, opp->SpinDegs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FLIPDEG1, opp->FlipDegs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMGRAB1, opp->NumGrabs);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRAIL1, opp->NumRails);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMTLAN1, opp->NumTricksLanded);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMUTRI1, opp->NumUberTricks);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMRESE1, opp->NumResets);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMWIPE1, opp->NumWipeouts);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMFRAG1, opp->NumFrags);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMDEAD1, opp->NumDeaths);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAY1, opp->NumMultipliers);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL1, opp->NumComboChainLinks);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB1, opp->NumPerfectLandingBonus);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB1, opp->NumLastSecondLandingBonus);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME1, fptoui(opp->AirTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM1, fptoui(opp->GrabTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS1, fptoui(opp->RailDist));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM1, fptoui(opp->BiggestAirTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI1, fptoui(opp->BiggestGrabTime));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI1, fptoui(opp->BiggestRailDist));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE1, fptoui(opp->MaxSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP1, fptoui(opp->MaxAvgSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE1, fptoui(opp->SumSpeedCPS));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK1, fptoui(opp->SumTick));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL11, opp->TricksAtLevel[0]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL21, opp->TricksAtLevel[1]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL31, opp->TricksAtLevel[2]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL41, opp->TricksAtLevel[3]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL51, opp->TricksAtLevel[4]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL61, opp->TricksAtLevel[5]);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BESTRPO1, opp->BestTrickPoints);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_POINTS1, opp->TotalPoints);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI1, opp->TotalPointsLostToWipeouts);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE1, opp->TotalPointsLostToResets);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608((LobbyMan*)self, *(int*)self, 'rank', buf, (int)func_00268EF0, 20.0f);
     postMsg(self, 0x100);
@@ -7299,8 +7296,8 @@ extern "C" void func_00268FB8(void* self, void* a1, int a2);
 
 struct sTagsUnkReq20D8 {
     char name[0x20];   // 0x00
-    char x20[0x20];    // 0x20
-    char x40[0x68];    // 0x40
+    char group[0x20];  // 0x20 (names ours) the roster group func_003F0E38 sends as GROUP
+    char resource[0x68]; // 0x40 the sender's resource (BuddyMan::mResource)
     int flags;         // 0xA8
     char pad[0x14];
 };
@@ -7339,8 +7336,8 @@ extern "C" int func_002620D8(BuddyMan* self, char* name, int kind, int* err, cha
         extraFlagged = 1;
     }
     strcpy(rec.name, name);
-    strcpy(rec.x40, self->mResource);
-    rec.x20[0] = 0;
+    strcpy(rec.resource, self->mResource);
+    rec.group[0] = 0;
     switch (kind) {
     case 0:
         if (func_00262280(self) + extraUnflagged >= 41) {
@@ -10375,8 +10372,8 @@ struct sNetMsg5458 {
     int type;       // 0x0
     void** vt;      // 0x4
     int flag;       // 0x8
-    int v0;         // 0xC
-    int v1;         // 0x10
+    int index;      // 0xC (names ours) the row, or func_00265568's rule slot
+    int value;      // 0x10 func_00265568's new rule value
 };
 
 /**
@@ -10410,7 +10407,7 @@ extern "C" void func_00265458(cSetupMan* self, int id)
         sNetMsg5458* updateEvent = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 251;
         updateEvent->vt = D_00481150;
-        updateEvent->v0 = id;
+        updateEvent->index = id;
         updateEvent->flag = 0;
         void* mp = updateEvent;
         sMsgList5458_insert(((sMsgListNode5458*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -10463,8 +10460,8 @@ struct sNetMsg5568 {
     int type;       // 0x0
     void** vt;      // 0x4
     int flag;       // 0x8
-    int v0;         // 0xC
-    int v1;         // 0x10
+    int index;      // 0xC (names ours) the rule slot, or func_00265458's row
+    int value;      // 0x10 the new rule value
 };
 
 /**
@@ -10499,8 +10496,8 @@ extern "C" void func_00265568(cSetupMan* self, int ruleSlot, int newValue)
         sNetMsg5568* updateEvent = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 0xFC;
         updateEvent->vt = D_00481130;
-        updateEvent->v0 = ruleSlot;
-        updateEvent->v1 = newValue;
+        updateEvent->index = ruleSlot;
+        updateEvent->value = newValue;
         updateEvent->flag = 0;
         void* mp = updateEvent;
         sMsgList5568_insert(((sMsgListNode5568*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -11986,10 +11983,11 @@ extern "C" int func_003F6838(void* conn, int a1, int a2, int a3);
 
 struct sSlotFlags_668E8 {
     unsigned active : 1;
-    unsigned b1 : 1;
-    unsigned b2 : 1;
-    unsigned b3 : 1;
-    unsigned b4 : 1;
+    // (names ours) bits 1..3 all take bit 0 of the read block's LED word; bit 4 is VK_SHIFT (func_003F6838)
+    unsigned ledBitA : 1;
+    unsigned ledBitB : 1;
+    unsigned ledBitC : 1;
+    unsigned shiftDown : 1;
 };
 
 
@@ -12045,12 +12043,12 @@ extern "C" void func_002668E8(cUsbKeyboard* self)
                     }
                 }
                 if (func_003F6838(readBlock, 0, 0, 0x10))
-                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b4 = 1;
+                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).shiftDown = 1;
                 else
-                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b4 = 0;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b2 = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b3 = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b1 = readBlock->on;
+                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).shiftDown = 0;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitB = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitC = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitA = readBlock->on;
             }
         }
     }

@@ -1584,11 +1584,11 @@ struct sPtElem2B30 {
  */
 extern "C" void* func_00372B30(cBezierCache* self)
 {
-    new ((char*)&self->unk_018[2]) sPtElem2B30[4];
-    new ((char*)&self->unk_060[0]) sPtElem2B30[6];
-    new ((char*)&self->unk_0B0[1]) sPtElem2B30[8];
-    new ((char*)&self->unk_110[3]) sPtElem2B30[4];
-    new ((char*)&self->unk_110[7]) sPtElem2B30[6];
+    new ((char*)&self->mCacheRecord[2]) sPtElem2B30[4];
+    new ((char*)&self->mLMUVCache[0]) sPtElem2B30[6];
+    new ((char*)&self->m6x6Basis[1]) sPtElem2B30[8];
+    new ((char*)&self->m8x8Basis[3]) sPtElem2B30[4];
+    new ((char*)&self->m8x8Basis[7]) sPtElem2B30[6];
     new ((char*)&self->mFreeNrmListSP[2]) sPtElem2B30[8];
     self->m4x4CacheRecord = 0;
     self->m6x6CacheRecord = 0;
@@ -1608,10 +1608,11 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 // list, point / uv grids, a normal cache with its own free list, and the cubic basis tables.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
+// One cache record (12 bytes; func_003747A0's sPEnt_47A0 names its words from use, names ours).
 struct sBzRec_2B78 {
-    int f0;
-    int f4;
-    int f8;                     // -1 = free
+    int patch;                  // [U] the cached patch record (tPatchRecord*)
+    int flags;                  // [U] in-use / view bits (func_003747A0 ORs 0xC | 1 << view)
+    int nrmSlot;                // [U] the normal-cache index; -1 = none
 };
 
 struct sBzV3_2B78 {
@@ -1645,12 +1646,12 @@ struct sBzCache_2B78 {
     sBzPts4_2B78* pts4;             // 0x048
     sBzPts6_2B78* pts6;             // 0x04C
     sBzPts8_2B78* pts8;             // 0x050
-    sBzUV4_2B78* uvA4;              // 0x054
-    sBzUV6_2B78* uvA6;              // 0x058
-    sBzUV8_2B78* uvA8;              // 0x05C
-    sBzUV4_2B78* uvB4;              // 0x060
-    sBzUV6_2B78* uvB6;              // 0x064
-    sBzUV8_2B78* uvB8;              // 0x068
+    sBzUV4_2B78* m4x4UVCache;       // 0x054 [R] "4x4UVCache" (cBezierCache::mUVCache[0])
+    sBzUV6_2B78* m6x6UVCache;       // 0x058 [R] "6x6UVCache"
+    sBzUV8_2B78* m8x8UVCache;       // 0x05C [R] "8x8UVCache"
+    sBzUV4_2B78* m4x4LMUVCache;     // 0x060 [R] "4x4LMUVCache" (cBezierCache::mLMUVCache[0])
+    sBzUV6_2B78* m6x6LMUVCache;     // 0x064 [R] "6x6LMUVCache"
+    sBzUV8_2B78* m8x8LMUVCache;     // 0x068 [R] "8x8LMUVCache"
     int pad06C;
     t4Vector basis4[4];             // 0x070
     t4Vector basis6[6];             // 0x0B0
@@ -1765,27 +1766,27 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int count4x4, int count6x6, i
         cacheSlot = new (str_8x8PosCache, 0, 0) sBzPts8_2B78[count8x8];
     }
     {
-        sBzUV4_2B78*& cacheSlot = self->uvA4;
+        sBzUV4_2B78*& cacheSlot = self->m4x4UVCache;
         cacheSlot = new (str_4x4UVCache, 0, 0) sBzUV4_2B78[count4x4];
     }
     {
-        sBzUV6_2B78*& cacheSlot = self->uvA6;
+        sBzUV6_2B78*& cacheSlot = self->m6x6UVCache;
         cacheSlot = new (str_6x6UVCache, 0, 0) sBzUV6_2B78[count6x6];
     }
     {
-        sBzUV8_2B78*& cacheSlot = self->uvA8;
+        sBzUV8_2B78*& cacheSlot = self->m8x8UVCache;
         cacheSlot = new (str_8x8UVCache, 0, 0) sBzUV8_2B78[count8x8];
     }
     {
-        sBzUV4_2B78*& cacheSlot = self->uvB4;
+        sBzUV4_2B78*& cacheSlot = self->m4x4LMUVCache;
         cacheSlot = new (str_4x4LMUVCache, 0, 0) sBzUV4_2B78[count4x4];
     }
     {
-        sBzUV6_2B78*& cacheSlot = self->uvB6;
+        sBzUV6_2B78*& cacheSlot = self->m6x6LMUVCache;
         cacheSlot = new (str_6x6LMUVCache, 0, 0) sBzUV6_2B78[count6x6];
     }
     {
-        sBzUV8_2B78*& cacheSlot = self->uvB8;
+        sBzUV8_2B78*& cacheSlot = self->m8x8LMUVCache;
         cacheSlot = new (str_8x8LMUVCache, 0, 0) sBzUV8_2B78[count8x8];
     }
 
@@ -1829,7 +1830,7 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int count4x4, int count6x6, i
     for (k = 0; k < 3; k++) {
         int j;
         for (j = 0; j < self->cacheSize[k]; j++)
-            self->records[k][j].f8 = -1;
+            self->records[k][j].nrmSlot = -1;
     }
 
     if (nn4 > 0)
@@ -1908,16 +1909,16 @@ struct sPtBufs_37D0 {
 
 struct sPtSys_37D0 {
     char pad0[0xC];
-    sPtBufs_37D0 b0C;       // 0x0C
+    sPtBufs_37D0 cacheRecord;      // 0x0C [R] the "4x4CacheRecord" .. 8x8 tables
     char pad18[0xC];
-    sPtBufs_37D0 b24;       // 0x24
+    sPtBufs_37D0 freeList;         // 0x24 [R] "4x4FreeList" .. 8x8
     char pad30[0x18];
-    sPtBufs_37D0 b48;       // 0x48
-    sPtBufs_37D0 b54;       // 0x54
-    sPtBufs_37D0 b60;       // 0x60
+    sPtBufs_37D0 posCache;         // 0x48 [R] "4x4PosCache" .. 8x8
+    sPtBufs_37D0 uvCache;          // 0x54 [R] "4x4UVCache" .. 8x8
+    sPtBufs_37D0 lmuvCache;        // 0x60 [R] "4x4LMUVCache" .. 8x8
     char pad6C[0x148];
-    sPtBufs_37D0 b1B4;      // 0x1B4
-    sPtBufs_37D0 b1C0;      // 0x1C0
+    sPtBufs_37D0 nrmCache;         // 0x1B4 [R] "4x4NrmCache" .. 8x8
+    sPtBufs_37D0 freeNrmList;      // 0x1C0 [R] "4x4FreeNrmList" .. 8x8
 };
 
 #define PT_FREE_BUFS_37D0(t) \
@@ -1937,23 +1938,24 @@ struct sPtSys_37D0 {
  */
 extern "C" void func_003737D0(sPtSys_37D0* self)
 {
-    PT_FREE_BUFS_37D0(self->b0C);
-    PT_FREE_BUFS_37D0(self->b24);
-    PT_FREE_BUFS_37D0(self->b48);
-    PT_FREE_BUFS_37D0(self->b54);
-    PT_FREE_BUFS_37D0(self->b60);
-    PT_FREE_BUFS_37D0(self->b1B4);
-    PT_FREE_BUFS_37D0(self->b1C0);
+    PT_FREE_BUFS_37D0(self->cacheRecord);
+    PT_FREE_BUFS_37D0(self->freeList);
+    PT_FREE_BUFS_37D0(self->posCache);
+    PT_FREE_BUFS_37D0(self->uvCache);
+    PT_FREE_BUFS_37D0(self->lmuvCache);
+    PT_FREE_BUFS_37D0(self->nrmCache);
+    PT_FREE_BUFS_37D0(self->freeNrmList);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003739D0);
 #ifdef SKIP_ASM
+// One cache record (as func_00372B78's sBzRec_2B78; names ours).
 struct sPtSlot39D0 {
-    int f0;
-    int f4;
-    int f8;
+    int patch;                      // [U] the cached patch record
+    int flags;                      // [U] in-use / view bits
+    int nrmSlot;                    // [U] the normal-cache index; -1 = none
 };
 
 struct sPtPools39D0 {
@@ -2009,9 +2011,9 @@ extern "C" void func_003739D0(sPtPools39D0* self)
     for (k = 0; k < 3; k++) {
         int j;
         for (j = 0; j < self->cnt[k]; j++) {
-            self->slots[k][j].f8 = -1;
-            self->slots[k][j].f4 = 0;
-            self->slots[k][j].f0 = 0;
+            self->slots[k][j].nrmSlot = -1;
+            self->slots[k][j].flags = 0;
+            self->slots[k][j].patch = 0;
         }
     }
     self->freeCountB[0] = 0;
@@ -2329,7 +2331,7 @@ static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
  * Computes a patch's n x n grid of unit normals (VU0 macro code).
  *
  * Loads the 16 coefficient vectors of @p mat (m_fBm0 .. m_fBm3). A first pass evaluates the patch with the
- * derivative basis (3t^2, 2t, 1, 0; unk_310[@p idx]) in one direction and the basis (unk_190[@p idx]) in the other,
+ * derivative basis (3t^2, 2t, 1, 0; mDBasis[@p idx]) in one direction and the basis (mBasis[@p idx]) in the other,
  * storing that tangent in @p out; a second pass evaluates the other tangent and replaces each entry with the
  * normalised cross product of the two (left unnormalised when its length is 0). func_003747A0 calls it for patches
  * that need normals.
@@ -2343,8 +2345,8 @@ static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
 extern "C" void func_00374518(cBezierCache* self, tPatchRecord* mat, sPatchOut4518* out, int idx)
 {
     int n = self->mPatchOrder[idx];
-    t4Vector* basis = self->unk_190[idx];
-    t4Vector* dbasis = self->unk_310[idx];
+    t4Vector* basis = self->mBasis[idx];
+    t4Vector* dbasis = self->mDBasis[idx];
     sPatchOut4518* cursor = out;
     int i;
     __asm__ __volatile__(
@@ -4579,10 +4581,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawString3D);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 struct sPtRenderState {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words)
     short tex;
     short pad;
 };
@@ -4985,7 +4984,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
     sPtRenderState* rs = ((sPtRenderState*)self->m_pCurrentDrawState);
     self->mVifCursor = next + 0x10;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sPtRingEnt* deferEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
             + ((unsigned int)ring->mSubmits | 0x30000000));
@@ -5156,11 +5155,11 @@ static inline unsigned long gsPrim_A260(int prim)
  * Opens a GS triangle-strip packet of @p n vertices for the caller to fill and returns where the vertices go.
  *
  * Sets bits 6-9 of the current draw state's first word to 3 and clears the low 30 bits of its fourth word, and rebuilds
- * the matrices (func_0037D968) when mMatricesValid is 0. At mVifCursor (remembered in unk_5A28, the packet cursor in
- * unk_5A2C) it writes a DMA cnt tag (n * 3 + 4 qwords), a VIF UNPACK header and a PACKED GIF tag for @p n loops of
- * three registers: PRIM 0x5C (Gouraud, textured, blended tri strip) with ST, RGBAQ, XYZ2 when the draw state has a
- * texture, else PRIM 0x4C with NOP, RGBAQ, XYZ2. After the n * 3 quadwords of vertex space it adds a VIF MSCAL of the
- * VU1 program at D_12B0 when the flag D_004A4380 is set (clearing it) or D_12B8 otherwise. func_0037A430 closes the
+ * the matrices (func_0037D968) when mMatricesValid is 0. At mVifCursor (remembered in mStripPacketStart, the packet
+ * cursor in mStripCursor) it writes a DMA cnt tag (n * 3 + 4 qwords), a VIF UNPACK header and a PACKED GIF tag for @p n
+ * loops of three registers: PRIM 0x5C (Gouraud, textured, blended tri strip) with ST, RGBAQ, XYZ2 when the draw state
+ * has a texture, else PRIM 0x4C with NOP, RGBAQ, XYZ2. After the n * 3 quadwords of vertex space it adds a VIF MSCAL of
+ * the VU1 program at D_12B0 when the flag D_004A4380 is set (clearing it) or D_12B8 otherwise. func_0037A430 closes the
  * packet. cSpeedBoostFX_render uses the pair.
  *
  * @param n  the number of vertices
@@ -5173,8 +5172,9 @@ extern "C" unsigned long* func_0037A260(cPS2GraphicsMan* self, int n)
     int primType;
     long regList;
     D_004A4380 = 0;
-    ((sPtRenderState*)self->m_pCurrentDrawState)->f0 = (((sPtRenderState*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sPtRenderState*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    ((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[0]
+            = (((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[0] & ~0x3C0) | 0xC0;
+    ((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -5186,21 +5186,22 @@ extern "C" unsigned long* func_0037A260(cPS2GraphicsMan* self, int n)
         regList = 1055;
     }
     unsigned int buf = self->mVifCursor;
-    self->unk_5A28 = buf;
-    (*(unsigned long**)&self->unk_5A2C) = func_0038F460(D_004A4474, buf, -1, 0);
-    ((unsigned long*)self->unk_5A2C)[0] = (n * 3 + 4) | 0x10000000;
-    ((unsigned long*)self->unk_5A2C)[1] = 0;
-    ((unsigned long*)self->unk_5A2C)[2] = 0;
-    ((unsigned long*)self->unk_5A2C)[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
-    ((unsigned long*)self->unk_5A2C)[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType) | ((unsigned long)0xC000 << 46);
-    ((unsigned long*)self->unk_5A2C)[5] = regList;
-    ((unsigned long*)self->unk_5A2C)[6] = (long)n * 3;
-    ((unsigned long*)self->unk_5A2C)[7] = 0;
-    unsigned long* verts = ((unsigned long*)self->unk_5A2C) + 8;
-    (*(unsigned long**)&self->unk_5A2C) = verts + n * 6;
-    ((unsigned long*)self->unk_5A2C)[0] = 0;
-    ((unsigned long*)self->unk_5A2C)[1] = (unsigned long)(addr | 0x14000000) << 32;
-    (*(unsigned long**)&self->unk_5A2C) += 2;
+    self->mStripPacketStart = buf;
+    (*(unsigned long**)&self->mStripCursor) = func_0038F460(D_004A4474, buf, -1, 0);
+    ((unsigned long*)self->mStripCursor)[0] = (n * 3 + 4) | 0x10000000;
+    ((unsigned long*)self->mStripCursor)[1] = 0;
+    ((unsigned long*)self->mStripCursor)[2] = 0;
+    ((unsigned long*)self->mStripCursor)[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
+    ((unsigned long*)self->mStripCursor)[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType)
+            | ((unsigned long)0xC000 << 46);
+    ((unsigned long*)self->mStripCursor)[5] = regList;
+    ((unsigned long*)self->mStripCursor)[6] = (long)n * 3;
+    ((unsigned long*)self->mStripCursor)[7] = 0;
+    unsigned long* verts = ((unsigned long*)self->mStripCursor) + 8;
+    (*(unsigned long**)&self->mStripCursor) = verts + n * 6;
+    ((unsigned long*)self->mStripCursor)[0] = 0;
+    ((unsigned long*)self->mStripCursor)[1] = (unsigned long)(addr | 0x14000000) << 32;
+    (*(unsigned long**)&self->mStripCursor) += 2;
     return verts;
 }
 #endif
@@ -5226,18 +5227,19 @@ extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
 /**
  * Closes the packet opened by func_0037A260 and queues it in the deferred draw list.
  *
- * Ends the packet at unk_5A2C with func_0038F668 (DMA channel D_004A4474) and moves mVifCursor there. While mpDeferMan
- * holds fewer than 2600 entries it appends a 0x80-byte entry with the current draw state (low 5 bits of its third word
- * from the manager's mActivePortIndex), the packet's start (unk_5A28) and end and the view index mActiveViewIndex.
- * Then mVifCursor skips 0x10 bytes, bits 6-9 of the draw state's first word and the low 30 bits of its fourth word
- * are cleared, and unk_5A28/unk_5A2C are reset to 0. cSpeedBoostFX_render calls it after filling the vertices.
+ * Ends the packet at mStripCursor with func_0038F668 (DMA channel D_004A4474) and moves mVifCursor there. While
+ * mpDeferMan holds fewer than 2600 entries it appends a 0x80-byte entry with the current draw state (low 5 bits of its
+ * third word from the manager's mActivePortIndex), the packet's start (mStripPacketStart) and end and the view index
+ * mActiveViewIndex. Then mVifCursor skips 0x10 bytes, bits 6-9 of the draw state's first word and the low 30 bits of
+ * its fourth word are cleared, and mStripPacketStart/mStripCursor are reset to 0. cSpeedBoostFX_render calls it after
+ * filling the vertices.
  */
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void func_0037A430(cPS2GraphicsMan* self)
 {
-    unsigned int next = func_0038F668(D_004A4474, ((unsigned long*)self->unk_5A2C), 4);
+    unsigned int next = func_0038F668(D_004A4474, ((unsigned long*)self->mStripCursor), 4);
     self->mVifCursor = next;
-    unsigned int buf = self->unk_5A28;
+    unsigned int buf = self->mStripPacketStart;
     cPS2DeferManager* ring = self->mpDeferMan;
     sDrawState* rs = self->m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
@@ -5253,8 +5255,8 @@ extern "C" void func_0037A430(cPS2GraphicsMan* self)
     self->mVifCursor += 0x10;
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
-    self->unk_5A28 = 0;
-    self->unk_5A2C = 0;
+    self->mStripPacketStart = 0;
+    self->mStripCursor = 0;
 }
 #endif
 
@@ -5673,10 +5675,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawCharShadowModel);
 #ifdef SKIP_ASM
 struct sPtRS_B548 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words)
     short tex;
     short tex2;
 };
@@ -5716,7 +5715,8 @@ struct sBone_B548 {
 
 struct sMdl_B548 {
     char pad0[0x20];
-    int o20;
+    int bonesOffset;                // 0x20 [U] the bone table's offset from the model data
+                                    //      (cPS2GraphicsMan_ResolveCharModel)
     char pad24[0x18];
     sTrk_B548* tracks;              // 0x3C
     char pad40[8];
@@ -5782,7 +5782,7 @@ static inline void QueueRecord_B548(cPS2GraphicsMan* self, unsigned int buf, uns
     cPS2DeferManager* ring = self->mpDeferMan;
     sPtRS_B548* rs = ((sPtRS_B548*)self->m_pCurrentDrawState);
     if (ring->mNumSubmitDMA < 0xA28) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sPtEnt_B548* e = (sPtEnt_B548*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_B548*)&ring->mSubmits[0]) | 0x30000000));
         e->rs = *rs;
@@ -5808,17 +5808,23 @@ extern "C" void cPS2GraphicsMan_DrawCharShadowModel(cPS2GraphicsMan* self, sMdl_
 {
     unsigned int buf = self->mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f0 |= 0x30;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f4 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f4 & ~0x7C) | 4;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] |= 0x30;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & ~0x7C) | 4;
     int cnt = 0;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f4 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f4 & ~0xF80) | 0x580;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f0 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f0 & 0xF00FFFFF) | 0x06400000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f4 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f4 & 0xFE7FFFFF) | 0x01000000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f4 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f4 & 0xFFCFFFFF) | 0x00300000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f4 = (((sPtRS_B548*)self->m_pCurrentDrawState)->f4 & 0xFFF00FFF) | 0x00014000;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & ~0xF80) | 0x580;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] & 0xF00FFFFF) | 0x06400000;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFE7FFFFF) | 0x01000000;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFFCFFFFF) | 0x00300000;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFFF00FFF) | 0x00014000;
     ((sPtRS_B548*)self->m_pCurrentDrawState)->tex = -1;
     ((sPtRS_B548*)self->m_pCurrentDrawState)->tex2 = -1;
-    sBone_B548* bone = (sBone_B548*)(base + model->o20);
+    sBone_B548* bone = (sBone_B548*)(base + model->bonesOffset);
     for (int i = 0; i < model->nbones; i++, bone++) {
         if (bone->flags & 1) {
             packet[0] = 0x10000003;
@@ -5837,8 +5843,8 @@ extern "C" void cPS2GraphicsMan_DrawCharShadowModel(cPS2GraphicsMan* self, sMdl_
     self->mVifCursor = next;
     QueueRecord_B548(self, buf, next, 1);
     self->mVifCursor += 0x10;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] &= ~0x3C0;
+    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
 }
 #endif
 
@@ -5850,10 +5856,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetShadowCharMatrices);
 typedef int cQuad128_BA50 __attribute__((mode(TI)));
 
 struct sRS_BA50 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words)
 };
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
@@ -5897,9 +5900,9 @@ extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(cPS2GraphicsMan* self, voi
     packet += 16;
     self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
     sRS_BA50* rs = (sRS_BA50*)self->m_pCurrentDrawState;
-    rs->f0 = (rs->f0 & ~0x3C0) | 0x1C0;
+    rs->m_bitGroups[0] = (rs->m_bitGroups[0] & ~0x3C0) | 0x1C0;
     sRS_BA50* rs2 = (sRS_BA50*)self->m_pCurrentDrawState;
-    rs2->fC = (rs2->fC & 0xC0000000) | (buf & 0x3FFFFFFF);
+    rs2->m_bitGroups[3] = (rs2->m_bitGroups[3] & 0xC0000000) | (buf & 0x3FFFFFFF);
 }
 #endif
 
@@ -6021,22 +6024,22 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * resets the GS.
  *
  * Returns false at once when func_0037BD38 rejects @p psm2 with @p zpsm. Otherwise stores @p displayWidth x @p
- * displayHeight as the display size (unk_5A54, unk_5A58), @p w x @p bufferHeight as the frame buffer size (mFBWidth,
- * mFBHeight), @p psm as the display format (unk_5A38), @p psm2 as mCurrentFBFormat, @p zpsm as mCurrentZBFormat, @p
- * interlaceMode and @p fieldMode in unk_5A44 and unk_5A46, 2 in unk_5A48 (the output mode) and @p flag in unk_5A4C;
- * clears mCurrentFrameCount and the vertical magnification (unk_5A60), and sets the horizontal one (unk_5A64) from the
- * display width: 256 -> 9, 320 -> 7, 384 -> 6, 512 -> 4, 640 -> 3 (other widths leave it unchanged). It computes the
- * buffer widths in 64-pixel units (mFrameBufferWidth, unk_5A5C), the page counts of the display, draw and z buffers
- * (unk_5A68, unk_5A6C, unk_5A70: pages of 64 x 32 pixels for 32/24-bit formats, 64 x 64 for 16-bit ones) and the dither
- * flag unk_59D0 (1 for a 16-bit display format).
+ * displayHeight as the display size (mDisplayWidth, mDisplayHeight), @p w x @p bufferHeight as the frame buffer size
+ * (mFBWidth, mFBHeight), @p psm as the display format (mDisplayFormat), @p psm2 as mCurrentFBFormat, @p zpsm as
+ * mCurrentZBFormat, @p interlaceMode and @p fieldMode in mInterlace and mFieldMode, 2 in mOutputMode (the output mode)
+ * and @p flag in mDTV; clears mCurrentFrameCount and the vertical magnification (mMagV), and sets the horizontal one
+ * (mMagH) from the display width: 256 -> 9, 320 -> 7, 384 -> 6, 512 -> 4, 640 -> 3 (other widths leave it unchanged).
+ * It computes the buffer widths in 64-pixel units (mFrameBufferWidth, mDisplayBufferWidth), the page counts of the
+ * display, draw and z buffers (mDisplayPages, mDrawPages, mZBufferPages: pages of 64 x 32 pixels for 32/24-bit formats,
+ * 64 x 64 for 16-bit ones) and the dither flag mDither (1 for a 16-bit display format).
  *
  * Then it empties the texture manager's VRAM heaps (func_00367078), allocates the draw, display and z buffers in that
- * order (func_003673D8; their pages go to unk_5A78, unk_5A7C and mCurrentZBufferPage) and sets up the texture manager's
- * second heap (func_00367340): from the draw buffer over a1 * a2 + 2 * w * h words when both colour formats are
- * PSMCT24, from the display buffer over a1 * a2 + w * h when only the display format is, else from the z buffer over w
- * * h. Finally it flushes the data cache, waits for the next vertical sync on GS CSR (0x12001000), calls
- * sceGsResetGraph(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1), and sets the display
- * registers with func_00382AF0(self, 0, 1). cPS2GraphicsMan_SetDisplayMode1 calls it.
+ * order (func_003673D8; their pages go to mDrawBufferPage, mDisplayBufferPage and mCurrentZBufferPage) and sets up the
+ * texture manager's second heap (func_00367340): from the draw buffer over a1 * a2 + 2 * w * h words when both colour
+ * formats are PSMCT24, from the display buffer over a1 * a2 + w * h when only the display format is, else from the z
+ * buffer over w * h. Finally it flushes the data cache, waits for the next vertical sync on GS CSR (0x12001000), calls
+ * sceGsResetGraph(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1),
+ * and sets the display registers with func_00382AF0(self, 0, 1). cPS2GraphicsMan_SetDisplayMode1 calls it.
  *
  * @param displayWidth  display width in pixels
  * @param displayHeight  display height in pixels
@@ -6046,9 +6049,9 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * @param psm2  GS pixel format of the draw buffer
  * @param zpsm  GS z format of the z buffer
  * @param resetMode  first argument of the GS reset call sceGsResetGraph
- * @param interlaceMode  interlace setting (unk_5A44), passed on to sceGsResetGraph
- * @param fieldMode  field/frame setting (unk_5A46), passed on to sceGsResetGraph
- * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in unk_5A4C
+ * @param interlaceMode  interlace setting (mInterlace), passed on to sceGsResetGraph
+ * @param fieldMode  field/frame setting (mFieldMode), passed on to sceGsResetGraph
+ * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in mDTV
  * @return true when the mode was set, false when the draw and z formats do not go together
  */
 extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight,
@@ -6058,55 +6061,57 @@ extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, 
     if (!func_0037BD38((self), psm2, zpsm))
         return false;
 
-    self->unk_5A58 = (int)displayHeight;
+    self->mDisplayHeight = (int)displayHeight;
     self->mFBWidth = (int)w;
     self->mFBHeight = (int)bufferHeight;
     self->mCurrentFBFormat = (int)psm2;
-    self->unk_5A38 = (int)psm;
+    self->mDisplayFormat = (int)psm;
     self->mCurrentZBFormat = (int)zpsm;
-    self->unk_5A44 = interlaceMode;
-    self->unk_5A46 = fieldMode;
+    self->mInterlace = interlaceMode;
+    self->mFieldMode = fieldMode;
     self->mCurrentFrameCount = 0;
-    self->unk_5A54 = (int)displayWidth;
-    self->unk_5A48 = 2;
-    self->unk_5A4C = flag;
-    self->unk_5A60 = 0;
+    self->mDisplayWidth = (int)displayWidth;
+    self->mOutputMode = 2;
+    self->mDTV = flag;
+    self->mMagV = 0;
 
     switch (displayWidth) {
     case 256:
-        self->unk_5A64 = 9;
+        self->mMagH = 9;
         break;
     case 320:
-        self->unk_5A64 = 7;
+        self->mMagH = 7;
         break;
     case 384:
-        self->unk_5A64 = 6;
+        self->mMagH = 6;
         break;
     case 512:
-        self->unk_5A64 = 4;
+        self->mMagH = 4;
         break;
     case 640:
-        self->unk_5A64 = 3;
+        self->mMagH = 3;
         break;
     }
 
     self->mFrameBufferWidth = (int)(((unsigned int)self->mFBWidth + 0x3F) >> 6);
-    self->unk_5A5C = (int)(((unsigned int)self->unk_5A54 + 0x3F) >> 6);
+    self->mDisplayBufferWidth = (int)(((unsigned int)self->mDisplayWidth + 0x3F) >> 6);
 
-    switch ((unsigned int)self->unk_5A38) {
+    switch ((unsigned int)self->mDisplayFormat) {
     case kGS_PSMCT32:
     case kGS_PSMCT24:
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->unk_59D0 = 0;
-        self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x1F) >> 5);
+        self->mDither = 0;
+        self->mDisplayPages = (unsigned int)self->mDisplayBufferWidth * (((unsigned int)self->mDisplayHeight
+                + 0x1F) >> 5);
         break;
     case kGS_PSMCT16:
     case kGS_PSMCT16S:
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->unk_59D0 = 1;
-        self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x3F) >> 6);
+        self->mDither = 1;
+        self->mDisplayPages = (unsigned int)self->mDisplayBufferWidth * (((unsigned int)self->mDisplayHeight
+                + 0x3F) >> 6);
         break;
     }
 
@@ -6115,38 +6120,42 @@ extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, 
     case kGS_PSMCT24:
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
+        self->mDrawPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
     case kGS_PSMCT16:
     case kGS_PSMCT16S:
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
+        self->mDrawPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
 
     switch ((unsigned int)self->mCurrentZBFormat) {
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
+        self->mZBufferPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
+        self->mZBufferPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
 
     int gs = (int)self->mTexMan;
     func_00367078(gs);
-    self->unk_5A78 = func_003673D8(gs, self->unk_5A6C << 13);
-    self->unk_5A7C = func_003673D8(gs, self->unk_5A68 << 13);
-    self->mCurrentZBufferPage = func_003673D8(gs, self->unk_5A70 << 13);
+    self->mDrawBufferPage = func_003673D8(gs, self->mDrawPages << 13);
+    self->mDisplayBufferPage = func_003673D8(gs, self->mDisplayPages << 13);
+    self->mCurrentZBufferPage = func_003673D8(gs, self->mZBufferPages << 13);
 
     // PORT: reads psm and psm2 as one 64-bit word.
-    if (*(long*)(unsigned int*)&self->unk_5A38 == ((long)kGS_PSMCT24 << 32 | kGS_PSMCT24))
-        func_00367340((void*)(int)self->mTexMan, self->unk_5A78 << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
-    else if ((unsigned int)self->unk_5A38 == kGS_PSMCT24)
-        func_00367340((void*)(int)self->mTexMan, self->unk_5A7C << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
+    if (*(long*)(unsigned int*)&self->mDisplayFormat == ((long)kGS_PSMCT24 << 32 | kGS_PSMCT24))
+        func_00367340((void*)(int)self->mTexMan, self->mDrawBufferPage << 11,
+                (unsigned int)self->mDisplayWidth * (unsigned int)self->mDisplayHeight
+                        + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
+    else if ((unsigned int)self->mDisplayFormat == kGS_PSMCT24)
+        func_00367340((void*)(int)self->mTexMan, self->mDisplayBufferPage << 11,
+                (unsigned int)self->mDisplayWidth * (unsigned int)self->mDisplayHeight
+                        + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
     else
         func_00367340((void*)(int)self->mTexMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
 
@@ -6156,7 +6165,7 @@ extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, 
     }
     *(volatile long*)0x12001000;
 
-    sceGsResetGraph(resetMode, self->unk_5A44, flag ? 80 : self->unk_5A48, self->unk_5A46);
+    sceGsResetGraph(resetMode, self->mInterlace, flag ? 80 : self->mOutputMode, self->mFieldMode);
     func_003E6690(flag ? 3 : 1);
     func_00382AF0(self, 0, 1);
     return true;
@@ -6166,39 +6175,40 @@ extern "C" bool func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, 
 //100%
 INCLUDE_ASM("render/particle", func_0037C198);
 #ifdef SKIP_ASM
+// The GS DIMX register (names: the GS manual's DIMX fields DM00 .. DM33, each followed by a reserved bit).
 struct sPtBits_C198 {
-    unsigned long f0 : 3;
-    unsigned long g0 : 1;
-    unsigned long f1 : 3;
-    unsigned long g1 : 1;
-    unsigned long f2 : 3;
-    unsigned long g2 : 1;
-    unsigned long f3 : 3;
-    unsigned long g3 : 1;
-    unsigned long f4 : 3;
-    unsigned long g4 : 1;
-    unsigned long f5 : 3;
-    unsigned long g5 : 1;
-    unsigned long f6 : 3;
-    unsigned long g6 : 1;
-    unsigned long f7 : 3;
-    unsigned long g7 : 1;
-    unsigned long f8 : 3;
-    unsigned long g8 : 1;
-    unsigned long f9 : 3;
-    unsigned long g9 : 1;
-    unsigned long f10 : 3;
-    unsigned long g10 : 1;
-    unsigned long f11 : 3;
-    unsigned long g11 : 1;
-    unsigned long f12 : 3;
-    unsigned long g12 : 1;
-    unsigned long f13 : 3;
-    unsigned long g13 : 1;
-    unsigned long f14 : 3;
-    unsigned long g14 : 1;
-    unsigned long f15 : 3;
-    unsigned long g15 : 1;
+    unsigned long DM00 : 3;
+    unsigned long DM00Reserved : 1;
+    unsigned long DM01 : 3;
+    unsigned long DM01Reserved : 1;
+    unsigned long DM02 : 3;
+    unsigned long DM02Reserved : 1;
+    unsigned long DM03 : 3;
+    unsigned long DM03Reserved : 1;
+    unsigned long DM10 : 3;
+    unsigned long DM10Reserved : 1;
+    unsigned long DM11 : 3;
+    unsigned long DM11Reserved : 1;
+    unsigned long DM12 : 3;
+    unsigned long DM12Reserved : 1;
+    unsigned long DM13 : 3;
+    unsigned long DM13Reserved : 1;
+    unsigned long DM20 : 3;
+    unsigned long DM20Reserved : 1;
+    unsigned long DM21 : 3;
+    unsigned long DM21Reserved : 1;
+    unsigned long DM22 : 3;
+    unsigned long DM22Reserved : 1;
+    unsigned long DM23 : 3;
+    unsigned long DM23Reserved : 1;
+    unsigned long DM30 : 3;
+    unsigned long DM30Reserved : 1;
+    unsigned long DM31 : 3;
+    unsigned long DM31Reserved : 1;
+    unsigned long DM32 : 3;
+    unsigned long DM32Reserved : 1;
+    unsigned long DM33 : 3;
+    unsigned long DM33Reserved : 1;
 };
 
 struct sPtGfx_C198 {
@@ -6207,7 +6217,7 @@ struct sPtGfx_C198 {
 };
 
 /**
- * Packs a 4 x 4 dither matrix into the GS DIMX register value unk_59E0.
+ * Packs a 4 x 4 dither matrix into the GS DIMX register value mDitherMatrix.
  *
  * Entry n of @p src goes into bits 4n to 4n + 2 and bit 4n + 3 is cleared (DIMX holds sixteen 3-bit entries, DM00 to
  * DM33, one nibble apart). cPS2GraphicsMan_Init calls it.
@@ -6217,38 +6227,38 @@ struct sPtGfx_C198 {
 // PORT: 64-bit `long` bitfields (the GS-style register word).
 extern "C" void func_0037C198(cPS2GraphicsMan* self, int* src)
 {
-    (*(sPtBits_C198*)&self->unk_59E0).f0 = src[0];
-    (*(sPtBits_C198*)&self->unk_59E0).f1 = src[1];
-    (*(sPtBits_C198*)&self->unk_59E0).f2 = src[2];
-    (*(sPtBits_C198*)&self->unk_59E0).f3 = src[3];
-    (*(sPtBits_C198*)&self->unk_59E0).f4 = src[4];
-    (*(sPtBits_C198*)&self->unk_59E0).f5 = src[5];
-    (*(sPtBits_C198*)&self->unk_59E0).f6 = src[6];
-    (*(sPtBits_C198*)&self->unk_59E0).f7 = src[7];
-    (*(sPtBits_C198*)&self->unk_59E0).f8 = src[8];
-    (*(sPtBits_C198*)&self->unk_59E0).f9 = src[9];
-    (*(sPtBits_C198*)&self->unk_59E0).f10 = src[10];
-    (*(sPtBits_C198*)&self->unk_59E0).f11 = src[11];
-    (*(sPtBits_C198*)&self->unk_59E0).f12 = src[12];
-    (*(sPtBits_C198*)&self->unk_59E0).f13 = src[13];
-    (*(sPtBits_C198*)&self->unk_59E0).f14 = src[14];
-    (*(sPtBits_C198*)&self->unk_59E0).f15 = src[15];
-    (*(sPtBits_C198*)&self->unk_59E0).g0 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g1 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g2 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g3 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g4 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g5 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g6 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g7 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g8 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g9 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g10 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g11 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g12 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g13 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g14 = 0;
-    (*(sPtBits_C198*)&self->unk_59E0).g15 = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM00 = src[0];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM01 = src[1];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM02 = src[2];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM03 = src[3];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM10 = src[4];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM11 = src[5];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM12 = src[6];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM13 = src[7];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM20 = src[8];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM21 = src[9];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM22 = src[10];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM23 = src[11];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM30 = src[12];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM31 = src[13];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM32 = src[14];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM33 = src[15];
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM00Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM01Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM02Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM03Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM10Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM11Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM12Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM13Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM20Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM21Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM22Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM23Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM30Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM31Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM32Reserved = 0;
+    (*(sPtBits_C198*)&self->mDitherMatrix).DM33Reserved = 0;
 }
 #endif
 
@@ -6265,8 +6275,8 @@ static inline float clamp_C570(float x, float hi)
 
 
 /**
- * Sets the screen brightness colour: unk_59EC[0..2] = @p colour's r, g and b, each clamped to 0..1 and times 128,
- * converted with fptoui (float to unsigned).
+ * Sets the screen brightness colour: mBrightnessColour[0..2] = @p colour's r, g and b, each clamped to 0..1 and times
+ * 128, converted with fptoui (float to unsigned).
  *
  * func_00382AF0 multiplies these into the colour of the sprites that copy the draw buffer to the display buffer.
  * cPS2GraphicsMan_Init calls it.
@@ -6276,9 +6286,9 @@ static inline float clamp_C570(float x, float hi)
 extern "C" void func_0037C570(cPS2GraphicsMan* self, tRGB* colour)
 {
     float one = 1.0f;
-    self->unk_59EC[0] = fptoui(clamp_C570(colour->R, one) * 128.0f);
-    self->unk_59EC[1] = fptoui(clamp_C570(colour->G, one) * 128.0f);
-    self->unk_59EC[2] = fptoui(clamp_C570(colour->B, one) * 128.0f);
+    self->mBrightnessColour[0] = fptoui(clamp_C570(colour->R, one) * 128.0f);
+    self->mBrightnessColour[1] = fptoui(clamp_C570(colour->G, one) * 128.0f);
+    self->mBrightnessColour[2] = fptoui(clamp_C570(colour->B, one) * 128.0f);
 }
 #endif
 
@@ -6292,16 +6302,16 @@ struct sRGB_C638 {
 };
 
 /**
- * Returns the screen brightness colour: unk_59EC[0..2] divided by 128 (the inverse of func_0037C570).
+ * Returns the screen brightness colour: mBrightnessColour[0..2] divided by 128 (the inverse of func_0037C570).
  *
  * @return the r, g and b brightness, 1.0 = full
  */
 extern "C" sRGB_C638 func_0037C638(cPS2GraphicsMan* self)
 {
     sRGB_C638 colour;
-    colour.x = (float)(unsigned int)self->unk_59EC[0] * 0.0078125f;
-    colour.y = (float)(unsigned int)self->unk_59EC[1] * 0.0078125f;
-    colour.z = (float)(unsigned int)self->unk_59EC[2] * 0.0078125f;
+    colour.x = (float)(unsigned int)self->mBrightnessColour[0] * 0.0078125f;
+    colour.y = (float)(unsigned int)self->mBrightnessColour[1] * 0.0078125f;
+    colour.z = (float)(unsigned int)self->mBrightnessColour[2] * 0.0078125f;
     return colour;
 }
 #endif
@@ -6316,7 +6326,7 @@ static inline float clamp_C720(float x, float hi)
 }
 
 /**
- * Sets the screen alpha unk_59F8 to (1 - @p alpha clamped to 0..1) * 128, converted with fptoui.
+ * Sets the screen alpha mScreenAlpha to (1 - @p alpha clamped to 0..1) * 128, converted with fptoui.
  *
  * func_00382AF0 uses it as the alpha of the sprites that copy the draw buffer to the display buffer and turns blending
  * on when it is not 128. cPS2GraphicsMan_Init and cSpeedBoostFX__cSpeedBoostFX (with 0, i.e. 128) call it.
@@ -6325,7 +6335,7 @@ static inline float clamp_C720(float x, float hi)
  */
 extern "C" void func_0037C720(cPS2GraphicsMan* self, float alpha)
 {
-    self->unk_59F8 = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
+    self->mScreenAlpha = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
 }
 #endif
 
@@ -6333,13 +6343,13 @@ extern "C" void func_0037C720(cPS2GraphicsMan* self, float alpha)
 INCLUDE_ASM("render/particle", func_0037C770);
 #ifdef SKIP_ASM
 /**
- * Returns the screen fade set by func_0037C720: 1 - unk_59F8 / 128.
+ * Returns the screen fade set by func_0037C720: 1 - mScreenAlpha / 128.
  *
  * @return the fade amount (0 = none)
  */
 extern "C" float func_0037C770(cPS2GraphicsMan* self)
 {
-    unsigned int rawAlpha = (unsigned int)self->unk_59F8;
+    unsigned int rawAlpha = (unsigned int)self->mScreenAlpha;
     return 1.0f - (float)rawAlpha * 0.0078125f;
 }
 #endif
@@ -6744,13 +6754,13 @@ struct sPtGfxB_CC98 {
     char pad_0x5908[0x5A00 - 0x5908];
     unsigned int bufAddr;           // 0x5A00
     char pad_0x5A04[0x5A54 - 0x5A04];
-    int f5A54;
-    int f5A58;
-    int f5A5C;
+    int mDisplayWidth;              // 0x5A54 (cPS2GraphicsMan's names at these offsets)
+    int mDisplayHeight;             // 0x5A58
+    int mDisplayBufferWidth;        // 0x5A5C
     char pad_0x5A60[0x5A80 - 0x5A60];
-    unsigned int f5A80;
+    unsigned int mCurrentZBufferPage;   // 0x5A80
     char pad_0x5A84[4];
-    int f5A88;
+    int mDisplayBufferAddress;      // 0x5A88
 };
 
 /**
@@ -6767,13 +6777,13 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     self->top[1] = *self->top;
     self->top++;
     sPtTex_CC98* tex = self->tbl->entries[obj[1]];
-    self->top->f0 &= ~0x3C0;
-    self->top->fC &= 0xC0000000;
+    self->top->m_bitGroups[0] &= ~0x3C0;
+    self->top->m_bitGroups[3] &= 0xC0000000;
     unsigned int buf = self->bufAddr;
     int sz = tex->size / 32;
-    int w5A88 = self->f5A88 << 5;
-    int h5A5C = self->f5A5C;
-    unsigned int zbufPage = self->f5A80;
+    int dispBlock = self->mDisplayBufferAddress << 5;
+    int dispBufferWidth = self->mDisplayBufferWidth;
+    unsigned int zbufPage = self->mCurrentZBufferPage;
     unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
     *(cQuad128_CC98*)packet = 0x10000013;
     packet[2] = 0;
@@ -6797,7 +6807,7 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     packet[15] = 59;
     packet[16] = 0;
     packet[17] = 20;
-    packet[18] = (long)w5A88 | (long)h5A5C << 14 | 0x2a8000000L;
+    packet[18] = (long)dispBlock | (long)dispBufferWidth << 14 | 0x2a8000000L;
     packet[19] = 6;
     packet[20] = 278;
     packet[21] = 0;
@@ -6806,8 +6816,8 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     packet[22] = ((unsigned long)one.i << 32) | 0x80808080UL;
     packet[23] = 1;
     packet += 24;
-    int dispHeight = self->f5A58;
-    int dispWidth = self->f5A54;
+    int dispHeight = self->mDisplayHeight;
+    int dispWidth = self->mDisplayWidth;
     packet[0] = 0x80008;
     packet[1] = 3;
     packet[2] = 0xffff00000000UL;
@@ -6827,7 +6837,7 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     cPS2DeferManager* ring = self->ring;
     sPtRenderState* rs = self->top;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7)
             + ((unsigned int)ring->mSubmits | 0x30000000));
@@ -7824,19 +7834,19 @@ INCLUDE_ASM("render/particle", func_0037E120);
  * Writes a DMA cnt tag (6 quadwords), VIF STMASK 0 / STCYCL 1,1 and UNPACK V4-32 of 5 quadwords to VU address 0
  * (TOPS-relative), the matrix @p mat (copied with VU0) and a quadword whose w is @p flags. When @p extraMat is not 0 it
  * appends that matrix with func_0037E040; when bit 0 of @p flags is set it appends @p hdr and @p src with
- * func_0037E098. @p a3 is not used. cPS2GraphicsMan_RenderModel and cPS2GridMesh_Render1 (cPS2GridMesh's render, which passes
- * its texture matrix as @p extraMat) call it.
+ * func_0037E098. @p scale is not used. cPS2GraphicsMan_RenderModel and cPS2GridMesh_Render1 (cPS2GridMesh's render,
+ * which passes its texture matrix as @p extraMat) call it.
  *
  * @param mat  the object matrix
  * @param hdr  3 quadwords for func_0037E098
- * @param a3  not used
+ * @param scale  not used (cPS2GridMesh_Render1 passes its mesh scale vector here)
  * @param extraMat  an optional second matrix, or 0
  * @param src  10 quadwords for func_0037E098
  * @param flags  the flags word sent to the VU; bit 0 adds the func_0037E098 upload
  * @param pp  the packet cursor
  */
 // PORT: 64-bit `ulong` packet words and PS2-only VU0 asm (lqc2/sqc2 copy).
-extern "C" void func_0037E120(void* self, sPartPktQuad* mat, sPartPktQuad* hdr, int a3, void* extraMat,
+extern "C" void func_0037E120(void* self, sPartPktQuad* mat, sPartPktQuad* hdr, int scale, void* extraMat,
                               sPartPktQuad* src, int flags, char** pp)
 {
     char* packet = *pp;
@@ -7947,10 +7957,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderParticleEmitter);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sPtRS_0518 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words); [U] word 0
+                                    //      bits 6..9 = layer, word 2 bits 0..4 = key
     short tex;
     short pad;
 };
@@ -8010,11 +8018,11 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
         return;
     self->top[1] = *self->top;
     self->top++;
-    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
-    self->top->fC &= 0xC0000000;
-    self->top->f4 = (self->top->f4 & ~3) | 2;
-    self->top->f8 &= 0xE00003FF;
-    self->top->f8 = (self->top->f8 & ~0x3E0) | 0xE0;
+    self->top->m_bitGroups[0] = (self->top->m_bitGroups[0] & ~0x3C0) | 0x100;
+    self->top->m_bitGroups[3] &= 0xC0000000;
+    self->top->m_bitGroups[1] = (self->top->m_bitGroups[1] & ~3) | 2;
+    self->top->m_bitGroups[2] &= 0xE00003FF;
+    self->top->m_bitGroups[2] = (self->top->m_bitGroups[2] & ~0x3E0) | 0xE0;
     unsigned int buf = self->bufAddr;
     unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
     packet[0] = 0x10000017;
@@ -8034,7 +8042,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
     unsigned int next = self->bufAddr;
     sPtRS_0518* rs = self->top;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sPtEnt_0518* ringEntry = (sPtEnt_0518*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_0518*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
@@ -8158,28 +8166,28 @@ void cPS2GraphicsMan::RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
         int first = firstIndex + hdr.seg - firstIndex;
         if (ringSize - firstIndex < first)
             first = ringSize - firstIndex;
-        int pad = 0x40 - first - over;
+        int skipQuads = 0x40 - first - over;
         sQuad_07A0* lastA;
         sQuad_07A0* lastB;
         if (done < ringSize) {
-            int e = Wrap_07A0(done, wrap, ringSize);
-            lastB = ((sQuad_07A0*)obj->m_velocities) + e;
-            lastA = ((sQuad_07A0*)obj->m_positions) + e;
+            int lastIndex = Wrap_07A0(done, wrap, ringSize);
+            lastB = ((sQuad_07A0*)obj->m_velocities) + lastIndex;
+            lastA = ((sQuad_07A0*)obj->m_positions) + lastIndex;
         } else {
-            int e = Wrap_07A0(done - 1, wrap, ringSize);
-            lastB = ((sQuad_07A0*)obj->m_velocities) + e;
-            lastA = ((sQuad_07A0*)obj->m_positions) + e;
+            int lastIndex = Wrap_07A0(done - 1, wrap, ringSize);
+            lastB = ((sQuad_07A0*)obj->m_velocities) + lastIndex;
+            lastA = ((sQuad_07A0*)obj->m_positions) + lastIndex;
         }
         CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_positions) + firstIndex, first);
         if (over > 0)
             CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_positions), over);
         CopyQuads_07A0(&writePtr, lastA, 1);
-        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
+        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + skipQuads);
         CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_velocities) + firstIndex, first);
         if (over > 0)
             CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_velocities), over);
         CopyQuads_07A0(&writePtr, lastB, 1);
-        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
+        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + skipQuads);
         writePtr[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
         writePtr[1] = (unsigned long)34816 << 45;
         writePtr += 2;
@@ -8190,12 +8198,13 @@ void cPS2GraphicsMan::RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
         if (ring->mNumSubmitDMA < 2600) {
             rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
             int key = ring->mActiveViewIndex;
-            sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_07A0*)&ring->mSubmits[0]) | 0x30000000));
-            e->rs = *rs;
-            e->buf = buf;
-            e->next = next;
-            e->key = key;
-            e->flag = 0;
+            sPtEnt_07A0* deferEntry = (sPtEnt_07A0*)((ring->mNumSubmitDMA++ << 7)
+                    + ((unsigned int)((sPtEnt_07A0*)&ring->mSubmits[0]) | 0x30000000));
+            deferEntry->rs = *rs;
+            deferEntry->buf = buf;
+            deferEntry->next = next;
+            deferEntry->key = key;
+            deferEntry->flag = 0;
         }
         mVifCursor += 0x10;
     }
@@ -8363,8 +8372,8 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
 {
     if (cRenderToggles_m_DisableDynamicEmitters != 0)
         return;
-    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
-    self->top->fC &= 0xC0000000;
+    self->top->m_bitGroups[0] = (self->top->m_bitGroups[0] & ~0x3C0) | 0x100;
+    self->top->m_bitGroups[3] &= 0xC0000000;
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -8400,31 +8409,31 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
         int first = firstIndex + hdr.seg - firstIndex;
         if (ringSize - firstIndex < first)
             first = ringSize - firstIndex;
-        int pad = 43 - first - over;
+        int skipQuads = 43 - first - over;
         sGifQuad* lastA;
         sGifQuad* lastB;
         sCol_0CE0* lastC;
         if (done < ringSize) {
-            int e = wrapIndex(done, wrap, ringSize);
-            lastA = obj->posA + e;
-            lastB = obj->posB + e;
-            lastC = obj->cols + e;
+            int lastIndex = wrapIndex(done, wrap, ringSize);
+            lastA = obj->posA + lastIndex;
+            lastB = obj->posB + lastIndex;
+            lastC = obj->cols + lastIndex;
         } else {
-            int e = wrapIndex(done - 1, wrap, ringSize);
-            lastA = obj->posA + e;
-            lastB = obj->posB + e;
-            lastC = obj->cols + e;
+            int lastIndex = wrapIndex(done - 1, wrap, ringSize);
+            lastA = obj->posA + lastIndex;
+            lastB = obj->posB + lastIndex;
+            lastC = obj->cols + lastIndex;
         }
         CopyQuads(&writePtr, obj->posA + firstIndex, first);
         if (over > 0)
             CopyQuads(&writePtr, obj->posA, over);
         CopyQuads(&writePtr, lastA, 1);
-        writePtr = (unsigned long*)((sGifQuad*)writePtr + pad);
+        writePtr = (unsigned long*)((sGifQuad*)writePtr + skipQuads);
         CopyQuads(&writePtr, obj->posB + firstIndex, first);
         if (over > 0)
             CopyQuads(&writePtr, obj->posB, over);
         CopyQuads(&writePtr, lastB, 1);
-        writePtr = (unsigned long*)((sGifQuad*)writePtr + pad);
+        writePtr = (unsigned long*)((sGifQuad*)writePtr + skipQuads);
         writePtr[0] = 0;
         writePtr[1] = (unsigned long)0x6E2CC06E << 32;
         writePtr += 2;
@@ -8442,19 +8451,20 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
         cPS2DeferManager* ring = self->ring;
         sPtRenderState* rs = self->top;
         if (ring->mNumSubmitDMA < 2600) {
-            rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+            rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
             int key = ring->mActiveViewIndex;
-            sPtRingEnt* e = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits | 0x30000000));
-            e->rs = *rs;
-            e->buf = buf;
-            e->next = next;
-            e->key = key;
-            e->flag = 0;
+            sPtRingEnt* deferEntry = (sPtRingEnt*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)ring->mSubmits
+                    | 0x30000000));
+            deferEntry->rs = *rs;
+            deferEntry->buf = buf;
+            deferEntry->next = next;
+            deferEntry->key = key;
+            deferEntry->flag = 0;
         }
         self->bufAddr += 0x10;
     }
-    self->top->f0 &= ~0x3C0;
-    self->top->fC &= 0xC0000000;
+    self->top->m_bitGroups[0] &= ~0x3C0;
+    self->top->m_bitGroups[3] &= 0xC0000000;
 }
 #endif
 
@@ -9516,21 +9526,21 @@ static inline int gsCoord_382AF0(int v)
  * Flips the display buffers, programs the CRTC registers and sends the per-frame GS setup packet.
  *
  * Increments mCurrentFrameCount. Unless mSkipNextPageFlip is set (it is then cleared), picks the buffers: with
- * mFilterEnabled clear and an even count the draw page (mCurrentFrameBufferPage) is unk_5A7C and the display page
- * (mDisplayBufferAddress) unk_5A78, otherwise the other way round. Waits for the VIF1, GIF and fromSPR DMA channels,
- * VIF1 and the GS FIFO to go idle, and for the next vertical sync when @p waitVsync is set. Writes PMODE (EN1 = @p en1,
- * MMOD 1, ALP 0xFF), SMODE2 (interlace unk_5A44, field mode unk_5A46), DISPFB1 (display page, unk_5A5C width, unk_5A38
- * format), DISPLAY1 (position from m_screenOffset; in progressive mode, unk_5A4C, the magnification fits the display
- * width into 1550 clocks, else MAGH unk_5A64, MAGV unk_5A60 and a height doubled in interlaced field mode) and BGCOLOR
- * 0.
+ * mFilterEnabled clear and an even count the draw page (mCurrentFrameBufferPage) is mDisplayBufferPage and the display
+ * page (mDisplayBufferAddress) mDrawBufferPage, otherwise the other way round. Waits for the VIF1, GIF and fromSPR DMA
+ * channels, VIF1 and the GS FIFO to go idle, and for the next vertical sync when @p waitVsync is set. Writes PMODE (EN1
+ * = @p en1, MMOD 1, ALP 0xFF), SMODE2 (interlace mInterlace, field mode mFieldMode), DISPFB1 (display page,
+ * mDisplayBufferWidth width, mDisplayFormat format), DISPLAY1 (position from m_screenOffset; in progressive mode, mDTV,
+ * the magnification fits the display width into 1550 clocks, else MAGH mMagH, MAGV mMagV and a height doubled in
+ * interlaced field mode) and BGCOLOR 0.
  *
  * Then builds a GS packet in D_004FFCC0 (uncached accelerated): when mFilterEnabled is set, a pass that copies the draw
- * buffer into the display buffer as 32-pixel-wide textured sprite strips coloured by the brightness unk_59EC times
- * mScreenBrightness and alpha unk_59F8 (blended when not 128); the draw context (FRAME_1/2, ZBUF_1/2, XYOFFSET_1/2,
- * FBA, TEXA, PRMODECONT, COLCLAMP, DTHE from unk_59D0, DIMX from unk_59E0, PABE, SCANMSK, TEXFLUSH); a clear of the
- * frame and z buffer in 32-pixel sprite strips with mClearColour (z test always); TEST_1 0x500AD (alpha greater than
- * 10, z GEQUAL); and SCISSOR_1/2 from mScissor. Sends it with func_00371940. The kick thread func_00382760,
- * func_0037BD98 and cPS2GraphicsMan_PageFlip call it.
+ * buffer into the display buffer as 32-pixel-wide textured sprite strips coloured by the brightness mBrightnessColour
+ * times mScreenBrightness and alpha mScreenAlpha (blended when not 128); the draw context (FRAME_1/2, ZBUF_1/2,
+ * XYOFFSET_1/2, FBA, TEXA, PRMODECONT, COLCLAMP, DTHE from mDither, DIMX from mDitherMatrix, PABE, SCANMSK, TEXFLUSH);
+ * a clear of the frame and z buffer in 32-pixel sprite strips with mClearColour (z test always); TEST_1 0x500AD (alpha
+ * greater than 10, z GEQUAL); and SCISSOR_1/2 from mScissor. Sends it with func_00371940. The kick thread
+ * func_00382760, func_0037BD98 and cPS2GraphicsMan_PageFlip call it.
  *
  * @param vself  the cPS2GraphicsMan
  * @param en1  PMODE.EN1: 1 to enable read circuit 1
@@ -9547,11 +9557,11 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         vself->mSkipNextPageFlip = 0;
     } else {
         if (vself->mFilterEnabled == 0 && (count & 1) == 0) {
-            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->unk_5A7C);
-            vself->mDisplayBufferAddress = (int)((unsigned int)vself->unk_5A78);
+            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->mDisplayBufferPage);
+            vself->mDisplayBufferAddress = (int)((unsigned int)vself->mDrawBufferPage);
         } else {
-            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->unk_5A78);
-            vself->mDisplayBufferAddress = (int)((unsigned int)vself->unk_5A7C);
+            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->mDrawBufferPage);
+            vself->mDisplayBufferAddress = (int)((unsigned int)vself->mDisplayBufferPage);
         }
     }
 
@@ -9578,15 +9588,15 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         *(volatile ulong*)0x12000000 = pmode | ((ulong)1 << 5) | ((ulong)0xFF << 8);
     }
     // SMODE2: INT, FFMD
-    *(volatile ulong*)0x12000020 = (ulong)vself->unk_5A44 | ((ulong)vself->unk_5A46 << 1);
+    *(volatile ulong*)0x12000020 = (ulong)vself->mInterlace | ((ulong)vself->mFieldMode << 1);
     // DISPFB1: FBP, FBW, PSM
     *(volatile ulong*)0x12000070 = (ulong)(unsigned int)vself->mDisplayBufferAddress
-                                 | ((ulong)(unsigned int)vself->unk_5A5C << 9)
-                                 | ((ulong)(unsigned int)vself->unk_5A38 << 15);
+                                 | ((ulong)(unsigned int)vself->mDisplayBufferWidth << 9)
+                                 | ((ulong)(unsigned int)vself->mDisplayFormat << 15);
     // DISPLAY1: DX, DY, MAGH, MAGV, DW, DH
-    if (vself->unk_5A4C != 0) {
-        int w = (unsigned int)vself->unk_5A54;
-        int displayHeight = (unsigned int)vself->unk_5A58;
+    if (vself->mDTV != 0) {
+        int w = (unsigned int)vself->mDisplayWidth;
+        int displayHeight = (unsigned int)vself->mDisplayHeight;
         *(volatile ulong*)0x12000080 = (ulong)((int)(vself->m_screenOffset[0] * 4.0f + -43.0f) + 344)
                                      | ((ulong)((int)(12.0f - vself->m_screenOffset[1] * 2.0f) + 35) << 12)
                                      | ((ulong)(1550 / w - 1) << 23)
@@ -9594,13 +9604,13 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
                                      | ((ulong)(displayHeight - 1) << 44);
     } else {
         int fieldMul = 1;
-        if (vself->unk_5A44 != 0) {
-            fieldMul = vself->unk_5A46 == kGS_FFMD_FRAME ? 2 : 1;
+        if (vself->mInterlace != 0) {
+            fieldMul = vself->mFieldMode == kGS_FFMD_FRAME ? 2 : 1;
         }
         *(volatile ulong*)0x12000080 = (ulong)(vself->m_screenOffset[0] * 8.0f + 5.0f + 636.0f)
                                      | ((ulong)(50.0f - vself->m_screenOffset[1] * 2.0f) << 12)
-                                     | ((ulong)(unsigned int)vself->unk_5A64 << 23)
-                                     | ((ulong)(unsigned int)vself->unk_5A60 << 27)
+                                     | ((ulong)(unsigned int)vself->mMagH << 23)
+                                     | ((ulong)(unsigned int)vself->mMagV << 27)
                                      | ((ulong)2560 << 32)
                                      | ((ulong)(((unsigned int)vself->mFBHeight - 1) * fieldMul) << 44);
     }
@@ -9613,8 +9623,9 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         // Copy the draw buffer into the display buffer: GIFtag (11 x A+D)
         gsPacket[0] = ((ulong)1 << 60) | 11;
         gsPacket[1] = 0xE;
-        gsPacket[2] = (ulong)(unsigned int)vself->mDisplayBufferAddress | ((ulong)(unsigned int)vself->unk_5A5C << 16)
-             | ((ulong)(unsigned int)vself->unk_5A38 << 24) | ((ulong)0xFF000000 << 32);
+        gsPacket[2] = (ulong)(unsigned int)vself->mDisplayBufferAddress
+                | ((ulong)(unsigned int)vself->mDisplayBufferWidth << 16)
+             | ((ulong)(unsigned int)vself->mDisplayFormat << 24) | ((ulong)0xFF000000 << 32);
         gsPacket[3] = 76; // FRAME_1 (display buffer)
         gsPacket[4] = 97;
         gsPacket[5] = 20; // TEX1_1
@@ -9625,12 +9636,14 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         gsPacket[9] = 66; // ALPHA_1
         gsPacket[10] = 5;
         gsPacket[11] = 8; // CLAMP_1
-        gsPacket[12] = ((ulong)((unsigned int)vself->unk_5A54 - 1) << 16) | ((ulong)((unsigned int)vself->unk_5A58 - 1) << 48);
+        gsPacket[12] = ((ulong)((unsigned int)vself->mDisplayWidth - 1) << 16)
+                | ((ulong)((unsigned int)vself->mDisplayHeight - 1) << 48);
         gsPacket[13] = 0x40; // SCISSOR_1
-        gsPacket[14] = ((ulong)((unsigned int)vself->unk_5A54 - 1) << 16) | ((ulong)((unsigned int)vself->unk_5A58 - 1) << 48);
+        gsPacket[14] = ((ulong)((unsigned int)vself->mDisplayWidth - 1) << 16)
+                | ((ulong)((unsigned int)vself->mDisplayHeight - 1) << 48);
         gsPacket[15] = 65; // SCISSOR_2
-        gsPacket[16] = (ulong)((0x800 - ((unsigned int)vself->unk_5A54 >> 1)) << 4)
-              | ((ulong)((0x800 - ((unsigned int)vself->unk_5A58 >> 1)) << 4) << 32);
+        gsPacket[16] = (ulong)((0x800 - ((unsigned int)vself->mDisplayWidth >> 1)) << 4)
+              | ((ulong)((0x800 - ((unsigned int)vself->mDisplayHeight >> 1)) << 4) << 32);
         gsPacket[17] = 0x18; // XYOFFSET_1
         gsPacket[18] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24) | ((ulong)1 << 32);
         gsPacket[19] = 78; // ZBUF_1
@@ -9639,29 +9652,33 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
         gsPacket[22] = 0;
         gsPacket[23] = 0x3F; // TEXFLUSH
         {
-            int abe = (unsigned int)vself->unk_59F8 != kGSAlphaOne;
+            int abe = (unsigned int)vself->mScreenAlpha != kGSAlphaOne;
             // GIFtag: 1 loop, REGLIST {PRIM, RGBAQ}
             gsPacket[24] = ((ulong)2 << 60) | ((ulong)1 << 58) | 1;
             gsPacket[25] = 0x10;
             gsPacket[26] = ((ulong)abe << 6) | 0x11E; // sprite, IIP, TME, FST
         }
         {
-            int scaledRed = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[0] * vself->mScreenBrightness), 0, 255);
-            int scaledGreen = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[1] * vself->mScreenBrightness), 0, 255);
-            int scaledBlue = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[2] * vself->mScreenBrightness), 0, 255);
+            int scaledRed = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[0]
+                    * vself->mScreenBrightness), 0, 255);
+            int scaledGreen = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[1]
+                    * vself->mScreenBrightness), 0, 255);
+            int scaledBlue = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[2]
+                    * vself->mScreenBrightness), 0, 255);
             union { float f; int i; } unitQ;
             unitQ.f = 1.0f;
-            gsPacket[27] = (ulong)scaledRed | ((ulong)scaledGreen << 8) | ((ulong)scaledBlue << 16) | ((ulong)(unsigned int)vself->unk_59F8 << 24)
+            gsPacket[27] = (ulong)scaledRed | ((ulong)scaledGreen << 8) | ((ulong)scaledBlue << 16)
+                    | ((ulong)(unsigned int)vself->mScreenAlpha << 24)
                   | ((ulong)unitQ.i << 32);
         }
         {
             // Vertical sprite strips, 32 pixels wide.
-            unsigned int w = (unsigned int)vself->unk_5A54;
+            unsigned int w = (unsigned int)vself->mDisplayWidth;
             int stripW = 32;
             int n = w / stripW;
             int du = ((unsigned int)vself->mFBWidth / n) << 4;
             int x0 = gsCoord_382AF0(-(w >> 1));
-            int ybase = 0x8000 - (((unsigned int)vself->unk_5A58 >> 1) << 4);
+            int ybase = 0x8000 - (((unsigned int)vself->mDisplayHeight >> 1) << 4);
             int y0;
             int uoff;
             int xoff;
@@ -9672,7 +9689,7 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
             int stripV1;
             int y1;
             int i;
-            if (vself->unk_5A4C != 0) {
+            if (vself->mDTV != 0) {
                 uoff = 8;
                 xoff = 0;
                 yoff = 0;
@@ -9684,7 +9701,7 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
             y0 = yoff + ybase;
             x = xoff + x0;
             stripV1 = (((unsigned int)vself->mFBHeight - 1) << 4) + 8;
-            y1 = y0 + (((unsigned int)vself->unk_5A58 - 1) << 4);
+            y1 = y0 + (((unsigned int)vself->mDisplayHeight - 1) << 4);
             stripU0 = uoff;
             stripU1 = stripU0 + du;
             // GIFtag: n + 1 loops, REGLIST {UV, XYZ2, UV, XYZ2}
@@ -9702,11 +9719,11 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
                 gsPacket += 4;
             }
             gsPacket[0] = (ulong)uoff | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
-            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-((unsigned int)vself->unk_5A54 >> 1))
-                 | ((ulong)((((unsigned int)vself->unk_5A58 >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-((unsigned int)vself->mDisplayWidth >> 1))
+                 | ((ulong)((((unsigned int)vself->mDisplayHeight >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
             gsPacket[2] = (ulong)((unsigned int)vself->mFBWidth << 4) | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
-            gsPacket[3] = (ulong)((((unsigned int)vself->unk_5A54 >> 1) << 4) + 0x8000)
-                 | ((ulong)((((unsigned int)vself->unk_5A58 >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[3] = (ulong)((((unsigned int)vself->mDisplayWidth >> 1) << 4) + 0x8000)
+                 | ((ulong)((((unsigned int)vself->mDisplayHeight >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
             gsPacket += 4;
         }
     }
@@ -9740,9 +9757,9 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
     gsPacket[21] = 26; // PRMODECONT
     gsPacket[22] = 1;
     gsPacket[23] = 70; // COLCLAMP
-    gsPacket[24] = (unsigned int)vself->unk_59D0;
+    gsPacket[24] = (unsigned int)vself->mDither;
     gsPacket[25] = 69; // DTHE
-    gsPacket[26] = vself->unk_59E0;
+    gsPacket[26] = vself->mDitherMatrix;
     gsPacket[27] = 68; // DIMX
     gsPacket[28] = 0;
     gsPacket[29] = 73; // PABE
@@ -10144,10 +10161,8 @@ extern "C" void func_00384DC0(void* self)
 INCLUDE_ASM("render/particle", func_00384E50);
 #ifdef SKIP_ASM
 struct sPtRS_4E50 {
-    int f0;
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words); [U] word 2
+                                    //      bits 0..4 = key
     short tex;
     short pad;
 };
@@ -10213,7 +10228,7 @@ extern "C" void func_00384E50(sPktBuilder_4E50* self, int flags)
         cPS2DeferManager* ring = graphicsMan->ring;
         sPtRS_4E50* rs = graphicsMan->top;
         if (ring->mNumSubmitDMA < 2600) {
-            rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+            rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
             int key = ring->mActiveViewIndex;
             sPtEnt_4E50* deferEntry = (sPtEnt_4E50*)((ring->mNumSubmitDMA++ << 7)
                 + ((unsigned int)ring->mSubmits | 0x30000000));
@@ -10234,11 +10249,12 @@ extern "C" void func_00384E50(sPktBuilder_4E50* self, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00384FD0);
 #ifdef SKIP_ASM
+// The line-strip packet builder (func_00384E50's sPktBuilder_4E50 names the same words; names ours, from use).
 struct sPartGsCtx {
-    int field_0x0;
+    int where;           // 0x0 [U] where func_00384E50 stores the final cursor
     ulong* p;            // 0x4
-    int field_0x8;
-    int field_0xc;
+    int packetStart;     // 0x8 [U] the packet's DMA / VIF header, 0 before the first strip
+    int stripTags;       // 0xC [U] the open strip's tags, 0 when none is open
     int count;           // 0x10
 };
 
@@ -10296,19 +10312,19 @@ INCLUDE_ASM("render/particle", func_003850A8);
  * @param stripVertex  the first vertex (s, t, colour)
  * @param pos  its projected position
  */
-// PORT: packet pointers held in int fields (field_0x8 / field_0xc).
+// PORT: packet pointers held in int fields (packetStart / stripTags).
 extern "C" void func_003850A8(sPartGsCtx* ctx, sPartGsVtx* stripVertex, sPartGsPos* pos)
 {
-    if (ctx->field_0x8 == 0) {
+    if (ctx->packetStart == 0) {
         ulong* packetStart = ctx->p;
-        ctx->field_0x8 = (int)packetStart;
+        ctx->packetStart = (int)packetStart;
         ctx->p = packetStart + 4;
-    } else if (ctx->field_0xc != 0) {
+    } else if (ctx->stripTags != 0) {
         func_00384DC0(ctx);
     }
     ulong* stripTags = ctx->p;
     ctx->count = 0;
-    ctx->field_0xc = (int)stripTags;
+    ctx->stripTags = (int)stripTags;
     ctx->p = stripTags + 6;
     func_00384FD0(ctx, stripVertex, pos);
 }
@@ -10787,10 +10803,8 @@ void cPS2GridMesh::Render(int meshMatrix, const tMaterialBlockRecord* materialBl
 INCLUDE_ASM("render/particle", cPS2GridMesh_Render1);
 #ifdef SKIP_ASM
 struct sPtRS_5C10 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words); [U] word 0
+                                    //      bits 6..9 = layer, word 2 bits 0..4 = key
     short tex;
     short pad;
 };
@@ -10905,8 +10919,8 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
     if (self->gfx->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self->gfx);
     }
-    self->gfx->top->f0 = (self->gfx->top->f0 & ~0x3C0) | 0xC0;
-    self->gfx->top->fC &= 0xC0000000;
+    self->gfx->top->m_bitGroups[0] = (self->gfx->top->m_bitGroups[0] & ~0x3C0) | 0xC0;
+    self->gfx->top->m_bitGroups[3] &= 0xC0000000;
     self->gfx->top->tex = tex;
     unsigned int addr = self->gfx->bufAddr;
     sMat_5C10 baseMatrix = *mat;
@@ -10927,7 +10941,7 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
     sPtRS_5C10* rs = self->gfx->top;
     unsigned int cur = self->gfx->bufAddr;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sPtEnt_5C10* deferEntry = (sPtEnt_5C10*)((ring->mNumSubmitDMA++ << 7)
             + ((unsigned int)ring->mSubmits | 0x30000000));
@@ -11194,17 +11208,19 @@ struct sRef_66F0 {
 };
 
 
+// The model header (On Tour tMdfModelHeader, 0x50; its DWARF lists no members): field names ours, from use.
 struct sMdl_66F0 {
     char pad0[0x18];
-    int o18;
+    int matsOffset;                 // 0x18 [U] the 0x50-byte material records' offset from the model data
     char pad1c[4];
-    int o20;
+    int bonesOffset;                // 0x20 [U] the bone table's offset
     char pad24[0xC];
-    int o30;
-    int o34;
+    int refsOffset;                 // 0x30 [U] the reference table's offset (resolved into refs)
+    int blendsOffset;               // 0x34 [U] the blended-matrix table's offset (resolved into blends)
     tMdfBlendedMatrix* blends;
     sRef_66F0* refs;
-    int x40;
+    int morphWeights;               // 0x40 [U] stored from the last argument ([O] ResolveCharModel's
+                                    //      float* morphWeights)
     short nblends;
     short nrefs;
     short nbones;
@@ -11216,12 +11232,12 @@ struct sMdl_66F0 {
  * matrices.
  *
  * Relocates the model's blend table (+0x34), reference table (+0x30), material block (+0x18) and bones (+0x20) against
- * @p base, with every bone's animation tracks and keys, and stores @p x at +0x40. Each bone reads its 32-byte name
- * record: an alpha, flag 0x8000 for names starting with str_alph (4 chars) or "ea", an environment-map number from an
- * "envN" second name (+0x10), and the name itself is replaced by cGraphicsMan_GetTextureID's result. Material matrix
- * indices and blend indices are rebased by @p tbl; each blended matrix is registered (cGraphicsMan_AddBlendedMatrix)
- * and matched against the caller's list (areBlendedMatricesEqual) or appended to it, and the reference table is remapped to the
- * shared indices. cPS2GraphicsMan vtable slot 109.
+ * @p base, with every bone's animation tracks and keys, and stores @p morphWeights at +0x40. Each bone reads its
+ * 32-byte name record: an alpha, flag 0x8000 for names starting with str_alph (4 chars) or "ea", an environment-map
+ * number from an "envN" second name (+0x10), and the name itself is replaced by cGraphicsMan_GetTextureID's result.
+ * Material matrix indices and blend indices are rebased by @p tbl; each blended matrix is registered
+ * (cGraphicsMan_AddBlendedMatrix) and matched against the caller's list (areBlendedMatricesEqual) or appended to it,
+ * and the reference table is remapped to the shared indices. cPS2GraphicsMan vtable slot 109.
  *
  * @param gfx    the graphics manager (this)
  * @param inModel      the model header (tMdfModelHeader*)
@@ -11229,15 +11245,16 @@ struct sMdl_66F0 {
  * @param tbl    per-part bone offsets (On Tour partBoneOffset)
  * @param count  in/out: number of entries in @p slots (On Tour numBlendedMats)
  * @param slots  the shared blended-matrix list (On Tour blendedMats)
- * @param x      stored in the model at +0x40 (On Tour: float* morphWeights)
+ * @param morphWeights  stored in the model at +0x40 (On Tour: float* morphWeights)
  */
-extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl, int* count, tMdfBlendedMatrix* slots, int x)
+extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl,
+        int* count, tMdfBlendedMatrix* slots, int morphWeights)
 {
-    inModel->blends = (tMdfBlendedMatrix*)(base + inModel->o34);
-    inModel->refs = (sRef_66F0*)(base + inModel->o30);
-    char* mats = base + inModel->o18;
-    sBone_66F0* bones = (sBone_66F0*)(base + inModel->o20);
-    inModel->x40 = x;
+    inModel->blends = (tMdfBlendedMatrix*)(base + inModel->blendsOffset);
+    inModel->refs = (sRef_66F0*)(base + inModel->refsOffset);
+    char* mats = base + inModel->matsOffset;
+    sBone_66F0* bones = (sBone_66F0*)(base + inModel->bonesOffset);
+    inModel->morphWeights = morphWeights;
     for (int i = 0; i < inModel->nrefs; i++)
         inModel->refs[i].idx = (int*)(base + (int)inModel->refs[i].idx);
     for (int i = 0; i < inModel->nbones; i++) {
@@ -11477,8 +11494,8 @@ struct sPartStrip_6DD0 {
     void* verts;    // 0x0
     void* cols;     // 0x4
     int count;      // 0x8
-    float f0;       // 0xC
-    float f1;       // 0x10
+    float alphaScale;   // 0xC (name ours, as func_00386D10's) [U] the trail's alpha multiplier
+    float alphaStep;    // 0x10 (name ours) [U] the trail's alpha step
 };
 
 extern "C" void func_00387EC0(void* self, void* verts, void* cols, int count, void* a4, void* a5, void* a6, float f0, float f1);
@@ -11499,7 +11516,8 @@ extern "C" void func_00386DD0(void* self, sPartStrip_6DD0* strips, int n, void* 
 {
     for (; n > 0; n--, strips++) {
         if (strips->count >= 2) {
-            func_00387EC0(self, strips->verts, strips->cols, strips->count, firstRing, secondRing, textured, strips->f0, strips->f1);
+            func_00387EC0(self, strips->verts, strips->cols, strips->count, firstRing, secondRing, textured,
+                    strips->alphaScale, strips->alphaStep);
         }
     }
 }
@@ -11515,10 +11533,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderMultipleBoardTrails);
 // PORT: uncached (0x30000000) packet pointers held in int; ulong is 64-bit (GIF/VIF words).
 
 struct sRS_6E78 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
+    int m_bitGroups[4];             // 0x00 [O] sDrawState::m_bitGroups (the draw state's bit words)
     short tex;
     short pad;
 };
@@ -11670,17 +11685,22 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, cPS2GraphicsMan* self)
 void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
 {
     *((sRS_6E78*)m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
-    ((sRS_6E78*)m_pCurrentDrawState)->f8 = (((sRS_6E78*)m_pCurrentDrawState)->f8 & ~0x3E0) | 0x60;
-    ((sRS_6E78*)m_pCurrentDrawState)->f0 = (((sRS_6E78*)m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sRS_6E78*)m_pCurrentDrawState)->fC &= 0xC0000000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[2] = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[2] & ~0x3E0)
+            | 0x60;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[0] = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[0] & ~0x3C0)
+            | 0xC0;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
     if (mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)this);
     }
-    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x400000) | 0x400000;
-    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x1800000) | 0x1000000;
-    ((sRS_6E78*)m_pCurrentDrawState)->f4 &= ~0x300000;
-    ((sRS_6E78*)m_pCurrentDrawState)->f4 &= ~0xFF000;
-    ((sRS_6E78*)m_pCurrentDrawState)->f4 = (((sRS_6E78*)m_pCurrentDrawState)->f4 & ~0x7C) | 0x14;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x400000) | 0x400000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x1800000) | 0x1000000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] &= ~0x300000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] &= ~0xFF000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x7C)
+            | 0x14;
     int tex = _EffectTexMap[D_004A45D4.texIndex];
     ((sRS_6E78*)m_pCurrentDrawState)->tex = tex;
 
@@ -11799,7 +11819,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     unsigned int next = mVifCursor;
     sRS_6E78* rs = ((sRS_6E78*)m_pCurrentDrawState);
     if (ring->mNumSubmitDMA < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
         sEnt_6E78* deferEntry = (sEnt_6E78*)((ring->mNumSubmitDMA++ << 7)
             + ((unsigned int)ring->mSubmits | 0x30000000));
@@ -11810,8 +11830,8 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
         deferEntry->flag = 0;
     }
     mVifCursor += 0x10;
-    ((sRS_6E78*)m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sRS_6E78*)m_pCurrentDrawState)->fC &= 0xC0000000;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[0] &= ~0x3C0;
+    ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
     *((sRS_6E78*)m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
 }
 #endif
@@ -12503,8 +12523,8 @@ INCLUDE_ASM("render/particle", func_00389620);
  */
 extern "C" void func_00389620(cIrradiance* dst, cIrradiance* src, float dt)
 {
-    float* srcW = &src->unk_000[0].w;
-    float* dstW = &dst->unk_000[0].w;
+    float* srcW = &src->mVectors[0].w;
+    float* dstW = &dst->mVectors[0].w;
     for (int i = 0; i < 10; i++) {
         *dstW += *srcW * dt;
         dstW += 4;
@@ -13148,18 +13168,18 @@ extern "C" void func_00389CB8(t4Vector* out, void* sunp, float scale)
     } else {
         azim = 0.0f;
     }
-    sMat_9CB8 R = t4mat_Identity_9CB8;
-    Translate_9CB8(&R, eye);
-    RotateAxis_9CB8(&R, &t4vect_YAxis_9CB8, -elev);
-    RotateAxis_9CB8(&R, &t4vect_ZAxis_9CB8, -azim);
-    MMI_TRANSPOSE4(&R);
+    sMat_9CB8 sunFrame = t4mat_Identity_9CB8;
+    Translate_9CB8(&sunFrame, eye);
+    RotateAxis_9CB8(&sunFrame, &t4vect_YAxis_9CB8, -elev);
+    RotateAxis_9CB8(&sunFrame, &t4vect_ZAxis_9CB8, -azim);
+    MMI_TRANSPOSE4(&sunFrame);
     // NOTE: D_00500C60 is a function-static matrix and D_004A59A4 its first-use guard.
     if (D_004A59A4 == 0) {
         SetCols_9CB8(&D_00500C60, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
                      1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
         D_004A59A4 = 1;
     }
-    sMat_9CB8 basisRotation = Mul_9CB8(D_00500C60, R);
+    sMat_9CB8 basisRotation = Mul_9CB8(D_00500C60, sunFrame);
     sMat3_9CB8 rotation3x3 = ToMat3_9CB8(basisRotation);
     func_00389840(prm, &rotation3x3, 3, 3);
     func_00389620_9CB8(out, prm, scale * 0.7500065565109253f);
@@ -13366,15 +13386,15 @@ extern "C" void func_0038A6A8(void* self, float* point, tLightRecord* forceSrc)
     case eNEWLight_Spot:
         if (!func_0038A530(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv, &planeD))
             return;
-        if (!(planeD >= forceSrc->unk_060))
+        if (!(planeD >= forceSrc->mSpotOuterCos))
             return;
         fade = fade_38A6A8(forceSrc, dist);
         k = curve_38A6A8(forceSrc, inv) * forceSrc->m_fIntensity * fade;
-        if (planeD >= forceSrc->unk_05C)
+        if (planeD >= forceSrc->mSpotInnerCos)
             k *= powi_38A6A8(planeD, forceSrc->m_cDropOff);
         else {
-            k *= powi_38A6A8(forceSrc->unk_05C, forceSrc->m_cDropOff);
-            k *= (planeD - forceSrc->unk_060) / (forceSrc->unk_05C - forceSrc->unk_060);
+            k *= powi_38A6A8(forceSrc->mSpotInnerCos, forceSrc->m_cDropOff);
+            k *= (planeD - forceSrc->mSpotOuterCos) / (forceSrc->mSpotInnerCos - forceSrc->mSpotOuterCos);
         }
         k = clamp_38A6A8(k, 5.0f);
         {

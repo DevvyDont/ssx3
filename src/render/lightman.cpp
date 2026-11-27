@@ -212,7 +212,9 @@ void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
             char* pos = ((char*)&lights[i].m_fvWorldPos[0]);
             sV3_DC70 dir = Normalize_DC70(lights[i].m_fvDirection[0], lights[i].m_fvDirection[1],
                                           lights[i].m_fvDirection[2]);
-            cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].unk_05C), lights[i].m_fIntensity, lights[i].m_cDecayRate, (float)lights[i].m_cDropOff);
+            cLightInst_CreateSpot_DC70(obj, &col, pos, &dir,
+                    1.5707963705062866f - func_0031C128(lights[i].mSpotInnerCos), lights[i].m_fIntensity,
+                    lights[i].m_cDecayRate, (float)lights[i].m_cDropOff);
             break;
         }
         case eNEWLight_Ambient:

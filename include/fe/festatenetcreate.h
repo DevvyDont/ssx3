@@ -69,8 +69,9 @@ struct cFEStateCreateStep1 : public cFEStateNet {
                                     //       it differs
     int miSavedSpam[2];             // 0x6E0 [U] func_001BA178 saves mpAccount->mSpam[0..1], func_001BA218 restores them, func_001BA358
                                     //       sets mpAccount->mChangeSpam when either differs
-    int unk_6E8;                    // 0x6E8 [U] func_001B92C8 (popup 0x82C events): 1 on 0x11 (option 2), 0 on 0xF/0x10/0x14; on 0x16
-                                    //       it opens the "kT_POPUP204SaveAccount" yes/no popup when set, else pushes cFEStateSelectPersona
+    int mbSaveAccount;              // 0x6E8 (name ours) [U] func_001B92C8 (popup 0x82C events): 1 on 0x11 (option 2),
+                                    //       0 on 0xF/0x10/0x14; on 0x16 it opens the "kT_POPUP204SaveAccount" yes/no
+                                    //       popup when set, else pushes cFEStateSelectPersona
     int mbEditAccount;              // 0x6EC [R] cFEStateCreateStep1_cFEStateCreateStep1's 3rd argument (mHashName 0x4D when set, 0x50 when not), 1 in the default
                                     //       ctor; [U] onCreateScreen picks the form from it, onWidgetCreate/onWidgetEvent/func_001BA178 test it
     cUIText* mpStaticContinue;      // 0x6F0 [R] 0; [U] onWidgetCreate cFEStateCreateStep1_onWidgetCreate: widget "StaticContinue"; onGainTransition
@@ -94,7 +95,7 @@ CHECK_OFFSET(cFEStateCreateStep1, mszSavedPassword, 0x6D4);
 CHECK_OFFSET(cFEStateCreateStep1, mszSavedConfirm, 0x6D8);
 CHECK_OFFSET(cFEStateCreateStep1, mszSavedMail, 0x6DC);
 CHECK_OFFSET(cFEStateCreateStep1, miSavedSpam, 0x6E0);
-CHECK_OFFSET(cFEStateCreateStep1, unk_6E8, 0x6E8);
+CHECK_OFFSET(cFEStateCreateStep1, mbSaveAccount, 0x6E8);
 CHECK_OFFSET(cFEStateCreateStep1, mbEditAccount, 0x6EC);
 CHECK_OFFSET(cFEStateCreateStep1, mpStaticContinue, 0x6F0);
 CHECK_SIZE(cFEStateCreateStep1, 0x6F4);
@@ -118,8 +119,9 @@ struct cFEStateCreateStep2 : public cFEStateNet {
                                     //       (func_001BB2D0..func_001BB4B0, cFEStateCreateStep2_onWidgetEvent, func_001BB840); func_001BAED8 sends mName/mPassword
     int mbScreenReady;              // 0x6D4 [U] onCreateScreen cFEStateCreateStep2_onCreateScreen clears it first and sets it once every box is filled;
                                     //       onWidgetEvent cFEStateCreateStep2_onWidgetEvent stores box changes into mpAccount only while it is set
-    int unk_6D8;                    // 0x6D8 [U] func_001BAED8 (popup events): 1 on 0x11 (option 2), 0 on 0xF/0x10/0x14; on 0x16 it opens
-                                    //       "kT_POPUP204SaveAccount" when set, else "kT_POPUP201Verify" and submits the account (func_0025C610)
+    int mbSaveAccount;              // 0x6D8 (name ours) [U] func_001BAED8 (popup events): 1 on 0x11 (option 2), 0 on
+                                    //       0xF/0x10/0x14; on 0x16 it opens "kT_POPUP204SaveAccount" when set, else
+                                    //       "kT_POPUP201Verify" and submits the account (func_0025C610)
     int unk_6DC;                    // 0x6DC [U] onCreateScreen cFEStateCreateStep2_onCreateScreen stores 0; no read seen
 
     // Methods bound to their retail symbols by asm labels.
@@ -136,7 +138,7 @@ struct cFEStateCreateStep2 : public cFEStateNet {
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);
 CHECK_OFFSET(cFEStateCreateStep2, mbScreenReady, 0x6D4);
-CHECK_OFFSET(cFEStateCreateStep2, unk_6D8, 0x6D8);
+CHECK_OFFSET(cFEStateCreateStep2, mbSaveAccount, 0x6D8);
 CHECK_OFFSET(cFEStateCreateStep2, unk_6DC, 0x6DC);
 CHECK_SIZE(cFEStateCreateStep2, 0x6E0);
 

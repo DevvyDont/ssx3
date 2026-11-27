@@ -633,8 +633,8 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
 {
     cBECharProfileDB* self = vself;
     void* db = D_004A6750;
-    int n = func_0014DC40(db, self->unk_BC0);
-    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->unk_BC0);
+    int n = func_0014DC40(db, self->mCharacterID);
+    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->mCharacterID);
     for (int i = 0; i < n; i++, prizeGroup++)
     {
         func_00151C90((cBECharProfileDB*)self, prizeGroup->prize, 1);
@@ -646,8 +646,8 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
         if ((*(short*)&it->flags) & 0x10)
             *(short*)&it->flags |= 0x26;
     }
-    int numDefs = func_0014D988(db, self->unk_BC0);
-    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->unk_BC0);
+    int numDefs = func_0014D988(db, self->mCharacterID);
+    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->mCharacterID);
     int changed = 0;
     for (int i = 0; i < numDefs; i++, itemDef++)
     {
@@ -1010,7 +1010,7 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
     void* db = D_004A6750;
     sEconDef_151A88* itemDef = (sEconDef_151A88*)func_0014D998(db, k);
     int n = func_0014D988(db, k);
-    self->unk_BC0 = k;
+    self->mCharacterID = k;
     self->mNumBolts = n;
     if (self->mpBoltsMap == 0)
         self->mpBoltsMap = (short*)operator_new_tag(kBolt_Num * 2, str_Profile_Bolts_Map, 0, 0);
@@ -1195,7 +1195,7 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
 {
     cBECharProfileDB* self = selfp;
     sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
-    sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->unk_BC0, id));
+    sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->mCharacterID, id));
     tBEProfileBolt* item = getItem_151C90(self, id);
     int bit1 = hasFlag_151C90(def, 1) != 0;
     int bit8 = hasFlag_151C90(def, 8) != 0;
@@ -1209,8 +1209,8 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
     if (on && bit1)
     {
         int rid = def->rel;
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->unk_BC0, rid);
-        int n = func_0014D4C8(db, self->unk_BC0, rid);
+        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->mCharacterID, rid);
+        int n = func_0014D4C8(db, self->mCharacterID, rid);
         for (int i = 0; i < n; i++, rel++)
         {
             int sid = rel->other;
@@ -1227,8 +1227,8 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
     }
     else if (!on && (wasOn || bit8))
     {
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->unk_BC0, id);
-        int n = func_0014D4C8(db, self->unk_BC0, id);
+        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->mCharacterID, id);
+        int n = func_0014D4C8(db, self->mCharacterID, id);
         for (int i = 0; i < n; i++, rel++)
         {
             if (func_00151C90((cBECharProfileDB*)self, rel->other, 0) == 0)
@@ -1317,7 +1317,7 @@ extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
     cBECharProfileDB* self = selfp;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
     int n = 0;
-    sEconLink_151EF0* link = func_0014DB40(db, self->unk_BC0, id, on, &n);
+    sEconLink_151EF0* link = func_0014DB40(db, self->mCharacterID, id, on, &n);
     tBEProfileBolt* item = getItem_151EF0(self, id);
     for (int i = 0; i < n; i++, link++)
     {
@@ -1334,7 +1334,7 @@ extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
         {
             if (has)
                 continue;
-            if (!(getDef_151EF0(db, func_0014D448(db, self->unk_BC0, link->target))->flags & 8))
+            if (!(getDef_151EF0(db, func_0014D448(db, self->mCharacterID, link->target))->flags & 8))
                 continue;
         }
         if (targetItem->id == id)
@@ -1388,8 +1388,8 @@ static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
 extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
 {
     void* db = func_0014BDB8((self));
-    int n = func_0014D988(db, self->unk_BC0);
-    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, self->unk_BC0);
+    int n = func_0014D988(db, self->mCharacterID);
+    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, self->mCharacterID);
     *changed = 0;
     for (int i = 0; i < n; i++, def++)
     {
@@ -1455,12 +1455,12 @@ extern "C" int func_001521F0(cBECharProfileDB* self)
     int i = 0;
     int ok = 1;
     void* db = func_0014BDB8_noarg();
-    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->unk_BC0);
-    int n = func_0014DC40(db, self->unk_BC0);
+    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->mCharacterID);
+    int n = func_0014DC40(db, self->mCharacterID);
     for (; i < n; i++, group++)
     {
         sEconDef_1521F0* list[528];
-        int cnt = func_0014D608(db, self->unk_BC0, group->id, (void**)list, -1, 1);
+        int cnt = func_0014D608(db, self->mCharacterID, group->id, (void**)list, -1, 1);
         int j;
         for (j = 0; j < cnt; j++)
         {

@@ -635,14 +635,14 @@ float cWorldLightMan::GetIntensity(t4Vector* point, tLightRecord* lp)
         return light->m_fRGBIntensity;
     case eNEWLight_Spot:
         if (cWorldLightMan_CalcLightDist(this, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, &dot)) {
-            if (dot >= light->unk_060) {
+            if (dot >= light->mSpotOuterCos) {
                 att = Atten_5D30(light, dist);
                 amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
-                if (light->unk_05C <= dot) {
+                if (light->mSpotInnerCos <= dot) {
                     amount *= Pow_5D30(dot, light->m_cDropOff);
                 } else {
-                    amount *= Pow_5D30(light->unk_05C, light->m_cDropOff);
-                    amount *= (dot - light->unk_060) / (light->unk_05C - light->unk_060);
+                    amount *= Pow_5D30(light->mSpotInnerCos, light->m_cDropOff);
+                    amount *= (dot - light->mSpotOuterCos) / (light->mSpotInnerCos - light->mSpotOuterCos);
                 }
                 return light->m_fRGBIntensity * amount;
             }

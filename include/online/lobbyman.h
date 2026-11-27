@@ -86,17 +86,19 @@ CHECK_SIZE(tLobbyAccount, 0x50);
 // the opponent's into mOpponentStats with one block copy). Filled from the "onln" reply (func_0025D048).
 struct tLobbyStats {
     int mRank;              // 0x00 [U] tag "R"; the setup manager sends it to the opponent (func_00264CB8)
-    int unk_04;             // 0x04 [U] "STAT" field 2
-    int unk_08;             // 0x08 [U] "STAT" fields 2 + 3 + 4
-    int unk_0C;             // 0x0C [U] "STAT" field 6
-    int unk_10;             // 0x10 [U] func_0025D048 stores -1
+    int mWins;              // 0x04 (name ours) [U] "STAT" field 2; [R] func_001AFA60 shows it as the wins of
+                            //      "kT_CMNWinRatio"
+    int mGamesPlayed;       // 0x08 (name ours) [U] "STAT" fields 2 + 3 + 4; [R] func_001AFA60: "kT_CMNGamesPlayed"
+    int mDisconnects;       // 0x0C (name ours) [U] "STAT" field 6; [R] func_001AFA60: "kT_CMNDisconnects"
+    int mPing;              // 0x10 (name ours) [U] func_0025F288: a room user's "P" text as a number, which
+                            //      func_001B3BF0 draws as the connection-quality meter; func_0025D048 stores -1
 };
 
 CHECK_OFFSET(tLobbyStats, mRank, 0x00);
-CHECK_OFFSET(tLobbyStats, unk_04, 0x04);
-CHECK_OFFSET(tLobbyStats, unk_08, 0x08);
-CHECK_OFFSET(tLobbyStats, unk_0C, 0x0C);
-CHECK_OFFSET(tLobbyStats, unk_10, 0x10);
+CHECK_OFFSET(tLobbyStats, mWins, 0x04);
+CHECK_OFFSET(tLobbyStats, mGamesPlayed, 0x08);
+CHECK_OFFSET(tLobbyStats, mDisconnects, 0x0C);
+CHECK_OFFSET(tLobbyStats, mPing, 0x10);
 CHECK_SIZE(tLobbyStats, 0x14);
 
 // LobbyMan::mEventList, a g++ 2.95 std::list<online::Event*, BXAllocator>: the allocator (one word: BXAllocator is
@@ -157,8 +159,8 @@ struct LobbyMan {
                                     //       disconnect clears; update polls the room/user lists only when set
     int mDisconnected;              // 0x010 [P] assert "!disconnected" (lw 0x10); [U] onconnectionmsg sets 1,
                                     //       update clears it and disconnects
-    int unk_014;                    // 0x014 [R] ctor 0; [U] connect stores its argument (non-zero: use the known
-                                    //       address, state 3; zero: look the server name up, state 2)
+    int mbUseCachedAddr;            // 0x014 (name ours) [R] ctor 0; [U] connect stores its argument (non-zero: use
+                                    //       the known address, state 3; zero: look the server name up, state 2)
     int mHaveCPAT;                  // 0x018 [R] ctor 0; [U] onauthentication: 1 when the reply has "CPAT";
                                     //       selectpersona (func_0025CD50) then sends mCPAT as "CDEV"
     char mCPAT[0x24];               // 0x01C [U] onauthentication decodes "CPAT" into it (func_003EFD30, up to 0x21)
@@ -210,7 +212,7 @@ struct LobbyMan {
     tLobbyStats mOpponentStats;     // 0x0CC [U] block-copied in by cFEStateChallengeReceivedPopup_onCreateScreen / func_002642B8
     float mTimeout;                 // 0x0E0 [U] func_0025B608 stores the request timeout (20.0), connect 30.0;
                                     //       update subtracts the frame time and gives up when it goes negative
-    float unk_0E4;                  // 0x0E4 [U] update subtracts the frame time (no other writer seen)
+    float mCountdown;               // 0x0E4 (name ours) [U] update subtracts the frame time (no other writer seen)
     char* mServerName;              // 0x0E8 [R] ctor cBXString(.., "ps2ssx04.ea.com"); [U] connect looks it up
     tLobbyEventList mEventList;     // 0x0EC [R] std::list<online::Event*, BXAllocator>: allocator word at 0xEC,
                                     //       node pointer at 0xF0 (ctor allocates the 0xC-byte head node "StlBlock",
@@ -265,7 +267,7 @@ CHECK_OFFSET(LobbyMan, mServerAddr, 0x004);
 CHECK_OFFSET(LobbyMan, mAuthenticated, 0x008);
 CHECK_OFFSET(LobbyMan, mLoggedIn, 0x00C);
 CHECK_OFFSET(LobbyMan, mDisconnected, 0x010);
-CHECK_OFFSET(LobbyMan, unk_014, 0x014);
+CHECK_OFFSET(LobbyMan, mbUseCachedAddr, 0x014);
 CHECK_OFFSET(LobbyMan, mHaveCPAT, 0x018);
 CHECK_OFFSET(LobbyMan, mCPAT, 0x01C);
 CHECK_OFFSET(LobbyMan, mRequestId, 0x040);
@@ -298,7 +300,7 @@ CHECK_OFFSET(LobbyMan, mIsHost, 0x0B4);
 CHECK_OFFSET(LobbyMan, mStats, 0x0B8);
 CHECK_OFFSET(LobbyMan, mOpponentStats, 0x0CC);
 CHECK_OFFSET(LobbyMan, mTimeout, 0x0E0);
-CHECK_OFFSET(LobbyMan, unk_0E4, 0x0E4);
+CHECK_OFFSET(LobbyMan, mCountdown, 0x0E4);
 CHECK_OFFSET(LobbyMan, mServerName, 0x0E8);
 CHECK_OFFSET(LobbyMan, mEventList, 0x0EC);
 CHECK_OFFSET(LobbyMan, mpConfig, 0x0F4);
