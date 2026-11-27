@@ -50,4 +50,16 @@ CHECK_OFFSET(luno_cLunoVar, Data, 0x0);
 CHECK_OFFSET(luno_cLunoVar, Type, 0x8);
 CHECK_SIZE(luno_cLunoVar, 0xC);
 
+// luno::cLunoCArg: one argument of a script C function ([O] On Tour class cLunoCArg, 0x10: int Index, cLunoVar Arg).
+// [U] the world-script functions (seg/seg_1FBE38) take an array of them: Index names the parameter-block field the
+// argument sets, Arg its value (an int turned into a float where the field type table says eLunoVar_Float).
+struct luno_cLunoCArg {
+    int Index;                          // 0x0 [O]; [U] the field index
+    luno_cLunoVar Arg;                  // 0x4 [O]; [U] Data.Int (+0x4) and Type (+0xC)
+};
+
+CHECK_OFFSET(luno_cLunoCArg, Index, 0x0);
+CHECK_OFFSET(luno_cLunoCArg, Arg, 0x4);
+CHECK_SIZE(luno_cLunoCArg, 0x10);
+
 #endif /* LUNO_LUNOVAR_H */

@@ -25,6 +25,7 @@
 // retail use; [O] SSX On Tour's DWARF (same members, names and offsets; its bools are bytes, retail's words).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/effectlink.h"
 #include "bx/math3d.h"
 #include "render/particle.h"
@@ -148,7 +149,8 @@ CHECK_SIZE(cDynamicParticleModifier, 0x270);
 // cHaloModifier(const tAddHaloData&, tInstanceRecord*); [U] cHaloModifier_cHaloModifier (view sEffSrc_6120) copies
 // Type, Mesh, Radius and Speed into the members of the same names and (ColourR, ColourG, ColourB, ColourA) into Color.
 struct tAddHaloData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddHaloFunc's instance lookup (-1: the script's
+                                    //      current instance)
     int Type;                       // 0x04 [O]; [U] -> Type
     int Mesh;                       // 0x08 [O]; [U] -> Mesh
     float ColourA;                  // 0x0C [O]; [U] -> Color.w
@@ -157,10 +159,11 @@ struct tAddHaloData {
     float ColourB;                  // 0x18 [O]; [U] -> Color.z
     float Radius;                   // 0x1C [O]; [U] -> Radius
     int Speed;                      // 0x20 [O]; [U] -> Speed
-    char unk_024[0x4];              // 0x24 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x24 [O]
+    char unk_025[0x3];              // 0x25 padding
 };
 
-CHECK_OFFSET(tAddHaloData, unk_000, 0x00);
+CHECK_OFFSET(tAddHaloData, InstId, 0x00);
 CHECK_OFFSET(tAddHaloData, Type, 0x04);
 CHECK_OFFSET(tAddHaloData, Mesh, 0x08);
 CHECK_OFFSET(tAddHaloData, ColourA, 0x0C);
@@ -169,7 +172,7 @@ CHECK_OFFSET(tAddHaloData, ColourG, 0x14);
 CHECK_OFFSET(tAddHaloData, ColourB, 0x18);
 CHECK_OFFSET(tAddHaloData, Radius, 0x1C);
 CHECK_OFFSET(tAddHaloData, Speed, 0x20);
-CHECK_OFFSET(tAddHaloData, unk_024, 0x24);
+CHECK_OFFSET(tAddHaloData, null, 0x24);
 CHECK_SIZE(tAddHaloData, 0x28);
 
 // cHaloModifier: a light halo drawn at one mesh of the instance, spinning by Speed degrees per update

@@ -5,6 +5,7 @@
 #include "object/instancenode.h"
 #include "world/worldcache.h"
 #include "wscript/wscriptmission.h"
+#include "wscript/wscriptcache.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
@@ -21,6 +22,25 @@
 #include "ai/riderhandler.h"
 #include "main/gameviewman.h"
 #include "wscript/wscriptprocess.h"
+#include "ai/ridermetrix.h"
+#include "object/animdeltanode.h"
+#include "object/animcombonode.h"
+#include "object/animteeternode.h"
+#include "object/conveyornode.h"
+#include "object/counternode.h"
+#include "object/animobject.h"
+#include "object/boostnode.h"
+#include "object/deadfadenode.h"
+#include "object/debouncenode.h"
+#include "object/fencenode.h"
+#include "object/rollermodifier.h"
+#include "object/texflipmodifier.h"
+#include "object/boostmodifier.h"
+#include "object/splinemodifier.h"
+#include "object/multisplinemodifier.h"
+#include "object/floatrailnode.h"
+#include "object/springrailnode.h"
+#include "object/effectmodifier.h"
 
 // The script functions' command and type arguments (names ours, from what each function does with the value; the On
 // Tour parameter blocks (tExpireData, tRailData, ...) type them int). Evidence: [U] the function each is used in.
@@ -85,6 +105,22 @@ enum eIconType { kIconType_Multiplier = 0, kIconType_PowerUp = 1, kIconType_Poin
 
 // The world script manager (cWScriptMan::TheWScriptMan): its constructor stores itself here.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
+
+// The instance record a world-cache data tag points at: m_bfuiMemLoc holds its address / 4 (On Tour's
+// cWorld::getInstanceResource, inlined into these functions, decodes the same packed pointer).
+static inline tInstanceRecord* instanceAtMemLoc(unsigned memLoc) {
+    return (tInstanceRecord*)(memLoc << 2); // PORT: packed pointer in a 32-bit handle
+}
+
+// Stores one script argument in the parameter-block field it names (the argument loop of every script function
+// below): as a float when the field type table says eLunoVar_Float and the argument is not already one (an int turned
+// into a float), otherwise as given.
+static inline void setArgField(void* field, const luno_cLunoCArg* arg, int fieldType) {
+    if (arg->Arg.Type != fieldType && fieldType == eLunoVar_Float)
+        *(float*)field = (float)arg->Arg.Data.Int;
+    else
+        *(int*)field = arg->Arg.Data.Int;
+}
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
 #ifdef SKIP_ASM
@@ -156,12 +192,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimDeltaNode_cAnimDeltaNode1_B060(void*, int, void*, void*) __asm__("cAnimDeltaNode_cAnimDeltaNode1");
 extern char D_00489658_B060[] __asm__("D_00489658");
 extern t3Vector luno_gLunoNil_B060 __asm__("luno_gLunoNil");
-struct Tag_B060 { char c; Tag_B060() {} Tag_B060(const Tag_B060 &o) : c(o.c) {} };
-extern unsigned D_B060[] __asm__("D_004FB390");
+extern tMakeAnimDeltaData sAnimDeltaDefaults __asm__("D_004FB390");
 extern int D_004A55C0;
 extern const int MakeAnimDeltaFunc_types[];
 extern "C" void* MEM_copy_B060(void*, void*, int) __asm__("MEM_copy");
-struct Ent_B060 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[4]): animates a world instance with a new AnimDelta node, unless its current node is
  * busy.
@@ -181,36 +215,32 @@ struct Ent_B060 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeAnimDeltaFunc(int n, Ent_B060 *params) {
+extern "C" t3Vector MakeAnimDeltaFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55C0 == 0) {
-        D_B060[0] = 0xFFFFFFFF;
-        ((int*)D_B060)[1] = 1;
-        ((int*)D_B060)[2] = 0;
-        *(float*)&D_B060[3] = -1.0f;
-        *(float*)&D_B060[4] = -1.0f;
-        *(float*)&D_B060[5] = 30.0f;
-        ((int*)D_B060)[6] = 0;
-        *(float*)&D_B060[7] = -1.0f;
-        ((int*)D_B060)[8] = 0;
-        ((int*)D_B060)[9] = 0;
+        sAnimDeltaDefaults.InstId = 0xFFFFFFFF;
+        sAnimDeltaDefaults.Type = 1;
+        sAnimDeltaDefaults.Dir = 0;
+        sAnimDeltaDefaults.FromTime = -1.0f;
+        sAnimDeltaDefaults.ToTime = -1.0f;
+        sAnimDeltaDefaults.Speed = 30.0f;
+        sAnimDeltaDefaults.SpeedRange = 0.0f;
+        sAnimDeltaDefaults.StartTime = -1.0f;
+        sAnimDeltaDefaults.RandomStart = 0;
+        sAnimDeltaDefaults.ForceVisible = 0;
         D_004A55C0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_B060*)((char*)D_B060 + 40)) = Tag_B060((*(Tag_B060*)((char*)D_B060 + 40)));
+        sAnimDeltaDefaults.null = WScriptNullType(sAnimDeltaDefaults.null);
     }
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_B060(buf, D_B060, 44);
-    Ent_B060 *x = params;
+    MEM_copy_B060(buf, &sAnimDeltaDefaults, sizeof(tMakeAnimDeltaData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeAnimDeltaFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -250,12 +280,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimComboNode_cAnimComboNode1_B270(void*, int, void*, void*) __asm__("cAnimComboNode_cAnimComboNode1");
 extern char D_00489668_B270[] __asm__("D_00489668");
 extern t3Vector luno_gLunoNil_B270 __asm__("luno_gLunoNil");
-struct Tag_B270 { char c; Tag_B270() {} Tag_B270(const Tag_B270 &o) : c(o.c) {} };
-extern unsigned D_B270[] __asm__("D_004FB3C0");
+extern tMakeAnimComboData sAnimComboDefaults __asm__("D_004FB3C0");
 extern int D_004A55C4;
 extern const int MakeAnimComboFunc_types[];
 extern "C" void* MEM_copy_B270(void*, void*, int) __asm__("MEM_copy");
-struct Ent_B270 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[5]): plays a two-stage animation on a world instance with a new AnimCombo node,
  * unless its current node is busy.
@@ -276,40 +304,36 @@ struct Ent_B270 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeAnimComboFunc(int n, Ent_B270 *params) {
+extern "C" t3Vector MakeAnimComboFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55C4 == 0) {
-        D_B270[0] = 0xFFFFFFFF;
-        ((int*)D_B270)[1] = 1;
-        ((int*)D_B270)[2] = 0;
-        *(float*)&D_B270[3] = -1.0f;
-        *(float*)&D_B270[4] = 30.0f;
-        *(float*)&D_B270[5] = 30.0f;
-        ((int*)D_B270)[6] = 0;
-        *(float*)&D_B270[7] = -1.0f;
-        ((int*)D_B270)[8] = 0;
-        ((int*)D_B270)[9] = 0;
-        *(float*)&D_B270[10] = 31.0f;
-        *(float*)&D_B270[11] = -1.0f;
-        *(float*)&D_B270[12] = 30.0f;
-        ((int*)D_B270)[13] = 0;
+        sAnimComboDefaults.InstId = 0xFFFFFFFF;
+        sAnimComboDefaults.Type = 1;
+        sAnimComboDefaults.Dir = 0;
+        sAnimComboDefaults.FromTime = -1.0f;
+        sAnimComboDefaults.ToTime = 30.0f;
+        sAnimComboDefaults.Speed = 30.0f;
+        sAnimComboDefaults.SpeedRange = 0.0f;
+        sAnimComboDefaults.StartTime = -1.0f;
+        sAnimComboDefaults.RandomStart = 0;
+        sAnimComboDefaults.ForceVisible = 0;
+        sAnimComboDefaults.FromTime2 = 31.0f;
+        sAnimComboDefaults.ToTime2 = -1.0f;
+        sAnimComboDefaults.Speed2 = 30.0f;
+        sAnimComboDefaults.Stop = 0;
         D_004A55C4 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_B270*)((char*)D_B270 + 56)) = Tag_B270((*(Tag_B270*)((char*)D_B270 + 56)));
+        sAnimComboDefaults.null = WScriptNullType(sAnimComboDefaults.null);
     }
     unsigned buf64[15];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_B270(buf, D_B270, 60);
-    Ent_B270 *x = params;
+    MEM_copy_B270(buf, &sAnimComboDefaults, sizeof(tMakeAnimComboData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeAnimComboFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -349,12 +373,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimTeeterNode_cAnimTeeterNode1_B498(void*, int, void*, void*) __asm__("cAnimTeeterNode_cAnimTeeterNode1");
 extern char D_00489678_B498[] __asm__("D_00489678");
 extern t3Vector luno_gLunoNil_B498 __asm__("luno_gLunoNil");
-struct Tag_B498 { char c; Tag_B498() {} Tag_B498(const Tag_B498 &o) : c(o.c) {} };
-extern unsigned D_B498[] __asm__("D_004FB400");
+extern tMakeAnimTeeterData sAnimTeeterDefaults __asm__("D_004FB400");
 extern int D_004A55C8;
 extern const int MakeAnimTeeterFunc_types[];
 extern "C" void* MEM_copy_B498(void*, void*, int) __asm__("MEM_copy");
-struct Ent_B498 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[6]): makes a world instance teeter (a new AnimTeeter node), unless its current node
  * is busy.
@@ -375,36 +397,32 @@ struct Ent_B498 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeAnimTeeterFunc(int n, Ent_B498 *params) {
+extern "C" t3Vector MakeAnimTeeterFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55C8 == 0) {
-        D_B498[0] = 0xFFFFFFFF;
-        *(float*)&D_B498[1] = 0.6000000238418579f;
-        ((int*)D_B498)[2] = 0;
-        *(float*)&D_B498[3] = 60.0f;
-        *(float*)&D_B498[4] = 0.019999999552965164f;
-        *(float*)&D_B498[5] = -10.0f;
-        *(float*)&D_B498[6] = 0.6000000238418579f;
-        ((int*)D_B498)[7] = 0;
-        *(float*)&D_B498[8] = -1.0f;
-        *(float*)&D_B498[9] = -1.0f;
+        sAnimTeeterDefaults.InstId = 0xFFFFFFFF;
+        sAnimTeeterDefaults.TorqueScale = 0.6000000238418579f;
+        sAnimTeeterDefaults.BounceFactor = 0.0f;
+        sAnimTeeterDefaults.MaxSpeed = 60.0f;
+        sAnimTeeterDefaults.Spring = 0.019999999552965164f;
+        sAnimTeeterDefaults.PivotTime = -10.0f;
+        sAnimTeeterDefaults.Damp = 0.6000000238418579f;
+        sAnimTeeterDefaults.AnimSign = 0;
+        sAnimTeeterDefaults.FromTime = -1.0f;
+        sAnimTeeterDefaults.ToTime = -1.0f;
         D_004A55C8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_B498*)((char*)D_B498 + 40)) = Tag_B498((*(Tag_B498*)((char*)D_B498 + 40)));
+        sAnimTeeterDefaults.null = WScriptNullType(sAnimTeeterDefaults.null);
     }
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_B498(buf, D_B498, 44);
-    Ent_B498 *x = params;
+    MEM_copy_B498(buf, &sAnimTeeterDefaults, sizeof(tMakeAnimTeeterData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeAnimTeeterFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -444,12 +462,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cConveyorNode_cConveyorNode_B6B8(void*, int, void*, void*) __asm__("cConveyorNode_cConveyorNode");
 extern char D_00489688_B6B8[] __asm__("D_00489688");
 extern t3Vector luno_gLunoNil_B6B8 __asm__("luno_gLunoNil");
-struct Tag_B6B8 { char c; Tag_B6B8() {} Tag_B6B8(const Tag_B6B8 &o) : c(o.c) {} };
-extern unsigned D_B6B8[] __asm__("D_004FB430");
+extern tMakeConveyorData sConveyorDefaults __asm__("D_004FB430");
 extern int D_004A55CC;
 extern const int MakeConveyorFunc_types[];
 extern "C" void* MEM_copy_B6B8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_B6B8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[8]): turns a world instance into a conveyor (a new Conveyor node), unless its
  * current node is busy.
@@ -469,39 +485,35 @@ struct Ent_B6B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeConveyorFunc(int n, Ent_B6B8 *params) {
+extern "C" t3Vector MakeConveyorFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55CC == 0) {
-        D_B6B8[0] = 0xFFFFFFFF;
-        *(float*)&D_B6B8[1] = 100.0f;
+        sConveyorDefaults.InstId = 0xFFFFFFFF;
+        sConveyorDefaults.Vel = 100.0f;
         float z = 0.0f;
-        *(float*)&D_B6B8[2] = z;
-        *(float*)&D_B6B8[3] = z;
-        ((int*)D_B6B8)[4] = 0;
-        ((int*)D_B6B8)[5] = 0;
-        ((int*)D_B6B8)[6] = 0;
-        ((int*)D_B6B8)[7] = 0;
-        ((int*)D_B6B8)[8] = 0;
-        ((int*)D_B6B8)[9] = 0;
-        ((int*)D_B6B8)[10] = 0;
-        ((int*)D_B6B8)[11] = 0;
+        sConveyorDefaults.UScroll = z;
+        sConveyorDefaults.VScroll = z;
+        sConveyorDefaults.Rotate0 = 0;
+        sConveyorDefaults.Rotate1 = 0;
+        sConveyorDefaults.Rotate2 = 0;
+        sConveyorDefaults.Rotate3 = 0;
+        sConveyorDefaults.Rotate4 = 0;
+        sConveyorDefaults.Rotate5 = 0;
+        sConveyorDefaults.Rotate6 = 0;
+        sConveyorDefaults.Rotate7 = 0;
         D_004A55CC = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_B6B8*)((char*)D_B6B8 + 48)) = Tag_B6B8((*(Tag_B6B8*)((char*)D_B6B8 + 48)));
+        sConveyorDefaults.null = WScriptNullType(sConveyorDefaults.null);
     }
     unsigned buf64[13];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_B6B8(buf, D_B6B8, 52);
-    Ent_B6B8 *x = params;
+    MEM_copy_B6B8(buf, &sConveyorDefaults, sizeof(tMakeConveyorData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeConveyorFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -541,12 +553,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cCounterNode_cCounterNode1_B8D0(void*, int, void*, void*) __asm__("cCounterNode_cCounterNode1");
 extern char D_004A3BE8_B8D0[] __asm__("D_004A3BE8");
 extern t3Vector luno_gLunoNil_B8D0 __asm__("luno_gLunoNil");
-struct Tag_B8D0 { char c; Tag_B8D0() {} Tag_B8D0(const Tag_B8D0 &o) : c(o.c) {} };
-extern unsigned D_B8D0[] __asm__("D_004FB468");
+extern tMakeCounterData sCounterDefaults __asm__("D_004FB468");
 extern int D_004A55D0;
 extern int MakeCounterFunc_types[2];
 extern "C" void* MEM_copy_B8D0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_B8D0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[9]): gives a world instance a hit counter (a new Counter node), unless its current
  * node is busy.
@@ -565,28 +575,24 @@ struct Ent_B8D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeCounterFunc(int n, Ent_B8D0 *params) {
+extern "C" t3Vector MakeCounterFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55D0 == 0) {
-        D_B8D0[0] = 0xFFFFFFFF;
-        ((int*)D_B8D0)[1] = 3;
+        sCounterDefaults.InstId = 0xFFFFFFFF;
+        sCounterDefaults.StartCount = 3;
         D_004A55D0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_B8D0*)((char*)D_B8D0 + 8)) = Tag_B8D0((*(Tag_B8D0*)((char*)D_B8D0 + 8)));
+        sCounterDefaults.null = WScriptNullType(sCounterDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_B8D0(buf, D_B8D0, 12);
-    Ent_B8D0 *x = params;
+    MEM_copy_B8D0(buf, &sCounterDefaults, sizeof(tMakeCounterData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeCounterFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -626,12 +632,33 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFloatingNode_cFloatingNode_BAB0(void*, int, void*, void*) __asm__("cFloatingNode_cFloatingNode");
 extern char D_00489698_BAB0[] __asm__("D_00489698");
 extern t3Vector luno_gLunoNil_BAB0 __asm__("luno_gLunoNil");
-struct Tag_BAB0 { char c; Tag_BAB0() {} Tag_BAB0(const Tag_BAB0 &o) : c(o.c) {} };
-extern unsigned D_BAB0[] __asm__("D_004FB478");
+// World-script data that makes a floating node (On Tour tMakeFloatingData, 0x20; same offsets): the block below
+// fills it, cFloatingNode_cFloatingNode reads it.
+struct tMakeFloatingData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    float LSpring;                  // 0x04 [O]
+    float LDamp;                    // 0x08 [O]
+    float ASpring;                  // 0x0C [O]
+    float ADamp;                    // 0x10 [O]
+    float ForceScale;               // 0x14 [O]
+    float TorqueScale;              // 0x18 [O]
+    WScriptNullType null;           // 0x1C [O]
+    char unk_01D[0x3];              // 0x1D padding
+};
+
+CHECK_OFFSET(tMakeFloatingData, InstId, 0x00);
+CHECK_OFFSET(tMakeFloatingData, LSpring, 0x04);
+CHECK_OFFSET(tMakeFloatingData, LDamp, 0x08);
+CHECK_OFFSET(tMakeFloatingData, ASpring, 0x0C);
+CHECK_OFFSET(tMakeFloatingData, ADamp, 0x10);
+CHECK_OFFSET(tMakeFloatingData, ForceScale, 0x14);
+CHECK_OFFSET(tMakeFloatingData, TorqueScale, 0x18);
+CHECK_OFFSET(tMakeFloatingData, null, 0x1C);
+CHECK_SIZE(tMakeFloatingData, 0x20);
+extern tMakeFloatingData sFloatingDefaults __asm__("D_004FB478");
 extern int D_004A55D4;
 extern const int MakeFloatingFunc_types[];
 extern "C" void* MEM_copy_BAB0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_BAB0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[14]): makes a world instance float on springs (a new Floating node), unless its
  * current node is busy.
@@ -651,33 +678,29 @@ struct Ent_BAB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeFloatingFunc(int n, Ent_BAB0 *params) {
+extern "C" t3Vector MakeFloatingFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55D4 == 0) {
-        D_BAB0[0] = 0xFFFFFFFF;
-        *(float*)&D_BAB0[1] = 10.0f;
-        *(float*)&D_BAB0[2] = 10.0f;
-        *(float*)&D_BAB0[3] = 40.0f;
-        *(float*)&D_BAB0[4] = 10.0f;
-        *(float*)&D_BAB0[5] = 0.20000000298023224f;
-        *(float*)&D_BAB0[6] = 10.0f;
+        sFloatingDefaults.InstId = 0xFFFFFFFF;
+        sFloatingDefaults.LSpring = 10.0f;
+        sFloatingDefaults.LDamp = 10.0f;
+        sFloatingDefaults.ASpring = 40.0f;
+        sFloatingDefaults.ADamp = 10.0f;
+        sFloatingDefaults.ForceScale = 0.20000000298023224f;
+        sFloatingDefaults.TorqueScale = 10.0f;
         D_004A55D4 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_BAB0*)((char*)D_BAB0 + 28)) = Tag_BAB0((*(Tag_BAB0*)((char*)D_BAB0 + 28)));
+        sFloatingDefaults.null = WScriptNullType(sFloatingDefaults.null);
     }
     unsigned buf64[8];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_BAB0(buf, D_BAB0, 32);
-    Ent_BAB0 *x = params;
+    MEM_copy_BAB0(buf, &sFloatingDefaults, sizeof(tMakeFloatingData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeFloatingFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -717,12 +740,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cAnimObjectNode_cAnimObjectNode1_BCB8(void*, int, int, void*, void*) __asm__("cAnimObjectNode_cAnimObjectNode1");
 extern char D_004896A8_BCB8[] __asm__("D_004896A8");
 extern t3Vector luno_gLunoNil_BCB8 __asm__("luno_gLunoNil");
-struct Tag_BCB8 { char c; Tag_BCB8() {} Tag_BCB8(const Tag_BCB8 &o) : c(o.c) {} };
-extern unsigned D_BCB8[] __asm__("D_004FB498");
+extern tMakeAnimObjectData sAnimObjectDefaults __asm__("D_004FB498");
 extern int D_004A55D8;
 extern const int MakeAnimObjectFunc_types[];
 extern "C" void* MEM_copy_BCB8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_BCB8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[3]): animates a world instance as an animated object (a new AnimObject node), unless
  * its current node is busy.
@@ -742,36 +763,32 @@ struct Ent_BCB8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
+extern "C" t3Vector MakeAnimObjectFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55D8 == 0) {
-        D_BCB8[0] = 0xFFFFFFFF;
-        ((int*)D_BCB8)[1] = 1;
-        ((int*)D_BCB8)[2] = 0;
-        *(float*)&D_BCB8[3] = -1.0f;
-        *(float*)&D_BCB8[4] = -1.0f;
-        *(float*)&D_BCB8[5] = 30.0f;
-        ((int*)D_BCB8)[6] = 0;
-        *(float*)&D_BCB8[7] = -1.0f;
-        ((int*)D_BCB8)[8] = 0;
-        ((int*)D_BCB8)[9] = 0;
+        sAnimObjectDefaults.InstId = 0xFFFFFFFF;
+        sAnimObjectDefaults.Type = 1;
+        sAnimObjectDefaults.Dir = 0;
+        sAnimObjectDefaults.FromTime = -1.0f;
+        sAnimObjectDefaults.ToTime = -1.0f;
+        sAnimObjectDefaults.Speed = 30.0f;
+        sAnimObjectDefaults.SpeedRange = 0.0f;
+        sAnimObjectDefaults.StartTime = -1.0f;
+        sAnimObjectDefaults.RandomStart = 0;
+        sAnimObjectDefaults.ForceVisible = 0;
         D_004A55D8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_BCB8*)((char*)D_BCB8 + 40)) = Tag_BCB8((*(Tag_BCB8*)((char*)D_BCB8 + 40)));
+        sAnimObjectDefaults.null = WScriptNullType(sAnimObjectDefaults.null);
     }
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_BCB8(buf, D_BCB8, 44);
-    Ent_BCB8 *x = params;
+    MEM_copy_BCB8(buf, &sAnimObjectDefaults, sizeof(tMakeAnimObjectData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeAnimObjectFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -811,12 +828,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cBoostNode_cBoostNode1_BEC8(void*, int, int, void*, void*) __asm__("cBoostNode_cBoostNode1");
 extern char D_004A3BF0_BEC8[] __asm__("D_004A3BF0");
 extern t3Vector luno_gLunoNil_BEC8 __asm__("luno_gLunoNil");
-struct Tag_BEC8 { char c; Tag_BEC8() {} Tag_BEC8(const Tag_BEC8 &o) : c(o.c) {} };
-extern unsigned D_BEC8[] __asm__("D_004FB4C8");
+extern tMakeBoostData sBoostDefaults __asm__("D_004FB4C8");
 extern int D_004A55DC;
 extern const int MakeBoostFunc_types[];
 extern "C" void* MEM_copy_BEC8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_BEC8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[7]): turns a world instance into a boost object (a new Boost node), unless its
  * current node is busy.
@@ -836,35 +851,31 @@ struct Ent_BEC8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeBoostFunc(int n, Ent_BEC8 *params) {
+extern "C" t3Vector MakeBoostFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55DC == 0) {
-        D_BEC8[0] = 0xFFFFFFFF;
-        ((int*)D_BEC8)[1] = 0;
-        *(float*)&D_BEC8[2] = 1.0f;
+        sBoostDefaults.InstId = 0xFFFFFFFF;
+        sBoostDefaults.Type = 0;
+        sBoostDefaults.BoostTime = 1.0f;
         float z = 0.0f;
-        *(float*)&D_BEC8[3] = z;
-        *(float*)&D_BEC8[4] = 1.0f;
-        *(float*)&D_BEC8[5] = z;
-        *(float*)&D_BEC8[6] = 1.0f;
-        *(float*)&D_BEC8[7] = z;
+        sBoostDefaults.Drag = z;
+        sBoostDefaults.MaxSpeed = 1.0f;
+        sBoostDefaults.BoostX = z;
+        sBoostDefaults.BoostY = 1.0f;
+        sBoostDefaults.BoostZ = z;
         D_004A55DC = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_BEC8*)((char*)D_BEC8 + 32)) = Tag_BEC8((*(Tag_BEC8*)((char*)D_BEC8 + 32)));
+        sBoostDefaults.null = WScriptNullType(sBoostDefaults.null);
     }
     unsigned buf64[9];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_BEC8(buf, D_BEC8, 36);
-    Ent_BEC8 *x = params;
+    MEM_copy_BEC8(buf, &sBoostDefaults, sizeof(tMakeBoostData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeBoostFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -904,12 +915,25 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cObjectNode_cObjectNode_C0D0(void*, int, void*, int, bool) __asm__("cObjectNode_cObjectNode");
 extern char D_004A3BF8_C0D0[] __asm__("D_004A3BF8");
 extern t3Vector luno_gLunoNil_C0D0 __asm__("luno_gLunoNil");
-struct Tag_C0D0 { char c; Tag_C0D0() {} Tag_C0D0(const Tag_C0D0 &o) : c(o.c) {} };
-extern unsigned D_C0D0[] __asm__("D_004FB4F0");
+// World-script data that makes an object node (On Tour tMakeObjectData, 0x10; same offsets): the block below fills
+// it and passes Solid and ForceVisible to cObjectNode_cObjectNode.
+struct tMakeObjectData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Solid;                      // 0x04 [O]
+    int ForceVisible;               // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tMakeObjectData, InstId, 0x00);
+CHECK_OFFSET(tMakeObjectData, Solid, 0x04);
+CHECK_OFFSET(tMakeObjectData, ForceVisible, 0x08);
+CHECK_OFFSET(tMakeObjectData, null, 0x0C);
+CHECK_SIZE(tMakeObjectData, 0x10);
+extern tMakeObjectData sObjectDefaults __asm__("D_004FB4F0");
 extern int D_004A55E0;
 extern const int MakeObjectFunc_types[];
 extern "C" void* MEM_copy_C0D0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_C0D0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[0]): gives a world instance a plain object node (a new Object node), unless its
  * current node is busy.
@@ -928,29 +952,25 @@ struct Ent_C0D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeObjectFunc(int n, Ent_C0D0 *params) {
+extern "C" t3Vector MakeObjectFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55E0 == 0) {
-        D_C0D0[0] = 0xFFFFFFFF;
-        ((int*)D_C0D0)[1] = 0;
-        ((int*)D_C0D0)[2] = 0;
+        sObjectDefaults.InstId = 0xFFFFFFFF;
+        sObjectDefaults.Solid = 0;
+        sObjectDefaults.ForceVisible = 0;
         D_004A55E0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_C0D0*)((char*)D_C0D0 + 12)) = Tag_C0D0((*(Tag_C0D0*)((char*)D_C0D0 + 12)));
+        sObjectDefaults.null = WScriptNullType(sObjectDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_C0D0(buf, D_C0D0, 16);
-    Ent_C0D0 *x = params;
+    MEM_copy_C0D0(buf, &sObjectDefaults, sizeof(tMakeObjectData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeObjectFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -991,7 +1011,7 @@ extern char str_RestoreNode[];
 /**
  * Applies a dead/restore request to a world instance by the request's Type.
  *
- * @p ev is a tMakeDeadData-style block (On Tour: InstId, Type). Type kMakeDead_Dead replaces the instance's node
+ * @p data is the request (On Tour tMakeDeadData: InstId, Type). Type kMakeDead_Dead replaces the instance's node
  * (m_pActiveNode) with a new cDeadNode (cMemMan_alloc 0x1C, "DeadNode"); kMakeDead_Restore replaces it with a new
  * cRestoreNode (0x1C, "RestoreNode"); kMakeDead_ResetFlags deletes the node and rewrites the instance flags (m_iFlags)
  * as (f & 0xFFFF0300) | ((f & 0xFFFF0300) >> 16) | 2. An existing node is deleted through its virtual destructor
@@ -1000,10 +1020,10 @@ extern char str_RestoreNode[];
  *
  * MakeDeadFunc calls it for the script, cObjectInterface_makeDead for cDeadFadeNode when its fade ends.
  *
- * @param ev  the request block: InstId at +0x0, Type at +0x4
+ * @param data  the request: its Type picks what happens
  */
-extern "C" void makeDead(tInstanceRecord* self, char* ev) {
-    switch (*(int*)(ev + 4)) {
+extern "C" void makeDead(tInstanceRecord* self, const tMakeDeadData* data) {
+    switch (data->Type) {
     case kMakeDead_ResetFlags: {
         cInstanceNode* curNode = self->m_pActiveNode;
         if (curNode) {
@@ -1049,12 +1069,10 @@ static inline tInstanceRecord *conv_C420(unsigned i) { if (i == 0) return 0; ret
 extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void makeDead_C420(void*, void*) __asm__("makeDead");
 extern t3Vector luno_gLunoNil_C420 __asm__("luno_gLunoNil");
-struct Tag_C420 { char c; Tag_C420() {} Tag_C420(const Tag_C420 &o) : c(o.c) {} };
-extern unsigned D_C420[] __asm__("D_004FB500");
+extern tMakeDeadData sDeadDefaults __asm__("D_004FB500");
 extern int D_004A55E4;
 extern int MakeDeadFunc_types[2];
 extern "C" void* MEM_copy_C420(void*, void*, int) __asm__("MEM_copy");
-struct Ent_C420 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[2]): makes a world instance dead or restores it, unless its current node is busy.
  *
@@ -1071,26 +1089,22 @@ struct Ent_C420 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeDeadFunc(int n, Ent_C420 *params) {
+extern "C" t3Vector MakeDeadFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55E4 == 0) {
-        D_C420[0] = 0xFFFFFFFF;
-        ((int*)D_C420)[1] = 0;
+        sDeadDefaults.InstId = 0xFFFFFFFF;
+        sDeadDefaults.Type = 0;
         D_004A55E4 = 1;
-        (*(Tag_C420*)((char*)D_C420 + 8)) = Tag_C420((*(Tag_C420*)((char*)D_C420 + 8)));
+        sDeadDefaults.null = WScriptNullType(sDeadDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_C420(buf, D_C420, 12);
-    Ent_C420 *x = params;
+    MEM_copy_C420(buf, &sDeadDefaults, sizeof(tMakeDeadData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeDeadFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1129,12 +1143,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDeadFadeNode_cDeadFadeNode_C5D8(void*, int, void*, void*, int) __asm__("cDeadFadeNode_cDeadFadeNode");
 extern char D_004896D8_C5D8[] __asm__("D_004896D8");
 extern t3Vector luno_gLunoNil_C5D8 __asm__("luno_gLunoNil");
-struct Tag_C5D8 { char c; Tag_C5D8() {} Tag_C5D8(const Tag_C5D8 &o) : c(o.c) {} };
-extern unsigned D_C5D8[] __asm__("D_004FB510");
+extern tMakeDeadFadeData sDeadFadeDefaults __asm__("D_004FB510");
 extern int D_004A55E8;
 extern const int MakeDeadFadeFunc_types[];
 extern "C" void* MEM_copy_C5D8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_C5D8 { int idx; int val; int pad; int type; };
 /**
  * Script function: makes a world instance fade out and die (a new "DeadFade" node), unless it is already
  * busy.
@@ -1147,30 +1159,26 @@ struct Ent_C5D8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
+extern "C" t3Vector MakeDeadFadeFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55E8 == 0) {
-        D_C5D8[0] = 0xFFFFFFFF;
-        ((int*)D_C5D8)[1] = 0;
-        *(float*)&D_C5D8[2] = 2.0f;
-        *(float*)&D_C5D8[3] = 25.0f;
+        sDeadFadeDefaults.InstId = 0xFFFFFFFF;
+        sDeadFadeDefaults.Type = 0;
+        sDeadFadeDefaults.FadeTime = 2.0f;
+        sDeadFadeDefaults.ZVel = 25.0f;
         D_004A55E8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_C5D8*)((char*)D_C5D8 + 16)) = Tag_C5D8((*(Tag_C5D8*)((char*)D_C5D8 + 16)));
+        sDeadFadeDefaults.null = WScriptNullType(sDeadFadeDefaults.null);
     }
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_C5D8(buf, D_C5D8, 20);
-    Ent_C5D8 *x = params;
+    MEM_copy_C5D8(buf, &sDeadFadeDefaults, sizeof(tMakeDeadFadeData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeDeadFadeFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1210,12 +1218,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDebounceNode_cDebounceNode1_C7D0(void*, int, void*, void*, int) __asm__("cDebounceNode_cDebounceNode1");
 extern char D_004896E8_C7D0[] __asm__("D_004896E8");
 extern t3Vector luno_gLunoNil_C7D0 __asm__("luno_gLunoNil");
-struct Tag_C7D0 { char c; Tag_C7D0() {} Tag_C7D0(const Tag_C7D0 &o) : c(o.c) {} };
-extern unsigned D_C7D0[] __asm__("D_004FB528");
+extern tMakeDebounceData sDebounceDefaults __asm__("D_004FB528");
 extern int D_004A55EC;
 extern const int MakeDebounceFunc_types[];
 extern "C" void* MEM_copy_C7D0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_C7D0 { int idx; int val; int pad; int type; };
 /**
  * Script command MakeDebounce: turns an instance into a debounce node.
  *
@@ -1230,30 +1236,26 @@ struct Ent_C7D0 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" t3Vector MakeDebounceFunc(int n, Ent_C7D0 *params) {
+extern "C" t3Vector MakeDebounceFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55EC == 0) {
-        D_C7D0[0] = 0xFFFFFFFF;
-        *(float*)&D_C7D0[1] = 1.0f;
-        ((int*)D_C7D0)[2] = 1;
-        ((int*)D_C7D0)[3] = -1;
+        sDebounceDefaults.InstId = 0xFFFFFFFF;
+        sDebounceDefaults.Time = 1.0f;
+        sDebounceDefaults.Type = 1;
+        sDebounceDefaults.Visible = -1;
         D_004A55EC = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_C7D0*)((char*)D_C7D0 + 16)) = Tag_C7D0((*(Tag_C7D0*)((char*)D_C7D0 + 16)));
+        sDebounceDefaults.null = WScriptNullType(sDebounceDefaults.null);
     }
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_C7D0(buf, D_C7D0, 20);
-    Ent_C7D0 *x = params;
+    MEM_copy_C7D0(buf, &sDebounceDefaults, sizeof(tMakeDebounceData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeDebounceFunc_types[idx];
-        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)field = (float)x->val;
-        else
-            *field = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1293,12 +1295,71 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFlagNode_cFlagNode1_C9C8(void*, int, void*, void*) __asm__("cFlagNode_cFlagNode1");
 extern char D_004A3C08_C9C8[] __asm__("D_004A3C08");
 extern t3Vector luno_gLunoNil_C9C8 __asm__("luno_gLunoNil");
-struct Tag_C9C8 { char c; Tag_C9C8() {} Tag_C9C8(const Tag_C9C8 &o) : c(o.c) {} };
-extern unsigned D_C9C8[] __asm__("D_004FB540");
+// World-script data that makes a flag node (On Tour tMakeFlagData, 0x6C; same offsets): the block below fills it,
+// cFlagNode_cFlagNode reads it.
+struct tMakeFlagData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int BaseSideHeld;               // 0x04 [O]
+    int OppositeSideHeld;           // 0x08 [O]
+    int PerpSideHeld;               // 0x0C [O]
+    float Speed1;                   // 0x10 [O]
+    float Magnitude1;               // 0x14 [O]
+    float Frequency1;               // 0x18 [O]
+    float Speed2;                   // 0x1C [O]
+    float Magnitude2;               // 0x20 [O]
+    float Frequency2;               // 0x24 [O]
+    float Speed3;                   // 0x28 [O]
+    float Magnitude3;               // 0x2C [O]
+    float Frequency3;               // 0x30 [O]
+    float Speed4;                   // 0x34 [O]
+    float Magnitude4;               // 0x38 [O]
+    float Frequency4;               // 0x3C [O]
+    float LowWindX;                 // 0x40 [O]
+    float LowWindY;                 // 0x44 [O]
+    float LowWindZ;                 // 0x48 [O]
+    float HighWindX;                // 0x4C [O]
+    float HighWindY;                // 0x50 [O]
+    float HighWindZ;                // 0x54 [O]
+    float MinWindFactor;            // 0x58 [O]
+    float UScroll;                  // 0x5C [O]
+    float VScroll;                  // 0x60 [O]
+    int OverSaturate;               // 0x64 [O]
+    WScriptNullType null;           // 0x68 [O]
+    char unk_069[0x3];              // 0x69 padding
+};
+
+CHECK_OFFSET(tMakeFlagData, InstId, 0x00);
+CHECK_OFFSET(tMakeFlagData, BaseSideHeld, 0x04);
+CHECK_OFFSET(tMakeFlagData, OppositeSideHeld, 0x08);
+CHECK_OFFSET(tMakeFlagData, PerpSideHeld, 0x0C);
+CHECK_OFFSET(tMakeFlagData, Speed1, 0x10);
+CHECK_OFFSET(tMakeFlagData, Magnitude1, 0x14);
+CHECK_OFFSET(tMakeFlagData, Frequency1, 0x18);
+CHECK_OFFSET(tMakeFlagData, Speed2, 0x1C);
+CHECK_OFFSET(tMakeFlagData, Magnitude2, 0x20);
+CHECK_OFFSET(tMakeFlagData, Frequency2, 0x24);
+CHECK_OFFSET(tMakeFlagData, Speed3, 0x28);
+CHECK_OFFSET(tMakeFlagData, Magnitude3, 0x2C);
+CHECK_OFFSET(tMakeFlagData, Frequency3, 0x30);
+CHECK_OFFSET(tMakeFlagData, Speed4, 0x34);
+CHECK_OFFSET(tMakeFlagData, Magnitude4, 0x38);
+CHECK_OFFSET(tMakeFlagData, Frequency4, 0x3C);
+CHECK_OFFSET(tMakeFlagData, LowWindX, 0x40);
+CHECK_OFFSET(tMakeFlagData, LowWindY, 0x44);
+CHECK_OFFSET(tMakeFlagData, LowWindZ, 0x48);
+CHECK_OFFSET(tMakeFlagData, HighWindX, 0x4C);
+CHECK_OFFSET(tMakeFlagData, HighWindY, 0x50);
+CHECK_OFFSET(tMakeFlagData, HighWindZ, 0x54);
+CHECK_OFFSET(tMakeFlagData, MinWindFactor, 0x58);
+CHECK_OFFSET(tMakeFlagData, UScroll, 0x5C);
+CHECK_OFFSET(tMakeFlagData, VScroll, 0x60);
+CHECK_OFFSET(tMakeFlagData, OverSaturate, 0x64);
+CHECK_OFFSET(tMakeFlagData, null, 0x68);
+CHECK_SIZE(tMakeFlagData, 0x6C);
+extern tMakeFlagData sFlagDefaults __asm__("D_004FB540");
 extern int D_004A55F0;
 extern const int MakeFlagFunc_types[];
 extern "C" void* MEM_copy_C9C8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_C9C8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[12]): makes a world instance wave like a flag (a new Flag node), unless its current
  * node is busy.
@@ -1321,53 +1382,49 @@ struct Ent_C9C8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeFlagFunc(int n, Ent_C9C8 *params) {
+extern "C" t3Vector MakeFlagFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55F0 == 0) {
-        D_C9C8[0] = 0xFFFFFFFF;
-        ((int*)D_C9C8)[1] = 1;
-        ((int*)D_C9C8)[2] = 0;
-        ((int*)D_C9C8)[3] = 0;
-        *(float*)&D_C9C8[4] = 1.0f;
-        *(float*)&D_C9C8[5] = 25.0f;
-        *(float*)&D_C9C8[6] = 1.0f;
-        *(float*)&D_C9C8[7] = 1.0f;
+        sFlagDefaults.InstId = 0xFFFFFFFF;
+        sFlagDefaults.BaseSideHeld = 1;
+        sFlagDefaults.OppositeSideHeld = 0;
+        sFlagDefaults.PerpSideHeld = 0;
+        sFlagDefaults.Speed1 = 1.0f;
+        sFlagDefaults.Magnitude1 = 25.0f;
+        sFlagDefaults.Frequency1 = 1.0f;
+        sFlagDefaults.Speed2 = 1.0f;
         float z = 0.0f;
-        *(float*)&D_C9C8[8] = z;
-        *(float*)&D_C9C8[9] = 1.0f;
-        *(float*)&D_C9C8[10] = 1.0f;
-        *(float*)&D_C9C8[11] = z;
-        *(float*)&D_C9C8[12] = 1.0f;
-        *(float*)&D_C9C8[13] = 1.0f;
-        *(float*)&D_C9C8[14] = z;
-        *(float*)&D_C9C8[15] = 1.0f;
-        *(float*)&D_C9C8[16] = z;
-        *(float*)&D_C9C8[17] = z;
-        *(float*)&D_C9C8[18] = z;
-        *(float*)&D_C9C8[19] = z;
-        *(float*)&D_C9C8[20] = z;
-        *(float*)&D_C9C8[21] = z;
-        *(float*)&D_C9C8[22] = z;
-        *(float*)&D_C9C8[23] = z;
-        *(float*)&D_C9C8[24] = z;
-        ((int*)D_C9C8)[25] = 0;
+        sFlagDefaults.Magnitude2 = z;
+        sFlagDefaults.Frequency2 = 1.0f;
+        sFlagDefaults.Speed3 = 1.0f;
+        sFlagDefaults.Magnitude3 = z;
+        sFlagDefaults.Frequency3 = 1.0f;
+        sFlagDefaults.Speed4 = 1.0f;
+        sFlagDefaults.Magnitude4 = z;
+        sFlagDefaults.Frequency4 = 1.0f;
+        sFlagDefaults.LowWindX = z;
+        sFlagDefaults.LowWindY = z;
+        sFlagDefaults.LowWindZ = z;
+        sFlagDefaults.HighWindX = z;
+        sFlagDefaults.HighWindY = z;
+        sFlagDefaults.HighWindZ = z;
+        sFlagDefaults.MinWindFactor = z;
+        sFlagDefaults.UScroll = z;
+        sFlagDefaults.VScroll = z;
+        sFlagDefaults.OverSaturate = 0;
         D_004A55F0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_C9C8*)((char*)D_C9C8 + 104)) = Tag_C9C8((*(Tag_C9C8*)((char*)D_C9C8 + 104)));
+        sFlagDefaults.null = WScriptNullType(sFlagDefaults.null);
     }
     unsigned buf64[27];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_C9C8(buf, D_C9C8, 108);
-    Ent_C9C8 *x = params;
+    MEM_copy_C9C8(buf, &sFlagDefaults, sizeof(tMakeFlagData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeFlagFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1401,12 +1458,10 @@ INCLUDE_ASM("seg/seg_1FBE38", MakeFenceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_CC20 __asm__("luno_gLunoNil");
-struct Tag_CC20 { char c; Tag_CC20() {} Tag_CC20(const Tag_CC20 &o) : c(o.c) {} };
-extern unsigned D_CC20[] __asm__("D_004FB5B0");
+extern tMakeFenceData sFenceDefaults __asm__("D_004FB5B0");
 extern int D_004A55F4;
 extern const int D_00446028[];
 extern "C" void* MEM_copy_CC20(void*, void*, int) __asm__("MEM_copy");
-struct Ent_CC20 { int idx; int val; int pad; int type; };
 extern "C" int checkActiveNode(void*, int, void*);
 #define ASSERT_CC20(c) do { } while (0)
 
@@ -1429,27 +1484,23 @@ extern "C" int checkActiveNode(void*, int, void*);
  * @return @p ret
  */
 // PORT: struct return written with the hidden return pointer explicit.
-extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, Ent_CC20 *params) {
+extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, luno_cLunoCArg *params) {
     if (D_004A55F4 == 0) {
-        D_CC20[0] = 0xFFFFFFFF;
-        *(float*)&D_CC20[2] = 0.5f;
-        ((int*)D_CC20)[1] = 0;
+        sFenceDefaults.InstId = 0xFFFFFFFF;
+        sFenceDefaults.Flexibility = 0.5f;
+        sFenceDefaults.Type = 0;
         D_004A55F4 = 1;
-        (*(Tag_CC20*)((char*)D_CC20 + 12)) = Tag_CC20((*(Tag_CC20*)((char*)D_CC20 + 12)));
+        sFenceDefaults.null = WScriptNullType(sFenceDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_CC20(buf, D_CC20, 16);
-    Ent_CC20 *x = params;
+    MEM_copy_CC20(buf, &sFenceDefaults, sizeof(tMakeFenceData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446028[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1461,7 +1512,7 @@ extern "C" t3Vector* MakeFenceFunc(t3Vector* ret, int n, Ent_CC20 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         cInstanceNode* node = obj->m_pActiveNode;
@@ -1488,12 +1539,37 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFlexBridgeNode_cFlexBridgeNode_CDC8(void*, int, void*, void*) __asm__("cFlexBridgeNode_cFlexBridgeNode");
 extern char D_004896F8_CDC8[] __asm__("D_004896F8");
 extern t3Vector luno_gLunoNil_CDC8 __asm__("luno_gLunoNil");
-struct Tag_CDC8 { char c; Tag_CDC8() {} Tag_CDC8(const Tag_CDC8 &o) : c(o.c) {} };
-extern unsigned D_CDC8[] __asm__("D_004FB5C0");
+// World-script data that makes a flex bridge node (On Tour tMakeFlexBridgeData; same offsets): the block below fills
+// it.
+struct tMakeFlexBridgeData {
+    float LSpring;                  // 0x00 [O]
+    float LDamp;                    // 0x04 [O]
+    float ASpring;                  // 0x08 [O]
+    float ADamp;                    // 0x0C [O]
+    float ForceScale;               // 0x10 [O]
+    float TorqueScale;              // 0x14 [O]
+    float LengthScale;              // 0x18 [O]
+    int Width;                      // 0x1C [O]
+    unsigned int InstId;            // 0x20 [O] tResourceID
+    WScriptNullType null;           // 0x24 [O]
+    char unk_025[0x3];              // 0x25 padding
+};
+
+CHECK_OFFSET(tMakeFlexBridgeData, LSpring, 0x00);
+CHECK_OFFSET(tMakeFlexBridgeData, LDamp, 0x04);
+CHECK_OFFSET(tMakeFlexBridgeData, ASpring, 0x08);
+CHECK_OFFSET(tMakeFlexBridgeData, ADamp, 0x0C);
+CHECK_OFFSET(tMakeFlexBridgeData, ForceScale, 0x10);
+CHECK_OFFSET(tMakeFlexBridgeData, TorqueScale, 0x14);
+CHECK_OFFSET(tMakeFlexBridgeData, LengthScale, 0x18);
+CHECK_OFFSET(tMakeFlexBridgeData, Width, 0x1C);
+CHECK_OFFSET(tMakeFlexBridgeData, InstId, 0x20);
+CHECK_OFFSET(tMakeFlexBridgeData, null, 0x24);
+CHECK_SIZE(tMakeFlexBridgeData, 0x28);
+extern tMakeFlexBridgeData sFlexBridgeDefaults __asm__("D_004FB5C0");
 extern int D_004A55F8;
 extern const int MakeFlexBridgeFunc_types[];
 extern "C" void* MEM_copy_CDC8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_CDC8 { int idx; int val; int pad; int type; };
 /**
  * Script function: turns a world instance into a flexing bridge (a new "FlexBridge" node), unless it is
  * already busy.
@@ -1506,35 +1582,31 @@ struct Ent_CDC8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
+extern "C" t3Vector MakeFlexBridgeFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55F8 == 0) {
-        *(float*)&D_CDC8[0] = 500.0f;
-        *(float*)&D_CDC8[1] = 1.0f;
-        *(float*)&D_CDC8[2] = 2400.0f;
-        *(float*)&D_CDC8[3] = 0.10000000149011612f;
-        *(float*)&D_CDC8[4] = 0.10000000149011612f;
-        *(float*)&D_CDC8[5] = 10.0f;
-        ((int*)D_CDC8)[6] = 0;
-        ((int*)D_CDC8)[7] = 16;
-        D_CDC8[8] = 0xFFFFFFFF;
+        sFlexBridgeDefaults.LSpring = 500.0f;
+        sFlexBridgeDefaults.LDamp = 1.0f;
+        sFlexBridgeDefaults.ASpring = 2400.0f;
+        sFlexBridgeDefaults.ADamp = 0.10000000149011612f;
+        sFlexBridgeDefaults.ForceScale = 0.10000000149011612f;
+        sFlexBridgeDefaults.TorqueScale = 10.0f;
+        sFlexBridgeDefaults.LengthScale = 0.0f;
+        sFlexBridgeDefaults.Width = 16;
+        sFlexBridgeDefaults.InstId = 0xFFFFFFFF;
         D_004A55F8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_CDC8*)((char*)D_CDC8 + 36)) = Tag_CDC8((*(Tag_CDC8*)((char*)D_CDC8 + 36)));
+        sFlexBridgeDefaults.null = WScriptNullType(sFlexBridgeDefaults.null);
     }
     unsigned buf64[10];
     unsigned *buf = buf64;
     buf64[8] = 0xFFFFFFFF;
-    MEM_copy_CDC8(buf, D_CDC8, 40);
-    Ent_CDC8 *x = params;
+    MEM_copy_CDC8(buf, &sFlexBridgeDefaults, sizeof(tMakeFlexBridgeData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeFlexBridgeFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[8];
     tInstanceRecord *obj;
@@ -1575,12 +1647,48 @@ extern "C" void cMeshAnimNode_cMeshAnimNode1_CFF0(void*, int, void*, void*, tCol
     __asm__("cMeshAnimNode_cMeshAnimNode1");
 extern char D_00489708_CFF0[] __asm__("D_00489708");
 extern t3Vector luno_gLunoNil_CFF0 __asm__("luno_gLunoNil");
-struct Tag_CFF0 { char c; Tag_CFF0() {} Tag_CFF0(const Tag_CFF0 &o) : c(o.c) {} };
-extern unsigned D_CFF0[] __asm__("D_004FB5E8");
+// World-script data that makes a mesh-anim node (On Tour tMakeMeshAnimData; same offsets): the block below fills it.
+struct tMakeMeshAnimData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Type;                       // 0x04 [O]
+    float Drag;                     // 0x08 [O]
+    float VelScale;                 // 0x0C [O]
+    float Life;                     // 0x10 [O]
+    float DisperseX;                // 0x14 [O]
+    float DisperseY;                // 0x18 [O]
+    float DisperseZ;                // 0x1C [O]
+    float VelX;                     // 0x20 [O]
+    float VelY;                     // 0x24 [O]
+    float VelZ;                     // 0x28 [O]
+    float AngVel;                   // 0x2C [O]
+    float FadeTime;                 // 0x30 [O]
+    unsigned int RootInstId;        // 0x34 [O] tResourceID
+    int RootMesh;                   // 0x38 [O]
+    WScriptNullType null;           // 0x3C [O]
+    char unk_03D[0x3];              // 0x3D padding
+};
+
+CHECK_OFFSET(tMakeMeshAnimData, InstId, 0x00);
+CHECK_OFFSET(tMakeMeshAnimData, Type, 0x04);
+CHECK_OFFSET(tMakeMeshAnimData, Drag, 0x08);
+CHECK_OFFSET(tMakeMeshAnimData, VelScale, 0x0C);
+CHECK_OFFSET(tMakeMeshAnimData, Life, 0x10);
+CHECK_OFFSET(tMakeMeshAnimData, DisperseX, 0x14);
+CHECK_OFFSET(tMakeMeshAnimData, DisperseY, 0x18);
+CHECK_OFFSET(tMakeMeshAnimData, DisperseZ, 0x1C);
+CHECK_OFFSET(tMakeMeshAnimData, VelX, 0x20);
+CHECK_OFFSET(tMakeMeshAnimData, VelY, 0x24);
+CHECK_OFFSET(tMakeMeshAnimData, VelZ, 0x28);
+CHECK_OFFSET(tMakeMeshAnimData, AngVel, 0x2C);
+CHECK_OFFSET(tMakeMeshAnimData, FadeTime, 0x30);
+CHECK_OFFSET(tMakeMeshAnimData, RootInstId, 0x34);
+CHECK_OFFSET(tMakeMeshAnimData, RootMesh, 0x38);
+CHECK_OFFSET(tMakeMeshAnimData, null, 0x3C);
+CHECK_SIZE(tMakeMeshAnimData, 0x40);
+extern tMakeMeshAnimData sMeshAnimDefaults __asm__("D_004FB5E8");
 extern int D_004A55FC;
 extern const int MakeMeshAnimFunc_types[];
 extern "C" void* MEM_copy_CFF0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_CFF0 { int idx; int val; int pad; int type; };
 /**
  * Script command MakeMeshAnim: turns an instance into an animated-mesh node.
  *
@@ -1595,43 +1703,39 @@ struct Ent_CFF0 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" t3Vector MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
+extern "C" t3Vector MakeMeshAnimFunc(int n, luno_cLunoCArg *params) {
     if (D_004A55FC == 0) {
-        D_CFF0[0] = 0xFFFFFFFF;
-        ((int*)D_CFF0)[1] = 0;
-        *(float*)&D_CFF0[2] = 0.10000000149011612f;
-        *(float*)&D_CFF0[3] = 1.0f;
-        *(float*)&D_CFF0[4] = 2.0f;
-        *(float*)&D_CFF0[5] = 600.0f;
-        *(float*)&D_CFF0[6] = 600.0f;
-        *(float*)&D_CFF0[7] = 300.0f;
+        sMeshAnimDefaults.InstId = 0xFFFFFFFF;
+        sMeshAnimDefaults.Type = 0;
+        sMeshAnimDefaults.Drag = 0.10000000149011612f;
+        sMeshAnimDefaults.VelScale = 1.0f;
+        sMeshAnimDefaults.Life = 2.0f;
+        sMeshAnimDefaults.DisperseX = 600.0f;
+        sMeshAnimDefaults.DisperseY = 600.0f;
+        sMeshAnimDefaults.DisperseZ = 300.0f;
         float z = 0.0f;
-        *(float*)&D_CFF0[8] = z;
-        *(float*)&D_CFF0[9] = z;
-        *(float*)&D_CFF0[10] = z;
-        *(float*)&D_CFF0[11] = 360.0f;
-        *(float*)&D_CFF0[12] = -1.0f;
-        D_CFF0[13] = 0xFFFFFFFF;
-        ((int*)D_CFF0)[14] = -1;
+        sMeshAnimDefaults.VelX = z;
+        sMeshAnimDefaults.VelY = z;
+        sMeshAnimDefaults.VelZ = z;
+        sMeshAnimDefaults.AngVel = 360.0f;
+        sMeshAnimDefaults.FadeTime = -1.0f;
+        sMeshAnimDefaults.RootInstId = 0xFFFFFFFF;
+        sMeshAnimDefaults.RootMesh = -1;
         D_004A55FC = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_CFF0*)((char*)D_CFF0 + 60)) = Tag_CFF0((*(Tag_CFF0*)((char*)D_CFF0 + 60)));
+        sMeshAnimDefaults.null = WScriptNullType(sMeshAnimDefaults.null);
     }
     unsigned buf64[16];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[13] = 0xFFFFFFFF;
-    MEM_copy_CFF0(buf, D_CFF0, 64);
-    Ent_CFF0 *x = params;
+    MEM_copy_CFF0(buf, &sMeshAnimDefaults, sizeof(tMakeMeshAnimData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeMeshAnimFunc_types[idx];
-        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)field = (float)x->val;
-        else
-            *field = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1667,12 +1771,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addRoller_D250(void*, void*, tIntersectInfo*, tCollideInfo*) __asm__("cMoveNode_addRoller");
 extern t3Vector luno_gLunoNil_D250 __asm__("luno_gLunoNil");
-struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} };
-extern unsigned D_D250[] __asm__("D_004FB628");
+extern tAddRollerData sRollerDefaults __asm__("D_004FB628");
 extern int D_004A5600;
 extern const int D_004460A0[];
 extern "C" void* MEM_copy_D250(void*, void*, int) __asm__("MEM_copy");
-struct Ent_D250 { int idx; int val; int pad; int type; };
 /**
  * Script function: adds a roller modifier to a moving world instance, with the script's current collision.
  *
@@ -1684,30 +1786,26 @@ struct Ent_D250 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector AddRollerFunc(int n, Ent_D250 *params) {
+extern "C" t3Vector AddRollerFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5600 == 0) {
-        D_D250[0] = 0xFFFFFFFF;
-        *(float*)&D_D250[1] = 1.0f;
-        *(float*)&D_D250[2] = 0.699999988079071f;
-        *(float*)&D_D250[3] = 0.5f;
+        sRollerDefaults.InstId = 0xFFFFFFFF;
+        sRollerDefaults.Mass = 1.0f;
+        sRollerDefaults.Elast = 0.699999988079071f;
+        sRollerDefaults.Friction = 0.5f;
         D_004A5600 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_D250*)((char*)D_D250 + 16)) = Tag_D250((*(Tag_D250*)((char*)D_D250 + 16)));
+        sRollerDefaults.null = WScriptNullType(sRollerDefaults.null);
     }
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_D250(buf, D_D250, 20);
-    Ent_D250 *x = params;
+    MEM_copy_D250(buf, &sRollerDefaults, sizeof(tAddRollerData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_004460A0[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -1719,7 +1817,7 @@ extern "C" t3Vector AddRollerFunc(int n, Ent_D250 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
@@ -1744,12 +1842,128 @@ void operator_delete(int*);
 extern char D_00489718_D420[] __asm__("D_00489718");
 extern char D_00489730_D420[] __asm__("D_00489730");
 extern t3Vector luno_gLunoNil_D420 __asm__("luno_gLunoNil");
-struct Tag_D420 { char c; Tag_D420() {} Tag_D420(const Tag_D420 &o) : c(o.c) {} };
-extern unsigned D_D420[] __asm__("D_004FB640");
+// World-script data that makes a particle node (On Tour tMakeParticleData; same offsets): the block below fills it.
+struct tMakeParticleData {
+    int NumParticles;               // 0x00 [O]
+    int NumBlur;                    // 0x04 [O]
+    float Duration;                 // 0x08 [O]
+    float Damp;                     // 0x0C [O]
+    float Size;                     // 0x10 [O]
+    float Life;                     // 0x14 [O]
+    float SizeR;                    // 0x18 [O]
+    float LifeR;                    // 0x1C [O]
+    float BlurStep;                 // 0x20 [O]
+    float OffX;                     // 0x24 [O]
+    float OffY;                     // 0x28 [O]
+    float OffZ;                     // 0x2C [O]
+    float R0X;                      // 0x30 [O]
+    float R0Y;                      // 0x34 [O]
+    float R0Z;                      // 0x38 [O]
+    float R1X;                      // 0x3C [O]
+    float R1Y;                      // 0x40 [O]
+    float R1Z;                      // 0x44 [O]
+    float VelX;                     // 0x48 [O]
+    float VelY;                     // 0x4C [O]
+    float VelZ;                     // 0x50 [O]
+    float R0VX;                     // 0x54 [O]
+    float R0VY;                     // 0x58 [O]
+    float R0VZ;                     // 0x5C [O]
+    float R1VX;                     // 0x60 [O]
+    float R1VY;                     // 0x64 [O]
+    float R1VZ;                     // 0x68 [O]
+    float R2VX;                     // 0x6C [O]
+    float R2VY;                     // 0x70 [O]
+    float R2VZ;                     // 0x74 [O]
+    float ForceX;                   // 0x78 [O]
+    float ForceY;                   // 0x7C [O]
+    float ForceZ;                   // 0x80 [O]
+    float StartColA;                // 0x84 [O]
+    float StartColR;                // 0x88 [O]
+    float StartColG;                // 0x8C [O]
+    float StartColB;                // 0x90 [O]
+    float EndColA;                  // 0x94 [O]
+    float EndColR;                  // 0x98 [O]
+    float EndColG;                  // 0x9C [O]
+    float EndColB;                  // 0xA0 [O]
+    float R0A;                      // 0xA4 [O]
+    float R0R;                      // 0xA8 [O]
+    float R0G;                      // 0xAC [O]
+    float R0B;                      // 0xB0 [O]
+    float R1A;                      // 0xB4 [O]
+    float R1R;                      // 0xB8 [O]
+    float R1G;                      // 0xBC [O]
+    float R1B;                      // 0xC0 [O]
+    int TextureId;                  // 0xC4 [O]
+    int BlendMode;                  // 0xC8 [O]
+    float SizeFinal;                // 0xCC [O]
+    int NumFlipTextures;            // 0xD0 [O]
+    float FlipTextureRate;          // 0xD4 [O]
+    unsigned int InstId;            // 0xD8 [O] tResourceID
+    WScriptNullType null;           // 0xDC [O]
+    char unk_0DD[0x3];              // 0xDD padding
+};
+
+CHECK_OFFSET(tMakeParticleData, NumParticles, 0x00);
+CHECK_OFFSET(tMakeParticleData, NumBlur, 0x04);
+CHECK_OFFSET(tMakeParticleData, Duration, 0x08);
+CHECK_OFFSET(tMakeParticleData, Damp, 0x0C);
+CHECK_OFFSET(tMakeParticleData, Size, 0x10);
+CHECK_OFFSET(tMakeParticleData, Life, 0x14);
+CHECK_OFFSET(tMakeParticleData, SizeR, 0x18);
+CHECK_OFFSET(tMakeParticleData, LifeR, 0x1C);
+CHECK_OFFSET(tMakeParticleData, BlurStep, 0x20);
+CHECK_OFFSET(tMakeParticleData, OffX, 0x24);
+CHECK_OFFSET(tMakeParticleData, OffY, 0x28);
+CHECK_OFFSET(tMakeParticleData, OffZ, 0x2C);
+CHECK_OFFSET(tMakeParticleData, R0X, 0x30);
+CHECK_OFFSET(tMakeParticleData, R0Y, 0x34);
+CHECK_OFFSET(tMakeParticleData, R0Z, 0x38);
+CHECK_OFFSET(tMakeParticleData, R1X, 0x3C);
+CHECK_OFFSET(tMakeParticleData, R1Y, 0x40);
+CHECK_OFFSET(tMakeParticleData, R1Z, 0x44);
+CHECK_OFFSET(tMakeParticleData, VelX, 0x48);
+CHECK_OFFSET(tMakeParticleData, VelY, 0x4C);
+CHECK_OFFSET(tMakeParticleData, VelZ, 0x50);
+CHECK_OFFSET(tMakeParticleData, R0VX, 0x54);
+CHECK_OFFSET(tMakeParticleData, R0VY, 0x58);
+CHECK_OFFSET(tMakeParticleData, R0VZ, 0x5C);
+CHECK_OFFSET(tMakeParticleData, R1VX, 0x60);
+CHECK_OFFSET(tMakeParticleData, R1VY, 0x64);
+CHECK_OFFSET(tMakeParticleData, R1VZ, 0x68);
+CHECK_OFFSET(tMakeParticleData, R2VX, 0x6C);
+CHECK_OFFSET(tMakeParticleData, R2VY, 0x70);
+CHECK_OFFSET(tMakeParticleData, R2VZ, 0x74);
+CHECK_OFFSET(tMakeParticleData, ForceX, 0x78);
+CHECK_OFFSET(tMakeParticleData, ForceY, 0x7C);
+CHECK_OFFSET(tMakeParticleData, ForceZ, 0x80);
+CHECK_OFFSET(tMakeParticleData, StartColA, 0x84);
+CHECK_OFFSET(tMakeParticleData, StartColR, 0x88);
+CHECK_OFFSET(tMakeParticleData, StartColG, 0x8C);
+CHECK_OFFSET(tMakeParticleData, StartColB, 0x90);
+CHECK_OFFSET(tMakeParticleData, EndColA, 0x94);
+CHECK_OFFSET(tMakeParticleData, EndColR, 0x98);
+CHECK_OFFSET(tMakeParticleData, EndColG, 0x9C);
+CHECK_OFFSET(tMakeParticleData, EndColB, 0xA0);
+CHECK_OFFSET(tMakeParticleData, R0A, 0xA4);
+CHECK_OFFSET(tMakeParticleData, R0R, 0xA8);
+CHECK_OFFSET(tMakeParticleData, R0G, 0xAC);
+CHECK_OFFSET(tMakeParticleData, R0B, 0xB0);
+CHECK_OFFSET(tMakeParticleData, R1A, 0xB4);
+CHECK_OFFSET(tMakeParticleData, R1R, 0xB8);
+CHECK_OFFSET(tMakeParticleData, R1G, 0xBC);
+CHECK_OFFSET(tMakeParticleData, R1B, 0xC0);
+CHECK_OFFSET(tMakeParticleData, TextureId, 0xC4);
+CHECK_OFFSET(tMakeParticleData, BlendMode, 0xC8);
+CHECK_OFFSET(tMakeParticleData, SizeFinal, 0xCC);
+CHECK_OFFSET(tMakeParticleData, NumFlipTextures, 0xD0);
+CHECK_OFFSET(tMakeParticleData, FlipTextureRate, 0xD4);
+CHECK_OFFSET(tMakeParticleData, InstId, 0xD8);
+CHECK_OFFSET(tMakeParticleData, null, 0xDC);
+CHECK_SIZE(tMakeParticleData, 0xE0);
+extern tMakeParticleData sParticleDefaults __asm__("D_004FB640");
 extern int D_004A5604;
 extern const int D_004460B0[];
 extern "C" void* MEM_copy_D420(void*, void*, int) __asm__("MEM_copy");
-struct Ent_D420 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[16]): attaches a particle effect to a world instance (a new Particle node), unless
  * its current node is busy.
@@ -1774,83 +1988,80 @@ struct Ent_D420 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
+extern "C" t3Vector MakeParticleFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5604 == 0) {
-        ((int*)D_D420)[0] = 1;
-        ((int*)D_D420)[1] = 0;
-        *(float*)&D_D420[2] = -1.0f;
-        *(float*)&D_D420[3] = 1.0f;
-        *(float*)&D_D420[4] = 4.0f;
+        sParticleDefaults.NumParticles = 1;
+        sParticleDefaults.NumBlur = 0;
+        sParticleDefaults.Duration = -1.0f;
+        sParticleDefaults.Damp = 1.0f;
+        sParticleDefaults.Size = 4.0f;
         float z = 0.0f;
-        *(float*)&D_D420[5] = z;
-        *(float*)&D_D420[6] = z;
-        *(float*)&D_D420[7] = z;
-        *(float*)&D_D420[8] = z;
-        *(float*)&D_D420[9] = z;
-        *(float*)&D_D420[10] = z;
-        *(float*)&D_D420[11] = z;
-        *(float*)&D_D420[12] = z;
-        *(float*)&D_D420[13] = z;
-        *(float*)&D_D420[14] = z;
-        *(float*)&D_D420[15] = z;
-        *(float*)&D_D420[16] = z;
-        *(float*)&D_D420[17] = z;
-        *(float*)&D_D420[18] = z;
-        *(float*)&D_D420[19] = z;
-        *(float*)&D_D420[20] = z;
-        *(float*)&D_D420[21] = z;
-        *(float*)&D_D420[22] = z;
-        *(float*)&D_D420[23] = z;
-        *(float*)&D_D420[24] = z;
-        *(float*)&D_D420[25] = z;
-        *(float*)&D_D420[26] = z;
-        *(float*)&D_D420[27] = z;
-        *(float*)&D_D420[28] = z;
-        *(float*)&D_D420[29] = z;
-        *(float*)&D_D420[30] = z;
-        *(float*)&D_D420[31] = z;
-        *(float*)&D_D420[32] = z;
-        *(float*)&D_D420[33] = 1.0f;
-        *(float*)&D_D420[34] = z;
-        *(float*)&D_D420[35] = z;
-        *(float*)&D_D420[36] = z;
-        *(float*)&D_D420[37] = 1.0f;
-        *(float*)&D_D420[38] = 1.0f;
-        *(float*)&D_D420[39] = 1.0f;
-        *(float*)&D_D420[40] = 1.0f;
-        *(float*)&D_D420[41] = 1.0f;
-        *(float*)&D_D420[42] = z;
-        *(float*)&D_D420[43] = z;
-        *(float*)&D_D420[44] = z;
-        *(float*)&D_D420[45] = 1.0f;
-        *(float*)&D_D420[46] = z;
-        *(float*)&D_D420[47] = z;
-        *(float*)&D_D420[48] = z;
-        ((int*)D_D420)[49] = 16;
-        ((int*)D_D420)[50] = 0;
-        *(float*)&D_D420[51] = z;
-        ((int*)D_D420)[52] = 1;
-        *(float*)&D_D420[53] = 20.0f;
-        D_D420[54] = 0xFFFFFFFF;
+        sParticleDefaults.Life = z;
+        sParticleDefaults.SizeR = z;
+        sParticleDefaults.LifeR = z;
+        sParticleDefaults.BlurStep = z;
+        sParticleDefaults.OffX = z;
+        sParticleDefaults.OffY = z;
+        sParticleDefaults.OffZ = z;
+        sParticleDefaults.R0X = z;
+        sParticleDefaults.R0Y = z;
+        sParticleDefaults.R0Z = z;
+        sParticleDefaults.R1X = z;
+        sParticleDefaults.R1Y = z;
+        sParticleDefaults.R1Z = z;
+        sParticleDefaults.VelX = z;
+        sParticleDefaults.VelY = z;
+        sParticleDefaults.VelZ = z;
+        sParticleDefaults.R0VX = z;
+        sParticleDefaults.R0VY = z;
+        sParticleDefaults.R0VZ = z;
+        sParticleDefaults.R1VX = z;
+        sParticleDefaults.R1VY = z;
+        sParticleDefaults.R1VZ = z;
+        sParticleDefaults.R2VX = z;
+        sParticleDefaults.R2VY = z;
+        sParticleDefaults.R2VZ = z;
+        sParticleDefaults.ForceX = z;
+        sParticleDefaults.ForceY = z;
+        sParticleDefaults.ForceZ = z;
+        sParticleDefaults.StartColA = 1.0f;
+        sParticleDefaults.StartColR = z;
+        sParticleDefaults.StartColG = z;
+        sParticleDefaults.StartColB = z;
+        sParticleDefaults.EndColA = 1.0f;
+        sParticleDefaults.EndColR = 1.0f;
+        sParticleDefaults.EndColG = 1.0f;
+        sParticleDefaults.EndColB = 1.0f;
+        sParticleDefaults.R0A = 1.0f;
+        sParticleDefaults.R0R = z;
+        sParticleDefaults.R0G = z;
+        sParticleDefaults.R0B = z;
+        sParticleDefaults.R1A = 1.0f;
+        sParticleDefaults.R1R = z;
+        sParticleDefaults.R1G = z;
+        sParticleDefaults.R1B = z;
+        sParticleDefaults.TextureId = 16;
+        sParticleDefaults.BlendMode = 0;
+        sParticleDefaults.SizeFinal = z;
+        sParticleDefaults.NumFlipTextures = 1;
+        sParticleDefaults.FlipTextureRate = 20.0f;
+        sParticleDefaults.InstId = 0xFFFFFFFF;
         D_004A5604 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_D420*)((char*)D_D420 + 0xDC)) = Tag_D420((*(Tag_D420*)((char*)D_D420 + 0xDC)));
+        sParticleDefaults.null = WScriptNullType(sParticleDefaults.null);
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489718_D420, 0x20000000, 0);
-    buf[54] = 0xFFFFFFFF;
-    MEM_copy_D420(buf, D_D420, 0xE0);
-    Ent_D420 *x = params;
+    tMakeParticleData *data = (tMakeParticleData*)buf;
+    data->InstId = 0xFFFFFFFF;
+    MEM_copy_D420(buf, &sParticleDefaults, sizeof(tMakeParticleData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = D_004460B0[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    unsigned id = buf[54];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -1880,8 +2091,8 @@ extern "C" t3Vector MakeParticleFunc(int n, Ent_D420 *params) {
             return luno_gLunoNil_D420;
         }
     }
-    if (*(float*)&buf[7] > *(float*)&buf[5])
-        *(float*)&buf[7] = *(float*)&buf[5];
+    if (data->LifeR > data->Life)
+        data->LifeR = data->Life;
     cParticleNode_cParticleNode1_D420(cMemMan_alloc(44, D_00489730_D420, 0x20000000, 0), 1, obj, buf, 0);
     return luno_gLunoNil_D420;
 }
@@ -1892,14 +2103,13 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRiderPositionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V4_D758 { float x, y, z, w; V4_D758() {} V4_D758(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} } __attribute__((aligned(16)));
-struct M4_D758 { V4_D758 r[4]; };
 extern "C" void cMoveNode_addPosition_D758(void*, V4_D758*) __asm__("cMoveNode_addPosition");
 // Rider k as a cBeing (the null-checked upcast of SSXApp->Game->AI->Riders[k]).
 static inline cBeing *shape_D758(int k) {
     return SSXApp->Game->AI->Riders[k];
 }
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
-static inline V4_D758 mtxApply_D758(M4_D758 *m, const V4_D758 &v) {
+static inline V4_D758 mtxApply_D758(t4Matrix *m, const V4_D758 &v) {
     V4_D758 out;
     __asm__(
         ".set push\n"
@@ -1935,12 +2145,29 @@ static inline void vAddTo_D758(V4_D758 &a, const V4_D758 &b) {
         : "memory");
 }
 extern t3Vector luno_gLunoNil_D758 __asm__("luno_gLunoNil");
-struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} };
-extern unsigned D_D758[] __asm__("D_004FB720");
+// World-script data that adds a rider-position modifier (On Tour tAddRiderPositionData; same offsets): the block below
+// fills it.
+struct tAddRiderPositionData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Being;                      // 0x04 [O]
+    float OffsetX;                  // 0x08 [O]
+    float OffsetY;                  // 0x0C [O]
+    float OffsetZ;                  // 0x10 [O]
+    WScriptNullType null;           // 0x14 [O]
+    char unk_015[0x3];              // 0x15 padding
+};
+
+CHECK_OFFSET(tAddRiderPositionData, InstId, 0x00);
+CHECK_OFFSET(tAddRiderPositionData, Being, 0x04);
+CHECK_OFFSET(tAddRiderPositionData, OffsetX, 0x08);
+CHECK_OFFSET(tAddRiderPositionData, OffsetY, 0x0C);
+CHECK_OFFSET(tAddRiderPositionData, OffsetZ, 0x10);
+CHECK_OFFSET(tAddRiderPositionData, null, 0x14);
+CHECK_SIZE(tAddRiderPositionData, 0x18);
+extern tAddRiderPositionData sRiderPositionDefaults __asm__("D_004FB720");
 extern int D_004A5608;
 extern const int D_00446190[];
 extern "C" void* MEM_copy_D758(void*, void*, int) __asm__("MEM_copy");
-struct Ent_D758 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[23]): adds a position modifier that puts a moving world instance at a rider, with an
  * offset.
@@ -1962,34 +2189,31 @@ struct Ent_D758 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
+extern "C" t3Vector AddRiderPositionFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5608 == 0) {
-        D_D758[0] = 0xFFFFFFFF;
-        ((int*)D_D758)[1] = -1;
+        sRiderPositionDefaults.InstId = 0xFFFFFFFF;
+        sRiderPositionDefaults.Being = -1;
         float z = 0.0f;
-        *(float*)&D_D758[2] = z;
-        *(float*)&D_D758[3] = z;
-        *(float*)&D_D758[4] = z;
+        sRiderPositionDefaults.OffsetX = z;
+        sRiderPositionDefaults.OffsetY = z;
+        sRiderPositionDefaults.OffsetZ = z;
         D_004A5608 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_D758*)((char*)D_D758 + 20)) = Tag_D758((*(Tag_D758*)((char*)D_D758 + 20)));
+        sRiderPositionDefaults.null = WScriptNullType(sRiderPositionDefaults.null);
     }
     unsigned buf64[6];
     unsigned *buf = buf64;
+    tAddRiderPositionData *data = (tAddRiderPositionData*)buf;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_D758(buf, D_D758, 24);
-    Ent_D758 *x = params;
+    MEM_copy_D758(buf, &sRiderPositionDefaults, sizeof(tAddRiderPositionData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446190[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -1999,16 +2223,17 @@ extern "C" t3Vector AddRiderPositionFunc(int n, Ent_D758 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
         if (activeNode->isMoveNode()) {
-            int k = buf[1];
+            int k = data->Being;
             if (k != kWScriptBeing_None) {
                 V4_D758 pos = *(V4_D758*)shape_D758(k)->getPosition();
-                M4_D758 *riderTransform = (M4_D758*)shape_D758(buf[1])->getTransform();
-                vAddTo_D758(pos, mtxApply_D758(riderTransform, V4_D758(*(float*)&buf[2], *(float*)&buf[3], *(float*)&buf[4], 0.0f)));
+                t4Matrix *riderTransform = shape_D758(data->Being)->getTransform();
+                vAddTo_D758(pos, mtxApply_D758(riderTransform, V4_D758(data->OffsetX, data->OffsetY, data->OffsetZ,
+                        0.0f)));
                 cMoveNode_addPosition_D758(activeNode, &pos);
             }
         }
@@ -2022,16 +2247,35 @@ INCLUDE_ASM("seg/seg_1FBE38", AddParentFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
-extern "C" void cMoveNode_addParent_D9F8(void*, int, int, V4_D9F8*) __asm__("cMoveNode_addParent");
+extern "C" void cMoveNode_addParent_D9F8(void*, tInstanceRecord*, int, V4_D9F8*) __asm__("cMoveNode_addParent");
 static inline tInstanceRecord *refToPtr_D9F8(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
 extern t3Vector luno_gLunoNil_D9F8 __asm__("luno_gLunoNil");
-struct Tag_D9F8 { char c; Tag_D9F8() {} Tag_D9F8(const Tag_D9F8 &o) : c(o.c) {} };
-extern unsigned D_D9F8[] __asm__("D_004FB738");
+// World-script data that parents one instance's node to another (On Tour tAddParentData; same offsets): the block below
+// fills it.
+struct tAddParentData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    unsigned int ParentId;          // 0x04 [O] tResourceID
+    int Mesh;                       // 0x08 [O]
+    float OffsetX;                  // 0x0C [O]
+    float OffsetY;                  // 0x10 [O]
+    float OffsetZ;                  // 0x14 [O]
+    WScriptNullType null;           // 0x18 [O]
+    char unk_019[0x3];              // 0x19 padding
+};
+
+CHECK_OFFSET(tAddParentData, InstId, 0x00);
+CHECK_OFFSET(tAddParentData, ParentId, 0x04);
+CHECK_OFFSET(tAddParentData, Mesh, 0x08);
+CHECK_OFFSET(tAddParentData, OffsetX, 0x0C);
+CHECK_OFFSET(tAddParentData, OffsetY, 0x10);
+CHECK_OFFSET(tAddParentData, OffsetZ, 0x14);
+CHECK_OFFSET(tAddParentData, null, 0x18);
+CHECK_SIZE(tAddParentData, 0x1C);
+extern tAddParentData sParentDefaults __asm__("D_004FB738");
 extern int D_004A560C;
 extern const int AddParentFunc_types[];
 extern "C" void* MEM_copy_D9F8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_D9F8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[17]): attaches a moving world instance to a parent instance (a parent modifier).
  *
@@ -2051,36 +2295,33 @@ struct Ent_D9F8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
+extern "C" t3Vector AddParentFunc(int n, luno_cLunoCArg *params) {
     if (D_004A560C == 0) {
-        D_D9F8[0] = 0xFFFFFFFF;
-        D_D9F8[1] = 0xFFFFFFFF;
-        ((int*)D_D9F8)[2] = 0;
+        sParentDefaults.InstId = 0xFFFFFFFF;
+        sParentDefaults.ParentId = 0xFFFFFFFF;
+        sParentDefaults.Mesh = 0;
         float z = 0.0f;
-        *(float*)&D_D9F8[3] = z;
-        *(float*)&D_D9F8[4] = z;
-        *(float*)&D_D9F8[5] = z;
+        sParentDefaults.OffsetX = z;
+        sParentDefaults.OffsetY = z;
+        sParentDefaults.OffsetZ = z;
         D_004A560C = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_D9F8*)((char*)D_D9F8 + 24)) = Tag_D9F8((*(Tag_D9F8*)((char*)D_D9F8 + 24)));
+        sParentDefaults.null = WScriptNullType(sParentDefaults.null);
     }
     unsigned buf64[7];
     unsigned *buf = buf64;
+    tAddParentData *data = (tAddParentData*)buf;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_D9F8(buf, D_D9F8, 28);
-    Ent_D9F8 *x = params;
+    MEM_copy_D9F8(buf, &sParentDefaults, sizeof(tAddParentData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = AddParentFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -2097,7 +2338,7 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
         }
         obj = inst;
     }
-    unsigned id2 = buf[1];
+    unsigned id2 = data->ParentId;
     if (~id2 != 0) {
         cWorldCacheTable *parentSection = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id2 & 0xFF];
         unsigned parentRef;
@@ -2105,14 +2346,14 @@ extern "C" t3Vector AddParentFunc(int n, Ent_D9F8 *params) {
         if (!parentSection || (parentRef = parentSection->m_pCacheTable[3].m_pDataTag[id2 >> 8].m_bfuiMemLoc) == 0)
             parentInst = 0;
         else
-            parentInst = (tInstanceRecord*)(parentRef << 2);
+            parentInst = instanceAtMemLoc(parentRef);
         cInstanceNode *parentNode = parentInst ? parentInst->m_pActiveNode : 0;
         if (parentNode && !parentNode->isType(6)) {
             cInstanceNode *activeNode = obj->m_pActiveNode;
             if (activeNode && activeNode->isMoveNode()) {
-                int k = (int)parentNode->Instance;
-                V4_D9F8 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                cMoveNode_addParent_D9F8(activeNode, k, buf[2], &offset);
+                tInstanceRecord *parentRecord = parentNode->Instance;
+                V4_D9F8 offset(data->OffsetX, data->OffsetY, data->OffsetZ, 0.0f);
+                cMoveNode_addParent_D9F8(activeNode, parentRecord, data->Mesh, &offset);
             }
         }
     }
@@ -2125,16 +2366,35 @@ INCLUDE_ASM("seg/seg_1FBE38", AddChildFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
-extern "C" void cMoveNode_addParent_DC60(void*, int, int, V4_DC60*) __asm__("cMoveNode_addParent");
+extern "C" void cMoveNode_addParent_DC60(void*, tInstanceRecord*, int, V4_DC60*) __asm__("cMoveNode_addParent");
 static inline tInstanceRecord *refToPtr_DC60(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
 extern t3Vector luno_gLunoNil_DC60 __asm__("luno_gLunoNil");
-struct Tag_DC60 { char c; Tag_DC60() {} Tag_DC60(const Tag_DC60 &o) : c(o.c) {} };
-extern unsigned D_DC60[] __asm__("D_004FB758");
+// World-script data that adds a child instance to a node (On Tour tAddChildData; same offsets): the block below fills
+// it.
+struct tAddChildData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    unsigned int ChildId;           // 0x04 [O] tResourceID
+    int Mesh;                       // 0x08 [O]
+    float OffsetX;                  // 0x0C [O]
+    float OffsetY;                  // 0x10 [O]
+    float OffsetZ;                  // 0x14 [O]
+    WScriptNullType null;           // 0x18 [O]
+    char unk_019[0x3];              // 0x19 padding
+};
+
+CHECK_OFFSET(tAddChildData, InstId, 0x00);
+CHECK_OFFSET(tAddChildData, ChildId, 0x04);
+CHECK_OFFSET(tAddChildData, Mesh, 0x08);
+CHECK_OFFSET(tAddChildData, OffsetX, 0x0C);
+CHECK_OFFSET(tAddChildData, OffsetY, 0x10);
+CHECK_OFFSET(tAddChildData, OffsetZ, 0x14);
+CHECK_OFFSET(tAddChildData, null, 0x18);
+CHECK_SIZE(tAddChildData, 0x1C);
+extern tAddChildData sChildDefaults __asm__("D_004FB758");
 extern int D_004A5610;
 extern const int AddChildFunc_types[];
 extern "C" void* MEM_copy_DC60(void*, void*, int) __asm__("MEM_copy");
-struct Ent_DC60 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[18]): makes a world instance the parent of a moving child instance (a parent
  * modifier on the child).
@@ -2155,36 +2415,33 @@ struct Ent_DC60 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
+extern "C" t3Vector AddChildFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5610 == 0) {
-        D_DC60[0] = 0xFFFFFFFF;
-        D_DC60[1] = 0xFFFFFFFF;
-        ((int*)D_DC60)[2] = 0;
+        sChildDefaults.InstId = 0xFFFFFFFF;
+        sChildDefaults.ChildId = 0xFFFFFFFF;
+        sChildDefaults.Mesh = 0;
         float z = 0.0f;
-        *(float*)&D_DC60[3] = z;
-        *(float*)&D_DC60[4] = z;
-        *(float*)&D_DC60[5] = z;
+        sChildDefaults.OffsetX = z;
+        sChildDefaults.OffsetY = z;
+        sChildDefaults.OffsetZ = z;
         D_004A5610 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_DC60*)((char*)D_DC60 + 24)) = Tag_DC60((*(Tag_DC60*)((char*)D_DC60 + 24)));
+        sChildDefaults.null = WScriptNullType(sChildDefaults.null);
     }
     unsigned buf64[7];
     unsigned *buf = buf64;
+    tAddChildData *data = (tAddChildData*)buf;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_DC60(buf, D_DC60, 28);
-    Ent_DC60 *x = params;
+    MEM_copy_DC60(buf, &sChildDefaults, sizeof(tAddChildData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = AddChildFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -2201,22 +2458,22 @@ extern "C" t3Vector AddChildFunc(int n, Ent_DC60 *params) {
         }
         obj = inst;
     }
-    if (~buf[1] != 0) {
+    if (~data->ChildId != 0) {
         cInstanceNode *parentNode = obj->m_pActiveNode;
         if (parentNode && !parentNode->isType(6)) {
-            unsigned id2 = buf[1];
+            unsigned id2 = data->ChildId;
             cWorldCacheTable *childSection = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id2 & 0xFF];
             unsigned childRef;
             tInstanceRecord *childInst;
             if (!childSection || (childRef = childSection->m_pCacheTable[3].m_pDataTag[id2 >> 8].m_bfuiMemLoc) == 0)
                 childInst = 0;
             else
-                childInst = (tInstanceRecord*)(childRef << 2);
+                childInst = instanceAtMemLoc(childRef);
             cInstanceNode *childNode = childInst ? childInst->m_pActiveNode : 0;
             if (childNode && childNode->isMoveNode()) {
-                int k = (int)parentNode->Instance;
-                V4_DC60 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                cMoveNode_addParent_DC60(childNode, k, buf[2], &offset);
+                tInstanceRecord *parentRecord = parentNode->Instance;
+                V4_DC60 offset(data->OffsetX, data->OffsetY, data->OffsetZ, 0.0f);
+                cMoveNode_addParent_DC60(childNode, parentRecord, data->Mesh, &offset);
             }
         }
     }
@@ -2232,12 +2489,10 @@ extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSp
 static inline tInstanceRecord *refToPtr_DED0(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
 extern t3Vector luno_gLunoNil_DED0 __asm__("luno_gLunoNil");
-struct Tag_DED0 { char c; Tag_DED0() {} Tag_DED0(const Tag_DED0 &o) : c(o.c) {} };
-extern unsigned D_DED0[] __asm__("D_004FB778");
+extern tAddSplineData sSplineDefaults __asm__("D_004FB778");
 extern int D_004A5614;
 extern const int AddSplineFunc_types[];
 extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_DED0 { int idx; int val; int pad; int type; };
 /**
  * Script function: puts a moving world instance on a spline path (a single-spline description).
  *
@@ -2249,39 +2504,35 @@ struct Ent_DED0 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector AddSplineFunc(int n, Ent_DED0 *params) {
+extern "C" t3Vector AddSplineFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5614 == 0) {
-        D_DED0[0] = 0xFFFFFFFF;
-        D_DED0[1] = 0xFFFFFFFF;
-        ((int*)D_DED0)[2] = 1;
-        ((int*)D_DED0)[3] = 3;
-        *(float*)&D_DED0[4] = 20.0f;
+        sSplineDefaults.InstId = 0xFFFFFFFF;
+        sSplineDefaults.SplineId = 0xFFFFFFFF;
+        sSplineDefaults.Sequence = 1;
+        sSplineDefaults.Orient = 3;
+        sSplineDefaults.Speed = 20.0f;
         float z = 0.0f;
-        *(float*)&D_DED0[5] = z;
-        *(float*)&D_DED0[6] = z;
-        *(float*)&D_DED0[7] = z;
-        ((int*)D_DED0)[8] = 1;
-        *(float*)&D_DED0[9] = z;
-        *(float*)&D_DED0[10] = z;
+        sSplineDefaults.Heading = z;
+        sSplineDefaults.StartDistance = z;
+        sSplineDefaults.RandomDistance = z;
+        sSplineDefaults.Start = 1;
+        sSplineDefaults.Force = z;
+        sSplineDefaults.ForceTime = z;
         D_004A5614 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_DED0*)((char*)D_DED0 + 44)) = Tag_DED0((*(Tag_DED0*)((char*)D_DED0 + 44)));
+        sSplineDefaults.null = WScriptNullType(sSplineDefaults.null);
     }
     unsigned buf64[12];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_DED0(buf, D_DED0, 48);
-    Ent_DED0 *x = params;
+    MEM_copy_DED0(buf, &sSplineDefaults, sizeof(tAddSplineData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = AddSplineFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -2319,12 +2570,10 @@ extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpl
 static inline tInstanceRecord *refToPtr_E0C0(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
 extern t3Vector luno_gLunoNil_E0C0 __asm__("luno_gLunoNil");
-struct Tag_E0C0 { char c; Tag_E0C0() {} Tag_E0C0(const Tag_E0C0 &o) : c(o.c) {} };
-extern unsigned D_E0C0[] __asm__("D_004FB7A8");
+extern tAddMultiSplineData sMultiSplineDefaults __asm__("D_004FB7A8");
 extern int D_004A5618;
 extern const int AddMultiSplineFunc_types[];
 extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_E0C0 { int idx; int val; int pad; int type; };
 /**
  * Script function: puts a moving world instance on a multi-spline path.
  *
@@ -2336,40 +2585,36 @@ struct Ent_E0C0 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector AddMultiSplineFunc(int n, Ent_E0C0 *params) {
+extern "C" t3Vector AddMultiSplineFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5618 == 0) {
-        D_E0C0[0] = 0xFFFFFFFF;
-        D_E0C0[1] = 0xFFFFFFFF;
-        ((int*)D_E0C0)[2] = 3;
-        *(float*)&D_E0C0[3] = 20.0f;
+        sMultiSplineDefaults.InstId = 0xFFFFFFFF;
+        sMultiSplineDefaults.SplineId = 0xFFFFFFFF;
+        sMultiSplineDefaults.Orient = 3;
+        sMultiSplineDefaults.Speed = 20.0f;
         float z = 0.0f;
-        *(float*)&D_E0C0[4] = z;
-        *(float*)&D_E0C0[5] = z;
-        *(float*)&D_E0C0[6] = 1.0f;
-        *(float*)&D_E0C0[7] = z;
-        *(float*)&D_E0C0[8] = z;
-        *(float*)&D_E0C0[9] = z;
-        ((int*)D_E0C0)[10] = 1;
-        ((int*)D_E0C0)[11] = 2;
+        sMultiSplineDefaults.Heading = z;
+        sMultiSplineDefaults.StartDistance = z;
+        sMultiSplineDefaults.ColourA = 1.0f;
+        sMultiSplineDefaults.ColourR = z;
+        sMultiSplineDefaults.ColourG = z;
+        sMultiSplineDefaults.ColourB = z;
+        sMultiSplineDefaults.DrawSpline = 1;
+        sMultiSplineDefaults.NumModels = 2;
         D_004A5618 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_E0C0*)((char*)D_E0C0 + 48)) = Tag_E0C0((*(Tag_E0C0*)((char*)D_E0C0 + 48)));
+        sMultiSplineDefaults.null = WScriptNullType(sMultiSplineDefaults.null);
     }
     unsigned buf64[13];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_E0C0(buf, D_E0C0, 52);
-    Ent_E0C0 *x = params;
+    MEM_copy_E0C0(buf, &sMultiSplineDefaults, sizeof(tAddMultiSplineData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = AddMultiSplineFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -2405,12 +2650,42 @@ INCLUDE_ASM("seg/seg_1FBE38", AddUVScrollFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addUVScroll_E2C0(void*, void*) __asm__("cMoveNode_addUVScroll");
 extern t3Vector luno_gLunoNil_E2C0 __asm__("luno_gLunoNil");
-struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} };
-extern unsigned D_E2C0[] __asm__("D_004FB7E0");
+// World-script data that adds a UV-scroll modifier (On Tour tAddUVScrollData; same offsets): the block below fills it.
+struct tAddUVScrollData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Type;                       // 0x04 [O]
+    float UStart;                   // 0x08 [O]
+    float VStart;                   // 0x0C [O]
+    float UScroll;                  // 0x10 [O]
+    float VScroll;                  // 0x14 [O]
+    float TimeOn;                   // 0x18 [O]
+    float TimeOff;                  // 0x1C [O]
+    float AngVel;                   // 0x20 [O]
+    float AxisX;                    // 0x24 [O]
+    float AxisY;                    // 0x28 [O]
+    float AxisZ;                    // 0x2C [O]
+    WScriptNullType null;           // 0x30 [O]
+    char unk_031[0x3];              // 0x31 padding
+};
+
+CHECK_OFFSET(tAddUVScrollData, InstId, 0x00);
+CHECK_OFFSET(tAddUVScrollData, Type, 0x04);
+CHECK_OFFSET(tAddUVScrollData, UStart, 0x08);
+CHECK_OFFSET(tAddUVScrollData, VStart, 0x0C);
+CHECK_OFFSET(tAddUVScrollData, UScroll, 0x10);
+CHECK_OFFSET(tAddUVScrollData, VScroll, 0x14);
+CHECK_OFFSET(tAddUVScrollData, TimeOn, 0x18);
+CHECK_OFFSET(tAddUVScrollData, TimeOff, 0x1C);
+CHECK_OFFSET(tAddUVScrollData, AngVel, 0x20);
+CHECK_OFFSET(tAddUVScrollData, AxisX, 0x24);
+CHECK_OFFSET(tAddUVScrollData, AxisY, 0x28);
+CHECK_OFFSET(tAddUVScrollData, AxisZ, 0x2C);
+CHECK_OFFSET(tAddUVScrollData, null, 0x30);
+CHECK_SIZE(tAddUVScrollData, 0x34);
+extern tAddUVScrollData sUVScrollDefaults __asm__("D_004FB7E0");
 extern int D_004A561C;
 extern const int D_00446238[];
 extern "C" void* MEM_copy_E2C0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_E2C0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[21]): adds a UV-scroll modifier to a moving world instance.
  *
@@ -2429,39 +2704,35 @@ struct Ent_E2C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddUVScrollFunc(int n, Ent_E2C0 *params) {
+extern "C" t3Vector AddUVScrollFunc(int n, luno_cLunoCArg *params) {
     if (D_004A561C == 0) {
-        D_E2C0[0] = 0xFFFFFFFF;
-        ((int*)D_E2C0)[1] = 5;
+        sUVScrollDefaults.InstId = 0xFFFFFFFF;
+        sUVScrollDefaults.Type = 5;
         float z = 0.0f;
-        *(float*)&D_E2C0[2] = z;
-        *(float*)&D_E2C0[3] = z;
-        *(float*)&D_E2C0[4] = 0.016666699200868607f;
-        *(float*)&D_E2C0[5] = 0.016666699200868607f;
-        *(float*)&D_E2C0[6] = 1.0f;
-        *(float*)&D_E2C0[7] = z;
-        *(float*)&D_E2C0[8] = z;
-        *(float*)&D_E2C0[9] = z;
-        *(float*)&D_E2C0[10] = z;
-        *(float*)&D_E2C0[11] = 1.0f;
+        sUVScrollDefaults.UStart = z;
+        sUVScrollDefaults.VStart = z;
+        sUVScrollDefaults.UScroll = 0.016666699200868607f;
+        sUVScrollDefaults.VScroll = 0.016666699200868607f;
+        sUVScrollDefaults.TimeOn = 1.0f;
+        sUVScrollDefaults.TimeOff = z;
+        sUVScrollDefaults.AngVel = z;
+        sUVScrollDefaults.AxisX = z;
+        sUVScrollDefaults.AxisY = z;
+        sUVScrollDefaults.AxisZ = 1.0f;
         D_004A561C = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_E2C0*)((char*)D_E2C0 + 48)) = Tag_E2C0((*(Tag_E2C0*)((char*)D_E2C0 + 48)));
+        sUVScrollDefaults.null = WScriptNullType(sUVScrollDefaults.null);
     }
     unsigned buf64[13];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_E2C0(buf, D_E2C0, 52);
-    Ent_E2C0 *x = params;
+    MEM_copy_E2C0(buf, &sUVScrollDefaults, sizeof(tAddUVScrollData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446238[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -2473,7 +2744,7 @@ extern "C" t3Vector AddUVScrollFunc(int n, Ent_E2C0 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
@@ -2490,12 +2761,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddTexFlipFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addTexFlip_E4A8(void*, void*) __asm__("cMoveNode_addTexFlip");
 extern t3Vector luno_gLunoNil_E4A8 __asm__("luno_gLunoNil");
-struct Tag_E4A8 { char c; Tag_E4A8() {} Tag_E4A8(const Tag_E4A8 &o) : c(o.c) {} };
-extern unsigned D_E4A8[] __asm__("D_004FB818");
+extern tAddTexFlipData sTexFlipDefaults __asm__("D_004FB818");
 extern int D_004A5620;
 extern const int D_00446268[];
 extern "C" void* MEM_copy_E4A8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_E4A8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[22]): adds a texture-flip modifier to a moving world instance.
  *
@@ -2513,29 +2782,25 @@ struct Ent_E4A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddTexFlipFunc(int n, Ent_E4A8 *params) {
+extern "C" t3Vector AddTexFlipFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5620 == 0) {
-        D_E4A8[0] = 0xFFFFFFFF;
-        ((int*)D_E4A8)[1] = 0;
-        ((int*)D_E4A8)[2] = 0;
-        ((int*)D_E4A8)[3] = 0;
-        *(float*)&D_E4A8[4] = 2.0f;
+        sTexFlipDefaults.InstId = 0xFFFFFFFF;
+        sTexFlipDefaults.Type = 0;
+        sTexFlipDefaults.StartId = 0;
+        sTexFlipDefaults.Dir = 0;
+        sTexFlipDefaults.Speed = 2.0f;
         D_004A5620 = 1;
-        (*(Tag_E4A8*)((char*)D_E4A8 + 20)) = Tag_E4A8((*(Tag_E4A8*)((char*)D_E4A8 + 20)));
+        sTexFlipDefaults.null = WScriptNullType(sTexFlipDefaults.null);
     }
     unsigned buf64[6];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_E4A8(buf, D_E4A8, 24);
-    Ent_E4A8 *x = params;
+    MEM_copy_E4A8(buf, &sTexFlipDefaults, sizeof(tAddTexFlipData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446268[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -2547,7 +2812,7 @@ extern "C" t3Vector AddTexFlipFunc(int n, Ent_E4A8 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
@@ -2564,12 +2829,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddBoostFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addBoost_E668(void*, void*) __asm__("cMoveNode_addBoost");
 extern t3Vector luno_gLunoNil_E668 __asm__("luno_gLunoNil");
-struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} };
-extern unsigned D_E668[] __asm__("D_004FB830");
+extern tAddBoostData sAddBoostDefaults __asm__("D_004FB830");
 extern int D_004A5624;
 extern const int D_00446280[];
 extern "C" void* MEM_copy_E668(void*, void*, int) __asm__("MEM_copy");
-struct Ent_E668 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[24]): adds a boost modifier to a moving world instance.
  *
@@ -2588,35 +2851,31 @@ struct Ent_E668 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddBoostFunc(int n, Ent_E668 *params) {
+extern "C" t3Vector AddBoostFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5624 == 0) {
-        D_E668[0] = 0xFFFFFFFF;
-        ((int*)D_E668)[1] = 1;
+        sAddBoostDefaults.InstId = 0xFFFFFFFF;
+        sAddBoostDefaults.Type = 1;
         float z = 0.0f;
-        *(float*)&D_E668[2] = z;
-        *(float*)&D_E668[3] = 0.10000000149011612f;
-        *(float*)&D_E668[4] = 20.0f;
-        *(float*)&D_E668[5] = z;
-        *(float*)&D_E668[6] = z;
-        *(float*)&D_E668[7] = 1.0f;
+        sAddBoostDefaults.BoostTime = z;
+        sAddBoostDefaults.Drag = 0.10000000149011612f;
+        sAddBoostDefaults.MaxSpeed = 20.0f;
+        sAddBoostDefaults.BoostX = z;
+        sAddBoostDefaults.BoostY = z;
+        sAddBoostDefaults.BoostZ = 1.0f;
         D_004A5624 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_E668*)((char*)D_E668 + 32)) = Tag_E668((*(Tag_E668*)((char*)D_E668 + 32)));
+        sAddBoostDefaults.null = WScriptNullType(sAddBoostDefaults.null);
     }
     unsigned buf64[9];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_E668(buf, D_E668, 36);
-    Ent_E668 *x = params;
+    MEM_copy_E668(buf, &sAddBoostDefaults, sizeof(tAddBoostData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446280[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -2628,7 +2887,7 @@ extern "C" t3Vector AddBoostFunc(int n, Ent_E668 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
@@ -2703,12 +2962,129 @@ static inline int nearViewer_E840(const t4Vector &pos) {
     return 0;
 }
 extern t3Vector luno_gLunoNil_E840 __asm__("luno_gLunoNil");
-struct Tag_E840 { char c; Tag_E840() {} Tag_E840(const Tag_E840 &o) : c(o.c) {} };
-extern unsigned D_E840[] __asm__("D_004FB858");
+// World-script data that adds a particle effect to a node (On Tour tAddParticleData; same offsets): the block below
+// fills it.
+struct tAddParticleData {
+    int NumParticles;               // 0x00 [O]
+    int NumBlur;                    // 0x04 [O]
+    float Duration;                 // 0x08 [O]
+    float Damp;                     // 0x0C [O]
+    float Size;                     // 0x10 [O]
+    float Life;                     // 0x14 [O]
+    float SizeR;                    // 0x18 [O]
+    float LifeR;                    // 0x1C [O]
+    float BlurStep;                 // 0x20 [O]
+    float OffX;                     // 0x24 [O]
+    float OffY;                     // 0x28 [O]
+    float OffZ;                     // 0x2C [O]
+    float R0X;                      // 0x30 [O]
+    float R0Y;                      // 0x34 [O]
+    float R0Z;                      // 0x38 [O]
+    float R1X;                      // 0x3C [O]
+    float R1Y;                      // 0x40 [O]
+    float R1Z;                      // 0x44 [O]
+    float VelX;                     // 0x48 [O]
+    float VelY;                     // 0x4C [O]
+    float VelZ;                     // 0x50 [O]
+    float R0VX;                     // 0x54 [O]
+    float R0VY;                     // 0x58 [O]
+    float R0VZ;                     // 0x5C [O]
+    float R1VX;                     // 0x60 [O]
+    float R1VY;                     // 0x64 [O]
+    float R1VZ;                     // 0x68 [O]
+    float R2VX;                     // 0x6C [O]
+    float R2VY;                     // 0x70 [O]
+    float R2VZ;                     // 0x74 [O]
+    float ForceX;                   // 0x78 [O]
+    float ForceY;                   // 0x7C [O]
+    float ForceZ;                   // 0x80 [O]
+    float StartColA;                // 0x84 [O]
+    float StartColR;                // 0x88 [O]
+    float StartColG;                // 0x8C [O]
+    float StartColB;                // 0x90 [O]
+    float EndColA;                  // 0x94 [O]
+    float EndColR;                  // 0x98 [O]
+    float EndColG;                  // 0x9C [O]
+    float EndColB;                  // 0xA0 [O]
+    float R0A;                      // 0xA4 [O]
+    float R0R;                      // 0xA8 [O]
+    float R0G;                      // 0xAC [O]
+    float R0B;                      // 0xB0 [O]
+    float R1A;                      // 0xB4 [O]
+    float R1R;                      // 0xB8 [O]
+    float R1G;                      // 0xBC [O]
+    float R1B;                      // 0xC0 [O]
+    int TextureId;                  // 0xC4 [O]
+    int BlendMode;                  // 0xC8 [O]
+    float SizeFinal;                // 0xCC [O]
+    int NumFlipTextures;            // 0xD0 [O]
+    float FlipTextureRate;          // 0xD4 [O]
+    unsigned int InstId;            // 0xD8 [O] tResourceID
+    WScriptNullType null;           // 0xDC [O]
+    char unk_0DD[0x3];              // 0xDD padding
+};
+
+CHECK_OFFSET(tAddParticleData, NumParticles, 0x00);
+CHECK_OFFSET(tAddParticleData, NumBlur, 0x04);
+CHECK_OFFSET(tAddParticleData, Duration, 0x08);
+CHECK_OFFSET(tAddParticleData, Damp, 0x0C);
+CHECK_OFFSET(tAddParticleData, Size, 0x10);
+CHECK_OFFSET(tAddParticleData, Life, 0x14);
+CHECK_OFFSET(tAddParticleData, SizeR, 0x18);
+CHECK_OFFSET(tAddParticleData, LifeR, 0x1C);
+CHECK_OFFSET(tAddParticleData, BlurStep, 0x20);
+CHECK_OFFSET(tAddParticleData, OffX, 0x24);
+CHECK_OFFSET(tAddParticleData, OffY, 0x28);
+CHECK_OFFSET(tAddParticleData, OffZ, 0x2C);
+CHECK_OFFSET(tAddParticleData, R0X, 0x30);
+CHECK_OFFSET(tAddParticleData, R0Y, 0x34);
+CHECK_OFFSET(tAddParticleData, R0Z, 0x38);
+CHECK_OFFSET(tAddParticleData, R1X, 0x3C);
+CHECK_OFFSET(tAddParticleData, R1Y, 0x40);
+CHECK_OFFSET(tAddParticleData, R1Z, 0x44);
+CHECK_OFFSET(tAddParticleData, VelX, 0x48);
+CHECK_OFFSET(tAddParticleData, VelY, 0x4C);
+CHECK_OFFSET(tAddParticleData, VelZ, 0x50);
+CHECK_OFFSET(tAddParticleData, R0VX, 0x54);
+CHECK_OFFSET(tAddParticleData, R0VY, 0x58);
+CHECK_OFFSET(tAddParticleData, R0VZ, 0x5C);
+CHECK_OFFSET(tAddParticleData, R1VX, 0x60);
+CHECK_OFFSET(tAddParticleData, R1VY, 0x64);
+CHECK_OFFSET(tAddParticleData, R1VZ, 0x68);
+CHECK_OFFSET(tAddParticleData, R2VX, 0x6C);
+CHECK_OFFSET(tAddParticleData, R2VY, 0x70);
+CHECK_OFFSET(tAddParticleData, R2VZ, 0x74);
+CHECK_OFFSET(tAddParticleData, ForceX, 0x78);
+CHECK_OFFSET(tAddParticleData, ForceY, 0x7C);
+CHECK_OFFSET(tAddParticleData, ForceZ, 0x80);
+CHECK_OFFSET(tAddParticleData, StartColA, 0x84);
+CHECK_OFFSET(tAddParticleData, StartColR, 0x88);
+CHECK_OFFSET(tAddParticleData, StartColG, 0x8C);
+CHECK_OFFSET(tAddParticleData, StartColB, 0x90);
+CHECK_OFFSET(tAddParticleData, EndColA, 0x94);
+CHECK_OFFSET(tAddParticleData, EndColR, 0x98);
+CHECK_OFFSET(tAddParticleData, EndColG, 0x9C);
+CHECK_OFFSET(tAddParticleData, EndColB, 0xA0);
+CHECK_OFFSET(tAddParticleData, R0A, 0xA4);
+CHECK_OFFSET(tAddParticleData, R0R, 0xA8);
+CHECK_OFFSET(tAddParticleData, R0G, 0xAC);
+CHECK_OFFSET(tAddParticleData, R0B, 0xB0);
+CHECK_OFFSET(tAddParticleData, R1A, 0xB4);
+CHECK_OFFSET(tAddParticleData, R1R, 0xB8);
+CHECK_OFFSET(tAddParticleData, R1G, 0xBC);
+CHECK_OFFSET(tAddParticleData, R1B, 0xC0);
+CHECK_OFFSET(tAddParticleData, TextureId, 0xC4);
+CHECK_OFFSET(tAddParticleData, BlendMode, 0xC8);
+CHECK_OFFSET(tAddParticleData, SizeFinal, 0xCC);
+CHECK_OFFSET(tAddParticleData, NumFlipTextures, 0xD0);
+CHECK_OFFSET(tAddParticleData, FlipTextureRate, 0xD4);
+CHECK_OFFSET(tAddParticleData, InstId, 0xD8);
+CHECK_OFFSET(tAddParticleData, null, 0xDC);
+CHECK_SIZE(tAddParticleData, 0xE0);
+extern tAddParticleData sAddParticleDefaults __asm__("D_004FB858");
 extern int D_004A5628;
 extern const int D_004462A0[];
 extern "C" void* MEM_copy_E840(void*, void*, int) __asm__("MEM_copy");
-struct Ent_E840 { int idx; int val; int pad; int type; };
 /**
  * Script function AddParticle (gLunoCFunctions, between AddBoost and AddDynamicParticle): adds a particle emitter
  * to a world instance near the viewer.
@@ -2721,85 +3097,82 @@ struct Ent_E840 { int idx; int val; int pad; int type; };
  * @param params  the arguments (cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector AddParticleFunc(int n, Ent_E840 *params) {
+extern "C" t3Vector AddParticleFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5628 == 0) {
-        ((int*)D_E840)[0] = 1;
-        ((int*)D_E840)[1] = 0;
-        *(float*)&D_E840[2] = -1.0f;
-        *(float*)&D_E840[3] = 1.0f;
-        *(float*)&D_E840[4] = 4.0f;
+        sAddParticleDefaults.NumParticles = 1;
+        sAddParticleDefaults.NumBlur = 0;
+        sAddParticleDefaults.Duration = -1.0f;
+        sAddParticleDefaults.Damp = 1.0f;
+        sAddParticleDefaults.Size = 4.0f;
         float z = 0.0f;
-        *(float*)&D_E840[5] = z;
-        *(float*)&D_E840[6] = z;
-        *(float*)&D_E840[7] = z;
-        *(float*)&D_E840[8] = z;
-        *(float*)&D_E840[9] = z;
-        *(float*)&D_E840[10] = z;
-        *(float*)&D_E840[11] = z;
-        *(float*)&D_E840[12] = z;
-        *(float*)&D_E840[13] = z;
-        *(float*)&D_E840[14] = z;
-        *(float*)&D_E840[15] = z;
-        *(float*)&D_E840[16] = z;
-        *(float*)&D_E840[17] = z;
-        *(float*)&D_E840[18] = z;
-        *(float*)&D_E840[19] = z;
-        *(float*)&D_E840[20] = z;
-        *(float*)&D_E840[21] = z;
-        *(float*)&D_E840[22] = z;
-        *(float*)&D_E840[23] = z;
-        *(float*)&D_E840[24] = z;
-        *(float*)&D_E840[25] = z;
-        *(float*)&D_E840[26] = z;
-        *(float*)&D_E840[27] = z;
-        *(float*)&D_E840[28] = z;
-        *(float*)&D_E840[29] = z;
-        *(float*)&D_E840[30] = z;
-        *(float*)&D_E840[31] = z;
-        *(float*)&D_E840[32] = z;
-        *(float*)&D_E840[33] = 1.0f;
-        *(float*)&D_E840[34] = z;
-        *(float*)&D_E840[35] = z;
-        *(float*)&D_E840[36] = z;
-        *(float*)&D_E840[37] = 1.0f;
-        *(float*)&D_E840[38] = 1.0f;
-        *(float*)&D_E840[39] = 1.0f;
-        *(float*)&D_E840[40] = 1.0f;
-        *(float*)&D_E840[41] = 1.0f;
-        *(float*)&D_E840[42] = z;
-        *(float*)&D_E840[43] = z;
-        *(float*)&D_E840[44] = z;
-        *(float*)&D_E840[45] = 1.0f;
-        *(float*)&D_E840[46] = z;
-        *(float*)&D_E840[47] = z;
-        *(float*)&D_E840[48] = z;
-        ((int*)D_E840)[49] = 16;
-        ((int*)D_E840)[50] = 0;
-        *(float*)&D_E840[51] = z;
-        ((int*)D_E840)[52] = 1;
-        *(float*)&D_E840[53] = 20.0f;
-        D_E840[54] = 0xFFFFFFFF;
+        sAddParticleDefaults.Life = z;
+        sAddParticleDefaults.SizeR = z;
+        sAddParticleDefaults.LifeR = z;
+        sAddParticleDefaults.BlurStep = z;
+        sAddParticleDefaults.OffX = z;
+        sAddParticleDefaults.OffY = z;
+        sAddParticleDefaults.OffZ = z;
+        sAddParticleDefaults.R0X = z;
+        sAddParticleDefaults.R0Y = z;
+        sAddParticleDefaults.R0Z = z;
+        sAddParticleDefaults.R1X = z;
+        sAddParticleDefaults.R1Y = z;
+        sAddParticleDefaults.R1Z = z;
+        sAddParticleDefaults.VelX = z;
+        sAddParticleDefaults.VelY = z;
+        sAddParticleDefaults.VelZ = z;
+        sAddParticleDefaults.R0VX = z;
+        sAddParticleDefaults.R0VY = z;
+        sAddParticleDefaults.R0VZ = z;
+        sAddParticleDefaults.R1VX = z;
+        sAddParticleDefaults.R1VY = z;
+        sAddParticleDefaults.R1VZ = z;
+        sAddParticleDefaults.R2VX = z;
+        sAddParticleDefaults.R2VY = z;
+        sAddParticleDefaults.R2VZ = z;
+        sAddParticleDefaults.ForceX = z;
+        sAddParticleDefaults.ForceY = z;
+        sAddParticleDefaults.ForceZ = z;
+        sAddParticleDefaults.StartColA = 1.0f;
+        sAddParticleDefaults.StartColR = z;
+        sAddParticleDefaults.StartColG = z;
+        sAddParticleDefaults.StartColB = z;
+        sAddParticleDefaults.EndColA = 1.0f;
+        sAddParticleDefaults.EndColR = 1.0f;
+        sAddParticleDefaults.EndColG = 1.0f;
+        sAddParticleDefaults.EndColB = 1.0f;
+        sAddParticleDefaults.R0A = 1.0f;
+        sAddParticleDefaults.R0R = z;
+        sAddParticleDefaults.R0G = z;
+        sAddParticleDefaults.R0B = z;
+        sAddParticleDefaults.R1A = 1.0f;
+        sAddParticleDefaults.R1R = z;
+        sAddParticleDefaults.R1G = z;
+        sAddParticleDefaults.R1B = z;
+        sAddParticleDefaults.TextureId = 16;
+        sAddParticleDefaults.BlendMode = 0;
+        sAddParticleDefaults.SizeFinal = z;
+        sAddParticleDefaults.NumFlipTextures = 1;
+        sAddParticleDefaults.FlipTextureRate = 20.0f;
+        sAddParticleDefaults.InstId = 0xFFFFFFFF;
         D_004A5628 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_E840*)((char*)D_E840 + 0xDC)) = Tag_E840((*(Tag_E840*)((char*)D_E840 + 0xDC)));
+        sAddParticleDefaults.null = WScriptNullType(sAddParticleDefaults.null);
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489740_E840, 0x20000000, 0);
-    buf[54] = 0xFFFFFFFF;
-    MEM_copy_E840(buf, D_E840, 0xE0);
-    Ent_E840 *x = params;
+    tAddParticleData *data = (tAddParticleData*)buf;
+    data->InstId = 0xFFFFFFFF;
+    MEM_copy_E840(buf, &sAddParticleDefaults, sizeof(tAddParticleData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = D_004462A0[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    if (*(float*)&buf[7] > *(float*)&buf[5])
-        *(float*)&buf[7] = *(float*)&buf[5];
-    unsigned id = buf[54];
+    if (data->LifeR > data->Life)
+        data->LifeR = data->Life;
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -2850,12 +3223,137 @@ extern "C" void cMoveNode_addDynamicParticle_EE98(void*, void*, int, V4_EE98*) _
 void operator_delete(int*);
 extern char D_00489750_EE98[] __asm__("D_00489750");
 extern t3Vector luno_gLunoNil_EE98 __asm__("luno_gLunoNil");
-struct Tag_EE98 { char c; Tag_EE98() {} Tag_EE98(const Tag_EE98 &o) : c(o.c) {} };
-extern unsigned D_EE98[] __asm__("D_004FB938");
+// World-script data that adds a dynamic particle effect to a node (On Tour tAddDynamicParticleData; same offsets): the
+// block below fills it.
+struct tAddDynamicParticleData {
+    int NumParticles;               // 0x00 [O]
+    int NumBlur;                    // 0x04 [O]
+    float Duration;                 // 0x08 [O]
+    float Damp;                     // 0x0C [O]
+    float Size;                     // 0x10 [O]
+    float Life;                     // 0x14 [O]
+    float SizeR;                    // 0x18 [O]
+    float LifeR;                    // 0x1C [O]
+    float BlurStep;                 // 0x20 [O]
+    float OffX;                     // 0x24 [O]
+    float OffY;                     // 0x28 [O]
+    float OffZ;                     // 0x2C [O]
+    float R0X;                      // 0x30 [O]
+    float R0Y;                      // 0x34 [O]
+    float R0Z;                      // 0x38 [O]
+    float R1X;                      // 0x3C [O]
+    float R1Y;                      // 0x40 [O]
+    float R1Z;                      // 0x44 [O]
+    float VelX;                     // 0x48 [O]
+    float VelY;                     // 0x4C [O]
+    float VelZ;                     // 0x50 [O]
+    float R0VX;                     // 0x54 [O]
+    float R0VY;                     // 0x58 [O]
+    float R0VZ;                     // 0x5C [O]
+    float R1VX;                     // 0x60 [O]
+    float R1VY;                     // 0x64 [O]
+    float R1VZ;                     // 0x68 [O]
+    float R2VX;                     // 0x6C [O]
+    float R2VY;                     // 0x70 [O]
+    float R2VZ;                     // 0x74 [O]
+    float ForceX;                   // 0x78 [O]
+    float ForceY;                   // 0x7C [O]
+    float ForceZ;                   // 0x80 [O]
+    float StartColA;                // 0x84 [O]
+    float StartColR;                // 0x88 [O]
+    float StartColG;                // 0x8C [O]
+    float StartColB;                // 0x90 [O]
+    float EndColA;                  // 0x94 [O]
+    float EndColR;                  // 0x98 [O]
+    float EndColG;                  // 0x9C [O]
+    float EndColB;                  // 0xA0 [O]
+    float R0A;                      // 0xA4 [O]
+    float R0R;                      // 0xA8 [O]
+    float R0G;                      // 0xAC [O]
+    float R0B;                      // 0xB0 [O]
+    float R1A;                      // 0xB4 [O]
+    float R1R;                      // 0xB8 [O]
+    float R1G;                      // 0xBC [O]
+    float R1B;                      // 0xC0 [O]
+    int TextureId;                  // 0xC4 [O]
+    int BlendMode;                  // 0xC8 [O]
+    float SizeFinal;                // 0xCC [O]
+    int NumFlipTextures;            // 0xD0 [O]
+    float FlipTextureRate;          // 0xD4 [O]
+    unsigned int InstId;            // 0xD8 [O] tResourceID
+    int Mesh;                       // 0xDC [O]
+    float OffsetX;                  // 0xE0 [O]
+    float OffsetY;                  // 0xE4 [O]
+    float OffsetZ;                  // 0xE8 [O]
+    WScriptNullType null;           // 0xEC [O]
+    char unk_0ED[0x3];              // 0xED padding
+};
+
+CHECK_OFFSET(tAddDynamicParticleData, NumParticles, 0x00);
+CHECK_OFFSET(tAddDynamicParticleData, NumBlur, 0x04);
+CHECK_OFFSET(tAddDynamicParticleData, Duration, 0x08);
+CHECK_OFFSET(tAddDynamicParticleData, Damp, 0x0C);
+CHECK_OFFSET(tAddDynamicParticleData, Size, 0x10);
+CHECK_OFFSET(tAddDynamicParticleData, Life, 0x14);
+CHECK_OFFSET(tAddDynamicParticleData, SizeR, 0x18);
+CHECK_OFFSET(tAddDynamicParticleData, LifeR, 0x1C);
+CHECK_OFFSET(tAddDynamicParticleData, BlurStep, 0x20);
+CHECK_OFFSET(tAddDynamicParticleData, OffX, 0x24);
+CHECK_OFFSET(tAddDynamicParticleData, OffY, 0x28);
+CHECK_OFFSET(tAddDynamicParticleData, OffZ, 0x2C);
+CHECK_OFFSET(tAddDynamicParticleData, R0X, 0x30);
+CHECK_OFFSET(tAddDynamicParticleData, R0Y, 0x34);
+CHECK_OFFSET(tAddDynamicParticleData, R0Z, 0x38);
+CHECK_OFFSET(tAddDynamicParticleData, R1X, 0x3C);
+CHECK_OFFSET(tAddDynamicParticleData, R1Y, 0x40);
+CHECK_OFFSET(tAddDynamicParticleData, R1Z, 0x44);
+CHECK_OFFSET(tAddDynamicParticleData, VelX, 0x48);
+CHECK_OFFSET(tAddDynamicParticleData, VelY, 0x4C);
+CHECK_OFFSET(tAddDynamicParticleData, VelZ, 0x50);
+CHECK_OFFSET(tAddDynamicParticleData, R0VX, 0x54);
+CHECK_OFFSET(tAddDynamicParticleData, R0VY, 0x58);
+CHECK_OFFSET(tAddDynamicParticleData, R0VZ, 0x5C);
+CHECK_OFFSET(tAddDynamicParticleData, R1VX, 0x60);
+CHECK_OFFSET(tAddDynamicParticleData, R1VY, 0x64);
+CHECK_OFFSET(tAddDynamicParticleData, R1VZ, 0x68);
+CHECK_OFFSET(tAddDynamicParticleData, R2VX, 0x6C);
+CHECK_OFFSET(tAddDynamicParticleData, R2VY, 0x70);
+CHECK_OFFSET(tAddDynamicParticleData, R2VZ, 0x74);
+CHECK_OFFSET(tAddDynamicParticleData, ForceX, 0x78);
+CHECK_OFFSET(tAddDynamicParticleData, ForceY, 0x7C);
+CHECK_OFFSET(tAddDynamicParticleData, ForceZ, 0x80);
+CHECK_OFFSET(tAddDynamicParticleData, StartColA, 0x84);
+CHECK_OFFSET(tAddDynamicParticleData, StartColR, 0x88);
+CHECK_OFFSET(tAddDynamicParticleData, StartColG, 0x8C);
+CHECK_OFFSET(tAddDynamicParticleData, StartColB, 0x90);
+CHECK_OFFSET(tAddDynamicParticleData, EndColA, 0x94);
+CHECK_OFFSET(tAddDynamicParticleData, EndColR, 0x98);
+CHECK_OFFSET(tAddDynamicParticleData, EndColG, 0x9C);
+CHECK_OFFSET(tAddDynamicParticleData, EndColB, 0xA0);
+CHECK_OFFSET(tAddDynamicParticleData, R0A, 0xA4);
+CHECK_OFFSET(tAddDynamicParticleData, R0R, 0xA8);
+CHECK_OFFSET(tAddDynamicParticleData, R0G, 0xAC);
+CHECK_OFFSET(tAddDynamicParticleData, R0B, 0xB0);
+CHECK_OFFSET(tAddDynamicParticleData, R1A, 0xB4);
+CHECK_OFFSET(tAddDynamicParticleData, R1R, 0xB8);
+CHECK_OFFSET(tAddDynamicParticleData, R1G, 0xBC);
+CHECK_OFFSET(tAddDynamicParticleData, R1B, 0xC0);
+CHECK_OFFSET(tAddDynamicParticleData, TextureId, 0xC4);
+CHECK_OFFSET(tAddDynamicParticleData, BlendMode, 0xC8);
+CHECK_OFFSET(tAddDynamicParticleData, SizeFinal, 0xCC);
+CHECK_OFFSET(tAddDynamicParticleData, NumFlipTextures, 0xD0);
+CHECK_OFFSET(tAddDynamicParticleData, FlipTextureRate, 0xD4);
+CHECK_OFFSET(tAddDynamicParticleData, InstId, 0xD8);
+CHECK_OFFSET(tAddDynamicParticleData, Mesh, 0xDC);
+CHECK_OFFSET(tAddDynamicParticleData, OffsetX, 0xE0);
+CHECK_OFFSET(tAddDynamicParticleData, OffsetY, 0xE4);
+CHECK_OFFSET(tAddDynamicParticleData, OffsetZ, 0xE8);
+CHECK_OFFSET(tAddDynamicParticleData, null, 0xEC);
+CHECK_SIZE(tAddDynamicParticleData, 0xF0);
+extern tAddDynamicParticleData sDynamicParticleDefaults __asm__("D_004FB938");
 extern int D_004A562C;
 extern const int D_00446380[];
 extern "C" void* MEM_copy_EE98(void*, void*, int) __asm__("MEM_copy");
-struct Ent_EE98 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[26]): adds a dynamic (moving) particle emitter to a moving world instance.
  *
@@ -2880,89 +3378,86 @@ struct Ent_EE98 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
+extern "C" t3Vector AddDynamicParticleFunc(int n, luno_cLunoCArg *params) {
     if (D_004A562C == 0) {
-        ((int*)D_EE98)[0] = 1;
-        ((int*)D_EE98)[1] = 0;
-        *(float*)&D_EE98[2] = -1.0f;
-        *(float*)&D_EE98[3] = 1.0f;
-        *(float*)&D_EE98[4] = 4.0f;
+        sDynamicParticleDefaults.NumParticles = 1;
+        sDynamicParticleDefaults.NumBlur = 0;
+        sDynamicParticleDefaults.Duration = -1.0f;
+        sDynamicParticleDefaults.Damp = 1.0f;
+        sDynamicParticleDefaults.Size = 4.0f;
         float z = 0.0f;
-        *(float*)&D_EE98[5] = z;
-        *(float*)&D_EE98[6] = z;
-        *(float*)&D_EE98[7] = z;
-        *(float*)&D_EE98[8] = z;
-        *(float*)&D_EE98[9] = z;
-        *(float*)&D_EE98[10] = z;
-        *(float*)&D_EE98[11] = z;
-        *(float*)&D_EE98[12] = z;
-        *(float*)&D_EE98[13] = z;
-        *(float*)&D_EE98[14] = z;
-        *(float*)&D_EE98[15] = z;
-        *(float*)&D_EE98[16] = z;
-        *(float*)&D_EE98[17] = z;
-        *(float*)&D_EE98[18] = z;
-        *(float*)&D_EE98[19] = z;
-        *(float*)&D_EE98[20] = z;
-        *(float*)&D_EE98[21] = z;
-        *(float*)&D_EE98[22] = z;
-        *(float*)&D_EE98[23] = z;
-        *(float*)&D_EE98[24] = z;
-        *(float*)&D_EE98[25] = z;
-        *(float*)&D_EE98[26] = z;
-        *(float*)&D_EE98[27] = z;
-        *(float*)&D_EE98[28] = z;
-        *(float*)&D_EE98[29] = z;
-        *(float*)&D_EE98[30] = z;
-        *(float*)&D_EE98[31] = z;
-        *(float*)&D_EE98[32] = z;
-        *(float*)&D_EE98[33] = 1.0f;
-        *(float*)&D_EE98[34] = z;
-        *(float*)&D_EE98[35] = z;
-        *(float*)&D_EE98[36] = z;
-        *(float*)&D_EE98[37] = 1.0f;
-        *(float*)&D_EE98[38] = 1.0f;
-        *(float*)&D_EE98[39] = 1.0f;
-        *(float*)&D_EE98[40] = 1.0f;
-        *(float*)&D_EE98[41] = 1.0f;
-        *(float*)&D_EE98[42] = z;
-        *(float*)&D_EE98[43] = z;
-        *(float*)&D_EE98[44] = z;
-        *(float*)&D_EE98[45] = 1.0f;
-        *(float*)&D_EE98[46] = z;
-        *(float*)&D_EE98[47] = z;
-        *(float*)&D_EE98[48] = z;
-        ((int*)D_EE98)[49] = 16;
-        ((int*)D_EE98)[50] = 0;
-        *(float*)&D_EE98[51] = z;
-        ((int*)D_EE98)[52] = 1;
-        *(float*)&D_EE98[53] = 20.0f;
-        D_EE98[54] = 0xFFFFFFFF;
-        ((int*)D_EE98)[55] = 0;
-        *(float*)&D_EE98[56] = z;
-        *(float*)&D_EE98[57] = z;
-        *(float*)&D_EE98[58] = z;
+        sDynamicParticleDefaults.Life = z;
+        sDynamicParticleDefaults.SizeR = z;
+        sDynamicParticleDefaults.LifeR = z;
+        sDynamicParticleDefaults.BlurStep = z;
+        sDynamicParticleDefaults.OffX = z;
+        sDynamicParticleDefaults.OffY = z;
+        sDynamicParticleDefaults.OffZ = z;
+        sDynamicParticleDefaults.R0X = z;
+        sDynamicParticleDefaults.R0Y = z;
+        sDynamicParticleDefaults.R0Z = z;
+        sDynamicParticleDefaults.R1X = z;
+        sDynamicParticleDefaults.R1Y = z;
+        sDynamicParticleDefaults.R1Z = z;
+        sDynamicParticleDefaults.VelX = z;
+        sDynamicParticleDefaults.VelY = z;
+        sDynamicParticleDefaults.VelZ = z;
+        sDynamicParticleDefaults.R0VX = z;
+        sDynamicParticleDefaults.R0VY = z;
+        sDynamicParticleDefaults.R0VZ = z;
+        sDynamicParticleDefaults.R1VX = z;
+        sDynamicParticleDefaults.R1VY = z;
+        sDynamicParticleDefaults.R1VZ = z;
+        sDynamicParticleDefaults.R2VX = z;
+        sDynamicParticleDefaults.R2VY = z;
+        sDynamicParticleDefaults.R2VZ = z;
+        sDynamicParticleDefaults.ForceX = z;
+        sDynamicParticleDefaults.ForceY = z;
+        sDynamicParticleDefaults.ForceZ = z;
+        sDynamicParticleDefaults.StartColA = 1.0f;
+        sDynamicParticleDefaults.StartColR = z;
+        sDynamicParticleDefaults.StartColG = z;
+        sDynamicParticleDefaults.StartColB = z;
+        sDynamicParticleDefaults.EndColA = 1.0f;
+        sDynamicParticleDefaults.EndColR = 1.0f;
+        sDynamicParticleDefaults.EndColG = 1.0f;
+        sDynamicParticleDefaults.EndColB = 1.0f;
+        sDynamicParticleDefaults.R0A = 1.0f;
+        sDynamicParticleDefaults.R0R = z;
+        sDynamicParticleDefaults.R0G = z;
+        sDynamicParticleDefaults.R0B = z;
+        sDynamicParticleDefaults.R1A = 1.0f;
+        sDynamicParticleDefaults.R1R = z;
+        sDynamicParticleDefaults.R1G = z;
+        sDynamicParticleDefaults.R1B = z;
+        sDynamicParticleDefaults.TextureId = 16;
+        sDynamicParticleDefaults.BlendMode = 0;
+        sDynamicParticleDefaults.SizeFinal = z;
+        sDynamicParticleDefaults.NumFlipTextures = 1;
+        sDynamicParticleDefaults.FlipTextureRate = 20.0f;
+        sDynamicParticleDefaults.InstId = 0xFFFFFFFF;
+        sDynamicParticleDefaults.Mesh = 0;
+        sDynamicParticleDefaults.OffsetX = z;
+        sDynamicParticleDefaults.OffsetY = z;
+        sDynamicParticleDefaults.OffsetZ = z;
         D_004A562C = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_EE98*)((char*)D_EE98 + 0xEC)) = Tag_EE98((*(Tag_EE98*)((char*)D_EE98 + 0xEC)));
+        sDynamicParticleDefaults.null = WScriptNullType(sDynamicParticleDefaults.null);
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xF0, D_00489750_EE98, 0x20000000, 0);
-    buf[54] = 0xFFFFFFFF;
-    MEM_copy_EE98(buf, D_EE98, 0xF0);
-    Ent_EE98 *x = params;
+    tAddDynamicParticleData *data = (tAddDynamicParticleData*)buf;
+    data->InstId = 0xFFFFFFFF;
+    MEM_copy_EE98(buf, &sDynamicParticleDefaults, sizeof(tAddDynamicParticleData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = D_00446380[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    if (*(float*)&buf[7] > *(float*)&buf[5])
-        *(float*)&buf[7] = *(float*)&buf[5];
-    unsigned id = buf[54];
+    if (data->LifeR > data->Life)
+        data->LifeR = data->Life;
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -2972,13 +3467,13 @@ extern "C" t3Vector AddDynamicParticleFunc(int n, Ent_EE98 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode && activeNode->isMoveNode()) {
         float one = 1.0f;
-        V4_EE98 offset(*(float*)&buf[56], *(float*)&buf[57], *(float*)&buf[58], one);
-        cMoveNode_addDynamicParticle_EE98(activeNode, buf, buf[55], &offset);
+        V4_EE98 offset(data->OffsetX, data->OffsetY, data->OffsetZ, one);
+        cMoveNode_addDynamicParticle_EE98(activeNode, buf, data->Mesh, &offset);
         return luno_gLunoNil_EE98;
     }
     operator_delete((int*)buf);
@@ -2992,12 +3487,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 extern t3Vector luno_gLunoNil_F1C8 __asm__("luno_gLunoNil");
-struct Tag_F1C8 { char c; Tag_F1C8() {} Tag_F1C8(const Tag_F1C8 &o) : c(o.c) {} };
-extern unsigned D_F1C8[] __asm__("D_004FBA28");
+extern tAddRailData sRailDefaults __asm__("D_004FBA28");
 extern int D_004A5630;
 extern const int D_00446470[];
 extern "C" void* MEM_copy_F1C8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_F1C8 { int idx; int val; int pad; int type; };
 /**
  * Script function: adds a rail to a moving world instance.
  *
@@ -3009,28 +3502,24 @@ struct Ent_F1C8 { int idx; int val; int pad; int type; };
  * @param params  the arguments (On Tour cLunoCArg*)
  * @return a void script value
  */
-extern "C" t3Vector AddRailFunc(int n, Ent_F1C8 *params) {
+extern "C" t3Vector AddRailFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5630 == 0) {
-        D_F1C8[0] = 0xFFFFFFFF;
-        D_F1C8[1] = 0xFFFFFFFF;
-        ((int*)D_F1C8)[2] = -1;
+        sRailDefaults.InstId = 0xFFFFFFFF;
+        sRailDefaults.SplineId = 0xFFFFFFFF;
+        sRailDefaults.Mesh = -1;
         D_004A5630 = 1;
-        (*(Tag_F1C8*)((char*)D_F1C8 + 12)) = Tag_F1C8((*(Tag_F1C8*)((char*)D_F1C8 + 12)));
+        sRailDefaults.null = WScriptNullType(sRailDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_F1C8(buf, D_F1C8, 16);
-    Ent_F1C8 *x = params;
+    MEM_copy_F1C8(buf, &sRailDefaults, sizeof(tAddRailData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446470[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3043,7 +3532,7 @@ extern "C" t3Vector AddRailFunc(int n, Ent_F1C8 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (~buf[1] != 0) {
@@ -3068,12 +3557,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFloatRailNode_cFloatRailNode_F390(void*, void*, void*) __asm__("cFloatRailNode_cFloatRailNode");
 extern char D_00489768_F390[] __asm__("D_00489768");
 extern t3Vector luno_gLunoNil_F390 __asm__("luno_gLunoNil");
-struct Tag_F390 { char c; Tag_F390() {} Tag_F390(const Tag_F390 &o) : c(o.c) {} };
-extern unsigned D_F390[] __asm__("D_004FBA38");
+extern tMakeFloatRailData sFloatRailDefaults __asm__("D_004FBA38");
 extern int D_004A5634;
 extern const int MakeFloatRailFunc_types[];
 extern "C" void* MEM_copy_F390(void*, void*, int) __asm__("MEM_copy");
-struct Ent_F390 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[49]): hangs a world instance on up to eight others as a floating rail (a new
  * FloatRail node), unless its current node is busy.
@@ -3095,33 +3582,33 @@ struct Ent_F390 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
+extern "C" t3Vector MakeFloatRailFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5634 == 0) {
-        D_F390[0] = 0xFFFFFFFF;
-        D_F390[1] = 0xFFFFFFFF;
-        D_F390[2] = 0xFFFFFFFF;
-        D_F390[3] = 0xFFFFFFFF;
-        D_F390[4] = 0xFFFFFFFF;
-        D_F390[5] = 0xFFFFFFFF;
-        D_F390[6] = 0xFFFFFFFF;
-        D_F390[7] = 0xFFFFFFFF;
-        D_F390[8] = 0xFFFFFFFF;
-        ((int*)D_F390)[9] = -1;
-        ((int*)D_F390)[10] = -1;
-        ((int*)D_F390)[11] = -1;
-        ((int*)D_F390)[12] = -1;
-        ((int*)D_F390)[13] = -1;
-        ((int*)D_F390)[14] = -1;
-        ((int*)D_F390)[15] = -1;
-        ((int*)D_F390)[16] = -1;
-        ((int*)D_F390)[17] = 1;
-        *(float*)&D_F390[18] = 0.5f;
-        *(float*)&D_F390[19] = 0.5f;
-        *(float*)&D_F390[20] = 1.0f;
+        sFloatRailDefaults.InstId = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId1 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId2 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId3 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId4 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId5 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId6 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId7 = 0xFFFFFFFF;
+        sFloatRailDefaults.InstId8 = 0xFFFFFFFF;
+        sFloatRailDefaults.Mesh1 = -1;
+        sFloatRailDefaults.Mesh2 = -1;
+        sFloatRailDefaults.Mesh3 = -1;
+        sFloatRailDefaults.Mesh4 = -1;
+        sFloatRailDefaults.Mesh5 = -1;
+        sFloatRailDefaults.Mesh6 = -1;
+        sFloatRailDefaults.Mesh7 = -1;
+        sFloatRailDefaults.Mesh8 = -1;
+        sFloatRailDefaults.Flags = 1;
+        sFloatRailDefaults.LSpring = 0.5f;
+        sFloatRailDefaults.LDamp = 0.5f;
+        sFloatRailDefaults.ForceScale = 1.0f;
         D_004A5634 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_F390*)((char*)D_F390 + 84)) = Tag_F390((*(Tag_F390*)((char*)D_F390 + 84)));
+        sFloatRailDefaults.null = WScriptNullType(sFloatRailDefaults.null);
     }
     unsigned buf64[22];
     unsigned *buf = buf64;
@@ -3134,16 +3621,12 @@ extern "C" t3Vector MakeFloatRailFunc(int n, Ent_F390 *params) {
     buf64[6] = 0xFFFFFFFF;
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
-    MEM_copy_F390(buf, D_F390, 88);
-    Ent_F390 *x = params;
+    MEM_copy_F390(buf, &sFloatRailDefaults, sizeof(tMakeFloatRailData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeFloatRailFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3183,12 +3666,10 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cSpringRailNode_cSpringRailNode_F5E8(void*, void*, void*) __asm__("cSpringRailNode_cSpringRailNode");
 extern char D_00489778_F5E8[] __asm__("D_00489778");
 extern t3Vector luno_gLunoNil_F5E8 __asm__("luno_gLunoNil");
-struct Tag_F5E8 { char c; Tag_F5E8() {} Tag_F5E8(const Tag_F5E8 &o) : c(o.c) {} };
-extern unsigned D_F5E8[] __asm__("D_004FBA90");
+extern tMakeSpringRailData sSpringRailDefaults __asm__("D_004FBA90");
 extern int D_004A5638;
 extern const int MakeSpringRailFunc_types[];
 extern "C" void* MEM_copy_F5E8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_F5E8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[70]): hangs a world instance on up to eight others as a springy rail (a new
  * SpringRail node), unless its current node is busy.
@@ -3210,36 +3691,37 @@ struct Ent_F5E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
+extern "C" t3Vector MakeSpringRailFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5638 == 0) {
-        D_F5E8[0] = 0xFFFFFFFF;
-        D_F5E8[1] = 0xFFFFFFFF;
-        D_F5E8[2] = 0xFFFFFFFF;
-        D_F5E8[3] = 0xFFFFFFFF;
-        D_F5E8[4] = 0xFFFFFFFF;
-        D_F5E8[5] = 0xFFFFFFFF;
-        D_F5E8[6] = 0xFFFFFFFF;
-        D_F5E8[7] = 0xFFFFFFFF;
-        D_F5E8[8] = 0xFFFFFFFF;
-        ((int*)D_F5E8)[9] = -1;
-        ((int*)D_F5E8)[10] = -1;
-        ((int*)D_F5E8)[11] = -1;
-        ((int*)D_F5E8)[12] = -1;
-        ((int*)D_F5E8)[13] = -1;
-        ((int*)D_F5E8)[14] = -1;
-        ((int*)D_F5E8)[15] = -1;
-        ((int*)D_F5E8)[16] = -1;
-        ((int*)D_F5E8)[17] = 1;
-        *(float*)&D_F5E8[18] = 0.5f;
-        *(float*)&D_F5E8[19] = 0.5f;
-        *(float*)&D_F5E8[20] = 1.0f;
+        sSpringRailDefaults.InstId = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId1 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId2 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId3 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId4 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId5 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId6 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId7 = 0xFFFFFFFF;
+        sSpringRailDefaults.InstId8 = 0xFFFFFFFF;
+        sSpringRailDefaults.Mesh1 = -1;
+        sSpringRailDefaults.Mesh2 = -1;
+        sSpringRailDefaults.Mesh3 = -1;
+        sSpringRailDefaults.Mesh4 = -1;
+        sSpringRailDefaults.Mesh5 = -1;
+        sSpringRailDefaults.Mesh6 = -1;
+        sSpringRailDefaults.Mesh7 = -1;
+        sSpringRailDefaults.Mesh8 = -1;
+        sSpringRailDefaults.Flags = 1;
+        sSpringRailDefaults.ASpring = 0.5f;
+        sSpringRailDefaults.ADamp = 0.5f;
+        sSpringRailDefaults.TorqueScale = 1.0f;
         D_004A5638 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_F5E8*)((char*)D_F5E8 + 84)) = Tag_F5E8((*(Tag_F5E8*)((char*)D_F5E8 + 84)));
+        sSpringRailDefaults.null = WScriptNullType(sSpringRailDefaults.null);
     }
     unsigned buf64[22];
     unsigned *buf = buf64;
+    tMakeSpringRailData *data = (tMakeSpringRailData*)buf;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     buf64[2] = 0xFFFFFFFF;
@@ -3249,18 +3731,14 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     buf64[6] = 0xFFFFFFFF;
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
-    MEM_copy_F5E8(buf, D_F5E8, 88);
-    Ent_F5E8 *x = params;
+    MEM_copy_F5E8(buf, &sSpringRailDefaults, sizeof(tMakeSpringRailData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = MakeSpringRailFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -3282,7 +3760,7 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode && checkActiveNode(activeNode, ATYPE_SPRINGRAIL, buf))
         return luno_gLunoNil_F5E8;
-    *(float*)&buf[20] *= 0.0010000000474974513f;
+    data->TorqueScale *= 0.0010000000474974513f;
     cSpringRailNode_cSpringRailNode_F5E8(cMemMan_alloc(0x80, D_00489778_F5E8, 0x20000000, 0), obj, buf);
     return luno_gLunoNil_F5E8;
 }
@@ -3292,18 +3770,29 @@ extern "C" t3Vector MakeSpringRailFunc(int n, Ent_F5E8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", AIEventFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data that flags a world event on a rider (On Tour tAIEventData; same offsets): the block below fills
+// it.
+struct tAIEventData {
+    int Being;                      // 0x00 [O]
+    int EventId;                    // 0x04 [O]
+    float Arg;                      // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tAIEventData, Being, 0x00);
+CHECK_OFFSET(tAIEventData, EventId, 0x04);
+CHECK_OFFSET(tAIEventData, Arg, 0x08);
+CHECK_OFFSET(tAIEventData, null, 0x0C);
+CHECK_SIZE(tAIEventData, 0x10);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_F850 { char c; Flag_F850() {} Flag_F850(const Flag_F850& o) : c(o.c) {} };
-struct Ent_F850 { int idx; int val; int pad; int kind; };
-struct R12_F850 { int a; int b; int c; };
-extern R12_F850 luno_gLunoNil_F850 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_F850 __asm__("luno_gLunoNil");
 
 extern int D_00446530_F850[] __asm__("D_00446530");
 extern "C" void cRider_flagEventWorld(cRider*, int, float);
 extern int D_004A563C_F850 __asm__("D_004A563C");
-struct T12_F850 { int a; int b; int e; Flag_F850 f; };
-extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
+extern tAIEventData sAIEventDefaults __asm__("D_004FBAE8");
 /**
  * Script function (gLunoCFunctions[27]): flags a world event on a rider (cRider_flagEventWorld).
  *
@@ -3318,33 +3807,30 @@ extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_F850 AIEventFunc(int n, Ent_F850* params) {
+extern "C" luno_cLunoVar AIEventFunc(int n, luno_cLunoCArg* params) {
     if (D_004A563C_F850 == 0) {
-        D_004FBAE8_F850.a = -1;
+        sAIEventDefaults.Being = -1;
         D_004A563C_F850 = 1;
-        D_004FBAE8_F850.b = 0;
-        D_004FBAE8_F850.e = 0;
+        sAIEventDefaults.EventId = 0;
+        sAIEventDefaults.Arg = 0.0f;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBAE8_F850.f = Flag_F850(D_004FBAE8_F850.f);
+        sAIEventDefaults.null = WScriptNullType(sAIEventDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBAE8_F850, 16);
-    Ent_F850* curArg = params;
+    tAIEventData *data = (tAIEventData*)vp;
+    MEM_copy(vp, &sAIEventDefaults, sizeof(tAIEventData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_00446530_F850[k] && D_00446530_F850[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_00446530_F850[k]);
     }
-    if (vp[0] == kWScriptBeing_None)
-        vp[0] = cWScriptMan_TheWScriptMan->Being;
+    if (data->Being == kWScriptBeing_None)
+        data->Being = cWScriptMan_TheWScriptMan->Being;
     cGame* game = SSXApp->Game;
     cAI* ai = game->AI;
-    cRider_flagEventWorld(ai->Riders[vp[0]], vp[1], *(float*)&vp[2]);
+    cRider_flagEventWorld(ai->Riders[data->Being], data->EventId, data->Arg);
     return luno_gLunoNil_F850;
 }
 #endif
@@ -3364,12 +3850,24 @@ static inline tInstanceRecord *look_F9A8(unsigned id) {
 }
 
 extern t3Vector luno_gLunoNil_F9A8 __asm__("luno_gLunoNil");
-struct Tag_F9A8 { char c; Tag_F9A8() {} Tag_F9A8(const Tag_F9A8 &o) : c(o.c) {} };
-extern unsigned D_F9A8[] __asm__("D_004FBAF8");
+// World-script data that signals an instance's node (On Tour tSignalData; same offsets): the block below fills it.
+struct tSignalData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Signal;                     // 0x04 [O]
+    float Arg;                      // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tSignalData, InstId, 0x00);
+CHECK_OFFSET(tSignalData, Signal, 0x04);
+CHECK_OFFSET(tSignalData, Arg, 0x08);
+CHECK_OFFSET(tSignalData, null, 0x0C);
+CHECK_SIZE(tSignalData, 0x10);
+extern tSignalData sSignalDefaults __asm__("D_004FBAF8");
 extern int D_004A5640;
 extern const int D_00446540[];
 extern "C" void* MEM_copy_F9A8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_F9A8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[28]): sends a signal to a world instance's active node.
  *
@@ -3387,32 +3885,29 @@ struct Ent_F9A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector SignalFunc(int n, Ent_F9A8 *params) {
+extern "C" t3Vector SignalFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5640 == 0) {
-        D_F9A8[0] = 0xFFFFFFFF;
-        ((int*)D_F9A8)[1] = -1;
-        ((int*)D_F9A8)[2] = 0;
+        sSignalDefaults.InstId = 0xFFFFFFFF;
+        sSignalDefaults.Signal = -1;
+        sSignalDefaults.Arg = 0.0f;
         D_004A5640 = 1;
-        (*(Tag_F9A8*)((char*)D_F9A8 + 12)) = Tag_F9A8((*(Tag_F9A8*)((char*)D_F9A8 + 12)));
+        sSignalDefaults.null = WScriptNullType(sSignalDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
-    buf[0] = 0xFFFFFFFF;
-    MEM_copy_F9A8(buf, D_F9A8, 16);
-    Ent_F9A8 *x = params;
+    tSignalData *data = (tSignalData*)buf;
+    data->InstId = 0xFFFFFFFF;
+    MEM_copy_F9A8(buf, &sSignalDefaults, sizeof(tSignalData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446540[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    tInstanceRecord *obj = look_F9A8(buf[0]);
+    tInstanceRecord *obj = look_F9A8(data->InstId);
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode)
-        activeNode->signal(buf[1], *(float*)&buf[2]);
+        activeNode->signal(data->Signal, data->Arg);
     return luno_gLunoNil_F9A8;
 }
 #endif
@@ -3421,9 +3916,8 @@ extern "C" t3Vector SignalFunc(int n, Ent_F9A8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", HideInstanceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_FB50 { char c; Flag_FB50() {} Flag_FB50(const Flag_FB50& o) : c(o.c) {} };
 extern unsigned D_004A5648_FB50 __asm__("D_004A5648");
-extern Flag_FB50 D_004A564C_FB50 __asm__("D_004A564C");
+extern WScriptNullType D_004A564C_FB50 __asm__("D_004A564C");
 extern int D_004A5650_FB50 __asm__("D_004A5650");
 extern int HideInstanceFunc_types[2];
 static inline tInstanceRecord *refToPtr_FB50(unsigned i) { return (tInstanceRecord*)(i << 2); }
@@ -3433,7 +3927,6 @@ extern "C" void cHideNode_cHideNode_FB50(void*, void*) __asm__("cHideNode_cHideN
 extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
 extern t3Vector luno_gLunoNil_FB50 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
-struct Ent_FB50 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[29]): hides a world instance by giving it a new Hide node.
  *
@@ -3450,26 +3943,22 @@ struct Ent_FB50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector HideInstanceFunc(int n, Ent_FB50 *params) {
+extern "C" t3Vector HideInstanceFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5650_FB50 == 0) {
         D_004A5648_FB50 = 0xFFFFFFFF;
         D_004A5650_FB50 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
-        D_004A564C_FB50 = Flag_FB50(D_004A564C_FB50);
+        D_004A564C_FB50 = WScriptNullType(D_004A564C_FB50);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_FB50(buf, &D_004A5648_FB50, 8);
-    Ent_FB50 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = HideInstanceFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3516,13 +4005,11 @@ static inline tInstanceRecord *look_FD58(unsigned id) {
 }
 
 extern t3Vector luno_gLunoNil_FD58 __asm__("luno_gLunoNil");
-struct Tag_FD58 { char c; Tag_FD58() {} Tag_FD58(const Tag_FD58 &o) : c(o.c) {} };
 extern unsigned D_FD58 __asm__("D_004A5658");
-extern Tag_FD58 D_004A565C;
+extern WScriptNullType D_004A565C;
 extern int D_004A5660;
 extern int D_004A3C20;
 extern "C" void* MEM_copy_FD58(void*, void*, int) __asm__("MEM_copy");
-struct Ent_FD58 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[58]): shows a hidden world instance again by deleting its Hide node.
  *
@@ -3538,25 +4025,21 @@ struct Ent_FD58 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector ShowInstanceFunc(int n, Ent_FD58 *params) {
+extern "C" t3Vector ShowInstanceFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5660 == 0) {
         D_FD58 = 0xFFFFFFFF;
         D_004A5660 = 1;
-        D_004A565C = Tag_FD58(D_004A565C);
+        D_004A565C = WScriptNullType(D_004A565C);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_FD58(buf, &D_FD58, 8);
-    Ent_FD58 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C20)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     tInstanceRecord* obj = (tInstanceRecord *)look_FD58(buf[0]);
     if (obj) {
@@ -3579,12 +4062,22 @@ static inline tInstanceRecord *conv_FF00(unsigned i) { if (i == 0) return 0; ret
 extern "C" void *cAudioInterface_bxAudio_FF00(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_WorldSound_FF00(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 extern t3Vector luno_gLunoNil_FF00 __asm__("luno_gLunoNil");
-struct Tag_FF00 { char c; Tag_FF00() {} Tag_FF00(const Tag_FF00 &o) : c(o.c) {} };
-extern unsigned D_FF00[] __asm__("D_004FBB08");
+// World-script data that plays a sound on an instance (On Tour tPlayAudioData; same offsets): the block below fills it.
+struct tPlayAudioData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    unsigned int SoundId;           // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tPlayAudioData, InstId, 0x00);
+CHECK_OFFSET(tPlayAudioData, SoundId, 0x04);
+CHECK_OFFSET(tPlayAudioData, null, 0x08);
+CHECK_SIZE(tPlayAudioData, 0xC);
+extern tPlayAudioData sPlayAudioDefaults __asm__("D_004FBB08");
 extern int D_004A5664;
 extern int PlayAudioFunc_types[2];
 extern "C" void* MEM_copy_FF00(void*, void*, int) __asm__("MEM_copy");
-struct Ent_FF00 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[30]): plays a world sound at a world instance.
  *
@@ -3600,26 +4093,22 @@ struct Ent_FF00 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector PlayAudioFunc(int n, Ent_FF00 *params) {
+extern "C" t3Vector PlayAudioFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5664 == 0) {
-        D_FF00[0] = 0xFFFFFFFF;
-        D_FF00[1] = 0xFFFFFFFF;
+        sPlayAudioDefaults.InstId = 0xFFFFFFFF;
+        sPlayAudioDefaults.SoundId = 0xFFFFFFFF;
         D_004A5664 = 1;
-        (*(Tag_FF00*)((char*)D_FF00 + 8)) = Tag_FF00((*(Tag_FF00*)((char*)D_FF00 + 8)));
+        sPlayAudioDefaults.null = WScriptNullType(sPlayAudioDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_FF00(buf, D_FF00, 12);
-    Ent_FF00 *x = params;
+    MEM_copy_FF00(buf, &sPlayAudioDefaults, sizeof(tPlayAudioData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = PlayAudioFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3655,12 +4144,25 @@ static inline tInstanceRecord *conv_00A8(unsigned i) { if (i == 0) return 0; ret
 extern "C" void *cAudioInterface_bxAudio_00A8(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_AttachSound_00A8(void*, void*, int, int) __asm__("cSSXAudio_AttachSound");
 extern t3Vector luno_gLunoNil_00A8 __asm__("luno_gLunoNil");
-struct Tag_00A8 { char c; Tag_00A8() {} Tag_00A8(const Tag_00A8 &o) : c(o.c) {} };
-extern unsigned D_00A8[] __asm__("D_004FBB18");
+// World-script data that attaches a sound to an instance (On Tour tAttachAudioData; same offsets): the block below
+// fills it.
+struct tAttachAudioData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    unsigned int SoundId;           // 0x04 [O]
+    int Mesh;                       // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tAttachAudioData, InstId, 0x00);
+CHECK_OFFSET(tAttachAudioData, SoundId, 0x04);
+CHECK_OFFSET(tAttachAudioData, Mesh, 0x08);
+CHECK_OFFSET(tAttachAudioData, null, 0x0C);
+CHECK_SIZE(tAttachAudioData, 0x10);
+extern tAttachAudioData sAttachAudioDefaults __asm__("D_004FBB18");
 extern int D_004A5668;
 extern const int AttachAudioFunc_types[];
 extern "C" void* MEM_copy_00A8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_00A8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[31]): attaches a looping sound to a world instance.
  *
@@ -3676,27 +4178,23 @@ struct Ent_00A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AttachAudioFunc(int n, Ent_00A8 *params) {
+extern "C" t3Vector AttachAudioFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5668 == 0) {
-        D_00A8[0] = 0xFFFFFFFF;
-        D_00A8[1] = 0xFFFFFFFF;
-        ((int*)D_00A8)[2] = -1;
+        sAttachAudioDefaults.InstId = 0xFFFFFFFF;
+        sAttachAudioDefaults.SoundId = 0xFFFFFFFF;
+        sAttachAudioDefaults.Mesh = -1;
         D_004A5668 = 1;
-        (*(Tag_00A8*)((char*)D_00A8 + 12)) = Tag_00A8((*(Tag_00A8*)((char*)D_00A8 + 12)));
+        sAttachAudioDefaults.null = WScriptNullType(sAttachAudioDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_00A8(buf, D_00A8, 16);
-    Ent_00A8 *x = params;
+    MEM_copy_00A8(buf, &sAttachAudioDefaults, sizeof(tAttachAudioData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = AttachAudioFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3733,12 +4231,25 @@ static inline tInstanceRecord *conv_0260(unsigned i) { if (i == 0) return 0; ret
 extern "C" void *cAudioInterface_bxAudio_0260(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_DetachSound_0260(void*, void*, int, int) __asm__("cSSXAudio_DetachSound");
 extern t3Vector luno_gLunoNil_0260 __asm__("luno_gLunoNil");
-struct Tag_0260 { char c; Tag_0260() {} Tag_0260(const Tag_0260 &o) : c(o.c) {} };
-extern unsigned D_0260[] __asm__("D_004FBB28");
+// World-script data that detaches a sound from an instance (On Tour tDetachAudioData; same offsets): the block below
+// fills it.
+struct tDetachAudioData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    unsigned int SoundId;           // 0x04 [O]
+    int Mesh;                       // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tDetachAudioData, InstId, 0x00);
+CHECK_OFFSET(tDetachAudioData, SoundId, 0x04);
+CHECK_OFFSET(tDetachAudioData, Mesh, 0x08);
+CHECK_OFFSET(tDetachAudioData, null, 0x0C);
+CHECK_SIZE(tDetachAudioData, 0x10);
+extern tDetachAudioData sDetachAudioDefaults __asm__("D_004FBB28");
 extern int D_004A566C;
 extern const int DetachAudioFunc_types[];
 extern "C" void* MEM_copy_0260(void*, void*, int) __asm__("MEM_copy");
-struct Ent_0260 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[73]): detaches a sound from a world instance.
  *
@@ -3754,27 +4265,23 @@ struct Ent_0260 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector DetachAudioFunc(int n, Ent_0260 *params) {
+extern "C" t3Vector DetachAudioFunc(int n, luno_cLunoCArg *params) {
     if (D_004A566C == 0) {
-        D_0260[0] = 0xFFFFFFFF;
-        D_0260[1] = 0xFFFFFFFF;
-        ((int*)D_0260)[2] = -1;
+        sDetachAudioDefaults.InstId = 0xFFFFFFFF;
+        sDetachAudioDefaults.SoundId = 0xFFFFFFFF;
+        sDetachAudioDefaults.Mesh = -1;
         D_004A566C = 1;
-        (*(Tag_0260*)((char*)D_0260 + 12)) = Tag_0260((*(Tag_0260*)((char*)D_0260 + 12)));
+        sDetachAudioDefaults.null = WScriptNullType(sDetachAudioDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_0260(buf, D_0260, 16);
-    Ent_0260 *x = params;
+    MEM_copy_0260(buf, &sDetachAudioDefaults, sizeof(tDetachAudioData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = DetachAudioFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3807,12 +4314,22 @@ INCLUDE_ASM("seg/seg_1FBE38", ExpireFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_0418 __asm__("luno_gLunoNil");
-struct Tag_0418 { char c; Tag_0418() {} Tag_0418(const Tag_0418 &o) : c(o.c) {} };
-extern unsigned D_0418[] __asm__("D_004FBB38");
+// World-script data that expires an instance's node (On Tour tExpireData; same offsets): the block below fills it.
+struct tExpireData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Type;                       // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tExpireData, InstId, 0x00);
+CHECK_OFFSET(tExpireData, Type, 0x04);
+CHECK_OFFSET(tExpireData, null, 0x08);
+CHECK_SIZE(tExpireData, 0xC);
+extern tExpireData sExpireDefaults __asm__("D_004FBB38");
 extern int D_004A5670;
 extern int D_004A3C30;
 extern "C" void* MEM_copy_0418(void*, void*, int) __asm__("MEM_copy");
-struct Ent_0418 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[32]): expires a world instance's active node.
  *
@@ -3831,26 +4348,22 @@ struct Ent_0418 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
+extern "C" t3Vector ExpireFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5670 == 0) {
-        D_0418[0] = 0xFFFFFFFF;
-        ((int*)D_0418)[1] = 0;
+        sExpireDefaults.InstId = 0xFFFFFFFF;
+        sExpireDefaults.Type = 0;
         D_004A5670 = 1;
-        (*(Tag_0418*)((char*)D_0418 + 8)) = Tag_0418((*(Tag_0418*)((char*)D_0418 + 8)));
+        sExpireDefaults.null = WScriptNullType(sExpireDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_0418(buf, D_0418, 12);
-    Ent_0418 *x = params;
+    MEM_copy_0418(buf, &sExpireDefaults, sizeof(tExpireData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C30)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3862,7 +4375,7 @@ extern "C" t3Vector ExpireFunc(int n, Ent_0418 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode) {
@@ -3881,13 +4394,11 @@ INCLUDE_ASM("seg/seg_1FBE38", LoseFocusFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_05E8 __asm__("luno_gLunoNil");
-struct Tag_05E8 { char c; Tag_05E8() {} Tag_05E8(const Tag_05E8 &o) : c(o.c) {} };
 extern unsigned D_05E8 __asm__("D_004A5678");
-extern Tag_05E8 D_004A567C;
+extern WScriptNullType D_004A567C;
 extern int D_004A5680;
 extern int D_004A3C38;
 extern "C" void* MEM_copy_05E8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_05E8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[33]): tells a world instance's active node that it lost focus.
  *
@@ -3905,25 +4416,21 @@ struct Ent_05E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
+extern "C" t3Vector LoseFocusFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5680 == 0) {
         D_05E8 = 0xFFFFFFFF;
         D_004A5680 = 1;
-        D_004A567C = Tag_05E8(D_004A567C);
+        D_004A567C = WScriptNullType(D_004A567C);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_05E8(buf, &D_05E8, 8);
-    Ent_05E8 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C38)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -3936,7 +4443,7 @@ extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode)
@@ -3949,16 +4456,14 @@ extern "C" t3Vector LoseFocusFunc(int n, Ent_05E8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", TransportFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_0770 { char c; Flag_0770() {} Flag_0770(const Flag_0770& o) : c(o.c) {} };
 extern unsigned D_004A5688_0770 __asm__("D_004A5688");
-extern Flag_0770 D_004A568C_0770 __asm__("D_004A568C");
+extern WScriptNullType D_004A568C_0770 __asm__("D_004A568C");
 extern int D_004A5690_0770 __asm__("D_004A5690");
 extern int TransportFunc_types[2];
 static inline tInstanceRecord *refToPtr_0770(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
 extern t3Vector luno_gLunoNil_0770 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0770(void*, void*, int) __asm__("MEM_copy");
-struct Ent_0770 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[34]): transports the script's rider to a world instance.
  *
@@ -3976,26 +4481,22 @@ struct Ent_0770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
+extern "C" t3Vector TransportFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5690_0770 == 0) {
         D_004A5688_0770 = 0xFFFFFFFF;
         D_004A5690_0770 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
-        D_004A568C_0770 = Flag_0770(D_004A568C_0770);
+        D_004A568C_0770 = WScriptNullType(D_004A568C_0770);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0770(buf, &D_004A5688_0770, 8);
-    Ent_0770 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = TransportFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -4031,16 +4532,14 @@ extern "C" t3Vector TransportFunc(int n, Ent_0770 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", SetupMissionRiderFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_0948 { char c; Flag_0948() {} Flag_0948(const Flag_0948& o) : c(o.c) {} };
 extern unsigned D_004A5698_0948 __asm__("D_004A5698");
-extern Flag_0948 D_004A569C_0948 __asm__("D_004A569C");
+extern WScriptNullType D_004A569C_0948 __asm__("D_004A569C");
 extern int D_004A56A0_0948 __asm__("D_004A56A0");
 extern int SetupMissionRiderFunc_types[2];
 static inline tInstanceRecord *refToPtr_0948(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_0948(unsigned i) { if (i == 0) return 0; return refToPtr_0948(i); }
 extern t3Vector luno_gLunoNil_0948 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0948(void*, void*, int) __asm__("MEM_copy");
-struct Ent_0948 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[64]): sets the script's rider up for a mission at a world instance.
  *
@@ -4058,26 +4557,22 @@ struct Ent_0948 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
+extern "C" t3Vector SetupMissionRiderFunc(int n, luno_cLunoCArg *params) {
     if (D_004A56A0_0948 == 0) {
         D_004A5698_0948 = 0xFFFFFFFF;
         D_004A56A0_0948 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
-        D_004A569C_0948 = Flag_0948(D_004A569C_0948);
+        D_004A569C_0948 = WScriptNullType(D_004A569C_0948);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0948(buf, &D_004A5698_0948, 8);
-    Ent_0948 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = SetupMissionRiderFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -4113,18 +4608,26 @@ extern "C" t3Vector SetupMissionRiderFunc(int n, Ent_0948 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", RailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of RailFunc (On Tour tRailData; same offsets): the block below fills it.
+struct tRailData {
+    unsigned int SplineId;          // 0x00 [O] tResourceID
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tRailData, SplineId, 0x00);
+CHECK_OFFSET(tRailData, Cmd, 0x04);
+CHECK_OFFSET(tRailData, null, 0x08);
+CHECK_SIZE(tRailData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_0B20 { char c; Flag_0B20() {} Flag_0B20(const Flag_0B20& o) : c(o.c) {} };
-struct Ent_0B20 { int idx; int val; int pad; int kind; };
-struct R12_0B20 { int a; int b; int c; };
-extern R12_0B20 luno_gLunoNil_0B20 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_0B20 __asm__("luno_gLunoNil");
 
 extern int D_004A3C50_0B20[2] __asm__("D_004A3C50");
 extern "C" void cRailManNode_addRail(unsigned, int);
 extern int D_004A56A4_0B20 __asm__("D_004A56A4");
-struct T12_0B20 { unsigned a; int b; Flag_0B20 f; };
-extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
+extern tRailData sRailCmdDefaults __asm__("D_004FBB48");
 /**
  * Script function (gLunoCFunctions[35]): switches a rail (spline) on or off.
  *
@@ -4139,27 +4642,23 @@ extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
+extern "C" luno_cLunoVar RailFunc(int n, luno_cLunoCArg* params) {
     if (D_004A56A4_0B20 == 0) {
-        D_004FBB48_0B20.a = -1;
-        D_004FBB48_0B20.b = 1;
+        sRailCmdDefaults.SplineId = -1;
+        sRailCmdDefaults.Cmd = 1;
         D_004A56A4_0B20 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBB48_0B20.f = Flag_0B20(D_004FBB48_0B20.f);
+        sRailCmdDefaults.null = WScriptNullType(sRailCmdDefaults.null);
     }
     unsigned block[4] __attribute__((aligned(16)));
     unsigned* vp = block;
     vp[0] = 0xFFFFFFFFu;
-    MEM_copy(vp, &D_004FBB48_0B20, 12);
-    Ent_0B20* curArg = params;
+    MEM_copy(vp, &sRailCmdDefaults, sizeof(tRailData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C50_0B20[k] && D_004A3C50_0B20[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3C50_0B20[k]);
     }
     if (~vp[0] != 0) {
         int y = vp[1];
@@ -4176,17 +4675,23 @@ extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
 INCLUDE_ASM("seg/seg_1FBE38", NISFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory_0C78(int, int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptCategory");
-extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID_0C78(int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptHashID");
-extern "C" void cSSXScriptEngine_ReadyNISList_0C78(int, int) __asm__("cSSXScriptEngine_ReadyNISList");
-extern "C" void cSSXScriptEngine_PlayNISList_0C78(int, int, int, int) __asm__("cSSXScriptEngine_PlayNISList");
 extern t3Vector luno_gLunoNil_0C78 __asm__("luno_gLunoNil");
-struct Tag_0C78 { char c; Tag_0C78() {} Tag_0C78(const Tag_0C78 &o) : c(o.c) {} };
-extern unsigned D_0C78[] __asm__("D_004FBB58");
+// World-script data that queues or plays an NIS (On Tour tNISData; same offsets): the block below fills it.
+struct tNISData {
+    unsigned int ScriptId;          // 0x00 [O]
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tNISData, ScriptId, 0x00);
+CHECK_OFFSET(tNISData, Cmd, 0x04);
+CHECK_OFFSET(tNISData, null, 0x08);
+CHECK_SIZE(tNISData, 0xC);
+extern tNISData sNISDefaults __asm__("D_004FBB58");
 extern int D_004A56A8;
 extern int D_004A3C58;
 extern "C" void* MEM_copy_0C78(void*, void*, int) __asm__("MEM_copy");
-struct Ent_0C78 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[36]): queues or plays an in-game cinematic (NIS) through the script engine.
  *
@@ -4204,38 +4709,35 @@ struct Ent_0C78 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector NISFunc(int n, Ent_0C78 *params) {
+extern "C" t3Vector NISFunc(int n, luno_cLunoCArg *params) {
     if (D_004A56A8 == 0) {
-        D_0C78[0] = 0xFFFFFFFF;
-        ((int*)D_0C78)[1] = 0;
+        sNISDefaults.ScriptId = 0xFFFFFFFF;
+        sNISDefaults.Cmd = 0;
         D_004A56A8 = 1;
-        (*(Tag_0C78*)((char*)D_0C78 + 8)) = Tag_0C78((*(Tag_0C78*)((char*)D_0C78 + 8)));
+        sNISDefaults.null = WScriptNullType(sNISDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
-    MEM_copy_0C78(buf, D_0C78, 12);
-    Ent_0C78 *x = params;
+    tNISData *data = (tNISData*)buf;
+    MEM_copy_0C78(buf, &sNISDefaults, sizeof(tNISData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C58)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    unsigned id = buf[0];
-    switch ((int)buf[1]) {
+    unsigned id = data->ScriptId;
+    switch (data->Cmd) {
     case kNISCmd_QueueScript:
-        cSSXScriptEngine_AddToNISListByScriptHashID_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
-        cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
+        ScriptEngine->AddToNISListByScriptHashID(0, id, 3, -1, -1, -1);
+        ScriptEngine->ReadyNISList(0);
         break;
     case kNISCmd_QueueCategory:
-        cSSXScriptEngine_AddToNISListByScriptCategory_0C78((int)ScriptEngine, 0, id, 3, 0, -1, -1, -1);
-        cSSXScriptEngine_ReadyNISList_0C78((int)ScriptEngine, 0);
+        ScriptEngine->AddToNISListByScriptCategory(0, id, 3, 0, -1, -1, -1);
+        ScriptEngine->ReadyNISList(0);
         break;
     case kNISCmd_Play:
-        cSSXScriptEngine_PlayNISList_0C78((int)ScriptEngine, 0, 1, 0);
+        ScriptEngine->PlayNISList(0, 1, 0);
         break;
     }
     return luno_gLunoNil_0C78;
@@ -4246,17 +4748,25 @@ extern "C" t3Vector NISFunc(int n, Ent_0C78 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", CollectPoolFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of CollectPoolFunc (On Tour tCollectPoolData; same offsets): the block below fills it.
+struct tCollectPoolData {
+    unsigned int PoolId;            // 0x00 [O]
+    int PoolSize;                   // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tCollectPoolData, PoolId, 0x00);
+CHECK_OFFSET(tCollectPoolData, PoolSize, 0x04);
+CHECK_OFFSET(tCollectPoolData, null, 0x08);
+CHECK_SIZE(tCollectPoolData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
-struct Ent_0E28 { int idx; int val; int pad; int kind; };
-struct R12_0E28 { int a; int b; int c; };
-extern R12_0E28 luno_gLunoNil_0E28 __asm__("luno_gLunoNil");
-struct Flag_0E28 { char c; Flag_0E28() {} Flag_0E28(const Flag_0E28& o) : c(o.c) {} };
+extern luno_cLunoVar luno_gLunoNil_0E28 __asm__("luno_gLunoNil");
 
 extern int D_004A3C60_0E28[2] __asm__("D_004A3C60");
 extern "C" void cWScriptMan_collectPool(cWScriptMan*, unsigned, int);
 extern int D_004A56AC_0E28 __asm__("D_004A56AC");
-struct T12u_0E28 { unsigned a; int b; Flag_0E28 f; };
-extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
+extern tCollectPoolData sCollectPoolDefaults __asm__("D_004FBB68");
 /**
  * Script function (gLunoCFunctions[37]): sets up a collection pool (cWScriptMan_collectPool).
  *
@@ -4270,26 +4780,22 @@ extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0E28 CollectPoolFunc(int n, Ent_0E28* params) {
+extern "C" luno_cLunoVar CollectPoolFunc(int n, luno_cLunoCArg* params) {
     if (D_004A56AC_0E28 == 0) {
-        D_004FBB68_0E28.a = 0xFFFFFFFFu;
-        D_004FBB68_0E28.b = 1;
+        sCollectPoolDefaults.PoolId = 0xFFFFFFFFu;
+        sCollectPoolDefaults.PoolSize = 1;
         D_004A56AC_0E28 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBB68_0E28.f = Flag_0E28(D_004FBB68_0E28.f);
+        sCollectPoolDefaults.null = WScriptNullType(sCollectPoolDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBB68_0E28, 12);
-    Ent_0E28* curArg = params;
+    MEM_copy(vp, &sCollectPoolDefaults, sizeof(tCollectPoolData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C60_0E28[k] && D_004A3C60_0E28[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3C60_0E28[k]);
     }
     unsigned x = vp[0];
     if (x != kWScriptId_None)
@@ -4303,13 +4809,61 @@ INCLUDE_ASM("seg/seg_1FBE38", CollectInstFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_0F50 __asm__("luno_gLunoNil");
-struct Tag_0F50 { char c; Tag_0F50() {} Tag_0F50(const Tag_0F50 &o) : c(o.c) {} };
-extern unsigned D_0F50[] __asm__("D_004FBB78");
+// World-script data that fills a collect pool (On Tour tCollectInstData; same offsets): the block below fills it.
+struct tCollectInstData {
+    unsigned int PoolId;            // 0x00 [O]
+    unsigned int InstId1;           // 0x04 [O] tResourceID
+    unsigned int InstId2;           // 0x08 [O] tResourceID
+    unsigned int InstId3;           // 0x0C [O] tResourceID
+    unsigned int InstId4;           // 0x10 [O] tResourceID
+    unsigned int InstId5;           // 0x14 [O] tResourceID
+    unsigned int InstId6;           // 0x18 [O] tResourceID
+    unsigned int InstId7;           // 0x1C [O] tResourceID
+    unsigned int InstId8;           // 0x20 [O] tResourceID
+    unsigned int InstId9;           // 0x24 [O] tResourceID
+    unsigned int InstId10;          // 0x28 [O] tResourceID
+    unsigned int InstId11;          // 0x2C [O] tResourceID
+    unsigned int InstId12;          // 0x30 [O] tResourceID
+    unsigned int InstId13;          // 0x34 [O] tResourceID
+    unsigned int InstId14;          // 0x38 [O] tResourceID
+    unsigned int InstId15;          // 0x3C [O] tResourceID
+    unsigned int InstId16;          // 0x40 [O] tResourceID
+    unsigned int InstId17;          // 0x44 [O] tResourceID
+    unsigned int InstId18;          // 0x48 [O] tResourceID
+    unsigned int InstId19;          // 0x4C [O] tResourceID
+    unsigned int InstId20;          // 0x50 [O] tResourceID
+    WScriptNullType null;           // 0x54 [O]
+    char unk_055[0x3];              // 0x55 padding
+};
+
+CHECK_OFFSET(tCollectInstData, PoolId, 0x00);
+CHECK_OFFSET(tCollectInstData, InstId1, 0x04);
+CHECK_OFFSET(tCollectInstData, InstId2, 0x08);
+CHECK_OFFSET(tCollectInstData, InstId3, 0x0C);
+CHECK_OFFSET(tCollectInstData, InstId4, 0x10);
+CHECK_OFFSET(tCollectInstData, InstId5, 0x14);
+CHECK_OFFSET(tCollectInstData, InstId6, 0x18);
+CHECK_OFFSET(tCollectInstData, InstId7, 0x1C);
+CHECK_OFFSET(tCollectInstData, InstId8, 0x20);
+CHECK_OFFSET(tCollectInstData, InstId9, 0x24);
+CHECK_OFFSET(tCollectInstData, InstId10, 0x28);
+CHECK_OFFSET(tCollectInstData, InstId11, 0x2C);
+CHECK_OFFSET(tCollectInstData, InstId12, 0x30);
+CHECK_OFFSET(tCollectInstData, InstId13, 0x34);
+CHECK_OFFSET(tCollectInstData, InstId14, 0x38);
+CHECK_OFFSET(tCollectInstData, InstId15, 0x3C);
+CHECK_OFFSET(tCollectInstData, InstId16, 0x40);
+CHECK_OFFSET(tCollectInstData, InstId17, 0x44);
+CHECK_OFFSET(tCollectInstData, InstId18, 0x48);
+CHECK_OFFSET(tCollectInstData, InstId19, 0x4C);
+CHECK_OFFSET(tCollectInstData, InstId20, 0x50);
+CHECK_OFFSET(tCollectInstData, null, 0x54);
+CHECK_SIZE(tCollectInstData, 0x58);
+extern tCollectInstData sCollectInstDefaults __asm__("D_004FBB78");
 extern int D_56B0_0F50 __asm__("D_004A56B0");
 extern const int D_00446570_0F50[] __asm__("D_00446570");
 extern "C" void* MEM_copy_0F50(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cWScriptMan_collectInst_0F50(cWScriptMan*, unsigned, unsigned*, int) __asm__("cWScriptMan_collectInst");
-struct Ent_0F50 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[38]): registers up to 20 instances with a collection pool (cWScriptMan_collectInst).
  *
@@ -4327,33 +4881,33 @@ struct Ent_0F50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector CollectInstFunc(int n, Ent_0F50 *params) {
+extern "C" t3Vector CollectInstFunc(int n, luno_cLunoCArg *params) {
     if (D_56B0_0F50 == 0) {
-        D_0F50[0] = 0xFFFFFFFF;
-        D_0F50[1] = 0xFFFFFFFF;
-        D_0F50[2] = 0xFFFFFFFF;
-        D_0F50[3] = 0xFFFFFFFF;
-        D_0F50[4] = 0xFFFFFFFF;
-        D_0F50[5] = 0xFFFFFFFF;
-        D_0F50[6] = 0xFFFFFFFF;
-        D_0F50[7] = 0xFFFFFFFF;
-        D_0F50[8] = 0xFFFFFFFF;
-        D_0F50[9] = 0xFFFFFFFF;
-        D_0F50[10] = 0xFFFFFFFF;
-        D_0F50[11] = 0xFFFFFFFF;
-        D_0F50[12] = 0xFFFFFFFF;
-        D_0F50[13] = 0xFFFFFFFF;
-        D_0F50[14] = 0xFFFFFFFF;
-        D_0F50[15] = 0xFFFFFFFF;
-        D_0F50[16] = 0xFFFFFFFF;
-        D_0F50[17] = 0xFFFFFFFF;
-        D_0F50[18] = 0xFFFFFFFF;
-        D_0F50[19] = 0xFFFFFFFF;
-        D_0F50[20] = 0xFFFFFFFF;
+        sCollectInstDefaults.PoolId = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId1 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId2 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId3 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId4 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId5 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId6 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId7 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId8 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId9 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId10 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId11 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId12 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId13 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId14 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId15 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId16 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId17 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId18 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId19 = 0xFFFFFFFF;
+        sCollectInstDefaults.InstId20 = 0xFFFFFFFF;
         D_56B0_0F50 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        (*(Tag_0F50*)((char*)D_0F50 + 0x54)) = Tag_0F50((*(Tag_0F50*)((char*)D_0F50 + 0x54)));
+        sCollectInstDefaults.null = WScriptNullType(sCollectInstDefaults.null);
     }
     unsigned buf64[22];
     unsigned *buf = buf64;
@@ -4377,16 +4931,12 @@ extern "C" t3Vector CollectInstFunc(int n, Ent_0F50 *params) {
     buf64[18] = 0xFFFFFFFF;
     buf64[19] = 0xFFFFFFFF;
     buf64[20] = 0xFFFFFFFF;
-    MEM_copy_0F50(buf, D_0F50, 88);
-    Ent_0F50 *x = params;
+    MEM_copy_0F50(buf, &sCollectInstDefaults, sizeof(tCollectInstData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446570_0F50[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     if (buf[0] != kWScriptId_None)
         cWScriptMan_collectInst_0F50(cWScriptMan_TheWScriptMan, buf[0], buf + 1, 20);
@@ -4398,15 +4948,24 @@ extern "C" t3Vector CollectInstFunc(int n, Ent_0F50 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", CollectFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of CollectFunc (On Tour tCollectData; same offsets): the block below fills it.
+struct tCollectData {
+    unsigned int PoolId;            // 0x00 [O]
+    unsigned int InstId;            // 0x04 [O] tResourceID
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tCollectData, PoolId, 0x00);
+CHECK_OFFSET(tCollectData, InstId, 0x04);
+CHECK_OFFSET(tCollectData, null, 0x08);
+CHECK_SIZE(tCollectData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_1120 { char c; Flag_1120() {} Flag_1120(const Flag_1120& o) : c(o.c) {} };
-struct Ent_1120 { int idx; int val; int pad; int kind; };
 extern int D_004A3C68_1120[2] __asm__("D_004A3C68");
 extern "C" int cWScriptMan_collect_1120(cWScriptMan*, int, unsigned, unsigned) __asm__("cWScriptMan_collect");
 extern int D_004A56B4_1120 __asm__("D_004A56B4");
-struct T12_1120 { unsigned a; unsigned b; Flag_1120 f; };
-extern T12_1120 D_004FBBD0_1120 __asm__("D_004FBBD0");
+extern tCollectData sCollectDefaults __asm__("D_004FBBD0");
 static inline bool isIdle_1120(int slot) {
     if (slot != -1) {
         cRider *r = SSXApp->Game->AI->Riders[slot];
@@ -4431,29 +4990,25 @@ static inline bool isIdle_1120(int slot) {
  * @param params     the keyword arguments (index, value, type)
  * @return @p self
  */
-extern "C" void* CollectFunc(luno_cLunoVar* self, int n, Ent_1120* params) {
+extern "C" void* CollectFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     int slot = cWScriptMan_TheWScriptMan->Being;
     if (isIdle_1120(slot)) {
         if (D_004A56B4_1120 == 0) {
-            D_004FBBD0_1120.a = 0xFFFFFFFF;
-            D_004FBBD0_1120.b = 0xFFFFFFFF;
+            sCollectDefaults.PoolId = 0xFFFFFFFF;
+            sCollectDefaults.InstId = 0xFFFFFFFF;
             D_004A56B4_1120 = 1;
             // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back;
             //       sb 0(sp)).
-            D_004FBBD0_1120.f = Flag_1120(D_004FBBD0_1120.f);
+            sCollectDefaults.null = WScriptNullType(sCollectDefaults.null);
         }
         unsigned argBlock[4] __attribute__((aligned(16)));
         unsigned* vp = argBlock;
         argBlock[1] = 0xFFFFFFFF;
-        MEM_copy(vp, &D_004FBBD0_1120, 12);
-        Ent_1120* keyArg = params;
+        MEM_copy(vp, &sCollectDefaults, sizeof(tCollectData));
+        luno_cLunoCArg* keyArg = params;
         for (int i = 0; i < n; i++, keyArg++) {
-            int k = keyArg->idx;
-            unsigned* field = (unsigned*)((k << 2) + (int)vp);
-            if (keyArg->kind != D_004A3C68_1120[k] && D_004A3C68_1120[k] == eLunoVar_Float)
-                *(float*)field = (float)keyArg->val;
-            else
-                *field = keyArg->val;
+            int k = keyArg->Index;
+            setArgField(&vp[k], keyArg, D_004A3C68_1120[k]);
         }
         unsigned x = vp[0];
         if (x != kWScriptId_None) {
@@ -4477,18 +5032,26 @@ extern "C" void* CollectFunc(luno_cLunoVar* self, int n, Ent_1120* params) {
 INCLUDE_ASM("seg/seg_1FBE38", MissionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of MissionFunc (On Tour tMissionData; same offsets): the block below fills it.
+struct tMissionData {
+    unsigned int MissionId;         // 0x00 [O]
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tMissionData, MissionId, 0x00);
+CHECK_OFFSET(tMissionData, Cmd, 0x04);
+CHECK_OFFSET(tMissionData, null, 0x08);
+CHECK_SIZE(tMissionData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_12F0 { char c; Flag_12F0() {} Flag_12F0(const Flag_12F0& o) : c(o.c) {} };
-struct Ent_12F0 { int idx; int val; int pad; int kind; };
-struct R12_12F0 { int a; int b; int c; };
-extern R12_12F0 luno_gLunoNil_12F0 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_12F0 __asm__("luno_gLunoNil");
 
 extern int D_004A3C70_12F0[2] __asm__("D_004A3C70");
 extern "C" int cWScriptMan_doMissionCmd_12F0(cWScriptMan*, unsigned, int, int) __asm__("cWScriptMan_doMissionCmd");
 extern int D_004A56B8_12F0 __asm__("D_004A56B8");
-struct T12_12F0 { unsigned a; int b; Flag_12F0 f; };
-extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
+extern tMissionData sMissionDefaults __asm__("D_004FBBE0");
 /**
  * Script function (gLunoCFunctions[40]): runs a mission command and returns its result (cWScriptMan_doMissionCmd).
  *
@@ -4503,26 +5066,22 @@ extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value, or nil
  */
-extern "C" void* MissionFunc(luno_cLunoVar* self, int n, Ent_12F0* params) {
+extern "C" void* MissionFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A56B8_12F0 == 0) {
-        D_004FBBE0_12F0.a = -1;
-        D_004FBBE0_12F0.b = -1;
+        sMissionDefaults.MissionId = -1;
+        sMissionDefaults.Cmd = -1;
         D_004A56B8_12F0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBBE0_12F0.f = Flag_12F0(D_004FBBE0_12F0.f);
+        sMissionDefaults.null = WScriptNullType(sMissionDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBBE0_12F0, 12);
-    Ent_12F0* curArg = params;
+    MEM_copy(vp, &sMissionDefaults, sizeof(tMissionData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C70_12F0[k] && D_004A3C70_12F0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3C70_12F0[k]);
     }
     unsigned x = vp[0];
     if (x != kWScriptId_None) {
@@ -4530,7 +5089,7 @@ extern "C" void* MissionFunc(luno_cLunoVar* self, int n, Ent_12F0* params) {
         self->Type = 1;
         *luno_cLunoVar_castInt(self) = cmdResult;
     } else {
-        *(R12_12F0*)self = luno_gLunoNil_12F0;
+        *(luno_cLunoVar*)self = luno_gLunoNil_12F0;
     }
     return self;
 }
@@ -4625,16 +5184,13 @@ INCLUDE_ASM("seg/seg_1FBE38", CollectCountFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_1560 { char c; Flag_1560() {} Flag_1560(const Flag_1560& o) : c(o.c) {} };
-struct Ent_1560 { int idx; int val; int pad; int kind; };
-struct R12_1560 { int a; int b; int c; };
-extern R12_1560 luno_gLunoNil_1560 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_1560 __asm__("luno_gLunoNil");
 
 extern int D_004A3C80_1560[2] __asm__("D_004A3C80");
 extern "C" int cWScriptMan_collectCount(cWScriptMan*, unsigned);
 extern int D_004A56C8_1560 __asm__("D_004A56C8");
 extern unsigned D_004A56C0_1560 __asm__("D_004A56C0");
-extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
+extern WScriptNullType D_004A56C4_1560 __asm__("D_004A56C4");
 /**
  * Script function (gLunoCFunctions[53]): returns how many items of a collection pool are collected
  * (cWScriptMan_collectCount).
@@ -4650,25 +5206,21 @@ extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value
  */
-extern "C" void* CollectCountFunc(luno_cLunoVar* self, int n, Ent_1560* params) {
+extern "C" void* CollectCountFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A56C8_1560 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A56C4_1560 = Flag_1560(D_004A56C4_1560);
+        D_004A56C4_1560 = WScriptNullType(D_004A56C4_1560);
         D_004A56C0_1560 = -1;
         D_004A56C8_1560 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A56C0_1560, 8);
-    Ent_1560* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3C80_1560[k] && D_004A3C80_1560[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3C80_1560[k]);
     }
     unsigned x = vp[0];
     if (x != kWScriptId_None) {
@@ -4698,14 +5250,11 @@ static inline tInstanceRecord *look_1680(unsigned id) {
 }
 
 float *luno_cLunoVar_castFloat_1680(void*) __asm__("luno_cLunoVar_castFloat__FPv");
-struct V3_1680 { int w0, w1, w2; };
-struct Tag_1680 { char c; Tag_1680() {} Tag_1680(const Tag_1680 &o) : c(o.c) {} };
 extern unsigned D_1680 __asm__("D_004A56D0");
-extern Tag_1680 D_004A56D4;
+extern WScriptNullType D_004A56D4;
 extern int D_004A56D8;
 extern int D_004A3C88;
 extern "C" void* MEM_copy_1680(void*, void*, int) __asm__("MEM_copy");
-struct Ent_1680 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[54]): returns a world instance's current animation frame as a float.
  *
@@ -4723,25 +5272,21 @@ struct Ent_1680 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1680* AnimFrameFunc(V3_1680 *ret, int n, Ent_1680 *params) {
+extern "C" luno_cLunoVar* AnimFrameFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
     if (D_004A56D8 == 0) {
         D_1680 = 0xFFFFFFFF;
         D_004A56D8 = 1;
-        D_004A56D4 = Tag_1680(D_004A56D4);
+        D_004A56D4 = WScriptNullType(D_004A56D4);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_1680(buf, &D_1680, 8);
-    Ent_1680 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C88)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     tInstanceRecord *obj = look_1680(buf[0]);
     float animFrame;
@@ -4751,11 +5296,11 @@ extern "C" V3_1680* AnimFrameFunc(V3_1680 *ret, int n, Ent_1680 *params) {
             animFrame = activeNode->getAnimFrame();
         else
             animFrame = -1.0f;
-        ((int*)ret)[2] = 2;
+        ret->Type = eLunoVar_Float;
         *luno_cLunoVar_castFloat_1680(ret) = animFrame;
     } else {
         animFrame = -1.0f;
-        ((int*)ret)[2] = 2;
+        ret->Type = eLunoVar_Float;
         *luno_cLunoVar_castFloat_1680(ret) = animFrame;
     }
     return ret;
@@ -4777,14 +5322,11 @@ static inline tInstanceRecord *look_1830(unsigned id) {
 }
 
 int *luno_cLunoVar_castInt(void*);
-struct V3_1830 { int w0, w1, w2; };
-struct Tag_1830 { char c; Tag_1830() {} Tag_1830(const Tag_1830 &o) : c(o.c) {} };
 extern unsigned D_1830 __asm__("D_004A56E0");
-extern Tag_1830 D_004A56E4;
+extern WScriptNullType D_004A56E4;
 extern int D_004A56E8;
 extern int D_004A3C90;
 extern "C" void* MEM_copy_1830(void*, void*, int) __asm__("MEM_copy");
-struct Ent_1830 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[109]): returns a world instance's animation direction as an int.
  *
@@ -4802,25 +5344,21 @@ struct Ent_1830 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
+extern "C" luno_cLunoVar* AnimDirFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
     if (D_004A56E8 == 0) {
         D_1830 = 0xFFFFFFFF;
         D_004A56E8 = 1;
-        D_004A56E4 = Tag_1830(D_004A56E4);
+        D_004A56E4 = WScriptNullType(D_004A56E4);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_1830(buf, &D_1830, 8);
-    Ent_1830 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C90)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -4833,7 +5371,7 @@ extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (obj) {
@@ -4843,10 +5381,10 @@ extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
             animDir = activeNode->getAnimDir();
         else
             animDir = 0;
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = animDir;
     } else {
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = 0;
     }
     return ret;
@@ -4858,13 +5396,23 @@ INCLUDE_ASM("seg/seg_1FBE38", FrameUpdateEventFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int *luno_cLunoVar_castInt(void*);
-struct V3_19C8 { int w0, w1, w2; };
-struct Tag_19C8 { char c; Tag_19C8() {} Tag_19C8(const Tag_19C8 &o) : c(o.c) {} };
-extern unsigned D_19C8[] __asm__("D_004FBC00");
+// World-script data that sets an instance's frame-update event (On Tour tFrameUpdateEventData; same offsets): the block
+// below fills it.
+struct tFrameUpdateEventData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    float Frame;                    // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tFrameUpdateEventData, InstId, 0x00);
+CHECK_OFFSET(tFrameUpdateEventData, Frame, 0x04);
+CHECK_OFFSET(tFrameUpdateEventData, null, 0x08);
+CHECK_SIZE(tFrameUpdateEventData, 0xC);
+extern tFrameUpdateEventData sFrameUpdateEventDefaults __asm__("D_004FBC00");
 extern int D_004A56EC;
 extern int D_004A3C98;
 extern "C" void* MEM_copy_19C8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_19C8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[55]): asks a world instance's active node whether its animation has passed a frame
  * (frameUpdateEvent).
@@ -4883,28 +5431,25 @@ struct Ent_19C8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) {
+extern "C" luno_cLunoVar* FrameUpdateEventFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
     if (D_004A56EC == 0) {
-        D_19C8[0] = 0xFFFFFFFF;
-        *(float*)&D_19C8[1] = -1.0f;
+        sFrameUpdateEventDefaults.InstId = 0xFFFFFFFF;
+        sFrameUpdateEventDefaults.Frame = -1.0f;
         D_004A56EC = 1;
-        (*(Tag_19C8*)((char*)D_19C8 + 8)) = Tag_19C8((*(Tag_19C8*)((char*)D_19C8 + 8)));
+        sFrameUpdateEventDefaults.null = WScriptNullType(sFrameUpdateEventDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
+    tFrameUpdateEventData *data = (tFrameUpdateEventData*)buf;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_19C8(buf, D_19C8, 12);
-    Ent_19C8 *x = params;
+    MEM_copy_19C8(buf, &sFrameUpdateEventDefaults, sizeof(tFrameUpdateEventData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3C98)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -4914,20 +5459,20 @@ extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) 
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         cInstanceNode *activeNode = obj->m_pActiveNode;
-        float frameArg = *(float*)&buf[1];
+        float frameArg = data->Frame;
         int eventHit;
         if (activeNode)
             eventHit = activeNode->frameUpdateEvent(frameArg * 0.03333333507180214f);
         else
             eventHit = 0;
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = eventHit;
     } else {
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = 0;
     }
     return ret;
@@ -4938,16 +5483,14 @@ extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) 
 INCLUDE_ASM("seg/seg_1FBE38", GotoTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_1B88 { char c; Flag_1B88() {} Flag_1B88(const Flag_1B88& o) : c(o.c) {} };
 extern unsigned D_004A56F0_1B88 __asm__("D_004A56F0");
-extern Flag_1B88 D_004A56F4_1B88 __asm__("D_004A56F4");
+extern WScriptNullType D_004A56F4_1B88 __asm__("D_004A56F4");
 extern int D_004A56F8_1B88 __asm__("D_004A56F8");
 extern int D_004A3CA0_1B88[2] __asm__("D_004A3CA0");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" void cWScriptMan_gotoTask(cWScriptMan*, int);
 int* luno_cLunoVar_castInt(void*);
 
-struct Ent_1B88 { int idx; int val; int pad; int kind; };
 
 /**
  * Script function (gLunoCFunctions[56]): makes the script's process jump to a task (cWScriptMan_gotoTask).
@@ -4963,25 +5506,21 @@ struct Ent_1B88 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* GotoTaskFunc(luno_cLunoVar* self, int n, Ent_1B88* params) {
+extern "C" void* GotoTaskFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A56F8_1B88 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A56F4_1B88 = Flag_1B88(D_004A56F4_1B88);
+        D_004A56F4_1B88 = WScriptNullType(D_004A56F4_1B88);
         D_004A56F0_1B88 = -1;
         D_004A56F8_1B88 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A56F0_1B88, 8);
-    Ent_1B88* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CA0_1B88[k] && D_004A3CA0_1B88[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CA0_1B88[k]);
     }
     cWScriptMan_gotoTask(cWScriptMan_TheWScriptMan, vp[0]);
     self->Type = 1;
@@ -4994,16 +5533,14 @@ extern "C" void* GotoTaskFunc(luno_cLunoVar* self, int n, Ent_1B88* params) {
 INCLUDE_ASM("seg/seg_1FBE38", AdvanceToTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_1C80 { char c; Flag_1C80() {} Flag_1C80(const Flag_1C80& o) : c(o.c) {} };
 extern unsigned D_004A5700_1C80 __asm__("D_004A5700");
-extern Flag_1C80 D_004A5704_1C80 __asm__("D_004A5704");
+extern WScriptNullType D_004A5704_1C80 __asm__("D_004A5704");
 extern int D_004A5708_1C80 __asm__("D_004A5708");
 extern int D_004A3CA8_1C80[2] __asm__("D_004A3CA8");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" void cWScriptMan_advanceToTask(cWScriptMan*, int);
 int* luno_cLunoVar_castInt(void*);
 
-struct Ent_1C80 { int idx; int val; int pad; int kind; };
 
 /**
  * Script function (gLunoCFunctions[57]): advances the script's process to a task (cWScriptMan_advanceToTask).
@@ -5019,25 +5556,21 @@ struct Ent_1C80 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* AdvanceToTaskFunc(luno_cLunoVar* self, int n, Ent_1C80* params) {
+extern "C" void* AdvanceToTaskFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A5708_1C80 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A5704_1C80 = Flag_1C80(D_004A5704_1C80);
+        D_004A5704_1C80 = WScriptNullType(D_004A5704_1C80);
         D_004A5700_1C80 = -1;
         D_004A5708_1C80 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5700_1C80, 8);
-    Ent_1C80* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CA8_1C80[k] && D_004A3CA8_1C80[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CA8_1C80[k]);
     }
     cWScriptMan_advanceToTask(cWScriptMan_TheWScriptMan, vp[0]);
     self->Type = 1;
@@ -5050,9 +5583,8 @@ extern "C" void* AdvanceToTaskFunc(luno_cLunoVar* self, int n, Ent_1C80* params)
 INCLUDE_ASM("seg/seg_1FBE38", RiderInVolumeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_1D78 { char c; Flag_1D78() {} Flag_1D78(const Flag_1D78& o) : c(o.c) {} };
 extern unsigned D_004A5710_1D78 __asm__("D_004A5710");
-extern Flag_1D78 D_004A5714_1D78 __asm__("D_004A5714");
+extern WScriptNullType D_004A5714_1D78 __asm__("D_004A5714");
 extern int D_004A5718_1D78 __asm__("D_004A5718");
 extern int RiderInVolumeFunc_types[2];
 static inline tInstanceRecord *refToPtr_1D78(unsigned i) { return (tInstanceRecord*)(i << 2); }
@@ -5060,7 +5592,6 @@ static inline tInstanceRecord *conv_1D78(unsigned i) { if (i == 0) return 0; ret
 extern t3Vector luno_gLunoNil_1D78 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_1D78(void*, void*, int) __asm__("MEM_copy");
 int* luno_cLunoVar_castInt_1D78(void*) __asm__("luno_cLunoVar_castInt__FPv");
-struct Ent_1D78 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[65]): returns whether the script's rider has the world instance in its list of
  * visited ids.
@@ -5081,26 +5612,22 @@ struct Ent_1D78 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* RiderInVolumeFunc(luno_cLunoVar* self, int n, Ent_1D78 *params) {
+extern "C" void* RiderInVolumeFunc(luno_cLunoVar* self, int n, luno_cLunoCArg *params) {
     if (D_004A5718_1D78 == 0) {
         D_004A5710_1D78 = 0xFFFFFFFF;
         D_004A5718_1D78 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb 0(sp)).
-        D_004A5714_1D78 = Flag_1D78(D_004A5714_1D78);
+        D_004A5714_1D78 = WScriptNullType(D_004A5714_1D78);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_1D78(buf, &D_004A5710_1D78, 8);
-    Ent_1D78 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = RiderInVolumeFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -5142,17 +5669,14 @@ done:
 INCLUDE_ASM("seg/seg_1FBE38", SetGamePathFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_1F48 { char c; Flag_1F48() {} Flag_1F48(const Flag_1F48& o) : c(o.c) {} };
 extern int D_004A5720_1F48 __asm__("D_004A5720");
-extern Flag_1F48 D_004A5724_1F48 __asm__("D_004A5724");
+extern WScriptNullType D_004A5724_1F48 __asm__("D_004A5724");
 extern int D_004A5728_1F48 __asm__("D_004A5728");
 extern int D_004A3CB8_1F48[2] __asm__("D_004A3CB8");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" void setGamePath_1F48(int) __asm__("setGamePath");
 
-struct Ent_1F48 { int idx; int val; int pad; int kind; };
-struct R12_1F48 { int a; int b; int c; };
-extern R12_1F48 luno_gLunoNil_1F48 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_1F48 __asm__("luno_gLunoNil");
 
 /**
  * Script function (gLunoCFunctions[66]): does nothing in effect: it hands Path to the empty stub setGamePath.
@@ -5167,25 +5691,21 @@ extern R12_1F48 luno_gLunoNil_1F48 __asm__("luno_gLunoNil");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_1F48 SetGamePathFunc(int n, Ent_1F48* params) {
+extern "C" luno_cLunoVar SetGamePathFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5728_1F48 == 0) {
         D_004A5720_1F48 = -1;
         D_004A5728_1F48 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A5724_1F48 = Flag_1F48(D_004A5724_1F48);
+        D_004A5724_1F48 = WScriptNullType(D_004A5724_1F48);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5720_1F48, 8);
-    Ent_1F48* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CB8_1F48[k] && D_004A3CB8_1F48[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CB8_1F48[k]);
     }
     setGamePath_1F48(vp[0]);
     return luno_gLunoNil_1F48;
@@ -5201,12 +5721,22 @@ extern "C" void cWScriptMan_failActiveLocalMission_2048(cWScriptMan*, int)
     __asm__("cWScriptMan_failActiveLocalMission");
 extern "C" void cSectionMan_eventbegin_2048(cSectionMan*, int) __asm__("cSectionMan_eventbegin");
 extern t3Vector luno_gLunoNil_2048 __asm__("luno_gLunoNil");
-struct Tag_2048 { char c; Tag_2048() {} Tag_2048(const Tag_2048 &o) : c(o.c) {} };
-extern unsigned D_2048[] __asm__("D_004FBC10");
+// World-script data that sets a game mode (On Tour tSetGameModeData; same offsets): the block below fills it.
+struct tSetGameModeData {
+    int Mode;                       // 0x00 [O]
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tSetGameModeData, Mode, 0x00);
+CHECK_OFFSET(tSetGameModeData, Cmd, 0x04);
+CHECK_OFFSET(tSetGameModeData, null, 0x08);
+CHECK_SIZE(tSetGameModeData, 0xC);
+extern tSetGameModeData sSetGameModeDefaults __asm__("D_004FBC10");
 extern int D_004A572C;
 extern int D_004A3CC0;
 extern "C" void* MEM_copy_2048(void*, void*, int) __asm__("MEM_copy");
-struct Ent_2048 { int idx; int val; int pad; int type; };
 /**
  * Script command SetGameMode: switches the section manager to a game mode, failing the running mission first.
  *
@@ -5220,25 +5750,21 @@ struct Ent_2048 { int idx; int val; int pad; int type; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" t3Vector SetGameModeFunc(int n, Ent_2048 *params) {
+extern "C" t3Vector SetGameModeFunc(int n, luno_cLunoCArg *params) {
     if (D_004A572C == 0) {
-        ((int*)D_2048)[0] = -1;
-        ((int*)D_2048)[1] = -1;
+        sSetGameModeDefaults.Mode = -1;
+        sSetGameModeDefaults.Cmd = -1;
         D_004A572C = 1;
-        (*(Tag_2048*)((char*)D_2048 + 8)) = Tag_2048((*(Tag_2048*)((char*)D_2048 + 8)));
+        sSetGameModeDefaults.null = WScriptNullType(sSetGameModeDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
-    MEM_copy_2048(buf, D_2048, 12);
-    Ent_2048 *x = params;
+    MEM_copy_2048(buf, &sSetGameModeDefaults, sizeof(tSetGameModeData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int argType = (&D_004A3CC0)[idx];
-        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != argType && argType == eLunoVar_Float)
-            *(float*)field = (float)x->val;
-        else
-            *field = x->val;
+        setArgField(&buf[idx], x, argType);
     }
     int notBusy;
     int k = cWScriptMan_TheWScriptMan->Being;
@@ -5273,10 +5799,22 @@ INCLUDE_ASM("seg/seg_1FBE38", SectionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
+// World-script data of SectionFunc (On Tour tSectionData; same offsets): the block below fills it.
+struct tSectionData {
+    int Location;                   // 0x00 [O]
+    int Cmd;                        // 0x04 [O]
+    int Mode;                       // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tSectionData, Location, 0x00);
+CHECK_OFFSET(tSectionData, Cmd, 0x04);
+CHECK_OFFSET(tSectionData, Mode, 0x08);
+CHECK_OFFSET(tSectionData, null, 0x0C);
+CHECK_SIZE(tSectionData, 0x10);
 extern "C" void* MEM_copy_2210(void*, void*, int) __asm__("MEM_copy");
-struct Flag_2210 { char c; Flag_2210() {} Flag_2210(const Flag_2210& o) : c(o.c) {} };
-struct Defaults_2210 { int v[3]; Flag_2210 flag; };
-extern Defaults_2210 D_004FBC20_2210 __asm__("D_004FBC20");
+extern tSectionData sSectionDefaults __asm__("D_004FBC20");
 extern int D_004A5730_2210 __asm__("D_004A5730");
 extern const int D_004465C8_2210[] __asm__("D_004465C8");
 extern char* const D_00445E40_2210[] __asm__("D_00445E40");
@@ -5290,7 +5828,6 @@ extern "C" void cGame_setState_2210(void* self, int a, int b, int refresh) __asm
 extern "C" void* cAudioInterface_bxAudio_2210() __asm__("cAudioInterface_bxAudio");
 extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
 
-struct Ent_2210 { int idx; int val; int pad; int kind; };
 
 /**
  * Script command Section: loads or activates a location's world sections, or switches the game state.
@@ -5310,28 +5847,24 @@ struct Ent_2210 { int idx; int val; int pad; int kind; };
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" t3Vector SectionFunc(int n, Ent_2210* params)
+extern "C" t3Vector SectionFunc(int n, luno_cLunoCArg* params)
 {
     if (D_004A5730_2210 == 0) {
-        D_004FBC20_2210.v[0] = -1;
-        D_004FBC20_2210.v[1] = -1;
-        D_004FBC20_2210.v[2] = -1;
+        sSectionDefaults.Location = -1;
+        sSectionDefaults.Cmd = -1;
+        sSectionDefaults.Mode = -1;
         D_004A5730_2210 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBC20_2210.flag = Flag_2210(D_004FBC20_2210.flag);
+        sSectionDefaults.null = WScriptNullType(sSectionDefaults.null);
     }
     int argBlock[4] __attribute__((aligned(16)));
     int* vp = argBlock;
-    MEM_copy_2210(vp, &D_004FBC20_2210, 0x10);
-    Ent_2210* keyArg = params;
+    MEM_copy_2210(vp, &sSectionDefaults, sizeof(tSectionData));
+    luno_cLunoCArg* keyArg = params;
     for (int i = 0; i < n; i++, keyArg++) {
-        int k = keyArg->idx;
-        int* field = (int*)((k << 2) + (int)vp);
-        if (keyArg->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == eLunoVar_Float)
-            *(float*)field = (float)keyArg->val;
-        else
-            *field = keyArg->val;
+        int k = keyArg->Index;
+        setArgField(&vp[k], keyArg, D_004465C8_2210[k]);
     }
     int ok;
     int cur = cWScriptMan_TheWScriptMan->Being;
@@ -5384,16 +5917,25 @@ extern "C" t3Vector SectionFunc(int n, Ent_2210* params)
 INCLUDE_ASM("seg/seg_1FBE38", RemoveModifierFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of RemoveModifierFunc (On Tour tRemoveModifierData; same offsets): the block below fills it.
+struct tRemoveModifierData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Type;                       // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tRemoveModifierData, InstId, 0x00);
+CHECK_OFFSET(tRemoveModifierData, Type, 0x04);
+CHECK_OFFSET(tRemoveModifierData, null, 0x08);
+CHECK_SIZE(tRemoveModifierData, 0xC);
 extern t3Vector luno_gLunoNil_2490 __asm__("luno_gLunoNil");
-struct Tag_2490 { char c; Tag_2490() {} Tag_2490(const Tag_2490 &o) : c(o.c) {} };
-struct T12_2490 { unsigned a; int b; Tag_2490 f; };
-extern T12_2490 D_4FBC30_2490 __asm__("D_004FBC30");
+extern tRemoveModifierData sRemoveModifierDefaults __asm__("D_004FBC30");
 extern int D_5734_2490 __asm__("D_004A5734");
 extern int D_3CC8_2490 __asm__("D_004A3CC8");
 extern "C" void* MEM_copy_2490(void*, void*, int) __asm__("MEM_copy");
 extern "C" void tModifierBlock_fadeEffectModifier_2490(tModifierBlock*) __asm__("tModifierBlock_fadeEffectModifier");
 extern "C" void tModifierBlock_remHaloModifier_2490(tModifierBlock*) __asm__("tModifierBlock_remHaloModifier");
-struct Ent_2490 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[69]): removes a modifier (effect fade or halo) from a moving world instance.
  *
@@ -5411,28 +5953,24 @@ struct Ent_2490 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
+extern "C" t3Vector RemoveModifierFunc(int n, luno_cLunoCArg *params) {
     if (D_5734_2490 == 0) {
-        D_4FBC30_2490.a = 0xFFFFFFFF;
-        D_4FBC30_2490.b = -1;
+        sRemoveModifierDefaults.InstId = 0xFFFFFFFF;
+        sRemoveModifierDefaults.Type = -1;
         D_5734_2490 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_4FBC30_2490.f = Tag_2490(D_4FBC30_2490.f);
+        sRemoveModifierDefaults.null = WScriptNullType(sRemoveModifierDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_2490(buf, &D_4FBC30_2490, 12);
-    Ent_2490 *x = params;
+    MEM_copy_2490(buf, &sRemoveModifierDefaults, sizeof(tRemoveModifierData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_3CC8_2490)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -5445,7 +5983,7 @@ extern "C" t3Vector RemoveModifierFunc(int n, Ent_2490 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (obj) {
@@ -5485,23 +6023,16 @@ struct cLunoValue {
     int type;
 };
 extern cLunoValue luno_gLunoNil;
-struct sBindArg_1FBE38 { int idx; int val; int pad; int type; };
-struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack
-                            //       temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -5515,7 +6046,7 @@ extern int D_004A3CD0_2680[2] __asm__("D_004A3CD0");
 extern "C" bool isGamePath(unsigned);
 extern int D_004A5740_2680 __asm__("D_004A5740");
 extern int D_004A5738_2680 __asm__("D_004A5738");
-extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
+extern WScriptNullType D_004A573C_2680 __asm__("D_004A573C");
 /**
  * Script function (gLunoCFunctions[42]): returns whether the game is on a given game path.
  *
@@ -5530,11 +6061,11 @@ extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGamePathFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGamePathFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
     if (D_004A5740_2680 == 0) {
-        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5738_2680 = -1;
-        D_004A573C_2680 = sBindEnd_1FBE38();
+        D_004A573C_2680 = WScriptNullType(D_004A573C_2680);
         D_004A5740_2680 = 1;
     }
     int v[4];
@@ -5550,21 +6081,16 @@ INCLUDE_ASM("seg/seg_1FBE38", IsGameModeFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -5578,7 +6104,7 @@ extern int D_004A3CD8_2778[2] __asm__("D_004A3CD8");
 extern "C" bool isGameMode(unsigned);
 extern int D_004A5750_2778 __asm__("D_004A5750");
 extern int D_004A5748_2778 __asm__("D_004A5748");
-extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
+extern WScriptNullType D_004A574C_2778 __asm__("D_004A574C");
 /**
  * Script function (gLunoCFunctions[43]): returns whether the game is in a given game mode.
  *
@@ -5593,11 +6119,11 @@ extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGameModeFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGameModeFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
     if (D_004A5750_2778 == 0) {
-        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5748_2778 = -1;
-        D_004A574C_2778 = sBindEnd_1FBE38();
+        D_004A574C_2778 = WScriptNullType(D_004A574C_2778);
         D_004A5750_2778 = 1;
     }
     int v[4];
@@ -5613,21 +6139,16 @@ INCLUDE_ASM("seg/seg_1FBE38", IsGameEventFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -5641,7 +6162,7 @@ extern int D_004A3CE0_2870[2] __asm__("D_004A3CE0");
 extern "C" bool isGameEvent(unsigned);
 extern int D_004A5760_2870 __asm__("D_004A5760");
 extern int D_004A5758_2870 __asm__("D_004A5758");
-extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
+extern WScriptNullType D_004A575C_2870 __asm__("D_004A575C");
 /**
  * Script function (gLunoCFunctions[108]): returns whether the game is running a given game event.
  *
@@ -5657,11 +6178,11 @@ extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsGameEventFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGameEventFunc(cLunoValue* ret, int n, luno_cLunoCArg* e) {
     if (D_004A5760_2870 == 0) {
-        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        // NOTE: guarded static-local init (defaults record = { int, WScriptNullType }).
         D_004A5758_2870 = -1;
-        D_004A575C_2870 = sBindEnd_1FBE38();
+        D_004A575C_2870 = WScriptNullType(D_004A575C_2870);
         D_004A5760_2870 = 1;
     }
     int v[4];
@@ -5678,15 +6199,12 @@ INCLUDE_ASM("seg/seg_1FBE38", SetCurrentInstanceFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2968 { char c; Flag_2968() {} Flag_2968(const Flag_2968& o) : c(o.c) {} };
-struct Ent_2968 { int idx; int val; int pad; int kind; };
-struct R12_2968 { int a; int b; int c; };
-extern R12_2968 luno_gLunoNil_2968 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_2968 __asm__("luno_gLunoNil");
 
 extern int D_004A3CE8_2968[2] __asm__("D_004A3CE8");
 extern int D_004A5770_2968 __asm__("D_004A5770");
 extern unsigned D_004A5768_2968 __asm__("D_004A5768");
-extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
+extern WScriptNullType D_004A576C_2968 __asm__("D_004A576C");
 /**
  * Script function (gLunoCFunctions[44]): makes a world instance the script's current instance.
  *
@@ -5701,11 +6219,11 @@ extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
+extern "C" luno_cLunoVar SetCurrentInstanceFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5770_2968 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A576C_2968 = Flag_2968(D_004A576C_2968);
+        D_004A576C_2968 = WScriptNullType(D_004A576C_2968);
         D_004A5768_2968 = -1;
         D_004A5770_2968 = 1;
     }
@@ -5713,14 +6231,10 @@ extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     unsigned* vp = block;
     vp[0] = 0xFFFFFFFFu;
     MEM_copy(vp, &D_004A5768_2968, 8);
-    Ent_2968* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CE8_2968[k] && D_004A3CE8_2968[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CE8_2968[k]);
     }
     cWScriptMan* scriptMan = cWScriptMan_TheWScriptMan;
     unsigned x = vp[0];
@@ -5731,7 +6245,7 @@ extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     if (section == 0 || (w = section->m_pCacheTable[3].m_pDataTag[x >> 8].m_bfuiMemLoc) == 0)
         inst = 0;
     else
-        inst = (tInstanceRecord*)(w << 2);
+        inst = instanceAtMemLoc(w);
     scriptMan->Inst = inst;
     return luno_gLunoNil_2968;
 }
@@ -5741,18 +6255,26 @@ extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
 INCLUDE_ASM("seg/seg_1FBE38", ProcessFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of ProcessFunc (On Tour tProcessData; same offsets): the block below fills it.
+struct tProcessData {
+    unsigned int ProcessId;         // 0x00 [O]
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tProcessData, ProcessId, 0x00);
+CHECK_OFFSET(tProcessData, Cmd, 0x04);
+CHECK_OFFSET(tProcessData, null, 0x08);
+CHECK_SIZE(tProcessData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2AC0 { char c; Flag_2AC0() {} Flag_2AC0(const Flag_2AC0& o) : c(o.c) {} };
-struct Ent_2AC0 { int idx; int val; int pad; int kind; };
-struct R12_2AC0 { int a; int b; int c; };
-extern R12_2AC0 luno_gLunoNil_2AC0 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_2AC0 __asm__("luno_gLunoNil");
 
 extern int D_004A3CF0_2AC0[2] __asm__("D_004A3CF0");
 extern "C" void cWScriptMan_doProcessCmd(cWScriptMan*, int, int);
 extern int D_004A5774_2AC0 __asm__("D_004A5774");
-struct T12_2AC0 { unsigned a; int b; Flag_2AC0 f; };
-extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
+extern tProcessData sProcessDefaults __asm__("D_004FBC40");
 /**
  * Script function (gLunoCFunctions[45]): sends a command to a script process (cWScriptMan_doProcessCmd).
  *
@@ -5767,26 +6289,22 @@ extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2AC0 ProcessFunc(int n, Ent_2AC0* params) {
+extern "C" luno_cLunoVar ProcessFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5774_2AC0 == 0) {
-        D_004FBC40_2AC0.a = -1;
-        D_004FBC40_2AC0.b = 0;
+        sProcessDefaults.ProcessId = -1;
+        sProcessDefaults.Cmd = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBC40_2AC0.f = Flag_2AC0(D_004FBC40_2AC0.f);
+        sProcessDefaults.null = WScriptNullType(sProcessDefaults.null);
         D_004A5774_2AC0 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBC40_2AC0, 12);
-    Ent_2AC0* curArg = params;
+    MEM_copy(vp, &sProcessDefaults, sizeof(tProcessData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CF0_2AC0[k] && D_004A3CF0_2AC0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CF0_2AC0[k]);
     }
     cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, vp[0], vp[1]);
     return luno_gLunoNil_2AC0;
@@ -5799,16 +6317,13 @@ INCLUDE_ASM("seg/seg_1FBE38", EndMissionFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2BD8 { char c; Flag_2BD8() {} Flag_2BD8(const Flag_2BD8& o) : c(o.c) {} };
-struct Ent_2BD8 { int idx; int val; int pad; int kind; };
-struct R12_2BD8 { int a; int b; int c; };
-extern R12_2BD8 luno_gLunoNil_2BD8 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_2BD8 __asm__("luno_gLunoNil");
 
 extern int D_004A3CF8_2BD8[2] __asm__("D_004A3CF8");
 extern "C" void cWScriptMan_doMissionCmd(cWScriptMan*, int, int, int);
 extern int D_004A5780_2BD8 __asm__("D_004A5780");
 extern unsigned D_004A5778_2BD8 __asm__("D_004A5778");
-extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
+extern WScriptNullType D_004A577C_2BD8 __asm__("D_004A577C");
 /**
  * Script function (gLunoCFunctions[51]): ends a mission (mission command 0).
  *
@@ -5822,25 +6337,21 @@ extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2BD8 EndMissionFunc(int n, Ent_2BD8* params) {
+extern "C" luno_cLunoVar EndMissionFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5780_2BD8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A577C_2BD8 = Flag_2BD8(D_004A577C_2BD8);
+        D_004A577C_2BD8 = WScriptNullType(D_004A577C_2BD8);
         D_004A5778_2BD8 = -1;
         D_004A5780_2BD8 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5778_2BD8, 8);
-    Ent_2BD8* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3CF8_2BD8[k] && D_004A3CF8_2BD8[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3CF8_2BD8[k]);
     }
     cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, vp[0], 0, -1);
     return luno_gLunoNil_2BD8;
@@ -5853,16 +6364,13 @@ INCLUDE_ASM("seg/seg_1FBE38", EndProcessFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2CE8 { char c; Flag_2CE8() {} Flag_2CE8(const Flag_2CE8& o) : c(o.c) {} };
-struct Ent_2CE8 { int idx; int val; int pad; int kind; };
-struct R12_2CE8 { int a; int b; int c; };
-extern R12_2CE8 luno_gLunoNil_2CE8 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_2CE8 __asm__("luno_gLunoNil");
 
 extern int D_004A3D00_2CE8[2] __asm__("D_004A3D00");
 extern "C" void cWScriptMan_doProcessCmd(cWScriptMan*, int, int);
 extern int D_004A5790_2CE8 __asm__("D_004A5790");
 extern unsigned D_004A5788_2CE8 __asm__("D_004A5788");
-extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
+extern WScriptNullType D_004A578C_2CE8 __asm__("D_004A578C");
 /**
  * Script function (gLunoCFunctions[46]): stops a script process (process command 0).
  *
@@ -5876,25 +6384,21 @@ extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2CE8 EndProcessFunc(int n, Ent_2CE8* params) {
+extern "C" luno_cLunoVar EndProcessFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5790_2CE8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A578C_2CE8 = Flag_2CE8(D_004A578C_2CE8);
+        D_004A578C_2CE8 = WScriptNullType(D_004A578C_2CE8);
         D_004A5788_2CE8 = -1;
         D_004A5790_2CE8 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5788_2CE8, 8);
-    Ent_2CE8* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D00_2CE8[k] && D_004A3D00_2CE8[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D00_2CE8[k]);
     }
     cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, vp[0], 0);
     return luno_gLunoNil_2CE8;
@@ -5907,16 +6411,13 @@ INCLUDE_ASM("seg/seg_1FBE38", EndTaskFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2DF0 { char c; Flag_2DF0() {} Flag_2DF0(const Flag_2DF0& o) : c(o.c) {} };
-struct Ent_2DF0 { int idx; int val; int pad; int kind; };
-struct R12_2DF0 { int a; int b; int c; };
-extern R12_2DF0 luno_gLunoNil_2DF0 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_2DF0 __asm__("luno_gLunoNil");
 
 extern int D_004A3D08_2DF0[2] __asm__("D_004A3D08");
 extern "C" void cWScriptMan_doProcessCmd(cWScriptMan*, int, int);
 extern int D_004A57A0_2DF0 __asm__("D_004A57A0");
 extern unsigned D_004A5798_2DF0 __asm__("D_004A5798");
-extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
+extern WScriptNullType D_004A579C_2DF0 __asm__("D_004A579C");
 /**
  * Script function (gLunoCFunctions[47]): ends a script process's current task (process command 2).
  *
@@ -5930,25 +6431,21 @@ extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2DF0 EndTaskFunc(int n, Ent_2DF0* params) {
+extern "C" luno_cLunoVar EndTaskFunc(int n, luno_cLunoCArg* params) {
     if (D_004A57A0_2DF0 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A579C_2DF0 = Flag_2DF0(D_004A579C_2DF0);
+        D_004A579C_2DF0 = WScriptNullType(D_004A579C_2DF0);
         D_004A5798_2DF0 = -1;
         D_004A57A0_2DF0 = 1;
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5798_2DF0, 8);
-    Ent_2DF0* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D08_2DF0[k] && D_004A3D08_2DF0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D08_2DF0[k]);
     }
     cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, vp[0], 2);
     return luno_gLunoNil_2DF0;
@@ -5962,12 +6459,10 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderActionFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_2EF8 { char c; Flag_2EF8() {} Flag_2EF8(const Flag_2EF8& o) : c(o.c) {} };
-struct Ent_2EF8 { int idx; int val; int pad; int kind; };
 extern int D_004A3D10_2EF8[2] __asm__("D_004A3D10");
 extern int D_004A57B0_2EF8 __asm__("D_004A57B0");
 extern int D_004A57A8_2EF8 __asm__("D_004A57A8");
-extern Flag_2EF8 D_004A57AC_2EF8 __asm__("D_004A57AC");
+extern WScriptNullType D_004A57AC_2EF8 __asm__("D_004A57AC");
 extern "C" int cRider_getMissionInt_2EF8(cRider*, int) __asm__("cRider_getMissionInt");
 /**
  * Script function (gLunoCFunctions[50]): answers a rider-action question about the script's rider
@@ -5991,25 +6486,21 @@ extern "C" int cRider_getMissionInt_2EF8(cRider*, int) __asm__("cRider_getMissio
  * @return self, set to the int answer
  */
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
-extern "C" void* RiderActionFunc(luno_cLunoVar* self, int n, Ent_2EF8* params) {
+extern "C" void* RiderActionFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A57B0_2EF8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
         D_004A57B0_2EF8 = 1;
         D_004A57A8_2EF8 = 0;
-        D_004A57AC_2EF8 = Flag_2EF8(D_004A57AC_2EF8);
+        D_004A57AC_2EF8 = WScriptNullType(D_004A57AC_2EF8);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A57A8_2EF8, 8);
-    Ent_2EF8* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == eLunoVar_Float)
-            *(float*)d = (float)curArg->val;
-        else
-            *d = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D10_2EF8[k]);
     }
     cRider* riderEntry = SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being];
     cBeing* riderIface = riderEntry;
@@ -6058,13 +6549,23 @@ static inline tInstanceRecord *look_3130(unsigned id) {
 }
 
 int *luno_cLunoVar_castInt(void*);
-struct V3_3130 { int w0, w1, w2; };
-struct Tag_3130 { char c; Tag_3130() {} Tag_3130(const Tag_3130 &o) : c(o.c) {} };
-extern unsigned D_3130[] __asm__("D_004FBC50");
+// World-script data that names an instance (On Tour reuses MovieFunc's block here) (On Tour tMovieData; same offsets):
+// the block below fills it.
+struct tMovieData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tMovieData, InstId, 0x00);
+CHECK_OFFSET(tMovieData, Cmd, 0x04);
+CHECK_OFFSET(tMovieData, null, 0x08);
+CHECK_SIZE(tMovieData, 0xC);
+extern tMovieData sHasActiveObjectDefaults __asm__("D_004FBC50");
 extern int D_004A57B4;
 extern int D_004A3D18;
 extern "C" void* MEM_copy_3130(void*, void*, int) __asm__("MEM_copy");
-struct Ent_3130 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[52]): returns whether a world instance has an active node.
  *
@@ -6081,33 +6582,29 @@ struct Ent_3130 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_3130* HasActiveObjectFunc(V3_3130 *ret, int n, Ent_3130 *params) {
+extern "C" luno_cLunoVar* HasActiveObjectFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
     if (D_004A57B4 == 0) {
-        D_3130[0] = 0xFFFFFFFF;
-        D_3130[1] = 1;
+        sHasActiveObjectDefaults.InstId = 0xFFFFFFFF;
+        sHasActiveObjectDefaults.Cmd = 1;
         D_004A57B4 = 1;
-        (*(Tag_3130*)((char*)D_3130 + 8)) = Tag_3130((*(Tag_3130*)((char*)D_3130 + 8)));
+        sHasActiveObjectDefaults.null = WScriptNullType(sHasActiveObjectDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_3130(buf, D_3130, 12);
-    Ent_3130 *x = params;
+    MEM_copy_3130(buf, &sHasActiveObjectDefaults, sizeof(tMovieData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3D18)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     tInstanceRecord *obj = look_3130(buf[0]);
     if (obj && obj->m_pActiveNode) {
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = 1;
     } else {
-        ((int*)ret)[2] = 1;
+        ret->Type = eLunoVar_Int;
         *luno_cLunoVar_castInt(ret) = 0;
     }
     return ret;
@@ -6298,19 +6795,27 @@ extern "C" void* CurrentRailFunc(luno_cLunoVar* self) {
 INCLUDE_ASM("seg/seg_1FBE38", AIRandomFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of AIRandomFunc (On Tour tAIRandomData; same offsets): the block below fills it.
+struct tAIRandomData {
+    float Lo;                       // 0x00 [O]
+    float Hi;                       // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tAIRandomData, Lo, 0x00);
+CHECK_OFFSET(tAIRandomData, Hi, 0x04);
+CHECK_OFFSET(tAIRandomData, null, 0x08);
+CHECK_SIZE(tAIRandomData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_3598 { char c; Flag_3598() {} Flag_3598(const Flag_3598& o) : c(o.c) {} };
-struct Ent_3598 { int idx; int val; int pad; int kind; };
-struct R12_3598 { int a; int b; int c; };
-extern R12_3598 luno_gLunoNil_3598 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_3598 __asm__("luno_gLunoNil");
 
 extern int D_004A3D20_3598[2] __asm__("D_004A3D20");
 float AIrandf(float, float);
 void* luno_cLunoVar_castFloat(void*);
 extern int D_004A57B8_3598 __asm__("D_004A57B8");
-struct T12_3598 { float a; float b; Flag_3598 f; };
-extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
+extern tAIRandomData sAIRandomDefaults __asm__("D_004FBC60");
 /**
  * Script function (gLunoCFunctions[77]): returns a random float between two bounds (AIrandf).
  *
@@ -6324,26 +6829,22 @@ extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the random float
  */
-extern "C" void* AIRandomFunc(luno_cLunoVar* self, int n, Ent_3598* params) {
+extern "C" void* AIRandomFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A57B8_3598 == 0) {
-        D_004FBC60_3598.a = 0;
-        D_004FBC60_3598.b = 1.0f;
+        sAIRandomDefaults.Lo = 0;
+        sAIRandomDefaults.Hi = 1.0f;
         D_004A57B8_3598 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBC60_3598.f = Flag_3598(D_004FBC60_3598.f);
+        sAIRandomDefaults.null = WScriptNullType(sAIRandomDefaults.null);
     }
     float block[4] __attribute__((aligned(16)));
     float* vp = block;
-    MEM_copy(vp, &D_004FBC60_3598, 12);
-    Ent_3598* curArg = params;
+    MEM_copy(vp, &sAIRandomDefaults, sizeof(tAIRandomData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D20_3598[k] && D_004A3D20_3598[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D20_3598[k]);
     }
     float randValue = AIrandf(vp[0], vp[1]);
     self->Type = 2;
@@ -6356,16 +6857,14 @@ extern "C" void* AIRandomFunc(luno_cLunoVar* self, int n, Ent_3598* params) {
 INCLUDE_ASM("seg/seg_1FBE38", CurrentTrickFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Flag_36B0 { char c; Flag_36B0() {} Flag_36B0(const Flag_36B0& o) : c(o.c) {} };
 extern int D_004A57C0_36B0 __asm__("D_004A57C0");
-extern Flag_36B0 D_004A57C4_36B0 __asm__("D_004A57C4");
+extern WScriptNullType D_004A57C4_36B0 __asm__("D_004A57C4");
 extern int D_004A57C8_36B0 __asm__("D_004A57C8");
 extern int D_004A3D28_36B0[2] __asm__("D_004A3D28");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" int cWScriptMan_getCurrentTrick(cWScriptMan*, int, int);
 int* luno_cLunoVar_castInt(void*);
 
-struct Ent_36B0 { int idx; int val; int pad; int kind; };
 
 /**
  * Script function (gLunoCFunctions[78]): returns a field of the current trick definition (cWScriptMan_getCurrentTrick).
@@ -6381,25 +6880,21 @@ struct Ent_36B0 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the field value
  */
-extern "C" void* CurrentTrickFunc(luno_cLunoVar* self, int n, Ent_36B0* params) {
+extern "C" void* CurrentTrickFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A57C8_36B0 == 0) {
         D_004A57C0_36B0 = -1;
         D_004A57C8_36B0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A57C4_36B0 = Flag_36B0(D_004A57C4_36B0);
+        D_004A57C4_36B0 = WScriptNullType(D_004A57C4_36B0);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A57C0_36B0, 8);
-    Ent_36B0* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D28_36B0[k] && D_004A3D28_36B0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D28_36B0[k]);
     }
     int trickField = cWScriptMan_getCurrentTrick(cWScriptMan_TheWScriptMan, cWScriptMan_TheWScriptMan->Being, vp[0]);
     self->Type = 1;
@@ -6415,14 +6910,12 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderMetricFunc);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_37B0 { char c; Flag_37B0() {} Flag_37B0(const Flag_37B0& o) : c(o.c) {} };
 extern int D_004A57D0_37B0 __asm__("D_004A57D0");
-extern Flag_37B0 D_004A57D4_37B0 __asm__("D_004A57D4");
+extern WScriptNullType D_004A57D4_37B0 __asm__("D_004A57D4");
 extern int D_004A57D8_37B0 __asm__("D_004A57D8");
 extern int D_004A3D30_37B0[2] __asm__("D_004A3D30");
 extern "C" int cRider_getMissionInt_37B0(cRider* rider, int which) __asm__("cRider_getMissionInt");
 
-struct Ent_37B0 { int idx; int val; int pad; int kind; };
 
 /**
  * Script function (gLunoCFunctions[79]): answers a rider-metric question about the script's rider
@@ -6445,26 +6938,22 @@ struct Ent_37B0 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the int answer
  */
-extern "C" void* RiderMetricFunc(luno_cLunoVar* self, int n, Ent_37B0* params)
+extern "C" void* RiderMetricFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params)
 {
     if (D_004A57D8_37B0 == 0) {
         D_004A57D0_37B0 = -1;
         D_004A57D8_37B0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A57D4_37B0 = Flag_37B0(D_004A57D4_37B0);
+        D_004A57D4_37B0 = WScriptNullType(D_004A57D4_37B0);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A57D0_37B0, 8);
-    Ent_37B0* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D30_37B0[k]);
     }
     cAI* ai = SSXApp->Game->AI;
     cRider* riderEntry = ai->Riders[cWScriptMan_TheWScriptMan->Being];
@@ -6507,12 +6996,22 @@ extern int TheCrowdMan3d_39F0 __asm__("TheCrowdMan3d");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
 extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
 extern t3Vector luno_gLunoNil_39F0 __asm__("luno_gLunoNil");
-struct Tag_39F0 { char c; Tag_39F0() {} Tag_39F0(const Tag_39F0 &o) : c(o.c) {} };
-extern unsigned D_39F0[] __asm__("D_004FBC70");
+// World-script data that joins or leaves a 3D crowd (On Tour tCrowd3dData; same offsets): the block below fills it.
+struct tCrowd3dData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Cmd;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tCrowd3dData, InstId, 0x00);
+CHECK_OFFSET(tCrowd3dData, Cmd, 0x04);
+CHECK_OFFSET(tCrowd3dData, null, 0x08);
+CHECK_SIZE(tCrowd3dData, 0xC);
+extern tCrowd3dData sCrowd3dDefaults __asm__("D_004FBC70");
 extern int D_004A57DC;
 extern int D_004A3D38;
 extern "C" void* MEM_copy_39F0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_39F0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[80]): adds a world instance to, or removes it from, its 3D crowd.
  *
@@ -6529,26 +7028,22 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
+extern "C" t3Vector Crowd3dFunc(int n, luno_cLunoCArg *params) {
     if (D_004A57DC == 0) {
-        D_39F0[0] = 0xFFFFFFFF;
-        ((int*)D_39F0)[1] = -1;
+        sCrowd3dDefaults.InstId = 0xFFFFFFFF;
+        sCrowd3dDefaults.Cmd = -1;
         D_004A57DC = 1;
-        (*(Tag_39F0*)((char*)D_39F0 + 8)) = Tag_39F0((*(Tag_39F0*)((char*)D_39F0 + 8)));
+        sCrowd3dDefaults.null = WScriptNullType(sCrowd3dDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_39F0(buf, D_39F0, 12);
-    Ent_39F0 *x = params;
+    MEM_copy_39F0(buf, &sCrowd3dDefaults, sizeof(tCrowd3dData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3D38)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -6560,7 +7055,7 @@ extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         int crowdCmd = buf[1];
@@ -6578,18 +7073,31 @@ extern "C" t3Vector Crowd3dFunc(int n, Ent_39F0 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", Crowd2dFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of Crowd2dFunc (On Tour tCrowd2dData; same offsets): the block below fills it.
+struct tCrowd2dData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Cmd;                        // 0x04 [O]
+    int Mesh;                       // 0x08 [O]
+    int Context;                    // 0x0C [O]
+    WScriptNullType null;           // 0x10 [O]
+    char unk_011[0x3];              // 0x11 padding
+};
+
+CHECK_OFFSET(tCrowd2dData, InstId, 0x00);
+CHECK_OFFSET(tCrowd2dData, Cmd, 0x04);
+CHECK_OFFSET(tCrowd2dData, Mesh, 0x08);
+CHECK_OFFSET(tCrowd2dData, Context, 0x0C);
+CHECK_OFFSET(tCrowd2dData, null, 0x10);
+CHECK_SIZE(tCrowd2dData, 0x14);
 extern int TheCrowdMan2d_3BA0 __asm__("TheCrowdMan2d");
 extern t3Vector luno_gLunoNil_3BA0 __asm__("luno_gLunoNil");
-struct Tag_3BA0 { char c; Tag_3BA0() {} Tag_3BA0(const Tag_3BA0 &o) : c(o.c) {} };
-struct T20_3BA0 { unsigned a; int b; int c; int d; Tag_3BA0 f; };
-extern T20_3BA0 D_4FBC80_3BA0 __asm__("D_004FBC80");
+extern tCrowd2dData sCrowd2dDefaults __asm__("D_004FBC80");
 extern int D_57E0_3BA0 __asm__("D_004A57E0");
 extern const int D_004465D8_3BA0[] __asm__("D_004465D8");
 extern "C" void* MEM_copy_3BA0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_00229820_3BA0(int, unsigned, int, int) __asm__("func_00229820");
 extern "C" void func_00229788_3BA0(int, unsigned, int, int) __asm__("func_00229788");
 extern "C" void func_002297D8_3BA0(int, unsigned, int, int) __asm__("func_002297D8");
-struct Ent_3BA0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[88]): runs a 2D-crowd command on a world instance.
  *
@@ -6607,30 +7115,26 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector Crowd2dFunc(int n, Ent_3BA0 *params) {
+extern "C" t3Vector Crowd2dFunc(int n, luno_cLunoCArg *params) {
     if (D_57E0_3BA0 == 0) {
-        D_4FBC80_3BA0.a = 0xFFFFFFFF;
-        D_4FBC80_3BA0.b = -1;
-        D_4FBC80_3BA0.c = 0;
-        D_4FBC80_3BA0.d = 0;
+        sCrowd2dDefaults.InstId = 0xFFFFFFFF;
+        sCrowd2dDefaults.Cmd = -1;
+        sCrowd2dDefaults.Mesh = 0;
+        sCrowd2dDefaults.Context = 0;
         D_57E0_3BA0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_4FBC80_3BA0.f = Tag_3BA0(D_4FBC80_3BA0.f);
+        sCrowd2dDefaults.null = WScriptNullType(sCrowd2dDefaults.null);
     }
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_3BA0(buf, &D_4FBC80_3BA0, 20);
-    Ent_3BA0 *x = params;
+    MEM_copy_3BA0(buf, &sCrowd2dDefaults, sizeof(tCrowd2dData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_004465D8_3BA0[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -6642,7 +7146,7 @@ extern "C" t3Vector Crowd2dFunc(int n, Ent_3BA0 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         int mode = buf[1];
@@ -6809,18 +7313,27 @@ extern "C" t3Vector RiderInTunnelFunc(void) {
 INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayPointsFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of UpdateDisplayPointsFunc (On Tour tUpdateDisplayPointsData; same offsets): the block below fills
+// it.
+struct tUpdateDisplayPointsData {
+    int Points;                     // 0x00 [O]
+    int Goal;                       // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tUpdateDisplayPointsData, Points, 0x00);
+CHECK_OFFSET(tUpdateDisplayPointsData, Goal, 0x04);
+CHECK_OFFSET(tUpdateDisplayPointsData, null, 0x08);
+CHECK_SIZE(tUpdateDisplayPointsData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_3FF0 { char c; Flag_3FF0() {} Flag_3FF0(const Flag_3FF0& o) : c(o.c) {} };
-struct Ent_3FF0 { int idx; int val; int pad; int kind; };
-struct R12_3FF0 { int a; int b; int c; };
-extern R12_3FF0 luno_gLunoNil_3FF0 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_3FF0 __asm__("luno_gLunoNil");
 
 extern int D_004A3D40_3FF0[2] __asm__("D_004A3D40");
 void cWScriptMan_updateMissionPoints(void*, int, int);
 extern int D_004A57E4_3FF0 __asm__("D_004A57E4");
-struct T12_3FF0 { int a; int b; Flag_3FF0 f; };
-extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
+extern tUpdateDisplayPointsData sDisplayPointsDefaults __asm__("D_004FBC98");
 /**
  * Script function (gLunoCFunctions[98]): shows the mission points display with a value and a goal.
  *
@@ -6835,26 +7348,22 @@ extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_3FF0 UpdateDisplayPointsFunc(int n, Ent_3FF0* params) {
+extern "C" luno_cLunoVar UpdateDisplayPointsFunc(int n, luno_cLunoCArg* params) {
     if (D_004A57E4_3FF0 == 0) {
-        D_004FBC98_3FF0.a = 0;
-        D_004FBC98_3FF0.b = -1;
+        sDisplayPointsDefaults.Points = 0;
+        sDisplayPointsDefaults.Goal = -1;
         D_004A57E4_3FF0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBC98_3FF0.f = Flag_3FF0(D_004FBC98_3FF0.f);
+        sDisplayPointsDefaults.null = WScriptNullType(sDisplayPointsDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBC98_3FF0, 12);
-    Ent_3FF0* curArg = params;
+    MEM_copy(vp, &sDisplayPointsDefaults, sizeof(tUpdateDisplayPointsData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D40_3FF0[k] && D_004A3D40_3FF0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D40_3FF0[k]);
     }
     cWScriptMan_updateMissionPoints(cWScriptMan_TheWScriptMan, vp[0], vp[1]);
     return luno_gLunoNil_3FF0;
@@ -6865,18 +7374,27 @@ extern "C" R12_3FF0 UpdateDisplayPointsFunc(int n, Ent_3FF0* params) {
 INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayCountFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of UpdateDisplayCountFunc (On Tour tUpdateDisplayCountData; same offsets): the block below fills
+// it.
+struct tUpdateDisplayCountData {
+    int Count;                      // 0x00 [O]
+    int Max;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tUpdateDisplayCountData, Count, 0x00);
+CHECK_OFFSET(tUpdateDisplayCountData, Max, 0x04);
+CHECK_OFFSET(tUpdateDisplayCountData, null, 0x08);
+CHECK_SIZE(tUpdateDisplayCountData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_4100 { char c; Flag_4100() {} Flag_4100(const Flag_4100& o) : c(o.c) {} };
-struct Ent_4100 { int idx; int val; int pad; int kind; };
-struct R12_4100 { int a; int b; int c; };
-extern R12_4100 luno_gLunoNil_4100 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_4100 __asm__("luno_gLunoNil");
 
 extern int D_004A3D48_4100[2] __asm__("D_004A3D48");
 void cWScriptMan_updateMissionCount(void*, int, int);
 extern int D_004A57E8_4100 __asm__("D_004A57E8");
-struct T12_4100 { int a; int b; Flag_4100 f; };
-extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
+extern tUpdateDisplayCountData sDisplayCountDefaults __asm__("D_004FBCA8");
 /**
  * Script function (gLunoCFunctions[75]): shows the mission count display with a count and a maximum.
  *
@@ -6891,26 +7409,22 @@ extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4100 UpdateDisplayCountFunc(int n, Ent_4100* params) {
+extern "C" luno_cLunoVar UpdateDisplayCountFunc(int n, luno_cLunoCArg* params) {
     if (D_004A57E8_4100 == 0) {
-        D_004FBCA8_4100.a = 0;
+        sDisplayCountDefaults.Count = 0;
         D_004A57E8_4100 = 1;
-        D_004FBCA8_4100.b = 0;
+        sDisplayCountDefaults.Max = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBCA8_4100.f = Flag_4100(D_004FBCA8_4100.f);
+        sDisplayCountDefaults.null = WScriptNullType(sDisplayCountDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBCA8_4100, 12);
-    Ent_4100* curArg = params;
+    MEM_copy(vp, &sDisplayCountDefaults, sizeof(tUpdateDisplayCountData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D48_4100[k] && D_004A3D48_4100[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D48_4100[k]);
     }
     cWScriptMan_updateMissionCount(cWScriptMan_TheWScriptMan, vp[0], vp[1]);
     return luno_gLunoNil_4100;
@@ -6921,18 +7435,27 @@ extern "C" R12_4100 UpdateDisplayCountFunc(int n, Ent_4100* params) {
 INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayTicksFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of UpdateDisplayTicksFunc (On Tour tUpdateDisplayTicksData; same offsets): the block below fills
+// it.
+struct tUpdateDisplayTicksData {
+    int Ticks;                      // 0x00 [O]
+    int Dir;                        // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tUpdateDisplayTicksData, Ticks, 0x00);
+CHECK_OFFSET(tUpdateDisplayTicksData, Dir, 0x04);
+CHECK_OFFSET(tUpdateDisplayTicksData, null, 0x08);
+CHECK_SIZE(tUpdateDisplayTicksData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_4210 { char c; Flag_4210() {} Flag_4210(const Flag_4210& o) : c(o.c) {} };
-struct Ent_4210 { int idx; int val; int pad; int kind; };
-struct R12_4210 { int a; int b; int c; };
-extern R12_4210 luno_gLunoNil_4210 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_4210 __asm__("luno_gLunoNil");
 
 extern int D_004A3D50_4210[2] __asm__("D_004A3D50");
 void cWScriptMan_updateMissionTicks(void*, int, int);
 extern int D_004A57EC_4210 __asm__("D_004A57EC");
-struct T12_4210 { int a; int b; Flag_4210 f; };
-extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
+extern tUpdateDisplayTicksData sDisplayTicksDefaults __asm__("D_004FBCB8");
 /**
  * Script function (gLunoCFunctions[76]): shows the mission clock with a tick count and a direction.
  *
@@ -6947,26 +7470,22 @@ extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4210 UpdateDisplayTicksFunc(int n, Ent_4210* params) {
+extern "C" luno_cLunoVar UpdateDisplayTicksFunc(int n, luno_cLunoCArg* params) {
     if (D_004A57EC_4210 == 0) {
-        D_004FBCB8_4210.a = 0;
-        D_004FBCB8_4210.b = -1;
+        sDisplayTicksDefaults.Ticks = 0;
+        sDisplayTicksDefaults.Dir = -1;
         D_004A57EC_4210 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBCB8_4210.f = Flag_4210(D_004FBCB8_4210.f);
+        sDisplayTicksDefaults.null = WScriptNullType(sDisplayTicksDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBCB8_4210, 12);
-    Ent_4210* curArg = params;
+    MEM_copy(vp, &sDisplayTicksDefaults, sizeof(tUpdateDisplayTicksData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D50_4210[k] && D_004A3D50_4210[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D50_4210[k]);
     }
     cWScriptMan_updateMissionTicks(cWScriptMan_TheWScriptMan, vp[0], vp[1]);
     return luno_gLunoNil_4210;
@@ -6978,20 +7497,15 @@ INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayHeightFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -7004,7 +7518,7 @@ static inline tInstanceRecord *refToPtr_1FBE38(unsigned i) { return (tInstanceRe
 static inline tInstanceRecord *refToObj_1FBE38(unsigned i) { if (i == 0) return 0; return refToPtr_1FBE38(i); }
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned D_004A57F0_4320 __asm__("D_004A57F0");
-extern sBindEnd_1FBE38 D_004A57F4_4320 __asm__("D_004A57F4");
+extern WScriptNullType D_004A57F4_4320 __asm__("D_004A57F4");
 extern int D_004A57F8_4320 __asm__("D_004A57F8");
 extern int UpdateDisplayHeightFunc_types[2];
 // Inline accessor of the script manager, cWScriptMan_TheWScriptMan (wscript/wscriptman cWScriptMan_getTheWScriptMan is
@@ -7030,27 +7544,23 @@ void cWScriptMan_updateMissionHeight(void*, int, void*);
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
+extern "C" cLunoValue UpdateDisplayHeightFunc(int n, luno_cLunoCArg* params) {
     if (D_004A57F8_4320 == 0) {
         D_004A57F0_4320 = 0xFFFFFFFF;
         D_004A57F8_4320 = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor's stack temp
         //       (lbu; sb 0(sp)).
-        D_004A57F4_4320 = sBindEnd_1FBE38();
+        D_004A57F4_4320 = WScriptNullType(D_004A57F4_4320);
     }
     unsigned buf64[2];
     unsigned* buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy(buf, &D_004A57F0_4320, 8);
-    sBindArg_1FBE38* x = params;
+    luno_cLunoCArg* x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = UpdateDisplayHeightFunc_types[idx];
-        unsigned* slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     int gv = curProcess_4320()->Being;
     unsigned id = buf[0];
@@ -7082,16 +7592,13 @@ INCLUDE_ASM("seg/seg_1FBE38", PassthroughGateFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_44A8 { char c; Flag_44A8() {} Flag_44A8(const Flag_44A8& o) : c(o.c) {} };
-struct Ent_44A8 { int idx; int val; int pad; int kind; };
-struct R12_44A8 { int a; int b; int c; };
-extern R12_44A8 luno_gLunoNil_44A8 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_44A8 __asm__("luno_gLunoNil");
 
 extern int D_004A3D60_44A8[2] __asm__("D_004A3D60");
 extern "C" void cGameModeMan_riderGateHit(cGameModeMan*, int, int);
 extern int D_004A5808_44A8 __asm__("D_004A5808");
 extern int D_004A5800_44A8 __asm__("D_004A5800");
-extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
+extern WScriptNullType D_004A5804_44A8 __asm__("D_004A5804");
 /**
  * Script function (gLunoCFunctions[82]): reports that the script's rider passed a gate.
  *
@@ -7106,25 +7613,21 @@ extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_44A8 PassthroughGateFunc(int n, Ent_44A8* params) {
+extern "C" luno_cLunoVar PassthroughGateFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5808_44A8 == 0) {
         D_004A5800_44A8 = -1;
         D_004A5808_44A8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A5804_44A8 = Flag_44A8(D_004A5804_44A8);
+        D_004A5804_44A8 = WScriptNullType(D_004A5804_44A8);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5800_44A8, 8);
-    Ent_44A8* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D60_44A8[k] && D_004A3D60_44A8[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D60_44A8[k]);
     }
     int beingIndex = cWScriptMan_TheWScriptMan->Being;
     cGameModeMan_riderGateHit(SSXApp->GameModeMan, beingIndex, vp[0]);
@@ -7136,28 +7639,54 @@ extern "C" R12_44A8 PassthroughGateFunc(int n, Ent_44A8* params) {
 INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayTrickFunc);
 #ifdef SKIP_ASM
 // PORT: 64-bit bitfield container (unsigned long is 8 bytes on the EE).
-extern t3Vector luno_gLunoNil_45B8 __asm__("luno_gLunoNil");
-struct Tag_45B8 { char c; Tag_45B8() {} Tag_45B8(const Tag_45B8 &o) : c(o.c) {} };
-struct Rec_45B8 {
-    unsigned a0; int a1; int a2; int a3;
-    unsigned a4; unsigned a5; unsigned a6; unsigned a7;
-    unsigned a8; unsigned a9; unsigned a10; unsigned a11;
-    unsigned a12; unsigned a13; unsigned a14; unsigned a15;
-    Tag_45B8 f;
+// World-script data that names the mission's current trick (On Tour tUpdateDisplayTrickData; same offsets): the
+// block below fills it.
+struct tUpdateDisplayTrickData {
+    int Rail;                       // 0x00 [O]
+    int RailSpin;                   // 0x04 [O]
+    int TakeOff;                    // 0x08 [O]
+    int Orient;                     // 0x0C [O]
+    int Spin;                       // 0x10 [O]
+    int Reps;                       // 0x14 [O]
+    int Flip;                       // 0x18 [O]
+    int Special;                    // 0x1C [O]
+    int PostSpin;                   // 0x20 [O]
+    int UberGrind;                  // 0x24 [O]
+    int Grab;                       // 0x28 [O]
+    int ToLate;                     // 0x2C [O]
+    int LateGrab;                   // 0x30 [O]
+    int HandPlant;                  // 0x34 [O]
+    int Land;                       // 0x38 [O]
+    int Press;                      // 0x3C [O]
+    WScriptNullType null;           // 0x40 [O]
+    char unk_041[0x3];              // 0x41 padding
 };
-extern Rec_45B8 D_4FBCC8_45B8 __asm__("D_004FBCC8");
+
+CHECK_OFFSET(tUpdateDisplayTrickData, Rail, 0x00);
+CHECK_OFFSET(tUpdateDisplayTrickData, RailSpin, 0x04);
+CHECK_OFFSET(tUpdateDisplayTrickData, TakeOff, 0x08);
+CHECK_OFFSET(tUpdateDisplayTrickData, Orient, 0x0C);
+CHECK_OFFSET(tUpdateDisplayTrickData, Spin, 0x10);
+CHECK_OFFSET(tUpdateDisplayTrickData, Reps, 0x14);
+CHECK_OFFSET(tUpdateDisplayTrickData, Flip, 0x18);
+CHECK_OFFSET(tUpdateDisplayTrickData, Special, 0x1C);
+CHECK_OFFSET(tUpdateDisplayTrickData, PostSpin, 0x20);
+CHECK_OFFSET(tUpdateDisplayTrickData, UberGrind, 0x24);
+CHECK_OFFSET(tUpdateDisplayTrickData, Grab, 0x28);
+CHECK_OFFSET(tUpdateDisplayTrickData, ToLate, 0x2C);
+CHECK_OFFSET(tUpdateDisplayTrickData, LateGrab, 0x30);
+CHECK_OFFSET(tUpdateDisplayTrickData, HandPlant, 0x34);
+CHECK_OFFSET(tUpdateDisplayTrickData, Land, 0x38);
+CHECK_OFFSET(tUpdateDisplayTrickData, Press, 0x3C);
+CHECK_OFFSET(tUpdateDisplayTrickData, null, 0x40);
+CHECK_SIZE(tUpdateDisplayTrickData, 0x44);
+extern t3Vector luno_gLunoNil_45B8 __asm__("luno_gLunoNil");
+extern tUpdateDisplayTrickData sDisplayTrickDefaults __asm__("D_004FBCC8");
 extern int D_580C_45B8 __asm__("D_004A580C");
 extern const int D_00446650_45B8[] __asm__("D_00446650");
 extern "C" void* MEM_copy_45B8(void*, void*, int) __asm__("MEM_copy");
-struct BF_45B8 {
-    unsigned long f0 : 3; unsigned long f1 : 4; unsigned long f2 : 3; unsigned long f3 : 2;
-    unsigned long f4 : 4; unsigned long f5 : 3; unsigned long f6 : 3; unsigned long f7 : 6;
-    unsigned long f8 : 4; unsigned long f9 : 3; unsigned long f10 : 7; unsigned long f11 : 1;
-    unsigned long f12 : 7; unsigned long f13 : 2; unsigned long f14 : 4; unsigned long f15 : 3;
-    unsigned long f16 : 5;
-};
-extern "C" void cWScriptMan_updateMissionTrick_45B8(cWScriptMan*, BF_45B8*) __asm__("cWScriptMan_updateMissionTrick");
-struct Ent_45B8 { int idx; int val; int pad; int type; };
+extern "C" void cWScriptMan_updateMissionTrick_45B8(cWScriptMan*,
+        tTrickNameDef*) __asm__("cWScriptMan_updateMissionTrick");
 /**
  * Script function (gLunoCFunctions[83]): shows the mission trick display for a trick built from script arguments.
  *
@@ -7173,61 +7702,58 @@ struct Ent_45B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
+extern "C" t3Vector UpdateDisplayTrickFunc(int n, luno_cLunoCArg *params) {
     if (D_580C_45B8 == 0) {
-        D_4FBCC8_45B8.a0 = 0;
-        D_4FBCC8_45B8.a1 = 0;
-        D_4FBCC8_45B8.a2 = 0;
-        D_4FBCC8_45B8.a3 = 0;
-        D_4FBCC8_45B8.a4 = 0;
-        D_4FBCC8_45B8.a5 = 0;
-        D_4FBCC8_45B8.a6 = 0;
-        D_4FBCC8_45B8.a7 = 0;
-        D_4FBCC8_45B8.a8 = 0;
-        D_4FBCC8_45B8.a9 = 0;
-        D_4FBCC8_45B8.a10 = 0;
-        D_4FBCC8_45B8.a11 = 0;
-        D_4FBCC8_45B8.a12 = 0;
-        D_4FBCC8_45B8.a13 = 0;
-        D_4FBCC8_45B8.a14 = 0;
-        D_4FBCC8_45B8.a15 = 0;
+        sDisplayTrickDefaults.Rail = 0;
+        sDisplayTrickDefaults.RailSpin = 0;
+        sDisplayTrickDefaults.TakeOff = 0;
+        sDisplayTrickDefaults.Orient = 0;
+        sDisplayTrickDefaults.Spin = 0;
+        sDisplayTrickDefaults.Reps = 0;
+        sDisplayTrickDefaults.Flip = 0;
+        sDisplayTrickDefaults.Special = 0;
+        sDisplayTrickDefaults.PostSpin = 0;
+        sDisplayTrickDefaults.UberGrind = 0;
+        sDisplayTrickDefaults.Grab = 0;
+        sDisplayTrickDefaults.ToLate = 0;
+        sDisplayTrickDefaults.LateGrab = 0;
+        sDisplayTrickDefaults.HandPlant = 0;
+        sDisplayTrickDefaults.Land = 0;
+        sDisplayTrickDefaults.Press = 0;
         D_580C_45B8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_4FBCC8_45B8.f = Tag_45B8(D_4FBCC8_45B8.f);
+        sDisplayTrickDefaults.null = WScriptNullType(sDisplayTrickDefaults.null);
     }
-    Rec_45B8 rec;
-    Rec_45B8 *buf = &rec;
-    MEM_copy_45B8(buf, &D_4FBCC8_45B8, 68);
-    BF_45B8 bf;
-    Ent_45B8 *x = params;
+    tUpdateDisplayTrickData rec;
+    tUpdateDisplayTrickData *buf = &rec;
+    MEM_copy_45B8(buf, &sDisplayTrickDefaults, sizeof(tUpdateDisplayTrickData));
+    tTrickNameDef trick;
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446650_45B8[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&v[idx], x, keywordType);
     }
-    bf.f0 = buf->a0;
-    bf.f1 = buf->a1;
-    bf.f2 = buf->a2;
-    bf.f3 = buf->a3;
-    bf.f4 = buf->a4;
-    bf.f5 = buf->a5;
-    bf.f6 = buf->a6;
-    bf.f7 = buf->a7;
-    bf.f8 = buf->a8;
-    bf.f9 = buf->a9;
-    bf.f10 = buf->a10;
-    bf.f11 = buf->a11;
-    bf.f12 = buf->a12;
-    bf.f13 = buf->a13;
-    bf.f15 = buf->a14;
-    bf.f14 = buf->a15;
-    bf.f16 = 0;
-    cWScriptMan_updateMissionTrick_45B8(cWScriptMan_TheWScriptMan, &bf);
+    trick.rail = buf->Rail;
+    trick.railSpin = buf->RailSpin;
+    trick.takeoff = buf->TakeOff;
+    trick.orient = buf->Orient;
+    trick.spin = buf->Spin;
+    trick.reps = buf->Reps;
+    trick.flip = buf->Flip;
+    trick.special = buf->Special;
+    trick.postSpin = buf->PostSpin;
+    trick.uberGrind = buf->UberGrind;
+    trick.grab = buf->Grab;
+    trick.toLate = buf->ToLate;
+    trick.lateGrab = buf->LateGrab;
+    trick.handplant = buf->HandPlant;
+    trick.land = buf->Land;
+    trick.press = buf->Press;
+    trick.monster = 0;
+    cWScriptMan_updateMissionTrick_45B8(cWScriptMan_TheWScriptMan, &trick);
     return luno_gLunoNil_45B8;
 }
 #endif
@@ -7238,12 +7764,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddFadeFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMoveNode_addFade(void*, void*);
 extern t3Vector luno_gLunoNil_4980 __asm__("luno_gLunoNil");
-struct Tag_4980 { char c; Tag_4980() {} Tag_4980(const Tag_4980 &o) : c(o.c) {} };
-extern unsigned D_4980[] __asm__("D_004FBD10");
+extern tAddFadeData sFadeDefaults __asm__("D_004FBD10");
 extern int D_004A5810;
 extern int D_004A3D68;
 extern "C" void* MEM_copy_4980(void*, void*, int) __asm__("MEM_copy");
-struct Ent_4980 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[84]): adds a fade modifier to a moving world instance.
  *
@@ -7261,26 +7785,22 @@ struct Ent_4980 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddFadeFunc(int n, Ent_4980 *params) {
+extern "C" t3Vector AddFadeFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5810 == 0) {
-        D_4980[0] = 0xFFFFFFFF;
-        *(float*)&D_4980[1] = 1.0f;
+        sFadeDefaults.InstId = 0xFFFFFFFF;
+        sFadeDefaults.Fade = 1.0f;
         D_004A5810 = 1;
-        (*(Tag_4980*)((char*)D_4980 + 8)) = Tag_4980((*(Tag_4980*)((char*)D_4980 + 8)));
+        sFadeDefaults.null = WScriptNullType(sFadeDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_4980(buf, D_4980, 12);
-    Ent_4980 *x = params;
+    MEM_copy_4980(buf, &sFadeDefaults, sizeof(tAddFadeData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3D68)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -7292,7 +7812,7 @@ extern "C" t3Vector AddFadeFunc(int n, Ent_4980 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode == 0)
@@ -7309,16 +7829,13 @@ INCLUDE_ASM("seg/seg_1FBE38", ReplayFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_4B38 { char c; Flag_4B38() {} Flag_4B38(const Flag_4B38& o) : c(o.c) {} };
-struct Ent_4B38 { int idx; int val; int pad; int kind; };
-struct R12_4B38 { int a; int b; int c; };
-extern R12_4B38 luno_gLunoNil_4B38 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_4B38 __asm__("luno_gLunoNil");
 
 extern int D_004A3D70_4B38[2] __asm__("D_004A3D70");
 extern "C" void cReplay_eventWScript(cReplay*, int, int);
 extern int D_004A5820_4B38 __asm__("D_004A5820");
 extern int D_004A5818_4B38 __asm__("D_004A5818");
-extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
+extern WScriptNullType D_004A581C_4B38 __asm__("D_004A581C");
 /**
  * Script function (gLunoCFunctions[85]): records a world-script event in the replay.
  *
@@ -7332,25 +7849,21 @@ extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4B38 ReplayFunc(int n, Ent_4B38* params) {
+extern "C" luno_cLunoVar ReplayFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5820_4B38 == 0) {
         D_004A5818_4B38 = -1;
         D_004A5820_4B38 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A581C_4B38 = Flag_4B38(D_004A581C_4B38);
+        D_004A581C_4B38 = WScriptNullType(D_004A581C_4B38);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5818_4B38, 8);
-    Ent_4B38* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D70_4B38[k] && D_004A3D70_4B38[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D70_4B38[k]);
     }
     cReplay_eventWScript(SSXApp->Game->Replay, cWScriptMan_TheWScriptMan->Being, vp[0]);
     return luno_gLunoNil_4B38;
@@ -7363,10 +7876,8 @@ INCLUDE_ASM("seg/seg_1FBE38", RiderHeightFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* luno_cLunoVar_castFloat(void*);
 extern "C" void MEM_copy(void*, void*, int);
-struct Tag_4C50 { char c; Tag_4C50() {} Tag_4C50(const Tag_4C50 &o) : c(o.c) {} };
-struct Ent_4C50 { int idx; int val; int pad; int type; };
 extern unsigned D_5828_4C50 __asm__("D_004A5828");
-extern Tag_4C50 D_582C_4C50 __asm__("D_004A582C");
+extern WScriptNullType D_582C_4C50 __asm__("D_004A582C");
 extern int D_5830_4C50 __asm__("D_004A5830");
 extern int D_3D78_4C50 __asm__("D_004A3D78");
 static inline t4Vector pos_4C50(tInstanceRecord *o) { return *(t4Vector*)o->m_fmTransform.m[3]; }
@@ -7386,27 +7897,23 @@ static inline t4Vector pos_4C50(tInstanceRecord *o) { return *(t4Vector*)o->m_fm
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the height difference
  */
-extern "C" void* RiderHeightFunc(luno_cLunoVar* self, int n, Ent_4C50 *params) {
+extern "C" void* RiderHeightFunc(luno_cLunoVar* self, int n, luno_cLunoCArg *params) {
     if (D_5830_4C50 == 0) {
         D_5828_4C50 = 0xFFFFFFFF;
         D_5830_4C50 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_582C_4C50 = Tag_4C50(D_582C_4C50);
+        D_582C_4C50 = WScriptNullType(D_582C_4C50);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy(buf, &D_5828_4C50, 8);
-    Ent_4C50 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_3D78_4C50)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)d = (float)x->val;
-        else
-            *d = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     int slot = cWScriptMan_TheWScriptMan->Being;
@@ -7420,7 +7927,7 @@ extern "C" void* RiderHeightFunc(luno_cLunoVar* self, int n, Ent_4C50 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (obj) {
@@ -7450,12 +7957,10 @@ INCLUDE_ASM("seg/seg_1FBE38", AddDebounceFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMoveNode_addDebounce_4E38(void*, void*) __asm__("cMoveNode_addDebounce");
 extern t3Vector luno_gLunoNil_4E38 __asm__("luno_gLunoNil");
-struct Tag_4E38 { char c; Tag_4E38() {} Tag_4E38(const Tag_4E38 &o) : c(o.c) {} };
-extern unsigned D_4E38[] __asm__("D_004FBD20");
+extern tAddDebounceData sAddDebounceDefaults __asm__("D_004FBD20");
 extern int D_004A5834;
 extern int D_004A3D80;
 extern "C" void* MEM_copy_4E38(void*, void*, int) __asm__("MEM_copy");
-struct Ent_4E38 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[87]): adds a debounce modifier to a moving world instance.
  *
@@ -7473,26 +7978,22 @@ struct Ent_4E38 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
+extern "C" t3Vector AddDebounceFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5834 == 0) {
-        D_4E38[0] = 0xFFFFFFFF;
-        *(float*)&D_4E38[1] = 1.0f;
+        sAddDebounceDefaults.InstId = 0xFFFFFFFF;
+        sAddDebounceDefaults.Time = 1.0f;
         D_004A5834 = 1;
-        (*(Tag_4E38*)((char*)D_4E38 + 8)) = Tag_4E38((*(Tag_4E38*)((char*)D_4E38 + 8)));
+        sAddDebounceDefaults.null = WScriptNullType(sAddDebounceDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_4E38(buf, D_4E38, 12);
-    Ent_4E38 *x = params;
+    MEM_copy_4E38(buf, &sAddDebounceDefaults, sizeof(tAddDebounceData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3D80)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -7504,7 +8005,7 @@ extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     cInstanceNode *activeNode = obj->m_pActiveNode;
     if (activeNode == 0)
@@ -7519,16 +8020,24 @@ extern "C" t3Vector AddDebounceFunc(int n, Ent_4E38 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", CameraFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of CameraFunc (On Tour tCameraData; same offsets): the block below fills it.
+struct tCameraData {
+    int Cmd;                        // 0x00 [O]
+    int Type;                       // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tCameraData, Cmd, 0x00);
+CHECK_OFFSET(tCameraData, Type, 0x04);
+CHECK_OFFSET(tCameraData, null, 0x08);
+CHECK_SIZE(tCameraData, 0xC);
 extern int D_004A5838_4FF0 __asm__("D_004A5838");
 extern int D_004A3D88_4FF0[2] __asm__("D_004A3D88");
 extern "C" void MEM_copy(void*, void*, int);
 
-struct Flag_4FF0 { char c; Flag_4FF0() {} Flag_4FF0(const Flag_4FF0& o) : c(o.c) {} };
-struct Ent_4FF0 { int idx; int val; int pad; int kind; };
-struct R12_4FF0 { int a; int b; int c; };
-struct T12_4FF0 { int a; int b; Flag_4FF0 f; };
-extern T12_4FF0 D_004FBD30_4FF0 __asm__("D_004FBD30");
-extern R12_4FF0 luno_gLunoNil_4FF0 __asm__("luno_gLunoNil");
+extern tCameraData sCameraDefaults __asm__("D_004FBD30");
+extern luno_cLunoVar luno_gLunoNil_4FF0 __asm__("luno_gLunoNil");
 
 /**
  * Script function (gLunoCFunctions[89]): reads its arguments and does nothing else (a stubbed camera command).
@@ -7543,26 +8052,22 @@ extern R12_4FF0 luno_gLunoNil_4FF0 __asm__("luno_gLunoNil");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4FF0 CameraFunc(int n, Ent_4FF0* params) {
+extern "C" luno_cLunoVar CameraFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5838_4FF0 == 0) {
-        D_004FBD30_4FF0.a = 0;
+        sCameraDefaults.Cmd = 0;
         D_004A5838_4FF0 = 1;
-        D_004FBD30_4FF0.b = 0;
+        sCameraDefaults.Type = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBD30_4FF0.f = Flag_4FF0(D_004FBD30_4FF0.f);
+        sCameraDefaults.null = WScriptNullType(sCameraDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBD30_4FF0, 12);
-    Ent_4FF0* curArg = params;
+    MEM_copy(vp, &sCameraDefaults, sizeof(tCameraData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D88_4FF0[k] && D_004A3D88_4FF0[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D88_4FF0[k]);
     }
     return luno_gLunoNil_4FF0;
 }
@@ -7572,6 +8077,22 @@ extern "C" R12_4FF0 CameraFunc(int n, Ent_4FF0* params) {
 INCLUDE_ASM("seg/seg_1FBE38", CameraShakeFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
+// World-script data that shakes the camera (On Tour tCameraShakeData; same offsets): the block below fills it.
+struct tCameraShakeData {
+    int Type;                       // 0x00 [O]
+    int Proximity;                  // 0x04 [O]
+    unsigned int InstId;            // 0x08 [O] tResourceID
+    float Scale;                    // 0x0C [O]
+    WScriptNullType null;           // 0x10 [O]
+    char unk_011[0x3];              // 0x11 padding
+};
+
+CHECK_OFFSET(tCameraShakeData, Type, 0x00);
+CHECK_OFFSET(tCameraShakeData, Proximity, 0x04);
+CHECK_OFFSET(tCameraShakeData, InstId, 0x08);
+CHECK_OFFSET(tCameraShakeData, Scale, 0x0C);
+CHECK_OFFSET(tCameraShakeData, null, 0x10);
+CHECK_SIZE(tCameraShakeData, 0x14);
 #include "bx/math3d.h"
 extern cLunoValue luno_gLunoNil;
 // A plain (not 16-byte aligned) 4-float vector built in place for the node calls that take a vector pointer.
@@ -7579,20 +8100,15 @@ struct sVec4_1FBE38 { float x, y, z, w; sVec4_1FBE38(float a, float b, float c, 
 extern void* cMultiParticleMan_TheMultiParticleMan;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
 // (cLunoValue layout: value word, second word, type).
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -7635,8 +8151,7 @@ static inline float vLen_1FBE38(const t4Vector &v) {
 // True when the race slot (-1 = none) holds a rider that is not computer-controlled.
 // Defaults record of this camera-shake binding; keyword indexes the shake keyword table (the prototype asserts
 // dp->Index < kNumCameraShakeKeywords).
-struct Rec_50F0 { int keyword; int useObj; unsigned id; float scale; sBindEnd_1FBE38 f; };
-extern Rec_50F0 D_004FBD40_50F0 __asm__("D_004FBD40");
+extern tCameraShakeData sCameraShakeDefaults __asm__("D_004FBD40");
 extern int D_004A583C;
 extern const int D_00446690[];
 extern int D_004A3BD8[2];  // shake type per camera-shake keyword
@@ -7662,34 +8177,31 @@ static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
+extern "C" cLunoValue CameraShakeFunc(int n, luno_cLunoCArg *params) {
     if (D_004A583C == 0) {
-        D_004FBD40_50F0.keyword = 0;
-        D_004FBD40_50F0.useObj = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        sCameraShakeDefaults.Type = 0;
+        sCameraShakeDefaults.Proximity = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor's stack temp
         //       (lbu; sb 0(sp)).
-        D_004FBD40_50F0.f = sBindEnd_1FBE38();
-        D_004FBD40_50F0.scale = 1.0f;
-        D_004FBD40_50F0.id = 0xFFFFFFFF;
+        sCameraShakeDefaults.null = WScriptNullType(sCameraShakeDefaults.null);
+        sCameraShakeDefaults.Scale = 1.0f;
+        sCameraShakeDefaults.InstId = 0xFFFFFFFF;
         D_004A583C = 1;
     }
-    Rec_50F0 rec;
-    Rec_50F0 *buf = &rec;
-    rec.id = 0xFFFFFFFF;
-    MEM_copy(buf, &D_004FBD40_50F0, 20);
-    sBindArg_1FBE38 *x = params;
+    tCameraShakeData rec;
+    tCameraShakeData *buf = &rec;
+    rec.InstId = 0xFFFFFFFF;
+    MEM_copy(buf, &sCameraShakeDefaults, sizeof(tCameraShakeData));
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446690[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)d = (float)x->val;
-        else
-            *d = x->val;
+        setArgField(&v[idx], x, keywordType);
     }
     tInstanceRecord *obj = 0;
-    if (buf->useObj) {
-        unsigned id = buf->id;
+    if (buf->Proximity) {
+        unsigned id = buf->InstId;
         if (~id == 0) {
             obj = cWScriptMan_TheWScriptMan->Inst;
         } else {
@@ -7703,8 +8215,8 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
         }
     }
     int being = cWScriptMan_TheWScriptMan->Being;
-    float scale = buf->scale;
-    int keyword = buf->keyword;
+    float scale = buf->Scale;
+    int keyword = buf->Type;
     if (keyword == 0) {
         cGame *game = SSXApp->Game;
         int np = game->AI->NumberOfPlayersAllocated;
@@ -7740,15 +8252,26 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", AddMagnetFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data that makes a node a magnet (On Tour tAddMagnetData; same offsets): the block below fills it.
+struct tAddMagnetData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    float Radius;                   // 0x04 [O]
+    float Speed;                    // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tAddMagnetData, InstId, 0x00);
+CHECK_OFFSET(tAddMagnetData, Radius, 0x04);
+CHECK_OFFSET(tAddMagnetData, Speed, 0x08);
+CHECK_OFFSET(tAddMagnetData, null, 0x0C);
+CHECK_SIZE(tAddMagnetData, 0x10);
 extern t3Vector luno_gLunoNil_5478 __asm__("luno_gLunoNil");
-struct Tag_5478 { char c; Tag_5478() {} Tag_5478(const Tag_5478 &o) : c(o.c) {} };
-struct Rec_5478 { unsigned id; float a; float b; Tag_5478 f; };
-extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
+extern tAddMagnetData sMagnetDefaults __asm__("D_004FBD58");
 extern int D_5840_5478 __asm__("D_004A5840");
 extern const int D_004466A0_5478[] __asm__("D_004466A0");
 extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addMagnet_5478(cInstanceNode*, const t4Matrix*, float, float) __asm__("cMoveNode_addMagnet");
-struct Ent_5478 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[90]): adds a magnet modifier to a moving world instance.
  *
@@ -7765,31 +8288,28 @@ struct Ent_5478 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddMagnetFunc(int n, Ent_5478 *params) {
+extern "C" t3Vector AddMagnetFunc(int n, luno_cLunoCArg *params) {
     if (D_5840_5478 == 0) {
-        D_4FBD58_5478.id = 0xFFFFFFFF;
-        D_4FBD58_5478.a = 400.0f;
-        D_4FBD58_5478.b = 30.0f;
+        sMagnetDefaults.InstId = 0xFFFFFFFF;
+        sMagnetDefaults.Radius = 400.0f;
+        sMagnetDefaults.Speed = 30.0f;
         D_5840_5478 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_4FBD58_5478.f = Tag_5478(D_4FBD58_5478.f);
+        sMagnetDefaults.null = WScriptNullType(sMagnetDefaults.null);
     }
-    Rec_5478 rec;
-    Rec_5478 *buf = &rec;
-    rec.id = 0xFFFFFFFF;
-    MEM_copy_5478(buf, &D_4FBD58_5478, 0x10);
-    Ent_5478 *x = params;
+    tAddMagnetData rec;
+    tAddMagnetData *buf = &rec;
+    rec.InstId = 0xFFFFFFFF;
+    MEM_copy_5478(buf, &sMagnetDefaults, sizeof(tAddMagnetData));
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_004466A0_5478[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&v[idx], x, keywordType);
     }
-    unsigned id = buf->id;
+    unsigned id = buf->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -7799,13 +8319,13 @@ extern "C" t3Vector AddMagnetFunc(int n, Ent_5478 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         cInstanceNode *activeNode = obj->m_pActiveNode;
         if (activeNode) {
             if (activeNode->isMoveNode())
-                cMoveNode_addMagnet_5478(activeNode, activeNode->getRootTransform(), buf->a, buf->b);
+                cMoveNode_addMagnet_5478(activeNode, activeNode->getRootTransform(), buf->Radius, buf->Speed);
         }
     }
     return luno_gLunoNil_5478;
@@ -7818,13 +8338,11 @@ INCLUDE_ASM("seg/seg_1FBE38", LightningFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void DoLightningFlash_5660(float) __asm__("DoLightningFlash");
 extern t3Vector luno_gLunoNil_5660 __asm__("luno_gLunoNil");
-struct Tag_5660 { char c; Tag_5660() {} Tag_5660(const Tag_5660 &o) : c(o.c) {} };
 extern unsigned D_5660 __asm__("D_004A5848");
-extern Tag_5660 D_004A584C;
+extern WScriptNullType D_004A584C;
 extern int D_004A5850;
 extern int D_004A3D90;
 extern "C" void* MEM_copy_5660(void*, void*, int) __asm__("MEM_copy");
-struct Ent_5660 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[92]): starts a lightning flash when the script's rider is human.
  *
@@ -7841,25 +8359,21 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector LightningFunc(int n, Ent_5660 *params) {
+extern "C" t3Vector LightningFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5850 == 0) {
         D_5660 = 0xFFFFFFFF;
         D_004A5850 = 1;
-        D_004A584C = Tag_5660(D_004A584C);
+        D_004A584C = WScriptNullType(D_004A584C);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_5660(buf, &D_5660, 8);
-    Ent_5660 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3D90)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     int k = cWScriptMan_TheWScriptMan->Being;
     if (k != kWScriptBeing_None) {
@@ -7878,14 +8392,11 @@ INCLUDE_ASM("seg/seg_1FBE38", AddHaloFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_57C0 __asm__("luno_gLunoNil");
-struct Tag_57C0 { char c; Tag_57C0() {} Tag_57C0(const Tag_57C0 &o) : c(o.c) {} };
-struct Rec_57C0 { unsigned id; int a; int b; float c; float d; float e; float g; float h; int k; Tag_57C0 f; };
-extern Rec_57C0 D_4FBD68_57C0 __asm__("D_004FBD68");
+extern tAddHaloData sHaloDefaults __asm__("D_004FBD68");
 extern int D_5854_57C0 __asm__("D_004A5854");
 extern const int D_004466B0_57C0[] __asm__("D_004466B0");
 extern "C" void* MEM_copy_57C0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addHalo_57C0(void*, void*) __asm__("cMoveNode_addHalo");
-struct Ent_57C0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[97]): adds a halo modifier to a moving world instance.
  *
@@ -7902,37 +8413,34 @@ struct Ent_57C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddHaloFunc(int n, Ent_57C0 *params) {
+extern "C" t3Vector AddHaloFunc(int n, luno_cLunoCArg *params) {
     if (D_5854_57C0 == 0) {
-        D_4FBD68_57C0.id = 0xFFFFFFFF;
-        D_4FBD68_57C0.a = 0;
-        D_4FBD68_57C0.b = -1;
-        D_4FBD68_57C0.c = 1.0f;
-        D_4FBD68_57C0.d = 1.0f;
-        D_4FBD68_57C0.e = 1.0f;
-        D_4FBD68_57C0.g = 1.0f;
-        D_4FBD68_57C0.h = 100.0f;
-        D_4FBD68_57C0.k = 0;
+        sHaloDefaults.InstId = 0xFFFFFFFF;
+        sHaloDefaults.Type = 0;
+        sHaloDefaults.Mesh = -1;
+        sHaloDefaults.ColourA = 1.0f;
+        sHaloDefaults.ColourR = 1.0f;
+        sHaloDefaults.ColourG = 1.0f;
+        sHaloDefaults.ColourB = 1.0f;
+        sHaloDefaults.Radius = 100.0f;
+        sHaloDefaults.Speed = 0;
         D_5854_57C0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_4FBD68_57C0.f = Tag_57C0(D_4FBD68_57C0.f);
+        sHaloDefaults.null = WScriptNullType(sHaloDefaults.null);
     }
-    Rec_57C0 rec;
-    Rec_57C0 *buf = &rec;
-    rec.id = 0xFFFFFFFF;
-    MEM_copy_57C0(buf, &D_4FBD68_57C0, 40);
-    Ent_57C0 *x = params;
+    tAddHaloData rec;
+    tAddHaloData *buf = &rec;
+    rec.InstId = 0xFFFFFFFF;
+    MEM_copy_57C0(buf, &sHaloDefaults, sizeof(tAddHaloData));
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_004466B0_57C0[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&v[idx], x, keywordType);
     }
-    unsigned id = buf->id;
+    unsigned id = buf->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -7942,7 +8450,7 @@ extern "C" t3Vector AddHaloFunc(int n, Ent_57C0 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
         cInstanceNode *activeNode = obj->m_pActiveNode;
@@ -7961,20 +8469,15 @@ INCLUDE_ASM("seg/seg_1FBE38", MiniAvalancheFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -7983,8 +8486,25 @@ int* luno_cLunoVar_castInt(void*);
         *luno_cLunoVar_castInt(ret) = r_; \
     } while (0)
 
-struct Rec_59A0 { int head; unsigned id[8]; int cnt[8]; float f0[8]; float f1[8]; float f2[8]; float f3[8]; sBindEnd_1FBE38 f; };
-extern Rec_59A0 D_004FBD90_59A0 __asm__("D_004FBD90");
+// World-script data that adds up to 8 instances to a mini avalanche, one cAvalanche_addAvalancheNode call per slot.
+// On Tour's MiniAvalancheFunc is an empty stub, so the type name is ours; the members take the names of
+// addAvalancheNode's On Tour parameters (avalancheId, inst, life, fadein, fadeout, speed, type) that each one feeds.
+struct tMiniAvalancheData {
+    int AvalancheId;                // 0x00 [U] -> addAvalancheNode's avalancheId
+    unsigned int InstId[8];         // 0x04 [U] tResourceID of each slot's instance; kInvalidRID skips the slot
+    int Type[8];                    // 0x24 [U] -> type
+    float Life[8];                  // 0x44 [U] -> life
+    float FadeIn[8];                // 0x64 [U] -> fadein
+    float FadeOut[8];               // 0x84 [U] -> fadeout
+    float Speed[8];                 // 0xA4 [U] -> speed
+    WScriptNullType null;           // 0xC4 the block's end marker
+    char unk_0C5[0x3];              // 0xC5 padding
+};
+CHECK_OFFSET(tMiniAvalancheData, InstId, 0x04);
+CHECK_OFFSET(tMiniAvalancheData, Speed, 0xA4);
+CHECK_OFFSET(tMiniAvalancheData, null, 0xC4);
+CHECK_SIZE(tMiniAvalancheData, 0xC8);
+extern tMiniAvalancheData sMiniAvalancheDefaults __asm__("D_004FBD90");
 extern const int D_004466D8_59A0[] __asm__("D_004466D8");
 extern int D_004A5858_59A0 __asm__("D_004A5858");
 static inline tInstanceRecord *conv_59A0(unsigned i) { return i ? refToPtr_1FBE38(i) : 0; }
@@ -7998,47 +8518,58 @@ extern "C" void cAvalanche_addAvalancheNode(int, tInstanceRecord*, float, float,
  * fade-out (3 s) and speed (1).
  *
  * For each instance id that is not -1, the instance is looked up (a missing one passes 0) and
- * cAvalanche_addAvalancheNode(avalanche id, instance, type, life, fade-in, fade-out, speed) adds it.
+ * cAvalanche_addAvalancheNode(avalanche id, instance, life, fade-in, fade-out, speed, type) adds it.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
+extern "C" cLunoValue MiniAvalancheFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5858_59A0 == 0) {
-        D_004FBD90_59A0.head = 0;
-        D_004FBD90_59A0.id[7] = D_004FBD90_59A0.id[6] = D_004FBD90_59A0.id[5] = D_004FBD90_59A0.id[4] = D_004FBD90_59A0.id[3] = D_004FBD90_59A0.id[2] = D_004FBD90_59A0.id[1] = D_004FBD90_59A0.id[0] = 0xFFFFFFFF;
-        D_004FBD90_59A0.cnt[7] = D_004FBD90_59A0.cnt[6] = D_004FBD90_59A0.cnt[5] = D_004FBD90_59A0.cnt[4] = D_004FBD90_59A0.cnt[3] = D_004FBD90_59A0.cnt[2] = D_004FBD90_59A0.cnt[1] = D_004FBD90_59A0.cnt[0] = 0;
-        D_004FBD90_59A0.f0[7] = D_004FBD90_59A0.f0[6] = D_004FBD90_59A0.f0[5] = D_004FBD90_59A0.f0[4] = D_004FBD90_59A0.f0[3] = D_004FBD90_59A0.f0[2] = D_004FBD90_59A0.f0[1] = D_004FBD90_59A0.f0[0] = 10.0f;
-        D_004FBD90_59A0.f1[7] = D_004FBD90_59A0.f1[6] = D_004FBD90_59A0.f1[5] = D_004FBD90_59A0.f1[4] = D_004FBD90_59A0.f1[3] = D_004FBD90_59A0.f1[2] = D_004FBD90_59A0.f1[1] = D_004FBD90_59A0.f1[0] = 0.0f;
-        D_004FBD90_59A0.f2[7] = D_004FBD90_59A0.f2[6] = D_004FBD90_59A0.f2[5] = D_004FBD90_59A0.f2[4] = D_004FBD90_59A0.f2[3] = D_004FBD90_59A0.f2[2] = D_004FBD90_59A0.f2[1] = D_004FBD90_59A0.f2[0] = 3.0f;
-        D_004FBD90_59A0.f3[7] = D_004FBD90_59A0.f3[6] = D_004FBD90_59A0.f3[5] = D_004FBD90_59A0.f3[4] = D_004FBD90_59A0.f3[3] = D_004FBD90_59A0.f3[2] = D_004FBD90_59A0.f3[1] = D_004FBD90_59A0.f3[0] = 1.0f;
+        sMiniAvalancheDefaults.AvalancheId = 0;
+        sMiniAvalancheDefaults.InstId[7] = sMiniAvalancheDefaults.InstId[6] = sMiniAvalancheDefaults.InstId[5] =
+                sMiniAvalancheDefaults.InstId[4] = sMiniAvalancheDefaults.InstId[3] = sMiniAvalancheDefaults.InstId[2] =
+                sMiniAvalancheDefaults.InstId[1] = sMiniAvalancheDefaults.InstId[0] = 0xFFFFFFFF;
+        sMiniAvalancheDefaults.Type[7] = sMiniAvalancheDefaults.Type[6] = sMiniAvalancheDefaults.Type[5] =
+                sMiniAvalancheDefaults.Type[4] = sMiniAvalancheDefaults.Type[3] = sMiniAvalancheDefaults.Type[2] =
+                sMiniAvalancheDefaults.Type[1] = sMiniAvalancheDefaults.Type[0] = 0;
+        sMiniAvalancheDefaults.Life[7] = sMiniAvalancheDefaults.Life[6] = sMiniAvalancheDefaults.Life[5] =
+                sMiniAvalancheDefaults.Life[4] = sMiniAvalancheDefaults.Life[3] = sMiniAvalancheDefaults.Life[2] =
+                sMiniAvalancheDefaults.Life[1] = sMiniAvalancheDefaults.Life[0] = 10.0f;
+        sMiniAvalancheDefaults.FadeIn[7] = sMiniAvalancheDefaults.FadeIn[6] = sMiniAvalancheDefaults.FadeIn[5] =
+                sMiniAvalancheDefaults.FadeIn[4] = sMiniAvalancheDefaults.FadeIn[3] = sMiniAvalancheDefaults.FadeIn[2] =
+                sMiniAvalancheDefaults.FadeIn[1] = sMiniAvalancheDefaults.FadeIn[0] = 0.0f;
+        sMiniAvalancheDefaults.FadeOut[7] = sMiniAvalancheDefaults.FadeOut[6] = sMiniAvalancheDefaults.FadeOut[5] =
+                sMiniAvalancheDefaults.FadeOut[4] = sMiniAvalancheDefaults.FadeOut[3] =
+                sMiniAvalancheDefaults.FadeOut[2] = sMiniAvalancheDefaults.FadeOut[1] =
+                sMiniAvalancheDefaults.FadeOut[0] = 3.0f;
+        sMiniAvalancheDefaults.Speed[7] = sMiniAvalancheDefaults.Speed[6] = sMiniAvalancheDefaults.Speed[5] =
+                sMiniAvalancheDefaults.Speed[4] = sMiniAvalancheDefaults.Speed[3] = sMiniAvalancheDefaults.Speed[2] =
+                sMiniAvalancheDefaults.Speed[1] = sMiniAvalancheDefaults.Speed[0] = 1.0f;
         D_004A5858_59A0 = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor's stack temp
         //       (lbu; sb 0(sp)).
-        D_004FBD90_59A0.f = sBindEnd_1FBE38();
+        sMiniAvalancheDefaults.null = WScriptNullType(sMiniAvalancheDefaults.null);
     }
-    Rec_59A0 rec;
-    Rec_59A0* vp = &rec;
-    rec.id[7] = rec.id[6] = rec.id[5] = rec.id[4] = rec.id[3] = rec.id[2] = rec.id[1] = rec.id[0] = 0xFFFFFFFF;
-    MEM_copy(vp, &D_004FBD90_59A0, 200);
-    sBindArg_1FBE38* x = params;
+    tMiniAvalancheData rec;
+    tMiniAvalancheData* vp = &rec;
+    rec.InstId[7] = rec.InstId[6] = rec.InstId[5] = rec.InstId[4] = rec.InstId[3] = rec.InstId[2] = rec.InstId[1] =
+            rec.InstId[0] = 0xFFFFFFFF;
+    MEM_copy(vp, &sMiniAvalancheDefaults, sizeof(tMiniAvalancheData));
+    int *v = (int*)vp;
+    luno_cLunoCArg* x = params;
     for (int i = 0; i < n; i++, x++) {
-        int k = x->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (x->type != D_004466D8_59A0[k] && D_004466D8_59A0[k] == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        int k = x->Index;
+        setArgField(&v[k], x, D_004466D8_59A0[k]);
     }
-    int head = vp->head;
-    int* cp = vp->cnt;
-    float* f3 = vp->f3;
-    float* f2 = vp->f2;
-    float* f1 = vp->f1;
-    float* f0 = vp->f0;
+    int avalancheId = vp->AvalancheId;
+    int* type = vp->Type;
+    float* speed = vp->Speed;
+    float* fadeOut = vp->FadeOut;
+    float* fadeIn = vp->FadeIn;
+    float* life = vp->Life;
     for (int i = 0; i < 8; i++) {
-        unsigned id = vp->id[i];
+        unsigned id = vp->InstId[i];
         if (id != tResourceID::kInvalidRID) {
             cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
             tInstanceRecord *inst;
@@ -8048,9 +8579,9 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
                 unsigned j = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc;
                 inst = conv_59A0(j);
             }
-            cAvalanche_addAvalancheNode(head, inst, *f0, *f1, *f2, *f3, *cp);
+            cAvalanche_addAvalancheNode(avalancheId, inst, *life, *fadeIn, *fadeOut, *speed, *type);
         }
-        cp++; f3++; f2++; f1++; f0++;
+        type++; speed++; fadeOut++; fadeIn++; life++;
     }
     return luno_gLunoNil;
 }
@@ -8062,17 +8593,14 @@ INCLUDE_ASM("seg/seg_1FBE38", TriggerMiniAvalancheFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_5C88 { char c; Flag_5C88() {} Flag_5C88(const Flag_5C88& o) : c(o.c) {} };
-struct Ent_5C88 { int idx; int val; int pad; int kind; };
-struct R12_5C88 { int a; int b; int c; };
-extern R12_5C88 luno_gLunoNil_5C88 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_5C88 __asm__("luno_gLunoNil");
 
 extern int D_004A3D98_5C88[2] __asm__("D_004A3D98");
 extern "C" int cAvalanche_triggerAvalanche(int);
 extern int cAvalanche_m_badCookie_5C88 __asm__("cAvalanche_m_badCookie");
 extern int D_004A5868_5C88 __asm__("D_004A5868");
 extern int D_004A5860_5C88 __asm__("D_004A5860");
-extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
+extern WScriptNullType D_004A5864_5C88 __asm__("D_004A5864");
 /**
  * Script function (gLunoCFunctions[94]): triggers an avalanche (cAvalanche_triggerAvalanche).
  *
@@ -8086,25 +8614,21 @@ extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_5C88 TriggerMiniAvalancheFunc(int n, Ent_5C88* params) {
+extern "C" luno_cLunoVar TriggerMiniAvalancheFunc(int n, luno_cLunoCArg* params) {
     if (D_004A5868_5C88 == 0) {
         D_004A5868_5C88 = 1;
         D_004A5860_5C88 = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004A5864_5C88 = Flag_5C88(D_004A5864_5C88);
+        D_004A5864_5C88 = WScriptNullType(D_004A5864_5C88);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
     MEM_copy(vp, &D_004A5860_5C88, 8);
-    Ent_5C88* curArg = params;
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3D98_5C88[k] && D_004A3D98_5C88[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3D98_5C88[k]);
     }
     int avalancheId = vp[0];
     if (cAvalanche_m_badCookie_5C88 == 0)
@@ -8121,13 +8645,11 @@ static inline tInstanceRecord *refToPtr_5D90(unsigned i) { return (tInstanceReco
 static inline tInstanceRecord *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
 extern "C" void cMoveNode_addAvaSpline_5D90(void*, void*) __asm__("cMoveNode_addAvaSpline");
 extern t3Vector luno_gLunoNil_5D90 __asm__("luno_gLunoNil");
-struct Tag_5D90 { char c; Tag_5D90() {} Tag_5D90(const Tag_5D90 &o) : c(o.c) {} };
 extern unsigned D_5D90 __asm__("D_004A5870");
-extern Tag_5D90 D_004A5874;
+extern WScriptNullType D_004A5874;
 extern int D_004A5878;
 extern int D_004A3DA0;
 extern "C" void* MEM_copy_5D90(void*, void*, int) __asm__("MEM_copy");
-struct Ent_5D90 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[95]): puts a moving world instance on the avalanche spline.
  *
@@ -8143,25 +8665,21 @@ struct Ent_5D90 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector AddAvaSplineFunc(int n, Ent_5D90 *params) {
+extern "C" t3Vector AddAvaSplineFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5878 == 0) {
         D_5D90 = 0xFFFFFFFF;
         D_004A5878 = 1;
-        D_004A5874 = Tag_5D90(D_004A5874);
+        D_004A5874 = WScriptNullType(D_004A5874);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_5D90(buf, &D_5D90, 8);
-    Ent_5D90 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = (&D_004A3DA0)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -8196,31 +8714,24 @@ INCLUDE_ASM("seg/seg_1FBE38", SetAvalancheEmitterDataFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern t3Vector luno_gLunoNil_5F40 __asm__("luno_gLunoNil");
-struct Tag_5F40 { char c; Tag_5F40() {} Tag_5F40(const Tag_5F40 &o) : c(o.c) {} };
-struct Rec_5F40 {
-    int a; int b; float c; float d; float e;
-    float m[28];
-    float v[16];
-    int k; int l; float n; int o; float p; unsigned id;
-    Tag_5F40 f;
-};
-extern Rec_5F40 D_4FBE58_5F40 __asm__("D_004FBE58");
+// The block is laid out as AddParticleFunc's tAddParticleData (the particle data, then the instance at 0xD8) and gets
+// the same defaults; On Tour's SetAvalancheEmitterDataFunc is an empty stub, so its own type name is unknown.
+extern tAddParticleData sAvalancheEmitterDefaults __asm__("D_004FBE58");
 extern int D_587C_5F40 __asm__("D_004A587C");
 extern const int D_004467A0_5F40[] __asm__("D_004467A0");
 extern "C" void* MEM_copy_5F40(void*, void*, int) __asm__("MEM_copy");
-extern "C" void cAvalanche_setAvalancheNodeEmitterData_5F40(tInstanceRecord*, Rec_5F40*)
+extern "C" void cAvalanche_setAvalancheNodeEmitterData_5F40(tInstanceRecord*, tAddParticleData*)
     __asm__("cAvalanche_setAvalancheNodeEmitterData");
 static inline tInstanceRecord *refToPtr_5F40(unsigned i) { return (tInstanceRecord*)(i << 2); }
 static inline tInstanceRecord *conv_5F40(unsigned i) { if (i == 0) return 0; return refToPtr_5F40(i); }
-struct Ent_5F40 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[96]): sets the particle-emitter parameters of the avalanche node bound to a world
  * instance.
  *
  * Copies the static defaults (set up on the first call) into a 224-byte parameter block and lets each argument override
  * the field its index names, turning an int into a float where the field type table D_004467A0 says eLunoVar_Float. The
- * first 0xD8 bytes are emitter parameters in the layout of On Tour's tAddDynamicParticleData (NumParticles 1, Duration
- * -1, Damp 1, Size 4, ...); InstId sits at +0xD8 (default -1).
+ * block has the layout of AddParticleFunc's tAddParticleData: emitter parameters first (NumParticles 1, Duration -1,
+ * Damp 1, Size 4, ...), then InstId at +0xD8 (default -1).
  *
  * When InstId is not -1 the instance is looked up (no current-instance shortcut; a missing one passes 0) and
  * cAvalanche_setAvalancheNodeEmitterData copies the parameters to its node.
@@ -8229,86 +8740,83 @@ struct Ent_5F40 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
+extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, luno_cLunoCArg *params) {
     if (D_587C_5F40 == 0) {
-        Rec_5F40 &defaultBlock = D_4FBE58_5F40;
+        tAddParticleData &defaultBlock = sAvalancheEmitterDefaults;
         float zero = 0.0f;
         float one = 1.0f;
-        defaultBlock.a = 1;
-        defaultBlock.b = 0;
-        defaultBlock.c = -1.0f;
-        defaultBlock.d = one;
-        defaultBlock.e = 4.0f;
-        defaultBlock.m[0] = zero;
-        defaultBlock.m[1] = zero;
-        defaultBlock.m[2] = zero;
-        defaultBlock.m[3] = zero;
-        defaultBlock.m[4] = zero;
-        defaultBlock.m[5] = zero;
-        defaultBlock.m[6] = zero;
-        defaultBlock.m[7] = zero;
-        defaultBlock.m[8] = zero;
-        defaultBlock.m[9] = zero;
-        defaultBlock.m[10] = zero;
-        defaultBlock.m[11] = zero;
-        defaultBlock.m[12] = zero;
-        defaultBlock.m[13] = zero;
-        defaultBlock.m[14] = zero;
-        defaultBlock.m[15] = zero;
-        defaultBlock.m[16] = zero;
-        defaultBlock.m[17] = zero;
-        defaultBlock.m[18] = zero;
-        defaultBlock.m[19] = zero;
-        defaultBlock.m[20] = zero;
-        defaultBlock.m[21] = zero;
-        defaultBlock.m[22] = zero;
-        defaultBlock.m[23] = zero;
-        defaultBlock.m[24] = zero;
-        defaultBlock.m[25] = zero;
-        defaultBlock.m[26] = zero;
-        defaultBlock.m[27] = zero;
-        defaultBlock.v[0] = one;
-        defaultBlock.v[1] = zero;
-        defaultBlock.v[2] = zero;
-        defaultBlock.v[3] = zero;
-        defaultBlock.v[4] = one;
-        defaultBlock.v[5] = one;
-        defaultBlock.v[6] = one;
-        defaultBlock.v[7] = one;
-        defaultBlock.v[8] = one;
-        defaultBlock.v[9] = zero;
-        defaultBlock.v[10] = zero;
-        defaultBlock.v[11] = zero;
-        defaultBlock.v[12] = one;
-        defaultBlock.v[13] = zero;
-        defaultBlock.v[14] = zero;
-        defaultBlock.v[15] = zero;
-        defaultBlock.k = 16;
-        defaultBlock.l = 0;
-        defaultBlock.n = zero;
-        defaultBlock.o = 1;
-        defaultBlock.p = 20.0f;
-        defaultBlock.id = 0xFFFFFFFF;
+        defaultBlock.NumParticles = 1;
+        defaultBlock.NumBlur = 0;
+        defaultBlock.Duration = -1.0f;
+        defaultBlock.Damp = one;
+        defaultBlock.Size = 4.0f;
+        defaultBlock.Life = zero;
+        defaultBlock.SizeR = zero;
+        defaultBlock.LifeR = zero;
+        defaultBlock.BlurStep = zero;
+        defaultBlock.OffX = zero;
+        defaultBlock.OffY = zero;
+        defaultBlock.OffZ = zero;
+        defaultBlock.R0X = zero;
+        defaultBlock.R0Y = zero;
+        defaultBlock.R0Z = zero;
+        defaultBlock.R1X = zero;
+        defaultBlock.R1Y = zero;
+        defaultBlock.R1Z = zero;
+        defaultBlock.VelX = zero;
+        defaultBlock.VelY = zero;
+        defaultBlock.VelZ = zero;
+        defaultBlock.R0VX = zero;
+        defaultBlock.R0VY = zero;
+        defaultBlock.R0VZ = zero;
+        defaultBlock.R1VX = zero;
+        defaultBlock.R1VY = zero;
+        defaultBlock.R1VZ = zero;
+        defaultBlock.R2VX = zero;
+        defaultBlock.R2VY = zero;
+        defaultBlock.R2VZ = zero;
+        defaultBlock.ForceX = zero;
+        defaultBlock.ForceY = zero;
+        defaultBlock.ForceZ = zero;
+        defaultBlock.StartColA = one;
+        defaultBlock.StartColR = zero;
+        defaultBlock.StartColG = zero;
+        defaultBlock.StartColB = zero;
+        defaultBlock.EndColA = one;
+        defaultBlock.EndColR = one;
+        defaultBlock.EndColG = one;
+        defaultBlock.EndColB = one;
+        defaultBlock.R0A = one;
+        defaultBlock.R0R = zero;
+        defaultBlock.R0G = zero;
+        defaultBlock.R0B = zero;
+        defaultBlock.R1A = one;
+        defaultBlock.R1R = zero;
+        defaultBlock.R1G = zero;
+        defaultBlock.R1B = zero;
+        defaultBlock.TextureId = 16;
+        defaultBlock.BlendMode = 0;
+        defaultBlock.SizeFinal = zero;
+        defaultBlock.NumFlipTextures = 1;
+        defaultBlock.FlipTextureRate = 20.0f;
+        defaultBlock.InstId = 0xFFFFFFFF;
         D_587C_5F40 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        defaultBlock.f = Tag_5F40(defaultBlock.f);
+        defaultBlock.null = WScriptNullType(defaultBlock.null);
     }
-    Rec_5F40 rec;
-    Rec_5F40 *buf = &rec;
-    rec.id = 0xFFFFFFFF;
-    MEM_copy_5F40(buf, &D_4FBE58_5F40, 0xE0);
-    Ent_5F40 *x = params;
+    tAddParticleData rec;
+    tAddParticleData *buf = &rec;
+    rec.InstId = 0xFFFFFFFF;
+    MEM_copy_5F40(buf, &sAvalancheEmitterDefaults, sizeof(tAddParticleData));
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_004467A0_5F40[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&v[idx], x, keywordType);
     }
-    unsigned id = buf->id;
+    unsigned id = buf->InstId;
     if (~id != 0) {
         cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
         tInstanceRecord *obj;
@@ -8327,20 +8835,15 @@ INCLUDE_ASM("seg/seg_1FBE38", IsIconEnabledFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
-// empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
         MEM_copy(vp, defaults, size); \
-        sBindArg_1FBE38* p_ = args; \
+        luno_cLunoCArg* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
-            int k_ = p_->idx; \
-            int* d_ = (int*)((k_ << 2) + (int)vp); \
-            if (p_->type != (types)[k_] && (types)[k_] == eLunoVar_Float) \
-                *(float*)d_ = (float)p_->val; \
-            else \
-                *d_ = p_->val; \
+            int k_ = p_->Index; \
+            setArgField(&vp[k_], p_, (types)[k_]); \
         } \
     } while (0)
 #define BIND_SET_RESULT_1FBE38(ret, value) do { \
@@ -8355,7 +8858,7 @@ extern int D_004A3DA8_61B0[2] __asm__("D_004A3DA8");
 extern int D_005308D0_61B0[] __asm__("D_005308D0");
 extern int D_004A5888_61B0 __asm__("D_004A5888");
 extern int D_004A5880_61B0 __asm__("D_004A5880");
-extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
+extern WScriptNullType D_004A5884_61B0 __asm__("D_004A5884");
 /**
  * Script function (gLunoCFunctions[99]): returns whether a type of on-course icon is enabled by the custom race rules.
  *
@@ -8372,12 +8875,12 @@ extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
+extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, luno_cLunoCArg *e) {
     if (D_004A5888_61B0 == 0) {
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor's stack temp
         //       (lbu; sb 0(sp)).
         D_004A5880_61B0 = 0;
-        D_004A5884_61B0 = sBindEnd_1FBE38();
+        D_004A5884_61B0 = WScriptNullType(D_004A5884_61B0);
         D_004A5888_61B0 = 1;
     }
     int v[4];
@@ -8419,19 +8922,27 @@ extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, sBindArg_1FBE38
 INCLUDE_ASM("seg/seg_1FBE38", MessageCenterFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of MessageCenterFunc (On Tour tMessageCenterData; same offsets): the block below fills it.
+struct tMessageCenterData {
+    unsigned int TitleId;           // 0x00 [O]
+    unsigned int MsgId;             // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tMessageCenterData, TitleId, 0x00);
+CHECK_OFFSET(tMessageCenterData, MsgId, 0x04);
+CHECK_OFFSET(tMessageCenterData, null, 0x08);
+CHECK_SIZE(tMessageCenterData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_6300 { char c; Flag_6300() {} Flag_6300(const Flag_6300& o) : c(o.c) {} };
-struct Ent_6300 { int idx; int val; int pad; int kind; };
-struct R12_6300 { int a; int b; int c; };
-extern R12_6300 luno_gLunoNil_6300 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_6300 __asm__("luno_gLunoNil");
 
 extern int D_004A3DB0_6300[2] __asm__("D_004A3DB0");
 extern "C" void func_001E3510(int, int);
 extern "C" void* cBE_getInterface_6300(cBE*, int) __asm__("cBE_getInterface__Fv");
 extern int D_004A588C_6300 __asm__("D_004A588C");
-struct T12_6300 { int a; int b; Flag_6300 f; };
-extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
+extern tMessageCenterData sMessageCenterDefaults __asm__("D_004FBF38");
 /**
  * Script function (gLunoCFunctions[100]): shows a message-centre popup, except in a network game.
  *
@@ -8446,26 +8957,22 @@ extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_6300 MessageCenterFunc(int n, Ent_6300* params) {
+extern "C" luno_cLunoVar MessageCenterFunc(int n, luno_cLunoCArg* params) {
     if (D_004A588C_6300 == 0) {
-        D_004FBF38_6300.a = 0;
+        sMessageCenterDefaults.TitleId = 0;
         D_004A588C_6300 = 1;
-        D_004FBF38_6300.b = 0;
+        sMessageCenterDefaults.MsgId = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FBF38_6300.f = Flag_6300(D_004FBF38_6300.f);
+        sMessageCenterDefaults.null = WScriptNullType(sMessageCenterDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FBF38_6300, 12);
-    Ent_6300* curArg = params;
+    MEM_copy(vp, &sMessageCenterDefaults, sizeof(tMessageCenterData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3DB0_6300[k] && D_004A3DB0_6300[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3DB0_6300[k]);
     }
     int x = vp[0];
     int y = vp[1];
@@ -8482,12 +8989,24 @@ INCLUDE_ASM("seg/seg_1FBE38", DangerStartFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cDangerMan_AddDangerElem_6438(void*, void*, float, float) __asm__("cDangerMan_AddDangerElem");
 extern t3Vector luno_gLunoNil_6438 __asm__("luno_gLunoNil");
-struct Tag_6438 { char c; Tag_6438() {} Tag_6438(const Tag_6438 &o) : c(o.c) {} };
-extern unsigned D_6438[] __asm__("D_004FBF48");
+// World-script data that starts a danger zone (On Tour tDangerStartData; same offsets): the block below fills it.
+struct tDangerStartData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    float Radius;                   // 0x04 [O]
+    float Delay;                    // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tDangerStartData, InstId, 0x00);
+CHECK_OFFSET(tDangerStartData, Radius, 0x04);
+CHECK_OFFSET(tDangerStartData, Delay, 0x08);
+CHECK_OFFSET(tDangerStartData, null, 0x0C);
+CHECK_SIZE(tDangerStartData, 0x10);
+extern tDangerStartData sDangerStartDefaults __asm__("D_004FBF48");
 extern int D_004A5890;
 extern const int D_00446880[];
 extern "C" void* MEM_copy_6438(void*, void*, int) __asm__("MEM_copy");
-struct Ent_6438 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[101]): registers a world instance as a danger the AI riders track.
  *
@@ -8504,29 +9023,26 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector DangerStartFunc(int n, Ent_6438 *params) {
+extern "C" t3Vector DangerStartFunc(int n, luno_cLunoCArg *params) {
     if (D_004A5890 == 0) {
-        D_6438[0] = 0xFFFFFFFF;
-        *(float*)&D_6438[1] = 1000.0f;
-        ((int*)D_6438)[2] = 0;
+        sDangerStartDefaults.InstId = 0xFFFFFFFF;
+        sDangerStartDefaults.Radius = 1000.0f;
+        sDangerStartDefaults.Delay = 0.0f;
         D_004A5890 = 1;
-        (*(Tag_6438*)((char*)D_6438 + 12)) = Tag_6438((*(Tag_6438*)((char*)D_6438 + 12)));
+        sDangerStartDefaults.null = WScriptNullType(sDangerStartDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
-    buf[0] = 0xFFFFFFFF;
-    MEM_copy_6438(buf, D_6438, 16);
-    Ent_6438 *x = params;
+    tDangerStartData *data = (tDangerStartData*)buf;
+    data->InstId = 0xFFFFFFFF;
+    MEM_copy_6438(buf, &sDangerStartDefaults, sizeof(tDangerStartData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446880[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    unsigned id = buf[0];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -8536,11 +9052,11 @@ extern "C" t3Vector DangerStartFunc(int n, Ent_6438 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             obj = 0;
         else
-            obj = (tInstanceRecord*)(i << 2);
+            obj = instanceAtMemLoc(i);
     }
     if (obj) {
-        float radius = *(float*)&buf[1];
-        float delay = *(float*)&buf[2];
+        float radius = data->Radius;
+        float delay = data->Delay;
         int instIdBuf[1];
         instIdBuf[0] = obj->m_RID;
         cDangerMan_AddDangerElem_6438(SSXApp->Game->AI->DangerMan, instIdBuf, radius, delay);
@@ -8565,13 +9081,11 @@ static inline tInstanceRecord *look_65E8(unsigned id) {
 
 extern "C" void cDangerMan_RemoveDangerElem_65E8(void*, void*) __asm__("cDangerMan_RemoveDangerElem");
 extern t3Vector luno_gLunoNil_65E8 __asm__("luno_gLunoNil");
-struct Tag_65E8 { char c; Tag_65E8() {} Tag_65E8(const Tag_65E8 &o) : c(o.c) {} };
 extern unsigned D_65E8 __asm__("D_004A5898");
-extern Tag_65E8 D_004A589C;
+extern WScriptNullType D_004A589C;
 extern int D_004A58A0;
 extern int D_004A3DB8;
 extern "C" void* MEM_copy_65E8(void*, void*, int) __asm__("MEM_copy");
-struct Ent_65E8 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[102]): stops tracking a world instance as a danger.
  *
@@ -8588,25 +9102,21 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector DangerEndFunc(int n, Ent_65E8 *params) {
+extern "C" t3Vector DangerEndFunc(int n, luno_cLunoCArg *params) {
     if (D_004A58A0 == 0) {
         D_65E8 = 0xFFFFFFFF;
         D_004A58A0 = 1;
-        D_004A589C = Tag_65E8(D_004A589C);
+        D_004A589C = WScriptNullType(D_004A589C);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_65E8(buf, &D_65E8, 8);
-    Ent_65E8 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3DB8)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     tInstanceRecord *obj = look_65E8(buf[0]);
     if (obj) {
@@ -8633,12 +9143,22 @@ static inline tInstanceRecord *look_6770(unsigned id) {
 
 extern "C" void cDangerMan_AddDangerVolume_6770(void*, void*, int) __asm__("cDangerMan_AddDangerVolume");
 extern t3Vector luno_gLunoNil_6770 __asm__("luno_gLunoNil");
-struct Tag_6770 { char c; Tag_6770() {} Tag_6770(const Tag_6770 &o) : c(o.c) {} };
-extern unsigned D_6770[] __asm__("D_004FBF58");
+// World-script data that enables a danger zone (On Tour tEnableDangerZoneData; same offsets): the block below fills it.
+struct tEnableDangerZoneData {
+    unsigned int InstId;            // 0x00 [O] tResourceID
+    int Level;                      // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tEnableDangerZoneData, InstId, 0x00);
+CHECK_OFFSET(tEnableDangerZoneData, Level, 0x04);
+CHECK_OFFSET(tEnableDangerZoneData, null, 0x08);
+CHECK_SIZE(tEnableDangerZoneData, 0xC);
+extern tEnableDangerZoneData sEnableDangerZoneDefaults __asm__("D_004FBF58");
 extern int D_004A58A4;
 extern int D_004A3DC0;
 extern "C" void* MEM_copy_6770(void*, void*, int) __asm__("MEM_copy");
-struct Ent_6770 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[103]): enables a danger zone around a world instance.
  *
@@ -8655,26 +9175,22 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector EnableDangerZoneFunc(int n, Ent_6770 *params) {
+extern "C" t3Vector EnableDangerZoneFunc(int n, luno_cLunoCArg *params) {
     if (D_004A58A4 == 0) {
-        D_6770[0] = 0xFFFFFFFF;
-        D_6770[1] = 0;
+        sEnableDangerZoneDefaults.InstId = 0xFFFFFFFF;
+        sEnableDangerZoneDefaults.Level = 0;
         D_004A58A4 = 1;
-        (*(Tag_6770*)((char*)D_6770 + 8)) = Tag_6770((*(Tag_6770*)((char*)D_6770 + 8)));
+        sEnableDangerZoneDefaults.null = WScriptNullType(sEnableDangerZoneDefaults.null);
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    MEM_copy_6770(buf, D_6770, 12);
-    Ent_6770 *x = params;
+    MEM_copy_6770(buf, &sEnableDangerZoneDefaults, sizeof(tEnableDangerZoneData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3DC0)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -8687,7 +9203,7 @@ extern "C" t3Vector EnableDangerZoneFunc(int n, Ent_6770 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
 
@@ -8705,13 +9221,11 @@ INCLUDE_ASM("seg/seg_1FBE38", DisableDangerZoneFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cDangerMan_RemoveDangerVolume_6908(void*, void*) __asm__("cDangerMan_RemoveDangerVolume");
 extern t3Vector luno_gLunoNil_6908 __asm__("luno_gLunoNil");
-struct Tag_6908 { char c; Tag_6908() {} Tag_6908(const Tag_6908 &o) : c(o.c) {} };
 extern unsigned D_6908 __asm__("D_004A58A8");
-extern Tag_6908 D_004A58AC;
+extern WScriptNullType D_004A58AC;
 extern int D_004A58B0;
 extern int D_004A3DC8;
 extern "C" void* MEM_copy_6908(void*, void*, int) __asm__("MEM_copy");
-struct Ent_6908 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[104]): disables a danger zone around a world instance.
  *
@@ -8727,25 +9241,21 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector DisableDangerZoneFunc(int n, Ent_6908 *params) {
+extern "C" t3Vector DisableDangerZoneFunc(int n, luno_cLunoCArg *params) {
     if (D_004A58B0 == 0) {
         D_6908 = 0xFFFFFFFF;
         D_004A58B0 = 1;
-        D_004A58AC = Tag_6908(D_004A58AC);
+        D_004A58AC = WScriptNullType(D_004A58AC);
     }
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_6908(buf, &D_6908, 8);
-    Ent_6908 *x = params;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = (&D_004A3DC8)[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
     tInstanceRecord *obj;
@@ -8758,7 +9268,7 @@ extern "C" t3Vector DisableDangerZoneFunc(int n, Ent_6908 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (obj)
@@ -8771,113 +9281,223 @@ extern "C" t3Vector DisableDangerZoneFunc(int n, Ent_6908 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", MultiParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern t3Vector luno_gLunoNil_6A90 __asm__("luno_gLunoNil");
-struct Tag_6A90 { char c; Tag_6A90() {} Tag_6A90(const Tag_6A90 &o) : c(o.c) {} };
-struct Rec_6A90 {
-    int a; int b; float c; float d; float e;
-    float m[28];
-    float v[16];
-    int k; int l; float n; int o; float p; int q; int w;
-    Tag_6A90 f;
+// World-script data that adds a multi-particle effect (On Tour tMultiParticleData; same offsets): the block below
+// fills it.
+struct tMultiParticleData {
+    int NumParticles;               // 0x00 [O]
+    int NumBlur;                    // 0x04 [O]
+    float Duration;                 // 0x08 [O]
+    float Damp;                     // 0x0C [O]
+    float Size;                     // 0x10 [O]
+    float Life;                     // 0x14 [O]
+    float SizeR;                    // 0x18 [O]
+    float LifeR;                    // 0x1C [O]
+    float BlurStep;                 // 0x20 [O]
+    float OffX;                     // 0x24 [O]
+    float OffY;                     // 0x28 [O]
+    float OffZ;                     // 0x2C [O]
+    float R0X;                      // 0x30 [O]
+    float R0Y;                      // 0x34 [O]
+    float R0Z;                      // 0x38 [O]
+    float R1X;                      // 0x3C [O]
+    float R1Y;                      // 0x40 [O]
+    float R1Z;                      // 0x44 [O]
+    float VelX;                     // 0x48 [O]
+    float VelY;                     // 0x4C [O]
+    float VelZ;                     // 0x50 [O]
+    float R0VX;                     // 0x54 [O]
+    float R0VY;                     // 0x58 [O]
+    float R0VZ;                     // 0x5C [O]
+    float R1VX;                     // 0x60 [O]
+    float R1VY;                     // 0x64 [O]
+    float R1VZ;                     // 0x68 [O]
+    float R2VX;                     // 0x6C [O]
+    float R2VY;                     // 0x70 [O]
+    float R2VZ;                     // 0x74 [O]
+    float ForceX;                   // 0x78 [O]
+    float ForceY;                   // 0x7C [O]
+    float ForceZ;                   // 0x80 [O]
+    float StartColA;                // 0x84 [O]
+    float StartColR;                // 0x88 [O]
+    float StartColG;                // 0x8C [O]
+    float StartColB;                // 0x90 [O]
+    float EndColA;                  // 0x94 [O]
+    float EndColR;                  // 0x98 [O]
+    float EndColG;                  // 0x9C [O]
+    float EndColB;                  // 0xA0 [O]
+    float R0A;                      // 0xA4 [O]
+    float R0R;                      // 0xA8 [O]
+    float R0G;                      // 0xAC [O]
+    float R0B;                      // 0xB0 [O]
+    float R1A;                      // 0xB4 [O]
+    float R1R;                      // 0xB8 [O]
+    float R1G;                      // 0xBC [O]
+    float R1B;                      // 0xC0 [O]
+    int TextureId;                  // 0xC4 [O]
+    int BlendMode;                  // 0xC8 [O]
+    float SizeFinal;                // 0xCC [O]
+    int NumFlipTextures;            // 0xD0 [O]
+    float FlipTextureRate;          // 0xD4 [O]
+    int Id;                         // 0xD8 [O]
+    int MaxInst;                    // 0xDC [O]
+    WScriptNullType null;           // 0xE0 [O]
+    char unk_0E1[0x3];              // 0xE1 padding
 };
-extern Rec_6A90 D_4FBF68_6A90 __asm__("D_004FBF68");
+
+CHECK_OFFSET(tMultiParticleData, NumParticles, 0x00);
+CHECK_OFFSET(tMultiParticleData, NumBlur, 0x04);
+CHECK_OFFSET(tMultiParticleData, Duration, 0x08);
+CHECK_OFFSET(tMultiParticleData, Damp, 0x0C);
+CHECK_OFFSET(tMultiParticleData, Size, 0x10);
+CHECK_OFFSET(tMultiParticleData, Life, 0x14);
+CHECK_OFFSET(tMultiParticleData, SizeR, 0x18);
+CHECK_OFFSET(tMultiParticleData, LifeR, 0x1C);
+CHECK_OFFSET(tMultiParticleData, BlurStep, 0x20);
+CHECK_OFFSET(tMultiParticleData, OffX, 0x24);
+CHECK_OFFSET(tMultiParticleData, OffY, 0x28);
+CHECK_OFFSET(tMultiParticleData, OffZ, 0x2C);
+CHECK_OFFSET(tMultiParticleData, R0X, 0x30);
+CHECK_OFFSET(tMultiParticleData, R0Y, 0x34);
+CHECK_OFFSET(tMultiParticleData, R0Z, 0x38);
+CHECK_OFFSET(tMultiParticleData, R1X, 0x3C);
+CHECK_OFFSET(tMultiParticleData, R1Y, 0x40);
+CHECK_OFFSET(tMultiParticleData, R1Z, 0x44);
+CHECK_OFFSET(tMultiParticleData, VelX, 0x48);
+CHECK_OFFSET(tMultiParticleData, VelY, 0x4C);
+CHECK_OFFSET(tMultiParticleData, VelZ, 0x50);
+CHECK_OFFSET(tMultiParticleData, R0VX, 0x54);
+CHECK_OFFSET(tMultiParticleData, R0VY, 0x58);
+CHECK_OFFSET(tMultiParticleData, R0VZ, 0x5C);
+CHECK_OFFSET(tMultiParticleData, R1VX, 0x60);
+CHECK_OFFSET(tMultiParticleData, R1VY, 0x64);
+CHECK_OFFSET(tMultiParticleData, R1VZ, 0x68);
+CHECK_OFFSET(tMultiParticleData, R2VX, 0x6C);
+CHECK_OFFSET(tMultiParticleData, R2VY, 0x70);
+CHECK_OFFSET(tMultiParticleData, R2VZ, 0x74);
+CHECK_OFFSET(tMultiParticleData, ForceX, 0x78);
+CHECK_OFFSET(tMultiParticleData, ForceY, 0x7C);
+CHECK_OFFSET(tMultiParticleData, ForceZ, 0x80);
+CHECK_OFFSET(tMultiParticleData, StartColA, 0x84);
+CHECK_OFFSET(tMultiParticleData, StartColR, 0x88);
+CHECK_OFFSET(tMultiParticleData, StartColG, 0x8C);
+CHECK_OFFSET(tMultiParticleData, StartColB, 0x90);
+CHECK_OFFSET(tMultiParticleData, EndColA, 0x94);
+CHECK_OFFSET(tMultiParticleData, EndColR, 0x98);
+CHECK_OFFSET(tMultiParticleData, EndColG, 0x9C);
+CHECK_OFFSET(tMultiParticleData, EndColB, 0xA0);
+CHECK_OFFSET(tMultiParticleData, R0A, 0xA4);
+CHECK_OFFSET(tMultiParticleData, R0R, 0xA8);
+CHECK_OFFSET(tMultiParticleData, R0G, 0xAC);
+CHECK_OFFSET(tMultiParticleData, R0B, 0xB0);
+CHECK_OFFSET(tMultiParticleData, R1A, 0xB4);
+CHECK_OFFSET(tMultiParticleData, R1R, 0xB8);
+CHECK_OFFSET(tMultiParticleData, R1G, 0xBC);
+CHECK_OFFSET(tMultiParticleData, R1B, 0xC0);
+CHECK_OFFSET(tMultiParticleData, TextureId, 0xC4);
+CHECK_OFFSET(tMultiParticleData, BlendMode, 0xC8);
+CHECK_OFFSET(tMultiParticleData, SizeFinal, 0xCC);
+CHECK_OFFSET(tMultiParticleData, NumFlipTextures, 0xD0);
+CHECK_OFFSET(tMultiParticleData, FlipTextureRate, 0xD4);
+CHECK_OFFSET(tMultiParticleData, Id, 0xD8);
+CHECK_OFFSET(tMultiParticleData, MaxInst, 0xDC);
+CHECK_OFFSET(tMultiParticleData, null, 0xE0);
+CHECK_SIZE(tMultiParticleData, 0xE4);
+extern t3Vector luno_gLunoNil_6A90 __asm__("luno_gLunoNil");
+extern tMultiParticleData sMultiParticleDefaults __asm__("D_004FBF68");
 extern int D_58B4_6A90 __asm__("D_004A58B4");
 extern const int D_00446890_6A90[] __asm__("D_00446890");
 extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int cMultiParticleMan_TheMultiParticleMan_6A90 __asm__("cMultiParticleMan_TheMultiParticleMan");
-extern "C" void cMultiParticleMan_addParticle_6A90(int, int, Rec_6A90*, int) __asm__("cMultiParticleMan_addParticle");
-struct Ent_6A90 { int idx; int val; int pad; int type; };
+extern "C" void cMultiParticleMan_addParticle_6A90(int, int, tMultiParticleData*,
+        int) __asm__("cMultiParticleMan_addParticle");
 /**
  * Script command MultiParticle: adds a particle system to the multi-particle manager.
  *
- * Copies the static tParticleData defaults (D_004FBF68, set once under D_004A58B4: identity colour/vectors, 16, 20.0,
- * 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the type is
- * eLunoVar_Float), and calls cMultiParticleMan_addParticle(TheMultiParticleMan, data +0xD8, data, data +0xDC).
+ * Copies the static tMultiParticleData defaults (D_004FBF68, set once under D_004A58B4: identity colour/vectors, 16,
+ * 20.0, MaxInst 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the
+ * type is eLunoVar_Float), and calls cMultiParticleMan_addParticle(TheMultiParticleMan, Id, data, MaxInst).
  *
  * @param n  the number of keyword arguments
  * @param params  the keyword arguments (index, value, type)
  * @return luno_gLunoNil (no value)
  */
-extern "C" t3Vector MultiParticleFunc(int n, Ent_6A90 *params) {
+extern "C" t3Vector MultiParticleFunc(int n, luno_cLunoCArg *params) {
     if (D_58B4_6A90 == 0) {
-        Rec_6A90 &defaults = D_4FBF68_6A90;
+        tMultiParticleData &defaults = sMultiParticleDefaults;
         float zero = 0.0f;
         float one = 1.0f;
-        defaults.a = 1;
-        defaults.b = 0;
-        defaults.c = -1.0f;
-        defaults.d = one;
-        defaults.e = 4.0f;
-        defaults.m[0] = zero;
-        defaults.m[1] = zero;
-        defaults.m[2] = zero;
-        defaults.m[3] = zero;
-        defaults.m[4] = zero;
-        defaults.m[5] = zero;
-        defaults.m[6] = zero;
-        defaults.m[7] = zero;
-        defaults.m[8] = zero;
-        defaults.m[9] = zero;
-        defaults.m[10] = zero;
-        defaults.m[11] = zero;
-        defaults.m[12] = zero;
-        defaults.m[13] = zero;
-        defaults.m[14] = zero;
-        defaults.m[15] = zero;
-        defaults.m[16] = zero;
-        defaults.m[17] = zero;
-        defaults.m[18] = zero;
-        defaults.m[19] = zero;
-        defaults.m[20] = zero;
-        defaults.m[21] = zero;
-        defaults.m[22] = zero;
-        defaults.m[23] = zero;
-        defaults.m[24] = zero;
-        defaults.m[25] = zero;
-        defaults.m[26] = zero;
-        defaults.m[27] = zero;
-        defaults.v[0] = one;
-        defaults.v[1] = zero;
-        defaults.v[2] = zero;
-        defaults.v[3] = zero;
-        defaults.v[4] = one;
-        defaults.v[5] = one;
-        defaults.v[6] = one;
-        defaults.v[7] = one;
-        defaults.v[8] = one;
-        defaults.v[9] = zero;
-        defaults.v[10] = zero;
-        defaults.v[11] = zero;
-        defaults.v[12] = one;
-        defaults.v[13] = zero;
-        defaults.v[14] = zero;
-        defaults.v[15] = zero;
-        defaults.k = 16;
-        defaults.l = 0;
-        defaults.n = zero;
-        defaults.o = 1;
-        defaults.p = 20.0f;
-        defaults.q = 0;
-        defaults.w = 0x80;
+        defaults.NumParticles = 1;
+        defaults.NumBlur = 0;
+        defaults.Duration = -1.0f;
+        defaults.Damp = one;
+        defaults.Size = 4.0f;
+        defaults.Life = zero;
+        defaults.SizeR = zero;
+        defaults.LifeR = zero;
+        defaults.BlurStep = zero;
+        defaults.OffX = zero;
+        defaults.OffY = zero;
+        defaults.OffZ = zero;
+        defaults.R0X = zero;
+        defaults.R0Y = zero;
+        defaults.R0Z = zero;
+        defaults.R1X = zero;
+        defaults.R1Y = zero;
+        defaults.R1Z = zero;
+        defaults.VelX = zero;
+        defaults.VelY = zero;
+        defaults.VelZ = zero;
+        defaults.R0VX = zero;
+        defaults.R0VY = zero;
+        defaults.R0VZ = zero;
+        defaults.R1VX = zero;
+        defaults.R1VY = zero;
+        defaults.R1VZ = zero;
+        defaults.R2VX = zero;
+        defaults.R2VY = zero;
+        defaults.R2VZ = zero;
+        defaults.ForceX = zero;
+        defaults.ForceY = zero;
+        defaults.ForceZ = zero;
+        defaults.StartColA = one;
+        defaults.StartColR = zero;
+        defaults.StartColG = zero;
+        defaults.StartColB = zero;
+        defaults.EndColA = one;
+        defaults.EndColR = one;
+        defaults.EndColG = one;
+        defaults.EndColB = one;
+        defaults.R0A = one;
+        defaults.R0R = zero;
+        defaults.R0G = zero;
+        defaults.R0B = zero;
+        defaults.R1A = one;
+        defaults.R1R = zero;
+        defaults.R1G = zero;
+        defaults.R1B = zero;
+        defaults.TextureId = 16;
+        defaults.BlendMode = 0;
+        defaults.SizeFinal = zero;
+        defaults.NumFlipTextures = 1;
+        defaults.FlipTextureRate = 20.0f;
+        defaults.Id = 0;
+        defaults.MaxInst = 0x80;
         D_58B4_6A90 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        defaults.f = Tag_6A90(defaults.f);
+        defaults.null = WScriptNullType(defaults.null);
     }
-    Rec_6A90 rec;
-    Rec_6A90 *buf = &rec;
-    MEM_copy_6A90(buf, &D_4FBF68_6A90, 228);
-    Ent_6A90 *x = params;
+    tMultiParticleData rec;
+    tMultiParticleData *buf = &rec;
+    MEM_copy_6A90(buf, &sMultiParticleDefaults, sizeof(tMultiParticleData));
+    int *v = (int*)buf;
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int argType = D_00446890_6A90[idx];
-        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != argType && argType == eLunoVar_Float)
-            *(float*)field = (float)x->val;
-        else
-            *field = x->val;
+        setArgField(&v[idx], x, argType);
     }
-    cMultiParticleMan_addParticle_6A90(cMultiParticleMan_TheMultiParticleMan_6A90, buf->q, buf, buf->w);
+    cMultiParticleMan_addParticle_6A90(cMultiParticleMan_TheMultiParticleMan_6A90, buf->Id, buf, buf->MaxInst);
     return luno_gLunoNil_6A90;
 }
 #endif
@@ -8890,12 +9510,25 @@ extern void *cMultiParticleMan_TheMultiParticleMan_6CB0 __asm__("cMultiParticleM
 void cMultiParticleMan_addInst(void*, int, int);
 void cMultiParticleMan_remInst(void*, int, int);
 extern t3Vector luno_gLunoNil_6CB0 __asm__("luno_gLunoNil");
-struct Tag_6CB0 { char c; Tag_6CB0() {} Tag_6CB0(const Tag_6CB0 &o) : c(o.c) {} };
-extern unsigned D_6CB0[] __asm__("D_004FC050");
+// World-script data that adds or removes a multi-particle instance (On Tour tMultiParticleInstData; same offsets): the
+// block below fills it.
+struct tMultiParticleInstData {
+    int Id;                         // 0x00 [O]
+    unsigned int InstId;            // 0x04 [O] tResourceID
+    int Cmd;                        // 0x08 [O]
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tMultiParticleInstData, Id, 0x00);
+CHECK_OFFSET(tMultiParticleInstData, InstId, 0x04);
+CHECK_OFFSET(tMultiParticleInstData, Cmd, 0x08);
+CHECK_OFFSET(tMultiParticleInstData, null, 0x0C);
+CHECK_SIZE(tMultiParticleInstData, 0x10);
+extern tMultiParticleInstData sMultiParticleInstDefaults __asm__("D_004FC050");
 extern int D_004A58B8;
 extern const int D_00446970[];
 extern "C" void* MEM_copy_6CB0(void*, void*, int) __asm__("MEM_copy");
-struct Ent_6CB0 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[106]): attaches a world instance to a multi-particle effect, or detaches it.
  *
@@ -8912,29 +9545,26 @@ struct Ent_6CB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" t3Vector MultiParticleInstFunc(int n, Ent_6CB0 *params) {
+extern "C" t3Vector MultiParticleInstFunc(int n, luno_cLunoCArg *params) {
     if (D_004A58B8 == 0) {
-        ((int*)D_6CB0)[0] = 0;
-        D_6CB0[1] = 0xFFFFFFFF;
-        ((int*)D_6CB0)[2] = 0;
+        sMultiParticleInstDefaults.Id = 0;
+        sMultiParticleInstDefaults.InstId = 0xFFFFFFFF;
+        sMultiParticleInstDefaults.Cmd = 0;
         D_004A58B8 = 1;
-        (*(Tag_6CB0*)((char*)D_6CB0 + 12)) = Tag_6CB0((*(Tag_6CB0*)((char*)D_6CB0 + 12)));
+        sMultiParticleInstDefaults.null = WScriptNullType(sMultiParticleInstDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
+    tMultiParticleInstData *data = (tMultiParticleInstData*)buf;
     buf64[1] = 0xFFFFFFFF;
-    MEM_copy_6CB0(buf, D_6CB0, 16);
-    Ent_6CB0 *x = params;
+    MEM_copy_6CB0(buf, &sMultiParticleInstDefaults, sizeof(tMultiParticleInstData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int keywordType = D_00446970[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != keywordType && keywordType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, keywordType);
     }
-    unsigned id = buf[1];
+    unsigned id = data->InstId;
     tInstanceRecord *obj;
     if (~id == 0) {
         obj = cWScriptMan_TheWScriptMan->Inst;
@@ -8945,14 +9575,14 @@ extern "C" t3Vector MultiParticleInstFunc(int n, Ent_6CB0 *params) {
         if (!section || (i = section->m_pCacheTable[3].m_pDataTag[id >> 8].m_bfuiMemLoc) == 0)
             inst = 0;
         else
-            inst = (tInstanceRecord*)(i << 2);
+            inst = instanceAtMemLoc(i);
         obj = inst;
     }
     if (obj) {
-        if (buf[2] == 0)
-            cMultiParticleMan_addInst(cMultiParticleMan_TheMultiParticleMan_6CB0, buf[0], obj->m_RID);
+        if (data->Cmd == 0)
+            cMultiParticleMan_addInst(cMultiParticleMan_TheMultiParticleMan_6CB0, data->Id, obj->m_RID);
         else
-            cMultiParticleMan_remInst(cMultiParticleMan_TheMultiParticleMan_6CB0, buf[0], obj->m_RID);
+            cMultiParticleMan_remInst(cMultiParticleMan_TheMultiParticleMan_6CB0, data->Id, obj->m_RID);
     }
     return luno_gLunoNil_6CB0;
 }
@@ -8968,13 +9598,24 @@ extern "C" void cSSXAudio_WorldSound_6E68(void*, void*, int) __asm__("cSSXAudio_
 int *luno_cLunoVar_castInt(void*);
 static inline char *refToPtr_6E68(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_6E68(unsigned i) { if (i == 0) return 0; return refToPtr_6E68(i); }
-struct V3_6E68 { int w0, w1, w2; };
-struct Tag_6E68 { char c; Tag_6E68() {} Tag_6E68(const Tag_6E68 &o) : c(o.c) {} };
-extern unsigned D_6E68[] __asm__("D_004FC060");
+// World-script data that checks a gate (On Tour tCheckGateData; same offsets): the block below fills it.
+struct tCheckGateData {
+    unsigned int InstId1;           // 0x00 [O] tResourceID
+    unsigned int InstId2;           // 0x04 [O] tResourceID
+    unsigned int InstId3;           // 0x08 [O] tResourceID
+    WScriptNullType null;           // 0x0C [O]
+    char unk_00D[0x3];              // 0x0D padding
+};
+
+CHECK_OFFSET(tCheckGateData, InstId1, 0x00);
+CHECK_OFFSET(tCheckGateData, InstId2, 0x04);
+CHECK_OFFSET(tCheckGateData, InstId3, 0x08);
+CHECK_OFFSET(tCheckGateData, null, 0x0C);
+CHECK_SIZE(tCheckGateData, 0x10);
+extern tCheckGateData sCheckGateDefaults __asm__("D_004FC060");
 extern int D_004A58BC;
 extern const int CheckGateFunc_types[];
 extern "C" void* MEM_copy_6E68(void*, void*, int) __asm__("MEM_copy");
-struct Ent_6E68 { int idx; int val; int pad; int type; };
 /**
  * Script function (gLunoCFunctions[107]): checks the script's rider against a gate (cWScriptMan_checkGate) and plays a
  * sound when it passed.
@@ -8992,35 +9633,32 @@ struct Ent_6E68 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
+extern "C" luno_cLunoVar* CheckGateFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
     if (D_004A58BC == 0) {
-        D_6E68[0] = 0xFFFFFFFF;
-        D_6E68[1] = 0xFFFFFFFF;
-        D_6E68[2] = 0xFFFFFFFF;
+        sCheckGateDefaults.InstId1 = 0xFFFFFFFF;
+        sCheckGateDefaults.InstId2 = 0xFFFFFFFF;
+        sCheckGateDefaults.InstId3 = 0xFFFFFFFF;
         D_004A58BC = 1;
-        (*(Tag_6E68*)((char*)D_6E68 + 12)) = Tag_6E68((*(Tag_6E68*)((char*)D_6E68 + 12)));
+        sCheckGateDefaults.null = WScriptNullType(sCheckGateDefaults.null);
     }
     unsigned buf64[4];
     unsigned *buf = buf64;
+    tCheckGateData *data = (tCheckGateData*)buf;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     buf64[2] = 0xFFFFFFFF;
-    MEM_copy_6E68(buf, D_6E68, 16);
-    Ent_6E68 *x = params;
+    MEM_copy_6E68(buf, &sCheckGateDefaults, sizeof(tCheckGateData));
+    luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
-        int idx = x->idx;
+        int idx = x->Index;
         int expectedType = CheckGateFunc_types[idx];
-        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != expectedType && expectedType == eLunoVar_Float)
-            *(float*)slot = (float)x->val;
-        else
-            *slot = x->val;
+        setArgField(&buf[idx], x, expectedType);
     }
-    int gateId = buf[1];
-    int nextGateId = buf[2];
-    int gateResult = cWScriptMan_checkGate_6E68(cWScriptMan_TheWScriptMan, buf[0], gateId, nextGateId);
+    int gateId = data->InstId2;
+    int nextGateId = data->InstId3;
+    int gateResult = cWScriptMan_checkGate_6E68(cWScriptMan_TheWScriptMan, data->InstId1, gateId, nextGateId);
     if (gateResult == kGate_Passed) {
-        unsigned id = buf[1];
+        unsigned id = data->InstId2;
         char *obj;
         cWorldCacheTable *section = cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable[id & 0xFF];
         if (!section) {
@@ -9033,7 +9671,7 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
         if (obj)
             cSSXAudio_WorldSound_6E68(cAudioInterface_bxAudio_6E68(), obj, 92);
     }
-    ((int*)ret)[2] = 1;
+    ret->Type = eLunoVar_Int;
     *luno_cLunoVar_castInt(ret) = gateResult;
     return ret;
 }
@@ -9043,18 +9681,26 @@ extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", ShowMessageIconFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// World-script data of ShowMessageIconFunc (On Tour tShowMessageIconData; same offsets): the block below fills it.
+struct tShowMessageIconData {
+    unsigned int TitleId;           // 0x00 [O]
+    unsigned int MsgId;             // 0x04 [O]
+    WScriptNullType null;           // 0x08 [O]
+    char unk_009[0x3];              // 0x09 padding
+};
+
+CHECK_OFFSET(tShowMessageIconData, TitleId, 0x00);
+CHECK_OFFSET(tShowMessageIconData, MsgId, 0x04);
+CHECK_OFFSET(tShowMessageIconData, null, 0x08);
+CHECK_SIZE(tShowMessageIconData, 0xC);
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
-struct Flag_7020 { char c; Flag_7020() {} Flag_7020(const Flag_7020& o) : c(o.c) {} };
-struct Ent_7020 { int idx; int val; int pad; int kind; };
-struct R12_7020 { int a; int b; int c; };
-extern R12_7020 luno_gLunoNil_7020 __asm__("luno_gLunoNil");
+extern luno_cLunoVar luno_gLunoNil_7020 __asm__("luno_gLunoNil");
 
 extern int D_004A3DD0_7020[2] __asm__("D_004A3DD0");
 extern "C" int func_001E3570(int, int);
 extern int D_004A58C0_7020 __asm__("D_004A58C0");
-struct T12_7020 { int a; int b; Flag_7020 f; };
-extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
+extern tShowMessageIconData sMessageIconDefaults __asm__("D_004FC070");
 /**
  * Script function (gLunoCFunctions[110]): shows a message icon and returns whether it was shown.
  *
@@ -9069,26 +9715,22 @@ extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* ShowMessageIconFunc(luno_cLunoVar* self, int n, Ent_7020* params) {
+extern "C" void* ShowMessageIconFunc(luno_cLunoVar* self, int n, luno_cLunoCArg* params) {
     if (D_004A58C0_7020 == 0) {
-        D_004FC070_7020.a = 0;
+        sMessageIconDefaults.TitleId = 0;
         D_004A58C0_7020 = 1;
-        D_004FC070_7020.b = 0;
+        sMessageIconDefaults.MsgId = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
-        D_004FC070_7020.f = Flag_7020(D_004FC070_7020.f);
+        sMessageIconDefaults.null = WScriptNullType(sMessageIconDefaults.null);
     }
     int block[4] __attribute__((aligned(16)));
     int* vp = block;
-    MEM_copy(vp, &D_004FC070_7020, 12);
-    Ent_7020* curArg = params;
+    MEM_copy(vp, &sMessageIconDefaults, sizeof(tShowMessageIconData));
+    luno_cLunoCArg* curArg = params;
     for (int i = 0; i < n; i++, curArg++) {
-        int k = curArg->idx;
-        int* slot = (int*)((k << 2) + (int)vp);
-        if (curArg->kind != D_004A3DD0_7020[k] && D_004A3DD0_7020[k] == eLunoVar_Float)
-            *(float*)slot = (float)curArg->val;
-        else
-            *slot = curArg->val;
+        int k = curArg->Index;
+        setArgField(&vp[k], curArg, D_004A3DD0_7020[k]);
     }
     bool iconShown = func_001E3570(vp[0], vp[1]) != 0;
     self->Type = 1;
@@ -9102,8 +9744,8 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_cWScriptMission);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char cWScriptMission_vtbl_7128[] __asm__("cWScriptMission_vtbl");
-extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
-extern "C" int cWScriptMan_getScriptCode_7128(cWScriptMan*, int) __asm__("cWScriptMan_getScriptCode");
+extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, const tWScriptProcessData* def);
+extern "C" char* cWScriptMan_getScriptCode_7128(cWScriptMan*, int) __asm__("cWScriptMan_getScriptCode");
 /**
  * Constructs a mission script process: the script-process base, the mission's ID and key, and its four script
  * entry points.
@@ -9114,14 +9756,14 @@ extern "C" int cWScriptMan_getScriptCode_7128(cWScriptMan*, int) __asm__("cWScri
  * @param key  the mission key
  * @return @p self
  */
-extern "C" void* cWScriptMission_cWScriptMission(cWScriptMission* self, void* man, int sectionId, char* data, int key) {
-    cWScriptProcess_cWScriptProcess(self, man, sectionId, (int)data);
+extern "C" void* cWScriptMission_cWScriptMission(cWScriptMission* self, void* man, int sectionId,
+                                                 const tWScriptMissionData* data, int key) {
+    cWScriptProcess_cWScriptProcess(self, man, sectionId, data);
     self->mVtbl = (void**)cWScriptMission_vtbl_7128;
-    self->Scope = *(int*)(data + 0x50);
+    self->Scope = data->Scope;
     self->SortKey = key;
     for (int i = 0; i < 4; i++)
-        ((int*)(&self->MissionScriptCode[0]))[i] =
-            cWScriptMan_getScriptCode_7128(self->Manager, ((int*)(data + 0x40))[i]);
+        self->MissionScriptCode[i] = cWScriptMan_getScriptCode_7128(self->Manager, data->MissionScriptId[i]);
     return self;
 }
 #endif
@@ -9213,7 +9855,7 @@ extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" void cRider_flagEventMissionSuccess(void* rider, int player, int money);
 extern "C" unsigned int cBEMissionInterface_getNextMissionID(void* missions, int id);
 extern "C" void cBEMissionInterface_setIsShowIcon(void* missions, int id, int active);
-extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, int);
+extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, char* scriptCode);
 extern "C" int cBEMissionInterface_isMissionLocked(void* missions, int id);
 extern "C" void cBEMissionInterface_setIsLocked(void* missions, int id, int a);
 extern "C" void cBEMissionInterface_setIsReady(void* missions, int id, int a);
@@ -9255,7 +9897,7 @@ void cWScriptMission::missionPass()
     if (next != kWScriptId_None) {
         cBEMissionInterface_setIsShowIcon(missions, (int)ProcessId, 0);
         if (MissionScriptCode[1] != 0) {
-            cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
+            cWScriptMan_runScriptCode(Manager, this, MissionScriptCode[1]);
         }
         if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
             cBEMissionInterface_setIsLocked(missions, next, 0);
@@ -9263,7 +9905,7 @@ void cWScriptMission::missionPass()
             cBEMissionInterface_setIsShowIcon(missions, next, 1);
         }
     } else if (MissionScriptCode[1] != 0) {
-        cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
+        cWScriptMan_runScriptCode(Manager, this, MissionScriptCode[1]);
     }
     cWScriptMan_updateWorld(Manager);
     cWScriptMan_processPass(Manager, this);
@@ -9281,7 +9923,7 @@ int cBE_getInterface_Fv_74C0(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_isMissionAvailable_74C0(int, int) __asm__("cBEMissionInterface_isMissionAvailable");
 extern "C" void cBEMissionInterface_setIsAvailable_74C0(int, int, int) __asm__("cBEMissionInterface_setIsAvailable");
 extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
-extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, int);
+extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, char* scriptCode);
 struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
 /**
  * Handles a failed mission: makes it available again, runs the fail script and ends the process.
@@ -9296,7 +9938,7 @@ void cWScriptMission::missionFail()
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
     if (!cBEMissionInterface_isMissionAvailable_74C0(iface, ProcessId))
         cBEMissionInterface_setIsAvailable_74C0(iface, ProcessId, 1);
-    int failScript = (int)MissionScriptCode[2];
+    char* failScript = MissionScriptCode[2];
     if (failScript)
         cWScriptMan_runScriptCode(Manager, this, failScript);
     else
@@ -9309,7 +9951,7 @@ void cWScriptMission::missionFail()
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionUpdateWorld);
 #ifdef SKIP_ASM
-extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, int);
+extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, char* scriptCode);
 
 /**
  * Runs the mission's update-world script, if it has one.
@@ -9320,11 +9962,9 @@ extern "C" void cWScriptMan_runScriptCode(cWScriptMan*, void *, int);
  */
 void cWScriptMission::missionUpdateWorld()
 {
-    int temp_6;
-
-    temp_6 = ((int)MissionScriptCode[3]);
-    if (temp_6 != 0) {
-        cWScriptMan_runScriptCode(Manager, this, temp_6);
+    char* worldScript = MissionScriptCode[3];
+    if (worldScript != 0) {
+        cWScriptMan_runScriptCode(Manager, this, worldScript);
     }
 }
 #endif

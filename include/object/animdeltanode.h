@@ -31,6 +31,7 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "wscript/wscriptnull.h"
 
 struct cObjNode;
 struct tInstanceRecord;
@@ -39,6 +40,38 @@ struct cMeshAnimFrame;
 struct tMeshVelocity;
 
 struct cBxReplayFrame;
+
+// World-script data that makes an anim delta node (On Tour tMakeAnimDeltaData, 0x2C: tMakeAnimObjectData's fields,
+// object/animobject.h). [R] MakeAnimDeltaFunc (seg/seg_1FBE38) builds its static defaults (InstId -1, Type 1, FromTime
+// -1, ToTime -1, Speed 30, StartTime -1) and copies them into the block the script arguments fill; [U]
+// cAnimDeltaNode_cAnimDeltaNode1 passes it to cAnimObjectNode_cAnimObjectNode1.
+struct tMakeAnimDeltaData {
+    unsigned int InstId;            // 0x00 [O] tResourceID; [R] -1 = the script's current instance
+    int Type;                       // 0x04 [O]
+    int Dir;                        // 0x08 [O]
+    float FromTime;                 // 0x0C [O]
+    float ToTime;                   // 0x10 [O]
+    float Speed;                    // 0x14 [O]
+    float SpeedRange;               // 0x18 [O]
+    float StartTime;                // 0x1C [O]
+    int RandomStart;                // 0x20 [O]
+    int ForceVisible;               // 0x24 [O]
+    WScriptNullType null;           // 0x28 [O]
+    char unk_029[0x3];              // 0x29 padding
+};
+
+CHECK_OFFSET(tMakeAnimDeltaData, InstId, 0x00);
+CHECK_OFFSET(tMakeAnimDeltaData, Type, 0x04);
+CHECK_OFFSET(tMakeAnimDeltaData, Dir, 0x08);
+CHECK_OFFSET(tMakeAnimDeltaData, FromTime, 0x0C);
+CHECK_OFFSET(tMakeAnimDeltaData, ToTime, 0x10);
+CHECK_OFFSET(tMakeAnimDeltaData, Speed, 0x14);
+CHECK_OFFSET(tMakeAnimDeltaData, SpeedRange, 0x18);
+CHECK_OFFSET(tMakeAnimDeltaData, StartTime, 0x1C);
+CHECK_OFFSET(tMakeAnimDeltaData, RandomStart, 0x20);
+CHECK_OFFSET(tMakeAnimDeltaData, ForceVisible, 0x24);
+CHECK_OFFSET(tMakeAnimDeltaData, null, 0x28);
+CHECK_SIZE(tMakeAnimDeltaData, 0x2C);
 
 struct cAnimDeltaNode {
     // The signal that adds to Delta (name ours): [U] signal adds its argument / 30 to Delta and passes any other signal

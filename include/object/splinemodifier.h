@@ -14,6 +14,7 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use (asm of every method listed in methods.txt); [O] On Tour.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/transformmodifier.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
@@ -39,7 +40,8 @@ enum eSplineSignal { kSplineSignal_SetSpeed = 400, kSplineSignal_Start = 401, kS
 // cSplineModifier(const tAddSplineData& sdata); [U] cSplineModifier_cSplineModifier1 (src/object/multiparticle.cpp)
 // reads every member from SplineId to ForceTime at these offsets and widths.
 struct tAddSplineData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddSplineFunc's instance lookup (-1: the script's
+                                    //      current instance)
     unsigned int SplineId;          // 0x04 [O] tResourceID; [U] cSpline_init(&Spline, SplineId)
     int Sequence;                   // 0x08 [O]; [U] -> SequenceType
     int Orient;                     // 0x0C [O]; [U] -> OrientType
@@ -50,10 +52,11 @@ struct tAddSplineData {
     int Start;                      // 0x20 [O]; [U] Start = Start != 0
     float Force;                    // 0x24 [O]; [U] -> Force (x 100)
     float ForceTime;                // 0x28 [O]; [U] -> ForceTime
-    char unk_02C[0x4];              // 0x2C [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x2C [O]
+    char unk_02D[0x3];              // 0x2D padding
 };
 
-CHECK_OFFSET(tAddSplineData, unk_000, 0x00);
+CHECK_OFFSET(tAddSplineData, InstId, 0x00);
 CHECK_OFFSET(tAddSplineData, SplineId, 0x04);
 CHECK_OFFSET(tAddSplineData, Sequence, 0x08);
 CHECK_OFFSET(tAddSplineData, Orient, 0x0C);
@@ -64,7 +67,7 @@ CHECK_OFFSET(tAddSplineData, RandomDistance, 0x1C);
 CHECK_OFFSET(tAddSplineData, Start, 0x20);
 CHECK_OFFSET(tAddSplineData, Force, 0x24);
 CHECK_OFFSET(tAddSplineData, ForceTime, 0x28);
-CHECK_OFFSET(tAddSplineData, unk_02C, 0x2C);
+CHECK_OFFSET(tAddSplineData, null, 0x2C);
 CHECK_SIZE(tAddSplineData, 0x30);
 
 // The replayed state of a spline modifier (On Tour cSplineModifierState, 0x50). cSplineModifier holds these members

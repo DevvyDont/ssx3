@@ -12,6 +12,7 @@
 // every On Tour offset equals retail.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 
 struct cBeing;
 #include "object/physicsmodifier.h"
@@ -24,28 +25,29 @@ struct tInstanceRecord;
 // sSphDef_342768) stores Type, BoostTime seconds * TimerHz, (BoostX, BoostY, BoostZ, 0) as Boost, MaxSpeed * 100 and
 // Drag.
 struct tAddBoostData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
-    short Type;                     // 0x04 [O] int Type; [U] the ctor reads its low half (lh) -> Type
-    char unk_006[0x2];              // 0x06 [O] Type's high half (never read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddBoostFunc's instance lookup (-1: the script's
+                                    //      current instance)
+    int Type;                       // 0x04 [O]; [U] the ctor reads it as a short (lh) -> Type; [R] AddBoostFunc's
+                                    //      default 0 (sw)
     float BoostTime;                // 0x08 [O]; [U] * TimerHz -> BoostTime (frames)
     float Drag;                     // 0x0C [O]; [U] -> Drag
     float MaxSpeed;                 // 0x10 [O]; [U] * 100 -> MaxSpeed
     float BoostX;                   // 0x14 [O]; [U] -> Boost.x
     float BoostY;                   // 0x18 [O]; [U] -> Boost.y
     float BoostZ;                   // 0x1C [O]; [U] -> Boost.z
-    char unk_020[0x4];              // 0x20 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x20 [O]
+    char unk_021[0x3];              // 0x21 padding
 };
 
-CHECK_OFFSET(tAddBoostData, unk_000, 0x00);
+CHECK_OFFSET(tAddBoostData, InstId, 0x00);
 CHECK_OFFSET(tAddBoostData, Type, 0x04);
-CHECK_OFFSET(tAddBoostData, unk_006, 0x06);
 CHECK_OFFSET(tAddBoostData, BoostTime, 0x08);
 CHECK_OFFSET(tAddBoostData, Drag, 0x0C);
 CHECK_OFFSET(tAddBoostData, MaxSpeed, 0x10);
 CHECK_OFFSET(tAddBoostData, BoostX, 0x14);
 CHECK_OFFSET(tAddBoostData, BoostY, 0x18);
 CHECK_OFFSET(tAddBoostData, BoostZ, 0x1C);
-CHECK_OFFSET(tAddBoostData, unk_020, 0x20);
+CHECK_OFFSET(tAddBoostData, null, 0x20);
 CHECK_SIZE(tAddBoostData, 0x24);
 
 struct cBxReplayFrame;

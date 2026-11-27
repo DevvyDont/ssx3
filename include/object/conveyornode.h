@@ -28,6 +28,7 @@
 // t2Vector (2 floats) is written as a float array, as in render/font.h.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 
 struct cObjNode;
@@ -37,7 +38,8 @@ struct tInstanceRecord;
 // cConveyorNode(cBucketList*, tInstanceRecord*, const tMakeConveyorData*); [U] cConveyorNode_cConveyorNode (view
 // sDesc_3010) stores Vel, builds the UV scroll from (UScroll, VScroll) and copies Rotate0..7 (read as an array of 8).
 struct tMakeConveyorData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeConveyorFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float Vel;                      // 0x04 [O]; [U] -> the node's speed (+0x1C)
     float UScroll;                  // 0x08 [O]; [U] the UV scroll's u
     float VScroll;                  // 0x0C [O]; [U] the UV scroll's v
@@ -49,16 +51,17 @@ struct tMakeConveyorData {
     int Rotate5;                    // 0x24 [O]
     int Rotate6;                    // 0x28 [O]
     int Rotate7;                    // 0x2C [O]
-    char unk_030[0x4];              // 0x30 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x30 [O]
+    char unk_031[0x3];              // 0x31 padding
 };
 
-CHECK_OFFSET(tMakeConveyorData, unk_000, 0x00);
+CHECK_OFFSET(tMakeConveyorData, InstId, 0x00);
 CHECK_OFFSET(tMakeConveyorData, Vel, 0x04);
 CHECK_OFFSET(tMakeConveyorData, UScroll, 0x08);
 CHECK_OFFSET(tMakeConveyorData, VScroll, 0x0C);
 CHECK_OFFSET(tMakeConveyorData, Rotate0, 0x10);
 CHECK_OFFSET(tMakeConveyorData, Rotate7, 0x2C);
-CHECK_OFFSET(tMakeConveyorData, unk_030, 0x30);
+CHECK_OFFSET(tMakeConveyorData, null, 0x30);
 CHECK_SIZE(tMakeConveyorData, 0x34);
 
 struct cBxReplayFrame;

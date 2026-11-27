@@ -26,6 +26,7 @@
 // from world/worldview.h until both move to a bx header.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/transformmodifier.h"
 #include "intersect/spheretree.h"
 #include "bx/math3d.h"
@@ -78,18 +79,20 @@ CHECK_SIZE(bxSphereTree, 0x140);
 // cRollerModifier(const tAddRollerData& rdata, ...); [U] cRollerModifier_cRollerModifier (src/object/railmodifier.cpp)
 // stores Mass and Elast into mMass / mElast.
 struct tAddRollerData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddRollerFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float Mass;                     // 0x04 [O]; [U] -> mMass
     float Elast;                    // 0x08 [O]; [U] -> mElast
-    float unk_00C;                  // 0x0C [O] Friction (no retail read)
-    char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+    float Friction;                 // 0x0C [O]; [R] AddRollerFunc's default 10 (no ctor read)
+    WScriptNullType null;           // 0x10 [O]
+    char unk_011[0x3];              // 0x11 padding
 };
 
-CHECK_OFFSET(tAddRollerData, unk_000, 0x00);
+CHECK_OFFSET(tAddRollerData, InstId, 0x00);
 CHECK_OFFSET(tAddRollerData, Mass, 0x04);
 CHECK_OFFSET(tAddRollerData, Elast, 0x08);
-CHECK_OFFSET(tAddRollerData, unk_00C, 0x0C);
-CHECK_OFFSET(tAddRollerData, unk_010, 0x10);
+CHECK_OFFSET(tAddRollerData, Friction, 0x0C);
+CHECK_OFFSET(tAddRollerData, null, 0x10);
 CHECK_SIZE(tAddRollerData, 0x14);
 
 struct cBxReplayFrame;

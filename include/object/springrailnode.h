@@ -33,6 +33,7 @@
 //       cSpringRailNode).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/flexrailnode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
@@ -73,7 +74,8 @@ CHECK_SIZE(tSpringRailNode, 0x60);
 // the members of the same names; the cFlexRailNode base ctor (src/object/flexbridgenode.cpp, view sFlexDef_347D90)
 // counts the ids that are not -1 and stores Flags as RailFlags.
 struct tMakeSpringRailData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeSpringRailFunc's instance lookup (-1: the script's
+                                    //      current instance)
     unsigned int InstId1;           // 0x04 [O] tResourceID; [U] the rail nodes' instance ids, read as an array of 8
     unsigned int InstId2;           // 0x08 [O]
     unsigned int InstId3;           // 0x0C [O]
@@ -94,10 +96,11 @@ struct tMakeSpringRailData {
     float ASpring;                  // 0x48 [O]; [U] -> ASpring
     float ADamp;                    // 0x4C [O]; [U] -> ADamp
     float TorqueScale;              // 0x50 [O]; [U] -> TorqueScale
-    char unk_054[0x4];              // 0x54 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x54 [O]
+    char unk_055[0x3];              // 0x55 padding
 };
 
-CHECK_OFFSET(tMakeSpringRailData, unk_000, 0x00);
+CHECK_OFFSET(tMakeSpringRailData, InstId, 0x00);
 CHECK_OFFSET(tMakeSpringRailData, InstId1, 0x04);
 CHECK_OFFSET(tMakeSpringRailData, InstId8, 0x20);
 CHECK_OFFSET(tMakeSpringRailData, Mesh1, 0x24);
@@ -106,7 +109,7 @@ CHECK_OFFSET(tMakeSpringRailData, Flags, 0x44);
 CHECK_OFFSET(tMakeSpringRailData, ASpring, 0x48);
 CHECK_OFFSET(tMakeSpringRailData, ADamp, 0x4C);
 CHECK_OFFSET(tMakeSpringRailData, TorqueScale, 0x50);
-CHECK_OFFSET(tMakeSpringRailData, unk_054, 0x54);
+CHECK_OFFSET(tMakeSpringRailData, null, 0x54);
 CHECK_SIZE(tMakeSpringRailData, 0x58);
 
 struct cBxReplayFrame;

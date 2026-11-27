@@ -26,6 +26,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cCounterNodeState { int Count; int Counted; }, tMakeCounterData).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 
 struct cObjNode;
@@ -33,19 +34,18 @@ struct tInstanceRecord;
 
 // World-script data that makes a counter (On Tour tMakeCounterData, 0xC). [O] On Tour's cCounterNode(bucket,
 // tInstanceRecord* pInst, tMakeCounterData* cdata); [U] cCounterNode_cCounterNode1 (src/object/debouncenode.cpp):
-// Count = StartCount. Retail reads StartCount as a signed halfword (lh +0x4), On Tour declares an int: typed short here
-// so the ctor's load keeps its width.
+// Count = StartCount as a short (lh +0x4; On Tour and the script defaults, MakeCounterFunc's sw 3, make it an int).
 struct tMakeCounterData {
-    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
-    short StartCount;               // 0x4 [O] (int there); [U] -> Count (lh)
-    char unk_006[0x2];              // 0x6 [O] StartCount's high half (no retail read)
-    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeCounterFunc's instance lookup (-1: the script's
+                                    //      current instance)
+    int StartCount;                 // 0x4 [O]; [U] -> Count as a short (lh); [R] MakeCounterFunc's default 3 (sw)
+    WScriptNullType null;           // 0x8 [O]
+    char unk_009[0x3];              // 0x9 padding
 };
 
-CHECK_OFFSET(tMakeCounterData, unk_000, 0x0);
+CHECK_OFFSET(tMakeCounterData, InstId, 0x0);
 CHECK_OFFSET(tMakeCounterData, StartCount, 0x4);
-CHECK_OFFSET(tMakeCounterData, unk_006, 0x6);
-CHECK_OFFSET(tMakeCounterData, unk_008, 0x8);
+CHECK_OFFSET(tMakeCounterData, null, 0x8);
 CHECK_SIZE(tMakeCounterData, 0xC);
 
 struct cCounterNode : public cInstanceNode {

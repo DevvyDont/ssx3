@@ -33,6 +33,7 @@
 //       cFloatRailNode).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/flexrailnode.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
@@ -71,7 +72,8 @@ CHECK_SIZE(tFloatRailNode, 0x50);
 // the members of the same names; the cFlexRailNode base ctor (src/object/flexbridgenode.cpp, view sFlexDef_347D90)
 // counts the ids that are not -1 and stores Flags as RailFlags.
 struct tMakeFloatRailData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeFloatRailFunc's instance lookup (-1: the script's
+                                    //      current instance)
     unsigned int InstId1;           // 0x04 [O] tResourceID; [U] the rail nodes' instance ids, read as an array of 8
     unsigned int InstId2;           // 0x08 [O]
     unsigned int InstId3;           // 0x0C [O]
@@ -92,10 +94,11 @@ struct tMakeFloatRailData {
     float LSpring;                  // 0x48 [O]; [U] -> LSpring
     float LDamp;                    // 0x4C [O]; [U] -> LDamp
     float ForceScale;               // 0x50 [O]; [U] -> ForceScale
-    char unk_054[0x4];              // 0x54 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x54 [O]
+    char unk_055[0x3];              // 0x55 padding
 };
 
-CHECK_OFFSET(tMakeFloatRailData, unk_000, 0x00);
+CHECK_OFFSET(tMakeFloatRailData, InstId, 0x00);
 CHECK_OFFSET(tMakeFloatRailData, InstId1, 0x04);
 CHECK_OFFSET(tMakeFloatRailData, InstId8, 0x20);
 CHECK_OFFSET(tMakeFloatRailData, Mesh1, 0x24);
@@ -104,7 +107,7 @@ CHECK_OFFSET(tMakeFloatRailData, Flags, 0x44);
 CHECK_OFFSET(tMakeFloatRailData, LSpring, 0x48);
 CHECK_OFFSET(tMakeFloatRailData, LDamp, 0x4C);
 CHECK_OFFSET(tMakeFloatRailData, ForceScale, 0x50);
-CHECK_OFFSET(tMakeFloatRailData, unk_054, 0x54);
+CHECK_OFFSET(tMakeFloatRailData, null, 0x54);
 CHECK_SIZE(tMakeFloatRailData, 0x58);
 
 struct cBxReplayFrame;

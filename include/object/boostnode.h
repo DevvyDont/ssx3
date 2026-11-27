@@ -31,6 +31,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cBoostNodeState, tMakeBoostData).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 #include "bx/math3d.h"
 
@@ -43,28 +44,29 @@ struct tInstanceRecord;
 // BoostZ) into Boost (all zero: a default direction by Type). cBoostModifier's tAddBoostData (object/boostmodifier.h)
 // has the same layout.
 struct tMakeBoostData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
-    short Type;                     // 0x04 [O] int Type; [U] the ctor reads its low half (lh) -> Type
-    char unk_006[0x2];              // 0x06 [O] Type's high half (never read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeBoostFunc's instance lookup (-1: the script's
+                                    //      current instance)
+    int Type;                       // 0x04 [O]; [U] the ctor reads it as a short (lh) -> Type; [R] MakeBoostFunc's
+                                    //      default 0 (sw)
     float BoostTime;                // 0x08 [O]; [U] * TimerHz -> BoostTime (frames)
     float Drag;                     // 0x0C [O]; [U] -> Drag
     float MaxSpeed;                 // 0x10 [O]; [U] * 27.78 -> MaxSpeed
     float BoostX;                   // 0x14 [O]; [U] the boost direction, normalised into Boost
     float BoostY;                   // 0x18 [O]; [U] ditto
     float BoostZ;                   // 0x1C [O]; [U] ditto
-    char unk_020[0x4];              // 0x20 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x20 [O]
+    char unk_021[0x3];              // 0x21 padding
 };
 
-CHECK_OFFSET(tMakeBoostData, unk_000, 0x00);
+CHECK_OFFSET(tMakeBoostData, InstId, 0x00);
 CHECK_OFFSET(tMakeBoostData, Type, 0x04);
-CHECK_OFFSET(tMakeBoostData, unk_006, 0x06);
 CHECK_OFFSET(tMakeBoostData, BoostTime, 0x08);
 CHECK_OFFSET(tMakeBoostData, Drag, 0x0C);
 CHECK_OFFSET(tMakeBoostData, MaxSpeed, 0x10);
 CHECK_OFFSET(tMakeBoostData, BoostX, 0x14);
 CHECK_OFFSET(tMakeBoostData, BoostY, 0x18);
 CHECK_OFFSET(tMakeBoostData, BoostZ, 0x1C);
-CHECK_OFFSET(tMakeBoostData, unk_020, 0x20);
+CHECK_OFFSET(tMakeBoostData, null, 0x20);
 CHECK_SIZE(tMakeBoostData, 0x24);
 
 struct cBeing;

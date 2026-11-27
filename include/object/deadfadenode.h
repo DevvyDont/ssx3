@@ -32,6 +32,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cDeadFadeNode, tMakeDeadData, tMakeDeadFadeData).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 #include "bx/math3d.h"
 
@@ -45,7 +46,7 @@ struct tMakeDeadData {
     unsigned int InstId;            // 0x0 [O] tResourceID; [R] ctors store 0xFFFFFFFF (the default id) first
     int Type;                       // 0x4 [O]; [U] makeDead (lw +0x4): 0 -> cDeadNode, 1 -> delete the node and reset
                                     //     the record flags, 3 -> cRestoreNode
-    char null;                      // 0x8 [O] WScriptNullType (1 byte)
+    WScriptNullType null;           // 0x8 [O]
     char unk_9[0x3];                // 0x9 padding
 };
 
@@ -63,14 +64,15 @@ struct tMakeDeadFadeData {
     int Type;                       // 0x04 [O]; [U] ditto (Data.Type)
     float FadeTime;                 // 0x08 [O]; [U] FadeRate = update time / FadeTime (its word also lands in Data.null)
     float ZVel;                     // 0x0C [O]; [U] DistRate = ZVel * update time
-    char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x10 [O]
+    char unk_011[0x3];              // 0x11 padding
 };
 
 CHECK_OFFSET(tMakeDeadFadeData, InstId, 0x00);
 CHECK_OFFSET(tMakeDeadFadeData, Type, 0x04);
 CHECK_OFFSET(tMakeDeadFadeData, FadeTime, 0x08);
 CHECK_OFFSET(tMakeDeadFadeData, ZVel, 0x0C);
-CHECK_OFFSET(tMakeDeadFadeData, unk_010, 0x10);
+CHECK_OFFSET(tMakeDeadFadeData, null, 0x10);
 CHECK_SIZE(tMakeDeadFadeData, 0x14);
 
 struct cDeadFadeNode : public cInstanceNode {

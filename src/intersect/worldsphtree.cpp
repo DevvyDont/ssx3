@@ -4897,7 +4897,7 @@ cBoostNode* cBoostNode::cBoostNode1(void* bucket, int nodeType, void* instance, 
 {
     cInstanceNode_cInstanceNode1((this), bucket, nodeType, instance);
     VPTR_OF(cObjNode, this) = cBoostNode_vtbl;
-    int type = def->Type;
+    int type = (short)def->Type;
     Type = type;
     BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     if (def->BoostX == 0.0f && def->BoostY == 0.0f && def->BoostZ == 0.0f) {
@@ -6138,7 +6138,7 @@ extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostDa
     self->Active = 1;
     VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
     self->Instance = instRecord;
-    int type = def->Type;
+    int type = (short)def->Type;
     self->Type = type;
     int boostFrames = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     self->BoostTime = boostFrames;

@@ -34,6 +34,7 @@
 //   [O] SSX On Tour's DWARF (cAnimObjectNodeState, cAnimNodeState, cAnimNode, cMoveNode chain, tMakeAnimObjectData).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -153,7 +154,8 @@ CHECK_SIZE(cAnimObjectNode, 0x6C);
 // 44-byte block of it from its static defaults and the script arguments; [U] cAnimObjectNode_cAnimObjectNode1 reads
 // Type .. ForceVisible.
 struct tMakeAnimObjectData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read here)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeAnimObjectFunc's instance lookup (-1: the script's
+                                    //      current instance)
     int Type;                       // 0x04 [O]; [U] cAnimObjectNode ctor: -> AnimType (lhu)
     int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: kDir_Reverse negates AnimSpeed
     float FromTime;                 // 0x0C [O]; [U] cAnimObjectNode ctor: / 30 -> FromTime
@@ -163,13 +165,14 @@ struct tMakeAnimObjectData {
     float StartTime;                // 0x1C [O]; [U] cAnimObjectNode ctor: CurrTime
     int RandomStart;                // 0x20 [O]; [U] cAnimObjectNode ctor: CurrTime = AIrandf(From, To)
     int ForceVisible;               // 0x24 [O]; [U] cAnimObjectNode ctor: passed to cAnimNode_cAnimNode
-    char unk_028[0x4];              // 0x28 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x28 [O]
+    char unk_029[0x3];              // 0x29 padding
 
     // The Dir that plays backwards (name ours): [U] the cAnimObjectNode ctor negates AnimSpeed for it.
     enum { kDir_Reverse = 1 };
 };
 
-CHECK_OFFSET(tMakeAnimObjectData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimObjectData, InstId, 0x00);
 CHECK_OFFSET(tMakeAnimObjectData, Type, 0x04);
 CHECK_OFFSET(tMakeAnimObjectData, Dir, 0x08);
 CHECK_OFFSET(tMakeAnimObjectData, FromTime, 0x0C);
@@ -179,7 +182,7 @@ CHECK_OFFSET(tMakeAnimObjectData, SpeedRange, 0x18);
 CHECK_OFFSET(tMakeAnimObjectData, StartTime, 0x1C);
 CHECK_OFFSET(tMakeAnimObjectData, RandomStart, 0x20);
 CHECK_OFFSET(tMakeAnimObjectData, ForceVisible, 0x24);
-CHECK_OFFSET(tMakeAnimObjectData, unk_028, 0x28);
+CHECK_OFFSET(tMakeAnimObjectData, null, 0x28);
 CHECK_SIZE(tMakeAnimObjectData, 0x2C);
 
 #endif /* OBJECT_ANIMOBJECT_H */

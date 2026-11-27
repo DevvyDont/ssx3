@@ -23,6 +23,7 @@
 //   [O] SSX On Tour's DWARF (cInstanceNode chain, cFenceNodeState, tMakeFenceData, cFenceNode).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 #include "ui/uithing.h"
 
@@ -41,7 +42,7 @@ struct tMakeFenceData {
     int Type;                       // 0x4 [O]; [U] updateGrid: kFenceType_SwingBottom = the bottom row bends too
                                     //     (lw 0x20)
     float Flexibility;              // 0x8 [O]; [U] updateGrid scales the sway by it (lwc1 0x24)
-    char null;                      // 0xC [O] WScriptNullType (1 byte)
+    WScriptNullType null;           // 0xC [O]
     char unk_D[0x3];                // 0xD padding
 };
 

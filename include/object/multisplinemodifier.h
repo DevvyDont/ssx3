@@ -15,6 +15,7 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use (asm of every method in methods.txt); [O] On Tour.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/transformmodifier.h"
 #include "world/worldview.h"
 #include "ui/uithing.h"
@@ -49,7 +50,8 @@ CHECK_SIZE(tMultiNode, 0x60);
 // cMultiSplineModifier(const tAddMultiSplineData& sdata, tInstanceRecord* inst); [U]
 // cMultiSplineModifier_cMultiSplineModifier (src/object/splinemodifier.cpp) reads every member from SplineId to NumModels at these offsets and widths.
 struct tAddMultiSplineData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddMultiSplineFunc's instance lookup (-1: the script's
+                                    //      current instance)
     unsigned int SplineId;          // 0x04 [O] tResourceID; [U] cSpline_init(&Spline, SplineId)
     int Orient;                     // 0x08 [O]; [U] -> OrientType
     float Speed;                    // 0x0C [O]; [U] cMultiSplineModifier_setSpeed; its sign picks the direction
@@ -61,10 +63,11 @@ struct tAddMultiSplineData {
     float ColourB;                  // 0x24 [O]; [U] Colour's fourth
     int DrawSpline;                 // 0x28 [O]; [U] DrawPath = DrawSpline != 0
     int NumModels;                  // 0x2C [O]; [U] -> NumModels
-    char unk_030[0x4];              // 0x30 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x30 [O]
+    char unk_031[0x3];              // 0x31 padding
 };
 
-CHECK_OFFSET(tAddMultiSplineData, unk_000, 0x00);
+CHECK_OFFSET(tAddMultiSplineData, InstId, 0x00);
 CHECK_OFFSET(tAddMultiSplineData, SplineId, 0x04);
 CHECK_OFFSET(tAddMultiSplineData, Orient, 0x08);
 CHECK_OFFSET(tAddMultiSplineData, Speed, 0x0C);
@@ -76,7 +79,7 @@ CHECK_OFFSET(tAddMultiSplineData, ColourG, 0x20);
 CHECK_OFFSET(tAddMultiSplineData, ColourB, 0x24);
 CHECK_OFFSET(tAddMultiSplineData, DrawSpline, 0x28);
 CHECK_OFFSET(tAddMultiSplineData, NumModels, 0x2C);
-CHECK_OFFSET(tAddMultiSplineData, unk_030, 0x30);
+CHECK_OFFSET(tAddMultiSplineData, null, 0x30);
 CHECK_SIZE(tAddMultiSplineData, 0x34);
 
 struct cBxReplayFrame;

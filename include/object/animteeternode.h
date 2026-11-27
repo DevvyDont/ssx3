@@ -33,6 +33,7 @@
 //   [O] SSX On Tour's DWARF (cAnimTeeterNodeState, tMakeAnimTeeterData, cAnimNodeState, cAnimNode, cMoveNode chain).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -46,7 +47,8 @@ struct tMeshVelocity;
 // cAnimTeeterNode_cAnimTeeterNode1 (src/intersect/worldsphtree.cpp) reads every member from TorqueScale to ToTime into the node members of the same
 // names (MaxSpeed into MaxAnimSpeed).
 struct tMakeAnimTeeterData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeAnimTeeterFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float TorqueScale;              // 0x04 [O]; [U] -> TorqueScale (x 1e-6)
     float BounceFactor;             // 0x08 [O]; [U] -> BounceFactor
     float MaxSpeed;                 // 0x0C [O]; [U] -> MaxAnimSpeed (/ 30 / TimerHz)
@@ -56,10 +58,11 @@ struct tMakeAnimTeeterData {
     int AnimSign;                   // 0x1C [O]; [U] -> AnimSign
     float FromTime;                 // 0x20 [O]; [U] FromTime's rate setup
     float ToTime;                   // 0x24 [O]; [U] ToTime's rate setup
-    char unk_028[0x4];              // 0x28 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x28 [O]
+    char unk_029[0x3];              // 0x29 padding
 };
 
-CHECK_OFFSET(tMakeAnimTeeterData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimTeeterData, InstId, 0x00);
 CHECK_OFFSET(tMakeAnimTeeterData, TorqueScale, 0x04);
 CHECK_OFFSET(tMakeAnimTeeterData, BounceFactor, 0x08);
 CHECK_OFFSET(tMakeAnimTeeterData, MaxSpeed, 0x0C);
@@ -69,7 +72,7 @@ CHECK_OFFSET(tMakeAnimTeeterData, Damp, 0x18);
 CHECK_OFFSET(tMakeAnimTeeterData, AnimSign, 0x1C);
 CHECK_OFFSET(tMakeAnimTeeterData, FromTime, 0x20);
 CHECK_OFFSET(tMakeAnimTeeterData, ToTime, 0x24);
-CHECK_OFFSET(tMakeAnimTeeterData, unk_028, 0x28);
+CHECK_OFFSET(tMakeAnimTeeterData, null, 0x28);
 CHECK_SIZE(tMakeAnimTeeterData, 0x2C);
 
 struct t4Vector;

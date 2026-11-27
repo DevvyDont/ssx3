@@ -18,6 +18,7 @@
 // Evidence tags: [P] preview inline accessors (via instancenode.h); [R] ctors/dtor/allocation; [U] retail use; [O] On Tour.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
 
 struct cObjNode;
@@ -31,40 +32,46 @@ struct tMaterialBlockRecord;
 // addDebounce / addRail (src/object/movenode.cpp) and cRailModifier_cRailModifier (src/object/splinemodifier.cpp)
 // read the members below.
 struct tAddFadeData {
-    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddFadeFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float Fade;                     // 0x4 [O]; [U] cMoveNode_addFade's fade value
-    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x8 [O]
+    char unk_009[0x3];              // 0x9 padding
 };
 
-CHECK_OFFSET(tAddFadeData, unk_000, 0x0);
+CHECK_OFFSET(tAddFadeData, InstId, 0x0);
 CHECK_OFFSET(tAddFadeData, Fade, 0x4);
-CHECK_OFFSET(tAddFadeData, unk_008, 0x8);
+CHECK_OFFSET(tAddFadeData, null, 0x8);
 CHECK_SIZE(tAddFadeData, 0xC);
 
 struct tAddDebounceData {
-    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddDebounceFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float Time;                     // 0x4 [O]; [U] cMoveNode_addDebounce passes it to the node's debounce setter
                                     //      (virtual slot 41)
-    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x8 [O]
+    char unk_009[0x3];              // 0x9 padding
 };
 
-CHECK_OFFSET(tAddDebounceData, unk_000, 0x0);
+CHECK_OFFSET(tAddDebounceData, InstId, 0x0);
 CHECK_OFFSET(tAddDebounceData, Time, 0x4);
-CHECK_OFFSET(tAddDebounceData, unk_008, 0x8);
+CHECK_OFFSET(tAddDebounceData, null, 0x8);
 CHECK_SIZE(tAddDebounceData, 0xC);
 
 struct tAddRailData {
-    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddRailFunc's instance lookup (-1: the script's
+                                    //      current instance)
     unsigned int SplineId;          // 0x4 [O] tResourceID; [U] addRail: tModifierBlock_findRail(block, SplineId);
                                     //      cRailModifier_cRailModifier stores it as SplineId
     int Mesh;                       // 0x8 [O]; [U] cRailModifier_cRailModifier stores it as Mesh
-    char unk_00C[0x4];              // 0xC [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0xC [O]
+    char unk_00D[0x3];              // 0xD padding
 };
 
-CHECK_OFFSET(tAddRailData, unk_000, 0x0);
+CHECK_OFFSET(tAddRailData, InstId, 0x0);
 CHECK_OFFSET(tAddRailData, SplineId, 0x4);
 CHECK_OFFSET(tAddRailData, Mesh, 0x8);
-CHECK_OFFSET(tAddRailData, unk_00C, 0xC);
+CHECK_OFFSET(tAddRailData, null, 0xC);
 CHECK_SIZE(tAddRailData, 0x10);
 
 struct cInstanceNode;

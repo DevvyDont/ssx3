@@ -702,7 +702,7 @@ void* cCounterNode::cCounterNode1(void* bucket, void* inst, tMakeCounterData* co
 {
     cInstanceNode_cInstanceNode1(this, bucket, 7, inst);
     VPTR_OF(cObjNode, this) = (void**)cCounterNode_vtbl;
-    Count = counterData->StartCount;
+    Count = (short)counterData->StartCount;
     Counted = 0;
     return ((void*)this);
 }

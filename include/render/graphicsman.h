@@ -351,8 +351,8 @@ public:
     void setScreenTintOffsetB(int idx, float value) __asm__("cGraphicsMan_setScreenTintOffsetB");
     void SetDefaultDrawState() __asm__("cGraphicsMan_SetDefaultDrawState");
     void SetDrawState(sDrawState* src) __asm__("cGraphicsMan_SetDrawState");
-    int CurrentDrawState() __asm__("cGraphicsMan_CurrentDrawState");
-    int CurrentDrawState1() __asm__("cGraphicsMan_CurrentDrawState1");
+    sDrawState* CurrentDrawState() __asm__("cGraphicsMan_CurrentDrawState");
+    sDrawState* CurrentDrawState1() __asm__("cGraphicsMan_CurrentDrawState1");
     void SetDepthMask(int enable) __asm__("cGraphicsMan_SetDepthMask");
     void SetDrawLayer(int value) __asm__("cGraphicsMan_SetDrawLayer");
     void SetBlendMode(int mode, int context) __asm__("cGraphicsMan_SetBlendMode");

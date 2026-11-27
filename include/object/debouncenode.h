@@ -28,6 +28,7 @@
 //   [O] SSX On Tour's DWARF (cMoveNode chain, cDebounceNode, tMakeDebounceData).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "object/movenode.h"
 
 struct cObjNode;
@@ -39,23 +40,25 @@ struct tModifierBlock;
 // [U] cDebounceNode_cDebounceNode1 (view sDef_342C08): Time seconds * TimerHz -> Life (+0x2C), Type -> +0x30, and
 // Visible (0 / 1 / other) edits the instance record's visibility flags.
 struct tMakeDebounceData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeDebounceFunc's instance lookup (-1: the script's
+                                    //      current instance)
     float Time;                     // 0x04 [O]; [U] * TimerHz -> the node's life (+0x2C)
     int Type;                       // 0x08 [O]; [U] -> the node's Type (+0x30)
     int Visible;                    // 0x0C [O]; [U] 0 clears the record's low four flag bits, 1 sets bit 0 and bit 2
                                     //      (clears bit 1), else bit 1 becomes bit 2 when bits 0 and 1 are set
-    char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x10 [O]
+    char unk_011[0x3];              // 0x11 padding
 
     // Visible values (names ours): [U] the ctor hides the instance for kVisible_Hide (clears the record's low four
     // flag bits) and shows it for kVisible_Show (sets bits 0 and 2, clears bit 1); any other value keeps it.
     enum { kVisible_Hide = 0, kVisible_Show = 1 };
 };
 
-CHECK_OFFSET(tMakeDebounceData, unk_000, 0x00);
+CHECK_OFFSET(tMakeDebounceData, InstId, 0x00);
 CHECK_OFFSET(tMakeDebounceData, Time, 0x04);
 CHECK_OFFSET(tMakeDebounceData, Type, 0x08);
 CHECK_OFFSET(tMakeDebounceData, Visible, 0x0C);
-CHECK_OFFSET(tMakeDebounceData, unk_010, 0x10);
+CHECK_OFFSET(tMakeDebounceData, null, 0x10);
 CHECK_SIZE(tMakeDebounceData, 0x14);
 
 struct cDebounceNode : public cMoveNode {

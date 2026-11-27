@@ -33,7 +33,7 @@ extern "C" int get_uint(void* reader, void* dst);
 extern "C" int get_cCTActionSwitchCam(void* reader, cCTActionSwitchCam* dst);
 extern "C" int get_cCTActionBoundedCam(void* reader, cCTActionBoundedCam* obj);
 extern "C" int get_cCTActionSpline(void* reader, cCTActionSpline* dst);
-void* get_cCTActionNone(void* unused, int* outType);
+int get_cCTActionNone(void* unused, int* outType);
 // PORT: the game's tagged allocator, bound as a placement operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
@@ -162,8 +162,7 @@ extern "C" int get_camaction(void* reader, void** out)
     }
     case eCTActionNone: {
         sCTActNoneA* action = new (str_Camera_Action_None, 0, 0) sCTActNoneA;
-        // PORT: get_cCTActionNone returns the byte count as void*.
-        int bytesRead = (int)get_cCTActionNone(reader, (int*)action);
+        int bytesRead = get_cCTActionNone(reader, (int*)action);
         *out = action;
         n += bytesRead;
         break;
@@ -265,9 +264,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionNone__FPvPi);
  *
  * @param reader   the stream's read cursor, not touched
  * @param outType  the action's type field, set to 3
- * @return 0, the number of bytes read (typed as a pointer)
+ * @return 0, the number of bytes read
  */
-void* get_cCTActionNone(void* reader, int* outType)
+int get_cCTActionNone(void* reader, int* outType)
 {
     *outType = 3;
     return 0;
@@ -360,7 +359,7 @@ struct sBoundObjPoint;
 extern "C" int get_cCTBoundObjEllipse(void* reader, cCTBoundObjEllipse* obj);
 extern "C" int get_cCTBoundObjBox(void* reader, cCTBoundObj* obj);
 extern "C" int get_cCTBoundObjLine(void* reader, cCTBoundObjLine* obj);
-void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
+int get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj);
 
 /**
  * Reads a camera bounding object of any type from a trigger stream and allocates it.
@@ -401,8 +400,7 @@ extern "C" int get_camboundobj(void* reader, void** out)
     }
     case eCTBoundObjPoint: {
         sCTBoundPointG* boundObj = new (str_Camera_Point_BoundObj, 0, 0) sCTBoundPointG;
-        // PORT: get_cCTBoundObjPoint returns the byte count as void*.
-        int bytesRead = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)boundObj);
+        int bytesRead = get_cCTBoundObjPoint(reader, (sBoundObjPoint*)boundObj);
         *out = boundObj;
         n += bytesRead;
         break;
@@ -523,13 +521,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjPoint__FPvP14s
  *
  * @param self  pointer to the stream's read cursor (On Tour char** src)
  * @param obj  the point to fill
- * @return the number of bytes read (get_t3Vector's count, typed void* here)
+ * @return the number of bytes read (get_t3Vector's count)
  */
-void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
+int get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
 {
     obj->Type = 3;
     void* result = ctObjectAccessor(obj, kCTObjectPos);
-    return get_t3Vector(self, result);
+    return get_t3Vector_n(self, result);
 }
 #endif
 
@@ -1526,12 +1524,12 @@ extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
     self->PitchLookRate = 10.0f;
     self->HeightOffset = 70.0f;
     self->IdealDist = 400.0f;
-    *(int*)&self->LeadDistance = 0;
+    self->LeadDistance = 0.0f;
     self->PitchOffset = 20.0f;
     *(&self->Position) = t4vect_Origin_00173208;
     self->AlgorithmType = 90;
-    *(int*)&self->Pitch = 0;
-    *(int*)&self->Heading = 0;
+    self->Pitch = 0.0f;
+    self->Heading = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -1736,8 +1734,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
  */
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
-    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cCameraAlgorithm, self);
-    return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
+    return vt[3].fn(vthis(self, vt[3]), self->Target->Rider->getAIIndex());
 }
 #endif
 
@@ -2153,7 +2151,7 @@ extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(cBoundedAlgorithm* self)
     self->AlgorithmType = 91;
     VPTR_OF(cCameraAlgorithm, self) = cBoundedAlgorithm_vtbl;
     self->BoundAction = 0;
-    *(int*)&self->LeadDistance = 0;
+    self->LeadDistance = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -2175,7 +2173,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAl
 void* cBoundedAlgorithm__cBoundedAlgorithm(void* vself)
 {
     cBoundedAlgorithm* self = (cBoundedAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cBoundedAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cBoundedAlgorithm_vtbl;
     return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
@@ -2570,8 +2568,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
  */
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
-    sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)VPTR_OF(cCameraAlgorithm, self);
-    return vt[3].fn(vthis(self, vt[3]), (void*)self->Target->Rider->getAIIndex());
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
+    return vt[3].fn(vthis(self, vt[3]), self->Target->Rider->getAIIndex());
 }
 #endif
 
@@ -2611,11 +2609,10 @@ static inline void WalkList_4848(cCTNode* e, CameraCollisionCallback* ctx)
             tCameraTrigger* trig = e->Trigger;
             cBeing& rider = *ctx->rider;
             cCTVolume* volume = trig->Volume;
-            // the rider's getPosition (cBeing slot 5) and the volume's containsPoint (slot 7), called by hand
-            sVEntry<t4Vector*(void*)>* riderVt = *(sVEntry<t4Vector*(void*)>**)&rider;
+            // the volume's containsPoint (slot 7) is called by hand
             sVEntry<int(void*, t4Vector*)>* volumeVt = (sVEntry<int(void*, t4Vector*)>*)volume->mVtbl;
             void* volumeThis = vthis(volume, volumeVt[7]);
-            t4Vector* riderPos = riderVt[5].fn(vthis(&rider, riderVt[5]));
+            t4Vector* riderPos = rider.getPosition();
             if (volumeVt[7].fn(volumeThis, riderPos)) {
                 cActiveTriggerNode* f = cActiveTriggerList_find(ctx->ActiveTriggerList, trig);
                 if (f) {
@@ -3291,7 +3288,6 @@ extern "C" void cScriptAlgorithm__cScriptAlgorithm(cScriptAlgorithm* self, int f
 }
 #endif
 
-typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos);
@@ -3307,9 +3303,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos
  * @param scriptAlgo  the script camera algorithm (this)
  * @return @p self, holding the target position
  */
-extern "C" void* cScriptAlgorithm_getTargetPos(void* self, cScriptAlgorithm* scriptAlgo)
+extern "C" t4Vector* cScriptAlgorithm_getTargetPos(t4Vector* self, cScriptAlgorithm* scriptAlgo)
 {
-    *(cQuad128*)self = *(cQuad128*)&scriptAlgo->Target;
+    *self = scriptAlgo->Target;
     return self;
 }
 #endif
@@ -3421,9 +3417,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_setBoundAct
  *
  * @param boundAction  the cCTActionBoundedCam to follow
  */
-void cBoundedAlgorithm::setBoundAction(int boundAction)
+void cBoundedAlgorithm::setBoundAction(cCTActionBoundedCam* boundAction)
 {
-    BoundAction = (cCTActionBoundedCam*)boundAction;
+    BoundAction = boundAction;
 }
 #endif
 //100%
@@ -3436,9 +3432,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_getBoundAct
  *
  * @return the cCTActionBoundedCam pointer at +0x80
  */
-int cBoundedAlgorithm::getBoundAction()
+cCTActionBoundedCam* cBoundedAlgorithm::getBoundAction()
 {
-    return ((int)BoundAction);
+    return BoundAction;
 }
 #endif
 //100%
@@ -3778,11 +3774,10 @@ extern "C" void descend(nash_Cell* node, CameraCollisionCallback* ctx)
             tCameraTrigger* trig = entry->Trigger;
             cBeing& rider = *ctx->rider;
             cCTVolume* volume = trig->Volume;
-            // the rider's getPosition (cBeing slot 5) and the volume's containsPoint (slot 7), called by hand
-            sVEntry<t4Vector*(void*)>* riderVt = *(sVEntry<t4Vector*(void*)>**)&rider;
+            // the volume's containsPoint (slot 7) is called by hand
             sVEntry<int(void*, t4Vector*)>* volumeVt = (sVEntry<int(void*, t4Vector*)>*)volume->mVtbl;
             void* volumeThis = vthis(volume, volumeVt[7]);
-            t4Vector* riderPos = riderVt[5].fn(vthis(&rider, riderVt[5]));
+            t4Vector* riderPos = rider.getPosition();
             if (volumeVt[7].fn(volumeThis, riderPos)) {
                 cActiveTriggerNode* existing = cActiveTriggerList_find(ctx->ActiveTriggerList, trig);
                 if (existing) {
@@ -3881,7 +3876,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm__cDE
 void* cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm(void* vself)
 {
     cDEFAULT_2ChaseAlgorithm* self = (cDEFAULT_2ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_2ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_2ChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4050,7 +4045,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm__cDE
 void* cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm(void* vself)
 {
     cDEFAULT_3ChaseAlgorithm* self = (cDEFAULT_3ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_3ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_3ChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4217,7 +4212,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm__cDE
 void* cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm(void* vself)
 {
     cDEFAULT_4ChaseAlgorithm* self = (cDEFAULT_4ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDEFAULT_4ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_4ChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4444,7 +4439,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm__cDi
 void* cDirectionChaseAlgorithm__cDirectionChaseAlgorithm(void* vself)
 {
     cDirectionChaseAlgorithm* self = (cDirectionChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cDirectionChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cDirectionChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4737,7 +4732,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm__cSPOKEC
 void* cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm(void* vself)
 {
     cSPOKEChaseAlgorithm* self = (cSPOKEChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cSPOKEChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cSPOKEChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -5307,8 +5302,8 @@ extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPECha
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     self->AlgorithmType = 67;
     VPTR_OF(cCameraAlgorithm, self) = cSUPERPIPEChaseAlgorithm_vtbl;
-    *(t4Vector*)&self->Point1 = *point1;
-    *(t4Vector*)&self->Point2 = *point2;
+    self->Point1 = *point1;
+    self->Point2 = *point2;
     return ((void*)self);
 }
 #endif
@@ -5331,7 +5326,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm__cSU
 void* cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm(void* vself)
 {
     cSUPERPIPEChaseAlgorithm* self = (cSUPERPIPEChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cSUPERPIPEChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cSUPERPIPEChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -5892,7 +5887,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm__c
 void* cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm(void* vself)
 {
     cPOST_RACE_1ChaseAlgorithm* self = (cPOST_RACE_1ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)((int)(void*)cPOST_RACE_1ChaseAlgorithm_vtbl);
+    VPTR_OF(cCameraAlgorithm, self) = (void**)cPOST_RACE_1ChaseAlgorithm_vtbl;
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif

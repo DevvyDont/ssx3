@@ -365,7 +365,7 @@ public:
     int GetCurrentZBufferPage() __asm__("cPS2GraphicsMan_GetCurrentZBufferPage");
     int GetCurrentFBFormat() __asm__("cPS2GraphicsMan_GetCurrentFBFormat");
     int GetCurrentZBFormat() __asm__("cPS2GraphicsMan_GetCurrentZBFormat");
-    int GetTextureMan() __asm__("cPS2GraphicsMan_GetTextureMan");
+    cTextureMan* GetTextureMan() __asm__("cPS2GraphicsMan_GetTextureMan");
     void SetMinFlipWait(int minWait) __asm__("cPS2GraphicsMan_SetMinFlipWait");
     int GetDisplayBufferAddress() __asm__("cPS2GraphicsMan_GetDisplayBufferAddress");
     int GetFrameBufferWidth() __asm__("cPS2GraphicsMan_GetFrameBufferWidth");
@@ -375,7 +375,7 @@ public:
     void SetScreenBrightness(float x) __asm__("cPS2GraphicsMan_SetScreenBrightness");
     float GetScreenBrightness() __asm__("cPS2GraphicsMan_GetScreenBrightness");
     void AddDMAToWorld(unsigned int buf, unsigned int next, int flag) __asm__("cPS2GraphicsMan_AddDMAToWorld");
-    int GetDeferMan() __asm__("cPS2GraphicsMan_GetDeferMan");
+    cPS2DeferManager* GetDeferMan() __asm__("cPS2GraphicsMan_GetDeferMan");
     void updateNetMat() __asm__("cPS2GraphicsMan_updateNetMat");
     int CalcSortZ(void* vec) __asm__("cPS2GraphicsMan_CalcSortZ");
     int projOutCode(t4Vector* vec) __asm__("cPS2GraphicsMan_projOutCode");

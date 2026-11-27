@@ -35,6 +35,7 @@
 //   [O] SSX On Tour's DWARF (cAnimComboNodeState, cAnimObjectNodeState, cAnimNodeState, cAnimNode, cAnimComboNode).
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -49,7 +50,8 @@ struct tMeshVelocity;
 // cAnimObjectNode_cAnimObjectNode1, which reads Type .. ForceVisible (object/animobject.h), then sets FromTime2 /
 // ToTime2 / AnimSpeed2 / Stop / StopInPlace from the second-phase fields.
 struct tMakeAnimComboData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] MakeAnimComboFunc's instance lookup (-1: the script's
+                                    //      current instance)
     int Type;                       // 0x04 [O]; [U] cAnimObjectNode ctor: -> AnimType
     int Dir;                        // 0x08 [O]; [U] cAnimObjectNode ctor: 1 negates AnimSpeed
     float FromTime;                 // 0x0C [O]; [U] cAnimObjectNode ctor: / 30 -> FromTime
@@ -64,10 +66,11 @@ struct tMakeAnimComboData {
     float ToTime2;                  // 0x2C [O]; [U] / 30 -> ToTime2 (< 0: the model's m_fAnimTime)
     float Speed2;                   // 0x30 [O]; [U] / 30 / TimerHz -> AnimSpeed2
     int Stop;                       // 0x34 [O]; [U] != 0 -> Stop, < 0 -> StopInPlace
-    char unk_038[0x4];              // 0x38 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x38 [O]
+    char unk_039[0x3];              // 0x39 padding
 };
 
-CHECK_OFFSET(tMakeAnimComboData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimComboData, InstId, 0x00);
 CHECK_OFFSET(tMakeAnimComboData, Type, 0x04);
 CHECK_OFFSET(tMakeAnimComboData, Dir, 0x08);
 CHECK_OFFSET(tMakeAnimComboData, FromTime, 0x0C);
@@ -81,7 +84,7 @@ CHECK_OFFSET(tMakeAnimComboData, FromTime2, 0x28);
 CHECK_OFFSET(tMakeAnimComboData, ToTime2, 0x2C);
 CHECK_OFFSET(tMakeAnimComboData, Speed2, 0x30);
 CHECK_OFFSET(tMakeAnimComboData, Stop, 0x34);
-CHECK_OFFSET(tMakeAnimComboData, unk_038, 0x38);
+CHECK_OFFSET(tMakeAnimComboData, null, 0x38);
 CHECK_SIZE(tMakeAnimComboData, 0x3C);
 
 struct cBxReplayFrame;

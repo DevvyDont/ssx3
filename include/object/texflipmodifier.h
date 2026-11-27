@@ -10,6 +10,7 @@
 // writeToReplayFrame cTexFlipModifier_writeToReplayFrame.
 
 #include "layout.h"
+#include "wscript/wscriptnull.h"
 #include "world/worldrecords.h" /* tMaterialRecord */
 
 struct tInstanceRecord;
@@ -19,20 +20,22 @@ struct tInstanceRecord;
 // (src/object/railmodifier.cpp) stores Type / Dir into the members of the same names, Speed / TimerHz as the rate,
 // and starts the flip at StartId (TexIndex).
 struct tAddTexFlipData {
-    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId;            // 0x00 [O] tResourceID; [U] AddTexFlipFunc's instance lookup (-1: the script's
+                                    //      current instance)
     int Type;                       // 0x04 [O]; [U] -> Type
     int StartId;                    // 0x08 [O]; [U] -> TexIndex (below 0: a random start)
     int Dir;                        // 0x0C [O]; [U] -> Dir
     float Speed;                    // 0x10 [O]; [U] Speed / TimerHz -> Speed and BaseSpeed
-    char unk_014[0x4];              // 0x14 [O] WScriptNullType null (1 byte) + padding
+    WScriptNullType null;           // 0x14 [O]
+    char unk_015[0x3];              // 0x15 padding
 };
 
-CHECK_OFFSET(tAddTexFlipData, unk_000, 0x00);
+CHECK_OFFSET(tAddTexFlipData, InstId, 0x00);
 CHECK_OFFSET(tAddTexFlipData, Type, 0x04);
 CHECK_OFFSET(tAddTexFlipData, StartId, 0x08);
 CHECK_OFFSET(tAddTexFlipData, Dir, 0x0C);
 CHECK_OFFSET(tAddTexFlipData, Speed, 0x10);
-CHECK_OFFSET(tAddTexFlipData, unk_014, 0x14);
+CHECK_OFFSET(tAddTexFlipData, null, 0x14);
 CHECK_SIZE(tAddTexFlipData, 0x18);
 
 // The modifier's private material block (On Tour struct tTexFlipMaterialBlockRecord : tMaterialBlockRecord, 0x84

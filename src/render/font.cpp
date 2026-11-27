@@ -2030,11 +2030,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState);
  *
  * Identical to cGraphicsMan_CurrentDrawState1.
  *
- * @return m_pCurrentDrawState (as an int)
+ * @return m_pCurrentDrawState
  */
-int cGraphicsMan::CurrentDrawState()
+sDrawState* cGraphicsMan::CurrentDrawState()
 {
-    return ((int)m_pCurrentDrawState);
+    return m_pCurrentDrawState;
 }
 #endif
 //100%
@@ -2045,11 +2045,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState1);
  *
  * Identical to cGraphicsMan_CurrentDrawState.
  *
- * @return m_pCurrentDrawState (as an int)
+ * @return m_pCurrentDrawState
  */
-int cGraphicsMan::CurrentDrawState1()
+sDrawState* cGraphicsMan::CurrentDrawState1()
 {
-    return ((int)m_pCurrentDrawState);
+    return m_pCurrentDrawState;
 }
 #endif
 //100%
@@ -2630,10 +2630,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_getGraphicsMan);
 /**
  * Returns the graphics manager singleton (cGraphicsMan_TheGraphicsMan).
  *
- * @return cGraphicsMan_TheGraphicsMan (as an int)
+ * @return cGraphicsMan_TheGraphicsMan
  */
-extern "C" int cGraphicsMan_getGraphicsMan(void) {
-    return *(int*)&cGraphicsMan_TheGraphicsMan;
+extern "C" cPS2GraphicsMan* cGraphicsMan_getGraphicsMan(void) {
+    return cGraphicsMan_TheGraphicsMan;
 }
 #endif
 //100%
@@ -2810,7 +2810,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_PopDrawState);
  */
 void cGraphicsMan::PopDrawState()
 {
-    m_pCurrentDrawState = (sDrawState*)((int) (((int)m_pCurrentDrawState) - 20));
+    m_pCurrentDrawState--;
 }
 #endif
 //100%
@@ -4290,9 +4290,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTextureMan);
  *
  * @return mTexMan
  */
-int cPS2GraphicsMan::GetTextureMan()
+cTextureMan* cPS2GraphicsMan::GetTextureMan()
 {
-    return ((int)mTexMan);
+    return mTexMan;
 }
 #endif
 //100%
@@ -4467,11 +4467,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDeferMan);
 /**
  * Returns the deferred-draw manager (mpDeferMan).
  *
- * @return mpDeferMan (as an int)
+ * @return mpDeferMan
  */
-int cPS2GraphicsMan::GetDeferMan()
+cPS2DeferManager* cPS2GraphicsMan::GetDeferMan()
 {
-    return ((int)mpDeferMan);
+    return mpDeferMan;
 }
 #endif
 //100%
@@ -4597,7 +4597,7 @@ void cPS2GraphicsMan_PopView(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     self->mMatricesValid = 0;
-    *(char**)&self->mCurrentView -= 0x40;
+    self->mCurrentView--;
     self->mViewStackIdx -= 1;
 }
 #endif
@@ -7696,7 +7696,7 @@ extern "C" int *cScreenTint_ColourB(void) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_FillR);
 #ifdef SKIP_ASM
-extern int cScreenTint_m_FillR;
+extern float cScreenTint_m_FillR;
 
 /**
  * Returns &cScreenTint_m_FillR, the float that item 6 of cScreenTintMenu_cScreenTintMenu edits as "Fill Red" (0 to 1).
@@ -7706,14 +7706,14 @@ extern int cScreenTint_m_FillR;
  *
  * @return &cScreenTint_m_FillR
  */
-extern "C" int *cScreenTint_FillR(void) {
+extern "C" float *cScreenTint_FillR(void) {
     return &cScreenTint_m_FillR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_FillG);
 #ifdef SKIP_ASM
-extern int cScreenTint_m_FillG;
+extern float cScreenTint_m_FillG;
 
 /**
  * Returns &cScreenTint_m_FillG, the float that item 7 of cScreenTintMenu_cScreenTintMenu edits as "Fill Green" (0 to
@@ -7724,14 +7724,14 @@ extern int cScreenTint_m_FillG;
  *
  * @return &cScreenTint_m_FillG
  */
-extern "C" int *cScreenTint_FillG(void) {
+extern "C" float *cScreenTint_FillG(void) {
     return &cScreenTint_m_FillG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_FillB);
 #ifdef SKIP_ASM
-extern int cScreenTint_m_FillB;
+extern float cScreenTint_m_FillB;
 
 /**
  * Returns &cScreenTint_m_FillB, the float that item 8 of cScreenTintMenu_cScreenTintMenu edits as "Fill Blue" (0 to 1).
@@ -7741,7 +7741,7 @@ extern int cScreenTint_m_FillB;
  *
  * @return &cScreenTint_m_FillB
  */
-extern "C" int *cScreenTint_FillB(void) {
+extern "C" float *cScreenTint_FillB(void) {
     return &cScreenTint_m_FillB;
 }
 #endif
@@ -8362,9 +8362,9 @@ INCLUDE_ASM("render/font", cScreenTint_Fill);
  * @param value  the fill level
  */
 extern "C" void cScreenTint_Fill(float value) {
-    *(float*)&cScreenTint_m_FillB = value;
-    *(float*)&cScreenTint_m_FillG = value;
-    *(float*)&cScreenTint_m_FillR = value;
+    cScreenTint_m_FillB = value;
+    cScreenTint_m_FillG = value;
+    cScreenTint_m_FillR = value;
 }
 #endif
 //100%
