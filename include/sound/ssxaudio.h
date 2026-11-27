@@ -714,6 +714,9 @@ struct cSSXAudio {
     void SoftGlideProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_SoftGlideProgram");
     void RailGlideProgram(cRider* rider, int* volume, int* pitch) __asm__("cSSXAudio_RailGlideProgram");
     void RiderCollision(cRider* rider, cRider* opponent) __asm__("cSSXAudio_RiderCollision");
+    void TurboOff(cRider* obj) __asm__("cSSXAudio_TurboOff");
+    void Update(float dt) __asm__("cSSXAudio_Update");
+    float Volume2Float(int n) __asm__("cSSXAudio_Volume2Float");
 };
 
 CHECK_OFFSET(cSSXAudio, mpVBankManager, 0x0);

@@ -445,27 +445,27 @@ extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, in
  * @param item  the popup state
  * @param msg  popup event code (kONPOPUPCREATE or kONPOPUPDESTROY)
  */
-extern "C" void cFEStateRequestLine_onPopupEvent(cFEStateRequestLine* self, cUIState* item, int msg)
+void cFEStateRequestLine::onPopupEvent(cUIState* item, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONPOPUPCREATE:
         if (item->mHashName != cUIStateBuyPopup::kStateID) {
-            self->mAttrState &= ~8;
+            mAttrState &= ~8;
         }
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (((self->mAttrState >> 3) & 1) == 0) {
-            self->mAttrState |= 8;
+        if (((mAttrState >> 3) & 1) == 0) {
+            mAttrState |= 8;
         }
         if (item->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)item)->mbAccept != 0) {
-            int song = self->mSongOrder[self->mFirstVisibleSong + self->mpRadioMenu->mpSelected->mMiscData];
-            self->buySong(song);
-            self->updatePlayList();
-            self->updateHilightedSongInfo(song);
-            self->updateCash();
-            self->updateFreeSongMarkers();
-            self->updateButtonsText(song);
-            self->updateHelpText(song);
+            int song = mSongOrder[mFirstVisibleSong + mpRadioMenu->mpSelected->mMiscData];
+            buySong(song);
+            updatePlayList();
+            updateHilightedSongInfo(song);
+            updateCash();
+            updateFreeSongMarkers();
+            updateButtonsText(song);
+            updateHelpText(song);
         }
         break;
     }

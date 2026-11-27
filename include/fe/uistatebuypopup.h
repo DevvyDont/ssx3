@@ -66,6 +66,9 @@ struct cUIStateBuyPopup : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cUIStateBuyPopup();
     virtual void onCreateScreen() __asm__("cUIStateBuyPopup_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cUIStateBuyPopup_onWidgetCreate");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cUIStateBuyPopup_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cUIStateBuyPopup_onWidgetEvent");
 };
 
 CHECK_OFFSET(cUIStateBuyPopup, mInfo, 0x048);

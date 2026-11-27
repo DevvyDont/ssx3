@@ -92,6 +92,7 @@ struct cDebounceNode : public cMoveNode {
     virtual bool updateNode() __asm__("cDebounceNode_updateNode");
     virtual void loseFocus() __asm__("cDebounceNode_loseFocus");
     virtual void expire(int check) __asm__("cDebounceNode_expire");
+    virtual void onCollide(const tCollideInfo*, const tIntersectInfo*, cBeing*) __asm__("cDebounceNode_onCollide__FPv");
 };
 
 CHECK_OFFSET(cDebounceNode, Life, 0x2C);

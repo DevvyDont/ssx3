@@ -2305,7 +2305,7 @@ extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
 
 
-#define S_02D0 ((char*)self)
+#define S_02D0 ((char*)this)
 #define CB_02D0(off) (*(int (**)())(S_02D0 + (off)))()
 
 /**
@@ -2318,86 +2318,86 @@ extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
  * goes to LoadStart (31), LoadFailed (36) or LoadCorrupt (37), delete to DeleteConfirm (24), cancel to Done
  * (1).
  */
-extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
+void cMCOverlayManager::UpdateLoad()
 {
-    if (self->mCheckCard)
+    if (mCheckCard)
         return;
     int quit = 0;
-    if (self->mSave || self->mDelete || CB_02D0(0x78))
+    if (mSave || mDelete || CB_02D0(0x78))
         quit = 1;
-    int held = self->mCurrDeviceStateLast;
-    int ready = self->updateDeviceStateMonitor();
+    int held = mCurrDeviceStateLast;
+    int ready = updateDeviceStateMonitor();
     if (!CB_02D0(0x78) && ready) {
 
-        if (self->mCurrDeviceStateLast & 8) {
-            if (self->mPollForNoCard || CB_02D0(0x78) || CB_02D0(104) || quit) {
-                self->TriggerPollNoCardError();
+        if (mCurrDeviceStateLast & 8) {
+            if (mPollForNoCard || CB_02D0(0x78) || CB_02D0(104) || quit) {
+                TriggerPollNoCardError();
                 return;
             }
         } else {
-            if (self->mPollForUnformatted && (self->mCurrDeviceStateLast & 0x10)) {
-                self->SetState(39);
+            if (mPollForUnformatted && (mCurrDeviceStateLast & 0x10)) {
+                SetState(39);
                 return;
             }
-            if (self->mCurrDeviceStateLast & 1) {
-                self->SetState(5);
+            if (mCurrDeviceStateLast & 1) {
+                SetState(5);
                 return;
             }
-            if (self->mPollForFullCard && (self->mCurrDeviceStateLast & 4)) {
-                self->SetState(23);
+            if (mPollForFullCard && (mCurrDeviceStateLast & 4)) {
+                SetState(23);
                 return;
             }
         }
-        if (!(self->mCurrDeviceStateLast & 8) && (held & 8)) {
-            self->InitiateFileCheck();
+        if (!(mCurrDeviceStateLast & 8) && (held & 8)) {
+            InitiateFileCheck();
             return;
         }
         int rel = held & ~4;
-        if (self->mCurrDeviceStateLast == 0 && rel) {
-            self->InitiateFileCheck();
+        if (mCurrDeviceStateLast == 0 && rel) {
+            InitiateFileCheck();
             return;
         }
     }
     if (!quit) {
-        if (self->mCardChanged) {
-            self->mCardChanged = 0;
-            self->RecheckCard();
+        if (mCardChanged) {
+            mCardChanged = 0;
+            RecheckCard();
         }
-        if (self->mCurrDeviceStateLast & 8) {
-            self->SetState(49);
+        if (mCurrDeviceStateLast & 8) {
+            SetState(49);
             return;
         }
     }
-    (self->callbackLoadReady)();
-    if ((self->mState ^ 0x1D) != 0)
+    (callbackLoadReady)();
+    if ((mState ^ 0x1D) != 0)
         return;
     if (CB_02D0(0x78)) {
-        if (self->mLoadOk) {
-            self->SetState(0x1F);
+        if (mLoadOk) {
+            SetState(0x1F);
             return;
         }
-        if (!self->mpMemCard->IsAvailable1()) {
-            self->SetState(36);
+        if (!mpMemCard->IsAvailable1()) {
+            SetState(36);
             return;
         }
-        if (!self->mpMemCard->HasFileName(self->mFileCursor)) {
-            self->SetState(37);
+        if (!mpMemCard->HasFileName(mFileCursor)) {
+            SetState(37);
             return;
         }
-        if (!self->mpMemCard->IsFileSlotBroken(self->mFileCursor))
+        if (!mpMemCard->IsFileSlotBroken(mFileCursor))
             return;
-        self->SetState(37);
+        SetState(37);
         return;
     }
     if (CB_02D0(104)) {
-        if (!self->mDeleteOk)
+        if (!mDeleteOk)
             return;
-        self->mpMemCard->GetTitleString(self->mFileCursor, self->mActiveTitleString);
-        self->SetState(0x18);
+        mpMemCard->GetTitleString(mFileCursor, mActiveTitleString);
+        SetState(0x18);
         return;
     }
     if (CB_02D0(108))
-        self->SetState(1);
+        SetState(1);
 }
 #undef CB_02D0
 #undef S_02D0

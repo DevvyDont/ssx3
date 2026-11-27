@@ -248,9 +248,9 @@ static inline t3VectorInit operator+(const t3Vector& a, const t3Vector& b)
  * @param Color  the vertex colours (a, r, g, b floats)
  * @param Offset  a translation added to every position
  */
-extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices,
-                                                  const t3Vector* Positions, const t2Vector* UV, const tARGB* Color,
-                                                  const t3Vector* Offset)
+void cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
+                                        const t3Vector* Positions, const t2Vector* UV, const tARGB* Color,
+                                        const t3Vector& Offset)
 {
     tBxVertex verts[3];
     (*(t4Vector*)&verts[2].u).z = 1.0f;
@@ -260,7 +260,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                verts[j].p = t4VectorInit(Positions[Index] + *Offset, 1.0f);
+                verts[j].p = t4VectorInit(Positions[Index] + Offset, 1.0f);
                 verts[j].a = (int)(Color[Index].A * 0.5f);
                 verts[j].r = (int)(Color[Index].R * 0.5f);
                 verts[j].g = (int)(Color[Index].G * 0.5f);
@@ -269,13 +269,13 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = UV[Index].Y();
             }
             Indices += 3;
-            self->RenderTriStrip(3, verts, 0);
+            RenderTriStrip(3, verts, 0);
         }
     } else {
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                verts[j].p = t4VectorInit(Positions[Index] + *Offset, 1.0f);
+                verts[j].p = t4VectorInit(Positions[Index] + Offset, 1.0f);
                 verts[j].a = (int)(Color[Index].A * 0.5f);
                 verts[j].r = (int)(Color[Index].R * 0.5f);
                 verts[j].g = (int)(Color[Index].G * 0.5f);
@@ -285,7 +285,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 (*(t4Vector*)&verts[j].u).y = 0.0f;
             }
             Indices += 3;
-            self->RenderTriStrip(3, verts, 0);
+            RenderTriStrip(3, verts, 0);
         }
     }
 }
@@ -581,16 +581,16 @@ static inline void gmMtxCopy_A2C0(t4Matrix* dst, t4Matrix* src)
  *
  * @param mat  the mesh matrix, updated in place
  */
-extern "C" void cGraphicsMan_DeformMeshMatrix(cGraphicsMan* self, t4Matrix* mat)
+void cGraphicsMan::DeformMeshMatrix(t4Matrix& mat)
 {
-    if (self->m_isInNIS[6] != 0) {
+    if (m_isInNIS[6] != 0) {
         t4Matrix result;
-        t4Vector pos = mat->row[3];
+        t4Vector pos = mat.row[3];
         t4Matrix product;
         t4Matrix* deform = cPlants_getDeformationMatrix(&pos);
-        gmMtxMul_A2C0(&product, mat, deform);
+        gmMtxMul_A2C0(&product, &mat, deform);
         gmMtxCopy_A2C0(&result, &product);
-        gmMtxCopy_A2C0(mat, &result);
+        gmMtxCopy_A2C0(&mat, &result);
     }
 }
 #endif

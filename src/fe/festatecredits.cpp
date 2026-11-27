@@ -367,7 +367,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetMenu);
  * @param Event  the menu event
  * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
-extern "C" int cFEStateCredits_onWidgetMenu(cFEStateCredits* self, int pMenu, unsigned int Event)
+int cFEStateCredits::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     switch (Event) {
     case cUIMenu::kONNEXT:
@@ -390,13 +390,13 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (only 6, back, is handled)
  */
-extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* item, int msg)
+void cFEStateCredits::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) != 0 && msg == cUIState::kONPREV) {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, 36);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, 36);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
     }
 }
@@ -459,13 +459,13 @@ extern sFlowState_865A8 gFlowState;
  * Finds the "Menu" object on the state's first screen and calls cFEFlowState_setValue (On Tour cFEFlowState::setValue)
  * on the flow state gFlowState with this state's id (+0xC) and the menu's selected index (+0x95).
  */
-extern "C" void cFEState_onLoseFocus(cFEState* self)
+void cFEState::onLoseFocus(cUIState*)
 {
-    void* screen = cList_first((cList*)(&self->mScreens));
+    void* screen = cList_first((cList*)(&mScreens));
     if (screen != 0) {
         cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (((void*)obj) != 0) {
-            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, (signed char)obj->mScrollItemCurrent);
+            cFEFlowState_setValue(&gFlowState, *(signed char*)&mHashName, (signed char)obj->mScrollItemCurrent);
         }
     }
 }

@@ -218,6 +218,7 @@ struct tActiveAvalanche {
     void buildArray() __asm__("tActiveAvalanche_buildArray");
     void render() __asm__("tActiveAvalanche_render");
     void update() __asm__("tActiveAvalanche_update");
+    void end() __asm__("tActiveAvalanche_end");
 };
 
 CHECK_OFFSET(tActiveAvalanche, m_avalanche, 0x000);

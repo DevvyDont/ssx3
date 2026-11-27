@@ -96,6 +96,11 @@ struct cFEStateChatRoom : public cFEStateNet {
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateChatRoom_onWidgetCreate");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChatRoom_onGainTransition");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateChatRoom_onInputBegin");
+    virtual void onWidgetEvent(cUIThing* msg, unsigned int ev) __asm__("cFEStateChatRoom_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* sender, unsigned int event, unsigned int value)
+        __asm__("cFEStateChatRoom_onWidgetMenu");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateChatRoom_onPopupEvent");
+    virtual void onMenuGainFocus(cUIGroup*) __asm__("cFEStateChatRoom_onMenuGainFocus__FPv");
 };
 
 CHECK_OFFSET(cFEStateChatRoom, mpQualityIcon, 0x6D0);

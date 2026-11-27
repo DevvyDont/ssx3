@@ -1273,22 +1273,23 @@ INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
  * @param flags  draw flags passed on to the graphics manager
  */
 // Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
-extern "C" void cMoveNode_renderModel(cMoveNode* self, t4Matrix* tex, int flags)
+void cMoveNode::renderModel(const t4Matrix* tex, int flags)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
-    sMnObj_6298* obj = ((sMnObj_6298*)self->Instance);
+    sMnObj_6298* obj = ((sMnObj_6298*)Instance);
     if (!Visible_6298(cam, obj)) {
         return;
     }
     void* rot = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     t4Matrix rm;
-    if (HasRot_6298(((sMnMod_6298*)self->ModifierBlock))) {
-        rot = RotOf_6298(((cMnNode_6298*)self), &rm);
+    if (HasRot_6298(((sMnMod_6298*)ModifierBlock))) {
+        rot = RotOf_6298(((cMnNode_6298*)this), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(((sMnMod_6298*)self->ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)self)) : ((sMnObj_6298*)self->Instance)->light;
-    gfx->RenderModel((const tInstanceRecord*)((sMnObj_6298*)self->Instance), (const tMaterialBlockRecord*)light, *(const t4Matrix*)t4mat_Identity, self->Fade, tex, (const t4Matrix*)rot, flags);
+    void* light = HasLight_6298(((sMnMod_6298*)ModifierBlock)) ? LightOf_6298(((cMnNode_6298*)this)) : ((sMnObj_6298*)Instance)->light;
+    gfx->RenderModel((const tInstanceRecord*)((sMnObj_6298*)Instance), (const tMaterialBlockRecord*)light,
+            *(const t4Matrix*)t4mat_Identity, Fade, tex, (const t4Matrix*)rot, flags);
 }
 #endif
 
@@ -1475,7 +1476,7 @@ void cMoveNode::updateOverlapSystem()
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_hasBoundBox);
 #ifdef SKIP_ASM
-extern "C" int tModifierBlock_getBoundBox(void*);
+extern "C" const tBoundBox* tModifierBlock_getBoundBox(void*);
 
 /**
  * Tells whether the node's modifier block provides a bounding box.
@@ -1494,14 +1495,14 @@ bool cMoveNode::hasBoundBox()
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_getBoundBox);
 #ifdef SKIP_ASM
-extern "C" int tModifierBlock_getBoundBox(void*);
+extern "C" const tBoundBox* tModifierBlock_getBoundBox(void*);
 
 /**
  * Returns the bounding box of the node's modifier block.
  *
  * @return tModifierBlock_getBoundBox() of the block at +0x1C, or 0 when the node has no modifier block
  */
-extern "C" int cMoveNode_getBoundBox(cMoveNode* self)
+extern "C" const tBoundBox* cMoveNode_getBoundBox(cMoveNode* self)
 {
     if (((void*)self->ModifierBlock) != 0) {
         return tModifierBlock_getBoundBox(((void*)self->ModifierBlock));
@@ -1576,10 +1577,10 @@ extern "C" void tModifierBlock_applyForce(void*);
  *
  * The intersect info and force (On Tour applyForce(intInfo, force)) pass through in their registers.
  */
-extern "C" void cMoveNode_applyForce(cMoveNode* self)
+void cMoveNode::applyForce(const tIntersectInfo&, const t4Vector&)
 {
-    if (((void*)self->ModifierBlock) != 0) {
-        tModifierBlock_applyForce(((void*)self->ModifierBlock));
+    if (((void*)ModifierBlock) != 0) {
+        tModifierBlock_applyForce(((void*)ModifierBlock));
     }
 }
 #endif
@@ -1595,10 +1596,10 @@ extern "C" void tModifierBlock_updateIntersectInfo(void*);
  * Does nothing without a modifier block. The intersect info (On Tour updateIntersectInfo(intInfo)) passes
  * through in its register.
  */
-extern "C" void cMoveNode_updateIntersectInfo(cMoveNode* self)
+void cMoveNode::updateIntersectInfo(tIntersectInfo&)
 {
-    if (((void*)self->ModifierBlock) != 0) {
-        tModifierBlock_updateIntersectInfo(((void*)self->ModifierBlock));
+    if (((void*)ModifierBlock) != 0) {
+        tModifierBlock_updateIntersectInfo(((void*)ModifierBlock));
     }
 }
 #endif
@@ -1614,10 +1615,10 @@ extern "C" void tModifierBlock_signal(void*);
  *
  * The signal number and argument (On Tour signal(int signal, float arg)) pass through in their registers.
  */
-extern "C" void cMoveNode_signal(cMoveNode* self)
+void cMoveNode::signal(int, float)
 {
-    if (((void*)self->ModifierBlock) != 0) {
-        tModifierBlock_signal(((void*)self->ModifierBlock));
+    if (((void*)ModifierBlock) != 0) {
+        tModifierBlock_signal(((void*)ModifierBlock));
     }
 }
 #endif
@@ -1700,15 +1701,15 @@ int cMultiSplineModifier_incFocusCount_2(void* self, void* a1) __asm__("cMultiSp
  * @param pInst  the instance gaining focus (unused by the counter)
  * @return the new count, or 0 when the node keeps no focus count
  */
-extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
+int cMoveNode::incFocusCount(tInstanceRecord* pInst)
 {
-    void* block = ((void*)self->ModifierBlock);
+    void* block = ((void*)ModifierBlock);
     if (block != 0) {
         void* node = *(void**)block;
         if (node != 0) {
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)node;
             if (vt[26].fn(vthis(node, vt[26])) == cTransformModifier::kTransform_MultiSpline) {
-                return cMultiSplineModifier_incFocusCount_2(*(void**)self->ModifierBlock, pInst);
+                return cMultiSplineModifier_incFocusCount_2(*(void**)ModifierBlock, pInst);
             }
         }
         return 0;
@@ -1736,15 +1737,15 @@ int cMultiSplineModifier_decFocusCount_2(void* self, void* a1) __asm__("cMultiSp
  * @param pInst  the instance losing focus (unused by the counter)
  * @return the new count, or 0 when the node keeps no focus count
  */
-extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
+int cMoveNode::decFocusCount(tInstanceRecord* pInst)
 {
-    void* block = ((void*)self->ModifierBlock);
+    void* block = ((void*)ModifierBlock);
     if (block != 0) {
         void* node = *(void**)block;
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
             if (vt[26].fn(vthis(node, vt[26])) == cTransformModifier::kTransform_MultiSpline) {
-                return cMultiSplineModifier_decFocusCount_2(*(void**)self->ModifierBlock, pInst);
+                return cMultiSplineModifier_decFocusCount_2(*(void**)ModifierBlock, pInst);
             }
         }
         return 0;

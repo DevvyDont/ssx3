@@ -242,6 +242,10 @@ struct cComputer {
     bool shouldRiderGrab() __asm__("cComputer_shouldRiderGrab");
     int updateRiderPathDifficulty(int RiderID, int Heat) __asm__("cComputer_updateRiderPathDifficulty");
     void followPathCruise(tCruiseCmd* cruiseCmd) __asm__("cComputer_followPathCruise");
+    void attackTargetCruise(tCruiseCmd* cmd) __asm__("cComputer_attackTargetCruise");
+    void avoidTargetCruise(tCruiseCmd* cmd) __asm__("cComputer_avoidTargetCruise");
+    float calcTurn(t4Vector* target) __asm__("cComputer_calcTurn");
+    void Init() __asm__("cComputer_Init");
 };
 
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);

@@ -81,6 +81,10 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateNetCreateRoomPopup();
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetCreateRoomPopup_onWidgetEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateNetCreateRoomPopup_onLoseTransition__FPv");
+    virtual void onUpdate() __asm__("cFEStateNetCreateRoomPopup_onUpdate__FPv");
+    virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetCreateRoomPopup_onWidgetPair__FPv");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetCreateRoomPopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

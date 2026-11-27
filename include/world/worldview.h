@@ -249,6 +249,8 @@ struct cWorldView {
     void setFocus(int id, const t4Vector& pos, float fRadius) __asm__("cWorldView_setFocus");
     void recursiveFlushPages(tBxBSPNode* node) __asm__("cWorldView_recursiveFlushPages");
     void recursiveIsEmptyPages(tBxBSPNode* node, int* ok) __asm__("cWorldView_recursiveIsEmptyPages");
+    float getDistanceToBox(const t4Vector& pos, const t4Vector& boxMin, const t4Vector& boxMax)
+        __asm__("cWorldView_getDistanceToBox");
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

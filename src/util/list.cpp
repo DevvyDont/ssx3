@@ -255,14 +255,13 @@ INCLUDE_ASM("util/list", cList_clear__FPv);
  * Points the list head (+0x0) at itself and the tail (+0x4) at the sentinel node (+0xC), whose next/prev (+0xC, +0x10)
  * point back at the head and itself.
  */
-void cList_clear(void* vself)
+void cList::clear()
 {
-    cList* self = (cList*)vself;
-    void* sentinel = (char*)&self->mEnd;
-    self->mStart.mpNext = (cListNode*)sentinel;
-    *(void**)&self->mEnd = ((void*)self);
-    self->mEnd.mpNext = (cListNode*)sentinel;
-    *(void**)self = ((void*)self);
+    void* sentinel = (char*)&mEnd;
+    mStart.mpNext = (cListNode*)sentinel;
+    *(void**)&mEnd = ((void*)this);
+    mEnd.mpNext = (cListNode*)sentinel;
+    *(void**)this = ((void*)this);
 }
 #endif
 
@@ -292,7 +291,7 @@ void cList::destroyList()
         delete n;
         n = nextNode;
     }
-    cList_clear(this);
+    this->clear();
 }
 #endif
 
@@ -327,7 +326,7 @@ public:
     cList_traverseFlat_cVirt* mpNext;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
-    virtual int traverseFlat(void*);
+    virtual void* traverseFlat(void*);
 };
 
 /**
@@ -337,14 +336,14 @@ public:
  * link first, and calls each node's slot 2 with the operator.
  *
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
- * @return the first nonzero node result, or 0 (On Tour returns void*)
+ * @return the first non-null node result, or 0
  */
-extern "C" int cList_traverseFlat(cList* self, cListOperator* pOperator)
+void* cList::traverseFlat(cListOperator* pOperator)
 {
-    cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)self->mStart.mpNext;
+    cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseFlat_cVirt* nextNode = n->mpNext;
-        int result = n->traverseFlat(pOperator);
+        void* result = n->traverseFlat(pOperator);
         if (result != 0) {
             return result;
         }
@@ -364,7 +363,7 @@ public:
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int traverseRecurse(void*);
+    virtual void* traverseRecurse(void*);
 };
 
 /**
@@ -373,14 +372,14 @@ public:
  * The same walk as cList_traverseFlat, calling each node's slot 3 (the recursive form) instead.
  *
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
- * @return the first nonzero node result, or 0 (On Tour returns void*)
+ * @return the first non-null node result, or 0
  */
-extern "C" int cList_traverseRecurse(cList* self, cListOperator* pOperator)
+void* cList::traverseRecurse(cListOperator* pOperator)
 {
-    cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)self->mStart.mpNext;
+    cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseRecurse_cVirt* nextNode = n->mpNext;
-        int result = n->traverseRecurse(pOperator);
+        void* result = n->traverseRecurse(pOperator);
         if (result != 0) {
             return result;
         }

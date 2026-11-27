@@ -64,14 +64,14 @@ extern int gTitleScreenDelay;
  *
  * @return true when the transition is done, false while waiting
  */
-extern "C" bool cFEStateTitle_onGainTransition(cFEStateTitle* self)
+bool cFEStateTitle::onGainTransition(int)
 {
     if (gTitleScreenDelay == 0 || --gTitleScreenDelay == 0) {
-        cUIThing* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
+        cUIThing* uiObj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
             uiObj->setFocus(1);
         }
-        uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_tReal));
+        uiObj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_tReal));
         if (uiObj != 0) {
             uiObj->setVisible(1);
         }
@@ -139,9 +139,8 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onPopupEvent__FPv);
 /**
  * Ignores popup events: the title state's onPopupEvent has an empty body.
  */
-void cFEStateTitle_onPopupEvent(void* vself)
+void cFEStateTitle::onPopupEvent(cUIState*, unsigned int)
 {
-    cFEStateTitle* self = (cFEStateTitle*)vself;
 }
 #endif
 
@@ -181,13 +180,13 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param msg  the widget (On Tour pWidget), despite the name
  * @param type  the widget event; only kONNEXT acts
  */
-extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, int type)
+void cFEStateTitle::onWidgetEvent(cUIThing* msg, unsigned int type)
 {
     if (type == cUIState::kONNEXT) {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getNextState((cUIState*)self, msg->mMiscData);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getNextState((cUIState*)this, msg->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
     }
 }
@@ -203,7 +202,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 (animation and sound) for kONNEXT, else 0x100 (animation only)
  */
-extern "C" int cFEStateTitle_onWidgetMenu(cFEStateTitle* self, int pMenu, int Event)
+int cFEStateTitle::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     return Event != cUIMenu::kONNEXT ? 0x100 : 257;
 }
@@ -600,11 +599,11 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetMenu);
  * @return for kONNEXT, 1 (sound only) while the choice flag +0x48 is 0, else 0x101; 0x100 for kONMISC; 0x101
  *         otherwise
  */
-extern "C" int cFEStateMainMenu_onWidgetMenu(cFEStateMainMenu* self, int pMenu, int Event)
+int cFEStateMainMenu::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     switch (Event) {
     case cUIMenu::kONNEXT:
-        return self->mGoToNextState == 0 ? 1 : 257;
+        return mGoToNextState == 0 ? 1 : 257;
     case cUIMenu::kONMISC:
         return 0x100;
     }
@@ -645,7 +644,7 @@ static inline void Show195328(void* self, char* name)
  * @param msg  the popup event (0x15, 0x16)
  */
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
-extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* obj, int msg)
+void cFEStateMainMenu::onPopupEvent(cUIState* obj, unsigned int msg)
 {
     if (msg == cUIState::kONPOPUPCREATE) {
         return;
@@ -654,16 +653,16 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
         return;
     }
     if ((int)obj->getData(0) != 0) {
-        self->mGoToNextState = 1;
-        int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
-        self->mCurrentCtrl = savedCtrl;
-        cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
-        self->onWidgetEvent(self->mpSelectMultiModeWidget, 5);
+        mGoToNextState = 1;
+        int savedCtrl = *(signed char*)&mSaveCurrentCtrl;
+        mCurrentCtrl = savedCtrl;
+        cUIThing_playKeyframerEvent(mpSelectMultiModeWidget, 2);
+        onWidgetEvent(mpSelectMultiModeWidget, 5);
     }
-    Show195328(self, str_hl);
-    Show195328(self, str_3_help_multi);
-    Show195328(self, str_btext5);
-    Show195328(self, str_ps2sq);
+    Show195328(this, str_hl);
+    Show195328(this, str_3_help_multi);
+    Show195328(this, str_btext5);
+    Show195328(this, str_ps2sq);
 }
 #endif
 

@@ -62,6 +62,13 @@ struct cFloatingNode : public cMoveNode {
     virtual void restoreOverlapSystem() __asm__("cFloatingNode_restoreOverlapSystem");
     virtual bool updateNode() __asm__("cFloatingNode_updateNode");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFloatingNode_writeToReplayFrame");
+    virtual void* getNodeState() __asm__("cFloatingNode_getNodeState__FPv");
+    virtual const tBoundBox* getBoundBox() const __asm__("cFloatingNode_getBoundBox");
+    virtual bool hasAnimMats() const __asm__("cFloatingNode_hasAnimMats__FPv");
+    virtual const t4Matrix* getAnimMats() __asm__("cFloatingNode_getAnimMats");
+    virtual const t4Matrix* getAnimMat(int i) __asm__("cFloatingNode_getAnimMat");
+    virtual void updateRootTransform() __asm__("cFloatingNode_updateRootTransform");
+    virtual void makeAnimMats(const t4Matrix* mat, t4Matrix* out) __asm__("cFloatingNode_makeAnimMats");
 };
 
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);

@@ -334,10 +334,11 @@ static inline void refresh_1620(sWidget_1620* w)
  * "titlesel_character_multi" shows the player 1 or 2 title (by mUserNum); on other paths that one is hidden.
  * Texts "0" to "9" get the selectable characters' names, their index as id, and start hidden.
  *
- * @param w  the widget being created
+ * @param pWidget  the widget being created
  */
-extern "C" void cFEStateCharSelect_onWidgetCreate(cFEStateCharSelect* self, sWidget_1620* w)
+void cFEStateCharSelect::onWidgetCreate(cUIThing* pWidget)
 {
+    sWidget_1620* w = (sWidget_1620*)pWidget;
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_names_menu)) {
         w->b0 = 0;
@@ -352,7 +353,7 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(cFEStateCharSelect* self, sWid
     }
     if (hashName == GetHashValue32(str_titlesel_character_multi)) {
         if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-            switch (self->mUserNum) {
+            switch (mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer1SelectCharacter));
                 break;
@@ -459,54 +460,55 @@ static inline void refresh_17E8(sIface_17E8* iface)
  * stores the choice; kONLOSEFOCUS hides the name. kONPREV pushes the previous state; kONOPTION opens "FEOptions"
  * (state bits 0x100); kONMISC opens "cFEStateProfileLoad" for this controller.
  *
- * @param widget  the widget (ignored when 0); its id (+0x18) is the character index
+ * @param pWidget  the widget, viewed as widget (ignored when 0); its id (+0x18) is the character index
  * @param event  the widget event
  */
 // Character select: widget event handler.
-extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_17E8* widget, int event)
+void cFEStateCharSelect::onWidgetEvent(cUIThing* pWidget, unsigned int event)
 {
+    sObj_17E8* widget = (sObj_17E8*)pWidget;
     if (widget == 0)
         return;
     switch (event) {
     case cUIState::kONNEXT: {
         int on = 1;
-        cFERider* feRider = (cFERider*)riderSlot_17E8((self));
+        cFERider* feRider = (cFERider*)riderSlot_17E8((this));
         feRider->mSelected = on;
         feRider->mCustomized = 0;
-        int rider = self->mUserNum;
-        int player = self->mCurrentCtrl;
+        int rider = mUserNum;
+        int player = mCurrentCtrl;
         int ch = D_00440F68[widget->id];
-        int board = self->mCheatCharID;
+        int board = mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
         cBENewPlayerInterface_setPlayerCheatCharID(iface, rider, board);
         refresh_17E8(iface);
-        unsigned char mask = on << self->mCurrentCtrl;
-        cFECustom_setPlayerCtrlMask(*(void**)(char*)self->mpEngine, self->mUserNum, mask);
-        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect((self), widget->id);
+        unsigned char mask = on << mCurrentCtrl;
+        cFECustom_setPlayerCtrlMask(*(void**)(char*)mpEngine, mUserNum, mask);
+        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)mpEngine)->onSelect((this), widget->id);
         if (((void*)st) != 0)
-            cUIStateStack_push(&self->mpEngine->mStateStack, st);
-        cFERider_setVisible(riderSlot_17E8((self)), 0);
-        self->mbDraw3D = 0;
+            cUIStateStack_push(&mpEngine->mStateStack, st);
+        cFERider_setVisible(riderSlot_17E8((this)), 0);
+        mbDraw3D = 0;
         break;
     }
     case cUIState::kONPREV: {
-        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack((self), widget->id);
+        cUIState* st = (cUIState*)(*(cStateFactory_17E8**)(char*)mpEngine)->onBack((this), widget->id);
         if (((void*)st) != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, st);
-            cFERider_setVisible(riderSlot_17E8((self)), 0);
-            self->mbDraw3D = 0;
+            cUIStateStack_push(&mpEngine->mStateStack, st);
+            cFERider_setVisible(riderSlot_17E8((this)), 0);
+            mbDraw3D = 0;
         }
         break;
     }
     case cUIState::kONGAINFOCUS: {
         widget->setVisible(1);
-        cFEStateCharSelect_updateWidget((self), self->mUserNum, D_00440F68[widget->id]);
-        int rider = self->mUserNum;
-        int player = self->mCurrentCtrl;
+        cFEStateCharSelect_updateWidget((this), mUserNum, D_00440F68[widget->id]);
+        int rider = mUserNum;
+        int player = mCurrentCtrl;
         int ch = D_00440F68[widget->id];
-        int board = self->mCheatCharID;
+        int board = mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
@@ -522,26 +524,27 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         break;
     case cUIState::kONOPTION: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, mUserNum, mCurrentCtrl);
         refresh_17E8(iface);
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
+        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
-        cFERider_setVisible(riderSlot_17E8((self)), 0);
-        self->mbDraw3D = 0;
+        cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
+        cFERider_setVisible(riderSlot_17E8((this)), 0);
+        mbDraw3D = 0;
         break;
     }
     case cUIState::kONMISC: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, mUserNum, mCurrentCtrl);
         refresh_17E8(iface);
-        cUIState* st = (cUIState*)cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), (char*)self->mpEngine, 2, 1 << self->mCurrentCtrl);
-        cUIStateStack_push(&self->mpEngine->mStateStack, st);
-        char* top = *(char**)(char*)self->mpEngine;
+        cUIState* st = (cUIState*)cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad,
+                0x100, 0), (char*)mpEngine, 2, 1 << mCurrentCtrl);
+        cUIStateStack_push(&mpEngine->mStateStack, st);
+        char* top = *(char**)(char*)mpEngine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;
-        cFERider_setVisible(riderSlot_17E8((self)), 0);
-        self->mbDraw3D = 0;
+        cFERider_setVisible(riderSlot_17E8((this)), 0);
+        mbDraw3D = 0;
         break;
     }
     }
@@ -908,50 +911,52 @@ static inline void vcall_2460(sCW_2460* w, int k, int v)
  * "nametext" starts empty. The six picture slots ("pic1" ...) take the first entries' values; slots past the
  * entry count are hidden and disabled, and the first slot gets the highlight colour.
  *
- * @param w  the widget being created
+ * @param pWidget  the widget being created
  */
-extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* self, sCW_2460* w)
+void cFEStateCheatCharSelect::onWidgetCreate(cUIThing* pWidget)
 {
+    sCW_2460* w = (sCW_2460*)pWidget;
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_6pics)) {
-        self->mpMenu = (cUIMenu*)w;
+        mpMenu = (cUIMenu*)w;
         w->id18 = 0;
-        ((sCW_2460*)self->mpMenu)->b0 = 0;
-        if (self->mNumCharacters >= 6) cUIMenu_setScrollableMenu(((sCW_2460*)self->mpMenu), self->mNumCharacters);
+        ((sCW_2460*)mpMenu)->b0 = 0;
+        if (mNumCharacters >= 6) cUIMenu_setScrollableMenu(((sCW_2460*)mpMenu), mNumCharacters);
         return;
     }
     if (hashName == GetHashValue32(str_arrowleft)) {
-        self->mpArrowPrev = (cUIThing*)w;
-        vcall_2460(w, 9, self->mNumCharacters >= 7);
+        mpArrowPrev = (cUIThing*)w;
+        vcall_2460(w, 9, mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_arrowright)) {
-        self->mpArrowNext = (cUIThing*)w;
-        vcall_2460(w, 9, self->mNumCharacters >= 7);
+        mpArrowNext = (cUIThing*)w;
+        vcall_2460(w, 9, mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_nametext)) {
-        self->mpNameWidget = (cUIText*)w;
+        mpNameWidget = (cUIText*)w;
         cUIText_setAsciiString((cUIText*)w, str_empty_d);
         return;
     }
     int i = 0;
     char** tb = D_00440FA0;
-    sCW_2460** sp = ((sCW_2460**)&self->mpCharWidget[0]);
+    sCW_2460** sp = ((sCW_2460**)&mpCharWidget[0]);
     for (; i < 6; sp++, tb++, i++) {
         if (hashName == GetHashValue32(*tb)) {
             *sp = w;
             w->id18 = i;
             if (i == 0) {
-                sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*, void*)>*)((sCW_2460*)self->mpCharWidget[0])->vt)[21];
-                vtEntry->fn((char*)self->mpCharWidget[0] + vtEntry->delta, gBigSize);
+                sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*,
+                        void*)>*)((sCW_2460*)mpCharWidget[0])->vt)[21];
+                vtEntry->fn((char*)mpCharWidget[0] + vtEntry->delta, gBigSize);
             }
-            if (i >= self->mNumCharacters) {
+            if (i >= mNumCharacters) {
                 vcall_2460(*sp, 9, 0);
                 vcall_2460(*sp, 8, 1);
             } else {
                 sCW_2460* sl = *sp;
-                sl->f7C = (&((int*)&self->mpCharElem[0])[0])[i];
+                sl->f7C = (&((int*)&mpCharElem[0])[0])[i];
                 sl->f78 = -1;
             }
         }

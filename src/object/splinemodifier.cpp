@@ -540,37 +540,37 @@ static inline void vu0AddTo_9CF8(t4Vector& a, const t4Vector& b)
  *
  * @param body  the intersect info to update (On Tour tIntersectInfo&: Ipos +0x0, Ivel +0x20, Iangvel +0x30)
  */
-extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, tIntersectInfo* body)
+void cSplineModifier::updateIntersectInfo(tIntersectInfo& body)
 {
-    cSplineModifierState* state = (cSplineModifierState*)&self->BoundBox; // the cSplineModifierState part (+0x10)
-    if (self->Start == 0) {
+    cSplineModifierState* state = (cSplineModifierState*)&BoundBox; // the cSplineModifierState part (+0x10)
+    if (Start == 0) {
         return;
     }
-    if (self->Complete != 0) {
+    if (Complete != 0) {
         return;
     }
     float rateY = 0.0f;
     float rateZ = rateY;
-    float dirX = self->Dir.x;
+    float dirX = Dir.x;
     if (9.999999747378752e-06f < Abs_9CF8(dirX)) {
-        float ddirY = self->DDir.y;
-        float ddirX = self->DDir.x;
-        float selfX2 = self->X2;
-        float sum = selfX2 + self->Y2;
+        float ddirY = DDir.y;
+        float ddirX = DDir.x;
+        float selfX2 = X2;
+        float sum = selfX2 + Y2;
         rateZ = -selfX2 / sum;
-        rateZ *= ddirY / dirX - self->Dir.y * ddirX / selfX2;
-        rateY = (1.0f / Sqrt_9CF8(sum)) * (self->DDir.z - self->Dir.z * (ddirX + ddirY) / sum);
+        rateZ *= ddirY / dirX - Dir.y * ddirX / selfX2;
+        rateY = (1.0f / Sqrt_9CF8(sum)) * (DDir.z - Dir.z * (ddirX + ddirY) / sum);
     }
-    t4Vector vel = vu0Scale_9CF8(vu0Normalize_9CF8(self->Dir), state->Velocity);
+    t4Vector vel = vu0Scale_9CF8(vu0Normalize_9CF8(Dir), state->Velocity);
     t4Vector w;
     w.x = 0.0f;
-    w.z = rateZ * self->Velocity;
-    w.y = rateY * self->Velocity;
+    w.z = rateZ * Velocity;
+    w.y = rateY * Velocity;
     w.w = 0.0f;
-    w = vu0MulMat_9CF8(&(*(&self->Transform)), w);
-    t4Vector relPos = vu0Sub_9CF8(body->Ipos, *(t4Vector*)&self->Pos);
-    vu0AddTo_9CF8(body->Ivel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
-    vu0AddTo_9CF8(body->Iangvel, w);
+    w = vu0MulMat_9CF8(&(*(&Transform)), w);
+    t4Vector relPos = vu0Sub_9CF8(body.Ipos, *(t4Vector*)&Pos);
+    vu0AddTo_9CF8(body.Ivel, vu0Add_9CF8(vel, vu0Cross_9CF8(relPos, w)));
+    vu0AddTo_9CF8(body.Iangvel, w);
 }
 #endif
 
@@ -589,19 +589,19 @@ extern "C" void cSplineModifier_setSpeed(void* self);
  *
  * @param msg  signal id (On Tour signal)
  */
-extern "C" void cSplineModifier_signal(cSplineModifier* self, int msg)
+void cSplineModifier::signal(int msg, float)
 {
     if (msg == kSplineSignal_SetSpeed) {
-        cSplineModifier_setSpeed(self);
-        self->Complete = 0;
-        self->Start = 1;
+        cSplineModifier_setSpeed(this);
+        Complete = 0;
+        Start = 1;
     } else if (msg == kSplineSignal_Start) {
-        self->Complete = 0;
-        self->Start = 1;
+        Complete = 0;
+        Start = 1;
     } else if (msg == kSplineSignal_Reverse) {
-        self->Velocity = -self->Velocity;
-        self->Complete = 0;
-        self->Start = 1;
+        Velocity = -Velocity;
+        Complete = 0;
+        Start = 1;
     }
 }
 #endif
@@ -938,13 +938,10 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateRootTransform__F
 #ifdef SKIP_ASM
 /**
  * Updates the multi-spline modifier's root transform by updating its nodes.
- *
- * @return the result of cMultiSplineModifier_updateNodes()
  */
-void* cMultiSplineModifier_updateRootTransform(void* vself)
+void cMultiSplineModifier::updateRootTransform()
 {
-    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
-    return ((cMultiSplineModifier*)self)->updateNodes();
+    ((cMultiSplineModifier*)this)->updateNodes();
 }
 #endif
 
@@ -1334,20 +1331,20 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_getAnimMats);
  * @param item  the instance record to draw (On Tour tInstanceRecord* inst)
  * @return the animation matrices, or 0 when the model instance has none
  */
-extern "C" int cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, tInstanceRecord* item)
+extern "C" const t4Matrix* cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, tInstanceRecord* item)
 {
     tInstanceRecord* cur = self->Instance;
     if (((void*)item) == ((void*)cur)) {
         cInstanceNode* obj = item->m_pActiveNode;
         if (obj->hasAnimMats()) {
             obj = self->Instance->m_pActiveNode;
-            return (int)obj->getAnimMats();
+            return obj->getAnimMats();
         }
         return 0;
     }
     cInstanceNode* obj = cur->m_pActiveNode;
     obj->makeAnimMats((const t4Matrix*)&item->m_fmTransform, self->AnimMats);
-    return (int)self->AnimMats;
+    return self->AnimMats;
 }
 #endif
 
@@ -1417,13 +1414,11 @@ public:
  *
  * Calls virtual slot 51 (updateRootTransform in cMoveNode's vtable) of the node of the model instance (+0x40,
  * node at +0xC).
- *
- * @return no meaningful value (the virtual returns void; On Tour's postUpdate returns nothing)
  */
-extern "C" int cMultiSplineModifier_postUpdate(cMultiSplineModifier* self)
+void cMultiSplineModifier::postUpdate()
 {
-    cSplineVirt* splineObj = (cSplineVirt*)self->Instance->m_pActiveNode;
-    return splineObj->updateRootTransform();
+    cSplineVirt* splineObj = (cSplineVirt*)Instance->m_pActiveNode;
+    splineObj->updateRootTransform();
 }
 #endif
 
@@ -1790,15 +1785,15 @@ INCLUDE_ASM("object/splinemodifier", cRailLink_add);
  *
  * @param node  the link to insert (On Tour cRailLink* effect)
  */
-extern "C" void cRailLink_add(cRailLink* self, cRailLink* node)
+void cRailLink::add(cRailLink* node)
 {
-    cRailLink* head = (cRailLink*)(*(void**)self);
+    cRailLink* head = (cRailLink*)(*(void**)this);
     if (((void*)head) != 0) {
         head->Prev = (cRailLink*)((void*)node);
     }
-    node->Prev = (cRailLink*)((void*)self);
-    *(void**)node = *(void**)self;
-    *(void**)self = ((void*)node);
+    node->Prev = (cRailLink*)((void*)this);
+    *(void**)node = *(void**)this;
+    *(void**)this = ((void*)node);
 }
 #endif
 

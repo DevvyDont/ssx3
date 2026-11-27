@@ -30,6 +30,10 @@ struct cFEStateOptionsGame : public cUIState {
     virtual ~cFEStateOptionsGame();
     virtual void onCreateScreen() __asm__("cFEStateOptionsGame_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsGame_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateOptionsGame_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cFEStateOptionsGame_onWidgetMenu");
+    virtual int onWidgetPair(cUIPair* pair, unsigned int event) __asm__("cFEStateOptionsGame_onWidgetPair");
 };
 
 CHECK_OFFSET(cFEStateOptionsGame, mLanguageSlot, 0x048);

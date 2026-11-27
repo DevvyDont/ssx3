@@ -45,6 +45,7 @@ struct cFEStateLegal : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateLegal();
     virtual void onCreateScreen() __asm__("cFEStateLegal_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateLegal_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateLegal, mDisplayTicks, 0x048);

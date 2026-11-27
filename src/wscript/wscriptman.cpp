@@ -2340,7 +2340,7 @@ void cWScriptMan::failActiveLocalMission()
         *(int*)process = 0;
         cProcessList_addProcess((char*)&IdleList, process);
     }
-    tMissionMenuQueue_empty(&MissionMenuQueue);
+    MissionMenuQueue.empty();
 }
 #endif
 
@@ -3147,7 +3147,7 @@ extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self);
  */
 extern "C" void* tMissionMenuQueue_tMissionMenuQueue(tMissionMenuQueue* self)
 {
-    tMissionMenuQueue_init(self);
+    self->init();
     return ((void*)self);
 }
 #endif
@@ -3162,11 +3162,11 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  *
  * Sets the read (+0x0) and write (+0x4) positions to 0 and fills the 16 twelve-byte entries from +0x8 with zero.
  */
-extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self)
+void tMissionMenuQueue::init()
 {
-    *(int*)self = 0;
-    self->Next = 0;
-    MEM_fill(&self->Queue[0], 0, 0xC0);
+    *(int*)this = 0;
+    Next = 0;
+    MEM_fill(&Queue[0], 0, 0xC0);
 }
 #endif
 
@@ -3179,11 +3179,11 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * Empties a mission menu queue: the read (+0x0) and write (+0x4) positions become 0 and the 16 entries (+0x8, 0xC0
  * bytes) are zeroed. Same body as tMissionMenuQueue_init.
  */
-extern "C" void tMissionMenuQueue_empty(tMissionMenuQueue* self)
+void tMissionMenuQueue::empty()
 {
-    *(int*)self = 0;
-    self->Next = 0;
-    MEM_fill(&self->Queue[0], 0, 0xC0);
+    *(int*)this = 0;
+    Next = 0;
+    MEM_fill(&Queue[0], 0, 0xC0);
 }
 #endif
 

@@ -172,6 +172,7 @@ struct cAnimComboNode {
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAnimComboNode_writeToReplayFrame");
     void cacheFrame() __asm__("cAnimComboNode_cacheFrame");
     int getAnimDir() __asm__("cAnimComboNode_getAnimDir");
+    void* getNodeState() __asm__("cAnimComboNode_getNodeState__FPv");
 };
 
 CHECK_OFFSET(cAnimComboNode, AnimSpeed2, 0x00);

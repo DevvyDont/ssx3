@@ -1433,11 +1433,11 @@ INCLUDE_ASM("ui/uiscreen", cUISlider_setUIData);
  *
  * The record (On Tour tUIBaseObject* pUIBase) is not declared here; it stays in $a1 for the cUIThing call.
  */
-extern "C" void cUISlider_setUIData(cUISlider* self)
+void cUISlider::setUIData(tUIBaseObject*)
 {
-    cUIThing_setUIData(self);
-    self->mNumValues = 10;
-    self->mBackWidth = 100;
+    cUIThing_setUIData(this);
+    mNumValues = 10;
+    mBackWidth = 100;
 }
 #endif
 
@@ -1466,34 +1466,34 @@ struct cUISlider_onInput_sVEntryS {
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return true for left or right (even at the end of the range), else false (On Tour returns bool)
  */
-extern "C" bool cUISlider_onInput(cUISlider* self, cUIInput* input)
+bool cUISlider::onInput(const cUIInput* input)
 {
-    char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)self)))->mpSound;
+    char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)this)))->mpSound;
     char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
     if (input->isLeft()) {
-        if (self->mValue > 0) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
+        if (mValue > 0) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 8);
             if (ev != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
-            self->mValue = self->mValue - 1;
-            cUIState* mgr = self->mpScreen->mpState;
-            mgr->onWidgetEvent((cUIThing*)self, cUIState::kONCHANGE);
+            mValue = mValue - 1;
+            cUIState* mgr = mpScreen->mpState;
+            mgr->onWidgetEvent((cUIThing*)this, cUIState::kONCHANGE);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
         return true;
     }
     if (input->isRight()) {
-        if (self->mValue + 1 < self->mNumValues) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
+        if (mValue + 1 < mNumValues) {
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 9);
             if (ev != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
-            self->mValue = self->mValue + 1;
-            cUIState* mgr = self->mpScreen->mpState;
-            mgr->onWidgetEvent((cUIThing*)self, cUIState::kONCHANGE);
+            mValue = mValue + 1;
+            cUIState* mgr = mpScreen->mpState;
+            mgr->onWidgetEvent((cUIThing*)this, cUIState::kONCHANGE);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(vthis(snd, vs[2]), 1);
         }
@@ -1709,13 +1709,10 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys all screens of a UI state by destroying its screen list (mScreens, +0x24) with cList_destroyList().
- *
- * @return cList_destroyList()'s return value (On Tour's onDestroyScreen returns nothing)
  */
-void* cUIState_onDestroyScreen(void* vself)
+void cUIState::onDestroyScreen()
 {
-    cUIState* self = (cUIState*)vself;
-    return cList_destroyList((&self->mScreens));
+    cList_destroyList((&mScreens));
 }
 #endif
 
@@ -1731,12 +1728,12 @@ void* cList_first(cList*);
  *
  * On Tour passes the previous state; this build's declaration drops it.
  */
-extern "C" void cUIState_onGainFocus(cUIState* self)
+void cUIState::onGainFocus(cUIState*)
 {
-    cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
+    cUIScreen* n = (cUIScreen*)cList_first((cList*)&mScreens);
     if (((void*)n) != 0) {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, self);
-        vt[13].fn(vthis(self, vt[13]), (char*)&n->mRootGroup);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)VPTR_OF(cListNode, this);
+        vt[13].fn(vthis(this, vt[13]), (char*)&n->mRootGroup);
     }
 }
 #endif
@@ -1747,9 +1744,8 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onInputAlways__FPv);
 /**
  * Does nothing: the base UI state's onInputAlways has an empty body.
  */
-void cUIState_onInputAlways(void* vself)
+void cUIState::onInputAlways(cUIInput*)
 {
-    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -1792,18 +1788,18 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
  * with its enabled bit set gets it through its virtual slot 4 until one returns non-zero. Virtual slot 9
  * (cUIState_onInputAlways) is then called and the loop stops.
  */
-extern "C" void cUIState_onUpdate(cUIState* self)
+void cUIState::onUpdate()
 {
-    int mask = (signed char)self->mCtrlBits;
-    cUIInput* input = (cUIInput*)((char*)self->mpEngine->mpInput);
-    self->mCurrentCtrl = 0;
+    int mask = (signed char)mCtrlBits;
+    cUIInput* input = (cUIInput*)((char*)mpEngine->mpInput);
+    mCurrentCtrl = 0;
     do {
-        input->setPadNum((unsigned char)self->mCurrentCtrl);
+        input->setPadNum((unsigned char)mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
-                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, self);
-                if (!vs[8].fn(vthis(self, vs[8]), ((char*)input))) {
-                    cUIScreen* n = (cUIScreen*)cList_first((cList*)(&self->mScreens));
+                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, this);
+                if (!vs[8].fn(vthis(this, vs[8]), ((char*)input))) {
+                    cUIScreen* n = (cUIScreen*)cList_first((cList*)(&mScreens));
                     if (((char*)n) != 0) {
                         do {
                             if (n->mAttrScreen & 1) {
@@ -1814,14 +1810,14 @@ extern "C" void cUIState_onUpdate(cUIState* self)
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
-                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)VPTR_OF(cListNode, self);
-                vs2[9].fn(vthis(self, vs2[9]), ((char*)input));
+                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)VPTR_OF(cListNode, this);
+                vs2[9].fn(vthis(this, vs2[9]), ((char*)input));
                 break;
             }
         }
         mask >>= 1;
-    } while (++self->mCurrentCtrl < 2);
-    self->mCurrentCtrl = -1;
+    } while (++mCurrentCtrl < 2);
+    mCurrentCtrl = -1;
 }
 #endif
 

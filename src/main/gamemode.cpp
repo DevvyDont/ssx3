@@ -1181,9 +1181,9 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_writeToReplayFrame);
  *
  * @param stream  the replay stream
  */
-extern "C" void cGMBigAirHandler_writeToReplayFrame(cGMBigAirHandler* self, cBxReplayFrame* stream)
+void cGMBigAirHandler::writeToReplayFrame(cReplayFramePtr* stream)
 {
-    stream->write((char*)&self->uiScore[0][0], 160);
+    stream->write((char*)&uiScore[0][0], 160);
 }
 #endif
 
@@ -1199,9 +1199,9 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMBigAirHandler_readFromReplayFrame(cGMBigAirHandler* self, cBxReplayFrame* stream)
+void cGMBigAirHandler::readFromReplayFrame(cReplayFramePtr* stream)
 {
-    stream->read((char*)&self->uiScore[0][0], 160);
+    stream->read((char*)&uiScore[0][0], 160);
 }
 #endif
 
@@ -1847,9 +1847,8 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_riderGateHit__FPv);
 /**
  * Does nothing: slot +0x3C (riderGateHit) of the timed event handler's vtable cGMRaceHandler_vtbl.
  */
-void cGMRaceHandler_riderGateHit(void* vself)
+void cGMRaceHandler::riderGateHit(int, int)
 {
-    cGMRaceHandler* self = (cGMRaceHandler*)vself;
 }
 #endif
 
@@ -1865,9 +1864,9 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_writeToReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMRaceHandler_writeToReplayFrame(cGMRaceHandler* self, cBxReplayFrame* stream)
+void cGMRaceHandler::writeToReplayFrame(cReplayFramePtr* stream)
 {
-    stream->write((const char*)self, 208);
+    stream->write((const char*)this, 208);
 }
 #endif
 
@@ -1882,9 +1881,9 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMRaceHandler_readFromReplayFrame(cGMRaceHandler* self, cBxReplayFrame* stream)
+void cGMRaceHandler::readFromReplayFrame(cReplayFramePtr* stream)
 {
-    stream->read((char*)self, 208);
+    stream->read((char*)this, 208);
 }
 #endif
 
@@ -2035,9 +2034,9 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_writeToReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMMPRaceHandler_writeToReplayFrame(cGMMPRaceHandler* self, cBxReplayFrame* stream)
+void cGMMPRaceHandler::writeToReplayFrame(cReplayFramePtr* stream)
 {
-    stream->write((const char*)self, 44);
+    stream->write((const char*)this, 44);
 }
 #endif
 
@@ -2053,9 +2052,9 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMMPRaceHandler_readFromReplayFrame(cGMMPRaceHandler* self, cBxReplayFrame* stream)
+void cGMMPRaceHandler::readFromReplayFrame(cReplayFramePtr* stream)
 {
-    stream->read((char*)self, 44);
+    stream->read((char*)this, 44);
 }
 #endif
 
@@ -2347,7 +2346,7 @@ extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
  *
  * @return 1
  */
-extern "C" int cGMTimeHandler_riderCheckpointHit(cGMTimeHandler* self)
+bool cGMTimeHandler::riderCheckpointHit(int, int)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int state = cBENewRaceInterface_getLocationID(iface);
@@ -2358,15 +2357,16 @@ extern "C" int cGMTimeHandler_riderCheckpointHit(cGMTimeHandler* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, self->mCurrentDifficulty, self->uiTrackProgress);
+        int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent,
+                mCurrentDifficulty, uiTrackProgress);
         cAI* clk = SSXApp->Game->AI;
         int secs = (int)((float)clk->EventTimerTick * 0.01666666753590107f);
         if (bonus != 0) {
             cRiderMetrix_evSplitTime(clk->Riders[0]->mMetrix, secs - bonus);
         }
-        (self->uiTrackProgress)++;
+        (uiTrackProgress)++;
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -2921,7 +2921,7 @@ extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
  *
  * @return 1
  */
-extern "C" int cGMPointHandler_riderCheckpointHit(cGMPointHandler* self)
+bool cGMPointHandler::riderCheckpointHit(int, int)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int state = cBENewRaceInterface_getLocationID(iface);
@@ -2932,15 +2932,16 @@ extern "C" int cGMPointHandler_riderCheckpointHit(cGMPointHandler* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, self->mCurrentDifficulty, self->uiTrackProgress) * 100;
+        int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent,
+                mCurrentDifficulty, uiTrackProgress) * 100;
         cRiderMetrix* riderMetrix = SSXApp->Game->AI->Riders[0]->mMetrix;
         int curScore = riderMetrix->Totals.TotalPoints;
         if (bonusPoints != 0) {
             cRiderMetrix_evSplitPoints(riderMetrix, curScore - bonusPoints);
         }
-        (self->uiTrackProgress)++;
+        (uiTrackProgress)++;
     }
-    return 1;
+    return true;
 }
 #endif
 

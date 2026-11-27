@@ -1183,10 +1183,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDTV__FPv);
  *
  * @return 0 (false)
  */
-int cGraphicsMan_GetDTV(void* vself)
+bool cGraphicsMan::GetDTV()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -1242,9 +1241,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetAIUpdatesPerRender__FPv);
  * (cPS2GraphicsMan_vtbl) inherits, between the clear-colour slot 15 (cPS2GraphicsMan_SetScreenClearColour in the PS2 vtable) and
  * IsRenderReady (slot 17).
  */
-void cGraphicsMan_SetAIUpdatesPerRender(void* vself)
+void cGraphicsMan::SetAIUpdatesPerRender(int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -1254,15 +1252,14 @@ INCLUDE_ASM("render/font", cGraphicsMan_IsRenderReady__FPv);
 /**
  * Base-class default: reports that the renderer is ready for a new frame.
  *
- * Returns 1. The module render functions call slot 17 and skip the frame while it returns 0; cPS2GraphicsMan overrides
- * it with cPS2GraphicsMan_IsRenderReady__FPv.
+ * Returns true. The module render functions call slot 17 and skip the frame while it returns false;
+ * cPS2GraphicsMan overrides it with cPS2GraphicsMan_IsRenderReady__FPv.
  *
- * @return 1 (true)
+ * @return true
  */
-int cGraphicsMan_IsRenderReady(void* vself)
+bool cGraphicsMan::IsRenderReady()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -1272,14 +1269,14 @@ INCLUDE_ASM("render/font", cGraphicsMan_IsRenderIdle__FPv);
 /**
  * Base-class default: reports that the renderer has no work in flight.
  *
- * Returns 1. cGraphicsMan_FlushRenderer() polls slot 18; cPS2GraphicsMan overrides it with cPS2GraphicsMan_IsRenderIdle__FPv.
+ * Returns true. cGraphicsMan_FlushRenderer() polls slot 18; cPS2GraphicsMan overrides it with
+ * cPS2GraphicsMan_IsRenderIdle__FPv.
  *
- * @return 1 (true)
+ * @return true
  */
-int cGraphicsMan_IsRenderIdle(void* vself)
+bool cGraphicsMan::IsRenderIdle()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -1927,9 +1924,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RemoveScreenGrabTexture__FPv);
  * The base cGraphicsMan::RemoveScreenGrabTexture: does nothing (cPS2GraphicsMan_RemoveScreenGrabTexture is the PS2
  * version). Declared with only the this pointer.
  */
-void cGraphicsMan_RemoveScreenGrabTexture(void* vself)
+void cGraphicsMan::RemoveScreenGrabTexture(tScreenGrabHandle&)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -1941,9 +1937,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_TakeScreenGrab__FPv);
  *
  * cPS2GraphicsMan overrides slot 61 with cPS2GraphicsMan_TakeScreenGrab.
  */
-void cGraphicsMan_TakeScreenGrab(void* vself)
+void cGraphicsMan::TakeScreenGrab(const tScreenGrabHandle&)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -1955,9 +1950,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetActiveDrawState__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_SetActiveDrawState(void* vself)
+void cGraphicsMan::SetActiveDrawState(const sDrawState&)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -1972,10 +1966,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_ActiveDrawState__FPv);
  *
  * @return a pointer to m_activeDrawState
  */
-void* cGraphicsMan_ActiveDrawState(void* vself)
+const sDrawState* cGraphicsMan::ActiveDrawState()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    return &((cGraphicsMan*)self)->m_activeDrawState;
+    return &((cGraphicsMan*)this)->m_activeDrawState;
 }
 #endif
 
@@ -1987,9 +1980,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetActiveTexture__FPv);
  *
  * cPS2GraphicsMan does not override the slot.
  */
-void cGraphicsMan_SetActiveTexture(void* vself)
+void cGraphicsMan::SetActiveTexture(int, unsigned int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2277,9 +2269,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_ClearProjTextures__FPv);
  *
  * cPS2GraphicsMan overrides slot 66 with cPS2GraphicsMan_ClearProjTextures__FPv, which zeroes mNumShdw.
  */
-void cGraphicsMan_ClearProjTextures(void* vself)
+void cGraphicsMan::ClearProjTextures()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2290,9 +2281,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_AddProjectiveTexture__FPv);
  * The base cGraphicsMan::AddProjectiveTexture: does nothing (cPS2GraphicsMan_AddProjectiveTexture is the PS2
  * version). Declared with only the this pointer.
  */
-void cGraphicsMan_AddProjectiveTexture(void* vself)
+void cGraphicsMan::AddProjectiveTexture(const t4Vector&, const t4Matrix&, const t4Matrix&, float, int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2318,9 +2308,9 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardTrail__FPv);
  *
  * cPS2GraphicsMan does not override the slot (it overrides the next one, 89, with cPS2GraphicsMan_RenderMultipleBoardTrails).
  */
-void cGraphicsMan_RenderBoardTrail(void* vself)
+void cGraphicsMan::RenderBoardTrail(const t3Vector&, void*, unsigned short*, int, unsigned short*, int,
+                                    unsigned short*, int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2332,9 +2322,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardTrail1__FPv);
  *
  * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_RenderMultipleBoardTrails.
  */
-void cGraphicsMan_RenderBoardTrail1(void* vself)
+void cGraphicsMan::RenderBoardTrail1()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2346,9 +2335,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardWake__FPv);
  *
  * cPS2GraphicsMan overrides slot 90 with cPS2GraphicsMan_RenderBoardWake, which cBoardWakeFX_render() calls.
  */
-void cGraphicsMan_RenderBoardWake(void* vself)
+void cGraphicsMan::RenderBoardWake(tBoardWakeVertex**, int, int, int, int, float, float)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2360,9 +2348,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetShinyBoarder__FPv);
  *
  * cPS2GraphicsMan overrides slot 98 with cPS2GraphicsMan_SetShinyBoarder__FPvi, which stores the flag.
  */
-void cGraphicsMan_SetShinyBoarder(void* vself)
+void cGraphicsMan::SetShinyBoarder(int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2404,9 +2391,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_DrawCharShadowModel__FPv);
  *
  * cPS2GraphicsMan overrides slot 100 with cPS2GraphicsMan_DrawCharShadowModel, which cAnimModel_rendershadow() calls.
  */
-void cGraphicsMan_DrawCharShadowModel(void* vself)
+void cGraphicsMan::DrawCharShadowModel(const tMdfModelHeader*, const char*, const tARGB&)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2418,9 +2404,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_SectionLoaded__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_SectionLoaded(void* vself)
+void cGraphicsMan::SectionLoaded(int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2432,9 +2417,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_InitGlobalBuffer__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_InitGlobalBuffer(void* vself)
+void cGraphicsMan::InitGlobalBuffer(void*, const tResourceID*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2446,9 +2430,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PurgeGlobalBuffer__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_PurgeGlobalBuffer(void* vself)
+void cGraphicsMan::PurgeGlobalBuffer(const tResourceID*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2460,9 +2443,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_InitGlobalRGBBuffer__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_InitGlobalRGBBuffer(void* vself)
+void cGraphicsMan::InitGlobalRGBBuffer(void*, const tResourceID*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2474,9 +2456,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PurgeGlobalRGBBuffer__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_PurgeGlobalRGBBuffer(void* vself)
+void cGraphicsMan::PurgeGlobalRGBBuffer(const tResourceID*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2488,9 +2469,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PurgeMeshData__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_PurgeMeshData(void* vself)
+void cGraphicsMan::PurgeMeshData()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2502,9 +2482,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RemapModelMaterialId__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_RemapModelMaterialId(void* vself)
+void cGraphicsMan::RemapModelMaterialId(tMdfModelHeader*, char*, char*, int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2517,9 +2496,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_ResolveCharModel__FPv);
  * On Tour's version takes the model header and data, part bone offsets, blended matrices and morph weights; this
  * declaration names none of them.
  */
-void cGraphicsMan_ResolveCharModel(void* vself)
+void cGraphicsMan::ResolveCharModel(tMdfModelHeader*, char*, int*, int&, tMdfBlendedMatrix*, float*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2531,9 +2509,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_InitCharModelPart__FPv);
  *
  * cAnimModel_compile() calls slot 110; cPS2GraphicsMan's override cPS2GraphicsMan_InitCharModelPart__FPv is empty too.
  */
-void cGraphicsMan_InitCharModelPart(void* vself)
+void cGraphicsMan::InitCharModelPart(tMdfModelHeader*, int, tMdfBlendedMatrix*, const t4Matrix*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2544,9 +2521,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_GenerateBlendedMatrices__FPv);
  * The base cGraphicsMan::GenerateBlendedMatrices: does nothing (cPS2GraphicsMan_GenerateBlendedMatrices is the PS2
  * version). Declared with only the this pointer.
  */
-void cGraphicsMan_GenerateBlendedMatrices(void* vself)
+void cGraphicsMan::GenerateBlendedMatrices(const t4Matrix*, int*, const tMdfBlendedMatrix*, int, t4Matrix*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2558,9 +2534,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PurgeCharModel__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_PurgeCharModel(void* vself)
+void cGraphicsMan::PurgeCharModel(tMdfModelHeader*)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2572,9 +2547,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PurgeCharModels__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_PurgeCharModels(void* vself)
+void cGraphicsMan::PurgeCharModels()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2589,9 +2563,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_getCurrentFrameCount__FPv);
  *
  * @return 0
  */
-int cGraphicsMan_getCurrentFrameCount(void* vself)
+int cGraphicsMan::getCurrentFrameCount()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
     return 0;
 }
 #endif
@@ -2604,9 +2577,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_UpdateFullScreenEffects__FPv);
  *
  * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_UpdateFullScreenEffects.
  */
-void cGraphicsMan_UpdateFullScreenEffects(void* vself)
+void cGraphicsMan::UpdateFullScreenEffects(int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2618,9 +2590,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderFullScreenEffects__FPv);
  *
  * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_RenderFullScreenEffects.
  */
-void cGraphicsMan_RenderFullScreenEffects(void* vself)
+void cGraphicsMan::RenderFullScreenEffects(int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -2742,9 +2713,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_loadexecpurge__FPv);
  * cSSXApp_loadexecpurge__FPv() calls slot 119; cPS2GraphicsMan overrides it with cPS2GraphicsMan_loadexecpurge, which removes its
  * interrupt handlers.
  */
-void cGraphicsMan_loadexecpurge(void* vself)
+void cGraphicsMan::loadexecpurge()
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -3562,9 +3532,8 @@ INCLUDE_ASM("render/font", cPS2LightMan_SetAmbient__FPv);
 /**
  * Does nothing: cPS2LightMan's SetAmbient has an empty body.
  */
-void cPS2LightMan_SetAmbient(void* vself)
+void cPS2LightMan::SetAmbient()
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3576,9 +3545,8 @@ INCLUDE_ASM("render/font", cPS2LightMan_LoadLight__FPv);
  *
  * Slot 13 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_LoadLight__FPv, which is empty too.
  */
-void cPS2LightMan_LoadLight(void* vself)
+void cPS2LightMan::LoadLight()
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3590,9 +3558,8 @@ INCLUDE_ASM("render/font", cPS2LightMan_SetChannel__FPv);
  *
  * Slot 14 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_SetChannel__FPv, which is empty too.
  */
-void cPS2LightMan_SetChannel(void* vself)
+void cPS2LightMan::SetChannel()
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3604,9 +3571,8 @@ INCLUDE_ASM("render/font", cPS2LightMan_ClearChannel__FPv);
  *
  * Slot 15 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_ClearChannel__FPv, which is empty too.
  */
-void cPS2LightMan_ClearChannel(void* vself)
+void cPS2LightMan::ClearChannel()
 {
-    cPS2LightMan* self = (cPS2LightMan*)vself;
 }
 #endif
 
@@ -3916,10 +3882,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetNumDisplayModes__FPv);
  *
  * @return the number of display modes
  */
-int cPS2GraphicsMan_GetNumDisplayModes(void* vself)
+int cPS2GraphicsMan::GetNumDisplayModes()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return self->NumDisplayModes;
+    return NumDisplayModes;
 }
 #endif
 
@@ -3946,10 +3911,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode1__FPv);
  *
  * @return the current display mode index
  */
-int cPS2GraphicsMan_GetDisplayMode1(void* vself)
+int cPS2GraphicsMan::GetDisplayMode1()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return self->CurrentDisplayMode;
+    return CurrentDisplayMode;
 }
 #endif
 
@@ -3962,10 +3926,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
  *
  * @return the screen width in pixels
  */
-extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
+int cPS2GraphicsMan::GetScreenWidth()
 {
-    int i = self->CurrentDisplayMode;
-    tDisplayMode* modes = self->DisplayModes;
+    int i = CurrentDisplayMode;
+    tDisplayMode* modes = DisplayModes;
     return modes[i].mFrameWidth;
 }
 #endif
@@ -3978,10 +3942,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenHeight);
  *
  * @return the screen height in pixels
  */
-extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
+int cPS2GraphicsMan::GetScreenHeight()
 {
-    int i = self->CurrentDisplayMode;
-    tDisplayMode* modes = self->DisplayModes;
+    int i = CurrentDisplayMode;
+    tDisplayMode* modes = DisplayModes;
     return modes[i].mFrameHeight;
 }
 #endif
@@ -4012,10 +3976,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTVDisplayFormat__FPv);
  *
  * @return this + 0x6B94
  */
-void* cPS2GraphicsMan_GetTVDisplayFormat(void* vself)
+const tTVDisplayFormat* cPS2GraphicsMan::GetTVDisplayFormat()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return &((cPS2GraphicsMan*)self)->mTVDisplayFormat;
+    return &((cPS2GraphicsMan*)this)->mTVDisplayFormat;
 }
 #endif
 
@@ -4176,9 +4139,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetIrradiance);
  *
  * @param src  the irradiance info to use
  */
-extern "C" void cPS2GraphicsMan_SetIrradiance(cPS2GraphicsMan* self, tIrradianceInfo* src)
+void cPS2GraphicsMan::SetIrradiance(const tIrradianceInfo& src, int)
 {
-    self->mIrradianceInfo = *src;
+    mIrradianceInfo = src;
 }
 #endif
 
@@ -4192,10 +4155,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetIrradiance__FPv);
  *
  * @return &mIrradianceInfo
  */
-void* cPS2GraphicsMan_GetIrradiance(void* vself)
+void* cPS2GraphicsMan::GetIrradiance()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return &((cPS2GraphicsMan*)self)->mIrradianceInfo;
+    return &((cPS2GraphicsMan*)this)->mIrradianceInfo;
 }
 #endif
 
@@ -4207,9 +4169,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_InitCharModelPart__FPv);
  *
  * cAnimModel_compile() calls slot 110.
  */
-void cPS2GraphicsMan_InitCharModelPart(void* vself)
+void cPS2GraphicsMan::InitCharModelPart(tMdfModelHeader*, int, tMdfBlendedMatrix*, const t4Matrix*)
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
 }
 #endif
 
@@ -4223,10 +4184,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_getCurrentFrameCount__FPv);
  *
  * @return the frame counter
  */
-int cPS2GraphicsMan_getCurrentFrameCount(void* vself)
+int cPS2GraphicsMan::getCurrentFrameCount()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return self->mCurrentFrameCount;
+    return mCurrentFrameCount;
 }
 #endif
 
@@ -4547,10 +4507,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetShinyBoarder__FPvi);
  *
  * @param state  non-zero to draw riders shiny (On Tour State)
  */
-void cPS2GraphicsMan_SetShinyBoarder(void* vself, int state)
+void cPS2GraphicsMan::SetShinyBoarder(int state)
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    self->mShinyBoarder = state;
+    mShinyBoarder = state;
 }
 #endif
 
@@ -4562,9 +4521,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
  * mCurrentView to it and increments mViewStackIdx. No overflow check.
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::PushView()
 {
-    t4Matrix* top = self->mCurrentView;
+    t4Matrix* top = mCurrentView;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4579,8 +4538,8 @@ extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
         :
         : "r"(top + 1), "r"(top)
         : "memory");
-    self->mCurrentView++;
-    self->mViewStackIdx += 1;
+    mCurrentView++;
+    mViewStackIdx += 1;
 }
 #endif
 
@@ -4593,12 +4552,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PopView__FPv);
  * Moves mCurrentView (+0x13E4) back by one 0x40-byte matrix, decrements mViewStackIdx (+0x13E0) and clears mMatricesValid
  * (+0x6B90) so the combined matrices are rebuilt. No underflow check (the preview asserted).
  */
-void cPS2GraphicsMan_PopView(void* vself)
+void cPS2GraphicsMan::PopView()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    self->mMatricesValid = 0;
-    self->mCurrentView--;
-    self->mViewStackIdx -= 1;
+    mMatricesValid = 0;
+    mCurrentView--;
+    mViewStackIdx -= 1;
 }
 #endif
 
@@ -4818,10 +4776,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetView__FPv);
  *
  * @return the current view matrix
  */
-int cPS2GraphicsMan_GetView(void* vself)
+const t4Matrix* cPS2GraphicsMan_GetView(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return (int)self->mCurrentView;
+    return self->mCurrentView;
 }
 #endif
 
@@ -4884,7 +4842,7 @@ extern t4Matrix t4mat_Identity;
  * Sets the top view matrix (mCurrentView) to t4mat_Identity.
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::IdentityView()
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -4898,9 +4856,9 @@ extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(&t4mat_Identity)
+        : "r"((char*)mCurrentView), "r"(&t4mat_Identity)
         : "memory");
-    self->mMatricesValid = 0;
+    mMatricesValid = 0;
 }
 #endif
 
@@ -5115,9 +5073,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetLightMats__FPv);
 /**
  * Sets the lighting matrices: empty in the PS2 renderer.
  */
-void cPS2GraphicsMan_SetLightMats(void* vself)
+void cPS2GraphicsMan::SetLightMats(void*)
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
 }
 #endif
 

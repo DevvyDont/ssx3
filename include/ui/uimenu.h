@@ -139,6 +139,7 @@ struct cUIMenu : public cUIGroup {
     void setScrollOffset(signed char scrollItemOffset) __asm__("cUIMenu_setScrollOffset");
     cUIThing* getSelected() __asm__("cUIMenu_getSelected");
     unsigned char getSelectedIndex() __asm__("cUIMenu_getSelectedIndex");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUIMenu_setUIData");
 };
 
 CHECK_OFFSET(cUIMenu, mAttrMenu, 0x090);

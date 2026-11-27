@@ -40,6 +40,10 @@ struct cRestoreNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cRestoreNode1() __asm__("cRestoreNode_cRestoreNode1");
+    // expire stays a C function (cRestoreNode_expire): declared first, it is the vtable's key function, which keeps the
+    // vtable out of the units defining the other overrides
+    virtual void expire(int) __asm__("cRestoreNode_expire__FPv");
+    virtual void signal(int, float) __asm__("cRestoreNode_signal__FPv");
 };
 
 CHECK_SIZE(cRestoreNode, 0x1C);

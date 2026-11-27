@@ -17,6 +17,9 @@
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
+struct cBxReplayFrame;
+struct t4Matrix;
+
 struct cPositionModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl); dtor
@@ -41,6 +44,13 @@ struct cPositionModifier : public cTransformModifier {
     virtual ~cPositionModifier();
     virtual void updateRootTransform() __asm__("cPositionModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cPositionModifier_writeToReplayFrame");
+    virtual void update() __asm__("cPositionModifier_update__FPv");
+    virtual int getTransformType() const __asm__("cPositionModifier_getTransformType__FPv");
+    virtual const tBoundBox* getBoundBox() const __asm__("cPositionModifier_getBoundBox__FPv");
+    virtual float getRadius() const __asm__("cPositionModifier_getRadius__FPv");
+    virtual void setRadius(float val) __asm__("cPositionModifier_setRadius__FPvf");
+    virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cPositionModifier_setBoundBox");
+    virtual const t4Matrix* getRootTransform() __asm__("cPositionModifier_getRootTransform");
 };
 
 CHECK_OFFSET(cPositionModifier, unk_04, 0x04);

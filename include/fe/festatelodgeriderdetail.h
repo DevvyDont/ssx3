@@ -27,6 +27,10 @@ struct cFEStateLodgeRiderDetail : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStateLodgeRiderDetail_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateLodgeRiderDetail_onWidgetCreate");
     virtual void onPreRender2D() __asm__("cFEStateLodgeRiderDetail_onPreRender2D");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateLodgeRiderDetail_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cFEStateLodgeRiderDetail_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int event) __asm__("cFEStateLodgeRiderDetail_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateLodgeRiderDetail, mbCheatCharEnable, 0x048);

@@ -43,6 +43,8 @@ struct cFEStateUberTrick : public cUIState {
     virtual bool onGainTransition(int on) __asm__("cFEStateUberTrick_onGainTransition");
     virtual void onUpdate() __asm__("cFEStateUberTrick_onUpdate");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateUberTrick_onWidgetCreate");
+    virtual void onPopupEvent(cUIState* item, unsigned int msg) __asm__("cFEStateUberTrick_onPopupEvent");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateUberTrick_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateUberTrick, mbModelVisible, 0x048);

@@ -112,6 +112,7 @@ struct cUIText : public cUIThing {
     int getStringID() __asm__("cUIText_getStringID");
     virtual void updateLocale() __asm__("cUIText_updateLocale");
     char getNumTextLines() __asm__("cUIText_getNumTextLines");
+    virtual void setUIData(tUIBaseObject* pObj) __asm__("cUIText_setUIData");
 };
 
 CHECK_OFFSET(cUIText, mAttrText, 0x074);

@@ -59,6 +59,7 @@ struct cUIIcon : public cUIThing {
     int getTexture() __asm__("cUIIcon_getTexture");
     void setTexture(int textureId) __asm__("cUIIcon_setTexture");
     void setTileUV1(float x, float y) __asm__("cUIIcon_setTileUV1");
+    virtual void setUIData(tUIBaseObject* pObj) __asm__("cUIIcon_setUIData");
 };
 
 CHECK_OFFSET(cUIIcon, mAttrIcon, 0x074);

@@ -44,6 +44,7 @@ struct cFEStatePeakRoom : public cUIState {
     virtual ~cFEStatePeakRoom();
     virtual void onCreateScreen() __asm__("cFEStatePeakRoom_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* item, unsigned int key) __asm__("cFEStatePeakRoom_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* item, unsigned int key, unsigned int id) __asm__("cFEStatePeakRoom_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStatePeakRoom, mpTrophyIcons, 0x048);

@@ -90,6 +90,7 @@ struct cTexFlipModifier {
     void setupMaterialRecords() __asm__("cTexFlipModifier_setupMaterialRecords");
     void signal(int id, float value) __asm__("cTexFlipModifier_signal");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cTexFlipModifier_writeToReplayFrame");
+    void update() __asm__("cTexFlipModifier_update");
 };
 
 CHECK_OFFSET(cTexFlipModifier, Type, 0x00);

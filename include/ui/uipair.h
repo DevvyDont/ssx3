@@ -61,6 +61,7 @@ struct cUIPair : public cUIThing {
     virtual void updateLocale() __asm__("cUIPair_updateLocale");
     virtual void render2D(float x, float y) __asm__("cUIPair_render2D");
     virtual void update(unsigned short ev) __asm__("cUIPair_update");
+    virtual void* traverseRecurse(cListOperator* pOperator) __asm__("cUIPair_traverseRecurse");
 };
 
 CHECK_OFFSET(cUIPair, mAttrPair, 0x074);

@@ -847,7 +847,7 @@ int cReplayCache::updateControlCmd(tControlCmd* controlCmd)
         result = 0;
         break;
     case kGamePlayback: case kInstantPlayback: case kPlaybackStep:
-        result = cReplayCache_getControlCmd(this, controlCmd);
+        result = this->getControlCmd(controlCmd);
         break;
     case kPlaybackInput: case kPlaybackUpdate: case kPlaybackStepUpdate: case kPlaybackStart: case kPlaybackLoad:
     case kStartAutoReplay: case kReplayEnd:
@@ -974,18 +974,18 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param out  receives the command
  * @return true when a command was read, false past the end
  */
-extern "C" bool cReplayCache_getControlCmd(cReplayCache* self, tControlCmd* out)
+bool cReplayCache::getControlCmd(tControlCmd* out)
 {
     MEM_fill(out, 0, 8);
-    if (self->PlaybackCursor >= self->RecordCursor) {
+    if (PlaybackCursor >= RecordCursor) {
         return false;
     }
-    if (self->PlaybackLeft <= 0) {
-        self->PlaybackLeft = self->CmdFrame[self->PlaybackCursor].CruiseCmd.Count;
+    if (PlaybackLeft <= 0) {
+        PlaybackLeft = CmdFrame[PlaybackCursor].CruiseCmd.Count;
     }
-    *out = self->CmdFrame[self->PlaybackCursor];
-    if (--self->PlaybackLeft <= 0) {
-        self->PlaybackCursor++;
+    *out = CmdFrame[PlaybackCursor];
+    if (--PlaybackLeft <= 0) {
+        PlaybackCursor++;
     }
     return true;
 }
@@ -1052,7 +1052,7 @@ extern "C" int HUFF_decode(void* src, int a, int dst);
  * @param pp  in/out: the read cursor in the save data
  * @return 1 (always)
  */
-extern "C" int cReplayCache_load(cReplayCache* self, char** pp)
+int cReplayCache::load(char** pp)
 {
     struct {
         int tag;
@@ -1061,10 +1061,10 @@ extern "C" int cReplayCache_load(cReplayCache* self, char** pp)
     int size;
     MEM_copy(&hdr, *pp, 8);
     *pp += 8;
-    *(int*)self = hdr.value;
+    *(int*)this = hdr.value;
     MEM_copy(&size, *pp, 4);
     *pp += 4;
-    HUFF_decode(*pp, 0, (int)self->CmdFrame);
+    HUFF_decode(*pp, 0, (int)CmdFrame);
     *pp += size;
     return 1;
 }

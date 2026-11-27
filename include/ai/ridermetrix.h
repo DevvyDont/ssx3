@@ -277,6 +277,7 @@ struct cRiderMetrix {
     int addHUDfx(int hfx, const char* displayStr, float decayTime, int data) __asm__("cRiderMetrix_addHUDfx");
     int addHUDfx1(int type, int value, int data, float duration) __asm__("cRiderMetrix_addHUDfx1");
     float evSpin(float x) __asm__("cRiderMetrix_evSpin");
+    float evAddCash(unsigned int kind, int amount) __asm__("cRiderMetrix_evAddCash");
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

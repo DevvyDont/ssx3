@@ -65,7 +65,8 @@ public:
     // 0x004: the vptr. [R] cUILocaleInterface_vtbl (0x0046D848), then cFELocale_vtbl (ctor); the dtor stores them in
     //        reverse; [P] preview ~cUILocaleInterface. Slots [R] cUILocaleInterface_vtbl, names [O]:
     virtual ~cUILocaleInterface();                                   // slot 1 cUILocaleInterface__cUILocaleInterface
-    virtual void setDisplayMode(signed char mode);                   // slot 2 cUILocaleInterface_setDisplayMode
+    virtual void setDisplayMode(signed char mode)
+        __asm__("cUILocaleInterface_setDisplayMode");                   // slot 2 cUILocaleInterface_setDisplayMode
     virtual void setLanguage(signed char language);                  // slot 3 cUILocaleInterface_setLanguage
     virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cUILocaleInterface_getStringByHash
 

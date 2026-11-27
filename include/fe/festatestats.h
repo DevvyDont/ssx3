@@ -62,6 +62,10 @@ struct cFEStateStats : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateStats_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateStats_onWidgetCreate");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateStats_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateStats_onUpdate__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index)
+        __asm__("cFEStateStats_onWidgetMenu");
+    virtual void onMenuGainFocus(cUIGroup*) __asm__("cFEStateStats_onMenuGainFocus__FPv");
 };
 
 CHECK_OFFSET(cFEStateStats, mpMenus, 0x6D0);

@@ -58,6 +58,8 @@ struct cFEStateEventSelect : public cFEState {
     virtual void onCreateScreen() __asm__("cFEStateEventSelect_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateEventSelect_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateEventSelect_onUpdate");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cFEStateEventSelect_onWidgetCreate__FPv");
+    virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cFEStateEventSelect_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateEventSelect, mMap, 0x048);

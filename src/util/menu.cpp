@@ -444,7 +444,6 @@ extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const ch
  * @p left at rect.x + 16, @p center centred in the rect, @p right ending 16 before the right edge (widths from
  * cFont_textExtent). Resets ShadowOffset to (0, 0) at the end. The unit's callers declare it with other types.
  *
- * @param item  the menu item being drawn (its Menu supplies the box drawer and font)
  * @param rect  the row's rect (x, y, w, h)
  * @param left  text at the left edge, or 0
  * @param center  centred text, or 0
@@ -452,31 +451,31 @@ extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const ch
  * @param style  the box colour (a tARGB) passed to the box drawer
  * @param color  the text colour (tARGB) copied into the font
  */
-extern "C" void cMenuItem_textRender_impl(cMenuItem* item, tRect* rect, const char* left, const char* center,
-                                          const char* right, char* style, tARGB* color)
+void cMenuItem::textRender(tRect* rect, const char* left, const char* center, const char* right, char* style,
+                           tARGB* color)
 {
-    cMenu* menu = item->Menu;
+    cMenu* menu = Menu;
     sVEntry<void(void*, tRect*, char*)>* vt = (sVEntry<void(void*, tRect*, char*)>*)menu->mVtbl;
     vt[8].fn(vthis(menu, vt[8]), rect, style);
-    *(tARGB*)font_2CA768(item)->Color = *color;
-    cFont* font = font_2CA768(item);
+    *(tARGB*)font_2CA768(this)->Color = *color;
+    cFont* font = font_2CA768(this);
     t2Vector sc(2.0f, 2.0f);
     // Same-layout cast: cFont::ShadowOffset is On Tour's t2Vector, kept as float[2] in render/font.h.
     *(t2Vector*)font->ShadowOffset = sc;
     if (left) {
-        cFont_text(font_2CA768(item), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
+        cFont_text(font_2CA768(this), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
     }
     if (center) {
-        cFont* measureFont = font_2CA768(item);
+        cFont* measureFont = font_2CA768(this);
         float w = cFont_textExtent(measureFont, center, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
-        cFont_text(font_2CA768(item), rect->X + (rect->W - w) * 0.5f, rect->Y + 6.0f - 1.0f, center);
+        cFont_text(font_2CA768(this), rect->X + (rect->W - w) * 0.5f, rect->Y + 6.0f - 1.0f, center);
     }
     if (right) {
-        cFont* measureFont = font_2CA768(item);
+        cFont* measureFont = font_2CA768(this);
         float w = cFont_textExtent(measureFont, right, 0, 0, measureFont->Scale[0], measureFont->Scale[1]);
-        cFont_text(font_2CA768(item), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
+        cFont_text(font_2CA768(this), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
     }
-    *(t2Vector*)font_2CA768(item)->ShadowOffset = t2Vector(0.0f, 0.0f);
+    *(t2Vector*)font_2CA768(this)->ShadowOffset = t2Vector(0.0f, 0.0f);
 }
 #endif
 
@@ -521,9 +520,9 @@ void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm
  * @param rightText  text at the right edge, or 0
  * @return cMenuItem_textRender's return value (it returns nothing)
  */
-void* cMenuItem_textRender1_5(void* self, int rect, const char* leftText, const char* centerText, void* rightText)
+void* cMenuItem::textRender1(int rect, const char* leftText, const char* centerText, void* rightText)
 {
-    int focused = self == ((cMenu*)(*(void**)self))->getFocusItem();
+    int focused = this == ((cMenu*)(*(void**)this))->getFocusItem();
     char* style = focused ? kBoxSelectedColor : kBoxUnselectedColor;
     cMenuItem_textRender1_sVec3* textRgb = focused ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
@@ -531,7 +530,7 @@ void* cMenuItem_textRender1_5(void* self, int rect, const char* leftText, const 
     textColor.r = textRgb->x;
     textColor.g = textRgb->y;
     textColor.b = textRgb->z;
-    return cMenuItem_textRender(self, rect, leftText, centerText, rightText, style, &textColor);
+    return cMenuItem_textRender(this, rect, leftText, centerText, rightText, style, &textColor);
 }
 #endif
 
@@ -1523,7 +1522,7 @@ void cMenuSys_init(void* self);
 extern "C" void* cMenuSys_cMenuSys(cMenuSys* self)
 {
     *(int*)self = 0;
-    cMenuSys_init(self);
+    self->init();
     return ((void*)self);
 }
 #endif
@@ -1556,16 +1555,15 @@ INCLUDE_ASM("util/menu", cMenuSys_init__FPv);
  *
  * Zeroes +0x0, +0x54, +0x58 and +0x64, sets +0x48 to 11 and +0x4C and +0x50 to -1.
  */
-void cMenuSys_init(void* vself)
+void cMenuSys::init()
 {
-    cMenuSys* self = (cMenuSys*)vself;
-    self->Font = 0;
-    self->Active = 0;
-    *(int*)self = 0;
-    self->MenuYOffset = 0;
-    self->VKey = -1;
-    self->Key = 11;
-    self->AsciiKey = -1;
+    Font = 0;
+    Active = 0;
+    *(int*)this = 0;
+    MenuYOffset = 0;
+    VKey = -1;
+    Key = 11;
+    AsciiKey = -1;
 }
 #endif
 

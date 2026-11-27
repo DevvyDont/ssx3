@@ -28,6 +28,7 @@ struct cFEStateMPCircuit : public cUIState {
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateMPCircuit_onWidgetEvent");
     void initCircuitList() __asm__("cFEStateMPCircuit_initCircuitList__FPv");
     void updateWidget() __asm__("cFEStateMPCircuit_updateWidget__FPv");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cFEStateMPCircuit_onWidgetCreate__FPv");
 };
 
 CHECK_SIZE(cFEStateMPCircuit, 0x48);

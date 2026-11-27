@@ -26,6 +26,8 @@ struct cFEStateTransition : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateTransition();
     virtual void onCreateScreen() __asm__("cFEStateTransition_onCreateScreen");
+    virtual bool onScreenEvent(cUIScreen* screen, unsigned int id) __asm__("cFEStateTransition_onScreenEvent");
+    virtual int handleEvent(int which, void*) __asm__("cFEStateTransition_handleEvent");
 };
 
 CHECK_OFFSET(cFEStateTransition, mpSnow, 0x048);

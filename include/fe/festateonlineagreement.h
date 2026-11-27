@@ -67,6 +67,10 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateOnlineAgreement_onUpdate");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOnlineAgreement_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateOnlineAgreement_onWidgetEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateOnlineAgreement_onLoseTransition__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cFEStateOnlineAgreement_onWidgetMenu");
+    virtual bool onGainTransition(int) __asm__("cFEStateOnlineAgreement_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateOnlineAgreement, mpTOSLines, 0x6D0);

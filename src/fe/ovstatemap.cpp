@@ -362,76 +362,75 @@ typedef sVEntry<void(void*, const tARGB&)> tSetColourSlot;
  * kONPREV closes the popup, or else closes the overlay, pops the state stack and marks this state pending
  * delete with mode 7. kONGAINFOCUS and kONLOSEFOCUS (highlight on/off) recolour the popup's Yes/No buttons.
  *
- * @param selfp  the cOVState_MAP (raw pointer)
  * @param pWidget  the widget the event is for (null: nothing happens)
  * @param Event  UI event code (1, 2, 5, 6 or 7)
  */
 // Map overlay message handler: confirm/cancel of the map popup and toggling of the legend objects.
-extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidget, int Event)
+void cOVState_MAP::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
 {
     if (((void*)pWidget) == 0) {
         return;
     }
     switch (Event) {
     case cUIState::kONNEXT:
-        if (selfp->mSessionPopupActive != 0) {
+        if (mSessionPopupActive != 0) {
             if (pWidget->mMiscData != 0) {
-                selfp->mSessionPopupActive = 0;
-                selfp->setupPopup();
+                mSessionPopupActive = 0;
+                setupPopup();
                 break;
             }
             cBEMissionInterface* iface = (cBEMissionInterface*)cBE_getInterface_Fv(cBE_getBE(), 10);
-            iface->nextSessionID = selfp->mSelectedSessionPoint;
+            iface->nextSessionID = mSelectedSessionPoint;
             func_0028FAE0(cAudioInterface_bxAudio());
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cGame_setState(game, 0xF, 0, 0);
-            selfp->cleanupIndicators();
-            selfp->setupScreenExit();
+            cleanupIndicators();
+            setupScreenExit();
         } else {
-            selfp->mSessionPopupActive = 1;
-            selfp->mSelectedSessionPoint = pWidget->mMiscData;
-            selfp->setupPopup();
-            cUIThing* confirmNo = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+            mSessionPopupActive = 1;
+            mSelectedSessionPoint = pWidget->mMiscData;
+            setupPopup();
+            cUIThing* confirmNo = cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
             tSetColourSlot* vt = (tSetColourSlot*)VPTR_OF(cListNode, confirmNo);
             vt[11].fn(vthis(confirmNo, vt[11]), tMapColour(1.0f, 0.0f, 0.0f, 0.0f));
         }
         break;
     case cUIState::kONPREV:
-        if (selfp->mSessionPopupActive != 0) {
-            selfp->mSessionPopupActive = 0;
-            selfp->setupPopup();
+        if (mSessionPopupActive != 0) {
+            mSessionPopupActive = 0;
+            setupPopup();
         } else {
-            selfp->cleanupIndicators();
-            selfp->setupScreenExit();
-            cUIStateStack_pop_8C28(&selfp->mpEngine->mStateStack, 1);
-            selfp->mAttrState = (selfp->mAttrState & ~0x3F00) | 0x780;
+            cleanupIndicators();
+            setupScreenExit();
+            cUIStateStack_pop_8C28(&mpEngine->mStateStack, 1);
+            mAttrState = (mAttrState & ~0x3F00) | 0x780;
         }
         break;
     case cUIState::kONGAINFOCUS:
-        if (selfp->mSessionPopupActive != 0) {
-            selfp->setWidgetHiliteColor((cUIText*)pWidget, 1);
+        if (mSessionPopupActive != 0) {
+            setWidgetHiliteColor((cUIText*)pWidget, 1);
             if (pWidget->mMiscData == 0) {
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_x);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_a);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_a);
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_na);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_na);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_Yes_x);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_No_x);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_Yes_a);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_No_a);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_Yes_na);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_No_na);
             } else {
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_Yes_x);
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No_a);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_Yes_a);
-                cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No_na);
-                cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_Yes_na);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_No_x);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_Yes_x);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_No_a);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_Yes_a);
+                cUIState_showObjSafe(((char*)this), str_ConfirmMenu_No_na);
+                cUIState_hideObjSafe(((char*)this), str_ConfirmMenu_Yes_na);
             }
         }
         break;
     case cUIState::kONLOSEFOCUS:
-        if (selfp->mSessionPopupActive != 0) {
-            selfp->setWidgetUnHiliteColor((cUIText*)pWidget, 1);
+        if (mSessionPopupActive != 0) {
+            setWidgetUnHiliteColor((cUIText*)pWidget, 1);
         }
         break;
     case cUIState::kONOPTION:
@@ -452,7 +451,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetMenu);
  * @param event  the menu event
  * @return 0 for events 8 and 9, else 0x101
  */
-extern "C" int cOVState_MAP_onWidgetMenu(cOVState_MAP* self, int menu, int event)
+int cOVState_MAP::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     return ((unsigned int)(event - 8) < 2) ? 0 : 257;
 }
@@ -621,10 +620,10 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
  *
  * @param pInput  the UI input object
  */
-extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, const cUIInput* pInput)
+void cOVState_MAP::onInputAlways(cUIInput* pInput)
 {
     if (pInput->isUp() || pInput->isDown()) {
-        self->showIndicators();
+        showIndicators();
     }
 }
 #endif

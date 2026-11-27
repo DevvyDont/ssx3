@@ -56,6 +56,11 @@ struct cFEStateCareerStats : public cUIState {
     virtual ~cFEStateCareerStats();
     virtual void onCreateScreen() __asm__("cFEStateCareerStats_onCreateScreen");
     virtual bool onGainTransition(int on) __asm__("cFEStateCareerStats_onGainTransition");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateCareerStats_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cFEStateCareerStats_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateCareerStats_onWidgetEvent");
+    virtual bool onInputBegin(cUIInput* w) __asm__("cFEStateCareerStats_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateCareerStats, mStatsState, 0x048);

@@ -84,6 +84,9 @@ struct cFEStateCreateStep1 : public cFEStateNet {
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateCreateStep1_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateCreateStep1_onCreateScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateCreateStep1_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateCreateStep1_onUpdate__FPv");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateCreateStep1_onWidgetEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCreateStep1_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateCreateStep1, mpAccount, 0x6D0);
@@ -127,6 +130,8 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateCreateStep2_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* box) __asm__("cFEStateCreateStep2_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateStep2_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateCreateStep2_onUpdate__FPv");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateCreateStep2_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);

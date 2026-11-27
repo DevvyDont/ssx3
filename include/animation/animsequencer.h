@@ -83,6 +83,7 @@ struct tEventFlags {
     // Methods bound to their retail symbols by asm labels.
     bool isSet1(int bit) __asm__("tEventFlags_isSet1");
     bool isJustChanged(int bit) __asm__("tEventFlags_isJustChanged");
+    void clear1(int bit) __asm__("tEventFlags_clear1");
 };
 
 CHECK_OFFSET(tEventFlags, IsSet, 0x0);
@@ -242,6 +243,7 @@ struct cAnimSequencer {
     void removeAllEndTriggers(int trig) __asm__("cAnimSequencer_removeAllEndTriggers");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimSequencer_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cAnimSequencer_readFromReplayFrame");
+    void init() __asm__("cAnimSequencer_init__FPv");
 };
 
 CHECK_OFFSET(cAnimSequencer, NumPlaying, 0x0);

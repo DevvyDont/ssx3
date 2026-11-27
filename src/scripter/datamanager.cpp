@@ -756,7 +756,6 @@ extern "C" cUIState* cUIStateStack_findState(void* table, int hash);
 typedef sVEntry<int(void*, int)> tForcePlayUpdateSlot;
 
 // The unit declares tNISList_Play as void; it returns the state at 0xA4.
-int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play");
 
 /**
  * Starts the NIS list's head script (or video) once it is ready, with its transition in, and returns the list state.
@@ -784,26 +783,26 @@ int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play"
  * @param notify  force an immediate update of the started script or video (On Tour forceUpdate)
  * @return the list state after the call (+0xA4)
  */
-int tNISList_Play_impl(char* vself, int fade, int notify)
+int tNISList::Play(int fade, int notify)
 {
-    tNISList* self = (tNISList*)vself;
-    tNISList* dm = (tNISList*)self;
-    if (self->mState == keNISListState_Loading) {
-        self->CheckOnLoading();
+    tNISList* dm = (tNISList*)this;
+    if (mState == keNISListState_Loading) {
+        CheckOnLoading();
     }
-    if (self->mState != keNISListState_Ready) {
-        return self->mState;
+    if (mState != keNISListState_Ready) {
+        return mState;
     }
-    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
+    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&mList.mBuffer[0], 0);
     dm->mState = keNISListState_Playing;
     char* table = (char*)&SSXApp->Game->UI->mStateStack;
     cUIState* hudState = cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (hudState != 0) {
         hudState->handleEvent(0, 0);
     }
-    if (self->IsVideo(item) == 0) {
-        cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->scriptHandle, 0, (item->controlBits >> 3) & 1);
-        if (self->mIsCutSceneHandler != 0) {
+    if (IsVideo(item) == 0) {
+        cSSXScriptEngine_PlayRequestScript_i(*(void**)this, mViewIndex, item->scriptHandle, 0,
+                (item->controlBits >> 3) & 1);
+        if (mIsCutSceneHandler != 0) {
             cTransitionMan* snd = cGame_getTransitionMan(SSXApp->Game, 0);
             if (snd->mbPlayingTransition != 0) {
                 cTransitionMan_EndTransition(snd);
@@ -812,25 +811,25 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
             int tHold = 0;
             float cutSceneTime = 0.0f;
             tSSXScriptHeader* transitionInfo = (tSSXScriptHeader*)GetSSXScriptHeader(
-                cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->scriptHandle));
+                cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)this, item->scriptHandle));
             if (fade) {
                 tIn = transitionInfo->startFadeToTransitionFrames;
                 tHold = transitionInfo->startHoldTransitionFrames;
             }
-            self->mTransitionWaitFrames = 0;
+            mTransitionWaitFrames = 0;
             if (tIn + tHold + transitionInfo->startFadeFromTransitionFrames > 0) {
                 if (transitionInfo->startTransitionType != keScriptTransition_CrossFade) {
-                    int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self,
+                    int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)this,
                         transitionInfo->startTransitionType, transitionInfo->startTransitionColour);
                     if (transition != 0) {
-                        int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)self,
+                        int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)this,
                             transitionInfo->startTransitionType, transitionInfo->startTransitionColour);
                         float tt = (float)tIn * 0.01666666753590107f;
                         cTransitionMan_StartTransition_f(snd, 2, transition, transitionOut, tt,
                             (float)tHold * 0.01666666753590107f,
                             (float)transitionInfo->startFadeFromTransitionFrames * 0.01666666753590107f, 0, 0);
                         cutSceneTime = tt;
-                        self->mTransitionWaitFrames = tIn + tHold;
+                        mTransitionWaitFrames = tIn + tHold;
                     }
                 } else if (tIn) {
                     int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, keScriptTransition_CrossFade,
@@ -839,11 +838,11 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
                     cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, tt);
                     cutSceneTime = tt;
                 }
-                if (self->mTransitionWaitFrames > 0) {
+                if (mTransitionWaitFrames > 0) {
                     notify = 0;
-                    cBXScriptEngine_PauseScript(*(void**)self, item->scriptHandle);
-                    self->mIsStartTransition = 1;
-                    self->mInScriptTransition = 1;
+                    cBXScriptEngine_PauseScript(*(void**)this, item->scriptHandle);
+                    mIsStartTransition = 1;
+                    mInScriptTransition = 1;
                 }
             }
             if (cutSceneTime <= 0.0f) {
@@ -852,21 +851,21 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
             cCutSceneTransitionMan_StartCutScene(SSXApp->Game->CutSceneTransitionMan, cutSceneTime);
         }
         if (notify) {
-            cSSXScriptEngine* eng = self->mpNISEngine;
+            cSSXScriptEngine* eng = mpNISEngine;
             tForcePlayUpdateSlot* vt = (tForcePlayUpdateSlot*)eng->mVtbl;
             tForcePlayUpdateSlot* vtEntry = &vt[6];
             vtEntry->fn(vthis(eng, *vtEntry), item->scriptHandle);
         }
     } else {
-        if (self->mIsCutSceneHandler != 0) {
+        if (mIsCutSceneHandler != 0) {
             cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);
         }
-        cVidEngine_PlayVideo(&self->mpNISEngine->mpPlayer);
+        cVidEngine_PlayVideo(&mpNISEngine->mpPlayer);
         if (notify) {
-            cVidEngine_UpdateVideo(&self->mpNISEngine->mpPlayer);
+            cVidEngine_UpdateVideo(&mpNISEngine->mpPlayer);
         }
     }
-    return self->mState;
+    return mState;
 }
 #endif
 
@@ -876,15 +875,14 @@ extern "C" void* tNISList_DoPause(void*, int, int);
 INCLUDE_ASM("scripter/datamanager", tNISList_Pause__FPvi);
 #ifdef SKIP_ASM
 /**
- * Pauses or resumes a NIS list: tNISList_DoPause(self, @p pauseList, 0).
+ * Pauses or resumes a NIS list: tNISList_DoPause(this, @p pauseList, 0).
  *
  * @param pauseList  nonzero to pause, 0 to resume
  * @return tNISList_DoPause's return register (it returns nothing)
  */
-void* tNISList_Pause(void* vself, int pauseList)
+void* tNISList::Pause(int pauseList)
 {
-    tNISList* self = (tNISList*)vself;
-    return tNISList_DoPause(self, pauseList, 0);
+    return tNISList_DoPause(this, pauseList, 0);
 }
 #endif
 
@@ -1267,94 +1265,94 @@ extern "C" void cTransitionMan_EndTransition(void* p);
  * next script starts (tNISList_PlayNextScriptOnAvailable) unless the start-transition flag (+0xAC) is set, in which
  * case the head resumes (cBXScriptEngine_ResumeScript or cVidEngine_PlayVideo). Once the game's transition manager
  * (cGame_getTransitionMan, mbPlayingTransition) is idle and the wait is over, both flags clear. - While paused on
- * loading (+0xA8), once the pending entry (+0xBC) is ready the pause is undone (tNISList_DoPause(self, 0, 1)) and
+ * loading (+0xA8), once the pending entry (+0xBC) is ready the pause is undone (tNISList_DoPause(this, 0, 1)) and
  * tNISList_PlayNextScript plays it. - A skip in progress (+0xC8) counts down; at 0 it ends a running transition
  * (cTransitionMan_EndTransition) and starts the next script. - Otherwise the next script starts once the head script's
  * request is back to keScriptRequestState_Ready or ending (cBXScriptEngine_IsRequestPlaybackEnding), or the head video
  * reports done (cVidEngine_IsVideoOnLastFrame), after tNISList_DoTransitionToNext.
  */
-extern "C" void tNISList_Update(tNISList* self)
+void tNISList::Update()
 {
-    if (self->mState == keNISListState_Loading) {
-        self->CheckOnLoading();
+    if (mState == keNISListState_Loading) {
+        CheckOnLoading();
         return;
     }
-    if (self->mState == keNISListState_Ready) {
-        int playOnReady = self->mPlayOnReady;
+    if (mState == keNISListState_Ready) {
+        int playOnReady = mPlayOnReady;
         if (playOnReady != tNISList::kePlayOnReady_No) {
-            tNISList_Play(((char*)self), playOnReady == tNISList::kePlayOnReady_YesWithTransitionIn, 0);
-            self->mPlayOnReady = tNISList::kePlayOnReady_No;
+            tNISList_Play(((char*)this), playOnReady == tNISList::kePlayOnReady_YesWithTransitionIn, 0);
+            mPlayOnReady = tNISList::kePlayOnReady_No;
         }
     }
-    if (self->mState != keNISListState_Playing) {
+    if (mState != keNISListState_Playing) {
         return;
     }
-    if (self->mNumPause != 0) {
+    if (mNumPause != 0) {
         return;
     }
-    if (self->mInScriptTransition != 0) {
-        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList, 0);
+    if (mInScriptTransition != 0) {
+        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&mList, 0);
         cTransitionMan* obj = cGame_getTransitionMan(SSXApp->Game, 0);
-        if (self->mTransitionWaitFrames != 0) {
-            if (--self->mTransitionWaitFrames == 0) {
-                if (self->mIsStartTransition == 0) {
-                    self->PlayNextScriptOnAvailable();
+        if (mTransitionWaitFrames != 0) {
+            if (--mTransitionWaitFrames == 0) {
+                if (mIsStartTransition == 0) {
+                    PlayNextScriptOnAvailable();
                     return;
                 }
-                if (self->IsVideo(item) == 0) {
-                    cBXScriptEngine_ResumeScript(*(void**)self, item->scriptHandle);
+                if (IsVideo(item) == 0) {
+                    cBXScriptEngine_ResumeScript(*(void**)this, item->scriptHandle);
                 } else {
-                    cVidEngine_PlayVideo(&self->mpNISEngine->mpPlayer);
+                    cVidEngine_PlayVideo(&mpNISEngine->mpPlayer);
                 }
             }
         }
-        if (obj->mbPlayingTransition == 0 && self->mTransitionWaitFrames == 0) {
-            self->mIsStartTransition = 0;
-            self->mInScriptTransition = 0;
+        if (obj->mbPlayingTransition == 0 && mTransitionWaitFrames == 0) {
+            mIsStartTransition = 0;
+            mInScriptTransition = 0;
         }
     }
-    if (self->mPausedOnNextScriptLoading != 0) {
-        void* list = (char*)&self->mList;
-        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
+    if (mPausedOnNextScriptLoading != 0) {
+        void* list = (char*)&mList;
+        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, mNextPendingScriptIndex);
         int ok;
-        if (self->IsVideo(item) == 0) {
-            ok = cBXScriptEngine_GetRequestState(*(void**)self,
-                     cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex)->scriptHandle)
+        if (IsVideo(item) == 0) {
+            ok = cBXScriptEngine_GetRequestState(*(void**)this,
+                     cCircularBuffer_operatorIndex(list, mNextPendingScriptIndex)->scriptHandle)
                  == keScriptRequestState_Ready;
         } else {
             ok = item->scriptHandle >= 0;
         }
         if (ok) {
-            tNISList_DoPause(((char*)self), 0, 1);
-            self->PlayNextScript();
+            tNISList_DoPause(((char*)this), 0, 1);
+            PlayNextScript();
         }
         return;
     }
-    if (self->mDoSkip != 0) {
-        if (--self->mDoSkip == 0) {
-            if (self->mInScriptTransition != 0) {
+    if (mDoSkip != 0) {
+        if (--mDoSkip == 0) {
+            if (mInScriptTransition != 0) {
                 cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
-                self->mIsStartTransition = 0;
-                self->mInScriptTransition = 0;
-                self->mTransitionWaitFrames = 0;
+                mIsStartTransition = 0;
+                mInScriptTransition = 0;
+                mTransitionWaitFrames = 0;
             }
-            self->PlayNextScriptOnAvailable();
+            PlayNextScriptOnAvailable();
             return;
         }
     }
-    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList, 0);
+    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&mList, 0);
     int done = 0;
-    if (self->IsVideo(item) == 0) {
-        if (cBXScriptEngine_GetRequestState(*(void**)self, item->scriptHandle) == keScriptRequestState_Ready
-            || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, item->scriptHandle) != 0) {
+    if (IsVideo(item) == 0) {
+        if (cBXScriptEngine_GetRequestState(*(void**)this, item->scriptHandle) == keScriptRequestState_Ready
+            || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)this, item->scriptHandle) != 0) {
             done = 1;
         }
-    } else if (cVidEngine_IsVideoOnLastFrame(&self->mpNISEngine->mpPlayer) != 0) {
-        tNISList_DoTransitionToNext(((char*)self));
+    } else if (cVidEngine_IsVideoOnLastFrame(&mpNISEngine->mpPlayer) != 0) {
+        tNISList_DoTransitionToNext(((char*)this));
         done = 1;
     }
     if (done) {
-        self->PlayNextScriptOnAvailable();
+        PlayNextScriptOnAvailable();
     }
 }
 #endif
@@ -2006,7 +2004,6 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int 
 
 
 // The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
-int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionToNext");
 
 /**
  * Starts the transition from the current NIS entry into the next, or reports one already running.
@@ -2024,18 +2021,17 @@ int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionT
  *
  * @return +0xB0: 1 while a script transition is running
  */
-int tNISList_DoTransitionToNext_impl(char* vself)
+int tNISList::DoTransitionToNext()
 {
-    tNISList* self = (tNISList*)vself;
-    if (self->mInScriptTransition != 0) {
-        if (self->mIsStartTransition != 0) {
+    if (mInScriptTransition != 0) {
+        if (mIsStartTransition != 0) {
             cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
             return 0;
         }
         return 1;
     }
-    tNISListEntry* item = cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
-    if (self->IsVideo(item) == 0) {
+    tNISListEntry* item = cCircularBuffer_operatorIndex(&mList.mBuffer[0], 0);
+    if (IsVideo(item) == 0) {
         tSSXScriptHeader* transitionInfo = (tSSXScriptHeader*)GetSSXScriptHeader(
             cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, item->scriptHandle));
         cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
@@ -2044,44 +2040,48 @@ int tNISList_DoTransitionToNext_impl(char* vself)
         }
         if (transitionInfo->endFadeToTransitionFrames + transitionInfo->endHoldTransitionFrames + transitionInfo->endFadeFromTransitionFrames > 0) {
             if (transitionInfo->endTransitionType != keScriptTransition_CrossFade) {
-                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->endTransitionType, transitionInfo->endTransitionColour);
+                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)this,
+                        transitionInfo->endTransitionType, transitionInfo->endTransitionColour);
                 if (transition == 0) {
                     return 0;
                 }
-                int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->endTransitionType, transitionInfo->endTransitionColour);
+                int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)this,
+                        transitionInfo->endTransitionType, transitionInfo->endTransitionColour);
                 cTransitionMan_StartTransition(snd, 2, transition, transitionOut, 0, 0, (float)transitionInfo->endFadeToTransitionFrames * 0.01666666753590107f, (float)transitionInfo->endHoldTransitionFrames * 0.01666666753590107f, (float)transitionInfo->endFadeFromTransitionFrames * 0.01666666753590107f);
-                self->mTransitionWaitFrames = transitionInfo->endFadeToTransitionFrames + transitionInfo->endHoldTransitionFrames;
+                mTransitionWaitFrames = transitionInfo->endFadeToTransitionFrames +
+                        transitionInfo->endHoldTransitionFrames;
             } else {
                 int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, keScriptTransition_CrossFade,
                     transitionInfo->endTransitionColour);
                 cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, (float)transitionInfo->endFadeToTransitionFrames * 0.01666666753590107f);
-                self->mTransitionWaitFrames = 0;
+                mTransitionWaitFrames = 0;
             }
-            if (self->mTransitionWaitFrames > 0) {
-                self->mIsStartTransition = 0;
-                self->mInScriptTransition = 1;
+            if (mTransitionWaitFrames > 0) {
+                mIsStartTransition = 0;
+                mInScriptTransition = 1;
             }
         }
     } else {
-        tVideoDB* videoInfo = (tVideoDB*)tNISList_GetVideoDBRecord((tNISList*)self, (int*)item);
+        tVideoDB* videoInfo = (tVideoDB*)tNISList_GetVideoDBRecord((tNISList*)this, (int*)item);
         cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (snd->mbPlayingTransition != 0) {
             cTransitionMan_EndTransition(snd);
         }
         if (0.0f < videoInfo->transitionOutTime) {
             if (videoInfo->transitionOut != keScriptTransition_CrossFade) {
-                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, videoInfo->transitionOut, videoInfo->transitionColour);
+                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)this, videoInfo->transitionOut,
+                        videoInfo->transitionColour);
                 cTransitionMan_StartTransitionOut(snd, 2, transition, videoInfo->transitionOutTime);
-                self->mTransitionWaitFrames = 0;
+                mTransitionWaitFrames = 0;
             } else {
                 int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, keScriptTransition_CrossFade,
                     videoInfo->transitionColour);
                 cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, videoInfo->transitionOutTime);
-                self->mTransitionWaitFrames = 0;
+                mTransitionWaitFrames = 0;
             }
         }
     }
-    return self->mInScriptTransition;
+    return mInScriptTransition;
 }
 #endif
 

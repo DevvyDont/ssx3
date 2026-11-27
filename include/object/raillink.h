@@ -16,6 +16,8 @@
 
 struct cBxReplayFrame;
 
+struct cRailLink;
+
 struct cRailLink {
     cRailLink* Next;                // 0x00 [O]; [U] cRailLink_add/append walk and patch it, unlink (cRailLink_unlink)
                                     //      clears it
@@ -23,7 +25,8 @@ struct cRailLink {
     // 0x08: the vptr. [R] cRailLink_vtbl (0x00491200), stored by the destructor and by every derived dtor before
     //   unlinking. Slots:
     virtual ~cRailLink();                                       // 1  ([R] cRailLink_vtbl; types [O])
-    virtual void writeToReplayFrame(cBxReplayFrame* data);      // 2
+    virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cRailLink_writeToReplayFrame__FPv");      // 2
+    void add(cRailLink* node) __asm__("cRailLink_add");
 };
 
 CHECK_OFFSET(cRailLink, Next, 0x00);

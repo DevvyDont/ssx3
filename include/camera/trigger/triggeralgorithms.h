@@ -72,6 +72,8 @@ struct cTriggerAlgorithm : public cChaseAlgorithm {
 
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cTriggerAlgorithm_update");
+    virtual void snapCurrent() __asm__("cTriggerAlgorithm_snapCurrent");
+    virtual void snap(int key) __asm__("cTriggerAlgorithm_snap");
 };
 
 CHECK_OFFSET(cTriggerAlgorithm, Position, 0x40);
@@ -103,6 +105,10 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     void setBoundAction(cCTActionBoundedCam* boundAction) __asm__("cBoundedAlgorithm_setBoundAction");
     cCTActionBoundedCam* getBoundAction() __asm__("cBoundedAlgorithm_getBoundAction");
+    // snap stays a C function (cBoundedAlgorithm_snap): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void snap(int subjectId) __asm__("cBoundedAlgorithm_snap");
+    virtual void snapCurrent() __asm__("cBoundedAlgorithm_snapCurrent");
 };
 
 CHECK_OFFSET(cBoundedAlgorithm, BoundAction, 0x80);

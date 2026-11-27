@@ -49,12 +49,18 @@ public:
     virtual void purge() __asm__("cGameModeHandler_purge");                                                 // 3
     virtual void cleanRiderRanksPoints();                                 // 4
     virtual void cleanRiderRanksTime();                                   // 5
-    virtual bool riderCheckpointHit(int iRider, int iSecsAdded);          // 6
-    virtual void riderGateHit(int iRider, int iGateID);                   // 7
-    virtual void raceFinish(int iRider);                                  // 8
-    virtual unsigned int getHeatScore(int iRider, int iHeat);             // 9
-    virtual void writeToReplayFrame(cReplayFramePtr* data);               // 10
-    virtual void readFromReplayFrame(cReplayFramePtr* data);              // 11
+    virtual bool riderCheckpointHit(int iRider, int iSecsAdded)
+        __asm__("cGameModeHandler_riderCheckpointHit__FPv");          // 6
+    virtual void riderGateHit(int iRider, int iGateID)
+        __asm__("cGameModeHandler_riderGateHit__FPv");                   // 7
+    virtual void raceFinish(int iRider)
+        __asm__("cGameModeHandler_raceFinish__FPv");                                  // 8
+    virtual unsigned int getHeatScore(int iRider, int iHeat)
+        __asm__("cGameModeHandler_getHeatScore__FPv");             // 9
+    virtual void writeToReplayFrame(cReplayFramePtr* data)
+        __asm__("cGameModeHandler_writeToReplayFrame__FPv");               // 10
+    virtual void readFromReplayFrame(cReplayFramePtr* data)
+        __asm__("cGameModeHandler_readFromReplayFrame__FPv");              // 11
 };
 
 CHECK_SIZE(cGameModeHandler, 0x4);
@@ -78,6 +84,8 @@ struct cGMBigAirHandler : public cGameModeHandler {
     virtual unsigned int getHeatScore(int col, int row) __asm__("cGMBigAirHandler_getHeatScore");
     virtual void raceFinish(int idx) __asm__("cGMBigAirHandler_raceFinish");
     void fillScoreTable() __asm__("cGMBigAirHandler_fillScoreTable");
+    virtual void writeToReplayFrame(cReplayFramePtr* stream) __asm__("cGMBigAirHandler_writeToReplayFrame");
+    virtual void readFromReplayFrame(cReplayFramePtr* stream) __asm__("cGMBigAirHandler_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
@@ -106,6 +114,9 @@ struct cGMRaceHandler : public cGameModeHandler {
     virtual ~cGMRaceHandler();
     virtual void init() __asm__("cGMRaceHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMRaceHandler_raceFinish");
+    virtual void riderGateHit(int, int) __asm__("cGMRaceHandler_riderGateHit__FPv");
+    virtual void writeToReplayFrame(cReplayFramePtr* stream) __asm__("cGMRaceHandler_writeToReplayFrame");
+    virtual void readFromReplayFrame(cReplayFramePtr* stream) __asm__("cGMRaceHandler_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGMRaceHandler, unk_04, 0x04);
@@ -129,6 +140,8 @@ struct cGMMPRaceHandler : public cGameModeHandler {
     virtual ~cGMMPRaceHandler();
     virtual void init() __asm__("cGMMPRaceHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMMPRaceHandler_raceFinish");
+    virtual void writeToReplayFrame(cReplayFramePtr* stream) __asm__("cGMMPRaceHandler_writeToReplayFrame");
+    virtual void readFromReplayFrame(cReplayFramePtr* stream) __asm__("cGMMPRaceHandler_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);
@@ -150,6 +163,8 @@ struct cGMMPSlopeHandler : public cGameModeHandler {
     virtual void init() __asm__("cGMMPSlopeHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMMPSlopeHandler_raceFinish");
     virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMMPSlopeHandler_riderCheckpointHit");
+    virtual void writeToReplayFrame(cReplayFramePtr*) __asm__("cGMMPSlopeHandler_writeToReplayFrame__FPv");
+    virtual void readFromReplayFrame(cReplayFramePtr*) __asm__("cGMMPSlopeHandler_readFromReplayFrame__FPv");
 };
 
 CHECK_OFFSET(cGMMPSlopeHandler, LastCheckpointHit, 0x04);
@@ -173,6 +188,7 @@ struct cGMTimeHandler : public cGameModeHandler {
     virtual ~cGMTimeHandler();
     virtual void init() __asm__("cGMTimeHandler_init");
     virtual void raceFinish(int riderIndex) __asm__("cGMTimeHandler_raceFinish");
+    virtual bool riderCheckpointHit(int, int) __asm__("cGMTimeHandler_riderCheckpointHit");
 };
 
 CHECK_OFFSET(cGMTimeHandler, uiTimeToBeat, 0x04);
@@ -196,6 +212,7 @@ struct cGMPointHandler : public cGameModeHandler {
     virtual ~cGMPointHandler();
     virtual void init() __asm__("cGMPointHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMPointHandler_raceFinish");
+    virtual bool riderCheckpointHit(int, int) __asm__("cGMPointHandler_riderCheckpointHit");
 };
 
 CHECK_OFFSET(cGMPointHandler, uiScoreToBeat, 0x04);

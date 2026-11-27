@@ -96,6 +96,8 @@ struct cUIVector : public cUIThing {
     virtual void render2D(float x, float y) __asm__("cUIVector_render2D");
     virtual void update(unsigned short ev) __asm__("cUIVector_update");
     virtual void getSize(t3Vector* out) __asm__("cUIVector_getSize");
+    virtual void setUIData(tUIBaseObject* pUIBase) __asm__("cUIVector_setUIData");
+    virtual void setSize(const t3Vector* off) __asm__("cUIVector_setSize");
 };
 
 CHECK_OFFSET(cUIVector, mAttrVector, 0x074);

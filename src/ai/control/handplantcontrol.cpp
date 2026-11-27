@@ -876,10 +876,10 @@ extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, f
  *
  * @param state  the motion state being left (eMotionState; On Tour prev)
  */
-extern "C" void cAirMotion_gainFocus(cAirMotion* self, int state)
+void cAirMotion::gainFocus(int state)
 {
-    *(int*)self = state == MS_Handplant;
-    cRider* rider = self->mRider;
+    *(int*)this = state == MS_Handplant;
+    cRider* rider = mRider;
     cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, 3333.33349609375f);
 }
 #endif
@@ -903,7 +903,7 @@ extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, f
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 extern "C" void cRider_updateWind(char* self);
 int cRider_getControlState(void* rider);
-extern void* t4vect_Zero[];
+extern t4Vector t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
 static inline void vu0ScaleEq_139A20(t4Vector& v, float s)
@@ -969,7 +969,7 @@ void cAirMotion::step()
         t4Vector up = rider1->RiderRoot.row[2];
         rider1->mGroundNormal = up;
     }
-    mRider->GroundVelocity = *(t4Vector*)t4vect_Zero;
+    mRider->GroundVelocity = t4vect_Zero;
     int st = mRider->mAirPredictor->SimState;
     int ok = 0;
     if (st == cAirPredictor::kSS_SimDone || st == cAirPredictor::kSS_SimCheckObjectsDone) ok = 1;
@@ -998,7 +998,7 @@ void cAirMotion::step()
                 int big = 1;
                 if (!(0.0872664749622345f < absf_139A20(rider3->mRiderHandler->SpinControl.AirAdjSpin))) big = 0;
                 if (big) {
-                    cRider_alignRiderAxis(rider3, &rider3->mAirPredictor->GuessLandNormal, t4vect_Zero, x, y);
+                    cRider_alignRiderAxis(rider3, &rider3->mAirPredictor->GuessLandNormal, &t4vect_Zero, x, y);
                     goto done;
                 }
             }
@@ -1013,7 +1013,7 @@ void cAirMotion::step()
                 cRider* rider5 = mRider;
                 cRider_alignRiderAxis(rider5, &rider5->mAirPredictor->GuessLandNormal, &frontAlign, x, y);
             } else {
-                cRider_alignRiderAxis(rider4, tgt, t4vect_Zero, x, y);
+                cRider_alignRiderAxis(rider4, tgt, &t4vect_Zero, x, y);
             }
         }
     }
@@ -3320,7 +3320,7 @@ float cGroundMotion::getDigForce(float* snow, float dv, float sv, float lean)
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_setupGroundVectors);
 #ifdef SKIP_ASM
 extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
-extern void* t4vect_Zero[];
+extern t4Vector t4vect_Zero;
 
 // The probe's hit array: retail runs an (empty) constructor loop over its 64 entries, so the element type has a
 // user-written default constructor; tIntersectInfo itself is a plain struct.
@@ -5177,7 +5177,7 @@ extern "C" void cBeing__cBeing(cBeing* self, int flags)
 }
 #endif
 
-extern void* t4vect_Zero[];
+extern t4Vector t4vect_Zero;
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getVelocity__FPv);
@@ -5189,10 +5189,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getVelocity__FPv);
  *
  * @return t4vect_Zero
  */
-void* cBeing_getVelocity(void* vself)
+t4Vector* cBeing::getVelocity()
 {
-    cBeing* self = (cBeing*)vself;
-    return (void*)t4vect_Zero;
+    return &t4vect_Zero;
 }
 #endif
 
@@ -5207,10 +5206,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isIntersecting__FPv);
  *
  * @return 0
  */
-int cBeing_isIntersecting(void* vself)
+bool cBeing::isIntersecting(tInstanceRecord*)
 {
-    cBeing* self = (cBeing*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -5220,9 +5218,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_applyBoost__FPv);
 /**
  * Applies no boost: cBeing's applyBoost has an empty body.
  */
-void cBeing_applyBoost(void* vself)
+void cBeing::applyBoost(t4Vector*)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5236,14 +5233,13 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getPosition__FPv);
  *
  * @return t4vect_Zero
  */
-void* cBeing_getPosition(void* vself)
+t4Vector* cBeing::getPosition()
 {
-    cBeing* self = (cBeing*)vself;
-    return (void*)t4vect_Zero;
+    return &t4vect_Zero;
 }
 #endif
 
-extern void* t4mat_Identity[];
+extern t4Matrix t4mat_Identity;
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getTransform__FPv);
@@ -5256,10 +5252,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getTransform__FPv);
  *
  * @return t4mat_Identity
  */
-void* cBeing_getTransform(void* vself)
+t4Matrix* cBeing::getTransform()
 {
-    cBeing* self = (cBeing*)vself;
-    return (void*)t4mat_Identity;
+    return &t4mat_Identity;
 }
 #endif
 
@@ -5313,9 +5308,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_transport__FPv);
 /**
  * Does nothing: cBeing's transport has an empty body.
  */
-void cBeing_transport(void* vself)
+void cBeing::transport(t4Matrix*)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5336,9 +5330,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_initForMission__FPv);
 /**
  * Does nothing: cBeing's initForMission has an empty body.
  */
-void cBeing_initForMission(void* vself)
+void cBeing::initForMission(t4Matrix*)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5348,9 +5341,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventSpeedBoost__FPv);
 /**
  * Ignores a speed-boost event: cBeing's flagEventSpeedBoost has an empty body.
  */
-void cBeing_flagEventSpeedBoost(void* vself)
+void cBeing::flagEventSpeedBoost(float)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5360,9 +5352,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickBoost__FPv);
 /**
  * Ignores a trick-boost event: cBeing's flagEventTrickBoost has an empty body.
  */
-void cBeing_flagEventTrickBoost(void* vself)
+void cBeing::flagEventTrickBoost(float)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5372,9 +5363,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickMultiplier__FPv)
 /**
  * Ignores a trick-multiplier event: cBeing's flagEventTrickMultiplier has an empty body.
  */
-void cBeing_flagEventTrickMultiplier(void* vself)
+void cBeing::flagEventTrickMultiplier(float)
 {
-    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5656,12 +5646,11 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getPosition__FPv);
 /**
  * Returns the address of the rider's mPosition (+0x110).
  *
- * @return self + 0x110
+ * @return &mPosition (+0x110)
  */
-void* cRider_getPosition(void* vself)
+t4Vector* cRider::getPosition()
 {
-    cRider* self = (cRider*)vself;
-    return (char*)&self->mPosition;
+    return &mPosition;
 }
 #endif
 
@@ -5703,10 +5692,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVelocity__FPv);
  *
  * @return a pointer to mVelocity (+0x1E0)
  */
-void* cRider_getVelocity(void* vself)
+t4Vector* cRider::getVelocity()
 {
-    cRider* self = (cRider*)vself;
-    return (char*)&self->mVelocity;
+    return &mVelocity;
 }
 #endif
 
@@ -6529,9 +6517,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationBump__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 17 (kRiderVt_vibrationBump).
  */
-void cRider_vibrationBump(void* vself)
+void cRider::vibrationBump(float)
 {
-    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6541,9 +6528,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationRumble__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 18 (kRiderVt_vibrationRumble).
  */
-void cRider_vibrationRumble(void* vself)
+void cRider::vibrationRumble(float)
 {
-    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -8325,12 +8311,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", tEventFlags_clear1);
  * @param bit  the flag number, 0-63
  */
 // PORT: ulong is 64-bit here
-extern "C" void tEventFlags_clear1(tEventFlags* self, int bit)
+void tEventFlags::clear1(int bit)
 {
     ulong mask = (ulong)1 << bit;
-    ulong oldBits = *(ulong*)self;
-    *(ulong*)self = oldBits & ~mask;
-    self->IsJustChanged |= mask & oldBits;
+    ulong oldBits = *(ulong*)this;
+    *(ulong*)this = oldBits & ~mask;
+    IsJustChanged |= mask & oldBits;
 }
 #endif
 

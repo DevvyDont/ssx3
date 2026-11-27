@@ -67,7 +67,7 @@ INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateBonusMaterial_onWidgetMenu(cFEStateBonusMaterial* self, int menu, unsigned int key)
+int cFEStateBonusMaterial::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {

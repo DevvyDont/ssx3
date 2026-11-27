@@ -217,7 +217,7 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  */
 extern "C" void cFEStateMountainRoom_onGainFocus(cFEStateMountainRoom* self, int pPrevState)
 {
-    cFEStateMountainRoom_updateMarkers(self);
+    self->updateMarkers();
     cFEState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -301,33 +301,34 @@ static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
  * entries
  * 0-3.
  *
- * @param w  the widget being created
+ * @param pWidget  the widget being created
  */
-extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, sWidget_2AD0* w)
+void cFEStateMountainRoom::onWidgetCreate(cUIThing* pWidget)
 {
+    sWidget_2AD0* w = (sWidget_2AD0*)pWidget;
     int widgetHash = w->hash;
     if (widgetHash == GetHashValue32(str_screentitle)) {
         cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLETrophyRoom));
         return;
     }
     if (widgetHash == GetHashValue32(str_Group_peak_pass)) {
-        setW_2AD0(((char*)self), 72, w);
+        setW_2AD0(((char*)this), 72, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Front)) {
-        setW_2AD0(((char*)self), 76, w);
+        setW_2AD0(((char*)this), 76, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_peak_pass)) {
-        self->mpPassIcon = (cUIIcon*)w;
+        mpPassIcon = (cUIIcon*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_level_numb_back) || widgetHash == GetHashValue32(str_level_numb_front)) {
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
         memset(buf + 5, 0, 15);
-        cUIEngine* eng = self->mpEngine;
-        buf[2] = *(unsigned char*)&self->mLevel + '0';
+        cUIEngine* eng = mpEngine;
+        buf[2] = *(unsigned char*)&mLevel + '0';
         int hash = GetHashValue32(buf);
         int texElem = cUITextureBank_getElementByHashname(&eng->mTextureBank, hash);
         w->f78 = -1;
@@ -335,83 +336,83 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_0)) {
-        setW_2AD0(((char*)self), 88, w);
+        setW_2AD0(((char*)this), 88, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_1)) {
-        setW_2AD0(((char*)self), 92, w);
+        setW_2AD0(((char*)this), 92, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_2)) {
-        setW_2AD0(((char*)self), 0x60, w);
+        setW_2AD0(((char*)this), 0x60, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_3)) {
-        setW_2AD0(((char*)self), 100, w);
+        setW_2AD0(((char*)this), 100, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_4)) {
-        setW_2AD0(((char*)self), 104, w);
+        setW_2AD0(((char*)this), 104, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_0)) {
-        setW_2AD0(((char*)self), 108, w);
+        setW_2AD0(((char*)this), 108, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_1)) {
-        setW_2AD0(((char*)self), 0x70, w);
+        setW_2AD0(((char*)this), 0x70, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_2)) {
-        setW_2AD0(((char*)self), 116, w);
+        setW_2AD0(((char*)this), 116, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_0)) {
-        setW_2AD0(((char*)self), 144, w);
+        setW_2AD0(((char*)this), 144, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_1)) {
-        setW_2AD0(((char*)self), 148, w);
+        setW_2AD0(((char*)this), 148, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_2)) {
-        setW_2AD0(((char*)self), 152, w);
+        setW_2AD0(((char*)this), 152, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_0)) {
-        setW_2AD0(((char*)self), 0x78, w);
+        setW_2AD0(((char*)this), 0x78, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_1)) {
-        setW_2AD0(((char*)self), 0x7C, w);
+        setW_2AD0(((char*)this), 0x7C, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_2)) {
-        setW_2AD0(((char*)self), 0x80, w);
+        setW_2AD0(((char*)this), 0x80, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_0)) {
-        setW_2AD0(((char*)self), 132, w);
+        setW_2AD0(((char*)this), 132, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_1)) {
-        setW_2AD0(((char*)self), 136, w);
+        setW_2AD0(((char*)this), 136, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_2)) {
-        setW_2AD0(((char*)self), 140, w);
+        setW_2AD0(((char*)this), 140, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_0)) {
-        setW_2AD0(((char*)self), 156, w);
+        setW_2AD0(((char*)this), 156, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_1)) {
-        setW_2AD0(((char*)self), 160, w);
+        setW_2AD0(((char*)this), 160, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_2)) {
-        setW_2AD0(((char*)self), 164, w);
+        setW_2AD0(((char*)this), 164, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Peak_pass_text)) {
@@ -431,7 +432,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
         return;
     }
     if (widgetHash == GetHashValue32(str_helptext)) {
-        setW_2AD0(((char*)self), 84, w);
+        setW_2AD0(((char*)this), 84, w);
         return;
     }
 }
@@ -486,7 +487,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateMountainRoom_onWidgetMenu(cFEStateMountainRoom* self, int menu, unsigned int key)
+int cFEStateMountainRoom::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -763,10 +764,10 @@ static inline void setMarkerElem_3340(cUIIcon* marker, cTextureElement* elem)
 #define SHOW_MARKER_3340(markers, count)                                   \
     {                                                                      \
         if (st < 4)                                                        \
-            setMarkerElem_3340(self->markers[count], self->mpDoneElem);    \
+            setMarkerElem_3340(this->markers[count], this->mpDoneElem);    \
         else                                                               \
-            setMarkerElem_3340(self->markers[count], self->mpNotDoneElem); \
-        self->markers[count++]->setVisible(1);                             \
+            setMarkerElem_3340(this->markers[count], this->mpNotDoneElem); \
+        this->markers[count++]->setVisible(1);                             \
     }
 
 /**
@@ -781,7 +782,7 @@ static inline void setMarkerElem_3340(cUIIcon* marker, cTextureElement* elem)
  * -1) and is shown (setVisible). The six counts are On Tour's raceCount, ssCount, hpCount, baCount, raceBACount and
  * freeBACount.
  */
-extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* self)
+void cFEStateMountainRoom::updateMarkers()
 {
     int raceCount = 0;
     int ssCount = 0;
@@ -797,7 +798,7 @@ extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* self)
                 int track = gMedalsInfo[mountain][peak][i].track;
                 if (track < 0)
                     break;
-                unsigned int st = getChallengeMedal(self->mUserNum, self->mCharID, mountain, peak, i);
+                unsigned int st = getChallengeMedal(mUserNum, mCharID, mountain, peak, i);
                 if (track == 0) {
                     SHOW_MARKER_3340(mpRaceMarkers, raceCount);
                 } else if (track == 1) {
@@ -1153,7 +1154,7 @@ extern "C" void* cList_getByIndex(void* list, int id);
  * @param id  the menu item index (On Tour index)
  * @return 0x100 for kONOPTION and kONMISC, 0x10 for kONNEXT on an unowned trophy, otherwise 0x101
  */
-extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* item, unsigned int key, int id)
+int cFEStatePeakRoom::onWidgetMenu(cUIMenu* item, unsigned int key, unsigned int id)
 {
     switch (key) {
     default:
@@ -1164,8 +1165,8 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* it
     case cUIMenu::kONNEXT: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         cUIThing* entry = (cUIThing*)cList_getByIndex((char*)&item->mList, id);
-        if (cBERewardInterface_isTrophyOwned(iface, self->mUserNum, self->mCharID,
-                          self->mPeakNum, entry->mMiscData) == 0) {
+        if (cBERewardInterface_isTrophyOwned(iface, mUserNum, mCharID,
+                          mPeakNum, entry->mMiscData) == 0) {
             return 0x10;
         }
         break;

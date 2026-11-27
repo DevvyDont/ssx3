@@ -192,15 +192,23 @@ struct cCameraAlgorithm {
     // (retail has getPose at 2 and no renderDebugInfo; the rest keep On Tour's order).
     virtual ~cCameraAlgorithm();                                                    // 1
     virtual tPose getPose() = 0;                                                    // 2
-    virtual void snap(int subjectID);                                               // 3
-    virtual void snapCurrent();                                                     // 4
-    virtual void update();                                                          // 5
+    virtual void snap(int subjectID)
+        __asm__("cCameraAlgorithm_snap__FPv");                                               // 3
+    virtual void snapCurrent()
+        __asm__("cCameraAlgorithm_snapCurrent__FPv");                                                     // 4
+    virtual void update()
+        __asm__("cCameraAlgorithm_update__FPv");                                                          // 5
     virtual t4Vector getTargetPos();                                                // 6
-    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* data_outArg);     // 7
-    virtual void doRaceCamFinalPhase(int ignoreCollisions);                         // 8 (On Tour: bool)
-    virtual void updateAlgorithm(int ignoreCollisions);                             // 9 (bool)
-    virtual void notifyMoveZ(int didMoveZ);                                         // 10 (bool)
-    virtual bool shouldSnapOnUpdate();                                              // 11
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* data_outArg)
+        __asm__("cCameraAlgorithm_getRaceCamFinalPhaseData__FPv");     // 7
+    virtual void doRaceCamFinalPhase(int ignoreCollisions)
+        __asm__("cCameraAlgorithm_doRaceCamFinalPhase__FPv");                         // 8 (On Tour: bool)
+    virtual void updateAlgorithm(int ignoreCollisions)
+        __asm__("cCameraAlgorithm_updateAlgorithm");                             // 9 (bool)
+    virtual void notifyMoveZ(int didMoveZ)
+        __asm__("cCameraAlgorithm_notifyMoveZ__FPv");                                         // 10 (bool)
+    virtual bool shouldSnapOnUpdate()
+        __asm__("cCameraAlgorithm_shouldSnapOnUpdate__FPv");                                              // 11
 
     // Methods bound to their retail symbols by asm labels.
     float getDefaultView() __asm__("cCameraAlgorithm_getDefaultView");
@@ -249,6 +257,12 @@ CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
 // cEditorCameraAlgorithm_cEditorCameraAlgorithm (vtables D_0045BD10 / D_0045BCA8); [U] the controller's dtor deletes
 // them (slot 1), snap / snapCurrent call slots 3 / 4.
 struct cManualCameraAlgorithm : public cBasicCameraAlgorithm {
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cManualCameraAlgorithm__cManualCameraAlgorithm stays a C function (g++ 2.95 takes no asm
+    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cManualCameraAlgorithm();
+    virtual void snap(int) __asm__("cManualCameraAlgorithm_snap__FPv");
 };
 
 struct cEditorCameraAlgorithm : public cBasicCameraAlgorithm {
@@ -278,6 +292,8 @@ CHECK_SIZE(cChaseAlgorithm, 0x40);
 
 // cLookAtChaseAlgorithm (retail 0x390: the 0x390-byte allocations of its field-less subclasses, and cCamera's
 // embedded cDEFAULT_3ChaseAlgorithm spanning 0xC0..0x450).
+struct t4Vector;
+
 struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
     // cChaseAlgorithm (camera/cameraalgorithms.h, 0x40): the vptr at 0x10:
     //   [R] cLookAtChaseAlgorithm_vtbl; [U] the virtual calls (updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
@@ -422,6 +438,30 @@ struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
         __asm__("cLookAtChaseAlgorithm_updateCameraShake");
     void updatePitchBlending(float x, float y, float z, float w) __asm__("cLookAtChaseAlgorithm_updatePitchBlending");
     void setupInitialCamDir(float backDist, float height) __asm__("cLookAtChaseAlgorithm_setupInitialCamDir");
+    virtual void updateAlgorithm(int ignoreCollisions) __asm__("cLookAtChaseAlgorithm_updateAlgorithm");
+    void setupChaseData(cChaseSetup* out, float normalVelMinSmoothness, float normalVelMaxSmoothness,
+                        float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness,
+                        float powderVelMaxSmoothness, float powderVelStartSlope, float powderVelEndSlope)
+        __asm__("cLookAtChaseAlgorithm_setupChaseData");
+    void updateLateralShift(cChaseSetup* info, float proportion, float targetProportion)
+        __asm__("cLookAtChaseAlgorithm_updateLateralShift");
+    void updateViewCam(float side, float back, float up, float ease) __asm__("cLookAtChaseAlgorithm_updateViewCam");
+    void updateRailCam(cChaseSetup* src, float rise, float smoothness) __asm__("cLookAtChaseAlgorithm_updateRailCam");
+    void* updateDebugCam() __asm__("cLookAtChaseAlgorithm_updateDebugCam__FPv");
+    void calcPitchHeading() __asm__("cLookAtChaseAlgorithm_calcPitchHeading");
+    void calcLookVectorFromPitchAndHeading(t4Vector* out)
+        __asm__("cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading");
+    void calcPose() __asm__("cLookAtChaseAlgorithm_calcPose");
+    void verify() __asm__("cLookAtChaseAlgorithm_verify");
+    void setupCamDirection(cChaseSetup* info) __asm__("cLookAtChaseAlgorithm_setupCamDirection");
+    void updateFOVWithSpeed(cChaseSetup* obj, float fOVSpeedScalar, float defaultViewScalar, float fOVBoostScalar,
+                            float smoothness)
+        __asm__("cLookAtChaseAlgorithm_updateFOVWithSpeed");
+    void updateAirCam(cChaseSetup* info, float fullScalar, float blendTime, float amplitude, float exitSmoothness)
+        __asm__("cLookAtChaseAlgorithm_updateAirCam");
+    void updateHalfPipeCam(cChaseSetup* info, float blendOut) __asm__("cLookAtChaseAlgorithm_updateHalfPipeCam");
+    virtual void doRaceCamFinalPhase(int) __asm__("cLookAtChaseAlgorithm_doRaceCamFinalPhase");
+    virtual void snapCurrent() __asm__("cLookAtChaseAlgorithm_snapCurrent");
 };
 
 CHECK_OFFSET(cLookAtChaseAlgorithm, Position, 0x040);

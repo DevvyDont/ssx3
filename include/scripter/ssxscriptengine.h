@@ -760,6 +760,8 @@ struct cSSXScriptEngine {
     bool IsNISActive() __asm__("cSSXScriptEngine_IsNISActive");
     int GetActiveNIS() __asm__("cSSXScriptEngine_GetActiveNIS");
     void DeInitOnce() __asm__("cSSXScriptEngine_DeInitOnce");
+    void BuildCharacterBitRoleArray(int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+        __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 };
 
 CHECK_OFFSET(cSSXScriptEngine, mpObjectDatabase, 0x000);

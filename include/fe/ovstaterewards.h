@@ -42,6 +42,14 @@ struct cOVState_REWARDS : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void updateMenu(int base) __asm__("cOVState_REWARDS_updateMenu");
+    // retail's destructor cOVState_REWARDS__cOVState_REWARDS stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_REWARDS();
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_REWARDS_onGainFocus");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int key) __asm__("cOVState_REWARDS_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* id, unsigned int event, unsigned int index)
+        __asm__("cOVState_REWARDS_onWidgetMenu");
+    virtual bool onGainTransition(int) __asm__("cOVState_REWARDS_onGainTransition");
 };
 
 CHECK_OFFSET(cOVState_REWARDS, mItemSize, 0x9C);

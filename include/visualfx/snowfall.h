@@ -52,6 +52,8 @@ struct cSnowFall : public cObjNode {
     virtual ~cSnowFall();
     virtual void update() __asm__("cSnowFall_update");
     virtual void render() __asm__("cSnowFall_render");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cSnowFall_writeToReplayFrame__FPv");
+    virtual void readFromReplayFrame(cBxReplayFrame*) __asm__("cSnowFall_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cSnowFall, mSnowBoxes, 0x10);

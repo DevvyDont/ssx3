@@ -959,16 +959,17 @@ void cUIThing_setUIData_8998(void* self, void* data) __asm__("cUIThing_setUIData
  * The record's mIconFlags bit 2 goes to mAttrIcon.mIconFlip and bits 0-1 to mIconRotate; the element is the texture
  * bank's mTextureID entry. The size (mTiledU, mTiledV) is stored in hundredths in the record.
  *
- * @param data  the icon's record (On Tour tUIBaseObject* pUIBase)
+ * @param pObj  the icon's record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIIcon_setUIData(cUIIcon* self, tUIIcon* data)
+void cUIIcon::setUIData(tUIBaseObject* pObj)
 {
-    cUIThing_setUIData_8998(self, data);
-    self->mAttrIcon.mIconFlip = data->mIconFlags >> 2;
-    self->mAttrIcon.mIconRotate = (unsigned char)data->mIconFlags;
-    self->mpTextureElem = (const cTextureElement*)self->mpScreen->mpState->mpEngine->mTextureBank.getElementByHashname(
+    tUIIcon* data = (tUIIcon*)pObj;
+    cUIThing_setUIData_8998(this, data);
+    mAttrIcon.mIconFlip = data->mIconFlags >> 2;
+    mAttrIcon.mIconRotate = (unsigned char)data->mIconFlags;
+    mpTextureElem = (const cTextureElement*)mpScreen->mpState->mpEngine->mTextureBank.getElementByHashname(
         data->mTextureID);
-    *(t2Vector*)&self->mTileUV[0] = t2Vector(data->mTiledU * 0.01f, data->mTiledV * 0.01f);
+    *(t2Vector*)&mTileUV[0] = t2Vector(data->mTiledU * 0.01f, data->mTiledV * 0.01f);
 }
 #endif
 
@@ -1338,23 +1339,24 @@ struct tARGBInit : tARGB {
  * with bit 0 of its mFlags and, when mShadow is then set, takes mShadowColour from its mSColour bytes (scaled by
  * 1/255). Always sets mWrap (bit 7 of mAttr).
  *
- * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
+ * @param pObj  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIListBox_setUIData(cUIListBox* self, tUIListBox* data)
+void cUIListBox::setUIData(tUIBaseObject* pObj)
 {
-    cUIThing_setUIData_2(self, data);
-    self->mAttrListBox.mFont = data->mFontID & 3;
+    tUIListBox* data = (tUIListBox*)pObj;
+    cUIThing_setUIData_2(this, data);
+    mAttrListBox.mFont = data->mFontID & 3;
     // slot 23 (cUIListBox_setShadow) by hand: cUIListBox declares no virtual for it
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self);
-    vt[23].fn(vthis(self, vt[23]), data->mFlags & 1);
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, this);
+    vt[23].fn(vthis(this, vt[23]), data->mFlags & 1);
     // hasShadow, read as cUIListBox_hasShadow does: mShadow from the attribute word
-    if ((*(int*)&self->mAttrListBox >> 2) & 1) {
-        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+    if ((*(int*)&mAttrListBox >> 2) & 1) {
+        mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
                                         data->mSColour.r * 0.003921568859368563f,
                                         data->mSColour.g * 0.003921568859368563f,
                                         data->mSColour.b * 0.003921568859368563f);
     }
-    self->mAttr |= 0x80;
+    mAttr |= 0x80;
 }
 #endif
 

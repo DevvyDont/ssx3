@@ -18,6 +18,8 @@ struct cFEFlowState {
     // Methods bound to their retail symbols by asm labels.
     signed char getValue(int index) __asm__("cFEFlowState_getValue");
     void setValue(int index, int value) __asm__("cFEFlowState_setValue");
+    void setNumStates(int NumStates) __asm__("cFEFlowState_setNumStates");
+    void purge() __asm__("cFEFlowState_purge");
 };
 
 CHECK_OFFSET(cFEFlowState, mNumStates, 0x000);

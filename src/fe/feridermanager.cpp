@@ -919,12 +919,12 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBoneQuaternion);
 /**
  * Returns the address of a bone's rotation in the front-end rider's model (the mapped bone's second quadword).
  *
- * @param riderSlot  the front-end rider
  * @param index      the bone id (through the bone map at +0xC7C)
  * @return the address of the bone's quaternion
  */
-extern "C" int cFERider_getBoneQuaternion(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + (riderSlot->mBoneMap[index] << 5) + 0x10;
+int cFERider::getBoneQuaternion(int index)
+{
+    return ((int)mpAnimModel->bones) + (mBoneMap[index] << 5) + 0x10;
 }
 #endif
 //100%
@@ -955,10 +955,10 @@ extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(cRiderAnim*, int);
 /**
  * Asks the front-end rider's animation (+0xC) for its current animation id (cRiderAnimBase_getCurrentAnimID with 2).
  *
- * @param riderSlot  the front-end rider
  */
-extern "C" void cFERider_getAnimID(cFERider* riderSlot) {
-    cRiderAnimBase_getCurrentAnimID__FPvi((riderSlot->mpRiderAnim), 2);
+void cFERider::getAnimID()
+{
+    cRiderAnimBase_getCurrentAnimID__FPvi((mpRiderAnim), 2);
 }
 #endif
 //100%
@@ -973,10 +973,10 @@ extern "C" void cRiderAnimBase_getCurrentAnimFramePercent(cRiderAnim*, int);
  * cRiderAnimBase_getCurrentAnimFramePercent divides the playing sequence's time (+0x8) by its length (+0x10); its float result is passed through
  * (the declared return type is void).
  *
- * @param riderSlot  the front-end rider
  */
-extern "C" void cFERider_getAnimPercent(cFERider* riderSlot) {
-    cRiderAnimBase_getCurrentAnimFramePercent((riderSlot->mpRiderAnim), 2);
+void cFERider::getAnimPercent()
+{
+    cRiderAnimBase_getCurrentAnimFramePercent((mpRiderAnim), 2);
 }
 #endif
 

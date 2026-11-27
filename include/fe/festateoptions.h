@@ -64,6 +64,10 @@ struct cFEStateOptionsController : public cFEState {
     virtual void onCreateScreen() __asm__("cFEStateOptionsController_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsController_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateOptionsController_onUpdate");
+    virtual void onPopupEvent(cUIState* obj, unsigned int msg) __asm__("cFEStateOptionsController_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
+        __asm__("cFEStateOptionsController_onWidgetMenu");
+    virtual int onWidgetPair(cUIPair* pair, unsigned int event) __asm__("cFEStateOptionsController_onWidgetPair");
 };
 
 CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
@@ -145,6 +149,8 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
     virtual void hideActionButtons(int on) __asm__("cFEStateOptionsDeviceSelect_hideActionButtons");
     virtual void updateDone() __asm__("cFEStateOptionsDeviceSelect_updateDone");
     virtual void displayStatus() __asm__("cFEStateOptionsDeviceSelect_displayStatus");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int msg, unsigned int)
+        __asm__("cFEStateOptionsDeviceSelect_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSaveScreen, 0x22C);
@@ -207,6 +213,9 @@ struct cFEStateOptions : public cFEState {
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOptions_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptions_onWidgetEvent");
     virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateOptions_onInputBegin");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int index)
+        __asm__("cFEStateOptions_onWidgetMenu");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateOptions_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateOptions, mbToSaveOptionScreen, 0x048);
@@ -259,6 +268,9 @@ struct cFEStateOptionsSaveLoad : public cFEState {
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateOptionsSaveLoad_onWidgetCreate");
     virtual void onPreRender2D() __asm__("cFEStateOptionsSaveLoad_onPreRender2D");
     virtual void onPopupEvent(cUIState* widget, unsigned int event) __asm__("cFEStateOptionsSaveLoad_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
+        __asm__("cFEStateOptionsSaveLoad_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsSaveLoad_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateOptionsSaveLoad, mSaveLoadCurrentCtrl, 0x048);

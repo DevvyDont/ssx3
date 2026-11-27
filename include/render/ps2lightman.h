@@ -54,6 +54,10 @@ struct cPS2LightMan {
     void CreatePoint(int light, int colour, int pos, float intensity, int decay) __asm__("cPS2LightMan_CreatePoint");
     void CreateSpot(int light, int colour, int pos, int dir, float x, float y, int decay, float z)
         __asm__("cPS2LightMan_CreateSpot");
+    void SetAmbient() __asm__("cPS2LightMan_SetAmbient__FPv");
+    void LoadLight() __asm__("cPS2LightMan_LoadLight__FPv");
+    void SetChannel() __asm__("cPS2LightMan_SetChannel__FPv");
+    void ClearChannel() __asm__("cPS2LightMan_ClearChannel__FPv");
 };
 
 CHECK_OFFSET(cPS2LightMan, mVtbl, 0x00);

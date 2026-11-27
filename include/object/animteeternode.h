@@ -141,6 +141,7 @@ struct cAnimTeeterNode {
     void applyForce(tIntersectInfo* intInfo, t4Vector* force) __asm__("cAnimTeeterNode_applyForce");
     void writeToReplayFrame(void* stream) __asm__("cAnimTeeterNode_writeToReplayFrame");
     int getAnimDir() __asm__("cAnimTeeterNode_getAnimDir");
+    void* getNodeState() __asm__("cAnimTeeterNode_getNodeState__FPv");
 };
 
 CHECK_OFFSET(cAnimTeeterNode, TorqueSum, 0x00);

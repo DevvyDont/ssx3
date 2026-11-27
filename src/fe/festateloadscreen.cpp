@@ -375,15 +375,16 @@ void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("c
 /**
  * Saves the base game-state data into a replay frame: the state's first word.
  *
- * Writes 4 bytes from @p self (mNextState, +0x0) through the stream's virtual slot 1 (write). Every game-flow state's
- * own writeToReplayFrame calls this (cGFEndState_writeToReplayFrame__FPv, cGFGateState_writeToReplayFrame__FPv, ...).
+ * Writes 4 bytes from this state (mNextState, +0x0) through the stream's virtual slot 1 (write). Every game-flow
+ * state's own writeToReplayFrame calls this (cGFEndState_writeToReplayFrame__FPv, cGFGateState_writeToReplayFrame__FPv,
+ * ...).
  *
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
  * @return the stream write's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
-void cGameState_writeToReplayFrame_2(void* self, cBxReplayFrame* obj)
+void cGameState::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    obj->write((const char*)self, 4);
+    obj->write((const char*)this, 4);
 }
 #endif
 
@@ -397,15 +398,15 @@ void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj) __asm__("
 /**
  * Restores the base game-state data from a replay frame: the state's first word.
  *
- * Reads 4 bytes into @p self (mNextState, +0x0) through the stream's virtual slot 2 (read); the mirror of
+ * Reads 4 bytes into this state (mNextState, +0x0) through the stream's virtual slot 2 (read); the mirror of
  * cGameState_writeToReplayFrame.
  *
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
  * @return the stream read's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
-void cGameState_readFromReplayFrame_2(void* self, cBxReplayFrame* obj)
+void cGameState::readFromReplayFrame(cBxReplayFrame* obj)
 {
-    obj->read((char*)self, 4);
+    obj->read((char*)this, 4);
 }
 #endif
 
@@ -690,16 +691,16 @@ public:
  * 2. Sub-state 2: calls cGameState_gotoNextState() when the race's mode (+0x48) is 4 and its +0x49 flag is clear.
  * update slot of vtable cGFFinishlineState_vtbl.
  */
-extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
+void cGFFinishlineState::update()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (self->mShowEventResultsDelay != 0) {
-        if (--self->mShowEventResultsDelay == 0) {
+    if (mShowEventResultsDelay != 0) {
+        if (--mShowEventResultsDelay == 0) {
             int n = *(int*)SSXApp->Game->Replay;
             int ok = n != 0 && n < 10;
             if (!ok) {
                 cOVStateManager_triggerFinishOverlay();
-                if (self->mSubState != 2) {
+                if (mSubState != 2) {
                     cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState(&SSXApp->Game->UI->mStateStack, GetHashValue32(str_finishov_b));
                     if (finishOverlay != 0) {
                         finishOverlay->handleEvent(0, 0);
@@ -708,7 +709,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
             }
         }
     }
-    int state = self->mSubState;
+    int state = mSubState;
     switch (state) {
     case 0: {
         cSSXApp* ssxApp = SSXApp;
@@ -735,13 +736,13 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
         cSSXScriptEngine_AppendEndEventSequence(ScriptEngine);
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
         if (cSSXScriptEngine_GetNISListLength(ScriptEngine, 0) > 0) {
-            *(int*)self = 0xC;
+            *(int*)this = 0xC;
         }
         sRace_233CD8* rc2 = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc2->mode48 == 0) {
             cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
         }
-        self->mSubState = 1;
+        mSubState = 1;
         break;
     }
     case 1: {
@@ -753,13 +754,13 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
             finishOverlay->handleEvent(1, 0);
         }
         cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 4);
-        self->mSubState = 2;
+        mSubState = 2;
         break;
     }
     case 2: {
         sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc->flag49 == kGAMEPATH_WORLDCIRCUIT && rc->mode48 == kGAMEMODE_FREERIDE) {
-            ((cGameState*)self)->gotoNextState();
+            ((cGameState*)this)->gotoNextState();
         }
         break;
     }

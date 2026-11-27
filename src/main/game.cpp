@@ -876,9 +876,6 @@ struct sGroup_D278 {
 extern sGroup_D278 cSectionMan_mLocationMap_D278[] __asm__("cSectionMan_mLocationMap");
 extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int id);
 
-// PORT: the unit declares cSectionMan_isLoaded(void*) for its callers; the body reads a1, bound by asm label
-int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded");
-
 /**
  * Tells whether all of a location's world sections are loaded.
  *
@@ -888,24 +885,24 @@ int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded
  * @param idx  the location (On Tour eBELocationID)
  * @return 1 when everything is loaded, else 0
  */
-int cSectionMan_isLoaded_impl(void* self, int idx)
+int cSectionMan::isLoaded(int idx)
 {
     int ok = 1;
     for (int i = 0; i < cSectionMan_mLocationMap_D278[idx].iNumSection; i++) {
-        if (((cSectionMan*)self)->isSectionLoaded(cSectionMan_mLocationMap_D278[idx].iBESectionID[i]) == 0) {
+        if (((cSectionMan*)this)->isSectionLoaded(cSectionMan_mLocationMap_D278[idx].iBESectionID[i]) == 0) {
             ok = 0;
             break;
         }
     }
     int skySection = cSectionMan_mLocationMap_D278[idx].iBESkySectionID;
     if (skySection >= 0 && cSectionMan_mSectionMap[skySection].iWorldSectionID >= 0) {
-        if (((cSectionMan*)self)->isSectionLoaded(skySection) == 0) {
+        if (((cSectionMan*)this)->isSectionLoaded(skySection) == 0) {
             ok = 0;
         }
     }
     int transportSection = cSectionMan_mLocationMap_D278[idx].iBETransportSectionID;
     if (transportSection >= 0 && cSectionMan_mSectionMap[transportSection].iWorldSectionID >= 0) {
-        if (((cSectionMan*)self)->isSectionLoaded(transportSection) == 0) {
+        if (((cSectionMan*)this)->isSectionLoaded(transportSection) == 0) {
             ok = 0;
         }
     }

@@ -71,6 +71,7 @@ struct cFEStateRiderDetail : public cFEState {
     virtual void onPreRender2D() __asm__("cFEStateRiderDetail_onPreRender2D");
     virtual void onUpdate() __asm__("cFEStateRiderDetail_onUpdate");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateRiderDetail_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* item, unsigned int msg) __asm__("cFEStateRiderDetail_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateRiderDetail, mbIsFirst, 0x048);

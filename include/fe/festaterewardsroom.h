@@ -33,6 +33,8 @@ struct cFEStateRewardsRoom : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStateRewardsRoom_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateRewardsRoom_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateRewardsRoom_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cFEStateRewardsRoom_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateRewardsRoom, mCharID, 0x048);

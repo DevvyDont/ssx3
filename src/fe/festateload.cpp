@@ -54,13 +54,10 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetCreate__FPv);
  *
  * Sits in the onWidgetCreate slot of cFEStateEventSelect_vtbl; the widget passes through untouched in the second
  * argument register, and cUITemplate_MAP_onWidgetCreate() selects the peak in the "SP_PeakList" menu.
- *
- * @return cUITemplate_MAP_onWidgetCreate()'s return value (it returns nothing meaningful)
  */
-void* cFEStateEventSelect_onWidgetCreate(void* vself)
+void cFEStateEventSelect::onWidgetCreate(cUIThing*)
 {
-    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
-    return cUITemplate_MAP_onWidgetCreate(&self->mMap);
+    cUITemplate_MAP_onWidgetCreate(&mMap);
 }
 #endif
 
@@ -207,30 +204,30 @@ static inline void Opened1867A8(void* vself, void* item)
  * @param obj  the widget
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUIThing* obj, int msg)
+void cFEStateEventSelect::onWidgetEvent(cUIThing* obj, unsigned int msg)
 {
     if (msg == cUIState::kONNEXT) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, cUIState::kONNEXT) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&mMap, obj, cUIState::kONNEXT) == 1) {
             if (IsQuick1867A8()) {
-                PlayIntro1867A8(self);
-                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                PlayIntro1867A8(this);
+                cUIStateStack_pop(&mpEngine->mStateStack, 1);
             } else {
-                cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
-                Opened1867A8(self, feCustom->getNextState(self, obj->mMiscData));
+                cMgr1867A8* feCustom = *(cMgr1867A8**)mpEngine;
+                Opened1867A8(this, feCustom->getNextState(this, obj->mMiscData));
             }
         }
     } else if (msg == cUIState::kONPREV) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, cUIState::kONPREV) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&mMap, obj, cUIState::kONPREV) == 1) {
             if (IsQuick1867A8()) {
-                PlayIntro1867A8(self);
-                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                PlayIntro1867A8(this);
+                cUIStateStack_pop(&mpEngine->mStateStack, 1);
             } else {
-                cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
-                Opened1867A8(self, feCustom->getPrevState(self, obj->mMiscData));
+                cMgr1867A8* feCustom = *(cMgr1867A8**)mpEngine;
+                Opened1867A8(this, feCustom->getPrevState(this, obj->mMiscData));
             }
         }
     } else {
-        cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, msg);
+        cUITemplate_MAP_onWidgetEvent((char*)&mMap, obj, msg);
     }
 }
 #endif
@@ -411,9 +408,8 @@ INCLUDE_ASM("fe/festateload", cFEStateMemCard_onWidgetMenu__FPv);
  *
  * @return 0x100
  */
-int cFEStateMemCard_onWidgetMenu(void* vself)
+int cFEStateMemCard::onWidgetMenu(cUIMenu*, unsigned int, unsigned int)
 {
-    cFEStateMemCard* self = (cFEStateMemCard*)vself;
     return 0x100;
 }
 #endif

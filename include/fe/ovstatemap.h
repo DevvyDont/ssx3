@@ -104,6 +104,9 @@ struct cOVState_MAP : public cOVState {
     virtual bool onGainTransition(int on) __asm__("cOVState_MAP_onGainTransition");
     virtual void onDestroyScreen() __asm__("cOVState_MAP_onDestroyScreen");
     virtual void onUpdate() __asm__("cOVState_MAP_onUpdate");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cOVState_MAP_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int) __asm__("cOVState_MAP_onWidgetMenu");
+    virtual void onInputAlways(cUIInput* pInput) __asm__("cOVState_MAP_onInputAlways");
 };
 
 CHECK_OFFSET(cOVState_MAP, mbSessionUnlocked, 0x9C);

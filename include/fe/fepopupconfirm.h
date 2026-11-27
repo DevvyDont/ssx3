@@ -49,7 +49,7 @@ struct cFEPopupConfirm : public cScreenPopup {
     virtual void setMessage(unsigned short* ustrText)
         __asm__("cFEPopupConfirm_setMessage");                             // 27
     virtual void initPopup(unsigned short* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate,
-                           int bSnowFlake);                                         // 28 (On Tour: the flags are bool)
+                           int bSnowFlake) __asm__("cFEPopupConfirm_initPopup"); // 28 (On Tour: the flags are bool)
     // --- cFEPopupConfirm
     unsigned short mDisplayText[800]; // 0x360 [O]; [U] initPopup / setMessage copy the 16-bit message here and point
                                     //       info.mtMessage's value (+0xC4) at it

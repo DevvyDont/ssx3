@@ -250,6 +250,7 @@ struct cRiderAnimBase {
     void playFromAnimID(int anim, int animid, float blend) __asm__("cRiderAnimBase_playFromAnimID");
     int playInto(cAnimSequencer* seq, cAnimSequence* node, int anim) __asm__("cRiderAnimBase_playInto");
     void playBlendIn(void* sequencer, cAnimSequence* sequence, int anim) __asm__("cRiderAnimBase_playBlendIn");
+    int play(int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 };
 
 CHECK_OFFSET(cRiderAnimBase, CurrentAnimID, 0x00);

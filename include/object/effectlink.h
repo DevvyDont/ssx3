@@ -12,6 +12,8 @@
 
 struct cBxReplayFrame;
 
+struct cEffectLink;
+
 struct cEffectLink {
     // What getType (slot 2) reports (names ours, from the classes): [R] cEffectLink_getType and
     // cParticleModifier_getType return 1, cDynamicParticleModifier_getType 2, cHaloModifier_getType 3; [U]
@@ -22,13 +24,14 @@ struct cEffectLink {
     // 0x08: the vptr. [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock (+0x18) store it
     //   Slots:
     virtual ~cEffectLink();                                     // 1  ([R] cEffectLink_vtbl; types [O])
-    virtual int getType();                                      // 2
-    virtual void fadeEffect();                                  // 3
-    virtual void writeToReplayFrame(cBxReplayFrame* data);      // 4
+    virtual int getType() __asm__("cEffectLink_getType__FPv");                                      // 2
+    virtual void fadeEffect() __asm__("cEffectLink_fadeEffect__FPv");                                  // 3
+    virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cEffectLink_writeToReplayFrame__FPv");      // 4
 
     // Methods bound to their retail symbols by asm labels.
     void add(cEffectLink* other) __asm__("cEffectLink_add__FP11cEffectLinkT0");
     void unlink() __asm__("cEffectLink_unlink");
+    void append(cEffectLink* other) __asm__("cEffectLink_append");
 };
 
 CHECK_OFFSET(cEffectLink, Next, 0x00);

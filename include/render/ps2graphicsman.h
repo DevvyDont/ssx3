@@ -406,6 +406,45 @@ public:
     virtual void RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
         __asm__("cPS2GraphicsMan_RenderMultipleBoardTrails");
     virtual void loadexecpurge() __asm__("cPS2GraphicsMan_loadexecpurge");
+    virtual int GetNumDisplayModes() __asm__("cPS2GraphicsMan_GetNumDisplayModes__FPv");
+    virtual int GetDisplayMode1() __asm__("cPS2GraphicsMan_GetDisplayMode1__FPv");
+    virtual int GetScreenWidth() __asm__("cPS2GraphicsMan_GetScreenWidth");
+    virtual int GetScreenHeight() __asm__("cPS2GraphicsMan_GetScreenHeight");
+    virtual const tTVDisplayFormat* GetTVDisplayFormat() __asm__("cPS2GraphicsMan_GetTVDisplayFormat__FPv");
+    virtual void* GetIrradiance() __asm__("cPS2GraphicsMan_GetIrradiance__FPv");
+    virtual int getCurrentFrameCount() __asm__("cPS2GraphicsMan_getCurrentFrameCount__FPv");
+    virtual void SetShinyBoarder(int state) __asm__("cPS2GraphicsMan_SetShinyBoarder__FPvi");
+    virtual void PushView() __asm__("cPS2GraphicsMan_PushView");
+    virtual void PopView() __asm__("cPS2GraphicsMan_PopView__FPv");
+    virtual void IdentityView() __asm__("cPS2GraphicsMan_IdentityView");
+    virtual void SetViewportWindow(float x, float y, float w, float rectHeight, int)
+        __asm__("cPS2GraphicsMan_SetViewportWindow");
+    virtual void SetViewportOrthographic(float cx, float cy, float fx, float fy, float zNear, float zFar, int, int)
+        __asm__("cPS2GraphicsMan_SetViewportOrthographic");
+    virtual void RenderTriStrip(int numVerts, tBxVertex* src, int) __asm__("cPS2GraphicsMan_RenderTriStrip");
+    virtual void PlatformUploadTextures() __asm__("cPS2GraphicsMan_PlatformUploadTextures__FPv");
+    virtual void SetNewTextureData(int textureId, const SHAPE* objp, int copyMem)
+        __asm__("cPS2GraphicsMan_SetNewTextureData");
+    virtual bool LockFrameToTexture(int idx, int) __asm__("cPS2GraphicsMan_LockFrameToTexture");
+    virtual void RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
+        __asm__("cPS2GraphicsMan_RenderDynamicParticleEmitter");
+    virtual void InitCharModelPart(tMdfModelHeader*, int, tMdfBlendedMatrix*, const t4Matrix*)
+        __asm__("cPS2GraphicsMan_InitCharModelPart__FPv");
+    virtual void SetLightMats(void*) __asm__("cPS2GraphicsMan_SetLightMats__FPv");
+    virtual void SetIrradiance(const tIrradianceInfo& src, int) __asm__("cPS2GraphicsMan_SetIrradiance");
+    virtual void SetTVDisplayFormat1(const tTVDisplayFormat& src) __asm__("cPS2GraphicsMan_SetTVDisplayFormat1");
+    virtual int AddTexture(const SHAPE* pShp, const char* textureName, int lockType, int copyMem, int bindId)
+        __asm__("cPS2GraphicsMan_AddTexture");
+    virtual void CreateScreenGrabTexture(tScreenGrabHandle& out, unsigned int width, unsigned int height)
+        __asm__("cPS2GraphicsMan_CreateScreenGrabTexture");
+    virtual void RemoveScreenGrabTexture(tScreenGrabHandle& item) __asm__("cPS2GraphicsMan_RemoveScreenGrabTexture");
+    virtual int GetOutCode(const t4Vector& point) __asm__("cPS2GraphicsMan_GetOutCode");
+    virtual void RenderSnowBoxFlakes(const tSnowBoxData& obj) __asm__("cPS2GraphicsMan_RenderSnowBoxFlakes");
+    virtual void RenderSnowBoxFluffs(const tSnowBoxData& obj) __asm__("cPS2GraphicsMan_RenderSnowBoxFluffs");
+    virtual void GenerateBlendedMatrices(const t4Matrix* matlist, int* partBoneOffsets,
+                                         const tMdfBlendedMatrix* blendedMatrixTranslationTable, int n,
+                                         t4Matrix* blendedmatlist)
+        __asm__("cPS2GraphicsMan_GenerateBlendedMatrices");
 };
 
 // --- layout checks

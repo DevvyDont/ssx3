@@ -176,6 +176,14 @@ struct cFlexBridgeNode : public cInstanceNode {
     virtual void update() __asm__("cFlexBridgeNode_update");
     virtual void render() __asm__("cFlexBridgeNode_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlexBridgeNode_writeToReplayFrame");
+    virtual void* getNodeState() __asm__("cFlexBridgeNode_getNodeState__FPv");
+    virtual bool hasIntersect() const __asm__("cFlexBridgeNode_hasIntersect__FPv");
+    virtual bool hasBoundBox() __asm__("cFlexBridgeNode_hasBoundBox__FPv");
+    virtual void applyForce(const tIntersectInfo& intInfo, const t4Vector& force) __asm__("cFlexBridgeNode_applyForce");
+    virtual void updateIntersectInfo(tIntersectInfo& intInfo) __asm__("cFlexBridgeNode_updateIntersectInfo");
+    virtual int intersect(cWorldIntersectType& tester, tIntersectInfo* out, int cap, int flags)
+        __asm__("cFlexBridgeNode_intersect");
+    virtual const tBoundBox* getBoundBox() const __asm__("cFlexBridgeNode_getBoundBox__FPv");
 };
 
 CHECK_OFFSET(cFlexBridgeNode, unk_01C, 0x01C);

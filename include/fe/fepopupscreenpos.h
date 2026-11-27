@@ -29,6 +29,7 @@ struct cFEPopupScreenPos : public cUIState {
     virtual ~cFEPopupScreenPos();
     virtual void onCreateScreen() __asm__("cFEPopupScreenPos_onCreateScreen");
     virtual void onUpdate() __asm__("cFEPopupScreenPos_onUpdate");
+    virtual bool onLoseTransition() __asm__("cFEPopupScreenPos_onLoseTransition__FPv");
 };
 
 CHECK_OFFSET(cFEPopupScreenPos, mX, 0x048);

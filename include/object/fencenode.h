@@ -120,6 +120,7 @@ struct cFenceNode : public cInstanceNode {
     virtual ~cFenceNode();
     virtual void render() __asm__("cFenceNode_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFenceNode_writeToReplayFrame");
+    virtual void onCollide(const tCollideInfo* obj, const tIntersectInfo*, cBeing*) __asm__("cFenceNode_onCollide");
 };
 
 CHECK_OFFSET(cFenceNode, FenceData, 0x01C);

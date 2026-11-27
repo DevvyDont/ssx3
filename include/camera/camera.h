@@ -87,12 +87,33 @@ struct cRiderCameraTarget : public cCameraTarget {
     // Methods bound to their retail symbols by asm labels.
     void setRider(cRider* rider) __asm__("cRiderCameraTarget_setRider");
     cRider* getRider() __asm__("cRiderCameraTarget_getRider");
+    // getLean stays a C function (cRiderCameraTarget_getLean): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual float getLean() const __asm__("cRiderCameraTarget_getLean__FPv");
+    virtual float getTotalAirTime() const __asm__("cRiderCameraTarget_getTotalAirTime__FPv");
+    virtual float getRemainingAirTime() const __asm__("cRiderCameraTarget_getRemainingAirTime");
+    virtual float getApexTime() const __asm__("cRiderCameraTarget_getApexTime");
+    virtual float getBoostWarp() const __asm__("cRiderCameraTarget_getBoostWarp__FPv");
+    virtual float getCrouch() const __asm__("cRiderCameraTarget_getCrouch__FPv");
+    virtual bool isAirPredictorDone() const __asm__("cRiderCameraTarget_isAirPredictorDone");
+    virtual int getSurfaceType() const __asm__("cRiderCameraTarget_getSurfaceType__FPv");
+    virtual float getVerticalJump() const __asm__("cRiderCameraTarget_getVerticalJump__FPv");
+    virtual float getLandingAngle() const __asm__("cRiderCameraTarget_getLandingAngle");
+    virtual const t4Vector& getHandplantSplineTangent() const
+        __asm__("cRiderCameraTarget_getHandplantSplineTangent__FPv");
+    virtual const t4Vector& getHandplantTarget() const __asm__("cRiderCameraTarget_getHandplantTarget__FPv");
+    virtual const t4Vector& getApexPos() const __asm__("cRiderCameraTarget_getApexPos__FPv");
+    virtual const t4Vector& getHalfPipeNormal() const __asm__("cRiderCameraTarget_getHalfPipeNormal__FPv");
+    virtual const t4Vector& getLandingNormal() const __asm__("cRiderCameraTarget_getLandingNormal__FPv");
+    virtual const t4Vector& getLandingVelocity() const __asm__("cRiderCameraTarget_getLandingVelocity__FPv");
 };
 
 CHECK_OFFSET(cRiderCameraTarget, Rider, 0x4);
 CHECK_SIZE(cRiderCameraTarget, 0x8);
 
 struct tPose;
+
+struct t4Vector;
 
 struct cSimpleCamera {
     float View;                 // 0x00 [O]; [P] getFOV (lwc1); [U] cSimpleCamera_getFOV getFOV, cSimpleCamera_setFOV setFOV
@@ -124,6 +145,9 @@ struct cSimpleCamera {
     float getHeading() __asm__("cSimpleCamera_getHeading");
     float getPitch() __asm__("cSimpleCamera_getPitch");
     void updateCamMat() __asm__("cSimpleCamera_updateCamMat");
+    void setupCamWithPosAndTarget(const t4Vector* camPos, const t4Vector* camTargetPos)
+        __asm__("cSimpleCamera_setupCamWithPosAndTarget");
+    void* update() __asm__("cSimpleCamera_update__FPv");
 };
 
 CHECK_OFFSET(cSimpleCamera, View, 0x00);
@@ -203,6 +227,8 @@ struct cCamera {
     cScriptCameraController* getScriptController() __asm__("cCamera_getScriptController");
     int isStreamReady() __asm__("cCamera_isStreamReady");
     int getStreamFocusID() __asm__("cCamera_getStreamFocusID");
+    void updateCamMat() __asm__("cCamera_updateCamMat");
+    void avoidGround() __asm__("cCamera_avoidGround");
 };
 
 CHECK_OFFSET(cCamera, View, 0x000);

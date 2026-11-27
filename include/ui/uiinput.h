@@ -20,7 +20,7 @@ struct cUIInput {
     // 0x8: the vptr. [U] the destructor restores cUIInput's vtable. Slots: [R] cUIInput_vtbl's 46 entries; [O] On Tour's
     //   virtuals, same names and order (setPadNum takes an int in retail: cUIInput_setPadNum__FPvi).
     virtual ~cUIInput();                                        // 1
-    virtual bool getState(char state) const;                    // 2
+    virtual bool getState(char state) const __asm__("cUIInput_getState__FPv");                    // 2
     virtual bool isStart() const __asm__("cUIInput_isStart__FPv");                               // 3
     virtual bool isSelect() const __asm__("cUIInput_isSelect__FPv");                              // 4
     virtual bool isNext() const __asm__("cUIInput_isNext__FPv");                                // 5

@@ -254,9 +254,8 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cBEInterface's writeToReplayFrame has an empty body.
  */
-void cBEInterface_writeToReplayFrame(void* vself)
+void cBEInterface::writeToReplayFrame(cBxReplayFrame*)
 {
-    cBEInterface* self = (cBEInterface*)vself;
 }
 #endif
 
@@ -266,9 +265,8 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_readFromReplayFrame__FPv);
 /**
  * Reads nothing from the replay frame: cBEInterface's readFromReplayFrame has an empty body.
  */
-void cBEInterface_readFromReplayFrame(void* vself)
+void cBEInterface::readFromReplayFrame(cBxReplayFrame*)
 {
-    cBEInterface* self = (cBEInterface*)vself;
 }
 #endif
 

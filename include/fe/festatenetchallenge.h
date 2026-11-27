@@ -119,6 +119,13 @@ struct cFEStateChallengePopup : public cFEStateNet {
     virtual ~cFEStateChallengePopup();
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateChallengePopup_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateChallengePopup_onCreateScreen");
+    virtual bool onLoseTransition() __asm__("cFEStateChallengePopup_onLoseTransition__FPv");
+    virtual bool onGainTransition(int) __asm__("cFEStateChallengePopup_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateChallengePopup_onUpdate__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cFEStateChallengePopup_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateChallengePopup_onWidgetEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateChallengePopup_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mbChallengeSent, 0x6D0);
@@ -172,6 +179,13 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChallengeReceivedPopup_onGainTransition");
     virtual void onCreateScreen() __asm__("cFEStateChallengeReceivedPopup_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateChallengeReceivedPopup_onWidgetCreate");
+    virtual bool onLoseTransition() __asm__("cFEStateChallengeReceivedPopup_onLoseTransition__FPv");
+    virtual void onUpdate() __asm__("cFEStateChallengeReceivedPopup_onUpdate__FPv");
+    virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cFEStateChallengeReceivedPopup_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event)
+        __asm__("cFEStateChallengeReceivedPopup_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cFEStateChallengeReceivedPopup_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);

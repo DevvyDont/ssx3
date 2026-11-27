@@ -493,11 +493,10 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_init__FPv);
  * Initialises an animation sequencer as empty: zeroes its count (On Tour NumPlaying) and its sequence list
  * head.
  */
-void cAnimSequencer_init(void* vself)
+void cAnimSequencer::init()
 {
-    cAnimSequencer* self = (cAnimSequencer*)vself;
-    *(int*)self = 0;
-    self->PlayList = 0;
+    *(int*)this = 0;
+    PlayList = 0;
 }
 #endif
 
@@ -1023,11 +1022,10 @@ void cMdfArchive_linkArchive_impl(void* self, char* data) __asm__("cMdfArchive_l
  *
  * @param data  the MDF archive in memory
  */
-void cMdfArchive_attachArchive(void* vself, int data)
+void cMdfArchive::attachArchive(int data)
 {
-    cMdfArchive* self = (cMdfArchive*)vself;
-    *(int*)self = data;
-    self->linkArchive((char*)data);
+    *(int*)this = data;
+    linkArchive((char*)data);
 }
 #endif
 
@@ -1042,11 +1040,10 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_attachConstArchive__FPv);
  *
  * @return what cMdfArchive_linkArchive leaves in the return register (callers ignore it)
  */
-void* cMdfArchive_attachConstArchive(void* vself)
+void* cMdfArchive::attachConstArchive()
 {
-    cMdfArchive* self = (cMdfArchive*)vself;
-    *(int*)self = 0;
-    return cMdfArchive_linkArchive(self);
+    *(int*)this = 0;
+    return cMdfArchive_linkArchive(this);
 }
 #endif
 
@@ -1065,10 +1062,11 @@ extern "C" char *FILE_loadpack(int, int);
  * @param name  the archive's file name
  * @param flags  memory flags for the load
  */
-extern "C" void cMdfArchive_loadArchive(cMdfArchive* self, int name, int flags) {
+void cMdfArchive::loadArchive(int name, int flags)
+{
     char *data = FILE_loadpack(name, flags);
-    *(char **)self = data;
-    self->linkArchive(data);
+    *(char **)this = data;
+    linkArchive(data);
 }
 #endif
 

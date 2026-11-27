@@ -4371,20 +4371,20 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider (cRider)
  */
-extern "C" void cSSXAudio_TurboOff(cSSXAudio* self, cRider* obj)
+void cSSXAudio::TurboOff(cRider* obj)
 {
-    if (cSSXAudio_ReplayMode(self) != 0) {
+    if (cSSXAudio_ReplayMode(this) != 0) {
         return;
     }
     bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
-        int n = --self->mTurboRef;
+        int n = --mTurboRef;
         if (n <= 0) {
             if (n == 0) {
-                cBankMonitor_BANKMONITOR_StopHandle(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
-                                                    self->mTurboHandle, 1, 0.0f);
+                cBankMonitor_BANKMONITOR_StopHandle(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                                                    mTurboHandle, 1, 0.0f);
             }
-            self->mTurboRef = 0;
+            mTurboRef = 0;
         }
     }
 }
@@ -4836,7 +4836,7 @@ void cSSXAudio::PlayerResetEvent(cRider* obj)
     WipeoutSlideEnd(obj);
     WipeoutTumbleEnd(obj);
     if (mTurboRef > 0) {
-        cSSXAudio_TurboOff(this, obj);
+        this->TurboOff(obj);
     }
     if (((void*)obj) == cSSXAudio_GetFocusRider_p(this, -1)) {
         func_0028F108(this, obj);
@@ -12762,10 +12762,9 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetChar__FPv);
  *
  * @return the character read
  */
-signed char FileParser_GetChar(void* vself)
+signed char FileParser::GetChar()
 {
-    FileParser* self = (FileParser*)vself;
-    return *self->mPtr++;
+    return *mPtr++;
 }
 #endif
 
@@ -12786,18 +12785,17 @@ int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
  *
  * @return 1 when the data ends or the next character is '[' (a section header), else 0
  */
-int FileParser_SkipSpace_r(void* vself)
+int FileParser::SkipSpace()
 {
-    FileParser* self = (FileParser*)vself;
-    while (*(signed char*)self->mPtr != 0) {
-        if (self->SkipComment() == true) return 1;
-        signed char curChar = *(signed char*)self->mPtr;
+    while (*(signed char*)mPtr != 0) {
+        if (SkipComment() == true) return 1;
+        signed char curChar = *(signed char*)mPtr;
         if (curChar != ' ' && curChar != '\t' && curChar != '\n' && curChar != '\r') {
             int atSection = 0;
             if (curChar == '[') atSection = 1;
             return atSection;
         }
-        FileParser_GetChar(self);
+        GetChar();
     }
     return 1;
 }
@@ -12845,10 +12843,10 @@ extern "C" int FileParser_IsEOF(FileParser*);
  */
 void FileParser::SkipSectionNames()
 {
-    FileParser_SkipSpace_r(this);
+    this->SkipSpace();
     while (*(signed char*)mPtr == '[') {
         FindNextSection();
-        FileParser_SkipSpace_r(this);
+        this->SkipSpace();
     }
     IsEOF();
 }
@@ -12872,7 +12870,7 @@ bool FileParser::FindEOL()
         if (curChar == '\n') {
             return false;
         }
-        FileParser_GetChar(this);
+        this->GetChar();
     }
     return true;
 }
@@ -12899,12 +12897,12 @@ char* FileParser::FindNextSection()
 {
     while (*(signed char*)mPtr != 0) {
         SkipComment();
-        if (FileParser_GetChar(this) == '[') {
+        if (this->GetChar() == '[') {
             int n = 0;
             if (*(signed char*)mPtr != ']') {
                 do {
                     char* dst = (char*)&mTempStr;
-                    dst[n] = FileParser_GetChar(this);
+                    dst[n] = this->GetChar();
                     n++;
                 } while (*(signed char*)mPtr != ']');
             }
@@ -12992,7 +12990,7 @@ char* FileParser::GetString()
     if (*(signed char*)mPtr != '"') {
         char* dst = (char*)&mTempStr;
         do {
-            dst[n] = FileParser_GetChar(this);
+            dst[n] = this->GetChar();
             n++;
         } while (*(signed char*)mPtr != '"');
     }
@@ -13015,19 +13013,18 @@ extern "C" char* FileParser_GetName_t(void* self) __asm__("FileParser_GetName");
  *
  * @return mTempStr holding the token
  */
-extern "C" char* FileParser_GetName_t(void* vself)
+char* FileParser::GetName()
 {
-    FileParser* self = (FileParser*)vself;
     int n = 0;
-    FileParser_SkipSpace_r(self);
-    while (*(signed char*)self->mPtr != 0 && *(signed char*)self->mPtr != ' ' &&
-           *(signed char*)self->mPtr != '\t' && *(signed char*)self->mPtr != '\n' &&
-           *(signed char*)self->mPtr != '\r') {
-        char* dst = self->mTempStr;
-        dst[n] = FileParser_GetChar(self);
+    SkipSpace();
+    while (*(signed char*)mPtr != 0 && *(signed char*)mPtr != ' ' &&
+           *(signed char*)mPtr != '\t' && *(signed char*)mPtr != '\n' &&
+           *(signed char*)mPtr != '\r') {
+        char* dst = mTempStr;
+        dst[n] = GetChar();
         n++;
     }
-    char* buf = self->mTempStr;
+    char* buf = mTempStr;
     buf[n] = 0;
     return buf;
 }
@@ -13097,9 +13094,9 @@ int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 int FileParser::ExpectToken(const char* name)
 {
     int i = 0;
-    FileParser_SkipSpace_r(this);
+    this->SkipSpace();
     while (*mPtr != 0 && name[i] != 0) {
-        if (FileParser_GetChar(this) != name[i]) {
+        if (this->GetChar() != name[i]) {
             return 1;
         }
         i++;
@@ -13125,7 +13122,7 @@ int FileParser::IsEOF()
     if (mPtr - mBasePtr >= mFileSize) {
         return 1;
     }
-    FileParser_SkipSpace_r(this);
+    this->SkipSpace();
     signed char nextChar = *(signed char*)mPtr;
     int finished = 0;
     if (nextChar == 0 || nextChar == '[') {

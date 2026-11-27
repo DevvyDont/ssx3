@@ -87,6 +87,11 @@ struct cFEUseExistingAccount : public cFEStateNet {
     virtual ~cFEUseExistingAccount();
     virtual void onCreateScreen() __asm__("cFEUseExistingAccount_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEUseExistingAccount_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEUseExistingAccount_onUpdate__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cFEUseExistingAccount_onWidgetMenu");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEUseExistingAccount_onPopupEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEUseExistingAccount_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEUseExistingAccount, unk_6D0, 0x6D0);
@@ -128,6 +133,10 @@ struct cFEStateSelectPersona : public cFEStateNet {
     // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateSelectPersona();
     virtual void onCreateScreen() __asm__("cFEStateSelectPersona_onCreateScreen");
+    virtual void onUpdate() __asm__("cFEStateSelectPersona_onUpdate__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cFEStateSelectPersona_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateSelectPersona_onPopupEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateSelectPersona_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateSelectPersona, mbExistingPersona, 0x6D0);

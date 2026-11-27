@@ -83,10 +83,10 @@ extern char str_whitefade[];
  * @param hash  the event (a name hash)
  * @return true for "whitefade"
  */
-extern "C" bool cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
+bool cFECustom::onScreenEvent(cUIScreen* screen, unsigned int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
-        cUIState* obj = self->mpTransitionState;
+        cUIState* obj = mpTransitionState;
         if (obj != 0) {
             obj->handleEvent(1, 0);
         }

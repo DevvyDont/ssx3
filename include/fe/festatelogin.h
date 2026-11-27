@@ -60,6 +60,8 @@ struct cFEStateLogin : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateLogin_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateLogin_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* popup, unsigned int kind) __asm__("cFEStateLogin_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateLogin_onUpdate__FPv");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateLogin_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateLogin, mpustrDisconnect, 0x6D0);

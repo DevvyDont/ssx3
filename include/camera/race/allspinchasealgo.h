@@ -39,6 +39,10 @@ struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData");
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void snap(int id) __asm__("cSPOKEChaseAlgorithm_snap");
+    virtual void update() __asm__("cSPOKEChaseAlgorithm_update");
 };
 
 CHECK_OFFSET(cSPOKEChaseAlgorithm, LastLookDir, 0x390);
@@ -60,6 +64,7 @@ struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData");
     virtual void snap(int id) __asm__("cSUPERPIPEChaseAlgorithm_snap");
+    virtual void update() __asm__("cSUPERPIPEChaseAlgorithm_update");
 };
 
 CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point1, 0x390);
@@ -81,6 +86,8 @@ struct cPOST_RACE_1ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cPOST_RACE_1ChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cPOST_RACE_1ChaseAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_OFFSET(cPOST_RACE_1ChaseAlgorithm, StartDir, 0x390);

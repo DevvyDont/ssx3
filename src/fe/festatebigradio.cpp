@@ -460,21 +460,22 @@ static inline int Is_193650(int id, char* s) { return id == GetHashValue32(s); }
  * short character names; "player1 info" and "player2 info" go to the panels' +0x4. Widgets named "ij" (panel
  * i 1-2, row j 1-8) become row j of panel i and are tagged with the panel index.
  *
- * @param w  the widget being created
+ * @param pWidget  the widget being created
  */
-extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* self, cUIObj_193650* w)
+void cFEStateBraggingRights::onWidgetCreate(cUIThing* pWidget)
 {
+    cUIObj_193650* w = (cUIObj_193650*)pWidget;
     cUIThing* wp = (cUIThing*)w;
     if (Is_193650(wp->mHashName, str_1Menu)) {
-        *(void**)&self->mMenuCtrl[0] = 0;
+        *(void**)&mMenuCtrl[0] = 0;
         w->setFocus(1);
-        *(void**)&self->mMenuCtrl[0] = w;
+        *(void**)&mMenuCtrl[0] = w;
         wp->mAttr |= 1;
         *(int*)(((char*)wp) + 0x90) |= 1;
     } else if (Is_193650(wp->mHashName, str_2Menu)) {
-        *(void**)&self->mMenuCtrl[1] = 0;
+        *(void**)&mMenuCtrl[1] = 0;
         w->setFocus(1);
-        *(void**)&self->mMenuCtrl[1] = w;
+        *(void**)&mMenuCtrl[1] = w;
         wp->mAttr |= 1;
         *(int*)(((char*)wp) + 0x90) |= 1;
     } else if (Is_193650(wp->mHashName, str_Player1_title) || Is_193650(wp->mHashName, str_Player1_name)) {
@@ -486,14 +487,14 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* se
         void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
         cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
     } else if (Is_193650(wp->mHashName, str_player1_info)) {
-        self->mMenuCtrl[0].mpGroup = (cUIGroup*)w;
+        mMenuCtrl[0].mpGroup = (cUIGroup*)w;
     } else if (Is_193650(wp->mHashName, str_player2_info)) {
-        self->mMenuCtrl[1].mpGroup = (cUIGroup*)w;
+        mMenuCtrl[1].mpGroup = (cUIGroup*)w;
     } else {
         char name[3];
         name[2] = 0;
         for (int i = 0; i < 2; i++) {
-            void** slots = (void**)&self->mMenuCtrl[i].mpListBox[0];
+            void** slots = (void**)&mMenuCtrl[i].mpListBox[0];
             for (int j = 0; j < 8; j++) {
                 name[0] = '1' + i;
                 name[1] = '1' + j;
@@ -704,16 +705,16 @@ static inline int isOn00193CF8()
  * @return 0x100, 1 or 0 as above, else 0x101
  */
 // Handles a menu event for one of the two radio list controls.
-extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self, cUIMenu* ctrl, int msg)
+int cFEStateBraggingRights::onWidgetMenu(cUIMenu* ctrl, unsigned int msg, unsigned int)
 {
     int found = 0;
     void** item;
-    void** menuSlot = (void**)(&self->mMenuCtrl[0]);
+    void** menuSlot = (void**)(&mMenuCtrl[0]);
     if (*menuSlot == ((void*)ctrl)) {
         item = menuSlot;
         found = 1;
     } else {
-        item = (void**)(&self->mMenuCtrl[1]);
+        item = (void**)(&mMenuCtrl[1]);
         if (*item != ((void*)ctrl)) item = 0;
     }
     switch (msg) {
@@ -726,7 +727,7 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self,
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;
     case cUIMenu::kONNEXT:
-        if (self->mMenuCtrl[0].mbConfirmed == 0 || self->mMenuCtrl[1].mbConfirmed == 0) return 1;
+        if (mMenuCtrl[0].mbConfirmed == 0 || mMenuCtrl[1].mbConfirmed == 0) return 1;
         return 257;
     case cUIMenu::kONPREVIOUS:
         if (isOn00193CF8()) return 0;

@@ -388,17 +388,16 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onincomingmsg__FPv);
 /**
  * Logs an incoming lobby message: passes mpLobbyApi and the message to func_003E8FD0().
  *
- * The message arrives in the second argument register (the C declares only self) and reaches func_003E8FD0() untouched;
- * that function prints "recv: %c%c%c%c/%c%c%c%c" with the message's two codes plus its text (or "[null data]", "[binary
- * data]", "[long data]"). The functor thunk func_00268B08, registered as LobbyApi message callback 0 by
- * func_0025A948(), calls it.
+ * The message arrives in the second argument register (the member declares no parameters) and reaches
+ * func_003E8FD0() untouched; that function prints "recv: %c%c%c%c/%c%c%c%c" with the message's two codes plus its
+ * text (or "[null data]", "[binary data]", "[long data]"). The functor thunk func_00268B08, registered as LobbyApi
+ * message callback 0 by func_0025A948(), calls it.
  *
  * @return no meaningful value (func_003E8FD0() returns nothing)
  */
-void* LobbyMan_onincomingmsg(void* vself)
+void* LobbyMan::onincomingmsg()
 {
-    LobbyMan* self = (LobbyMan*)vself;
-    return func_003E8FD0((int)self->mpLobbyApi);
+    return func_003E8FD0((int)mpLobbyApi);
 }
 #endif
 
@@ -680,7 +679,7 @@ extern "C" sBXStr_9B10 func_00318630(const sBXStr_9B10& a, const char* b);
  *   numbers, then by command:
  * - "challenge": a signature other than cCommSystem_getSignature() answers "badversion" (func_0025FB80); a sender
  *   func_002623B0() reports as ignored answers "ignore"; when waiting for a game (mState 22) with that sender as
- *   mOpponent it calls func_0025F628(self, 1, 1); otherwise it adds the challenger to BuddyMan (func_00262AF0).
+ *   mOpponent it calls func_0025F628(this, 1, 1); otherwise it adds the challenger to BuddyMan (func_00262AF0).
  * - "lockChal": from mOpponent in mState 22 calls func_0025FA48(), in mState 23 func_0025FAD0(), otherwise answers
  *   "abortChal".
  * - "decline", "ignore", "badversion": mState 22 drops back to 1 and an event of type 237, 240 or 242 is posted.
@@ -694,7 +693,7 @@ extern "C" sBXStr_9B10 func_00318630(const sBXStr_9B10& a, const char* b);
  *
  * @param msg  the LobbyApi message: code mKind, flags mStatus, tag record pointer mpTagText
  */
-extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onchatmsg(LobbyApiMsgT* msg)
 {
     char name[0x100];
     char text[0x100];
@@ -714,44 +713,44 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
         sscanf(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &locationId, &gameMode, &gameEvent, &ranked, &multipliers, &powerUps, &numberAI, &pointIcons, sig, &i, &j, &k, &rank);
         if (strcmp(cmd, str_challenge) == 0) {
             if (strcmp(sig, cCommSystem_getSignature(cCommSystem_mCommSystem)) != 0) {
-                func_0025FB80(self, (int)name, D_004807E8);
+                func_0025FB80(this, (int)name, D_004807E8);
             } else if (func_002623B0((BuddyMan*)Mgr_9B10(), (int)name) != 0) {
-                func_0025FB80(self, (int)name, D_004A2F50);
-            } else if (*(int*)self == 22 && strcmp(self->mOpponent, name) == 0) {
-                func_0025F628(self, 1, 1);
+                func_0025FB80(this, (int)name, D_004A2F50);
+            } else if (*(int*)this == 22 && strcmp(mOpponent, name) == 0) {
+                func_0025F628(this, 1, 1);
             } else {
                 func_00262AF0((BuddyMan*)Mgr_9B10(), name, locationId, gameMode, gameEvent, ranked != 0, multipliers != 0, powerUps != 0, numberAI, pointIcons != 0, text, i, j, k, rank);
             }
         } else if (strcmp(cmd, str_lockChal) == 0) {
-            if (*(int*)self == 22 && strcmp(self->mOpponent, name) == 0) {
-                func_0025FA48(self, name);
-            } else if (*(int*)self == 23) {
-                func_0025FAD0(self, name);
+            if (*(int*)this == 22 && strcmp(mOpponent, name) == 0) {
+                func_0025FA48(this, name);
+            } else if (*(int*)this == 23) {
+                func_0025FAD0(this, name);
             } else {
-                func_0025FB80(self, (int)name, D_004807F8);
+                func_0025FB80(this, (int)name, D_004807F8);
             }
         } else if (strcmp(cmd, str_decline) == 0) {
-            if (*(int*)self == 22)
-                *(int*)self = 1;
+            if (*(int*)this == 22)
+                *(int*)this = 1;
             {
                 online_Event* event = (online_Event*)newMsg_9B10();
                 event->mType = 237;
                 event->mVtbl = online_Event_vtbl;
-                post_9B10(((char*)self), event);
+                post_9B10(((char*)this), event);
             }
         } else if (strcmp(cmd, str_abortChal) == 0) {
             if (func_00263128((BuddyMan*)Mgr_9B10(), name) != 0)
                 func_00263018((BuddyMan*)Mgr_9B10(), name);
-            int gone = strcasecmp(self->mOpponent, name) == 0;
+            int gone = strcasecmp(mOpponent, name) == 0;
             int send = 0;
-            if (*(int*)self == 0x18) {
+            if (*(int*)this == 0x18) {
                 if (gone) {
-                    func_0025F858(self);
+                    func_0025F858(this);
                     send = 1;
                 }
-            } else if (*(int*)self == 22 || *(int*)self == 23) {
+            } else if (*(int*)this == 22 || *(int*)this == 23) {
                 if (gone) {
-                    *(int*)self = 1;
+                    *(int*)this = 1;
                     send = 1;
                 }
             } else {
@@ -762,36 +761,36 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
                 online_Event* event = (online_Event*)newMsg_9B10();
                 event->mType = 238;
                 event->mVtbl = online_Event_vtbl;
-                post_9B10(((char*)self), event);
+                post_9B10(((char*)this), event);
             }
         } else if (strcmp(cmd, str_ignore) == 0) {
-            if (*(int*)self == 22)
-                *(int*)self = 1;
+            if (*(int*)this == 22)
+                *(int*)this = 1;
             {
                 online_Event* event = (online_Event*)newMsg_9B10();
                 event->mType = 0xF0;
                 event->mVtbl = online_Event_vtbl;
-                post_9B10(((char*)self), event);
+                post_9B10(((char*)this), event);
             }
         } else if (strcmp(cmd, str_badversion) == 0) {
-            if (*(int*)self == 22)
-                *(int*)self = 1;
+            if (*(int*)this == 22)
+                *(int*)this = 1;
             {
                 online_Event* event = (online_Event*)newMsg_9B10();
                 event->mType = 242;
                 event->mVtbl = online_Event_vtbl;
-                post_9B10(((char*)self), event);
+                post_9B10(((char*)this), event);
             }
         }
         break;
     }
     case 'chat': // 'chat'
         if (func_002623B0((BuddyMan*)Mgr_9B10(), (int)name) == 0)
-            func_0025AB40(self, name, text);
+            func_0025AB40(this, name, text);
         break;
     case 'cast': { // 'cast'
         sBXStr_9B10 res = func_00318630(sBXStr_9B10(str_broadcast), text);
-        func_0025AB40(self, name, res.p);
+        func_0025AB40(this, name, res.p);
         break;
     }
     }
@@ -890,7 +889,7 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  *
  * @param msg  the LobbyApi message (tag record pointer mpTagText)
  */
-extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onplaymsg(LobbyApiMsgT* msg)
 {
     char name[0x100];
     char selfName[0x100];
@@ -906,29 +905,29 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_OPPO), oppoName, 0x100,
                                       str_empty_i);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_AUTH), auth, 0x100, str_empty_i);
-    self->mWhen = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_WHEN), 0);
+    mWhen = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_WHEN), 0);
     int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), -1);
     int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P2), -1);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), p1Text, 0x100, str_empty_i);
-    self->mHostAddr = func_0025A730(
-        self, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_FROM), 0));
-    self->mOppoAddr = func_0025A730(
-        self, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0));
-    cBXString_operatorE1(&self->mGameName, name);
-    cBXString_operatorE1(&self->mHostName, hostName);
-    cBXString_operatorE1(&self->mOppoName, oppoName);
-    cBXString_operatorE1(&self->mAuth, auth);
+    mHostAddr = func_0025A730(
+        this, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_FROM), 0));
+    mOppoAddr = func_0025A730(
+        this, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0));
+    cBXString_operatorE1(&mGameName, name);
+    cBXString_operatorE1(&mHostName, hostName);
+    cBXString_operatorE1(&mOppoName, oppoName);
+    cBXString_operatorE1(&mAuth, auth);
     int same = strcmp(selfName, hostName) == 0;
-    self->mIsHost = same;
-    cBXString_operatorE1(&self->mOpponent, same ? oppoName : hostName);
-    self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SEED), 0);
-    if (*(int*)self != 0x18 && *(int*)self != 20)
+    mIsHost = same;
+    cBXString_operatorE1(&mOpponent, same ? oppoName : hostName);
+    mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SEED), 0);
+    if (*(int*)this != 0x18 && *(int*)this != 20)
     {
-        *(int*)self = 25;
+        *(int*)this = 25;
         func_00263BA8((cGameConnMan*)func_002591D0(), 0);
         return;
     }
-    *(int*)self = 25;
+    *(int*)this = 25;
     if (strlen(p1Text))
     {
         cBEInterface* ri = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -976,11 +975,11 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, LobbyApiMsgT* msg)
         }
     }
     int type = 239;
-    func_00259098(func_002591D0(), self->mMatchType, 0);
+    func_00259098(func_002591D0(), mMatchType, 0);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
-    post_A1D0(((char*)self), event);
+    post_A1D0(((char*)this), event);
 }
 #endif
 
@@ -3532,25 +3531,25 @@ static inline void post_D8F8(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_onroomselected(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onroomselected(LobbyApiMsgT* msg)
 {
-    *(int*)self = 1;
+    *(int*)this = 1;
     if (msg->mStatus == 0) {
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_NAME), buf, 0x100,
                                           str_empty_i);
-        cBXString_operatorE1(&self->mRoomName, buf);
+        cBXString_operatorE1(&mRoomName, buf);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 220;
         event->mVtbl = online_Event_vtbl;
-        post_D8F8(((char*)self), event);
+        post_D8F8(((char*)this), event);
     } else {
-        cBXString_Reset(&self->mRoomName);
+        cBXString_Reset(&mRoomName);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_D8F8(((char*)self), event);
+        post_D8F8(((char*)this), event);
     }
 }
 #endif
@@ -5368,29 +5367,29 @@ static inline sMsgListIterF8A0 sMsgListF8A0_insert(sMsgListIterF8A0 pos, void* c
  *
  * @param msg   the LobbyApi reply: error code mStatus, tag record pointer mpTagText
  */
-extern "C" void LobbyMan_onchallengeresponse(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::onchallengeresponse(LobbyApiMsgT* msg)
 {
     char buf[16];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_MODE), buf, 0x10, str_empty_i);
     if (msg->mStatus != 0) {
-        if (*(int*)self == 21) {
-            *(int*)self = 1;
-            func_0025FC48(((char*)self));
+        if (*(int*)this == 21) {
+            *(int*)this = 1;
+            func_0025FC48(((char*)this));
             online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
             event->mType = 258;
             event->mVtbl = online_ErrorEvent_vtbl;
             event->mError = msg->mStatus;
             void* mp = event;
-            sMsgListF8A0_insert((sMsgListNodeF8A0*)self->mEventList.mpHead, mp);
+            sMsgListF8A0_insert((sMsgListNodeF8A0*)mEventList.mpHead, mp);
         }
     } else if (strcmp(buf, str_chal) == 0) {
-        if (*(int*)self == 21)
-            func_0025FC70(self, (int)self->mOpponent, 0x18);
+        if (*(int*)this == 21)
+            func_0025FC70(this, (int)mOpponent, 0x18);
     } else if (strcmp(buf, str_idle) == 0) {
     } else if (strcmp(buf, str_play) == 0) {
-        if (*(int*)self == 21) {
-            *(int*)self = 0x18;
-            self->mTimeout = 20.0f;
+        if (*(int*)this == 21) {
+            *(int*)this = 0x18;
+            mTimeout = 20.0f;
             D_004A5154 = 20.0f;
         }
     }
@@ -6973,7 +6972,7 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onBuddySend__FPv);
 /**
  * Does nothing: the reply handler for sent buddy messages (run by the thunk func_00268FE0) has an empty body.
  */
-void BuddyMan_onBuddySend(void* self)
+void BuddyMan::onBuddySend()
 {
 }
 #endif

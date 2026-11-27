@@ -94,6 +94,9 @@ struct cFEStateNetHelpPopup : public cUIState {
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateNetHelpPopup_onWidgetCreate");
     void setOption(int optionNum, int textId, int iconIndex) __asm__("cFEStateNetHelpPopup_setOption__FPviii");
     virtual int handleEvent(int msg, void* msgParam) __asm__("cFEStateNetHelpPopup_handleEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateNetHelpPopup_onLoseTransition__FPv");
+    virtual bool onInputBegin(cUIInput*) __asm__("cFEStateNetHelpPopup_onInputBegin__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetHelpPopup_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateNetHelpPopup, miNumOptions, 0x048);

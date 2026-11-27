@@ -324,6 +324,7 @@ struct cWorldCache {
     void addBxStreamDataSubmit(int group, int id, unsigned int key, void* chunk)
         __asm__("cWorldCache_addBxStreamDataSubmit");
     void activateSectionPatches(int idx) __asm__("cWorldCache_activateSectionPatches");
+    int init(const char* name, int pNash) __asm__("cWorldCache_init");
 };
 
 CHECK_OFFSET(cWorldCache, mp_DataHeader, 0x0000);

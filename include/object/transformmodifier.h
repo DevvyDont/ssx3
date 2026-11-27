@@ -37,32 +37,58 @@ struct cTransformModifier {
     // store their own. Slots [R] cTransformModifier_vtbl (27; names from its entries), types [O] On Tour's class
     // cTransformModifier (same order; its second getRootTransform overload is retail's getRootTransform1):
     virtual ~cTransformModifier();                                                  // 1
-    virtual void update();                                                          // 2
-    virtual void updateRootTransform();                                             // 3
-    virtual void postUpdate();                                                      // 4
-    virtual void signal(int signal, float arg);                                     // 5
-    virtual bool isComplete();                                                      // 6
-    virtual void clearComplete();                                                   // 7
-    virtual bool shouldRebound();                                                   // 8
-    virtual bool runCollide(int Being);                                             // 9
-    virtual void collide(const tCollideInfo* tc, const tIntersectInfo* ti);         // 10
-    virtual void render();                                                          // 11
-    virtual const tBoundBox* getBoundBox() const;                                   // 12
-    virtual void setBoundBox(const tBoundBox& boundbox);                            // 13
-    virtual float getRadius() const;                                                // 14
-    virtual void setRadius(float radius);                                           // 15
-    virtual int getMesh() const;                                                    // 16
-    virtual bool isRootTransformDirty() const;                                      // 17
-    virtual const t4Matrix* getRootTransform();                                     // 18
-    virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst);               // 19
-    virtual bool hasIntersect() const;                                              // 20
-    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags); // 21
-    virtual void updateIntersectInfo(tIntersectInfo& intInfo);                      // 22
-    virtual const t4Matrix* getAnimMats(tInstanceRecord* inst);                     // 23
-    virtual void updateOverlapSystem();                                             // 24
-    virtual cMoveNode* getParent() const;                                           // 25
-    virtual int getTransformType() const;                                           // 26
-    virtual void writeToReplayFrame(cBxReplayFrame* data);                          // 27
+    virtual void update()
+        __asm__("cTransformModifier_update__FPv");                                                          // 2
+    virtual void updateRootTransform()
+        __asm__("cTransformModifier_updateRootTransform__FPv");                                             // 3
+    virtual void postUpdate()
+        __asm__("cTransformModifier_postUpdate__FPv");                                                      // 4
+    virtual void signal(int signal, float arg)
+        __asm__("cTransformModifier_signal__FPv");                                     // 5
+    virtual bool isComplete()
+        __asm__("cTransformModifier_isComplete__FPv");                                                      // 6
+    virtual void clearComplete()
+        __asm__("cTransformModifier_clearComplete__FPv");                                                   // 7
+    virtual bool shouldRebound()
+        __asm__("cTransformModifier_shouldRebound__FPv");                                                   // 8
+    virtual bool runCollide(int Being)
+        __asm__("cTransformModifier_runCollide__FPv");                                             // 9
+    virtual void collide(const tCollideInfo* tc, const tIntersectInfo* ti)
+        __asm__("cTransformModifier_collide__FPv");         // 10
+    virtual void render()
+        __asm__("cTransformModifier_render__FPv");                                                          // 11
+    virtual const tBoundBox* getBoundBox() const
+        __asm__("cTransformModifier_getBoundBox__FPv");                                   // 12
+    virtual void setBoundBox(const tBoundBox& boundbox)
+        __asm__("cTransformModifier_setBoundBox__FPv");                            // 13
+    virtual float getRadius() const
+        __asm__("cTransformModifier_getRadius__FPv");                                                // 14
+    virtual void setRadius(float radius)
+        __asm__("cTransformModifier_setRadius__FPv");                                           // 15
+    virtual int getMesh() const
+        __asm__("cTransformModifier_getMesh__FPv");                                                    // 16
+    virtual bool isRootTransformDirty() const
+        __asm__("cTransformModifier_isRootTransformDirty__FPv");                                      // 17
+    virtual const t4Matrix* getRootTransform()
+        __asm__("cTransformModifier_getRootTransform__FPv");                                     // 18
+    virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst)
+        __asm__("cTransformModifier_getRootTransform1__FPv");               // 19
+    virtual bool hasIntersect() const
+        __asm__("cTransformModifier_hasIntersect__FPv");                                              // 20
+    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags)
+        __asm__("cTransformModifier_intersect__FPv"); // 21
+    virtual void updateIntersectInfo(tIntersectInfo& intInfo)
+        __asm__("cTransformModifier_updateIntersectInfo__FPv");                      // 22
+    virtual const t4Matrix* getAnimMats(tInstanceRecord* inst)
+        __asm__("cTransformModifier_getAnimMats__FPv");                     // 23
+    virtual void updateOverlapSystem()
+        __asm__("cTransformModifier_updateOverlapSystem__FPv");                                             // 24
+    virtual cMoveNode* getParent() const
+        __asm__("cTransformModifier_getParent__FPv");                                           // 25
+    virtual int getTransformType() const
+        __asm__("cTransformModifier_getTransformType__FPv");                                           // 26
+    virtual void writeToReplayFrame(cBxReplayFrame* data)
+        __asm__("cTransformModifier_writeToReplayFrame__FPv");                          // 27
 };
 
 CHECK_SIZE(cTransformModifier, 0x4);

@@ -140,6 +140,10 @@ struct cFEStateNet : public cUIState {
     // declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateNet();
     virtual void onCreateScreen() __asm__("cFEStateNet_onCreateScreen__FPv");
+    virtual void onUpdate() __asm__("cFEStateNet_onUpdate");
+    virtual bool onGainTransition(int) __asm__("cFEStateNet_onGainTransition__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNet_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateNet_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);

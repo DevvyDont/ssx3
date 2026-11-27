@@ -72,6 +72,9 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
     virtual ~cFEStateCreateDuplicate();
     virtual void onCreateScreen() __asm__("cFEStateCreateDuplicate_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateDuplicate_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateCreateDuplicate_onUpdate__FPv");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateCreateDuplicate_onPopupEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCreateDuplicate_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateCreateDuplicate, mbAccount, 0x6D0);

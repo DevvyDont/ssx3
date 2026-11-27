@@ -709,34 +709,37 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
  * @param pNash  the overlap system the chunk resolver uses (On Tour Nash*, passed as int)
  * @return nonzero when the stream manager and the world view started, otherwise 0
  */
-extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
+int cWorldCache::init(const char* name, int pNash)
 {
-    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316, str_WORLD_MEMMAN, 0, 0));
+    m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316,
+            str_WORLD_MEMMAN, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
     func_003186D0(&full, str_bar_e, (cBXString_cBXString2(&base, name), &base));
     func_00318630(&path, &full, str_sdb);
-    *(void**)self = FILE_load(path.p, 0x2000000);
+    *(void**)this = FILE_load(path.p, 0x2000000);
     cBXString__cBXString(&path, 2);
     cBXString__cBXString(&full, 2);
     cBXString__cBXString(&base, 2);
-    tStreamDataHeader* hdr = self->mp_DataHeader;
+    tStreamDataHeader* hdr = mp_DataHeader;
     hdr->m_pSection = (struct tBxSection*)&hdr[1]; // the section records follow the 0x50-byte header
-    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), &self->mp_DataHeader->m_iTable[0]);
-    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)self->mp_DataHeader->m_uiNumSections * 4, str_SectionTables, 0, 0));
-    for (unsigned int i = 0; i < self->mp_DataHeader->m_uiNumSections; i++)
-        self->m_pSectionCacheTable[i] = 0;
+    m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232,
+            str_SharedTable, 0, 0), &mp_DataHeader->m_iTable[0]);
+    m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)mp_DataHeader->m_uiNumSections * 4,
+            str_SectionTables, 0, 0));
+    for (unsigned int i = 0; i < mp_DataHeader->m_uiNumSections; i++)
+        m_pSectionCacheTable[i] = 0;
     cChunkResolve* resolver = (cChunkResolve*)cChunkResolve_construct();
-    self->mp_ChunkResolve = resolver;
+    mp_ChunkResolve = resolver;
     sVE_7FC0* vt = (sVE_7FC0*)resolver->mVtbl;
     vt[2].fn(vthis(resolver, vt[2]), pNash);
-    if (cStreamMan_init((char*)&self->m_StreamMan, name, self) == 0)
+    if (cStreamMan_init((char*)&m_StreamMan, name, this) == 0)
         return 0;
-    int viewOk = cWorldView_init_p((char*)&self->m_WorldView, self->mp_DataHeader, self);
+    int viewOk = cWorldView_init_p((char*)&m_WorldView, mp_DataHeader, this);
     if (viewOk == 0)
         return 0;
-    self->initPageMap();
+    initPageMap();
     return viewOk;
 }
 #endif

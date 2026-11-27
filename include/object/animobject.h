@@ -116,6 +116,8 @@ struct cAnimObjectNode {
     void* cAnimObjectNode1(int bucket, int nodeType, tInstanceRecord* obj, tMakeAnimObjectData* def)
         __asm__("cAnimObjectNode_cAnimObjectNode1");
     bool updateNode() __asm__("cAnimObjectNode_updateNode");
+    void* getNodeState() __asm__("cAnimObjectNode_getNodeState__FPv");
+    void signal(int msg, float msgValue) __asm__("cAnimObjectNode_signal");
 };
 
 CHECK_OFFSET(cAnimObjectNode, AnimType, 0x00);

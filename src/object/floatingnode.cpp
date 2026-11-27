@@ -288,7 +288,7 @@ static inline void Pose_F120(t4Matrix* dst, const t4Matrix* parent, const t4Matr
  * @param out  receives one matrix per part (On Tour animMats)
  */
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
-extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t4Matrix* out)
+void cFloatingNode::makeAnimMats(const t4Matrix* mat, t4Matrix* out)
 {
     t4Matrix tiltMat;
     t4Vector base = mat->row[3];
@@ -296,8 +296,8 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
     float rot[3];
     pos[0] = 0.0f;
     pos[1] = 0.0f;
-    pos[2] = self->Z - base.z;
-    cFloatingNodeState* tilt = (cFloatingNodeState*)&self->ZSpring;
+    pos[2] = Z - base.z;
+    cFloatingNodeState* tilt = (cFloatingNodeState*)&ZSpring;
     rot[0] = tilt->OX;
     rot[1] = tilt->OY;
     rot[2] = 0.0f;
@@ -325,8 +325,8 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
     tiltMat.row[3].y = pos[1];
     tiltMat.row[3].z = pos[2];
     tiltMat.row[3].w = 1.0f;
-    tModelRecord* skel = self->Instance->m_Model;
-    float sc4 = self->Instance->m_fScale;
+    tModelRecord* skel = Instance->m_Model;
+    float sc4 = Instance->m_fScale;
     tMeshHeirarchyRecord* bone = skel->m_MeshHeirarchy;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
@@ -344,7 +344,7 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
             Copy_F120(&out[i], &boneMat);
         }
     }
-    self->Flags &= 0xFFFE;
+    Flags &= 0xFFFE;
 }
 #endif
 

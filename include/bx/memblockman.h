@@ -40,6 +40,10 @@ struct TMemBlock8 {
 struct TMemContainer8 {
     TMemBlock8 m_blockList[256];    // 0x000 [O]; [R] ctor links block i to i + 1 (stride 8), the last link (+0x7F8) 0
     TMemBlock8* m_freeList;         // 0x800 [O]; [R] ctor: block 0; [U] alloc pops, free pushes (lw/sw 0x800)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc() __asm__("TMemContainer8_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer8_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock8, m_pNext, 0x0);
@@ -60,6 +64,10 @@ struct TMemBlock16 {
 struct TMemContainer16 {
     TMemBlock16 m_blockList[512];   // 0x0000 [O]; [R] ctor links them, last link (+0x1FF0) 0
     TMemBlock16* m_freeList;        // 0x2000 [O]; [R] ctor: block 0; [U] alloc / free (lw/sw 0x2000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc() __asm__("TMemContainer16_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer16_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock16, m_pNext, 0x0);
@@ -80,6 +88,10 @@ struct TMemBlock32 {
 struct TMemContainer32 {
     TMemBlock32 m_blockList[768];   // 0x0000 [O]; [R] ctor links them, last link (+0x5FE0) 0
     TMemBlock32* m_freeList;        // 0x6000 [O]; [R] ctor: block 0; [U] alloc / free (lw/sw 0x6000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc() __asm__("TMemContainer32_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer32_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock32, m_pNext, 0x0);
@@ -100,6 +112,10 @@ struct TMemBlock64 {
 struct TMemContainer64 {
     TMemBlock64 m_blockList[3200];  // 0x00000 [O]; [R] ctor links them, last link (+0x31FC0) 0
     TMemBlock64* m_freeList;        // 0x32000 [O]; [R] ctor: block 0; [U] alloc / free (lui 0x3 + 0x2000)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc() __asm__("TMemContainer64_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer64_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock64, m_pNext, 0x0);
@@ -120,6 +136,10 @@ struct TMemBlock128 {
 struct TMemContainer128 {
     TMemBlock128 m_blockList[1200]; // 0x00000 [O]; [R] ctor links them, last link (+0x25780) 0
     TMemBlock128* m_freeList;       // 0x25800 [O]; [R] ctor: block 0; [U] alloc / free
+
+    // Methods bound to their retail symbols by asm labels.
+    void* alloc() __asm__("TMemContainer128_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer128_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock128, m_pNext, 0x0);
@@ -144,6 +164,7 @@ struct TMemContainer256 {
 
     // Methods bound to their retail symbols by asm labels.
     void* alloc(unsigned int align) __asm__("TMemContainer256_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer256_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock256, m_pNext, 0x0);
@@ -168,6 +189,7 @@ struct TMemContainer512 {
 
     // Methods bound to their retail symbols by asm labels.
     void* alloc(unsigned int align) __asm__("TMemContainer512_alloc__FPv");
+    void free(void** node) __asm__("TMemContainer512_free__FPvPPv");
 };
 
 CHECK_OFFSET(TMemBlock512, m_pNext, 0x0);

@@ -5604,48 +5604,48 @@ extern "C" void cMoveNode_signal(void* p);
  * @param msg  the signal number
  * @param msgValue  its argument
  */
-extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msgValue)
+void cAnimObjectNode::signal(int msg, float msgValue)
 {
     if (msg == cAnimObjectNode::kAnimSignal_SetDelay) {
-        self->Delay = (int)(msgValue * (float)cAppMan_TheAppMan->TimerHz);
+        Delay = (int)(msgValue * (float)cAppMan_TheAppMan->TimerHz);
     } else if (msg == cAnimObjectNode::kAnimSignal_SetTime) {
         msgValue = msgValue * 0.03333333507180214f;
-        if (self->FromTime <= msgValue && msgValue <= self->ToTime) {
-            self->CurrTime = msgValue;
+        if (FromTime <= msgValue && msgValue <= ToTime) {
+            CurrTime = msgValue;
         }
     } else if (msg == cAnimObjectNode::kAnimSignal_SetSpeed) {
         msgValue = msgValue * 0.03333333507180214f;
-        self->AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
+        AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
     } else if (msg == cAnimObjectNode::kAnimSignal_SetToTime) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = self->Instance->m_Model->m_fAnimTime;
+        float lim = Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
             msgValue = lim;
         }
         if (msgValue < 0.0f) {
             msgValue = 0.0f;
         }
-        self->ToTime = msgValue;
-        if (msgValue < self->CurrTime) {
-            self->CurrTime = msgValue;
+        ToTime = msgValue;
+        if (msgValue < CurrTime) {
+            CurrTime = msgValue;
         }
     } else if (msg == cAnimObjectNode::kAnimSignal_SetFromTime) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = self->Instance->m_Model->m_fAnimTime;
+        float lim = Instance->m_Model->m_fAnimTime;
         if (lim < msgValue) {
             msgValue = lim;
         }
         if (msgValue < 0.0f) {
             msgValue = 0.0f;
         }
-        self->FromTime = msgValue;
-        if (self->CurrTime < msgValue) {
-            self->CurrTime = msgValue;
+        FromTime = msgValue;
+        if (CurrTime < msgValue) {
+            CurrTime = msgValue;
         }
     } else if (msg == cAnimObjectNode::kAnimSignal_PlayOnce) {
-        *(short*)self = cAnimObjectNode::kAnimType_Once;
+        *(short*)this = cAnimObjectNode::kAnimType_Once;
     } else {
-        cMoveNode_signal(&self->MoveNodeBase);
+        cMoveNode_signal(&MoveNodeBase);
     }
 }
 #endif

@@ -1674,7 +1674,6 @@ static inline float Atan2_1732E8(float y, float x)
     return a;
 }
 
-extern "C" void cTriggerAlgorithm_snap_x(char* self, long key) __asm__("cTriggerAlgorithm_snap");
 /**
  * Snaps a trigger camera into place behind the rider it follows, when @p key names that rider.
  *
@@ -1687,35 +1686,34 @@ extern "C" void cTriggerAlgorithm_snap_x(char* self, long key) __asm__("cTrigger
  *
  * @param key  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
+void cTriggerAlgorithm::snap(int key)
 {
-    cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
-    if (key != self->Target->Rider->getAIIndex())
+    if (key != Target->Rider->getAIIndex())
         return;
     t4Vector focusPos, riderFront, dir;
     {
-        cCameraTarget* posTarget = self->Target;
+        cCameraTarget* posTarget = Target;
         focusPos = posTarget->getPosition();
     }
     {
-        cCameraTarget* frontTarget = self->Target;
+        cCameraTarget* frontTarget = Target;
         riderFront = frontTarget->getFront();
     }
-    AddEq_1732E8(focusPos, Scale_1732E8(t4vect_ZAxis_32E8, self->HeightOffset));
-    AddEq_1732E8(focusPos, Scale_1732E8(riderFront, self->LeadDistance));
-    self->Heading = wrap_1732E8(Atan2_1732E8(riderFront.y, riderFront.x));
+    AddEq_1732E8(focusPos, Scale_1732E8(t4vect_ZAxis_32E8, HeightOffset));
+    AddEq_1732E8(focusPos, Scale_1732E8(riderFront, LeadDistance));
+    Heading = wrap_1732E8(Atan2_1732E8(riderFront.y, riderFront.x));
     float frontPitch = Atan2_1732E8(riderFront.z, Len2_1732E8(sVec2(riderFront.x, riderFront.y)));
-    float mm = -self->PitchOffset * 0.01745329424738884f;
-    self->Pitch = wrap_1732E8(frontPitch * -self->PitchMultiplier + mm);
+    float mm = -PitchOffset * 0.01745329424738884f;
+    Pitch = wrap_1732E8(frontPitch * -PitchMultiplier + mm);
     float sinHeading, cosHeading, sinPitch, cosPitch;
-    fSinCos(&sinHeading, &cosHeading, self->Heading);
-    fSinCos(&sinPitch, &cosPitch, -self->Pitch);
+    fSinCos(&sinHeading, &cosHeading, Heading);
+    fSinCos(&sinPitch, &cosPitch, -Pitch);
     dir.x = cosPitch * cosHeading;
     dir.y = cosPitch * sinHeading;
     dir.z = -sinPitch;
     dir.w = 0.0f;
-    self->Position = Sub_1732E8(focusPos, Scale_1732E8(dir, self->IdealDist));
-    self->update();
+    Position = Sub_1732E8(focusPos, Scale_1732E8(dir, IdealDist));
+    update();
 }
 #endif
 
@@ -1729,13 +1727,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent
  *
  * Calls its own virtual snap (slot 3) with that rider's AI index (slot 7 of the rider's +0x6C0 part, reached through
  * Target +0x30 and its Rider +0x4).
- *
- * @return whatever the virtual snap returns
  */
-extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
+void cTriggerAlgorithm::snapCurrent()
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
-    return vt[3].fn(vthis(self, vt[3]), self->Target->Rider->getAIIndex());
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, this);
+    vt[3].fn(vthis(this, vt[3]), Target->Rider->getAIIndex());
 }
 #endif
 
@@ -2563,13 +2559,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent
  *
  * Calls its own virtual snap (slot 3, cBoundedAlgorithm_snap) with that rider's AI index (slot 7 of the rider's +0x6C0 part,
  * through Target +0x30 and its Rider +0x4).
- *
- * @return whatever the virtual snap returns
  */
-extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
+void cBoundedAlgorithm::snapCurrent()
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, self);
-    return vt[3].fn(vthis(self, vt[3]), self->Target->Rider->getAIIndex());
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cCameraAlgorithm, this);
+    vt[3].fn(vthis(this, vt[3]), Target->Rider->getAIIndex());
 }
 #endif
 
@@ -5144,8 +5138,6 @@ extern "C" t4Vector f_177FC0_8208(void* self, const t4Vector& v) __asm__("cSPOKE
 extern "C" t4Vector f_177EF8_8208(void* self) __asm__("cSPOKEChaseAlgorithm_getRiderPosition");
 int cRider_getMotionState(void* self);
 
-extern "C" void cSPOKEChaseAlgorithm_update_v(char* self) __asm__("cSPOKEChaseAlgorithm_update");
-
 /**
  * Runs one frame of the SPOKE camera: eases the eye toward getDesiredPosition and aims 37 units above the followed
  * point.
@@ -5154,15 +5146,15 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self) __asm__("cSPOKEChaseAl
  * distance of 150 to 0 at 1500 (its square root while handplanting, motion state 5); Position = f * Position + (1 -
  * f) * getDesiredPosition(setup velocity), and CamTargetPos = getRiderPosition + Z * 37.
  */
-extern "C" void cSPOKEChaseAlgorithm_update_v(char* vself)
+void cSPOKEChaseAlgorithm::update()
 {
-    cSPOKEChaseAlgorithm* self = (cSPOKEChaseAlgorithm*)vself;
     sCamInfo info;
-    cLookAtChaseAlgorithm_setupChaseData_8208(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_8208(this, &info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    *(float*)self = 0.7853981852531433f;
-    t4Vector scratchVec = Sub_8208(self->CamTargetPos, self->Position);
+    *(float*)this = 0.7853981852531433f;
+    t4Vector scratchVec = Sub_8208(CamTargetPos, Position);
     float len = Length_8208(scratchVec);
     float distFrac;
     if (len >= 150.0f) {
@@ -5175,17 +5167,17 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* vself)
         distFrac = 0.0f;
     }
     float keepWeight = (1.0f - distFrac) * 0.9879999756813049f;
-    if (cRider_getMotionState(self->Target->Rider) == MS_Handplant) {
+    if (cRider_getMotionState(Target->Rider) == MS_Handplant) {
         keepWeight = Sqrt_8208(keepWeight);
     }
     {
-        t4Vector keptEye = Scale_8208(self->Position, keepWeight);
+        t4Vector keptEye = Scale_8208(Position, keepWeight);
         float newWeight = 1.0f - keepWeight;
-        AddD_8208(scratchVec, keptEye, Scale_8208(f_177FC0_8208(self, info.dir), newWeight));
-        self->Position = scratchVec;
+        AddD_8208(scratchVec, keptEye, Scale_8208(f_177FC0_8208(this, info.dir), newWeight));
+        Position = scratchVec;
     }
-    AddD_8208(scratchVec, f_177EF8_8208(self), ScaleP_8208(&t4vect_ZAxis_8208, 37.0f));
-    self->CamTargetPos = scratchVec;
+    AddD_8208(scratchVec, f_177EF8_8208(this), ScaleP_8208(&t4vect_ZAxis_8208, 37.0f));
+    CamTargetPos = scratchVec;
 }
 #endif
 
@@ -5265,18 +5257,19 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
  *
  * @param id  the subject's AI index (On Tour subjectID); any other rider is ignored
  */
-extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
+void cSPOKEChaseAlgorithm::snap(int id)
 {
-    cRider* rider = self->Target->Rider;
+    cRider* rider = Target->Rider;
     if (id == rider->getAIIndex()) {
-        cCameraTarget* subject = self->Target;
-        self->LastLookDir = subject->getFront();
-        subject = self->Target;
-        self->Position = f_177FC0_1783E0(((cCameraAlgorithm_cVirt*)self), subject->getVelocity());
-        self->CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)self)), ScaleP_1783E0(&t4vect_ZAxis_83E0, 37.0f));
-        f_166C60_1783E0(((cCameraAlgorithm_cVirt*)self), id);
-        cLookAtChaseAlgorithm_setupInitialCamDir(((cCameraAlgorithm_cVirt*)self), 559.7440185546875f, 300.0f);
-        ((cCameraAlgorithm_cVirt*)self)->update();
+        cCameraTarget* subject = Target;
+        LastLookDir = subject->getFront();
+        subject = Target;
+        Position = f_177FC0_1783E0(((cCameraAlgorithm_cVirt*)this), subject->getVelocity());
+        CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)this)), ScaleP_1783E0(&t4vect_ZAxis_83E0,
+                37.0f));
+        f_166C60_1783E0(((cCameraAlgorithm_cVirt*)this), id);
+        cLookAtChaseAlgorithm_setupInitialCamDir(((cCameraAlgorithm_cVirt*)this), 559.7440185546875f, 300.0f);
+        ((cCameraAlgorithm_cVirt*)this)->update();
     }
 }
 #endif
@@ -5644,22 +5637,23 @@ static inline float Length_1787E0(const t4Vector& v)
  * getIdealTargetPos. When the two are over 600 apart the eye is pulled in to 600. When they are under 1 apart it
  * computes a fallback offset (X axis * 600) but never applies it, so the degenerate pose stays.
  */
-extern "C" void cSUPERPIPEChaseAlgorithm_update(cSUPERPIPEChaseAlgorithm* self)
+void cSUPERPIPEChaseAlgorithm::update()
 {
     sCamInfo info;
-    cLookAtChaseAlgorithm_setupChaseData_87E0(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_87E0(((char*)this), &info, 0.2713613510131836f, 0.8999999761581421f,
+            0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    *(float*)self = 0.7853981852531433f;
-    self->Position = f_1785F0_1787E0(((char*)self));
-    self->CamTargetPos = f_178758_1787E0(((char*)self));
-    t4Vector look = Sub_1787E0(self->CamTargetPos, self->Position);
+    *(float*)this = 0.7853981852531433f;
+    Position = f_1785F0_1787E0(((char*)this));
+    CamTargetPos = f_178758_1787E0(((char*)this));
+    t4Vector look = Sub_1787E0(CamTargetPos, Position);
     float len = Length_1787E0(look);
     if (len < 1.0f) {
         look = ScaleP_1787E0(&t4vect_XAxis, 600.0f);
     } else if (len > 600.0f) {
         ScaleEq_1787E0(look, 600.0f / len);
-        self->Position = Sub_1787E0(self->CamTargetPos, look);
+        Position = Sub_1787E0(CamTargetPos, look);
     }
 }
 #endif
@@ -5915,7 +5909,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_ge
  *
  * @param other  the cRaceCamFinalPhaseData to fill (On Tour data_outArg)
  */
-void cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
+void cPOST_RACE_1ChaseAlgorithm::getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
 {
     // the symbol keeps the untyped (void*, void*) signature; other is the caller's cRaceCamFinalPhaseData
     cRaceCamFinalPhaseData* data = (cRaceCamFinalPhaseData*)other;

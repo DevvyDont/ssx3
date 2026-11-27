@@ -563,14 +563,14 @@ extern "C" void cWScriptProcess_end(cWScriptProcess* self);
  * Sets the state (+0x0) to 3, runs the script code at +0x30 through cWScriptMan_runScriptCode when there is one and
  * calls cWScriptProcess_end.
  */
-extern "C" void cWScriptProcess_processEnd(cWScriptProcess* self)
+void cWScriptProcess::processEnd()
 {
-    *(int*)self = 3;
-    void* script = self->ProcessScriptCode[2];
+    *(int*)this = 3;
+    void* script = ProcessScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode(self->Manager, self, script);
+        cWScriptMan_runScriptCode(Manager, this, script);
     }
-    cWScriptProcess_end(self);
+    end();
 }
 #endif
 
@@ -587,15 +587,15 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
  * list (+0x2B8) back to the list at +0x2B4 if it is there. Then destroys the luno table at +0x1C and clears the
  * pointer.
  */
-extern "C" void cWScriptProcess_end(cWScriptProcess* self)
+void cWScriptProcess::end()
 {
-    *(int*)self = 3;
-    cWScriptMan_processEnd(self->Manager, self);
-    void* obj = self->Local;
+    *(int*)this = 3;
+    cWScriptMan_processEnd(Manager, this);
+    void* obj = Local;
     if (obj != 0) {
         luno_cLunoTable__cLunoTable(obj, 3);
     }
-    self->Local = 0;
+    Local = 0;
 }
 #endif
 
@@ -1194,13 +1194,13 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Starts the task once: sets its state to kTaskState_Start and runs its start script (TaskScriptCode[0], +0x8) when it
  * has one.
  */
-extern "C" void cWScriptTask_taskStart(cWScriptTask* self)
+void cWScriptTask::taskStart()
 {
-    if (*(int*)self != kTaskState_Start) {
-        *(int*)self = kTaskState_Start;
-        void* script = self->TaskScriptCode[0];
+    if (*(int*)this != kTaskState_Start) {
+        *(int*)this = kTaskState_Start;
+        void* script = TaskScriptCode[0];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+            cWScriptMan_runScriptCode1(Process->Manager, this, script);
         }
     }
 }
@@ -1233,13 +1233,13 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Ends the task once: sets its state to kTaskState_End and runs its end script (TaskScriptCode[2], +0x10) when it has
  * one.
  */
-extern "C" void cWScriptTask_taskEnd(cWScriptTask* self)
+void cWScriptTask::taskEnd()
 {
-    if (*(int*)self != kTaskState_End) {
-        *(int*)self = kTaskState_End;
-        void* script = self->TaskScriptCode[2];
+    if (*(int*)this != kTaskState_End) {
+        *(int*)this = kTaskState_End;
+        void* script = TaskScriptCode[2];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
+            cWScriptMan_runScriptCode1(Process->Manager, this, script);
         }
     }
 }

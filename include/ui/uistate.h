@@ -140,29 +140,43 @@ struct cUIState : public cListNode {
     virtual ~cUIState();                                                              // 1
     virtual void onCreateScreen()
         __asm__("cUIState_onCreateScreen__FPv");                                                    // 4
-    virtual void onDestroyScreen();                                                   // 5
-    virtual void onGainFocus(cUIState* pPrevState);                                   // 6
-    virtual bool onGainTransition(int bFirstTime);                                    // 7
-    virtual bool onInputBegin(cUIInput* pInput);                                      // 8
-    virtual void onInputAlways(cUIInput* pInput);                                     // 9
+    virtual void onDestroyScreen()
+        __asm__("cUIState_onDestroyScreen__FPv");                                                   // 5
+    virtual void onGainFocus(cUIState* pPrevState)
+        __asm__("cUIState_onGainFocus");                                   // 6
+    virtual bool onGainTransition(int bFirstTime)
+        __asm__("cUIState_onGainTransition__FPv");                                    // 7
+    virtual bool onInputBegin(cUIInput* pInput)
+        __asm__("cUIState_onInputBegin__FPv");                                      // 8
+    virtual void onInputAlways(cUIInput* pInput)
+        __asm__("cUIState_onInputAlways__FPv");                                     // 9
     virtual bool onLoseTransition()
         __asm__("cUIState_onLoseTransition__FPv");                                                  // 10
-    virtual void onLoseFocus(cUIState* pNextState);                                   // 11
-    virtual void onUpdate();                                                          // 12
+    virtual void onLoseFocus(cUIState* pNextState)
+        __asm__("cUIState_onLoseFocus__FPv");                                   // 11
+    virtual void onUpdate() __asm__("cUIState_onUpdate");                                                          // 12
     virtual void onMenuGainFocus(cUIGroup* pRootGroup)
         __asm__("cUIState_onMenuGainFocus");                               // 13
     virtual void onPreRender2D()
         __asm__("cUIState_onPreRender2D__FPv");                                                     // 14
     virtual void onRender2D()
         __asm__("cUIState_onRender2D");                                                        // 15
-    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event);               // 16
-    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event);                  // 17
-    virtual void onWidgetCreate(cUIThing* pWidget);                                   // 18
-    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event);                // 19
-    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index); // 20
-    virtual int onWidgetPair(cUIPair* pPair, unsigned int Event);                     // 21
-    virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event);            // 22
-    virtual void* getData(int msg);                                                   // 23
+    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event)
+        __asm__("cUIState_onScreenEvent__FPv");               // 16
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event)
+        __asm__("cUIState_onPopupEvent__FPv");                  // 17
+    virtual void onWidgetCreate(cUIThing* pWidget)
+        __asm__("cUIState_onWidgetCreate__FPv");                                   // 18
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event)
+        __asm__("cUIState_onWidgetEvent__FPv");                // 19
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index)
+        __asm__("cUIState_onWidgetMenu__FPv"); // 20
+    virtual int onWidgetPair(cUIPair* pPair, unsigned int Event)
+        __asm__("cUIState_onWidgetPair__FPv");                     // 21
+    virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event)
+        __asm__("cUIState_onWidgetListBox__FPv");            // 22
+    virtual void* getData(int msg)
+        __asm__("cUIState_getData__FPv");                                                   // 23
     virtual int handleEvent(int msg, void* pParam);                                   // 24
 
     // Methods bound to their retail symbols by asm labels.

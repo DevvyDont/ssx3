@@ -16,6 +16,8 @@
 
 struct tInstanceRecord;
 
+struct cBxReplayFrame;
+
 struct cMagnetModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store cMagnetModifier_vtbl; dtor cMagnetModifier__cMagnetModifier
@@ -47,6 +49,14 @@ struct cMagnetModifier : public cTransformModifier {
     virtual void update() __asm__("cMagnetModifier_update");
     virtual void updateRootTransform() __asm__("cMagnetModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMagnetModifier_writeToReplayFrame");
+    virtual bool isRootTransformDirty() const __asm__("cMagnetModifier_isRootTransformDirty__FPv");
+    virtual bool hasIntersect() const __asm__("cMagnetModifier_hasIntersect__FPv");
+    virtual const tBoundBox* getBoundBox() const __asm__("cMagnetModifier_getBoundBox__FPv");
+    virtual float getRadius() const __asm__("cMagnetModifier_getRadius__FPv");
+    virtual int getTransformType() const __asm__("cMagnetModifier_getTransformType__FPv");
+    virtual void setRadius(float) __asm__("cMagnetModifier_setRadius__FPv");
+    virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cMagnetModifier_setBoundBox");
+    virtual const t4Matrix* getRootTransform() __asm__("cMagnetModifier_getRootTransform");
 };
 
 CHECK_OFFSET(cMagnetModifier, unk_04, 0x04);

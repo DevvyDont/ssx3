@@ -42,6 +42,9 @@ struct cParentModifier : public cPositionModifier {
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParentModifier_writeToReplayFrame");
     void* cParentModifier1(tInstanceRecord* parentInstance, int meshIndex, const t4Vector* pos)
         __asm__("cParentModifier_cParentModifier1");
+    virtual void update() __asm__("cParentModifier_update__FPv");
+    virtual int getMesh() const __asm__("cParentModifier_getMesh__FPv");
+    virtual int getTransformType() const __asm__("cParentModifier_getTransformType__FPv");
 };
 
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);

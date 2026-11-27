@@ -52,6 +52,8 @@ struct cReplayCache {
     int addControlCmd(tControlCmd* chunk) __asm__("cReplayCache_addControlCmd");
     void truncate(unsigned int pos) __asm__("cReplayCache_truncate");
     bool moveTo(unsigned int pos) __asm__("cReplayCache_moveTo");
+    int load(char** pp) __asm__("cReplayCache_load");
+    bool getControlCmd(tControlCmd* out) __asm__("cReplayCache_getControlCmd");
 };
 CHECK_OFFSET(cReplayCache, RecordCursor, 0x0);
 CHECK_OFFSET(cReplayCache, PlaybackCursor, 0x4);

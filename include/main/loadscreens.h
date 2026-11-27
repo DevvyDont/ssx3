@@ -237,6 +237,7 @@ struct cFELoadState : public cUIState {
     virtual void onCreateScreen() __asm__("cFELoadState_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFELoadState_onWidgetCreate");
     void InitwidgetMultiP(char player) __asm__("cFELoadState_InitwidgetMultiP");
+    virtual bool onGainTransition(int) __asm__("cFELoadState_onGainTransition");
 };
 
 CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);
@@ -272,6 +273,8 @@ struct cFELoadHintState : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFELoadHintState();
     virtual void onCreateScreen() __asm__("cFELoadHintState_onCreateScreen");
+    virtual bool onGainTransition(int) __asm__("cFELoadHintState_onGainTransition");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cFELoadHintState_onWidgetCreate__FPv");
 };
 
 CHECK_OFFSET(cFELoadHintState, mpParentModule, 0x048);
@@ -302,6 +305,8 @@ struct cFELoadStateInLodge : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFELoadStateInLodge();
     virtual void onCreateScreen() __asm__("cFELoadStateInLodge_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cFELoadStateInLodge_onWidgetCreate__FPv");
+    virtual bool onGainTransition(int) __asm__("cFELoadStateInLodge_onGainTransition");
 };
 
 CHECK_SIZE(cFELoadStateInLodge, 0x48);
@@ -375,6 +380,8 @@ struct cGameLoadStateOutLodge : public cUIState {
     // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cGameLoadStateOutLodge();
     virtual void onCreateScreen() __asm__("cGameLoadStateOutLodge_onCreateScreen");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cGameLoadStateOutLodge_onWidgetCreate__FPv");
+    virtual bool onGainTransition(int) __asm__("cGameLoadStateOutLodge_onGainTransition");
 };
 
 CHECK_SIZE(cGameLoadStateOutLodge, 0x48);

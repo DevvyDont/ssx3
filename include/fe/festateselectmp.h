@@ -43,6 +43,7 @@ struct cFEStateSelectMultiplayerMode : public cUIState {
     virtual ~cFEStateSelectMultiplayerMode();
     virtual void onCreateScreen() __asm__("cFEStateSelectMultiplayerMode_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateSelectMultiplayerMode_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateSelectMultiplayerMode_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateSelectMultiplayerMode, 0x48);

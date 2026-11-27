@@ -4049,7 +4049,7 @@ void cRider::renderShadow()
 {
     if (mIsOnScreen != 0)
     {
-        cRider_RenderShadow(this);
+        this->RenderShadow();
     }
 }
 #endif
@@ -4320,16 +4320,17 @@ static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE
  * through graphics slots 31, 53, 55, 101, 54 and 32, and pops the state. The shadow itself is drawn on every
  * call (cPlayerShadow_AddShadow).
  */
-extern "C" void cRider_RenderShadow(cRider* self)
+void cRider::RenderShadow()
 {
-    if (self->mShadowRendered == 0) {
-        self->mShadowRendered = 1;
+    if (mShadowRendered == 0) {
+        mShadowRendered = 1;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         top_2898(ps2GraphicsMan)[1] = top_2898(ps2GraphicsMan)[0];
         top_2898(ps2GraphicsMan)++;
         t3Vector center;
         {
-            sV4_2898 midpoint = Scale_2898(Add_2898(BonePos_2898(self, self->LeftLeg.FootSkelIndex), BonePos_2898(self, self->RightLeg.FootSkelIndex)), 0.5f);
+            sV4_2898 midpoint = Scale_2898(Add_2898(BonePos_2898(this, LeftLeg.FootSkelIndex), BonePos_2898(this,
+                    RightLeg.FootSkelIndex)), 0.5f);
             center.x = midpoint.x;
             center.y = midpoint.y;
             center.z = midpoint.z;
@@ -4340,13 +4341,14 @@ extern "C" void cRider_RenderShadow(cRider* self)
         }
         t3Vector objUp;
         {
-            sV4_2898 upRow = *(sV4_2898*)&self->mMatrix.row[2];
+            sV4_2898 upRow = *(sV4_2898*)&mMatrix.row[2];
             objUp.x = upRow.x;
             objUp.y = upRow.y;
             objUp.z = upRow.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, Model_2898(self)->SkelMatrices, 0);
+        func_00374D00(Shadow_2898(this), &center, &objUp, &cRider_RenderShadow_lnorm, Model_2898(this)->SkelMatrices,
+                0);
         cPS2GraphicsMan* grManPushView = GrMan;
         top_2898(grManPushView)->f8 = (top_2898(grManPushView)->f8 & ~0x3E0) | 0x20;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFE7FFFFF) | 0x1000000;
@@ -4358,17 +4360,17 @@ extern "C" void cRider_RenderShadow(cRider* self)
         vt[31].fn(vthis(grManPushView, vt[31]));
         cPS2GraphicsMan* grManLockTex = GrMan;
         sVEntry<void(void*, void*, int)>* vt3 = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cGraphicsMan, grManLockTex);
-        vt3[53].fn(vthis(grManLockTex, vt3[53]), Shadow_2898(self)->f170, 1);
+        vt3[53].fn(vthis(grManLockTex, vt3[53]), Shadow_2898(this)->f170, 1);
         cPS2GraphicsMan* grManClearTex = GrMan;
         sVEI3_2898* vt4 = (sVEI3_2898*)VPTR_OF(cGraphicsMan, grManClearTex);
-        vt4[55].fn(vthis(grManClearTex, vt4[55]), Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
-        if (self->getMotionState() == 0) {
+        vt4[55].fn(vthis(grManClearTex, vt4[55]), Tex_2898(Shadow_2898(this)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
+        if (getMotionState() == 0) {
             k = 0.0f;
         }
         t4Matrix mat;
-        CopyMat_2898(&mat, &Shadow_2898(self)->mat);
-        sV4_2898 tuvScale = Shadow_2898(self)->f150;
-        sV4_2898 tuvTrans = Shadow_2898(self)->f160;
+        CopyMat_2898(&mat, &Shadow_2898(this)->mat);
+        sV4_2898 tuvScale = Shadow_2898(this)->f150;
+        sV4_2898 tuvTrans = Shadow_2898(this)->f160;
         cPS2GraphicsMan* grManTuvBatch = GrMan;
         sVE4_2898* vt5 = (sVE4_2898*)VPTR_OF(cGraphicsMan, grManTuvBatch);
         vt5[101].fn(vthis(grManTuvBatch, vt5[101]), &mat, &tuvScale, &tuvTrans);
@@ -4382,7 +4384,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         shadowColour.y = 0.3f;
         shadowColour.z = 0.3f;
         shadowColour.w = 0.3f;
-        cAnimModel_rendershadow(Model_2898(self), 3, &boardColour, &shadowColour);
+        cAnimModel_rendershadow(Model_2898(this), 3, &boardColour, &shadowColour);
         cPS2GraphicsMan* grManRestoreLock = GrMan;
         sVEI_2898* vt6 = (sVEI_2898*)VPTR_OF(cGraphicsMan, grManRestoreLock);
         vt6[54].fn(vthis(grManRestoreLock, vt6[54]));
@@ -4392,7 +4394,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         cPS2GraphicsMan* grManPopState = GrMan;
         top_2898(grManPopState)--;
     }
-    cPlayerShadow_AddShadow(Shadow_2898(self));
+    cPlayerShadow_AddShadow(Shadow_2898(this));
 }
 #endif
 
@@ -4814,8 +4816,6 @@ static inline void SetPath_3210(void* self, sVec4* p, sVec4* d)
     cRider_putAt_3210(self, p, d, 5, 0.0f);
 }
 
-extern "C" void cRider_transport_v(cRider* self, const t4Matrix* m) __asm__("cRider_transport");
-
 /**
  * Teleports the rider to a transform, keeping its speed, with a per-rider offset so riders do not overlap.
  *
@@ -4827,12 +4827,12 @@ extern "C" void cRider_transport_v(cRider* self, const t4Matrix* m) __asm__("cRi
  *
  * @param mat  the target transform, row 3 = position (On Tour: const t4Matrix & mat)
  */
-extern "C" void cRider_transport_v(cRider* self, const t4Matrix* mat)
+void cRider::transport(t4Matrix* mat)
 {
-    cReplay_eventReset(SSXApp->Game->Replay, self->mAIIndex);
+    cReplay_eventReset(SSXApp->Game->Replay, mAIIndex);
     sVec4 pos = *(const sVec4*)&mat->row[3];
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
-    int i = self->mAIIndex;
+    int i = mAIIndex;
     if (i == 0) {
         off = sVec4(2.0f, 0.0f, 0.0f, 0.0f);
     } else if (i == 1) {
@@ -4849,21 +4849,21 @@ extern "C" void cRider_transport_v(cRider* self, const t4Matrix* mat)
     off = Scale_3210(MatMulV_3210(mat, off), 100.0f);
     AddEq_3210(pos, off);
     sVec4 dir = MatMulV_3210(mat, t4vect_XAxis);
-    cRiderMetrix_evReset(self->mMetrix, 1);
-    cRider_setMotionState_impl(self, 0);
-    cRider_setControlState_impl(self, 0);
-    self->cancelRiderTransitions();
-    char* sub = (char*)&VPTR_AT(self, sizeof(cRiderState));
+    cRiderMetrix_evReset(mMetrix, 1);
+    cRider_setMotionState_impl(this, 0);
+    cRider_setControlState_impl(this, 0);
+    cancelRiderTransitions();
+    char* sub = (char*)&VPTR_AT(this, sizeof(cRiderState));
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
     cCameraController* ctrl = SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
     sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)ctrl->mVtbl; // slot 3: snap(subjectID)
     void* objB = vthis(ctrl, vtB[3]);
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
-    float len = Length_3210(*(sVec4*)&self->mVelocity);
-    SetPath_3210(self, &pos, &dir);
-    self->mVelocity = Scale_3210(sVec4(*(sVec4*)&self->mMatrix.row[1]), len);
-    cRiderHandler_resetRiderFX(self->mRiderHandler);
-    func_002F1A00(self->mAttachedEmitterFX);
+    float len = Length_3210(*(sVec4*)&mVelocity);
+    SetPath_3210(this, &pos, &dir);
+    mVelocity = Scale_3210(sVec4(*(sVec4*)&mMatrix.row[1]), len);
+    cRiderHandler_resetRiderFX(mRiderHandler);
+    func_002F1A00(mAttachedEmitterFX);
 }
 #endif
 

@@ -105,7 +105,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
  * @return 0x100 (animation only) for events 8 and 9, else 0x101 (animation and sound)
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cOVState_ENTERLODGE_onWidgetMenu(cOVState_ENTERLODGE* self, int pMenu, unsigned int key)
+int cOVState_ENTERLODGE::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -143,7 +143,7 @@ struct sSelf001F72E0 {
  * @param widget  the item (On Tour pWidget); ignored when null
  * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
-extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUIThing* widget, int msg)
+void cOVState_ENTERLODGE::onWidgetEvent(cUIThing* widget, unsigned int msg)
 {
     if (((void*)widget) != 0) {
         switch (msg) {
@@ -158,15 +158,15 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
                 }
                 break;
             case 1:
-                self->mRemovePDA = 1;
-                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                mRemovePDA = 1;
+                cUIStateStack_pop(&mpEngine->mStateStack, 1);
                 break;
             }
             break;
         case cUIState::kONPREV:
-            self->mRemovePDA = 1;
+            mRemovePDA = 1;
             ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
             break;
         }
     }
@@ -298,7 +298,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 for kONNEXT, else 0
  */
-extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(cOVState_BIGCHALLENGE_START* self, int pMenu, int Event)
+int cOVState_BIGCHALLENGE_START::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     return Event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -335,7 +335,7 @@ extern int cPauseState_FlagsTable[];
  * @param item  the selected item; ignored when null
  * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_START* self, cUIThing* item, int msg)
+void cOVState_BIGCHALLENGE_START::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
@@ -346,7 +346,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
             if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
-                ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
+                ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = mMissionId;
                 cWScriptMan_startLocalMission(cWScriptMan_TheWScriptMan);
             }
             cOVStateManager_mStatus = 3;
@@ -355,7 +355,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
             break;
         }
     case cUIState::kONPREV:
-        ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
+        ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = mMissionId;
         cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
@@ -459,7 +459,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetMenu);
  * @param event  the menu event
  * @return 0x101 for kONNEXT, else 0
  */
-extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(cOVState_BIGCHALLENGE_FAIL* self, int menu, int event)
+int cOVState_BIGCHALLENGE_FAIL::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -490,7 +490,7 @@ extern char str_TransitionOut_b[];
  * @param item  the widget; its misc data (+0x18) is set by cOVState_BIGCHALLENGE_FAIL_onWidgetCreate
  * @param msg  the widget event: 5 select, 6 back
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_FAIL* self, cUIThing* item, int msg)
+void cOVState_BIGCHALLENGE_FAIL::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
@@ -499,9 +499,9 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
     case cUIState::kONNEXT: {
         int choice = item->mMiscData;
         if (choice == 0) {
-            ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
+            ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
-            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             return;
@@ -513,9 +513,9 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         break;
     }
     case cUIState::kONPREV: {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b));
         if (frame != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpScreen, frame & 0xFFFF, 1);
+            cUIScreen_playFrame(mpScreen, frame & 0xFFFF, 1);
         }
         break;
     }
@@ -523,7 +523,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         return;
     }
     cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
-    cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
+    cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
@@ -726,10 +726,11 @@ static inline int isHashTOPTIMES(int id, char* s)
  *
  * "continue" reads kT_CMNContinue, or kT_OVRCMNReturn while cOVStateManager_mMiscData is set; "saverecords" gets miscData 1.
  *
- * @param w  the widget being created
+ * @param pWidget  the widget being created
  */
-extern "C" void cOVState_TOPTIMES_onWidgetCreate(cOVState_TOPTIMES* self, cUIText* w)
+void cOVState_TOPTIMES::onWidgetCreate(cUIThing* pWidget)
 {
+    cUIText* w = (cUIText*)pWidget;
     int id = w->mHashName;
     if (isHashTOPTIMES(id, str_continue)) {
         if (cOVStateManager_mMiscData == 0) {
@@ -809,7 +810,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 for kONNEXT, else 0
  */
-extern "C" int cOVState_TOPTIMES_onWidgetMenu(cOVState_TOPTIMES* self, int pMenu, int Event)
+int cOVState_TOPTIMES::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     return Event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -823,18 +824,18 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetEvent);
  * On Cross, passes the chosen button to the panel's virtual slot 26 (cOVState_TOPTIMES_handleNext: continue or save
  * records).
  *
- * The C call passes only self, while cOVState_TOPTIMES_handleNext takes the item as its second argument: it gets @p pWidget
- * only because the argument register still holds it, so a port must pass it explicitly.
+ * The call passes only this object, while cOVState_TOPTIMES_handleNext takes the item as its second argument: it gets
+ * @p pWidget only because the argument register still holds it, so a port must pass it explicitly.
  *
  * @param pWidget  the chosen item; ignored when null
  * @param Event  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, cUIThing* pWidget, int Event)
+void cOVState_TOPTIMES::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
 {
     if (((void*)pWidget) != 0) {
         if (Event == cUIState::kONNEXT) {
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-            vt[26].fn(vthis(self, vt[26]));
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+            vt[26].fn(vthis(this, vt[26]));
         }
     }
 }

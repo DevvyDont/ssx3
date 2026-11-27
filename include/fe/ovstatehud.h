@@ -131,6 +131,9 @@ struct tHUDDef {
     // Methods bound to their retail symbols by asm labels.
     void getPos(void* outPos) __asm__("tHUDDef_getPos");
     void getSize(void* outVec, void* fallback) __asm__("tHUDDef_getSize");
+    void getColour(void* outColor) __asm__("tHUDDef_getColour__FPvT0");
+    void getColour1(void* outColor) __asm__("tHUDDef_getColour1__FPvT0");
+    float getScale(void* outRange) __asm__("tHUDDef_getScale__FPvT0");
 };
 
 struct cRider;
@@ -425,6 +428,7 @@ struct cOVStateHiScoreList : public cOVState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVStateHiScoreList();
     virtual void onCreateScreen() __asm__("cOVStateHiScoreList_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int Event) __asm__("cOVStateHiScoreList_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVStateHiScoreList, 0x9C);

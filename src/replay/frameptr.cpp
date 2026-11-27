@@ -149,10 +149,10 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
  * @param dst  receives the bytes (On Tour char* data)
  * @param n  how many (On Tour len)
  */
-extern "C" void cReplayFramePtr_read(cReplayFramePtr* self, void* dst, int n)
+void cReplayFramePtr::read(char* dst, int n)
 {
-    MEM_copy(dst, self->ReadData, n);
-    self->ReadData += n;
+    MEM_copy(dst, ReadData, n);
+    ReadData += n;
 }
 #endif
 
@@ -1276,7 +1276,6 @@ static inline bool isIdleNoCamFB88(char* s)
 // PORT: returns whether a menu action was queued; the unit declares it
 // void earlier, so the definition goes through an asm label.
 extern "C" bool cReplay_updateInput_FB88(void* self, int a1) __asm__("cReplay_updateInput");
-extern "C" bool cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_updateInput");
 /**
  * Reads the replay menu buttons into the next replay command.
  *
@@ -1292,9 +1291,9 @@ extern "C" bool cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_up
  * @param debug  nonzero to stop the replay at once on input 0x66 (On Tour: bool debug)
  * @return true when a command was queued
  */
-extern "C" bool cReplay_updateInput_impl(void* self, int debug)
+bool cReplay::updateInput(int debug)
 {
-    cReplay* replay = (cReplay*)self;
+    cReplay* replay = (cReplay*)this;
     cSSXApp* app = SSXApp;
     sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
     sFpView_FB88* cur = (sFpView_FB88*)app->Game->UI->mpSound;
@@ -1347,7 +1346,7 @@ extern "C" bool cReplay_updateInput_impl(void* self, int debug)
             }
         } else if (cInput_getState(input, 108)) {
             uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
-            ((cReplay*)self)->cycleReplayCameraAlgorithm();
+            ((cReplay*)this)->cycleReplayCameraAlgorithm();
         }
     }
     replay->Cmd = command;

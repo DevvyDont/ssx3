@@ -1532,14 +1532,14 @@ static inline float fsDot_D650(const t4Vector& a, const t4Vector& b)
  *
  * @param obj  the collision info (On Tour const tCollideInfo* tc)
  */
-extern "C" void cFenceNode_onCollide(cFenceNode* self, void* obj)
+void cFenceNode::onCollide(const tCollideInfo* obj, const tIntersectInfo*, cBeing*)
 {
     tCollideInfo* hitInfo = (tCollideInfo*)obj;
-    if (self->ForceMax >= 1.0f) return;
+    if (ForceMax >= 1.0f) return;
     float dot = fsDot_D650(hitInfo->Reflect, hitInfo->Direct);
-    self->setForce(dot * 0.0010000000474974513f * hitInfo->Vel);
-    if (self->NextPropTime == 0) self->NextPropTime = 4;
-    if (self->PrevPropTime == 0) self->PrevPropTime = 4;
+    setForce(dot * 0.0010000000474974513f * hitInfo->Vel);
+    if (NextPropTime == 0) NextPropTime = 4;
+    if (PrevPropTime == 0) PrevPropTime = 4;
 }
 #endif
 

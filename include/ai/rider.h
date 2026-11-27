@@ -880,6 +880,17 @@ struct cRider : public cRiderState, public cBeing {
     bool checkRailBodyCollisions() __asm__("cRider_checkRailBodyCollisions");
     virtual void vibrationReset() __asm__("cRider_vibrationReset__FPv");
     virtual void vibrationUpdate() __asm__("cRider_vibrationUpdate__FPv");
+    virtual void transport(t4Matrix* mat) __asm__("cRider_transport");
+    int isPipeJump() __asm__("cRider_isPipeJump__FPv");
+    void updateAIPath() __asm__("cRider_updateAIPath");
+    virtual t4Vector* getPosition() __asm__("cRider_getPosition__FPv");
+    virtual t4Vector* getVelocity() __asm__("cRider_getVelocity__FPv");
+    virtual void vibrationBump(float) __asm__("cRider_vibrationBump__FPv");
+    virtual void vibrationRumble(float) __asm__("cRider_vibrationRumble__FPv");
+    void RenderShadow() __asm__("cRider_RenderShadow");
+    void applyJumpPop(float speedFactor) __asm__("cRider_applyJumpPop");
+    void moveFromCollision(const t4Vector* offset) __asm__("cRider_moveFromCollision");
+    bool isRailBoardIntersect(t4Vector* tgt, t4Vector* dir) __asm__("cRider_isRailBoardIntersect");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

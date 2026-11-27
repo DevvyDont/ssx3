@@ -125,6 +125,7 @@ struct cAnimDeltaNode {
     bool updateNode() __asm__("cAnimDeltaNode_updateNode");
     void signal(int id, float signalArg) __asm__("cAnimDeltaNode_signal");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAnimDeltaNode_writeToReplayFrame");
+    void* getNodeState() __asm__("cAnimDeltaNode_getNodeState__FPv");
 };
 
 CHECK_OFFSET(cAnimDeltaNode, AnimType, 0x00);

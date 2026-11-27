@@ -43,18 +43,18 @@ struct cObjNode {
     // [P] 0xC; [U] cSortObjNode_compare/equal call slot 8 (lw 0xC, then 0x40/0x44 of the table). Slots [R]
     // cObjNode_vtbl (13; names from its entries cObjNode_*), types [O] (On Tour's cObjNode definitions):
     virtual ~cObjNode();                                            // 1
-    virtual void update();                                          // 2
-    virtual void apply();                                           // 3
-    virtual void render();                                          // 4
-    virtual void renderModel(const t4Matrix* mat, int flags);       // 5
-    virtual bool compare(const cObjNode* p);                        // 6
-    virtual bool equal(const cObjNode* p);                          // 7
-    virtual unsigned int getSortIndex() const;                      // 8
-    virtual bool hasParent() const;                                 // 9
-    virtual bool isType(int type);                                  // 10
+    virtual void update() __asm__("cObjNode_update__FPv");                                          // 2
+    virtual void apply() __asm__("cObjNode_apply__FPv");                                           // 3
+    virtual void render() __asm__("cObjNode_render__FPv");                                          // 4
+    virtual void renderModel(const t4Matrix* mat, int flags) __asm__("cObjNode_renderModel__FPv");       // 5
+    virtual bool compare(const cObjNode* p) __asm__("cObjNode_compare__FPv");                        // 6
+    virtual bool equal(const cObjNode* p) __asm__("cObjNode_equal__FPv");                          // 7
+    virtual unsigned int getSortIndex() const __asm__("cObjNode_getSortIndex__FPv");                      // 8
+    virtual bool hasParent() const __asm__("cObjNode_hasParent__FPv");                                 // 9
+    virtual bool isType(int type) __asm__("cObjNode_isType__FPv");                                  // 10
     virtual unsigned int getSectionId();                            // 11
-    virtual void writeToReplayFrame(cBxReplayFrame* data);          // 12
-    virtual void readFromReplayFrame(cBxReplayFrame* data);         // 13
+    virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cObjNode_writeToReplayFrame__FPv");          // 12
+    virtual void readFromReplayFrame(cBxReplayFrame* data) __asm__("cObjNode_readFromReplayFrame__FPv");         // 13
 
     // Methods bound to their retail symbols by asm labels.
     void* cObjNode2() __asm__("cObjNode_cObjNode2");
@@ -143,6 +143,9 @@ struct cTypeObjNode : public cObjNode {
     int isRootTransformDirty() __asm__("cTypeObjNode_isRootTransformDirty");
     void resetRootTransformDirty() __asm__("cTypeObjNode_resetRootTransformDirty");
     virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cTypeObjNode_writeToReplayFrame");
+    virtual void update() __asm__("cTypeObjNode_update__FPv");
+    virtual void render() __asm__("cTypeObjNode_render__FPv");
+    virtual bool isType(int type) __asm__("cTypeObjNode_isType");
 };
 
 CHECK_OFFSET(cTypeObjNode, ObjNodeType, 0x10);
@@ -188,6 +191,11 @@ struct cSortObjNode : public cTypeObjNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cSortObjNode1(void* bucket, int type) __asm__("cSortObjNode_cSortObjNode1");
+    // getSortIndex stays a C function (cSortObjNode_getSortIndex): declared first, it is the vtable's key function,
+    // which keeps the vtable out of the units defining the other overrides
+    virtual unsigned int getSortIndex() const __asm__("cSortObjNode_getSortIndex__FPv");
+    virtual bool compare(const cObjNode* obj) __asm__("cSortObjNode_compare");
+    virtual bool equal(const cObjNode* obj) __asm__("cSortObjNode_equal");
 };
 
 CHECK_OFFSET(cSortObjNode, SortIndex, 0x14);

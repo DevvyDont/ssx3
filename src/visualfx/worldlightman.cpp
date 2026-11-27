@@ -3184,9 +3184,8 @@ INCLUDE_ASM("visualfx/worldlightman", cSnowFall_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cSnowFall's writeToReplayFrame has an empty body.
  */
-void cSnowFall_writeToReplayFrame(void* vself)
+void cSnowFall::writeToReplayFrame(cBxReplayFrame*)
 {
-    cSnowFall* self = (cSnowFall*)vself;
 }
 #endif
 

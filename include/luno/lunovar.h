@@ -43,6 +43,11 @@ struct luno_cLunoVar {
     luno_cLunoVarData Data;             // 0x0 [O] (anonymous union)
     int Type;                           // 0x8 [O] eLunoVarType; [U] cLunoVar_writeToReplayFrame / readFromReplayFrame,
                                         //     the table code (type 4 = table)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* castInt() __asm__("luno_cLunoVar_castInt__FPv");
+    void* castFloat() __asm__("luno_cLunoVar_castFloat__FPv");
+    void* castIndex() __asm__("luno_cLunoVar_castIndex__FPv");
 };
 
 CHECK_SIZE(luno_cLunoVarData, 0x8);

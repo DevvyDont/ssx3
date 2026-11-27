@@ -40,8 +40,10 @@ public:
     // 0x00C: the vptr. Slots [R] cBEInterface_vtbl, names and order [O]:
     virtual void submit();                                       // slot 1 cBEInterface_submit (empty)
     virtual void discard() __asm__("cBEInterface_discard__FPv"); // slot 2 cBEInterface_discard (empty)
-    virtual void writeToReplayFrame(cBxReplayFrame* data);       // slot 3 cBEInterface_writeToReplayFrame (empty)
-    virtual void readFromReplayFrame(cBxReplayFrame* data);      // slot 4 cBEInterface_readFromReplayFrame (empty)
+    virtual void writeToReplayFrame(cBxReplayFrame* data)
+        __asm__("cBEInterface_writeToReplayFrame__FPv");       // slot 3 cBEInterface_writeToReplayFrame (empty)
+    virtual void readFromReplayFrame(cBxReplayFrame* data)
+        __asm__("cBEInterface_readFromReplayFrame__FPv");      // slot 4 cBEInterface_readFromReplayFrame (empty)
 };
 
 CHECK_OFFSET(cBEInterface, bCanSubmit, 0x000);

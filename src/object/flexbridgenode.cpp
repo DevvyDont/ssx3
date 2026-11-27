@@ -446,21 +446,21 @@ static inline float Torque_6E38(float k, const t4Vector& a, const t4Vector& b)
  * @param intInfo  the hit (On Tour tIntersectInfo): position and triangle index
  * @param force    the force to apply
  */
-extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo* intInfo, t4Vector* force)
+void cFlexBridgeNode::applyForce(const tIntersectInfo& intInfo, const t4Vector& force)
 {
-    cFlexBridgeNode* data = self;
-    if (intInfo->Face < 0) {
+    cFlexBridgeNode* data = this;
+    if (intInfo.Face < 0) {
         return;
     }
-    const t4Matrix* transform = self->getRootTransform();
-    t4Vector relPos = vu0Sub_6E38(intInfo->Ipos, Pos_6E38(transform));
+    const t4Matrix* transform = getRootTransform();
+    t4Vector relPos = vu0Sub_6E38(intInfo.Ipos, Pos_6E38(transform));
     t4Vector y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(&data->BottomRightOffset)));
-    t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->Face]);
+    t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo.Face]);
     float yoffset = vu0Dot_6E38(relPos, y);
-    int seg = intInfo->Face / 2;
+    int seg = intInfo.Face / 2;
     tSpringNode* pNode = data->Mesh.Nodes;
-    vu0AddEq_6E38(pNode[seg].F, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, *force)));
-    pNode[seg].T += Torque_6E38(data->Mesh.TorqueScale, n, *force) * yoffset;
+    vu0AddEq_6E38(pNode[seg].F, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, force)));
+    pNode[seg].T += Torque_6E38(data->Mesh.TorqueScale, n, force) * yoffset;
 }
 #endif
 
@@ -585,19 +585,19 @@ struct sFlBridge_70D0 {
  *
  * @param intInfo  the hit (On Tour tIntersectInfo); nothing happens without a triangle index
  */
-extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tIntersectInfo* intInfo)
+void cFlexBridgeNode::updateIntersectInfo(tIntersectInfo& intInfo)
 {
-    int idx = intInfo->Face;
+    int idx = intInfo.Face;
     if (idx >= 0) {
         int pairIndex = idx / 2;
-        tSpringNode* ents = self->Mesh.Nodes;
-        t4Vector* matrix = (t4Vector*)self->getRootTransform();
+        tSpringNode* ents = Mesh.Nodes;
+        t4Vector* matrix = (t4Vector*)getRootTransform();
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
         t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&t4vect_XAxis_70D0, entry->W));
-        t4Vector arm = vu0Sub_70D0(((&intInfo->Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
+        t4Vector arm = vu0Sub_70D0(((&intInfo.Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
         t4Vector pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(&entry->V))), vu0Cross_70D0(arm, axisVec));
-        vu0AddEq_70D0(((&intInfo->Ipos))[2], pointVelocity);
-        vu0AddEq_70D0(((&intInfo->Ipos))[3], axisVec);
+        vu0AddEq_70D0(((&intInfo.Ipos))[2], pointVelocity);
+        vu0AddEq_70D0(((&intInfo.Ipos))[3], axisVec);
     }
 }
 #endif
@@ -740,41 +740,41 @@ static inline void TransposeInverse_7268(t4Matrix* t)
  * @param flags   query flags; bit 1 must be set
  * @return the number of hits
  */
-extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectType* tester, tIntersectInfo* out, int cap, int flags)
+int cFlexBridgeNode::intersect(cWorldIntersectType& tester, tIntersectInfo* out, int cap, int flags)
 {
     if (!(flags & 2)) {
         return 0;
     }
     tPolyModelMesh mesh;
-    mesh.NumFaces = (self->Mesh.Width - 1) * 2;
-    mesh.NumVertices = self->Mesh.Width * 2;
-    (*(void**)&mesh.Face) = ((void*)self->Faces);
-    (*(t4VectorCtor**)&mesh.Vertex) = ((t4VectorCtor*)self->Verts);
-    (*(t4VectorCtor**)&mesh.Normal) = ((t4VectorCtor*)self->FaceNorms);
-    t4Matrix* matrix = (t4Matrix*)self->getRootTransform();
+    mesh.NumFaces = (Mesh.Width - 1) * 2;
+    mesh.NumVertices = Mesh.Width * 2;
+    (*(void**)&mesh.Face) = ((void*)Faces);
+    (*(t4VectorCtor**)&mesh.Vertex) = ((t4VectorCtor*)Verts);
+    (*(t4VectorCtor**)&mesh.Normal) = ((t4VectorCtor*)FaceNorms);
+    t4Matrix* matrix = (t4Matrix*)getRootTransform();
     t4Matrix inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    tester->Transform(*(const t4Matrix*)&inv, 1.0f / (self->Instance)->m_fScale);
-    int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
-    tester->UnTransform();
+    tester.Transform(*(const t4Matrix*)&inv, 1.0f / Instance->m_fScale);
+    int n = cWorldIntersectType_IsMeshInt(&tester, &mesh, 1, out, cap);
+    tester.UnTransform();
     for (int i = 0; i < n; i++) {
         tIntersectInfo* hit = &out[i];
         Reset_7268(hit);
-        float dataScale = self->Instance->m_fScale;
+        float dataScale = Instance->m_fScale;
         float one = 1.0f;
         (*(t4VectorCtor*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(t4VectorCtor*)&hit->Ipos),
                                                                     t4VectorCtor(dataScale, dataScale, dataScale,
                                                                                  one)));
         (*(t4VectorCtor*)&hit->Inorm) = MulVec_7268(matrix, (*(t4VectorCtor*)&hit->Inorm));
         hit->HitType = 1;
-        (*(void**)&hit->Inst) = self->Instance;
-        int k = self->Instance->m_Model->m_iNumMeshes - 1;
+        (*(void**)&hit->Inst) = Instance;
+        int k = Instance->m_Model->m_iNumMeshes - 1;
         (*(int*)&hit->SphTree) = 0;
         hit->Mesh = k;
         (*(t4VectorCtor*)&hit->Ivel) = t4vect_Zero_v7268;
         (*(t4VectorCtor*)&hit->Iangvel) = t4vect_Zero_v7268;
-        hit->Stype = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
+        hit->Stype = *(short*)(((char*)(Instance)->m_pCollideRecord) + k * 12 + 0x1A);
     }
     return n;
 }

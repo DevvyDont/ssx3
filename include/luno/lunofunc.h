@@ -44,6 +44,7 @@ struct luno_cLunoFunc {
     // Methods bound to their retail symbols by asm labels.
     void writeToReplayFrame(cBxReplayFrame* stream, int base) __asm__("luno_cLunoFunc_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream, const char* base) __asm__("luno_cLunoFunc_readFromReplayFrame");
+    void init(int firstWord, int secondWord) __asm__("luno_cLunoFunc_init__FPvii");
 };
 
 CHECK_OFFSET(luno_cLunoFunc, Chunk, 0x0);

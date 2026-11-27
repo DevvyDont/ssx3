@@ -229,6 +229,10 @@ struct cFEMemCard : public cOVState {
     virtual bool onLoseTransition() __asm__("cFEMemCard_onLoseTransition");
     virtual void onDestroyScreen() __asm__("cFEMemCard_onDestroyScreen");
     void writeDone() __asm__("cFEMemCard_writeDone__FPv");
+    virtual void onPopupEvent(cUIState* popup, unsigned int button) __asm__("cFEMemCard_onPopupEvent");
+    virtual void onGainFocus(cUIState*) __asm__("cFEMemCard_onGainFocus");
+    virtual void onLoseFocus(cUIState*) __asm__("cFEMemCard_onLoseFocus__FPv");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cFEMemCard_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEMemCard, mLastLoadFileName, 0x9C);

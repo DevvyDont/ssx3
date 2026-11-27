@@ -1701,7 +1701,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
  * @param event  the menu event
  * @return 0x101 for kONNEXT, else 0
  */
-extern "C" int cOVTemplate_Simple_onWidgetMenu(cOVTemplate_Simple* self, int menu, int event)
+int cOVTemplate_Simple::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -1722,7 +1722,7 @@ extern int cOVStateManager_mStatus;
  * @param widget  the widget; nothing happens when it is null
  * @param key  the widget event
  */
-extern "C" void cOVTemplate_Simple_onWidgetEvent(cOVTemplate_Simple* self, int widget, int key)
+void cOVTemplate_Simple::onWidgetEvent(cUIThing* widget, unsigned int key)
 {
     if (widget != 0 && key == cUIState::kONNEXT) {
         cOVStateManager_mStatus = kOVSTATUS_GOTONEXT;
@@ -1854,7 +1854,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, else 0x101
  */
-extern "C" int cOVTemplate_Dialog_onWidgetMenu(cOVTemplate_Dialog* self, int menu, unsigned int key)
+int cOVTemplate_Dialog::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -1941,7 +1941,7 @@ static inline void Pop_20D5A8()
  * @param w  the button (its index at +0x18: 0 yes, 1 no), or 0
  * @param ev  widget event number: 5 select, 6 back
  */
-extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUIThing* w, int ev)
+void cOVTemplate_Dialog::onWidgetEvent(cUIThing* w, unsigned int ev)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (((char*)w) == 0) {
@@ -1949,11 +1949,11 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
     }
     switch (ev) {
     case 5:
-        Play_20D5A8(((char*)self));
+        Play_20D5A8(((char*)this));
         switch (w->mMiscData) {
         case 0:
-            self->mRemovePDA = 1;
-            switch (self->mDialogType) {
+            mRemovePDA = 1;
+            switch (mDialogType) {
             case 0: {
                 int kind = cBENewRaceInterface_newRace.cGameEvent;
                 if (kind >= 6 && kind <= 11) {
@@ -1993,7 +1993,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             }
             case 1: {
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
-                self->mRemovePDA = 0;
+                mRemovePDA = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (cGameComm_mGameComm) {
                     cGameComm_localDisconnected((char*)cGameComm_mGameComm, 0);
@@ -2009,7 +2009,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 if (any) {
                     cUIEngine* ui = SSXApp->Game->UI;
                     cUIState* st = (cUIState*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(
-                        cMemMan_alloc(564, str_Save_Profile, 0x100, 0), self->mpEngine, 1);
+                        cMemMan_alloc(564, str_Save_Profile, 0x100, 0), mpEngine, 1);
                     st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
                     cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
                 } else {
@@ -2052,11 +2052,11 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 cRider_quitEvent(Rider_D5A8());
                 break;
             case 6: {
-                (self)->mRemovePDA = 0;
+                mRemovePDA = 0;
                 cUIEngine* ui = SSXApp->Game->UI;
                 cUIState* st =
                     (cUIState*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0),
-                                                                 self->mpEngine, (unsigned char)self->mCurrentCtrl,
+                                                                 mpEngine, (unsigned char)mCurrentCtrl,
                                                                  0x18);
                 st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
                 cUIStateStack_pushSpecial(&ui->mStateStack, st, 0, 0);
@@ -2065,19 +2065,19 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             }
             break;
         case 1:
-            if (self->mDialogType != 6) {
-                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+            if (mDialogType != 6) {
+                cUIStateStack_pop(&mpEngine->mStateStack, 1);
             } else {
-                (self)->mRemovePDA = 1;
+                mRemovePDA = 1;
                 cGame_exit(SSXApp->Game, 0);
             }
             break;
         }
         break;
     case 6:
-        if (self->mDialogType != ev) {
-            Play_20D5A8(((char*)self));
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        if (mDialogType != ev) {
+            Play_20D5A8(((char*)this));
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
         }
         break;
     }

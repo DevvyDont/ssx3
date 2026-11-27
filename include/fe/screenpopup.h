@@ -197,6 +197,11 @@ struct cScreenPopup : public cUIState {
     virtual bool onGainTransition(int first) __asm__("cScreenPopup_onGainTransition");
     virtual void onUpdate() __asm__("cScreenPopup_onUpdate");
     virtual bool onLoseTransition() __asm__("cScreenPopup_onLoseTransition__FPv");
+    virtual void onGainFocus(cUIState*) __asm__("cScreenPopup_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int msg, unsigned int) __asm__("cScreenPopup_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* id, unsigned int ev) __asm__("cScreenPopup_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* child, unsigned int msg) __asm__("cScreenPopup_onPopupEvent");
+    void setupBackgroundType() __asm__("cScreenPopup_setupBackgroundType");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

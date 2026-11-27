@@ -2243,7 +2243,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void* cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
+bool cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
 
 /**
  * Reads one of the eight front-end input states: maps @p k 0-7 to input ids 0x72-0x79 for cInput_getState(mpInput).
@@ -2270,8 +2270,9 @@ extern "C" void cFEInput_getState(cFEInput* self, signed char k)
 }
 #endif
 
-// PORT: the real function is C++ void* cInput_getState(void* self, int) (bx/execman); these thunks pass an int handle.
-void* cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
+// PORT: the real function is C++ cInput_getState(void* self, int) (bx/execman; On Tour's cInput::getState returns
+// bool); these thunks pass an int handle.
+bool cInput_getState(cInput*, int) __asm__("cInput_getState__FPvi");
 
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
@@ -2279,12 +2280,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
 /**
  * Tells whether the front-end input's start state is active: cInput_getState(mpInput, 0x70).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isStart(void* vself)
+bool cFEInput::isStart() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 0x70);
+    return cInput_getState(mpInput, 0x70);
 }
 #endif
 
@@ -2294,12 +2294,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
 /**
  * Tells whether the front-end input's select state is active: cInput_getState(mpInput, 0x71).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isSelect(void* vself)
+bool cFEInput::isSelect() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 113);
+    return cInput_getState(mpInput, 113);
 }
 #endif
 
@@ -2309,12 +2308,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
 /**
  * Tells whether the front-end input's next state is active: cInput_getState(mpInput, 0x7A).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isNext(void* vself)
+bool cFEInput::isNext() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 122);
+    return cInput_getState(mpInput, 122);
 }
 #endif
 
@@ -2324,12 +2322,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
 /**
  * Tells whether the front-end input's previous state is active: cInput_getState(mpInput, 0x7B).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isPrevious(void* vself)
+bool cFEInput::isPrevious() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 123);
+    return cInput_getState(mpInput, 123);
 }
 #endif
 
@@ -2339,12 +2336,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOption__FPv);
 /**
  * Tells whether the front-end input's option state is active: cInput_getState(mpInput, 0x7C).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isOption(void* vself)
+bool cFEInput::isOption() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 0x7c);
+    return cInput_getState(mpInput, 0x7c);
 }
 #endif
 
@@ -2354,12 +2350,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
 /**
  * Tells whether the front-end input's misc state is active: cInput_getState(mpInput, 0x7D).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isMisc(void* vself)
+bool cFEInput::isMisc() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 125);
+    return cInput_getState(mpInput, 125);
 }
 #endif
 
@@ -2369,12 +2364,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
 /**
  * Tells whether the "next" button is held on the front-end input: cInput_getState(mpInput, 0x97).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isNextHeld(void* vself)
+bool cFEInput::isNextHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 151);
+    return cInput_getState(mpInput, 151);
 }
 #endif
 
@@ -2384,12 +2378,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
 /**
  * Tells whether the "previous" button is held on the front-end input: cInput_getState(mpInput, 0x98).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isPreviousHeld(void* vself)
+bool cFEInput::isPreviousHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 152);
+    return cInput_getState(mpInput, 152);
 }
 #endif
 
@@ -2399,12 +2392,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
 /**
  * Tells whether the "option" button is held on the front-end input: cInput_getState(mpInput, 0x99).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isOptionHeld(void* vself)
+bool cFEInput::isOptionHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 153);
+    return cInput_getState(mpInput, 153);
 }
 #endif
 
@@ -2414,12 +2406,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
 /**
  * Tells whether the "misc" button is held on the front-end input: cInput_getState(mpInput, 0x9A).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isMiscHeld(void* vself)
+bool cFEInput::isMiscHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 154);
+    return cInput_getState(mpInput, 154);
 }
 #endif
 
@@ -2429,12 +2420,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
 /**
  * Tells whether the "next" button was just released on the front-end input: cInput_getState(mpInput, 0x9B).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isNextReleased(void* vself)
+bool cFEInput::isNextReleased() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 155);
+    return cInput_getState(mpInput, 155);
 }
 #endif
 
@@ -2444,12 +2434,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
 /**
  * Tells whether the "previous" button was just released on the front-end input: cInput_getState(mpInput, 0x9C).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isPreviousReleased(void* vself)
+bool cFEInput::isPreviousReleased() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 156);
+    return cInput_getState(mpInput, 156);
 }
 #endif
 
@@ -2459,12 +2448,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
 /**
  * Tells whether the "option" button was just released on the front-end input: cInput_getState(mpInput, 0x9D).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isOptionReleased(void* vself)
+bool cFEInput::isOptionReleased() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 157);
+    return cInput_getState(mpInput, 157);
 }
 #endif
 
@@ -2474,12 +2462,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
 /**
  * Tells whether the "misc" button was just released on the front-end input: cInput_getState(mpInput, 0x9E).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isMiscReleased(void* vself)
+bool cFEInput::isMiscReleased() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 158);
+    return cInput_getState(mpInput, 158);
 }
 #endif
 
@@ -2489,12 +2476,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
 /**
  * Tells whether the front-end input's up state is active: cInput_getState(mpInput, 0x72).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isUp(void* vself)
+bool cFEInput::isUp() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 114);
+    return cInput_getState(mpInput, 114);
 }
 #endif
 
@@ -2504,12 +2490,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
 /**
  * Tells whether the front-end input's down state is active: cInput_getState(mpInput, 0x73).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isDown(void* vself)
+bool cFEInput::isDown() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 115);
+    return cInput_getState(mpInput, 115);
 }
 #endif
 
@@ -2519,12 +2504,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
 /**
  * Tells whether the front-end input's left state is active: cInput_getState(mpInput, 0x74).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLeft(void* vself)
+bool cFEInput::isLeft() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 116);
+    return cInput_getState(mpInput, 116);
 }
 #endif
 
@@ -2534,12 +2518,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
 /**
  * Tells whether right was pressed on the front-end input: cInput_getState(mpInput, 0x75), getState's index 3.
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRight(void* vself)
+bool cFEInput::isRight() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 117);
+    return cInput_getState(mpInput, 117);
 }
 #endif
 
@@ -2549,12 +2532,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
 /**
  * Tells whether up is held on the front-end input: cInput_getState(mpInput, 0x93).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isUpHeld(void* vself)
+bool cFEInput::isUpHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 147);
+    return cInput_getState(mpInput, 147);
 }
 #endif
 
@@ -2564,12 +2546,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
 /**
  * Tells whether down is held on the front-end input: cInput_getState(mpInput, 0x94).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isDownHeld(void* vself)
+bool cFEInput::isDownHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 148);
+    return cInput_getState(mpInput, 148);
 }
 #endif
 
@@ -2579,12 +2560,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
 /**
  * Tells whether left is held on the front-end input: cInput_getState(mpInput, 0x95).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLeftHeld(void* vself)
+bool cFEInput::isLeftHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 149);
+    return cInput_getState(mpInput, 149);
 }
 #endif
 
@@ -2594,12 +2574,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
 /**
  * Tells whether right is held on the front-end input: cInput_getState(mpInput, 0x96).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRightHeld(void* vself)
+bool cFEInput::isRightHeld() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 150);
+    return cInput_getState(mpInput, 150);
 }
 #endif
 
@@ -2609,12 +2588,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1__FPv);
 /**
  * Tells whether the front-end input's R1 state is active: cInput_getState(mpInput, 0x7E).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRShift1(void* vself)
+bool cFEInput::isRShift1() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 0x7e);
+    return cInput_getState(mpInput, 0x7e);
 }
 #endif
 
@@ -2624,12 +2602,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2__FPv);
 /**
  * Tells whether the front-end input's R2 state is active: cInput_getState(mpInput, 0x7F).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRShift2(void* vself)
+bool cFEInput::isRShift2() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 0x7f);
+    return cInput_getState(mpInput, 0x7f);
 }
 #endif
 
@@ -2639,12 +2616,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1__FPv);
 /**
  * Tells whether the front-end input's L1 state is active: cInput_getState(mpInput, 0x80).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLShift1(void* vself)
+bool cFEInput::isLShift1() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 0x80);
+    return cInput_getState(mpInput, 0x80);
 }
 #endif
 
@@ -2654,12 +2630,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
 /**
  * Tells whether the front-end input's L2 state is active: cInput_getState(mpInput, 0x81).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLShift2(void* vself)
+bool cFEInput::isLShift2() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 129);
+    return cInput_getState(mpInput, 129);
 }
 #endif
 
@@ -2669,12 +2644,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
 /**
  * Tells whether R1 is held on the front-end input: cInput_getState(mpInput, 0x82).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRShift1Held(void* vself)
+bool cFEInput::isRShift1Held() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 130);
+    return cInput_getState(mpInput, 130);
 }
 #endif
 
@@ -2684,12 +2658,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
 /**
  * Tells whether R2 is held on the front-end input: cInput_getState(mpInput, 0x83).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isRShift2Held(void* vself)
+bool cFEInput::isRShift2Held() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 131);
+    return cInput_getState(mpInput, 131);
 }
 #endif
 
@@ -2699,12 +2672,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
 /**
  * Tells whether L1 is held on the front-end input: cInput_getState(mpInput, 0x84).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLShift1Held(void* vself)
+bool cFEInput::isLShift1Held() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 132);
+    return cInput_getState(mpInput, 132);
 }
 #endif
 
@@ -2714,12 +2686,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
 /**
  * Tells whether L2 is held on the front-end input: cInput_getState(mpInput, 0x85).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isLShift2Held(void* vself)
+bool cFEInput::isLShift2Held() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 133);
+    return cInput_getState(mpInput, 133);
 }
 #endif
 
@@ -2729,12 +2700,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
 /**
  * Tells whether the camera-zoom control is active on the front-end input: cInput_getState(mpInput, 0x90).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isCamZoom(void* vself)
+bool cFEInput::isCamZoom() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 144);
+    return cInput_getState(mpInput, 144);
 }
 #endif
 
@@ -2744,12 +2714,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
 /**
  * Tells whether the camera-pan control is active on the front-end input: cInput_getState(mpInput, 0x92).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isCamPan(void* vself)
+bool cFEInput::isCamPan() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 146);
+    return cInput_getState(mpInput, 146);
 }
 #endif
 
@@ -2759,16 +2728,15 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
 /**
  * Tells whether the camera-rotate control is active on the front-end input: cInput_getState(mpInput, 0x91).
  *
- * @return nonzero when the state is active (On Tour returns bool)
+ * @return whether the state is active
  */
-void* cFEInput_isCamRotate(void* vself)
+bool cFEInput::isCamRotate() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getState(self->mpInput, 145);
+    return cInput_getState(mpInput, 145);
 }
 #endif
 
-extern "C" void* cInput_getValue(cInput*, int);
+extern "C" float cInput_getValue(cInput*, int);  // On Tour: float cInput::getValue(eInputStates)
 
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
@@ -2776,12 +2744,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
 /**
  * Returns the camera-zoom control's analogue value: cInput_getValue(mpInput, 0x90).
  *
- * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ * @return cInput_getValue's result, the control's analogue value
  */
-void* cFEInput_getCamZoom(void* vself)
+float cFEInput::getCamZoom() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue(self->mpInput, 144);
+    return cInput_getValue(mpInput, 144);
 }
 #endif
 
@@ -2791,12 +2758,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
 /**
  * Returns the camera-pan control's analogue value: cInput_getValue(mpInput, 0x92).
  *
- * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ * @return cInput_getValue's result, the control's analogue value
  */
-void* cFEInput_getCamPan(void* vself)
+float cFEInput::getCamPan() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue(self->mpInput, 146);
+    return cInput_getValue(mpInput, 146);
 }
 #endif
 
@@ -2806,12 +2772,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
 /**
  * Returns the camera-rotate control's analogue value: cInput_getValue(mpInput, 0x91).
  *
- * @return cInput_getValue's result (On Tour returns float; declared void* here)
+ * @return cInput_getValue's result, the control's analogue value
  */
-void* cFEInput_getCamRotate(void* vself)
+float cFEInput::getCamRotate() const
 {
-    cFEInput* self = (cFEInput*)vself;
-    return cInput_getValue(self->mpInput, 145);
+    return cInput_getValue(mpInput, 145);
 }
 #endif
 

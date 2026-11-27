@@ -62,6 +62,7 @@ struct cPathSys {
     int loadCheckpoints(char* cursor) __asm__("cPathSys_loadCheckpoints");
     int loadStartpoints(char* cursor) __asm__("cPathSys_loadStartpoints");
     void removeInjectedPathFile() __asm__("cPathSys_removeInjectedPathFile__FPv");
+    int getNearResetPaths(void* position, void** out, int maxOut) __asm__("cPathSys_getNearResetPaths__FPv");
 };
 
 CHECK_OFFSET(cPathSys, NumStartpoints, 0x000);

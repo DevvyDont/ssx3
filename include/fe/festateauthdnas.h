@@ -96,6 +96,10 @@ struct cFEStateAuthDNAS : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateAuthDNAS_onCreateScreen");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateAuthDNAS_onInputBegin");
     virtual void onUpdate() __asm__("cFEStateAuthDNAS_onUpdate");
+    virtual bool onLoseTransition() __asm__("cFEStateAuthDNAS_onLoseTransition__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateAuthDNAS_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cFEStateAuthDNAS_onWidgetMenu");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateAuthDNAS_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateAuthDNAS, mpAuth, 0x6D0);
@@ -145,6 +149,9 @@ struct cFEStateAuthDNASError : public cFEStateNet {
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateAuthDNASError_onWidgetCreate");
     virtual bool onGainTransition(int on) __asm__("cFEStateAuthDNASError_onGainTransition");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateAuthDNASError_onWidgetEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateAuthDNASError_onLoseTransition__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cFEStateAuthDNASError_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateAuthDNASError, mpustrBody, 0x6D0);

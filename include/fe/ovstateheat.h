@@ -44,6 +44,7 @@ struct cOVState_HEAT_PREEVENT : public cOVState {
     // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVState_HEAT_PREEVENT();
     virtual void onUpdate() __asm__("cOVState_HEAT_PREEVENT_onUpdate");
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_HEAT_PREEVENT_onGainFocus");
 };
 
 CHECK_SIZE(cOVState_HEAT_PREEVENT, 0x9C);

@@ -15,6 +15,8 @@
 
 struct tInstanceRecord;
 
+struct cBxReplayFrame;
+
 struct cAvaSplineModifier : public cTransformModifier {
     // cTransformModifier (object/transformmodifier.h, 0x4): the vptr at 0x00:
     //   [R] ctors store cAvaSplineModifier_vtbl; dtor cAvaSplineModifier__cAvaSplineModifier
@@ -38,6 +40,12 @@ struct cAvaSplineModifier : public cTransformModifier {
     virtual ~cAvaSplineModifier();
     virtual void update() __asm__("cAvaSplineModifier_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAvaSplineModifier_writeToReplayFrame");
+    virtual const tBoundBox* getBoundBox() const __asm__("cAvaSplineModifier_getBoundBox__FPv");
+    virtual float getRadius() const __asm__("cAvaSplineModifier_getRadius__FPv");
+    virtual void setRadius(float val) __asm__("cAvaSplineModifier_setRadius__FPvf");
+    virtual int getTransformType() const __asm__("cAvaSplineModifier_getTransformType__FPv");
+    virtual const t4Matrix* getRootTransform() __asm__("cAvaSplineModifier_getRootTransform__FPv");
+    virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cAvaSplineModifier_setBoundBox");
 };
 
 CHECK_OFFSET(cAvaSplineModifier, unk_04, 0x04);

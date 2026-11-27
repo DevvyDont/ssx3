@@ -3653,9 +3653,8 @@ INCLUDE_ASM("ai/computer", cRider_isPipeJump__FPv);
  *
  * @return always 0
  */
-int cRider_isPipeJump(void* vself)
+int cRider::isPipeJump()
 {
-    cRider* self = (cRider*)vself;
     return 0;
 }
 #endif
@@ -3710,35 +3709,35 @@ static inline float atan2_001125C0(float y, float x)
  * 500 off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot
  * 2 says so. Finally +0x4CC = atan2 of the aim point minus the closest point (x/y).
  */
-extern "C" void cRider_updateAIPath(cRider* self)
+void cRider::updateAIPath()
 {
-    self->PrevPathParam = self->PathParam;
-    int nf = !cRider_isPipeJump_b((char*)self);
+    PrevPathParam = PathParam;
+    int nf = !cRider_isPipeJump_b((char*)this);
     if (nf)
-        self->PathParam = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, nf);
+        PathParam = cPath_intersectPath1(AIPath, &mPosition, &PathPos, &PathDistXY, mAIPathHint, nf);
     else
-        self->PathParam = cPath_intersectPath(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, 0);
-    float k = self->calculateAheadDist(nf);
-    *(&self->IntersectPos) = cPath_getPathPos_1125C0(self->AIPath, 0, self->PathParam + k);
-    cRider_setAimTarget_2(((char*)self), nf);
-    if (0.0f < self->MinDistanceLeft)
+        PathParam = cPath_intersectPath(AIPath, &mPosition, &PathPos, &PathDistXY, 0);
+    float k = calculateAheadDist(nf);
+    *(&IntersectPos) = cPath_getPathPos_1125C0(AIPath, 0, PathParam + k);
+    cRider_setAimTarget_2(((char*)this), nf);
+    if (0.0f < MinDistanceLeft)
     {
-        if (500.0f < self->PathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
-            self->checkAIPathSwitch(0);
-        else if (cPath_getLength(self->AIPath) - 200.0f < self->PathParam)
-            self->checkAIPathSwitch(1);
+        if (500.0f < PathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
+            checkAIPathSwitch(0);
+        else if (cPath_getLength(AIPath) - 200.0f < PathParam)
+            checkAIPathSwitch(1);
         else
         {
-            cAIPath* aiPath = self->AIPath;
+            cAIPath* aiPath = AIPath;
             sVEntry<int(void*, float, float)>* vtable = (sVEntry<int(void*, float, float)>*)aiPath->mVtbl;
             sVEntry<int(void*, float, float)>* ve = &vtable[2];
-            if (ve->fn(vthis(aiPath, *ve), self->PrevPathParam, self->PathParam))
-                self->checkAIPathSwitch(0);
+            if (ve->fn(vthis(aiPath, *ve), PrevPathParam, PathParam))
+                checkAIPathSwitch(0);
         }
     }
-    float dx = self->IntersectPos.x - self->PathPos.x;
-    float dy = self->IntersectPos.y - self->PathPos.y;
-    self->PathHeading = atan2_001125C0(dy, dx);
+    float dx = IntersectPos.x - PathPos.x;
+    float dy = IntersectPos.y - PathPos.y;
+    PathHeading = atan2_001125C0(dy, dx);
 }
 #endif
 

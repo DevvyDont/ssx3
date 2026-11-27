@@ -61,6 +61,7 @@ struct cFEStateCharSetup : public cFEState {
     virtual void onDestroyScreen() __asm__("cFEStateCharSetup_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateCharSetup_onUpdate");
     virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateCharSetup_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int) __asm__("cFEStateCharSetup_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateCharSetup, mbIsFirst, 0x048);

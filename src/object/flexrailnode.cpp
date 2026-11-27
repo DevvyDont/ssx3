@@ -1807,20 +1807,20 @@ extern "C" void cFlagSet_PurgeMesh(void* self);
  * @param rider  instance record of the flag to remove
  * @return true if the instance was removed
  */
-extern "C" bool cFlagSet_RemoveFlag(cFlagSet* self, tInstanceRecord* rider)
+bool cFlagSet::RemoveFlag(tInstanceRecord* rider)
 {
-    if (self->mCurrentNumInstances == 0) {
+    if (mCurrentNumInstances == 0) {
         return false;
     }
-    if (*((int*)rider->m_Model) != self->mModelID) {
+    if (*((int*)rider->m_Model) != mModelID) {
         return false;
     }
-    for (int i = 0; i < self->mCurrentNumInstances; i++) {
-        if (((int)self->mInstances[i]->m_RID) == ((int)rider->m_RID)) {
-            self->mInstances[i] = self->mInstances[self->mCurrentNumInstances - 1];
-            self->mInstances[self->mCurrentNumInstances - 1] = 0;
-            if (--self->mCurrentNumInstances == 0) {
-                cFlagSet_PurgeMesh(self);
+    for (int i = 0; i < mCurrentNumInstances; i++) {
+        if (((int)mInstances[i]->m_RID) == ((int)rider->m_RID)) {
+            mInstances[i] = mInstances[mCurrentNumInstances - 1];
+            mInstances[mCurrentNumInstances - 1] = 0;
+            if (--mCurrentNumInstances == 0) {
+                cFlagSet_PurgeMesh(this);
             }
             return true;
         }

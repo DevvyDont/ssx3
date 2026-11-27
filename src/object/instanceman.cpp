@@ -307,16 +307,15 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
  *
  * @param time  the time to evaluate at (On Tour time)
  */
-void cAnimFrame_update_impl(char* vself, float time)
+void cAnimFrame::update(float time)
 {
-    cAnimFrame* self = (cAnimFrame*)vself;
-    tChannelRecord** curves = self->AnimRecord->m_pChannels;
-    int* cur = (int*)self;
+    tChannelRecord** curves = AnimRecord->m_pChannels;
+    int* cur = (int*)this;
     unsigned int mask = 1;
-    float* out = (float*)(&self->Vals[0]);
+    float* out = (float*)(&Vals[0]);
     for (int i = 0; i < 16; i++) {
         tChannelRecord* curve = *curves;
-        if ((unsigned int)self->AnimRecord->m_ChannelMask & mask) {
+        if ((unsigned int)AnimRecord->m_ChannelMask & mask) {
             tSegmentRecord* segment = &curve->m_Segments[*cur];
             if (!inRange_351538(segment, time)) {
                 segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);

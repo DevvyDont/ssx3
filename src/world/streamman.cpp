@@ -95,10 +95,10 @@ extern const char str_ssb[];
  * @param id  the world cache that receives the streamed chunks
  * @return always 1
  */
-extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
+int cStreamMan::init(const char* name, int id)
 {
-    *(int*)self = id;
-    sprintf((char*)&self->m_filename, str_pct_spct_s_e, name, str_ssb);
+    *(int*)this = id;
+    sprintf((char*)&m_filename, str_pct_spct_s_e, name, str_ssb);
     return 1;
 }
 #endif

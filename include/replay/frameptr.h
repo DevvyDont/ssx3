@@ -75,6 +75,7 @@ struct cReplayFramePtr : public cBxReplayFrame {
     int getBlockSaveSize() __asm__("cReplayFramePtr_getBlockSaveSize");
     int GetSize() __asm__("cReplayFramePtr_GetSize");
     void putFrameBlock() __asm__("cReplayFramePtr_putFrameBlock__FPv");
+    virtual void read(char* dst, int n) __asm__("cReplayFramePtr_read");
 };
 
 

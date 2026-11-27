@@ -3249,7 +3249,6 @@ struct sRiderSet_BDB8 {
 };
 
 // PORT: callers pass only (self, flags); the three player slots arrive in a2..a4.
-extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int* flags, int p0, int p1, int p2) __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 
 /**
  * Fills @p flags[0..20] with the character bit of the rider in each script role slot, 0 for an empty slot.
@@ -3266,7 +3265,8 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
  * @param supportChar1AIIndex  the second supporting character's AI index
  */
 // Fills the 21 per-slot team flags of the script engine from the current rider set.
-extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+void cSSXScriptEngine::BuildCharacterBitRoleArray(int* flags, int mainCharAIIndex, int supportChar0AIIndex,
+                                                  int supportChar1AIIndex)
 {
     sRiderSet_BDB8* set = (sRiderSet_BDB8*)SSXApp->Game->AI;
     int numA = set->numA;

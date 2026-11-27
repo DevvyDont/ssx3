@@ -253,7 +253,6 @@ static inline float Atan2_0348(float y, float x)
     return r;
 }
 
-extern "C" float cComputer_calcTurn_0348(char* self, t4Vector* target) __asm__("cComputer_calcTurn");
 /**
  * Returns the steering amount that turns the computer rider towards a point.
  *
@@ -267,15 +266,14 @@ extern "C" float cComputer_calcTurn_0348(char* self, t4Vector* target) __asm__("
  * @param target  the point to steer towards
  * @return the turn amount, -0.98 to 0.98
  */
-extern "C" float cComputer_calcTurn_0348(char* vself, t4Vector* target)
+float cComputer::calcTurn(t4Vector* target)
 {
-    cComputer* self = (cComputer*)vself;
-    t4Vector up = *(&self->RiderHandler.GroundMotion.mRider->mMatrix.row[2]);
+    t4Vector up = *(&RiderHandler.GroundMotion.mRider->mMatrix.row[2]);
     if (up.z <= 0.0f)
         up = t4vect_ZAxis_v0348;
-    t4Vector fwd = *self->RiderHandler.GroundMotion.mRider->getVelocity();
+    t4Vector fwd = *RiderHandler.GroundMotion.mRider->getVelocity();
     t4Vector side = Cross_0348(fwd, up);
-    t4Vector toTarget = Sub_0348(*target, *self->RiderHandler.GroundMotion.mRider->getPosition());
+    t4Vector toTarget = Sub_0348(*target, *RiderHandler.GroundMotion.mRider->getPosition());
     toTarget.z = 0.0f;
     toTarget = Norm_0348(toTarget);
     toTarget = Norm_0348(Sub_0348(toTarget, Scale_0348(up, Dot_0348(toTarget, up))));
@@ -692,17 +690,17 @@ static inline sRiderPair* Rec_0B90(cComputer* self)
  *
  * @param cmd  the cruise command being built (On Tour tCruiseCmd)
  */
-extern "C" void cComputer_attackTargetCruise(cComputer* self, tCruiseCmd* cmd)
+void cComputer::attackTargetCruise(tCruiseCmd* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
-    sRiderPair* rec = Rec_0B90(self);
+    sRiderPair* rec = Rec_0B90(this);
     cAI* list = SSXApp->Game->AI;
-    cComputerState* ctl = (cComputerState*)(&self->mDesiredSpeed);
+    cComputerState* ctl = (cComputerState*)(&mDesiredSpeed);
     cRider* tgt = list->Riders[ctl->mTargetID];
-    float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
+    float diff = rec->mAngle - RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    float mySpd = Len_0B90(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
+    float mySpd = Len_0B90(*(&RiderHandler.GroundMotion.mRider->mVelocity));
     float absAng = Abs_0B90(ang);
     // Angle thresholds: 90, 50 and 15 degrees in radians.
     float behindAng = 1.5707964897155762f;
@@ -712,39 +710,39 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, tCruiseCmd* cmd)
     float steer;
     if (absAng > behindAng) {
         t4Vector pathPos;
-        cComputer_calculateTargetPos_0B90(&pathPos, ((char*)self));
-        steer = cComputer_calcTurn_0B90(((char*)self), &pathPos);
-        if (Rec_0B90(self)->mDistance > 200.0f && hisSpd < mySpd)
+        cComputer_calculateTargetPos_0B90(&pathPos, ((char*)this));
+        steer = cComputer_calcTurn_0B90(((char*)this), &pathPos);
+        if (Rec_0B90(this)->mDistance > 200.0f && hisSpd < mySpd)
             cmd->CruiseBrake = 0x1F;
     } else {
         t4Vector tgtDir = Norm_0B90(*tgt->getVelocity());
         t4Vector aimPos = Add_0B90(*tgt->getPosition(), Scale_0B90(tgtDir, 300.0f));
         if (absAng < wideAng) {
             if (absAng < narrowAng)
-                cComputer_setupRecklessCrouch_0B90(((char*)self), cmd);
+                cComputer_setupRecklessCrouch_0B90(((char*)this), cmd);
             else
-                cComputer_setupCrouch_0B90(((char*)self), cmd);
+                cComputer_setupCrouch_0B90(((char*)this), cmd);
         } else if (mySpd < hisSpd) {
-            cComputer_setupCrouch_0B90(((char*)self), cmd);
+            cComputer_setupCrouch_0B90(((char*)this), cmd);
         } else if (hisSpd < mySpd) {
             cmd->CruiseBrake = 0x1F;
         }
-        steer = cComputer_calcTurn_0B90(((char*)self), &aimPos);
+        steer = cComputer_calcTurn_0B90(((char*)this), &aimPos);
     }
     cmd->CruiseTurn = (int)(steer * 31.0f);
     z = 1;
-    ctl = (cComputerState*)(&self->mDesiredSpeed);
-    if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->mDesiredSpeed, &below, &toPipe, &toRail, &isSpin,
+    ctl = (cComputerState*)(&mDesiredSpeed);
+    if (cComputer_checkForJumpEvent_0B90(((char*)this), &ctl->mDesiredSpeed, &below, &toPipe, &toRail, &isSpin,
             &isFlip)) {
-        self->mTargetID = -1;
-        self->cruiseLogic = cComputer_mCruiseLogic[0];
-        self->mCruiseLogicID = 0;
-    } else if (!cComputer_checkForTargets_0B90(((char*)self), &z)) {
-        self->cruiseLogic = cComputer_mCruiseLogic[1];
-        self->mCruiseLogicID = 1;
+        mTargetID = -1;
+        cruiseLogic = cComputer_mCruiseLogic[0];
+        mCruiseLogicID = 0;
+    } else if (!cComputer_checkForTargets_0B90(((char*)this), &z)) {
+        cruiseLogic = cComputer_mCruiseLogic[1];
+        mCruiseLogicID = 1;
     } else if (!z && !list->Riders[ctl->mTargetID]->isHuman()) {
-        self->cruiseLogic = cComputer_mCruiseLogic[2];
-        self->mCruiseLogicID = 2;
+        cruiseLogic = cComputer_mCruiseLogic[2];
+        mCruiseLogicID = 2;
     }
 }
 #endif
@@ -827,28 +825,28 @@ static inline sRiderPair* Rec_0F88(cComputer* self)
  *
  * @param cmd  the cruise command being built (On Tour tCruiseCmd)
  */
-extern "C" void cComputer_avoidTargetCruise(cComputer* self, tCruiseCmd* cmd)
+void cComputer::avoidTargetCruise(tCruiseCmd* cmd)
 {
     t4Vector targetPos;
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
-    cComputerState* ctl = (cComputerState*)(&self->mDesiredSpeed);
-    sRiderPair* rec = Rec_0F88(self);
+    cComputerState* ctl = (cComputerState*)(&mDesiredSpeed);
+    sRiderPair* rec = Rec_0F88(this);
     cRider* tgt = SSXApp->Game->AI->Riders[ctl->mTargetID];
-    float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
+    float diff = rec->mAngle - RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    float mySpd = Len_0F88(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
+    float mySpd = Len_0F88(*(&RiderHandler.GroundMotion.mRider->mVelocity));
     float hisSpd = Len_0F88(*tgt->getVelocity());
     float steer = 0.0f;
     if (Abs_0F88(ang) > 1.5707964897155762f) {
-        cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
-        steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
+        cComputer_calculateTargetPos_0F88(&targetPos, ((char*)this));
+        steer = cComputer_calcTurn_0F88(((char*)this), &targetPos);
         if (mySpd < hisSpd)
-            cComputer_setupRecklessCrouch_0F88(((char*)self), cmd);
+            cComputer_setupRecklessCrouch_0F88(((char*)this), cmd);
         else
-            cComputer_setupCrouch_0F88(((char*)self), cmd);
+            cComputer_setupCrouch_0F88(((char*)this), cmd);
     } else {
-        float targetDist = Rec_0F88(self)->mDistance;
+        float targetDist = Rec_0F88(this)->mDistance;
         float lim;
         if (targetDist == 0.0f) {
             lim = 1.5707963705062866f;
@@ -858,29 +856,30 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, tCruiseCmd* cmd)
                 lim += 3.1415927410125732f;
         }
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
-            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
-            steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
-            cComputer_setupCrouch_0F88(((char*)self), cmd);
+            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)this));
+            steer = cComputer_calcTurn_0F88(((char*)this), &targetPos);
+            cComputer_setupCrouch_0F88(((char*)this), cmd);
         } else if (tgt->isComputer()) {
-            if (tgt->AIPath == self->RiderHandler.GroundMotion.mRider->AIPath)
-                cRider_checkAIPathSwitch((char*)self->RiderHandler.GroundMotion.mRider, 0);
-            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
-            steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
-            cComputer_setupCrouch_0F88(((char*)self), cmd);
+            if (tgt->AIPath == RiderHandler.GroundMotion.mRider->AIPath)
+                cRider_checkAIPathSwitch((char*)RiderHandler.GroundMotion.mRider, 0);
+            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)this));
+            steer = cComputer_calcTurn_0F88(((char*)this), &targetPos);
+            cComputer_setupCrouch_0F88(((char*)this), cmd);
         }
     }
     cmd->CruiseTurn = (int)(steer * 31.0f);
     z = 0;
-    if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
-        self->mTargetID = -1;
-        self->cruiseLogic = cComputer_mCruiseLogic[0];
-        self->mCruiseLogicID = 0;
-    } else if (!cComputer_checkForTargets_0F88(((char*)self), &z)) {
-        self->cruiseLogic = cComputer_mCruiseLogic[1];
-        self->mCruiseLogicID = 1;
+    if (cComputer_checkForJumpEvent_0F88(((char*)this), (float*)(&mDesiredSpeed), &below, &toPipe, &toRail, &isSpin,
+            &isFlip)) {
+        mTargetID = -1;
+        cruiseLogic = cComputer_mCruiseLogic[0];
+        mCruiseLogicID = 0;
+    } else if (!cComputer_checkForTargets_0F88(((char*)this), &z)) {
+        cruiseLogic = cComputer_mCruiseLogic[1];
+        mCruiseLogicID = 1;
     } else if (z) {
-        self->cruiseLogic = cComputer_mCruiseLogic[3];
-        self->mCruiseLogicID = 3;
+        cruiseLogic = cComputer_mCruiseLogic[3];
+        mCruiseLogicID = 3;
     }
 }
 #endif
@@ -4327,8 +4326,6 @@ static inline void AddEq_6538(t4Vector& a, const t4Vector& b)
         : "memory");
 }
 extern "C" void cRiderSphereTree_ApplyOffset(void* p, const t4Vector* d);
-// PORT: the unit declares cRider_moveFromCollision(void*, const t4Vector&) for its callers; same symbol.
-extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* d) __asm__("cRider_moveFromCollision");
 
 /**
  * Moves the rider by an offset out of a collision.
@@ -4338,14 +4335,13 @@ extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* d) __a
  *
  * @param offset  the offset
  */
-extern "C" void cRider_moveFromCollision_6538(char* vself, const t4Vector* offset)
+void cRider::moveFromCollision(const t4Vector* offset)
 {
-    cRider* self = (cRider*)vself;
-    AddEq_6538(self->mPosition, *offset);
-    AddEq_6538(self->mModelOffset, *offset);
-    cRiderSphereTree_ApplyOffset(self->mSphereTree, offset);
-    AddEq_6538(self->mBoundsMin, *offset);
-    AddEq_6538(self->mBoundsMax, *offset);
+    AddEq_6538(mPosition, *offset);
+    AddEq_6538(mModelOffset, *offset);
+    cRiderSphereTree_ApplyOffset(mSphereTree, offset);
+    AddEq_6538(mBoundsMin, *offset);
+    AddEq_6538(mBoundsMax, *offset);
 }
 #endif
 
@@ -6147,8 +6143,6 @@ static inline t4VectorInit Fwd_86B8(const sAnimModelBone* n)
                     0.0f);
 }
 
-extern "C" bool cRider_isRailBoardIntersect_86B8(char* self, t4Vector* tgt, t4Vector* dir)
-    __asm__("cRider_isRailBoardIntersect");
 /**
  * Tells whether the rider's board reaches a rail.
  *
@@ -6163,16 +6157,15 @@ extern "C" bool cRider_isRailBoardIntersect_86B8(char* self, t4Vector* tgt, t4Ve
  * @param dir  the rail direction
  * @return true when the board reaches the rail, else false
  */
-extern "C" bool cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4Vector* dir)
+bool cRider::isRailBoardIntersect(t4Vector* tgt, t4Vector* dir)
 {
-    cRider* self = (cRider*)vself;
-    sAnimModelBone* n = &(self->mAnimModel->bones)[self->mBoneBoardRoot];
+    sAnimModelBone* n = &(mAnimModel->bones)[mBoneBoardRoot];
     const t4Vector& fwd = Fwd_86B8(n);
-    t4VectorInit pos = Add_86B8(n->pos, self->mModelOffset);
-    float blend = self->mSlewed[9].cur;
+    t4VectorInit pos = Add_86B8(n->pos, mModelOffset);
+    float blend = mSlewed[9].cur;
     float nearR = Lerp_86B8(50.0f, 30.0f, blend);
     float farR;
-    if (!self->PressMode)
+    if (!PressMode)
         farR = Lerp_86B8(170.0f, 100.0f, blend);
     else
         farR = Lerp_86B8(170.0f, 50.0f, blend);
@@ -6190,7 +6183,7 @@ extern "C" bool cRider_isRailBoardIntersect_86B8(char* vself, t4Vector* tgt, t4V
     float along = Dot_86B8(relScaled, Sub_86B8(Scale_86B8(*dir, dd), fwd));
     t4VectorInit probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
     tIntersectInfo hit;
-    if (!cOverlapList_splineIntersect_86B8(self->mOverlapList, &probePos, &hit.Ipos, 1, 300.0f))
+    if (!cOverlapList_splineIntersect_86B8(mOverlapList, &probePos, &hit.Ipos, 1, 300.0f))
         return false;
     diff = Sub_86B8(probePos, hit.Ipos);
     return Len_86B8(diff) <= nearR;
@@ -6459,42 +6452,41 @@ void cComputer_Init_self(char* self) __asm__("cComputer_Init");
  * the three 0x3C-byte history tables (GrabHistoryCounter, UberHistoryCounter, TweakHistoryCounter; MEM_fill) and runs
  * cComputer_resetCounters. Called at the end of cComputer_cComputer and by func_00108F88.
  */
-void cComputer_Init_self(char* vself)
+void cComputer::Init()
 {
-    cComputer* self = (cComputer*)vself;
-    self->mGrabID = -1;
-    self->mIsSpinTrick = 0;
-    self->mIsGonnaMessUp = 0;
-    self->mIsNaturalAir = 0;
-    self->mToRail = 0;
-    self->mIsUber = 0;
-    self->mIsTweak = 0;
-    self->mToPipe = 0;
-    self->mHoldToLandTime = 0.0f;
-    self->mSpinAxis = 0.0f;
-    self->mFlipAxis = 0.0f;
-    self->mGrabStartTime = 0.0f;
-    self->mGrabEndTime = 0.0f;
-    self->mDesiredSpeed = 0.0f;
-    self->mWanderTime = 0;
-    self->mBadHeadingTime = 0;
-    self->mCruiseLogicID = 0;
-    self->mBlockTimer = 0.0f;
-    self->mShouldIBlock = 0;
-    self->mStartJumpPos = t4vect_Origin;
-    self->mEndJumpPos = t4vect_Origin;
-    self->mBoardPressTimer = 0;
-    cComputer_initRiderDifficulty(self);
-    self->mTargetID = -1;
-    self->mAccuracy = 1.0f;
-    self->cruiseLogic = cComputer_mCruiseLogic[1];
-    self->mCruiseLogicID = 1;
+    mGrabID = -1;
+    mIsSpinTrick = 0;
+    mIsGonnaMessUp = 0;
+    mIsNaturalAir = 0;
+    mToRail = 0;
+    mIsUber = 0;
+    mIsTweak = 0;
+    mToPipe = 0;
+    mHoldToLandTime = 0.0f;
+    mSpinAxis = 0.0f;
+    mFlipAxis = 0.0f;
+    mGrabStartTime = 0.0f;
+    mGrabEndTime = 0.0f;
+    mDesiredSpeed = 0.0f;
+    mWanderTime = 0;
+    mBadHeadingTime = 0;
+    mCruiseLogicID = 0;
+    mBlockTimer = 0.0f;
+    mShouldIBlock = 0;
+    mStartJumpPos = t4vect_Origin;
+    mEndJumpPos = t4vect_Origin;
+    mBoardPressTimer = 0;
+    cComputer_initRiderDifficulty(this);
+    mTargetID = -1;
+    mAccuracy = 1.0f;
+    cruiseLogic = cComputer_mCruiseLogic[1];
+    mCruiseLogicID = 1;
     do {
-        MEM_fill_8E88(&self->GrabHistoryCounter[0], 0, 0x3C);
-        MEM_fill_8E88(&self->UberHistoryCounter[0], 0, 0x3C);
-        MEM_fill_8E88(&self->TweakHistoryCounter[0], 0, 0x3C);
+        MEM_fill_8E88(&GrabHistoryCounter[0], 0, 0x3C);
+        MEM_fill_8E88(&UberHistoryCounter[0], 0, 0x3C);
+        MEM_fill_8E88(&TweakHistoryCounter[0], 0, 0x3C);
     } while (0);
-    cComputer_resetCounters(self);
+    cComputer_resetCounters(this);
 }
 #endif
 

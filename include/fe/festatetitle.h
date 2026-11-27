@@ -28,6 +28,10 @@ struct cFEStateTitle : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStateTitle_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateTitle_onUpdate");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateTitle_onWidgetCreate");
+    virtual bool onGainTransition(int) __asm__("cFEStateTitle_onGainTransition");
+    virtual void onPopupEvent(cUIState*, unsigned int) __asm__("cFEStateTitle_onPopupEvent__FPv");
+    virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cFEStateTitle_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int) __asm__("cFEStateTitle_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateTitle, mNumTicksIdle, 0x048);

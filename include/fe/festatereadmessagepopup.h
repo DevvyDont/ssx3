@@ -96,6 +96,10 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
         __asm__("cFEStateReadMessagePopup_onWidgetMenu");
     virtual void onCreateScreen() __asm__("cFEStateReadMessagePopup_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateReadMessagePopup_onWidgetEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateReadMessagePopup_onLoseTransition__FPv");
+    virtual void onUpdate() __asm__("cFEStateReadMessagePopup_onUpdate__FPv");
+    virtual void onWidgetCreate(cUIThing*) __asm__("cFEStateReadMessagePopup_onWidgetCreate__FPv");
+    virtual bool onGainTransition(int) __asm__("cFEStateReadMessagePopup_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateReadMessagePopup, mszSender, 0x6D0);

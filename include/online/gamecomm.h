@@ -252,6 +252,9 @@ struct cGameComm {
     void sendChat(const char* message) __asm__("cGameComm_sendChat");
     void updateMessageDisplay() __asm__("cGameComm_updateMessageDisplay");
     void updateSyncPacket(int frame, int value) __asm__("cGameComm_updateSyncPacket");
+    int checkErrors() __asm__("cGameComm_checkErrors");
+    void checkActive() __asm__("cGameComm_checkActive");
+    int writePacket(int type, const void* data, int len) __asm__("cGameComm_writePacket");
 };
 
 CHECK_SIZE(tGameCommPacket, 0xF0);

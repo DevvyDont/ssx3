@@ -4161,17 +4161,19 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_blend);
  * in float and truncated), and stores the targets in m_lastType / m_lastValue. Calls the empty virtual at vtable
  * +0x218 before and after.
  *
- * @param rhs  the region's tWPData_MusicTrigger (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_MusicTrigger (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, tWPData_MusicTrigger* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_MusicTrigger::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_MusicTrigger* rhs = (tWPData_MusicTrigger*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_Type = (int)(blendFactor * (float)rhs->m_Type + (1.0f - blendFactor) * (float)self->m_Type);
-    self->m_lastType = rhs->m_Type;
-    self->m_Value = (int)(blendFactor * (float)rhs->m_Value + (1.0f - blendFactor) * (float)self->m_Value);
-    self->m_lastValue = rhs->m_Value;
-    self->debugBlend();
+    m_Type = (int)(blendFactor * (float)rhs->m_Type + (1.0f - blendFactor) * (float)m_Type);
+    m_lastType = rhs->m_Type;
+    m_Value = (int)(blendFactor * (float)rhs->m_Value + (1.0f - blendFactor) * (float)m_Value);
+    m_lastValue = rhs->m_Value;
+    debugBlend();
 }
 #endif
 
@@ -4185,15 +4187,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_blend);
  * The int is computed in float and truncated; the target is stored in m_lastMixPreset. Calls the empty virtual at
  * vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Mix (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Mix (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, tWPData_Mix* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Mix::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Mix* rhs = (tWPData_Mix*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_MixPreset = (int)(blendFactor * (float)rhs->m_MixPreset + (1.0f - blendFactor) * (float)self->m_MixPreset);
-    self->m_lastMixPreset = rhs->m_MixPreset;
-    self->debugBlend();
+    m_MixPreset = (int)(blendFactor * (float)rhs->m_MixPreset + (1.0f - blendFactor) * (float)m_MixPreset);
+    m_lastMixPreset = rhs->m_MixPreset;
+    debugBlend();
 }
 #endif
 
@@ -4206,15 +4210,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_blend);
  * The int is computed in float and truncated, so a bank id is interpolated like a number; the target is stored in
  * m_lastBankID. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Ambience (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Ambience (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, tWPData_Ambience* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Ambience::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Ambience* rhs = (tWPData_Ambience*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_BankID = (int)(blendFactor * (float)rhs->m_BankID + (1.0f - blendFactor) * (float)self->m_BankID);
-    self->m_lastBankID = rhs->m_BankID;
-    self->debugBlend();
+    m_BankID = (int)(blendFactor * (float)rhs->m_BankID + (1.0f - blendFactor) * (float)m_BankID);
+    m_lastBankID = rhs->m_BankID;
+    debugBlend();
 }
 #endif
 
@@ -4227,15 +4233,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_blend);
  * The int is computed in float and truncated; the target is stored in m_lastSpeechID. Calls the empty virtual at
  * vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Speech (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Speech (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, tWPData_Speech* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Speech::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Speech* rhs = (tWPData_Speech*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_SpeechID = (int)(blendFactor * (float)rhs->m_SpeechID + (1.0f - blendFactor) * (float)self->m_SpeechID);
-    self->m_lastSpeechID = rhs->m_SpeechID;
-    self->debugBlend();
+    m_SpeechID = (int)(blendFactor * (float)rhs->m_SpeechID + (1.0f - blendFactor) * (float)m_SpeechID);
+    m_lastSpeechID = rhs->m_SpeechID;
+    debugBlend();
 }
 #endif
 
@@ -4247,15 +4255,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_blend);
  *
  * The target is stored in m_lastDrawDistance. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Camera (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Camera (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, tWPData_Camera* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Camera::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Camera* rhs = (tWPData_Camera*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_DrawDistance = blendFactor * rhs->m_DrawDistance + (1.0f - blendFactor) * self->m_DrawDistance;
-    self->m_lastDrawDistance = rhs->m_DrawDistance;
-    self->debugBlend();
+    m_DrawDistance = blendFactor * rhs->m_DrawDistance + (1.0f - blendFactor) * m_DrawDistance;
+    m_lastDrawDistance = rhs->m_DrawDistance;
+    debugBlend();
 }
 #endif
 
@@ -4268,27 +4278,29 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_blend);
  * With b = @p blendFactor squared, each of density, near, far and colour R/G/B becomes b * target + (1 - b) * current and its
  * m_last copy takes the target. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param src  the region's tWPData_Fog values (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Fog values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* src, float blendFactor) {
+void tWPInGameData_Fog::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Fog* src = (tWPData_Fog*)data;
     float inv;
-    self->debugBlend();
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    self->m_FogDensity = blendFactor * src->m_FogDensity + inv * self->m_FogDensity;
-    self->m_lastFogDensity = src->m_FogDensity;
-    self->m_FogNear = blendFactor * src->m_FogNear + inv * self->m_FogNear;
-    self->m_lastFogNear = src->m_FogNear;
-    self->m_FogFar = blendFactor * src->m_FogFar + inv * self->m_FogFar;
-    self->m_lastFogFar = src->m_FogFar;
-    self->m_FogColourR = blendFactor * src->m_FogColourR + inv * self->m_FogColourR;
-    self->m_lastFogColourR = src->m_FogColourR;
-    self->m_FogColourG = blendFactor * src->m_FogColourG + inv * self->m_FogColourG;
-    self->m_lastFogColourG = src->m_FogColourG;
-    self->m_FogColourB = blendFactor * src->m_FogColourB + inv * self->m_FogColourB;
-    self->m_lastFogColourB = src->m_FogColourB;
-    self->debugBlend();
+    m_FogDensity = blendFactor * src->m_FogDensity + inv * m_FogDensity;
+    m_lastFogDensity = src->m_FogDensity;
+    m_FogNear = blendFactor * src->m_FogNear + inv * m_FogNear;
+    m_lastFogNear = src->m_FogNear;
+    m_FogFar = blendFactor * src->m_FogFar + inv * m_FogFar;
+    m_lastFogFar = src->m_FogFar;
+    m_FogColourR = blendFactor * src->m_FogColourR + inv * m_FogColourR;
+    m_lastFogColourR = src->m_FogColourR;
+    m_FogColourG = blendFactor * src->m_FogColourG + inv * m_FogColourG;
+    m_lastFogColourG = src->m_FogColourG;
+    m_FogColourB = blendFactor * src->m_FogColourB + inv * m_FogColourB;
+    m_lastFogColourB = src->m_FogColourB;
+    debugBlend();
 }
 #endif
 
@@ -4302,32 +4314,34 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_blend);
  * m_LightGlowBlend3 each become b * target + (1 - b) * current, and each m_last copy takes the target. Calls the
  * empty virtual at vtable +0x218 before and after.
  *
- * @param src  the region's light-glow values (On Tour const tWPData* rhs)
+ * @param data  the region's light-glow values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWPData_LightGlow* src, float blendFactor) {
+void tWPInGameData_LightGlow::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_LightGlow* src = (tWPData_LightGlow*)data;
     float inv;
-    self->debugBlend();
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    self->m_LightGlowCutoff = blendFactor * src->m_LightGlowCutoff + inv * self->m_LightGlowCutoff;
-    self->m_lastLightGlowCutoff = src->m_LightGlowCutoff;
-    self->m_LightGlowCutoffScale = blendFactor * src->m_LightGlowCutoffScale + inv * self->m_LightGlowCutoffScale;
-    self->m_lastLightGlowCutoffScale = src->m_LightGlowCutoffScale;
-    self->m_LightGlowCopyIntensity = blendFactor * src->m_LightGlowCopyIntensity + inv * self->m_LightGlowCopyIntensity;
-    self->m_lastLightGlowCopyIntensity = src->m_LightGlowCopyIntensity;
-    self->m_LightGlowSourceIntensity =
-        blendFactor * src->m_LightGlowSourceIntensity + inv * self->m_LightGlowSourceIntensity;
-    self->m_lastLightGlowSourceIntensity = src->m_LightGlowSourceIntensity;
-    self->m_LightGlowFrameIntensity =
-        blendFactor * src->m_LightGlowFrameIntensity + inv * self->m_LightGlowFrameIntensity;
-    self->m_lastLightGlowFrameIntensity = src->m_LightGlowFrameIntensity;
-    self->m_LightGlowBlend2 = blendFactor * src->m_LightGlowBlend2 + inv * self->m_LightGlowBlend2;
-    self->m_lastLightGlowBlend2 = src->m_LightGlowBlend2;
-    self->m_LightGlowBlend3 = blendFactor * src->m_LightGlowBlend3 + inv * self->m_LightGlowBlend3;
-    self->m_lastLightGlowBlend3 = src->m_LightGlowBlend3;
+    m_LightGlowCutoff = blendFactor * src->m_LightGlowCutoff + inv * m_LightGlowCutoff;
+    m_lastLightGlowCutoff = src->m_LightGlowCutoff;
+    m_LightGlowCutoffScale = blendFactor * src->m_LightGlowCutoffScale + inv * m_LightGlowCutoffScale;
+    m_lastLightGlowCutoffScale = src->m_LightGlowCutoffScale;
+    m_LightGlowCopyIntensity = blendFactor * src->m_LightGlowCopyIntensity + inv * m_LightGlowCopyIntensity;
+    m_lastLightGlowCopyIntensity = src->m_LightGlowCopyIntensity;
+    m_LightGlowSourceIntensity =
+        blendFactor * src->m_LightGlowSourceIntensity + inv * m_LightGlowSourceIntensity;
+    m_lastLightGlowSourceIntensity = src->m_LightGlowSourceIntensity;
+    m_LightGlowFrameIntensity =
+        blendFactor * src->m_LightGlowFrameIntensity + inv * m_LightGlowFrameIntensity;
+    m_lastLightGlowFrameIntensity = src->m_LightGlowFrameIntensity;
+    m_LightGlowBlend2 = blendFactor * src->m_LightGlowBlend2 + inv * m_LightGlowBlend2;
+    m_lastLightGlowBlend2 = src->m_LightGlowBlend2;
+    m_LightGlowBlend3 = blendFactor * src->m_LightGlowBlend3 + inv * m_LightGlowBlend3;
+    m_lastLightGlowBlend3 = src->m_LightGlowBlend3;
     {
-        self->debugBlend();
+        debugBlend();
     }
 }
 #endif
@@ -4341,27 +4355,29 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_blend);
  * With b = @p blendFactor squared, each becomes b * target + (1 - b) * current and its m_last copy takes the target. Calls the
  * empty virtual at vtable +0x218 before and after.
  *
- * @param src  the region's tWPData_ScreenTint values (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_ScreenTint values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, tWPData_ScreenTint* src, float blendFactor) {
+void tWPInGameData_ScreenTint::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_ScreenTint* src = (tWPData_ScreenTint*)data;
     float inv;
-    self->debugBlend();
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    self->m_ScreenTintScaleR = blendFactor * src->m_ScreenTintScaleR + inv * self->m_ScreenTintScaleR;
-    self->m_lastScreenTintScaleR = src->m_ScreenTintScaleR;
-    self->m_ScreenTintScaleG = blendFactor * src->m_ScreenTintScaleG + inv * self->m_ScreenTintScaleG;
-    self->m_lastScreenTintScaleG = src->m_ScreenTintScaleG;
-    self->m_ScreenTintScaleB = blendFactor * src->m_ScreenTintScaleB + inv * self->m_ScreenTintScaleB;
-    self->m_lastScreenTintScaleB = src->m_ScreenTintScaleB;
-    self->m_ScreenTintOffsetR = blendFactor * src->m_ScreenTintOffsetR + inv * self->m_ScreenTintOffsetR;
-    self->m_lastScreenTintOffsetR = src->m_ScreenTintOffsetR;
-    self->m_ScreenTintOffsetG = blendFactor * src->m_ScreenTintOffsetG + inv * self->m_ScreenTintOffsetG;
-    self->m_lastScreenTintOffsetG = src->m_ScreenTintOffsetG;
-    self->m_ScreenTintOffsetB = blendFactor * src->m_ScreenTintOffsetB + inv * self->m_ScreenTintOffsetB;
-    self->m_lastScreenTintOffsetB = src->m_ScreenTintOffsetB;
-    self->debugBlend();
+    m_ScreenTintScaleR = blendFactor * src->m_ScreenTintScaleR + inv * m_ScreenTintScaleR;
+    m_lastScreenTintScaleR = src->m_ScreenTintScaleR;
+    m_ScreenTintScaleG = blendFactor * src->m_ScreenTintScaleG + inv * m_ScreenTintScaleG;
+    m_lastScreenTintScaleG = src->m_ScreenTintScaleG;
+    m_ScreenTintScaleB = blendFactor * src->m_ScreenTintScaleB + inv * m_ScreenTintScaleB;
+    m_lastScreenTintScaleB = src->m_ScreenTintScaleB;
+    m_ScreenTintOffsetR = blendFactor * src->m_ScreenTintOffsetR + inv * m_ScreenTintOffsetR;
+    m_lastScreenTintOffsetR = src->m_ScreenTintOffsetR;
+    m_ScreenTintOffsetG = blendFactor * src->m_ScreenTintOffsetG + inv * m_ScreenTintOffsetG;
+    m_lastScreenTintOffsetG = src->m_ScreenTintOffsetG;
+    m_ScreenTintOffsetB = blendFactor * src->m_ScreenTintOffsetB + inv * m_ScreenTintOffsetB;
+    m_lastScreenTintOffsetB = src->m_ScreenTintOffsetB;
+    debugBlend();
 }
 #endif
 
@@ -4373,15 +4389,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_blend);
  *
  * The target is stored in m_lastSkyBoxRotation. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_SkyBox (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_SkyBox (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, tWPData_SkyBox* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_SkyBox::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_SkyBox* rhs = (tWPData_SkyBox*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_SkyBoxRotation = blendFactor * rhs->m_SkyBoxRotation + (1.0f - blendFactor) * self->m_SkyBoxRotation;
-    self->m_lastSkyBoxRotation = rhs->m_SkyBoxRotation;
-    self->debugBlend();
+    m_SkyBoxRotation = blendFactor * rhs->m_SkyBoxRotation + (1.0f - blendFactor) * m_SkyBoxRotation;
+    m_lastSkyBoxRotation = rhs->m_SkyBoxRotation;
+    debugBlend();
 }
 #endif
 
@@ -4395,33 +4413,35 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_blend);
  * truncated), lens intensity and radius each become b * target + (1 - b) * current, and each m_last copy takes the
  * target. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param src  the region's tWPData_Sun values (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Sun values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* src, float blendFactor) {
+void tWPInGameData_Sun::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Sun* src = (tWPData_Sun*)data;
     float inv;
-    self->debugBlend();
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    self->m_SunPitchOffset = blendFactor * src->m_SunPitchOffset + inv * self->m_SunPitchOffset;
-    self->m_lastSunPitchOffset = src->m_SunPitchOffset;
-    self->m_SunYawOffset = blendFactor * src->m_SunYawOffset + inv * self->m_SunYawOffset;
-    self->m_lastSunYawOffset = src->m_SunYawOffset;
-    self->m_SunColorR = blendFactor * src->m_SunColorR + inv * self->m_SunColorR;
-    self->m_lastSunColorR = src->m_SunColorR;
-    self->m_SunColorG = blendFactor * src->m_SunColorG + inv * self->m_SunColorG;
-    self->m_lastSunColorG = src->m_SunColorG;
-    self->m_SunColorB = blendFactor * src->m_SunColorB + inv * self->m_SunColorB;
-    self->m_lastSunColorB = src->m_SunColorB;
-    self->m_SunIntensity = blendFactor * src->m_SunIntensity + inv * self->m_SunIntensity;
-    self->m_lastSunIntensity = src->m_SunIntensity;
-    self->m_SunType = (int)(blendFactor * src->m_SunType + inv * self->m_SunType);
-    self->m_lastSunType = src->m_SunType;
-    self->m_LensIntensity = blendFactor * src->m_LensIntensity + inv * self->m_LensIntensity;
-    self->m_lastLensIntensity = src->m_LensIntensity;
-    self->m_SunRadius = blendFactor * src->m_SunRadius + inv * self->m_SunRadius;
-    self->m_lastSunRadius = src->m_SunRadius;
-    self->debugBlend();
+    m_SunPitchOffset = blendFactor * src->m_SunPitchOffset + inv * m_SunPitchOffset;
+    m_lastSunPitchOffset = src->m_SunPitchOffset;
+    m_SunYawOffset = blendFactor * src->m_SunYawOffset + inv * m_SunYawOffset;
+    m_lastSunYawOffset = src->m_SunYawOffset;
+    m_SunColorR = blendFactor * src->m_SunColorR + inv * m_SunColorR;
+    m_lastSunColorR = src->m_SunColorR;
+    m_SunColorG = blendFactor * src->m_SunColorG + inv * m_SunColorG;
+    m_lastSunColorG = src->m_SunColorG;
+    m_SunColorB = blendFactor * src->m_SunColorB + inv * m_SunColorB;
+    m_lastSunColorB = src->m_SunColorB;
+    m_SunIntensity = blendFactor * src->m_SunIntensity + inv * m_SunIntensity;
+    m_lastSunIntensity = src->m_SunIntensity;
+    m_SunType = (int)(blendFactor * src->m_SunType + inv * m_SunType);
+    m_lastSunType = src->m_SunType;
+    m_LensIntensity = blendFactor * src->m_LensIntensity + inv * m_LensIntensity;
+    m_lastLensIntensity = src->m_LensIntensity;
+    m_SunRadius = blendFactor * src->m_SunRadius + inv * m_SunRadius;
+    m_lastSunRadius = src->m_SunRadius;
+    debugBlend();
 }
 #endif
 
@@ -4433,15 +4453,17 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_blend);
  *
  * The target is stored in m_lastSnowSparkleDensity. Calls the empty virtual at vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Surface (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Surface (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, tWPData_Surface* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Surface::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Surface* rhs = (tWPData_Surface*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_SnowSparkleDensity = blendFactor * rhs->m_SnowSparkleDensity + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
-    self->m_lastSnowSparkleDensity = rhs->m_SnowSparkleDensity;
-    self->debugBlend();
+    m_SnowSparkleDensity = blendFactor * rhs->m_SnowSparkleDensity + (1.0f - blendFactor) * m_SnowSparkleDensity;
+    m_lastSnowSparkleDensity = rhs->m_SnowSparkleDensity;
+    debugBlend();
 }
 #endif
 
@@ -4456,21 +4478,25 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_blend);
  * target + (1 - b) * current and their m_last copies take the targets. Calls the empty virtual at vtable +0x218
  * before and after.
  *
- * @param rhs  the region's tWPData_Lighting (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Lighting (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, tWPData_Lighting* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Lighting::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Lighting* rhs = (tWPData_Lighting*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_LightIrradianceName = rhs->m_LightIrradianceName;
-    self->m_ShadowIrradianceName = rhs->m_ShadowIrradianceName;
-    self->m_TunnelIrradianceName = rhs->m_TunnelIrradianceName;
-    self->m_ObjectIrradianceName = rhs->m_ObjectIrradianceName;
-    self->m_AmbientLightIntensityOffset = blendFactor * rhs->m_AmbientLightIntensityOffset + (1.0f - blendFactor) * self->m_AmbientLightIntensityOffset;
-    self->m_lastAmbientLightIntensityOffset = rhs->m_AmbientLightIntensityOffset;
-    self->m_RimLightIntensityOffset = blendFactor * rhs->m_RimLightIntensityOffset + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
-    self->m_lastRimLightIntensityOffset = rhs->m_RimLightIntensityOffset;
-    self->debugBlend();
+    m_LightIrradianceName = rhs->m_LightIrradianceName;
+    m_ShadowIrradianceName = rhs->m_ShadowIrradianceName;
+    m_TunnelIrradianceName = rhs->m_TunnelIrradianceName;
+    m_ObjectIrradianceName = rhs->m_ObjectIrradianceName;
+    m_AmbientLightIntensityOffset = blendFactor * rhs->m_AmbientLightIntensityOffset +
+            (1.0f - blendFactor) * m_AmbientLightIntensityOffset;
+    m_lastAmbientLightIntensityOffset = rhs->m_AmbientLightIntensityOffset;
+    m_RimLightIntensityOffset = blendFactor * rhs->m_RimLightIntensityOffset +
+            (1.0f - blendFactor) * m_RimLightIntensityOffset;
+    m_lastRimLightIntensityOffset = rhs->m_RimLightIntensityOffset;
+    debugBlend();
 }
 #endif
 
@@ -4487,51 +4513,55 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_blend);
  * each become b * target + (1 - b) * current, and each m_last copy takes the target. Calls the empty virtual at
  * vtable +0x218 before and after.
  *
- * @param rhs  the region's tWPData_Weather (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Weather (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, tWPData_Weather* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Weather::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Weather* rhs = (tWPData_Weather*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_SnowIntensity = blendFactor * rhs->m_SnowIntensity + (1.0f - blendFactor) * self->m_SnowIntensity;
-    self->m_lastSnowIntensity = rhs->m_SnowIntensity;
-    self->m_FlakeSize = blendFactor * rhs->m_FlakeSize + (1.0f - blendFactor) * self->m_FlakeSize;
-    self->m_lastFlakeSize = rhs->m_FlakeSize;
-    self->m_WindIntensity = blendFactor * rhs->m_WindIntensity + (1.0f - blendFactor) * self->m_WindIntensity;
-    self->m_lastWindIntensity = rhs->m_WindIntensity;
-    self->m_WindRotation = blendFactor * rhs->m_WindRotation + (1.0f - blendFactor) * self->m_WindRotation;
-    self->m_lastWindRotation = rhs->m_WindRotation;
-    self->m_PlayerWindIntensity = blendFactor * rhs->m_PlayerWindIntensity + (1.0f - blendFactor) * self->m_PlayerWindIntensity;
-    self->m_lastPlayerWindIntensity = rhs->m_PlayerWindIntensity;
-    self->m_Temperature = blendFactor * rhs->m_Temperature + (1.0f - blendFactor) * self->m_Temperature;
-    self->m_lastTemperature = rhs->m_Temperature;
-    self->m_SnowFlurries = blendFactor * rhs->m_SnowFlurries + (1.0f - blendFactor) * self->m_SnowFlurries;
-    self->m_lastSnowFlurries = rhs->m_SnowFlurries;
-    self->m_SnowGravityMultiplier = blendFactor * rhs->m_SnowGravityMultiplier + (1.0f - blendFactor) * self->m_SnowGravityMultiplier;
-    self->m_lastSnowGravityMultiplier = rhs->m_SnowGravityMultiplier;
-    self->m_SnowFluffItensity = blendFactor * rhs->m_SnowFluffItensity + (1.0f - blendFactor) * self->m_SnowFluffItensity;
-    self->m_lastSnowFluffItensity = rhs->m_SnowFluffItensity;
-    self->m_SnowFluffWindIntensity = blendFactor * rhs->m_SnowFluffWindIntensity + (1.0f - blendFactor) * self->m_SnowFluffWindIntensity;
-    self->m_lastSnowFluffWindIntensity = rhs->m_SnowFluffWindIntensity;
-    self->m_LightningChance = blendFactor * rhs->m_LightningChance + (1.0f - blendFactor) * self->m_LightningChance;
-    self->m_lastLightningChance = rhs->m_LightningChance;
-    self->m_SnowFlakeColourA = blendFactor * rhs->m_SnowFlakeColourA + (1.0f - blendFactor) * self->m_SnowFlakeColourA;
-    self->m_lastSnowFlakeColourA = rhs->m_SnowFlakeColourA;
-    self->m_SnowFlakeColourR = blendFactor * rhs->m_SnowFlakeColourR + (1.0f - blendFactor) * self->m_SnowFlakeColourR;
-    self->m_lastSnowFlakeColourR = rhs->m_SnowFlakeColourR;
-    self->m_SnowFlakeColourG = blendFactor * rhs->m_SnowFlakeColourG + (1.0f - blendFactor) * self->m_SnowFlakeColourG;
-    self->m_lastSnowFlakeColourG = rhs->m_SnowFlakeColourG;
-    self->m_SnowFlakeColourB = blendFactor * rhs->m_SnowFlakeColourB + (1.0f - blendFactor) * self->m_SnowFlakeColourB;
-    self->m_lastSnowFlakeColourB = rhs->m_SnowFlakeColourB;
-    self->m_SnowFluffColourA = blendFactor * rhs->m_SnowFluffColourA + (1.0f - blendFactor) * self->m_SnowFluffColourA;
-    self->m_lastSnowFluffColourA = rhs->m_SnowFluffColourA;
-    self->m_SnowFluffColourR = blendFactor * rhs->m_SnowFluffColourR + (1.0f - blendFactor) * self->m_SnowFluffColourR;
-    self->m_lastSnowFluffColourR = rhs->m_SnowFluffColourR;
-    self->m_SnowFluffColourG = blendFactor * rhs->m_SnowFluffColourG + (1.0f - blendFactor) * self->m_SnowFluffColourG;
-    self->m_lastSnowFluffColourG = rhs->m_SnowFluffColourG;
-    self->m_SnowFluffColourB = blendFactor * rhs->m_SnowFluffColourB + (1.0f - blendFactor) * self->m_SnowFluffColourB;
-    self->m_lastSnowFluffColourB = rhs->m_SnowFluffColourB;
-    self->debugBlend();
+    m_SnowIntensity = blendFactor * rhs->m_SnowIntensity + (1.0f - blendFactor) * m_SnowIntensity;
+    m_lastSnowIntensity = rhs->m_SnowIntensity;
+    m_FlakeSize = blendFactor * rhs->m_FlakeSize + (1.0f - blendFactor) * m_FlakeSize;
+    m_lastFlakeSize = rhs->m_FlakeSize;
+    m_WindIntensity = blendFactor * rhs->m_WindIntensity + (1.0f - blendFactor) * m_WindIntensity;
+    m_lastWindIntensity = rhs->m_WindIntensity;
+    m_WindRotation = blendFactor * rhs->m_WindRotation + (1.0f - blendFactor) * m_WindRotation;
+    m_lastWindRotation = rhs->m_WindRotation;
+    m_PlayerWindIntensity = blendFactor * rhs->m_PlayerWindIntensity + (1.0f - blendFactor) * m_PlayerWindIntensity;
+    m_lastPlayerWindIntensity = rhs->m_PlayerWindIntensity;
+    m_Temperature = blendFactor * rhs->m_Temperature + (1.0f - blendFactor) * m_Temperature;
+    m_lastTemperature = rhs->m_Temperature;
+    m_SnowFlurries = blendFactor * rhs->m_SnowFlurries + (1.0f - blendFactor) * m_SnowFlurries;
+    m_lastSnowFlurries = rhs->m_SnowFlurries;
+    m_SnowGravityMultiplier = blendFactor * rhs->m_SnowGravityMultiplier +
+            (1.0f - blendFactor) * m_SnowGravityMultiplier;
+    m_lastSnowGravityMultiplier = rhs->m_SnowGravityMultiplier;
+    m_SnowFluffItensity = blendFactor * rhs->m_SnowFluffItensity + (1.0f - blendFactor) * m_SnowFluffItensity;
+    m_lastSnowFluffItensity = rhs->m_SnowFluffItensity;
+    m_SnowFluffWindIntensity = blendFactor * rhs->m_SnowFluffWindIntensity +
+            (1.0f - blendFactor) * m_SnowFluffWindIntensity;
+    m_lastSnowFluffWindIntensity = rhs->m_SnowFluffWindIntensity;
+    m_LightningChance = blendFactor * rhs->m_LightningChance + (1.0f - blendFactor) * m_LightningChance;
+    m_lastLightningChance = rhs->m_LightningChance;
+    m_SnowFlakeColourA = blendFactor * rhs->m_SnowFlakeColourA + (1.0f - blendFactor) * m_SnowFlakeColourA;
+    m_lastSnowFlakeColourA = rhs->m_SnowFlakeColourA;
+    m_SnowFlakeColourR = blendFactor * rhs->m_SnowFlakeColourR + (1.0f - blendFactor) * m_SnowFlakeColourR;
+    m_lastSnowFlakeColourR = rhs->m_SnowFlakeColourR;
+    m_SnowFlakeColourG = blendFactor * rhs->m_SnowFlakeColourG + (1.0f - blendFactor) * m_SnowFlakeColourG;
+    m_lastSnowFlakeColourG = rhs->m_SnowFlakeColourG;
+    m_SnowFlakeColourB = blendFactor * rhs->m_SnowFlakeColourB + (1.0f - blendFactor) * m_SnowFlakeColourB;
+    m_lastSnowFlakeColourB = rhs->m_SnowFlakeColourB;
+    m_SnowFluffColourA = blendFactor * rhs->m_SnowFluffColourA + (1.0f - blendFactor) * m_SnowFluffColourA;
+    m_lastSnowFluffColourA = rhs->m_SnowFluffColourA;
+    m_SnowFluffColourR = blendFactor * rhs->m_SnowFluffColourR + (1.0f - blendFactor) * m_SnowFluffColourR;
+    m_lastSnowFluffColourR = rhs->m_SnowFluffColourR;
+    m_SnowFluffColourG = blendFactor * rhs->m_SnowFluffColourG + (1.0f - blendFactor) * m_SnowFluffColourG;
+    m_lastSnowFluffColourG = rhs->m_SnowFluffColourG;
+    m_SnowFluffColourB = blendFactor * rhs->m_SnowFluffColourB + (1.0f - blendFactor) * m_SnowFluffColourB;
+    m_lastSnowFluffColourB = rhs->m_SnowFluffColourB;
+    debugBlend();
 }
 #endif
 
@@ -4545,17 +4575,19 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_blend);
  * b) * current, and m_lastLevel / m_lastPointRate take the targets. Calls the empty virtual at vtable +0x218 before
  * and after.
  *
- * @param rhs  the region's tWPData_Danger (On Tour const tWPData* rhs)
+ * @param data  the region's tWPData_Danger (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, tWPData_Danger* rhs, float blendFactor) {
-    self->debugBlend();
+void tWPInGameData_Danger::blend(const tWPData* data, float blendFactor)
+{
+    tWPData_Danger* rhs = (tWPData_Danger*)data;
+    debugBlend();
     blendFactor = blendFactor * blendFactor;
-    self->m_Level = (int)(blendFactor * (float)rhs->m_Level + (1.0f - blendFactor) * (float)self->m_Level);
-    self->m_lastLevel = rhs->m_Level;
-    self->m_PointRate = blendFactor * rhs->m_PointRate + (1.0f - blendFactor) * self->m_PointRate;
-    self->m_lastPointRate = rhs->m_PointRate;
-    self->debugBlend();
+    m_Level = (int)(blendFactor * (float)rhs->m_Level + (1.0f - blendFactor) * (float)m_Level);
+    m_lastLevel = rhs->m_Level;
+    m_PointRate = blendFactor * rhs->m_PointRate + (1.0f - blendFactor) * m_PointRate;
+    m_lastPointRate = rhs->m_PointRate;
+    debugBlend();
 }
 #endif
 
@@ -4666,15 +4698,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
  *
  * Slot 68 of tWPInGameData_MusicTrigger's vtable tWPInGameData_MusicTrigger_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData_MusicTrigger* rhs) {
-    if ((lhs->m_Type) != (rhs->m_Type)) {
+bool tWPInGameData_MusicTrigger::isEqual(const tWPData* data)
+{
+    tWPData_MusicTrigger* rhs = (tWPData_MusicTrigger*)data;
+    if ((m_Type) != (rhs->m_Type)) {
         return false;
     }
-    return (lhs->m_Value) == (rhs->m_Value);
+    return (m_Value) == (rhs->m_Value);
 }
 #endif
 
@@ -4686,12 +4719,13 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
  *
  * Slot 68 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData_Mix* rhs) {
-    return (lhs->m_MixPreset) == (rhs->m_MixPreset);
+bool tWPInGameData_Mix::isEqual(const tWPData* data)
+{
+    tWPData_Mix* rhs = (tWPData_Mix*)data;
+    return (m_MixPreset) == (rhs->m_MixPreset);
 }
 #endif
 
@@ -4703,12 +4737,13 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
  *
  * Slot 68 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData_Ambience* rhs) {
-    return (lhs->m_BankID) == (rhs->m_BankID);
+bool tWPInGameData_Ambience::isEqual(const tWPData* data)
+{
+    tWPData_Ambience* rhs = (tWPData_Ambience*)data;
+    return (m_BankID) == (rhs->m_BankID);
 }
 #endif
 
@@ -4720,12 +4755,13 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
  *
  * Slot 68 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData_Speech* rhs) {
-    return (lhs->m_SpeechID) == (rhs->m_SpeechID);
+bool tWPInGameData_Speech::isEqual(const tWPData* data)
+{
+    tWPData_Speech* rhs = (tWPData_Speech*)data;
+    return (m_SpeechID) == (rhs->m_SpeechID);
 }
 #endif
 
@@ -4737,15 +4773,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_isEqual);
  *
  * Slot 68 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, tWPData_Camera* rhs) {
+bool tWPInGameData_Camera::isEqual(const tWPData* data)
+{
+    tWPData_Camera* rhs = (tWPData_Camera*)data;
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_DrawDistance) == (rhs->m_DrawDistance)) {
+    if ((m_DrawDistance) == (rhs->m_DrawDistance)) {
         var_2 = 1;
     }
     return var_2;
@@ -4761,17 +4798,18 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
  *
  * Slot 68 of tWPInGameData_Fog's vtable tWPInGameData_Fog_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData_Fog* rhs) {
-    if (lhs->m_FogDensity != rhs->m_FogDensity) return false;
-    if (lhs->m_FogNear != rhs->m_FogNear) return false;
-    if (lhs->m_FogFar != rhs->m_FogFar) return false;
-    if (lhs->m_FogColourR != rhs->m_FogColourR) return false;
-    if (lhs->m_FogColourG != rhs->m_FogColourG) return false;
-    if (lhs->m_FogColourB != rhs->m_FogColourB) return false;
+bool tWPInGameData_Fog::isEqual(const tWPData* data)
+{
+    tWPData_Fog* rhs = (tWPData_Fog*)data;
+    if (m_FogDensity != rhs->m_FogDensity) return false;
+    if (m_FogNear != rhs->m_FogNear) return false;
+    if (m_FogFar != rhs->m_FogFar) return false;
+    if (m_FogColourR != rhs->m_FogColourR) return false;
+    if (m_FogColourG != rhs->m_FogColourG) return false;
+    if (m_FogColourB != rhs->m_FogColourB) return false;
     return true;
 }
 #endif
@@ -4785,18 +4823,19 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
  *
  * Slot 68 of tWPInGameData_LightGlow's vtable tWPInGameData_LightGlow_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData_LightGlow* rhs) {
-    if (lhs->m_LightGlowCutoff != rhs->m_LightGlowCutoff) return false;
-    if (lhs->m_LightGlowCutoffScale != rhs->m_LightGlowCutoffScale) return false;
-    if (lhs->m_LightGlowCopyIntensity != rhs->m_LightGlowCopyIntensity) return false;
-    if (lhs->m_LightGlowSourceIntensity != rhs->m_LightGlowSourceIntensity) return false;
-    if (lhs->m_LightGlowFrameIntensity != rhs->m_LightGlowFrameIntensity) return false;
-    if (lhs->m_LightGlowBlend2 != rhs->m_LightGlowBlend2) return false;
-    if (lhs->m_LightGlowBlend3 != rhs->m_LightGlowBlend3) return false;
+bool tWPInGameData_LightGlow::isEqual(const tWPData* data)
+{
+    tWPData_LightGlow* rhs = (tWPData_LightGlow*)data;
+    if (m_LightGlowCutoff != rhs->m_LightGlowCutoff) return false;
+    if (m_LightGlowCutoffScale != rhs->m_LightGlowCutoffScale) return false;
+    if (m_LightGlowCopyIntensity != rhs->m_LightGlowCopyIntensity) return false;
+    if (m_LightGlowSourceIntensity != rhs->m_LightGlowSourceIntensity) return false;
+    if (m_LightGlowFrameIntensity != rhs->m_LightGlowFrameIntensity) return false;
+    if (m_LightGlowBlend2 != rhs->m_LightGlowBlend2) return false;
+    if (m_LightGlowBlend3 != rhs->m_LightGlowBlend3) return false;
     return true;
 }
 #endif
@@ -4810,17 +4849,18 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
  *
  * Slot 68 of tWPInGameData_ScreenTint's vtable tWPInGameData_ScreenTint_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData_ScreenTint* rhs) {
-    if (lhs->m_ScreenTintScaleR != rhs->m_ScreenTintScaleR) return false;
-    if (lhs->m_ScreenTintScaleG != rhs->m_ScreenTintScaleG) return false;
-    if (lhs->m_ScreenTintScaleB != rhs->m_ScreenTintScaleB) return false;
-    if (lhs->m_ScreenTintOffsetR != rhs->m_ScreenTintOffsetR) return false;
-    if (lhs->m_ScreenTintOffsetG != rhs->m_ScreenTintOffsetG) return false;
-    if (lhs->m_ScreenTintOffsetB != rhs->m_ScreenTintOffsetB) return false;
+bool tWPInGameData_ScreenTint::isEqual(const tWPData* data)
+{
+    tWPData_ScreenTint* rhs = (tWPData_ScreenTint*)data;
+    if (m_ScreenTintScaleR != rhs->m_ScreenTintScaleR) return false;
+    if (m_ScreenTintScaleG != rhs->m_ScreenTintScaleG) return false;
+    if (m_ScreenTintScaleB != rhs->m_ScreenTintScaleB) return false;
+    if (m_ScreenTintOffsetR != rhs->m_ScreenTintOffsetR) return false;
+    if (m_ScreenTintOffsetG != rhs->m_ScreenTintOffsetG) return false;
+    if (m_ScreenTintOffsetB != rhs->m_ScreenTintOffsetB) return false;
     return true;
 }
 #endif
@@ -4833,15 +4873,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_isEqual);
  *
  * Slot 68 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, tWPData_SkyBox* rhs) {
+bool tWPInGameData_SkyBox::isEqual(const tWPData* data)
+{
+    tWPData_SkyBox* rhs = (tWPData_SkyBox*)data;
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_SkyBoxRotation) == (rhs->m_SkyBoxRotation)) {
+    if ((m_SkyBoxRotation) == (rhs->m_SkyBoxRotation)) {
         var_2 = 1;
     }
     return var_2;
@@ -4857,20 +4898,21 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
  *
  * Slot 68 of tWPInGameData_Sun's vtable tWPInGameData_Sun_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData_Sun* rhs) {
-    if (lhs->m_SunPitchOffset != rhs->m_SunPitchOffset) return false;
-    if (lhs->m_SunYawOffset != rhs->m_SunYawOffset) return false;
-    if (lhs->m_SunColorR != rhs->m_SunColorR) return false;
-    if (lhs->m_SunColorG != rhs->m_SunColorG) return false;
-    if (lhs->m_SunColorB != rhs->m_SunColorB) return false;
-    if (lhs->m_SunIntensity != rhs->m_SunIntensity) return false;
-    if (lhs->m_SunType != rhs->m_SunType) return false;
-    if (lhs->m_LensIntensity != rhs->m_LensIntensity) return false;
-    if (lhs->m_SunRadius != rhs->m_SunRadius) return false;
+bool tWPInGameData_Sun::isEqual(const tWPData* data)
+{
+    tWPData_Sun* rhs = (tWPData_Sun*)data;
+    if (m_SunPitchOffset != rhs->m_SunPitchOffset) return false;
+    if (m_SunYawOffset != rhs->m_SunYawOffset) return false;
+    if (m_SunColorR != rhs->m_SunColorR) return false;
+    if (m_SunColorG != rhs->m_SunColorG) return false;
+    if (m_SunColorB != rhs->m_SunColorB) return false;
+    if (m_SunIntensity != rhs->m_SunIntensity) return false;
+    if (m_SunType != rhs->m_SunType) return false;
+    if (m_LensIntensity != rhs->m_LensIntensity) return false;
+    if (m_SunRadius != rhs->m_SunRadius) return false;
     return true;
 }
 #endif
@@ -4884,15 +4926,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_isEqual);
  *
  * Slot 68 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, tWPData_Surface* rhs) {
+bool tWPInGameData_Surface::isEqual(const tWPData* data)
+{
+    tWPData_Surface* rhs = (tWPData_Surface*)data;
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_SnowSparkleDensity) == (rhs->m_SnowSparkleDensity)) {
+    if ((m_SnowSparkleDensity) == (rhs->m_SnowSparkleDensity)) {
         var_2 = 1;
     }
     return var_2;
@@ -4911,17 +4954,18 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  *
  * Slot 68 of tWPInGameData_Lighting's vtable tWPInGameData_Lighting_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData_Lighting* rhs) {
-    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return false;
-    if (lhs->m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return false;
-    if (lhs->m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return false;
+bool tWPInGameData_Lighting::isEqual(const tWPData* data)
+{
+    tWPData_Lighting* rhs = (tWPData_Lighting*)data;
+    if (func_002BB100_DE30((char*)&m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return false;
+    if (func_002BB100_DE30((char*)&m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return false;
+    if (m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return false;
+    if (m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return false;
     return true;
 }
 #endif
@@ -4935,67 +4979,68 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
  *
  * Slot 68 of tWPInGameData_Weather's vtable tWPInGameData_Weather_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Weather (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Weather, viewed as rhs (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" bool tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData_Weather* rhs) {
-    if ((lhs->m_SnowIntensity) != (rhs->m_SnowIntensity)) {
+bool tWPInGameData_Weather::isEqual(const tWPData* data)
+{
+    tWPData_Weather* rhs = (tWPData_Weather*)data;
+    if ((m_SnowIntensity) != (rhs->m_SnowIntensity)) {
         return false;
     }
-    if ((lhs->m_FlakeSize) != (rhs->m_FlakeSize)) {
+    if ((m_FlakeSize) != (rhs->m_FlakeSize)) {
         return false;
     }
-    if ((lhs->m_WindIntensity) != (rhs->m_WindIntensity)) {
+    if ((m_WindIntensity) != (rhs->m_WindIntensity)) {
         return false;
     }
-    if ((lhs->m_WindRotation) != (rhs->m_WindRotation)) {
+    if ((m_WindRotation) != (rhs->m_WindRotation)) {
         return false;
     }
-    if ((lhs->m_PlayerWindIntensity) != (rhs->m_PlayerWindIntensity)) {
+    if ((m_PlayerWindIntensity) != (rhs->m_PlayerWindIntensity)) {
         return false;
     }
-    if ((lhs->m_Temperature) != (rhs->m_Temperature)) {
+    if ((m_Temperature) != (rhs->m_Temperature)) {
         return false;
     }
-    if ((lhs->m_SnowFlurries) != (rhs->m_SnowFlurries)) {
+    if ((m_SnowFlurries) != (rhs->m_SnowFlurries)) {
         return false;
     }
-    if ((lhs->m_SnowGravityMultiplier) != (rhs->m_SnowGravityMultiplier)) {
+    if ((m_SnowGravityMultiplier) != (rhs->m_SnowGravityMultiplier)) {
         return false;
     }
-    if ((lhs->m_SnowFluffItensity) != (rhs->m_SnowFluffItensity)) {
+    if ((m_SnowFluffItensity) != (rhs->m_SnowFluffItensity)) {
         return false;
     }
-    if ((lhs->m_SnowFluffWindIntensity) != (rhs->m_SnowFluffWindIntensity)) {
+    if ((m_SnowFluffWindIntensity) != (rhs->m_SnowFluffWindIntensity)) {
         return false;
     }
-    if ((lhs->m_LightningChance) != (rhs->m_LightningChance)) {
+    if ((m_LightningChance) != (rhs->m_LightningChance)) {
         return false;
     }
-    if ((lhs->m_SnowFlakeColourA) != (rhs->m_SnowFlakeColourA)) {
+    if ((m_SnowFlakeColourA) != (rhs->m_SnowFlakeColourA)) {
         return false;
     }
-    if ((lhs->m_SnowFlakeColourR) != (rhs->m_SnowFlakeColourR)) {
+    if ((m_SnowFlakeColourR) != (rhs->m_SnowFlakeColourR)) {
         return false;
     }
-    if ((lhs->m_SnowFlakeColourG) != (rhs->m_SnowFlakeColourG)) {
+    if ((m_SnowFlakeColourG) != (rhs->m_SnowFlakeColourG)) {
         return false;
     }
-    if ((lhs->m_SnowFlakeColourB) != (rhs->m_SnowFlakeColourB)) {
+    if ((m_SnowFlakeColourB) != (rhs->m_SnowFlakeColourB)) {
         return false;
     }
-    if ((lhs->m_SnowFluffColourA) != (rhs->m_SnowFluffColourA)) {
+    if ((m_SnowFluffColourA) != (rhs->m_SnowFluffColourA)) {
         return false;
     }
-    if ((lhs->m_SnowFluffColourR) != (rhs->m_SnowFluffColourR)) {
+    if ((m_SnowFluffColourR) != (rhs->m_SnowFluffColourR)) {
         return false;
     }
-    if ((lhs->m_SnowFluffColourG) != (rhs->m_SnowFluffColourG)) {
+    if ((m_SnowFluffColourG) != (rhs->m_SnowFluffColourG)) {
         return false;
     }
-    if ((lhs->m_SnowFluffColourB) != (rhs->m_SnowFluffColourB)) {
+    if ((m_SnowFluffColourB) != (rhs->m_SnowFluffColourB)) {
         return false;
     }
     return true;
@@ -5011,15 +5056,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
  *
  * Slot 68 of tWPInGameData_Danger's vtable tWPInGameData_Danger_vtbl; the world-painter query calls it with the region's data.
  *
- * @param lhs  the in-game data
- * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
+ * @param data  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
  * @return true if every value matches
  */
-extern "C" bool tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData_Danger* rhs) {
-    if ((lhs->m_Level) != (rhs->m_Level)) {
+bool tWPInGameData_Danger::isEqual(const tWPData* data)
+{
+    tWPData_Danger* rhs = (tWPData_Danger*)data;
+    if ((m_Level) != (rhs->m_Level)) {
         return false;
     }
-    if ((lhs->m_PointRate) != (rhs->m_PointRate)) {
+    if ((m_PointRate) != (rhs->m_PointRate)) {
         return false;
     }
     return true;
@@ -5574,27 +5620,29 @@ static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
  * For pitch, yaw, colour R/G/B, intensity, type, lens intensity and radius in turn, reads 4 bytes into the value and
  * 4 into m_wpTravelDistance (+0x0), through the frame's slot 2 (read); the m_last targets are not restored.
  *
- * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, Stream_EA38* frame) {
-    Wr_EA38(frame, &self->m_SunPitchOffset, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunYawOffset, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunColorR, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunColorG, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunColorB, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunIntensity, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunType, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_LensIntensity, 4);
-    Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, &self->m_SunRadius, 4);
-    Wr_EA38(frame, ((char*)self), 4);
+void tWPInGameData_Sun::readFromReplayFrame(cReplayFramePtr* baseFrame)
+{
+    Stream_EA38* frame = (Stream_EA38*)baseFrame;
+    Wr_EA38(frame, &m_SunPitchOffset, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunYawOffset, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunColorR, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunColorG, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunColorB, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunIntensity, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunType, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_LensIntensity, 4);
+    Wr_EA38(frame, ((char*)this), 4);
+    Wr_EA38(frame, &m_SunRadius, 4);
+    Wr_EA38(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5635,21 +5683,23 @@ static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
  * (+0x48, +0x50), each followed by 4 bytes into m_wpTravelDistance (+0x0), through the frame's slot 2 (read); the
  * m_last targets are not restored.
  *
- * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Lighting_readFromReplayFrame(tWPInGameData_Lighting* self, Stream_ECC8* frame) {
-    Wr_ECC8(frame, &self->m_LightIrradianceName, 8);
-    Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, &self->m_ShadowIrradianceName, 8);
-    Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, &self->m_TunnelIrradianceName, 8);
-    Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, &self->m_ObjectIrradianceName, 8);
-    Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, &self->m_AmbientLightIntensityOffset, 4);
-    Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, &self->m_RimLightIntensityOffset, 4);
-    Wr_ECC8(frame, ((char*)self), 4);
+void tWPInGameData_Lighting::readFromReplayFrame(cReplayFramePtr* baseFrame)
+{
+    Stream_ECC8* frame = (Stream_ECC8*)baseFrame;
+    Wr_ECC8(frame, &m_LightIrradianceName, 8);
+    Wr_ECC8(frame, ((char*)this), 4);
+    Wr_ECC8(frame, &m_ShadowIrradianceName, 8);
+    Wr_ECC8(frame, ((char*)this), 4);
+    Wr_ECC8(frame, &m_TunnelIrradianceName, 8);
+    Wr_ECC8(frame, ((char*)this), 4);
+    Wr_ECC8(frame, &m_ObjectIrradianceName, 8);
+    Wr_ECC8(frame, ((char*)this), 4);
+    Wr_ECC8(frame, &m_AmbientLightIntensityOffset, 4);
+    Wr_ECC8(frame, ((char*)this), 4);
+    Wr_ECC8(frame, &m_RimLightIntensityOffset, 4);
+    Wr_ECC8(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5668,49 +5718,50 @@ public:
  * For each value (+0x8 to +0x98 in steps of 8) reads 4 bytes into it and 4 into m_wpTravelDistance (+0x0), through
  * the frame's slot 2 (read; the local class calls that slot "write"); the m_last targets are not restored.
  *
- * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to read from (On Tour cReplayFramePtr* data), viewed as frame
  */
-// Streams 19 words of self (at +0x8 .. +0x98), each followed by the word at +0x0.
-extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather* self, cStream_EE48* frame)
+// Streams 19 words of the object (at +0x8 .. +0x98), each followed by the word at +0x0.
+void tWPInGameData_Weather::readFromReplayFrame(cReplayFramePtr* baseFrame)
 {
-    frame->write(&self->m_SnowIntensity, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_FlakeSize, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_WindIntensity, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_WindRotation, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_PlayerWindIntensity, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_Temperature, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFlurries, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowGravityMultiplier, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffItensity, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffWindIntensity, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_LightningChance, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFlakeColourA, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFlakeColourR, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFlakeColourG, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFlakeColourB, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffColourA, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffColourR, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffColourG, 4);
-    frame->write(((char*)self), 4);
-    frame->write(&self->m_SnowFluffColourB, 4);
-    frame->write(((char*)self), 4);
+    cStream_EE48* frame = (cStream_EE48*)baseFrame;
+    frame->write(&m_SnowIntensity, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_FlakeSize, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_WindIntensity, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_WindRotation, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_PlayerWindIntensity, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_Temperature, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFlurries, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowGravityMultiplier, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffItensity, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffWindIntensity, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_LightningChance, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFlakeColourA, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFlakeColourR, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFlakeColourG, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFlakeColourB, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffColourA, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffColourR, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffColourG, 4);
+    frame->write(((char*)this), 4);
+    frame->write(&m_SnowFluffColourB, 4);
+    frame->write(((char*)this), 4);
 }
 #endif
 
@@ -5830,7 +5881,7 @@ void tWPInGameData_Camera::writeToReplayFrame(cReplayFramePtr* frame) const
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_writeToReplayFrame);
 #ifdef SKIP_ASM
-static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
+static inline void Wr_F580(cReplayFramePtr* s, const void* p, int n) {
     s->write((const char*)p, n);
 }
 
@@ -5842,26 +5893,27 @@ static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, cReplayFramePtr* frame) {
-    Wr_F580(frame, &self->m_FogDensity, 4);
-    Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, &self->m_FogNear, 4);
-    Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, &self->m_FogFar, 4);
-    Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, &self->m_FogColourR, 4);
-    Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, &self->m_FogColourG, 4);
-    Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, &self->m_FogColourB, 4);
-    Wr_F580(frame, ((char*)self), 4);
+void tWPInGameData_Fog::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    Wr_F580(frame, &m_FogDensity, 4);
+    Wr_F580(frame, ((char*)this), 4);
+    Wr_F580(frame, &m_FogNear, 4);
+    Wr_F580(frame, ((char*)this), 4);
+    Wr_F580(frame, &m_FogFar, 4);
+    Wr_F580(frame, ((char*)this), 4);
+    Wr_F580(frame, &m_FogColourR, 4);
+    Wr_F580(frame, ((char*)this), 4);
+    Wr_F580(frame, &m_FogColourG, 4);
+    Wr_F580(frame, ((char*)this), 4);
+    Wr_F580(frame, &m_FogColourB, 4);
+    Wr_F580(frame, ((char*)this), 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_writeToReplayFrame);
 #ifdef SKIP_ASM
-static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
+static inline void Wr_F700(cReplayFramePtr* s, const void* p, int n) {
     s->write((const char*)p, n);
 }
 
@@ -5873,21 +5925,22 @@ static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, cReplayFramePtr* frame) {
-    Wr_F700(frame, &self->m_LightGlowCutoff, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowCutoffScale, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowCopyIntensity, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowSourceIntensity, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowFrameIntensity, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowBlend2, 4);
-    Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, &self->m_LightGlowBlend3, 4);
-    Wr_F700(frame, ((char*)self), 4);
+void tWPInGameData_LightGlow::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    Wr_F700(frame, &m_LightGlowCutoff, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowCutoffScale, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowCopyIntensity, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowSourceIntensity, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowFrameIntensity, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowBlend2, 4);
+    Wr_F700(frame, ((char*)this), 4);
+    Wr_F700(frame, &m_LightGlowBlend3, 4);
+    Wr_F700(frame, ((char*)this), 4);
 }
 #endif
 

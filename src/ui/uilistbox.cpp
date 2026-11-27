@@ -379,13 +379,13 @@ extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1);
  *
  * On Tour passes the screen-data record; this build's declaration drops it.
  */
-extern "C" void cUIMenu_setUIData(cUIMenu* self)
+void cUIMenu::setUIData(tUIBaseObject*)
 {
-    cUIThing_setUIData(self);
-    char count = cList_size((char*)&self->mList);
-    self->mScrollItemNumVisible = count;
-    self->mScrollItemNum = count;
-    self->setInputMap(0);
+    cUIThing_setUIData(this);
+    char count = cList_size((char*)&mList);
+    mScrollItemNumVisible = count;
+    mScrollItemNum = count;
+    setInputMap(0);
 }
 #endif
 

@@ -484,32 +484,32 @@ static inline t4Vector pos3130(const t4MatrixVU& m)
  *
  * @param hit  intersect info of the collision (position, direction, accumulators, bone index)
  */
-extern "C" void cConveyorNode_updateIntersectInfo(cConveyorNode* self, tIntersectInfo* hit)
+void cConveyorNode::updateIntersectInfo(tIntersectInfo& hit)
 {
-    if (hit->Mesh < 0) {
+    if (hit.Mesh < 0) {
         return;
     }
-    const t4MatrixVU* root = (const t4MatrixVU*)self->getRootTransform();
-    tMeshHeirarchyRecord* bones = self->Instance->m_Model->m_MeshHeirarchy;
+    const t4MatrixVU* root = (const t4MatrixVU*)getRootTransform();
+    tMeshHeirarchyRecord* bones = Instance->m_Model->m_MeshHeirarchy;
     // a bone's tf4Matrix has t4Matrix's layout (16 floats)
-    t4MatrixVU boneMat = *((t4MatrixVU*)bones[hit->Mesh].m_pMeshMatrix);
-    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != tMeshHeirarchyRecord::kNoParent;
+    t4MatrixVU boneMat = *((t4MatrixVU*)bones[hit.Mesh].m_pMeshMatrix);
+    for (int parentIndex = bones[hit.Mesh].m_iParentID; parentIndex != tMeshHeirarchyRecord::kNoParent;
          parentIndex = bones[parentIndex].m_iParentID) {
         boneMat = mulMat3130(*((t4MatrixVU*)bones[parentIndex].m_pMeshMatrix), boneMat);
     }
     boneMat = mulMat3130(*root, boneMat);
-    if (self->Rotate[hit->Mesh] != 0) {
-        t4Vector offset = sub3130((*(&hit->Ipos)), pos3130(boneMat));
-        float k = self->Vel / len3130(offset);
-        t4Vector impulse = scale3130((*(&hit->Inorm)), k);
+    if (Rotate[hit.Mesh] != 0) {
+        t4Vector offset = sub3130((*(&hit.Ipos)), pos3130(boneMat));
+        float k = Vel / len3130(offset);
+        t4Vector impulse = scale3130((*(&hit.Inorm)), k);
         t4Vector torque = cross3130(offset, impulse);
-        addEq3130((*(&hit->Ivel)), torque);
-        addEq3130((*(&hit->Iangvel)), impulse);
+        addEq3130((*(&hit.Ivel)), torque);
+        addEq3130((*(&hit.Iangvel)), impulse);
     } else {
         loadVf8_3130(*(t4Vector*)&t4vect_YAxis);
         t4Vector n = norm3130(mulVec3130(boneMat));
-        t4Vector torque = scale3130(cross3130(n, (*(&hit->Inorm))), self->Vel);
-        addEq3130((*(&hit->Ivel)), torque);
+        t4Vector torque = scale3130(cross3130(n, (*(&hit.Inorm))), Vel);
+        addEq3130((*(&hit.Ivel)), torque);
     }
 }
 #endif

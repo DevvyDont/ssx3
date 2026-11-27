@@ -587,20 +587,21 @@ struct tARGBInit : tARGB {
  * its +0x21 byte, and loads the record's text id (+0x24) when nonzero (clear, cUITextScroll_clearBuffer; add, cUITextScroll_addUnicodeStringByID).
  * When mShadow is then set, takes mShadowColour from its RGBA bytes (+0x28, scaled by 1/255).
  *
- * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
+ * @param pObj  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUITextScroll_setUIData(cUITextScroll* self, tUITextScroll* data)
+void cUITextScroll::setUIData(tUIBaseObject* pObj)
 {
-    cUIThing_setUIData_2(self, data);
-    self->mAttrTextScroll.mFont = data->mFontID & 3;
-    self->setShadow(data->mTextFlags & 1);
+    tUITextScroll* data = (tUITextScroll*)pObj;
+    cUIThing_setUIData_2(this, data);
+    mAttrTextScroll.mFont = data->mFontID & 3;
+    setShadow(data->mTextFlags & 1);
     if (((int)data->mStringID) != 0) {
-        cUITextScroll_clearBuffer_1(self);
-        self->addUnicodeStringByID(((int)data->mStringID));
+        cUITextScroll_clearBuffer_1(this);
+        addUnicodeStringByID(((int)data->mStringID));
     }
-    int bits = *(int*)&self->mAttrTextScroll >> 3;
+    int bits = *(int*)&mAttrTextScroll >> 3;
     if (bits & 1) {
-        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+        mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
                                         data->mSColour.r * 0.003921568859368563f,
                                         data->mSColour.g * 0.003921568859368563f,
                                         data->mSColour.b * 0.003921568859368563f);

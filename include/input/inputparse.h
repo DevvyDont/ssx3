@@ -100,6 +100,8 @@ CHECK_OFFSET(tIdentifier, Name, 0x00);
 CHECK_OFFSET(tIdentifier, Expression, 0x40);
 CHECK_SIZE(tIdentifier, 0x44);
 
+union tInputOpCode;
+
 struct cInputMapParser {
     // A token (CurrentToken). [O] On Tour's cInputMapParser::eToken, names and values; [P] preview assert
     // "CurrentToken == kTokenIdent"; [U] readToken stores these numbers and the parse* functions compare them.
@@ -183,6 +185,13 @@ struct cInputMapParser {
     void* parseUnaryFunc(int op) __asm__("cInputMapParser_parseUnaryFunc");
     int compileStatement(const char* name, int* out, int max, int defaultModifier)
         __asm__("cInputMapParser_compileStatement");
+    void error(const char* fmt, ...) __asm__("cInputMapParser_error");
+    int compileParseNode(tParseNode* node, int* dst, void* vcode, int cap, int defaultModifier)
+        __asm__("cInputMapParser_compileParseNode");
+    int compileBinaryNode(tParseNode* node, int* dst, tInputOpCode* code, int cap, int op, int defaultModifier)
+        __asm__("cInputMapParser_compileBinaryNode");
+    int compileUnaryNode(tParseNode* node, int* dst, tInputOpCode* code, int cap, int op, int defaultModifier)
+        __asm__("cInputMapParser_compileUnaryNode");
 };
 
 CHECK_OFFSET(cInputMapParser, File, 0x00000);

@@ -105,6 +105,11 @@ struct cOVState_MESSAGECENTER : public cOVState {
     virtual void onCreateScreen() __asm__("cOVState_MESSAGECENTER_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cOVState_MESSAGECENTER_onDestroyScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_MESSAGECENTER_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cOVState_MESSAGECENTER_onWidgetEvent");
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_MESSAGECENTER_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int value)
+        __asm__("cOVState_MESSAGECENTER_onWidgetMenu");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cOVState_MESSAGECENTER_onPopupEvent");
 };
 
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpUnreadMail, 0x9C);
@@ -162,6 +167,9 @@ struct cOVState_ViewPopup : public cUIState {
     virtual void onCreateScreen() __asm__("cOVState_ViewPopup_onCreateScreen");
     virtual bool onGainTransition(int on) __asm__("cOVState_ViewPopup_onGainTransition");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cOVState_ViewPopup_onWidgetCreate");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVState_ViewPopup_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cOVState_ViewPopup_onWidgetMenu");
 };
 
 CHECK_OFFSET(cOVState_ViewPopup, mpNumberLabel, 0x48);

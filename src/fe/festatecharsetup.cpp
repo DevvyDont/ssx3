@@ -152,7 +152,7 @@ INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onWidgetMenu);
  * @param event  the menu event
  * @return 0x100 for kONMISC, else 0x101
  */
-extern "C" int cFEStateCharSetup_onWidgetMenu(cFEStateCharSetup* self, int menu, int event)
+int cFEStateCharSetup::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     return event != cUIMenu::kONMISC ? 257 : 0x100;
 }

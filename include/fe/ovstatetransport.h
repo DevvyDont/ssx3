@@ -54,6 +54,13 @@ struct cOVState_TRANSPORT : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void * cOVState_TRANSPORT_2(int engine, int overlayId) __asm__("cOVState_TRANSPORT_cOVState_TRANSPORT_2");
+    // retail's destructor cOVState_TRANSPORT__cOVState_TRANSPORT stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVState_TRANSPORT();
+    virtual void onWidgetCreate(cUIThing*) __asm__("cOVState_TRANSPORT_onWidgetCreate__FPv");
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_TRANSPORT_onGainFocus");
+    virtual void onWidgetEvent(cUIThing*, unsigned int) __asm__("cOVState_TRANSPORT_onWidgetEvent");
+    virtual void onInputAlways(cUIInput*) __asm__("cOVState_TRANSPORT_onInputAlways__FPv");
 };
 
 CHECK_OFFSET(cOVState_TRANSPORT, mMap, 0x9C);

@@ -135,10 +135,10 @@ extern "C" void cFEState_onGainFocus(void* self);
  * Runs the base cFEState_onGainFocus() and calls setFocus(1) (vtable slot 7) on the widget that
  * cFEStateBuyAttrib_onWidgetCreate() stored at 0xAC, without a null check.
  */
-extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
+void cFEStateBuyAttrib::onGainFocus(cUIState*)
 {
-    cFEState_onGainFocus(self);
-    cUIMenu* obj = self->pAttribMenu;
+    cFEState_onGainFocus(this);
+    cUIMenu* obj = pAttribMenu;
     obj->setFocus(1);
 }
 #endif
@@ -158,7 +158,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateBuyAttrib_onWidgetMenu(cFEStateBuyAttrib* self, int pMenu, unsigned int key)
+int cFEStateBuyAttrib::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -187,11 +187,11 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* self);
  * @param sender  the popup that closed (the cUIStateBuyPopup)
  * @param msg  the popup event (0x15 opened, 0x16 closed)
  */
-extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, cUIState* sender, int msg)
+void cFEStateBuyAttrib::onPopupEvent(cUIState* sender, unsigned int msg)
 {
     if (msg == cUIState::kONPOPUPDESTROY) {
         if (((cUIStateBuyPopup*)sender)->mbAccept != 0) {
-            self->buyExperience();
+            buyExperience();
         }
     }
 }
@@ -714,10 +714,10 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(cFEStateCareerStats* self, in
  * Runs the base cFEState_onGainFocus(), then cFEStateCareerStats_setupMenuFocus() with the menu index kept at
  * 0x48.
  */
-extern "C" void cFEStateCareerStats_onGainFocus(cFEStateCareerStats* self)
+void cFEStateCareerStats::onGainFocus(cUIState*)
 {
-    cFEState_onGainFocus(self);
-    self->setupMenuFocus(self->mStatsState);
+    cFEState_onGainFocus(this);
+    setupMenuFocus(mStatsState);
 }
 #endif
 
@@ -735,7 +735,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetMenu);
  * @param Event  the menu event
  * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
-extern "C" int cFEStateCareerStats_onWidgetMenu(cFEStateCareerStats* self, int pMenu, unsigned int Event)
+int cFEStateCareerStats::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     switch (Event) {
     case cUIMenu::kONNEXT:
@@ -761,7 +761,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (6 back; 5 accept is ignored)
  */
-extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUIThing* item, int msg)
+void cFEStateCareerStats::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
@@ -770,10 +770,10 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
     case cUIState::kONNEXT:
         break;
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = (cUICustomInterface*)((void*)self->mpEngine->mpCustom);
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = (cUICustomInterface*)((void*)mpEngine->mpCustom);
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -830,97 +830,97 @@ static inline void playFrame_56C8(cFEStateCareerStats* s, char* name)
  * @param w  the controller input (cUIInput)
  * @return 1 when a key changed the page or a list, otherwise 0
  */
-extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIInput* w)
+bool cFEStateCareerStats::onInputBegin(cUIInput* w)
 {
     int msg = 0;
     int handled = 0;
     if (wantCall_56C8(((char*)w), 19)) {
-        playFrame_56C8((self), str_hll);
+        playFrame_56C8((this), str_hll);
         msg = 1;
         handled = 1;
-        if (--self->mStatsState < 0) {
-            self->mStatsState = cFEStateCareerStats::kCareerStats_RidersBest;
+        if (--mStatsState < 0) {
+            mStatsState = cFEStateCareerStats::kCareerStats_RidersBest;
         }
     } else if (wantCall_56C8(((char*)w), 20)) {
-        playFrame_56C8((self), str_hlr);
+        playFrame_56C8((this), str_hlr);
         msg = 1;
         handled = 1;
-        if (++self->mStatsState >= 4) {
-            self->mStatsState = 0;
+        if (++mStatsState >= 4) {
+            mStatsState = 0;
         }
     }
     if (handled) {
-        self->setupMenuFocus(self->mStatsState);
-        self->setupLayout();
+        setupMenuFocus(mStatsState);
+        setupLayout();
     }
-    if (self->mStatsState == cFEStateCareerStats::kCareerStats_Highlights) {
+    if (mStatsState == cFEStateCareerStats::kCareerStats_Highlights) {
         if (wantCall_56C8(((char*)w), 17)) {
-            if (self->mTopHighlightNumber > 0) {
-                self->mTopHighlightNumber--;
-                self->setupHighlightsList();
+            if (mTopHighlightNumber > 0) {
+                mTopHighlightNumber--;
+                setupHighlightsList();
                 handled = 1;
-                playFrame_56C8((self), str_high_up);
+                playFrame_56C8((this), str_high_up);
                 msg = 2;
             } else {
                 msg = 4;
             }
         } else if (wantCall_56C8(((char*)w), 18)) {
-            if (self->mTopHighlightNumber + 3 < 0x18) {
-                self->mTopHighlightNumber++;
-                self->setupHighlightsList();
+            if (mTopHighlightNumber + 3 < 0x18) {
+                mTopHighlightNumber++;
+                setupHighlightsList();
                 handled = 1;
-                playFrame_56C8((self), str_high_down);
+                playFrame_56C8((this), str_high_down);
                 msg = 2;
             } else {
                 msg = 4;
             }
         }
-    } else if (self->mStatsState == cFEStateCareerStats::kCareerStats_Race_PlatMedals) {
+    } else if (mStatsState == cFEStateCareerStats::kCareerStats_Race_PlatMedals) {
         if (wantCall_56C8(((char*)w), 17)) {
-            if (self->mTopRaceEvent > 0) {
-                self->mTopRaceEvent--;
-                self->setupRacePlatinumMedalsList();
+            if (mTopRaceEvent > 0) {
+                mTopRaceEvent--;
+                setupRacePlatinumMedalsList();
                 handled = 1;
-                playFrame_56C8((self), str_race_up);
+                playFrame_56C8((this), str_race_up);
                 msg = 2;
             } else {
                 msg = 4;
             }
         } else if (wantCall_56C8(((char*)w), 18)) {
-            if (self->mTopRaceEvent + 5 < self->mTotalRaceEvent) {
+            if (mTopRaceEvent + 5 < mTotalRaceEvent) {
                 handled = 1;
-                self->mTopRaceEvent++;
-                self->setupRacePlatinumMedalsList();
-                playFrame_56C8((self), str_race_down);
+                mTopRaceEvent++;
+                setupRacePlatinumMedalsList();
+                playFrame_56C8((this), str_race_down);
                 msg = 2;
             } else {
                 msg = 4;
             }
         }
-    } else if (self->mStatsState == cFEStateCareerStats::kCareerStats_FS_PlatMedals) {
+    } else if (mStatsState == cFEStateCareerStats::kCareerStats_FS_PlatMedals) {
         if (wantCall_56C8(((char*)w), 17)) {
-            if (self->mTopFreestyleEvent > 0) {
-                self->mTopFreestyleEvent--;
-                self->setupFSPlatinumMedalsList();
+            if (mTopFreestyleEvent > 0) {
+                mTopFreestyleEvent--;
+                setupFSPlatinumMedalsList();
                 handled = 1;
-                playFrame_56C8((self), str_free_up);
+                playFrame_56C8((this), str_free_up);
                 msg = 2;
             } else {
                 msg = 4;
             }
         } else if (wantCall_56C8(((char*)w), 18)) {
-            if (self->mTopFreestyleEvent + 5 < self->mTotalFreestyleEvent) {
+            if (mTopFreestyleEvent + 5 < mTotalFreestyleEvent) {
                 handled = 1;
-                self->mTopFreestyleEvent++;
-                self->setupFSPlatinumMedalsList();
-                playFrame_56C8((self), str_free_down);
+                mTopFreestyleEvent++;
+                setupFSPlatinumMedalsList();
+                playFrame_56C8((this), str_free_down);
                 msg = 2;
             } else {
                 msg = 4;
             }
         }
     }
-    cUISoundInterface* sound = self->mpEngine->mpSound;
+    cUISoundInterface* sound = mpEngine->mpSound;
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)

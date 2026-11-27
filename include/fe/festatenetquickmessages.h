@@ -62,6 +62,9 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateNetQuickMessages_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateNetQuickMessages_onCreateScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateNetQuickMessages_onGainTransition");
+    virtual void onUpdate() __asm__("cFEStateNetQuickMessages_onUpdate__FPv");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateNetQuickMessages_onWidgetEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetQuickMessages_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);

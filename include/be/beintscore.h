@@ -115,6 +115,8 @@ struct cBEScoreInterface : public cBEInterface {
     // keeps the vtable out of the units defining the other overrides
     virtual void submit() __asm__("cBEScoreInterface_submit__FPv");
     virtual void discard() __asm__("cBEScoreInterface_discard");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cBEScoreInterface_writeToReplayFrame__FPv");
+    virtual void readFromReplayFrame(cBxReplayFrame*) __asm__("cBEScoreInterface_readFromReplayFrame__FPv");
 };
 
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);

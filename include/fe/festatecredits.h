@@ -41,6 +41,8 @@ struct cFEStateCredits : public cUIState {
     virtual void onRender2D() __asm__("cFEStateCredits_onRender2D");
     virtual void onUpdate() __asm__("cFEStateCredits_onUpdate");
     virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateCredits_onInputBegin");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int) __asm__("cFEStateCredits_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateCredits_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateCredits, mpWidget, 0x048);

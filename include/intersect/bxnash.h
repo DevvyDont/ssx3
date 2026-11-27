@@ -168,6 +168,8 @@ struct nash_Cell {
     void descend4(void* ctx) __asm__("nash_Cell_descend4");
     void descend5(void* ctx) __asm__("nash_Cell_descend5");
     void descend6(SplineCallback* splineQuery) __asm__("nash_Cell_descend6");
+    void addnode(int idx, nash_Node* item, nash_CellKey* target, const nash_CellKey* mykey)
+        __asm__("nash_Cell_addnode");
 };
 
 CHECK_OFFSET(nash_Cell, children, 0x000);

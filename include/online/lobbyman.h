@@ -253,6 +253,11 @@ struct LobbyMan {
     void onQuickMatchResponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onQuickMatchResponse");
     int getnumrooms() __asm__("LobbyMan_getnumrooms");
     void onresultsreportresponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onresultsreportresponse");
+    void* onincomingmsg() __asm__("LobbyMan_onincomingmsg__FPv");
+    void onchatmsg(LobbyApiMsgT* msg) __asm__("LobbyMan_onchatmsg");
+    void onplaymsg(LobbyApiMsgT* msg) __asm__("LobbyMan_onplaymsg");
+    void onroomselected(LobbyApiMsgT* msg) __asm__("LobbyMan_onroomselected");
+    void onchallengeresponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onchallengeresponse");
 };
 
 CHECK_OFFSET(LobbyMan, mState, 0x000);

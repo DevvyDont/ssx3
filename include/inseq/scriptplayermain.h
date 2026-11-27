@@ -96,6 +96,7 @@ struct cScriptPlayerMain {
     int DoUpdate(float time, float prev, float speed) __asm__("cScriptPlayerMain_DoUpdate");
     int Init(tInSeqScriptHeader* data, char* owner, int playerId) __asm__("cScriptPlayerMain_Init");
     void Play1(int loopScript) __asm__("cScriptPlayerMain_Play1");
+    void DoUpdateFrame() __asm__("cScriptPlayerMain_DoUpdateFrame");
 };
 
 CHECK_OFFSET(tInSeqScriptHeader, isSmallEndian, 0x0);

@@ -96,15 +96,15 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadHintState_onGainTransition(cFELoadHintState* self)
+bool cFELoadHintState::onGainTransition(int)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -114,9 +114,8 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onWidgetCreate__FPv);
 /**
  * Does nothing: the load-hint state's onWidgetCreate has an empty body.
  */
-void cFELoadHintState_onWidgetCreate(void* vself)
+void cFELoadHintState::onWidgetCreate(cUIThing*)
 {
-    cFELoadHintState* self = (cFELoadHintState*)vself;
 }
 #endif
 
@@ -200,15 +199,15 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadState_onGainTransition(cFELoadState* self)
+bool cFELoadState::onGainTransition(int)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -286,9 +285,8 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onWidgetCreate__FPv);
 /**
  * Does nothing: the in-lodge loading state's onWidgetCreate has an empty body.
  */
-void cFELoadStateInLodge_onWidgetCreate(void* vself)
+void cFELoadStateInLodge::onWidgetCreate(cUIThing*)
 {
-    cFELoadStateInLodge* self = (cFELoadStateInLodge*)vself;
 }
 #endif
 
@@ -309,15 +307,15 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadStateInLodge_onGainTransition(cFELoadStateInLodge* self)
+bool cFELoadStateInLodge::onGainTransition(int)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
-    return 0;
+    return false;
 }
 #endif
 

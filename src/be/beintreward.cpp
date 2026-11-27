@@ -655,10 +655,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumSongs__FPv);
  *
  * @return the song count
  */
-int cBERewardInterface_getTotalNumSongs(void* vself)
+int cBERewardInterface::getTotalNumSongs()
 {
-    cBERewardInterface* self = (cBERewardInterface*)vself;
-    return cAudioInterface_bxAudio(self)->MusicSys.mNumFESongs;
+    return cAudioInterface_bxAudio(this)->MusicSys.mNumFESongs;
 }
 #endif
 

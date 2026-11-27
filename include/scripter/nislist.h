@@ -209,6 +209,10 @@ struct tNISList {
     void PlayNextScript() __asm__("tNISList_PlayNextScript");
     bool IsVideo(void* entry) __asm__("tNISList_IsVideo");
     void DoPause(int on, int hard) __asm__("tNISList_DoPause");
+    void* Pause(int pauseList) __asm__("tNISList_Pause__FPvi");
+    void Update() __asm__("tNISList_Update");
+    int Play(int fade, int notify) __asm__("tNISList_Play");
+    int DoTransitionToNext() __asm__("tNISList_DoTransitionToNext");
 };
 
 CHECK_OFFSET(tNISList, mpNISEngine, 0x000);

@@ -107,6 +107,8 @@ struct cBoostNode : public cInstanceNode {
         __asm__("cBoostNode_cBoostNode1");
     void applyDrag(cBeing* obj) __asm__("cBoostNode_applyDrag");
     void applyBoost(cBeing* obj) __asm__("cBoostNode_applyBoost");
+    void boostStart() __asm__("cBoostNode_boostStart__FPv");
+    void boostEnd() __asm__("cBoostNode_boostEnd__FPv");
 };
 
 CHECK_OFFSET(cBoostNode, unk_01C, 0x1C);

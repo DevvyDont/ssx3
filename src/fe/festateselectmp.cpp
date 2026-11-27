@@ -72,25 +72,25 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultiplayerMode* self, cUIThing* item, int msg)
+void cFEStateSelectMultiplayerMode::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case cUIState::kONNEXT: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getNextState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getNextState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }

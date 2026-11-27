@@ -34,20 +34,26 @@ class cBeing {
 public:
     // 0x000: the vptr (in a cRider: 0x6C0). Slots:
     virtual ~cBeing();                                       // 1  cRider__cRider (deleting dtor)
-    virtual t4Vector* getVelocity();                         // 2  cRider_getVelocity
-    virtual bool isIntersecting(tInstanceRecord* inst);      // 3  cRider_isIntersecting
-    virtual void applyBoost(t4Vector* v);                    // 4  cRider_applyBoost
-    virtual t4Vector* getPosition();                         // 5  cRider_getPosition
-    virtual t4Matrix* getTransform();                        // 6  cBeing_getTransform
+    virtual t4Vector* getVelocity() __asm__("cBeing_getVelocity__FPv");                         // 2  cRider_getVelocity
+    virtual bool isIntersecting(tInstanceRecord* inst)
+        __asm__("cBeing_isIntersecting__FPv");      // 3  cRider_isIntersecting
+    virtual void applyBoost(t4Vector* v) __asm__("cBeing_applyBoost__FPv");                    // 4  cRider_applyBoost
+    virtual t4Vector* getPosition() __asm__("cBeing_getPosition__FPv");                         // 5  cRider_getPosition
+    virtual t4Matrix* getTransform()
+        __asm__("cBeing_getTransform__FPv");                        // 6  cBeing_getTransform
     virtual int getAIIndex() __asm__("cBeing_getAIIndex__FPv");                                // 7  cRider_getAIIndex
     virtual bool isHuman() __asm__("cBeing_isHuman__FPv");                                  // 8  cRider_isHuman
     virtual bool isComputer() __asm__("cBeing_isComputer__FPv");                               // 9  cRider_isComputer
-    virtual void transport(t4Matrix* mat);                   // 10 cRider_transport
+    virtual void transport(t4Matrix* mat) __asm__("cBeing_transport__FPv");                   // 10 cRider_transport
     virtual void resetToPath() __asm__("cBeing_resetToPath__FPv");                              // 11 cBeing_resetToPath
-    virtual void initForMission(t4Matrix* mat);              // 12 cRider_initForMission
-    virtual void flagEventSpeedBoost(float sec);             // 13 cRider_flagEventSpeedBoost
-    virtual void flagEventTrickBoost(float sec);             // 14 cRider_flagEventTrickBoost
-    virtual void flagEventTrickMultiplier(float mult);       // 15 cRider_flagEventTrickMultiplier
+    virtual void initForMission(t4Matrix* mat)
+        __asm__("cBeing_initForMission__FPv");              // 12 cRider_initForMission
+    virtual void flagEventSpeedBoost(float sec)
+        __asm__("cBeing_flagEventSpeedBoost__FPv");             // 13 cRider_flagEventSpeedBoost
+    virtual void flagEventTrickBoost(float sec)
+        __asm__("cBeing_flagEventTrickBoost__FPv");             // 14 cRider_flagEventTrickBoost
+    virtual void flagEventTrickMultiplier(float mult)
+        __asm__("cBeing_flagEventTrickMultiplier__FPv");       // 15 cRider_flagEventTrickMultiplier
     virtual void vibrationReset();                           // 16 empty; cPlayer_vibrationReset
     virtual void vibrationBump(float val);                   // 17 empty; cPlayer_vibrationBump
     virtual void vibrationRumble(float val);                 // 18 empty; cPlayer_vibrationRumble

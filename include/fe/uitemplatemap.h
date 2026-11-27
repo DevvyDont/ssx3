@@ -63,6 +63,9 @@ CHECK_SIZE(tMapLocation, 0x6C);
 
 struct cUIText;
 
+struct cUIInput;
+struct cUIThing;
+
 struct cUITemplate_MAP {
     // The map's enums. [O] On Tour's eMapStyle (global there; the class static mMapStyle), eMapFEStartPoint
     // (mMapFEStart) and cUITemplate_MAP's own eMapPicTypes, eMapPopupType, eMapSelectableEvent and eMapState, names
@@ -132,6 +135,12 @@ struct cUITemplate_MAP {
     void setWidgetHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetHiliteColor");
     void setWidgetUnHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
     void setupLocationInfo() __asm__("cUITemplate_MAP_setupLocationInfo");
+    void setShowInfo(int show) __asm__("cUITemplate_MAP_setShowInfo");
+    void onWidgetCreate(cUIThing* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
+    int onGainTransition(int on) __asm__("cUITemplate_MAP_onGainTransition");
+    bool isMapEventCompleted(tMapLocation ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
+    int onInputBegin() __asm__("cUITemplate_MAP_onInputBegin__FPv");
+    void onInputAlways(cUIInput* menu) __asm__("cUITemplate_MAP_onInputAlways");
 };
 
 CHECK_OFFSET(cUITemplate_MAP, mShowInfo, 0x000);

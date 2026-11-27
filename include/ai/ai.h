@@ -209,6 +209,7 @@ struct cAI {
     void* resolveRace() __asm__("cAI_resolveRace__FPv");
     void* InitGroupAI() __asm__("cAI_InitGroupAI__FPv");
     void RefreshGroupAI() __asm__("cAI_RefreshGroupAI");
+    void forceAIState(int state) __asm__("cAI_forceAIState");
 };
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).

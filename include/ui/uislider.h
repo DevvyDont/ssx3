@@ -43,6 +43,8 @@ struct cUISlider : public cUIThing {
     void setBackgroundObject(cUIThing* background) __asm__("cUISlider_setBackgroundObject");
     void setKnobObject(cUIThing* knob) __asm__("cUISlider_setKnobObject");
     virtual void render2D(float dx, float dy) __asm__("cUISlider_render2D");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUISlider_setUIData");
+    virtual bool onInput(const cUIInput* input) __asm__("cUISlider_onInput");
 };
 
 CHECK_OFFSET(cUISlider, mValue, 0x074);

@@ -193,6 +193,7 @@ struct cScriptManualAlgorithm : public cScriptAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptManualAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptManualAlgorithm_update");
+    virtual void snap(int) __asm__("cScriptManualAlgorithm_snap");
 };
 
 CHECK_OFFSET(cScriptManualAlgorithm, Position, 0x30);
@@ -223,6 +224,7 @@ struct cScriptPointAlgorithm : public cScriptAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptPointAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptPointAlgorithm_update");
+    virtual void snap(int) __asm__("cScriptPointAlgorithm_snap");
 };
 
 CHECK_OFFSET(cScriptPointAlgorithm, Position, 0x30);
@@ -252,6 +254,7 @@ struct cScriptTargetAlgorithm : public cScriptAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptTargetAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptTargetAlgorithm_update");
+    virtual void snap(int) __asm__("cScriptTargetAlgorithm_snap");
 };
 
 CHECK_OFFSET(cScriptTargetAlgorithm, Position, 0x30);
@@ -282,6 +285,7 @@ struct cScriptRelativeAlgorithm : public cScriptAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptRelativeAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptRelativeAlgorithm_update");
+    virtual void snap(int) __asm__("cScriptRelativeAlgorithm_snap");
 };
 
 CHECK_OFFSET(cScriptRelativeAlgorithm, Position, 0x30);

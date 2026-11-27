@@ -70,6 +70,7 @@ struct cAnimFrame {
     void getDeriv(t4Vector* vel, t4Vector* rotVel, float time) __asm__("cAnimFrame_getDeriv");
     void* cAnimFrame1() __asm__("cAnimFrame_cAnimFrame1");
     void getAngles(t4Vector* out) __asm__("cAnimFrame_getAngles");
+    void update(float time) __asm__("cAnimFrame_update");
 };
 
 CHECK_OFFSET(cAnimFrame, Seg, 0x000);

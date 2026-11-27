@@ -44,8 +44,8 @@ struct cEffectModifier : public cEffectLink {
     // --- cEffectModifier
     // cEffectModifier's own slots ([R] cEffectModifier_vtbl; types [O] On Tour's class cEffectModifier):
     virtual void update();                                      // 5
-    virtual void render();                                      // 6
-    virtual void signal(int signal, float arg);                 // 7
+    virtual void render() __asm__("cEffectModifier_render__FPv");                                      // 6
+    virtual void signal(int signal, float arg) __asm__("cEffectModifier_signal__FPv");                 // 7
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
                                     //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
@@ -83,6 +83,7 @@ struct cParticleModifier : public cEffectModifier {
     virtual void update() __asm__("cParticleModifier_update");
     virtual void render() __asm__("cParticleModifier_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParticleModifier_writeToReplayFrame");
+    virtual int getType() __asm__("cParticleModifier_getType__FPv");
 };
 
 CHECK_OFFSET(cParticleModifier, Transform, 0x10);
@@ -129,6 +130,7 @@ struct cDynamicParticleModifier : public cEffectModifier {
     virtual void fadeEffect() __asm__("cDynamicParticleModifier_fadeEffect__FPv");
     virtual void render() __asm__("cDynamicParticleModifier_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cDynamicParticleModifier_writeToReplayFrame");
+    virtual int getType() __asm__("cDynamicParticleModifier_getType__FPv");
 };
 
 CHECK_OFFSET(cDynamicParticleModifier, Mesh, 0x10);
@@ -210,6 +212,7 @@ struct cHaloModifier : public cEffectModifier {
     virtual void update() __asm__("cHaloModifier_update");
     virtual void render() __asm__("cHaloModifier_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cHaloModifier_writeToReplayFrame");
+    virtual int getType() __asm__("cHaloModifier_getType__FPv");
 };
 
 CHECK_OFFSET(cHaloModifier, Color, 0x010);

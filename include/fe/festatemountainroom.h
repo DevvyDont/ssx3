@@ -58,6 +58,10 @@ struct cFEStateMountainRoom : public cUIState {
     virtual bool onInputBegin(cUIInput* widget) __asm__("cFEStateMountainRoom_onInputBegin");
     virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateMountainRoom_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateMountainRoom_onUpdate");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
+        __asm__("cFEStateMountainRoom_onWidgetMenu");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateMountainRoom_onWidgetCreate");
+    void updateMarkers() __asm__("cFEStateMountainRoom_updateMarkers");
 };
 
 CHECK_OFFSET(cFEStateMountainRoom, mpPassGroup, 0x048);

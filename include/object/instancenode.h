@@ -37,41 +37,67 @@ struct cInstanceNode : public cSortObjNode {
     // cInstanceNode_cInstanceNode1 / cInstanceNode_cInstanceNode. Its new slots ([R] cInstanceNode_vtbl, 46 in all:
     // names from its entries cInstanceNode_*; types [O] On Tour's cInstanceNode / cMoveNode definitions):
     virtual bool updateNode();                                                      // 15
-    virtual bool isMoveNode();                                                      // 16
-    virtual bool isComplete();                                                      // 17
-    virtual void throwMe(const t4Vector& vel);                                      // 18
-    virtual void* getNodeState();                                                   // 19
-    virtual bool hasFocusCount() const;                                             // 20
-    virtual int incFocusCount(tInstanceRecord* pInst);                              // 21
-    virtual int decFocusCount(tInstanceRecord* pInst);                              // 22
-    virtual int getFocusCount() const;                                              // 23
+    virtual bool isMoveNode()
+        __asm__("cInstanceNode_isMoveNode__FPv");                                                      // 16
+    virtual bool isComplete()
+        __asm__("cInstanceNode_isComplete__FPv");                                                      // 17
+    virtual void throwMe(const t4Vector& vel)
+        __asm__("cInstanceNode_throwMe__FPv");                                      // 18
+    virtual void* getNodeState()
+        __asm__("cInstanceNode_getNodeState__FPv");                                                   // 19
+    virtual bool hasFocusCount() const
+        __asm__("cInstanceNode_hasFocusCount__FPv");                                             // 20
+    virtual int incFocusCount(tInstanceRecord* pInst)
+        __asm__("cInstanceNode_incFocusCount__FPv");                              // 21
+    virtual int decFocusCount(tInstanceRecord* pInst)
+        __asm__("cInstanceNode_decFocusCount__FPv");                              // 22
+    virtual int getFocusCount() const
+        __asm__("cInstanceNode_getFocusCount__FPv");                                              // 23
     virtual const t4Matrix* getRootTransform();                                     // 24
     virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst);               // 25 On Tour's second
                                                                                     //    getRootTransform overload
-    virtual bool hasAnimMats() const;                                               // 26
-    virtual const t4Matrix* getAnimMats();                                          // 27
-    virtual const t4Matrix* getInstAnimMats(tInstanceRecord* inst);                 // 28
-    virtual const t4Matrix* getAnimMat(int animmat);                                // 29
-    virtual float getAnimFrame() const;                                             // 30
-    virtual int getAnimDir() const;                                                 // 31
-    virtual int frameUpdateEvent(float frame);                                      // 32
+    virtual bool hasAnimMats() const
+        __asm__("cInstanceNode_hasAnimMats__FPv");                                               // 26
+    virtual const t4Matrix* getAnimMats()
+        __asm__("cInstanceNode_getAnimMats__FPv");                                          // 27
+    virtual const t4Matrix* getInstAnimMats(tInstanceRecord* inst)
+        __asm__("cInstanceNode_getInstAnimMats__FPv");                 // 28
+    virtual const t4Matrix* getAnimMat(int animmat)
+        __asm__("cInstanceNode_getAnimMat__FPv");                                // 29
+    virtual float getAnimFrame() const
+        __asm__("cInstanceNode_getAnimFrame__FPv");                                             // 30
+    virtual int getAnimDir() const
+        __asm__("cInstanceNode_getAnimDir__FPv");                                                 // 31
+    virtual int frameUpdateEvent(float frame)
+        __asm__("cInstanceNode_frameUpdateEvent__FPv");                                      // 32
     virtual void makeAnimMats(const t4Matrix* root, t4Matrix* animMats)
         __asm__("cInstanceNode_makeAnimMats");            // 33
     virtual void expire(int runscript)
         __asm__("cInstanceNode_expire");                                             // 34 On Tour bool
     virtual void loseFocus()
         __asm__("cInstanceNode_loseFocus");                                                       // 35
-    virtual void signal(int signal, float arg);                                     // 36
-    virtual void makeActive();                                                      // 37
-    virtual bool hasIntersect() const;                                              // 38
-    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags); // 39
-    virtual void onCollide(const tCollideInfo* tc, const tIntersectInfo* ti, cBeing* pBeing); // 40
-    virtual void setDebounce(float seconds);                                        // 41
-    virtual void updateIntersectInfo(tIntersectInfo& info);                         // 42
-    virtual void applyForce(const tIntersectInfo& intInfo, const t4Vector& force);  // 43
-    virtual bool hasBoundBox();                                                     // 44
-    virtual const tBoundBox* getBoundBox() const;                                   // 45
-    virtual bool isFlexRail() const;                                                // 46
+    virtual void signal(int signal, float arg)
+        __asm__("cInstanceNode_signal__FPv");                                     // 36
+    virtual void makeActive()
+        __asm__("cInstanceNode_makeActive__FPv");                                                      // 37
+    virtual bool hasIntersect() const
+        __asm__("cInstanceNode_hasIntersect__FPv");                                              // 38
+    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags)
+        __asm__("cInstanceNode_intersect__FPv"); // 39
+    virtual void onCollide(const tCollideInfo* tc, const tIntersectInfo* ti, cBeing* pBeing)
+        __asm__("cInstanceNode_onCollide__FPv"); // 40
+    virtual void setDebounce(float seconds)
+        __asm__("cInstanceNode_setDebounce__FPv");                                        // 41
+    virtual void updateIntersectInfo(tIntersectInfo& info)
+        __asm__("cInstanceNode_updateIntersectInfo__FPv");                         // 42
+    virtual void applyForce(const tIntersectInfo& intInfo, const t4Vector& force)
+        __asm__("cInstanceNode_applyForce__FPv");  // 43
+    virtual bool hasBoundBox()
+        __asm__("cInstanceNode_hasBoundBox__FPv");                                                     // 44
+    virtual const tBoundBox* getBoundBox() const
+        __asm__("cInstanceNode_getBoundBox__FPv");                                   // 45
+    virtual bool isFlexRail() const
+        __asm__("cInstanceNode_isFlexRail__FPv");                                                // 46
     // --- cInstanceNode ---
     tInstanceRecord* Instance;   // 0x018 [P] getInstance (lw 0x18); [O] cInstanceNode::Instance; [R] cInstanceNode_cInstanceNode1 stores
                                  //       its record arg; [U] record flags at +0x8, root transform at +0x10, model at +0x80
@@ -87,6 +113,7 @@ struct cInstanceNode : public cSortObjNode {
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cInstanceNode_writeToReplayFrame");
     void* runCollideScript(int collideInfo, int intersectInfo, int pBeing)
         __asm__("cInstanceNode_runCollideScript__FPviii");
+    virtual unsigned int getSectionId() __asm__("cInstanceNode_getSectionId__FPv");
 };
 
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);

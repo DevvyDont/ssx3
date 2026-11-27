@@ -297,12 +297,12 @@ int cStreamInstance_GetRequestStatus_impl(void* self, int a1, int* out) __asm__(
  * @param out  receives the stream status, or 0
  * @return the driver's result
  */
-int cStreamInstance_GetRequestStatus_impl(void* self, int requestStatus, int* out)
+int cStreamInstance::GetRequestStatus(int requestStatus, int* out)
 {
     int buf[4];
     int* status = out ? out : buf;
     int result;
-    cStreamInstance_GetStatus(self, status);
+    cStreamInstance_GetStatus(this, status);
     SNDSYS_entercritical();
     result = SNDSTRM_requeststatus(status[1], requestStatus);
     SNDSYS_leavecritical();

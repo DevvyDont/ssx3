@@ -158,6 +158,14 @@ struct cMoveNode : public cInstanceNode {
     void addPosition(const t4Vector* pos) __asm__("cMoveNode_addPosition");
     void addParent(tInstanceRecord* parentinst, int mesh, const t4Vector* pos) __asm__("cMoveNode_addParent");
     virtual const t4Matrix* getInstAnimMats(tInstanceRecord* inst) __asm__("cMoveNode_getInstAnimMats");
+    virtual void apply() __asm__("cMoveNode_apply");
+    virtual bool isMoveNode() __asm__("cMoveNode_isMoveNode__FPv");
+    virtual void renderModel(const t4Matrix* tex, int flags) __asm__("cMoveNode_renderModel");
+    virtual void applyForce(const tIntersectInfo&, const t4Vector&) __asm__("cMoveNode_applyForce");
+    virtual void updateIntersectInfo(tIntersectInfo&) __asm__("cMoveNode_updateIntersectInfo");
+    virtual void signal(int, float) __asm__("cMoveNode_signal");
+    virtual int incFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_incFocusCount");
+    virtual int decFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_decFocusCount");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

@@ -209,6 +209,7 @@ struct cBERewardInterface : public cBEInterface {
         __asm__("cBERewardInterface_getTrackMedal__FPviiii");
     const cBEUserAwards* getUserAwards() __asm__("cBERewardInterface_getUserAwards__FPv");
     int getTotalNumUserAwards() __asm__("cBERewardInterface_getTotalNumUserAwards__FPv");
+    int getTotalNumSongs() __asm__("cBERewardInterface_getTotalNumSongs__FPv");
 };
 
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);

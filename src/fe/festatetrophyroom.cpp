@@ -192,7 +192,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetMenu);
  * @param Event  the menu event
  * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
-extern "C" int cFEStateTrophyRoom_onWidgetMenu(cFEStateTrophyRoom* self, int pMenu, unsigned int Event)
+int cFEStateTrophyRoom::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     switch (Event) {
     case cUIMenu::kONNEXT:
@@ -221,28 +221,28 @@ extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int ind
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (kONGAINFOCUS focused, kONPREV back)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUIThing* item, int msg)
+void cFEStateTrophyRoom::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case cUIState::kONPREV: {
-        cUIIcon* w = self->mpBigIcon;
+        cUIIcon* w = mpBigIcon;
         if (w != 0) {
             w->setVisible(0);
         }
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, self->mPeakNum);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, mPeakNum);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONGAINFOCUS:
-        self->mCurSelection = item->mMiscData;
-        self->updateBigArt(item->mMiscData);
-        self->updateStats(item->mMiscData);
+        mCurSelection = item->mMiscData;
+        updateBigArt(item->mMiscData);
+        updateStats(item->mMiscData);
         break;
     }
 }
@@ -650,7 +650,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
-extern "C" int cFEStateRewardsRoom_onWidgetMenu(cFEStateRewardsRoom* self, int pMenu, unsigned int key)
+int cFEStateRewardsRoom::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -998,7 +998,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
-extern "C" int cFEMemCard_onWidgetMenu(cFEMemCard* self, int menu, unsigned int key)
+int cFEMemCard::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {

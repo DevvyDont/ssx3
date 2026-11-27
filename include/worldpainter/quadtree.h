@@ -83,6 +83,7 @@ struct tQuadTreeNode {
 
     // Methods bound to their retail symbols by asm labels.
     void init() __asm__("tQuadTreeNode_init");
+    void setLeafNode(int key, int data) __asm__("tQuadTreeNode_setLeafNode");
 };
 
 CHECK_OFFSET(tQuadTreeNode, m_leaf, 0x0);

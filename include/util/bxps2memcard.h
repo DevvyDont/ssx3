@@ -293,6 +293,7 @@ struct cPS2MemCard {
     int GetFreeDirEntries() __asm__("cPS2MemCard_GetFreeDirEntries__FPv");
     void Init() __asm__("cPS2MemCard_Init");
     int GetLastError(int i) __asm__("cPS2MemCard_GetLastError");
+    void Update() __asm__("cPS2MemCard_Update");
 };
 
 CHECK_OFFSET(cPS2MemCard, mVtbl, 0x0000);

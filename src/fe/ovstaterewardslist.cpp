@@ -63,11 +63,12 @@ public:
  * kONNEXT colours the item and asks the custom interface's slot 4 (getNextState) for item id 1 only; the
  * result is pushed even when it is 0. kONPREV pushes the slot-5 result for the item's id when there is one.
  *
- * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the id
+ * @param pWidget  the widget (ignored when 0); its miscellaneous data (+0x18) is the id
  * @param msg  the widget event
  */
-extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUIObj_200288* item, int msg)
+void cOVStateRewardsList::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
+    cUIObj_200288* item = (cUIObj_200288*)pWidget;
     if (item == 0) {
         return;
     }
@@ -76,17 +77,17 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
         item->setColor(sColor_200288(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            cUICustomInterface* obj = self->mpEngine->mpCustom;
-            nextState = obj->getNextState((cUIState*)self, 1);
+            cUICustomInterface* obj = mpEngine->mpCustom;
+            nextState = obj->getNextState((cUIState*)this, 1);
         }
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, *(int*)((char*)item + 0x18));
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }

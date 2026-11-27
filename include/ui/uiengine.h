@@ -80,10 +80,14 @@ public:
     // cFECustom implementations (fe/fereal), which take and every caller passes an int state argument (On Tour:
     // void* pData):
     virtual ~cUICustomInterface();                                      // slot 1
-    virtual void onUpdate();                                            // slot 2
-    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event); // slot 3
-    virtual cUIState* getNextState(cUIState* pCurrentState, int pData); // slot 4
-    virtual cUIState* getPrevState(cUIState* pCurrentState, int pData); // slot 5
+    virtual void onUpdate()
+        __asm__("cUICustomInterface_onUpdate__FPv");                                            // slot 2
+    virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event)
+        __asm__("cUICustomInterface_onScreenEvent__FPv"); // slot 3
+    virtual cUIState* getNextState(cUIState* pCurrentState, int pData)
+        __asm__("cUICustomInterface_getNextState__FPv"); // slot 4
+    virtual cUIState* getPrevState(cUIState* pCurrentState, int pData)
+        __asm__("cUICustomInterface_getPrevState__FPv"); // slot 5
 };
 
 CHECK_OFFSET(cUICustomInterface, mpEngine, 0x000);
@@ -101,9 +105,9 @@ public:
     // 0x000: the vptr only ([O] On Tour size 0x4). [R] cUISoundInterface_vtbl (cUISoundInterface_cUISoundInterface;
     // the cFESound / cOVSound dtors restore it); cFESound_cFESound stores cFESound_vtbl. Slots [R], names [O]:
     virtual ~cUISoundInterface();      // slot 1
-    virtual void playSound(int e);     // slot 2
-    virtual void soundInitialize();    // slot 3
-    virtual void soundShutdown();      // slot 4
+    virtual void playSound(int e) __asm__("cUISoundInterface_playSound__FPv");     // slot 2
+    virtual void soundInitialize() __asm__("cUISoundInterface_soundInitialize__FPv");    // slot 3
+    virtual void soundShutdown() __asm__("cUISoundInterface_soundShutdown__FPv");      // slot 4
 };
 
 CHECK_SIZE(cUISoundInterface, 0x4);

@@ -337,17 +337,18 @@ struct tARGBInit : tARGB {
  * Sets a text widget up from its screen-data record: font, visibility, localized string and, when enabled,
  * colour.
  *
- * @param data  the widget's record (On Tour tUIBaseObject* pUIBase)
+ * @param pObj  the widget's record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIText_setUIData(cUIText* self, tUIText* data)
+void cUIText::setUIData(tUIBaseObject* pObj)
 {
-    cUIThing_setUIData_2(self, data);
-    ((tAttrText*)&self->mAttrText)->mFont = data->mFontID & 3;
-    self->setShadow(data->mBools1 & 1);
-    cUIText_setUnicodeStringByID(self, ((int)data->mStringID));
-    int textFlags = self->mAttrText >> 2;
+    tUIText* data = (tUIText*)pObj;
+    cUIThing_setUIData_2(this, data);
+    ((tAttrText*)&mAttrText)->mFont = data->mFontID & 3;
+    setShadow(data->mBools1 & 1);
+    cUIText_setUnicodeStringByID(this, ((int)data->mStringID));
+    int textFlags = mAttrText >> 2;
     if (textFlags & 1) {
-        self->mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
+        mShadowColour = tARGBInit(data->mSColour.a * 0.003921568859368563f,
                                         data->mSColour.r * 0.003921568859368563f,
                                         data->mSColour.g * 0.003921568859368563f,
                                         data->mSColour.b * 0.003921568859368563f);

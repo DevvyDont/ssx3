@@ -421,6 +421,8 @@ struct cBaseClass_DynamicEmitter {
     void setupEmitter(tParticleData* def, float seed) __asm__("cBaseClass_DynamicEmitter_setupEmitter");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBaseClass_DynamicEmitter_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cBaseClass_DynamicEmitter_readFromReplayFrame");
+    void setTime(float duration) __asm__("cBaseClass_DynamicEmitter_setTime");
+    void updateBASE(t4Vector* pos, t4Vector* vel, int rnd, float dt) __asm__("cBaseClass_DynamicEmitter_updateBASE");
 };
 
 CHECK_OFFSET(cBaseClass_DynamicEmitter, Duration, 0x00);

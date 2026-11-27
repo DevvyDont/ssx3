@@ -191,7 +191,7 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
  * @param item  the popup that sent the event
  * @param msg  the popup event; only 0x16 is handled
  */
-extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIState* item, int msg)
+void cFEStateRiderDetail::onPopupEvent(cUIState* item, unsigned int msg)
 {
     cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == cUIState::kONPOPUPDESTROY) {
@@ -199,17 +199,17 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIS
             int cheatCharId = ((cFEStateCheatCharSelect*)item)->mCheatCharID;
             if (((cFEStateCheatCharSelect*)item)->mDone != 0) {
                 cBEInterface* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
-                cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
+                cBENewPlayerInterface_setPlayerCheatCharID(pi2, mUserNum, cheatCharId);
                 pi2->submit();
             }
         } else if (item->mHashName == 0) {
             char* name = ((cKeyboardPopup*)item)->mszEditString;
             if (((cKeyboardPopup*)item)->mbAcceptText != 0 && strlen(name) != 0) {
-                cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
+                cBENewPlayerInterface_setPlayerName(pi, mUserNum, name);
                 pi->submit();
             }
         }
-        cFEStateCharSetup_show3DCharacter(self, 1);
+        cFEStateCharSetup_show3DCharacter(this, 1);
     }
 }
 #endif

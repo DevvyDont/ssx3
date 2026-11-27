@@ -46,19 +46,28 @@ struct cFEStateRewardGalleryBase : public cUIState {
     // whose extra getIconID(const char*) is retail's non-virtual cFEStateRewardGalleryBase_getIconID):
     virtual const char* getIconsFileName();                                         // 25
     virtual int getIconID(int index);                                               // 26 (retail getIconID1)
-    virtual const cTextureElement* getTextureElement(int index);                    // 27
-    virtual void allocRewards();                                                    // 28
-    virtual void purgeRewards();                                                    // 29
+    virtual const cTextureElement* getTextureElement(int index)
+        __asm__("cFEStateRewardGalleryBase_getTextureElement__FPv");                    // 27
+    virtual void allocRewards()
+        __asm__("cFEStateRewardGalleryBase_allocRewards__FPv");                                                    // 28
+    virtual void purgeRewards()
+        __asm__("cFEStateRewardGalleryBase_purgeRewards__FPv");                                                    // 29
     virtual void buyReward(int rIndex)
         __asm__("cFEStateRewardGalleryBase_buyReward");                                             // 30
-    virtual void showReward(int rIndex);                                            // 31
-    virtual void showBuyPopup(int rIndex);                                          // 32
+    virtual void showReward(int rIndex)
+        __asm__("cFEStateRewardGalleryBase_showReward");                                            // 31
+    virtual void showBuyPopup(int rIndex)
+        __asm__("cFEStateRewardGalleryBase_showBuyPopup");                                          // 32
     virtual void updateHelpText(int rIndex)
         __asm__("cFEStateRewardGalleryBase_updateHelpText");                                        // 33
-    virtual const void* getReward(int index);                                       // 34
-    virtual int getRewardCost(const void* pReward);                                 // 35
-    virtual int getRewardStoreNum(const void* pReward);                             // 36
-    virtual const char* getRewardName(const void* pReward);                         // 37
+    virtual const void* getReward(int index)
+        __asm__("cFEStateRewardGalleryBase_getReward__FPv");                                       // 34
+    virtual int getRewardCost(const void* pReward)
+        __asm__("cFEStateRewardGalleryBase_getRewardCost__FPv");                                 // 35
+    virtual int getRewardStoreNum(const void* pReward)
+        __asm__("cFEStateRewardGalleryBase_getRewardStoreNum__FPv");                             // 36
+    virtual const char* getRewardName(const void* pReward)
+        __asm__("cFEStateRewardGalleryBase_getRewardName__FPv");                         // 37
     virtual bool isRewardOwned(int rIndex)
         __asm__("cFEStateRewardGalleryBase_isRewardOwned");                                         // 38
     virtual void updateRow(int rowNum)
@@ -124,6 +133,9 @@ struct cFEStateRewardGalleryBase : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStateRewardGalleryBase_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateRewardGalleryBase_onUpdate");
     virtual bool onInputBegin(cUIInput* in) __asm__("cFEStateRewardGalleryBase_onInputBegin");
+    int getIconID1() __asm__("cFEStateRewardGalleryBase_getIconID1__FPv");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateRewardGalleryBase_onGainFocus");
+    virtual void onPopupEvent(cUIState* widget, unsigned int msg) __asm__("cFEStateRewardGalleryBase_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryBase, mLoadingState, 0x048);
@@ -211,6 +223,10 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryPosters();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryPosters_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryPosters_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryPosters_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardName__FPvT0");
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryPosters_getIconsFileName__FPv");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpDBPosters, 0xA24);
@@ -243,6 +259,12 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryTradingCards();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryTradingCards_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryTradingCards_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryTradingCards_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other)
+        __asm__("cFEStateRewardGalleryTradingCards_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other)
+        __asm__("cFEStateRewardGalleryTradingCards_getRewardName__FPvT0");
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryTradingCards_getIconsFileName__FPv");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpDBTradingCards, 0xA24);
@@ -275,6 +297,12 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryConceptArts();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryConceptArts_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryConceptArts_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryConceptArts_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other)
+        __asm__("cFEStateRewardGalleryConceptArts_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other)
+        __asm__("cFEStateRewardGalleryConceptArts_getRewardName__FPvT0");
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryConceptArts_getIconsFileName__FPv");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpDBConceptArts, 0xA24);
@@ -303,6 +331,10 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryVideos();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryVideos_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryVideos_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryVideos_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardName__FPvT0");
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryVideos_getIconsFileName__FPv");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpDBVideos, 0xA24);
@@ -331,6 +363,10 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryToys();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryToys_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryToys_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryToys_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardName__FPvT0");
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryToys_getIconsFileName__FPv");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpDBToys, 0xA24);
@@ -362,6 +398,11 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
     virtual ~cFEStateRewardGalleryCheatChars();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryCheatChars_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryCheatChars_purgeRewards");
+    virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryCheatChars_getReward__FPvi");
+    virtual int getRewardStoreNum(const void* other)
+        __asm__("cFEStateRewardGalleryCheatChars_getRewardStoreNum__FPvT0");
+    virtual const char* getRewardName(const void* other)
+        __asm__("cFEStateRewardGalleryCheatChars_getRewardName__FPvT0");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpDBCheatChars, 0xA24);

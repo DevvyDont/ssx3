@@ -342,16 +342,16 @@ INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
  * @param index  the menu item index
  * @return 0x10 for a refused kONNEXT, 0 for kONOPTION and kONMISC, otherwise 0x101
  */
-extern "C" int cFEStateAudioOptions_onWidgetMenu(cFEStateAudioOptions* self, int pMenu, int Event, int index)
+int cFEStateAudioOptions::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index)
 {
     if (Event == cUIMenu::kONNEXT && (index == 2 || index == 3 || index == 4)) {
-        if (index == 2 && self->mCreatedRequestList == 0) {
+        if (index == 2 && mCreatedRequestList == 0) {
             goto ok;
         }
-        if (index == 3 && self->mCreatedRequestList == 0) {
+        if (index == 3 && mCreatedRequestList == 0) {
             goto ok;
         }
-        if (index == 4 && self->mInStore == 0 && self->mCreatedRequestList == 0) {
+        if (index == 4 && mInStore == 0 && mCreatedRequestList == 0) {
         ok:
             return 0x10;
         }

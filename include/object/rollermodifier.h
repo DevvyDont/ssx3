@@ -149,6 +149,22 @@ struct cRollerModifier : public cTransformModifier {
     void updateMOI() __asm__("cRollerModifier_updateMOI");
     void translateMe(const t4Vector* off) __asm__("cRollerModifier_translateMe");
     void* collide1() __asm__("cRollerModifier_collide1__FPv");
+    // retail's destructor cRollerModifier__cRollerModifier stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cRollerModifier();
+    virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRollerModifier_writeToReplayFrame");
+    virtual void updateRootTransform() __asm__("cRollerModifier_updateRootTransform__FPv");
+    virtual bool shouldRebound() __asm__("cRollerModifier_shouldRebound__FPv");
+    virtual bool isComplete() __asm__("cRollerModifier_isComplete");
+    virtual const tBoundBox* getBoundBox() const __asm__("cRollerModifier_getBoundBox__FPv");
+    virtual float getRadius() const __asm__("cRollerModifier_getRadius__FPv");
+    virtual void setRadius(float val) __asm__("cRollerModifier_setRadius__FPvf");
+    virtual const t4Matrix* getRootTransform() __asm__("cRollerModifier_getRootTransform__FPv");
+    virtual int getTransformType() const __asm__("cRollerModifier_getTransformType__FPv");
+    virtual void collide(const tCollideInfo*, const tIntersectInfo*) __asm__("cRollerModifier_collide");
+    virtual bool runCollide(int) __asm__("cRollerModifier_runCollide__FPv");
+    virtual const t4Matrix* getRootTransform1(tInstanceRecord*) __asm__("cRollerModifier_getRootTransform1__FPv");
+    virtual void setBoundBox(const tBoundBox& bb) __asm__("cRollerModifier_setBoundBox");
 };
 
 CHECK_OFFSET(cRollerModifier, mKineticEnergy, 0x004);

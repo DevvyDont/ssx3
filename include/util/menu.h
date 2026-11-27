@@ -88,6 +88,9 @@ enum tMIGainFocus {
 // cRGBTitleMenuItem, cExpandMenuItem, ...; each derived constructor stores its own vtable at +0x10). Size 0x14: On
 // Tour's, and retail's methods reach the vptr at +0x10 (g++ 2.95 puts it after the members). Member names are EA's,
 // from On Tour's DWARF ([O]); [R] retail's constructor cMenuItem_cMenuItem; [U] how retail code uses the field.
+struct tARGB;
+struct tRect;
+
 struct cMenuItem {
     cMenu* Menu;                     // 0x00 [O]; [U] cMenu_addItem fills it
     int Flags;                       // 0x04 [O]; [R] ctor = 1 (active)
@@ -115,6 +118,10 @@ struct cMenuItem {
     void* getRightShift() __asm__("cMenuItem_getRightShift__FPv");
     void gainFocus() __asm__("cMenuItem_gainFocus__FPv");
     void loseFocus() __asm__("cMenuItem_loseFocus__FPv");
+    void textRender(tRect* rect, const char* left, const char* center, const char* right, char* style, tARGB* color)
+        __asm__("cMenuItem_textRender");
+    void* textRender1(int rect, const char* leftText, const char* centerText, void* rightText)
+        __asm__("cMenuItem_textRender1");
 };
 
 CHECK_OFFSET(cMenuItem, Flags, 0x04);

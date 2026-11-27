@@ -50,6 +50,7 @@ struct cFEState : public cUIState {
     // first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEState();
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEState_onGainFocus");
+    virtual void onLoseFocus(cUIState*) __asm__("cFEState_onLoseFocus");
 };
 
 CHECK_SIZE(cFEState, 0x48);

@@ -144,6 +144,15 @@ struct cSplineModifier : public cTransformModifier {
     virtual void updateRootTransform() __asm__("cSplineModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSplineModifier_writeToReplayFrame");
     void setSpeed(float speed) __asm__("cSplineModifier_setSpeed");
+    virtual void clearComplete() __asm__("cSplineModifier_clearComplete__FPv");
+    virtual const tBoundBox* getBoundBox() const __asm__("cSplineModifier_getBoundBox__FPv");
+    virtual float getRadius() const __asm__("cSplineModifier_getRadius__FPv");
+    virtual void setRadius(float val) __asm__("cSplineModifier_setRadius__FPvf");
+    virtual int getTransformType() const __asm__("cSplineModifier_getTransformType__FPv");
+    virtual void signal(int msg, float) __asm__("cSplineModifier_signal");
+    virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cSplineModifier_setBoundBox");
+    virtual const t4Matrix* getRootTransform() __asm__("cSplineModifier_getRootTransform");
+    virtual void updateIntersectInfo(tIntersectInfo& body) __asm__("cSplineModifier_updateIntersectInfo");
 };
 
 CHECK_OFFSET(cSplineModifier, unk_04, 0x04);

@@ -102,6 +102,9 @@ struct cFEStateNetConfig : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateNetConfig_onUpdate");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateNetConfig_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetConfig_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateNetConfig_onPopupEvent");
+    virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetConfig_onWidgetPair__FPv");
+    virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int key) __asm__("cFEStateNetConfig_onWidgetListBox");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);
@@ -173,6 +176,7 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     virtual ~cFEStateNetAccountMem();
     virtual void onUpdate() __asm__("cFEStateNetAccountMem_onUpdate");
     virtual void onPopupEvent(cUIState* w, unsigned int msg) __asm__("cFEStateNetAccountMem_onPopupEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateNetAccountMem_onLoseTransition__FPv");
 };
 
 CHECK_OFFSET(cFEStateNetAccountMem, miResult, 0x6D0);

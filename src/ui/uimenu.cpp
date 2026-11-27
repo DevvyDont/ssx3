@@ -719,19 +719,20 @@ public:
 /**
  * Searches the pair and then its two widgets for the first one the operator accepts.
  *
- * @param pred  the operator (On Tour cListOperator* pOperator)
+ * @param pOperator  the operator (On Tour cListOperator* pOperator)
  * @return the widget found, or 0
  */
-extern "C" void* cUIPair_traverseRecurse(cUIPair* self, cUIPair_traverseRecurse_cPred* pred)
+void* cUIPair::traverseRecurse(cListOperator* pOperator)
 {
-    if (pred->onListNode(self)) {
-        return ((void*)self);
+    cUIPair_traverseRecurse_cPred* pred = (cUIPair_traverseRecurse_cPred*)pOperator;
+    if (pred->onListNode(this)) {
+        return ((void*)this);
     }
-    cUIPair_traverseRecurse_cNode* child = (cUIPair_traverseRecurse_cNode*)self->mpEntry;
+    cUIPair_traverseRecurse_cNode* child = (cUIPair_traverseRecurse_cNode*)mpEntry;
     if (child != 0 && child->traverseRecurse(pred) != 0) {
-        return self->mpEntry;
+        return mpEntry;
     }
-    cUIPair_traverseRecurse_cNode* next = (cUIPair_traverseRecurse_cNode*)self->mpWidget;
+    cUIPair_traverseRecurse_cNode* next = (cUIPair_traverseRecurse_cNode*)mpWidget;
     if (next != 0) {
         return next->traverseRecurse(pred);
     }
@@ -1000,14 +1001,14 @@ INCLUDE_ASM("ui/uimenu", cUIProgress_setUIData);
  * Sets up a progress bar from its UI data, then sets its default range.
  *
  * Runs the base cUIThing_setUIData(), then stores 10 at 0x80 (the full-scale value that the bar setter
- * cUIProgress_setValue() divides by) and 100 at 0x84. Only @p self is declared: the UI data pointer reaches
+ * cUIProgress_setValue() divides by) and 100 at 0x84. The UI data parameter is unnamed: the pointer reaches
  * cUIThing_setUIData() unchanged in its register.
  */
-extern "C" void cUIProgress_setUIData(cUIProgress* self)
+void cUIProgress::setUIData(tUIBaseObject*)
 {
-    cUIThing_setUIData(self);
-    self->mNumValues = 10;
-    self->mBackWidth = 100;
+    cUIThing_setUIData(this);
+    mNumValues = 10;
+    mBackWidth = 100;
 }
 #endif
 

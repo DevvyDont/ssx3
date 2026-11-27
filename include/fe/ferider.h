@@ -106,6 +106,9 @@ struct cFERider {
     void setVisible(int enable) __asm__("cFERider_setVisible");
     void setCharID(unsigned int item, int flag) __asm__("cFERider_setCharID");
     void updateAnimModelParts() __asm__("cFERider_updateAnimModelParts");
+    int getBoneQuaternion(int index) __asm__("cFERider_getBoneQuaternion");
+    void getAnimID() __asm__("cFERider_getAnimID");
+    void getAnimPercent() __asm__("cFERider_getAnimPercent");
 };
 
 CHECK_OFFSET(cFERider, mCharID, 0x000);

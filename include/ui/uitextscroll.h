@@ -100,6 +100,7 @@ struct cUITextScroll : public cUIThing {
     unsigned short getSelectedIndex() __asm__("cUITextScroll_getSelectedIndex");
     int getFont() __asm__("cUITextScroll_getFont");
     void setInputMap(char value) __asm__("cUITextScroll_setInputMap");
+    virtual void setUIData(tUIBaseObject* pObj) __asm__("cUITextScroll_setUIData");
 };
 
 CHECK_OFFSET(cUITextScroll, mAttrTextScroll, 0x074);

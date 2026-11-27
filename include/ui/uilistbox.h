@@ -116,6 +116,7 @@ struct cUIListBox : public cUIThing {
     unsigned char getNumEntries() __asm__("cUIListBox_getNumEntries");
     virtual void updateLocale() __asm__("cUIListBox_updateLocale");
     virtual void render2D(float x, float y) __asm__("cUIListBox_render2D");
+    virtual void setUIData(tUIBaseObject* pObj) __asm__("cUIListBox_setUIData");
 };
 
 CHECK_OFFSET(cUIListBox, mAttrListBox, 0x074);

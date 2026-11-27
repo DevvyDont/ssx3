@@ -36,6 +36,8 @@ struct cFEStateMainMenu : public cUIState {
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateMainMenu_onWidgetCreate");
     virtual void onUpdate() __asm__("cFEStateMainMenu_onUpdate");
     virtual void onWidgetEvent(cUIThing* item_, unsigned int type) __asm__("cFEStateMainMenu_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int) __asm__("cFEStateMainMenu_onWidgetMenu");
+    virtual void onPopupEvent(cUIState* obj, unsigned int msg) __asm__("cFEStateMainMenu_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateMainMenu, mGoToNextState, 0x048);

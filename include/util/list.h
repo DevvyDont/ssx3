@@ -61,8 +61,9 @@ public:
                                 //      cList_addToEnd (lw/sw 0xC)
     // 0x18: the vptr. [R] cList_vtbl D_00494C98 (ctor cList_cList, dtor cList__cList); slots [R], names [O]:
     virtual ~cList();                                            // 1 cList__cList
-    virtual void* traverseFlat(cListOperator* pOperator);        // 2 cList_traverseFlat
-    virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cList_traverseRecurse
+    virtual void* traverseFlat(cListOperator* pOperator) __asm__("cList_traverseFlat");        // 2 cList_traverseFlat
+    virtual void* traverseRecurse(cListOperator* pOperator)
+        __asm__("cList_traverseRecurse");     // 3 cList_traverseRecurse
 
     // Methods bound to their retail symbols by asm labels.
     cListNode* first() __asm__("cList_first__FP5cList");
@@ -72,6 +73,7 @@ public:
     void addToEnd(cListNode* newNode) __asm__("cList_addToEnd__FP5cListP9cListNode");
     void destroyList() __asm__("cList_destroyList");
     int size() __asm__("cList_size");
+    void clear() __asm__("cList_clear__FPv");
 };
 
 CHECK_OFFSET(cList, mStart, 0x00);

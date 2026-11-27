@@ -43,15 +43,15 @@ extern "C" void cUIStateStack_pop(void* list, int a1);
 /**
  * Shows the autosave notice for 240 frames, then plays "TransitionOut" and closes it.
  */
-extern "C" void cFEStateLegal_onUpdate(cFEStateLegal* self)
+void cFEStateLegal::onUpdate()
 {
-    cUIState_onUpdate(self);
-    if (++self->mDisplayTicks == cFEStateLegal::kDisplayTicks) {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
+    cUIState_onUpdate(this);
+    if (++mDisplayTicks == cFEStateLegal::kDisplayTicks) {
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpScreen, frame, 1);
+            cUIScreen_playFrame(mpScreen, frame, 1);
         }
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
 #endif

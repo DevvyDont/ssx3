@@ -143,6 +143,7 @@ struct cPS2PadDevice {
     // Methods bound to their retail symbols by asm labels.
     int numActuators() __asm__("cPS2PadDevice_numActuators__FPv");
     void setActuator(int mode, float level) __asm__("cPS2PadDevice_setActuator");
+    int sampleButtons(float* out) __asm__("cPS2PadDevice_sampleButtons");
 };
 
 CHECK_OFFSET(cPS2PadDevice, mVtbl, 0x000);

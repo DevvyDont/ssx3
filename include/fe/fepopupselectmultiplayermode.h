@@ -27,6 +27,12 @@ struct cFEPopupSelectMultiplayerMode : public cUIState {
     virtual ~cFEPopupSelectMultiplayerMode();
     virtual void onCreateScreen() __asm__("cFEPopupSelectMultiplayerMode_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEPopupSelectMultiplayerMode_onWidgetCreate");
+    virtual bool onLoseTransition() __asm__("cFEPopupSelectMultiplayerMode_onLoseTransition__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event)
+        __asm__("cFEPopupSelectMultiplayerMode_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int idx)
+        __asm__("cFEPopupSelectMultiplayerMode_onWidgetMenu");
+    virtual bool onGainTransition(int) __asm__("cFEPopupSelectMultiplayerMode_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cFEPopupSelectMultiplayerMode, mMultiMode, 0x048);

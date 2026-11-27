@@ -47,9 +47,9 @@ struct cWScriptTask {
     virtual ~cWScriptTask();                                       // 1
     virtual void update();                                         // 2
     virtual void dispatchTaskEvent(const struct tWScriptEvent& event); // 3
-    virtual void taskStart();                                      // 4
+    virtual void taskStart() __asm__("cWScriptTask_taskStart");                                      // 4
     virtual void taskUpdate() __asm__("cWScriptTask_taskUpdate");                                     // 5
-    virtual void taskEnd();                                        // 6
+    virtual void taskEnd() __asm__("cWScriptTask_taskEnd");                                        // 6
     virtual void eventOnCollide() __asm__("cWScriptTask_eventOnCollide");                                 // 7
     virtual void eventOnJump() __asm__("cWScriptTask_eventOnJump");                                    // 8
     virtual void eventOnLand() __asm__("cWScriptTask_eventOnLand");                                    // 9
@@ -128,6 +128,8 @@ struct cWScriptProcess {
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cWScriptProcess_readFromReplayFrame");
     bool isProcessEvent(unsigned int eventId) __asm__("cWScriptProcess_isProcessEvent");
     int isMission() __asm__("cWScriptProcess_isMission__FPv");
+    void processEnd() __asm__("cWScriptProcess_processEnd");
+    void end() __asm__("cWScriptProcess_end");
 };
 
 CHECK_OFFSET(cWScriptProcess, StateSectionId, 0x0C);

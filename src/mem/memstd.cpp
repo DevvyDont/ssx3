@@ -2412,11 +2412,10 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff);
  * @param scaleX  horizontal scale
  * @param scaleY  vertical scale
  */
-void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* vself, float scaleX, float scaleY)
+void SSX_VD_PS2_SINGLE_BUFFERD::SetScale(float scaleX, float scaleY)
 {
-    SSX_VD_PS2_SINGLE_BUFFERD* self = (SSX_VD_PS2_SINGLE_BUFFERD*)vself;
-    self->mScaleX = scaleX;
-    self->mScaleY = scaleY;
+    mScaleX = scaleX;
+    mScaleY = scaleY;
 }
 #endif
 
@@ -2552,7 +2551,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
     float sw = (float)((cRend_4410*)self->m_pGrMan)->width();
     float sh = (float)((cRend_4410*)self->m_pGrMan)->height() - fh;
     self->SetPosition((sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
-    SSX_VD_PS2_SINGLE_BUFFERD_SetScale(self, 1.0f, 1.0f);
+    self->SetScale(1.0f, 1.0f);
     self->mDrawLayer = drawLayer;
     return self;
 }
@@ -2865,9 +2864,9 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv);
  *
  * @return whatever func_002548D0 left in the return register
  */
-void* SSX_VD_PS2_SINGLE_BUFFERD_ReDraw(void* self)
+void* SSX_VD_PS2_SINGLE_BUFFERD::ReDraw()
 {
-    return func_002548D0(self);
+    return func_002548D0(this);
 }
 #endif
 
@@ -3223,12 +3222,11 @@ INCLUDE_ASM("mem/memstd", cCommChannel_channelOpen__FPv);
  *
  * @return 1
  */
-int cCommChannel_channelOpen(void* vself)
+int cCommChannel::channelOpen()
 {
-    cCommChannel* self = (cCommChannel*)vself;
     int one = 1;
-    self->mError = 0;
-    *(int*)self = one;
+    mError = 0;
+    *(int*)this = one;
     return one;
 }
 #endif
@@ -3239,11 +3237,11 @@ INCLUDE_ASM("mem/memstd", cCommChannel_channelClose);
 /**
  * Closes a comm channel: if it is open, clears mChannelOpen and mError.
  */
-extern "C" void cCommChannel_channelClose(cCommChannel* self)
+void cCommChannel::channelClose()
 {
-    if (*(int*)self != 0) {
-        *(int*)self = 0;
-        self->mError = 0;
+    if (*(int*)this != 0) {
+        *(int*)this = 0;
+        mError = 0;
     }
 }
 #endif

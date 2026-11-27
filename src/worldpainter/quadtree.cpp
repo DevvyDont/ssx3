@@ -2981,16 +2981,16 @@ extern short D_005377B8[];
  * func_002C42B0...). Also finishes the directory scan (copies names, titles and dates into the file slots) and the
  * asynchronous icon file loads. mFileInfoValid is 1 while no call is outstanding.
  */
-extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
+void cPS2MemCard::Update()
 {
-    if (self->mDevices[self->mDevice].mFormat == 0) {
-        self->unk_050 = 0;
-        self->mNumDirTable = 0;
-        MEM_fill(self->mFileSlots, 0, 720);
+    if (mDevices[mDevice].mFormat == 0) {
+        unk_050 = 0;
+        mNumDirTable = 0;
+        MEM_fill(mFileSlots, 0, 720);
     }
     int one = 1;
-    self->mFileInfoValid = one;
-    if (self->mGetInfoPending != 0) {
+    mFileInfoValid = one;
+    if (mGetInfoPending != 0) {
         int syncCmd;
         D_004A3940 = 0;
         syncCmd = 0;
@@ -3004,49 +3004,49 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
         if (syncResult == -2) {
         set:
             // mDevices[mGetInfoDevice].mCardChanged; both member spellings change the code here
-            *(int*)((char*)self + self->mGetInfoDevice * 0x14 + 0x18C) = one;
+            *(int*)((char*)this + mGetInfoDevice * 0x14 + 0x18C) = one;
             syncResult = D_004A3940;
         }
         if ((unsigned)(syncResult + 19) < 9 || (unsigned)(syncResult + 49) < 10 || (unsigned)(syncResult + 59) < 10
             || (unsigned)(syncResult + 79) < 10) {
             D_004A3940 = -10;
         }
-        if (func_002C63E8(self, D_004A3940) == 0) {
+        if (func_002C63E8(this, D_004A3940) == 0) {
             if (D_004A3938 != 2) {
                 D_004A3940 = -10002;
             } else if (D_004A3944 == 0) {
                 D_004A3940 = -2;
             }
         }
-        self->mGetInfoPending = 0;
-        self->mDevices[self->mGetInfoDevice].mLastError = D_004A3940;
-        self->mDevices[self->mGetInfoDevice].mType = D_004A3938;
-        self->mDevices[self->mGetInfoDevice].mFreeClusters = D_004A393C;
-        self->mDevices[self->mGetInfoDevice].mFormat = D_004A3944;
+        mGetInfoPending = 0;
+        mDevices[mGetInfoDevice].mLastError = D_004A3940;
+        mDevices[mGetInfoDevice].mType = D_004A3938;
+        mDevices[mGetInfoDevice].mFreeClusters = D_004A393C;
+        mDevices[mGetInfoDevice].mFormat = D_004A3944;
     }
-    switch (self->mState) {
+    switch (mState) {
     case 2: case 6: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
     case 18: case 22: case 23: case 24: case 28: case 29: case 30: case 35: case 36: case 37:
     case 38: case 39: case 41: case 42: case 43: case 45: case 46: case 47: case 49: case 50:
     case 51: case 54: case 55: case 56: case 57: case 58: case 59: case 61: case 64: case 66:
     case 68: case 70: case 72: case 74: case 76: case 78:
         {
-            self->mFileInfoValid = 0;
+            mFileInfoValid = 0;
             D_004A3940 = 0;
             if (sceMcSync_i(1, 0, &D_004A3940) == 0) {
                 return;
             }
-            self->mFileInfoValid = 1;
+            mFileInfoValid = 1;
             if (D_004A3940 == -1) {
-                self->mDevices[self->mDevice].mCardChanged = 1;
+                mDevices[mDevice].mCardChanged = 1;
             }
             int syncResult = D_004A3940;
             if (syncResult < 0) {
-                int st = self->mState;
+                int st = mState;
                 if (st != 36 && (unsigned)(st - 54) >= 6) {
-                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8(self, syncResult) == 0) {
-                        ((cMemCard*)self)->SetBrokenFile(self->mScanFileSlot);
-                        func_002C48C0(self, 0x10);
+                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8(this, syncResult) == 0) {
+                        ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
+                        func_002C48C0(this, 0x10);
                         return;
                     }
                 } else {
@@ -3055,31 +3055,31 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
                     }
                 }
                 if (D_004A3940 < 0) {
-                    if (self->mState == 35 || self->mState == 7) {
-                        func_002C52D8(self);
+                    if (mState == 35 || mState == 7) {
+                        func_002C52D8(this);
                     }
-                    if (self->mState == 19) {
-                        self->mCurrentFileSlot = -1;
+                    if (mState == 19) {
+                        mCurrentFileSlot = -1;
                     }
-                    func_002C48C0(self, 1);
+                    func_002C48C0(this, 1);
                     return;
                 }
             }
-            self->mDevices[self->mDevice].mLastError = 0;
+            mDevices[mDevice].mLastError = 0;
         }
         break;
     }
-    if (self->mReadFailed != 0) {
-        self->mReadFailed = 0;
-        func_002C48C0(self, 0x1E);
+    if (mReadFailed != 0) {
+        mReadFailed = 0;
+        func_002C48C0(this, 0x1E);
         return;
     }
-    if (self->mWriteFailed != 0) {
-        self->mWriteFailed = 0;
-        func_002C48C0(self, 0x18);
+    if (mWriteFailed != 0) {
+        mWriteFailed = 0;
+        func_002C48C0(this, 0x18);
         return;
     }
-    switch (self->mState) {
+    switch (mState) {
     case 0:
     case 1:
     case 78:
@@ -3090,76 +3090,76 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
             return;
         }
         if (D_004A3940 == -1) {
-            self->mDevices[self->mDevice].mCardChanged = 1;
+            mDevices[mDevice].mCardChanged = 1;
         }
         break;
     case 3:
-        func_002C48C0(self, 4);
+        func_002C48C0(this, 4);
         break;
     case 5:
-        if (((cMemCard*)self)->DidErrorOccur() == 0) {
-            func_002C4210(self);
+        if (((cMemCard*)this)->DidErrorOccur() == 0) {
+            func_002C4210(this);
             return;
         }
         break;
     case 34:
-        if (((cMemCard*)self)->DidErrorOccur() == 0) {
-            func_002C42B0(self);
+        if (((cMemCard*)this)->DidErrorOccur() == 0) {
+            func_002C42B0(this);
             return;
         }
         break;
     case 6:
         {
             int i;
-            self->unk_050 = self->mMaxFiles;
-            MEM_fill_v(self->mFileSlots, 0, 720);
-            for (i = 0; i < self->mMaxFiles; i++) {
+            unk_050 = mMaxFiles;
+            MEM_fill_v(mFileSlots, 0, 720);
+            for (i = 0; i < mMaxFiles; i++) {
                 unsigned char slotDigit = i + '1';
                 int j;
-                for (j = 0; j < self->unk_050; j++) {
-                    int n = strlen((char*)self->mDirTable[j].m_entryName);
-                    if (n != 0 && self->mDirTable[j].m_entryName[n - 1] == slotDigit) {
-                        strcpy(self->mFileSlots[i].mFileName, (char*)self->mDirTable[j].m_entryName);
+                for (j = 0; j < unk_050; j++) {
+                    int n = strlen((char*)mDirTable[j].m_entryName);
+                    if (n != 0 && mDirTable[j].m_entryName[n - 1] == slotDigit) {
+                        strcpy(mFileSlots[i].mFileName, (char*)mDirTable[j].m_entryName);
                         break;
                     }
                 }
             }
             D_004A3940 = 0;
-            func_002C48C0(self, 7);
+            func_002C48C0(this, 7);
             return;
         }
     case 8:
-        self->mFileDescriptor = D_004A3940;
-        func_002C48C0(self, 10);
+        mFileDescriptor = D_004A3940;
+        func_002C48C0(this, 10);
         return;
     case 10:
-        ((cMemCard*)self)->ShiftJISToAscii(self->mFileSlots[self->mScanFileSlot].mTitle, D_005377B8);
-        func_002C48C0(self, 9);
+        ((cMemCard*)this)->ShiftJISToAscii(mFileSlots[mScanFileSlot].mTitle, D_005377B8);
+        func_002C48C0(this, 9);
         return;
     case 9:
-        func_002C48C0(self, 11);
+        func_002C48C0(this, 11);
         return;
     case 11:
-        if (self->mFileDirEntry.m_fileSizeByte != self->mDataSize) {
-            ((cMemCard*)self)->SetBrokenFile(self->mScanFileSlot);
-            func_002C48C0(self, 0x10);
+        if (mFileDirEntry.m_fileSizeByte != mDataSize) {
+            ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
+            func_002C48C0(this, 0x10);
         }
-        __builtin_memcpy(&self->mFileSlots[self->mScanFileSlot].mModifyTime, &self->mFileDirEntry.m_modify, 8);
-        func_002C48C0(self, 12);
+        __builtin_memcpy(&mFileSlots[mScanFileSlot].mModifyTime, &mFileDirEntry.m_modify, 8);
+        func_002C48C0(this, 12);
         return;
     case 12:
     case 13:
     case 14:
         {
             int k;
-            if (self->mState != 13) {
-                k = self->mState == 14 ? 2 : 0;
+            if (mState != 13) {
+                k = mState == 14 ? 2 : 0;
             } else {
                 k = 1;
             }
-            if (self->mFileDirEntry.m_fileSizeByte != D_00487450[k]) {
-                func_002C5570(self, self->mScanFileSlot);
-                func_002C48C0(self, 0x10);
+            if (mFileDirEntry.m_fileSizeByte != D_00487450[k]) {
+                func_002C5570(this, mScanFileSlot);
+                func_002C48C0(this, 0x10);
                 return;
             }
         }
@@ -3167,42 +3167,42 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
     case 15:
     case 16:
     next:
-        while (++self->mScanFileSlot < self->mMaxFiles) {
-            if (((cMemCard*)self)->HasFileName(self->mScanFileSlot) != 0) {
+        while (++mScanFileSlot < mMaxFiles) {
+            if (((cMemCard*)this)->HasFileName(mScanFileSlot) != 0) {
                 goto found;
             }
         }
     case 7:
-        func_002C6280_v(self);
+        func_002C6280_v(this);
         break;
     case 35:
         if (D_004A3940 != 1) {
-            func_002C52D8(self);
+            func_002C52D8(this);
         }
         D_004A3940 = 0;
         break;
     case 17:
-        if (self->mDevices[self->mDevice].mFormat != 0) {
+        if (mDevices[mDevice].mFormat != 0) {
             break;
         }
-        func_002C4388(self);
+        func_002C4388(this);
         return;
     case 19:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C4410(self);
+        func_002C4410(this);
         return;
     case 40:
     case 44:
     case 48:
-        if (ASYNCFILE_getstatus(self->mIconFileHandle) != 1) {
+        if (ASYNCFILE_getstatus(mIconFileHandle) != 1) {
             return;
         }
-        self->mIconFileData = 0;
-        self->mIconFileSize = 0;
-        ASYNCFILE_release(self->mIconFileHandle, &self->mIconFileData, &self->mIconFileSize);
-        func_002C48C0(self, self->mState + 1);
+        mIconFileData = 0;
+        mIconFileSize = 0;
+        ASYNCFILE_release(mIconFileHandle, &mIconFileData, &mIconFileSize);
+        func_002C48C0(this, mState + 1);
         return;
     case 22:
     case 28:
@@ -3210,24 +3210,24 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
     case 41:
     case 45:
     case 49:
-        self->mFileDescriptor = D_004A3940;
-        func_002C48C0(self, self->mState + 1);
+        mFileDescriptor = D_004A3940;
+        func_002C48C0(this, mState + 1);
         return;
     case 20:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(self, 36);
+        func_002C48C0(this, 36);
         return;
     case 27:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(self, 0x1C);
+        func_002C48C0(this, 0x1C);
         return;
     case 55:
     case 56:
-        func_002C48C0(self, 58);
+        func_002C48C0(this, 58);
         return;
     case 36:
     case 38:
@@ -3238,104 +3238,104 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
     case 54:
     case 57:
     case 58:
-        func_002C48C0(self, self->mState + 1);
+        func_002C48C0(this, mState + 1);
         return;
     case 21:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(self, 22);
+        func_002C48C0(this, 22);
         return;
     case 23:
-        func_002C48C0(self, 52);
+        func_002C48C0(this, 52);
         return;
     case 29:
-        if (D_004A3940 != self->mTransferSize) {
+        if (D_004A3940 != mTransferSize) {
             D_004A3940 = -10001;
-            func_002C48C0(self, 1);
+            func_002C48C0(this, 1);
             return;
         }
-        func_002C48C0(self, 53);
+        func_002C48C0(this, 53);
         return;
     case 25:
-        self->mFileInfoValid = 0;
-        self->mFileSlots[self->mCurrentFileSlot].mIconSysUnreadable = 0;
-        self->mFileSlots[self->mCurrentFileSlot].mBroken = 0;
-        self->mFileSlots[self->mCurrentFileSlot].mDisabled = 0;
-        strcpy(self->mFileSlots[self->mCurrentFileSlot].mFileName, self->mFileName);
-        strcpy(self->mFileSlots[self->mCurrentFileSlot].mTitle, self->mTitle);
+        mFileInfoValid = 0;
+        mFileSlots[mCurrentFileSlot].mIconSysUnreadable = 0;
+        mFileSlots[mCurrentFileSlot].mBroken = 0;
+        mFileSlots[mCurrentFileSlot].mDisabled = 0;
+        strcpy(mFileSlots[mCurrentFileSlot].mFileName, mFileName);
+        strcpy(mFileSlots[mCurrentFileSlot].mTitle, mTitle);
         break;
     case 60:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6848(self);
+        func_002C6848(this);
         return;
     case 61:
-        self->mNumDirTable = D_004A3940;
+        mNumDirTable = D_004A3940;
         break;
     case 63:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C69A0(self);
+        func_002C69A0(this);
         return;
     case 73:
-        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6A28(self);
+        func_002C6A28(this);
         return;
     case 65:
-        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6A88(self);
+        func_002C6A88(this);
         return;
     case 71:
-        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6B00(self);
+        func_002C6B00(this);
         return;
     case 67:
-        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6B78(self);
+        func_002C6B78(this);
         return;
     case 69:
-        if (((cMemCard*)self)->DidErrorOccur() != 0 || self->mFileDescriptor < 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6BF8(self);
+        func_002C6BF8(this);
         return;
     case 75:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6C88(self);
+        func_002C6C88(this);
         return;
     case 77:
-        if (((cMemCard*)self)->DidErrorOccur() != 0) {
+        if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6D18(self);
+        func_002C6D18(this);
         return;
     case 64:
         {
             int lastResult = D_004A3940;
-            self->mState = 0;
-            self->mFileDescriptor = lastResult;
+            mState = 0;
+            mFileDescriptor = lastResult;
         }
         break;
     case 74:
-        self->mState = 0;
-        self->mFileDescriptor = -1;
+        mState = 0;
+        mFileDescriptor = -1;
         break;
     found:
-        sprintf(self->mIconFilePath, str_pct_s_pct_s_h, self->mFileSlots[self->mScanFileSlot].mFileName, str_icon_sys);
-        func_002C48C0(self, 8);
+        sprintf(mIconFilePath, str_pct_s_pct_s_h, mFileSlots[mScanFileSlot].mFileName, str_icon_sys);
+        func_002C48C0(this, 8);
         return;
     case 52:
     case 53:
@@ -3344,19 +3344,19 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
     case 68:
     case 70:
     case 72:
-        self->mState = 0;
+        mState = 0;
         break;
     }
-    if (cPS2MemCard_GetLastError_i(self, self->mDevice) == -10
-        || cPS2MemCard_GetLastError_i(self, self->mDevice) == -1) {
-        func_002C5250(self);
+    if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
+        || cPS2MemCard_GetLastError_i(this, mDevice) == -1) {
+        func_002C5250(this);
     }
-    if (cPS2MemCard_GetLastError_i(self, self->mDevice) == -10
-        || cPS2MemCard_GetLastError_i(self, self->mDevice) == -2) {
-        func_002C5278(self);
+    if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
+        || cPS2MemCard_GetLastError_i(this, mDevice) == -2) {
+        func_002C5278(this);
     }
-    if (self->mState != 0) {
-        func_002C48C0(self, 0);
+    if (mState != 0) {
+        func_002C48C0(this, 0);
     }
 }
 #endif

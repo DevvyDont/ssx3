@@ -612,8 +612,7 @@ extern char str_save[];
  *         and sound)
  */
 // Pause-menu key filter: returns 0x100 for kONOPTION / kONMISC and for kONNEXT unless the item is str_save, else 0x101.
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(cOVState_PAUSE_OPTIONS* self, cUIMenu* menu, unsigned int key,
-                                                   int index)
+int cOVState_PAUSE_OPTIONS::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int index)
 {
     switch (key) {
     case cUIMenu::kONNEXT: {
@@ -640,7 +639,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
  * @param Event  the list-box event (tUILBEvent): kONLEFT .. kONDOWN moves, kONPREVIOUS Triangle
  * @return 0x100 (animation only) for kONPREVIOUS, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(cOVState_PAUSE_OPTIONS* self, int pListBox, int Event)
+int cOVState_PAUSE_OPTIONS::onWidgetListBox(cUIListBox* pListBox, unsigned int Event)
 {
     return Event != cUIListBox::kONPREVIOUS ? 257 : 0x100;
 }
@@ -656,7 +655,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetPair);
  * @param Event  the pair event: 0 Cross, 1 Triangle
  * @return 0x100 (animation only) for event 0, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(cOVState_PAUSE_OPTIONS* self, int pPair, int Event)
+int cOVState_PAUSE_OPTIONS::onWidgetPair(cUIPair* pPair, unsigned int Event)
 {
     return Event != 0 ? 257 : 0x100;
 }
@@ -931,25 +930,25 @@ extern char str_Text_ContinueGame[];
  * @param item  the widget
  * @param msg   the event (tUIStateEvent)
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_ERROR* self, cUIThing* item, int msg)
+void cOVState_PAUSE_ONLINE_ERROR::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (item == 0) {
         return;
     }
     switch (msg) {
     case cUIState::kONNEXT:
-        self->doContinueCancel(item, msg);
+        doContinueCancel(item, msg);
         break;
     case cUIState::kONGAINFOCUS: {
         int id = item->mHashName;
         if (id == GetHashValue32(str_Text_CancelGame)) {
-            self->setCancelHighLight(1);
-            self->setContinueHighLight(0);
+            setCancelHighLight(1);
+            setContinueHighLight(0);
         } else {
             int id2 = item->mHashName;
             if (id2 == GetHashValue32(str_Text_ContinueGame)) {
-                self->setContinueHighLight(1);
-                self->setCancelHighLight(0);
+                setContinueHighLight(1);
+                setCancelHighLight(0);
             }
         }
         break;
@@ -1192,17 +1191,17 @@ extern char str_at_TextPulseWhiteOrange[];
  * frames, after which cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable
  * cOVState_HEAT_PREEVENT_vtbl, screen "40race_pre") for overlay type 8. BE interface 0 is fetched and unused.
  */
-extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(cOVState_HEAT_PREEVENT* self)
+void cOVState_HEAT_PREEVENT::onGainFocus(cUIState*)
 {
     char buf[32];
-    cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
-    cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+    cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         sprintf(buf, str_riderpct_d, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
-        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     }
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
@@ -2812,15 +2811,15 @@ extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
  * @param popup  the popup state that sent the event
  * @param key  the popup event
  */
-extern "C" void cOVState_SAVEREPLAY_onPopupEvent(cOVState_SAVEREPLAY* self, cUIState* popup, int key)
+void cOVState_SAVEREPLAY::onPopupEvent(cUIState* popup, unsigned int key)
 {
     if (key == cUIState::kONPOPUPDESTROY) {
-        if (self->mPopupType == cFEMemCard::kPOP_SAVEDONE) {
+        if (mPopupType == cFEMemCard::kPOP_SAVEDONE) {
             cReplay_purgeSave(SSXApp->Game->Replay);
-            self->mIsReplayAlloc = 0;
+            mIsReplayAlloc = 0;
         }
     }
-    cFEMemCard_onPopupEvent(self, popup, key);
+    cFEMemCard_onPopupEvent(this, popup, key);
 }
 #endif
 
@@ -3360,12 +3359,12 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a1);
 /**
  * Runs the base UI-state focus handling, then refreshes the rewards menu.
  *
- * Calls cUIState_onGainFocus() and then cOVState_REWARDS_updateMenu(self, 0).
+ * Calls cUIState_onGainFocus() and then cOVState_REWARDS_updateMenu(this, 0).
  */
-extern "C" void cOVState_REWARDS_onGainFocus(cOVState_REWARDS* self)
+void cOVState_REWARDS::onGainFocus(cUIState*)
 {
-    cUIState_onGainFocus(self);
-    self->updateMenu(0);
+    cUIState_onGainFocus(this);
+    updateMenu(0);
 }
 #endif
 
@@ -3388,7 +3387,7 @@ extern "C" void cBERewardInterface_clearUserAwards(void* iface);
  * @param pWidget  the item; ignored when null
  * @param key  the widget event; only kONNEXT (Cross) acts
  */
-extern "C" void cOVState_REWARDS_onWidgetEvent(cOVState_REWARDS* self, void* pWidget, int key)
+void cOVState_REWARDS::onWidgetEvent(cUIThing* pWidget, unsigned int key)
 {
     if (pWidget != 0) {
         if (key == cUIState::kONNEXT) {
@@ -3418,16 +3417,16 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a);
  * @param index  the new scroll offset for kSCROLLUP .. kSCROLLCHANGE
  * @return 1 for kSCROLLUPDATE, 0 as above, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_REWARDS_onWidgetMenu(cOVState_REWARDS* self, int id, int event, int index)
+int cOVState_REWARDS::onWidgetMenu(cUIMenu* id, unsigned int event, unsigned int index)
 {
     switch (event) {
     case cUIMenu::kSCROLLUPDATE:
-        self->updateMenu(index);
+        updateMenu(index);
         return 1;
     case cUIMenu::kONPREVIOUS: case cUIMenu::kONOPTION: case cUIMenu::kONMISC:
         return 0;
     case cUIMenu::kSCROLLUP: case cUIMenu::kSCROLLDOWN:
-        if (self->mItemSize < 10) {
+        if (mItemSize < 10) {
             return 0;
         }
         /* fall through */
@@ -3562,9 +3561,9 @@ static inline unsigned short* lookupString_1FFF78(char* name)
  * @return always 0
  */
 // Rewards overlay: fills in the event-result and reward texts the first time it is shown.
-extern "C" int cOVState_REWARDS_onGainTransition(cOVState_REWARDS* self)
+bool cOVState_REWARDS::onGainTransition(int)
 {
-    if (self->mDoneTransition == 0) {
+    if (mDoneTransition == 0) {
         unsigned short result[104];
         unsigned short fmt[0x10];
         unsigned short reward[104];
@@ -3604,16 +3603,17 @@ extern "C" int cOVState_REWARDS_onGainTransition(cOVState_REWARDS* self)
             break;
         }
         }
-        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_rewardlisting)), result);
+        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_rewardlisting)),
+                result);
         int id = cBENewPlayerInterface_getHumanRider(player, 0);
-        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1text));
+        void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_1text));
         sprintf2_void(name, D_004A2590, cBECharacterInterface_getShortName(board, id));
         unsigned short* text = lookupString_1FFF78(str_kT_OVRCMNCongratUser);
         sprintf1(reward, text, name);
         cUIText_setUnicodeString(obj, reward);
     }
-    self->mDoneTransition = 1;
-    return 0;
+    mDoneTransition = 1;
+    return false;
 }
 #endif
 

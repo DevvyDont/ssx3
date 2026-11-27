@@ -62,18 +62,18 @@ extern char str_start[];
  * @param id  the event's label hash
  * @return 0
  */
-extern "C" int cFEStateTransition_onScreenEvent(cFEStateTransition* self, cUIScreen* screen, int id)
+bool cFEStateTransition::onScreenEvent(cUIScreen* screen, unsigned int id)
 {
     int eventHash1 = GetHashValue32(str_end);
     int eventHash2 = GetHashValue32(str_start);
     if (id == eventHash1) {
-        self->mAttrState &= ~8;
+        mAttrState &= ~8;
         screen->mRootGroup.mAttr &= ~0x40;
     } else if (id == eventHash2) {
-        self->mAttrState |= 8;
+        mAttrState |= 8;
         screen->mRootGroup.mAttr |= 0x40;
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -93,20 +93,20 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * @param which  the event id (On Tour: int msg); only 0 and 1 do anything
  * @return 0
  */
-extern "C" int cFEStateTransition_handleEvent(cFEStateTransition* self, int which)
+int cFEStateTransition::handleEvent(int which, void*)
 {
     if (which == 0) {
-        cUIScreen* screen = self->mpSnow;
+        cUIScreen* screen = mpSnow;
         if (screen != 0) {
             screen->mRootGroup.mAttr |= 0x40;
-            cUIScreen_playFrame(self->mpSnow, 0, 0);
+            cUIScreen_playFrame(mpSnow, 0, 0);
             cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xF);
         }
     } else if (which == 1) {
-        cUIScreen* screen = self->mpWhite;
+        cUIScreen* screen = mpWhite;
         if (screen != 0) {
             screen->mRootGroup.mAttr |= 0x40;
-            cUIScreen_playFrame(self->mpWhite, 0, 0);
+            cUIScreen_playFrame(mpWhite, 0, 0);
         }
     }
     return 0;

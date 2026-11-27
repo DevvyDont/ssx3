@@ -135,6 +135,13 @@ struct cMultiSplineModifier : public cTransformModifier {
     virtual void updateOverlapSystem() __asm__("cMultiSplineModifier_updateOverlapSystem");
     virtual void render() __asm__("cMultiSplineModifier_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMultiSplineModifier_writeToReplayFrame");
+    virtual float getRadius() const __asm__("cMultiSplineModifier_getRadius__FPv");
+    virtual void setRadius(float val) __asm__("cMultiSplineModifier_setRadius__FPvf");
+    virtual int getTransformType() const __asm__("cMultiSplineModifier_getTransformType__FPv");
+    virtual void updateRootTransform() __asm__("cMultiSplineModifier_updateRootTransform__FPv");
+    virtual void postUpdate() __asm__("cMultiSplineModifier_postUpdate");
+    virtual const tBoundBox* getBoundBox() const __asm__("cMultiSplineModifier_getBoundBox__FPv");
+    virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cMultiSplineModifier_setBoundBox");
 };
 
 CHECK_OFFSET(cMultiSplineModifier, NumModels, 0x04);

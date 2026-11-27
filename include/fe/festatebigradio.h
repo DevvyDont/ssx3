@@ -127,6 +127,7 @@ struct cFEStateRequestLine : public cFEState {
     virtual void onCreateScreen() __asm__("cFEStateRequestLine_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateRequestLine_onDestroyScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateRequestLine_onGainTransition");
+    virtual void onPopupEvent(cUIState* item, unsigned int msg) __asm__("cFEStateRequestLine_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateRequestLine, mCharID, 0x048);

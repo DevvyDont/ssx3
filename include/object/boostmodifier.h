@@ -58,8 +58,8 @@ struct cBoostModifier : public cPhysicsModifier {
     // cBoostModifier's own slots ([R] cBoostModifier_vtbl; types [O] On Tour's class cBoostModifier):
     virtual void applyBoost(cBeing* pBeing);                    // 7
     virtual void applyDrag(cBeing* pBeing) __asm__("cBoostModifier_applyDrag");                     // 8
-    virtual void boostStart();                                  // 9
-    virtual void boostEnd();                                    // 10
+    virtual void boostStart() __asm__("cBoostModifier_boostStart__FPv");                                  // 9
+    virtual void boostEnd() __asm__("cBoostModifier_boostEnd__FPv");                                    // 10
     char unk_08[0x8];               // 0x08 padding (the state is 16-byte aligned)
     // --- cBoostModifierState
     t4Vector Boost;                 // 0x10 [O]; [R] ctor (sq 0x10); [U] cBoostModifier_applyBoost (lqc2 0x10)
@@ -83,6 +83,7 @@ struct cBoostModifier : public cPhysicsModifier {
     void* cBoostModifier1(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
     virtual void update() __asm__("cBoostModifier_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBoostModifier_writeToReplayFrame");
+    virtual int getPhysicsType() __asm__("cBoostModifier_getPhysicsType__FPv");
 };
 
 CHECK_OFFSET(cBoostModifier, unk_08, 0x08);

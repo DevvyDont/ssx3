@@ -92,12 +92,11 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onInputBegin__FPv);
  * The base UI update cUIState_onUpdate() skips the state's screens when this returns nonzero; onInputAlways still
  * runs.
  *
- * @return always 1 (input consumed)
+ * @return always true (input consumed)
  */
-int cFEStateNetHelpPopup_onInputBegin(void* vself)
+bool cFEStateNetHelpPopup::onInputBegin(cUIInput*)
 {
-    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -348,10 +347,10 @@ extern "C" void cUIStateStack_pop(void*, int);
  * @param pWidget  the widget, unused
  * @param msg  widget event number
  */
-extern "C" void cFEStateNetHelpPopup_onWidgetEvent(cFEStateNetHelpPopup* self, int pWidget, int msg)
+void cFEStateNetHelpPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     if (msg == cUIState::kONPREV) {
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
 #endif

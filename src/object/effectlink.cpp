@@ -42,20 +42,20 @@ INCLUDE_ASM("object/effectlink", cEffectLink_append);
 /**
  * Appends a link at the end of an effect list.
  *
- * Walks Next from @p link to the last link, then sets @p other's Next to 0 and its Prev to that last link and makes
+ * Walks Next from this link to the last link, then sets @p other's Next to 0 and its Prev to that last link and makes
  * it the last link's Next. Callers pass a tModifierBlock's effect list head (+0x10).
  *
- * @param link   the list (any link in it; normally the head)
  * @param other  the link to append (On Tour effect)
  */
-extern "C" void cEffectLink_append(cEffectLink* link, cEffectLink* other)
+void cEffectLink::append(cEffectLink* other)
 {
-    while (link->Next != 0) {
-        link = link->Next;
+    cEffectLink* last = this;
+    while (last->Next != 0) {
+        last = last->Next;
     }
     other->Next = 0;
-    other->Prev = link;
-    link->Next = other;
+    other->Prev = last;
+    last->Next = other;
 }
 #endif
 

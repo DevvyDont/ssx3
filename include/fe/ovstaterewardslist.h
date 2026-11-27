@@ -34,6 +34,12 @@ struct cOVStateRewardsList : public cOVState {
     //       slots 4 / 5 and pushes the result on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen stores the screen (then cOVState_onCreateScreen)
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVStateRewardsList__cOVStateRewardsList stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVStateRewardsList();
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVStateRewardsList_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVStateRewardsList, 0x9C);

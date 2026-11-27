@@ -2153,7 +2153,6 @@ static inline int GetId119EF8(char* self)
 }
 
 // PORT: callers in this unit declare it void; the function returns 0.0f.
-float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __asm__("cRiderMetrix_evAddCash");
 
 /**
  * Awards career money to the rider and posts the matching HUD popups.
@@ -2170,26 +2169,25 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __a
  * @return always 0.0
  */
 // Awards trick/score metrics of the given kind and plays the matching reward popups.
-float cRiderMetrix_evAddCash_impl(char* vself, unsigned int kind, int amount)
+float cRiderMetrix::evAddCash(unsigned int kind, int amount)
 {
-    cRiderMetrix* self = (cRiderMetrix*)vself;
     if (amount != 0 && !IsBusy119EF8()) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        func_001E3760(GetId119EF8(((char*)self)), amount);
-        cBERewardInterface_awardUserCash(iface, GetId119EF8(((char*)self)), amount);
-        cRiderMetrix_addHUDfx1_i(self, 0x18, amount, 0, 0.7f);
+        func_001E3760(GetId119EF8(((char*)this)), amount);
+        cBERewardInterface_awardUserCash(iface, GetId119EF8(((char*)this)), amount);
+        cRiderMetrix_addHUDfx1_i(this, 0x18, amount, 0, 0.7f);
         switch (kind) {
         case kRMCS_Collectible:
-            cRiderMetrix_addHUDfx1_i(self, 49, amount, amount, 1.5f);
+            cRiderMetrix_addHUDfx1_i(this, 49, amount, amount, 1.5f);
             break;
         case kRMCS_BonusCash:
-            cRiderMetrix_addHUDfx1_i(self, 46, amount, 0, 2.5f);
+            cRiderMetrix_addHUDfx1_i(this, 46, amount, 0, 2.5f);
             break;
         case kRMCS_TrickSuccess:
-            cRiderMetrix_addHUDfx1_i(self, 47, amount, 0, 2.5f);
+            cRiderMetrix_addHUDfx1_i(this, 47, amount, 0, 2.5f);
             break;
         case kRMCS_ComboBonus:
-            cRiderMetrix_addHUDfx1_i(self, 0x30, amount, self->NumCombos, 2.5f);
+            cRiderMetrix_addHUDfx1_i(this, 0x30, amount, NumCombos, 2.5f);
             break;
         case kRMCS_Mission:
             break;

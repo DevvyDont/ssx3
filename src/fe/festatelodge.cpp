@@ -165,7 +165,7 @@ extern char str_TransitionOut_b[];
  * @param w  the option widget that sent the event; nothing happens when null
  * @param event  the widget event (only kONNEXT, accept, is handled)
  */
-extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, int event)
+void cFEStateLodge::onWidgetEvent(cUIThing* w, unsigned int event)
 {
     if (((char*)w) == 0) {
         return;
@@ -177,39 +177,39 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    if (w->mMiscData == 0 && self->bToNextState == 0) {
+    if (w->mMiscData == 0 && bToNextState == 0) {
         cFELocale* mgr = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
-        void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-        self->mPathToSaveProfile = cFEStateLodge::kPathSaveProgress;
-        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
+        void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, mpEngine, ((char*)this), text, 0, 0, 0, 0, 0);
+        mPathToSaveProfile = cFEStateLodge::kPathSaveProgress;
+        cUIStateStack_pushPopup(&mpEngine->mStateStack, newState);
         return;
     }
     int k = w->mMiscData;
-    if (k == cFEStateLodge::kPathQuit && self->bToNextState == 0) {
+    if (k == cFEStateLodge::kPathQuit && bToNextState == 0) {
         cFELocale* mgr = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, mgr);
         unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
-        void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-        self->mPathToSaveProfile = k;
-        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
+        void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, mpEngine, ((char*)this), text, 0, 0, 0, 0, 0);
+        mPathToSaveProfile = k;
+        cUIStateStack_pushPopup(&mpEngine->mStateStack, newState);
         return;
     }
     if (k == 8) {
-        ((cFECustom*)self->mpEngine->mpCustom)->mProfileLaunchScreen = 39;
+        ((cFECustom*)mpEngine->mpCustom)->mProfileLaunchScreen = 39;
         void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0, 0);
-        void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, 1 << self->mCurrentCtrl);
-        cUIStateStack_push(&self->mpEngine->mStateStack, newState);
+        void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, mpEngine, 3, 1 << mCurrentCtrl);
+        cUIStateStack_push(&mpEngine->mStateStack, newState);
         return;
     }
-    cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-    cUICustomInterface* obj = self->mpEngine->mpCustom;
-    void* nextState = obj->getNextState((cUIState*)self, w->mMiscData);
+    cUIScreen_playFrame(mpScreen, cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
+    cUICustomInterface* obj = mpEngine->mpCustom;
+    void* nextState = obj->getNextState((cUIState*)this, w->mMiscData);
     if (nextState != 0) {
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -229,7 +229,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetMenu);
  * @return 0x100 for events 7, 8 and 9, otherwise 0x101
  */
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateLodge_onWidgetMenu(cFEStateLodge* self, int pMenu, unsigned int key)
+int cFEStateLodge::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -457,7 +457,7 @@ static inline void commitK1F4108(void* np)
  * @param popup  the popup state that sent the event
  * @param event  the popup event (kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* self, cUIState* popup, int event)
+void cFEStateLodgeRiderDetail::onPopupEvent(cUIState* popup, unsigned int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (event != cUIState::kONPOPUPDESTROY)
@@ -466,14 +466,14 @@ extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* 
         int cheatCharId = ((cFEStateCheatCharSelect*)popup)->mCheatCharID;
         if (((cFEStateCheatCharSelect*)popup)->mDone != 0) {
             void* np2 = cBE_getInterface_Fv(cBE_getBE(), 1);
-            cBENewPlayerInterface_setPlayerCheatCharID(np2, self->mUserNum, cheatCharId);
+            cBENewPlayerInterface_setPlayerCheatCharID(np2, mUserNum, cheatCharId);
             commitK1F4108(np2);
         }
     } else if (popup->mHashName == 0) {
         if (((cKeyboardPopup*)popup)->mbAcceptText != 0) {
             char* name = ((cKeyboardPopup*)popup)->mszEditString;
             if (strlen(name) != 0) {
-                cBENewPlayerInterface_setPlayerName(np, self->mUserNum, name);
+                cBENewPlayerInterface_setPlayerName(np, mUserNum, name);
                 commitK1F4108(np);
             }
         }
@@ -575,7 +575,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(cFEStateLodgeRiderDetail* self, int pMenu, unsigned int key)
+int cFEStateLodgeRiderDetail::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -628,7 +628,7 @@ extern char str_TransitionOut_b[];
  * @param w  the option widget that sent the event; nothing happens when null
  * @param event  the widget event (kONNEXT accept, kONPREV back)
  */
-extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail* self, cUIThing* w, int event)
+void cFEStateLodgeRiderDetail::onWidgetEvent(cUIThing* w, unsigned int event)
 {
     if (((char*)w) == 0) {
         return;
@@ -642,7 +642,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         if (k == 14) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0);
             cKeyboardPopup* popup =
-                (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(mem, self->mpEngine, ((char*)self), 0, self->mCtrlBits);
+                (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(mem, mpEngine, ((char*)this), 0, mCtrlBits);
             popup->mUserNum = 0;
             popup->miCurrentKey = 55;
             cKeyboardPopup_setMaxCharacters(popup, 8);
@@ -659,32 +659,34 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
             cKeyboardPopup_setIncludeKey(popup, 0x40, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 65, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 66, 0, 2);
-            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
-            cKeyboardPopup_setInputText(popup, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum));
+            cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
+            cKeyboardPopup_setInputText(popup, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1),
+                    mUserNum));
             return;
         }
         if (k == 11) {
-            int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, id) > 0) {
+            int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
+            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum, id) > 0) {
                 void* mem = cMemMan_alloc(484, str_cFEStateCheatCharSelect_b, 0, 0);
-                void* popup = cFEStateCheatCharSelect_cFEStateCheatCharSelect(mem, self->mpEngine, ((char*)self), self->mUserNum, id);
-                cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
+                void* popup = cFEStateCheatCharSelect_cFEStateCheatCharSelect(mem, mpEngine, ((char*)this), mUserNum,
+                        id);
+                cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
             }
             return;
         }
-        cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
-        cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        void* nextState = obj->getNextState((cUIState*)self, w->mMiscData);
+        cUIScreen_playFrame(mpScreen, cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
+        cUICustomInterface* obj = (cUICustomInterface*)((char*)mpEngine->mpCustom);
+        void* nextState = obj->getNextState((cUIState*)this, w->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = (cUICustomInterface*)((char*)self->mpEngine->mpCustom);
-        void* nextState = obj->getPrevState((cUIState*)self, 0);
+        cUICustomInterface* obj = (cUICustomInterface*)((char*)mpEngine->mpCustom);
+        void* nextState = obj->getPrevState((cUIState*)this, 0);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }

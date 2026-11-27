@@ -32,6 +32,10 @@ struct cFEStateOptionsSound : public cUIState {
     virtual ~cFEStateOptionsSound();
     virtual void onCreateScreen() __asm__("cFEStateOptionsSound_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsSound_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateOptionsSound_onPopupEvent");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cFEStateOptionsSound_onWidgetMenu");
+    virtual int onWidgetPair(cUIPair* pair, unsigned int event) __asm__("cFEStateOptionsSound_onWidgetPair");
 };
 
 CHECK_SIZE(cFEStateOptionsSound, 0x48);

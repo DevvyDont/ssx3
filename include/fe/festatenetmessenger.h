@@ -111,6 +111,12 @@ struct cFEStateNetMessenger : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateNetMessenger_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateNetMessenger_onUpdate");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateNetMessenger_onInputBegin");
+    virtual bool onLoseTransition() __asm__("cFEStateNetMessenger_onLoseTransition__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int event, unsigned int value)
+        __asm__("cFEStateNetMessenger_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetMessenger_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int popupEvent) __asm__("cFEStateNetMessenger_onPopupEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetMessenger_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);

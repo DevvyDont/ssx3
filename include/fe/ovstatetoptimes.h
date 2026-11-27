@@ -52,6 +52,10 @@ struct cOVState_TOPTIMES : public cOVState {
     virtual ~cOVState_TOPTIMES();
     virtual void onCreateScreen() __asm__("cOVState_TOPTIMES_onCreateScreen");
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_TOPTIMES_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cOVState_TOPTIMES_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cOVState_TOPTIMES_onWidgetEvent");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cOVState_TOPTIMES_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_TOPTIMES, mTopTimesFlow, 0x9C);

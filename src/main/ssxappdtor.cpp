@@ -2126,17 +2126,16 @@ void cGameModeHandler::init()
 INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderCheckpointHit__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns 1: the base game mode handler's checkpoint handler accepts every checkpoint.
+ * Returns true: the base game mode handler's checkpoint handler accepts every checkpoint.
  *
  * Slot +0x34 of the base handler vtable cGameModeHandler_vtbl (and of the handlers that keep it); the overrides (for example
  * cGMBigAirHandler_riderCheckpointHit) take the rider and the seconds added.
  *
- * @return 1
+ * @return true
  */
-int cGameModeHandler_riderCheckpointHit(void* vself)
+bool cGameModeHandler::riderCheckpointHit(int, int)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -2148,9 +2147,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderGateHit__FPv);
  *
  * Slot +0x3C of the base handler vtable cGameModeHandler_vtbl and of most event handlers.
  */
-void cGameModeHandler_riderGateHit(void* vself)
+void cGameModeHandler::riderGateHit(int, int)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2163,9 +2161,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
  * Slot +0x44 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it to record a rider's result (for
  * example cGMBigAirHandler_raceFinish, cGMRaceHandler_raceFinish).
  */
-void cGameModeHandler_raceFinish(void* vself)
+void cGameModeHandler::raceFinish(int)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2179,9 +2176,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_getHeatScore__FPv);
  *
  * @return 0
  */
-int cGameModeHandler_getHeatScore(void* vself)
+unsigned int cGameModeHandler::getHeatScore(int, int)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
     return 0;
 }
 #endif
@@ -2194,9 +2190,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_writeToReplayFrame__FPv);
  *
  * Slot +0x54 of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_writeToReplayFrame overrides it for the scored event.
  */
-void cGameModeHandler_writeToReplayFrame(void* vself)
+void cGameModeHandler::writeToReplayFrame(cReplayFramePtr*)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2208,9 +2203,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_readFromReplayFrame__FPv);
  *
  * Slot +0x5C of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_readFromReplayFrame overrides it for the scored event.
  */
-void cGameModeHandler_readFromReplayFrame(void* vself)
+void cGameModeHandler::readFromReplayFrame(cReplayFramePtr*)
 {
-    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2310,9 +2304,8 @@ INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_writeToReplayFrame__FPv);
  *
  * Slot +0x54 (writeToReplayFrame) of cGMMPSlopeHandler_vtbl.
  */
-void cGMMPSlopeHandler_writeToReplayFrame(void* vself)
+void cGMMPSlopeHandler::writeToReplayFrame(cReplayFramePtr*)
 {
-    cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
 #endif
 
@@ -2324,9 +2317,8 @@ INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_readFromReplayFrame__FPv);
  *
  * Slot +0x5C (readFromReplayFrame) of cGMMPSlopeHandler_vtbl.
  */
-void cGMMPSlopeHandler_readFromReplayFrame(void* vself)
+void cGMMPSlopeHandler::readFromReplayFrame(cReplayFramePtr*)
 {
-    cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
 #endif
 
@@ -3688,9 +3680,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge_onWidgetCreate__FPv);
  * Does nothing: the leaving-the-lodge loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
  * cGameLoadStateOutLodge_vtbl.
  */
-void cGameLoadStateOutLodge_onWidgetCreate(void* vself)
+void cGameLoadStateOutLodge::onWidgetCreate(cUIThing*)
 {
-    cGameLoadStateOutLodge* self = (cGameLoadStateOutLodge*)vself;
 }
 #endif
 
@@ -3710,15 +3701,15 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int cGameLoadStateOutLodge_onGainTransition(cGameLoadStateOutLodge* self)
+bool cGameLoadStateOutLodge::onGainTransition(int)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
-    return 0;
+    return false;
 }
 #endif
 

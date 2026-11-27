@@ -74,6 +74,8 @@ struct cOVTemplate_Dialog : public cOVState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVTemplate_Dialog();
     virtual void onWidgetCreate(cUIThing* item) __asm__("cOVTemplate_Dialog_onWidgetCreate");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cOVTemplate_Dialog_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int ev) __asm__("cOVTemplate_Dialog_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
@@ -139,6 +141,14 @@ struct cOVTemplate_Simple : public cOVState {
     // cOVTemplate_Simple's notes on cUIState's fields:
     //   mpScreen: [U] onCreateScreen looks "overlayMenu" and "overlayOpt0" ... "overlayOpt4" up on it
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVTemplate_Simple__cOVTemplate_Simple stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVTemplate_Simple();
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cOVTemplate_Simple_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int key) __asm__("cOVTemplate_Simple_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVTemplate_Simple, 0x9C);

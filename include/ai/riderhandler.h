@@ -140,6 +140,7 @@ struct cAirMotion {
     void loseFocus() __asm__("cAirMotion_loseFocus__FPv");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAirMotion_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cAirMotion_readFromReplayFrame");
+    void gainFocus(int state) __asm__("cAirMotion_gainFocus");
 };
 
 CHECK_OFFSET(cAirMotion, IsLandVelAlign, 0x00);
@@ -180,6 +181,9 @@ struct cWipeoutMotion {
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_readFromReplayFrame");
     int getWipeoutMotionState() __asm__("cWipeoutMotion_getWipeoutMotionState");
+    void gainFocus(int prev) __asm__("cWipeoutMotion_gainFocus");
+    void resolveAirMotion() __asm__("cWipeoutMotion_resolveAirMotion");
+    void resolveGroundMotion() __asm__("cWipeoutMotion_resolveGroundMotion");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -363,6 +367,12 @@ struct cBoardPressControl {
     void blendOutOfPivot() __asm__("cBoardPressControl_blendOutOfPivot");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cBoardPressControl_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cBoardPressControl_readFromReplayFrame");
+    void gainFocus() __asm__("cBoardPressControl_gainFocus__FPv");
+    bool checkAirMotion() __asm__("cBoardPressControl_checkAirMotion");
+    void handleIntoState(tBoardPressCmd* in) __asm__("cBoardPressControl_handleIntoState");
+    void handleBalanceState(tBoardPressCmd* cmd) __asm__("cBoardPressControl_handleBalanceState");
+    void handleIntoAirState() __asm__("cBoardPressControl_handleIntoAirState__FPv");
+    void handleExitState(tBoardPressCmd* in) __asm__("cBoardPressControl_handleExitState");
 };
 
 CHECK_OFFSET(cBoardPressControl, State, 0x00);
@@ -508,6 +518,7 @@ struct cSpinControl {
     void update(tSpinCmd* input) __asm__("cSpinControl_update");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cSpinControl_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cSpinControl_readFromReplayFrame");
+    void gainFocus() __asm__("cSpinControl_gainFocus");
 };
 
 CHECK_OFFSET(cSpinControl, AirAdjState, 0x00);
@@ -563,6 +574,10 @@ struct cGateControl {
     int isLaunchAllowed() __asm__("cGateControl_isLaunchAllowed");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cGateControl_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cGateControl_readFromReplayFrame");
+    void gainFocus() __asm__("cGateControl_gainFocus");
+    void doSit(tGateCmd* cmd) __asm__("cGateControl_doSit");
+    void doGetupFromSit(tGateCmd* cmd) __asm__("cGateControl_doGetupFromSit");
+    void doGateRock(tGateCmd* cmd) __asm__("cGateControl_doGateRock");
 };
 
 CHECK_OFFSET(cGateControl, GateState, 0x00);
@@ -651,6 +666,8 @@ struct cWipeoutControl {
     void loseFocus() __asm__("cWipeoutControl_loseFocus");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutControl_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutControl_readFromReplayFrame");
+    void updateGround() __asm__("cWipeoutControl_updateGround");
+    void updateAir() __asm__("cWipeoutControl_updateAir");
 };
 
 CHECK_OFFSET(cWipeoutControl, RiderState, 0x00);
@@ -791,6 +808,7 @@ struct cUberGrindControl {
     void update(tUberGrindCmd* in) __asm__("cUberGrindControl_update");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cUberGrindControl_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cUberGrindControl_readFromReplayFrame");
+    void gainFocus() __asm__("cUberGrindControl_gainFocus");
 };
 
 CHECK_OFFSET(cUberGrindControl, GrindState, 0x00);

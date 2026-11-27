@@ -94,6 +94,7 @@ struct cFEStateMemCard : public cFEMemCard {
     virtual void onCreateScreen() __asm__("cFEStateMemCard_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateMemCard_onUpdate");
     virtual void updateDone() __asm__("cFEStateMemCard_updateDone");
+    virtual int onWidgetMenu(cUIMenu*, unsigned int, unsigned int) __asm__("cFEStateMemCard_onWidgetMenu__FPv");
 };
 
 CHECK_OFFSET(cFEStateMemCard, mMissingSavedFileTypeFlags, 0x22C);

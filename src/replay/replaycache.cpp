@@ -5048,7 +5048,6 @@ public:
 };
 
 
-extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self) __asm__("cScriptPlayerMain_DoUpdateFrame");
 /**
  * Runs one playback step of a script player: starts the entities on the first step, then advances them, handling the
  * end of the script.
@@ -5060,36 +5059,35 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self) __asm__("cScrip
  * the script a looping player restarts its entities (cScriptPlayerEntity_Restart) and replays the overshoot; otherwise
  * the comm interface (slot 5) is consulted before stopping.
  */
-extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
+void cScriptPlayerMain::DoUpdateFrame()
 {
-    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
-    if (self->mPlayState == 0 || self->mNumPaused > 0) {
+    if (mPlayState == 0 || mNumPaused > 0) {
         return;
     }
     cRcListener4DE0* comm = (cRcListener4DE0*)cScriptPlayerMain_GetInSeqCommInterface_p();
-    if (self->mPlayState == keScriptPlayState_PlayPending) {
-        self->mPlayState = keScriptPlayState_PlayExecuting;
+    if (mPlayState == keScriptPlayState_PlayPending) {
+        mPlayState = keScriptPlayState_PlayExecuting;
         if (comm != 0) {
-            comm->OnInSeqPlay(self);
+            comm->OnInSeqPlay(this);
         }
     }
-    if (self->mNumPaused > 0 || self->mPlayState == 0) {
+    if (mNumPaused > 0 || mPlayState == 0) {
         return;
     }
     int changed = 0;
-    float scriptLength = (float)cScriptPlayerMain_GetScriptLength_4DE0(self);
+    float scriptLength = (float)cScriptPlayerMain_GetScriptLength_4DE0(this);
     int hit = 0;
     float rem = 0.0f;
-    if (self->mPlayState == keScriptPlayState_PlayEnding && scriptLength <= self->mCurrFrame) {
-        cScriptPlayerMain_Stop_4DE0(self);
+    if (mPlayState == keScriptPlayState_PlayEnding && scriptLength <= mCurrFrame) {
+        cScriptPlayerMain_Stop_4DE0(this);
         return;
     }
-    if ((unsigned)(self->mPlayState - 3) < 2) {
-        float step = self->mPlaySpeed;
-        float currFrame = self->mCurrFrame;
+    if ((unsigned)(mPlayState - 3) < 2) {
+        float step = mPlaySpeed;
+        float currFrame = mCurrFrame;
         float fullStep = step;
         float lim = currFrame + step;
-        if (self->mPlayState == keScriptPlayState_PlayEnding) {
+        if (mPlayState == keScriptPlayState_PlayEnding) {
             lim = scriptLength;
         }
         if (scriptLength <= lim) {
@@ -5098,69 +5096,69 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
             lim = scriptLength;
             rem = fullStep - step;
         }
-        self->mEntityUpdateInProgress = 1;
-        changed = cScriptPlayerMain_DoUpdate_4DE0(self, lim, currFrame, step);
-        self->mEntityUpdateInProgress = 0;
+        mEntityUpdateInProgress = 1;
+        changed = cScriptPlayerMain_DoUpdate_4DE0(this, lim, currFrame, step);
+        mEntityUpdateInProgress = 0;
     } else {
         if (scriptLength == 0.0f) {
             hit = 1;
         }
-        self->mEntityUpdateInProgress = 1;
-        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
-            cScriptPlayerEntity_SetupPlay_4DE0(&self->mpEntityPlayers[i]);
+        mEntityUpdateInProgress = 1;
+        for (int i = 0; i < mpSystemHeader->numEntities; i++) {
+            cScriptPlayerEntity_SetupPlay_4DE0(&mpEntityPlayers[i]);
         }
-        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
+        for (int i = 0; i < mpSystemHeader->numEntities; i++) {
             int anyChanged = 0;
-            if (cScriptPlayerEntity_ExecutePlay_4DE0(&self->mpEntityPlayers[i]) != 0 || changed != 0) {
+            if (cScriptPlayerEntity_ExecutePlay_4DE0(&mpEntityPlayers[i]) != 0 || changed != 0) {
                 anyChanged = 1;
             }
             changed = anyChanged;
         }
-        self->mEntityUpdateInProgress = 0;
-        self->mPlayState = 3;
+        mEntityUpdateInProgress = 0;
+        mPlayState = 3;
         if (comm != 0) {
-            comm->OnInSeqUpdate(self, 0.0f, 0.0f);
+            comm->OnInSeqUpdate(this, 0.0f, 0.0f);
         }
     }
-    if (self->mDoStopInEntityUpdate != 0 || self->mPlayState == keScriptPlayState_PlayEnding) {
-        cScriptPlayerMain_Stop_4DE0(self);
+    if (mDoStopInEntityUpdate != 0 || mPlayState == keScriptPlayState_PlayEnding) {
+        cScriptPlayerMain_Stop_4DE0(this);
         return;
     }
-    if (hit != 0 && self->mLoopScript != 0) {
+    if (hit != 0 && mLoopScript != 0) {
         int changed2 = 0;
-        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
+        for (int i = 0; i < mpSystemHeader->numEntities; i++) {
             int anyChanged = 0;
-            if (cScriptPlayerEntity_Restart_4DE0(&self->mpEntityPlayers[i]) != 0 || changed2 != 0) {
+            if (cScriptPlayerEntity_Restart_4DE0(&mpEntityPlayers[i]) != 0 || changed2 != 0) {
                 anyChanged = 1;
             }
             changed2 = anyChanged;
         }
-        self->mCurrFrame = 0.0f;
+        mCurrFrame = 0.0f;
         while (scriptLength < rem) {
             rem -= scriptLength;
         }
         if (rem != 0.0f) {
-            self->mEntityUpdateInProgress = 1;
-            changed2 = cScriptPlayerMain_DoUpdate_4DE0(self, self->mCurrFrame + rem, self->mCurrFrame, rem);
-            self->mEntityUpdateInProgress = 0;
+            mEntityUpdateInProgress = 1;
+            changed2 = cScriptPlayerMain_DoUpdate_4DE0(this, mCurrFrame + rem, mCurrFrame, rem);
+            mEntityUpdateInProgress = 0;
         }
-        if (self->mDoStopInEntityUpdate != 0) {
-            cScriptPlayerMain_Stop_4DE0(self);
+        if (mDoStopInEntityUpdate != 0) {
+            cScriptPlayerMain_Stop_4DE0(this);
         }
     } else {
-        if (scriptLength <= self->mCurrFrame + self->mPlaySpeed) {
-            int keepPlaying = self->mLoopScript;
+        if (scriptLength <= mCurrFrame + mPlaySpeed) {
+            int keepPlaying = mLoopScript;
             if (keepPlaying != 0) {
                 if (comm != 0) {
-                    keepPlaying = comm->OnInSeqLoop(self);
+                    keepPlaying = comm->OnInSeqLoop(this);
                 }
-                if (self->mPlayState == 0 || keepPlaying != 0) {
+                if (mPlayState == 0 || keepPlaying != 0) {
                     return;
                 }
             }
-            self->mPlayState = 4;
+            mPlayState = 4;
             if (comm != 0) {
-                comm->OnInSeqPlayStopping(self);
+                comm->OnInSeqPlayStopping(this);
             }
         }
     }

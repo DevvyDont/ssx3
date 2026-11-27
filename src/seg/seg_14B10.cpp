@@ -50,9 +50,6 @@ extern char str_Race[];
 extern char str_EndRace[];
 extern char str_Shutdown[];
 
-// PORT: the unit declares cAI_forceAIState(void*); defined under an asm label with its real type.
-extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceAIState");
-
 /**
  * Sets the AI's game-flow state with its handler and name, without any change handling.
  *
@@ -62,49 +59,48 @@ extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceA
  * @param state  the state (On Tour tAIState)
  */
 // Forces the AI into the given state: state id, its state block and its name.
-extern "C" void cAI_forceAIState_impl(char* vself, int state)
+void cAI::forceAIState(int state)
 {
-    cAI* self = (cAI*)vself;
     switch (state) {
     case 1:
-        self->CurrentAIState = 1;
-        self->AIStateName = str_GameInit;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mGameInitHandler);
+        CurrentAIState = 1;
+        AIStateName = str_GameInit;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mGameInitHandler);
         break;
     case 2:
-        self->CurrentAIState = 2;
-        self->AIStateName = str_Freeride;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mFreerideHandler);
+        CurrentAIState = 2;
+        AIStateName = str_Freeride;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mFreerideHandler);
         break;
     case 3:
-        self->CurrentAIState = 3;
-        self->AIStateName = str_PreRace;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mPreRaceHandler);
+        CurrentAIState = 3;
+        AIStateName = str_PreRace;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mPreRaceHandler);
         break;
     case 4:
-        self->CurrentAIState = 4;
-        self->AIStateName = str_Countdown;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mCountdownHandler);
+        CurrentAIState = 4;
+        AIStateName = str_Countdown;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mCountdownHandler);
         break;
     case 5:
-        self->CurrentAIState = 5;
-        self->AIStateName = str_Race;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mRaceHandler);
+        CurrentAIState = 5;
+        AIStateName = str_Race;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mRaceHandler);
         break;
     case 6:
-        self->CurrentAIState = 6;
-        self->AIStateName = str_EndRace;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mEndRaceHandler);
+        CurrentAIState = 6;
+        AIStateName = str_EndRace;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mEndRaceHandler);
         break;
     case 7:
-        self->CurrentAIState = 7;
-        self->AIStateName = str_Shutdown;
-        self->CurrentAIStateHandler = (cAIStateHandler*)(&self->mShutdownHandler);
+        CurrentAIState = 7;
+        AIStateName = str_Shutdown;
+        CurrentAIStateHandler = (cAIStateHandler*)(&mShutdownHandler);
         break;
     default:
-        self->CurrentAIStateHandler = 0;
-        self->AIStateName = 0;
-        self->CurrentAIState = 0;
+        CurrentAIStateHandler = 0;
+        AIStateName = 0;
+        CurrentAIState = 0;
         break;
     }
 }
@@ -886,7 +882,7 @@ static inline sV4_4298 Up_4298(cRider* r) { return *(sV4_4298*)&r->mMatrix.row[2
 // retail reads SurfaceFlags signed (lh)
 static inline int Flags_4298(cRider* r) { return *(short*)&r->SurfaceFlags; }
 
-#define VEL_4298 (*(sV4_4298*)&self->mVelocity)
+#define VEL_4298 (*(sV4_4298*)&this->mVelocity)
 
 /**
  * Adds a jump's pop to the rider's mVelocity and reports the takeoff.
@@ -911,14 +907,14 @@ static inline int Flags_4298(cRider* r) { return *(short*)&r->SurfaceFlags; }
  * @param speedFactor  the jump strength, 0 to 1, or negative for a fixed small pop
  */
 // Applies the rider's push (speedFactor in [0, 1]; negative = no push) and the slope/heading corrections.
-extern "C" void cRider_applyJumpPop(cRider* self, float speedFactor)
+void cRider::applyJumpPop(float speedFactor)
 {
     int steered = 0;
     float speed = Len_4298(VEL_4298);
     sV4_4298 oldVel = VEL_4298;
     float push;
     if (speedFactor < 0.0f) {
-        self->mRiderHandler->GroundMotion.AITickOnLoseFocus = -1;
+        mRiderHandler->GroundMotion.AITickOnLoseFocus = -1;
         push = 0.16339834034442902f;
     } else {
         push = speedFactor * speedFactor;
@@ -927,19 +923,19 @@ extern "C" void cRider_applyJumpPop(cRider* self, float speedFactor)
     }
     float lo = fCos(0.8726646900177002f);
     float hi = fCos(1.2217305898666382f);
-    if (cRider_getMotionState(self) == 4) {
-        AddEq_4298(VEL_4298, Scale_4298(Up_4298(self), push));
+    if (cRider_getMotionState(this) == 4) {
+        AddEq_4298(VEL_4298, Scale_4298(Up_4298(this), push));
     } else {
-        float tParam = (self->mGroundNormal.z - lo) * (1.0f / (hi - lo));
-        sV4_4298 dir = Normalize_4298(Add_4298(*(sV4_4298*)&self->mGroundNormal,
-                                               Scale_4298(*(sV4_4298*)&self->mGroundForward, 0.2f)));
-        if (self->mGroundForward.z < 0.0f || tParam < 0.0f || self->mVelocity.z < 0.0f) {
+        float tParam = (mGroundNormal.z - lo) * (1.0f / (hi - lo));
+        sV4_4298 dir = Normalize_4298(Add_4298(*(sV4_4298*)&mGroundNormal,
+                                               Scale_4298(*(sV4_4298*)&mGroundForward, 0.2f)));
+        if (mGroundForward.z < 0.0f || tParam < 0.0f || mVelocity.z < 0.0f) {
             AddEq_4298(VEL_4298, Scale_4298(dir, push));
         } else {
-            sV4_4298 flat = Normalize_4298(sV4_4298(self->mGroundNormal.x, self->mGroundNormal.y, 0.0f, 0.0f));
+            sV4_4298 flat = Normalize_4298(sV4_4298(mGroundNormal.x, mGroundNormal.y, 0.0f, 0.0f));
             sV4_4298 side = Normalize_4298(
-                Sub_4298(*(sV4_4298*)&self->mGroundForward,
-                         Scale_4298(flat, Dot_4298(*(sV4_4298*)&self->mGroundForward, flat))));
+                Sub_4298(*(sV4_4298*)&mGroundForward,
+                         Scale_4298(flat, Dot_4298(*(sV4_4298*)&mGroundForward, flat))));
             sV4_4298 vdir = Normalize_4298(Sub_4298(VEL_4298, Scale_4298(flat, Dot_4298(VEL_4298, flat))));
             float sinLow = fSin(0.0f);
             float sinHigh = fSin(0.349065899848938f);
@@ -950,18 +946,18 @@ extern "C" void cRider_applyJumpPop(cRider* self, float speedFactor)
             VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - sideBlend), Scale_4298(vdir, sideBlend * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
         }
     }
-    cReplay_eventJump((int)SSXApp->Game->Replay, self->mAIIndex, &self->mMetrix->Totals);
+    cReplay_eventJump((int)SSXApp->Game->Replay, mAIIndex, &mMetrix->Totals);
     cWScriptMan_eventJump(cWScriptMan_TheWScriptMan);
     cRider_flagEventBoostPowerUp(
-        self, 1, cRiderMetrix_evTakeoff(self->mMetrix, self->IsRidingFakie != self->IsGoofyStance, steered));
-    if (self->mGroundNormal.z > hi + 0.019999999552965164f) {
+        this, 1, cRiderMetrix_evTakeoff(mMetrix, IsRidingFakie != IsGoofyStance, steered));
+    if (mGroundNormal.z > hi + 0.019999999552965164f) {
         sV4_4298 dv = Sub_4298(VEL_4298, oldVel);
         sV4_4298 ov = oldVel;
         ov.z = 0.0f;
         dv.z = 0.0f;
         if (Dot_4298(ov, dv) < 0.0f) {
-            float slowSpeed = self->TerminalVelocity * 0.5f;
-            float fastSpeed = self->TerminalVelocity * 0.699999988079071f;
+            float slowSpeed = TerminalVelocity * 0.5f;
+            float fastSpeed = TerminalVelocity * 0.699999988079071f;
             float k;
             if (slowSpeed <= speed) {
                 if (speed <= fastSpeed)
@@ -974,26 +970,26 @@ extern "C" void cRider_applyJumpPop(cRider* self, float speedFactor)
             SubEq_4298(VEL_4298, Scale_4298(dv, k));
         }
     }
-    float slope = self->LastGroundNormal.z;
-    sV4_4298 headingDir = *(sV4_4298*)&self->LastGroundNormal;
+    float slope = LastGroundNormal.z;
+    sV4_4298 headingDir = *(sV4_4298*)&LastGroundNormal;
     headingDir.z = 0.0f;
     if (Abs_4298(headingDir.x) > 0.0f || Abs_4298(headingDir.y) > 0.0f)
         DivEq_4298(headingDir, Len_4298(headingDir));
     else
         headingDir = t4vect_XAxis_4298;
-    *(sV4_4298*)&self->HalfPipeNormal = headingDir;
+    *(sV4_4298*)&HalfPipeNormal = headingDir;
     if (slope < 0.05000000074505806f && slope > -0.05000000074505806f) {
         sV4_4298 lat = Scale_4298(headingDir, Dot_4298(VEL_4298, headingDir) / Dot_4298(headingDir, headingDir));
         SubEq_4298(VEL_4298, lat);
-        AddEq_4298(*(sV4_4298*)&self->mPosition, Scale_4298(headingDir, 4.0f));
-        if (!(Flags_4298(self) & 0x20))
+        AddEq_4298(*(sV4_4298*)&mPosition, Scale_4298(headingDir, 4.0f));
+        if (!(Flags_4298(this) & 0x20))
             ScaleEq_4298(VEL_4298, 0.799975574016571f);
     }
     float len = Len_4298(VEL_4298);
-    if (self->TerminalVelocity < len)
-        ScaleEq_4298(VEL_4298, self->TerminalVelocity / len);
-    if (speedFactor >= 0.0f && (self->mGroundMaterial < 11 || self->mGroundMaterial > 13)) {
-        float tParam = (float)(AITick() - self->mRiderHandler->GroundMotion.AITickOnGainFocus) * 0.01666666753590107f;
+    if (TerminalVelocity < len)
+        ScaleEq_4298(VEL_4298, TerminalVelocity / len);
+    if (speedFactor >= 0.0f && (mGroundMaterial < 11 || mGroundMaterial > 13)) {
+        float tParam = (float)(AITick() - mRiderHandler->GroundMotion.AITickOnGainFocus) * 0.01666666753590107f;
         float k;
         if (tParam <= 0.5388872623443604f) {
             k = 0.6939882636070251f;
@@ -1007,12 +1003,12 @@ extern "C" void cRider_applyJumpPop(cRider* self, float speedFactor)
     float cl = Len_4298(velCross);
     if (cl > 0.0f) {
         ScaleEq_4298(velCross, 1.0f / cl);
-        sV4_4298 side = Cross_4298(velCross, *(sV4_4298*)&self->mGroundNormal);
-        self->VerticalJump = Dot_4298(VEL_4298, *(sV4_4298*)&self->mGroundNormal) * Len_4298(side);
+        sV4_4298 side = Cross_4298(velCross, *(sV4_4298*)&mGroundNormal);
+        VerticalJump = Dot_4298(VEL_4298, *(sV4_4298*)&mGroundNormal) * Len_4298(side);
     } else {
-        self->VerticalJump = 0.0f;
+        VerticalJump = 0.0f;
     }
-    self->DidPop = speedFactor > 0.0f;
+    DidPop = speedFactor > 0.0f;
 }
 
 #undef VEL_4298

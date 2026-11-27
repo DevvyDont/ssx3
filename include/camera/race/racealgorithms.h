@@ -50,6 +50,12 @@ struct cMatrixChaseAlgorithm : public cLookAtChaseAlgorithm {
     virtual float getRestDrop();                                                    // 13 ([R] cMatrixChaseAlgorithm_vtbl: cMatrixChaseAlgorithm_getRestDrop__FPv)
     float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] cMatrixChaseAlgorithm_update update (lwc1/swc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cMatrixChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cMatrixChaseAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cMatrixChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_OFFSET(cMatrixChaseAlgorithm, LastAngle, 0x390);
@@ -75,6 +81,12 @@ struct cRelativeChaseAlgorithm : public cLookAtChaseAlgorithm {
     char unk_398[0x8];              // 0x398 alignment gap before the 16-byte-aligned t4Vector
     t4Vector LastLook;              // 0x3A0 [O] (On Tour 0x390); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
     t4Vector LastCamTargetPos;      // 0x3B0 [O] (On Tour 0x3A0); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cRelativeChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cRelativeChaseAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cRelativeChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_OFFSET(cRelativeChaseAlgorithm, Angle, 0x390);
@@ -109,6 +121,12 @@ struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
     float LeadDistance;             // 0x3C0 [O]; [R] = leadDistance; [U] cSplineCamAlgorithm_update
     float HeightOffset;             // 0x3C4 [O]; [R] = heightOffset; [U] cSplineCamAlgorithm_update
     char unk_3C8[0x8];              // 0x3C8 padding to the 16-byte class alignment (alloc 0x3D0)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cSplineCamAlgorithm_update");
+    virtual void snap(int id) __asm__("cSplineCamAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cSplineCamAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_OFFSET(cSplineCamAlgorithm, XOfT, 0x390);
@@ -140,6 +158,12 @@ CHECK_SIZE(cSplineCamAlgorithm, 0x3D0);
 struct cManualChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cManualChaseAlgorithm_vtbl: cManualChaseAlgorithm_getRestDrop__FPv)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cManualChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cManualChaseAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cManualChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_SIZE(cManualChaseAlgorithm, 0x390);
@@ -156,6 +180,14 @@ CHECK_SIZE(cManualChaseAlgorithm, 0x390);
 struct cIdleChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cIdleChaseAlgorithm_vtbl: cIdleChaseAlgorithm_getRestDrop__FPv)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cIdleChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cIdleChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cIdleChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cIdleChaseAlgorithm, 0x390);
@@ -172,6 +204,14 @@ CHECK_SIZE(cIdleChaseAlgorithm, 0x390);
 struct cLazyChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cLazyChaseAlgorithm_vtbl: cLazyChaseAlgorithm_getRestDrop__FPv)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cLazyChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cLazyChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cLazyChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cLazyChaseAlgorithm, 0x390);
@@ -188,6 +228,12 @@ CHECK_SIZE(cLazyChaseAlgorithm, 0x390);
 struct cLookBackChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cLookBackChaseAlgorithm_vtbl: cLookBackChaseAlgorithm_getRestDrop__FPv)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void update() __asm__("cLookBackChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cLookBackChaseAlgorithm_snap");
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
+        __asm__("cLookBackChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
 };
 
 CHECK_SIZE(cLookBackChaseAlgorithm, 0x390);
@@ -208,6 +254,12 @@ CHECK_SIZE(cLookBackChaseAlgorithm, 0x390);
 struct cMidRightChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cMidRightChaseAlgorithm_vtbl: cMidRightChaseAlgorithm_getRestDrop)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cMidRightChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void update() __asm__("cMidRightChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cMidRightChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cMidRightChaseAlgorithm, 0x390);
@@ -226,6 +278,12 @@ CHECK_SIZE(cMidRightChaseAlgorithm, 0x390);
 struct cMidLeftChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cMidLeftChaseAlgorithm_vtbl: cMidLeftChaseAlgorithm_getRestDrop)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
+        __asm__("cMidLeftChaseAlgorithm_getRaceCamFinalPhaseData");
+    virtual void update() __asm__("cMidLeftChaseAlgorithm_update");
+    virtual void snap(int id) __asm__("cMidLeftChaseAlgorithm_snap");
 };
 
 CHECK_SIZE(cMidLeftChaseAlgorithm, 0x390);

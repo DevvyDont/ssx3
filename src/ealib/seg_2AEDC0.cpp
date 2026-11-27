@@ -2476,10 +2476,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetCurrentFrameNumber__F
  *
  * @return the number of pictures decoded since Init
  */
-int PS2_SONY_CODEC_INTERNAL_GetCurrentFrameNumber(void* vself)
+int PS2_SONY_CODEC_INTERNAL::GetCurrentFrameNumber()
 {
-    PS2_SONY_CODEC_INTERNAL* self = (PS2_SONY_CODEC_INTERNAL*)vself;
-    return (int)self->mCurrentFrameNumber;
+    return (int)mCurrentFrameNumber;
 }
 #endif
 

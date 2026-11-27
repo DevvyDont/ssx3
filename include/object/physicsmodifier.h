@@ -22,10 +22,10 @@ struct cPhysicsModifier {
     // 0x04: the vptr. [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl
     //   (0x00490898). Slots:
     virtual ~cPhysicsModifier();                                // 1  ([R] cPhysicsModifier_vtbl; types [O])
-    virtual void update();                                      // 2
-    virtual void signal(int signal, float arg);                 // 3
+    virtual void update() __asm__("cPhysicsModifier_update__FPv");                                      // 2
+    virtual void signal(int signal, float arg) __asm__("cPhysicsModifier_signal__FPv");                 // 3
     virtual bool isActive();                                    // 4
-    virtual int getPhysicsType();                               // 5
+    virtual int getPhysicsType() __asm__("cPhysicsModifier_getPhysicsType__FPv");                               // 5
     virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cPhysicsModifier_writeToReplayFrame");      // 6
 
     // Methods bound to their retail symbols by asm labels.

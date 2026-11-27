@@ -113,6 +113,9 @@ struct cFEStateProfileLoad : public cFEMemCard {
     virtual void displayStatus() __asm__("cFEStateProfileLoad_displayStatus");
     virtual void updateDone() __asm__("cFEStateProfileLoad_updateDone");
     virtual void onDestroyScreen() __asm__("cFEStateProfileLoad_onDestroyScreen__FPv");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int msg, unsigned int)
+        __asm__("cFEStateProfileLoad_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateProfileLoad_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateProfileLoad, miCntrlID, 0x22C);

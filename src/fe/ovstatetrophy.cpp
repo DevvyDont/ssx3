@@ -76,14 +76,15 @@ public:
  * back.
  *
  * Cross sets the item's colour (slot 11) to (1, 1, 0, 0), opaque red in tARGB's A, R, G, B order, then pushes
- * getNextState(self, 1) for choice 1, or a null state otherwise. Triangle pushes getPrevState(self, miscData)
+ * getNextState(this, 1) for choice 1, or a null state otherwise. Triangle pushes getPrevState(this, miscData)
  * when it is not null.
  *
- * @param item  the item; ignored when null
+ * @param pWidget  the item; ignored when null
  * @param msg  the widget event: kONNEXT Cross, kONPREV Triangle
  */
-extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0* item, int msg)
+void cOVStateTrophy::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
+    cUIObj_20E9A0* item = (cUIObj_20E9A0*)pWidget;
     if (item == 0) {
         return;
     }
@@ -92,17 +93,17 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         item->setColor(sColor_20E9A0(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            cUICustomInterface* obj = self->mpEngine->mpCustom;
-            nextState = obj->getNextState((cUIState*)self, 1);
+            cUICustomInterface* obj = mpEngine->mpCustom;
+            nextState = obj->getNextState((cUIState*)this, 1);
         }
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
         break;
     }
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, *(int*)((char*)item + 0x18));
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }

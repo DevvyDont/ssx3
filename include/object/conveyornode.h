@@ -92,6 +92,8 @@ struct cConveyorNode : public cInstanceNode {
     // the vtable out of the units defining the other overrides
     virtual void update() __asm__("cConveyorNode_update");
     virtual void render() __asm__("cConveyorNode_render");
+    virtual void* getNodeState() __asm__("cConveyorNode_getNodeState__FPv");
+    virtual void updateIntersectInfo(tIntersectInfo& hit) __asm__("cConveyorNode_updateIntersectInfo");
 };
 
 CHECK_OFFSET(cConveyorNode, Vel, 0x1C);

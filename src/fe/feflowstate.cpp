@@ -16,13 +16,13 @@ extern char str_FEFlowState[];
  *
  * @param NumStates  number of states
  */
-extern "C" void cFEFlowState_setNumStates(cFEFlowState* self, int NumStates)
+void cFEFlowState::setNumStates(int NumStates)
 {
     signed char n = NumStates;
-    cFEFlowState_purge(self);
-    *(signed char*)self = n;
+    purge();
+    *(signed char*)this = n;
     void* states = operator_new_tag(n, str_FEFlowState, 0x100, 0);
-    self->mpValues = (char*)states;
+    mpValues = (char*)states;
     memset(states, 0, n);
 }
 #endif
@@ -38,14 +38,14 @@ void cMemMan_free(void* ptr);
  * cFEFlowState_setNumStates calls it before allocating a new array; cRealFE_loseFocus calls it on the front-end flow
  * state gFlowState.
  */
-extern "C" void cFEFlowState_purge(cFEFlowState* self)
+void cFEFlowState::purge()
 {
-    void* buffer = self->mpValues;
+    void* buffer = mpValues;
     if (buffer != 0) {
         cMemMan_free(buffer);
-        self->mpValues = 0;
+        mpValues = 0;
     }
-    *(char*)self = 0;
+    *(char*)this = 0;
 }
 #endif
 

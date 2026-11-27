@@ -70,12 +70,11 @@ extern t3Vector t3vect_Zero;
  * the triangle list just past the record, and allocates the vertex colour, position (zeroed) and
  * render-position arrays. An unfilled (line) shape also gets an array of 0x30-byte line vertices.
  *
- * @param uiVector        the vector object
  * @param pUIBase  its record (On Tour tUIBaseObject*)
  */
-extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
+void cUIVector::setUIData(tUIBaseObject* pUIBase)
 {
-    cUIVector* self = uiVector;
+    cUIVector* self = this;
     cUIThing_setUIData(self, pUIBase);
     tUIVector* pIYFVector = (tUIVector*)pUIBase;
     self->mAttrVector.mFill = pIYFVector->mFlags & 1;
@@ -371,19 +370,19 @@ INCLUDE_ASM("ui/uivector", cUIVector_setSize);
  *
  * @param off  new width and height (x, y); z is only copied into mSize
  */
-extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
+void cUIVector::setSize(const t3Vector* off)
 {
-    if (self->mAttrVector.mNumVertices == cUIVector::kQuadVertices) {
+    if (mAttrVector.mNumVertices == cUIVector::kQuadVertices) {
         signed char i;
         for (i = 1; i < cUIVector::kQuadVertices; i++) {
-            (self->mpVertexPosition)[i] = (self->mpVertexPosition)[0];
+            mpVertexPosition[i] = mpVertexPosition[0];
         }
-        (self->mpVertexPosition)[1].x += off->x;
-        (self->mpVertexPosition)[3].y += off->y;
-        (self->mpVertexPosition)[2].x += off->x;
-        (self->mpVertexPosition)[2].y += off->y;
+        mpVertexPosition[1].x += off->x;
+        mpVertexPosition[3].y += off->y;
+        mpVertexPosition[2].x += off->x;
+        mpVertexPosition[2].y += off->y;
     }
-    *(&self->mSize) = *off;
+    *(&mSize) = *off;
 }
 #endif
 
@@ -1248,10 +1247,9 @@ INCLUDE_ASM("ui/uivector", cUIThing_onInput__FPv);
  *
  * @return always 0
  */
-int cUIThing_onInput(void* vself)
+bool cUIThing::onInput(const cUIInput*)
 {
-    cUIThing* self = (cUIThing*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -1272,9 +1270,8 @@ INCLUDE_ASM("ui/uivector", cUIThing_render2D__FPv);
 /**
  * Draws nothing: cUIThing's render2D has an empty body.
  */
-void cUIThing_render2D(void* vself)
+void cUIThing::render2D(float, float)
 {
-    cUIThing* self = (cUIThing*)vself;
 }
 #endif
 
@@ -1284,9 +1281,8 @@ INCLUDE_ASM("ui/uivector", cUIThing_render3D__FPv);
 /**
  * Draws nothing: cUIThing's render3D has an empty body.
  */
-void cUIThing_render3D(void* vself)
+void cUIThing::render3D(cUIRenderContext*)
 {
-    cUIThing* self = (cUIThing*)vself;
 }
 #endif
 
@@ -2063,15 +2059,16 @@ extern "C" void* cList_traverseRecurse(void* list, cUIGroup_traverseRecurse_cFun
  * Stops at the group itself when the operator's callback (slot 2) returns nonzero; otherwise traverses the
  * child list (+0x74) with cList_traverseRecurse().
  *
- * @param fn  the list operator (On Tour cListOperator*)
+ * @param pOperator  the list operator (On Tour cListOperator*)
  * @return the node the operator stopped at, or 0 if none
  */
-extern "C" void* cUIGroup_traverseRecurse(cUIGroup* self, cUIGroup_traverseRecurse_cFunctor* fn)
+void* cUIGroup::traverseRecurse(cListOperator* pOperator)
 {
-    if (fn->onListNode(self) != 0) {
-        return ((void*)self);
+    cUIGroup_traverseRecurse_cFunctor* fn = (cUIGroup_traverseRecurse_cFunctor*)pOperator;
+    if (fn->onListNode(this) != 0) {
+        return ((void*)this);
     }
-    return cList_traverseRecurse((char*)&self->mList, fn);
+    return cList_traverseRecurse((char*)&mList, fn);
 }
 #endif
 
@@ -3212,10 +3209,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onGainTransition__FPv);
  *
  * @return always 0
  */
-int cUIState_onGainTransition(void* vself)
+bool cUIState::onGainTransition(int)
 {
-    cUIState* self = (cUIState*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -3227,10 +3223,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onInputBegin__FPv);
  *
  * @return 0 (input not handled)
  */
-int cUIState_onInputBegin(void* vself)
+bool cUIState::onInputBegin(cUIInput*)
 {
-    cUIState* self = (cUIState*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -3254,9 +3249,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onLoseFocus__FPv);
 /**
  * Default handler for a state losing focus; does nothing.
  */
-void cUIState_onLoseFocus(void* vself)
+void cUIState::onLoseFocus(cUIState*)
 {
-    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3279,10 +3273,9 @@ INCLUDE_ASM("ui/uivector", cUIState_onScreenEvent__FPv);
  *
  * @return 0 (event not handled)
  */
-int cUIState_onScreenEvent(void* vself)
+bool cUIState::onScreenEvent(cUIScreen*, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -3358,9 +3351,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onPopupEvent__FPv);
 /**
  * Ignores popup events: the base UI state's onPopupEvent has an empty body.
  */
-void cUIState_onPopupEvent(void* vself)
+void cUIState::onPopupEvent(cUIState*, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3370,9 +3362,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetCreate__FPv);
 /**
  * Does nothing: the base UI state's onWidgetCreate has an empty body.
  */
-void cUIState_onWidgetCreate(void* vself)
+void cUIState::onWidgetCreate(cUIThing*)
 {
-    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3382,9 +3373,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetEvent__FPv);
 /**
  * Ignores widget events: the base UI state's onWidgetEvent has an empty body.
  */
-void cUIState_onWidgetEvent(void* vself)
+void cUIState::onWidgetEvent(cUIThing*, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
 }
 #endif
 
@@ -3396,9 +3386,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetMenu__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetMenu(void* vself)
+int cUIState::onWidgetMenu(cUIMenu*, unsigned int, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3411,9 +3400,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetPair__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetPair(void* vself)
+int cUIState::onWidgetPair(cUIPair*, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3426,9 +3414,8 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetListBox__FPv);
  *
  * @return 0x101, the default result
  */
-int cUIState_onWidgetListBox(void* vself)
+int cUIState::onWidgetListBox(cUIListBox*, unsigned int)
 {
-    cUIState* self = (cUIState*)vself;
     return 257;
 }
 #endif
@@ -3441,9 +3428,8 @@ INCLUDE_ASM("ui/uivector", cUIState_getData__FPv);
  *
  * @return always 0
  */
-int cUIState_getData(void* vself)
+void* cUIState::getData(int)
 {
-    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif

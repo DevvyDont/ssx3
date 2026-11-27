@@ -35,6 +35,8 @@ struct cFEStateLodge : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStateLodge_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateLodge_onWidgetCreate");
     virtual void onPopupEvent(cUIState* msg, unsigned int id) __asm__("cFEStateLodge_onPopupEvent");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int event) __asm__("cFEStateLodge_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cFEStateLodge_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateLodge, mCheatCharID, 0x048);

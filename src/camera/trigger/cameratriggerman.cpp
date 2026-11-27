@@ -386,8 +386,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_resolve);
 #ifdef SKIP_ASM
 extern "C" void cCameraTriggerMan_streamIn(cCameraTriggerMan* self, void* stream);
 
-// PORT: the unit declares cCameraTriggerMan_resolve as returning void*, but the body returns nothing.
-void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __asm__("cCameraTriggerMan_resolve");
 /**
  * Resolves a streamed camera trigger chunk: reads the triggers out of the buffer.
  *
@@ -396,10 +394,10 @@ void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __as
  * @param rid  the chunk's resource id (On Tour rid), not used
  * @param stream  the loaded chunk data
  */
-void cCameraTriggerMan_resolve_impl(void* self, void* rid, void* stream)
+void cCameraTriggerMan::resolve(void* rid, void* stream)
 {
     if (stream != 0) {
-        ((cCameraTriggerMan*)self)->streamIn(stream);
+        ((cCameraTriggerMan*)this)->streamIn(stream);
     }
 }
 #endif

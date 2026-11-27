@@ -52,6 +52,7 @@ struct cStreamInstance {
     int Requests() __asm__("cStreamInstance_Requests");
     int TimeMult(int multAmount) __asm__("cStreamInstance_TimeMult");
     int GetStatus(void* out) __asm__("cStreamInstance_GetStatus");
+    int GetRequestStatus(int requestStatus, int* out) __asm__("cStreamInstance_GetRequestStatus");
 };
 
 CHECK_OFFSET(cStreamInstance, mBuffer, 0x000);

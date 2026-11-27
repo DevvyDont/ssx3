@@ -39,6 +39,13 @@ struct cDeadNode : public cInstanceNode {
     //   ObjNodeType: [R] node type 6 (cInstanceNode_cInstanceNode1)
     //   SortIndex: [R] type 6 draws from ObjNodeNoSortIndex
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
+
+    // Methods bound to their retail symbols by asm labels.
+    // loseFocus stays a C function (cDeadNode_loseFocus): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void loseFocus() __asm__("cDeadNode_loseFocus__FPv");
+    virtual void expire(int) __asm__("cDeadNode_expire__FPv");
+    virtual void signal(int, float) __asm__("cDeadNode_signal__FPv");
 };
 
 CHECK_SIZE(cDeadNode, 0x1C);

@@ -48,6 +48,8 @@ struct cCommChannel {
     int getChannelType() __asm__("cCommChannel_getChannelType__FPv");
     int readPacket() __asm__("cCommChannel_readPacket__FPv");
     int writePacket() __asm__("cCommChannel_writePacket__FPv");
+    int channelOpen() __asm__("cCommChannel_channelOpen__FPv");
+    void channelClose() __asm__("cCommChannel_channelClose");
 };
 
 CHECK_OFFSET(cCommChannel, mChannelOpen, 0x0);

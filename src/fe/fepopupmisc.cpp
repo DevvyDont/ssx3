@@ -383,12 +383,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onLoseTransition__FPv);
  *
  * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
- * @return always 1 (transition finished)
+ * @return always true (transition finished)
  */
-int cFEPopupScreenPos_onLoseTransition(void* vself)
+bool cFEPopupScreenPos::onLoseTransition()
 {
-    cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -576,9 +575,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateBraggingRights_onMenuGainFocus(void* vself)
+void cFEStateBraggingRights::onMenuGainFocus(cUIGroup*)
 {
-    cFEStateBraggingRights* self = (cFEStateBraggingRights*)vself;
 }
 #endif
 
@@ -612,9 +610,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChatRoom_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateChatRoom_onMenuGainFocus(void* vself)
+void cFEStateChatRoom::onMenuGainFocus(cUIGroup*)
 {
-    cFEStateChatRoom* self = (cFEStateChatRoom*)vself;
 }
 #endif
 
@@ -664,12 +661,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineAgreement_onLoseTransition__FPv);
 /**
  * Leaving transition of the terms-of-service state: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateOnlineAgreement_onLoseTransition(void* vself)
+bool cFEStateOnlineAgreement::onLoseTransition()
 {
-    cFEStateOnlineAgreement* self = (cFEStateOnlineAgreement*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -721,12 +717,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_onLoseTransition__FPv);
 /**
  * Leaving transition of the quick-match popup: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateNetQuickPlayPopup_onLoseTransition(void* vself)
+bool cFEStateNetQuickPlayPopup::onLoseTransition()
 {
-    cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -931,12 +926,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_onLoseTransition__FPv);
 /**
  * Leaving transition of the create-room popup: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateNetCreateRoomPopup_onLoseTransition(void* vself)
+bool cFEStateNetCreateRoomPopup::onLoseTransition()
 {
-    cFEStateNetCreateRoomPopup* self = (cFEStateNetCreateRoomPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -1039,12 +1033,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_onLoseTransition__FPv);
  *
  * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
- * @return always 1 (transition finished)
+ * @return always true (transition finished)
  */
-int cFEStateNetHelpPopup_onLoseTransition(void* vself)
+bool cFEStateNetHelpPopup::onLoseTransition()
 {
-    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -1217,7 +1210,7 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
 extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(cFEStateRewardGalleryBase* self, int flags)
 {
     VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
+    self->cFEStateRewardGalleryBase::purgeRewards();
     cFEStateRewardGalleryBase_purgeIcons(self);
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
@@ -1300,9 +1293,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconID1__FPv);
  *
  * @return -1
  */
-int cFEStateRewardGalleryBase_getIconID1(void* vself)
+int cFEStateRewardGalleryBase::getIconID1()
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return -0x1;
 }
 #endif
@@ -1317,9 +1309,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getTextureElement__FPv);
  *
  * @return 0 (no texture element)
  */
-int cFEStateRewardGalleryBase_getTextureElement(void* vself)
+const cTextureElement* cFEStateRewardGalleryBase::getTextureElement(int)
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1349,9 +1340,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_allocRewards__FPv);
  *
  * Each gallery class overrides it with the code that fills its reward array at +0xA28 (posters: cFEStateRewardGalleryPosters_allocRewards).
  */
-void cFEStateRewardGalleryBase_allocRewards(void* vself)
+void cFEStateRewardGalleryBase::allocRewards()
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
 }
 #endif
 
@@ -1364,9 +1354,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_purgeRewards__FPv);
  * The gallery classes override it (posters: cFEStateRewardGalleryPosters_purgeRewards clears the list); the destructors call this base version
  * directly.
  */
-void cFEStateRewardGalleryBase_purgeRewards(void* vself)
+void cFEStateRewardGalleryBase::purgeRewards()
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
 }
 #endif
 
@@ -1378,9 +1367,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getReward__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getReward(void* vself)
+const void* cFEStateRewardGalleryBase::getReward(int)
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1393,9 +1381,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardCost__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getRewardCost(void* vself)
+int cFEStateRewardGalleryBase::getRewardCost(const void*)
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1408,9 +1395,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardStoreNum__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getRewardStoreNum(void* vself)
+int cFEStateRewardGalleryBase::getRewardStoreNum(const void*)
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1423,9 +1409,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardName__FPv);
  *
  * @return 0 (no name)
  */
-int cFEStateRewardGalleryBase_getRewardName(void* vself)
+const char* cFEStateRewardGalleryBase::getRewardName(const void*)
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif
@@ -1492,10 +1477,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record
  */
-const tPosterInfo* cFEStateRewardGalleryPosters_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryPosters::getReward(int i)
 {
-    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
-    return self->mpPosters[i];
+    return mpPosters[i];
 }
 #endif
 
@@ -1529,9 +1513,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardStoreNum__FP
  * @param other  the reward record (a tPosterInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryPosters::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     tPosterInfo* poster = (tPosterInfo*)other;
     return poster->mStoreNum;
 }
@@ -1548,9 +1531,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardName__FPvT0)
  * @param other  the reward record (a tPosterInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryPosters_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryPosters::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     tPosterInfo* poster = (tPosterInfo*)other;
     return poster->mNameStringID;
 }
@@ -1618,10 +1600,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getReward__FPvi)
  * @param i  the reward index
  * @return the reward record
  */
-const tTradingCardInfo* cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryTradingCards::getReward(int i)
 {
-    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
-    return self->mpTradingCards[i];
+    return mpTradingCards[i];
 }
 #endif
 
@@ -1656,9 +1637,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardStoreNu
  * @param other  the reward record (a tTradingCardInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryTradingCards::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     tTradingCardInfo* card = (tTradingCardInfo*)other;
     return card->mStoreNum;
 }
@@ -1675,9 +1655,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardName__F
  * @param other  the reward record (a tTradingCardInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryTradingCards_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryTradingCards::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     tTradingCardInfo* card = (tTradingCardInfo*)other;
     return card->mNameStringID;
 }
@@ -1745,10 +1724,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record
  */
-const tConceptArtInfo* cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryConceptArts::getReward(int i)
 {
-    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
-    return self->mpConceptArts[i];
+    return mpConceptArts[i];
 }
 #endif
 
@@ -1783,9 +1761,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardStoreNum
  * @param other  the reward record (a tConceptArtInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryConceptArts::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     tConceptArtInfo* art = (tConceptArtInfo*)other;
     return art->mStoreNum;
 }
@@ -1802,9 +1779,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardName__FP
  * @param other  the reward record (a tConceptArtInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryConceptArts_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryConceptArts::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     tConceptArtInfo* art = (tConceptArtInfo*)other;
     return art->mNameStringID;
 }
@@ -1872,10 +1848,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record
  */
-const tVideoInfo* cFEStateRewardGalleryVideos_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryVideos::getReward(int i)
 {
-    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
-    return self->mpVideos[i];
+    return mpVideos[i];
 }
 #endif
 
@@ -1909,9 +1884,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardStoreNum__FPv
  * @param other  the reward record (a tVideoInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryVideos::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     tVideoInfo* video = (tVideoInfo*)other;
     return video->mStoreNum;
 }
@@ -1928,9 +1902,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardName__FPvT0);
  * @param other  the reward record (a tVideoInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryVideos_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryVideos::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     tVideoInfo* video = (tVideoInfo*)other;
     return video->mNameStringID;
 }
@@ -1998,10 +1971,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record
  */
-const tToyInfo* cFEStateRewardGalleryToys_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryToys::getReward(int i)
 {
-    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
-    return self->mpToys[i];
+    return mpToys[i];
 }
 #endif
 
@@ -2035,9 +2007,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0
  * @param other  the reward record (a tToyInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryToys::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     tToyInfo* toy = (tToyInfo*)other;
     return toy->mStoreNum;
 }
@@ -2054,9 +2025,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardName__FPvT0);
  * @param other  the reward record (a tToyInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryToys_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryToys::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     tToyInfo* toy = (tToyInfo*)other;
     return toy->mNameStringID;
 }
@@ -2124,10 +2094,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record
  */
-const tCheatCharInfo* cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
+const void* cFEStateRewardGalleryCheatChars::getReward(int i)
 {
-    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
-    return self->mpCheatChars[i];
+    return mpCheatChars[i];
 }
 #endif
 
@@ -2162,9 +2131,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardStoreNum_
  * @param other  the reward record (a tCheatCharInfo)
  * @return the store the reward is sold in
  */
-signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* vself, void* other)
+int cFEStateRewardGalleryCheatChars::getRewardStoreNum(const void* other)
 {
-    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
     tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
     return cheatChar->mStoreNum;
 }
@@ -2181,9 +2149,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardName__FPv
  * @param other  the reward record (a tCheatCharInfo)
  * @return the reward's name
  */
-char* cFEStateRewardGalleryCheatChars_getRewardName(void* vself, void* other)
+const char* cFEStateRewardGalleryCheatChars::getRewardName(const void* other)
 {
-    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
     tCheatCharInfo* cheatChar = (tCheatCharInfo*)other;
     return cheatChar->mNameStringID;
 }
@@ -2262,12 +2229,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onGainTransition__FPv);
  * Entry 7 of cFEStateVideoPlayer_vtbl, the vtable cFEStateVideoPlayer_cFEStateVideoPlayer stores for the video-player state (video and audio file names at
  * +0x48 and +0x148, movie player at +0x248).
  *
- * @return 1 (transition done)
+ * @return true (transition done)
  */
-int cFEStateVideoPlayer_onGainTransition(void* vself)
+bool cFEStateVideoPlayer::onGainTransition(int)
 {
-    cFEStateVideoPlayer* self = (cFEStateVideoPlayer*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -2279,12 +2245,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onLoseTransition__FPv);
  *
  * Entry 10 of cFEStateVideoPlayer_vtbl, the video-player state's vtable.
  *
- * @return 1 (transition done)
+ * @return true (transition done)
  */
-int cFEStateVideoPlayer_onLoseTransition(void* vself)
+bool cFEStateVideoPlayer::onLoseTransition()
 {
-    cFEStateVideoPlayer* self = (cFEStateVideoPlayer*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -2701,20 +2666,19 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * @param pWidget  the widget that sent the event
  * @param Event  the widget event
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultiplayerMode* self, cUIThing* pWidget,
-                                                           int Event)
+void cFEPopupSelectMultiplayerMode::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
 {
     switch (Event) {
     case cUIState::kONNEXT: {
-        cUIEngine* engine = self->mpEngine;
-        self->mMultiMode = 1;
+        cUIEngine* engine = mpEngine;
+        mMultiMode = 1;
         D_004A19D4 = pWidget->mMiscData != 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
     case cUIState::kONPREV: {
-        cUIEngine* engine = self->mpEngine;
-        self->mMultiMode = 0;
+        cUIEngine* engine = mpEngine;
+        mMultiMode = 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
@@ -2739,7 +2703,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * @param idx   the event's index argument (the menu's scroll offset for kSCROLLUP and kSCROLLDOWN)
  * @return always 0x101, the base handler's result
  */
-extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(cFEPopupSelectMultiplayerMode* self, void* menu, unsigned int key, int idx)
+int cFEPopupSelectMultiplayerMode::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int idx)
 {
     switch (key) {
     default:
@@ -2785,12 +2749,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onGainTransition__FP
  *
  * The state stack update cUIStateStack_updateLoop() ends a state's gain transition once this returns nonzero.
  *
- * @return always 1 (transition finished)
+ * @return always true (transition finished)
  */
-int cFEPopupSelectMultiplayerMode_onGainTransition(void* vself)
+bool cFEPopupSelectMultiplayerMode::onGainTransition(int)
 {
-    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -2802,12 +2765,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onLoseTransition__FP
  *
  * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
- * @return always 1 (transition finished)
+ * @return always true (transition finished)
  */
-int cFEPopupSelectMultiplayerMode_onLoseTransition(void* vself)
+bool cFEPopupSelectMultiplayerMode::onLoseTransition()
 {
-    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3456,12 +3418,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_onLoseTransition__FPv);
 /**
  * Leaving transition of the challenge popup: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateChallengePopup_onLoseTransition(void* vself)
+bool cFEStateChallengePopup::onLoseTransition()
 {
-    cFEStateChallengePopup* self = (cFEStateChallengePopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3519,12 +3480,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup_onLoseTransition__F
 /**
  * Leaving transition of the challenge-received popup: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateChallengeReceivedPopup_onLoseTransition(void* vself)
+bool cFEStateChallengeReceivedPopup::onLoseTransition()
 {
-    cFEStateChallengeReceivedPopup* self = (cFEStateChallengeReceivedPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3686,12 +3646,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onLoseTransition__FPv);
 /**
  * Leaving transition of the DNAS authentication state: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateAuthDNAS_onLoseTransition(void* vself)
+bool cFEStateAuthDNAS::onLoseTransition()
 {
-    cFEStateAuthDNAS* self = (cFEStateAuthDNAS*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3754,12 +3713,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_onLoseTransition__FPv);
 /**
  * Leaving transition of the DNAS error state: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateAuthDNASError_onLoseTransition(void* vself)
+bool cFEStateAuthDNASError::onLoseTransition()
 {
-    cFEStateAuthDNASError* self = (cFEStateAuthDNASError*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3814,12 +3772,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onLoseTransition__FPv);
 /**
  * Ends the account memory-card popup's lose-focus transition at once.
  *
- * @return always 1 (the transition is done)
+ * @return always true (the transition is done)
  */
-int cFEStateNetAccountMem_onLoseTransition(void* vself)
+bool cFEStateNetAccountMem::onLoseTransition()
 {
-    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -4091,9 +4048,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats_onMenuGainFocus__FPv);
  *
  * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
  */
-void cFEStateStats_onMenuGainFocus(void* vself)
+void cFEStateStats::onMenuGainFocus(cUIGroup*)
 {
-    cFEStateStats* self = (cFEStateStats*)vself;
 }
 #endif
 
@@ -4238,12 +4194,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onLoseTransition__FPv);
 /**
  * Lets the transition away from the messenger proceed at once.
  *
- * @return 1
+ * @return true
  */
-int cFEStateNetMessenger_onLoseTransition(void* vself)
+bool cFEStateNetMessenger::onLoseTransition()
 {
-    cFEStateNetMessenger* self = (cFEStateNetMessenger*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -4312,12 +4267,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_onLoseTransition__FPv);
 /**
  * Leaving transition of the read-message popup: nothing to animate, so it reports the transition done at once.
  *
- * @return 1 (done)
+ * @return true (done)
  */
-int cFEStateReadMessagePopup_onLoseTransition(void* vself)
+bool cFEStateReadMessagePopup::onLoseTransition()
 {
-    cFEStateReadMessagePopup* self = (cFEStateReadMessagePopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -4350,9 +4304,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_playSound__FPv);
 /**
  * Does nothing: the base UI sound interface plays no sound (entry 2 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_playSound(void* vself)
+void cUISoundInterface::playSound(int)
 {
-    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4362,9 +4315,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundInitialize__FPv);
 /**
  * Does nothing: the base UI sound interface needs no set-up (entry 3 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_soundInitialize(void* vself)
+void cUISoundInterface::soundInitialize()
 {
-    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4374,9 +4326,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundShutdown__FPv);
 /**
  * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_soundShutdown(void* vself)
+void cUISoundInterface::soundShutdown()
 {
-    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4426,9 +4377,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onUpdate__FPv);
 /**
  * Does nothing: the base UI custom interface has no per-frame work (entry 2 of cUICustomInterface_vtbl).
  */
-void cUICustomInterface_onUpdate(void* vself)
+void cUICustomInterface::onUpdate()
 {
-    cUICustomInterface* self = (cUICustomInterface*)vself;
 }
 #endif
 
@@ -4440,10 +4390,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onScreenEvent__FPv);
  *
  * @return 0 (not handled)
  */
-int cUICustomInterface_onScreenEvent(void* vself)
+bool cUICustomInterface::onScreenEvent(cUIScreen*, unsigned int)
 {
-    cUICustomInterface* self = (cUICustomInterface*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -4455,9 +4404,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getNextState__FPv);
  *
  * @return 0 (no state)
  */
-int cUICustomInterface_getNextState(void* vself)
+cUIState* cUICustomInterface::getNextState(cUIState*, int)
 {
-    cUICustomInterface* self = (cUICustomInterface*)vself;
     return 0;
 }
 #endif
@@ -4470,9 +4418,8 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getPrevState__FPv);
  *
  * @return 0 (no state)
  */
-int cUICustomInterface_getPrevState(void* vself)
+cUIState* cUICustomInterface::getPrevState(cUIState*, int)
 {
-    cUICustomInterface* self = (cUICustomInterface*)vself;
     return 0;
 }
 #endif
@@ -4505,10 +4452,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUIInput_getState__FPv);
  *
  * @return always 0 (not active)
  */
-int cUIInput_getState(void* vself)
+bool cUIInput::getState(char) const
 {
-    cUIInput* self = (cUIInput*)vself;
-    return 0;
+    return false;
 }
 #endif
 
@@ -7641,20 +7587,20 @@ extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
  * vtable entry 7) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the
  * menu.
  */
-extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
+void cOVState_MESSAGECENTER::onGainFocus(cUIState*)
 {
-    int state = self->miMiscData;
+    int state = miMiscData;
     if (state == 0) {
         goto reset;
     }
     if (state == 1) {
     reset:
-        cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(37));
-        cUIMenu* menu = self->mpMenu;
+        cUIMenu_setSelectedByIndex(mpMenu, func_001E3680(37));
+        cUIMenu* menu = mpMenu;
         menu->setFocus(1);
-        func_001E50C8(self, 37, -1);
+        func_001E50C8(this, 37, -1);
     } else {
-        cUIMenu* menu = self->mpMenu;
+        cUIMenu* menu = mpMenu;
         menu->setFocus(1);
     }
 }
@@ -7715,7 +7661,7 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
  * @param widget  the widget (a row's From text holds its message index in mMiscData)
  * @param event   the widget event
  */
-extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* self, cUIThing* widget, unsigned int event)
+void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -7726,51 +7672,51 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     switch (event) {
     case cUIState::kONNEXT:
         if (faqRowCount + queuedCount > 0) {
-            int k = self->mpMenu->mScrollItemCurrent;
+            int k = mpMenu->mScrollItemCurrent;
             int idx = queuedCount - k - 1;
             if (idx >= 0) {
                 int id = func_001E3620(idx);
                 list->mask |= 1 << idx;
-                func_001E50C8(self, id, k + 1);
+                func_001E50C8(this, id, k + 1);
             } else if (idx + faqRowCount >= 0) {
                 int w = widget->mMiscData;
                 sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
                 sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
                 if (groupEntry->enabled != 0 && w == groupEntry->start) {
                     func_001E3A78(messageEntry->id, !func_001E3A30_b(messageEntry->id));
-                    func_001E48B0(self);
-                    func_001E4658(self);
-                    func_001E4458(self);
+                    func_001E48B0(this);
+                    func_001E4658(this);
+                    func_001E4458(this);
                 } else {
-                    func_001E50C8(self, w, k + 1);
+                    func_001E50C8(this, w, k + 1);
                 }
             }
         }
         break;
     case cUIState::kONOPTION:
-        self->mbMessageDeleted = 0;
+        mbMessageDeleted = 0;
         if (queuedCount > 0) {
-            int idx = queuedCount - self->mpMenu->mScrollItemCurrent - 1;
+            int idx = queuedCount - mpMenu->mScrollItemCurrent - 1;
             if (idx >= 0) {
-                func_001E5148(self, idx);
-                self->mbMessageDeleted = 1;
+                func_001E5148(this, idx);
+                mbMessageDeleted = 1;
             }
-            func_001E4458(self);
+            func_001E4458(this);
         }
         break;
     case cUIState::kONPREV: {
-        int outFrame = cUIScreen_getFrameByLabel(self->mpMessageScreen, GetHashValue32(str_TransitionOut_b));
+        int outFrame = cUIScreen_getFrameByLabel(mpMessageScreen, GetHashValue32(str_TransitionOut_b));
         if (outFrame != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
+            cUIScreen_playFrame(mpMessageScreen, outFrame, 1);
         }
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         D_004A20C0 = 0;
         break;
     }
     case cUIState::kONGAINFOCUS: {
         int i;
         for (i = 0; i < 8; i++) {
-            void* subjectText = ((void**)&self->mpSubject)[i];
+            void* subjectText = ((void**)&mpSubject)[i];
             sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)subjectText + 8);
             vt[5].fn(vthis(subjectText, vt[5]), 0);
         }
@@ -7865,21 +7811,21 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
  * @param value   the event's value (the new scroll offset for kSCROLLUPDATE)
  * @return 257 for kSCROLLUPDATE, kSCROLLCHANGE and others, the answers above otherwise
  */
-extern "C" int cOVState_MESSAGECENTER_onWidgetMenu(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
+int cOVState_MESSAGECENTER::onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int value)
 {
     switch (event) {
     case cUIMenu::kSCROLLUPDATE:
-        self->mScrollOffset = value;
-        func_001E4658(self);
-        func_001E48B0(self);
+        mScrollOffset = value;
+        func_001E4658(this);
+        func_001E48B0(this);
         break;
     case cUIMenu::kSCROLLCHANGE:
-        func_001E4458(self);
+        func_001E4458(this);
         return 257;
     case cUIMenu::kONMISC:
         return 0;
     case cUIMenu::kONOPTION:
-        return self->mbMessageDeleted != 0;
+        return mbMessageDeleted != 0;
     case cUIMenu::kONNEXT:
     case cUIMenu::kONPREVIOUS:
         return 1;
@@ -7904,12 +7850,12 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * @param popup  the popup
  * @param event  the popup event
  */
-extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self, int popup, int event)
+void cOVState_MESSAGECENTER::onPopupEvent(cUIState* popup, unsigned int event)
 {
     if (event == cUIState::kONSCREENPOPUPPREV) {
-        func_001E48B0(self);
-        func_001E4758(self);
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        func_001E48B0(this);
+        func_001E4758(this);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
 #endif
@@ -8547,10 +8493,9 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onUpdate__FPv);
  *
  * @return cUIState_onUpdate()'s result (not meaningful; declared void* by the unit)
  */
-void* cOVState_ViewPopup_onUpdate(void* vself)
+void* cOVState::ViewPopup_onUpdate()
 {
-    cOVState* self = (cOVState*)vself;
-    return cUIState_onUpdate(self);
+    return cUIState_onUpdate(this);
 }
 #endif
 
@@ -8847,11 +8792,11 @@ extern "C" void func_001E3268(int id);
  * @param pWidget  the widget (On Tour pWidget); not used
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void* pWidget, unsigned int msg)
+void cOVState_ViewPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONOPTION: {
-        int id = self->miMessage;
+        int id = miMessage;
         sPopupEntry18_5800* popupEntry = &D_004C6C08_5800[id];
         sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->groupIndex];
         if (typeEntry->type == kMessageGroupFAQ) {
@@ -8860,13 +8805,13 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
         func_001E3268(id);
     }
     case cUIState::kONNEXT: {
-        cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
+        cUIState* parentState = mpParentState;
+        parentState->onPopupEvent((cUIState*)this, cUIState::kONSCREENPOPUPPREV);
         break;
     }
     case cUIState::kONPREV: {
-        cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
+        cUIState* parentState = mpParentState;
+        parentState->onPopupEvent((cUIState*)this, cUIState::kONSCREENPOPUPPREV);
         break;
     }
     }
@@ -8932,7 +8877,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetMenu);
  * @return 1 for kONNEXT and kONPREVIOUS, 0 for kONMISC, for kONOPTION whether the message's type is not
  *         kMessageGroupFAQ, otherwise 0x101
  */
-extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMenu, unsigned int Event)
+int cOVState_ViewPopup::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
 {
     switch (Event) {
     case cUIMenu::kONNEXT:
@@ -8941,7 +8886,7 @@ extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMe
     case cUIMenu::kONMISC:
         return 0;
     case cUIMenu::kONOPTION: {
-        sPopupEntry18* popupEntry = &D_004C6C08[self->miMessage];
+        sPopupEntry18* popupEntry = &D_004C6C08[miMessage];
         sPopupEntry14* typeEntry = &D_00441630[popupEntry->groupIndex];
         return typeEntry->type != kMessageGroupFAQ;
     }
@@ -9269,10 +9214,10 @@ extern char str_run_pct_d_pct_d[];
  * manager's first word) with "@TextPulseWhiteOrange" (cOVState_triggerTextFade; place capped at 6) and plays menu sound
  * 0xE.
  */
-extern "C" void cOVState_HEAT_STANDINGS_onGainFocus(cOVState_HEAT_STANDINGS* self)
+void cOVState_HEAT_STANDINGS::onGainFocus(cUIState*)
 {
     char buf[32];
-    cUIState_onGainFocus_v(self);
+    cUIState_onGainFocus_v(this);
     int* heatData = (int*)SSXApp->GameModeMan;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int x = *heatData;
@@ -9281,9 +9226,9 @@ extern "C" void cOVState_HEAT_STANDINGS_onGainFocus(cOVState_HEAT_STANDINGS* sel
         n = 6;
     }
     sprintf(buf, str_rider_pct_d, n);
-    cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+    cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     sprintf(buf, str_run_pct_d_pct_d, x, n);
-    cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+    cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
@@ -9327,7 +9272,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onWidgetMenu);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int cOVState_HEAT_STANDINGS_onWidgetMenu(cOVState_HEAT_STANDINGS* self, int widget, int event)
+int cOVState_HEAT_STANDINGS::onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -9348,7 +9293,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_HEAT_STANDINGS_onWidgetEvent(cOVState_HEAT_STANDINGS* self, cUIThing* popup, int event)
+void cOVState_HEAT_STANDINGS::onWidgetEvent(cUIThing* popup, unsigned int event)
 {
     if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
@@ -9514,10 +9459,10 @@ static inline unsigned short* Loc1E6718(char* name)
  *
  * @return 0 (the transition is not finished)
  */
-extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDINGS* self)
+bool cOVState_FINAL_STANDINGS::onGainTransition(int)
 {
-    if (self->doInit != 0) {
-        self->doInit = 0;
+    if (doInit != 0) {
+        doInit = 0;
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
@@ -9526,7 +9471,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         int track = cBENewRaceInterface_newRace.cGameMode;
         int players = cBENewRaceInterface_newRace.cGamePath;
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
-            cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screenData));
+            cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_screenData));
             dataPanel->setVisible(1);
             t3Vector pos = dataPanel->mPosition;
             t3Vector raisedPos;
@@ -9535,7 +9480,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             raisedPos.z = pos.z;
             dataPanel->mPosition = raisedPos;
         }
-        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_event));
+        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_track_event));
         unsigned short name[0x38];
         func_002C2540(name, cBENewRaceInterface_getLocationName1(iface0));
         unsigned short* str = 0;
@@ -9564,7 +9509,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             sprintf2(title, titleFmt, name, str);
         }
         cUIText_setUnicodeString(uiText, title);
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_b));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_b));
         if (players == 2) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNMultiPlayResults));
         } else if (players == 1) {
@@ -9586,7 +9531,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRFinalResults));
         }
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_finalScoreTime));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_finalScoreTime));
         if (track == 0 || track == 5) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNTime_b));
         } else {
@@ -9611,7 +9556,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             if (i < count) {
                 sprintf(buf, str_riderpct_d, i + 1);
                 int finished = 0;
-                uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+                uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
                 if (i == cGameModeMan_iRanking[pl0]) {
                     if (D_005366A8[pl0] != 0) {
                         finished = 1;
@@ -9633,7 +9578,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                     cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(net, rider, outfit));
                 }
                 sprintf(buf, str_timePointspct_d, i + 1);
-                uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+                uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
                 if (finished) {
                     cUIText_setAsciiString(uiText, str_DNF);
                     done = 1;
@@ -9646,11 +9591,11 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 }
             } else {
                 sprintf(buf, str_riderpct_d, i + 1);
-                cUIState_hideObjSafe(self, buf);
+                cUIState_hideObjSafe(this, buf);
                 sprintf(buf, str_timePointspct_d, i + 1);
-                cUIState_hideObjSafe(self, buf);
+                cUIState_hideObjSafe(this, buf);
                 sprintf(buf, str_rankpct_d, i + 1);
-                cUIState_hideObjSafe(self, buf);
+                cUIState_hideObjSafe(this, buf);
             }
         }
         sIdx5_6718 ids = D_0046E648;
@@ -9658,7 +9603,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         if (players == 2 && track != 0 && track != 5) {
             same = D_00536640[pl0] == D_00536640[pl1];
         }
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_b));
         if (players != 2) {
             if (track == 5 || track == 6) {
                 if (cGameModeMan_iRanking[pl0] == 0) {
@@ -9713,9 +9658,9 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             ids.v[0] = 2;
         }
         int show2 = 0;
-        cUIState_hideObjSafe(self, str_gold);
-        cUIState_hideObjSafe(self, str_silver);
-        cUIState_hideObjSafe(self, str_bronze);
+        cUIState_hideObjSafe(this, str_gold);
+        cUIState_hideObjSafe(this, str_silver);
+        cUIState_hideObjSafe(this, str_bronze);
         int show1 = 1;
         if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER && (track == 5 || track == 6)
             && cGameModeMan_iRanking[pl0] != 0) {
@@ -9738,31 +9683,31 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         if (mode == 3 || track == 5 || track == 6) {
             if (show1) {
                 if (cGameModeMan_iRanking[pl0] == 0) {
-                    cUIState_showObjSafe(self, str_gold);
+                    cUIState_showObjSafe(this, str_gold);
                 } else if (cGameModeMan_iRanking[pl0] == 1) {
-                    cUIState_showObjSafe(self, str_silver);
+                    cUIState_showObjSafe(this, str_silver);
                 } else if (cGameModeMan_iRanking[pl0] == 2) {
-                    cUIState_showObjSafe(self, str_bronze);
+                    cUIState_showObjSafe(this, str_bronze);
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT && D_004A213C != 0) {
-                    void* goldIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_gold));
+                    void* goldIcon = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_gold));
                     cUIIcon_setTextureByHashValue(goldIcon, GetHashValue32(str_platinum));
                 }
             }
             if (show2) {
                 if (cGameModeMan_iRanking[pl1] == 0) {
-                    cUIState_showObjSafe(self, str_gold);
+                    cUIState_showObjSafe(this, str_gold);
                 } else if (cGameModeMan_iRanking[pl1] == 1) {
-                    cUIState_showObjSafe(self, str_silver);
+                    cUIState_showObjSafe(this, str_silver);
                 } else if (cGameModeMan_iRanking[pl1] == 2) {
-                    cUIState_showObjSafe(self, str_bronze);
+                    cUIState_showObjSafe(this, str_bronze);
                 }
             }
         }
         int netIds[1] = { 8 };
         for (int i = 0; i < 5; i++) {
             sprintf(text, str_overlayOptpct_d, i);
-            cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(text));
+            cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(text));
             if (button != 0) {
                 cBE_getInterface_Fv(SSXApp->BE, 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
@@ -9788,7 +9733,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             }
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -9858,11 +9803,11 @@ extern tARGB D_004C8408;
  * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (chat window mode,
  * selected colour D_004C8408, input map 1, hidden). Plays menu sound 0xE.
  */
-extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* self)
+void cOVState_FINAL_STANDINGS::onGainFocus(cUIState*)
 {
     char buf[32];
     int second = 0;
-    cUIState_onGainFocus_v(self);
+    cUIState_onGainFocus_v(this);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGamePath;
@@ -9877,32 +9822,32 @@ extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* s
     }
     if (first) {
         sprintf(buf, str_riderpct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
-        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
         sprintf(buf, str_timePointspct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
-        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     }
     if (second) {
         sprintf(buf, str_riderpct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
-        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
         sprintf(buf, str_timePointspct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
-        cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, buf, str_at_TextPulseWhiteOrange);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        cUIThing* groupWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
+        cUIThing* groupWidget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ChatGroup));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
-        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_chatText));
+        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_chatText));
         if (uiText != 0) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_POPUP235Chat_b));
         }
-        groupWidget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
+        groupWidget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptexts));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
         cUITextScroll* chatScroll =
-            (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
+            (cUITextScroll*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_textScrollChat_b));
         chatScroll->mAttrTextScroll.mMode = 1;
         chatScroll->mSelectedColour = D_004C8408;
         cUITextScroll_setInputMap(chatScroll, 1);
@@ -9918,9 +9863,8 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onLoseFocus__FPv);
 /**
  * Does nothing when the final standings overlay loses focus (vtable entry 11, onLoseFocus).
  */
-void cOVState_FINAL_STANDINGS_onLoseFocus(void* vself)
+void cOVState_FINAL_STANDINGS::onLoseFocus(cUIState*)
 {
-    cOVState_FINAL_STANDINGS* self = (cOVState_FINAL_STANDINGS*)vself;
 }
 #endif
 
@@ -10021,7 +9965,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetMenu);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int cOVState_FINAL_STANDINGS_onWidgetMenu(cOVState_FINAL_STANDINGS* self, int widget, int event)
+int cOVState_FINAL_STANDINGS::onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -10041,7 +9985,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_FINAL_STANDINGS_onWidgetEvent(cOVState_FINAL_STANDINGS* self, cUIThing* popup, int event)
+void cOVState_FINAL_STANDINGS::onWidgetEvent(cUIThing* popup, unsigned int event)
 {
     if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
@@ -10251,10 +10195,10 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* self, void* popup, int event)
+void cOVState_RACE_FINISHOV::onWidgetEvent(cUIThing* popup, unsigned int event)
 {
     if (popup != 0) {
-        if (event == cUIState::kONNEXT && self->mCanContinue != 0) {
+        if (event == cUIState::kONNEXT && mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10276,11 +10220,11 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetMenu);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int cOVState_RACE_FINISHOV_onWidgetMenu(cOVState_RACE_FINISHOV* self, int widget, int key)
+int cOVState_RACE_FINISHOV::onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
 {
     int result = 0;
     if (key == cUIMenu::kONNEXT) {
-        if (self->mCanContinue == 0) {
+        if (mCanContinue == 0) {
             result = 0;
         } else {
             return 257;
@@ -10496,10 +10440,10 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
+void cOVState_BASSSP_QUAL_FINISHOV::onWidgetEvent(cUIThing* popup, unsigned int event)
 {
     if (popup != 0) {
-        if (event == cUIState::kONNEXT && self->mCanContinue != 0) {
+        if (event == cUIState::kONNEXT && mCanContinue != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10518,11 +10462,11 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, int key)
+int cOVState_BASSSP_QUAL_FINISHOV::onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
 {
     int result = 0;
     if (key == cUIMenu::kONNEXT) {
-        if (self->mCanContinue == 0) {
+        if (mCanContinue == 0) {
             result = 0;
         } else {
             return 257;
@@ -10859,8 +10803,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_TOURNAMENT_STANDINGS_onWidgetEvent(cOVState_TOURNAMENT_STANDINGS* self, cUIThing* popup,
-                                                            int event)
+void cOVState_TOURNAMENT_STANDINGS::onWidgetEvent(cUIThing* popup, unsigned int event)
 {
     if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;

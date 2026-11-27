@@ -39,6 +39,7 @@ struct cUIProgress : public cUIThing {
     void setNumValues(int numValues) __asm__("cUIProgress_setNumValues");
     virtual void render2D(float x, float y) __asm__("cUIProgress_render2D");
     virtual void update(unsigned short ev) __asm__("cUIProgress_update");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUIProgress_setUIData");
 };
 
 CHECK_OFFSET(cUIProgress, mpObjBackground, 0x074);

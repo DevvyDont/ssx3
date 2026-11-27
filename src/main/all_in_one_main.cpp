@@ -1397,14 +1397,14 @@ struct V2_C9D0 { float x, y; };
  * @param sx  horizontal scale factor
  * @param sy  vertical scale factor
  */
-extern "C" void cFont_textf1(cFont* self, int fmt, float posX, float posY, float sx, float sy, ...)
+void cFont::textf1(int fmt, float posX, float posY, float sx, float sy, ...)
 {
     char *ap;
     cFont_textf1_va_start(ap);
-    self->Scale[0] = self->BaseScale[0] * sx;
-    self->Scale[1] = self->BaseScale[1] * sy;
-    cFont_vtextf_C9D0(self, fmt, ap);
-    *(V2_C9D0*)&self->Scale[0] = *(V2_C9D0*)&self->BaseScale[0];
+    Scale[0] = BaseScale[0] * sx;
+    Scale[1] = BaseScale[1] * sy;
+    cFont_vtextf_C9D0(this, fmt, ap);
+    *(V2_C9D0*)&Scale[0] = *(V2_C9D0*)&BaseScale[0];
 }
 #endif
 
@@ -1686,9 +1686,10 @@ extern "C" void cUILocaleInterface_setTextNumCharFlag_CC08(void*, int) __asm__("
  *
  * @param mode  the new display mode, cUILocaleInterface::eDisplayMode
  */
-extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char mode) {
-    *self = mode;
-    cUILocaleInterface_setTextNumCharFlag_CC08(self, mode == cUILocaleInterface::kDisplayNumChar);
+void cUILocaleInterface::setDisplayMode(signed char mode)
+{
+    mDisplayMode = mode;
+    cUILocaleInterface_setTextNumCharFlag_CC08(this, mode == cUILocaleInterface::kDisplayNumChar);
 }
 #endif
 
@@ -5724,7 +5725,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 or 0x101
  */
-extern "C" int cFEPopupOptionReset_onWidgetMenu(cFEPopupOptionReset* self, int menu, unsigned int key)
+int cFEPopupOptionReset::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     int result = 257;
     if (key < 10) {
@@ -5756,18 +5757,19 @@ extern char str_no[];
  * @param widget  the widget (may be null)
  * @param event  the widget event
  */
-extern "C" void cFEPopupOptionReset_onWidgetEvent(cFEPopupOptionReset* self, cUIThing* widget, int event) {
+void cFEPopupOptionReset::onWidgetEvent(cUIThing* widget, unsigned int event)
+{
     if (((char*)widget) != 0) {
         if (event == cUIState::kONNEXT) {
             int yesCheckHash = widget->mHashName;
             if (yesCheckHash == GetHashValue32(str_yes)) {
-                self->mAccept = 1;
-                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                mAccept = 1;
+                cUIStateStack_pop(&mpEngine->mStateStack, 1);
             } else {
                 int noCheckHash = widget->mHashName;
                 if (noCheckHash == GetHashValue32(str_no)) {
-                    self->mAccept = 0;
-                    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                    mAccept = 0;
+                    cUIStateStack_pop(&mpEngine->mStateStack, 1);
                 }
             }
         }

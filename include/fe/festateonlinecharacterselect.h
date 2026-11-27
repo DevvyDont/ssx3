@@ -78,6 +78,8 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateOnlineCharacterSelect_onInputBegin");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         __asm__("cFEStateOnlineCharacterSelect_onWidgetEvent");
+    virtual void onUpdate() __asm__("cFEStateOnlineCharacterSelect_onUpdate__FPv");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateOnlineCharacterSelect_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpLBChallengerSelect, 0x6D0);

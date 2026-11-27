@@ -91,6 +91,7 @@ struct cOVState_PROFILE : public cFEMemCard {
     virtual ~cOVState_PROFILE();
     virtual void displayStatus() __asm__("cOVState_PROFILE_displayStatus");
     virtual void updateDone() __asm__("cOVState_PROFILE_updateDone");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cOVState_PROFILE_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVState_PROFILE, mIsOn, 0x22C);

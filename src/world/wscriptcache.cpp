@@ -322,16 +322,16 @@ void cMemMan_free(void* p);
 /**
  * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets kWSCacheState_Empty.
  */
-extern "C" void cWScriptCacheEntry_unload(cWScriptCacheEntry* self)
+void cWScriptCacheEntry::unload()
 {
-    void* buf = self->mpScriptHeader;
+    void* buf = mpScriptHeader;
     if (buf != 0) {
-        if (self->mStreamed == 0) {
+        if (mStreamed == 0) {
             cMemMan_free(buf);
         }
-        self->mpScriptHeader = 0;
+        mpScriptHeader = 0;
     }
-    *(short*)self = 0;
+    *(short*)this = 0;
 }
 #endif
 

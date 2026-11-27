@@ -954,19 +954,19 @@ extern "C" void cSSXAudio_Avalanche(void* self, int a1);
  * tActiveAvalancheNode_end(node, 1), the running flag is cleared, the audio interface's avalanche sound is switched off
  * (cSSXAudio_Avalanche with 0) and the counter at +0x708 of the AI's +0xA8 object is decremented if non-zero.
  */
-extern "C" void tActiveAvalanche_end(tActiveAvalanche* self)
+void tActiveAvalanche::end()
 {
-    if (self->m_activeNodeArray != 0) {
-        cMemMan_free(self->m_activeNodeArray);
-        self->m_activeNodeArray = 0;
+    if (m_activeNodeArray != 0) {
+        cMemMan_free(m_activeNodeArray);
+        m_activeNodeArray = 0;
     }
-    if (*(int*)self != 0) {
-        tActiveAvalancheNode* n = self->m_activeNodeList;
+    if (*(int*)this != 0) {
+        tActiveAvalancheNode* n = m_activeNodeList;
         while (((char*)n) != 0) {
             n->end(1);
             n = (tActiveAvalancheNode*)n->m_next;
         }
-        *(int*)self = 0;
+        *(int*)this = 0;
         cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 0);
         cDangerMan* dangerMan = SSXApp->Game->AI->DangerMan;
         if (dangerMan->mNumActiveAvalanche != 0) {
@@ -1964,7 +1964,7 @@ extern "C" void tActiveAvalanche_end(tActiveAvalanche* self);
 static inline void freeSlot_9A80(tActiveAvalanche* slot)
 {
     if (slot->m_avalanche != 0) {
-        tActiveAvalanche_end(slot);
+        slot->end();
     }
 }
 
@@ -2169,7 +2169,7 @@ static inline tActiveAvalanche* slots_RR()
 static inline void clearSlot_RR(tActiveAvalanche* s)
 {
     if (s->m_avalanche != 0) {
-        tActiveAvalanche_end(s);
+        s->end();
     }
 }
 

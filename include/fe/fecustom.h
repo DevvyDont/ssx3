@@ -48,6 +48,10 @@ struct cFECustom : public cUICustomInterface {
     unsigned char getPlayerCtrlMask(int index) __asm__("cFECustom_getPlayerCtrlMask");
     void * cFECustom1() __asm__("cFECustom_cFECustom1");
     void setProfileLaunchScreen(int launchScreen) __asm__("cFECustom_setProfileLaunchScreen");
+    // retail's destructor cFECustom__cFECustom stays a C function (g++ 2.95 takes no asm label on a destructor);
+    // declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFECustom();
+    virtual bool onScreenEvent(cUIScreen* screen, unsigned int hash) __asm__("cFECustom_onScreenEvent");
 };
 
 CHECK_OFFSET(cFECustom, mCtrlMask, 0x008);

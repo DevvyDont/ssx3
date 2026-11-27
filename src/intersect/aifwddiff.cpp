@@ -720,15 +720,14 @@ struct tCellNew : nash_Cell {
  * allocating (memory tag "Cell", children cleared) any child that does not exist, then pushes @p item on the reached
  * cell's list for its type.
  *
- * @param node    this cell (On Tour Cell): eight children, then one list per node type
  * @param idx     the node type (On Tour NodeType)
  * @param item    the node to add
  * @param target  the cell key the node belongs in
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_addnode(nash_Cell* node, int idx, nash_Node* item, nash_CellKey* target,
-                                  const nash_CellKey* mykey)
+void nash_Cell::addnode(int idx, nash_Node* item, nash_CellKey* target, const nash_CellKey* mykey)
 {
+    nash_Cell* cell = this;
     nash_CellKey cur = *mykey;
     while (cur.level != target->level) {
         int sh = cur.level - target->level - 1;
@@ -739,13 +738,13 @@ extern "C" void nash_Cell_addnode(nash_Cell* node, int idx, nash_Node* item, nas
         cur.x = cur.x * 2 + dx;
         cur.y = cur.y * 2 + dy;
         cur.z = cur.z * 2 + dz;
-        nash_Cell** childSlot = &node->children[dx][dy][dz];
+        nash_Cell** childSlot = &cell->children[dx][dy][dz];
         if (*childSlot == 0) {
             *childSlot = new (str_Cell, 0x20000000, 0) tCellNew;
         }
-        node = *childSlot;
+        cell = *childSlot;
     }
-    node->nodesinside[idx].prepend(item);
+    cell->nodesinside[idx].prepend(item);
 }
 #endif
 
@@ -776,7 +775,7 @@ void nash_Cell::movenode(int type, nash_Node* item, nash_CellKey* oldkey, nash_C
     }
     if (oldkey->level == mykey->level) {
         nodesinside[type].remove((nash_Node*)item);
-        nash_Cell_addnode(this, type, item, newkey, mykey);
+        this->addnode(type, item, newkey, mykey);
         return;
     }
     int olds = mykey->level - oldkey->level - 1;
@@ -817,7 +816,7 @@ void nash_Cell::movenode(int type, nash_Node* item, nash_CellKey* oldkey, nash_C
     if (newchild == 0) {
         newchild = new (str_Cell, 0x20000000, 0) tCellNew;
     }
-    nash_Cell_addnode(newchild, type, item, newkey, &newchildkey);
+    newchild->addnode(type, item, newkey, &newchildkey);
 }
 #endif
 
@@ -887,7 +886,7 @@ void nash_Octant::addnode(int idx, nash_Node* item, nash_CellKey* cell)
         rootkey = nc;
         rootcell = n;
     }
-    nash_Cell_addnode(rootcell, idx, item, cell, &rootkey);
+    rootcell->addnode(idx, item, cell, &rootkey);
 }
 #endif
 

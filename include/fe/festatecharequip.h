@@ -173,6 +173,8 @@ struct cFEStateCharEquip : public cFEState {
     virtual void onUpdate() __asm__("cFEStateCharEquip_onUpdate");
     virtual void onWidgetEvent(cUIThing* w, unsigned int ev) __asm__("cFEStateCharEquip_onWidgetEvent");
     virtual bool onInputBegin(cUIInput* in) __asm__("cFEStateCharEquip_onInputBegin");
+    virtual void onPopupEvent(cUIState* widget, unsigned int msg) __asm__("cFEStateCharEquip_onPopupEvent");
+    void updatePreviewLoad() __asm__("cFEStateCharEquip_updatePreviewLoad");
 };
 
 CHECK_OFFSET(cFEStateCharEquip, mpTitleText, 0x048);

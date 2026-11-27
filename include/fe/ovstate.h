@@ -81,6 +81,7 @@ struct cOVState : public cUIState {
     int PAUSE_ONLINE_ERROR_onGainTransition() __asm__("cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv");
     void* SAVEOPTIONS_onDestroyScreen() __asm__("cOVState_SAVEOPTIONS_onDestroyScreen__FPv");
     int AUTOSAVE_onInputBegin() __asm__("cOVState_AUTOSAVE_onInputBegin__FPv");
+    void* ViewPopup_onUpdate() __asm__("cOVState_ViewPopup_onUpdate__FPv");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

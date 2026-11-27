@@ -75,6 +75,8 @@ struct cCubicSplineInterpolant {
     void SpewSplineNumbers() __asm__("cCubicSplineInterpolant_SpewSplineNumbers");
     void initAsNatural() __asm__("cCubicSplineInterpolant_initAsNatural__FPv");
     float evaluate(float time) __asm__("cCubicSplineInterpolant_evaluate");
+    void initAsClamped(float start, float end) __asm__("cCubicSplineInterpolant_initAsClamped__FPvff");
+    void purge() __asm__("cCubicSplineInterpolant_purge__FPv");
 };
 
 CHECK_OFFSET(cCubicSplineInterpolant, MaxX, 0x004);

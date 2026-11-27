@@ -805,9 +805,6 @@ extern int kSequencerPriority[];
 extern cGameAnimMap* cGameAnimMap_TheGameAnimMap;
 
 
-// PORT: the unit declares cRiderAnimBase_play as void for its callers, but it returns the new
-// sequence id (callers in ai/ai read $v0); the int-returning body is bound by asm label.
-int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
 /**
  * Starts an AI animation on its sequencer slot and records it as that slot's current anim.
@@ -823,11 +820,10 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
  * @param blend  blend-in time in seconds; negative for the anim's default
  * @return the started AI anim (also stored in CurrentAnimID[slot]), or kAID_Invalid when it has no animation
  */
-int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
+int cRiderAnimBase::play(int anim, int flags, float blend)
 {
-    cRiderAnimBase* self = (cRiderAnimBase*)vself;
-    sVEntry<int(void*, int)>* vt = (sVEntry<int (void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(vthis(self, vt[4]), anim);
+    sVEntry<int(void*, int)>* vt = (sVEntry<int (void*, int)>*)mVtbl;
+    int id = vt[4].fn(vthis(this, vt[4]), anim);
     if (id == kGAD_Invalid)
         return kAID_Invalid;
     if (blend < 0.0f)
@@ -838,7 +834,7 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
     // first).
     int animId = *(cGameAnimMap_TheGameAnimMap->GameAnimMap + id);
     int slot = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
-    return self->CurrentAnimID[slot] = self->onInput(&self->Sequencer[slot], anim, animId, flags,
+    return CurrentAnimID[slot] = onInput(&Sequencer[slot], anim, animId, flags,
             kSequencerPriority[slot], blend);
 }
 #endif

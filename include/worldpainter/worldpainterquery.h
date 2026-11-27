@@ -172,12 +172,75 @@ struct tWPInGameData {
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const = 0; // 64
     virtual void readFromReplayFrame(cReplayFramePtr* frame) = 0;   // 65
     virtual void blend(const tWPData* data, float blend) = 0;       // 66
-    virtual void debugBlend();                                      // 67
+    virtual void debugBlend() __asm__("tWPInGameData_debugBlend__FPv");                                      // 67
     virtual bool isEqual(const tWPData* data) = 0;                  // 68
     virtual void setDefaults() = 0;                                 // 69
 
     // Methods bound to their retail symbols by asm labels.
     void blend1(float* dst, float* src, float blend) __asm__("tWPInGameData_blend1");
+    void* MusicTrigger_Type() __asm__("tWPInGameData_MusicTrigger_Type__FPv");
+    void* MusicTrigger_Value() __asm__("tWPInGameData_MusicTrigger_Value__FPv");
+    void* Mix_MixPreset() __asm__("tWPInGameData_Mix_MixPreset__FPv");
+    void* Ambience_BankID() __asm__("tWPInGameData_Ambience_BankID__FPv");
+    void* Speech_SpeechID() __asm__("tWPInGameData_Speech_SpeechID__FPv");
+    void* Camera_DrawDistance() __asm__("tWPInGameData_Camera_DrawDistance__FPv");
+    void* Fog_FogDensity() __asm__("tWPInGameData_Fog_FogDensity__FPv");
+    void* Fog_FogNear() __asm__("tWPInGameData_Fog_FogNear__FPv");
+    void* Fog_FogFar() __asm__("tWPInGameData_Fog_FogFar__FPv");
+    void* Fog_FogColourR() __asm__("tWPInGameData_Fog_FogColourR__FPv");
+    void* Fog_FogColourG() __asm__("tWPInGameData_Fog_FogColourG__FPv");
+    void* Fog_FogColourB() __asm__("tWPInGameData_Fog_FogColourB__FPv");
+    void* LightGlow_LightGlowCutoff() __asm__("tWPInGameData_LightGlow_LightGlowCutoff__FPv");
+    void* LightGlow_LightGlowCutoffScale() __asm__("tWPInGameData_LightGlow_LightGlowCutoffScale__FPv");
+    void* LightGlow_LightGlowCopyIntensity() __asm__("tWPInGameData_LightGlow_LightGlowCopyIntensity__FPv");
+    void* LightGlow_LightGlowSourceIntensity() __asm__("tWPInGameData_LightGlow_LightGlowSourceIntensity__FPv");
+    void* LightGlow_LightGlowFrameIntensity() __asm__("tWPInGameData_LightGlow_LightGlowFrameIntensity__FPv");
+    void* LightGlow_LightGlowBlend2() __asm__("tWPInGameData_LightGlow_LightGlowBlend2__FPv");
+    void* LightGlow_LightGlowBlend3() __asm__("tWPInGameData_LightGlow_LightGlowBlend3__FPv");
+    void* ScreenTint_ScreenTintScaleR() __asm__("tWPInGameData_ScreenTint_ScreenTintScaleR__FPv");
+    void* ScreenTint_ScreenTintScaleG() __asm__("tWPInGameData_ScreenTint_ScreenTintScaleG__FPv");
+    void* ScreenTint_ScreenTintScaleB() __asm__("tWPInGameData_ScreenTint_ScreenTintScaleB__FPv");
+    void* ScreenTint_ScreenTintOffsetR() __asm__("tWPInGameData_ScreenTint_ScreenTintOffsetR__FPv");
+    void* ScreenTint_ScreenTintOffsetG() __asm__("tWPInGameData_ScreenTint_ScreenTintOffsetG__FPv");
+    void* ScreenTint_ScreenTintOffsetB() __asm__("tWPInGameData_ScreenTint_ScreenTintOffsetB__FPv");
+    void* SkyBox_SkyBoxRotation() __asm__("tWPInGameData_SkyBox_SkyBoxRotation__FPv");
+    void* Sun_SunPitchOffset() __asm__("tWPInGameData_Sun_SunPitchOffset__FPv");
+    void* Sun_SunYawOffset() __asm__("tWPInGameData_Sun_SunYawOffset__FPv");
+    void* Sun_SunColorR() __asm__("tWPInGameData_Sun_SunColorR__FPv");
+    void* Sun_SunColorG() __asm__("tWPInGameData_Sun_SunColorG__FPv");
+    void* Sun_SunColorB() __asm__("tWPInGameData_Sun_SunColorB__FPv");
+    void* Sun_SunIntensity() __asm__("tWPInGameData_Sun_SunIntensity__FPv");
+    void* Sun_SunType() __asm__("tWPInGameData_Sun_SunType__FPv");
+    void* Sun_LensIntensity() __asm__("tWPInGameData_Sun_LensIntensity__FPv");
+    void* Sun_SunRadius() __asm__("tWPInGameData_Sun_SunRadius__FPv");
+    void* Surface_SnowSparkleDensity() __asm__("tWPInGameData_Surface_SnowSparkleDensity__FPv");
+    void* Lighting_LightIrradianceName() __asm__("tWPInGameData_Lighting_LightIrradianceName__FPv");
+    void* Lighting_ShadowIrradianceName() __asm__("tWPInGameData_Lighting_ShadowIrradianceName__FPv");
+    void* Lighting_TunnelIrradianceName() __asm__("tWPInGameData_Lighting_TunnelIrradianceName__FPv");
+    void* Lighting_ObjectIrradianceName() __asm__("tWPInGameData_Lighting_ObjectIrradianceName__FPv");
+    void* Lighting_AmbientLightIntensityOffset() __asm__("tWPInGameData_Lighting_AmbientLightIntensityOffset__FPv");
+    void* Lighting_RimLightIntensityOffset() __asm__("tWPInGameData_Lighting_RimLightIntensityOffset__FPv");
+    void* Weather_SnowIntensity() __asm__("tWPInGameData_Weather_SnowIntensity__FPv");
+    void* Weather_FlakeSize() __asm__("tWPInGameData_Weather_FlakeSize__FPv");
+    void* Weather_WindIntensity() __asm__("tWPInGameData_Weather_WindIntensity__FPv");
+    void* Weather_WindRotation() __asm__("tWPInGameData_Weather_WindRotation__FPv");
+    void* Weather_PlayerWindIntensity() __asm__("tWPInGameData_Weather_PlayerWindIntensity__FPv");
+    void* Weather_Temperature() __asm__("tWPInGameData_Weather_Temperature__FPv");
+    void* Weather_SnowFlurries() __asm__("tWPInGameData_Weather_SnowFlurries__FPv");
+    void* Weather_SnowGravityMultiplier() __asm__("tWPInGameData_Weather_SnowGravityMultiplier__FPv");
+    void* Weather_SnowFluffItensity() __asm__("tWPInGameData_Weather_SnowFluffItensity__FPv");
+    void* Weather_SnowFluffWindIntensity() __asm__("tWPInGameData_Weather_SnowFluffWindIntensity__FPv");
+    void* Weather_LightningChance() __asm__("tWPInGameData_Weather_LightningChance__FPv");
+    void* Weather_SnowFlakeColourA() __asm__("tWPInGameData_Weather_SnowFlakeColourA__FPv");
+    void* Weather_SnowFlakeColourR() __asm__("tWPInGameData_Weather_SnowFlakeColourR__FPv");
+    void* Weather_SnowFlakeColourG() __asm__("tWPInGameData_Weather_SnowFlakeColourG__FPv");
+    void* Weather_SnowFlakeColourB() __asm__("tWPInGameData_Weather_SnowFlakeColourB__FPv");
+    void* Weather_SnowFluffColourA() __asm__("tWPInGameData_Weather_SnowFluffColourA__FPv");
+    void* Weather_SnowFluffColourR() __asm__("tWPInGameData_Weather_SnowFluffColourR__FPv");
+    void* Weather_SnowFluffColourG() __asm__("tWPInGameData_Weather_SnowFluffColourG__FPv");
+    void* Weather_SnowFluffColourB() __asm__("tWPInGameData_Weather_SnowFluffColourB__FPv");
+    void* Danger_Level() __asm__("tWPInGameData_Danger_Level__FPv");
+    void* Danger_PointRate() __asm__("tWPInGameData_Danger_PointRate__FPv");
 };
 
 CHECK_OFFSET(tWPInGameData, m_wpTravelDistance, 0x0);
@@ -430,6 +493,8 @@ struct tWPInGameData_MusicTrigger : public tWPInGameData {
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_MusicTrigger_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const
         __asm__("tWPInGameData_MusicTrigger_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_MusicTrigger_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_MusicTrigger_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_MusicTrigger, m_Type, 0x08);
@@ -451,6 +516,8 @@ struct tWPInGameData_Mix : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Mix_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Mix_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Mix_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Mix_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Mix_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Mix, m_MixPreset, 0x08);
@@ -470,6 +537,8 @@ struct tWPInGameData_Ambience : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Ambience_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Ambience_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Ambience_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Ambience_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Ambience_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Ambience, m_BankID, 0x08);
@@ -489,6 +558,8 @@ struct tWPInGameData_Speech : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Speech_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Speech_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Speech_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Speech_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Speech_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Speech, m_SpeechID, 0x08);
@@ -508,6 +579,8 @@ struct tWPInGameData_Camera : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Camera_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Camera_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Camera_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Camera_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Camera_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Camera, m_DrawDistance, 0x08);
@@ -536,6 +609,9 @@ struct tWPInGameData_Fog : public tWPInGameData {
     // which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_Fog_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Fog_readFromReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Fog_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Fog_isEqual");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Fog_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Fog, m_FogDensity, 0x08);
@@ -576,6 +652,9 @@ struct tWPInGameData_LightGlow : public tWPInGameData {
     // function, which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_LightGlow_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_LightGlow_readFromReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_LightGlow_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_LightGlow_isEqual");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_LightGlow_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_LightGlow, m_LightGlowCutoff, 0x08);
@@ -616,6 +695,8 @@ struct tWPInGameData_ScreenTint : public tWPInGameData {
     // function, which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_ScreenTint_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_ScreenTint_readFromReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_ScreenTint_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_ScreenTint_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_ScreenTint, m_ScreenTintScaleR, 0x08);
@@ -645,6 +726,8 @@ struct tWPInGameData_SkyBox : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_SkyBox_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_SkyBox_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_SkyBox_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_SkyBox_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_SkyBox_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_SkyBox, m_SkyBoxRotation, 0x08);
@@ -678,6 +761,9 @@ struct tWPInGameData_Sun : public tWPInGameData {
     // setDefaults stays a C function (tWPInGameData_Sun_setDefaults): declared first, it is the vtable's key function,
     // which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_Sun_setDefaults");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Sun_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Sun_isEqual");
+    virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Sun_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Sun, m_SunPitchOffset, 0x08);
@@ -713,6 +799,8 @@ struct tWPInGameData_Surface : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Surface_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Surface_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Surface_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Surface_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Surface_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Surface, m_SnowSparkleDensity, 0x08);
@@ -740,6 +828,9 @@ struct tWPInGameData_Lighting : public tWPInGameData {
     // setDefaults stays a C function (tWPInGameData_Lighting_setDefaults): declared first, it is the vtable's key
     // function, which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_Lighting_setDefaults");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Lighting_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Lighting_isEqual");
+    virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Lighting_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Lighting, m_LightIrradianceName, 0x08);
@@ -803,6 +894,9 @@ struct tWPInGameData_Weather : public tWPInGameData {
     // setDefaults stays a C function (tWPInGameData_Weather_setDefaults): declared first, it is the vtable's key
     // function, which keeps the vtable out of the units defining the other overrides
     virtual void setDefaults() __asm__("tWPInGameData_Weather_setDefaults");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Weather_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Weather_isEqual");
+    virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Weather_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Weather, m_SnowIntensity, 0x08);
@@ -860,6 +954,8 @@ struct tWPInGameData_Danger : public tWPInGameData {
     virtual void setDefaults() __asm__("tWPInGameData_Danger_setDefaults");
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Danger_readFromReplayFrame");
     virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Danger_writeToReplayFrame");
+    virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Danger_blend");
+    virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Danger_isEqual");
 };
 
 CHECK_OFFSET(tWPInGameData_Danger, m_Level, 0x08);

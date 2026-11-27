@@ -53,6 +53,10 @@ struct cOVState_HEAT_STANDINGS : public cOVState {
     virtual ~cOVState_HEAT_STANDINGS();
     virtual void onCreateScreen() __asm__("cOVState_HEAT_STANDINGS_onCreateScreen");
     virtual bool onInputBegin(cUIInput* input) __asm__("cOVState_HEAT_STANDINGS_onInputBegin");
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_HEAT_STANDINGS_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int)
+        __asm__("cOVState_HEAT_STANDINGS_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_HEAT_STANDINGS_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
@@ -81,6 +85,12 @@ struct cOVState_FINAL_STANDINGS : public cOVState {
     virtual void onWidgetCreate(cUIThing* menu) __asm__("cOVState_FINAL_STANDINGS_onWidgetCreate");
     virtual void onUpdate() __asm__("cOVState_FINAL_STANDINGS_onUpdate");
     virtual bool onInputBegin(cUIInput* input) __asm__("cOVState_FINAL_STANDINGS_onInputBegin");
+    virtual bool onGainTransition(int) __asm__("cOVState_FINAL_STANDINGS_onGainTransition");
+    virtual void onGainFocus(cUIState*) __asm__("cOVState_FINAL_STANDINGS_onGainFocus");
+    virtual void onLoseFocus(cUIState*) __asm__("cOVState_FINAL_STANDINGS_onLoseFocus__FPv");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int)
+        __asm__("cOVState_FINAL_STANDINGS_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_FINAL_STANDINGS_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
@@ -111,6 +121,9 @@ struct cOVState_RACE_FINISHOV : public cOVState {
     virtual ~cOVState_RACE_FINISHOV();
     virtual void onCreateScreen() __asm__("cOVState_RACE_FINISHOV_onCreateScreen");
     virtual void onUpdate() __asm__("cOVState_RACE_FINISHOV_onUpdate");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_RACE_FINISHOV_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
+        __asm__("cOVState_RACE_FINISHOV_onWidgetMenu");
 };
 
 CHECK_OFFSET(cOVState_RACE_FINISHOV, mElapsedTime, 0x09C);
@@ -143,6 +156,10 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
     virtual ~cOVState_BASSSP_QUAL_FINISHOV();
     virtual void onCreateScreen() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen");
     virtual void onUpdate() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onUpdate");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int event)
+        __asm__("cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
+        __asm__("cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu");
 };
 
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mElapsedTime, 0x09C);
@@ -165,6 +182,8 @@ struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
     // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVState_TOURNAMENT_STANDINGS();
     virtual void onCreateScreen() __asm__("cOVState_TOURNAMENT_STANDINGS_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* popup, unsigned int event)
+        __asm__("cOVState_TOURNAMENT_STANDINGS_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVState_TOURNAMENT_STANDINGS, 0x9C);

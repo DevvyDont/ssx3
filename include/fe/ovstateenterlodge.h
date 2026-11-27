@@ -43,6 +43,9 @@ struct cOVState_ENTERLODGE : public cOVState {
     virtual ~cOVState_ENTERLODGE();
     virtual void onCreateScreen() __asm__("cOVState_ENTERLODGE_onCreateScreen");
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_ENTERLODGE_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
+        __asm__("cOVState_ENTERLODGE_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int msg) __asm__("cOVState_ENTERLODGE_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVState_ENTERLODGE, 0x9C);

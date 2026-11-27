@@ -104,7 +104,7 @@ void cUITemplate_MAP::onCreateScreen(void* screen, cUIState* owner)
         cOVStateManager_addPDATemplate();
     if (cUITemplate_MAP_mMapStyle != cUITemplate_MAP::kMAPSTYLE_FE_SELECTPEAKEVENT || cUITemplate_MAP_mMapFEStart == 0)
         cUITemplate_MAP_mMapState = 0;
-    cUITemplate_MAP_setShowInfo((cUITemplate_MAP*)self, 0);
+    ((cUITemplate_MAP*)self)->setShowInfo(0);
     self->popup = 0;
     self->mode = -1;
     self->file = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
@@ -172,8 +172,6 @@ static inline int isLabel2009D0(int id, char* s)
 {
     return id == GetHashValue32(s);
 }
-// PORT: the unit declares cUITemplate_MAP_onWidgetCreate(void*); the body also takes the menu in $5.
-extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
 
 /**
  * Preselects the map's peak list when it is created: entry 2, or for map styles 2 and up the entry of the current race
@@ -186,7 +184,7 @@ extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu) __a
  *
  * @param menu  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, cUIThing* menu)
+void cUITemplate_MAP::onWidgetCreate(cUIThing* menu)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (isLabel2009D0(menu->mHashName, str_SP_PeakList)) {
@@ -208,8 +206,6 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* self);
 extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 extern "C" void cUITemplate_MAP_setShowInfo(cUITemplate_MAP* self, int show);
 extern int cUITemplate_MAP_mMapState;
-// PORT: the unit declares cUITemplate_MAP_onGainTransition(void*); the body also takes a flag in $5.
-extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on) __asm__("cUITemplate_MAP_onGainTransition");
 
 /**
  * Sets up the map screen's menus when its gain transition starts.
@@ -220,13 +216,13 @@ extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on) __asm__("c
  * @param on  nonzero to run the setup
  * @return always 0
  */
-extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on)
+int cUITemplate_MAP::onGainTransition(int on)
 {
     if (on != 0) {
-        ((cUITemplate_MAP*)self)->setupMenuFocus(cUITemplate_MAP_mMapState);
-        ((cUITemplate_MAP*)self)->setupMenus();
-        cUITemplate_MAP_setupLocationInfo(self);
-        cUITemplate_MAP_setShowInfo((cUITemplate_MAP*)self, *(int*)self);
+        ((cUITemplate_MAP*)this)->setupMenuFocus(cUITemplate_MAP_mMapState);
+        ((cUITemplate_MAP*)this)->setupMenus();
+        cUITemplate_MAP_setupLocationInfo(this);
+        ((cUITemplate_MAP*)this)->setShowInfo(*(int*)this);
     }
     return 0;
 }
@@ -298,8 +294,6 @@ bool cBENewPlayerInterface_isEventLocked_b(void* iface, int player, int charID, 
 // PORT: the unit declares cUITemplate_MAP_isMapEventCompleted(void*, sPeakGoal*, int) further down; the goal is really taken by value
 // (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
 // own call; g++ merges the two identical tails.
-extern "C" bool cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
-    __asm__("cUITemplate_MAP_isMapEventCompleted");
 /**
  * Tells whether the map location's event has been completed by the current character.
  *
@@ -313,7 +307,7 @@ extern "C" bool cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocati
  * @param peak  the peak (On Tour eBEPeakID)
  * @return true when completed
  */
-extern "C" bool cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
+bool cUITemplate_MAP::isMapEventCompleted(tMapLocation ev, int peak)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -700,12 +694,14 @@ int cUITemplate_MAP::onWidgetMenu(int menu, int event)
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onInputBegin__FPv);
 #ifdef SKIP_ASM
+int cUITemplate_MAP_onInputBegin(void* self);
+
 /**
  * Map template's input hook: lets the input through unhandled.
  *
  * @return always 0
  */
-int cUITemplate_MAP_onInputBegin(void* self)
+int cUITemplate_MAP::onInputBegin()
 {
     return 0;
 }
@@ -721,8 +717,6 @@ extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 extern int cUITemplate_MAP_mMapState;
 
 
-// PORT: the unit declares cUITemplate_MAP_onInputAlways(void*); the body also takes the menu object in $5.
-extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu) __asm__("cUITemplate_MAP_onInputAlways");
 
 /**
  * Refreshes the map's info for the current map state when the input is up or down (isUp / isDown).
@@ -732,7 +726,7 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu) __as
  *
  * @param menu  the input (On Tour cUIInput* pInput)
  */
-extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu)
+void cUITemplate_MAP::onInputAlways(cUIInput* menu)
 {
     if (!menu->isUp()) {
         if (!menu->isDown()) {
@@ -740,15 +734,15 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, cUIInput* menu)
         }
     }
     if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTPEAK) {
-        ((cUITemplate_MAP*)self)->setupPeakInfo();
-        ((cUITemplate_MAP*)self)->setupLayout();
+        ((cUITemplate_MAP*)this)->setupPeakInfo();
+        ((cUITemplate_MAP*)this)->setupLayout();
     }
     if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTGOAL) {
-        ((cUITemplate_MAP*)self)->setupPeakGoals();
-        ((cUITemplate_MAP*)self)->setupLayout();
+        ((cUITemplate_MAP*)this)->setupPeakGoals();
+        ((cUITemplate_MAP*)this)->setupLayout();
     }
     if (cUITemplate_MAP_mMapState == cUITemplate_MAP::kMAPSTATE_SELECTLOCATION) {
-        cUITemplate_MAP_setupLocationInfo(self);
+        cUITemplate_MAP_setupLocationInfo(this);
     }
 }
 #endif
@@ -1065,7 +1059,7 @@ static inline cUIThing* hideObj_2030A0(cUITemplate_MAP* self, char* name)
  */
 void cUITemplate_MAP::setupMenuFocus(int focus)
 {
-    cUITemplate_MAP_setShowInfo(this, 0);
+    this->setShowInfo(0);
     cUITemplate_MAP_mMapState = focus;
     cUIThing* peak = hideObj_2030A0(this, str_SP_PeakList);
     cUIThing* goal0 = hideObj_2030A0(this, str_SPG_Peak1Goals);
@@ -1302,11 +1296,11 @@ extern char str_kT_BTNShowInfo[];
  *
  * @param show  nonzero to show info
  */
-extern "C" void cUITemplate_MAP_setShowInfo(cUITemplate_MAP* self, int show)
+void cUITemplate_MAP::setShowInfo(int show)
 {
-    *(int*)self = show;
-    cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_maptab_text));
-    if (*(int*)self != 0) {
+    *(int*)this = show;
+    cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_maptab_text));
+    if (*(int*)this != 0) {
         cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_BTNShowMap));
     } else {
         cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_BTNShowInfo));
@@ -2905,13 +2899,10 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetCreate__FPv);
  * Transport overlay's widget-create hook: forwards to the embedded map template (cUITemplate_MAP_onWidgetCreate on +0x9C).
  *
  * As declared it takes only the state; the widget reaches cUITemplate_MAP_onWidgetCreate untouched in the second argument register.
- *
- * @return what cUITemplate_MAP_onWidgetCreate leaves in the return register (that function returns nothing)
  */
-void* cOVState_TRANSPORT_onWidgetCreate(void* vself)
+void cOVState_TRANSPORT::onWidgetCreate(cUIThing*)
 {
-    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onWidgetCreate(&self->mMap);
+    cUITemplate_MAP_onWidgetCreate(&mMap);
 }
 #endif
 
@@ -2946,10 +2937,10 @@ extern "C" void cUITemplate_MAP_onGainFocus(cUITemplate_MAP* self);
  * Transport overlay's gain-focus hook: runs cUIState_onGainFocus, then cUITemplate_MAP_onGainFocus for the template at
  * +0x9C.
  */
-extern "C" void cOVState_TRANSPORT_onGainFocus(cOVState_TRANSPORT* self)
+void cOVState_TRANSPORT::onGainFocus(cUIState*)
 {
-    cUIState_onGainFocus(self);
-    self->mMap.onGainFocus();
+    cUIState_onGainFocus(this);
+    mMap.onGainFocus();
 }
 #endif
 
@@ -2985,11 +2976,11 @@ extern "C" int cUIStateStack_pop_85B8(void* self, int a1) __asm__("cUIStateStack
  * pending-delete bit in mAttrState (bits 8-13 = 7, bit 7 set). As declared the template call only gets the template
  * (+0x9C); the widget and event reach it in the argument registers.
  */
-extern "C" void cOVState_TRANSPORT_onWidgetEvent(cOVState_TRANSPORT* self)
+void cOVState_TRANSPORT::onWidgetEvent(cUIThing*, unsigned int)
 {
-    if (cUITemplate_MAP_onWidgetEvent(&self->mMap) == 1) {
-        cUIStateStack_pop_85B8(&self->mpEngine->mStateStack, 1);
-        self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
+    if (cUITemplate_MAP_onWidgetEvent(&mMap) == 1) {
+        cUIStateStack_pop_85B8(&mpEngine->mStateStack, 1);
+        mAttrState = (mAttrState & ~0x3F00) | 0x780;
     }
 }
 #endif
@@ -3036,13 +3027,10 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputAlways__FPv);
  * Transport overlay's every-frame input hook: forwards to cUITemplate_MAP_onInputAlways for the template at +0x9C.
  *
  * As declared it takes only the state; the input reaches the template untouched in the second argument register.
- *
- * @return what cUITemplate_MAP_onInputAlways leaves in the return register (it returns nothing)
  */
-void* cOVState_TRANSPORT_onInputAlways(void* vself)
+void cOVState_TRANSPORT::onInputAlways(cUIInput*)
 {
-    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onInputAlways(&self->mMap);
+    cUITemplate_MAP_onInputAlways(&mMap);
 }
 #endif
 

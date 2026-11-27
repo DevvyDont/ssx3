@@ -46,6 +46,7 @@ struct cRigidBody {
     void stepMotion(const t4Vector* force, const t4Vector* torque, float dt) __asm__("cRigidBody_stepMotion");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRigidBody_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRigidBody_readFromReplayFrame");
+    void updateImplicit() __asm__("cRigidBody_updateImplicit");
 };
 
 CHECK_OFFSET(cRigidBody, Pose, 0x00);

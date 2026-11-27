@@ -38,6 +38,9 @@ struct FileParser {
     bool AssignString(const char* name, char* out) __asm__("FileParser_AssignString");
     bool AssignFloat(const char* name, float* out) __asm__("FileParser_AssignFloat");
     bool AssignInt(const char* name, int* out) __asm__("FileParser_AssignInt");
+    signed char GetChar() __asm__("FileParser_GetChar__FPv");
+    int SkipSpace() __asm__("FileParser_SkipSpace");
+    char* GetName() __asm__("FileParser_GetName");
 };
 
 CHECK_OFFSET(FileParser, mFileSize, 0x000);

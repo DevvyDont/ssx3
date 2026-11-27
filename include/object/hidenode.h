@@ -39,6 +39,12 @@ struct cHideNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cHideNode1() __asm__("cHideNode_cHideNode1");
+    // loseFocus stays a C function (cHideNode_loseFocus): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void loseFocus() __asm__("cHideNode_loseFocus__FPv");
+    virtual void expire(int) __asm__("cHideNode_expire__FPv");
+    virtual void signal(int, float) __asm__("cHideNode_signal__FPv");
+    virtual void onCollide(const tCollideInfo*, const tIntersectInfo*, cBeing*) __asm__("cHideNode_onCollide__FPv");
 };
 
 CHECK_SIZE(cHideNode, 0x1C);

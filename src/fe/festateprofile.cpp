@@ -236,7 +236,7 @@ extern int cFEStateProfileLoad_mScreenAction;
  * @param msg  the menu event
  * @return 0x100 to refuse the event, 0x101 to allow it
  */
-extern "C" int cFEStateProfileLoad_onWidgetMenu(cFEStateProfileLoad* self, void* widget, unsigned int msg)
+int cFEStateProfileLoad::onWidgetMenu(cUIMenu* widget, unsigned int msg, unsigned int)
 {
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
@@ -247,7 +247,7 @@ extern "C" int cFEStateProfileLoad_onWidgetMenu(cFEStateProfileLoad* self, void*
         break;
     case cUIMenu::kONOPTION:
         if (cFEStateProfileLoad_mScreenAction == cFEStateProfileLoad::kScreenActionLoad
-            || self->mDeleteButtonActive == 0) {
+            || mDeleteButtonActive == 0) {
             return 0x100;
         }
         break;
@@ -772,13 +772,12 @@ static inline void* GetText_K18FD90(char* key)
  * kDELETING, cMCOverlayManager_SetAction(0) and manager state kMCOverlay_DeleteConfirm. kONKEYBOARDCANCEL does nothing.
  * Fills slot +0x9C (onWidgetEvent) of cFEStateProfileLoad_vtbl.
  *
- * @param vself  the profile load state
  * @param item  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cUIThing* item, int event)
+void cFEStateProfileLoad::onWidgetEvent(cUIThing* item, unsigned int event)
 {
-    cFEStateProfileLoad* self = vself;
+    cFEStateProfileLoad* self = this;
     switch (event) {
     case cUIState::kONKEYBOARDEND: {
         char buf[0x70];
@@ -796,7 +795,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
             func_002C2540(mp->mNewFileName, buf);
         }
         player->submit();
-        vself->startSave();
+        startSave();
         break;
     }
     case cUIState::kONNEXT: {
@@ -811,7 +810,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
             if (self->mState == cFEMemCard::kCHECKING && self->mMainButtonActive != 0) {
                 if (((char*)self->mpKeyboard) == 0) {
                     cKeyboardPopup* kb = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
-                        cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), vself, 0,
+                        cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), this, 0,
                         self->mCtrlBits);
                     self->mpKeyboard = kb;
                     kb->miCurrentKey = 55;

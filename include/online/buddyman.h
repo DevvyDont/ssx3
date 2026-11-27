@@ -116,6 +116,7 @@ struct BuddyMan {
     void onconnect(int* msg) __asm__("BuddyMan_onconnect");
     void onrosterupdate(int* msg) __asm__("BuddyMan_onrosterupdate");
     void onReceiveMessage(BuddyApiMsgT* msg) __asm__("BuddyMan_onReceiveMessage");
+    void onBuddySend() __asm__("BuddyMan_onBuddySend__FPv");
 };
 
 CHECK_OFFSET(BuddyMan, mServerName, 0x000);

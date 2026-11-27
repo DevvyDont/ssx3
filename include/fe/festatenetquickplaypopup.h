@@ -97,6 +97,11 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateNetQuickPlayPopup_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateNetQuickPlayPopup_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetQuickPlayPopup_onWidgetEvent");
+    virtual bool onLoseTransition() __asm__("cFEStateNetQuickPlayPopup_onLoseTransition__FPv");
+    virtual void onUpdate() __asm__("cFEStateNetQuickPlayPopup_onUpdate");
+    virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetQuickPlayPopup_onWidgetPair__FPv");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cFEStateNetQuickPlayPopup_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);

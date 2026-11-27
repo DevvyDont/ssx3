@@ -75,6 +75,7 @@ struct cMenuSys {
     void popMenu() __asm__("cMenuSys_popMenu");
     bool getLeftShift() __asm__("cMenuSys_getLeftShift");
     bool getRightShift() __asm__("cMenuSys_getRightShift");
+    void init() __asm__("cMenuSys_init__FPv");
 };
 
 CHECK_OFFSET(cMenuSys, MenuDepth, 0x000);

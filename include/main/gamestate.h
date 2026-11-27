@@ -55,6 +55,8 @@ enum eGFState {
     kGFSM_ReplayStart = 16, kGFSM_NumStates = 17
 };
 
+struct cBxReplayFrame;
+
 struct cGameState {
     int mNextState;                 // 0x00 [O] eGFState; [U] gotoNextState passes it to cGame_setState (with
                                     //      mStartupFlag) when non-zero; writeToReplayFrame / readFromReplayFrame copy
@@ -75,6 +77,8 @@ struct cGameState {
     void loseFocus() __asm__("cGameState_loseFocus__FPv");
     int isPreloadComplete() __asm__("cGameState_isPreloadComplete__FPv");
     void onWidgetEvent() __asm__("cGameState_onWidgetEvent__FPv");
+    void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cGameState_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cGameState_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cGameState, mNextState, 0x00);
@@ -326,6 +330,7 @@ struct cGFFinishlineState {
     void loseFocus() __asm__("cGFFinishlineState_loseFocus");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_readFromReplayFrame");
+    void update() __asm__("cGFFinishlineState_update");
 };
 
 CHECK_OFFSET(cGFFinishlineState, mNextState, 0x00);

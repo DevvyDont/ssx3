@@ -84,28 +84,28 @@ extern "C" void cUIThing_getAbsPosition(void* thing, t3Vector* out);
  * loaded), the first cell becomes the current cell (+0x8FC) if none is set, then vtable slot 40 (cFEStateRewardGalleryBase_updateList)
  * refreshes the grid and slot 33 (cFEStateRewardGalleryBase_updateHelpText) shows the help text for reward 0.
  */
-extern "C" void cFEStateRewardGalleryBase_onGainFocus(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::onGainFocus(cUIState*)
 {
     t3Vector firstCellPos;
     t3Vector widgetPos;
-    void* widget = *(void**)&self->mpIcons[0];
+    void* widget = *(void**)&mpIcons[0];
     if (widget != 0) {
         cUIThing_getAbsPosition(widget, &firstCellPos);
-        widget = (void*)self->mpHilighter;
+        widget = (void*)mpHilighter;
         if (widget != 0) {
             cUIThing_getAbsPosition(widget, &widgetPos);
-            self->mVertHilighterOffset = widgetPos.y - firstCellPos.y;
-            self->mHorizHilighterOffset = widgetPos.x - firstCellPos.x;
+            mVertHilighterOffset = widgetPos.y - firstCellPos.y;
+            mHorizHilighterOffset = widgetPos.x - firstCellPos.x;
         }
     }
-    self->mFirstVisibleRow = 0;
-    int fl = self->mLoadingState;
+    mFirstVisibleRow = 0;
+    int fl = mLoadingState;
     if (((fl >> 3) & 1) && ((fl >> 1) & 1)) {
-        if ((int)self->mpSelected == 0) {
-            self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
+        if ((int)mpSelected == 0) {
+            mpSelected = (cUIIcon*)(*(int*)&mpIcons[0]);
         }
-        self->updateList();
-        self->updateHelpText(0);
+        updateList();
+        updateHelpText(0);
     }
 }
 #endif
@@ -576,20 +576,20 @@ struct sVE_FD18 {
  * @param widget  the popup state that sent the event (a cUIStateBuyPopup when its mHashName is 7)
  * @param msg     the popup event; kONPOPUPCREATE and kONPOPUPDESTROY are handled
  */
-extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase* self, cUIState* widget, int msg)
+void cFEStateRewardGalleryBase::onPopupEvent(cUIState* widget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONPOPUPCREATE:
         if (widget->mHashName != cUIStateBuyPopup::kStateID) {
-            self->mAttrState &= ~8;
+            mAttrState &= ~8;
         }
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (((self->mAttrState >> 3) & 1) == 0) {
-            self->mAttrState |= 8;
+        if (((mAttrState >> 3) & 1) == 0) {
+            mAttrState |= 8;
         }
         if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
-            self->buyReward(self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);
+            buyReward(mFirstVisibleRow * mMaxRewardColumns + mpSelected->mMiscData);
         }
         break;
     }
@@ -916,28 +916,30 @@ extern char str_cFEStateVideoPlayer[];
  * cFEStatePreviewReward; type
  * 6 pushes a cFEStateVideoPlayer playing the reward's file. Other types show nothing.
  */
-extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::showReward(int)
 {
     void* nextState = 0;
-    sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)VPTR_OF(cListNode, self);
-    tVideoInfo* data = (tVideoInfo*)vt[34].fn(vthis(self, vt[34]));
-    switch (self->mRewardType) {
+    sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)VPTR_OF(cListNode, this);
+    tVideoInfo* data = (tVideoInfo*)vt[34].fn(vthis(this, vt[34]));
+    switch (mRewardType) {
     case kRewardPoster:
     case kRewardCard:
     case kRewardArt:
     case kRewardToy:
-        nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, (cUIState*)self,
-                          self->mUserNum);
-        ((cFEStatePreviewReward*)nextState)->setReward(self->mRewardType, data);
+        nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78,
+                str_cFEStatePreviewReward, 0, 0), mpEngine, (cUIState*)this,
+                          mUserNum);
+        ((cFEStatePreviewReward*)nextState)->setReward(mRewardType, data);
         break;
     case kRewardVideo:
-        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
-                          self->mUserNum);
+        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640,
+                str_cFEStateVideoPlayer, 0, 0), mpEngine, (cUIState*)this,
+                          mUserNum);
         ((cFEStateVideoPlayer*)nextState)->setVideoSourceFiles(((const tVideoInfo*)data)->mpVideoFileName, 0);
         break;
     }
     if (nextState != 0) {
-        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_pushPopup(&mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -961,18 +963,19 @@ extern char str_cUIStateBuyPopup[];
  * cBuyPopupInfo_initBuyReward() fills its mInfo (+0x48) with the reward type (+0x4C), the reward's name (slot 37), its cost (slot 35)
  * and the cash (+0x54); cUIStateStack_pushPopup() pushes it on the engine's state stack (mpEngine + 0x18).
  */
-extern "C" void cFEStateRewardGalleryBase_showBuyPopup(cFEStateRewardGalleryBase* self)
+void cFEStateRewardGalleryBase::showBuyPopup(int)
 {
-    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, self);
-    int sel = vt[34].fn(vthis(self, vt[34]));
-    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->mpEngine, self,
-                                       self->mUserNum);
-    sVEntry<int(void*, int)>* vt2 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-    int rewardName = vt2[37].fn(vthis(self, vt2[37]), sel);
-    sVEntry<int(void*, int)>* vt3 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, self);
-    int cost = vt3[35].fn(vthis(self, vt3[35]), sel);
-    cBuyPopupInfo_initBuyReward(popup + 0x48, self->mRewardType, rewardName, cost, self->mMoney);
-    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, this);
+    int sel = vt[34].fn(vthis(this, vt[34]));
+    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), mpEngine,
+            this,
+                                       mUserNum);
+    sVEntry<int(void*, int)>* vt2 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, this);
+    int rewardName = vt2[37].fn(vthis(this, vt2[37]), sel);
+    sVEntry<int(void*, int)>* vt3 = (sVEntry<int(void*, int)>*)VPTR_OF(cListNode, this);
+    int cost = vt3[35].fn(vthis(this, vt3[35]), sel);
+    cBuyPopupInfo_initBuyReward(popup + 0x48, mRewardType, rewardName, cost, mMoney);
+    cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
 }
 #endif
 
@@ -1448,7 +1451,7 @@ extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(cFESt
 }
 #endif
 
-extern void* D_00467070[];
+extern char D_00467070[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconsFileName__FPv);
@@ -1460,10 +1463,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconsFileName__
  *
  * @return D_00467070
  */
-void* cFEStateRewardGalleryPosters_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryPosters::getIconsFileName()
 {
-    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
-    return (void*)D_00467070;
+    return D_00467070;
 }
 #endif
 
@@ -1571,7 +1573,7 @@ extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingC
 }
 #endif
 
-extern void* D_00467098[];
+extern char D_00467098[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconsFileName__FPv);
@@ -1583,10 +1585,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconsFileN
  *
  * @return D_00467098
  */
-void* cFEStateRewardGalleryTradingCards_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryTradingCards::getIconsFileName()
 {
-    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
-    return (void*)D_00467098;
+    return D_00467098;
 }
 #endif
 
@@ -1695,7 +1696,7 @@ extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptAr
 }
 #endif
 
-extern void* D_004670C8[];
+extern char D_004670C8[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconsFileName__FPv);
@@ -1707,10 +1708,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconsFileNa
  *
  * @return D_004670C8
  */
-void* cFEStateRewardGalleryConceptArts_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryConceptArts::getIconsFileName()
 {
-    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
-    return (void*)D_004670C8;
+    return D_004670C8;
 }
 #endif
 
@@ -1818,7 +1818,7 @@ extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(cFEStat
 }
 #endif
 
-extern void* D_004670F0[];
+extern char D_004670F0[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconsFileName__FPv);
@@ -1830,10 +1830,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconsFileName__F
  *
  * @return D_004670F0
  */
-void* cFEStateRewardGalleryVideos_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryVideos::getIconsFileName()
 {
-    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
-    return (void*)D_004670F0;
+    return D_004670F0;
 }
 #endif
 
@@ -1941,7 +1940,7 @@ extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(cFEStateRew
 }
 #endif
 
-extern void* D_00467118[];
+extern char D_00467118[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconsFileName__FPv);
@@ -1953,10 +1952,9 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconsFileName__FPv
  *
  * @return D_00467118
  */
-void* cFEStateRewardGalleryToys_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryToys::getIconsFileName()
 {
-    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
-    return (void*)D_00467118;
+    return D_00467118;
 }
 #endif
 
@@ -2417,7 +2415,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetMenu);
  * @param event  menu event number (On Tour Event)
  * @return 0x100 for kONNEXT, kONOPTION and kONMISC, otherwise 0x101
  */
-extern "C" int cFEStatePreviewReward_onWidgetMenu(cFEStatePreviewReward* self, int menu, unsigned int event)
+int cFEStatePreviewReward::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     switch (event) {
     case cUIMenu::kONNEXT:

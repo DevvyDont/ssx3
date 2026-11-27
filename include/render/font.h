@@ -76,6 +76,7 @@ struct cFont {
     float charAdvance1(unsigned short charCode) __asm__("cFont_charAdvance1");
     void* cFont1() __asm__("cFont_cFont1");
     void loadFont(const char* name, int flags) __asm__("cFont_loadFont");
+    void textf1(int fmt, float posX, float posY, float sx, float sy, ...) __asm__("cFont_textf1");
 };
 
 // --- layout checks

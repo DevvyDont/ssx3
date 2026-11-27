@@ -531,10 +531,9 @@ INCLUDE_ASM("world/world", tPolyModelList_getMeshPolyModel__FPvi);
  * @param meshNum  mesh index (On Tour meshNum)
  * @return entry @p meshNum of MeshPolyModel
  */
-int tPolyModelList_getMeshPolyModel(void* vself, int meshNum)
+int tPolyModelList::getMeshPolyModel(int meshNum)
 {
-    tPolyModelList* self = (tPolyModelList*)vself;
-    return (int)((tPolyModelList*)self)->MeshPolyModel[meshNum];
+    return (int)((tPolyModelList*)this)->MeshPolyModel[meshNum];
 }
 #endif
 

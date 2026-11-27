@@ -6354,12 +6354,11 @@ void cSnowBox_resetWind(void*);
 /**
  * Resets every snow box (cSnowBox_resetWind); despite the name it reads no replay data (it takes no frame).
  *
- * @param self  the snowfall node
  */
-extern "C" void cSnowFall_readFromReplayFrame(cSnowFall* self)
+void cSnowFall::readFromReplayFrame(cBxReplayFrame*)
 {
     int i;
-    void** snowBoxes = (void**)(&self->mSnowBoxes[0]);
+    void** snowBoxes = (void**)(&mSnowBoxes[0]);
     for (i = 0; i < 12; i++) {
         if (snowBoxes[i] != 0) {
             cSnowBox_resetWind(snowBoxes[i]);

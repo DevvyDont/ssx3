@@ -657,23 +657,23 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
  * @param widget  the popup state that sent the event
  * @param msg  the popup event (kONPOPUPCREATE opened, kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateCharEquip_onPopupEvent(cFEStateCharEquip* self, cUIState* widget, int msg)
+void cFEStateCharEquip::onPopupEvent(cUIState* widget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONPOPUPCREATE:
         if (widget->mHashName != cUIStateBuyPopup::kStateID) {
-            self->mAttrState &= ~8;
+            mAttrState &= ~8;
         }
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (((self->mAttrState >> 3) & 1) == 0) {
-            self->mAttrState |= 8;
+        if (((mAttrState >> 3) & 1) == 0) {
+            mAttrState |= 8;
         }
         if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
-            func_0019BE80(self);
-            self->updateBankWidget();
-            if (func_0019B458((sEquipDetail*)self, self->mpMenu->mScrollItemCurrent)) {
-                func_0019B618(self, 0, 1);
+            func_0019BE80(this);
+            updateBankWidget();
+            if (func_0019B458((sEquipDetail*)this, mpMenu->mScrollItemCurrent)) {
+                func_0019B618(this, 0, 1);
             }
         }
         break;
@@ -729,7 +729,7 @@ void cFEStateCharEquip::onUpdate()
         }
         obj->setVisible(on);
     }
-    cFEStateCharEquip_updatePreviewLoad(this);
+    this->updatePreviewLoad();
     update3DPositions();
 }
 #endif
@@ -1291,33 +1291,33 @@ extern char str_preview[];
  * Once the queued file is ready, makes its texture (graphics manager vtable entry 46, kind "preview") into +0xA70, or
  * -1 when the file is empty, releases the file and refreshes the item preview (func_0019A9B8).
  */
-extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
+void cFEStateCharEquip::updatePreviewLoad()
 {
-    int mode1 = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
+    int mode1 = mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (!mode1)
         return;
-    if (self->mLargePreviewDelay > 0) {
-        if (--self->mLargePreviewDelay == 0) {
-            self->mPreviewTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager,
-                                                         self->mCharID, self->mLargePreviewFileName, 9, 1, 0);
-            self->mLargePreviewDelay = -1;
+    if (mLargePreviewDelay > 0) {
+        if (--mLargePreviewDelay == 0) {
+            mPreviewTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager,
+                                                         mCharID, mLargePreviewFileName, 9, 1, 0);
+            mLargePreviewDelay = -1;
         }
-    } else if (self->mPreviewTextureFileIndex >= 0) {
+    } else if (mPreviewTextureFileIndex >= 0) {
         cFEBoltFileManager* tbl = (cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(tbl, self->mCharID, self->mPreviewTextureFileIndex)) {
-            SHAPEFILE* file = (SHAPEFILE*)func_0019E2B0(tbl, self->mCharID, self->mPreviewTextureFileIndex);
+        if (func_0019E238(tbl, mCharID, mPreviewTextureFileIndex)) {
+            SHAPEFILE* file = (SHAPEFILE*)func_0019E2B0(tbl, mCharID, mPreviewTextureFileIndex);
             if (file != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file
                 // blob)
                 const SHAPE* shape = (const SHAPE*)((char*)file + file->tbl[0].offset);
-                self->mPreviewTextureID = ps2GraphicsMan->AddTexture(shape, str_preview, 0, 1, -1);
+                mPreviewTextureID = ps2GraphicsMan->AddTexture(shape, str_preview, 0, 1, -1);
             } else {
-                self->mPreviewTextureID = -1;
+                mPreviewTextureID = -1;
             }
-            func_0019DC20(tbl, self->mCharID, self->mPreviewTextureFileIndex);
-            self->mPreviewTextureFileIndex = -1;
-            func_0019A9B8(self);
+            func_0019DC20(tbl, mCharID, mPreviewTextureFileIndex);
+            mPreviewTextureFileIndex = -1;
+            func_0019A9B8(this);
         }
     }
 }

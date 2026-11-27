@@ -453,13 +453,13 @@ extern char str_pct_s_pct_d[];
  *
  * @param fmt  printf-style message, followed by its arguments
  */
-extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ...)
+void cInputMapParser::error(const char* fmt, ...)
 {
     char buf[0x400];
     cInputMapParser_error_va_list ap;
     cInputMapParser_error_va_start(ap);
-    vsprintf(buf + sprintf(buf, str_pct_s_pct_d, (char*)&self->FileName, self->LineNumber), fmt, ap);
-    self->ErrorFlag = 1;
+    vsprintf(buf + sprintf(buf, str_pct_s_pct_d, (char*)&FileName, LineNumber), fmt, ap);
+    ErrorFlag = 1;
 }
 #endif
 

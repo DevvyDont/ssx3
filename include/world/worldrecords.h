@@ -372,6 +372,9 @@ struct tPolyModelList {
     tPolyModelMesh** MeshPolyModel; // 0x0 [O]; [U] resolveCollideModel (method 1) fills it;
                                     //      tPolyModelList_getMeshPolyModel indexes it
     int NumMesh;                    // 0x4 [O]; [U] resolveCollideModel (method 1) stores the count and loops to it
+
+    // Methods bound to their retail symbols by asm labels.
+    int getMeshPolyModel(int meshNum) __asm__("tPolyModelList_getMeshPolyModel__FPvi");
 };
 
 CHECK_OFFSET(tPolyModelList, MeshPolyModel, 0x0);

@@ -439,8 +439,7 @@ extern "C" float cWorldView_getDistanceToBox_impl(void* self, const t4Vector& po
  * @param boxMax  the box's maximum corner
  * @return the distance, or -1 inside
  */
-extern "C" float cWorldView_getDistanceToBox_impl(void* self, const t4Vector& pos, const t4Vector& boxMin,
-                                    const t4Vector& boxMax)
+float cWorldView::getDistanceToBox(const t4Vector& pos, const t4Vector& boxMin, const t4Vector& boxMax)
 {
     bool bSpanX = boxMin.x <= pos.x && pos.x <= boxMax.x;
     bool bSpanY = boxMin.y <= pos.y && pos.y <= boxMax.y;

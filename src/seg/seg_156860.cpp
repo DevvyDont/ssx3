@@ -1976,55 +1976,54 @@ extern "C" void cGameComm_updateDisplayError(cGameComm* self);
  * +0x54 / +0x58 (mCheating 3), 6 or more pauses (mCheating 2), mStallTimer reaching 3600 or the link timeout +0x94
  * running out (+0x2C set, cGameComm_setCommError) each show the error (cGameComm_displayError) and return 1.
  *
- * @param gameComm  the game link
  * @return 1 when there is an error, else 0
  */
-extern "C" int cGameComm_checkErrors(cGameComm* gameComm)
+int cGameComm::checkErrors()
 {
-    if (gameComm->mDisplayError > 0) {
-        gameComm->updateDisplayError();
+    if (mDisplayError > 0) {
+        updateDisplayError();
         return 1;
     }
-    if (gameComm->mError != 0) return 1;
-    if (gameComm->mRemoteEndGame != 0) {
-        gameComm->displayError();
+    if (mError != 0) return 1;
+    if (mRemoteEndGame != 0) {
+        displayError();
         return 1;
     }
-    if (cCommSystem_getError_77C8(cCommSystem_mCommSystem, gameComm->mChannel) != 0) {
-        gameComm->setCommError();
-        gameComm->displayError();
+    if (cCommSystem_getError_77C8(cCommSystem_mCommSystem, mChannel) != 0) {
+        setCommError();
+        displayError();
         return 1;
     }
-    if (gameComm->mLocalUnplugCount >= 3) {
-        gameComm->mCheating[0] = 3;
-        gameComm->displayError();
+    if (mLocalUnplugCount >= 3) {
+        mCheating[0] = 3;
+        displayError();
         return 1;
     }
-    if (gameComm->mPauseCount[0] >= 6) {
-        gameComm->mCheating[0] = 2;
-        gameComm->displayError();
+    if (mPauseCount[0] >= 6) {
+        mCheating[0] = 2;
+        displayError();
         return 1;
     }
-    if (gameComm->mRemoteUnplugCount >= 3) {
-        gameComm->mCheating[1] = 3;
-        gameComm->displayError();
+    if (mRemoteUnplugCount >= 3) {
+        mCheating[1] = 3;
+        displayError();
         return 1;
     }
-    if (gameComm->mPauseCount[1] >= 6) {
-        gameComm->mCheating[1] = 2;
-        gameComm->displayError();
+    if (mPauseCount[1] >= 6) {
+        mCheating[1] = 2;
+        displayError();
         return 1;
     }
-    if (gameComm->mStallTimer >= 3600.0f) {
-        gameComm->setCommError();
-        gameComm->displayError();
+    if (mStallTimer >= 3600.0f) {
+        setCommError();
+        displayError();
         return 1;
     }
-    if (gameComm->mLinkTimeout <= 0) return 0;
-    if (--gameComm->mLinkTimeout > 0) return 0;
-    gameComm->mLinkTimedOut = 1;
-    gameComm->setCommError();
-    gameComm->displayError();
+    if (mLinkTimeout <= 0) return 0;
+    if (--mLinkTimeout > 0) return 0;
+    mLinkTimedOut = 1;
+    setCommError();
+    displayError();
     return 1;
 }
 #endif
@@ -2127,43 +2126,42 @@ extern int D_004A3ED0;
  * desync, or 1800 frames of +0x5C (counted while the peer is not paused), raise the comm error and show it. Last, when
  * D_004A3ED0 is set, mCheating[0] becomes 1 and the error is shown.
  *
- * @param gameComm  the game link
  */
-extern "C" void cGameComm_checkActive(cGameComm* gameComm)
+void cGameComm::checkActive()
 {
-    if (gameComm->mCheating[0] != 0) return;
-    if (gameComm->mPauseMenu[0] == 0) {
-        if (gameComm->mGameStartGate != 0) {
-            if (gameComm->mPauseMenu[1] == 0 && gameComm->mUnPauseTimer <= 0) {
+    if (mCheating[0] != 0) return;
+    if (mPauseMenu[0] == 0) {
+        if (mGameStartGate != 0) {
+            if (mPauseMenu[1] == 0 && mUnPauseTimer <= 0) {
                 cSSXApp* appObj = SSXApp;
-                int n = ++gameComm->mStallThreshold;
-                ++gameComm->mWaitingTimer;
+                int n = ++mStallThreshold;
+                ++mWaitingTimer;
                 unsigned int st = *(int*)appObj->Game->AI - 4;
                 if (st < 2) {
-                    if (n >= 10) gameComm->mStallTimer += 1.0f;
-                    if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;
+                    if (n >= 10) mStallTimer += 1.0f;
+                    if (mStallThreshold == 10) ++mStallCount;
                 }
             }
-            if (gameComm->mWaitingTimer == 60) gameComm->mWaitingMessage = 1;
+            if (mWaitingTimer == 60) mWaitingMessage = 1;
         }
-        if (gameComm->mRaceInProgress != 0) {
-            if (gameComm->mDesync != 0) {
-                gameComm->setCommError();
-                gameComm->displayError();
+        if (mRaceInProgress != 0) {
+            if (mDesync != 0) {
+                setCommError();
+                displayError();
                 return;
             }
-            if (gameComm->mPauseMenu[1] == 0) ++gameComm->mSyncInputDelay;
-            if (gameComm->mSyncInputDelay >= 1800) {
-                gameComm->mLinkTimedOut = 1;
-                gameComm->setCommError();
-                gameComm->displayError();
+            if (mPauseMenu[1] == 0) ++mSyncInputDelay;
+            if (mSyncInputDelay >= 1800) {
+                mLinkTimedOut = 1;
+                setCommError();
+                displayError();
                 return;
             }
         }
     }
     if (D_004A3ED0 != 0) {
-        gameComm->mCheating[0] = 1;
-        gameComm->displayError();
+        mCheating[0] = 1;
+        displayError();
     }
 }
 #endif
@@ -2302,8 +2300,6 @@ extern "C" tGameCommPacket* cGameComm_allocPacket_7E98(char* self) __asm__("cGam
 extern "C" void MEM_copy_7E98(void* dst, const void* src, int n) __asm__("MEM_copy");
 extern "C" void cGameComm_updateWriteQueue(cGameComm* self);
 
-// PORT: the unit declares this void(void*, int, int, int); the target returns a status
-extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data, int len) __asm__("cGameComm_writePacket");
 /**
  * Sends a packet to the peer, queueing it when it cannot go out now.
  *
@@ -2317,23 +2313,22 @@ extern "C" int cGameComm_writePacket_impl(char* self, int type, const void* data
  * @param len  the data size (at most 0xEC)
  * @return 1 when sent or queued, 0 when busy
  */
-extern "C" int cGameComm_writePacket_impl(char* vself, int type, const void* data, int len)
+int cGameComm::writePacket(int type, const void* data, int len)
 {
-    cGameComm* self = (cGameComm*)vself;
     tGameCommPacket pkt;
-    if (self->mError != 0) return 0;
-    self->updateWriteQueue();
+    if (mError != 0) return 0;
+    updateWriteQueue();
     pkt.mType = type;
     pkt.mSize = len + 4;
     pkt.mPlayerID = 0;
     MEM_copy_7E98(pkt.mData, data, len);
-    if (self->mWriteQueue.mTail == self->mWriteQueue.mHead) {
-        if (cCommSystem_writePacket_7E98(cCommSystem_mCommSystem, self->mChannel, &pkt, pkt.mSize)) return 1;
+    if (mWriteQueue.mTail == mWriteQueue.mHead) {
+        if (cCommSystem_writePacket_7E98(cCommSystem_mCommSystem, mChannel, &pkt, pkt.mSize)) return 1;
     }
     {
-        tGameCommPacket* queuedPacket = cGameComm_allocPacket_7E98(((char*)self));
+        tGameCommPacket* queuedPacket = cGameComm_allocPacket_7E98(((char*)this));
         MEM_copy_7E98(queuedPacket, &pkt, pkt.mSize);
-        self->mWriteQueue.mQueue[(self->mWriteQueue.mHead)++ % 32] = queuedPacket;
+        mWriteQueue.mQueue[(mWriteQueue.mHead)++ % 32] = queuedPacket;
     }
     return 1;
 }

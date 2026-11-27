@@ -34,6 +34,12 @@ struct cOVStateTrophy : public cOVState {
     //       4 / 5 and pushes the result on its stack (+0x18)
     //   mpScreen: [U] onCreateScreen stores the screen
     // cOVState (fe/ovstate.h, 0x9C)
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cOVStateTrophy__cOVStateTrophy stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVStateTrophy();
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVStateTrophy_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVStateTrophy, 0x9C);

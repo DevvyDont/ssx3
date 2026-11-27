@@ -148,11 +148,14 @@ struct cUIThing : public cListNode {
     virtual void setChannelDataKCP(unsigned int NumChannels, short* pPtr)
         __asm__("cUIThing_setChannelDataKCP"); // 13 cUIThing_setChannelDataKCP
     virtual cUIThing* getObjectByHashName(unsigned int hashname);         // 14 cUIThing_getObjectByHashName
-    virtual bool onInput(const cUIInput* pInput);                         // 15 cUIThing_onInput
+    virtual bool onInput(const cUIInput* pInput)
+        __asm__("cUIThing_onInput__FPv");                         // 15 cUIThing_onInput
     virtual void updateLocale()
         __asm__("cUIThing_updateLocale__FPv");                                          // 16 cUIThing_updateLocale
-    virtual void render2D(float x, float y);                              // 17 cUIThing_render2D
-    virtual void render3D(cUIRenderContext* pRenCon);                     // 18 cUIThing_render3D
+    virtual void render2D(float x, float y)
+        __asm__("cUIThing_render2D__FPv");                              // 17 cUIThing_render2D
+    virtual void render3D(cUIRenderContext* pRenCon)
+        __asm__("cUIThing_render3D__FPv");                     // 18 cUIThing_render3D
     virtual void update(unsigned short FrameNum)
         __asm__("cUIThing_update");                         // 19 cUIThing_update
     virtual void getSize(t3Vector* vec)

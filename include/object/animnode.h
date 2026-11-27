@@ -121,6 +121,9 @@ struct cAnimNode {
     t4Matrix* getAnimMats() __asm__("cAnimNode_getAnimMats");
     t4Matrix* getAnimMat(int i) __asm__("cAnimNode_getAnimMat");
     void clearFrameEvent() __asm__("cAnimNode_clearFrameEvent");
+    int updateNode() __asm__("cAnimNode_updateNode__FPv");
+    float getAnimSpeed() __asm__("cAnimNode_getAnimSpeed__FPv");
+    int hasAnimMats() __asm__("cAnimNode_hasAnimMats__FPv");
 };
 
 CHECK_OFFSET(cAnimNode, CurrTime, 0x00);

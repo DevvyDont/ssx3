@@ -142,22 +142,22 @@ extern char str_pct_s_group[];
  *
  * @return 0
  */
-extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* self)
+bool cOVTemplate_PauseMenu::onGainTransition(int)
 {
     char buf[64];
-    if (self->mMoveIcons != 0) {
-        self->mMoveIcons = 0;
+    if (mMoveIcons != 0) {
+        mMoveIcons = 0;
         for (int i = 0; i < 14; i++) {
             sprintf(buf, str_pct_s_group, gMenuItemIcons[i]);
-            cUIThing* obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
+            cUIThing* obj = cUIScreen_getObjectByHashName(mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
                 obj->setVisible(0);
             }
         }
         for (int i = 0; i < 8; i++) {
-            if (i < self->mPauseMenuNumOptions) {
-                sprintf(buf, str_pct_s_group, gMenuItemIcons[self->mPauseMenuOptions[i]]);
-                cUIThing* obj = cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
+            if (i < mPauseMenuNumOptions) {
+                sprintf(buf, str_pct_s_group, gMenuItemIcons[mPauseMenuOptions[i]]);
+                cUIThing* obj = cUIScreen_getObjectByHashName(mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     obj->setVisible(1);
                     t3Vector itemPos;
@@ -169,7 +169,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
             }
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -237,7 +237,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onLoseFocus__FPv);
 /**
  * Does nothing when the pause menu loses focus; the body is empty.
  */
-void cOVTemplate_PauseMenu_onLoseFocus(void* self)
+void cOVTemplate_PauseMenu::onLoseFocus(cUIState*)
 {
 }
 #endif
@@ -350,7 +350,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetMenu);
  * @param event  menu event number (On Tour Event)
  * @return 0x100 for kONOPTION and kONMISC, 0 for kONNEXT, otherwise 0x101
  */
-extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(cOVTemplate_PauseMenu* self, int menu, unsigned int event)
+int cOVTemplate_PauseMenu::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
     switch (event) {
     case cUIMenu::kONOPTION:
@@ -457,33 +457,34 @@ static inline void setColor_PMWE(sWidget_PMWE* w, void* c)
  * opens
  * cFEStateAudioOptions.
  *
- * @param w  the option row (its option at +0x18), or 0
+ * @param pWidget  the option row (its option at +0x18), or 0
  * @param event  widget event number: kONNEXT select, kONPREV back, kONGAINFOCUS highlight, kONLOSEFOCUS unhighlight
  */
-extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self, sWidget_PMWE* w, int event)
+void cOVTemplate_PauseMenu::onWidgetEvent(cUIThing* pWidget, unsigned int event)
 {
+    sWidget_PMWE* w = (sWidget_PMWE*)pWidget;
     if (w == 0)
         return;
     switch (event) {
     case cUIState::kONNEXT: {
         sSnd_PMWE* snd = &gUISoundNull;
-        if ((sSnd_PMWE*)self->mpEngine->mpSound != 0)
-            snd = (sSnd_PMWE*)self->mpEngine->mpSound;
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_Menu_b));
-        if (self->mPauseOptionUnlocked[w->idx] == 0) {
+        if ((sSnd_PMWE*)mpEngine->mpSound != 0)
+            snd = (sSnd_PMWE*)mpEngine->mpSound;
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpPauseScreen, GetHashValue32(str_Menu_b));
+        if (mPauseOptionUnlocked[w->idx] == 0) {
             snd->vt[2].fn(vthis(snd, snd->vt[2]), 4);
             return;
         }
         snd->vt[2].fn(vthis(snd, snd->vt[2]), 6);
         cOVTemplate_PauseMenu_mSelectedMenuIndex = *((unsigned char*)text + 0x95);
-        int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpPauseScreen, GetHashValue32(str_trans_out));
-        cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
-        self->mScreenExiting = 1;
+        int frame = cUIScreen_getFrameByLabel((cUIScreen*)mpPauseScreen, GetHashValue32(str_trans_out));
+        cUIScreen_playFrame(mpPauseScreen, frame, 1);
+        mScreenExiting = 1;
         switch (w->idx) {
         case 1:
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
-            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
             break;
@@ -534,32 +535,32 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
-        cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
         cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;
     case cUIState::kONGAINFOCUS: {
-        if (self->mScreenExiting == 0) {
-            if (self->mPauseOptionUnlocked[w->idx] != 0)
+        if (mScreenExiting == 0) {
+            if (mPauseOptionUnlocked[w->idx] != 0)
                 setColor_PMWE(w, D_004C8AF8);
             else
                 setColor_PMWE(w, D_004C8AE8);
-            if (self->mScreenExiting == 0)
-                self->setPDAIconColor(w->idx, 1);
+            if (mScreenExiting == 0)
+                setPDAIconColor(w->idx, 1);
         }
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_help0));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpPauseScreen, GetHashValue32(str_help0));
         if (text != 0)
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_H_J_b[w->idx]));
         break;
     }
     case cUIState::kONLOSEFOCUS:
-        if (self->mScreenExiting != 0)
+        if (mScreenExiting != 0)
             return;
-        if (self->mPauseOptionUnlocked[w->idx] != 0)
+        if (mPauseOptionUnlocked[w->idx] != 0)
             setColor_PMWE(w, D_004C8B18);
         else
             setColor_PMWE(w, D_004C8B08);
-        if (self->mScreenExiting == 0)
-            self->setPDAIconColor(w->idx, 0);
+        if (mScreenExiting == 0)
+            setPDAIconColor(w->idx, 0);
         break;
     case cUIState::kONSTART:
     case cUIState::kONSELECT:
@@ -578,9 +579,9 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onInputBegin__FPv);
  *
  * @return always 0
  */
-int cOVTemplate_PauseMenu_onInputBegin(void* self)
+bool cOVTemplate_PauseMenu::onInputBegin(cUIInput*)
 {
-    return 0;
+    return false;
 }
 #endif
 

@@ -47,7 +47,7 @@ struct cRailModifier : public cRailLink {
     //   Prev: [R] both ctors zero it
     // cRailModifier's own slots ([R] cRailModifier_vtbl; types [O] On Tour's class cRailModifier):
     virtual void update();                                      // 3
-    virtual void render();                                      // 4
+    virtual void render() __asm__("cRailModifier_render__FPv");                                      // 4
     char unk_0C[0x4];             // 0x0C padding (BoundBox is 16-byte aligned)
     // --- cRailModifierState (On Tour 0x30; [R] cRailModifier_cRailModifier1 reads and cRailModifier_writeToReplayFrame writes these
     //     0x30 bytes from +0x10)
@@ -80,6 +80,7 @@ struct cRailModifier : public cRailLink {
     int getSplineId() __asm__("cRailModifier_getSplineId");
     char* cRailModifier1(cBxReplayFrame* src) __asm__("cRailModifier_cRailModifier1");
     void updateBoundBox() __asm__("cRailModifier_updateBoundBox");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cRailModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cRailModifier, unk_0C, 0x0C);

@@ -41,6 +41,8 @@ struct cFEStatePreviewReward : public cUIState {
     virtual void onCreateScreen() __asm__("cFEStatePreviewReward_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStatePreviewReward_onUpdate");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStatePreviewReward_onInputBegin");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cFEStatePreviewReward_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStatePreviewReward, mpIcon, 0x048);

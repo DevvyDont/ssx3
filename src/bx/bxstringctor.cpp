@@ -3368,9 +3368,9 @@ int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut
  * @param maxOut  the most paths to return (On Tour maxListLen)
  * @return the number of paths written
  */
-int cPathSys_getNearResetPaths_impl(void* self, void* position, void** out, int maxOut)
+int cPathSys::getNearResetPaths(void* position, void** out, int maxOut)
 {
-    return cPathSys_getNearAIPaths_impl(self, position, out, maxOut, 1);
+    return cPathSys_getNearAIPaths_impl(this, position, out, maxOut, 1);
 }
 #endif
 

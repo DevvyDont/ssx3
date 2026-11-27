@@ -710,7 +710,7 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
  * Updates the audio each frame: the sound system, ducking and mixing, then the in-game sound events.
  *
  * Plays thunder when the screen tint asks (PlayThunder, cSSXAudio_PlayThunder), runs cController_Update, and while a
- * stream is ducked (mDuckStream not kNoDuckStream) un-ducks it (cSSXAudio_DuckToStream(self, kNoDuckStream, 0.5, 1.0))
+ * stream is ducked (mDuckStream not kNoDuckStream) un-ducks it (cSSXAudio_DuckToStream(this, kNoDuckStream, 0.5, 1.0))
  * once that stream has started and stopped again. Then cSSXAudio_UpdateDuck and cSSXAudio_UpdateMix. In game:
  * func_0028C8C8 and, while mAudioUpdateState is INGAME_UPDATE, func_0028F000 (not paused), cSSXAudio_PlayHistoryUpdate,
  * the lift update (cSSXAudio_UpdateLift in game state kGFSM_Riding, else cSSXAudio_ResetLift),
@@ -721,44 +721,44 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
  *
  * @param dt  the frame time
  */
-extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
+void cSSXAudio::Update(float dt)
 {
-    if (PlayThunder() != 0)
+    if (::PlayThunder() != 0)
         cSSXAudio_PlayThunder(cAudioInterface_bxAudio(), 0.0f);
-    cController_Update(((char*)self), dt);
-    int st = self->mDuckStream;
+    cController_Update(((char*)this), dt);
+    int st = mDuckStream;
     if (st != kNoDuckStream) {
-        if (self->mDuckedStreamHasStarted == 0) {
-            if (cStreamSys_STREAM_Playing(self->MusicSys.mpVStreamSys, st) != 0)
-                self->mDuckedStreamHasStarted = 1;
-        } else if (cStreamSys_STREAM_Playing(self->MusicSys.mpVStreamSys, st) == 0) {
-            self->DuckToStream(kNoDuckStream, 0.5f, 1.0f);
+        if (mDuckedStreamHasStarted == 0) {
+            if (cStreamSys_STREAM_Playing(MusicSys.mpVStreamSys, st) != 0)
+                mDuckedStreamHasStarted = 1;
+        } else if (cStreamSys_STREAM_Playing(MusicSys.mpVStreamSys, st) == 0) {
+            DuckToStream(kNoDuckStream, 0.5f, 1.0f);
         }
     }
-    self->UpdateDuck();
-    self->UpdateMix();
+    UpdateDuck();
+    UpdateMix();
     if (cAudioInterface_getApp()->Game != 0) {
-        func_0028C8C8(((char*)self));
-        if (self->mAudioUpdateState == INGAME_UPDATE) {
-            if (self->mAudioPaused == 0)
-                func_0028F000(((char*)self));
-            cSSXAudio_PlayHistoryUpdate(((char*)self));
+        func_0028C8C8(((char*)this));
+        if (mAudioUpdateState == INGAME_UPDATE) {
+            if (mAudioPaused == 0)
+                func_0028F000(((char*)this));
+            cSSXAudio_PlayHistoryUpdate(((char*)this));
             if (cAudioInterface_getGame()->mCurrentStateID == kGFSM_Riding)
-                cSSXAudio_UpdateLift(((char*)self));
+                cSSXAudio_UpdateLift(((char*)this));
             else
-                cSSXAudio_ResetLift(((char*)self));
-            cSSXAudio_UpdateAttachedSounds(((char*)self));
-            func_0028E100(((char*)self));
-            cSSXAudio_UpdateTrackBanks(((char*)self));
-            cSSXAudio_UpdateBoostBar(((char*)self));
-            cSSXAudio_UpdateLandedUber(((char*)self));
-            cSSXAudio_UpdateTimedEvent(((char*)self));
-            cSSXAudio_UpdateTone(((char*)self));
-            if (self->mAudioPaused != 0 && !(cPauseState_Flags & 2))
-                self->ResumeAudio();
+                cSSXAudio_ResetLift(((char*)this));
+            cSSXAudio_UpdateAttachedSounds(((char*)this));
+            func_0028E100(((char*)this));
+            cSSXAudio_UpdateTrackBanks(((char*)this));
+            cSSXAudio_UpdateBoostBar(((char*)this));
+            cSSXAudio_UpdateLandedUber(((char*)this));
+            cSSXAudio_UpdateTimedEvent(((char*)this));
+            cSSXAudio_UpdateTone(((char*)this));
+            if (mAudioPaused != 0 && !(cPauseState_Flags & 2))
+                ResumeAudio();
         }
     }
-    self->ApplyRMSData();
+    ApplyRMSData();
 }
 #endif
 
@@ -1686,14 +1686,13 @@ static inline float clamp_73D8(float f, float lo, float hi)
     return lo;
 }
 
-extern "C" float cSSXAudio_Volume2Float_impl(void* self, int n) __asm__("cSSXAudio_Volume2Float");
 /**
  * Converts a volume setting 0..11 to a level 0.0..1.0 (n / 11, clamped).
  *
  * @param n  the setting
  * @return the level
  */
-extern "C" float cSSXAudio_Volume2Float_impl(void* self, int n)
+float cSSXAudio::Volume2Float(int n)
 {
     return clamp_73D8(n * 0.09090909361839294f, 0.0f, 1.0f);
 }

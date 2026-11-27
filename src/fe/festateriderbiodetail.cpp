@@ -336,23 +336,23 @@ extern "C" void cFEStateRiderBio_setupBioScreen(cFEStateRiderBio* self);
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
  */
-extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing* item, int msg)
+void cFEStateRiderBio::onWidgetEvent(cUIThing* item, unsigned int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case cUIState::kONPREV: {
-        cUICustomInterface* obj = self->mpEngine->mpCustom;
-        void* nextState = obj->getPrevState((cUIState*)self, item->mMiscData);
+        cUICustomInterface* obj = mpEngine->mpCustom;
+        void* nextState = obj->getPrevState((cUIState*)this, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&mpEngine->mStateStack, nextState);
         }
         break;
     }
     case cUIState::kONCHANGE:
-        self->mScreen = *(unsigned char*)((char*)item + 0x319);
-        self->setupBioScreen();
+        mScreen = *(unsigned char*)((char*)item + 0x319);
+        setupBioScreen();
         break;
     }
 }

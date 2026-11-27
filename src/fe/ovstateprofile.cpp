@@ -467,14 +467,13 @@ static inline void* GetText_K211BC8(char* key)
  * cMCOverlayManager_SetAction(manager, 0) and manager state kMCOverlay_DeleteConfirm. kONKEYBOARDCANCEL and others do
  * nothing.
  *
- * @param vself  the profile overlay state (this)
  * @param item  the widget; its misc data (mMiscData) is the profile slot
  * @param event  the widget event: 5, 6, 7, 13 or 14
  */
 // Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
-extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing* item, int event)
+void cOVState_PROFILE::onWidgetEvent(cUIThing* item, unsigned int event)
 {
-    cOVState_PROFILE* self = vself;
+    cOVState_PROFILE* self = this;
     switch (event) {
     case cUIState::kONKEYBOARDEND: {
         char buf[0x70];
@@ -505,7 +504,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
         if (self->mState == cFEMemCard::kCHECKING) {
             if (self->mpKeyboard == 0) {
                 cKeyboardPopup* kb = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup(
-                    cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
+                    cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), ((void*)self->mpEngine), this, 0, self->mCtrlBits);
                 self->mpKeyboard = kb;
                 kb->miCurrentKey = 55;
                 cKeyboardPopup_setMaxCharacters(self->mpKeyboard, 8);

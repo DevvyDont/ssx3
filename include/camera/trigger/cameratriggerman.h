@@ -108,6 +108,7 @@ struct cCameraTriggerMan {
     void setInGameTriggers() __asm__("cCameraTriggerMan_setInGameTriggers__FPv");
     void* setReplayTriggers() __asm__("cCameraTriggerMan_setReplayTriggers__FPv");
     void checkCollisions(cRider* rider) __asm__("cCameraTriggerMan_checkCollisions");
+    void resolve(void* rid, void* stream) __asm__("cCameraTriggerMan_resolve");
 };
 
 CHECK_OFFSET(cCameraTriggerMan, TriggerList, 0x00);

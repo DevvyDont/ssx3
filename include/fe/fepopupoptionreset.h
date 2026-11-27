@@ -46,6 +46,8 @@ struct cFEPopupOptionReset : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEPopupOptionReset();
     virtual void onCreateScreen() __asm__("cFEPopupOptionReset_onCreateScreen");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cFEPopupOptionReset_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEPopupOptionReset_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEPopupOptionReset, mAccept, 0x048);

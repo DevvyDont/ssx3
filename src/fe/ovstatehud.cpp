@@ -97,15 +97,15 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the chosen item; ignored when null
  * @param Event  the widget event; only kONNEXT (Cross) acts
  */
-extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUIThing* item, int Event)
+void cOVStateHiScoreList::onWidgetEvent(cUIThing* item, unsigned int Event)
 {
     if (((void*)item) != 0 && Event == cUIState::kONNEXT) {
         void* nextState = 0;
         if (item->mMiscData == 1) {
-            cUICustomInterface* factory = self->mpEngine->mpCustom;
-            nextState = factory->getNextState(self, 1);
+            cUICustomInterface* factory = mpEngine->mpCustom;
+            nextState = factory->getNextState(this, 1);
         }
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -122,10 +122,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour__FPvT0);
  *
  * @param outColor  receives the colour as four floats (a tARGB: alpha, red, green, blue)
  */
-void tHUDDef_getColour(void* vself, void* outColor)
+void tHUDDef::getColour(void* outColor)
 {
-    tHUDDef* self = (tHUDDef*)vself;
-    cTextureElement* elem = (cTextureElement*)self;
+    cTextureElement* elem = (cTextureElement*)this;
     float* out = (float*)outColor;
     out[0] = elem->mLeft;
     out[1] = elem->mRight;
@@ -145,10 +144,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour1__FPvT0);
  *
  * @param outColor  receives the colour as an (r, g, b, a) 4-vector
  */
-void tHUDDef_getColour1(void* vself, void* outColor)
+void tHUDDef::getColour1(void* outColor)
 {
-    tHUDDef* self = (tHUDDef*)vself;
-    cTextureElement* elem = (cTextureElement*)self;
+    cTextureElement* elem = (cTextureElement*)this;
     float* out = (float*)outColor;
     out[3] = elem->mLeft;
     out[0] = elem->mRight;
@@ -227,10 +225,9 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getScale__FPvT0);
  * @param outRange  receives (scale x, scale y)
  * @return the x scale it copied
  */
-float tHUDDef_getScale(void* vself, void* outRange)
+float tHUDDef::getScale(void* outRange)
 {
-    tHUDDef* self = (tHUDDef*)vself;
-    const tHUDDef* def = (const tHUDDef*)self;
+    const tHUDDef* def = (const tHUDDef*)this;
     float* out = (float*)outRange;
     float scaleX = def->xx;
     out[0] = scaleX;
@@ -1457,7 +1454,7 @@ void cOVStateHUD1P::renderTime1(int hour, int minute, int sec, int secFrac, int 
     tARGB col;
     tHUDDef* elemDef = &defs[idx];
     elemDef->getPos(pos);
-    tHUDDef_getScale(elemDef, scale);
+    elemDef->getScale(scale);
     if (scaleMul != 0) {
         scale[0] *= scaleMul[0];
         scale[1] *= scaleMul[1];
@@ -1467,7 +1464,7 @@ void cOVStateHUD1P::renderTime1(int hour, int minute, int sec, int secFrac, int 
         pos[1] += posOff[1];
     }
     if (color == 0) {
-        tHUDDef_getColour(elemDef, &col);
+        elemDef->getColour(&col);
     } else {
         col = *color;
     }
@@ -1613,7 +1610,7 @@ void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* 
     scale[1] = 1.0f;
     tHUDDef* hudDef = &defs[idx];
     hudDef->getPos(pos);
-    tHUDDef_getScale(hudDef, escale);
+    hudDef->getScale(escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
@@ -1637,7 +1634,7 @@ void cOVStateHUD1P::renderText(cFont* font, tHUDDef* defs, int idx, const char* 
         rect[3] = extent[3];
     }
     if (color == 0) {
-        tHUDDef_getColour(&defs[idx], &col);
+        defs[idx].getColour(&col);
     } else {
         col = *color;
     }
@@ -1771,14 +1768,14 @@ void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx
     cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
     startDef->getPos(pos1);
-    tHUDDef_getScale(startDef, esc1);
+    startDef->getScale(esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
     tHUDDef* endDef = &defs[idx2];
     endDef->getPos(pos2);
-    tHUDDef_getScale(endDef, esc2);
+    endDef->getScale(esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
         esc2[1] *= scaleMul[1];
@@ -1821,8 +1818,8 @@ void cOVStateHUD1P::renderText1(float blend, cFont* font, tHUDDef* defs, int idx
     if (color == 0) {
         t4Vector startColour;
         t4Vector endColour;
-        tHUDDef_getColour1(&defs[idx1], &startColour);
-        tHUDDef_getColour1(&defs[idx2], &endColour);
+        defs[idx1].getColour1(&startColour);
+        defs[idx2].getColour1(&endColour);
         endColour.w = 0.0f;
         t4Vector blendedColour = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(endColour, startColour), blend), startColour);
         col = tARGBInit(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
@@ -1889,7 +1886,7 @@ void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsig
     scale[1] = 1.0f;
     tHUDDef* hudDef = &defs[idx];
     hudDef->getPos(pos);
-    tHUDDef_getScale(hudDef, escale);
+    hudDef->getScale(escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
@@ -1913,7 +1910,7 @@ void cOVStateHUD1P::renderText2(cFont* font, tHUDDef* defs, int idx, const unsig
         rect[3] = extent[3];
     }
     if (color == 0) {
-        tHUDDef_getColour(&defs[idx], &col);
+        defs[idx].getColour(&col);
     } else {
         col = *color;
     }
@@ -2032,14 +2029,14 @@ void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx
     cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
     startDef->getPos(pos1);
-    tHUDDef_getScale(startDef, esc1);
+    startDef->getScale(esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
     tHUDDef* endDef = &defs[idx2];
     endDef->getPos(pos2);
-    tHUDDef_getScale(endDef, esc2);
+    endDef->getScale(esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
         esc2[1] *= scaleMul[1];
@@ -2082,8 +2079,8 @@ void cOVStateHUD1P::renderText3(float blend, cFont* font, tHUDDef* defs, int idx
     if (color == 0) {
         t4Vector startColour;
         t4Vector endColour;
-        tHUDDef_getColour1(&defs[idx1], &startColour);
-        tHUDDef_getColour1(&defs[idx2], &endColour);
+        defs[idx1].getColour1(&startColour);
+        defs[idx2].getColour1(&endColour);
         endColour.w = 0.0f;
         t4Vector blendedColour = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(endColour, startColour), blend), startColour);
         col = tARGBInit(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
@@ -2156,7 +2153,7 @@ void cOVStateHUD1P::renderMultiText(cFont* font, tHUDDef* defs, int idx, const c
     tHUDDef* hudDef = &defs[idx];
     hudDef->getSize(wrap, 0);
     hudDef->getPos(pos);
-    tHUDDef_getScale(hudDef, escale);
+    hudDef->getScale(escale);
     cFont* sf = mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
     sf->Scale[1] = sf->BaseScale[1] * escale[1];
@@ -2165,7 +2162,7 @@ void cOVStateHUD1P::renderMultiText(cFont* font, tHUDDef* defs, int idx, const c
         remaining = cFont_textSmartLimit(mpFEFont, remaining, lines[n], 50, mpFEFont->Scale[0], wrap[0]);
         n++;
     }
-    tHUDDef_getColour(&defs[idx], &col);
+    defs[idx].getColour(&col);
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
@@ -2255,7 +2252,7 @@ void cOVStateHUD1P::renderMultiText1(cFont* font, tHUDDef* defs, int idx, const 
     defs[29].getSize(wrap, 0);
     tHUDDef* hudDef = &defs[idx];
     hudDef->getPos(pos);
-    tHUDDef_getScale(hudDef, escale);
+    hudDef->getScale(escale);
     cFont* sf = mpFEFont;
     sf->Scale[0] = sf->BaseScale[0] * escale[0];
     sf->Scale[1] = sf->BaseScale[1] * escale[1];
@@ -2264,7 +2261,7 @@ void cOVStateHUD1P::renderMultiText1(cFont* font, tHUDDef* defs, int idx, const 
         remaining = cFont_textSmartLimit1(mpFEFont, mpFEFont->Scale[0], wrap[0], remaining, lines[n], 50);
         n++;
     }
-    tHUDDef_getColour(&defs[idx], &col);
+    defs[idx].getColour(&col);
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;

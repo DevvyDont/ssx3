@@ -337,6 +337,7 @@ struct cReplay {
     void* initLoad() __asm__("cReplay_initLoad__FPv");
     void purgeLoad() __asm__("cReplay_purgeLoad__FPv");
     cReplayFrame* compareHighlights(int i, cReplayFrame* best, int positive) __asm__("cReplay_compareHighlights");
+    bool updateInput(int debug) __asm__("cReplay_updateInput");
 };
 
 CHECK_OFFSET(cReplayFrameList, Tail, 0x0);

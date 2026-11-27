@@ -83,6 +83,15 @@ struct cOVTemplate_PauseMenu : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void setPDAIconColor(int idx, int on) __asm__("cOVTemplate_PauseMenu_setPDAIconColor");
+    // retail's destructor cOVTemplate_PauseMenu__cOVTemplate_PauseMenu stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cOVTemplate_PauseMenu();
+    virtual bool onGainTransition(int) __asm__("cOVTemplate_PauseMenu_onGainTransition");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cOVTemplate_PauseMenu_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int event) __asm__("cOVTemplate_PauseMenu_onWidgetEvent");
+    virtual void onLoseFocus(cUIState*) __asm__("cOVTemplate_PauseMenu_onLoseFocus__FPv");
+    virtual bool onInputBegin(cUIInput*) __asm__("cOVTemplate_PauseMenu_onInputBegin__FPv");
 };
 
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuOptions, 0x9C);
@@ -113,6 +122,11 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
     virtual void onPreRender2D() __asm__("cOVState_PAUSE_OPTIONS_onPreRender2D");
     virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cOVState_PAUSE_OPTIONS_onWidgetEvent");
     virtual void onUpdate() __asm__("cOVState_PAUSE_OPTIONS_onUpdate");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int index)
+        __asm__("cOVState_PAUSE_OPTIONS_onWidgetMenu");
+    virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event)
+        __asm__("cOVState_PAUSE_OPTIONS_onWidgetListBox");
+    virtual int onWidgetPair(cUIPair* pPair, unsigned int Event) __asm__("cOVState_PAUSE_OPTIONS_onWidgetPair");
 };
 
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
@@ -151,6 +165,7 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVState_PAUSE_ONLINE_ERROR();
     virtual void onUpdate() __asm__("cOVState_PAUSE_ONLINE_ERROR_onUpdate");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);

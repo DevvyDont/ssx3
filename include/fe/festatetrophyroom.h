@@ -82,6 +82,9 @@ struct cFEStateTrophyRoom : public cFEState {
     virtual void onCreateScreen() __asm__("cFEStateTrophyRoom_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateTrophyRoom_onWidgetCreate");
     virtual void onUpdate() __asm__("cFEStateTrophyRoom_onUpdate");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
+        __asm__("cFEStateTrophyRoom_onWidgetMenu");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateTrophyRoom_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateTrophyRoom, mpBigIcon, 0x048);

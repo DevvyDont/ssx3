@@ -33,6 +33,7 @@ struct cFEStateRiderBio : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateRiderBio();
     virtual void onCreateScreen() __asm__("cFEStateRiderBio_onCreateScreen");
+    virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateRiderBio_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateRiderBio, mCharID, 0x048);

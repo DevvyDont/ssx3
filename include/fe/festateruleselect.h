@@ -37,6 +37,9 @@ struct cFEStateRuleSelect : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateRuleSelect();
     virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cFEStateRuleSelect_onWidgetEvent");
+    virtual int onWidgetPair(cUIPair* msg, unsigned int) __asm__("cFEStateRuleSelect_onWidgetPair");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int type, unsigned int idx)
+        __asm__("cFEStateRuleSelect_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateRuleSelect, mpGameEventMapping, 0x048);
@@ -163,6 +166,10 @@ struct cFEStateBraggingRights : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateBraggingRights_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateBraggingRights_onUpdate");
     int getBEData(int chan, int kind) __asm__("cFEStateBraggingRights_getBEData");
+    virtual void onMenuGainFocus(cUIGroup*) __asm__("cFEStateBraggingRights_onMenuGainFocus__FPv");
+    virtual int onWidgetMenu(cUIMenu* ctrl, unsigned int msg, unsigned int)
+        __asm__("cFEStateBraggingRights_onWidgetMenu");
+    virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateBraggingRights_onWidgetCreate");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

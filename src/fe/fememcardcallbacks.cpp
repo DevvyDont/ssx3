@@ -1289,14 +1289,13 @@ static inline void notifyK1D8700(char* vself, char* mp)
  * close; +0x210 is cleared. kONPOPUPDESTROY (popup closed) clears the words +0x1A4 and +0x1A0 when +0x1A0 is set;
  * otherwise it clears +0x210 (popup id kPOP_STATUS only) and the instance's popup pointer (+0x218).
  *
- * @param self_  the memory-card screen
  * @param popup  the popup state that sent the event (unused)
  * @param button  the popup event: kONSCREENPOPUPOPTION0 .. kONSCREENPOPUPOPTION2 for buttons 0-2, kONPOPUPDESTROY
  *                when the popup closes
  */
-extern "C" void cFEMemCard_onPopupEvent(cFEMemCard* self_, int popup, int button)
+void cFEMemCard::onPopupEvent(cUIState* popup, unsigned int button)
 {
-    cFEMemCard* self = (cFEMemCard*)self_;
+    cFEMemCard* self = (cFEMemCard*)this;
     if (button >= cUIState::kONSCREENPOPUPOPTION0 && button <= cUIState::kONSCREENPOPUPOPTION2) {
         int choice = 0;
         if (button == cUIState::kONSCREENPOPUPOPTION1) {
@@ -2042,10 +2041,10 @@ extern char str_text_box_message[];
  * Runs the base cUIState_onGainFocus(), then looks up "text box message" (str_text_box_message) on mpScreen (+0x40) and
  * calls its setVisible (cUIThing vtable slot 9) with 0.
  */
-extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
+void cFEMemCard::onGainFocus(cUIState*)
 {
-    cUIState_onGainFocus(self);
-    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+    cUIState_onGainFocus(this);
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_text_box_message));
     if (((void*)obj) != 0) {
         obj->setVisible(0);
     }
@@ -2058,9 +2057,8 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseFocus__FPv);
 /**
  * Does nothing (the memory-card screen's onLoseFocus handler, vtable entry 11).
  */
-void cFEMemCard_onLoseFocus(void* vself)
+void cFEMemCard::onLoseFocus(cUIState*)
 {
-    cFEMemCard* self = (cFEMemCard*)vself;
 }
 #endif
 
@@ -2204,43 +2202,43 @@ extern char str_empty_d[];
  * @param bSnowFlake  unused
  */
 // PORT: a6 is unused
-extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, void* ustrDisplay, int bYesOnly, int bNoButtons,
-        int layerOffset, int passUpdate, int bSnowFlake)
+void cFEPopupConfirm::initPopup(unsigned short* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset,
+                                int passUpdate, int bSnowFlake)
 {
     void* str = ustrDisplay;
-    cPopupInfo* sub = &self->info;
+    cPopupInfo* sub = &info;
     func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
-    self->info.meType = 2;
-    self->info.miLayerOffset = layerOffset;
-    self->info.miDefaultOption = 0;
-    self->info.mbPassUpdate = 0;
-    self->info.mbReceivePrev = 0;
+    info.meType = 2;
+    info.miLayerOffset = layerOffset;
+    info.miDefaultOption = 0;
+    info.mbPassUpdate = 0;
+    info.mbReceivePrev = 0;
     char* displayText;
     if (str) {
-        strcpy1(&self->mDisplayText[0], str);
-        displayText = (char*)&self->mDisplayText[0];
+        strcpy1(&mDisplayText[0], str);
+        displayText = (char*)&mDisplayText[0];
     } else {
-        displayText = (char*)&self->mDisplayText[0];
+        displayText = (char*)&mDisplayText[0];
         func_002C2540(displayText, str_empty_d);
     }
     strcpy1(displayText, str);
     if (bNoButtons) {
-        self->mNumButtons = 0;
+        mNumButtons = 0;
         sub->mbPassUpdate = 1;
         sub->meType = 0;
     } else if (bYesOnly) {
-        self->mNumButtons = 1;
+        mNumButtons = 1;
         sub->meType = 1;
         sub->mbPassUpdate = passUpdate;
     } else {
-        self->mNumButtons = 2;
+        mNumButtons = 2;
         sub->mbPassUpdate = passUpdate;
     }
     sub->mtMessage.pustr = (const unsigned short*)displayText;
     sub->mtMessage.eType = 1;
-    if ((int)self->mpScreen) {
-        cScreenPopup_redrawPopup_self(self);
+    if ((int)mpScreen) {
+        cScreenPopup_redrawPopup_self(this);
     }
 }
 #endif

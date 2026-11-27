@@ -104,6 +104,7 @@ struct cFlagSet {
     bool SameKind(void* data, tInstanceRecord* ctx) __asm__("cFlagSet_SameKind");
     void AddFlag(tFlagState* def, tInstanceRecord* mesh) __asm__("cFlagSet_AddFlag");
     bool Empty() __asm__("cFlagSet_Empty");
+    bool RemoveFlag(tInstanceRecord* rider) __asm__("cFlagSet_RemoveFlag");
 };
 
 CHECK_OFFSET(cFlagSet, mFlagData, 0x000);

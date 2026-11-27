@@ -415,7 +415,7 @@ extern char D_004A13A0[];
  * @param msg  the pair (On Tour cUIPair* pPair)
  * @return 0x101 for the pair named "0", otherwise 0x100
  */
-extern "C" int cFEStateRuleSelect_onWidgetPair(cFEStateRuleSelect* self, cUIPair* msg)
+int cFEStateRuleSelect::onWidgetPair(cUIPair* msg, unsigned int)
 {
     int id = msg->mHashName;
     return (id == GetHashValue32(D_004A13A0)) ? 257 : 0x100;
@@ -454,18 +454,18 @@ extern char str_normal[] __attribute__((aligned(8)));
  * @return for kISHIGHLIGHTABLE, 1 when the rule is enabled and 0 when it is disabled; 0x100 for kONMISC; otherwise
  *         0x101
  */
-extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu* pMenu, unsigned int type, int idx)
+int cFEStateRuleSelect::onWidgetMenu(cUIMenu* pMenu, unsigned int type, unsigned int idx)
 {
     switch (type) {
     case cUIMenu::kONMISC:
         return 0x100;
     case cUIMenu::kISHIGHLIGHTABLE: {
-        int sel = ((signed char*)self->mpGameEventMapping)[idx];
+        int sel = ((signed char*)mpGameEventMapping)[idx];
         int play = 0;
-        cUIThing* arrowLeft = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrw_left));
-        cUIThing* arrowRight = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrw_right));
-        int locked = *(signed char*)(((char*)self) + sel + 0x51) < 1;
-        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_rule_help));
+        cUIThing* arrowLeft = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_arrw_left));
+        cUIThing* arrowRight = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_arrw_right));
+        int locked = *(signed char*)(((char*)this) + sel + 0x51) < 1;
+        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_rule_help));
         if (locked && textHelp) {
             cUIText_setUnicodeStringByID(textHelp, GetHashValue32(D_00441058[sel]));
         }
@@ -484,15 +484,15 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu
             __builtin_memcpy(label, str_normal, 7);
         }
         if (play) {
-            int frameIndex = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(label));
+            int frameIndex = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(label));
             if (frameIndex != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, frameIndex, 1);
+                cUIScreen_playFrame(mpScreen, frameIndex, 1);
             }
         }
         return locked;
     }
     case cUIMenu::kSCROLLUPDATE:
-        self->setupMenu(idx);
+        setupMenu(idx);
         return 257;
     }
     return 257;

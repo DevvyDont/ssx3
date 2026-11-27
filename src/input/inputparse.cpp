@@ -1560,7 +1560,7 @@ int cInputMapParser::compileStatement(const char* name, int* out, int max, int d
     }
     int sep = ' ';
     int state = 0;
-    int n = cInputMapParser_compileParseNode(this, (tParseNode*)((void*)ident->Expression), &state, out, max,
+    int n = this->compileParseNode((tParseNode*)((void*)ident->Expression), &state, out, max,
             defaultModifier);
     max -= n;
     out += n;
@@ -1602,23 +1602,22 @@ extern char str_branch_offset_overflow[];
  * @param defaultModifier  button modifier for buttons and references without one
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* dst, void* vcode, int cap,
-                                                int defaultModifier)
+int cInputMapParser::compileParseNode(tParseNode* node, int* dst, void* vcode, int cap, int defaultModifier)
 {
     tInputOpCode* code = (tInputOpCode*)vcode;
     switch (node->Type) {
     case cInputMapParser::kNodeConstant:
         if (*dst < 0) {
-            if (self->NumFreeRegisters > 0) {
-                *dst = self->FreeRegisters[--self->NumFreeRegisters];
+            if (NumFreeRegisters > 0) {
+                *dst = FreeRegisters[--NumFreeRegisters];
             }
             if (*dst < 0) {
-                cInputMapParser_error(self, str_failed_to_allocate_temporary_register);
+                cInputMapParser_error(this, str_failed_to_allocate_temporary_register);
                 return -1;
             }
         }
         if (cap < 2) {
-            cInputMapParser_error(self, str_opcode_buffer_overflow);
+            cInputMapParser_error(this, str_opcode_buffer_overflow);
             return -1;
         }
         code->Binary.opcode = kInputOpCodeLoad;
@@ -1628,18 +1627,18 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
         code[1].Float.value = node->Value;
         return 2;
     case cInputMapParser::kNodeReference:
-        return cInputMapParser_compileParseNode(self, node->Identifier->Expression, dst, code, cap,
+        return compileParseNode(node->Identifier->Expression, dst, code, cap,
                                                 node->Modifier != kButtonModifier_Default ? node->Modifier
                                                                                           : defaultModifier);
     case cInputMapParser::kNodeButton: {
-        int idx = self->buttonToRegister(node->Index,
+        int idx = buttonToRegister(node->Index,
                                          node->Modifier == kButtonModifier_Default ? defaultModifier : node->Modifier);
         if (*dst == cInputMapParser::kNoRegister) {
             *dst = idx;
             return 0;
         }
         if (cap <= 0) {
-            cInputMapParser_error(self, str_opcode_buffer_overflow);
+            cInputMapParser_error(this, str_opcode_buffer_overflow);
             return -1;
         }
         code->Binary.opcode = kInputOpCodeMove;
@@ -1650,121 +1649,121 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
     }
     case cInputMapParser::kNodeConfig:
         if (*dst == cInputMapParser::kNoRegister) {
-            *dst = cInputMapParser_configToRegister_i(self, node->Index);
+            *dst = cInputMapParser_configToRegister_i(this, node->Index);
             return 0;
         }
         if (cap <= 0) {
-            cInputMapParser_error(self, str_opcode_buffer_overflow);
+            cInputMapParser_error(this, str_opcode_buffer_overflow);
             return -1;
         }
         code->Binary.opcode = kInputOpCodeMove;
         code->Binary.dest = *dst;
-        code->Binary.operand1 = cInputMapParser_configToRegister_i(self, node->Index);
+        code->Binary.operand1 = cInputMapParser_configToRegister_i(this, node->Index);
         code->Binary.operand2 = 0;
         return 1;
     case cInputMapParser::kNodeSelection: {
         int cond = cInputMapParser::kNoRegister;
-        int condLen = cInputMapParser_compileParseNode(self, node->Operand1, &cond, code, cap, defaultModifier);
+        int condLen = compileParseNode(node->Operand1, &cond, code, cap, defaultModifier);
         if (condLen < 0) {
             return -1;
         }
         code += condLen;
         cap -= condLen;
         if (cap <= 0) {
-            cInputMapParser_error(self, str_opcode_buffer_overflow);
+            cInputMapParser_error(this, str_opcode_buffer_overflow);
             return -1;
         }
         unsigned int reg = cond;
         code->Branch.opcode = kInputOpCodeBranchFalse;
         code->Branch.operand = reg;
         if (reg < 0x40) {
-            self->FreeRegisters[self->NumFreeRegisters++] = reg;
+            FreeRegisters[NumFreeRegisters++] = reg;
         }
         cap--;
-        int thenLen = cInputMapParser_compileParseNode(self, node->Operand2, dst, code + 1, cap, defaultModifier);
+        int thenLen = compileParseNode(node->Operand2, dst, code + 1, cap, defaultModifier);
         if (thenLen < 0) {
             return -1;
         }
         if (thenLen + 1 > 0xFFFF) {
-            cInputMapParser_error(self, str_branch_offset_overflow);
+            cInputMapParser_error(this, str_branch_offset_overflow);
             return -1;
         }
         code->Branch.offset = thenLen + 1;
         code += thenLen + 1;
         cap -= thenLen;
         if (cap <= 0) {
-            cInputMapParser_error(self, str_opcode_buffer_overflow);
+            cInputMapParser_error(this, str_opcode_buffer_overflow);
             return -1;
         }
         code->Branch.opcode = kInputOpCodeBranch;
         code->Branch.operand = 0;
-        int elseLen = cInputMapParser_compileParseNode(self, node->Operand3, dst, code + 1, cap - 1, defaultModifier);
+        int elseLen = compileParseNode(node->Operand3, dst, code + 1, cap - 1, defaultModifier);
         if (elseLen < 0) {
             return -1;
         }
         if (elseLen > 0xFFFF) {
-            cInputMapParser_error(self, str_branch_offset_overflow);
+            cInputMapParser_error(this, str_branch_offset_overflow);
             return -1;
         }
         code->Branch.offset = elseLen;
         return condLen + thenLen + elseLen + 2;
     }
     case cInputMapParser::kNodeOr:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeOr, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeOr, defaultModifier);
     case cInputMapParser::kNodeAnd:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAnd, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeAnd, defaultModifier);
     case cInputMapParser::kNodeGR:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeGR, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeGR, defaultModifier);
     case cInputMapParser::kNodeGE:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeGE, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeGE, defaultModifier);
     case cInputMapParser::kNodeLS:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeLS, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeLS, defaultModifier);
     case cInputMapParser::kNodeLE:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeLE, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeLE, defaultModifier);
     case cInputMapParser::kNodeEQ:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeEQ, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeEQ, defaultModifier);
     case cInputMapParser::kNodeNE:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeNE, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeNE, defaultModifier);
     case cInputMapParser::kNodeAdd:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAdd, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeAdd, defaultModifier);
     case cInputMapParser::kNodeSub:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeSub, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeSub, defaultModifier);
     case cInputMapParser::kNodeMul:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMul, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeMul, defaultModifier);
     case cInputMapParser::kNodeDiv:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeDiv, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeDiv, defaultModifier);
     case cInputMapParser::kNodeMax:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMax, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeMax, defaultModifier);
     case cInputMapParser::kNodeMin:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeMin, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeMin, defaultModifier);
     case cInputMapParser::kNodePow:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodePow, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodePow, defaultModifier);
     case cInputMapParser::kNodeAtan2:
-        return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, kInputOpCodeAtan2, defaultModifier);
+        return cInputMapParser_compileBinaryNode_K(this, node, dst, code, cap, kInputOpCodeAtan2, defaultModifier);
     case cInputMapParser::kNodeAtan:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeAtan, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeAtan, defaultModifier);
     case cInputMapParser::kNodeSin:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeSin, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeSin, defaultModifier);
     case cInputMapParser::kNodeCos:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeCos, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeCos, defaultModifier);
     case cInputMapParser::kNodeExp:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeExp, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeExp, defaultModifier);
     case cInputMapParser::kNodeLog:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeLog, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeLog, defaultModifier);
     case cInputMapParser::kNodeFloor:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeFloor, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeFloor, defaultModifier);
     case cInputMapParser::kNodeCeil:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeCeil, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeCeil, defaultModifier);
     case cInputMapParser::kNodeAbs:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeAbs, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeAbs, defaultModifier);
     case cInputMapParser::kNodeSqrt:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeSqrt, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeSqrt, defaultModifier);
     case cInputMapParser::kNodeMinRadian:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeMinRadian, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeMinRadian, defaultModifier);
     case cInputMapParser::kNodeNeg:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeNeg, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeNeg, defaultModifier);
     case cInputMapParser::kNodeNot:
-        return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, kInputOpCodeNot, defaultModifier);
+        return cInputMapParser_compileUnaryNode_K(this, node, dst, code, cap, kInputOpCodeNot, defaultModifier);
     }
     return -1;
 }
@@ -1789,40 +1788,40 @@ extern char str_opcode_buffer_overflow[];
  * @param defaultModifier  button modifier passed down to the operands
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNode* node, int* dst, tInputOpCode* code,
-                                                 int cap, int op, int defaultModifier)
+int cInputMapParser::compileBinaryNode(tParseNode* node, int* dst, tInputOpCode* code, int cap, int op,
+                                       int defaultModifier)
 {
     int src = -1;
-    int srcLen = cInputMapParser_compileParseNode(self, node->Operand1, &src, code, cap, defaultModifier);
+    int srcLen = compileParseNode(node->Operand1, &src, code, cap, defaultModifier);
     if (srcLen < 0) {
         return -1;
     }
     code += srcLen;
     cap -= srcLen;
     int argReg = -1;
-    int argLen = cInputMapParser_compileParseNode(self, node->Operand2, &argReg, code, cap, defaultModifier);
+    int argLen = compileParseNode(node->Operand2, &argReg, code, cap, defaultModifier);
     if (argLen < 0) {
         return -1;
     }
     code += argLen;
     cap -= argLen;
     if ((unsigned int)argReg < 0x40) {
-        self->FreeRegisters[self->NumFreeRegisters++] = argReg;
+        FreeRegisters[NumFreeRegisters++] = argReg;
     }
     if ((unsigned int)src < 0x40) {
-        self->FreeRegisters[self->NumFreeRegisters++] = src;
+        FreeRegisters[NumFreeRegisters++] = src;
     }
     if (*dst < 0) {
-        if (self->NumFreeRegisters > 0) {
-            *dst = self->FreeRegisters[--self->NumFreeRegisters];
+        if (NumFreeRegisters > 0) {
+            *dst = FreeRegisters[--NumFreeRegisters];
         }
         if (*dst < 0) {
-            cInputMapParser_error(self, str_failed_to_allocate_temporary_register);
+            cInputMapParser_error(this, str_failed_to_allocate_temporary_register);
             return -1;
         }
     }
     if (cap <= 0) {
-        cInputMapParser_error(self, str_opcode_buffer_overflow);
+        cInputMapParser_error(this, str_opcode_buffer_overflow);
         return -1;
     }
     code->Binary.opcode = op;
@@ -1852,31 +1851,31 @@ extern char str_opcode_buffer_overflow[];
  * @param defaultModifier  button modifier passed down to the operand
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNode* node, int* dst, tInputOpCode* code,
-                                                int cap, int op, int defaultModifier)
+int cInputMapParser::compileUnaryNode(tParseNode* node, int* dst, tInputOpCode* code, int cap, int op,
+                                      int defaultModifier)
 {
     tParseNode* operand = node->Operand1;
     int src = -1;
-    int n = cInputMapParser_compileParseNode(self, operand, &src, code, cap, defaultModifier);
+    int n = compileParseNode(operand, &src, code, cap, defaultModifier);
     if (n < 0) {
         return -1;
     }
     code += n;
     cap -= n;
     if ((unsigned int)src < 0x40) {
-        self->FreeRegisters[self->NumFreeRegisters++] = src;
+        FreeRegisters[NumFreeRegisters++] = src;
     }
     if (*dst < 0) {
-        if (self->NumFreeRegisters > 0) {
-            *dst = self->FreeRegisters[--self->NumFreeRegisters];
+        if (NumFreeRegisters > 0) {
+            *dst = FreeRegisters[--NumFreeRegisters];
         }
         if (*dst < 0) {
-            cInputMapParser_error(self, str_failed_to_allocate_temporary_register);
+            cInputMapParser_error(this, str_failed_to_allocate_temporary_register);
             return -1;
         }
     }
     if (cap <= 0) {
-        cInputMapParser_error(self, str_opcode_buffer_overflow);
+        cInputMapParser_error(this, str_opcode_buffer_overflow);
         return -1;
     }
     code->Binary.opcode = op;
@@ -3094,125 +3093,125 @@ static inline float Analog_326EB0(int v)
  * @param out  receives up to 24 button values
  * @return 24 when the pad was read, otherwise 0
  */
-extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
+int cPS2PadDevice::sampleButtons(float* out)
 {
     unsigned char data[32];
     int ok = 0;
     int ret;
-    if (self->mPhase == cPS2PadDevice::kPhaseOpen) {
-        int result = func_003FF708(self->mPort, self->mSlot, self->mPadBuf);
+    if (mPhase == cPS2PadDevice::kPhaseOpen) {
+        int result = func_003FF708(mPort, mSlot, mPadBuf);
         if (result == kPadCallOk) {
-            self->mPhase = result;
-            self->mModeSet = 0;
-            self->mActSmall = 0;
-            self->mLastSmall = -1;
-            self->mActBig = 0;
-            self->mLastBig = -1;
+            mPhase = result;
+            mModeSet = 0;
+            mActSmall = 0;
+            mLastSmall = -1;
+            mActBig = 0;
+            mLastBig = -1;
         }
     }
-    int state = scePadGetState(self->mPort, self->mSlot);
+    int state = scePadGetState(mPort, mSlot);
     if (state == kPadStateDisconnect || state == kPadStateError) {
-        self->mPhase = cPS2PadDevice::kPhaseGetType;
-        self->mModeSet = 0;
+        mPhase = cPS2PadDevice::kPhaseGetType;
+        mModeSet = 0;
     }
-    switch (self->mPhase) {
+    switch (mPhase) {
     case cPS2PadDevice::kPhaseGetType:
         if (state == kPadStateStable || state == kPadStateFindCTP1) {
-            self->mPressure = 0;
-            self->mAnalog = 0;
-            self->mActuator = 0;
-            int id = scePadInfoMode(self->mPort, self->mSlot, 1, 0);
+            mPressure = 0;
+            mAnalog = 0;
+            mActuator = 0;
+            int id = scePadInfoMode(mPort, mSlot, 1, 0);
             if (id != 0) {
-                int ext = scePadInfoMode(self->mPort, self->mSlot, 2, 0);
+                int ext = scePadInfoMode(mPort, mSlot, 2, 0);
                 switch (ext) {
                 case 0:
                     if (id == kPadIdDigital)
-                        self->mPhase = cPS2PadDevice::kPhaseRead;
+                        mPhase = cPS2PadDevice::kPhaseRead;
                     break;
                 case kPadIdDigital:
-                    self->mPhase = cPS2PadDevice::kPhaseSetMode;
+                    mPhase = cPS2PadDevice::kPhaseSetMode;
                     break;
                 case kPadIdAnalog:
-                    self->mAnalog = 1;
-                    self->mPhase = cPS2PadDevice::kPhaseSetMode;
+                    mAnalog = 1;
+                    mPhase = cPS2PadDevice::kPhaseSetMode;
                     break;
                 }
             }
         }
         break;
     case cPS2PadDevice::kPhaseSetMode:
-        if (self->mAnalog == 0 || self->mModeSet == 0) {
-            int result = scePadSetMainMode(self->mPort, self->mSlot, 1, 3);
+        if (mAnalog == 0 || mModeSet == 0) {
+            int result = scePadSetMainMode(mPort, mSlot, 1, 3);
             if (result == kPadCallOk) {
-                self->mModeSet = result;
-                self->mPhase = cPS2PadDevice::kPhaseWaitMode;
+                mModeSet = result;
+                mPhase = cPS2PadDevice::kPhaseWaitMode;
             }
         } else {
-            self->mPhase = cPS2PadDevice::kPhaseCheckPressure;
+            mPhase = cPS2PadDevice::kPhaseCheckPressure;
         }
         break;
     case cPS2PadDevice::kPhaseWaitMode:
-        if (scePadGetState(self->mPort, self->mSlot) != kPadStateExecCmd)
-            self->mPhase = cPS2PadDevice::kPhaseGetType;
+        if (scePadGetState(mPort, mSlot) != kPadStateExecCmd)
+            mPhase = cPS2PadDevice::kPhaseGetType;
         break;
     case cPS2PadDevice::kPhaseCheckPressure:
-        if (scePadInfoPressMode(self->mPort, self->mSlot) == kPadCallOk)
-            self->mPhase = cPS2PadDevice::kPhaseEnterPressure;
+        if (scePadInfoPressMode(mPort, mSlot) == kPadCallOk)
+            mPhase = cPS2PadDevice::kPhaseEnterPressure;
         else
-            self->mPhase = cPS2PadDevice::kPhaseCheckActuators;
+            mPhase = cPS2PadDevice::kPhaseCheckActuators;
         break;
     case cPS2PadDevice::kPhaseEnterPressure:
-        if (scePadEnterPressMode(self->mPort, self->mSlot) == kPadCallOk) {
-            self->mRetry = 0;
-            self->mPhase = cPS2PadDevice::kPhaseWaitPressure;
+        if (scePadEnterPressMode(mPort, mSlot) == kPadCallOk) {
+            mRetry = 0;
+            mPhase = cPS2PadDevice::kPhaseWaitPressure;
         }
         break;
     case cPS2PadDevice::kPhaseWaitPressure: {
-        int result = scePadGetReqState(self->mPort, self->mSlot);
+        int result = scePadGetReqState(mPort, mSlot);
         if (result == kPadReqFailed) {
-            self->mPhase = cPS2PadDevice::kPhaseGetType;
-            self->mModeSet = 0;
+            mPhase = cPS2PadDevice::kPhaseGetType;
+            mModeSet = 0;
         } else if (result == kPadReqComplete) {
-            if (++self->mRetry >= 5) {
-                self->mPressure = 1;
-                self->mPhase = cPS2PadDevice::kPhaseCheckActuators;
+            if (++mRetry >= 5) {
+                mPressure = 1;
+                mPhase = cPS2PadDevice::kPhaseCheckActuators;
             }
         } else {
-            self->mRetry = 0;
+            mRetry = 0;
         }
         break;
     }
     case cPS2PadDevice::kPhaseCheckActuators:
-        if (scePadInfoAct(self->mPort, self->mSlot, -1, 0) != 0)
-            self->mPhase = cPS2PadDevice::kPhaseAlignActuators;
+        if (scePadInfoAct(mPort, mSlot, -1, 0) != 0)
+            mPhase = cPS2PadDevice::kPhaseAlignActuators;
         else
-            self->mPhase = cPS2PadDevice::kPhaseRead;
+            mPhase = cPS2PadDevice::kPhaseRead;
         break;
     case cPS2PadDevice::kPhaseAlignActuators:
-        if (scePadSetActAlign(self->mPort, self->mSlot, &D_004A3FB8) == kPadCallOk) {
-            self->mRetry = 0;
-            self->mPhase = cPS2PadDevice::kPhaseWaitActuators;
+        if (scePadSetActAlign(mPort, mSlot, &D_004A3FB8) == kPadCallOk) {
+            mRetry = 0;
+            mPhase = cPS2PadDevice::kPhaseWaitActuators;
         }
         break;
     case cPS2PadDevice::kPhaseWaitActuators: {
-        int result = scePadGetReqState(self->mPort, self->mSlot);
+        int result = scePadGetReqState(mPort, mSlot);
         if (result == kPadReqFailed) {
-            self->mPhase = cPS2PadDevice::kPhaseGetType;
-            self->mModeSet = 0;
+            mPhase = cPS2PadDevice::kPhaseGetType;
+            mModeSet = 0;
         } else if (result == kPadReqComplete) {
-            if (++self->mRetry >= 5) {
-                self->mActuator = 1;
-                self->mPhase = cPS2PadDevice::kPhaseRead;
+            if (++mRetry >= 5) {
+                mActuator = 1;
+                mPhase = cPS2PadDevice::kPhaseRead;
             }
         } else {
-            self->mRetry = 0;
+            mRetry = 0;
         }
         break;
     }
     case cPS2PadDevice::kPhaseRead:
-        if (scePadRead(self->mPort, self->mSlot, data) == 0 || data[0] != 0) {
-            self->mPhase = cPS2PadDevice::kPhaseGetType;
-            self->mModeSet = 0;
+        if (scePadRead(mPort, mSlot, data) == 0 || data[0] != 0) {
+            mPhase = cPS2PadDevice::kPhaseGetType;
+            mModeSet = 0;
         } else {
             ok = 1;
         }
@@ -3225,7 +3224,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         out[1] = !(data[2] & 0x08) ? 1.0f : 0.0f;
         out[2] = !(data[2] & 0x02) ? 1.0f : 0.0f;
         out[3] = !(data[2] & 0x04) ? 1.0f : 0.0f;
-        if (self->mPressure != 0) {
+        if (mPressure != 0) {
             out[4] = data[8] * 0.003921568859368563f;
             out[5] = data[9] * 0.003921568859368563f;
             out[6] = data[10] * 0.003921568859368563f;
@@ -3252,7 +3251,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
             out[14] = !(data[3] & 0x01) ? 1.0f : 0.0f;
             out[15] = !(data[3] & 0x02) ? 1.0f : 0.0f;
         }
-        if (self->mAnalog != 0) {
+        if (mAnalog != 0) {
             out[16] = Analog_326EB0(((79 - data[4]) * 0xFF) / 79);
             out[17] = Analog_326EB0(((data[4] - 176) * 0xFF) / 79);
             out[18] = Analog_326EB0(((79 - data[5]) * 0xFF) / 79);
@@ -3272,13 +3271,13 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
             out[23] = 0.0f;
         }
     }
-    if (self->mPhase == cPS2PadDevice::kPhaseRead
-        && (self->mActSmall != self->mLastSmall || self->mActBig != self->mLastBig)) {
-        self->mActDirect[0] = self->mActSmall;
-        self->mActDirect[1] = self->mActBig;
-        self->mLastSmall = self->mActSmall;
-        self->mLastBig = self->mActBig;
-        scePadSetActDirect(self->mPort, self->mSlot, self->mActDirect);
+    if (mPhase == cPS2PadDevice::kPhaseRead
+        && (mActSmall != mLastSmall || mActBig != mLastBig)) {
+        mActDirect[0] = mActSmall;
+        mActDirect[1] = mActBig;
+        mLastSmall = mActSmall;
+        mLastBig = mActBig;
+        scePadSetActDirect(mPort, mSlot, mActDirect);
     }
     return ret;
 }

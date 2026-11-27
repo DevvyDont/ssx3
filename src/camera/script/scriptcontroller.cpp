@@ -383,9 +383,9 @@ public:
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptManualAlgorithm_update).
  */
-extern "C" void cScriptManualAlgorithm_snap(cScriptManualAlgorithm* self)
+void cScriptManualAlgorithm::snap(int)
 {
-    ((cScriptCtlVirt*)self)->update();
+    ((cScriptCtlVirt*)this)->update();
 }
 #endif
 
@@ -743,9 +743,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snap);
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptPointAlgorithm_update).
  */
-extern "C" void cScriptPointAlgorithm_snap(cScriptPointAlgorithm* self)
+void cScriptPointAlgorithm::snap(int)
 {
-    ((cScriptCtlVirt*)self)->update();
+    ((cScriptCtlVirt*)this)->update();
 }
 #endif
 
@@ -1085,9 +1085,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snap);
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptTargetAlgorithm_update).
  */
-extern "C" void cScriptTargetAlgorithm_snap(cScriptTargetAlgorithm* self)
+void cScriptTargetAlgorithm::snap(int)
 {
-    ((cScriptCtlVirt*)self)->update();
+    ((cScriptCtlVirt*)this)->update();
 }
 #endif
 
@@ -1634,18 +1634,17 @@ static inline float Length_16AD98(const t2Vector& v)
  * Unlike cScriptRelativeAlgorithm_update it does not recompute Heading (+0x44) and Pitch (+0x48), so a getPose straight
  * after a snap still uses the old angles.
  *
- * @param algorithm  the cScriptRelativeAlgorithm (this)
  */
-extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorithm)
+void cScriptRelativeAlgorithm::snap(int)
 {
-    cScriptRelativeAlgorithm* self = algorithm;
-    cScriptPlayerEntity* cam = algorithm->ScriptObj->mpCameraEntity->mpEntity;
+    cScriptRelativeAlgorithm* self = this;
+    cScriptPlayerEntity* cam = ScriptObj->mpCameraEntity->mpEntity;
     tSSXHeaderCameraAlgorithmic* header = GetSSXCameraAlgorithmicHeader(cam);
     GetSSXCameraAlgorithmicFrame(cam, &self->FrameInfo);
     self->Near = header->nearPlane;
     self->Far = header->farPlane;
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + ScriptObj->mBaseRotX;
     cRider* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, header->subject, cam->mpOwner);
     if (rider == 0) {
         rider = SSXApp->Game->AI->Riders[0];
@@ -1673,15 +1672,15 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
         k = self->FrameInfo.optimalTargetDistance;
     }
     float sinHead, cosHead, sinPitch, cosPitch;
-    cScriptObjCamera* scriptObj = algorithm->ScriptObj;
+    cScriptObjCamera* scriptObj = ScriptObj;
     headingAngle += scriptObj->mBaseRotZ;
     pitchAngle += scriptObj->mBaseRotY;
     fSinCos(&sinHead, &cosHead, headingAngle);
     fSinCos(&sinPitch, &cosPitch, pitchAngle);
     t4VectorCtor look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
     self->Position = Sub_16AD98(self->Target, Scale_16AD98(look, k));
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 

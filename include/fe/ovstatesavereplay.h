@@ -77,6 +77,7 @@ struct cOVState_SAVEREPLAY : public cFEMemCard {
     virtual void updateDone() __asm__("cOVState_SAVEREPLAY_updateDone");
     virtual void displayStatus() __asm__("cOVState_SAVEREPLAY_displayStatus");
     virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cOVState_SAVEREPLAY_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* popup, unsigned int key) __asm__("cOVState_SAVEREPLAY_onPopupEvent");
 };
 
 CHECK_OFFSET(cOVState_SAVEREPLAY, mIsHidden, 0x22C);

@@ -46,9 +46,8 @@ INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onWidgetCreate__FPv);
 /**
  * Does nothing: the multiplayer-circuit state's onWidgetCreate has an empty body.
  */
-void cFEStateMPCircuit_onWidgetCreate(void* vself)
+void cFEStateMPCircuit::onWidgetCreate(cUIThing*)
 {
-    cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
 }
 #endif
 

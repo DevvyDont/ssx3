@@ -41,6 +41,8 @@ struct tMissionMenuQueue {
     void addEntry(int missionId, int cmd, int being) __asm__("tMissionMenuQueue_addEntry");
     tMissionMenuQueueEntry* getNextEntry() __asm__("tMissionMenuQueue_getNextEntry");
     tMissionMenuQueueEntry* getEntry() __asm__("tMissionMenuQueue_getEntry");
+    void init() __asm__("tMissionMenuQueue_init");
+    void empty() __asm__("tMissionMenuQueue_empty");
 };
 
 CHECK_OFFSET(tMissionMenuQueue, Current, 0x00);

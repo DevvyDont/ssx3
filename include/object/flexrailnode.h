@@ -86,8 +86,8 @@ struct cFlexRailNode : public cInstanceNode {
     // Its new slots ([R] its vtable D_004900D0 / cFloatRailNode_vtbl / cSpringRailNode_vtbl, 50 in all; names from
     // the subclasses' entries, types [O] On Tour's cFlexRailNode / cFloatRailNode definitions):
     virtual void updateNodes();                                     // 47
-    virtual void updateMats();                                      // 48
-    virtual int getMesh(int seg);                                   // 49
+    virtual void updateMats() __asm__("cFlexRailNode_updateMats__FPv");                                      // 48
+    virtual int getMesh(int seg) __asm__("cFlexRailNode_getMesh__FPv");                                   // 49
     virtual void updateBoundBox() = 0;                              // 50 pure ([R] func_00411530 in D_004900D0)
     char unk_01C[0x4];           // 0x01C alignment gap: the state is 16-byte aligned (its tBoundBox); On Tour has it
                                  //       too (its cInstanceNode ends at 0x18, the state still starts at 0x20)
@@ -123,6 +123,9 @@ struct cFlexRailNode : public cInstanceNode {
     virtual void update() __asm__("cFlexRailNode_update");
     virtual void render() __asm__("cFlexRailNode_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlexRailNode_writeToReplayFrame");
+    virtual bool isFlexRail() const __asm__("cFlexRailNode_isFlexRail__FPv");
+    virtual void applyForce(const tIntersectInfo&, const t4Vector&) __asm__("cFlexRailNode_applyForce__FPv");
+    virtual void updateIntersectInfo(tIntersectInfo&) __asm__("cFlexRailNode_updateIntersectInfo__FPv");
 };
 
 CHECK_OFFSET(cFlexRailNode, unk_01C, 0x01C);

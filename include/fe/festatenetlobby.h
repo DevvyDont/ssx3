@@ -99,6 +99,10 @@ struct cFEStateLobbyMenu : public cFEStateNet {
     virtual void onCreateScreen() __asm__("cFEStateLobbyMenu_onCreateScreen");
     virtual bool onGainTransition(int reset) __asm__("cFEStateLobbyMenu_onGainTransition");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateLobbyMenu_onWidgetCreate");
+    virtual void onUpdate() __asm__("cFEStateLobbyMenu_onUpdate__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateLobbyMenu_onWidgetEvent");
+    virtual int onWidgetMenu(cUIMenu* obj, unsigned int msg, unsigned int index)
+        __asm__("cFEStateLobbyMenu_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateLobbyMenu, mpMenuPlayers, 0x6D0);

@@ -84,6 +84,8 @@ struct cFEStateVideoPlayer : public cFEState {
     virtual void onRender2D() __asm__("cFEStateVideoPlayer_onRender2D");
     virtual void onUpdate() __asm__("cFEStateVideoPlayer_onUpdate");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateVideoPlayer_onInputBegin");
+    virtual bool onLoseTransition() __asm__("cFEStateVideoPlayer_onLoseTransition__FPv");
+    virtual bool onGainTransition(int) __asm__("cFEStateVideoPlayer_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cFEStateVideoPlayer, mVideoFileName, 0x048);

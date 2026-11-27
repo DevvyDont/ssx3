@@ -1709,39 +1709,42 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_init__FPvii);
  * @param firstWord  the code chunk (On Tour data, stored as Chunk)
  * @param secondWord  the function index (FuncNum)
  */
-void luno_cLunoFunc_init(void* vself, int firstWord, int secondWord)
+void luno_cLunoFunc::init(int firstWord, int secondWord)
 {
-    luno_cLunoFunc* self = (luno_cLunoFunc*)vself;
-    *(int*)self = firstWord;
-    self->FuncNum = secondWord;
+    *(int*)this = firstWord;
+    FuncNum = secondWord;
 }
 #endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castInt__FPv);
 #ifdef SKIP_ASM
+void* luno_cLunoVar_castInt(void* self);
+
 /**
  * Returns a Luno value's data as an int reference: the value's own address, since the data is its first word.
  *
- * @return @p self
+ * @return this variable
  */
-void* luno_cLunoVar_castInt(void* self)
+void* luno_cLunoVar::castInt()
 {
-    return self;
+    return this;
 }
 #endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castFloat__FPv);
 #ifdef SKIP_ASM
+void* luno_cLunoVar_castFloat(void* self);
+
 /**
  * Returns a Luno value's data as a float reference: the value's own address.
  *
- * @return @p self
+ * @return this variable
  */
-void* luno_cLunoVar_castFloat(void* self)
+void* luno_cLunoVar::castFloat()
 {
-    return self;
+    return this;
 }
 #endif
 
@@ -1751,11 +1754,11 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castIndex__FPv);
 /**
  * Returns a Luno value's data as an index reference: the value's own address.
  *
- * @return @p self
+ * @return this variable
  */
-void* luno_cLunoVar_castIndex(void* self)
+void* luno_cLunoVar::castIndex()
 {
-    return self;
+    return this;
 }
 #endif
 

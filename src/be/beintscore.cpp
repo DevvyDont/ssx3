@@ -549,9 +549,8 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_writeToReplayFrame__FPv);
 /**
  * Writes the score interface's state to a replay frame: an empty stub, nothing is recorded.
  */
-void cBEScoreInterface_writeToReplayFrame(void* vself)
+void cBEScoreInterface::writeToReplayFrame(cBxReplayFrame*)
 {
-    cBEScoreInterface* self = (cBEScoreInterface*)vself;
 }
 #endif
 
@@ -561,9 +560,8 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_readFromReplayFrame__FPv);
 /**
  * Reads the score interface's state from a replay frame: an empty stub, nothing is restored.
  */
-void cBEScoreInterface_readFromReplayFrame(void* vself)
+void cBEScoreInterface::readFromReplayFrame(cBxReplayFrame*)
 {
-    cBEScoreInterface* self = (cBEScoreInterface*)vself;
 }
 #endif
 
