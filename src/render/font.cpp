@@ -1036,11 +1036,11 @@ extern "C" void* cSinCosTable_cSinCosTable(float* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392E60);
+INCLUDE_ASM("render/font", vifPacket_openUnpack);
 #ifdef SKIP_ASM
 /**
  * Opens a VIF unpack block in a packet builder: records the unpack settings and reserves one quadword for the STCYCL
- * and UNPACK codes that func_00392E98 writes when the block is closed.
+ * and UNPACK codes that vifPacket_closeUnpack writes when the block is closed.
  *
  * Stores the current write position as the block start (+0x8), @p cycleLength at +0x18, @p writeLength at +0x1C,
  * @p unpackMode at +0x20, @p vuAddr at +0x24 and whether @p vuAddr is nonzero at +0x28 (the UNPACK's FLG bit), sets the
@@ -1052,7 +1052,7 @@ INCLUDE_ASM("render/font", func_00392E60);
  * @param unpackMode  the UNPACK format (vn/vl bits, 0-15)
  * @param vuAddr  the VU memory address to unpack to
  */
-extern "C" void func_00392E60(void *packet, int writeLength, int cycleLength, int unpackMode, int vuAddr) {
+extern "C" void vifPacket_openUnpack(void *packet, int writeLength, int cycleLength, int unpackMode, int vuAddr) {
     int cur = *(int *)packet;
     *(int *)((char*)packet + 0x8) = cur;
     *(int *)((char*)packet + 0x2C) = 1;
@@ -1065,7 +1065,7 @@ extern "C" void func_00392E60(void *packet, int writeLength, int cycleLength, in
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00392E98);
+INCLUDE_ASM("render/font", vifPacket_closeUnpack);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sFontPkt_2E98 {
@@ -1087,7 +1087,7 @@ static inline long packWord_2E98(int y, int n, int x, int mode, int mask)
 }
 
 /**
- * Closes the VIF unpack block opened by func_00392E60: writes its STCYCL and UNPACK codes at the block start.
+ * Closes the VIF unpack block opened by vifPacket_openUnpack: writes its STCYCL and UNPACK codes at the block start.
  *
  * With a negative @p count the element count comes from the bytes written since the block start (minus the 16-byte
  * header) divided by the element size of the unpack mode (eVIFUnpackFormat: 12, 6, 3, 16, 8, 4 or 2 bytes;
@@ -1097,7 +1097,7 @@ static inline long packWord_2E98(int y, int n, int x, int mode, int mask)
  *
  * @param count  the number of elements, or negative to compute it
  */
-extern "C" void func_00392E98(sFontPkt_2E98* self, int count)
+extern "C" void vifPacket_closeUnpack(sFontPkt_2E98* self, int count)
 {
     int n;
     int requested = count;
@@ -2099,7 +2099,7 @@ extern "C" void cGraphicsMan_SetConstantColour(cGraphicsMan* self, sFontV4 colou
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394418);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_getConstantColour);
 #ifdef SKIP_ASM
 /**
  * Returns constant colour @p idx of the graphics manager (m_constantColours[idx], 16 bytes) by value.
@@ -2112,7 +2112,7 @@ INCLUDE_ASM("render/font", func_00394418);
  * @param idx  the constant colour slot (On Tour eGMConstantColourId; 0 or 1)
  * @return the colour in m_constantColours[@p idx]
  */
-extern "C" sFontV4 func_00394418(cPS2GraphicsMan* self, sFontV4 v, int idx)
+extern "C" sFontV4 cPS2GraphicsMan_getConstantColour(cPS2GraphicsMan* self, sFontV4 v, int idx)
 {
     return *(sFontV4*)self->m_constantColours[idx];
 }
@@ -3122,7 +3122,7 @@ public:
  * Forwards all five arguments to the virtual in vtable entry 22 (offset 0xB0) of the Bezier manager.
  *
  * That entry is this function's own slot in the cBezierMan vtable cBezierMan_vtbl; cPS2BezierMan overrides it with
- * func_0038B190, so the forward only reaches a derived implementation (on a plain cBezierMan it would call itself).
+ * cPS2BezierMan_queuePatch, so the forward only reaches a derived implementation (on a plain cBezierMan it would call itself).
  *
  * @param patchRecord  the patch record (On Tour tPatchRecord* pPatch)
  * @param edgeLods  the edge LOD bytes (On Tour edges)
@@ -3683,7 +3683,7 @@ static inline int glyphKeyEq(const int* a, const int* b)
  * Walks the chain of bucket @p hash (heads at +0x674A0) comparing the four state words (not the texture-id word @p key
  * carries); a hit is moved to the front of its chain and returned. On a miss it copies @p key into the next free entry
  * (+0x51484, count at +0x51480), pushes it on the chain and returns it. There is no capacity check on the 1024-entry
- * table. Callers: cPS2BezierMan_DrawPatches and the bucket builder func_00362DE8.
+ * table. Callers: cPS2BezierMan_DrawPatches and the bucket builder cPS2DeferManager_bucketRecords.
  *
  * @param key  the draw state to look up (four state words + the texture-id word)
  * @param hash  the bucket index (an 8-bit hash of the state words)
@@ -3723,7 +3723,7 @@ INCLUDE_ASM("render/font", cPS2DeferManager_Find1);
  *
  * Walks the chain of bucket @p hash (heads at +0x678A0), skipping nodes whose busy word (+0x14) is set, and compares
  * state, texture key and matrix index. A hit is moved to the front of its chain and returned; a miss returns 0 (the
- * callers then add a bucket). Callers: cPS2BezierMan_DrawPatches, cPS2GraphicsMan_RenderModel and func_00362DE8.
+ * callers then add a bucket). Callers: cPS2BezierMan_DrawPatches, cPS2GraphicsMan_RenderModel and cPS2DeferManager_bucketRecords.
  *
  * @param stateEntry  the state entry (from cPS2DeferManager_Find)
  * @param texKey  the texture key (both texture ids)
@@ -4282,7 +4282,7 @@ int cPS2GraphicsMan::GetDisplayBufferAddress()
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00395550);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_getDisplayBufferWidth);
 #ifdef SKIP_ASM
 /**
  * Returns the graphics manager's word at +0x5A5C (mDisplayBufferWidth).
@@ -4293,7 +4293,7 @@ INCLUDE_ASM("render/font", func_00395550);
  * @param graphicsMan  the graphics manager
  * @return mDisplayBufferWidth
  */
-extern "C" int func_00395550(cPS2GraphicsMan* graphicsMan) {
+extern "C" int cPS2GraphicsMan_getDisplayBufferWidth(cPS2GraphicsMan* graphicsMan) {
     return (graphicsMan->mDisplayBufferWidth);
 }
 #endif
@@ -4466,33 +4466,33 @@ extern "C" int cPS2GraphicsMan_GS_ID(void)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_updateNetMat);
 #ifdef SKIP_ASM
-extern "C" void func_0037D968(void* self);
+extern "C" void cPS2GraphicsMan_computeMatrices(void* self);
 
 /**
- * Recomputes the combined matrices with func_0037D968 when mMatricesValid is 0.
+ * Recomputes the combined matrices with cPS2GraphicsMan_computeMatrices when mMatricesValid is 0.
  *
  * Called by cPS2GraphicsMan_GetNetMatrix before it copies mNetMatrix.
  */
 void cPS2GraphicsMan::updateNetMat()
 {
     if (mMatricesValid == 0) {
-        func_0037D968(this);
+        cPS2GraphicsMan_computeMatrices(this);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003956D8);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_getNumViews);
 #ifdef SKIP_ASM
 /**
  * Returns the graphics manager's view count mNumViews (+0x59C0).
  *
- * func_00363490 uses the field as a loop count. A retail-only accessor (the preview's run has no counterpart).
+ * cPS2DeferManager_buildDmaChains uses the field as a loop count. A retail-only accessor (the preview's run has no counterpart).
  *
  * @param pS2GraphicsMan  the graphics manager
  * @return mNumViews
  */
-extern "C" int func_003956D8(cPS2GraphicsMan* pS2GraphicsMan) {
+extern "C" int cPS2GraphicsMan_getNumViews(cPS2GraphicsMan* pS2GraphicsMan) {
     return (pS2GraphicsMan->mNumViews);
 }
 #endif
@@ -4986,7 +4986,7 @@ extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, f
 }
 #endif
 
-extern "C" void* func_003826E0(void* self);
+extern "C" void* cPS2GraphicsMan_claimBuildBuffer(void* self);
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_CalcSortZ);
@@ -4994,7 +4994,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_CalcSortZ);
 /**
  * Returns the integer depth-sort key of a point.
  *
- * Recomputes the matrices first when mMatricesValid is 0 (func_0037D968). With VU0 it transforms @p vec by mNetMatrix,
+ * Recomputes the matrices first when mMatricesValid is 0 (cPS2GraphicsMan_computeMatrices). With VU0 it transforms @p vec by mNetMatrix,
  * multiplies the result's w by mSortZScale.w, clamps it to 0..mSortZScale.x and converts it to an integer.
  *
  * @param vec  the point (t4Vector)
@@ -5005,7 +5005,7 @@ int cPS2GraphicsMan::CalcSortZ(void* vec)
 {
     long sortZ;
     if (mMatricesValid == 0) {
-        func_0037D968(this);
+        cPS2GraphicsMan_computeMatrices(this);
     }
     __asm__ __volatile__(
         "lqc2      $vf5, 0x5920(%1)\n"
@@ -5037,18 +5037,18 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderReady__FPv);
 /**
  * Reports whether the renderer can accept a new frame.
  *
- * Returns func_003826E0().
+ * Returns cPS2GraphicsMan_claimBuildBuffer().
  *
  * @return non-zero when a frame can be drawn
  */
 void* cPS2GraphicsMan_IsRenderReady(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return func_003826E0(self);
+    return cPS2GraphicsMan_claimBuildBuffer(self);
 }
 #endif
 
-extern "C" void* func_00382730(void* self);
+extern "C" void* cPS2GraphicsMan_isKickIdle(void* self);
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderIdle__FPv);
@@ -5056,14 +5056,14 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderIdle__FPv);
 /**
  * Reports whether the renderer has finished all queued work.
  *
- * Returns func_00382730(); cGraphicsMan_FlushRenderer() polls it.
+ * Returns cPS2GraphicsMan_isKickIdle(); cGraphicsMan_FlushRenderer() polls it.
  *
  * @return non-zero when idle
  */
 void* cPS2GraphicsMan_IsRenderIdle(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return func_00382730(self);
+    return cPS2GraphicsMan_isKickIdle(self);
 }
 #endif
 
@@ -5159,16 +5159,16 @@ extern "C" int cPS2GraphicsMan_WaitVSync(void)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_PageFlip);
 #ifdef SKIP_ASM
-extern "C" void func_00382AF0(void* self, int arg1, int arg2);
+extern "C" void cPS2GraphicsMan_flipDisplayBuffers(void* self, int arg1, int arg2);
 
 /**
- * Flips the frame: calls func_00382AF0(@p self, @p arg1, 1).
+ * Flips the frame: calls cPS2GraphicsMan_flipDisplayBuffers(@p self, @p arg1, 1).
  *
- * @param arg1  passed through as func_00382AF0's second argument (preview: a bool)
+ * @param arg1  passed through as cPS2GraphicsMan_flipDisplayBuffers's second argument (preview: a bool)
  */
 void cPS2GraphicsMan::PageFlip(int arg1)
 {
-    func_00382AF0(this, arg1, 1);
+    cPS2GraphicsMan_flipDisplayBuffers(this, arg1, 1);
 }
 #endif
 
@@ -5206,14 +5206,14 @@ void cPS2GridMesh::SetScale(float range)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396128);
+INCLUDE_ASM("render/font", cTextureMan_resetBoundTextures);
 #ifdef SKIP_ASM
 /**
  * Resets three cached ids of the texture manager to -1: the words at +0x1F4C, +0x1F50 and +0x1F54.
  *
- * The first two in a two-pass loop. func_00363490 calls it on mTexMan before building the frame's chains.
+ * The first two in a two-pass loop. cPS2DeferManager_buildDmaChains calls it on mTexMan before building the frame's chains.
  */
-extern "C" void func_00396128(cTextureMan* self)
+extern "C" void cTextureMan_resetBoundTextures(cTextureMan* self)
 {
     int i;
     for (i = 0; i < 2; i++) {

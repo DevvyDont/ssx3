@@ -193,7 +193,7 @@ struct cMCOverlayManager {
     int mRetryToInit;           // 0x12C [O] (bool); [U] RetryCardOp
     int mState;                 // 0x130 [O] tMCOverlayManagerState; [U] the state handler (vtable slot 1,
                                 //       cMCOverlayManager_SetState) stores it; ManagerLoadSaveUpdate / fe code read it
-    // --- 16-bit strings (func_002C2540 widens, strcpy1 / sprintf1 work on unsigned short)
+    // --- 16-bit strings (strcpy3 widens, strcpy1 / sprintf1 work on unsigned short)
     unsigned short mFileName[64];          // 0x134 [O]; [U] the create-file state sprintf1s "%s-%s%04d" (type, name,
                                            //       cursor + 1) into it and hands it to the card's write call
     unsigned short mMatch[64];             // 0x1B4 [O]; [U] cMCOverlayManager_readSetFileType / cMCOverlayManager_writeSetFileType sprintf1 the wildcard

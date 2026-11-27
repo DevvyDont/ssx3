@@ -195,7 +195,7 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_createAndSetDescripti
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void cMemMan_free__FPv(void* p);
 extern "C" int USTR_length(unsigned short* s);
-extern "C" void func_002C2688(unsigned short* dst, unsigned short* src);
+extern "C" void strcat1(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern char str_cFEStateNetHelpPopup[];
 
@@ -206,7 +206,7 @@ extern char str_cFEStateNetHelpPopup[];
  * the popup's text.
  *
  * Looks up each non-zero description id at +0x58 (stopping at the first 0) through SSXApp's FELocale (slot 4),
- * allocates one buffer of the total length (tag "cFEStateNetHelpPopup"), appends the strings with func_002C2688(),
+ * allocates one buffer of the total length (tag "cFEStateNetHelpPopup"), appends the strings with strcat1(),
  * hands it to cUIText_setUnicodeStringWrap() on the text at +0xAC and frees it again. With no description the text gets
  * a null string. cFEStateNetHelpPopup_onGainTransition() calls it.
  *
@@ -233,7 +233,7 @@ void cFEStateNetHelpPopup::createAndSetDescriptionString()
         buf = new (str_cFEStateNetHelpPopup, 0x100, 0) unsigned short[total];
         buf[0] = 0;
         for (int i = 0; i < count; i++) {
-            func_002C2688(buf, strs[i]);
+            strcat1(buf, strs[i]);
         }
     }
     cUIText_setUnicodeStringWrap(mpDescription, buf);

@@ -2949,7 +2949,7 @@ static inline void padSetActuator(cPadDevice* pad, int act, float level)
  * Stops a pad device's vibration: sets every actuator to 0.
  *
  * Calls the device's virtual setActuator (slot 4) with level 0.0 for each actuator it reports through slot 3. Called by
- * cPadCache_clearAllVibrations and func_00125B18.
+ * cPadCache_clearAllVibrations and updatePadVibration.
  *
  */
 void cPadDevice::clearAllVibrations()

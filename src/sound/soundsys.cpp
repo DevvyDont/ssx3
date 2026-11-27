@@ -12708,7 +12708,7 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys_GetCurrentCheer);
  * Returns the cheer value unk_18C of a crowd instance, or 0 for an index past mNumInstances.
  *
  * The value is intensity + 1 for a TRICK cheer, ~intensity for a FALL cheer, the anticipation intensity 1 or 2, or 0.
- * func_00229530 (main/ssxapp.cpp) reads it for instance 0.
+ * cCrowdMan2d_spawnMarkers (main/ssxapp.cpp) reads it for instance 0.
  *
  * @param i  the crowd instance (viewport)
  * @return the cheer value

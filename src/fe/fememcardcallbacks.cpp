@@ -2178,7 +2178,7 @@ void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
 // PORT: cScreenPopup_redrawPopup takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 extern "C" void* strcpy1(void* dst, void* src);
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
 extern char str_empty_d[];
@@ -2220,7 +2220,7 @@ void cFEPopupConfirm::initPopup(unsigned short* ustrDisplay, int bYesOnly, int b
         displayText = (char*)&mDisplayText[0];
     } else {
         displayText = (char*)&mDisplayText[0];
-        func_002C2540(displayText, str_empty_d);
+        strcpy3(displayText, str_empty_d);
     }
     strcpy1(displayText, str);
     if (bNoButtons) {

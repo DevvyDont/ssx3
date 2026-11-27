@@ -43,7 +43,7 @@ extern "C" void* func_00242D50(void* self, ...)
 }
 #endif
 //100%
-INCLUDE_ASM("main/streampause", func_00242D90);
+INCLUDE_ASM("main/streampause", lexicographical_compare1);
 #ifdef SKIP_ASM
 /**
  * Compares two signed-char ranges lexicographically (the STL lexicographical_compare).
@@ -54,7 +54,7 @@ INCLUDE_ASM("main/streampause", func_00242D90);
  * @param last2  end of the second range
  * @return true when the first range orders before the second (a smaller element first, or a proper prefix)
  */
-extern "C" bool func_00242D90(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
+extern "C" bool lexicographical_compare1(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
         if (*first1 < *first2) return true;
         if (*first2 < *first1) return false;
@@ -63,7 +63,7 @@ extern "C" bool func_00242D90(signed char *first1, signed char *last1, signed ch
 }
 #endif
 //100%
-INCLUDE_ASM("main/streampause", func_00242DF8);
+INCLUDE_ASM("main/streampause", __lexicographical_compare_3way1);
 #ifdef SKIP_ASM
 /**
  * Three-way compares two signed-char ranges lexicographically (the STL lexicographical_compare_3way).
@@ -74,7 +74,7 @@ INCLUDE_ASM("main/streampause", func_00242DF8);
  * @param last2  end of the second range
  * @return -1 when the first range orders first, 1 when the second does, 0 when they are equal
  */
-extern "C" int func_00242DF8(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
+extern "C" int __lexicographical_compare_3way1(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
         if (*first1 < *first2) return -1;
         if (*first2 < *first1) return 1;
@@ -84,7 +84,7 @@ extern "C" int func_00242DF8(signed char *first1, signed char *last1, signed cha
 }
 #endif
 //100%
-INCLUDE_ASM("main/streampause", func_00242E58);
+INCLUDE_ASM("main/streampause", stlList_clear);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -95,7 +95,7 @@ void operator_delete(int* ptr);
  * Each node's next link is at +0x0 and is freed with operator_delete(); the sentinel's next (+0x0) and prev (+0x4) are
  * set back to the sentinel.
  */
-extern "C" void func_00242E58(void *self) {
+extern "C" void stlList_clear(void *self) {
     int **head = *(int ***)((char*)self + 4);
     int **node = (int **)*head;
     int **next;

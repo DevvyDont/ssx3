@@ -149,7 +149,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
@@ -194,7 +194,7 @@ void cMCOverlayManager::readSetFileType(int mode)
         cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     }
-    func_002C2540(fmt, str_pct_s_pct_s_e);
+    strcpy3(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(this, mFileType, name, 0x100);
     sprintf1_v(&mMatch[0], fmt, desc, name);
@@ -265,7 +265,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
@@ -309,7 +309,7 @@ void cMCOverlayManager::writeSetFileType(int mode, int profileId)
         cMemCard* memCard = mpMemCard;
         memCard->SetDataSize(fileSize);
     }
-    func_002C2540(fmt, str_pct_s_pct_s_e);
+    strcpy3(fmt, str_pct_s_pct_s_e);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(this, mFileType, name, 0x100);
     sprintf1_v(&mMatch[0], fmt, desc, name);
@@ -351,7 +351,7 @@ void* cMCOverlayManager::writeSetSize()
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetTitleString);
 #ifdef SKIP_ASM
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
@@ -377,7 +377,7 @@ void cMCOverlayManager::GetTitleString(int n, char* dst)
     char fmt[0x200];
     switch (mFileType) {
     case kMCFileType_Replay:
-        func_002C2540(fmt, str_pct_spct_d_b);
+        strcpy3(fmt, str_pct_spct_d_b);
         cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
@@ -389,7 +389,7 @@ void cMCOverlayManager::GetTitleString(int n, char* dst)
         break;
     }
     case kMCFileType_Profile:
-        func_002C2540(fmt, str_pct_spct_d_b);
+        strcpy3(fmt, str_pct_spct_d_b);
         cMCOverlayManager_getFileName_r(this, mFileType, name, 0x80);
         sprintf1_v(dst, fmt, name, n + 1);
         break;
@@ -433,7 +433,7 @@ void cMCOverlayManager::setTitleString(int n)
     char fmt[0x200];
     char name[0x200];
     GetTitleString(n, title);
-    func_002C2540(fmt, str_SSX_3_pct_s);
+    strcpy3(fmt, str_SSX_3_pct_s);
     switch (mFileType) {
     case kMCFileType_Replay: {
         cFELocale* loc = SSXApp->FELocale;
@@ -445,7 +445,7 @@ void cMCOverlayManager::setTitleString(int n)
     }
     case kMCFileType_Profile: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_002C2540(name, cBENewPlayerInterface_getPlayerName(iface, mSaveProfileID));
+        strcpy3(name, cBENewPlayerInterface_getPlayerName(iface, mSaveProfileID));
         sprintf1_v(out, fmt, name);
         break;
     }
@@ -3010,7 +3010,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBESaveInterface_generateSaveGame(void* iface);
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
@@ -3033,7 +3033,7 @@ void cMCOverlayManager::SettingsWriteStart()
     cMCOverlayManager_mSaveInProgress = 1;
     int saveData = cBESaveInterface_generateSaveGame(cBE_getInterface_Fv(cBE_getBE(), 5));
     int saveSize = cBESaveInterface_getSaveGameSize_r();
-    func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
+    strcpy3(fmt, str_pct_s_pct_spct_04d_b);
     cMCOverlayManager_getFileName_r(this, 2, name, 130);
     cMCOverlayManager_getProductCode_r(desc, 0x200);
     sprintf1_v(text, fmt, desc, name, mFileCursor + 1);
@@ -3355,7 +3355,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceFreeString);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
+extern "C" unsigned short* strcpy3_r(void*, void*) __asm__("strcpy3");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_Free[];
 extern char str_pct_d_pct_s[];
@@ -3373,8 +3373,8 @@ void cMCOverlayManager::GetDeviceFreeString(int i, void* out)
         && mDevices[i].bCorrectEncoding != 0) {
         char name[0x200];
         char path[0x200];
-        func_002C2540_r(name, str_Free);
-        func_002C2540_r(path, str_pct_d_pct_s);
+        strcpy3_r(name, str_Free);
+        strcpy3_r(path, str_pct_d_pct_s);
         sprintf1_v(out, path, mDevices[i].iFreeSpace, name);
     }
 }
@@ -3399,7 +3399,7 @@ int cMCOverlayManager::GetFreeSpace(int device)
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetDeviceTotalString);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
+extern "C" unsigned short* strcpy3_r(void*, void*) __asm__("strcpy3");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_Total[];
 extern char str_pct_d_pct_s[];
@@ -3424,8 +3424,8 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
     unsigned short fmt[256];
     if (self->dev[idx].bPluggedIn == 0) return;
     if (self->dev[idx].bValid && self->dev[idx].bFormatted && self->dev[idx].bCorrectEncoding) {
-        func_002C2540_r(str, str_Total);
-        func_002C2540_r(fmt, str_pct_d_pct_s);
+        strcpy3_r(str, str_Total);
+        strcpy3_r(fmt, str_pct_d_pct_s);
         sprintf1_v(dst, fmt, self->dev[idx].iTotalSpace, str);
     }
 }
@@ -3433,19 +3433,19 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
 
 struct sPad16 { char x; int pad[3]; };
 extern sPad16 D_0047C3A8;
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getProductCode);
 #ifdef SKIP_ASM
 /**
- * Writes the game's product code "BASLUS-20772" (D_0047C3A8), widened to 16 bits (func_002C2540), into @p self.
+ * Writes the game's product code "BASLUS-20772" (D_0047C3A8), widened to 16 bits (strcpy3), into @p self.
  *
  * Callers pass a buffer size as well, which is ignored.
  */
 void cMCOverlayManager::getProductCode()
 {
-    func_002C2540(this, &D_0047C3A8);
+    strcpy3(this, &D_0047C3A8);
 }
 #endif
 
@@ -3551,7 +3551,7 @@ int cMCOverlayManager::updateDeviceStateMonitor()
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getFileName);
 #ifdef SKIP_ASM
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 extern char str_REP[];
 extern char str_GAM[];
 extern char str_SET[];
@@ -3567,13 +3567,13 @@ void cMCOverlayManager::getFileName(int mode, void* buf)
 {
     switch (mode) {
     case kMCFileType_Replay:
-        func_002C2540(buf, str_REP);
+        strcpy3(buf, str_REP);
         break;
     case kMCFileType_Profile:
-        func_002C2540(buf, str_GAM);
+        strcpy3(buf, str_GAM);
         break;
     case kMCFileType_Settings:
-        func_002C2540(buf, str_SET);
+        strcpy3(buf, str_SET);
         break;
     }
 }
@@ -3607,7 +3607,7 @@ extern char str_pct_d_g[];
 void cMCOverlayManager::getDeviceNumberString(void* dst, int n)
 {
     unsigned short buf[256];
-    func_002C2540(buf, str_pct_d_g);
+    strcpy3(buf, str_pct_d_g);
     sprintf1(dst, buf, n + 1);
 }
 #endif
@@ -3659,7 +3659,7 @@ void cMCOverlayManager::GetMessage(void* out)
 {
     unsigned short num[256];
     unsigned short num2[256];
-    func_002C2540(out, D_004A29E8);
+    strcpy3(out, D_004A29E8);
     getDeviceNumberString(num, mSelectedDevice);
     switch (mState) {
     case kMCOverlay_Idle: case kMCOverlay_CheckCardsWait: case kMCOverlay_CheckCards: case kMCOverlay_ReadingCard:
@@ -4057,7 +4057,7 @@ void cOcclusionMan::removeVisCurtain(tVisCurtainRecord* curtain)
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_updateView);
 #ifdef SKIP_ASM
 extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, t4Vector* eye, tVisCurtainRecord* frustum);
-extern "C" void func_00229F88(int index, void* v, void* m);
+extern "C" void vu0_storeVectorAndMatrix(int index, void* v, void* m);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cOcclusionMan__VisSortFunc(const void* a, const void* b);
 
@@ -4157,7 +4157,7 @@ static inline t4Matrix* camMtx_25C0()
  * cPS2GraphicsMan_ClipBoundBox (slot 93) and face the eye (the dot product with its plane m_fvPlaneCoeffs is not
  * positive) goes into the in-view table (m_InView, count m_iNumInView) with its squared distance to m_fvBSphere. The
  * table is sorted nearest first (qsort with cOcclusionMan__VisSortFunc); for the first two it sets the mask bit, builds
- * the clip planes (cOcclusionMan_updateVisPlane) and hands them to func_00229F88. Likely bug: the in-view table has 32
+ * the clip planes (cOcclusionMan_updateVisPlane) and hands them to vu0_storeVectorAndMatrix. Likely bug: the in-view table has 32
  * entries and the count is not checked.
  *
  * @param bb  the camera's bounding box
@@ -4214,7 +4214,7 @@ void cOcclusionMan::updateView(tBoundBox* bb)
     for (int i = 0; i < m_iNumActive; i++) {
         m_uiVisMask |= 1 << i;
         updateVisPlane(&eye, m_InView[i].pVis);
-        func_00229F88(i, &m_InView[i].pVis->m_fvPlaneCoeffs, &m_InView[i].pVis->m_fvVisFrustum);
+        vu0_storeVectorAndMatrix(i, &m_InView[i].pVis->m_fvPlaneCoeffs, &m_InView[i].pVis->m_fvVisFrustum);
     }
 }
 #endif

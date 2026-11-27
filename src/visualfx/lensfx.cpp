@@ -90,7 +90,7 @@ void* cPS2LensFxMan__cPS2LensFxMan(void* vself)
  *
  * Converts the halo's screen rectangle (floats at +0x0..+0x24 of the second argument) to ints, gets a depth threshold
  * from fptoui, builds a GS-to-host transfer of that area of the Z buffer in the object's packet buffer
- * (+0x64A0), flushes the cache, reads the 24-bit samples back into +0x6510 over the GIF (sceGsSyncPath, func_00371940),
+ * (+0x64A0), flushes the cache, reads the 24-bit samples back into +0x6510 over the GIF (sceGsSyncPath, dma_sendGifNormal),
  * then counts the samples inside the rectangle and those at or below the threshold (unoccluded). When the count equals
  * the halo's area (+0x8 x +0xC) the visible fraction is stored through the third argument; otherwise (a clipped
  * rectangle) it stores max((visible - area / 2) / (area / 2), 0). Virtual slot 4. Asm only, no C body yet: the second
@@ -101,9 +101,16 @@ void* cPS2LensFxMan__cPS2LensFxMan(void* vself)
 INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan_sampleZBuffer);
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EC9D0__FPv);
+INCLUDE_ASM("visualfx/lensfx", tBoltOnFXEntry_tBoltOnFXEntry__FPv);
 #ifdef SKIP_ASM
-void* func_002EC9D0(void* self)
+/**
+ * Constructs a bolt-on FX entry with no emitter: sets the emitter index (+0x0) to -1 (tBoltOnFXEntry::kNoEmitter).
+ *
+ * The two cBoltOnFXInterface constructors call it on each of their 15 entries before func_002ECAF0.
+ *
+ * @return @p self
+ */
+void* tBoltOnFXEntry_tBoltOnFXEntry(void* self)
 {
     *(int*)self = -1;
     return self;
@@ -114,14 +121,14 @@ void* func_002EC9D0(void* self)
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
+extern "C" void cBoltOnFXInterface_clearEntries(cBoltOnFXInterface* self);
 
 /**
  * Constructs a rider's bolt-on effect set ("cBoltOnFXInterface"): the attached particle emitters its equipment carries.
  *
  * Installs the vtable cBoltOnFXInterface_vtbl at +0xC4, marks the set dirty (+0x0 = 1), stores the rider (+0x4) and the
  * attached-emitter owner (+0xC), clears the character pointer (+0x8) and empties the 15 entries (+0x10, 0xC bytes each:
- * emitter index, item, kind) through func_002EC9D0 and func_002ECAF0. cRider_cRider builds it on 200 bytes with the
+ * emitter index, item, kind) through tBoltOnFXEntry_tBoltOnFXEntry and cBoltOnFXInterface_clearEntries. cRider_cRider builds it on 200 bytes with the
  * rider's mAttachedEmitterFX and stores it as mBoltOnFX.
  *
  * @param rider  the rider
@@ -139,9 +146,9 @@ extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self,
     tBoltOnFXEntry* entry = &self->mEntries[0];
     int i;
     for (i = 14; i != -1; i--, entry++) {
-        func_002EC9D0(entry);
+        tBoltOnFXEntry_tBoltOnFXEntry(entry);
     }
-    func_002ECAF0(self);
+    cBoltOnFXInterface_clearEntries(self);
     return ((void*)self);
 }
 #endif
@@ -150,7 +157,7 @@ extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self,
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface1);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
+extern "C" void cBoltOnFXInterface_clearEntries(cBoltOnFXInterface* self);
 
 /**
  * Constructs a front-end character's bolt-on effect set ("cBoltOnFXInterface"), keyed by a character id instead of a
@@ -173,22 +180,22 @@ void* cBoltOnFXInterface::cBoltOnFXInterface1(int* charIdPtr, cAttachedEmitterFX
     tBoltOnFXEntry* entry = &mEntries[0];
     int i;
     for (i = 14; i != -1; i--, entry++) {
-        func_002EC9D0(entry);
+        tBoltOnFXEntry_tBoltOnFXEntry(entry);
     }
-    func_002ECAF0(this);
+    cBoltOnFXInterface_clearEntries(this);
     return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECAF0);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_clearEntries);
 #ifdef SKIP_ASM
 /**
  * Marks all 15 entries of a bolt-on effect set as free (emitter index -1).
  *
  * The two constructors cBoltOnFXInterface_cBoltOnFXInterface and cBoltOnFXInterface_cBoltOnFXInterface1 call it.
  */
-extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
+extern "C" void cBoltOnFXInterface_clearEntries(cBoltOnFXInterface* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -230,22 +237,22 @@ extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(cBoltOnFXInterface* self,
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECBC0);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_findOrCreateEntry);
 #ifdef SKIP_ASM
-extern "C" int func_002ECC28(cBoltOnFXInterface* self, int a1, int a2);
+extern "C" int cBoltOnFXInterface_createEntry(cBoltOnFXInterface* self, int a1, int a2);
 
 /**
  * Returns the entry of a bolt-on effect set that holds an emitter of @p kind on @p itemId, creating one when there is
  * none.
  *
- * Searches the 15 entries for a used one with item +0x4 == @p itemId and kind +0x8 == @p kind; otherwise func_002ECC28
- * creates it. func_002ECCB8 calls it.
+ * Searches the 15 entries for a used one with item +0x4 == @p itemId and kind +0x8 == @p kind; otherwise cBoltOnFXInterface_createEntry
+ * creates it. cBoltOnFXInterface_rebuild calls it.
  *
  * @param kind  the particle effect kind
  * @param itemId  the item (attach point) id
  * @return the entry index
  */
-extern "C" int func_002ECBC0(cBoltOnFXInterface* self, int kind, int itemId)
+extern "C" int cBoltOnFXInterface_findOrCreateEntry(cBoltOnFXInterface* self, int kind, int itemId)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -254,12 +261,12 @@ extern "C" int func_002ECBC0(cBoltOnFXInterface* self, int kind, int itemId)
             return i;
         }
     }
-    return func_002ECC28(self, kind, itemId);
+    return cBoltOnFXInterface_createEntry(self, kind, itemId);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_createEntry);
 #ifdef SKIP_ASM
 extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex);
 
@@ -274,7 +281,7 @@ extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int b
  * @param y  the item (attach point) id
  * @return the entry index, or 0 when full
  */
-extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
+extern "C" int cBoltOnFXInterface_createEntry(cBoltOnFXInterface* lensMgr, int x, int y)
 {
     cBoltOnFXInterface* self = lensMgr;
     int i;
@@ -291,7 +298,7 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_rebuild);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBEBoltInterface_getThis();
@@ -312,7 +319,7 @@ struct sVEi_CCB8 {
 };
 
 struct sLensItem_CCB8 {
-    // An unused kind or item id (name ours): [U] func_002ECCB8 skips the bolt or the item slot.
+    // An unused kind or item id (name ours): [U] cBoltOnFXInterface_rebuild skips the bolt or the item slot.
     enum { kNone = -1 };
     char pad0[4];
     short slot;                 // 0x4
@@ -331,13 +338,13 @@ struct sLensItem_CCB8 {
  * cRider_getCheatIdentity (cRider_getIdentity below 10); for a front-end character (+0x8) cBEBoltInterface_getCharProfile with the
  * current UI state's +0x44 and the id. Then walks the character's 0x38-byte bolt definitions (cBEBoltDB_getNumCharBolts count,
  * cBEBoltDB_getCharBolts) and, for each one with a kind (+0x11, not -1) whose part is fitted (the record's table at +0x288 for
- * slot +0x4; normal characters below 10 also need flag 0x10), marks func_002ECBC0's entry for each of its two items
+ * slot +0x4; normal characters below 10 also need flag 0x10), marks cBoltOnFXInterface_findOrCreateEntry's entry for each of its two items
  * (+0x12, +0x13) as used; kinds of 50 and up use kinds k-50 and k-49. Unused entries' emitters are released with
  * func_002F2218. Clears the dirty flag (+0x0).
  *
  * @param vself  the bolt-on effect set (this)
  */
-extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
+extern "C" void cBoltOnFXInterface_rebuild(cBoltOnFXInterface* vself)
 {
     cBoltOnFXInterface* self = vself;
     int used[15];
@@ -385,10 +392,10 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
                 continue;
             }
             if (k >= 50) {
-                used[func_002ECBC0(self, k - 50, itemId)] = 1;
-                used[func_002ECBC0(self, k - 49, itemId)] = 1;
+                used[cBoltOnFXInterface_findOrCreateEntry(self, k - 50, itemId)] = 1;
+                used[cBoltOnFXInterface_findOrCreateEntry(self, k - 49, itemId)] = 1;
             } else {
-                used[func_002ECBC0(self, k, itemId)] = 1;
+                used[cBoltOnFXInterface_findOrCreateEntry(self, k, itemId)] = 1;
             }
         }
     }
@@ -403,19 +410,19 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002ECF78);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_updateIfDirty);
 #ifdef SKIP_ASM
-extern "C" void func_002ECCB8(cBoltOnFXInterface* self);
+extern "C" void cBoltOnFXInterface_rebuild(cBoltOnFXInterface* self);
 
 /**
- * Rebuilds a bolt-on effect set (func_002ECCB8) when it is marked dirty (+0x0).
+ * Rebuilds a bolt-on effect set (cBoltOnFXInterface_rebuild) when it is marked dirty (+0x0).
  *
  * cRider_updateSplitMiscFX and cFERider_update call it each frame.
  */
-extern "C" void func_002ECF78(cBoltOnFXInterface* self)
+extern "C" void cBoltOnFXInterface_updateIfDirty(cBoltOnFXInterface* self)
 {
     if (self->mDirty != 0) {
-        func_002ECCB8(self);
+        cBoltOnFXInterface_rebuild(self);
     }
 }
 #endif
@@ -1413,7 +1420,7 @@ extern tRenderState cRenderStateMan_m_state[];
  * Returns the temperature for render state @p i (accessor slot 48).
  *
  * Calls virtual slot 48 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. func_002E1120 fades the rider's head puffs out as it rises from
+ * 0xF0-byte rows) and returns the value it points to. cDynamicSprayFX_updateHeadPuff fades the rider's head puffs out as it rises from
  * -5 to 20.
  *
  * @param i  the render state (view) index

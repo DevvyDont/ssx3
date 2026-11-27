@@ -400,7 +400,7 @@ void cBXString::concatCopy(int len1, const char* src1, int len2, const char* src
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_003185C8);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
 extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2);
@@ -419,7 +419,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(a + b).
-extern "C" cBXString* func_003185C8(cBXString* self, cBXString* left, cBXString* right)
+extern "C" cBXString* cBXString_operatorPlus(cBXString* self, cBXString* left, cBXString* right)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -431,7 +431,7 @@ extern "C" cBXString* func_003185C8(cBXString* self, cBXString* left, cBXString*
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318630);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus1);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
 extern "C" unsigned int strlen(const char* s);
@@ -451,7 +451,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(a + str).
-extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const char* str)
+extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* bxString, const char* str)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -470,7 +470,7 @@ extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const 
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_003186D0);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus2);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
 extern "C" unsigned int strlen(const char* s);
@@ -490,7 +490,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(str + b).
-extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* bxString)
+extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, cBXString* bxString)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -507,7 +507,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318760);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus3);
 #ifdef SKIP_ASM
 /**
  * Builds @p self as a string followed by one character.
@@ -521,7 +521,7 @@ INCLUDE_ASM("bx/bxstring", func_00318760);
  * @return @p self
  */
 // cBXString(a + ch).
-extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char ch)
+extern "C" cBXString* cBXString_operatorPlus3(cBXString* self, cBXString* bxString, char ch)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -533,7 +533,7 @@ extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char c
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_003187C8);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus4);
 #ifdef SKIP_ASM
 /**
  * Builds @p self as one character followed by a string.
@@ -547,7 +547,7 @@ INCLUDE_ASM("bx/bxstring", func_003187C8);
  * @return @p self
  */
 // cBXString(ch + b).
-extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxString)
+extern "C" cBXString* cBXString_operatorPlus4(cBXString* self, char ch, cBXString* bxString)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -629,7 +629,7 @@ cBXString* cBXString::Concat(const char* str)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318968);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlusE);
 #ifdef SKIP_ASM
 /**
  * Appends one character to the string (cBXString_ConcatImpl with a length of 1).
@@ -639,7 +639,7 @@ INCLUDE_ASM("bx/bxstring", func_00318968);
  * @param ch  the character to append
  * @return @p self
  */
-extern "C" cBXString* func_00318968(cBXString* self, char ch)
+extern "C" cBXString* cBXString_operatorPlusE(cBXString* self, char ch)
 {
     char buf = ch;
     self->ConcatImpl(1, &buf);
@@ -648,7 +648,7 @@ extern "C" cBXString* func_00318968(cBXString* self, char ch)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", func_003189A0);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorPlusE1);
 #ifdef SKIP_ASM
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
 
@@ -660,7 +660,7 @@ extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
  * @param other  the string to append
  * @return @p self
  */
-extern "C" cBXString* func_003189A0(cBXString* self, cBXString* other)
+extern "C" cBXString* cBXString_operatorPlusE1(cBXString* self, cBXString* other)
 {
     self->ConcatImpl(other->getData()->DataLength, other->Str);
     return self;

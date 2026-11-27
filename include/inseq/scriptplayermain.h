@@ -4,7 +4,7 @@
 // cScriptPlayerMain: the player of one in-game sequence (InSeq) script: play state, current frame and speed, and one
 // cScriptPlayerEntity per entity of the script (inseq/scriptplayerentity.h). cInSeq owns a fixed pool of them inside
 // its tScriptMainNode list. No virtual functions, no base class.
-// Size 0x48 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 nodes (func_002724C8) and runs this constructor
+// Size 0x48 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 nodes (operator_new_array) and runs this constructor
 // (cScriptPlayerMain_cScriptPlayerMain) on node + 8; the node's next/prev links follow at node + 0x50 / + 0x54 (On Tour tScriptMainNode:
 // index, script, pNext, pPrev; retail has one more word at the node's start). On Tour's class is 0x44: its two bools
 // at 0x3C/0x3D are 1 byte; retail's are words (the constructor zeroes 0x3C, 0x40 and 0x44 separately).

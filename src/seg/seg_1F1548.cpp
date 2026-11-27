@@ -578,8 +578,8 @@ extern "C" void cAttachedDynamicEmitter__cAttachedDynamicEmitter(cBaseClass_Dyna
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F17D0);
 #ifdef SKIP_ASM
-extern "C" void func_002F83B0();
-extern "C" void func_002F9838();
+extern "C" void cAttachedEmitterFX_fillEmitterTypes0To9();
+extern "C" void cAttachedEmitterFX_fillEmitterTypes10To19();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 extern "C" void* operator_new__FUi_17D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_AttachedEmitterTypeData[];
@@ -589,13 +589,13 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * Allocates and fills the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  *
  * Takes 5440 bytes (20 records of 0x110) through operator new[] tagged "AttachedEmitterTypeData", then fills types 0 to
- * 9 (func_002F83B0) and 10 to 19 (func_002F9838). func_002F18D8 calls it when the first attached-emitter FX object is
+ * 9 (cAttachedEmitterFX_fillEmitterTypes0To9) and 10 to 19 (cAttachedEmitterFX_fillEmitterTypes10To19). func_002F18D8 calls it when the first attached-emitter FX object is
  * set up.
  */
 extern "C" void func_002F17D0(void) {
     cAttachedEmitterFX_mEmitterDataArray = (char*)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
-    func_002F83B0();
-    func_002F9838();
+    cAttachedEmitterFX_fillEmitterTypes0To9();
+    cAttachedEmitterFX_fillEmitterTypes10To19();
 }
 #endif
 
@@ -1062,7 +1062,7 @@ extern "C" void cDynamicEmitter_render(void* obj, int level);
  *
  * Each used slot of the 10 (mEmitters) is drawn only when mRider is on screen (mIsOnScreen) or mFERider is shown
  * (mVisible). The draw layer is 7, or for a front-end rider its mDrawLayer + 1, or 22 when that layer is negative.
- * cRider's func_00122638 and cFERider_render call it.
+ * cRider's cRider_renderAttachedEmitterFX and cFERider_render call it.
  */
 extern "C" void func_002F2088(cAttachedEmitterFX* self)
 {
@@ -1100,7 +1100,7 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and cAttachedDynamicEmitter_cAttachedDynamicEmitter, stores @p boneIndex as its bone (+0x200),
  * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p typeIndex of cAttachedEmitterFX_mEmitterDataArray (0x110 bytes each), then
  * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
- * virtual reset (slot 2). The bolt-on FX code (func_002ECC28) calls it.
+ * virtual reset (slot 2). The bolt-on FX code (cBoltOnFXInterface_createEntry) calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param typeIndex  the emitter type (record index in cAttachedEmitterFX_mEmitterDataArray)

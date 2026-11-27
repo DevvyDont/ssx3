@@ -1646,7 +1646,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
 void cRider_flagEventBoostPowerUp_fi(void*, float, int) __asm__("cRider_flagEventBoostPowerUp");
-void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+void cRiderHandler_recordSprayBurst_impl(void* self, void* a, void* b, int c, float x) __asm__("cRiderHandler_recordSprayBurst__FPv");
 extern "C" float cRiderMetrix_evLand(void* self, int stance, int alternate, int style, int flag);
 extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int value);
 void cReplay_eventLand_10E910(void* self, int key, void* p) __asm__("cReplay_eventLand");
@@ -1662,7 +1662,7 @@ extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
  * (Totals.NumUberTricks, metrix +0x114, grew) raise mUberLevel by that many, capped at eUS_SuperUberMax; reaching it
  * sets mUberTimer to 60.
  *
- * func_00111AA0 (rider-handler landing effect) gets the intersection's position/normal, its surface (+0x4C) and @p speed. A
+ * cRiderHandler_recordSprayBurst (rider-handler landing effect) gets the intersection's position/normal, its surface (+0x4C) and @p speed. A
  * local rider (cBeing vtable slot 8, isHuman) gets a reaction through cRider_flagEventReaction: 3 (EarnComboPos) when the
  * combo-link count (+0x134) grew, 2 (UberPos) when an uber trick landed, else 1 (Pos) when cBEStatInterface_shouldCelebrateTrick (On Tour
  * cBEStatInterface::shouldCelebrateTrick) agrees for the points gained (Totals.TotalPoints, +0x198). Then
@@ -1700,7 +1700,7 @@ void cRider::flagEventLand(int isPipe, int rsm, int pressMode, tIntersectInfo* e
                 mUberTimer = 60.0f;
         }
     }
-    func_00111AA0_impl(mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
+    cRiderHandler_recordSprayBurst_impl(mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
     if (isHuman())
     {
         if (prevNumCombo < curNumCombo)
@@ -1908,7 +1908,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  * Rumbles (cBeing vtable slot 17, vibrationBump) with the hit strength (+0x30 of @p evt) * 5, takes the boost from
  * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to
  * cRider_flagEventBoostPowerUp(1), plays the hit (cSSXAudio_WipeoutHit), a grunt and the wipeout sound
- * (cSSXAudio_Wipeout), and spawns the impact effect (func_00111AA0) with surface @p surf. CS_Void is set first; a rider
+ * (cSSXAudio_Wipeout), and spawns the impact effect (cRiderHandler_recordSprayBurst) with surface @p surf. CS_Void is set first; a rider
  * sliding sideways on a rail (RailslideMode kRSM_FS or kRSM_BS) is turned +/-90 degrees about its up axis and its anim
  * heading offset follows.
  *
@@ -1930,7 +1930,7 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), this);
     cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), this, 0, 0);
     cSSXAudio_Wipeout(cAudioInterface_bxAudio(), this, amt);
-    func_00111AA0_impl(mRiderHandler, evt, &evt->Reflect, surf, evt->Vel);
+    cRiderHandler_recordSprayBurst_impl(mRiderHandler, evt, &evt->Reflect, surf, evt->Vel);
     cRider_setControlState_EB30(this, CS_Void);
     if (RailslideMode == kRSM_FS) {
         float ang = 1.5707963705062866f;
@@ -3025,9 +3025,9 @@ extern "C" void cBoardTrailFX_reset(void*);
 extern "C" void cSpeedBoostFX_reset(void*);
 void cTrickBoostFX_reset(void*);
 extern "C" void cAirStreamerFX_reset(void*);
-extern "C" void func_002D4BE0(void*);
+extern "C" void cAngerFX_clearViewState(void*);
 extern "C" void cPlayerIndicatorFX_reset(void*);
-extern "C" void func_002DF3B0(void*);
+extern "C" void cDynamicSprayFX_reset(void*);
 extern "C" void cPunchFX_reset(void*);
 void cCheatFX_reset(void*);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
@@ -3050,9 +3050,9 @@ void cRiderHandler::resetRiderFX()
     cSpeedBoostFX_reset(&SpeedBoostFX);
     cTrickBoostFX_reset(&TrickBoostFX);
     cAirStreamerFX_reset(&AirStreamerFX);
-    func_002D4BE0(&AngerFX);
+    cAngerFX_clearViewState(&AngerFX);
     cPlayerIndicatorFX_reset(&PlayerIndicatorFX);
-    func_002DF3B0(&DynamicSprayFX);
+    cDynamicSprayFX_reset(&DynamicSprayFX);
     cPunchFX_reset(&PunchFX);
     cCheatFX_reset(&CheatFX);
     cWorldPainterMan_reset_noarg();
@@ -3069,15 +3069,15 @@ void cRiderHandler::resetRiderFX()
 }
 #endif
 
-extern "C" void* func_002E23E0(void*);
+extern "C" void* cDynamicSprayFX_recordBurst(void*);
 
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler_updateRiderFX);
 #ifdef SKIP_ASM
-extern "C" void func_002D4C08(void*);
+extern "C" void cAngerFX_update(void*);
 extern "C" void cBoardSparkFX_update(void*);
 extern "C" void cBoardWakeFX_update(void*);
-extern "C" void func_002DF920(void*);
+extern "C" void cDynamicSprayFX_update(void*);
 extern "C" void cPlayerIndicatorFX_update(void*);
 extern "C" void cSpeedBoostFX_update(void*);
 extern "C" void cBoardTrailFX_update(void*);
@@ -3112,9 +3112,9 @@ void cRiderHandler::updateRiderFX()
     cSpeedBoostFX_update((char*)&SpeedBoostFX);
     cTrickBoostFX_update((char*)&TrickBoostFX);
     cAirStreamerFX_update((char*)&AirStreamerFX);
-    func_002D4C08((char*)&AngerFX);
+    cAngerFX_update((char*)&AngerFX);
     cPlayerIndicatorFX_update((char*)&PlayerIndicatorFX);
-    func_002DF920((char*)&DynamicSprayFX);
+    cDynamicSprayFX_update((char*)&DynamicSprayFX);
     cPunchFX_update((char*)&PunchFX);
     cCheatFX_update((char*)&CheatFX);
 }
@@ -3122,10 +3122,10 @@ void cRiderHandler::updateRiderFX()
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler_renderRiderFX);
 #ifdef SKIP_ASM
-extern "C" void func_002D5048(void*);
+extern "C" void cAngerFX_render(void*);
 extern "C" void cBoardSparkFX_render(void*);
 extern "C" void cBoardWakeFX_render(void*);
-extern "C" void func_002E24D0(void*);
+extern "C" void cDynamicSprayFX_render(void*);
 extern "C" void cPlayerIndicatorFX_render(void*);
 extern "C" void cSpeedBoostFX_render(void*);
 extern "C" void cBoardTrailFX_render(void*);
@@ -3156,27 +3156,27 @@ void cRiderHandler::renderRiderFX()
     cSpeedBoostFX_render((char*)&SpeedBoostFX);
     cTrickBoostFX_render((char*)&TrickBoostFX);
     cAirStreamerFX_render((char*)&AirStreamerFX);
-    func_002D5048((char*)&AngerFX);
+    cAngerFX_render((char*)&AngerFX);
     cPlayerIndicatorFX_render((char*)&PlayerIndicatorFX);
-    func_002E24D0((char*)&DynamicSprayFX);
+    cDynamicSprayFX_render((char*)&DynamicSprayFX);
     cPunchFX_render((char*)&PunchFX);
     cCheatFX_render((char*)&CheatFX);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", func_00111AA0__FPv);
+INCLUDE_ASM("ai/computer", cRiderHandler_recordSprayBurst__FPv);
 #ifdef SKIP_ASM
-// PORT: prototype mismatch. The project names this func_00111AA0__FPv (one
+// PORT: prototype mismatch. The project names this cRiderHandler_recordSprayBurst__FPv (one
 // void* param), but every caller passes (self, vecA, vecB, int, float) and the
-// body forwards them to func_002E23E0 with an extra 0 flag. The unit declares
-// func_002E23E0 as (void*), so both are bound by asm label.
-void func_002E23E0_impl(void* self, void* a, void* b, int c, int flag, float x) __asm__("func_002E23E0");
+// body forwards them to cDynamicSprayFX_recordBurst with an extra 0 flag. The unit declares
+// cDynamicSprayFX_recordBurst as (void*), so both are bound by asm label.
+void cDynamicSprayFX_recordBurst_impl(void* self, void* a, void* b, int c, int flag, float x) __asm__("cDynamicSprayFX_recordBurst");
 
-void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+void cRiderHandler_recordSprayBurst_impl(void* self, void* a, void* b, int c, float x) __asm__("cRiderHandler_recordSprayBurst__FPv");
 
 /**
- * Spawns the rider handler's landing / impact effect: forwards to func_002E23E0 on the effect at self + 0xB40.
+ * Spawns the rider handler's landing / impact effect: forwards to cDynamicSprayFX_recordBurst on the effect at self + 0xB40.
  *
  * Callers pass the cRiderHandler as self; the extra 0 flag is inserted before @p x.
  *
@@ -3185,10 +3185,10 @@ void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("f
  * @param surfaceType  the surface type
  * @param x  the impact speed
  */
-void func_00111AA0_impl(void* vself, void* pos, void* dir, int surfaceType, float x)
+void cRiderHandler_recordSprayBurst_impl(void* vself, void* pos, void* dir, int surfaceType, float x)
 {
     cRiderHandler* self = (cRiderHandler*)vself;
-    func_002E23E0_impl(&self->DynamicSprayFX, pos, dir, surfaceType, 0, x);
+    cDynamicSprayFX_recordBurst_impl(&self->DynamicSprayFX, pos, dir, surfaceType, 0, x);
 }
 #endif
 
@@ -3317,7 +3317,7 @@ extern "C" void cBoardTrailFX_reset(void*);
 extern "C" void cSpeedBoostFX_reset(void*);
 void cTrickBoostFX_reset(void*);
 extern "C" void cAirStreamerFX_reset(void*);
-extern "C" void func_002D4BE0(void*);
+extern "C" void cAngerFX_clearViewState(void*);
 extern "C" void cPlayerIndicatorFX_reset(void*);
 extern "C" void cPunchFX_reset(void*);
 extern "C" void cCheatFX_readFromReplayFrame(void* self, void* s);
@@ -3412,7 +3412,7 @@ void cRiderHandler::readFromReplayFrame(cBxReplayFrame* data)
     cSpeedBoostFX_reset(&SpeedBoostFX);
     cTrickBoostFX_reset(&TrickBoostFX);
     cAirStreamerFX_reset(&AirStreamerFX);
-    func_002D4BE0(&AngerFX);
+    cAngerFX_clearViewState(&AngerFX);
     cPlayerIndicatorFX_reset(&PlayerIndicatorFX);
     cPunchFX_reset(&PunchFX);
     cCheatFX_readFromReplayFrame(&CheatFX, data);

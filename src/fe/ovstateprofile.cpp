@@ -427,7 +427,7 @@ extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
 extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
 extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
-extern "C" void func_002C2540(void* dst, char* src);
+extern "C" void strcpy3(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_kT_MEMPlayerName_c[];
@@ -479,7 +479,7 @@ void cOVState_PROFILE::onWidgetEvent(cUIThing* item, unsigned int event)
         char buf[0x70];
         char fmt[0x70];
         char* name = self->mpKeyboard->mszEditString;
-        func_002C2540(((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mNewFileName, name);
+        strcpy3(((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mNewFileName, name);
         cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
             cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, name);

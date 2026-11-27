@@ -16,7 +16,7 @@
 // mIrradianceArray + i * 0xA0 ([O] cIrradianceDataBase::Get returns cIrradiance&, mIrradianceArray is cIrradiance*);
 // [O] cWorldLightMan::IntersectLights(const t4Vector&, cOverlapList*, cIrradiance&, int) = retail
 // cWorldLightMan_IntersectLights1(self, &entry->pos, list, &entry->RTlightInfo, 4); [U] the set is copied as 10
-// quadwords (getRealTimeLights, func_00389730 adds two sets vector by vector, cIrradiance_Scale / func_00389660 scale
+// quadwords (getRealTimeLights, cIrradiance_operatorPlus adds two sets vector by vector, cIrradiance_Scale / cIrradiance_tint scale
 // and tint each of the 10 vectors, cIrradiance_Clear zeroes it). The preview's SetIrradiance__15cPS2GraphicsManRC15
 // tIrradianceInfob takes the same 0xA0 block (cPS2GraphicsMan::mIrradianceInfo); whether tIrradianceInfo is a base
 // or another name of this class is not known. What each vector holds is not known yet.

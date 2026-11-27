@@ -146,13 +146,13 @@ INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode_update);
 
 INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode_render);
 
-INCLUDE_ASM("main/ssxapp2", func_00245228);
+INCLUDE_ASM("main/ssxapp2", cFEStateProgressive__cFEStateProgressive);
 
-INCLUDE_ASM("main/ssxapp2", func_00245248);
+INCLUDE_ASM("main/ssxapp2", cFEStateProgressive_onCreateScreen);
 
-INCLUDE_ASM("main/ssxapp2", func_002452D8);
+INCLUDE_ASM("main/ssxapp2", cFEStateProgressive_onWidgetEvent);
 
-INCLUDE_ASM("main/ssxapp2", func_002453E0);
+INCLUDE_ASM("main/ssxapp2", cFEStateProgressive_onWidgetMenu);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadState__cGameLoadState);
 
@@ -170,13 +170,13 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onWidgetCreate);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onGainTransition);
 
-INCLUDE_ASM("main/ssxapp2", func_00245708);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer__cGameLoadStateConquer);
 
-INCLUDE_ASM("main/ssxapp2", func_00245730);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onCreateScreen);
 
-INCLUDE_ASM("main/ssxapp2", func_002458B0);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onWidgetCreate);
 
-INCLUDE_ASM("main/ssxapp2", func_002458B8);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onGainTransition);
 
 INCLUDE_ASM("main/ssxapp2", cFELoadHintState__cFELoadHintState);
 

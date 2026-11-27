@@ -78,7 +78,7 @@ struct tWorldPainterRegionType {
 CHECK_SIZE(tWorldPainterRegionType, 0x4);
 
 // A painted name (irradiance map names of tWPInGameData_Lighting). On Tour: one member m_nameId of an 8-byte union
-// type (DWARF name lost); retail copies it with 8-byte moves and compares it as two words (func_002BB100).
+// type (DWARF name lost); retail copies it with 8-byte moves and compares it as two words (tWPNameField_operatorNotEqual).
 struct tWPNameField {
     // m_nameId[1] of a resolved field (name ours). [U] cRenderStateMan_resolveIrradianceName replaces the name in
     // m_nameId[0] with its id and stores this; cRenderStateMan_Irradiance resolves a field without it first.

@@ -216,7 +216,7 @@ struct LobbyMan {
     char* mServerName;              // 0x0E8 [R] ctor cBXString(.., "ps2ssx04.ea.com"); [U] connect looks it up
     tLobbyEventList mEventList;     // 0x0EC [R] std::list<online::Event*, BXAllocator>: allocator word at 0xEC,
                                     //       node pointer at 0xF0 (ctor allocates the 0xC-byte head node "StlBlock",
-                                    //       dtor func_001DB718 + delete); [U] every reply pushes an Event before
+                                    //       dtor tLobbyEventList_clear + delete); [U] every reply pushes an Event before
                                     //       the head node (mEventList.mpHead); 51 functions outside the class
     void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] LobbyMan_createConfig creates it (NetGameUtilCreate) from the
                                     //       logged-in "pers" config; LobbyMan_getConfigValue looks keys up; LobbyMan_destroyConfig frees

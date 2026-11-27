@@ -918,7 +918,7 @@ void cWakeParams::Clear()
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE398);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_scatterEmitPosition);
 #ifdef SKIP_ASM
 extern int D_004A3AFC;
 
@@ -970,13 +970,13 @@ static inline void wakeAddE398(t4Vector& a, const t4Vector& b)
  * Scatters a spray emission position randomly around the board.
  *
  * With bias = the lean side (mLeanSide, -1..1) it adds mBoardForward times (bias * 55 + a random value within +-(1 -
- * |bias|) * 55), then mBoardSide times a random value in -10..10. func_002DF920 fills both vectors from the board
+ * |bias|) * 55), then mBoardSide times a random value in -10..10. cDynamicSprayFX_update fills both vectors from the board
  * bone's matrix rows 0 and 2. The random numbers come from the generator in D_004A3AFC. The spray updates
- * func_002DFE88, func_002E02B8, func_002E0EE8 and func_002E1F70 call it.
+ * cDynamicSprayFX_updateCarveSpray, func_002E02B8, cDynamicSprayFX_updateBoardSpray and cDynamicSprayFX_updatePowderTrail call it.
  *
  * @param out  the position, changed in place
  */
-extern "C" void func_002DE398(cDynamicSprayFX* self, t4Vector* out)
+extern "C" void cDynamicSprayFX_scatterEmitPosition(cDynamicSprayFX* self, t4Vector* out)
 {
     float bias = self->mLeanSide;
     float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
@@ -1097,9 +1097,9 @@ extern char str_DynamicSprayData[];
 extern char str_BoneIndicies[];
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_002E26B8(cDynamicSprayFX* self);
-extern "C" void func_002DF448_E4A8(void* self) __asm__("func_002DF448");
-extern "C" void func_002DF3B0(cDynamicSprayFX* self);
+extern "C" void cDynamicSprayFX_tuneBurstEmitters(cDynamicSprayFX* self);
+extern "C" void cDynamicSprayFX_reinitEmitters_E4A8(void* self) __asm__("cDynamicSprayFX_reinitEmitters");
+extern "C" void cDynamicSprayFX_reset(cDynamicSprayFX* self);
 
 /**
  * Constructs a rider's snow spray effect: ten particle emitters and their ten spray settings.
@@ -1109,7 +1109,7 @@ extern "C" void func_002DF3B0(cDynamicSprayFX* self);
  *
  * Allocates the emitters ("DynamicSprayEmitter") and the spray data ("DynamicSprayData", each set filled in
  * here with its particle count, life, size, gravity, colour and speeds) and a 0x78-byte "BoneIndicies" block.
- * It then calls func_002E26B8, func_002DF448 and func_002DF3B0 (unknown) to finish the setup.
+ * It then calls cDynamicSprayFX_tuneBurstEmitters, cDynamicSprayFX_reinitEmitters and cDynamicSprayFX_reset (unknown) to finish the setup.
  *
  * @param inChrg  nonzero when this object is complete and must construct its virtual base
  * @return self
@@ -1734,9 +1734,9 @@ extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
     self->SprayData()[9].fE0 = 0.0f;
     self->SprayData()[9].fE4 = 0.0f;
     self->mBoneIndicies = operator new(0x78, str_BoneIndicies, 0, 0);
-    func_002E26B8((cDynamicSprayFX*)self);
-    func_002DF448_E4A8(self);
-    func_002DF3B0((cDynamicSprayFX*)self);
+    cDynamicSprayFX_tuneBurstEmitters((cDynamicSprayFX*)self);
+    cDynamicSprayFX_reinitEmitters_E4A8(self);
+    cDynamicSprayFX_reset((cDynamicSprayFX*)self);
     return self;
 }
 #endif
@@ -1769,10 +1769,10 @@ __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_reset);
 #ifdef SKIP_ASM
-extern "C" void func_002E26B8(cDynamicSprayFX* self);
-extern "C" void func_002E2550(cDynamicSprayFX* self);
+extern "C" void cDynamicSprayFX_tuneBurstEmitters(cDynamicSprayFX* self);
+extern "C" void cDynamicSprayFX_selectEmittersForLOD(cDynamicSprayFX* self);
 
 /**
  * Resets a rider's snow spray effect.
@@ -1780,11 +1780,11 @@ extern "C" void func_002E2550(cDynamicSprayFX* self);
  * Sets mBurstAlpha to 0.5 and mColour to white, and zeroes mShedAmount, mPowderLevel, mHeadPuffGlow, mLastSpeed,
  * mShedBone, mBoneIndiciesValid (so the bone table is looked up again), mBurstStrength and the lean side mLeanSide.
  * When the stored player flag (mIsPlayer) no longer matches
- * whether the rider has a view (mViewIndex >= 0) it re-tunes the emitters with func_002E26B8; then it picks the
- * emitters for the rider's detail level (func_002E2550). The cDynamicSprayFX constructor and cRiderHandler_resetRiderFX
+ * whether the rider has a view (mViewIndex >= 0) it re-tunes the emitters with cDynamicSprayFX_tuneBurstEmitters; then it picks the
+ * emitters for the rider's detail level (cDynamicSprayFX_selectEmittersForLOD). The cDynamicSprayFX constructor and cRiderHandler_resetRiderFX
  * (on cRiderHandler + 0xB40) call it.
  */
-extern "C" void func_002DF3B0(cDynamicSprayFX* self)
+extern "C" void cDynamicSprayFX_reset(cDynamicSprayFX* self)
 {
     t4Vector white;
     white.x = 1.0f;
@@ -1802,18 +1802,18 @@ extern "C" void func_002DF3B0(cDynamicSprayFX* self)
     self->mBurstStrength = 0.0f;
     self->mLeanSide = 0.0f;
     if (self->mIsPlayer != (self->mRider->mViewIndex >= 0)) {
-        func_002E26B8(self);
+        cDynamicSprayFX_tuneBurstEmitters(self);
     }
-    func_002E2550(self);
+    cDynamicSprayFX_selectEmittersForLOD(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF448);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_reinitEmitters);
 #ifdef SKIP_ASM
 
 
-struct func_002DF448_sFx {
+struct cDynamicSprayFX_reinitEmitters_sFx {
     char pad0[0x28];
     cDynamicColourEmitter* elems;     // 0x28
     char* data;                     // 0x2C
@@ -1825,10 +1825,10 @@ struct func_002DF448_sFx {
  * Re-initialises the ten spray emitters from their spray settings and clears the re-init flag (+0x60).
  *
  * Emitter i (0x210 bytes each, array at +0x28) gets its virtual slot 3 called with settings set i (0xE8 bytes each,
- * array at +0x2C) and the emitter's float at +0x58. The cDynamicSprayFX constructor calls it, and func_002DF920 does
+ * array at +0x2C) and the emitter's float at +0x58. The cDynamicSprayFX constructor calls it, and cDynamicSprayFX_update does
  * when +0x60 is set.
  */
-extern "C" void func_002DF448(func_002DF448_sFx* self)
+extern "C" void cDynamicSprayFX_reinitEmitters(cDynamicSprayFX_reinitEmitters_sFx* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -1840,7 +1840,7 @@ extern "C" void func_002DF448(func_002DF448_sFx* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF4D0);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_lookUpBones);
 #ifdef SKIP_ASM
 extern const char str_shinleft_b[];
 extern const char str_footleft_b[];
@@ -1871,9 +1871,9 @@ extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name
  * Stores cAnimModel_getBoneSkelIndex results for the rider's mAnimModel into the 0x78-byte table mBoneIndicies: shins,
  * feet, thighs, hips, spine, neck, clavicles, biceps, forearms and hands by name ("shinleft_b", "footleft_b", ...).
  * Entries 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones,
- * possibly a slip. func_002DF920 calls it while mBoneIndiciesValid is 0.
+ * possibly a slip. cDynamicSprayFX_update calls it while mBoneIndiciesValid is 0.
  */
-extern "C" void func_002DF4D0(cDynamicSprayFX* self)
+extern "C" void cDynamicSprayFX_lookUpBones(cDynamicSprayFX* self)
 {
     self->mBoneIndicies[0] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinleft_b);
     self->mBoneIndicies[1] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footleft_b);
@@ -1913,7 +1913,7 @@ extern "C" void func_002DF4D0(cDynamicSprayFX* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DF920);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_update);
 #ifdef SKIP_ASM
 struct sWakeFxF920 {
     cRider* obj;                // 0x00
@@ -1960,17 +1960,17 @@ struct sMtxF920 {
 int cRider_getMotionState(void*);
 int cRider_getControlState(void*);
 int cRiderAnimBase_getCurrentAnimID(void*, int);
-extern "C" void func_002DF448_F920(void*) __asm__("func_002DF448");
-extern "C" void func_002DF4D0_F920(void*) __asm__("func_002DF4D0");
-extern "C" void func_002E23E0_F920(void*, void*, void*, int, int, float) __asm__("func_002E23E0");
+extern "C" void cDynamicSprayFX_reinitEmitters_F920(void*) __asm__("cDynamicSprayFX_reinitEmitters");
+extern "C" void cDynamicSprayFX_lookUpBones_F920(void*) __asm__("cDynamicSprayFX_lookUpBones");
+extern "C" void cDynamicSprayFX_recordBurst_F920(void*, void*, void*, int, int, float) __asm__("cDynamicSprayFX_recordBurst");
 extern "C" void func_002E02B8_F920(void*) __asm__("func_002E02B8");
-extern "C" void func_002DFE88_F920(void*) __asm__("func_002DFE88");
-extern "C" void func_002E0EE8_F920(void*) __asm__("func_002E0EE8");
-extern "C" void func_002E1120_F920(void*) __asm__("func_002E1120");
-extern "C" void func_002E1598_F920(void*) __asm__("func_002E1598");
-extern "C" void func_002E1A80_F920(void*) __asm__("func_002E1A80");
-extern "C" void func_002E2260_F920(void*) __asm__("func_002E2260");
-extern "C" void func_002E1F70_F920(void*) __asm__("func_002E1F70");
+extern "C" void cDynamicSprayFX_updateCarveSpray_F920(void*) __asm__("cDynamicSprayFX_updateCarveSpray");
+extern "C" void cDynamicSprayFX_updateBoardSpray_F920(void*) __asm__("cDynamicSprayFX_updateBoardSpray");
+extern "C" void cDynamicSprayFX_updateHeadPuff_F920(void*) __asm__("cDynamicSprayFX_updateHeadPuff");
+extern "C" void cDynamicSprayFX_updateBurst_F920(void*) __asm__("cDynamicSprayFX_updateBurst");
+extern "C" void cDynamicSprayFX_updateSkidSpray_F920(void*) __asm__("cDynamicSprayFX_updateSkidSpray");
+extern "C" void cDynamicSprayFX_updateBodyShed_F920(void*) __asm__("cDynamicSprayFX_updateBodyShed");
+extern "C" void cDynamicSprayFX_updatePowderTrail_F920(void*) __asm__("cDynamicSprayFX_updatePowderTrail");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float wakeLenF920(const t4Vector& v)
@@ -2052,8 +2052,8 @@ static inline t4Vector wakeRowF920(cRider* o, int k)
  * Updates a rider's snow spray effect for this frame: samples the rider's state, then runs each enabled emitter's
  * update.
  *
- * Re-initialises the emitters when +0x60 is set (func_002DF448) and looks up the bones while +0x80 is 0
- * (func_002DF4D0). Sets the lean side +0x12C to +-1 from PressMode, the layer-2 animation (23..28, 37, 38) and
+ * Re-initialises the emitters when +0x60 is set (cDynamicSprayFX_reinitEmitters) and looks up the bones while +0x80 is 0
+ * (cDynamicSprayFX_lookUpBones). Sets the lean side +0x12C to +-1 from PressMode, the layer-2 animation (23..28, 37, 38) and
  * IsRidingFakie, or 0; +0xB4 = -mSlewed[0].cur * (1 - |mSlewed[3].cur|), negated when riding fakie; +0xB8 the speed
  * (length of kRiderVt_getVelocity's vector), +0xBC its absolute value and +0xC0 the normalised mVelocity.
  *
@@ -2061,19 +2061,19 @@ static inline t4Vector wakeRowF920(cRider* o, int k)
  * mIsInNIS is set without (mHiddenNIS clear, mNISShowBoardVisualFX and mOnGroundNIS set). +0x30/+0x40/+0x50/+0xA0 get
  * rows 1, 2, 0 and 3 of
  * the mBoneBoardChild matrix; +0xD0 the SurfPropCache record for mSurfaceType. A sharp slow-down (speed drop * 60 above
- * 555.6 at a speed above 555.6, or at least 27.8 in the NIS case) reports a burst through func_002E23E0. The emitters
- * are re-chosen (func_002E2550) when mLOD changed, the colour (+0x90) becomes the doubled table colour for the rider
+ * 555.6 at a speed above 555.6, or at least 27.8 in the NIS case) reports a burst through cDynamicSprayFX_recordBurst. The emitters
+ * are re-chosen (cDynamicSprayFX_selectEmittersForLOD) when mLOD changed, the colour (+0x90) becomes the doubled table colour for the rider
  * (as in cBoardWakeFX_createSeg) with alpha 1, and every emitter whose m_enabled is set runs its update: 0
- * func_002E0EE8, 1 func_002E02B8, 3 func_002DFE88, 4 func_002E1120, 5 func_002E1598, 7 func_002E1A80, 8 func_002E1F70,
- * 9 func_002E2260. cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xB40.
+ * cDynamicSprayFX_updateBoardSpray, 1 func_002E02B8, 3 cDynamicSprayFX_updateCarveSpray, 4 cDynamicSprayFX_updateHeadPuff, 5 cDynamicSprayFX_updateBurst, 7 cDynamicSprayFX_updateSkidSpray, 8 cDynamicSprayFX_updatePowderTrail,
+ * 9 cDynamicSprayFX_updateBodyShed. cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xB40.
  */
-extern "C" void func_002DF920(sWakeFxF920* self)
+extern "C" void cDynamicSprayFX_update(sWakeFxF920* self)
 {
     if (self->mbReinitEmitters != 0) {
-        func_002DF448_F920(self);
+        cDynamicSprayFX_reinitEmitters_F920(self);
     }
     if (self->mBoneIndiciesValid == 0) {
-        func_002DF4D0_F920(self);
+        cDynamicSprayFX_lookUpBones_F920(self);
     }
     self->mLeanSide = 0.0f;
     cRider* obj = self->obj;
@@ -2137,11 +2137,11 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     }
     if (self->mbSprayOn != 0 && x) {
         t4Vector burstPos = wakeAddF920(self->pos, wakeScaleF920(self->obj->mGroundNormal, 10.0f));
-        func_002E23E0_F920(self, &burstPos, &self->obj->mGroundNormal, self->obj->mSurfaceType, 1, burstStrength);
+        cDynamicSprayFX_recordBurst_F920(self, &burstPos, &self->obj->mGroundNormal, self->obj->mSurfaceType, 1, burstStrength);
     }
     self->mLastSpeed = self->mSpeed;
     if (self->mLOD != self->obj->mLOD) {
-        func_002E2550((cDynamicSprayFX*)self);
+        cDynamicSprayFX_selectEmittersForLOD((cDynamicSprayFX*)self);
     }
     char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
@@ -2156,18 +2156,18 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     wakeScaleE398(self->col, self->col, 2.0f);
     self->col.w = 1.0f;
     if (self->mEmitters[1].m_enabled) func_002E02B8_F920(self);
-    if (self->mEmitters[3].m_enabled) func_002DFE88_F920(self);
-    if (self->mEmitters[0].m_enabled) func_002E0EE8_F920(self);
-    if (self->mEmitters[4].m_enabled) func_002E1120_F920(self);
-    if (self->mEmitters[5].m_enabled) func_002E1598_F920(self);
-    if (self->mEmitters[7].m_enabled) func_002E1A80_F920(self);
-    if (self->mEmitters[9].m_enabled) func_002E2260_F920(self);
-    if (self->mEmitters[8].m_enabled) func_002E1F70_F920(self);
+    if (self->mEmitters[3].m_enabled) cDynamicSprayFX_updateCarveSpray_F920(self);
+    if (self->mEmitters[0].m_enabled) cDynamicSprayFX_updateBoardSpray_F920(self);
+    if (self->mEmitters[4].m_enabled) cDynamicSprayFX_updateHeadPuff_F920(self);
+    if (self->mEmitters[5].m_enabled) cDynamicSprayFX_updateBurst_F920(self);
+    if (self->mEmitters[7].m_enabled) cDynamicSprayFX_updateSkidSpray_F920(self);
+    if (self->mEmitters[9].m_enabled) cDynamicSprayFX_updateBodyShed_F920(self);
+    if (self->mEmitters[8].m_enabled) cDynamicSprayFX_updatePowderTrail_F920(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateCarveSpray);
 #ifdef SKIP_ASM
 // FAKEMATCH: identical if/else arms `if (self) { m = k; } else { m = k; }` inside the `k < 1.0f` arm of the m clamp
 // (the extra branch changes
@@ -2286,21 +2286,21 @@ static inline float wakeClampFE88(float v, float lo, float hi)
  * Updates spray emitter 3 (+0x28 + 0x630): a side spray thrown off the board edge while carving.
  *
  * Runs only while spraying (+0xB0) and when a random number is below the surface record's chance (+0xD0, +0x6C). The
- * emission point is 15 units ahead of the board (+0xA0 plus +0x30 * 15), scattered by func_002DE398. The emit chance
+ * emission point is 15 units ahead of the board (+0xA0 plus +0x30 * 15), scattered by cDynamicSprayFX_scatterEmitPosition. The emit chance
  * combines the rider's lean (|mSlewed[3].cur|), the carve value +0xB4 and how far the board faces across its velocity
  * (rider +0x3B0 against +0xC0), scaled down below a speed of about 555. The velocity mixes the rider velocity,
  * mGroundNormal and the board's side direction with settings set 3 (+0x2C, +0x390..+0x39C), the last two scaled by the
  * speed (+0xBC). Otherwise the emitter is updated with nothing to emit. Steps are 1/60 s
  * (cDynamicColourEmitter_update).
  */
-extern "C" void func_002DFE88(sWakeFxFE88* self)
+extern "C" void cDynamicSprayFX_updateCarveSpray(sWakeFxFE88* self)
 {
     void* em = self->p28 + 0x630;
     if (self->iB0 != 0) {
         float lim = *(float*)(self->pD0 + 0x6C);
         if (wakeRandE398() < lim) {
         t4Vector pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
-        func_002DE398((cDynamicSprayFX*)self, &pos);
+        cDynamicSprayFX_scatterEmitPosition((cDynamicSprayFX*)self, &pos);
         float k = wakeAbsE398(wakeDotFE88(*(t4Vector*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
         float faceFactor;
         if (k < 1.0f) {
@@ -2344,7 +2344,7 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
 INCLUDE_ASM("visualfx/boardwakefx", func_002E02B8);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E0EE8);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateBoardSpray);
 #ifdef SKIP_ASM
 struct sWakeFx0EE8 {
     cRider* obj;                // 0x00
@@ -2412,17 +2412,17 @@ static inline float wakeLimit0EE8()
  *
  * Emits when spraying (+0xB0), the speed (+0xBC) is above 222.2, the surface record (+0xD0) flag +0x58 is set and the
  * word at the rider's +0x88C object + 0xA0 is clear. The emission point is 15 units ahead of the board (+0xA0 plus
- * +0x30 * 15), scattered by func_002DE398; the velocity mixes the rider velocity and mGroundNormal with settings set 0
+ * +0x30 * 15), scattered by cDynamicSprayFX_scatterEmitPosition; the velocity mixes the rider velocity and mGroundNormal with settings set 0
  * (+0x2C, +0xD8..+0xE0), the last scaled by the speed. Otherwise the emitter is updated with nothing to emit.
  */
-extern "C" void func_002E0EE8(sWakeFx0EE8* self)
+extern "C" void cDynamicSprayFX_updateBoardSpray(sWakeFx0EE8* self)
 {
     int flag = *(int*)((char*)self->obj->mAttachedEmitterFX + 0xA0);
     cDynamicColourEmitter* em = self->em;
     if (self->mbSprayOn != 0 && wakeLimit0EE8() < self->mAbsSpeed && self->mpSurfData->ParticleSnowTrailActive != 0 &&
         flag == 0) {
         t4Vector pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
-        func_002DE398((cDynamicSprayFX*)self, &pos);
+        cDynamicSprayFX_scatterEmitPosition((cDynamicSprayFX*)self, &pos);
         char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
         t4Vector* riderVel = vt[2].fn(sub + vt[2].delta);
@@ -2438,7 +2438,7 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E10B8);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_initHeadPuff);
 #ifdef SKIP_ASM
 extern int D_004A3AFC;
 
@@ -2461,9 +2461,9 @@ static inline float wakeRand10B8()
  * Initialises the head-puff timing: blink on (+0x18 = 1), timer (+0x20) 0 and the period (+0x24) 0.4 to 0.5 s at
  * random.
  *
- * Nothing in the retail code references it; func_002E1120 runs the puffs from these fields.
+ * Nothing in the retail code references it; cDynamicSprayFX_updateHeadPuff runs the puffs from these fields.
  */
-extern "C" void func_002E10B8(sWake10B8* self)
+extern "C" void cDynamicSprayFX_initHeadPuff(sWake10B8* self)
 {
     self->mHeadPuffBlink = 1;
     self->mHeadPuffTimer = 0;
@@ -2472,7 +2472,7 @@ extern "C" void func_002E10B8(sWake10B8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateHeadPuff);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i);
@@ -2625,7 +2625,7 @@ static inline float wakeClamp1120(float v, float lo, float hi)
  * to 20. While blinking on with alpha above 0.02 the rate grows by 18 to 24 a second and each whole unit emits one
  * white puff with settings set 4 (+0x2C, +0x478..+0x480) plus 150 units along the head's z axis.
  */
-extern "C" void func_002E1120(sWakeFx1120* self)
+extern "C" void cDynamicSprayFX_updateHeadPuff(sWakeFx1120* self)
 {
     cDynamicColourEmitter* em = &self->mEmitters[4];
     cRider* obj = self->obj;
@@ -2700,7 +2700,7 @@ off:
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateBurst);
 #ifdef SKIP_ASM
 struct sWakeFx1598 {
     cRider* obj;                // 0x00
@@ -2805,7 +2805,7 @@ static inline t4Vector* wakeVel1598(sWakeFx1598* self)
  * multiplied by the surface's +0x68 (times 0.4 for a non-player).
  */
 // PORT: g++ minimum operator (<?).
-extern "C" void func_002E1598(sWakeFx1598* self)
+extern "C" void cDynamicSprayFX_updateBurst(sWakeFx1598* self)
 {
     tSurfData* cfg = self->mpSurfData;
     if (27.77777862548828f < self->mBurstStrength && cfg->ImpactActive != 0) {
@@ -2894,7 +2894,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1A80);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateSkidSpray);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -3060,7 +3060,7 @@ static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
  * rider velocity and mGroundNormal with settings set 7 (+0x2C, +0x730..+0x738) plus 0.3 of (the board's forward axis
  * times -speed + mVelocity).
  */
-extern "C" void func_002E1A80(sWakeFx1A80* self)
+extern "C" void cDynamicSprayFX_updateSkidSpray(sWakeFx1A80* self)
 {
     float facing = fsAbs(vu0Dot_1A80(self->obj->mGroundSide, self->mVelocityDir));
     facing = facing + facing;
@@ -3107,7 +3107,7 @@ extern "C" void func_002E1A80(sWakeFx1A80* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E1F70);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updatePowderTrail);
 #ifdef SKIP_ASM
 struct sWakeFx1F70 {
     cRider* obj;                // 0x00
@@ -3163,11 +3163,11 @@ static inline t4Vector* wakeVel1F70(sWakeFx1F70* self)
  * While spraying (+0xB0) with a surface record level (+0xD0, +0x5C) of at least 0.01 the level +0x10 rises by 0.01 a
  * frame up to that value and nothing is emitted that frame; otherwise it falls by 1/60. It drops to 0 when the speed
  * (+0xBC) is below 277.8 or, not spraying, the velocity's z is below -3333.3. With a positive level it emits at the
- * board (+0xA0, scattered by func_002DE398) with alpha level * 1.25 (faded as the rider falls), velocity from the rider
+ * board (+0xA0, scattered by cDynamicSprayFX_scatterEmitPosition) with alpha level * 1.25 (faded as the rider falls), velocity from the rider
  * velocity and +0x30 with settings set 8 (+0x2C, +0x818..+0x820).
  */
 // PORT: g++ minimum/maximum operators (<?, >?).
-extern "C" void func_002E1F70(sWakeFx1F70* self)
+extern "C" void cDynamicSprayFX_updatePowderTrail(sWakeFx1F70* self)
 {
     int done = 0;
     cDynamicColourEmitter* em = &self->mEmitters[8];
@@ -3193,7 +3193,7 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
             wakeAdd0EE8(wakeScale0EE8(*riderVel, self->mSprayData[8].fD8),
                         wakeScale0EE8(self->dir, self->mSprayData[8].fDC)),
             wakeScale0EE8(wakeScale0EE8(self->dir, self->mSprayData[8].fE0), self->mAbsSpeed));
-        func_002DE398((cDynamicSprayFX*)self, &pos);
+        cDynamicSprayFX_scatterEmitPosition((cDynamicSprayFX*)self, &pos);
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -3202,7 +3202,7 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_updateBodyShed);
 #ifdef SKIP_ASM
 
 struct sWakeFx2260 {
@@ -3247,7 +3247,7 @@ static inline float wakeLimit2260()
  * the hips bone (mBoneHips) with nothing to emit.
  */
 // PORT: g++ maximum operator (>?).
-extern "C" void func_002E2260(sWakeFx2260* self)
+extern "C" void cDynamicSprayFX_updateBodyShed(sWakeFx2260* self)
 {
     float zero = 0.0f;
     cDynamicColourEmitter* em = &self->mEmitters[9];
@@ -3290,7 +3290,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E23E0);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_recordBurst);
 #ifdef SKIP_ASM
 
 // PORT: PS2-only inline asm (float absolute value).
@@ -3361,8 +3361,8 @@ struct sWake_23E0 {
  * +0x124) from the stored point (+0xF0), or the rider is in the NIS state that allows a trail (mIsInNIS set,
  * mHiddenNIS clear, mNISShowBoardVisualFX and mOnGroundNIS set). It then stores the strength (doubled when
  * @p isSlowdown is 0), @p pos (+0xF0), @p dir
- * (+0x100), @p surfaceType (+0x110) and @p isSlowdown (+0x114). func_002DF920 reports slow-downs with @p isSlowdown = 1; func_00111AA0 (wipeout
- * impacts) passes 0. func_002E1598 plays the burst.
+ * (+0x100), @p surfaceType (+0x110) and @p isSlowdown (+0x114). cDynamicSprayFX_update reports slow-downs with @p isSlowdown = 1; cRiderHandler_recordSprayBurst (wipeout
+ * impacts) passes 0. cDynamicSprayFX_updateBurst plays the burst.
  *
  * @param pos  the burst position
  * @param dir  the burst direction (the surface normal)
@@ -3370,7 +3370,7 @@ struct sWake_23E0 {
  * @param isSlowdown  1 for a slow-down spray, 0 for an impact
  * @param speed  the burst strength
  */
-extern "C" void func_002E23E0(sWake_23E0* self, t4Vector* pos, t4Vector* dir, int surfaceType, int isSlowdown, float speed)
+extern "C" void cDynamicSprayFX_recordBurst(sWake_23E0* self, t4Vector* pos, t4Vector* dir, int surfaceType, int isSlowdown, float speed)
 {
     float absSpeed = Abs_23E0(speed);
     float distance = Abs_23E0(Length_23E0(Sub_23E0(self->mBurstPos, *pos)));
@@ -3393,12 +3393,12 @@ extern "C" void func_002E23E0(sWake_23E0* self, t4Vector* pos, t4Vector* dir, in
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E24D0);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_render);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_render(void* self, int mode);
 
 
-struct func_002E24D0_sFx {
+struct cDynamicSprayFX_render_sFx {
     cRider* owner;                  // 0x0
     char pad_0x04[0x24];
     cDynamicColourEmitter* wakes;     // 0x28
@@ -3411,7 +3411,7 @@ struct func_002E24D0_sFx {
  * set and whose m_enabledCount is positive, with cDynamicColourEmitter_render mode 7.
  * cRiderHandler_renderRiderFX and cAI_render call it on cRiderHandler + 0xB40.
  */
-extern "C" void func_002E24D0(func_002E24D0_sFx* self)
+extern "C" void cDynamicSprayFX_render(cDynamicSprayFX_render_sFx* self)
 {
     if (self->owner->mIsOnScreen != 0) {
         int i;
@@ -3426,17 +3426,17 @@ extern "C" void func_002E24D0(func_002E24D0_sFx* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_selectEmittersForLOD);
 #ifdef SKIP_ASM
 /**
  * Chooses which spray emitters run for the rider's detail level (mLOD), which it also stores in its own mLOD.
  *
  * Sets m_enabled of each of the ten mEmitters. Level 0: emitters 0, 5 and 6 on, 4 on for a player (mIsPlayer) or in
  * an NIS (mIsInNIS), 1, 2, 3, 7, 8 and 9 on for a player. Level 1: 0, 5 and 6 on, 1, 2, 3, 7 and 8 for a player, 4 and
- * 9 off. Other levels: 5 on, 6 for a player, the rest off. func_002DF3B0 and func_002DF920 (when mLOD
+ * 9 off. Other levels: 5 on, 6 for a player, the rest off. cDynamicSprayFX_reset and cDynamicSprayFX_update (when mLOD
  * changes) call it.
  */
-extern "C" void func_002E2550(cDynamicSprayFX* self)
+extern "C" void cDynamicSprayFX_selectEmittersForLOD(cDynamicSprayFX* self)
 {
     int mode = self->mRider->mLOD;
     self->mLOD = mode;
@@ -3487,7 +3487,7 @@ extern "C" void func_002E2550(cDynamicSprayFX* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
+INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_tuneBurstEmitters);
 #ifdef SKIP_ASM
 struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); };
 
@@ -3498,11 +3498,11 @@ struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); 
  * each) at +0x10, +0x18 and +0xCC to 55, 25, 170 and 30, 20, 60 for a player, or 24.75, 5, 76.5 and 19.5, 8, 39
  * otherwise, then re-initialises emitters 5 and 6 through their virtual slot 3 with their settings and their
  * m_emitter.SeedX0. The
- * cDynamicSprayFX constructor and func_002DF3B0 call it.
+ * cDynamicSprayFX constructor and cDynamicSprayFX_reset call it.
  *
  * @param vself  the spray effect (cDynamicSprayFX, this)
  */
-extern "C" void func_002E26B8(cDynamicSprayFX* vself)
+extern "C" void cDynamicSprayFX_tuneBurstEmitters(cDynamicSprayFX* vself)
 {
     int on = vself->mRider->mViewIndex >= 0;
     vself->mIsPlayer = on;
@@ -5455,7 +5455,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_cTransitionObj__FPv);
 /**
  * Constructs a transition object: installs cTransitionObj_vtbl.
  *
- * The wipe and circle constructors (cWipe_TObj_cWipe_TObj, func_002EBD88, cCircle_TObj_cCircle_TObj), the fade object code and
+ * The wipe and circle constructors (cWipe_TObj_cWipe_TObj, cCircle_TObj_cCircle_TObj1, cCircle_TObj_cCircle_TObj), the fade object code and
  * cSSXScriptEngine_MakeTransitionObject run it as the base constructor.
  *
  * @return @p self
@@ -6440,13 +6440,13 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX__cSpeedBoostFX);
 #include "visualfx/boardwakefx_classes.h"
 
 /**
- * Destroys a speed boost effect: frees its ribbon points (mStreamBuf) and calls func_0037C720 on the graphics manager
+ * Destroys a speed boost effect: frees its ribbon points (mStreamBuf) and calls cPS2GraphicsMan_setScreenFade on the graphics manager
  * with 0.
  */
 cVbDtor002E64C0::~cVbDtor002E64C0()
 {
     if (mStreamBuf != 0) cMemMan_free(mStreamBuf);
-    func_0037C720(GrMan_boardwakefx, 0.0f);
+    cPS2GraphicsMan_setScreenFade(GrMan_boardwakefx, 0.0f);
 }
 
 // PORT: the compiler names this dtor _$_15cVbDtor002E64C0; expose it under the address-derived name.
@@ -7019,8 +7019,8 @@ void cSpeedBoostFX::UpdateSpeedBoostTrail()
 INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_render);
 #ifdef SKIP_ASM
 extern int cPowerUpFXToggles_m_EnableSpeedBoostFX;
-extern "C" void* func_0037A260(void* gfx, int n);
-extern "C" void func_0037A430(void* gfx);
+extern "C" void* cPS2GraphicsMan_beginTriStripPacket(void* gfx, int n);
+extern "C" void cPS2GraphicsMan_endTriStripPacket(void* gfx);
 
 
 // The x, y, z of a vertex position from a trail corner (On Tour t4Vector = t3Vector form).
@@ -7168,7 +7168,7 @@ void cSpeedBoostFX::render()
     }
     if (mSpeedBoostTrailNumSegs >= 2) {
         cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-        tBxVertex* verts = (tBxVertex*)func_0037A260(gfx, mSpeedBoostTrailNumSegs * 2);
+        tBxVertex* verts = (tBxVertex*)cPS2GraphicsMan_beginTriStripPacket(gfx, mSpeedBoostTrailNumSegs * 2);
         // PORT: g++ minimum operator (<?).
         float len = mTrailLength <? mSpeedBoostTrailCurrentLength;
         float acc = 0.0f;
@@ -7193,7 +7193,7 @@ void cSpeedBoostFX::render()
             pos.w = 1.0f;
             setVtx_7A10(verts, vertIdx++, 1.0f, vv, vertColour, pos);
         }
-        func_0037A430(gfx);
+        cPS2GraphicsMan_endTriStripPacket(gfx);
     }
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop--;
 }

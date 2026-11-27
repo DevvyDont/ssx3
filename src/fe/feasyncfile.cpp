@@ -1619,7 +1619,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 struct sOwner1A56D0;
 extern "C" bool cFEStateNetMessenger_hasName(cFEStateNetMessenger* self, const char* name);
-extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
+extern "C" void tFEStringPtrVector_insertAux(void* vec, void** pos, void* const* val);
 extern char str_cBXString[];
 
 static inline BuddyMan* GetSession_001A54D8()
@@ -1653,7 +1653,7 @@ static inline void PushBack1A54D8(cFEStateNetMessenger* feStateNetMessenger, voi
         Construct1A54D8(((sElem1A54D8*)feStringPtrVector->mpFinish), x);
         ++(*(sElem1A54D8**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(feStringPtrVector, (void**)((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish), &x);
+        tFEStringPtrVector_insertAux(feStringPtrVector, (void**)((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish), &x);
     }
 }
 
@@ -1792,7 +1792,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 struct sOwner1A5450;
 extern "C" void cFEStateNetMessenger_clearNames(cFEStateNetMessenger* self);
-extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
+extern "C" void tFEStringPtrVector_insertAux(void* vec, void** pos, void* const* val);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern char str_cBXString[];
 extern char str_playerMenu[];
@@ -1832,7 +1832,7 @@ static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, voi
         Construct1A5898(((sElem1A5898*)feStringPtrVector->mpFinish), x);
         ++(*(sElem1A5898**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(feStringPtrVector, (void**)((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish), px);
+        tFEStringPtrVector_insertAux(feStringPtrVector, (void**)((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish), px);
     }
 }
 
@@ -2618,7 +2618,7 @@ extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void buildRoomDisplayName(const char* src, void* out);
 extern "C" void strcpy1(void* str, int a1);
-extern "C" void func_002C2688(void* str, unsigned short* s);
+extern "C" void strcat1(void* str, unsigned short* s);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1A7390(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" unsigned short* cFont_textSmartLimit1(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
@@ -2750,8 +2750,8 @@ extern "C" void cFEStateNet_showBuddyPresence(cFEStateNet* self, const char* nam
         UIAsciiToUnicode_i(wsp, sp.c);
         buildRoomDisplayName(detail1, w1);
         strcpy1(out, str);
-        func_002C2688(out, wsp);
-        func_002C2688(out, w1);
+        strcat1(out, wsp);
+        strcat1(out, w1);
         cUIText_setUnicodeString(locationText, (char*)out);
         break;
     }
@@ -3142,7 +3142,7 @@ extern "C" void* func_0041610C(void* dst, void* src, int n);
 
 
 
-extern "C" void func_001DB918(tFEPrivateMessageVector* vec, cPrivateMessage** pos, cPrivateMessage* const* x);
+extern "C" void tFEPrivateMessageVector_insertAux(tFEPrivateMessageVector* vec, cPrivateMessage** pos, cPrivateMessage* const* x);
 
 static inline cPrivateMessage** Copy1A7DD8(cPrivateMessage** first, cPrivateMessage** last, cPrivateMessage** result)
 {
@@ -3154,7 +3154,7 @@ static inline cPrivateMessage** Copy1A7DD8(cPrivateMessage** first, cPrivateMess
 /**
  * Appends a cPrivateMessage to mMessages, first deleting the oldest messages while 31 or more are kept.
  *
- * The oldest ones are deleted through their vtable entry 1 (destructor, flags 3). Grows the vector with func_001DB918
+ * The oldest ones are deleted through their vtable entry 1 (destructor, flags 3). Grows the vector with tFEPrivateMessageVector_insertAux
  * when it is full.
  *
  * @param selfp  the read-message popup state (this)
@@ -3184,7 +3184,7 @@ extern "C" void cFEStateReadMessagePopup_addMessage(cFEStateReadMessagePopup* se
         if (slot) *slot = x;
         self->mMessages.mpFinish++;
     } else {
-        func_001DB918(messageVec, self->mMessages.mpFinish, &x);
+        tFEPrivateMessageVector_insertAux(messageVec, self->mMessages.mpFinish, &x);
     }
 }
 #endif
@@ -3504,7 +3504,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet__cFEStateNet);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_001DB718(void* self);
+extern "C" void tLobbyEventList_clear(void* self);
 extern "C" void cUIState__cUIState(void* self, int flags);
 void operator_delete(int*);
 
@@ -3549,7 +3549,7 @@ extern "C" void f_1A85D0(cFEStateNet* self, int flags) __asm__("cFEStateNet__cFE
  * Destroys the cFEStateNet part of an online front-end state.
  *
  * Restores the vtable cFEStateNet_vtbl, deletes every queued event in mMsgList (each through its virtual destructor),
- * frees the mpPopupTextBuf text buffer, clears the list (func_001DB718) and frees its sentinel, destroys the
+ * frees the mpPopupTextBuf text buffer, clears the list (tLobbyEventList_clear) and frees its sentinel, destroys the
  * mszTargetUser string and runs the cUIState destructor cUIState__cUIState with @p flags.
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object)
@@ -3569,7 +3569,7 @@ extern "C" void f_1A85D0(cFEStateNet* self, int flags)
         self->mpPopupTextBuf = 0;
     }
     sList1A85D0* msgList = (sList1A85D0*)&self->mMsgList;
-    func_001DB718(msgList);
+    tLobbyEventList_clear(msgList);
     operator_delete((int*)msgList->node);
     cBXString__cBXString(&self->mszTargetUser, 2);
     cUIState__cUIState(self, flags);
@@ -11181,8 +11181,8 @@ INCLUDE_ASM("fe/feasyncfile", buildRoomDisplayName);
 int GetHashValue32(char* str);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern "C" void strcpy1(void* str, int a1);
-extern "C" void func_002C2540(void* str, const char* s);
-extern "C" void func_002C2688(void* str, unsigned short* s);
+extern "C" void strcpy3(void* str, const char* s);
+extern "C" void strcat1(void* str, unsigned short* s);
 extern "C" int strcmp(const char* a, const char* b);
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
@@ -11245,10 +11245,10 @@ extern "C" void buildRoomDisplayName(const char* src, void* out)
     } else if (strcmp(name, D_004A1A6C) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Beginner));
     } else {
-        func_002C2540(out, name);
+        strcpy3(out, name);
     }
     UIAsciiToUnicode(wext, ext);
-    func_002C2688(out, wext);
+    strcat1(out, wext);
 }
 #endif
 
@@ -11417,7 +11417,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 struct cBXString;
 extern "C" void* cBXString_Concat(void* self, const char* str);
-extern "C" cBXString* func_003189A0(cBXString* self, char** other);
+extern "C" cBXString* cBXString_operatorPlusE1(cBXString* self, char** other);
 
 
 
@@ -11448,7 +11448,7 @@ extern "C" void cFEStateChatRoom_addChatLine(cFEStateChatRoom* self, void* infov
     cBXString text;
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, str_colon_sp);
-    func_003189A0((cBXString*)&text, (char**)(info + 0xC));
+    cBXString_operatorPlusE1((cBXString*)&text, (char**)(info + 0xC));
     cUITextScroll_addAsciiString(self->mpTextScrollChat, text.Str);
     trimAndRestoreTextScroll(self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
     cBXString__cBXString(&text, 2);
@@ -12493,7 +12493,7 @@ extern "C" void cFEStateNetConfig_checkCardAndLoadConfigs(cFEStateNetConfig* sel
 extern "C" void cFEStateNetConfig_checkCardSlot(cFEStateNetConfig* self);
 extern "C" void cFEStateNetConfig_connectWithSelectedConfig(cFEStateNetConfig* self);
 extern "C" int cUIStateStack_popToState(void* p);
-void func_002C67E8(void* self, int a1);
+void cPS2MemCard_selectDevice(void* self, int a1);
 extern char* D_004A1B78_p __asm__("D_004A1B78");
 extern int D_004A1B80;
 
@@ -12515,11 +12515,11 @@ static inline int VCall1B41A8(int slot)
  * Runs one frame of the network-configuration state: updates the network object and steps the connect state
  * machine.
  *
- * Calls D_004A1B78's slot 3 each frame, then by miState: 1 -> 2; 2 (slot 11 idle) func_002C67E8(obj, D_004A1B80),
+ * Calls D_004A1B78's slot 3 each frame, then by miState: 1 -> 2; 2 (slot 11 idle) cPS2MemCard_selectDevice(obj, D_004A1B80),
  * -> 3; 3 (idle) cFEStateNetConfig_checkCardSlot; 4 cFEStateNetConfig_checkCardAndLoadConfigs; 5 counts miWaitFrames down and, when it runs out, either reports
  * error popup 0x842 (slot 53 returns 0: cFEStateNetConfig_showConfigLists(self, -1), cFEStateNetConfig_showCardErrorPopup(self, 0x842, 0x18, D_004A1B80)) or
  * pops the state stack (cUIStateStack_popToState on mpEngine + 0x18), then returns to 0; while still waiting it falls through
- * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) func_002C67E8, -> 8,
+ * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) cPS2MemCard_selectDevice, -> 8,
  * 8 (idle) cFEStateNetConfig_connectWithSelectedConfig (connect with the chosen setting). Ends with the cFEStateNet update (cFEStateNet_onUpdate).
  */
 void cFEStateNetConfig::onUpdate()
@@ -12535,7 +12535,7 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 2:
         if (VCall1B41A8(11) == 0) {
-            func_002C67E8(D_004A1B78_p, D_004A1B80);
+            cPS2MemCard_selectDevice(D_004A1B78_p, D_004A1B80);
             miState = 3;
         }
         break;
@@ -12570,7 +12570,7 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 7:
         if (VCall1B41A8(11) == 0) {
-            func_002C67E8(D_004A1B78_p, D_004A1B80);
+            cPS2MemCard_selectDevice(D_004A1B78_p, D_004A1B80);
             miState = 8;
         }
         break;

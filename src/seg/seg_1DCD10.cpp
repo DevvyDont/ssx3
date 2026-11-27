@@ -483,7 +483,7 @@ struct sKey_C190 {
 
 extern sCtx_C190* D_C190 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sKey_C190 cFogParticleMan_mSortKey_C190[] __asm__("cFogParticleMan_mSortKey");
-extern "C" void func_0037D968(void* self);
+extern "C" void cPS2GraphicsMan_computeMatrices(void* self);
 
 static inline sV3_C190 operator*(const sV3_C190& a, float s)
 {
@@ -566,7 +566,7 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
 /**
  * Adds fog sprites for a list of fog-sphere instances.
  *
- * Uses cGraphicsMan_TheGraphicsMan (refreshing its matrices with func_0037D968 when +0x6B90 is 0). For each instance it
+ * Uses cGraphicsMan_TheGraphicsMan (refreshing its matrices with cPS2GraphicsMan_computeMatrices when +0x6B90 is 0). For each instance it
  * projects the centre of its bounding box (+0x68, +0x74) with the view matrix; at a depth of 25000 or more the instance
  * is skipped, beyond 18000 it fades out linearly. Each point of each part of its mesh (+0x64) is projected with view *
  * instance matrix (+0x10); points at a depth of 500 or less, or behind, are skipped, and the fade ramps in up to 2500.
@@ -584,7 +584,7 @@ extern "C" void cPS2FogParticleMan_addFogInstance(cPS2FogParticleMan* out, sObj_
 {
     sCtx_C190* graphicsMan = D_C190;
     if (graphicsMan->ready == 0)
-        func_0037D968(graphicsMan);
+        cPS2GraphicsMan_computeMatrices(graphicsMan);
     for (int i = 0; i < n; i++) {
         sObj_C190* obj = objs[i];
         sV4_C190 viewCentre = mulMatVec_C190(&graphicsMan->view, sV4_C190(sV3_C190(obj->min.x + obj->max.x, obj->min.y + obj->max.y, obj->min.z + obj->max.z) * 0.5f, 1.0f));
@@ -694,8 +694,8 @@ struct sSort_C7B0 { int idx; int key; };
 // GS packet words are 64-bit `unsigned long`, and uncached (0x30000000) pointers are held in int.
 extern sDma_C7B0* D_004A4474_C7B0 __asm__("D_004A4474");
 extern sGfx_C7B0* cGraphicsMan_TheGraphicsMan_C7B0 __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" unsigned long* func_0038F460_C7B0(sDma_C7B0* dma, unsigned int buf, int a2, int a3) __asm__("func_0038F460");
-extern "C" unsigned int func_0038F668_C7B0(sDma_C7B0* dma, unsigned long* p, int a2) __asm__("func_0038F668");
+extern "C" unsigned long* cPS2ScratchPad_claimBuffer_C7B0(sDma_C7B0* dma, unsigned int buf, int a2, int a3) __asm__("cPS2ScratchPad_claimBuffer");
+extern "C" unsigned int cPS2ScratchPad_flushBufferTo_C7B0(sDma_C7B0* dma, unsigned long* p, int a2) __asm__("cPS2ScratchPad_flushBufferTo");
 
 static inline int FBits_C7B0(float f) { return *(int*)&f; }
 
@@ -704,14 +704,14 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
  *
  * Called through slot 3 of the cPS2FogParticleMan vtable (cPS2FogParticleMan_vtbl) by cFogParticleMan_render after it has sorted the
  * sort keys in cFogParticleMan_mSortKey. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
- * opens a packet at the graphics manager's current buffer address (+0x5A00) with func_0038F460, writes a DMA cnt tag, a
+ * opens a packet at the graphics manager's current buffer address (+0x5A00) with cPS2ScratchPad_claimBuffer, writes a DMA cnt tag, a
  * VIF DIRECT code, a GIF tag that sets PRIM to 0x56 (textured, alpha-blended sprite) and a REGLIST GIF tag of 5
  * registers (ST, RGBAQ, XYZ2, ST, XYZ2) looped once per sprite, then five words per sprite taken in mSortKey order from
  * mSprites: ST (0,0) and (1,1) scaled by the sprite's mTopLeft.w (its 1/w, also the Q of RGBAQ), the colour from
  * mColour (alpha in mColour[0]), and the two corners from mTopLeft and mBottomRight with z scaled by 1/w. An odd sprite
  * count gets one zero filler word.
  *
- * func_0038F668 closes the packet; when the graphics manager's render ring (+0x18F0) holds fewer than 2600 entries a
+ * cPS2ScratchPad_flushBufferTo closes the packet; when the graphics manager's render ring (+0x18F0) holds fewer than 2600 entries a
  * new 128-byte entry is appended (written through the uncached 0x30000000 alias) with a copy of the top render state
  * (+0xE84, its low 5 bits of word 2 replaced from ring +0x69CC4), the packet start and end and the sort key at ring
  * +0x69CC0. The buffer address then moves to the end + 0x10. Does nothing when miNumSphere is 0 or less.
@@ -729,7 +729,7 @@ void cPS2FogParticleMan::platformrender()
         int n = max;
         unsigned int buf = graphicsMan->bufAddr;
         if (left < n) n = left;
-        unsigned long* packet = func_0038F460_C7B0(D_004A4474_C7B0, buf, -1, 0);
+        unsigned long* packet = cPS2ScratchPad_claimBuffer_C7B0(D_004A4474_C7B0, buf, -1, 0);
         int oddCount;
         int qwc;
         float st0[2];
@@ -768,7 +768,7 @@ void cPS2FogParticleMan::platformrender()
             packet += 5;
         }
         if (oddCount) *packet++ = 0;
-        unsigned int next = func_0038F668_C7B0(D_004A4474_C7B0, packet, 4);
+        unsigned int next = cPS2ScratchPad_flushBufferTo_C7B0(D_004A4474_C7B0, packet, 4);
         sRing_C7B0* ring = graphicsMan->ring;
         sRS_C7B0* rs = graphicsMan->top;
         if (ring->count < 2600) {

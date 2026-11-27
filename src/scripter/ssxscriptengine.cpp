@@ -484,8 +484,8 @@ struct cBXStringLocal : cBXString {
     ~cBXStringLocal() { cBXString_dtor_local(this, 2); }
     cBXStringLocal& operator=(const cBXStringLocal& s) __asm__("cBXString_operatorE");
 };
-cBXStringLocal operator+(const char* a, const cBXStringLocal& b) __asm__("func_003186D0");
-cBXStringLocal operator+(const cBXStringLocal& a, const char* b) __asm__("func_00318630");
+cBXStringLocal operator+(const char* a, const cBXStringLocal& b) __asm__("cBXString_operatorPlus2");
+cBXStringLocal operator+(const cBXStringLocal& a, const char* b) __asm__("cBXString_operatorPlus1");
 extern "C" void* ASYNCFILE_load_8B98(const char* name, int flags) __asm__("ASYNCFILE_load");
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int slot, const char* name, int flags, int key, int a, int b);
 extern const char str_data_scripts_scdat_big_data_scripts_scfi[];

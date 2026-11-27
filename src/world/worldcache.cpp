@@ -695,8 +695,8 @@ struct sBXStr_7FC0
 };
 
 extern "C" void* cBXString_cBXString2(sBXStr_7FC0* self, const char* s);
-extern "C" sBXStr_7FC0* func_00318630(sBXStr_7FC0* self, sBXStr_7FC0* a, const char* str);
-extern "C" sBXStr_7FC0* func_003186D0(sBXStr_7FC0* self, const char* str, sBXStr_7FC0* b);
+extern "C" sBXStr_7FC0* cBXString_operatorPlus1(sBXStr_7FC0* self, sBXStr_7FC0* a, const char* str);
+extern "C" sBXStr_7FC0* cBXString_operatorPlus2(sBXStr_7FC0* self, const char* str, sBXStr_7FC0* b);
 extern "C" void cBXString__cBXString(sBXStr_7FC0* self, int flags);
 
 struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
@@ -716,8 +716,8 @@ int cWorldCache::init(const char* name, int pNash)
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
-    func_003186D0(&full, str_bar_e, (cBXString_cBXString2(&base, name), &base));
-    func_00318630(&path, &full, str_sdb);
+    cBXString_operatorPlus2(&full, str_bar_e, (cBXString_cBXString2(&base, name), &base));
+    cBXString_operatorPlus1(&path, &full, str_sdb);
     *(void**)this = FILE_load(path.p, 0x2000000);
     cBXString__cBXString(&path, 2);
     cBXString__cBXString(&full, 2);

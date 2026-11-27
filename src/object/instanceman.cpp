@@ -59,7 +59,7 @@ void cInstanceMan_copyInstance(void* vself, sInstanceStruct* dst, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_003512C0);
+INCLUDE_ASM("object/instanceman", cInstanceMan_getInstanceRecord);
 #ifdef SKIP_ASM
 struct sInstHandle {
     unsigned int gen : 8;
@@ -89,7 +89,7 @@ struct sInstPool {
  * @param handle  instance id (tResourceID)
  * @return the record, or 0 when the id belongs to another section
  */
-extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
+extern "C" sInstSlot* cInstanceMan_getInstanceRecord(sInstPool* self, unsigned int handle)
 {
     if ((handle & 0xFF) == self->gen) {
         sInstSlot* slot = &self->slots[handle >> 8];

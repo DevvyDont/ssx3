@@ -603,17 +603,17 @@ void cCommSystem::netConnLocalAddr(int *localAddr)
 INCLUDE_ASM("seg/seg_156860", func_00256088);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0031B008_6088(void *, int, void *) __asm__("func_0031B008");
+extern "C" void shutdownAndLoadExec_6088(void *, int, void *) __asm__("shutdownAndLoadExec");
 extern char str_cdrom0_NETGUI_NTGUI_ELF_1[];
 extern int D_004A2EC0;
 
 /**
- * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (func_0031B008 with 1 and D_004A2EC0).
+ * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (shutdownAndLoadExec with 1 and D_004A2EC0).
  *
  * cFEStateNetConfig_onCreateConfigPopupEvent and the debug menu screen call it.
  */
 extern "C" void func_00256088(void) {
-    func_0031B008_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
+    shutdownAndLoadExec_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
 }
 #endif
 
@@ -1575,12 +1575,12 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setState);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cGameComm_calcLatency(cGameComm* arg0);
 extern "C" void func_00258870(cGameComm*, int, int);
-extern "C" void func_0031AD18(void);
+extern "C" void clearDiscTrayOpened(void);
 /**
  * Switches the handshake and race state machine (mState) to a new tGameComm state.
  *
  * Entering GameActive (14) computes the latency (cGameComm_calcLatency), arms a 3600-frame link timeout and clears the
- * flag D_004A3ED0 (func_0031AD18); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
+ * flag D_004A3ED0 (clearDiscTrayOpened); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
  * 13 (each step's start, not its Wait) arm an 1800-frame timeout. func_00258870 skips arming while either side is
  * paused before the start gate.
  *
@@ -1593,7 +1593,7 @@ void cGameComm::setState(int mode)
     case kGameComm_GameActive:
         calcLatency();
         func_00258870(this, 3600, 0);
-        func_0031AD18();
+        clearDiscTrayOpened();
         mState = mode;
         return;
     case kGameComm_GameOver:

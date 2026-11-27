@@ -8,7 +8,7 @@
 //   cFade_TObj    a full-screen rectangle with the colour's alpha scaled by amount;
 //   cWipe_TObj    a full-screen rectangle slid in from a side (mHDir / mVDir: -1, 0 or 1);
 //   cCircle_TObj  an iris: everything outside a circle of radius (1 - amount) * 800 around (mOriginX, mOriginY); the
-//                 one-colour ctor picks a random origin on the 640x480 screen, func_002EBD88 takes it explicitly.
+//                 one-colour ctor picks a random origin on the 640x480 screen, cCircle_TObj_cCircle_TObj1 takes it explicitly.
 // Base cTransitionObj (On Tour 0x4, vptr only; vtable cTransitionObj_vtbl 0x004880E0: 1 dtor, 2 Draw = pure virtual):
 // its operator new / delete hand out one of four static 0x64-byte buffers (cTransitionObj_mBuffer, in-use flags cTransitionObj_mbBufferUsed;
 // cTransitionObj_operator_new ignores the size its callers pass), so the objects are never heap-allocated.
@@ -25,7 +25,7 @@
 // 0x00488080.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, the base's vptr written out inline. Evidence tags:
-//   [R] retail ctors (cFade_TObj_cFade_TObj, cWipe_TObj_cWipe_TObj, cCircle_TObj_cCircle_TObj, func_002EBD88), dtors and
+//   [R] retail ctors (cFade_TObj_cFade_TObj, cWipe_TObj_cWipe_TObj, cCircle_TObj_cCircle_TObj, cCircle_TObj_cCircle_TObj1), dtors and
 //       the pool allocation sizes;
 //   [P] the preview has the same ctor __10cFade_TObjG5tARGB (colour by value); tools/layout_xlate.py pairs the dtors
 //       and Draws: 0x0, 0x4-0x13 (the colour), 0x14 and 0x18, preview == retail;
@@ -80,8 +80,8 @@ struct cCircle_TObj {
     // --- cCircle_TObj
     tARGB mScreenColour;            // 0x04 [O]; [R] both ctors; [U] Draw passes its address to the rectangle and
                                     //      vertex helpers (func_002EB938, InitVertex)
-    float mOriginX;                 // 0x14 [O]; [R] ctor (rand % 1000) * 0.64, func_002EBD88 originX; [U] Draw (lwc1)
-    float mOriginY;                 // 0x18 [O]; [R] ctor (rand % 1000) * 0.48, func_002EBD88 originY; [U] Draw (lwc1)
+    float mOriginX;                 // 0x14 [O]; [R] ctor (rand % 1000) * 0.64, cCircle_TObj_cCircle_TObj1 originX; [U] Draw (lwc1)
+    float mOriginY;                 // 0x18 [O]; [R] ctor (rand % 1000) * 0.48, cCircle_TObj_cCircle_TObj1 originY; [U] Draw (lwc1)
 
     // Methods bound to their retail symbols by asm labels.
     void Draw(float amount) __asm__("cCircle_TObj_Draw");

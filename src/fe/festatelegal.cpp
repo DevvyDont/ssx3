@@ -64,7 +64,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void func_002C2868(char* s);
+extern "C" void lowercaseString(char* s);
 extern "C" int cBERewardInterface_buyCheatChar(void* iface, int a, int i, int item, int b);
 extern "C" int cBEEconInterface_getPeakPass(void* iface, int a, int i, int item, int b);
 int cBERewardInterface_getTotalNumSongs(void* iface);
@@ -98,7 +98,7 @@ static inline int ItemType_7D38(char* item)
  * Applies a cheat code: lower-cases @p code, hashes it and, when the hash is a known code, unlocks rewards or items for
  * every character of profile 0.
  *
- * Copies @p code into a 128-byte buffer (strcpy, no length check), lower-cases it (func_002C2868()) and compares
+ * Copies @p code into a 128-byte buffer (strcpy, no length check), lower-cases it (lowercaseString()) and compares
  * GetHashValue32() of it (recomputed for every comparison) against a fixed list. Uses the BE interfaces 11 (econ), 13
  * (rewards) and 9 (profiles). Most codes call cBERewardInterface_buyCheatChar() for characters 0-9 with one reward index (10, 11, 13, 15,
  * 17-28) and no money award. 0x82DE683 unlocks peak 1 and 0x4B1FF67 peaks 1 and 2 for all characters through
@@ -120,7 +120,7 @@ extern "C" bool applyCheatCode(char* code)
     void* profiles = cBE_getInterface_Fv(cBE_getBE(), 9);
     char buf[0x80];
     strcpy(buf, code);
-    func_002C2868(buf);
+    lowercaseString(buf);
     if (GetHashValue32(buf) == 0x7E68D) {
         for (int i = 0; i < 10; i++)
             cBERewardInterface_buyCheatChar(unlocks, 0, i, 11, 0);

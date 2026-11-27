@@ -321,7 +321,7 @@ void cRider::addRiderMetrix()
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011BBE8);
+INCLUDE_ASM("ai/rider", cRider_collectWornParts);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
@@ -348,7 +348,7 @@ extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int rider);
  * @param list  receives the entry pointers
  * @return the number of entries written
  */
-extern "C" int func_0011BBE8(cRider* vself, tBEBoltDef** list)
+extern "C" int cRider_collectWornParts(cRider* vself, tBEBoltDef** list)
 {
     cRider* self = (cRider*)vself;
     int n = 0;
@@ -393,11 +393,11 @@ extern "C" int func_0011BBE8(cRider* vself, tBEBoltDef** list)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011BD60);
+INCLUDE_ASM("ai/rider", cRider_addPartModelsToLoadList);
 #ifdef SKIP_ASM
 extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
-void* func_0011B678(void* self);
+void* compareLoadListNames(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
 
 
@@ -407,12 +407,12 @@ extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
  *
  * Each part's name is at +0x28; empty names are skipped and a name already in the table (strcmp) is not added
  * again. New entries (0x108 bytes: the name, -1, 0) go at the end and the count (+0x2940) is incremented; there is no
- * check against the table's 40 entries. The table is then sorted with qsort and func_0011B678.
+ * check against the table's 40 entries. The table is then sorted with qsort and compareLoadListNames.
  *
  * @param list  the part entries
  * @param n  how many there are
  */
-extern "C" void func_0011BD60(cRider* self, void** list, int n)
+extern "C" void cRider_addPartModelsToLoadList(cRider* self, void** list, int n)
 {
     for (int i = 0; i < n; i++, list++)
     {
@@ -435,19 +435,19 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
     next:;
     }
     tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
-    qsort(sortTable, sortTable->MdlLoadNum, 264, func_0011B678);
+    qsort(sortTable, sortTable->MdlLoadNum, 264, compareLoadListNames);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011BE88);
+INCLUDE_ASM("ai/rider", cRider_addPartTexturesToLoadList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
-void* func_0011B678(void* self);
+void* compareLoadListNames(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
 extern "C" int cBEBoltInterface_getCharacterID(int c);
 extern "C" int cBELibrary_getCheatCharacterID(int c);
@@ -462,12 +462,12 @@ extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int b, int a
  *
  * For a cheat character the name is the part's +0x2C string; otherwise cBEBoltInterface_buildBoltModelFileName on interface 9 builds it from the
  * character values cBEBoltInterface_getProfileIndex / cBEBoltInterface_getCharacterID and the part into a 256-byte buffer, skipping parts it rejects. New
- * entries go at start + count, without a bound check, and the range is sorted with qsort and func_0011B678.
+ * entries go at start + count, without a bound check, and the range is sorted with qsort and compareLoadListNames.
  *
  * @param list  the part entries
  * @param n  how many there are
  */
-extern "C" void func_0011BE88(cRider* self, void** list, int n)
+extern "C" void cRider_addPartTexturesToLoadList(cRider* self, void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int characterId = cBEBoltInterface_getCharacterID(self->mAIIndex);
@@ -515,7 +515,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
         }
     }
     tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
-    qsort(&((&sortTable->LoadList[0]))[sortTable->MdlLoadNum], sortTable->TexLoadNum, 264, func_0011B678);
+    qsort(&((&sortTable->LoadList[0]))[sortTable->MdlLoadNum], sortTable->TexLoadNum, 264, compareLoadListNames);
 }
 #endif
 
@@ -549,7 +549,7 @@ void* cMdfArchive_cMdfArchive(void* self);
 void cMdfArchive_attachArchive(void* self, int a1);
 extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
-extern "C" int func_0011BBE8(cRider* self, tBEBoltDef** list);
+extern "C" int cRider_collectWornParts(cRider* self, tBEBoltDef** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 
 
@@ -557,7 +557,7 @@ extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int
  * Adds the rider's outfit model parts from an MDF archive buffer to its animation model.
  *
  * Wraps @p pData in a local cMdfArchive (cMdfArchive_cMdfArchive, cMdfArchive_attachArchive) and gets the rider's part entries
- * (func_0011BBE8: the equipped items of its character, or every part of a cheat character, into a 52-entry
+ * (cRider_collectWornParts: the equipped items of its character, or every part of a cheat character, into a 52-entry
  * list). For each entry's four LOD part names (lodPartNames), the named archive part is added to mAnimModel at
  * that LOD as variant 0. The archive is destroyed with cMdfArchive__cMdfArchive(arc, 2).
  *
@@ -569,7 +569,7 @@ void cRider::parsePartsFromBuf(int pData)
     tBEBoltDef* list[52];
     cMdfArchive_cMdfArchive(&arc);
     cMdfArchive_attachArchive(&arc, pData);
-    int n = func_0011BBE8(this, list);
+    int n = cRider_collectWornParts(this, list);
     for (int i = 0; i < n; i++)
     {
         tBEBoltDef* item = list[i];
@@ -2691,7 +2691,7 @@ void cRider::updateBoost()
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00120378);
+INCLUDE_ASM("ai/rider", cRider_updateLookAnims);
 #ifdef SKIP_ASM
 struct sV_120378 {
     float x, y, z, w;
@@ -2889,7 +2889,7 @@ static inline float Clamp_120378(float v, float lo, float hi)
  * @param vself  the cRider
  */
 // Sets the look-layer anim speed from the rider's speed and (on its frame) picks the head/body look anims.
-extern "C" void func_00120378(cRider* vself)
+extern "C" void cRider_updateLookAnims(cRider* vself)
 {
     cRider* self = (cRider*)vself;
     float sideLimit = 416.66668701171875f;
@@ -3009,20 +3009,20 @@ void cRider::updateOverlapList()
 INCLUDE_ASM("ai/rider", cRider_updateSplitMiscFX);
 #ifdef SKIP_ASM
 extern "C" void func_002F1A08(void*);
-extern "C" void func_002ECF78(void*);
+extern "C" void cBoltOnFXInterface_updateIfDirty(void*);
 
 /**
- * Updates the rider's attached-emitter FX (func_002F1A08) and bolt-on FX (func_002ECF78).
+ * Updates the rider's attached-emitter FX (func_002F1A08) and bolt-on FX (cBoltOnFXInterface_updateIfDirty).
  */
 void cRider::updateSplitMiscFX()
 {
     func_002F1A08(mAttachedEmitterFX);
-    func_002ECF78(mBoltOnFX);
+    cBoltOnFXInterface_updateIfDirty(mBoltOnFX);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00120EB8);
+INCLUDE_ASM("ai/rider", cRider_updateHandlerFX);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* handler);
 
@@ -3031,7 +3031,7 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* handler);
  *
  * @param rider  the cRider
  */
-extern "C" void func_00120EB8(cRider* rider) {
+extern "C" void cRider_updateHandlerFX(cRider* rider) {
     cRiderHandler_updateRiderFX(rider->mRiderHandler);
 }
 #endif
@@ -3208,7 +3208,7 @@ void cRider::updateSplit3()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", cRider_updateSplit4);
 #ifdef SKIP_ASM
-extern "C" void func_00120378(cRider* self);
+extern "C" void cRider_updateLookAnims(cRider* self);
 
 static inline void approach_11F8(sRiderChannel* riderChannel)
 {
@@ -3228,12 +3228,12 @@ static inline void approach_11F8(sRiderChannel* riderChannel)
 /**
  * Runs the rider's look controllers, then moves all 19 slewed channels toward their targets.
  *
- * func_00120378 updates the head and upper-body look controllers; each mSlewed channel then steps cur toward
+ * cRider_updateLookAnims updates the head and upper-body look controllers; each mSlewed channel then steps cur toward
  * target by at most rate.
  */
 void cRider::updateSplit4()
 {
-    func_00120378(this);
+    cRider_updateLookAnims(this);
     approach_11F8(&mSlewed[0]);
     approach_11F8(&mSlewed[1]);
     approach_11F8(&mSlewed[2]);
@@ -3703,7 +3703,7 @@ have_axis:
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00121F30);
+INCLUDE_ASM("ai/rider", cRider_updateLOD);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
@@ -3739,7 +3739,7 @@ static inline t4Vector mtxMulVec_121F30(t4Vector* m, t4Vector* v)
  * Transforms the rider's position (virtual slot 5) by GrMan's view matrix (slot 35), scales the depth by tan(fov) (slot
  * 29) and 0.01: below 6 gives LOD 0, below 10 LOD 1, else 2. Called by cRider_renderBody.
  */
-extern "C" void func_00121F30(cRider* self)
+extern "C" void cRider_updateLOD(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Vector* viewMtx = (t4Vector*)ps2GraphicsMan->GetView();
@@ -3766,21 +3766,21 @@ extern "C" void func_00121F30(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122048);
+INCLUDE_ASM("ai/rider", setDefaultIrradiance);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Builds a 0xA0-byte record with func_00389C38 and passes it to virtual slot 69 of the object at GrMan.
-extern "C" void func_00389C38(void* rec, int flags);
+// Builds a 0xA0-byte record with cIrradiance_buildDefault and passes it to virtual slot 69 of the object at GrMan.
+extern "C" void cIrradiance_buildDefault(void* rec, int flags);
 
 /**
- * Builds a cleared 160-byte light record (func_00389C38 with 0) and hands it to GrMan's virtual slot 69 with 0.
+ * Builds a cleared 160-byte light record (cIrradiance_buildDefault with 0) and hands it to GrMan's virtual slot 69 with 0.
  *
  * Nothing in the source calls it.
  */
-extern "C" void func_00122048()
+extern "C" void setDefaultIrradiance()
 {
     char rec[160];
-    func_00389C38(rec, 0);
+    cIrradiance_buildDefault(rec, 0);
     GrMan->SetIrradiance(*(const tIrradianceInfo*)rec, 0);
 }
 #endif
@@ -3820,18 +3820,18 @@ extern "C" void cIrradiance_Clear(void* p);
 extern "C" void* cRenderStateMan_getIrradiance(int index);
 extern "C" float cRenderStateMan_RimLightIntensityOffset(int index);
 extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
-extern "C" void func_00389CB8(void* m, void* q, float f);
-extern "C" void func_0038A6A8(void* m, void* q, void* p);
-extern "C" void func_00389558(void* m, tRGB* v);
-extern "C" void func_00389520(void* m, t4Vector* q, tRGB* v);
+extern "C" void cIrradiance_addSunTerm(void* m, void* q, float f);
+extern "C" void cIrradiance_addWorldLight(void* m, void* q, void* p);
+extern "C" void addVec3InPlace(void* m, tRGB* v);
+extern "C" void cIrradiance_addLightFromDirection(void* m, t4Vector* q, tRGB* v);
 
 /**
  * Builds the rider's light block (PlayerIrradiance) from its environment, active world lights and handler lights.
  *
  * Clears the 10-quadword block, copies the rider's lens-table entry (cRenderStateMan_getIrradiance) to its start, adds
- * func_00389CB8's term at the hip position with cRenderStateMan_RimLightIntensityOffset's value, adds each active light of unk_794
- * (func_0038A6A8), then the handler cPlayerLights' extra ambient (func_00389558) and each of its directional
- * lights (func_00389520).
+ * cIrradiance_addSunTerm's term at the hip position with cRenderStateMan_RimLightIntensityOffset's value, adds each active light of unk_794
+ * (cIrradiance_addWorldLight), then the handler cPlayerLights' extra ambient (addVec3InPlace) and each of its directional
+ * lights (cIrradiance_addLightFromDirection).
  */
 void cRider::SetRiderLights()
 {
@@ -3843,12 +3843,12 @@ void cRider::SetRiderLights()
     cRider_getHipPosition(&hipPos, this);
     tIrradianceInfo* lightState = &PlayerIrradiance;
     {
-        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(getAIIndex()));
+        cIrradiance_addSunTerm(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(getAIIndex()));
     }
     for (int i = 0; i < 8; i++) {
         void* light = ActiveLights[i];
         if (light != 0)
-            func_0038A6A8(&PlayerIrradiance, &hipPos, light);
+            cIrradiance_addWorldLight(&PlayerIrradiance, &hipPos, light);
     }
     cRiderHandler* x = mRiderHandler;
     cPlayerLights* playerLights = x ? &x->PlayerLights : 0;
@@ -3856,14 +3856,14 @@ void cRider::SetRiderLights()
         {
             tRGBColour lightColour(playerLights->mExtraAmbientLight.R, playerLights->mExtraAmbientLight.G,
                                    playerLights->mExtraAmbientLight.B);
-            func_00389558(&PlayerIrradiance, &lightColour);
+            addVec3InPlace(&PlayerIrradiance, &lightColour);
         }
         for (int j = 0; j < playerLights->mNumDirectionalLights; j++) {
             t4Vector* qq = &playerLights->mDirectionalLightDirections[j];
             tRGBColour lightColour(playerLights->mDirectionalLightColours[j].R,
                                    playerLights->mDirectionalLightColours[j].G,
                                    playerLights->mDirectionalLightColours[j].B);
-            func_00389520(&PlayerIrradiance, qq, &lightColour);
+            cIrradiance_addLightFromDirection(&PlayerIrradiance, qq, &lightColour);
         }
     }
 }
@@ -3965,7 +3965,7 @@ int cRider::renderClip()
 INCLUDE_ASM("ai/rider", cRider_renderBody);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00121F30(cRider* self);
+extern "C" void cRider_updateLOD(cRider* self);
 extern "C" void cAnimModel_render(void* model, int lod, int a, int b);
 
 struct sVec4_122448 { float v[4]; };
@@ -3975,7 +3975,7 @@ extern sVec4_122448 t4vect_Zero_v122448 __asm__("t4vect_Zero");
 /**
  * Draws the rider's model when it is on screen, then updates the low-detail flag unk_B1C.
  *
- * Picks mLOD (func_00121F30), loads the rider's lights (graphics slot 69 with PlayerIrradiance), sets bits 2-6 of the
+ * Picks mLOD (cRider_updateLOD), loads the rider's lights (graphics slot 69 with PlayerIrradiance), sets bits 2-6 of the
  * draw state's word 1 to 5 and draws mAnimModel between two graphics slot-27 calls (with mPosition, then the
  * zero vector). The board and player additive flags come from the handler's cPlayerLights, or uber level 11
  * and up. When the view manager's word +0x14 is 0 or unk_B1C is set, unk_B1C becomes 1 if the rider is off
@@ -3993,7 +3993,7 @@ void cRider::renderBody()
         int additiveBoard = 0;
         if (playerLights->mBoardIsAdditive || mUberLevel >= 11)
             additiveBoard = 1;
-        func_00121F30(this);
+        cRider_updateLOD(this);
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &PlayerIrradiance, 1);
@@ -4072,7 +4072,7 @@ void cRider::renderFX()
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122638__FPv);
+INCLUDE_ASM("ai/rider", cRider_renderAttachedEmitterFX__FPv);
 #ifdef SKIP_ASM
 /**
  * Renders the rider's attached emitter FX: func_002F2088 on mAttachedEmitterFX.
@@ -4082,7 +4082,7 @@ INCLUDE_ASM("ai/rider", func_00122638__FPv);
  * @param vself  the cRider
  * @return func_002F2088's result
  */
-void* func_00122638(void* vself)
+void* cRider_renderAttachedEmitterFX(void* vself)
 {
     cRider* self = (cRider*)vself;
     return func_002F2088(self->mAttachedEmitterFX);
@@ -4105,7 +4105,7 @@ void cRider::flushActiveLights()
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122680);
+INCLUDE_ASM("ai/rider", drawEmptyHud2DPass);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: an empty ASSERT macro (`ASSERT_2680(SSXApp != 0)`, `do { } while (0)`) at entry, an unused `int unused[4]`
@@ -4179,7 +4179,7 @@ struct sV2v_2680 {
  * texture, two draw-state fields and the DebugFont's +0x28 pair (2, 2, then 0, 0), and ends with PopView, PopViewport and a
  * stack pop. Nothing in the source calls it.
  */
-extern "C" void func_00122680(void)
+extern "C" void drawEmptyHud2DPass(void)
 {
     ASSERT_2680(SSXApp != 0);
     if (cRenderToggles_m_DisableHUD == 0) {
@@ -4976,8 +4976,8 @@ extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, flo
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
-extern "C" void func_0030EA80(void* model, int i, int channel);
-extern "C" void func_0030E9E0(void* model, int i, int channel);
+extern "C" void cAnimModel_disablePart(void* model, int i, int channel);
+extern "C" void cAnimModel_enablePart(void* model, int i, int channel);
 void* cBEBoltInterface_getBoltDB_3640() __asm__("cBEBoltInterface_getBoltDB__FPv");
 extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int id);
 int cBEBoltDB_getNumCharBolts(void* tbl, int g);
@@ -5135,12 +5135,12 @@ void cRider::OnStartObjectUse()
     initTrack_3640(this, 16, zeroF, zeroF);
     initTrack_3640(this, 17, zeroF, zeroF);
     initTrack_3640(this, 18, zeroF, zeroF);
-    func_0030E9E0(mAnimModel, 5, 0);
-    func_0030E9E0(mAnimModel, 6, 0);
-    func_0030E9E0(mAnimModel, 8, 0);
-    func_0030E9E0(mAnimModel, 9, 0);
-    func_0030EA80(mAnimModel, 4, 0);
-    func_0030EA80(mAnimModel, 7, 0);
+    cAnimModel_enablePart(mAnimModel, 5, 0);
+    cAnimModel_enablePart(mAnimModel, 6, 0);
+    cAnimModel_enablePart(mAnimModel, 8, 0);
+    cAnimModel_enablePart(mAnimModel, 9, 0);
+    cAnimModel_disablePart(mAnimModel, 4, 0);
+    cAnimModel_disablePart(mAnimModel, 7, 0);
     if (rec->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = cBEBoltInterface_getBoltDB_3640();
@@ -5153,10 +5153,10 @@ void cRider::OnStartObjectUse()
             int id = entry->modelPart;
             if (id >= 0 && (entry->flags & 0x40)) {
                 if (lookup_3640(db, entry->id)->flags & 0x10) {
-                    func_0030EA80(mAnimModel, id, 0);
-                    func_0030EA80(mAnimModel, id, 1);
-                    func_0030EA80(mAnimModel, id, 2);
-                    func_0030EA80(mAnimModel, id, 3);
+                    cAnimModel_disablePart(mAnimModel, id, 0);
+                    cAnimModel_disablePart(mAnimModel, id, 1);
+                    cAnimModel_disablePart(mAnimModel, id, 2);
+                    cAnimModel_disablePart(mAnimModel, id, 3);
                 }
             }
         }
@@ -5172,8 +5172,8 @@ extern "C" void cScriptObjRider_OnEndObjectUse(void* self);
 extern "C" void cRider_initAlways(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
-extern "C" void func_0030EA80(void* model, int i, int channel);
-extern "C" void func_0030E9E0(void* model, int i, int channel);
+extern "C" void cAnimModel_disablePart(void* model, int i, int channel);
+extern "C" void cAnimModel_enablePart(void* model, int i, int channel);
 tSSXHeaderActor* GetSSXActorHeader(void* self);
 // PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
 void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
@@ -5210,7 +5210,7 @@ static inline void* model_123B48(cRider* self)
 
 static inline void setChan_123B48(cRider* self, int id, int ch)
 {
-    func_0030E9E0(model_123B48(self), id, ch);
+    cAnimModel_enablePart(model_123B48(self), id, ch);
 }
 
 static inline int entItem_123B48(tBEBoltDef* e)
@@ -5244,13 +5244,13 @@ void cRider::OnEndObjectUse()
     int* ids = mSoundHandles;
     mHiddenNIS = 0;
     mOnGroundNIS = 1;
-    func_0030EA80(mAnimModel, 5, 0);
-    func_0030EA80(mAnimModel, 6, 0);
-    func_0030EA80(mAnimModel, 8, 0);
-    func_0030EA80(mAnimModel, 9, 0);
-    func_0030EA80(mAnimModel, 11, 0);
-    func_0030E9E0(mAnimModel, 4, 0);
-    func_0030E9E0(mAnimModel, 7, 0);
+    cAnimModel_disablePart(mAnimModel, 5, 0);
+    cAnimModel_disablePart(mAnimModel, 6, 0);
+    cAnimModel_disablePart(mAnimModel, 8, 0);
+    cAnimModel_disablePart(mAnimModel, 9, 0);
+    cAnimModel_disablePart(mAnimModel, 11, 0);
+    cAnimModel_enablePart(mAnimModel, 4, 0);
+    cAnimModel_enablePart(mAnimModel, 7, 0);
     if (GetSSXActorHeader(mpEntity)->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = cBEBoltInterface_getBoltDB_noarg();
@@ -5589,7 +5589,7 @@ extern t4Vector t4vect_ZAxis_42B0 __asm__("t4vect_ZAxis");
 
 extern "C" void cWorldLine_cWorldLine(cWorldLine* ray, const t4Vector& a, const t4Vector& b, int n, float t);
 extern "C" float cOverlapList_terrainIntersect1(void* coll, cWorldLine* ray, tIntersectInfo* hit, int flags);
-void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+void cRiderHandler_recordSprayBurst_42B0(void* self, void* a, void* b, int c, float x) __asm__("cRiderHandler_recordSprayBurst__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector length).
 static inline float Length_42B0(const t4Vector& v)
@@ -5748,7 +5748,7 @@ static inline t4Vector SubV_42B0(sVecP_42B0 a, const t4Vector& b)
  *
  * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, GroundVelocity = zero, mSurfaceType and the four
  * audio values 0. On a hit: the first contact (unk_AFC set, unk_B00 clear) is reported to the rider handler
- * (func_00111AA0 with the hit point, its normal, material and the length of its third vector); then unk_B00 = 1,
+ * (cRiderHandler_recordSprayBurst with the hit point, its normal, material and the length of its third vector); then unk_B00 = 1,
  * mSurfaceType = the material (0 for -1), mGroundNormal, mGroundContactPoint and GroundVelocity come from the hit, unk_454 =
  * the probe base's height above the hit, mAudioSpeed = speed * 0.00072 (at most 1), mAudioPressure 0.3, mAudioEdging 0,
  * and mAudioBraking = (speed - unk_B04) * 0.0036 (at most 1) when the speed rose since the last call, else 0: the sign
@@ -5795,7 +5795,7 @@ void cRider::SetNISGroundVectors(void* pRiderPos)
         return;
     }
     if (mNISShowBoardVisualFX != 0 && mOnGroundNIS == 0) {
-        func_00111AA0_42B0(mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
+        cRiderHandler_recordSprayBurst_42B0(mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
     }
     mOnGroundNIS = 1;
     mSurfaceType = hit.Stype;
@@ -5855,8 +5855,8 @@ extern "C" void cRider_updateSkeleton(void* self);
 extern "C" int tEventFlags_isSet1(void* self, int a1);
 extern "C" int tEventFlags_isJustChanged(void* self, int a1);
 extern "C" void tEventFlags_clear1(void* self, int a1);
-extern "C" void func_0030E9E0(void* model, int i, int channel);
-extern "C" void func_0030EA80(void* model, int i, int channel);
+extern "C" void cAnimModel_enablePart(void* model, int i, int channel);
+extern "C" void cAnimModel_disablePart(void* model, int i, int channel);
 extern "C" void cRider_updateBoundBox_4788(cRider* self, sVec4* p) __asm__("cRider_updateBoundBox");
 extern void cRider_updateCollideInfo_4788(cRider* self) __asm__("cRider_updateCollideInfo");
 
@@ -6156,7 +6156,7 @@ void cRider::DoInSeqAnimUpdate(tSSXFrameActor* pFrameInfo, float currFrame, floa
         on = tEventFlags_isJustChanged(ch, 0) != 0;
     }
     if (on) {
-        func_0030E9E0(mAnimModel, 11, 0);
+        cAnimModel_enablePart(mAnimModel, 11, 0);
         tEventFlags_clear1(ch, 0);
     } else {
         int on2 = 0;
@@ -6164,7 +6164,7 @@ void cRider::DoInSeqAnimUpdate(tSSXFrameActor* pFrameInfo, float currFrame, floa
             on2 = tEventFlags_isJustChanged(ch, 1) != 0;
         }
         if (on2) {
-            func_0030EA80(mAnimModel, 11, 0);
+            cAnimModel_disablePart(mAnimModel, 11, 0);
             tEventFlags_clear1(ch, 1);
         }
     }
@@ -6622,7 +6622,7 @@ int cRider::syncCheckSum()
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00125B18);
+INCLUDE_ASM("ai/rider", updatePadVibration);
 #ifdef SKIP_ASM
 extern "C" void cPadDevice_clearAllVibrations(void* obj);
 
@@ -6639,7 +6639,7 @@ extern "C" void cPadDevice_clearAllVibrations(void* obj);
  * @param controller  the cPadDevice
  * @param on  0 to stop
  */
-extern "C" void func_00125B18(void* vibState, void* controller, int on)
+extern "C" void updatePadVibration(void* vibState, void* controller, int on)
 {
     float* vibLevels = (float*)vibState;
     void* obj = controller;
@@ -6985,7 +6985,7 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationUpdate);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int id);
-extern "C" void func_00125B18(void* vibState, void* controller, int on);
+extern "C" void updatePadVibration(void* vibState, void* controller, int on);
 
 
 static inline bool riderInRange_1278E8(int v)
@@ -6997,7 +6997,7 @@ static inline bool riderInRange_1278E8(int v)
  * Updates the player's pad vibration once a frame (cRider virtual slot 19).
  *
  * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, cBENewPlayerInterface_getUseDualShock) allows it for
- * the rider's AI index and the replay's first word is not 1-9; then func_00125B18 decays the levels and drives the pad.
+ * the rider's AI index and the replay's first word is not 1-9; then updatePadVibration decays the levels and drives the pad.
  */
 void cPlayer::vibrationUpdate()
 {
@@ -7010,7 +7010,7 @@ void cPlayer::vibrationUpdate()
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }
-        func_00125B18(&player->mVibrationBump, player->Pad, flag);
+        updatePadVibration(&player->mVibrationBump, player->Pad, flag);
     }
 }
 #endif

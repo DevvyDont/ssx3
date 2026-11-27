@@ -394,7 +394,7 @@ INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsActionable);
  * Tells whether the card in a port is ready for use.
  *
  * Through the card's own cMemCard virtuals, with port @p x: not IsInvalid (slot 48, word 97, cPS2MemCard_IsInvalid), not
- * IsDamaged (slot 50, word 101, func_002C67A8__FPv, which always returns 0), IsFormatted1 (slot 56, word 113,
+ * IsDamaged (slot 50, word 101, cPS2MemCard_IsDamaged1__FPv, which always returns 0), IsFormatted1 (slot 56, word 113,
  * cPS2MemCard_IsFormatted) and IsAvailable (slot 52, word 105, cPS2MemCard_IsAvailable). It is word 109 (slot 54) of
  * cPS2MemCard_vtbl, cMemCard::IsActionable; the profile and options screens call it before using a card.
  *

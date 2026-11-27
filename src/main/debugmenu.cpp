@@ -4414,7 +4414,7 @@ extern "C" void* MEM_initblock(void* self, int name, void* size, int infoSize, s
 
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_002516F0);
+INCLUDE_ASM("main/debugmenu", clearMemClassBuffer);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int val, int n);
 extern char memclass[];
@@ -4422,7 +4422,7 @@ extern char memclass[];
 /**
  * Clears the 256-byte buffer memclass with MEM_fill.
  */
-extern "C" void func_002516F0(void)
+extern "C" void clearMemClassBuffer(void)
 {
     MEM_fill(memclass, 0, 0x100);
 }

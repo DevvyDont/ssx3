@@ -34,21 +34,21 @@ struct cTextureMan;
 
 // A GS pixel storage format: the PSM field of the GS FRAME / ZBUF / TEX0 / BITBLTBUF registers (names ours, after the
 // PSM names the GS documentation and the existing notes use). [U] the display modes' formats
-// (tDisplayMode::mDisplayPSM, mFramePSM, mZBufferPSM; mCurrentFBFormat / mCurrentZBFormat): func_0037BD98 counts 32-row
+// (tDisplayMode::mDisplayPSM, mFramePSM, mZBufferPSM; mCurrentFBFormat / mCurrentZBFormat): cPS2GraphicsMan_applyDisplayMode counts 32-row
 // pages for kGS_PSMCT32, PSMCT24, PSMZ32 and PSMZ24 and 64-row pages for kGS_PSMCT16, PSMCT16S, PSMZ16 and PSMZ16S, and
-// func_0037BD38 pairs the colour formats with the z formats 48, 49 and 58 or 50.
+// gs_isZFormatCompatible pairs the colour formats with the z formats 48, 49 and 58 or 50.
 enum eGSPixelStorage {
     kGS_PSMCT32 = 0, kGS_PSMCT24 = 1, kGS_PSMCT16 = 2, kGS_PSMCT16S = 10, kGS_PSMT8 = 19, kGS_PSMT4 = 20,
     kGS_PSMZ32 = 48, kGS_PSMZ24 = 49, kGS_PSMZ16 = 50, kGS_PSMZ16S = 58
 };
 
 // EE interrupt sources the renderer installs handlers for (names after Sony's eekernel.h INTC_VBLANK_S and DMAC_VIF1).
-// [U] cPS2GraphicsMan_Init installs func_003825C0 for INTC cause 2 and func_00382650 for DMA channel 1 (VIF1), and each
+// [U] cPS2GraphicsMan_Init installs intc_handleVblankStart for INTC cause 2 and dmac_handleVif1End for DMA channel 1 (VIF1), and each
 // handler traps on any other cause.
 enum { kINTC_VBLANK_S = 2 };
 
 // The data format of a VIF UNPACK code (the low 4 bits of the 0x60..0x6F command: vn << 2 | vl; names after the EE
-// User's Manual's S-32 ... V4-5). [U] func_00392E98 (render/font) divides a block's byte count by each format's element
+// User's Manual's S-32 ... V4-5). [U] vifPacket_closeUnpack (render/font) divides a block's byte count by each format's element
 // size from that manual: 12 for V3-32, 6 for V3-16, 3 for V3-8, 16 for V4-32, 8 for V2-32 / V4-16, 4 for S-32 /
 // V2-16 / V4-8 and 2 for S-16 / V2-8 / V4-5.
 enum eVIFUnpackFormat {
@@ -58,25 +58,25 @@ enum eVIFUnpackFormat {
 };
 enum { kDMAC_VIF1 = 1 };
 
-// The FIFO field of the GS CSR register (bits 14-15; names ours). [U] the kick thread and func_00382AF0 wait until it
+// The FIFO field of the GS CSR register (bits 14-15; names ours). [U] the kick thread and cPS2GraphicsMan_flipDisplayBuffers wait until it
 // reads "empty" (01) before starting DMA or writing the display registers.
 enum { kGS_CSR_FIFO_MASK = 0xC000, kGS_CSR_FIFO_EMPTY = 0x4000 };
 
-// The GS's alpha scale: 0x80 is fully opaque (1.0) (name ours). [U] func_00382AF0 draws the filter pass with alpha
+// The GS's alpha scale: 0x80 is fully opaque (1.0) (name ours). [U] cPS2GraphicsMan_flipDisplayBuffers draws the filter pass with alpha
 // blending only when the filter alpha (cPS2GraphicsMan::mScreenAlpha) is not 0x80.
 enum { kGSAlphaOne = 0x80 };
 
 // SMODE2's FFMD bit, the field / frame read mode (names after Sony's libgraph SCE_GS_FIELD / SCE_GS_FRAME). [U]
-// func_0037BD98 keeps it in cPS2GraphicsMan::mFieldMode for sceGsResetGraph; func_00382AF0 doubles the display height
+// cPS2GraphicsMan_applyDisplayMode keeps it in cPS2GraphicsMan::mFieldMode for sceGsResetGraph; cPS2GraphicsMan_flipDisplayBuffers doubles the display height
 // for an interlaced frame-mode display.
 enum { kGS_FFMD_FIELD = 0, kGS_FFMD_FRAME = 1 };
 
-// A GS drawing context, as an index (names ours). [U] func_0037D668 writes FRAME_1 (register 76) for 0 and FRAME_2
+// A GS drawing context, as an index (names ours). [U] cPS2GraphicsMan_writeFrameRegPacket writes FRAME_1 (register 76) for 0 and FRAME_2
 // (77) for 1.
 enum eGSContext { kGS_Context1 = 0, kGS_Context2 = 1 };
 
 // A DMA tag's ID field (bits 28-30 of a source-chain tag; names ours, after the tag names the EE DMA documentation
-// uses). [U] func_003720F0, func_00372198 and func_00372348 walk a chain: cnt and ret tags carry QWC quadwords of
+// uses). [U] dma_rebaseChainRefs, dma_flattenChain and dma_packChainCntBlocks walk a chain: cnt and ret tags carry QWC quadwords of
 // data after the tag, a ref tag points elsewhere, and the ret tag ends the walk.
 enum eDMATagID {
     kDMATag_REFE = 0, kDMATag_CNT = 1, kDMATag_NEXT = 2, kDMATag_REF = 3, kDMATag_REFS = 4, kDMATag_CALL = 5,
@@ -91,25 +91,25 @@ struct tDisplayMode {
     char m_name[64];                // 0x00 [O] char m_name[64]; [U] GetDisplayModeName returns the record's start ([O]
                                     //      const char* GetDisplayModeName(int mode))
     char unk_040[0x40];             // 0x40 no retail access seen
-    int mDisplayWidth;              // 0x80 (name ours) [U] SetDisplayMode1 passes it to func_0037BD98, which stores it
+    int mDisplayWidth;              // 0x80 (name ours) [U] SetDisplayMode1 passes it to cPS2GraphicsMan_applyDisplayMode, which stores it
                                     //        as the display width (+0x5A54) and picks MAGH from it (256 / 320 / 384 /
                                     //        512 / 640)
-    int mDisplayHeight;             // 0x84 (name ours) [U] SetDisplayMode1 -> func_0037BD98: the display height
+    int mDisplayHeight;             // 0x84 (name ours) [U] SetDisplayMode1 -> cPS2GraphicsMan_applyDisplayMode: the display height
                                     //        (+0x5A58)
     int mFrameWidth;                // 0x88 (name ours) [P] GetScreenWidth; [U] GetDisplayMode matches the width;
-                                    //        func_0037BD98 stores it in mFBWidth
+                                    //        cPS2GraphicsMan_applyDisplayMode stores it in mFBWidth
     int mFrameHeight;               // 0x8C (name ours) [P] GetScreenHeight; [U] GetDisplayMode matches the height;
-                                    //        func_0037BD98 stores it in mFBHeight
+                                    //        cPS2GraphicsMan_applyDisplayMode stores it in mFBHeight
     int mDisplayPSM;                // 0x90 (name ours) [U] the display pixel format (GetDisplayMode: 32 -> 0, 24 -> 1,
-                                    //        16 -> 2); func_0037BD98 stores it at +0x5A38
+                                    //        16 -> 2); cPS2GraphicsMan_applyDisplayMode stores it at +0x5A38
     int mFramePSM;                  // 0x94 (name ours) [U] the frame-buffer pixel format (GetDisplayMode);
-                                    //        func_0037BD98 stores it in mCurrentFBFormat
+                                    //        cPS2GraphicsMan_applyDisplayMode stores it in mCurrentFBFormat
     int mZBufferPSM;                // 0x98 (name ours) [U] the z-buffer format (GetDisplayMode: 49 = PSMZ24);
-                                    //        func_0037BD98 stores it in mCurrentZBFormat
-    int mInterlace;                 // 0x9C (name ours) [U] SetDisplayMode1 passes it and its inverse to func_0037BD98
+                                    //        cPS2GraphicsMan_applyDisplayMode stores it in mCurrentZBFormat
+    int mInterlace;                 // 0x9C (name ours) [U] SetDisplayMode1 passes it and its inverse to cPS2GraphicsMan_applyDisplayMode
                                     //        (+0x5A44 / +0x5A46; [X] interlace / ffmd)
     int mDTV;                       // 0xA0 (name ours) [U] the mode id GetDisplayMode matches; SetDisplayMode1's last
-                                    //        argument, which func_0037BD98 stores at +0x5A4C (the accessor
+                                    //        argument, which cPS2GraphicsMan_applyDisplayMode stores at +0x5A4C (the accessor
                                     //        cPS2GraphicsMan_GetDTV returns it)
 };
 
@@ -222,7 +222,7 @@ public:
     t4Matrix mNetMatrix;            // 0x58A0 [P] GetNetMatrix copies it after updateNetMat (cPS2GraphicsMan_GetNetMatrix)
     t4Vector mScreenScale;          // 0x58E0 [X] screenScale
     t4Vector mScreenOffset;         // 0x58F0 [X] screenOffset
-    unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] func_00376938, func_0036B158
+    unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] cPS2GraphicsMan_setClippedScissor, func_0036B158
     float mPerspFov;                // 0x5908 (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores its fov;
                                     //        saved by cPS2GraphicsMan_PushViewport; [X] fovOrAspect?
     float mPerspFar;                // 0x590C (name ours) [U] cPS2GraphicsMan_SetViewportPerspective stores its zFar;
@@ -239,83 +239,83 @@ public:
                                     //        func_0036A428 reads it; [X] viewMatrices
     unsigned short mViewScissor[2][4]; // 0x59B0 (name ours) [R] ctor's fourth array loop (2); [U] per view:
                                        //        cPS2GraphicsMan_RenderFullScreenEffects copies mScissor into [view];
-                                       //        func_0036B158 / func_0036C790 draw over it
+                                       //        func_0036B158 / cPS2GraphicsMan_queueLightGlowPass draw over it
     int mNumViews;                  // 0x59C0 (name ours) [U] cPS2GraphicsMan_RenderFullScreenEffects sets view + 1;
-                                    //        accessor func_003956D8; func_00363490 and cRailModifier's split-screen
+                                    //        accessor cPS2GraphicsMan_getNumViews; cPS2DeferManager_buildDmaChains and cRailModifier's split-screen
                                     //        loops run over it; [X] numViews (split screen)
     int NumDisplayModes;            // 0x59C4 [O] cPSPGraphicsMan; [P] GetNumDisplayModes (cPS2GraphicsMan_GetNumDisplayModes)
     int CurrentDisplayMode;         // 0x59C8 [O]; [P] GetDisplayMode (cPS2GraphicsMan_GetDisplayMode1); [R] Init stores -1
     tDisplayMode* DisplayModes;     // 0x59CC [O]; [P] GetScreenWidth/Height read [CurrentDisplayMode] (0xA4 each)
-    int mDither;                    // 0x59D0 (name ours) [R] Init; [U] func_0037BD98 sets 1 for a 16-bit display
-                                    //        format, func_00382AF0 sends it as DTHE; [X] dither
+    int mDither;                    // 0x59D0 (name ours) [R] Init; [U] cPS2GraphicsMan_applyDisplayMode sets 1 for a 16-bit display
+                                    //        format, cPS2GraphicsMan_flipDisplayBuffers sends it as DTHE; [X] dither
     char unk_59D4[0xC];             // 0x59D4
-    unsigned long mDitherMatrix;    // 0x59E0 (name ours; 64-bit: EE long) [U] func_0037C198 packs the 4 x 4 dither
-                                    //        matrix into it (ld/sd), func_00382AF0 sends it as DIMX; [X] dimx
+    unsigned long mDitherMatrix;    // 0x59E0 (name ours; 64-bit: EE long) [U] cPS2GraphicsMan_setDitherMatrix packs the 4 x 4 dither
+                                    //        matrix into it (ld/sd), cPS2GraphicsMan_flipDisplayBuffers sends it as DIMX; [X] dimx
     int mFilterEnabled;             // 0x59E8 [P] EnableFilter/DisableFilter (cPS2GraphicsMan_EnableFilter/cPS2GraphicsMan_DisableFilter); [X] blitToDisplay
-    int mBrightnessColour[3];       // 0x59EC (name ours) [U] func_0037C570 sets r, g, b (0..128), func_0037C638
-                                    //        returns them, func_00382AF0 colours the filter pass with them; [X]
+    int mBrightnessColour[3];       // 0x59EC (name ours) [U] cPS2GraphicsMan_setBrightnessColour sets r, g, b (0..128), cPS2GraphicsMan_getBrightnessColour
+                                    //        returns them, cPS2GraphicsMan_flipDisplayBuffers colours the filter pass with them; [X]
                                     //        brightness r, g, b
-    int mScreenAlpha;               // 0x59F8 (name ours) [U] func_0037C720 sets (1 - fade) * 128, func_0037C770
-                                    //        returns the fade, func_00382AF0 blends the filter pass with it; [X] alpha
+    int mScreenAlpha;               // 0x59F8 (name ours) [U] cPS2GraphicsMan_setScreenFade sets (1 - fade) * 128, cPS2GraphicsMan_getScreenFade
+                                    //        returns the fade, cPS2GraphicsMan_flipDisplayBuffers blends the filter pass with it; [X] alpha
     float mScreenBrightness;        // 0x59FC [P] Get/SetScreenBrightness (cPS2GraphicsMan_GetScreenBrightness/cPS2GraphicsMan_SetScreenBrightness)
     unsigned int mVifCursor;        // 0x5A00 [X] vifCursor; [U] draw slots append packets here
     unsigned int mVifHalfStart;     // 0x5A04 [X]; [R] Init
     void* mpVifBuffRaw;             // 0x5A08 [X]; [R] Init: operator new(0x199940, "VifBuff")
     unsigned int mVifBuffBase;      // 0x5A0C [X]; [R] Init: raw rounded up to 128
-    int mBuildIndex;                // 0x5A10 [X]; [U] func_003826E0
+    int mBuildIndex;                // 0x5A10 [X]; [U] cPS2GraphicsMan_claimBuildBuffer
     unsigned int mGifCursor;        // 0x5A14 [X]
     unsigned int mGifHalfStart;     // 0x5A18 [X]
     void* mpGifBuffRaw;             // 0x5A1C [X]; [R] Init: operator new(0x4CC40, "GifBuff")
     unsigned int mGifBuffBase;      // 0x5A20 [X]
     int mGifBuildIndex;             // 0x5A24 [X]
-    unsigned int mStripPacketStart; // 0x5A28 (name ours) [U] func_0037A260 keeps the strip packet's start (mVifCursor)
-                                    //        here, func_0037A430 queues the packet from it and clears it
-    unsigned long* mStripCursor;    // 0x5A2C (name ours) [U] the strip packet's write cursor: func_0037A260 writes the
-                                    //        headers through it, func_0037A430 ends the packet there and clears it
-    int mFBWidth;                   // 0x5A30 [X] fbWidth; [U] func_0037BD98 (SetDisplayMode)
+    unsigned int mStripPacketStart; // 0x5A28 (name ours) [U] cPS2GraphicsMan_beginTriStripPacket keeps the strip packet's start (mVifCursor)
+                                    //        here, cPS2GraphicsMan_endTriStripPacket queues the packet from it and clears it
+    unsigned long* mStripCursor;    // 0x5A2C (name ours) [U] the strip packet's write cursor: cPS2GraphicsMan_beginTriStripPacket writes the
+                                    //        headers through it, cPS2GraphicsMan_endTriStripPacket ends the packet there and clears it
+    int mFBWidth;                   // 0x5A30 [X] fbWidth; [U] cPS2GraphicsMan_applyDisplayMode (SetDisplayMode)
     int mFBHeight;                  // 0x5A34 [X] fbHeight
-    int mDisplayFormat;             // 0x5A38 (name ours) [U] func_0037BD98 stores the display buffer's pixel format,
-                                    //        func_00382AF0 sends it in DISPFB1; [X] displayPsm
+    int mDisplayFormat;             // 0x5A38 (name ours) [U] cPS2GraphicsMan_applyDisplayMode stores the display buffer's pixel format,
+                                    //        cPS2GraphicsMan_flipDisplayBuffers sends it in DISPFB1; [X] displayPsm
     int mCurrentFBFormat;           // 0x5A3C [P] GetCurrentFBFormat / GetPSMFormat (cPS2GraphicsMan_GetCurrentFBFormat, cPS2GraphicsMan_GetPSMFormat)
     int mCurrentZBFormat;           // 0x5A40 [P] GetCurrentZBFormat (cPS2GraphicsMan_GetCurrentZBFormat; layout_xlate "seen")
-    short mInterlace;               // 0x5A44 (name ours) [U] func_0037BD98 / func_00382AF0: SMODE2.INT; [X] interlace
-    short mFieldMode;               // 0x5A46 (name ours) [U] func_0037BD98 / func_00382AF0: SMODE2.FFMD; [X] ffmd
-    short mOutputMode;              // 0x5A48 (name ours) [U] func_0037BD98 stores 2, the sceGsResetGraph mode; [X]
+    short mInterlace;               // 0x5A44 (name ours) [U] cPS2GraphicsMan_applyDisplayMode / cPS2GraphicsMan_flipDisplayBuffers: SMODE2.INT; [X] interlace
+    short mFieldMode;               // 0x5A46 (name ours) [U] cPS2GraphicsMan_applyDisplayMode / cPS2GraphicsMan_flipDisplayBuffers: SMODE2.FFMD; [X] ffmd
+    short mOutputMode;              // 0x5A48 (name ours) [U] cPS2GraphicsMan_applyDisplayMode stores 2, the sceGsResetGraph mode; [X]
                                     //        omode
     char unk_5A4A[0x2];             // 0x5A4A padding
     int mDTV;                       // 0x5A4C (name ours) [U] accessor cPS2GraphicsMan_GetDTV ([O] GetDTV);
-                                    //        func_0037BD98 stores tDisplayMode::mDTV; [X] progressive
+                                    //        cPS2GraphicsMan_applyDisplayMode stores tDisplayMode::mDTV; [X] progressive
     int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (cPS2GraphicsMan_GetFrameBufferWidth, by position; shift +0xC30); [X] fbw
-    int mDisplayWidth;              // 0x5A54 (name ours) [U] func_0037BD98: the display width; [X] dispWidth
-    int mDisplayHeight;             // 0x5A58 (name ours) [U] func_0037BD98: the display height; [X] dispHeight
-    int mDisplayBufferWidth;        // 0x5A5C (name ours) [U] accessor func_00395550; func_0037BD98: the display width
+    int mDisplayWidth;              // 0x5A54 (name ours) [U] cPS2GraphicsMan_applyDisplayMode: the display width; [X] dispWidth
+    int mDisplayHeight;             // 0x5A58 (name ours) [U] cPS2GraphicsMan_applyDisplayMode: the display height; [X] dispHeight
+    int mDisplayBufferWidth;        // 0x5A5C (name ours) [U] accessor cPS2GraphicsMan_getDisplayBufferWidth; cPS2GraphicsMan_applyDisplayMode: the display width
                                     //        in 64-pixel units (DISPFB1.FBW); [X] dispFbw
-    int mMagV;                      // 0x5A60 (name ours) [U] DISPLAY1.MAGV (func_0037BD98 clears it); [X] magv
+    int mMagV;                      // 0x5A60 (name ours) [U] DISPLAY1.MAGV (cPS2GraphicsMan_applyDisplayMode clears it); [X] magv
     int mMagH;                      // 0x5A64 (name ours) [U] DISPLAY1.MAGH, from the display width; [X] magh
-    int mDisplayPages;              // 0x5A68 (name ours) [U] func_0037BD98: the display buffer's VRAM pages; [X]
+    int mDisplayPages;              // 0x5A68 (name ours) [U] cPS2GraphicsMan_applyDisplayMode: the display buffer's VRAM pages; [X]
                                     //        displayPages
-    int mDrawPages;                 // 0x5A6C (name ours) [U] func_0037BD98: the draw buffer's VRAM pages; [X] drawPages
-    int mZBufferPages;              // 0x5A70 (name ours) [U] func_0037BD98: the z buffer's VRAM pages; [X] zPages
+    int mDrawPages;                 // 0x5A6C (name ours) [U] cPS2GraphicsMan_applyDisplayMode: the draw buffer's VRAM pages; [X] drawPages
+    int mZBufferPages;              // 0x5A70 (name ours) [U] cPS2GraphicsMan_applyDisplayMode: the z buffer's VRAM pages; [X] zPages
     int mCurrentFrameCount;         // 0x5A74 [P] getCurrentFrameCount (cPS2GraphicsMan_getCurrentFrameCount); [X] vsyncFlipCount
-    int mDrawBufferPage;            // 0x5A78 (name ours) [U] func_0037BD98 allocates it with mDrawPages; func_00382AF0
+    int mDrawBufferPage;            // 0x5A78 (name ours) [U] cPS2GraphicsMan_applyDisplayMode allocates it with mDrawPages; cPS2GraphicsMan_flipDisplayBuffers
                                     //        draws into it (and shows mDisplayBufferPage) with the filter on, else
                                     //        swaps the two every frame; [X] fbp0
-    int mDisplayBufferPage;         // 0x5A7C (name ours) [U] func_0037BD98 allocates it with mDisplayPages; [X] fbp1
+    int mDisplayBufferPage;         // 0x5A7C (name ours) [U] cPS2GraphicsMan_applyDisplayMode allocates it with mDisplayPages; [X] fbp1
     int mCurrentZBufferPage;        // 0x5A80 [P] GetCurrentZBufferPage (cPS2GraphicsMan_GetCurrentZBufferPage)
     int mCurrentFrameBufferPage;    // 0x5A84 [P] GetCurrentFrameBufferPage (cPS2GraphicsMan_GetCurrentFrameBufferPage)
     int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (cPS2GraphicsMan_GetDisplayBufferAddress)
     volatile int mKickState;        // 0x5A8C [X] kickState; [U] the DMA kick thread and IRQ handlers
     volatile int mBufState[2];      // 0x5A90 [X] bufState
 
-    // mKickState: where the frame being sent is (names ours). [U] the DMA kick thread func_00382760 starts phase 1
-    // from idle (1) and phase 2 once phase 1 is done (2 -> 3); the VIF1 DMA handler's func_00382688 moves 1 -> 2 and
-    // 3 -> 4; the VBlank handler's func_003825F8 moves 4 -> 5 after mMinFlipWait blanks; the thread then flips and goes
-    // back to 0 (func_00382730 tests for it).
+    // mKickState: where the frame being sent is (names ours). [U] the DMA kick thread cPS2GraphicsMan_runDmaKickThread starts phase 1
+    // from idle (1) and phase 2 once phase 1 is done (2 -> 3); the VIF1 DMA handler's cPS2GraphicsMan_handleVif1DmaEnd moves 1 -> 2 and
+    // 3 -> 4; the VBlank handler's cPS2GraphicsMan_handleVblank moves 4 -> 5 after mMinFlipWait blanks; the thread then flips and goes
+    // back to 0 (cPS2GraphicsMan_isKickIdle tests for it).
     enum eKickState {
         kKick_Idle = 0, kKick_Phase1Sent = 1, kKick_Phase1Done = 2, kKick_Phase2Sent = 3, kKick_Phase2Done = 4,
         kKick_FlipDue = 5
     };
-    // mBufState[i]: one packet buffer's state (names ours). [U] func_003826E0 marks a free buffer as being built,
+    // mBufState[i]: one packet buffer's state (names ours). [U] cPS2GraphicsMan_claimBuildBuffer marks a free buffer as being built,
     // EndFrame queues the built one (2), the kick thread sends a queued one (3) and frees it after the flip (0).
     enum eBufState { kBuf_Free = 0, kBuf_Building = 1, kBuf_Queued = 2, kBuf_Sending = 3 };
     volatile int mInFlightIndex;    // 0x5A98 [X]
@@ -327,7 +327,7 @@ public:
     int mQueuedGif1;                // 0x5AB0 [X]
     int mQueuedGif2;                // 0x5AB4 [X]
     int mMinFlipWait;               // 0x5AB8 [P] SetMinFlipWait (cPS2GraphicsMan_SetMinFlipWait; layout_xlate "seen"); [X] vblanksPerFlip
-    int mVblankCounter;             // 0x5ABC [X]; [U] func_003825F8
+    int mVblankCounter;             // 0x5ABC [X]; [U] cPS2GraphicsMan_handleVblank
     int mIntcHandlerId;             // 0x5AC0 [X]; [U] cPS2GraphicsMan_Purge (vtable slot 3) removes it
     int mDmacHandlerId;             // 0x5AC4 [X]; [U] ditto
     int mKickSema;                  // 0x5AC8 [X]; [U] ditto
@@ -352,12 +352,12 @@ public:
     tIrradianceInfo mIrradianceInfo; // 0x6BB0 [P] Get/SetIrradiance (tIrradianceInfo, copied as 10 qwords)
     int unk_6C50;                   // 0x6C50 [R] Init zeroes it
     int unk_6C54[4];                // 0x6C54 [R] Init zeroes them
-    char unk_6C64[0x40];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)
-    float unk_6CA4[2][6];           // 0x6CA4 [U] per-view screen-tint entries (colour r, g, b, fill r, g, b): func_00390458
-                                    //        writes cScreenTint_m_ColourR..m_FillB at +0x6CA4 + view * 0x18; func_003904A0
+    char unk_6C64[0x40];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (cPS2GraphicsMan_copyDepthFog, func_0036A428)
+    float unk_6CA4[2][6];           // 0x6CA4 [U] per-view screen-tint entries (colour r, g, b, fill r, g, b): cPS2GraphicsMan_copyScreenTint
+                                    //        writes cScreenTint_m_ColourR..m_FillB at +0x6CA4 + view * 0x18; cPS2GraphicsMan_queueScreenTintPass
                                     //        reads the six floats (skips the neutral 1, 1, 1 / 0, 0, 0)
-    float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (func_0036C740, func_0036C790)
-    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, func_00382760 calls
+    float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (cPS2GraphicsMan_copyLightGlow, cPS2GraphicsMan_queueLightGlowPass)
+    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, cPS2GraphicsMan_runDmaKickThread calls
     int mPhase2CallbackArg;         // 0x6D10 [X]
     int mShinyBoarder;              // 0x6D14 [P] SetShinyBoarder (cPS2GraphicsMan_SetShinyBoarder) bool
     char unk_6D18[0x8];             // 0x6D18 padding to 16

@@ -85,7 +85,7 @@ void cAnimModel::addTextureFile(int item)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DB90);
+INCLUDE_ASM("animation/animmodel", compareAnimModelPartIds);
 #ifdef SKIP_ASM
 /**
  * Compares two records by their first int: returns *self - *other (qsort-style comparator).
@@ -95,7 +95,7 @@ INCLUDE_ASM("animation/animmodel", func_0030DB90);
  * @param other  the second record
  * @return negative, zero or positive as the first int of @p self is below, equal to or above that of @p other
  */
-extern "C" int func_0030DB90(void* self, void* other)
+extern "C" int compareAnimModelPartIds(void* self, void* other)
 {
     return *(int*)self - *(int*)other;
 }
@@ -127,19 +127,19 @@ void cAnimModel::setScale(float lengthScale, float widthScale)
 INCLUDE_ASM("animation/animmodel", cAnimModel_compile);
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030E9E0);
+INCLUDE_ASM("animation/animmodel", cAnimModel_enablePart);
 #ifdef SKIP_ASM
 /**
  * Enables model part number @p i: ORs the part's mask into the model's mask and marks LOD slot @p channel used.
  *
  * Does nothing when @p i > maxPartIndex, partIndex is null or partIndex[i] is negative (no such part). A negative
- * @p channel marks all four lods[] slots used. func_0030EA80 is the reverse; ai/rider uses both to show and hide parts.
+ * @p channel marks all four lods[] slots used. cAnimModel_disablePart is the reverse; ai/rider uses both to show and hide parts.
  *
  * @param i  the part number (index into partIndex)
  * @param channel  the LOD slot 0-3 to enable, or negative for all four
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_0030E9E0(cAnimModel* self, int i, int channel)
+extern "C" void cAnimModel_enablePart(cAnimModel* self, int i, int channel)
 {
     if (i > self->maxPartIndex)
     {
@@ -171,20 +171,20 @@ extern "C" void func_0030E9E0(cAnimModel* self, int i, int channel)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EA80);
+INCLUDE_ASM("animation/animmodel", cAnimModel_disablePart);
 #ifdef SKIP_ASM
 /**
  * Disables model part number @p i: clears the part's mask bits from the model's mask and its LOD slot @p channel.
  *
  * Does nothing when @p i > maxPartIndex, partIndex is null or partIndex[i] is negative. A negative @p channel clears
  * used on all four lods[] slots; a single slot is cleared alone, and if any other slot of the part is still used the
- * part's mask is OR'd back into the model's mask. Reverse of func_0030E9E0.
+ * part's mask is OR'd back into the model's mask. Reverse of cAnimModel_enablePart.
  *
  * @param i  the part number (index into partIndex)
  * @param channel  the LOD slot 0-3 to disable, or negative for all four
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_0030EA80(cAnimModel* self, int i, int channel)
+extern "C" void cAnimModel_disablePart(cAnimModel* self, int i, int channel)
 {
     if (i > self->maxPartIndex)
     {
@@ -224,13 +224,13 @@ extern "C" void func_0030EA80(cAnimModel* self, int i, int channel)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030EB60);
+INCLUDE_ASM("animation/animmodel", cAnimModel_disableAllParts);
 #ifdef SKIP_ASM
 /**
  * Disables every part of the model: clears used on all four lods[] slots of each of the numParts parts and zeroes mask.
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_0030EB60(cAnimModel* self)
+extern "C" void cAnimModel_disableAllParts(cAnimModel* self)
 {
     for (int j = 0; j < self->numParts; j++)
     {

@@ -935,7 +935,7 @@ int cUITextScroll::allocLine()
 INCLUDE_ASM("ui/uitext", cUITextScroll_addAsciiString);
 #ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str);
-extern "C" void func_002C2540(void* dst, void* src);
+extern "C" void strcpy3(void* dst, void* src);
 
 /**
  * Appends ASCII text, word-wrapped to the box width (On Tour addAsciiString).
@@ -961,7 +961,7 @@ void cUITextScroll::addAsciiString(char* str)
     unsigned short* buf = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITEXTTEMP_b, 0x100, 0);
     float w = 0.0f;
     int start = 0;
-    func_002C2540(buf, str);
+    strcpy3(buf, str);
     while (i < len) {
         if (buf[i] == '\\' && buf[i + 1] == buf[i]) {
             buf[i] = 0;
@@ -1526,7 +1526,7 @@ extern "C" void c2DRender_drawRotRect1(int ctx, tBxVertex* v, tRect* r, t3Matrix
  * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
  * colour to alpha = c.a * 128, red/green/blue = c * 255 (cTextureElement_render scales all four by 128), then hands the quad to
  * the 2D renderer G2D through c2DRender_drawRect1, or c2DRender_drawRotRect1 (corners in the order that turns the texture 90
- * degrees) when bit 2 is set; both transform each corner by @p transform (func_0038E0A8) before submitting. No caller in retail
+ * degrees) when bit 2 is set; both transform each corner by @p transform (transformPoint2D) before submitting. No caller in retail
  * references it.
  *
  * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)

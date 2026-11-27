@@ -1334,7 +1334,7 @@ extern "C" int cWScriptMan_isFocusInstance(int, nash_Node*);
  * Each instance in the cell's instance list (nodesinside[0]) that cWScriptMan_isFocusInstance accepts is appended to
  * @p list (instances[numinstances++]; no bound check). With @p recurse the same is done for each of the eight
  * children, recursively.
- * The cell visitor func_00144368 and cFocusMan_update call it.
+ * The cell visitor FocusCallback_operatorCall and cFocusMan_update call it.
  *
  * @param node  the cell (eight child pointers, then the instance list)
  * @param recurse  nonzero to take the instances of all cells below too
@@ -1487,14 +1487,14 @@ struct InstanceCompare {
 extern t4Vector kRiderBoxOffset;
 extern "C" void FocusQuery_addcell_1B60(sFocusList* list, const nash_Cell* node, int recurse) __asm__("FocusQuery_addcell");
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
+extern "C" void mergesort(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
 extern "C" void cWScriptMan_downFocusScript(int, tFocusRec*);
 extern "C" void cWScriptMan_upFocusScript(int, tFocusRec*);
 
 struct FocusCallbackInline;
 // Retail's out-of-line copy of FocusCallback::operator() (matched in ai/control/handplantcontrol); the
 // recursion inside the inline operator goes to it.
-extern "C" void func_00144368_1B60(const FocusCallbackInline* cb, const nash_Cell* cell, const sNashKey* key) __asm__("func_00144368");
+extern "C" void FocusCallback_operatorCall_1B60(const FocusCallbackInline* cb, const nash_Cell* cell, const sNashKey* key) __asm__("FocusCallback_operatorCall");
 
 // FocusCallback (ai/focusbox.h) as cFocusMan_update inlines it: collects the instances of every cell that touches
 // one of the focus boxes. A local copy because its inline operator() and members use this unit's views of the
@@ -1538,21 +1538,21 @@ struct FocusCallbackInline {
         k.x = key.x * 2;
         k.y = key.y * 2;
         k.z = key.z * 2;
-        if (((nash_Cell**)&cell.children[0][0][0])[0]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[0], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[0]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[0], &k);
         k.x++;
-        if (((nash_Cell**)&cell.children[0][0][0])[4]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[4], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[4]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[4], &k);
         k.y++;
-        if (((nash_Cell**)&cell.children[0][0][0])[6]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[6], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[6]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[6], &k);
         k.x--;
-        if (((nash_Cell**)&cell.children[0][0][0])[2]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[2], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[2]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[2], &k);
         k.z++;
-        if (((nash_Cell**)&cell.children[0][0][0])[3]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[3], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[3]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[3], &k);
         k.x++;
-        if (((nash_Cell**)&cell.children[0][0][0])[7]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[7], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[7]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[7], &k);
         k.y--;
-        if (((nash_Cell**)&cell.children[0][0][0])[5]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[5], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[5]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[5], &k);
         k.x--;
-        if (((nash_Cell**)&cell.children[0][0][0])[1]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[1], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[1]) FocusCallback_operatorCall_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[1], &k);
     }
 };
 
@@ -1575,7 +1575,7 @@ static inline void Visit(const FocusCallbackInline& cb, const sNashTree* tree, i
  * crossing a box add their instances (FocusQuery_addcell), whole subtrees once below level 14. It stores the tick and the
  * positions. Instances newly in focus get flag 0x100; flag 0x200 follows the pass parity (+0xD4), and instances of the
  * previous pass (+0xD8 count, +0xDC list) not seen again lose 0x100. The new list replaces the old one (MEM_copy). The
- * instances that left focus are sorted (func_0013FAD8) and get cWScriptMan_downFocusScript, then those that entered get
+ * instances that left focus are sorted (mergesort) and get cWScriptMan_downFocusScript, then those that entered get
  * cWScriptMan_upFocusScript. cAI_update calls it.
  */
 extern "C" void cFocusMan_update(sFocusBoxes* self)
@@ -1643,13 +1643,13 @@ extern "C" void cFocusMan_update(sFocusBoxes* self)
     MEM_copy(self->instances, list.items, list.n << 2);
     tFocusRec* sorted[256];
     if (numunfocusinstances) {
-        func_0013FAD8(unfocusinstances, unfocusinstances + numunfocusinstances, sorted, InstanceCompare());
+        mergesort(unfocusinstances, unfocusinstances + numunfocusinstances, sorted, InstanceCompare());
         for (int i = 0; i < numunfocusinstances; i++) {
             cWScriptMan_downFocusScript(cWScriptMan_TheWScriptMan, sorted[i]);
         }
     }
     if (numfocusinstances) {
-        func_0013FAD8(focusinstances, focusinstances + numfocusinstances, sorted, InstanceCompare());
+        mergesort(focusinstances, focusinstances + numfocusinstances, sorted, InstanceCompare());
         for (int i = 0; i < numfocusinstances; i++) {
             cWScriptMan_upFocusScript(cWScriptMan_TheWScriptMan, sorted[i]);
         }

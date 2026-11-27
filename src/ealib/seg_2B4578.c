@@ -10759,14 +10759,14 @@ void func_003C07A8_impl(int flags)
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0858);
 #ifdef SKIP_ASM
-/* PORT: PS2-only VU0 state save; func_0031A308 without the $vi22/$vi18
+/* PORT: PS2-only VU0 state save; vu0_saveState without the $vi22/$vi18
    saves, and with ctc2 (not cfc2) on $vi16 as in the shipped code. */
 /**
  * Saves the VU0 register file into a buffer (0x208 bytes used) before the sound thread uses VU0.
  *
  * Stores vf1..vf31 at 0x10 * (n - 1), the accumulator (read into vf1 with vmaddx after vf1 is saved) at 0x1F0 and the
  * MAC flags ($vi17) at 0x200. The sound thread SNDDRV_thread calls it and restores with func_003C08F8. It is
- * func_0031A308 without the $vi22/$vi18 saves. Likely bug, kept from the shipped code: where the status flags should be
+ * vu0_saveState without the $vi22/$vi18 saves. Likely bug, kept from the shipped code: where the status flags should be
  * read it does ctc2 $9, $vi16, which writes the MAC flags into the status register, and then stores the MAC flags again
  * at 0x204.
  *
@@ -10827,14 +10827,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C08F8);
 #ifdef SKIP_ASM
 void func_003C07A8(int status);
 
-/* PORT: PS2-only VU0 state restore; same as func_0031A3C0 without the
+/* PORT: PS2-only VU0 state restore; same as vu0_restoreState without the
    $vi22/$vi18 restore. */
 /**
  * Restores the VU0 register file that func_003C0858 saved.
  *
  * Reloads the accumulator from 0x1F0 (vaddax with vf0.x), vf1..vf6, then re-creates the MAC flags from the word at
  * 0x200 with func_003C07A8 (which preserves vf1/vf2 around its vmul), then reloads vf7..vf31. The status word at 0x204
- * is not used. It is func_0031A3C0 without the $vi22/$vi18 restore; the sound thread SNDDRV_thread calls it after
+ * is not used. It is vu0_restoreState without the $vi22/$vi18 restore; the sound thread SNDDRV_thread calls it after
  * mixing.
  *
  * @param buf  the save area written by func_003C0858
@@ -11794,7 +11794,7 @@ void SNDSYSI_variabletimerservice_19A8(void) __asm__("SNDSYSI_variabletimerservi
 void func_003C0A60_19A8(void) __asm__("func_003C0A60");
 
 // (prototype from their definition at line 7983)
-/* PORT: PS2-only VU0 state save; func_0031A308 without the $vi22/$vi18
+/* PORT: PS2-only VU0 state save; vu0_saveState without the $vi22/$vi18
    saves, and with ctc2 (not cfc2) on $vi16 as in the shipped code. */
 void func_003C0858_19A8(void* buf) __asm__("func_003C0858");
 
@@ -11802,7 +11802,7 @@ void func_003C0858_19A8(void* buf) __asm__("func_003C0858");
 void SNDSYSI_timerservice_19A8(unsigned arg0) __asm__("SNDSYSI_timerservice");
 
 // (prototype from their definition at line 8040)
-/* PORT: PS2-only VU0 state restore; same as func_0031A3C0 without the
+/* PORT: PS2-only VU0 state restore; same as vu0_restoreState without the
    $vi22/$vi18 restore. */
 void func_003C08F8_19A8(void* buf) __asm__("func_003C08F8");
 

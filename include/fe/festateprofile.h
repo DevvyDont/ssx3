@@ -8,7 +8,7 @@
 // EA's source is fe/festateprofile.cpp (the July 2003 preview's assert strings; builds/x/v2 file_hints for retail
 // cFEStateProfileLoad_onRender2D__FPv). Retail code: fe/festateprofile (0x0018ECA0 ... 0x00190768) and
 // main/all_in_one_main (the destructor cFEStateProfileLoad__cFEStateProfileLoad, the engine-less ctor copy
-// func_001DE240 and the setter cFEStateProfileLoad_setQuitPath).
+// cFEStateProfileLoad_cFEStateProfileLoad1 and the setter cFEStateProfileLoad_setQuitPath).
 //
 // Size 0x280:
 //   [R] cMemMan_alloc(640, "cFEStateProfileLoad") + cFEStateProfileLoad_cFEStateProfileLoad(mem, engine, iType,

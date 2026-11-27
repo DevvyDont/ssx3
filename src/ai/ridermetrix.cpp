@@ -2939,16 +2939,16 @@ void cRider::updateTerminalVelocity()
 extern "C" void* strcasecmp(void* self);
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011B678__FPv);
+INCLUDE_ASM("ai/ridermetrix", compareLoadListNames__FPv);
 #ifdef SKIP_ASM
 /**
  * Compares two load-list names without case: forwards to strcasecmp.
  *
- * The sort comparator func_0011BD60 and func_0011BE88 pass to qsort; the second string arrives in a1.
+ * The sort comparator cRider_addPartModelsToLoadList and cRider_addPartTexturesToLoadList pass to qsort; the second string arrives in a1.
  *
  * @return strcasecmp's result
  */
-void* func_0011B678(void* self)
+void* compareLoadListNames(void* self)
 {
     return strcasecmp(self);
 }

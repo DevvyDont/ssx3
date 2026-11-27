@@ -455,7 +455,7 @@ extern char str_The_display_mode_has_been_set_to_interla[];
 extern char str_kT_CMNContinue_c[];
 
 // The display-mode popup's UI state (vtable D_0047DA58; the class name is not known, ours): a cUIState and two fields.
-// [R] func_002452D8 allocates 0x50 bytes for it and sets mInterlaced; [U] cUIStateDisplayModePopup_onCreateScreen / cUIStateDisplayModePopup_onUpdate.
+// [R] cFEStateProgressive_onWidgetEvent allocates 0x50 bytes for it and sets mInterlaced; [U] cUIStateDisplayModePopup_onCreateScreen / cUIStateDisplayModePopup_onUpdate.
 struct cUIStateDisplayModePopup : public cUIState {
     signed char mInterlaced;        // 0x48 (name ours) [U] 0: the popup says the mode was switched to progressive
     int mConfirmTimer;              // 0x4C (name ours) [U] cUIStateDisplayModePopup_onCreateScreen starts it at 300; cUIStateDisplayModePopup_onUpdate counts it down
@@ -469,7 +469,7 @@ struct cUIStateDisplayModePopup : public cUIState {
  * 0. The "Title" text gets "The display mode has been switched to Pr..." when the flag at +0x48 is 0, or "The display
  * mode has been set to interla..." otherwise; "yes" gets the localised "kT_CMNContinue"; "no" is hidden (setVisible,
  * slot 9, with 0) and made static (setStatic, slot 8, with 1). Starts the 300-frame countdown at +0x4C. The state is
- * pushed by func_002452D8() after the progressive-scan choice.
+ * pushed by cFEStateProgressive_onWidgetEvent() after the progressive-scan choice.
  */
 extern "C" void cUIStateDisplayModePopup_onCreateScreen(cUIStateDisplayModePopup* self)
 {
@@ -1346,7 +1346,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
 extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
-extern "C" void func_002C2540(void* dst, const char* s);
+extern "C" void strcpy3(void* dst, const char* s);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -1390,7 +1390,7 @@ void cFELoadState::widgetCreateQP(cUIThing* widget)
     unsigned short text[0x18];
     unsigned short fmtw[0x20];
     if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_rider)) {
-        func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
+        strcpy3(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
         cFELocale* locale = SSXApp->FELocale;
@@ -1399,23 +1399,23 @@ void cFELoadState::widgetCreateQP(cUIThing* widget)
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_knockdown)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->NumFrags);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_wipeouts)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->NumWipeouts);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubertricks)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->NumUberTricks);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubergrinds)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->NumUberGrindTricks);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_handplants)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->NumHandplants);
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_grabtime)) {
@@ -1428,7 +1428,7 @@ void cFELoadState::widgetCreateQP(cUIThing* widget)
         sprintf(buf, fmt, fptodp((float)min), fptodp((float)sec));
         cUIText_setAsciiString((cUIText*)widget, buf);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_best_combo)) {
-        func_002C2540(fmtw, str_pct_d_g);
+        strcpy3(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, st->LongestCombo);
         cUIText_setUnicodeString(widget, (char*)text);
     }

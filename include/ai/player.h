@@ -57,7 +57,7 @@ struct cPlayer {
     cReplayCache* ReplayCache; // 0xDF8 [R] ctor = cReplay_addCache(Game->Replay), released by ~cPlayer; [O]
     float mVibrationBump;      // 0xDFC bump level (name ours): [R] ctor = 0; [U] vibrationReset = 0, vibrationBump
                                //       raises it to its argument; decayed with 0xE00 by
-                               //       func_00125B18(&mVibrationBump, Pad, on) (a pair of floats)
+                               //       updatePadVibration(&mVibrationBump, Pad, on) (a pair of floats)
     float mVibrationRumble;    // 0xE00 rumble level (name ours): [R] ctor = 0; [U] vibrationReset = 0,
                                //       vibrationRumble(float) stores it
     char pad_E04[0xC];         // 0xE04 the cRider virtual base is 16-byte aligned

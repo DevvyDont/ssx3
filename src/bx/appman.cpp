@@ -481,7 +481,7 @@ INCLUDE_ASM("bx/appman", cExecutionMan_timerFunction__Fv);
 /**
  * Runs the app manager's timer step (cAppMan_timerFunction) on cAppMan_TheAppMan.
  *
- * The PS2 execution manager's timer thread (func_0031AC08) calls it after each semaphore wait, passing itself, which is
+ * The PS2 execution manager's timer thread (cPS2ExecutionMan_runTimerThread) calls it after each semaphore wait, passing itself, which is
  * ignored.
  *
  * @return no meaningful value (cAppMan_timerFunction sets none)
@@ -498,7 +498,7 @@ INCLUDE_ASM("bx/appman", getTheExecutionMan__Fv);
 /**
  * Returns the execution manager (+0x8 of cAppMan_TheAppMan).
  *
- * func_0031ABD0 uses it to reach the PS2 execution manager's semaphore.
+ * cPS2ExecutionMan_signalTimer uses it to reach the PS2 execution manager's semaphore.
  *
  * @return the execution manager
  */

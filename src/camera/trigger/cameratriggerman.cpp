@@ -65,7 +65,7 @@ void cCameraTriggerMan::loadTriggersIfNotStreaming()
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_reset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
@@ -144,7 +144,7 @@ static inline void remove_CA18(char* w, void* item, const sCtBox_CA18* box)
     }
 }
 
-extern "C" void func_0016CA18_impl(void* vself) __asm__("func_0016CA18");
+extern "C" void cCameraTriggerMan_reset_impl(void* vself) __asm__("cCameraTriggerMan_reset");
 /**
  * Takes every camera trigger out of the world's space hash and resets the trigger list, both trigger stacks and the
  * chase camera switches.
@@ -157,11 +157,11 @@ extern "C" void func_0016CA18_impl(void* vself) __asm__("func_0016CA18");
  * cCamera_resetChaseControllerSwitches runs.
  *
  * Unlike cCameraTriggerMan_purge it does not check the registration word (+0x20) before removing a trigger and leaves
- * the active lists alone. Its only caller is func_0016CEA8.
+ * the active lists alone. Its only caller is cCameraTriggerMan_streamOut.
  *
  * @param vvself  the camera trigger manager (this)
  */
-extern "C" void func_0016CA18_impl(void* vvself)
+extern "C" void cCameraTriggerMan_reset_impl(void* vvself)
 {
     cCameraTriggerMan* vself = (cCameraTriggerMan*)vvself;
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
@@ -347,18 +347,18 @@ void cCameraTriggerMan::streamIn(void* stream)
 extern "C" void* cCameraTriggerMan_resolve(void*, void*, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
+INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_streamOut);
 #ifdef SKIP_ASM
-extern "C" void func_0016CA18();
+extern "C" void cCameraTriggerMan_reset();
 
 /**
- * Resets the camera trigger manager in its argument register: a plain call of func_0016CA18.
+ * Resets the camera trigger manager in its argument register: a plain call of cCameraTriggerMan_reset.
  *
  * The manager pointer passes through untouched in $a0 (the declaration leaves it out). Nothing calls it or stores its
  * address.
  */
-extern "C" void func_0016CEA8(void) {
-    func_0016CA18();
+extern "C" void cCameraTriggerMan_streamOut(void) {
+    cCameraTriggerMan_reset();
 }
 #endif
 
@@ -403,7 +403,7 @@ void cCameraTriggerMan::resolve(void* rid, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF18);
+INCLUDE_ASM("camera/trigger/cameratriggerman", gCamTriggerMan_unresolve);
 #ifdef SKIP_ASM
 // PORT: cCameraTriggerMan_unresolve__FPv is mangled as (void*), but this caller passes two args.
 void cCameraTriggerMan_unresolve_2(void* mgr, void* self) __asm__("cCameraTriggerMan_unresolve__FPv");
@@ -415,7 +415,7 @@ void cCameraTriggerMan_unresolve_2(void* mgr, void* self) __asm__("cCameraTrigge
  * cPS2ChunkResolve_unresolve passes the chunk's resource id for stream data type 17, the counterpart of
  * gCamTriggerMan_resolve.
  */
-extern "C" void func_0016CF18(void* self)
+extern "C" void gCamTriggerMan_unresolve(void* self)
 {
     cCameraTriggerMan_unresolve_2((void*)((void**)&gCamTriggerMan), self);
 }
@@ -427,7 +427,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_unresolve__FPv)
 /**
  * Does nothing: the camera trigger manager's handler for a trigger chunk being unloaded.
  *
- * func_0016CF18 calls it with gCamTriggerMan and the chunk's resource id (a second argument the declaration leaves
+ * gCamTriggerMan_unresolve calls it with gCamTriggerMan and the chunk's resource id (a second argument the declaration leaves
  * out); the triggers are only cleared when new ones stream in (cCameraTriggerMan_streamIn).
  */
 void cCameraTriggerMan::unresolve()

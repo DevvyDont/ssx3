@@ -757,7 +757,7 @@ static inline void swapBankStopped(cSSXAudio* audio, cWorldTriggerInstance* inst
  *
  * Skipped while the sound effects are paused (mSFXPaused). For each in-use instance: when untouched it releases a swap
  * string (cSSXAudio_SwapBankStopped), marks it unused and stops it (cWorldTriggerInstance_Stop); when touched it runs
- * cWorldTriggerInstance_Update. Called every frame from the game (func_0022C830).
+ * cWorldTriggerInstance_Update. Called every frame from the game (cGame_renderVideo).
  */
 void cWorldTriggerManager::Update()
 {
@@ -2358,7 +2358,7 @@ extern "C" void* func_002B83B8(void* self, ...)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", nash_privy_QueryHelper_help1);
 #ifdef SKIP_ASM
-extern "C" void func_002BADD0(void* node, void* list);
+extern "C" void octreeNode_collectType5Items(void* node, void* list);
 
 union sFloatBits83F8 {
     int i;
@@ -2394,7 +2394,7 @@ static inline int Classify83F8(const t4Vector* v, const nash_CellKey* key)
  *
  * A node whose cell (key, grown by 0.2 cells) contains the position adds its kSNT_AudioVolume items to *partial and
  * recurses into its children down to level 11; otherwise nothing. Quirk: the cell test only returns 1 or 2, so the
- * inside branch (all items to *inside via func_002BADD0) is never taken. Called by cAudioOverlapList_update for each
+ * inside branch (all items to *inside via octreeNode_collectType5Items) is never taken. Called by cAudioOverlapList_update for each
  * root.
  *
  * @param partial  the callback (overlap list) for crossing cells (On Tour oncross)
@@ -2417,14 +2417,14 @@ extern "C" void nash_privy_QueryHelper_help1(nash_privy_QueryHelper* self, Audio
                 list->overlaps[list->numoverlaps++] = (tInstanceAudio*)item;
             }
         }
-        if (node->children[0][0][0]) func_002BADD0(node->children[0][0][0], inside);
-        if (node->children[0][0][1]) func_002BADD0(node->children[0][0][1], inside);
-        if (node->children[0][1][0]) func_002BADD0(node->children[0][1][0], inside);
-        if (node->children[0][1][1]) func_002BADD0(node->children[0][1][1], inside);
-        if (node->children[1][0][0]) func_002BADD0(node->children[1][0][0], inside);
-        if (node->children[1][0][1]) func_002BADD0(node->children[1][0][1], inside);
-        if (node->children[1][1][0]) func_002BADD0(node->children[1][1][0], inside);
-        if (node->children[1][1][1]) func_002BADD0(node->children[1][1][1], inside);
+        if (node->children[0][0][0]) octreeNode_collectType5Items(node->children[0][0][0], inside);
+        if (node->children[0][0][1]) octreeNode_collectType5Items(node->children[0][0][1], inside);
+        if (node->children[0][1][0]) octreeNode_collectType5Items(node->children[0][1][0], inside);
+        if (node->children[0][1][1]) octreeNode_collectType5Items(node->children[0][1][1], inside);
+        if (node->children[1][0][0]) octreeNode_collectType5Items(node->children[1][0][0], inside);
+        if (node->children[1][0][1]) octreeNode_collectType5Items(node->children[1][0][1], inside);
+        if (node->children[1][1][0]) octreeNode_collectType5Items(node->children[1][1][0], inside);
+        if (node->children[1][1][1]) octreeNode_collectType5Items(node->children[1][1][1], inside);
     }
     else if (overlap == kOctCrossing)
     {

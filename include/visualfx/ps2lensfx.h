@@ -35,12 +35,12 @@ struct cPS2LensFxMan {
     void** mVtbl;                   // 0x649C [R] cPS2LensFxMan_vtbl (cPS2LensFxMan_cPS2LensFxMan, the dtor)
     // --- cPS2LensFxMan
     unsigned long mFinishPacket[4]; // 0x64A0 [U] sampleZBuffer builds a 2-qword GIF packet here (GIFtag NLOOP 1, EOP,
-                                    //       A+D; then FINISH = 0) and sends it with func_00371940(this+0x64A0, 2, 6)
+                                    //       A+D; then FINISH = 0) and sends it with dma_sendGifNormal(this+0x64A0, 2, 6)
                                     //       before the read-back (EE long = 8 bytes)
     unsigned long mTransferPacket[10]; // 0x64C0 [U] sampleZBuffer's 5-qword GIF packet (GIFtag NLOOP 4, EOP, A+D;
                                     //       BITBLTBUF 0x50 built from the graphics manager's current buffer, TRXPOS
                                     //       0x51 / TRXREG 0x52 from the halo's mZSRect, TRXDIR 0x53 = 1, local ->
-                                    //       host); sent with func_00371940(this+0x64C0, 5, 6)
+                                    //       host); sent with dma_sendGifNormal(this+0x64C0, 5, 6)
     unsigned char mZBuffer[0x310];  // 0x6510 [U] sampleZBuffer points VIF1 DMA (D1_MADR) here and reads the
                                     //       rectangle's 24-bit z samples back (3 bytes each; at most 16 x 16 = 0x300
                                     //       bytes are used), then counts those at or below the halo's mZDist

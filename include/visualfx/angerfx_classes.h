@@ -48,7 +48,7 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
 
 extern char str_cAngerFX[];
 
-extern "C" void func_002D4BE0_erFX(void* self) __asm__("func_002D4BE0");
+extern "C" void cAngerFX_clearViewState_erFX(void* self) __asm__("cAngerFX_clearViewState");
 
 struct cAngerPart_ang {
     char data[0x2C];

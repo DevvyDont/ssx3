@@ -820,7 +820,7 @@ extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_readSetSize(void* mp, int a);
 extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
-extern "C" void func_002C2540(void*, void*);
+extern "C" void strcpy3(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
 extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
@@ -865,7 +865,7 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     memCardState->mType = 0;
     mp->SetState(53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
-    func_002C2540(fmt, str_pct_s_pct_s_c);
+    strcpy3(fmt, str_pct_s_pct_s_c);
     cMCOverlayManager_getProductCode_r(desc, 0x10);
     sprintf1(cFEStateMemCard_mInstance_86F90->mFileName, fmt, desc, name);
     cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);

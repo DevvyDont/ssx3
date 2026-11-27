@@ -6,109 +6,109 @@ INCLUDE_ASM("bx/bxstring2", cChallenger__cChallenger);
 
 INCLUDE_ASM("bx/bxstring2", BuddyMan__BuddyMan);
 
-INCLUDE_ASM("bx/bxstring2", func_00268A90);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onroomlistupdate_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268AB8);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onuserlistupdate_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268AE0);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onranklistupdate_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268B08);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onincomingmsg_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268B30);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onchatmsg_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268B58);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onconnectionmsg_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268B80);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onplaymsg_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268BA8);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onlobbyconnect_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268BD0);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onaccountcreated_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268BF8);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onaccountedited_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268C20);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268C48);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268C70);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onauthentication_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268C98);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onpersonaselected_invoke);
 
 INCLUDE_ASM("bx/bxstring2", func_00268CC0);
 
-INCLUDE_ASM("bx/bxstring2", func_00268CE8);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onpersonacreated_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268D10);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onpersonadeleted_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268D38);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onroomselected_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268D60);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onRoomCreated_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268D88);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onPingReceived_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268DB0);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268DD8);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onNewsRetrieved_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268E00);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268E28);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onPlayerFound_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268E78);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268EA0);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onchallengeresponse_invoke);
 
 INCLUDE_ASM("bx/bxstring2", func_00268EC8);
 
-INCLUDE_ASM("bx/bxstring2", func_00268EF0);
+INCLUDE_ASM("bx/bxstring2", LobbyMan_LobbyFunctor_onresultsreportresponse_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268F18);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onconnect_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268F40);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onReceiveMessage_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268F68);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onrosterupdate_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268F90);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onBuddyDelete_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268FB8);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onBuddyAdd_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00268FE0);
+INCLUDE_ASM("bx/bxstring2", BuddyMan_BuddyFunctor_onBuddySend_invoke);
 
-INCLUDE_ASM("bx/bxstring2", func_00269008);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleCharPickEcho);
 
-INCLUDE_ASM("bx/bxstring2", func_002690C8);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleCharConfirmEcho);
 
-INCLUDE_ASM("bx/bxstring2", func_00269188);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleWithdrawEcho);
 
-INCLUDE_ASM("bx/bxstring2", func_00269240);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostCharPick);
 
-INCLUDE_ASM("bx/bxstring2", func_00269300);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostCharConfirm);
 
-INCLUDE_ASM("bx/bxstring2", func_002693C0);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostWithdraw);
 
-INCLUDE_ASM("bx/bxstring2", func_00269478);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleClientBragRow);
 
-INCLUDE_ASM("bx/bxstring2", func_00269538);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleClientBragRule);
 
-INCLUDE_ASM("bx/bxstring2", func_00269608);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleClientBragLock);
 
-INCLUDE_ASM("bx/bxstring2", func_002696F8);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleClientBragUnlock);
 
-INCLUDE_ASM("bx/bxstring2", func_002697D0);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostBragRow);
 
-INCLUDE_ASM("bx/bxstring2", func_00269890);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleBragRowMessage);
 
-INCLUDE_ASM("bx/bxstring2", func_00269948);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostBragRule);
 
-INCLUDE_ASM("bx/bxstring2", func_00269A18);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleBragRuleMessage);
 
-INCLUDE_ASM("bx/bxstring2", func_00269AE0);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostBragLock);
 
-INCLUDE_ASM("bx/bxstring2", func_00269B90);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleBragLockAnswer);
 
-INCLUDE_ASM("bx/bxstring2", func_00269C40);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleHostBragUnlock);
 
-INCLUDE_ASM("bx/bxstring2", func_00269CF0);
+INCLUDE_ASM("bx/bxstring2", cSetupMan_handleBragUnlockMessage);
 
 INCLUDE_ASM("bx/bxstring2", func_00269DA0);
 

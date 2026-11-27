@@ -15,7 +15,7 @@ cBEInterface* cBE_getInterface_CE758(void* be, int kind) __asm__("cBE_getInterfa
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int track);
-extern "C" void func_002C2540(void* dst, void* src);
+extern "C" void strcpy3(void* dst, void* src);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
 extern "C" void sprintf1_CE758(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* str);
@@ -91,11 +91,11 @@ extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
         unsigned short buf[200];
         unsigned short fmt[32];
         if (peak == 0) {
-            func_002C2540(fmt, str_Happiness_pct_s);
+            strcpy3(fmt, str_Happiness_pct_s);
         } else if (peak == 1) {
-            func_002C2540(fmt, str_Ruthless_pct_s);
+            strcpy3(fmt, str_Ruthless_pct_s);
         } else if (peak == 2) {
-            func_002C2540(fmt, str_Throne_pct_s);
+            strcpy3(fmt, str_Throne_pct_s);
         }
         sprintf1_CE758(buf, fmt, Loc_CE758(str_kT_cmnRaceCaps));
         cUIText_setUnicodeString(text, buf);

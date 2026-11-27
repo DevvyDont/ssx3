@@ -505,7 +505,7 @@ void cSimpleCamera::setupCamWithPosAndTarget(const t4Vector* camPos, const t4Vec
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015E2A8);
+INCLUDE_ASM("camera/camera", InitCamShakeValuesTable);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sCamLag_15E2A8 {
@@ -526,9 +526,9 @@ extern int kCamShakeDependsOnDistance[5];
  * which a shake fades out (-1: no fade). Type 0: (0.05, 0.01, 0.4, 20000), flag 0; types 1-3 (the boost shakes
  * cCamera_applyCameraShake requests): (0.02, 0.01366, 0.07 / 0.08 / 0.09, -1), flag 1; type 4: (0.1, 0.03, 1.4, -1),
  * flag 1. The flag is cLookAtChaseAlgorithm_updateCameraShake's second argument. Called only by the unit's static
- * initializer func_001673F8.
+ * initializer __sti__all_in_one_camera_cpp.
  */
-extern "C" void func_0015E2A8(void)
+extern "C" void InitCamShakeValuesTable(void)
 {
     kCamShakeValues.f0 = 0.05f;
     kCamShakeValues.f4 = 0.01f;
@@ -568,7 +568,7 @@ struct sCamShake_E360 {
     float weight;   // 0x8
     float range;    // 0xC
 };
-// View of the tuning block initialised by func_0015E2A8 as one entry per shake type.
+// View of the tuning block initialised by InitCamShakeValuesTable as one entry per shake type.
 extern sCamShake_E360 kCamShakeValues_E360[] __asm__("kCamShakeValues");
 
 #define MIN_E360(a, b) ((a) <= (b) ? (a) : (b))
@@ -617,8 +617,8 @@ INCLUDE_ASM("camera/camera", cCamera_applyCameraShake);
 #include "bx/math3d.h"
 
 
-// The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
-// table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in kCamShakeDependsOnDistance.
+// The camera base matrix (set up by __sti__all_in_one_camera_cpp), followed by the camera-shake tuning
+// table: one entry per shake type, reset by InitCamShakeValuesTable, plus each type's selector in kCamShakeDependsOnDistance.
 struct sCamShake {
     float base;     // passed to cLookAtChaseAlgorithm_setupCameraShake_E460 / cLookAtChaseAlgorithm_updateCameraShake
     float spread;
@@ -5655,8 +5655,8 @@ INCLUDE_ASM("camera/camera", func_001635C8);
 /**
  * Returns 0.0f; nothing in the code or data refers to it.
  *
- * One of a run of unreferenced stubs (func_001635C0 .. func_001635E0) before the camera's air-spline getters
- * func_001635E8 and func_001635F0.
+ * One of a run of unreferenced stubs (func_001635C0 .. doRenderAirTargetGraph) before the camera's air-spline getters
+ * getAirPositionCamCSI and getAirTargetCamCSI.
  *
  * @return 0.0f
  */
@@ -5665,35 +5665,35 @@ extern "C" float func_001635C8(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001635D8);
+INCLUDE_ASM("camera/camera", doRenderAirPositionGraph);
 #ifdef SKIP_ASM
 /**
  * Returns 0; nothing in the code or data refers to it.
  *
- * One of the unreferenced stubs func_001635C0 .. func_001635E0.
+ * One of the unreferenced stubs func_001635C0 .. doRenderAirTargetGraph.
  *
  * @return 0
  */
-extern "C" int func_001635D8(void) {
+extern "C" int doRenderAirPositionGraph(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001635E0);
+INCLUDE_ASM("camera/camera", doRenderAirTargetGraph);
 #ifdef SKIP_ASM
 /**
  * Returns 0; nothing in the code or data refers to it.
  *
- * The last of the unreferenced stubs func_001635C0 .. func_001635E0.
+ * The last of the unreferenced stubs func_001635C0 .. doRenderAirTargetGraph.
  *
  * @return 0
  */
-extern "C" int func_001635E0(void) {
+extern "C" int doRenderAirTargetGraph(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001635E8);
+INCLUDE_ASM("camera/camera", getAirPositionCamCSI);
 #ifdef SKIP_ASM
 extern int D_004A4DD8;
 
@@ -5702,12 +5702,12 @@ extern int D_004A4DD8;
  *
  * @return the spline's address (0 when no air curve is running; D_004A1288 is the matching flag)
  */
-extern "C" int func_001635E8(void) {
+extern "C" int getAirPositionCamCSI(void) {
     return D_004A4DD8;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001635F0);
+INCLUDE_ASM("camera/camera", getAirTargetCamCSI);
 #ifdef SKIP_ASM
 extern int D_004A4DDC;
 
@@ -5716,7 +5716,7 @@ extern int D_004A4DDC;
  *
  * @return the spline's address (0 when no air curve is running)
  */
-extern "C" int func_001635F0(void) {
+extern "C" int getAirTargetCamCSI(void) {
     return D_004A4DDC;
 }
 #endif
@@ -6611,21 +6611,21 @@ void cLookAtChaseAlgorithm::updateRailCam(cChaseSetup* src, float rise, float sm
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00164868);
+INCLUDE_ASM("camera/camera", doRenderHalfPipeAngleGraph);
 #ifdef SKIP_ASM
 /**
  * Returns 0; nothing in the code or data refers to it.
  *
- * An unreferenced stub between cLookAtChaseAlgorithm_updateRailCam and func_00164870.
+ * An unreferenced stub between cLookAtChaseAlgorithm_updateRailCam and getHalfPipeAngleCSI.
  *
  * @return 0
  */
-extern "C" int func_00164868(void) {
+extern "C" int doRenderHalfPipeAngleGraph(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00164870);
+INCLUDE_ASM("camera/camera", getHalfPipeAngleCSI);
 #ifdef SKIP_ASM
 extern int D_004A4DE0;
 
@@ -6634,7 +6634,7 @@ extern int D_004A4DE0;
  *
  * @return the spline's address (0 until one is evaluated; never cleared afterwards, D_004A128C is the activity flag)
  */
-extern "C" int func_00164870(void) {
+extern "C" int getHalfPipeAngleCSI(void) {
     return D_004A4DE0;
 }
 #endif
@@ -8565,7 +8565,7 @@ extern "C" void* func_001673B8(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001673F8);
+INCLUDE_ASM("camera/camera", __sti__all_in_one_camera_cpp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new(unsigned int, void* p) { return p; }
@@ -8671,10 +8671,10 @@ extern sMatrix_1673F8 CamAxisFlip;
 extern sFlags_1673F8 D_004A4DC0;
 extern int persistentPlayerChoiceType[2];
 
-extern "C" void func_0015E2A8(void);
+extern "C" void InitCamShakeValuesTable(void);
 
-// The unit declares func_001673F8 later as returning void*; bind this body by asm label.
-extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_001673F8");
+// The unit declares __sti__all_in_one_camera_cpp later as returning void*; bind this body by asm label.
+extern "C" void __sti__all_in_one_camera_cpp_impl(int initialize, int priority) __asm__("__sti__all_in_one_camera_cpp");
 
 /**
  * Constructs camera/camera.cpp's static constants (its static initializer).
@@ -8683,13 +8683,13 @@ extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_0
  * fourteen region-type keys D_004A4D48..D_004A4DB0 with ids 0-13 and 56 float4 colour constants D_004C5020..D_004C5390
  * (the same per-unit copies the world-painter unit's func_002BBC38 builds), sets the axis-flip matrix CamAxisFlip (rows
  * (0, 0, 1, 0), (-1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 0, 1)) that CamMat is built from, fills the camera-shake table
- * (func_0015E2A8), builds the key D_004A4DC0 with id -1, and sets both views' persistentPlayerChoiceType to 61 (0x3D,
+ * (InitCamShakeValuesTable), builds the key D_004A4DC0 with id -1, and sets both views' persistentPlayerChoiceType to 61 (0x3D,
  * no choice). func_00168298 calls it from the constructor table.
  *
  * @param initialize  nonzero to construct (nothing is done for 0)
  * @param priority  the init priority; only 0xFFFF does anything
  */
-extern "C" void func_001673F8_impl(int initialize, int priority)
+extern "C" void __sti__all_in_one_camera_cpp_impl(int initialize, int priority)
 {
     if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004C5020) sColor_1673F8(1.0f, 1.0f, 1.0f, 0.5f);
@@ -8768,7 +8768,7 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
                                          -1.0f, 0.0f, 0.0f, 0.0f,
                                          0.0f, 1.0f, 0.0f, 0.0f,
                                          0.0f, 0.0f, 0.0f, 1.0f);
-        func_0015E2A8();
+        InitCamShakeValuesTable();
         new (&D_004A4DC0) sFlags_1673F8(-1, -1);
         persistentPlayerChoiceType[0] = 61;
         persistentPlayerChoiceType[1] = 61;
@@ -9858,19 +9858,19 @@ void cLookAtChaseAlgorithm::verify()
 }
 #endif
 
-extern "C" void* func_001673F8(int, int);
+extern "C" void* __sti__all_in_one_camera_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("camera/camera", func_00168298__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the camera unit's static initializer func_001673F8(1, 0xFFFF): a global constructor entry.
+ * Runs the camera unit's static initializer __sti__all_in_one_camera_cpp(1, 0xFFFF): a global constructor entry.
  *
- * @return func_001673F8's return value (declared void*; that function returns nothing)
+ * @return __sti__all_in_one_camera_cpp's return value (declared void*; that function returns nothing)
  */
 void* func_00168298(void* self)
 {
-    return func_001673F8(1, 0xffff);
+    return __sti__all_in_one_camera_cpp(1, 0xffff);
 }
 #endif
 

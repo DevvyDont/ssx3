@@ -335,14 +335,14 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovstatehud", makeTextPictLineAscii);
 #ifdef SKIP_ASM
-extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" unsigned short* strcpy3(unsigned short* dst, char* src);
 extern "C" void splitTextPictLine(tTextPictLine* self);
 struct sVec2f { float x, y; };
 
 /**
  * Sets a HUD text line from an 8-bit string and lays it out.
  *
- * Widens @p str into the line's 16-bit text (+0x4C) with func_002C2540, stores @p font (+0x8) and @p scale (+0x10),
+ * Widens @p str into the line's 16-bit text (+0x4C) with strcpy3, stores @p font (+0x8) and @p scale (+0x10),
  * then runs splitTextPictLine. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's
  * mpFEFont font.
  *
@@ -352,7 +352,7 @@ struct sVec2f { float x, y; };
  */
 extern "C" void makeTextPictLineAscii(tTextPictLine* self, char* str, cFont* font, sVec2f* scale)
 {
-    func_002C2540((unsigned short*)(&self->text[0]), str);
+    strcpy3((unsigned short*)(&self->text[0]), str);
     self->pFont = font;
     *(sVec2f*)&self->fontScaleBase[0] = *scale;
     splitTextPictLine(self);
@@ -2518,7 +2518,7 @@ struct sFont_001F31E0 {
  * by (3, 3), right-aligned at x 620 and vertically centred on y 445, with layer 31 in the draw state. Then an icon
  * sprite (texture: GrMan's word +0x1068) is drawn with cPS2GraphicsMan_DrawSprite 17 px left of the text at y 445, 18
  * high and |mAnimFrame - 1| * 18 wide, so it flips as mAnimFrame runs from 0 to 2, and everything is popped again. The
- * font keeps the 0.7 Scale and a (2, 2) shadow offset afterwards. cGame_render and func_0022C830 call it.
+ * font keeps the 0.7 Scale and a (2, 2) shadow offset afterwards. cGame_render and cGame_renderVideo call it.
  */
 void cBXLoadIndicator::Render()
 {

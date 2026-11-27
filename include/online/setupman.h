@@ -8,7 +8,7 @@
 // (mIsHost) owns the state machine; the client mirrors it.
 // EA's source: d:/ssx/code/source/online/setupman.cpp (the July 2003 preview's assert strings, with "!mSetupMan" and
 // the allocation tag "cSetupMan" in the same function). Retail code: dirtysock/tagsunk 0x00264030..0x00265768, plus
-// the per-message handlers func_00269008 .. func_00269CF0 in bx/bxstringctor (see the methods file).
+// the per-message handlers cSetupMan_handleCharPickEcho .. cSetupMan_handleBragUnlockMessage in bx/bxstringctor (see the methods file).
 // One instance, cSetupMan_mSetupMan (EA: the static cSetupMan::mSetupMan, preview assert "!mSetupMan"): cSetupMan_createInstance creates
 // it, cSetupMan_destroyInstance destroys it. No On Tour counterpart (On Tour has no online code).
 //

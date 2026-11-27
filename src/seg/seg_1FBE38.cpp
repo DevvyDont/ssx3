@@ -89,10 +89,10 @@ enum eScriptRiderQuery {
     kRiderQuery_NumLastSecondLanding = 17,
     kRiderQuery_Punching = 18
 };
-// tCrowd3dData::Cmd (Crowd3dFunc): func_00343C60 joins the instance's crowd block, func_00343F38 leaves it.
+// tCrowd3dData::Cmd (Crowd3dFunc): func_00343C60 joins the instance's crowd block, cCrowdMan3d_removeMember leaves it.
 enum eCrowd3dCmd { kCrowd3dCmd_Join = 0, kCrowd3dCmd_Leave = 1 };
-// tCrowd2dData::Cmd (Crowd2dFunc): func_00229820 points a bone at the shared crowd record; 1 is handled and ignored;
-// func_00229788 takes a crowd quad slot, func_002297D8 releases it.
+// tCrowd2dData::Cmd (Crowd2dFunc): cCrowdMan2d_attachBoneToCrowdPose points a bone at the shared crowd record; 1 is handled and ignored;
+// cCrowdMan2d_addQuad takes a crowd quad slot, cCrowdMan2d_removeQuad releases it.
 enum eCrowd2dCmd {
     kCrowd2dCmd_Attach = 0,
     kCrowd2dCmd_Ignored = 1,
@@ -6994,7 +6994,7 @@ INCLUDE_ASM("seg/seg_1FBE38", Crowd3dFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int TheCrowdMan3d_39F0 __asm__("TheCrowdMan3d");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
-extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
+extern "C" void cCrowdMan3d_removeMember_39F0(int, int) __asm__("cCrowdMan3d_removeMember");
 extern t3Vector luno_gLunoNil_39F0 __asm__("luno_gLunoNil");
 // World-script data that joins or leaves a 3D crowd (On Tour tCrowd3dData; same offsets): the block below fills it.
 struct tCrowd3dData {
@@ -7021,7 +7021,7 @@ extern "C" void* MEM_copy_39F0(void*, void*, int) __asm__("MEM_copy");
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, Cmd kCrowd3dCmd_Join passes its id
- * (m_RID) to func_00343C60 (joins the crowd block for its model) and kCrowd3dCmd_Leave to func_00343F38 (leaves it),
+ * (m_RID) to func_00343C60 (joins the crowd block for its model) and kCrowd3dCmd_Leave to cCrowdMan3d_removeMember (leaves it),
  * both on the 3D crowd manager TheCrowdMan3d; other values do nothing.
  *
  * @param n  the number of script arguments
@@ -7063,7 +7063,7 @@ extern "C" t3Vector Crowd3dFunc(int n, luno_cLunoCArg *params) {
         if (crowdCmd == kCrowd3dCmd_Join)
             func_00343C60_39F0(TheCrowdMan3d_39F0, w);
         else if (crowdCmd == kCrowd3dCmd_Leave)
-            func_00343F38_39F0(TheCrowdMan3d_39F0, w);
+            cCrowdMan3d_removeMember_39F0(TheCrowdMan3d_39F0, w);
     }
     return luno_gLunoNil_39F0;
 }
@@ -7095,9 +7095,9 @@ extern tCrowd2dData sCrowd2dDefaults __asm__("D_004FBC80");
 extern int D_57E0_3BA0 __asm__("D_004A57E0");
 extern const int D_004465D8_3BA0[] __asm__("D_004465D8");
 extern "C" void* MEM_copy_3BA0(void*, void*, int) __asm__("MEM_copy");
-extern "C" void func_00229820_3BA0(int, unsigned, int, int) __asm__("func_00229820");
-extern "C" void func_00229788_3BA0(int, unsigned, int, int) __asm__("func_00229788");
-extern "C" void func_002297D8_3BA0(int, unsigned, int, int) __asm__("func_002297D8");
+extern "C" void cCrowdMan2d_attachBoneToCrowdPose_3BA0(int, unsigned, int, int) __asm__("cCrowdMan2d_attachBoneToCrowdPose");
+extern "C" void cCrowdMan2d_addQuad_3BA0(int, unsigned, int, int) __asm__("cCrowdMan2d_addQuad");
+extern "C" void cCrowdMan2d_removeQuad_3BA0(int, unsigned, int, int) __asm__("cCrowdMan2d_removeQuad");
 /**
  * Script function (gLunoCFunctions[88]): runs a 2D-crowd command on a world instance.
  *
@@ -7107,9 +7107,9 @@ extern "C" void func_002297D8_3BA0(int, unsigned, int, int) __asm__("func_002297
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, its id (m_RID) goes to the 2D crowd
- * manager TheCrowdMan2d: Cmd kCrowd2dCmd_Attach calls func_00229820 (points bone Context of part Mesh at the shared
- * crowd record), kCrowd2dCmd_AddQuad func_00229788 (takes a crowd quad slot for the instance) and
- * kCrowd2dCmd_RemoveQuad func_002297D8 (releases it); kCrowd2dCmd_Ignored and others do nothing.
+ * manager TheCrowdMan2d: Cmd kCrowd2dCmd_Attach calls cCrowdMan2d_attachBoneToCrowdPose (points bone Context of part Mesh at the shared
+ * crowd record), kCrowd2dCmd_AddQuad cCrowdMan2d_addQuad (takes a crowd quad slot for the instance) and
+ * kCrowd2dCmd_RemoveQuad cCrowdMan2d_removeQuad (releases it); kCrowd2dCmd_Ignored and others do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -7154,12 +7154,12 @@ extern "C" t3Vector Crowd2dFunc(int n, luno_cLunoCArg *params) {
         int contextIndex = buf[3];
         unsigned instId = obj->m_RID;
         if (mode == kCrowd2dCmd_Attach)
-            func_00229820_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
+            cCrowdMan2d_attachBoneToCrowdPose_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
         else if (mode == kCrowd2dCmd_Ignored) {
         } else if (mode == kCrowd2dCmd_AddQuad)
-            func_00229788_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
+            cCrowdMan2d_addQuad_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
         else if (mode == kCrowd2dCmd_RemoveQuad)
-            func_002297D8_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
+            cCrowdMan2d_removeQuad_3BA0(TheCrowdMan2d_3BA0, instId, meshIndex, contextIndex);
     }
     return luno_gLunoNil_3BA0;
 }

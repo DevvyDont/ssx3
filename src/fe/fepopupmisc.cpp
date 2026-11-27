@@ -8945,7 +8945,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onCreateScreen);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern void* cBENewRaceInterface_getLocationName1_5B80(void* iface) __asm__("cBENewRaceInterface_getLocationName1");
-extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("func_002C2540");
+extern void strcpy3_5B80(unsigned short* dst, const char* src) __asm__("strcpy3");
 extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int a1, int a2);
 extern "C" int cGameModeMan_getHeatScore(cGameModeMan* info, int idx, int which);
@@ -9021,7 +9021,7 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
     cGameModeMan* info = SSXApp->GameModeMan;
     int kind = info->iHeatNum;
     cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_track_event));
-    func_002C2540_5B80(title, (char*)cBENewRaceInterface_getLocationName1_5B80(iface0));
+    strcpy3_5B80(title, (char*)cBENewRaceInterface_getLocationName1_5B80(iface0));
     unsigned short* fmt = 0;
     switch (event) {
     case 1: {
@@ -9385,7 +9385,7 @@ void cUIText_setUnicodeStringByID(cUIText* t, int id);
 
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
-extern "C" unsigned short* func_002C2540(void* dst, const char* s);
+extern "C" unsigned short* strcpy3(void* dst, const char* s);
 extern "C" void sprintf2(void* dst, const char* fmt, ...);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" char* cBENewPlayerInterface_getRiderName(void* iface, int idx);
@@ -9484,7 +9484,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_track_event));
         unsigned short name[0x38];
-        func_002C2540(name, cBENewRaceInterface_getLocationName1(iface0));
+        strcpy3(name, cBENewRaceInterface_getLocationName1(iface0));
         unsigned short* str = 0;
         switch (cBENewRaceInterface_newRace.cGameMode) {
         case 0:
@@ -9646,9 +9646,9 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 ((cUIThing*)uiText)->setVisible(0);
             } else {
                 if (cGameModeMan_iRanking[pl0] < cGameModeMan_iRanking[pl1]) {
-                    func_002C2540(text, cBENewPlayerInterface_getRiderName(player, pl0));
+                    strcpy3(text, cBENewPlayerInterface_getRiderName(player, pl0));
                 } else {
-                    func_002C2540(text, cBENewPlayerInterface_getRiderName(player, pl1));
+                    strcpy3(text, cBENewPlayerInterface_getRiderName(player, pl1));
                 }
                 unsigned short msg[200];
                 unsigned short* msgFmt = Loc1E6718(str_kT_OVRCMNCongratP1);

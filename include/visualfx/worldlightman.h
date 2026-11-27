@@ -41,7 +41,7 @@ struct tWorldPainterQuery;
 // cPS2LightMan_CreateLights (render/lightman). EA's header for it is not known.
 
 // A world light's type (tLightRecord::m_eLightType). [O] On Tour's enum eNEWLightType, names and values; [U]
-// func_0038A6A8 lights a point with the spot (1) and point (2) tests and adds nothing for a directional light (0).
+// cIrradiance_addWorldLight lights a point with the spot (1) and point (2) tests and adds nothing for a directional light (0).
 enum eNEWLightType {
     eNEWLight_Directional = 0, eNEWLight_Spot = 1, eNEWLight_Point = 2, eNEWLight_Ambient = 3, eNEWLight_Num = 4,
     eNEWLight_Unknown = 5

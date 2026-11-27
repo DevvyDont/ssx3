@@ -144,25 +144,25 @@ void cMemMan_free(void* ptr)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memman", func_00317EE0);
+INCLUDE_ASM("bx/memman", cMemMan_syncMutex);
 #ifdef SKIP_ASM
 /**
  * Locks and immediately unlocks the memory-manager mutex (cMemMan_m_mutex); nothing runs in between.
  */
-extern "C" void func_00317EE0(void) {
+extern "C" void cMemMan_syncMutex(void) {
     MUTEX_lock(cMemMan_m_mutex);
     MUTEX_unlock(cMemMan_m_mutex);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/memman", func_00317F18);
+INCLUDE_ASM("bx/memman", cMemMan_validatePools);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_validate();
 
 /**
  * Checks the memory manager's pools by calling cMemMan_validate.
  */
-extern "C" void func_00317F18(void) {
+extern "C" void cMemMan_validatePools(void) {
     cMemMan_validate();
 }
 #endif

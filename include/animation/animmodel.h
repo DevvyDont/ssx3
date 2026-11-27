@@ -24,7 +24,7 @@ struct sAnimModelLodRef {
 };
 
 // A part's LOD slot. The 4 slots double as the part's "channels": enabling a part sets used on all 4
-// (func_0030E9E0), drawing checks the slot of the requested LOD (cAnimModel_render).
+// (cAnimModel_enablePart), drawing checks the slot of the requested LOD (cAnimModel_render).
 struct sAnimModelLod {
     int used;                   // 0x0
     sAnimModelLodRef* refs;     // 0x4 numLodRefs entries (cAnimModel_addModelPartLOD)
@@ -40,7 +40,7 @@ struct sAnimModelPart {
     int firstBone;              // 0x04 first bone of this part (cAnimModel_applyOffset start + j; cAnimModel_getBoneSkelIndex returns firstBone + i)
     int unk_08;
     int unk_0C;                 // 0x0C a channel bit; >= 0 when the part has one (cAnimModel_getGraftMask)
-    unsigned long mask;         // 0x10 64-bit bone/channel mask OR'd into cAnimModel::mask (func_0030E9E0)
+    unsigned long mask;         // 0x10 64-bit bone/channel mask OR'd into cAnimModel::mask (cAnimModel_enablePart)
     sAnimModelLod lods[4];      // 0x18
     char* boneNames;            // 0x38 numBones names of 0x50 bytes (cAnimModel_getBoneSkelIndex, cAnimModel_getGraftMask)
     char* HotSpots;               // 0x3C data + src[0x1C] (addModelPartLOD)
@@ -75,7 +75,7 @@ struct cAnimModel {
     /* 0x008 */ int numParts;               // loop bound over parts everywhere
     /* 0x00C */ sAnimModelPart* parts;
     /* 0x010 */ int numBones;               // bones/matrices count; also the first channel bit (cAnimModel_getGraftMask)
-    /* 0x014 */ int maxPartIndex;           // i > this -> no such part (func_0030E9E0, cAnimModel_getGraftMask)
+    /* 0x014 */ int maxPartIndex;           // i > this -> no such part (cAnimModel_enablePart, cAnimModel_getGraftMask)
     /* 0x018 */ int unk_018;                // nonzero: draw per-part LOD refs, else one call with lodInfo (cAnimModel_render)
     /* 0x01C */ int* partIndex;             // part number -> index into parts, < 0 = none
     /* 0x020 */ int* boneChannelIndex;      // per-bone first-component index into the channel data (func_0030ECD8: first = arr[k] - arr[firstBone])
@@ -99,7 +99,7 @@ struct cAnimModel {
     /* 0x130 */ tTextureRef* TextureRefs;   // [O] cAnimModel::TextureRefs (+0x790); [R] cAnimModel_cAnimModel clears it (see NumTextureRefs)
     /* 0x134 */ char unk_134[0xC];
     /* 0x140 */ t4Vector ScaleVect;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
-    /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
+    /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (cAnimModel_enablePart, cAnimModel_disableAllParts)
     /* 0x158 */ unsigned long AnimMinPartsMask;      // another such mask (cAnimModel_addAnimMinPart)
 
     // Methods bound to their retail symbols by asm labels.

@@ -418,7 +418,7 @@ extern "C" bool cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, 
 extern "C" int cUITemplate_MAP_isMapEventLocked_enus(void* self, int kind, int x) __asm__("cUITemplate_MAP_isMapEventLocked");
 extern "C" int strcmp(const char*, const char*);
 extern "C" const char* cBENewRaceInterface_getLocationName_enus(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
-extern "C" unsigned short* func_002C2540_enus(unsigned short* dst, const char* s) __asm__("func_002C2540");
+extern "C" unsigned short* strcpy3_enus(unsigned short* dst, const char* s) __asm__("strcpy3");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" unsigned short* getPeakChallengeEventName(int kind);
 extern "C" void cUIText_setUnicodeString_enus(void* text, unsigned short* s) __asm__("cUIText_setUnicodeString");
@@ -547,7 +547,7 @@ void cUITemplate_MAP::setupMenus()
                     } else if (goal.kind == kGAMEEVENT_RIVALTIME) {
                         unsigned short text[200];
                         unsigned short wfmt[24];
-                        func_002C2540_enus(wfmt, D_004A2590);
+                        strcpy3_enus(wfmt, D_004A2590);
                         sprintf1(text, wfmt, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
                         cUIText_setUnicodeString_enus(menuObj, text);
                     } else {
@@ -1815,7 +1815,7 @@ extern "C" int strcmp(const char*, const char*);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
 int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int kind, int track);
 extern "C" const char* cBENewRaceInterface_getLocationName_oals(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
-extern "C" unsigned short* func_002C2540_oals(unsigned short* dst, const char* s) __asm__("func_002C2540");
+extern "C" unsigned short* strcpy3_oals(unsigned short* dst, const char* s) __asm__("strcpy3");
 extern "C" unsigned short* strcpy1_oals(unsigned short* dst, const unsigned short* src) __asm__("strcpy1");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void sprintf2(unsigned short* dst, const char* fmt, ...);
@@ -1947,10 +1947,10 @@ void cUITemplate_MAP::setupPeakGoals()
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
-                func_002C2540_oals(ev, goal.name);
+                strcpy3_oals(ev, goal.name);
             } else if (goal.kind == kGAMEEVENT_RIVALTIME) {
                 unsigned short fmt[20];
-                func_002C2540_oals(fmt, str_pct_S_pct_s_b);
+                strcpy3_oals(fmt, str_pct_S_pct_s_b);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track), Loc_5098(str_kT_cmnRaceCaps_b_oals));
             } else {
                 strcpy1_oals(ev, getPeakChallengeEventName(goal.kind));
@@ -1962,12 +1962,12 @@ void cUITemplate_MAP::setupPeakGoals()
             char name3[24];
             sprintf(name3, D_00471068, k);
             cUIState_showObjSafe(mpUIState, name3);
-            func_002C2540_oals(medal, D_004A2560_oals);
+            strcpy3_oals(medal, D_004A2560_oals);
             int medalLevel = cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track);
             if (medalLevel != kMEDAL_NONE) {
                 unsigned short fmt[8];
                 done++;
-                func_002C2540_oals(fmt, D_004A23C0);
+                strcpy3_oals(fmt, D_004A23C0);
                 sprintf1(medal, fmt, cUITemplate_MAP_getMedalStr_oals(((char*)this), medalLevel));
                 cUIState_showObjSafe(mpUIState, name1);
             } else {
@@ -1977,7 +1977,7 @@ void cUITemplate_MAP::setupPeakGoals()
             sprintf(name4, D_00471078, k);
             widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name4));
             unsigned short fmt[8];
-            func_002C2540_oals(fmt, D_004A2550);
+            strcpy3_oals(fmt, D_004A2550);
             sprintf1(wbuf, fmt, ev, medal);
             cUIText_setUnicodeString_oals(widget, wbuf);
         }
@@ -1999,10 +1999,10 @@ void cUITemplate_MAP::setupPeakGoals()
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else if (strcmp(goal.name, D_004A2560_oals)) {
-                func_002C2540_oals(ev, goal.name);
+                strcpy3_oals(ev, goal.name);
             } else if (goal.kind == kGAMEEVENT_RIVALPOINTS) {
                 unsigned short fmt[20];
-                func_002C2540_oals(fmt, str_pct_S_Jam_b_oals);
+                strcpy3_oals(fmt, str_pct_S_Jam_b_oals);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else {
                 strcpy1_oals(ev, getPeakChallengeEventName(goal.kind));
@@ -2015,7 +2015,7 @@ void cUITemplate_MAP::setupPeakGoals()
             char name3[24];
             sprintf(name3, D_00471068, k);
             cUIState_showObjSafe(mpUIState, name3);
-            func_002C2540_oals(medal, D_004A2560_oals);
+            strcpy3_oals(medal, D_004A2560_oals);
             int medalLevel = cBERewardInterface_getTrackMedal(rew, 0, ch, goal.kind, goal.track);
             char medalFmt[16];
             if (medalLevel != kMEDAL_NONE) {
@@ -2125,13 +2125,13 @@ void cUITemplate_MAP::setupPeakGoals()
         widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004712C8));
         int cost = cBERewardInterface_getEarningsTarget(rew, cUITemplate_MAP_mPeak);
         unsigned short* fmt = Loc_5098(str_kT_CMNEarnNum);
-        func_002C2540_oals(num, getDollarString(cost));
+        strcpy3_oals(num, getDollarString(cost));
         sprintf1(wbuf, fmt, num);
         cUIText_setUnicodeString_oals(widget, wbuf);
         widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004712F0));
         int money = cBEEconInterface_getTotalMoneyEarned1(econ, 0);
         fmt = Loc_5098(D_00471300);
-        func_002C2540_oals(num, getDollarString(money));
+        strcpy3_oals(num, getDollarString(money));
         sprintf1(wbuf, fmt, num);
         cUIText_setUnicodeString_oals(widget, wbuf);
         int ok;
@@ -2468,7 +2468,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(void* iface
 extern "C" int cBEScoreInterface_getHighScore(void* iface, int a, int event, int type);
 extern "C" char* formatMinutesSeconds(int t);
 extern "C" void strcpy1(void* dst, void* src);
-extern "C" void func_002C2540(void* dst, char* src);
+extern "C" void strcpy3(void* dst, char* src);
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeStringWrap(void* text, void* wstr);
 extern "C" void cUIText_setUnicodeString(void* text, char* str);
@@ -2689,7 +2689,7 @@ void cUITemplate_MAP::setupLocationInfo()
                 short part[304];
                 short pre[304];
                 short line[304];
-                func_002C2540(fmt, D_004A2590);
+                strcpy3(fmt, D_004A2590);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
                 cFELocale* loc = SSXApp->FELocale;
                 sLocVEntry_207430* vt = (sLocVEntry_207430*)VPTR_OF(cUILocaleInterface, loc);
@@ -2706,7 +2706,7 @@ void cUITemplate_MAP::setupLocationInfo()
                 short fmt[16];
                 short pre[312];
                 short line[304];
-                func_002C2540(fmt, str_pct_S_Jam_b);
+                strcpy3(fmt, str_pct_S_Jam_b);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
                 cFELocale* loc = SSXApp->FELocale;
                 sLocVEntry_207430* vt = (sLocVEntry_207430*)VPTR_OF(cUILocaleInterface, loc);

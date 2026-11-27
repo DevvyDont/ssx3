@@ -21,7 +21,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
  * Maps @p sky to one of the entries "APBR1" to "EPBR1" by the location's peak, the first letter of its kLOCATION_ name
  * (A: kLOCATION_ARA1, ASS1, ABA1, ABC1, HUB_A and any other value; B: BRA2, BHP1, HUB_B; C: CRA3, CBA2, CHP2, HUB_C; D:
  * DRA4, DSS2, DBC2, HUB_D; E: ERA5, ESS3, EBA3, EHP3, EBC3, HUB_E) and stores its index in
- * cIrradianceDataBase_TheDataBase (0 if absent) in cIrradianceDataBase_mDefaultId, which func_00389C38() applies. The
+ * cIrradianceDataBase_TheDataBase (0 if absent) in cIrradianceDataBase_mDefaultId, which cIrradiance_buildDefault() applies. The
  * source's note calls it the default rider irradiance bank.
  *
  * @param sky  BE location ID (callers pass the section manager's or the new race's location)

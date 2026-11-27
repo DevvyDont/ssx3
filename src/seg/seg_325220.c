@@ -2044,7 +2044,7 @@ extern int D_0052BCD4;
  * Shuts the SIF command layer down.
  *
  * Disables DMA channel 5 (DisableDmac), removes the channel 5 handler with RemoveDmacHandler and clears the
- * initialised flag D_0045517C. sceSifExitRpc and func_0031B008 call it.
+ * initialised flag D_0045517C. sceSifExitRpc and shutdownAndLoadExec call it.
  */
 void sceSifExitCmd(void) {
     DisableDmac(5);
@@ -7166,7 +7166,7 @@ extern void _LoadExecPS2(int a0, int a1, int a2);
  *
  * The argument strings arrive in the third argument register, which this definition passes on unnamed to
  * func_0042C510. Restores the TLB layout (func_0042C628) and calls the syscall 6 stub (seg_3249A0) with the kernel copy
- * of the name, the count and the kernel argument table (D_00456538 + 4). Called by func_0031B008.
+ * of the name, the count and the kernel argument table (D_00456538 + 4). Called by shutdownAndLoadExec.
  *
  * @param progPath  path of the program
  * @param argCount  argument count

@@ -96,7 +96,7 @@ public:
 };
 
 
-extern "C" void func_0037C720(void* mgr, float f);
+extern "C" void cPS2GraphicsMan_setScreenFade(void* mgr, float f);
 
 // cSpeedBoostFX (ai/riderhandler.h) as its destructor sees it.
 class cVbDtor002E64C0 : virtual public cRiderVb_bwf {

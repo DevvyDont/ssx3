@@ -447,13 +447,13 @@ tOverlapListNode* cWorldLightMan::evictOverlapNode(int iCurrentTick)
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights1);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_IntersectLights(cWorldLightMan* self, void* a1, void* a2, void** out, int count);
-extern "C" void func_0038A6A8(void* a, void* b, void* c);
+extern "C" void cIrradiance_addWorldLight(void* a, void* b, void* c);
 
 /**
  * Adds the strongest lights of an overlap list at a point to a light set.
  *
  * cWorldLightMan_IntersectLights picks up to @p count lights (at most 32) by intensity at @p pos; each found one is
- * added to @p irradiance with func_0038A6A8. cWorldLightMan_getRealTimeLights calls it with 4 lights and the cache
+ * added to @p irradiance with cIrradiance_addWorldLight. cWorldLightMan_getRealTimeLights calls it with 4 lights and the cache
  * entry's light set.
  *
  * @param pos  the point to light
@@ -468,7 +468,7 @@ void cWorldLightMan::IntersectLights1(void* pos, void* overlapList, cIrradiance*
     IntersectLights(pos, overlapList, buf, count);
     for (i = 0; i < count; i++) {
         if (buf[i] != 0) {
-            func_0038A6A8(irradiance, pos, buf[i]);
+            cIrradiance_addWorldLight(irradiance, pos, buf[i]);
         }
     }
 }
@@ -1731,7 +1731,7 @@ void sti_002F6B88(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
+INCLUDE_ASM("visualfx/worldlightman", getIdentityMatrixPtr);
 #ifdef SKIP_ASM
 extern t4Matrix t4mat_Identity;
 
@@ -1742,7 +1742,7 @@ extern t4Matrix t4mat_Identity;
  *
  * @return pointer to t4mat_Identity
  */
-extern "C" void* func_002F7A50()
+extern "C" void* getIdentityMatrixPtr()
 {
     return &t4mat_Identity;
 }
@@ -1901,7 +1901,7 @@ INCLUDE_ASM("visualfx/worldlightman", cAngerFX_writeToReplayFrame);
 /**
  * Does nothing.
  *
- * It is paired with cAngerFX_readFromReplayFrame, which forwards to the cAngerFX function func_002D4BE0. Nothing in the retail code
+ * It is paired with cAngerFX_readFromReplayFrame, which forwards to the cAngerFX function cAngerFX_clearViewState. Nothing in the retail code
  * references it.
  */
 extern "C" void cAngerFX_writeToReplayFrame(void) {
@@ -1911,16 +1911,16 @@ extern "C" void cAngerFX_writeToReplayFrame(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAngerFX_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_002D4BE0();
+extern "C" void cAngerFX_clearViewState();
 
 /**
- * Calls func_002D4BE0, passing its argument registers through untouched.
+ * Calls cAngerFX_clearViewState, passing its argument registers through untouched.
  *
- * func_002D4BE0 is the cAngerFX function after its constructor and destructor. Nothing in the retail code references
+ * cAngerFX_clearViewState is the cAngerFX function after its constructor and destructor. Nothing in the retail code references
  * it.
  */
 extern "C" void cAngerFX_readFromReplayFrame(void) {
-    func_002D4BE0();
+    cAngerFX_clearViewState();
 }
 #endif
 //100%
@@ -2055,7 +2055,7 @@ void cLensFxMan::Lock(int locked)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
+INCLUDE_ASM("visualfx/worldlightman", cReplay_isRecording);
 #ifdef SKIP_ASM
 /**
  * Returns whether a replay's state (its first word) is 0.
@@ -2065,7 +2065,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
  *
  * @return true when the state is 0 (kGameRecording), else false
  */
-extern "C" bool func_002F7BE0(void* self)
+extern "C" bool cReplay_isRecording(void* self)
 {
     return *(unsigned int*)self == 0;
 }
@@ -3190,7 +3190,7 @@ void cSnowFall::writeToReplayFrame(cBxReplayFrame*)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
+INCLUDE_ASM("visualfx/worldlightman", testBit64);
 #ifdef SKIP_ASM
 /**
  * Returns whether bit @p n of the 64-bit word at @p bits is set.
@@ -3202,7 +3202,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
  * @return true when the bit is set, else false
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" bool func_002F8170(unsigned long* bits, int n)
+extern "C" bool testBit64(unsigned long* bits, int n)
 {
     unsigned long mask = (unsigned long)1 << n;
     return (*bits & mask) != 0;
@@ -3509,7 +3509,7 @@ void* func_002F8390(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F83B0);
+INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_fillEmitterTypes0To9);
 #ifdef SKIP_ASM
 struct sAttachedEmitterType_83B0 {
     int unk_0;
@@ -3588,9 +3588,9 @@ extern sAttachedEmitterType_83B0* cAttachedEmitterFX_mEmitterDataArray;
  * Fills attached-emitter types 0 to 9 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
  * func_002F17D0 allocates the 20-record table (5440 bytes, "AttachedEmitterTypeData") and then calls this and
- * func_002F9838 (types 10 to 19). func_002F2130 creates attached emitters from it by kind.
+ * cAttachedEmitterFX_fillEmitterTypes10To19 (types 10 to 19). func_002F2130 creates attached emitters from it by kind.
  */
-extern "C" void func_002F83B0(void)
+extern "C" void cAttachedEmitterFX_fillEmitterTypes0To9(void)
 {
     sAttachedEmitterType_83B0* emitterTypes = cAttachedEmitterFX_mEmitterDataArray;
     emitterTypes[0].unk_0 = 1;
@@ -4465,7 +4465,7 @@ void* func_002F9818(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F9838);
+INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_fillEmitterTypes10To19);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sAttachedEmitterType_9838 {
@@ -4544,9 +4544,9 @@ extern sAttachedEmitterType_9838* cAttachedEmitterFX_mEmitterDataArray_9838 __as
 /**
  * Fills attached-emitter types 10 to 19 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
- * func_002F17D0 calls it right after func_002F83B0 (types 0 to 9).
+ * func_002F17D0 calls it right after cAttachedEmitterFX_fillEmitterTypes0To9 (types 0 to 9).
  */
-extern "C" void func_002F9838(void)
+extern "C" void cAttachedEmitterFX_fillEmitterTypes10To19(void)
 {
     sAttachedEmitterType_9838* emitterTypes = cAttachedEmitterFX_mEmitterDataArray_9838;
     emitterTypes[10].unk_0 = 5;

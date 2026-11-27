@@ -87,7 +87,7 @@ struct cCameraTriggerMan {
                                                 //       cCameraTriggerList__cCameraTriggerList; [U] init
                                                 //       (cCameraTriggerList_init), streamIn (loadFromBuffer),
                                                 //       loadTriggers (loadFromFile), purge / setTriggers / streamOut
-                                                //       (func_0016CA18) walk Triggers (0x0) and NumTriggers (0x4);
+                                                //       (cCameraTriggerMan_reset) walk Triggers (0x0) and NumTriggers (0x4);
                                                 //       getTriggerList returns this
     cActiveTriggerList ActiveTriggerList[2];    // 0x14 [O]; [R] the ctor's 2-element loop (stride 4), the dtor's
                                                 //       reverse loop; [U] init / initOnRestart / cleanupOnExit / purge

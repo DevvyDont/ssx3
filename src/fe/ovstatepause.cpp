@@ -1294,7 +1294,7 @@ extern char D_004A2138[];
 
 extern "C" void cOVTemplate_Simple_onCreateScreen(void* self);
 extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
-extern "C" unsigned short* func_002C2540_BD20(unsigned short* dst, char* src) __asm__("func_002C2540");
+extern "C" unsigned short* strcpy3_BD20(unsigned short* dst, char* src) __asm__("strcpy3");
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" int cGameModeMan_getHeatScore(void* stats, int id, int kind);
@@ -1406,7 +1406,7 @@ extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
     cGameModeMan* stats = SSXApp->GameModeMan;
     int mode = stats->iHeatNum;
     void* textObj = getObj_1FBD20(overlay, str_track_event);
-    func_002C2540_BD20(title, cBENewRaceInterface_getLocationName1(iface0));
+    strcpy3_BD20(title, cBENewRaceInterface_getLocationName1(iface0));
     unsigned short* str = 0;
     switch (cBENewRaceInterface_newRace.cGameMode) {
     case kGAMEMODE_SLOPESTYLE:
@@ -1631,7 +1631,7 @@ extern "C" char* cBENewPlayerInterface_getRiderName(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
 extern "C" void* cBEScoreInterface_getCurrentHighScore(void* iface, int idx);
 extern "C" char* formatMinutesSeconds(void* p);
-extern "C" void func_002C2540(unsigned short* dst, char* src);
+extern "C" void strcpy3(unsigned short* dst, char* src);
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
@@ -1739,7 +1739,7 @@ extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
     void* widget = getObj_1FC878(overlay, str_title1);
     cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_CMNStateMultiPlay));
     widget = getObj_1FC878(overlay, str_title2);
-    func_002C2540(title, cBENewRaceInterface_getLocationName1(iface0));
+    strcpy3(title, cBENewRaceInterface_getLocationName1(iface0));
     unsigned short* str = 0;
     switch (getField_1FC878(gs, 72))
     {
@@ -2046,8 +2046,8 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int a1, int char
 extern "C" int cBERewardInterface_isPeakLocked(void* iface, int a1, int a2);
 extern "C" void* fptoui(float x);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
-// func_002C2540 returns dst (the unit declares it void)
-unsigned short* func_002C2540_r(unsigned short* dst, char* src) __asm__("func_002C2540");
+// strcpy3 returns dst (the unit declares it void)
+unsigned short* strcpy3_r(unsigned short* dst, char* src) __asm__("strcpy3");
 extern char str_kT_TITLERivalChallenge[];
 extern char str_kT_OVRCMNChallengeBy[];
 extern char str_kT_HELPChalPeakRace[];
@@ -2133,14 +2133,14 @@ extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void
         widget = getObj_1FD320(self, str_title2);
         switch (mode) {
         case kGAMEEVENT_RIVALTIME:
-            func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
-            func_002C2540_r(fmt, (char*)D_004A2140);
+            strcpy3_r(title, cBENewRaceInterface_getLocationName1(iface0));
+            strcpy3_r(fmt, (char*)D_004A2140);
             sprintf1(out, fmt, title, lookupString_1FD320(str_kT_cmnRaceCaps_b));
             cUIText_setUnicodeString(widget, out);
             break;
         case kGAMEEVENT_RIVALPOINTS:
-            func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
-            func_002C2540_r(fmt, (char*)D_0046E558);
+            strcpy3_r(title, cBENewRaceInterface_getLocationName1(iface0));
+            strcpy3_r(fmt, (char*)D_0046E558);
             sprintf1(out, fmt, title);
             cUIText_setUnicodeString(widget, out);
             break;
@@ -2157,7 +2157,7 @@ extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void
         cUIText* statusB = (cUIText*)getObj_1FD320(self, str_obj2);
         widget = getObj_1FD320(self, str_title1);
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_TITLERivalChallenge));
-        func_002C2540_r(name, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewRaceInterface_getRival(iface0), 0));
+        strcpy3_r(name, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewRaceInterface_getRival(iface0), 0));
         unsigned short* lineFmt;
         if (mode >= 4 && mode <= 5)
             lineFmt = lookupString_1FD320(str_kT_OVRCMNChallengeBy);
@@ -2204,9 +2204,9 @@ extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void
             widget = getObj_1FD320(self, str_timescoretobeat);
             float mins = (float)stats->uiTimeLimit * 0.01666666753590107f;
             void* wholeSeconds = fptoui(mins);
-            func_002C2540_r(num, formatMinutesSeconds(wholeSeconds));
+            strcpy3_r(num, formatMinutesSeconds(wholeSeconds));
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNTimeToBeatColon);
-            func_002C2540_r(title, D_004A2550);
+            strcpy3_r(title, D_004A2550);
             sprintf1(text, title, labelText, num);
             cUIText_setUnicodeStringWrap(widget, text);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPRaceToBottom));
@@ -2223,7 +2223,7 @@ extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void
         case kGAMEEVENT_POINTS_PEAK3: {
             int n = (int)stats->uiPointTarget;
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNScoreToBeatColon);
-            func_002C2540_r(title, str_pct_s_pct_d_c);
+            strcpy3_r(title, str_pct_s_pct_d_c);
             sprintf1(num, title, labelText, n);
             cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_timescoretobeat), num);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPMakeWayDnSlope));
@@ -3522,7 +3522,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
 extern "C" int getPeakChallengeEventName(int id);
 extern "C" void strcpy1(unsigned short* dst, unsigned short* src);
-extern "C" void func_002C2540(unsigned short* dst, char* src);
+extern "C" void strcpy3(unsigned short* dst, char* src);
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 // Called for its side effect here; the unit declares it int-returning.
 void sprintf2_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("sprintf2");
@@ -3578,7 +3578,7 @@ bool cOVState_REWARDS::onGainTransition(int)
             strcpy1(result, (unsigned short*)getPeakChallengeEventName(kind));
             break;
         case kGAMEEVENT_RIVALPOINTS:
-            func_002C2540(fmt, str_pct_S_Jam);
+            strcpy3(fmt, str_pct_S_Jam);
             sprintf1(result, fmt, cBENewRaceInterface_getLocationName1(race));
             break;
         default: {
@@ -3598,7 +3598,7 @@ bool cOVState_REWARDS::onGainTransition(int)
                 label = lookupString_1FFF78(str_kT_cmnPipeCaps);
                 break;
             }
-            func_002C2540(fmt, str_pct_S_pct_s);
+            strcpy3(fmt, str_pct_S_pct_s);
             sprintf1(result, fmt, cBENewRaceInterface_getLocationName1(race), label);
             break;
         }

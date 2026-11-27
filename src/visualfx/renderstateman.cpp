@@ -651,7 +651,7 @@ extern tRenderState cRenderStateMan_m_state[];
  *
  * Calls virtual slot 42 of the state's world-painter query object m_query[7] (+0x1C) (cRenderStateMan_m_state[@p i],
  * 0xF0-byte rows) and returns the value it points to. cRider_SetRiderLights passes it with the rider's
- * kRiderVt_getAIIndex to func_00389CB8.
+ * kRiderVt_getAIIndex to cIrradiance_addSunTerm.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -1634,7 +1634,7 @@ extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i);
 extern "C" float cRenderStateMan_LightGlowBlend2(int i);
 extern "C" float cRenderStateMan_LightGlowBlend3(int i);
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i);
-extern "C" bool func_002F7BE0(void* p);
+extern "C" bool cReplay_isRecording(void* p);
 extern int cRenderStateMan_m_inNIS;
 extern int cDepthFog_m_OverrideWP;
 extern int cDepthFog_m_Exponent;
@@ -1677,7 +1677,7 @@ extern tARGB cDepthFog_m_Colour;
  *
  * Unless cDepthFog_m_OverrideWP is set, the fog density, near and far planes and colour come from the matching queries;
  * unless cScreenTint_m_OverrideWP is set, the tint scale and fill colours and the lightning chance do too (lightning is
- * enabled when the game's Replay state is kGamePlayback or func_002F7BE0 says so); unless cLightGlow_m_OverrideWP is
+ * enabled when the game's Replay state is kGamePlayback or cReplay_isRecording says so); unless cLightGlow_m_OverrideWP is
  * set, the light-glow intensities and scales do. The in-NIS flag and the remaining per-camera values are stored per @p
  * i in the graphics context.
  *
@@ -1707,7 +1707,7 @@ void cVisualEffectsMan::commonUpdate(int i)
         cScreenTint_m_LightningChance = cRenderStateMan_LightningChance(i);
         int on = 0;
         int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
-        if (*st == kGamePlayback || func_002F7BE0(st))
+        if (*st == kGamePlayback || cReplay_isRecording(st))
             on = 1;
         cScreenTint_m_LightningEnable = on;
     }

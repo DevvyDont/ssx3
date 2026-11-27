@@ -390,21 +390,21 @@ CHECK_SIZE(cGameLoadStateOutLodge, 0x48);
 // cGameLoadStateConquer: cGameLoadScreen's load state on the career (Conquer the Mountain) path: cGameLoadScreen_load
 // picks it when the race DB's online flag (+0x49) is clear and the game mode (+0x48) is neither 5 nor 6. The class name:
 // the retail allocation tag "cGameLoadStateConquer" (str_cGameLoadStateConquer in cGameLoadScreen_load). Retail code: the
-// dtor func_00245708, onCreateScreen func_00245730, onGainTransition func_002458B8 and onWidgetCreate func_002458B0 in
+// dtor cGameLoadStateConquer__cGameLoadStateConquer, onCreateScreen cGameLoadStateConquer_onCreateScreen, onGainTransition cGameLoadStateConquer_onGainTransition and onWidgetCreate cGameLoadStateConquer_onWidgetCreate in
 // main/ssxappdtor; there is no out-of-line ctor (cGameLoadScreen_load also clears D_004A19DC). No On Tour class, no
 // preview symbol.
 //
 // Size 0x48: [R] cGameLoadScreen_load: operator new(0x48, "cGameLoadStateConquer") + cUIState_cUIState(mem, mpUI) +
 // vtable (no own members, like cGameLoadStateOutLodge).
-// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C7A8 (24 slots: 1 dtor func_00245708,
-// 4 onCreateScreen func_00245730, 7 onGainTransition func_002458B8, 18 onWidgetCreate func_002458B0; builds/x/vtables).
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C7A8 (24 slots: 1 dtor cGameLoadStateConquer__cGameLoadStateConquer,
+// 4 onCreateScreen cGameLoadStateConquer_onCreateScreen, 7 onGainTransition cGameLoadStateConquer_onGainTransition, 18 onWidgetCreate cGameLoadStateConquer_onWidgetCreate; builds/x/vtables).
 // Derives from cUIState (ui/uistate.h). Evidence tags as for cGameLoadState.
 
 struct cGameLoadStateConquer : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] D_0047C7A8 (cGameLoadScreen_load, dtor func_00245708)
+    //   [R] D_0047C7A8 (cGameLoadScreen_load, dtor cGameLoadStateConquer__cGameLoadStateConquer)
     // cGameLoadStateConquer's notes on cUIState's fields:
-    //   mpScreen: [U] onGainTransition (func_002458B8) looks "%" up on it
+    //   mpScreen: [U] onGainTransition (cGameLoadStateConquer_onGainTransition) looks "%" up on it
 };
 
 CHECK_SIZE(cGameLoadStateConquer, 0x48);

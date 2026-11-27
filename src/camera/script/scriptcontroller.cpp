@@ -2121,7 +2121,7 @@ extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(cScriptRelativeAlgorithm*
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BC88);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketFOV);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BC88(float v, float lo, float hi)
@@ -2137,13 +2137,13 @@ static inline float Clamp_0016BC88(float v, float lo, float hi)
  *
  * @param fov  the value to clamp
  */
-extern "C" void func_0016BC88(float* fov)
+extern "C" void BracketFOV(float* fov)
 {
     *fov = Clamp_0016BC88(*fov, 5.0f, 80.0f);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCB8);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketLeadDist);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BCB8(float v, float lo, float hi)
@@ -2159,13 +2159,13 @@ static inline float Clamp_0016BCB8(float v, float lo, float hi)
  *
  * @param lead  the value to clamp
  */
-extern "C" void func_0016BCB8(float* lead)
+extern "C" void BracketLeadDist(float* lead)
 {
     *lead = Clamp_0016BCB8(*lead, -3000.0f, 3000.0f);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCE0);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketHeadingRadians);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_BCE0(float x)
@@ -2183,7 +2183,7 @@ static inline float ffloor_BCE0(float x)
  *
  * @param angle  the angle to wrap
  */
-extern "C" void func_0016BCE0(float* angle)
+extern "C" void BracketHeadingRadians(float* angle)
 {
     float radians = *angle;
     float n = ffloor_BCE0(radians * 0.15915493667125702f + 0.5f);
@@ -2191,7 +2191,7 @@ extern "C" void func_0016BCE0(float* angle)
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BD30);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketPitchRadians);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_BD30(float x)
@@ -2224,7 +2224,7 @@ static inline float Wrap_BD30(float a)
  *
  * @param angle  the angle to limit
  */
-extern "C" void func_0016BD30(float* angle)
+extern "C" void BracketPitchRadians(float* angle)
 {
     float w = Wrap_BD30(*angle);
     *angle = w;
@@ -2232,42 +2232,42 @@ extern "C" void func_0016BD30(float* angle)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDA0);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketHeading);
 #ifdef SKIP_ASM
-extern "C" void func_0016BCE0(float* p);
+extern "C" void BracketHeadingRadians(float* p);
 
 /**
- * Wraps an angle in degrees into [-180, 180) in place (converts to radians, func_0016BCE0, converts back).
+ * Wraps an angle in degrees into [-180, 180) in place (converts to radians, BracketHeadingRadians, converts back).
  *
  * @param angle  the angle to wrap
  */
-extern "C" void func_0016BDA0(float* angle)
+extern "C" void BracketHeading(float* angle)
 {
     float radians = *angle * 0.01745329424738884f;
-    func_0016BCE0(&radians);
+    BracketHeadingRadians(&radians);
     *angle = radians * 57.2957763671875f;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDE8);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketPitch);
 #ifdef SKIP_ASM
-extern "C" void func_0016BD30(float* p);
+extern "C" void BracketPitchRadians(float* p);
 
 /**
  * Wraps an angle in degrees into [-180, 180) and clamps it to [-90, 90], in place (through radians and
- * func_0016BD30).
+ * BracketPitchRadians).
  *
  * @param angle  the angle to limit
  */
-extern "C" void func_0016BDE8(float* angle)
+extern "C" void BracketPitch(float* angle)
 {
     float radians = *angle * 0.01745329424738884f;
-    func_0016BD30(&radians);
+    BracketPitchRadians(&radians);
     *angle = radians * 57.2957763671875f;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE30);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketRoll);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BE30(float v, float lo, float hi)
@@ -2283,13 +2283,13 @@ static inline float Clamp_0016BE30(float v, float lo, float hi)
  *
  * @param angle  the value to clamp
  */
-extern "C" void func_0016BE30(float* angle)
+extern "C" void BracketRoll(float* angle)
 {
     *angle = Clamp_0016BE30(*angle, -180.0f, 180.0f);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE60);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketJitterFocus);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BE60(float v, float lo, float hi)
@@ -2305,13 +2305,13 @@ static inline float Clamp_0016BE60(float v, float lo, float hi)
  *
  * @param jitter  the value to clamp
  */
-extern "C" void func_0016BE60(float* jitter)
+extern "C" void BracketJitterFocus(float* jitter)
 {
     *jitter = Clamp_0016BE60(*jitter, 0.0f, 10.0f);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE90);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketJitterRoll);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BE90(float v, float lo, float hi)
@@ -2327,13 +2327,13 @@ static inline float Clamp_0016BE90(float v, float lo, float hi)
  *
  * @param jitter  the value to clamp
  */
-extern "C" void func_0016BE90(float* jitter)
+extern "C" void BracketJitterRoll(float* jitter)
 {
     *jitter = Clamp_0016BE90(*jitter, 0.0f, 30.0f);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEC0);
+INCLUDE_ASM("camera/script/scriptcontroller", BracketTargetDistance);
 #ifdef SKIP_ASM
 // PORT: `<?` (GNU min operator) gives the target's min.s
 static inline float Clamp_0016BEC0(float v, float lo, float hi)
@@ -2349,7 +2349,7 @@ static inline float Clamp_0016BEC0(float v, float lo, float hi)
  *
  * @param dist  the value to clamp
  */
-extern "C" void func_0016BEC0(float* dist)
+extern "C" void BracketTargetDistance(float* dist)
 {
     *dist = Clamp_0016BEC0(*dist, -10000.0f, 10000.0f);
 }

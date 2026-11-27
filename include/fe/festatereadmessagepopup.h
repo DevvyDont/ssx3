@@ -41,7 +41,7 @@ struct cPrivateMessage;
 // line) and its vptr cPrivateMessage_vtbl at 0xC (cMemMan_alloc(0x10, "cPrivateMessage") in cFEStateReadMessagePopup_addOwnReply / cFEStateReadMessagePopup_collectSenderMessages).
 struct tFEPrivateMessageVector {
     int unk_00;                     // 0x0 never read or written directly; the vector's address (0x6D8) is what
-                                    //     the vector helpers (func_001DB918 insert) take
+                                    //     the vector helpers (tFEPrivateMessageVector_insertAux insert) take
     cPrivateMessage** mpStart;      // 0x4 [R] 0 (cFEStateReadMessagePopup_cFEStateReadMessagePopup1); [U] message i = mpStart[i] (cFEStateReadMessagePopup_redrawConversation)
     cPrivateMessage** mpFinish;     // 0x8 [R] 0; [U] cFEStateReadMessagePopup_addMessage appends here (and drops the oldest past 31),
                                     //     the destructor pops and deletes from it

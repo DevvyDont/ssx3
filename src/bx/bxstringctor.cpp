@@ -191,7 +191,7 @@ extern "C" int func_00268A88(int *wordPtr) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268A90);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onroomlistupdate_invoke);
 #ifdef SKIP_ASM
 /**
  * Calls LobbyMan_onroomlistupdate on the lobby manager passed as the third argument (callback thunk).
@@ -203,7 +203,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00268A90);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268A90(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onroomlistupdate_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onroomlistupdate(lobbyMan + D_004A2FB0.v);
 }
@@ -213,7 +213,7 @@ extern sShortPad16 D_004A2FB8;
 extern "C" void LobbyMan_onuserlistupdate(int);
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onuserlistupdate_invoke);
 #ifdef SKIP_ASM
 /**
  * Calls LobbyMan_onuserlistupdate on the lobby manager passed as the third argument (callback thunk).
@@ -225,14 +225,14 @@ INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268AB8(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onuserlistupdate_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onuserlistupdate(lobbyMan + D_004A2FB8.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268AE0);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onranklistupdate_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FC0;
 extern "C" void LobbyMan_onranklistupdate(int);
@@ -247,14 +247,14 @@ extern "C" void LobbyMan_onranklistupdate(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268AE0(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onranklistupdate_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onranklistupdate(lobbyMan + D_004A2FC0.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B08);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onincomingmsg_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF0;
 void* LobbyMan_onincomingmsg(void* self);
@@ -269,14 +269,14 @@ void* LobbyMan_onincomingmsg(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B08(void* self, void* message, LobbyMan* lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onincomingmsg_invoke(void* self, void* message, LobbyMan* lobbyMan)
 {
     LobbyMan_onincomingmsg(((char*)lobbyMan) + D_004A2FF0.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B30);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onchatmsg_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF8;
 extern "C" void LobbyMan_onchatmsg(int);
@@ -291,14 +291,14 @@ extern "C" void LobbyMan_onchatmsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B30(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onchatmsg_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onchatmsg(lobbyMan + D_004A2FF8.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B58);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onconnectionmsg_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3000;
 extern "C" void LobbyMan_onconnectionmsg(int);
@@ -313,14 +313,14 @@ extern "C" void LobbyMan_onconnectionmsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B58(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onconnectionmsg_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onconnectionmsg(lobbyMan + D_004A3000.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268B80);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onplaymsg_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3008;
 extern "C" void LobbyMan_onplaymsg(int);
@@ -335,14 +335,14 @@ extern "C" void LobbyMan_onplaymsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B80(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onplaymsg_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onplaymsg(lobbyMan + D_004A3008.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BA8);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onlobbyconnect_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3020;
 extern "C" void LobbyMan_onlobbyconnect(int);
@@ -358,14 +358,14 @@ extern "C" void LobbyMan_onlobbyconnect(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BA8(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onlobbyconnect_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onlobbyconnect(lobbyMan + D_004A3020.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BD0);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onaccountcreated_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3088;
 extern "C" void LobbyMan_onaccountcreated(int);
@@ -380,14 +380,14 @@ extern "C" void LobbyMan_onaccountcreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BD0(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onaccountcreated_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onaccountcreated(lobbyMan + D_004A3088.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268BF8);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onaccountedited_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30A8;
 extern "C" void LobbyMan_onaccountedited(int);
@@ -402,14 +402,14 @@ extern "C" void LobbyMan_onaccountedited(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BF8(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onaccountedited_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onaccountedited(lobbyMan + D_004A30A8.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C20);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30B0;
 extern "C" void LobbyMan_onlostaccountrequestsent(int);
@@ -424,14 +424,14 @@ extern "C" void LobbyMan_onlostaccountrequestsent(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C20(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onlostaccountrequestsent(lobbyMan + D_004A30B0.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C48);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30B8;
 extern "C" void LobbyMan_onlostpasswordrequestsent(int);
@@ -446,14 +446,14 @@ extern "C" void LobbyMan_onlostpasswordrequestsent(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C48(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onlostpasswordrequestsent(lobbyMan + D_004A30B8.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C70);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onauthentication_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30E8;
 extern "C" void LobbyMan_onauthentication(int);
@@ -468,14 +468,14 @@ extern "C" void LobbyMan_onauthentication(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C70(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onauthentication_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onauthentication(lobbyMan + D_004A30E8.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268C98);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onpersonaselected_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3118;
 extern "C" void LobbyMan_onpersonaselected(int);
@@ -490,7 +490,7 @@ extern "C" void LobbyMan_onpersonaselected(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C98(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onpersonaselected_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onpersonaselected(lobbyMan + D_004A3118.v);
 }
@@ -519,7 +519,7 @@ extern "C" void func_00268CC0(void* self, void* message, int lobbyMan)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268CE8);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onpersonacreated_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3138;
 extern "C" void LobbyMan_onpersonacreated(int);
@@ -534,14 +534,14 @@ extern "C" void LobbyMan_onpersonacreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268CE8(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onpersonacreated_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onpersonacreated(lobbyMan + D_004A3138.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D10);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onpersonadeleted_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3140;
 extern "C" void LobbyMan_onpersonadeleted(int);
@@ -556,14 +556,14 @@ extern "C" void LobbyMan_onpersonadeleted(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D10(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onpersonadeleted_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onpersonadeleted(lobbyMan + D_004A3140.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D38);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onroomselected_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3148;
 extern "C" void LobbyMan_onroomselected(int);
@@ -578,14 +578,14 @@ extern "C" void LobbyMan_onroomselected(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D38(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onroomselected_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onroomselected(lobbyMan + D_004A3148.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D60);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onRoomCreated_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3158;
 extern "C" void LobbyMan_onRoomCreated(int);
@@ -600,14 +600,14 @@ extern "C" void LobbyMan_onRoomCreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D60(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onRoomCreated_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onRoomCreated(lobbyMan + D_004A3158.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268D88);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onPingReceived_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3160;
 extern "C" void LobbyMan_onPingReceived(int);
@@ -622,14 +622,14 @@ extern "C" void LobbyMan_onPingReceived(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D88(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onPingReceived_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onPingReceived(lobbyMan + D_004A3160.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268DB0);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3170;
 extern "C" void LobbyMan_onAbuseReportReceived(int);
@@ -644,14 +644,14 @@ extern "C" void LobbyMan_onAbuseReportReceived(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268DB0(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onAbuseReportReceived(lobbyMan + D_004A3170.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268DD8);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onNewsRetrieved_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3178;
 extern "C" void LobbyMan_onNewsRetrieved(int);
@@ -666,14 +666,14 @@ extern "C" void LobbyMan_onNewsRetrieved(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268DD8(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onNewsRetrieved_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onNewsRetrieved(lobbyMan + D_004A3178.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E00);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A31B0;
 extern "C" void LobbyMan_onRanklistRetrieved(int);
@@ -688,14 +688,14 @@ extern "C" void LobbyMan_onRanklistRetrieved(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E00(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onRanklistRetrieved(lobbyMan + D_004A31B0.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E28);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onPlayerFound_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A31B8;
 extern "C" void LobbyMan_onPlayerFound(int);
@@ -710,7 +710,7 @@ extern "C" void LobbyMan_onPlayerFound(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E28(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onPlayerFound_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onPlayerFound(lobbyMan + D_004A31B8.v);
 }
@@ -739,7 +739,7 @@ extern "C" void func_00268E50(void* self, void* message, int lobbyMan)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268E78);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3210;
 extern "C" void LobbyMan_onQuickMatchResponse(int);
@@ -754,14 +754,14 @@ extern "C" void LobbyMan_onQuickMatchResponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E78(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onQuickMatchResponse(lobbyMan + D_004A3210.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268EA0);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onchallengeresponse_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3248;
 extern "C" void LobbyMan_onchallengeresponse(int);
@@ -776,7 +776,7 @@ extern "C" void LobbyMan_onchallengeresponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EA0(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onchallengeresponse(lobbyMan + D_004A3248.v);
 }
@@ -806,7 +806,7 @@ extern "C" void func_00268EC8(void* self, void* message, LobbyMan* lobbyMan)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268EF0);
+INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onresultsreportresponse_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3318;
 extern "C" void LobbyMan_onresultsreportresponse(int);
@@ -821,14 +821,14 @@ extern "C" void LobbyMan_onresultsreportresponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EF0(void* self, void* message, int lobbyMan)
+extern "C" void LobbyMan_LobbyFunctor_onresultsreportresponse_invoke(void* self, void* message, int lobbyMan)
 {
     LobbyMan_onresultsreportresponse(lobbyMan + D_004A3318.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F18);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onconnect_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3340;
 extern "C" void BuddyMan_onconnect(int);
@@ -843,14 +843,14 @@ extern "C" void BuddyMan_onconnect(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F18(void* self, void* message, int buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onconnect_invoke(void* self, void* message, int buddyMan)
 {
     BuddyMan_onconnect(buddyMan + D_004A3340.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F40);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onReceiveMessage_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3348;
 extern "C" void BuddyMan_onReceiveMessage(int);
@@ -865,14 +865,14 @@ extern "C" void BuddyMan_onReceiveMessage(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F40(void* self, void* message, int buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onReceiveMessage_invoke(void* self, void* message, int buddyMan)
 {
     BuddyMan_onReceiveMessage(buddyMan + D_004A3348.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F68);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onrosterupdate_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3350;
 extern "C" void BuddyMan_onrosterupdate(int);
@@ -887,14 +887,14 @@ extern "C" void BuddyMan_onrosterupdate(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F68(void* self, void* message, int buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onrosterupdate_invoke(void* self, void* message, int buddyMan)
 {
     BuddyMan_onrosterupdate(buddyMan + D_004A3350.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268F90);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onBuddyDelete_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3380;
 extern "C" void BuddyMan_onBuddyDelete(int);
@@ -909,14 +909,14 @@ extern "C" void BuddyMan_onBuddyDelete(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F90(void* self, void* message, int buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onBuddyDelete_invoke(void* self, void* message, int buddyMan)
 {
     BuddyMan_onBuddyDelete(buddyMan + D_004A3380.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268FB8);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onBuddyAdd_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3388;
 extern "C" void BuddyMan_onBuddyAdd(int);
@@ -931,14 +931,14 @@ extern "C" void BuddyMan_onBuddyAdd(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268FB8(void* self, void* message, int buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onBuddyAdd_invoke(void* self, void* message, int buddyMan)
 {
     BuddyMan_onBuddyAdd(buddyMan + D_004A3388.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268FE0);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan_BuddyFunctor_onBuddySend_invoke);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A33A0;
 void BuddyMan_onBuddySend(void* self);
@@ -953,14 +953,14 @@ void BuddyMan_onBuddySend(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268FE0(void* self, void* message, BuddyMan* buddyMan)
+extern "C" void BuddyMan_BuddyFunctor_onBuddySend_invoke(void* self, void* message, BuddyMan* buddyMan)
 {
     BuddyMan_onBuddySend(((char*)buddyMan) + D_004A33A0.v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269008);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleCharPickEcho);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1003,7 +1003,7 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269008(cSetupMan* self, int riderId, int hostState)
+extern "C" void cSetupMan_handleCharPickEcho(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 243;
     self->mState = hostState;
@@ -1018,7 +1018,7 @@ extern "C" void func_00269008(cSetupMan* self, int riderId, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002690C8);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleCharConfirmEcho);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1061,7 +1061,7 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_002690C8(cSetupMan* self, int riderId, int hostState)
+extern "C" void cSetupMan_handleCharConfirmEcho(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 244;
     self->mState = hostState;
@@ -1076,7 +1076,7 @@ extern "C" void func_002690C8(cSetupMan* self, int riderId, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269188);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleWithdrawEcho);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1118,7 +1118,7 @@ static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_002691
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_00269188(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleWithdrawEcho(cSetupMan* self, int hostState)
 {
     int kind = 247;
     (self)->mState = hostState;
@@ -1132,7 +1132,7 @@ extern "C" void func_00269188(cSetupMan* self, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269240);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostCharPick);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1177,7 +1177,7 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  * @param hostState  the host's setup state
  * @param riderStats  the host rider's 7 attribute bytes from the message
  */
-extern "C" void func_00269240(cSetupMan* self, int riderId, int hostState, void* riderStats)
+extern "C" void cSetupMan_handleHostCharPick(cSetupMan* self, int riderId, int hostState, void* riderStats)
 {
     int kind = 243;
     self->mState = hostState;
@@ -1192,7 +1192,7 @@ extern "C" void func_00269240(cSetupMan* self, int riderId, int hostState, void*
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269300);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostCharConfirm);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1236,7 +1236,7 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  * @param riderId  the host's character id
  * @param hostState  the host's setup state
  */
-extern "C" void func_00269300(cSetupMan* self, int riderId, int hostState)
+extern "C" void cSetupMan_handleHostCharConfirm(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 245;
     self->mState = hostState;
@@ -1251,7 +1251,7 @@ extern "C" void func_00269300(cSetupMan* self, int riderId, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002693C0);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostWithdraw);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1293,7 +1293,7 @@ static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_002693C0(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleHostWithdraw(cSetupMan* self, int hostState)
 {
     int kind = 247;
     (self)->mState = hostState;
@@ -1307,7 +1307,7 @@ extern "C" void func_002693C0(cSetupMan* self, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269478);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleClientBragRow);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1348,7 +1348,7 @@ static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_002694
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269478(cSetupMan* self, int rowIndex)
+extern "C" void cSetupMan_handleClientBragRow(cSetupMan* self, int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1361,7 +1361,7 @@ extern "C" void func_00269478(cSetupMan* self, int rowIndex)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269538);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleClientBragRule);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1403,7 +1403,7 @@ static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_002695
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269538(cSetupMan* self, int ruleSlot, int ruleValue)
+extern "C" void cSetupMan_handleClientBragRule(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1417,7 +1417,7 @@ extern "C" void func_00269538(cSetupMan* self, int ruleSlot, int ruleValue)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269608);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleClientBragLock);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1457,7 +1457,7 @@ static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_002696
  * 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
-extern "C" void func_00269608(cSetupMan* self)
+extern "C" void cSetupMan_handleClientBragLock(cSetupMan* self)
 {
     switch (self->mState)
     {
@@ -1480,7 +1480,7 @@ extern "C" void func_00269608(cSetupMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002696F8);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleClientBragUnlock);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1520,7 +1520,7 @@ static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696
  * mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
-extern "C" void func_002696F8(cSetupMan* self)
+extern "C" void cSetupMan_handleClientBragUnlock(cSetupMan* self)
 {
     if (self->mState == 8)
         self->mState = 7;
@@ -1535,7 +1535,7 @@ extern "C" void func_002696F8(cSetupMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002697D0);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostBragRow);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1576,7 +1576,7 @@ static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_002697D0(cSetupMan* self, int rowIndex)
+extern "C" void cSetupMan_handleHostBragRow(cSetupMan* self, int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1589,7 +1589,7 @@ extern "C" void func_002697D0(cSetupMan* self, int rowIndex)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269890);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleBragRowMessage);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1629,7 +1629,7 @@ static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_002698
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269890(cSetupMan* self, int rowIndex)
+extern "C" void cSetupMan_handleBragRowMessage(cSetupMan* self, int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1642,7 +1642,7 @@ extern "C" void func_00269890(cSetupMan* self, int rowIndex)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269948);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostBragRule);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1684,7 +1684,7 @@ static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_002699
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269948(cSetupMan* self, int ruleSlot, int ruleValue)
+extern "C" void cSetupMan_handleHostBragRule(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1698,7 +1698,7 @@ extern "C" void func_00269948(cSetupMan* self, int ruleSlot, int ruleValue)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269A18);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleBragRuleMessage);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1740,7 +1740,7 @@ static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269A18(cSetupMan* self, int ruleSlot, int ruleValue)
+extern "C" void cSetupMan_handleBragRuleMessage(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1754,7 +1754,7 @@ extern "C" void func_00269A18(cSetupMan* self, int ruleSlot, int ruleValue)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269AE0);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostBragLock);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1794,7 +1794,7 @@ static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269A
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269AE0(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleHostBragLock(cSetupMan* self, int hostState)
 {
     self->mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -1807,7 +1807,7 @@ extern "C" void func_00269AE0(cSetupMan* self, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269B90);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleBragLockAnswer);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1839,7 +1839,7 @@ static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B
 }
 
 /**
- * Handles the host's answer to the client's lock (type 11, sent by func_00269608): takes the host's state and posts an
+ * Handles the host's answer to the client's lock (type 11, sent by cSetupMan_handleClientBragLock): takes the host's state and posts an
  * event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
@@ -1848,7 +1848,7 @@ static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269B90(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleBragLockAnswer(cSetupMan* self, int hostState)
 {
     self->mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -1861,7 +1861,7 @@ extern "C" void func_00269B90(cSetupMan* self, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269C40);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleHostBragUnlock);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1895,14 +1895,14 @@ static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C
 /**
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
  *
- * Type 12 comes from the host unlocking its own panel (cSetupMan_unlockBragging) or answering the client's unlock (func_002696F8).
+ * Type 12 comes from the host unlocking its own panel (cSetupMan_unlockBragging) or answering the client's unlock (cSetupMan_handleClientBragUnlock).
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-12 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269C40(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleHostBragUnlock(cSetupMan* self, int hostState)
 {
     self->mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -1915,7 +1915,7 @@ extern "C" void func_00269C40(cSetupMan* self, int hostState)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00269CF0);
+INCLUDE_ASM("bx/bxstringctor", cSetupMan_handleBragUnlockMessage);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -1955,7 +1955,7 @@ static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269C
  *
  * @param hostState  the setup state from the message
  */
-extern "C" void func_00269CF0(cSetupMan* self, int hostState)
+extern "C" void cSetupMan_handleBragUnlockMessage(cSetupMan* self, int hostState)
 {
     self->mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);

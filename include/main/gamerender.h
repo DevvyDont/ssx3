@@ -52,7 +52,7 @@ struct FrustumIntersector {
     const tBoundBox* camerabox;     // 0x0004 [O] (a reference); [R] ctor argument 3; [U] func_00229F80, the callback
     char unk_0008[0x8];             // 0x0008 no access (alignment of VFIntersect)
     t4Matrix VFIntersect;           // 0x0010 [O] name (On Tour: PSPFrustumAABBIntersector, 0x60); [R] ctor copies the
-                                    //        graphics manager's view matrix (vtable slot 43) here; func_00229F30 loads
+                                    //        graphics manager's view matrix (vtable slot 43) here; vu0_storeTwoMatrices loads
                                     //        it into VU0 memory
     t4Matrix GFIntersect;           // 0x0050 [O] name (PSPFrustumAABBIntersector there); [R] ctor copies GrMan + 0x5800
     cWorld* world;                  // 0x0090 [O]; [R] ctor argument 4; [U] AddAllInstancesInside / AddAllPatchesInside /

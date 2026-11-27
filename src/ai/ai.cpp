@@ -329,9 +329,9 @@ extern "C" void cBoardTrailFX_update(void* p);
 extern "C" void cSpeedBoostFX_update(void* p);
 extern "C" void cTrickBoostFX_update(void* p);
 extern "C" void cAirStreamerFX_update(void* p);
-extern "C" void func_002D4C08(void* p);
+extern "C" void cAngerFX_update(void* p);
 extern "C" void cPlayerIndicatorFX_update(void* p);
-extern "C" void func_002DF920(void* p);
+extern "C" void cDynamicSprayFX_update(void* p);
 extern "C" void cPunchFX_update(void* p);
 extern "C" void cCheatFX_update(void* p);
 extern "C" void cRider_updateSplitMiscFX(void* rider);
@@ -417,9 +417,9 @@ void cAI::update()
         for (i = 0; i < n; i++) cSpeedBoostFX_update(&handlers[i]->SpeedBoostFX);
         for (i = 0; i < n; i++) cTrickBoostFX_update(&handlers[i]->TrickBoostFX);
         for (i = 0; i < n; i++) cAirStreamerFX_update(&handlers[i]->AirStreamerFX);
-        for (i = 0; i < n; i++) func_002D4C08(&handlers[i]->AngerFX);
+        for (i = 0; i < n; i++) cAngerFX_update(&handlers[i]->AngerFX);
         for (i = 0; i < n; i++) cPlayerIndicatorFX_update(&handlers[i]->PlayerIndicatorFX);
-        for (i = 0; i < n; i++) func_002DF920(&handlers[i]->DynamicSprayFX);
+        for (i = 0; i < n; i++) cDynamicSprayFX_update(&handlers[i]->DynamicSprayFX);
         for (i = 0; i < n; i++) cPunchFX_update(&handlers[i]->PunchFX);
         for (i = 0; i < n; i++) cCheatFX_update(&handlers[i]->CheatFX);
         for (i = 0; i < n; i++) cRider_updateSplitMiscFX(riders[i]);
@@ -462,14 +462,14 @@ extern "C" int cRider_renderClip(void*);
 extern "C" void cRider_renderBody(void*);
 extern "C" void cRider_renderLights(void*);
 extern "C" void cRider_renderShadow(void*);
-void func_00122638(void*);
-extern "C" void func_002D5048(void*);
+void cRider_renderAttachedEmitterFX(void*);
+extern "C" void cAngerFX_render(void*);
 extern "C" void cBoardSparkFX_render(void*);
 extern "C" void cBoardWakeFX_render(void*);
-extern "C" void func_002E24D0(void*);
+extern "C" void cDynamicSprayFX_render(void*);
 extern "C" void cPlayerIndicatorFX_render(void*);
 extern "C" void cSpeedBoostFX_render(void*);
-extern "C" void func_002EA538(void*, int);
+extern "C" void renderBoardTrails(void*, int);
 extern "C" void cTrickBoostFX_render(void*);
 extern "C" void cAirStreamerFX_render(void*);
 extern "C" void cPunchFX_render(void*);
@@ -484,9 +484,9 @@ void cCheatFX_render(void*);
  * player), only player 0 when PlaybackMan exists with mode (+0x70) 0, else the mission rider; otherwise the
  * players, the computers (if ComputerRidersActive) and the actors (if ComputerActorsActive). Each pass runs over
  * all of them: cRider_renderClip (visibility), then lights, body and shadow for visible riders, the board trails
- * (func_002EA538 on each handler's cBoardTrailFX, +0x520), the player indicator, cheat, board wake, air streamer,
- * speed boost and trick boost FX, then for visible riders board sparks, cAngerFX (func_002D5048), cDynamicSprayFX
- * (func_002E24D0) and punch FX, and finally func_00122638 per rider.
+ * (renderBoardTrails on each handler's cBoardTrailFX, +0x520), the player indicator, cheat, board wake, air streamer,
+ * speed boost and trick boost FX, then for visible riders board sparks, cAngerFX (cAngerFX_render), cDynamicSprayFX
+ * (cDynamicSprayFX_render) and punch FX, and finally cRider_renderAttachedEmitterFX per rider.
  */
 void cAI::render()
 {
@@ -544,7 +544,7 @@ void cAI::render()
     for (i = 0; i < n; i++) {
         ptrs[i] = sub[i] ? &sub[i]->BoardTrailFX : 0;
     }
-    func_002EA538(ptrs, n);
+    renderBoardTrails(ptrs, n);
     for (i = 0; i < n; i++) cPlayerIndicatorFX_render(&sub[i]->PlayerIndicatorFX);
     for (i = 0; i < n; i++) cCheatFX_render(&sub[i]->CheatFX);
     for (i = 0; i < n; i++) cBoardWakeFX_render(&sub[i]->BoardWakeFX);
@@ -555,15 +555,15 @@ void cAI::render()
         if (active[i]) cBoardSparkFX_render(&sub[i]->BoardSparkFX);
     }
     for (i = 0; i < n; i++) {
-        if (active[i]) func_002D5048(&sub[i]->AngerFX);
+        if (active[i]) cAngerFX_render(&sub[i]->AngerFX);
     }
     for (i = 0; i < n; i++) {
-        if (active[i]) func_002E24D0(&sub[i]->DynamicSprayFX);
+        if (active[i]) cDynamicSprayFX_render(&sub[i]->DynamicSprayFX);
     }
     for (i = 0; i < n; i++) {
         if (active[i]) cPunchFX_render(&sub[i]->PunchFX);
     }
-    for (i = 0; i < n; i++) func_00122638(riders[i]);
+    for (i = 0; i < n; i++) cRider_renderAttachedEmitterFX(riders[i]);
 }
 #endif
 
@@ -1077,7 +1077,7 @@ int cAI::isAILoadedAndReady()
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012A1F0);
+INCLUDE_ASM("ai/ai", cAI_isRiderCharacterRanked);
 #ifdef SKIP_ASM
 extern int cGameModeMan_iCharRank[];
 
@@ -1085,13 +1085,13 @@ extern int cGameModeMan_iCharRank[];
  * Returns whether rider @p idx's character is one of the first six entries of cGameModeMan_iCharRank.
  *
  * Reads SSXApp->GameModeMan->iCharacters[idx] and compares it with cGameModeMan_iCharRank[0..5] (one of cGameModeMan's sorted score
- * / rank tables, fe/ovstatepause uses it as a list of rider indices). Used by func_0012A998 and func_0012AA78 with each
+ * / rank tables, fe/ovstatepause uses it as a list of rider indices). Used by cAI_prepareToPurgeExpiredRiders and cAI_isReadyToPurgeExpiredRiders with each
  * computer rider's getAIIndex.
  *
  * @param idx  the rider's AI index
  * @return 1 when found, else 0
  */
-extern "C" int func_0012A1F0(cAI* self, int idx)
+extern "C" int cAI_isRiderCharacterRanked(cAI* self, int idx)
 {
     cGameModeMan* tbl = SSXApp->GameModeMan;
     int characterId = tbl->iCharacters[idx];
@@ -1286,14 +1286,14 @@ extern "C" void cAI_isPathFileLoaded(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/ai", func_0012A4F0);
+INCLUDE_ASM("ai/ai", cAI_reinitRiderPaths);
 #ifdef SKIP_ASM
 /**
  * Re-initialises every allocated rider's path: cRider_initPath(Riders[i], 0) for i below NumberOfRidersAllocated.
  *
  * Nothing in the source calls it.
  */
-extern "C" void func_0012A4F0(cAI* self) {
+extern "C" void cAI_reinitRiderPaths(cAI* self) {
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         cRider_initPath(self->Riders[i], 0);
@@ -1311,7 +1311,7 @@ extern "C" void func_0012A558(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/ai", func_0012A560);
+INCLUDE_ASM("ai/ai", cAI_teleportRiderToEnd);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getTrackPath(void* tree, int id);
 extern "C" float cTrackPath_getFinishLineParam(void* node);
@@ -1396,7 +1396,7 @@ static inline t4Vector Front_A560(cRider* rider)
  * @param which  the rider index to move, or -1 (kAllRiders) for all riders
  */
 // Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
-extern "C" void func_0012A560(cAI* self, int which)
+extern "C" void cAI_teleportRiderToEnd(cAI* self, int which)
 {
     const int kAllRiders = -1; // @p which: move every rider
     int n = NodeCount_A560(gPaths);
@@ -1428,7 +1428,7 @@ extern "C" void func_0012A560(cAI* self, int which)
 }
 #endif
 //100%
-INCLUDE_ASM("ai/ai", func_0012A768);
+INCLUDE_ASM("ai/ai", cAI_teleportRiderToEndInPosition);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getTrackPath(void* tree, int id);
 extern "C" float cTrackPath_getFinishLineParam(void* node);
@@ -1507,7 +1507,7 @@ static inline t4Vector Front_A768(cRider* rider)
  * Lines the first @p n riders up behind the first AI path node that has a marker distance, 1000 units apart, with
  * staggered time penalties.
  *
- * Finds the node like func_0012A560. Rider j (while riders remain) is placed with mode 5, after cRider_setControlState
+ * Finds the node like cAI_teleportRiderToEnd. Rider j (while riders remain) is placed with mode 5, after cRider_setControlState
  * / cRider_setMotionState with 0, at markerDist - k * 1000 (at least 0) facing along the path, with mPenaltyTicks = k *
  * 3600 (one minute per place at 60 ticks/s), where k counts down from @p n. Rider 0 is placed furthest back and gets
  * the largest penalty. Nothing in the source calls it.
@@ -1516,7 +1516,7 @@ static inline t4Vector Front_A768(cRider* rider)
  */
 // Puts the first `n` riders back on the first path node that has a distance, staggered 1000 units apart,
 // each with a penalty of 3600 ticks per place.
-extern "C" void func_0012A768(cAI* self, int n)
+extern "C" void cAI_teleportRiderToEndInPosition(cAI* self, int n)
 {
     int count = NodeCount_A768(gPaths);
     for (int i = 0; i < count; i++) {
@@ -1548,21 +1548,21 @@ extern "C" void func_0012A768(cAI* self, int n)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ai", func_0012A998);
+INCLUDE_ASM("ai/ai", cAI_prepareToPurgeExpiredRiders);
 #ifdef SKIP_ASM
 // self is a cAI (no header yet): +0x48 is a list of rider objects (count at +0x80), each holding
 // its cRider virtual-base pointer at +0x18.
 
-extern "C" int func_0012A1F0(cAI*, int);
+extern "C" int cAI_isRiderCharacterRanked(cAI*, int);
 
 /**
- * Hides the computer riders that func_0012A1F0 picks so they can be deleted safely later.
+ * Hides the computer riders that cAI_isRiderCharacterRanked picks so they can be deleted safely later.
  *
  * For each allocated computer (Computers[i], its cRider at +0x18) whose mRenderFlag is set and whose getAIIndex passes
- * func_0012A1F0: clears mRenderFlag and sets mSafeRenderTick to GrMan's virtual slot 114 result + 4 (a frame count a
+ * cAI_isRiderCharacterRanked: clears mRenderFlag and sets mSafeRenderTick to GrMan's virtual slot 114 result + 4 (a frame count a
  * few frames ahead). Nothing in the source calls it; it mirrors cAI_prepareToPurgeComputerRiders.
  */
-extern "C" void func_0012A998(cAI* self)
+extern "C" void cAI_prepareToPurgeExpiredRiders(cAI* self)
 {
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
@@ -1570,7 +1570,7 @@ extern "C" void func_0012A998(cAI* self)
         cRider* rider = *(cRider**)(list[i] + 0x18);
         if (rider->mRenderFlag != 0)
         {
-            if (func_0012A1F0(self, rider->getAIIndex()) != 0)
+            if (cAI_isRiderCharacterRanked(self, rider->getAIIndex()) != 0)
             {
                 cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
                 hiddenRider->mRenderFlag = 0;
@@ -1584,28 +1584,28 @@ extern "C" void func_0012A998(cAI* self)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/ai", func_0012AA78);
+INCLUDE_ASM("ai/ai", cAI_isReadyToPurgeExpiredRiders);
 #ifdef SKIP_ASM
 extern "C" bool cRider_isSafeToDelete(void*);
 
-extern "C" int func_0012A1F0(cAI*, int);
+extern "C" int cAI_isRiderCharacterRanked(cAI*, int);
 
 /**
- * Returns whether the computer riders that func_0012A1F0 picks can all be deleted now.
+ * Returns whether the computer riders that cAI_isRiderCharacterRanked picks can all be deleted now.
  *
- * Returns 0 when any allocated computer that is not yet safe to delete (cRider_isSafeToDelete) passes func_0012A1F0,
+ * Returns 0 when any allocated computer that is not yet safe to delete (cRider_isSafeToDelete) passes cAI_isRiderCharacterRanked,
  * else 1. Nothing in the source calls it; it mirrors cAI_isReadyToPurgeComputerRiders.
  *
  * @return 1 when every selected rider is safe to delete, else 0
  */
-extern "C" int func_0012AA78(cAI* self) {
+extern "C" int cAI_isReadyToPurgeExpiredRiders(cAI* self) {
     int i;
     int ok = 1;
     for (i = 0; i < self->NumberOfComputersAllocated; i++) {
         if (cRider_isSafeToDelete(self->Computers[i]->RiderHandler.GroundMotion.mRider) == 0) {
             char* obj = (char*)&VPTR_AT(self->Computers[i]->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
+            if (cAI_isRiderCharacterRanked(self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
                 ok = 0;
         }
     }

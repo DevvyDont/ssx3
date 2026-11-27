@@ -1016,7 +1016,7 @@ extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
-extern "C" void func_0031A6B8();
+extern "C" void setLoaderThreadPriority();
 extern "C" void cSSXAudio_ApplyMusicVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
 extern "C" void cSSXAudio_ApplySpeechVolume(void* opt, int v);
@@ -1161,7 +1161,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
     SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), cBEOptionInterface_mOption_82D0.output));
-    func_0031A6B8();
+    setLoaderThreadPriority();
     cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
     cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
     cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
@@ -1382,7 +1382,7 @@ extern "C" void initOnline()
 //100%
 INCLUDE_ASM("main/ssxapp", cCrowdMan2d_cCrowdMan2d);
 #ifdef SKIP_ASM
-extern "C" void func_002292E0(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self);
 // PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
 void* cCrowdRender2D_cCrowdRender2D(int mem);
 void* cCrowdRender2D_constructCrowdAnim2D(void* r);
@@ -1430,7 +1430,7 @@ static inline int AnimCount_229180(char* anim)
  * entries (+0x2220); makes itself the singleton TheCrowdMan2d. Creates a cCrowdRender2D (0x10 bytes, tag "cCrowdRender2D")
  * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record D_00536690: the
  * first short takes the animation's current frame texture id (+0x10), +0xC 0x20000, the shorts at +0x2, +0x4 and +0x6
- * -1, +0x8 and +0x10 0. Then resets the slots (func_002292E0). cGame_load builds it as CrowdMan2d (10016 bytes).
+ * -1, +0x8 and +0x10 0. Then resets the slots (cCrowdMan2d_resetSlots). cGame_load builds it as CrowdMan2d (10016 bytes).
  *
  * @return @p self
  */
@@ -1451,7 +1451,7 @@ extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
     D_00536690_229180[0].f4 = -1;
     D_00536690_229180[0].f8 = 0;
     D_00536690_229180[0].f6 = -1;
-    func_002292E0(self);
+    cCrowdMan2d_resetSlots(self);
     return (self);
 }
 #endif
@@ -1459,7 +1459,7 @@ extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
 //100%
 INCLUDE_ASM("main/ssxapp", cCrowdMan2d__cCrowdMan2d);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self);
 extern int TheCrowdMan2d;
 void operator_delete(int* p);
 void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
@@ -1468,13 +1468,13 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
  * Destroys the 2D crowd manager: releases every slot, clears the singleton TheCrowdMan2d, frees the animation (+0x4),
  * destroys the renderer (+0x0) and frees the object when bit 0 of @p flags is set.
  *
- * Uses func_00229398, operator_delete and cCrowdRender2D__cCrowdRender2D(renderer, 3). cGame_purge calls it.
+ * Uses cCrowdMan2d_releaseAllQuads, operator_delete and cCrowdRender2D__cCrowdRender2D(renderer, 3). cGame_purge calls it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 extern "C" void cCrowdMan2d__cCrowdMan2d(cCrowdMan2d* self, int flags)
 {
-    func_00229398(self);
+    cCrowdMan2d_releaseAllQuads(self);
     int* crowdAnim = (int*)self->mpAnim;
     TheCrowdMan2d = 0;
     operator_delete(crowdAnim);
@@ -1489,7 +1489,7 @@ extern "C" void cCrowdMan2d__cCrowdMan2d(cCrowdMan2d* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002292E0);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_resetSlots);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 unsigned int BXrand();
@@ -1503,7 +1503,7 @@ unsigned int BXrand();
  * 0xFFFFFFFF and every slot's delay (+0x30) to 300 + BXrand() % 300; clears the marker ring index (+0x2214) and its 40
  * entries (+0x2220, 1280 bytes).
  */
-extern "C" void func_002292E0(cCrowdMan2d* self)
+extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self)
 {
     cCrowdMan2d* crowd = self;
     int i;
@@ -1519,31 +1519,31 @@ extern "C" void func_002292E0(cCrowdMan2d* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229398);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_releaseAllQuads);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
+extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
 
 /**
  * Releases every used quad slot of the 2D crowd manager (each resource id at +0x8 other than 0xFFFFFFFF) with
- * func_00229B90.
+ * cCrowdMan2d_freeQuad.
  */
-extern "C" void func_00229398(cCrowdMan2d* self)
+extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
         unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
         if (*slotId != cCrowdMan2d::kFreeQuad) {
-            func_00229B90(self, i);
+            cCrowdMan2d_freeQuad(self, i);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229408);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_releaseSectionQuads);
 #ifdef SKIP_ASM
-extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
+extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
 
 /**
  * Releases the 2D crowd manager's quad slots in one world section: each used slot whose resource id has @p id as its
@@ -1553,41 +1553,41 @@ extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
  *
  * @param id  the world section id
  */
-extern "C" void func_00229408(cCrowdMan2d* self, int id)
+extern "C" void cCrowdMan2d_releaseSectionQuads(cCrowdMan2d* self, int id)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
         unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
         if (*slotId != cCrowdMan2d::kFreeQuad && *(unsigned char*)slotId == id) {
-            func_00229B90(self, i);
+            cCrowdMan2d_freeQuad(self, i);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229498);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_restart);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(cCrowdMan2d* self);
-extern "C" void func_002292E0(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self);
 
 /**
- * Restarts the 2D crowd manager: releases every slot (func_00229398) and resets slots and markers (func_002292E0).
+ * Restarts the 2D crowd manager: releases every slot (cCrowdMan2d_releaseAllQuads) and resets slots and markers (cCrowdMan2d_resetSlots).
  *
  * cGame_partialRestart calls it.
  */
-extern "C" void func_00229498(cCrowdMan2d* self)
+extern "C" void cCrowdMan2d_restart(cCrowdMan2d* self)
 {
-    func_00229398(self);
-    func_002292E0(self);
+    cCrowdMan2d_releaseAllQuads(self);
+    cCrowdMan2d_resetSlots(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002294C8);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_update);
 #ifdef SKIP_ASM
 extern "C" void cCrowdAnim2D_update(void* p);
-extern "C" void func_00229530(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_spawnMarkers(cCrowdMan2d* self);
 extern short D_00536690[];
 
 /**
@@ -1596,9 +1596,9 @@ extern short D_00536690[];
  *
  * Calls cCrowdAnim2D_update on the animation (+0x4) and copies its current frame texture id (+0x10) into the first
  * short of D_00536690; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
- * func_00229530. cGame_update calls it.
+ * cCrowdMan2d_spawnMarkers. cGame_update calls it.
  */
-extern "C" void func_002294C8(cCrowdMan2d* self)
+extern "C" void cCrowdMan2d_update(cCrowdMan2d* self)
 {
     int i;
     char* marker;
@@ -1613,18 +1613,18 @@ extern "C" void func_002294C8(cCrowdMan2d* self)
         }
         marker += 0x20;
     }
-    func_00229530(self);
+    cCrowdMan2d_spawnMarkers(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229530);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_spawnMarkers);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 extern "C" int cCrowdSys_GetCurrentCheer(void* self, int a1);
 struct sRingOwner;
 struct sQuad229;
-extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);
+extern "C" void cCrowdMan2d_addMarker(sRingOwner* self, sQuad229* q, int value);
 
 
 struct sCrowdSlot_229530 {
@@ -1693,13 +1693,13 @@ static inline float rands_229530(float lo, float hi)
  *
  * Takes the absolute value of cCrowdSys_GetCurrentCheer(gSSXAudio, 0) (crowd instance 0's cheer value); when it changes, stores it
  * as the crowd level (+0x2210) and sets the animation's target state (+0x0) to it, at least 1. Each used slot's delay
- * (+0x30) falls by 10 * level + 4; when it reaches 0, a marker goes into the ring (func_00229738, lifetime 3) at the
+ * (+0x30) falls by 10 * level + 4; when it reaches 0, a marker goes into the ring (cCrowdMan2d_addMarker, lifetime 3) at the
  * slot's centre (+0x0) plus its two half-axes (+0x10, +0x20) each scaled by a random value in [-1, 1), and the delay
  * restarts at 300 + BXrand() % 300.
  *
  * @param selfp  the 2D crowd manager
  */
-extern "C" void func_00229530(cCrowdMan2d* selfp)
+extern "C" void cCrowdMan2d_spawnMarkers(cCrowdMan2d* selfp)
 {
     sCrowd_229530* self = (sCrowd_229530*)selfp;
     int n = cCrowdSys_GetCurrentCheer(gSSXAudio, 0);
@@ -1718,7 +1718,7 @@ extern "C" void func_00229530(cCrowdMan2d* selfp)
                 float dyScale = rands_229530(-1.0f, 1.0f);
                 t4Vector spawnPos = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, dxScale)),
                                             Scale_229530(self->slots[i].dy, dyScale));
-                func_00229738((sRingOwner*)self, (sQuad229*)&spawnPos, 3);
+                cCrowdMan2d_addMarker((sRingOwner*)self, (sQuad229*)&spawnPos, 3);
                 self->slots[i].delay = BXrand() % 300 + 300;
             }
         }
@@ -1727,7 +1727,7 @@ extern "C" void func_00229530(cCrowdMan2d* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229738);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_addMarker);
 #ifdef SKIP_ASM
 struct sQuad229 {
     int v[4];
@@ -1755,7 +1755,7 @@ struct sRingOwner {
  * @param pos  the marker position (a 16-byte vector)
  * @param value  the marker's lifetime in updates
  */
-extern "C" void func_00229738(sRingOwner* self, sQuad229* pos, int value)
+extern "C" void cCrowdMan2d_addMarker(sRingOwner* self, sQuad229* pos, int value)
 {
     self->entries[self->index].q = *pos;
     self->entries[self->index].value = value;
@@ -1765,23 +1765,23 @@ extern "C" void func_00229738(sRingOwner* self, sQuad229* pos, int value)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229788);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_addQuad);
 #ifdef SKIP_ASM
-extern "C" void func_00229910(void* self, int slot, int a1);
+extern "C" void cCrowdMan2d_placeQuad(void* self, int slot, int a1);
 
 /**
- * Takes the first free quad slot among the first 64 and places it on the model of @p resourceId (func_00229910).
+ * Takes the first free quad slot among the first 64 and places it on the model of @p resourceId (cCrowdMan2d_placeQuad).
  *
  * Does nothing when those 64 are all used. Crowd2dFunc (a script command) calls it for its command 2.
  *
  * @param resourceId  the world resource id of the crowd model
  */
-extern "C" void func_00229788(cCrowdMan2d* self, int resourceId)
+extern "C" void cCrowdMan2d_addQuad(cCrowdMan2d* self, int resourceId)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
         if (((unsigned int*)(&self->mQuadId[0]))[i] == cCrowdMan2d::kFreeQuad) {
-            func_00229910(self, i, resourceId);
+            cCrowdMan2d_placeQuad(self, i, resourceId);
             break;
         }
     }
@@ -1789,23 +1789,23 @@ extern "C" void func_00229788(cCrowdMan2d* self, int resourceId)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_002297D8);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_removeQuad);
 #ifdef SKIP_ASM
-extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
+extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
 
 /**
- * Releases the first quad slot among the first 64 whose resource id equals @p val (func_00229B90).
+ * Releases the first quad slot among the first 64 whose resource id equals @p val (cCrowdMan2d_freeQuad).
  *
  * Crowd2dFunc (a script command) calls it for its command 3.
  *
  * @param val  the world resource id
  */
-extern "C" void func_002297D8(cCrowdMan2d* self, int val)
+extern "C" void cCrowdMan2d_removeQuad(cCrowdMan2d* self, int val)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
         if (((int*)self)[i + 2] == val) {
-            func_00229B90(self, i);
+            cCrowdMan2d_freeQuad(self, i);
             break;
         }
     }
@@ -1813,7 +1813,7 @@ extern "C" void func_002297D8(cCrowdMan2d* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229820);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_attachBoneToCrowdPose);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sHTable_229820 {
@@ -1878,7 +1878,7 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
  * @param boneIndex  the bone index within the part
  */
 // Points bone b of part a of the model behind handle at the shared crowd pose.
-extern "C" void func_00229820(cCrowdMan2d* self, unsigned int handle, int partIndex, int boneIndex)
+extern "C" void cCrowdMan2d_attachBoneToCrowdPose(cCrowdMan2d* self, unsigned int handle, int partIndex, int boneIndex)
 {
     sModel_229820* model = HandleToModel_229820(handle);
     if (model != 0) {
@@ -1895,7 +1895,7 @@ extern "C" void func_00229820(cCrowdMan2d* self, unsigned int handle, int partIn
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229910);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_placeQuad);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV3_229910 {
@@ -2062,8 +2062,8 @@ struct sCrowdSlot_229910 {
 };
 
 
-// PORT: callers declare func_00229910 as (void*, int, int); defined under an asm label.
-extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910 RID) __asm__("func_00229910");
+// PORT: callers declare cCrowdMan2d_placeQuad as (void*, int, int); defined under an asm label.
+extern "C" void cCrowdMan2d_placeQuad_r(cCrowdMan2d* self, int index, tResourceID_229910 RID) __asm__("cCrowdMan2d_placeQuad");
 
 /**
  * Places quad slot @p index on the crowd model of @p RID: keeps the id and derives the slot's centre and half-axes from
@@ -2078,7 +2078,7 @@ extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910
  * @param RID  the world resource id of the model
  */
 // Places crowd quad index on the model behind RID: corner points from the renderer, then base/width/height.
-extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910 RID)
+extern "C" void cCrowdMan2d_placeQuad_r(cCrowdMan2d* self, int index, tResourceID_229910 RID)
 {
     ((tResourceID_229910*)&self->mQuadId[0])[index] = RID;
     sV4_229910 pts[4];
@@ -2104,21 +2104,21 @@ extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229B90);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_freeQuad);
 #ifdef SKIP_ASM
 /**
  * Frees quad slot @p slotIndex of the 2D crowd manager: sets its resource id (+0x8) to 0xFFFFFFFF.
  *
  * @param slotIndex  the slot (0-127)
  */
-extern "C" void func_00229B90(cCrowdMan2d* self, int slotIndex)
+extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int slotIndex)
 {
     ((unsigned int*)self)[slotIndex + 2] = 0xFFFFFFFFU;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229BA8);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_renderMarkers);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2204,7 +2204,7 @@ static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
  *
  * @param crowdMan  the 2D crowd manager
  */
-extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
+extern "C" void cCrowdMan2d_renderMarkers(cCrowdMan2d* crowdMan)
 {
     cCrowdMan2d* self = crowdMan;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -2242,7 +2242,7 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229E20);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_writeToReplayFrame);
 #ifdef SKIP_ASM
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 /**
@@ -2253,18 +2253,18 @@ INCLUDE_ASM("main/ssxapp", func_00229E20);
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E20(cCrowdMan2d* self, cBxReplayFrame* stream)
+extern "C" void cCrowdMan2d_writeToReplayFrame(cCrowdMan2d* self, cBxReplayFrame* stream)
 {
     stream->write((const char*)&self->mQuadId[0], 0x200);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229E58);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(cCrowdMan2d* self);
-extern "C" void func_002292E0(cCrowdMan2d* self);
-extern "C" void func_00229910(void* self, int slot, int a1);
+extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self);
+extern "C" void cCrowdMan2d_placeQuad(void* self, int slot, int a1);
 
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
 struct sCrowdId_229E58 {
@@ -2274,29 +2274,29 @@ struct sCrowdId_229E58 {
 
 /**
  * Restores the 2D crowd manager from a replay frame: releases and resets every slot, reads 128 resource ids (0x200
- * bytes) with the stream's second virtual and places each used one again (func_00229910).
+ * bytes) with the stream's second virtual and places each used one again (cCrowdMan2d_placeQuad).
  *
- * The slot delays restart at random values (func_002292E0). cReplay_restoreFrame calls it.
+ * The slot delays restart at random values (cCrowdMan2d_resetSlots). cReplay_restoreFrame calls it.
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E58(cCrowdMan2d* self, cBxReplayFrame* stream)
+extern "C" void cCrowdMan2d_readFromReplayFrame(cCrowdMan2d* self, cBxReplayFrame* stream)
 {
-    func_00229398(self);
-    func_002292E0(self);
+    cCrowdMan2d_releaseAllQuads(self);
+    cCrowdMan2d_resetSlots(self);
     sCrowdId_229E58 ids[128];
     stream->read((char*)ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
         if (ids[i].id != cCrowdMan2d::kFreeQuad) {
-            func_00229910(self, i, ids[i].id);
+            cCrowdMan2d_placeQuad(self, i, ids[i].id);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229F30);
+INCLUDE_ASM("main/ssxapp", vu0_storeTwoMatrices);
 #ifdef SKIP_ASM
 /**
  * Stores two 4x4 matrices in VU0 data memory, eight quadwords from the address 0x40 put in vi1.
@@ -2309,7 +2309,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F30);
  */
 // Upload two 4x4 matrices (a, b) to VU0 data memory starting at quadword 0x40 (vi1 counts quadwords).
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
-extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
+extern "C" void vu0_storeTwoMatrices(void* firstMatrix, void* secondMatrix)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2341,7 +2341,7 @@ extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
 INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: FrustumIntersector_FrustumIntersector calls it right after func_00229F30.
+ * Does nothing: FrustumIntersector_FrustumIntersector calls it right after vu0_storeTwoMatrices.
  */
 void func_00229F80(void* self)
 {
@@ -2349,7 +2349,7 @@ void func_00229F80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229F88);
+INCLUDE_ASM("main/ssxapp", vu0_storeVectorAndMatrix);
 #ifdef SKIP_ASM
 /**
  * Stores a vector and a 4x4 matrix (five quadwords) in VU0 data memory at quadword 80 + 5 * @p index.
@@ -2363,7 +2363,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F88);
 // Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
 // starting at qword 0x50 + index * 5.
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
-extern "C" void func_00229F88(int index, void* vector, void* matrix)
+extern "C" void vu0_storeVectorAndMatrix(int index, void* vector, void* matrix)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -3204,7 +3204,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_FrustumIntersector);
 #ifdef SKIP_ASM
 extern "C" void cOcclusionMan_updateView(void* a, void* b);
-extern "C" void func_00229F30(void* a, void* b);
+extern "C" void vu0_storeTwoMatrices(void* a, void* b);
 void func_00229F80(void* p);
 extern "C" void FrustumCallback_operatorCall(void* ctx, void* data, void* cfg);
 extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list, int n);
@@ -3242,7 +3242,7 @@ static inline void Load_22ADD8(FrustumCallback* callback, nash_Cell* root, nash_
  * Stores @p occlusionMan, @p cameraBox and @p world and zeroes every list count (numcellsinside ..
  * numlighthaloscrossing) and pending object (lastinstance, lastpatch, lastfogvolume). Copies the matrix returned by
  * the graphics manager's GetNetMatrix (vtable slot 43) to VFIntersect and GrMan's mGuardBandMatrix to GFIntersect,
- * calls cOcclusionMan_updateView(@p occlusionMan, @p cameraBox), loads both matrices into VU0 with func_00229F30 and
+ * calls cOcclusionMan_updateView(@p occlusionMan, @p cameraBox), loads both matrices into VU0 with vu0_storeTwoMatrices and
  * calls func_00229F80 (empty). Then runs FrustumCallback_operatorCall on the root cell of each of the Nash's eight
  * octants that has one, with the occlusion man's m_uiVisMask as the plane mask, and sorts the culled cells' objects:
  * FrustumIntersector_AddAllPatchesInside, FrustumIntersector_AddAllInstancesInside and
@@ -3283,7 +3283,7 @@ extern "C" FrustumIntersector* FrustumIntersector_FrustumIntersector(FrustumInte
     }
     MatCopy_22ADD8(&self->GFIntersect, ((&GrMan->mGuardBandMatrix)));
     cOcclusionMan_updateView(self->occlusionman, (void*)self->camerabox);
-    func_00229F30(&self->VFIntersect, &self->GFIntersect);
+    vu0_storeTwoMatrices(&self->VFIntersect, &self->GFIntersect);
     func_00229F80((void*)self->camerabox);
     FrustumCallback callback;
     cOcclusionMan* om = self->occlusionman;
@@ -3317,12 +3317,12 @@ INCLUDE_ASM("main/ssxapp", cGame_render);
 extern "C" void cGameViewMan_updateStreamFocus(void* views);
 extern "C" int cGameViewMan_isStreamReady(void* views);
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_0022C830(void* self);
+extern "C" void cGame_renderVideo(void* self);
 extern "C" void cGarbageMan_Update();
 extern "C" void t4mat_invert(void* m);
 extern "C" void cGame_renderBuckets(void* self);
-extern "C" void func_00229BA8(cCrowdMan2d* p);
-extern "C" void func_00344138(void* p);
+extern "C" void cCrowdMan2d_renderMarkers(cCrowdMan2d* p);
+extern "C" void cCrowdMan3d_render(void* p);
 extern "C" void cMultiParticleMan_render(void* p);
 extern "C" void cGame_renderModels(void* self, void* world);
 extern "C" void cGame_renderFogVolumes(void* self, void* world);
@@ -3598,7 +3598,7 @@ static inline int IsReady_22B008(cGame* self)
  * Draws one game frame: every camera view of the world, then the 2D overlays, UI and audio tick.
  *
  * Returns false when GrMan's slot 17 returns 0; returns true early while StreamPause (slot 2) holds the frame, while
- * the fade screen is fully faded (cFadeScreen_drawFade) or while a script plays (func_0022C830 draws the cut scene).
+ * the fade screen is fully faded (cFadeScreen_drawFade) or while a script plays (cGame_renderVideo draws the cut scene).
  * For each ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws
  * SkyBox (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space
  * box of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
@@ -3631,7 +3631,7 @@ bool cGame::render()
         return true;
     }
     if (ScriptEngine->mIsPlaying != 0) {
-        func_0022C830(this);
+        cGame_renderVideo(this);
         return true;
     }
     cGarbageMan_Update();
@@ -3708,8 +3708,8 @@ bool cGame::render()
         FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, BXNash, OcclusionMan,
                                               (const tBoundBox*)&box, World);
         cGame_renderBuckets(this);
-        func_00229BA8((cCrowdMan2d*)((void*)CrowdMan2d));
-        func_00344138(((void*)CrowdMan3d));
+        cCrowdMan2d_renderMarkers((cCrowdMan2d*)((void*)CrowdMan2d));
+        cCrowdMan3d_render(((void*)CrowdMan3d));
         cMultiParticleMan_render(((void*)MultiParticleMan));
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         ((cScene_22B008*)AI)->v04();

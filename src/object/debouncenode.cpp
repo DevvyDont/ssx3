@@ -843,14 +843,14 @@ INCLUDE_ASM("object/debouncenode", cCrowdMan3d_cCrowdMan3d);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
-extern "C" void func_003442E0(sDebounceState* self);
+extern "C" void tCrowdBlock3d_reset(sDebounceState* self);
 extern void* TheCrowdMan3d_p __asm__("TheCrowdMan3d");
 
 /**
  * Constructs the 3D crowd manager: five crowd blocks of 0x1F4 bytes, all empty.
  *
  * For each block it sets the crowd model id (+0x4) and all 32 member ids (+0xC, 8-byte entries) to -1 and resets the
- * block with func_003442E0, stores the manager in TheCrowdMan3d (the global the world scripts and replay code use), then
+ * block with tCrowdBlock3d_reset, stores the manager in TheCrowdMan3d (the global the world scripts and replay code use), then
  * resets all five blocks again. cGame's loader allocates it (2500 bytes, "CrowdMan3d").
  *
  * @return self
@@ -868,12 +868,12 @@ extern "C" cCrowdMan3d* cCrowdMan3d_cCrowdMan3d(cCrowdMan3d* self)
             memberSlot->mInstanceId = tCrowdBlock3d::kFree;
             memberSlot++;
         }
-        func_003442E0((sDebounceState*)crowdBlock);
+        tCrowdBlock3d_reset((sDebounceState*)crowdBlock);
         crowdBlock = next;
     }
     TheCrowdMan3d_p = self;
     for (i = 0; i < 5; i++) {
-        func_003442E0((sDebounceState*)&self->mBlocks[i]);
+        tCrowdBlock3d_reset((sDebounceState*)&self->mBlocks[i]);
     }
     return self;
 }
@@ -884,14 +884,14 @@ INCLUDE_ASM("object/debouncenode", cCrowdMan3d__cCrowdMan3d);
 #ifdef SKIP_ASM
 extern int TheCrowdMan3d;
 void operator_delete(int*);
-void* func_00344348(void* self);
+void* tCrowdBlock3d_destroy(void* self);
 
 /**
  * Destroys the 3D crowd manager.
  *
- * Frees each block's animation data (func_00344348), clears the global TheCrowdMan3d, then runs the block destructor
- * (func_00344348 again) over the five blocks in reverse and deletes the manager when bit 0 of flags is set. The second
- * pass is harmless because func_00344800 nulls the pointers it frees.
+ * Frees each block's animation data (tCrowdBlock3d_destroy), clears the global TheCrowdMan3d, then runs the block destructor
+ * (tCrowdBlock3d_destroy again) over the five blocks in reverse and deletes the manager when bit 0 of flags is set. The second
+ * pass is harmless because tCrowdBlock3d_freeAnimation nulls the pointers it frees.
  *
  * @param flags  destructor flags; bit 0 deletes the storage
  */
@@ -899,14 +899,14 @@ extern "C" void cCrowdMan3d__cCrowdMan3d(cCrowdMan3d* self, int flags)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344348(&self->mBlocks[i]);
+        tCrowdBlock3d_destroy(&self->mBlocks[i]);
     }
     TheCrowdMan3d = 0;
     if (self->mBlocks != 0) {
         tCrowdBlock3d* blockIter = self->mBlocks + 5;
         while (self->mBlocks != blockIter) {
             blockIter--;
-            func_00344348(blockIter);
+            tCrowdBlock3d_destroy(blockIter);
         }
     }
     if (flags & 1) {
@@ -916,11 +916,11 @@ extern "C" void cCrowdMan3d__cCrowdMan3d(cCrowdMan3d* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343BC0);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_clearAllBlocks);
 #ifdef SKIP_ASM
 struct sDebounceState;
-extern "C" void func_003442E0(sDebounceState* self);
-void* func_00344348(void* self);
+extern "C" void tCrowdBlock3d_reset(sDebounceState* self);
+void* tCrowdBlock3d_destroy(void* self);
 
 struct sDebounceBlock {
     char data[0x1F4];
@@ -929,21 +929,21 @@ struct sDebounceBlock {
 /**
  * Empties every crowd block of the 3D crowd manager.
  *
- * For each of the five blocks: frees its animation data (func_00344348) and resets its state (func_003442E0). Used
- * before a replay frame is read (func_00344240).
+ * For each of the five blocks: frees its animation data (tCrowdBlock3d_destroy) and resets its state (tCrowdBlock3d_reset). Used
+ * before a replay frame is read (cCrowdMan3d_readFromReplayFrame).
  */
-extern "C" void func_00343BC0(sDebounceBlock* self)
+extern "C" void cCrowdMan3d_clearAllBlocks(sDebounceBlock* self)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344348(&self[i]);
-        func_003442E0((sDebounceState*)&self[i]);
+        tCrowdBlock3d_destroy(&self[i]);
+        tCrowdBlock3d_reset((sDebounceState*)&self[i]);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343C08);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_removeSectionMembers);
 #ifdef SKIP_ASM
 extern "C" void func_00344898(void* elem, void* arg);
 
@@ -955,7 +955,7 @@ extern "C" void func_00344898(void* elem, void* arg);
  *
  * @param sectionId  world section id being unloaded
  */
-extern "C" void func_00343C08(cCrowdMan3d* self, void* sectionId)
+extern "C" void cCrowdMan3d_removeSectionMembers(cCrowdMan3d* self, void* sectionId)
 {
     int i;
     for (i = 0; i < 5; i++) {
@@ -967,7 +967,7 @@ extern "C" void func_00343C08(cCrowdMan3d* self, void* sectionId)
 INCLUDE_ASM("object/debouncenode", func_00343C60);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343F38);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_removeMember);
 #ifdef SKIP_ASM
 // FAKEMATCH: a dead two-variable cycle `dA = dB + id; dB = dA;` (dB = 0 before the loop) on release()'s not-found path, so
 // `id` is still referenced after the found arm when cse2 picks the canonical register for `ents[j].ref.id == id` (flow
@@ -975,8 +975,8 @@ INCLUDE_ASM("object/debouncenode", func_00343F38);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" cWorld* cObjectInterface_getWorld();
 struct sDebounceState;
-extern "C" void func_003442E0(sDebounceState* self);
-extern "C" void* func_00344800(void* self);
+extern "C" void tCrowdBlock3d_reset(sDebounceState* self);
+extern "C" void* tCrowdBlock3d_freeAnimation(void* self);
 
 
 static inline tInstanceRecord* refToPtr3F38(unsigned int p)
@@ -1044,8 +1044,8 @@ struct sBlock3F38 {
                 m2->m_iFlags = (((unsigned int)m2->m_iFlags) & 0xFFFFFFFB) | 2;
                 ents[j].ref.id = 0xFFFFFFFF;
                 if (--count <= 0) {
-                    func_00344800(this);
-                    func_003442E0((sDebounceState*)this);
+                    tCrowdBlock3d_freeAnimation(this);
+                    tCrowdBlock3d_reset((sDebounceState*)this);
                 }
                 return;
             }
@@ -1064,12 +1064,12 @@ struct sDebounceMgr3F38 {
  *
  * Looks up the instance record for id, takes the crowd key from its model (+0x80, value >> 8) and finds the block whose
  * key (+0x8) matches. In that block it clears the member entry with this id, sets the record's flags to (flags & ~0x4)
- * | 0x2, decrements the member count (+0x0) and, when the block is empty, frees its animation data (func_00344800) and
- * resets it (func_003442E0). The world script handler calls it for crowd command 1.
+ * | 0x2, decrements the member count (+0x0) and, when the block is empty, frees its animation data (tCrowdBlock3d_freeAnimation) and
+ * resets it (tCrowdBlock3d_reset). The world script handler calls it for crowd command 1.
  *
  * @param id  instance id (tResourceID) of the crowd member
  */
-extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
+extern "C" void cCrowdMan3d_removeMember(sDebounceMgr3F38* self, unsigned int id)
 {
     tInstanceRecord* model = getModel3F38(id);
     unsigned int* key = ((unsigned int*)model->m_Model);
@@ -1083,23 +1083,23 @@ extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003440C8);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_update);
 #ifdef SKIP_ASM
-extern "C" void func_003449F0(void* elem);
+extern "C" void tCrowdBlock3d_updateAnimation(void* elem);
 
 /**
  * Updates the 3D crowds: advances the animation of every block that is in use.
  *
- * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block goes through func_003449F0.
+ * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block goes through tCrowdBlock3d_updateAnimation.
  * Called once per game update for cGame's CrowdMan3d.
  */
-extern "C" void func_003440C8(cCrowdMan3d* self)
+extern "C" void cCrowdMan3d_update(cCrowdMan3d* self)
 {
     int i;
     tCrowdBlock3d* crowdBlock = self->mBlocks;
     for (i = 0; i < 5; i++) {
         if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            func_003449F0(crowdBlock);
+            tCrowdBlock3d_updateAnimation(crowdBlock);
         }
         crowdBlock++;
     }
@@ -1107,23 +1107,23 @@ extern "C" void func_003440C8(cCrowdMan3d* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344138);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_render);
 #ifdef SKIP_ASM
-extern "C" void func_00344E18(void* elem);
+extern "C" void tCrowdBlock3d_render(void* elem);
 
 /**
  * Renders the 3D crowds: draws every block that is in use.
  *
- * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block is drawn by func_00344E18. Called
+ * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block is drawn by tCrowdBlock3d_render. Called
  * from the game render pass.
  */
-extern "C" void func_00344138(cCrowdMan3d* self)
+extern "C" void cCrowdMan3d_render(cCrowdMan3d* self)
 {
     int i;
     tCrowdBlock3d* crowdBlock = self->mBlocks;
     for (i = 0; i < 5; i++) {
         if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            func_00344E18(crowdBlock);
+            tCrowdBlock3d_render(crowdBlock);
         }
         crowdBlock++;
     }
@@ -1131,10 +1131,10 @@ extern "C" void func_00344138(cCrowdMan3d* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003441A8);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cDebounceStream;
-extern "C" void func_00344FC0(void* self, cBxReplayFrame* s);
+extern "C" void tCrowdBlock3d_writeToReplayFrame(void* self, cBxReplayFrame* s);
 
 
 
@@ -1142,53 +1142,53 @@ extern "C" void func_00344FC0(void* self, cBxReplayFrame* s);
  * Writes the 3D crowd manager to a replay frame.
  *
  * For each of the five blocks it writes the 4-byte key (+0x8) through the stream's write slot (vtable entry 1) and, for
- * a block in use, the block's member data (func_00344FC0).
+ * a block in use, the block's member data (tCrowdBlock3d_writeToReplayFrame).
  *
  * @param replayStream  replay stream to write to
  */
-extern "C" void func_003441A8(cCrowdMan3d* self, cBxReplayFrame* replayStream)
+extern "C" void cCrowdMan3d_writeToReplayFrame(cCrowdMan3d* self, cBxReplayFrame* replayStream)
 {
     int i;
     for (i = 0; i < 5; i++) {
         replayStream->write((const char*)&self->mBlocks[i].mKey, 4);
         if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            func_00344FC0(&self->mBlocks[i], replayStream);
+            tCrowdBlock3d_writeToReplayFrame(&self->mBlocks[i], replayStream);
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/debouncenode", func_00344240);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cDebounceStream;
-extern "C" void func_00344FF8(void* self, cBxReplayFrame* s);
+extern "C" void tCrowdBlock3d_readFromReplayFrame(void* self, cBxReplayFrame* s);
 
 
 
 /**
  * Reads the 3D crowd manager back from a replay frame.
  *
- * Empties all blocks first (func_00343BC0), then for each of the five reads the 4-byte key (+0x8) through the stream's
- * read slot (vtable entry 2) and, for a block in use, its member data and animation (func_00344FF8).
+ * Empties all blocks first (cCrowdMan3d_clearAllBlocks), then for each of the five reads the 4-byte key (+0x8) through the stream's
+ * read slot (vtable entry 2) and, for a block in use, its member data and animation (tCrowdBlock3d_readFromReplayFrame).
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344240(cCrowdMan3d* self, cBxReplayFrame* replayStream)
+extern "C" void cCrowdMan3d_readFromReplayFrame(cCrowdMan3d* self, cBxReplayFrame* replayStream)
 {
     int i;
-    func_00343BC0((sDebounceBlock*)self);
+    cCrowdMan3d_clearAllBlocks((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
         replayStream->read((char*)&self->mBlocks[i].mKey, 4);
         if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            func_00344FF8(&self->mBlocks[i], replayStream);
+            tCrowdBlock3d_readFromReplayFrame(&self->mBlocks[i], replayStream);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003442E0);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_reset);
 #ifdef SKIP_ASM
 struct sDebounceSlot {
     unsigned int id; // 0x0
@@ -1219,7 +1219,7 @@ struct sDebounceState {
  * (+0x1E8, +0x1EC, +0x1F0) and the item counts (+0x110, +0x114); sets the model id (+0x4) and key (+0x8) to -1 and
  * every member entry (+0xC, 32 of them) to id -1, value 0. It does not free anything.
  */
-extern "C" void func_003442E0(sDebounceState* self)
+extern "C" void tCrowdBlock3d_reset(sDebounceState* self)
 {
     int i;
     self->field_0x0 = 0;
@@ -1238,48 +1238,48 @@ extern "C" void func_003442E0(sDebounceState* self)
 }
 #endif
 
-extern "C" void* func_00344800(void* self);
+extern "C" void* tCrowdBlock3d_freeAnimation(void* self);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344348__FPv);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_destroy__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys one crowd block by freeing its animation data (func_00344800).
+ * Destroys one crowd block by freeing its animation data (tCrowdBlock3d_freeAnimation).
  *
- * @return nothing meaningful: it forwards func_00344800, which returns no value
+ * @return nothing meaningful: it forwards tCrowdBlock3d_freeAnimation, which returns no value
  */
-void* func_00344348(void* self)
+void* tCrowdBlock3d_destroy(void* self)
 {
-    return func_00344800(self);
+    return tCrowdBlock3d_freeAnimation(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344368);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_setModel);
 #ifdef SKIP_ASM
-extern "C" void func_003443A8(void* self);
+extern "C" void tCrowdBlock3d_buildAnimation(void* self);
 
 /**
  * Sets the crowd model of a block and builds its animation data.
  *
  * Stores modelId at +0x4, zeroes the animation time (+0x1DC), sets the time step (+0x1E4) to 1 / the frame rate at
- * cAppMan_TheAppMan +0x10 and calls func_003443A8.
+ * cAppMan_TheAppMan +0x10 and calls tCrowdBlock3d_buildAnimation.
  *
  * @param modelId  instance id (tResourceID) of the crowd model
  */
-extern "C" void func_00344368(void* self, int modelId)
+extern "C" void tCrowdBlock3d_setModel(void* self, int modelId)
 {
     char* owner = (char*)self;
     cAppMan* appMan = cAppMan_TheAppMan;
     *(int*)(owner + 0x4) = modelId;
     *(int*)(owner + 0x1DC) = 0;
     *(float*)(owner + 0x1E4) = 1.0f / (float)appMan->TimerHz;
-    func_003443A8(self);
+    tCrowdBlock3d_buildAnimation(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003443A8);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_buildAnimation);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -1396,18 +1396,18 @@ struct sDbOwner_43A8 {
     tModelRecord* def;               // 0x1F0
 };
 
-extern "C" void func_00344AA0_43A8(void* self) __asm__("func_00344AA0");
+extern "C" void tCrowdBlock3d_buildPartMatrices_43A8(void* self) __asm__("tCrowdBlock3d_buildPartMatrices");
 
 
 
-extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8");
+extern "C" void tCrowdBlock3d_buildAnimation_impl(sDbOwner_43A8* self) __asm__("tCrowdBlock3d_buildAnimation");
 /**
  * Builds a crowd block's animation data from its crowd model.
  *
  * Looks up the model record (id at +0x4) and takes its anim def (+0x80) and the period (def +0x14). Allocates one
  * 64-byte matrix per def entry ("AnimMats", +0x1E8), counts the entries with an animation source (+0x10C) and allocates
  * that many cMeshAnimFrame objects ("CrowdAnimMesh", 0xD0 bytes each, +0x1EC), initialising each from its source
- * (cAnimFrame_setAnimRecord) and updating it to the current time (vtable entry 2). Builds the part matrices (func_00344AA0), then
+ * (cAnimFrame_setAnimRecord) and updating it to the current time (vtable entry 2). Builds the part matrices (tCrowdBlock3d_buildPartMatrices), then
  * reads the model's item list (+0x94): +0x114 takes the first word of the first item with data, +0x110 the item count,
  * and for each item the slot pointer table (+0x11C) points at its own 20-byte slot (+0x13C, with the item's +0xC and
  * the u16 at data +0x4) or at the item itself when it has no data.
@@ -1415,7 +1415,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8")
  * Likely bug: the loop that sets the slot's three ids to -1 always writes slot 0, not the current slot. The tables hold
  * 8 entries but the item count is not checked against that.
  */
-extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
+extern "C" void tCrowdBlock3d_buildAnimation_impl(sDbOwner_43A8* self)
 {
     tInstanceRecord* animModel = self->model.get();
     int i;
@@ -1446,7 +1446,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
         sDbMesh_43A8* slotIds = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
         ((sDbVEntry_43A8*)slotIds->vtable)[2].fn(vthis(slotIds, ((sDbVEntry_43A8*)slotIds->vtable)[2]), self->time);
     }
-    func_00344AA0_43A8(self);
+    tCrowdBlock3d_buildPartMatrices_43A8(self);
     self->first = 0;
     self->count = ((sDbList_43A8*)animModel->m_MaterialBlock)->count;
     for (i = 0; i < self->count; i++) {
@@ -1476,7 +1476,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344730);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_selectVariant);
 #ifdef SKIP_ASM
 extern "C" cWorld* cObjectInterface_getWorld();
 
@@ -1551,7 +1551,7 @@ struct sDebounce4730 {
  *
  * @param index  variant index (the member entry's value)
  */
-extern "C" void func_00344730(sDebounce4730* self, int index)
+extern "C" void tCrowdBlock3d_selectVariant(sDebounce4730* self, int index)
 {
     tInstanceRecord* animModel = self->model.get();
     for (int i = 0; i < self->count; i++) {
@@ -1564,7 +1564,7 @@ extern "C" void func_00344730(sDebounce4730* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344800);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_freeAnimation);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void*);
@@ -1582,9 +1582,9 @@ struct sDebounceOwner4800 {
     cMeshAnimFrame* items;   // 0x1EC, array-new block (count at -0x10)
 };
 
-// The unit declares func_00344800 as `void* (void*)`, but the body returns nothing
-// (its wrapper func_00344348 only forwards). Bound by asm label.
-void func_00344800_v(sDebounceOwner4800* self) __asm__("func_00344800");
+// The unit declares tCrowdBlock3d_freeAnimation as `void* (void*)`, but the body returns nothing
+// (its wrapper tCrowdBlock3d_destroy only forwards). Bound by asm label.
+void tCrowdBlock3d_freeAnimation_v(sDebounceOwner4800* self) __asm__("tCrowdBlock3d_freeAnimation");
 
 /**
  * Frees a crowd block's animation data.
@@ -1592,7 +1592,7 @@ void func_00344800_v(sDebounceOwner4800* self) __asm__("func_00344800");
  * Destroys the cMeshAnimFrame array (+0x1EC; each element's destructor, vtable entry 1, in reverse, then frees the
  * array block) and frees the matrix buffer (+0x1E8); both pointers end up null.
  */
-void func_00344800_v(sDebounceOwner4800* self)
+void tCrowdBlock3d_freeAnimation_v(sDebounceOwner4800* self)
 {
     cMeshAnimFrame* items = self->items;
     if (items != 0) {
@@ -1614,7 +1614,7 @@ void func_00344800_v(sDebounceOwner4800* self)
 INCLUDE_ASM("object/debouncenode", func_00344898);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003449F0);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_updateAnimation);
 #ifdef SKIP_ASM
 struct sDebounceVEntry49F0 {
     short delta;
@@ -1634,17 +1634,17 @@ struct sDebounceOwner49F0 {
     cMeshAnimFrame* items;   // 0x1EC
 };
 
-extern "C" void func_00344AA0(sDebounceOwner49F0* self);
+extern "C" void tCrowdBlock3d_buildPartMatrices(sDebounceOwner49F0* self);
 
 /**
  * Advances a crowd block's animation by one frame.
  *
  * Adds the time step (+0x1E4) to the time (+0x1DC), wrapping it by the period (+0x1E0), updates each animated mesh
- * (+0x1EC, count +0x10C) to the new time through its vtable entry 2 and rebuilds the part matrices (func_00344AA0).
+ * (+0x1EC, count +0x10C) to the new time through its vtable entry 2 and rebuilds the part matrices (tCrowdBlock3d_buildPartMatrices).
  *
  * @param elem  the crowd block (0x1F4 bytes)
  */
-extern "C" void func_003449F0(void* elem)
+extern "C" void tCrowdBlock3d_updateAnimation(void* elem)
 {
     sDebounceOwner49F0* self = (sDebounceOwner49F0*)elem;
     float newTime = self->time + self->step;
@@ -1656,12 +1656,12 @@ extern "C" void func_003449F0(void* elem)
         sDebounceVEntry49F0* vt = (sDebounceVEntry49F0*)self->items[i].mVtbl;
         vt[2].fn(vthis(&self->items[i], vt[2]), self->time);
     }
-    func_00344AA0(self);
+    tCrowdBlock3d_buildPartMatrices(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344AA0);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_buildPartMatrices);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" cWorld* cObjectInterface_getWorld();
@@ -1833,7 +1833,7 @@ static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const t4Vector& s)
 }
 
 // Rebuilds the world matrix of every part; animated parts take their local matrix from the next animation item.
-extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self) __asm__("func_00344AA0");
+extern "C" void tCrowdBlock3d_buildPartMatrices_4AA0(sDbAnim_4AA0* self) __asm__("tCrowdBlock3d_buildPartMatrices");
 /**
  * Rebuilds the world matrix of every part of a crowd block's model.
  *
@@ -1842,7 +1842,7 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self) __asm__("func_00344AA0");
  * matrix; its translation row is scaled by the model's scale (+0x84). Child parts are multiplied by their parent's
  * result; the results go to the matrix buffer (+0x1E8).
  */
-extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
+extern "C" void tCrowdBlock3d_buildPartMatrices_4AA0(sDbAnim_4AA0* self)
 {
     sDbPart_4AA0* part = self->info->parts;
     float k = self->model.get()->scale;
@@ -1880,10 +1880,10 @@ extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344E18);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_render);
 #ifdef SKIP_ASM
 extern "C" cWorld* cObjectInterface_getWorld();
-extern "C" void func_00344730(sDebounce4730* self, int index);
+extern "C" void tCrowdBlock3d_selectVariant(sDebounce4730* self, int index);
 
 
 struct sModelSet_44E18 {
@@ -1914,11 +1914,11 @@ static inline int IsLoaded_44E18(tInstanceRecord* m)
  * Draws every member of a crowd block.
  *
  * Skips free entries (id -1) and members whose world-cache page is not loaded. When +0x114 is 2 or more it first
- * selects the member's variant (func_00344730 with the entry's value) and draws the member through graphics-manager
+ * selects the member's variant (tCrowdBlock3d_selectVariant with the entry's value) and draws the member through graphics-manager
  * slot 95 with the slot table (+0x118) and matrix buffer (+0x1E8); otherwise it draws through slot 96 with the matrix
  * buffer only.
  */
-extern "C" void func_00344E18(void* self)
+extern "C" void tCrowdBlock3d_render(void* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     unsigned int* ref = (unsigned int*)((char*)self + 0xC);
@@ -1932,7 +1932,7 @@ extern "C" void func_00344E18(void* self)
             continue;
         if (*(int*)((char*)self + 0x114) >= 2)
         {
-            func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
+            tCrowdBlock3d_selectVariant((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
             ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)self + 0x118), *(const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
@@ -1944,7 +1944,7 @@ extern "C" void func_00344E18(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344FC0);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_writeToReplayFrame);
 #ifdef SKIP_ASM
 // Replay stream: vtable entry 1 writes, entry 2 reads (as the other replay writers and readers use it).
 class cDebounceStream {
@@ -1958,30 +1958,30 @@ public:
  *
  * @param replayStream  replay stream to write to (vtable entry 1)
  */
-extern "C" void func_00344FC0(void* self, cBxReplayFrame* replayStream)
+extern "C" void tCrowdBlock3d_writeToReplayFrame(void* self, cBxReplayFrame* replayStream)
 {
     replayStream->write((const char*)self, 268);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00344FF8);
+INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_003443A8(void* self);
+extern "C" void tCrowdBlock3d_buildAnimation(void* self);
 
 /**
  * Reads a crowd block's member data back from a replay frame and rebuilds its animation.
  *
  * Reads the first 268 bytes (count, model id, key, 32 entries) through the stream's vtable entry 2, then frees
- * (func_00344800) and rebuilds (func_003443A8) the animation data.
+ * (tCrowdBlock3d_freeAnimation) and rebuilds (tCrowdBlock3d_buildAnimation) the animation data.
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344FF8(void* self, cBxReplayFrame* replayStream)
+extern "C" void tCrowdBlock3d_readFromReplayFrame(void* self, cBxReplayFrame* replayStream)
 {
     replayStream->read((char*)self, 268);
-    func_00344800(self);
-    func_003443A8(self);
+    tCrowdBlock3d_freeAnimation(self);
+    tCrowdBlock3d_buildAnimation(self);
 }
 #endif
 

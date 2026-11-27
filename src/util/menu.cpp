@@ -5900,8 +5900,8 @@ struct cBXStr_D0EF8 {
 };
 // Formats a value for display (prettyFloat returns a cBXString by value).
 cBXStr_D0EF8 FormatValue_D0EF8(float v) __asm__("prettyFloat");
-cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const char* b) __asm__("func_00318630");
-cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const cBXStr_D0EF8& b) __asm__("func_003185C8");
+cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const char* b) __asm__("cBXString_operatorPlus1");
+cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const cBXStr_D0EF8& b) __asm__("cBXString_operatorPlus");
 extern char str_comma[];
 extern sColor D_004D53C0;
 extern sColor D_004D53D0;

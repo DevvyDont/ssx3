@@ -2,7 +2,7 @@
 #define RENDER_2DRENDER_H
 
 // c2DRender: EA's stateless 2D quad/line helper. Its methods fill the positions (and UVs) of four tBxVertex from a
-// tRect, optionally transform them by a 3x3 matrix (func_0038E0A8), and submit them to the graphics manager
+// tRect, optionally transform them by a 3x3 matrix (transformPoint2D), and submit them to the graphics manager
 // (cGraphicsMan_TheGraphicsMan virtual slot 71 RenderTriStrip, slot 73 RenderLineStrip for drawLine). Callers: the UI
 // text
 // elements (cTextureElement_render, cTextureElement_render2, cTextureElement_render*), cHeartBeat_draw and cFadeScreen_drawFade.

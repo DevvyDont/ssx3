@@ -9,10 +9,10 @@
 // Name: the class name follows EA's file name (beziercache.cpp) and the preview's member names m4x4CacheRecord /
 // m6x6CacheRecord / m8x8CacheRecord; tPatchRecord::m_sCacheRecord[3] (world/patchrecord.h) holds a patch's record
 // index in each table ([P] "Patch->m_sCacheRecord[Size] < 0").
-// Retail code: func_00372B30 (ctor: zeroes the pointers), func_00372B78 (alloc: cMemMan_alloc of every table with the
+// Retail code: cBezierCache_cBezierCache (ctor: zeroes the pointers), cBezierCache_allocateCaches (alloc: cMemMan_alloc of every table with the
 // preview tags "4x4CacheRecord", "4x4FreeList", "4x4PosCache", "4x4UVCache", "4x4LMUVCache", "4x4NrmCache",
-// "4x4FreeNrmList" and their 6x6 / 8x8 twins; cPS2BezierMan's ctor passes the sizes 900, 220, 140), func_003737D0 /
-// func_003739D0 (reset / free lists), func_00374518 / func_003747A0 (patch evaluation), cPS2BezierMan_GetBezST
+// "4x4FreeNrmList" and their 6x6 / 8x8 twins; cPS2BezierMan's ctor passes the sizes 900, 220, 140), cBezierCache_freeCaches /
+// cBezierCache_clearRecords (reset / free lists), cBezierCache_computePatchNormals / cBezierCache_cachePatch (patch evaluation), cPS2BezierMan_GetBezST
 // (reads +0x190), cPS2BezierMan_GetBezdST (reads +0x310).
 //
 // Size 0x320: dbasis[3] ends at 0x31C and the t4Vector tables make the class 16-aligned; cPS2BezierMan's next member
@@ -41,7 +41,7 @@ struct cBezierCache {
                                      //       patch size
     int* mFreeListBuffer[3];         // 0x024 (name ours) [R] the "4x4FreeList" / 6x6 / 8x8 buffers
     int* mFreeList[3];               // 0x030 (name ours, after the tags) [U] the same free lists, indexed by patch
-                                     //       size (func_003747A0 pops mFreeList[Size][--mFreeListSP[Size]])
+                                     //       size (cBezierCache_cachePatch pops mFreeList[Size][--mFreeListSP[Size]])
     int mFreeListSP[3];                  // 0x03C [U] free-list stack pointers (counts), indexed by patch size
     t3Vector* mPosCache[3];          // 0x048 (name ours, after the tags) [R] "4x4PosCache" / 6x6 / 8x8: n x n
                                      //       positions per record

@@ -310,13 +310,13 @@ extern "C" void func_002C2208(void) {
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cMemCard_AsciiToShiftJIS);
 #ifdef SKIP_ASM
-extern "C" short func_002C2338(unsigned char c);
+extern "C" short convertAsciiCharToShiftJis(unsigned char c);
 
 /**
- * Converts an ASCII string into 16-bit Shift-JIS full-width characters, one func_002C2338 call per byte, and ends @p
+ * Converts an ASCII string into 16-bit Shift-JIS full-width characters, one convertAsciiCharToShiftJis call per byte, and ends @p
  * dst with a 0.
  *
- * A character func_002C2338 has no full-width form for becomes 0 and so ends the output early. func_002C48C0 (state 38)
+ * A character convertAsciiCharToShiftJis has no full-width form for becomes 0 and so ends the output early. cPS2MemCard_enterState (state 38)
  * uses it for the save title of the icon.sys it writes.
  *
  * @param dst  the 16-bit output buffer
@@ -325,7 +325,7 @@ extern "C" short func_002C2338(unsigned char c);
 void cMemCard::AsciiToShiftJIS(short* dst, const char* src)
 {
     while (*src != 0) {
-        *dst++ = func_002C2338(*src++);
+        *dst++ = convertAsciiCharToShiftJis(*src++);
     }
     *dst = 0;
 }
@@ -334,10 +334,10 @@ void cMemCard::AsciiToShiftJIS(short* dst, const char* src)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cMemCard_ShiftJISToAscii);
 #ifdef SKIP_ASM
-extern "C" char func_002C2430(short c);
+extern "C" char convertShiftJisCharToAscii(short c);
 
 /**
- * Converts a 16-bit Shift-JIS string into ASCII, one func_002C2430 call per character, and ends @p dst with a 0.
+ * Converts a 16-bit Shift-JIS string into ASCII, one convertShiftJisCharToAscii call per character, and ends @p dst with a 0.
  *
  * A character with no ASCII form becomes 0 in the output (the loop goes on; the string just reads shorter).
  * cPS2MemCard_Update uses it for the save titles it reads from the cards.
@@ -348,7 +348,7 @@ extern "C" char func_002C2430(short c);
 void cMemCard::ShiftJISToAscii(char* dst, const short* src)
 {
     for (; *src != 0; src++, dst++) {
-        *dst = func_002C2430(*src);
+        *dst = convertShiftJisCharToAscii(*src);
     }
     *dst = 0;
 }
@@ -395,13 +395,13 @@ extern "C" void cMemCard_DeleteInstance(cMemCard_DeleteInstance_cObj* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2338);
+INCLUDE_ASM("worldpainter/quadtree", convertAsciiCharToShiftJis);
 #ifdef SKIP_ASM
-struct func_002C2338_sRange {
+struct convertAsciiCharToShiftJis_sRange {
     unsigned short base;
     unsigned short first;
 };
-extern func_002C2338_sRange D_00445940[];
+extern convertAsciiCharToShiftJis_sRange D_00445940[];
 extern unsigned short D_00445950[];
 
 /**
@@ -415,7 +415,7 @@ extern unsigned short D_00445950[];
  * @param asciiChar  the ASCII character
  * @return the 16-bit Shift-JIS code with its bytes swapped, or 0
  */
-extern "C" short func_002C2338(unsigned char asciiChar)
+extern "C" short convertAsciiCharToShiftJis(unsigned char asciiChar)
 {
     int off = 0;
     int idx = 0;
@@ -447,7 +447,7 @@ extern "C" short func_002C2338(unsigned char asciiChar)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2430);
+INCLUDE_ASM("worldpainter/quadtree", convertShiftJisCharToAscii);
 #ifdef SKIP_ASM
 extern unsigned char D_00445998[];
 // Shift-JIS full-width range table: {first code, ASCII of first code} per range (digits, upper, lower case).
@@ -459,10 +459,10 @@ enum { kSJISLeadPunctuation = 0x81, kSJISLeadAlphanumeric = 0x82 };
 
 // Converts a Shift-JIS double-byte character (lead byte in the low byte) to ASCII; 0 if it has none.
 // PORT: declared earlier in the unit as char(short); defined under its own name bound to the symbol.
-extern "C" unsigned char func_002C2430_impl(unsigned int code) __asm__("func_002C2430");
+extern "C" unsigned char convertShiftJisCharToAscii_impl(unsigned int code) __asm__("convertShiftJisCharToAscii");
 /**
  * Returns the ASCII form of a Shift-JIS full-width character whose lead byte is in the low byte (the order
- * func_002C2338 produces), or 0 when it has none.
+ * convertAsciiCharToShiftJis produces), or 0 when it has none.
  *
  * Lead byte kSJISLeadPunctuation (0x81) looks the trail byte up in D_00445998 (from trail byte 0x40);
  * kSJISLeadAlphanumeric (0x82) covers digits (trail 0x4F-0x58), upper-case (0x60-0x79) and lower-case letters
@@ -473,7 +473,7 @@ extern "C" unsigned char func_002C2430_impl(unsigned int code) __asm__("func_002
  * @param code  the 16-bit character (lead byte low, trail byte high)
  * @return the ASCII character, or 0
  */
-extern "C" unsigned char func_002C2430_impl(unsigned int code)
+extern "C" unsigned char convertShiftJisCharToAscii_impl(unsigned int code)
 {
     unsigned int hi = (code >> 8) & 0xFF;
     int i = 0;
@@ -537,7 +537,7 @@ extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2540);
+INCLUDE_ASM("worldpainter/quadtree", strcpy3);
 #ifdef SKIP_ASM
 /**
  * Copies an 8-bit string into a 16-bit one, widening each byte, and ends @p dst with a 0 (no length limit).
@@ -548,7 +548,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2540);
  * @param src  the 8-bit string
  * @return @p dst
  */
-extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src)
+extern "C" unsigned short* strcpy3(unsigned short* dst, char* src)
 {
     unsigned short* ret = dst;
     while (*src != 0) {
@@ -585,7 +585,7 @@ char* strcpy2_impl(char* dst, unsigned short* src)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C25B8);
+INCLUDE_ASM("worldpainter/quadtree", strncpy1);
 #ifdef SKIP_ASM
 /**
  * Copies at most @p n units of a 16-bit string and ends @p dst with a 0, so @p dst needs room for n + 1 units.
@@ -595,7 +595,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C25B8);
  * @param n  the most units to copy
  * @return @p dst
  */
-extern "C" unsigned short* func_002C25B8(unsigned short* dst, unsigned short* src, int n)
+extern "C" unsigned short* strncpy1(unsigned short* dst, unsigned short* src, int n)
 {
     unsigned short* ret = dst;
     while (*src != 0 && n > 0) {
@@ -608,7 +608,7 @@ extern "C" unsigned short* func_002C25B8(unsigned short* dst, unsigned short* sr
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C25F8);
+INCLUDE_ASM("worldpainter/quadtree", strncpy2);
 #ifdef SKIP_ASM
 /**
  * Copies at most @p n bytes of an 8-bit string into a 16-bit one, widening each byte, and ends @p dst with a 0, so
@@ -619,7 +619,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C25F8);
  * @param n  the most characters to copy
  * @return @p dst
  */
-extern "C" unsigned short* func_002C25F8(unsigned short* dst, const char* src, int n)
+extern "C" unsigned short* strncpy2(unsigned short* dst, const char* src, int n)
 {
     unsigned short* start = dst;
     while (*src && n > 0) {
@@ -631,7 +631,7 @@ extern "C" unsigned short* func_002C25F8(unsigned short* dst, const char* src, i
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2640);
+INCLUDE_ASM("worldpainter/quadtree", strncpy3);
 #ifdef SKIP_ASM
 /**
  * Copies at most @p n units of a 16-bit string into an 8-bit one, keeping only each unit's low byte, and ends @p dst
@@ -642,7 +642,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2640);
  * @param n  the most characters to copy
  * @return @p dst
  */
-extern "C" unsigned char* func_002C2640(unsigned char* dst, const unsigned short* src, int n)
+extern "C" unsigned char* strncpy3(unsigned char* dst, const unsigned short* src, int n)
 {
     unsigned char* start = dst;
     while (*src && n > 0) {
@@ -655,7 +655,7 @@ extern "C" unsigned char* func_002C2640(unsigned char* dst, const unsigned short
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2688);
+INCLUDE_ASM("worldpainter/quadtree", strcat1);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 
@@ -666,7 +666,7 @@ extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
  * @param src  the 16-bit string to append
  * @return strcpy1's result (the end of the original @p dst)
  */
-extern "C" unsigned short* func_002C2688(unsigned short* dst, unsigned short* src)
+extern "C" unsigned short* strcat1(unsigned short* dst, unsigned short* src)
 {
     while (*dst != 0) {
         dst++;
@@ -769,14 +769,14 @@ extern "C" int sprintf2(unsigned short* dst, const char* fmt, ...)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2868);
+INCLUDE_ASM("worldpainter/quadtree", lowercaseString);
 #ifdef SKIP_ASM
 /**
  * Converts the ASCII upper-case letters of a string to lower case in place.
  *
  * @param str  the string
  */
-extern "C" void func_002C2868(char* str)
+extern "C" void lowercaseString(char* str)
 {
     while (*str != 0) {
         if (*str >= 'A' && *str <= 'Z') {
@@ -788,20 +788,20 @@ extern "C" void func_002C2868(char* str)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C28A0);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_getTick);
 #ifdef SKIP_ASM
 extern "C" void TIMER_gettick();
 
 /**
- * Calls TIMER_gettick, which reads the counter D_00450DCC; the GameLink platform table set up by func_002C2BD8 holds it
+ * Calls TIMER_gettick, which reads the counter D_00450DCC; the GameLink platform table set up by gameLink_initPlatformFuncs holds it
  * at +0x58.
  */
-extern "C" void func_002C28A0(void) {
+extern "C" void gameLink_getTick(void) {
     TIMER_gettick();
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C28C0);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_alloc);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -810,26 +810,26 @@ extern char str_GAMELINK_data[];
 /**
  * Allocates a block for GameLink: operator_new__FUi(size, "GAMELINK data", 0x100 when @p zeroFlag is set else 0, 0).
  *
- * func_002C2BD8 stores it in the GameLink platform table (+0x3C); func_002C2940 and func_002C29D0 use it.
+ * gameLink_initPlatformFuncs stores it in the GameLink platform table (+0x3C); gameLink_realloc and gameLink_createThread use it.
  *
  * @param name  unused (the tag is always "GAMELINK data")
  * @param size  the block size in bytes
  * @param zeroFlag  nonzero to pass the 0x100 allocation flag
  * @return the block's address
  */
-extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag)
+extern "C" void* gameLink_alloc(const char* name, int size, int zeroFlag)
 {
     return new (str_GAMELINK_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C28F8);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// Unit declares MEM_free / func_002C28F8 later with void return; keep the int-returning
+// Unit declares MEM_free / gameLink_free later with void return; keep the int-returning
 // signatures under asm labels. The argument passes straight through in a0.
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
-extern "C" bool func_002C28F8_impl(void* p) __asm__("func_002C28F8");
+extern "C" bool gameLink_free_impl(void* p) __asm__("gameLink_free");
 
 /**
  * Frees a GameLink block with MEM_free and returns whether MEM_free returned nonzero.
@@ -837,57 +837,57 @@ extern "C" bool func_002C28F8_impl(void* p) __asm__("func_002C28F8");
  * @param block  the block to free
  * @return true when MEM_free returned nonzero
  */
-extern "C" bool func_002C28F8_impl(void* block)
+extern "C" bool gameLink_free_impl(void* block)
 {
     return MEM_free_ret(block) != 0;
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2918);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_memcpy);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy();
 
 /**
  * Calls MEM_copy with the caller's arguments passed through and returns the destination (GameLink's memory copy).
- * Nothing in retail references it; func_002C2BD8 stores memset in the copy slot instead.
+ * Nothing in retail references it; gameLink_initPlatformFuncs stores memset in the copy slot instead.
  *
  * @param dst  the destination address
  * @return @p dst
  */
-extern "C" int func_002C2918(int dst) {
+extern "C" int gameLink_memcpy(int dst) {
     MEM_copy();
     return dst;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2940);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_realloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MUTEX_lock_p(void*) __asm__("MUTEX_lock");
 extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
 extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
-extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag);
-extern "C" void func_002C28F8(void* block);
+extern "C" void* gameLink_alloc(const char* name, int size, int zeroFlag);
+extern "C" void gameLink_free(void* block);
 extern char cMemMan_m_mutex[];
 
 /**
  * Resizes a GameLink block, realloc style.
  *
- * A null @p block allocates a new one (func_002C28C0); a zero @p size frees it (func_002C28F8) and returns 0; otherwise
+ * A null @p block allocates a new one (gameLink_alloc); a zero @p size frees it (gameLink_free) and returns 0; otherwise
  * cMemMan_internalResizeBlock resizes it with cMemMan_m_mutex locked.
  *
  * @param block  the block to resize, or 0
- * @param name  passed to func_002C28C0 (unused there)
+ * @param name  passed to gameLink_alloc (unused there)
  * @param size  the new size in bytes
- * @param zeroFlag  passed to func_002C28C0 for a new block
+ * @param zeroFlag  passed to gameLink_alloc for a new block
  * @return the block's (new) address, or 0
  */
-extern "C" void* func_002C2940(void* block, const char* name, int size, int zeroFlag) {
+extern "C" void* gameLink_realloc(void* block, const char* name, int size, int zeroFlag) {
     if (block == 0) {
-        return func_002C28C0(name, size, zeroFlag);
+        return gameLink_alloc(name, size, zeroFlag);
     }
     if (size == 0) {
-        func_002C28F8(block);
+        gameLink_free(block);
         return 0;
     } else {
         void* result;
@@ -899,19 +899,19 @@ extern "C" void* func_002C2940(void* block, const char* name, int size, int zero
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C29D0);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_createThread);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_002C28C0_29D0(const char* name, int size, int zeroFlag) __asm__("func_002C28C0");
-extern "C" int func_002C28F8_29D0(void* block) __asm__("func_002C28F8");
+extern "C" void* gameLink_alloc_29D0(const char* name, int size, int zeroFlag) __asm__("gameLink_alloc");
+extern "C" int gameLink_free_29D0(void* block) __asm__("gameLink_free");
 extern "C" int THREAD_createparam(THREAD* thread, int entryProc, int param, void* stackAddr, int stackSize,
                                   int priority);
 extern char str_threadstack[];
 
-// A GameLink thread handle (0xC bytes; name ours): the stack func_002C29D0 allocates, then REAL's THREAD record that
+// A GameLink thread handle (0xC bytes; name ours): the stack gameLink_createThread allocates, then REAL's THREAD record that
 // THREAD_createparam fills.
 struct tGameLinkThread {
-    void* stack;                    // 0x0 [U] func_002C29D0 allocates it ("threadstack"); func_002C2AA8 frees it
+    void* stack;                    // 0x0 [U] gameLink_createThread allocates it ("threadstack"); gameLink_destroyThread frees it
     THREAD thread;                  // 0x4 [U] THREAD_createparam's record
 };
 
@@ -920,18 +920,18 @@ CHECK_OFFSET(tGameLinkThread, thread, 0x4);
 CHECK_SIZE(tGameLinkThread, 0xC);
 
 // Predicate helper; keeps p[0] in one register for both tests.
-inline int func_002C29D0_valid(void* stack)
+inline int gameLink_createThread_valid(void* stack)
 {
     return stack != 0;
 }
 
-// PORT: the unit later declares func_002C29D0() for its address use; bound by asm label
-tGameLinkThread* func_002C29D0_impl(int threadEntry, int threadArg, int size) __asm__("func_002C29D0");
+// PORT: the unit later declares gameLink_createThread() for its address use; bound by asm label
+tGameLinkThread* gameLink_createThread_impl(int threadEntry, int threadArg, int size) __asm__("gameLink_createThread");
 
 /**
  * Creates and starts a thread for GameLink and returns its 0xC-byte handle, or 0 on failure.
  *
- * The handle comes from func_002C28C0; its first word is a @p size byte stack ("threadstack"), and THREAD_createparam
+ * The handle comes from gameLink_alloc; its first word is a @p size byte stack ("threadstack"), and THREAD_createparam
  * creates and starts the thread (CreateThread / StartThread, priority 99) with its id in the rest of the handle. When
  * the stack or the thread cannot be made, everything allocated is freed again.
  *
@@ -940,143 +940,143 @@ tGameLinkThread* func_002C29D0_impl(int threadEntry, int threadArg, int size) __
  * @param size  the stack size in bytes
  * @return the handle, or 0
  */
-tGameLinkThread* func_002C29D0_impl(int threadEntry, int threadArg, int size)
+tGameLinkThread* gameLink_createThread_impl(int threadEntry, int threadArg, int size)
 {
-    tGameLinkThread* thread = (tGameLinkThread*)func_002C28C0_29D0(0, sizeof(tGameLinkThread), 0);
+    tGameLinkThread* thread = (tGameLinkThread*)gameLink_alloc_29D0(0, sizeof(tGameLinkThread), 0);
     thread->stack = 0;
-    thread->stack = func_002C28C0_29D0(str_threadstack, size, 0);
+    thread->stack = gameLink_alloc_29D0(str_threadstack, size, 0);
     if (thread->stack != 0) {
         if (THREAD_createparam(&thread->thread, threadEntry, threadArg, thread->stack, size, 99) == 0) {
-            func_002C28F8_29D0(thread->stack);
+            gameLink_free_29D0(thread->stack);
             thread->stack = 0;
         }
     }
-    if (func_002C29D0_valid(thread->stack)) {
+    if (gameLink_createThread_valid(thread->stack)) {
         return thread;
     }
     if (thread != 0) {
         if (thread->stack != 0) {
-            func_002C28F8_29D0(thread->stack);
+            gameLink_free_29D0(thread->stack);
         }
-        func_002C28F8_29D0(thread);
+        gameLink_free_29D0(thread);
     }
     return 0;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2AA8);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_destroyThread);
 #ifdef SKIP_ASM
-extern "C" void func_002C28F8(void* block);
+extern "C" void gameLink_free(void* block);
 
 /**
- * Frees a thread handle made by func_002C29D0: frees its stack (first word) and clears it, then frees the handle itself
- * with func_002C28F8. The handle is read before it is checked for 0.
+ * Frees a thread handle made by gameLink_createThread: frees its stack (first word) and clears it, then frees the handle itself
+ * with gameLink_free. The handle is read before it is checked for 0.
  */
-extern "C" void func_002C2AA8(tGameLinkThread* self) {
+extern "C" void gameLink_destroyThread(tGameLinkThread* self) {
     if (self->stack != 0) {
-        func_002C28F8(self->stack);
+        gameLink_free(self->stack);
         self->stack = 0;
     }
     if (self != 0) {
         if (self->stack != 0) {
-            func_002C28F8(self->stack);
+            gameLink_free(self->stack);
         }
-        func_002C28F8(self);
+        gameLink_free(self);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2B08);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_yield);
 #ifdef SKIP_ASM
 extern "C" void THREAD_yield();
 
 /**
  * Calls THREAD_yield, which yields the current thread (GameLink's yield).
  */
-extern "C" void func_002C2B08(void) {
+extern "C" void gameLink_yield(void) {
     THREAD_yield();
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2B28);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_createMutex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag);
+extern "C" void* gameLink_alloc(const char* name, int size, int zeroFlag);
 extern "C" void MUTEX_create(void* mutex);
 extern char str_mutex[];
 
-// The unit declares func_002C2B28 later as void(); keep the real signature under an asm label.
-extern "C" void* func_002C2B28_impl(void) __asm__("func_002C2B28");
+// The unit declares gameLink_createMutex later as void(); keep the real signature under an asm label.
+extern "C" void* gameLink_createMutex_impl(void) __asm__("gameLink_createMutex");
 
 /**
- * Allocates a 0x10-byte block with func_002C28C0 and initialises it as a mutex with MUTEX_create (GameLink's mutex
+ * Allocates a 0x10-byte block with gameLink_alloc and initialises it as a mutex with MUTEX_create (GameLink's mutex
  * create).
  *
  * @return the mutex block
  */
-extern "C" void* func_002C2B28_impl(void)
+extern "C" void* gameLink_createMutex_impl(void)
 {
-    void* mutex = func_002C28C0(str_mutex, 0x10, 0);
+    void* mutex = gameLink_alloc(str_mutex, 0x10, 0);
     MUTEX_create(mutex);
     return mutex;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2B68);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_destroyMutex);
 #ifdef SKIP_ASM
-extern "C" void func_002C28F8(void* block);
+extern "C" void gameLink_free(void* block);
 extern "C" void MUTEX_destroy();
 
 /**
- * Destroys a mutex made by func_002C2B28: calls MUTEX_destroy (DeleteSema), then frees the block with func_002C28F8.
+ * Destroys a mutex made by gameLink_createMutex: calls MUTEX_destroy (DeleteSema), then frees the block with gameLink_free.
  *
  * @param mutexBlock  the mutex block
  */
-extern "C" void func_002C2B68(void* mutexBlock) {
+extern "C" void gameLink_destroyMutex(void* mutexBlock) {
     MUTEX_destroy();
-    func_002C28F8(mutexBlock);
+    gameLink_free(mutexBlock);
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2B98);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_lockMutex);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock();
 
 /**
  * Calls MUTEX_lock with the caller's arguments passed through (GameLink's mutex lock).
  */
-extern "C" void func_002C2B98(void) {
+extern "C" void gameLink_lockMutex(void) {
     MUTEX_lock();
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2BB8);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_unlockMutex);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_unlock();
 
 /**
  * Calls MUTEX_unlock with the caller's arguments passed through (GameLink's mutex unlock).
  */
-extern "C" void func_002C2BB8(void) {
+extern "C" void gameLink_unlockMutex(void) {
     MUTEX_unlock();
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2BD8);
+INCLUDE_ASM("worldpainter/quadtree", gameLink_initPlatformFuncs);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void strcmp();
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void func_002C29D0();
-extern "C" void func_002C2AA8();
-extern "C" void func_002C2B08();
-extern "C" void func_002C2B28();
-extern void func_002C28C0_2BD8() __asm__("func_002C28C0");
-extern void func_002C2940_2BD8() __asm__("func_002C2940");
+extern "C" void gameLink_createThread();
+extern "C" void gameLink_destroyThread();
+extern "C" void gameLink_yield();
+extern "C" void gameLink_createMutex();
+extern void gameLink_alloc_2BD8() __asm__("gameLink_alloc");
+extern void gameLink_realloc_2BD8() __asm__("gameLink_realloc");
 extern "C" void func_0041610C();
 extern "C" void memcmp();
 extern "C" void func_0041605C();
-extern "C" void func_002C28A0();
+extern "C" void gameLink_getTick();
 extern "C" void atof();
 extern "C" void atoi();
 extern "C" void bsearch();
@@ -1091,21 +1091,21 @@ struct tGameLinkPlatFuncs {
     void* pfnAtof;                  // 0x14 atof
     void* pfnQsort;                 // 0x18 qsort
     void* pfnBsearch;               // 0x1C bsearch
-    void* pfnThreadCreate;          // 0x20 func_002C29D0
-    void* pfnThreadFree;            // 0x24 func_002C2AA8
-    void* pfnYield;                 // 0x28 func_002C2B08
-    void* pfnMutexCreate;           // 0x2C func_002C2B28
-    void* pfnMutexDestroy;          // 0x30 func_002C2B68
-    void* pfnLock;                  // 0x34 func_002C2B98
-    void* pfnUnlock;                // 0x38 func_002C2BB8
-    void* pfnAlloc;                 // 0x3C func_002C28C0
-    void* pfnRealloc;               // 0x40 func_002C2940
-    void* pfnFree;                  // 0x44 func_002C28F8
+    void* pfnThreadCreate;          // 0x20 gameLink_createThread
+    void* pfnThreadFree;            // 0x24 gameLink_destroyThread
+    void* pfnYield;                 // 0x28 gameLink_yield
+    void* pfnMutexCreate;           // 0x2C gameLink_createMutex
+    void* pfnMutexDestroy;          // 0x30 gameLink_destroyMutex
+    void* pfnLock;                  // 0x34 gameLink_lockMutex
+    void* pfnUnlock;                // 0x38 gameLink_unlockMutex
+    void* pfnAlloc;                 // 0x3C gameLink_alloc
+    void* pfnRealloc;               // 0x40 gameLink_realloc
+    void* pfnFree;                  // 0x44 gameLink_free
     void* pfnMemset;                // 0x48 memset
     void* pfnMemcpy;                // 0x4C func_0041605C
     void* pfnMemmove;               // 0x50 func_0041610C
     void* pfnMemcmp;                // 0x54 memcmp
-    void* pfnCounter;               // 0x58 func_002C28A0
+    void* pfnCounter;               // 0x58 gameLink_getTick
 };
 
 CHECK_OFFSET(tGameLinkPlatFuncs, pfnStrlen, 0x04);
@@ -1136,21 +1136,21 @@ CHECK_SIZE(tGameLinkPlatFuncs, 0x5C);
  * Fills a GameLink platform function table with the game's implementations.
  *
  * +0x4 strlen, +0x8 strcpy, +0xC strcmp, +0x10 atoi, +0x14 atof, +0x18 qsort, +0x1C bsearch, +0x20
- * func_002C29D0 (thread create), +0x24 func_002C2AA8 (thread free), +0x28 func_002C2B08 (yield), +0x2C func_002C2B28
- * (mutex create), +0x30 func_002C2B68 (mutex destroy), +0x34 / +0x38 func_002C2B98 / func_002C2BB8 (lock, unlock),
- * +0x3C func_002C28C0 (alloc), +0x40 func_002C2940 (realloc), +0x44 func_002C28F8 (free), +0x48 memset, +0x4C
- * func_0041605C, +0x50 func_0041610C, +0x54 memcmp and +0x58 func_002C28A0 (counter). Nothing in retail calls
+ * gameLink_createThread (thread create), +0x24 gameLink_destroyThread (thread free), +0x28 gameLink_yield (yield), +0x2C gameLink_createMutex
+ * (mutex create), +0x30 gameLink_destroyMutex (mutex destroy), +0x34 / +0x38 gameLink_lockMutex / gameLink_unlockMutex (lock, unlock),
+ * +0x3C gameLink_alloc (alloc), +0x40 gameLink_realloc (realloc), +0x44 gameLink_free (free), +0x48 memset, +0x4C
+ * func_0041605C, +0x50 func_0041610C, +0x54 memcmp and +0x58 gameLink_getTick (counter). Nothing in retail calls
  * it.
  */
-extern "C" void func_002C2BD8(tGameLinkPlatFuncs* self) {
-    self->pfnAlloc = (void*)&func_002C28C0_2BD8;
-    self->pfnRealloc = (void*)&func_002C2940_2BD8;
-    self->pfnFree = (void*)&func_002C28F8;
+extern "C" void gameLink_initPlatformFuncs(tGameLinkPlatFuncs* self) {
+    self->pfnAlloc = (void*)&gameLink_alloc_2BD8;
+    self->pfnRealloc = (void*)&gameLink_realloc_2BD8;
+    self->pfnFree = (void*)&gameLink_free;
     self->pfnMemset = (void*)&memset;
     self->pfnMemmove = (void*)&func_0041610C;
     self->pfnMemcmp = (void*)&memcmp;
     self->pfnMemcpy = (void*)&func_0041605C;
-    self->pfnCounter = (void*)&func_002C28A0;
+    self->pfnCounter = (void*)&gameLink_getTick;
     self->pfnAtof = (void*)&atof;
     self->pfnAtoi = (void*)&atoi;
     self->pfnBsearch = (void*)&bsearch;
@@ -1158,17 +1158,17 @@ extern "C" void func_002C2BD8(tGameLinkPlatFuncs* self) {
     self->pfnStrcmp = (void*)&strcmp;
     self->pfnStrcpy = (void*)&strcpy;
     self->pfnStrlen = (void*)&strlen;
-    self->pfnThreadCreate = (void*)&func_002C29D0;
-    self->pfnThreadFree = (void*)&func_002C2AA8;
-    self->pfnYield = (void*)&func_002C2B08;
-    self->pfnMutexCreate = (void*)&func_002C2B28;
-    self->pfnMutexDestroy = (void*)&func_002C2B68;
-    self->pfnLock = (void*)&func_002C2B98;
-    self->pfnUnlock = (void*)&func_002C2BB8;
+    self->pfnThreadCreate = (void*)&gameLink_createThread;
+    self->pfnThreadFree = (void*)&gameLink_destroyThread;
+    self->pfnYield = (void*)&gameLink_yield;
+    self->pfnMutexCreate = (void*)&gameLink_createMutex;
+    self->pfnMutexDestroy = (void*)&gameLink_destroyMutex;
+    self->pfnLock = (void*)&gameLink_lockMutex;
+    self->pfnUnlock = (void*)&gameLink_unlockMutex;
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2D30);
+INCLUDE_ASM("worldpainter/quadtree", istr_alloc);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1177,26 +1177,26 @@ extern char str_ISTR_data[];
 /**
  * Allocates a block for ISTR: operator_new__FUi(size, "ISTR data", 0x100 when @p zeroFlag is set else 0, 0).
  *
- * func_002C2E78 stores it in the ISTR function table (+0x1C); func_002C2DB0 uses it.
+ * istr_initFuncs stores it in the ISTR function table (+0x1C); istr_realloc uses it.
  *
  * @param name  unused (the tag is always "ISTR data")
  * @param size  the block size in bytes
  * @param zeroFlag  nonzero to pass the 0x100 allocation flag
  * @return the block's address
  */
-extern "C" void* func_002C2D30(const char* name, int size, int zeroFlag)
+extern "C" void* istr_alloc(const char* name, int size, int zeroFlag)
 {
     return new (str_ISTR_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2D68);
+INCLUDE_ASM("worldpainter/quadtree", istr_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// Unit declares MEM_free / func_002C2D68 later with void return; keep the int-returning
+// Unit declares MEM_free / istr_free later with void return; keep the int-returning
 // signatures under asm labels. The argument passes straight through in a0.
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
-extern "C" bool func_002C2D68_impl(void* p) __asm__("func_002C2D68");
+extern "C" bool istr_free_impl(void* p) __asm__("istr_free");
 
 /**
  * Frees an ISTR block with MEM_free and returns whether MEM_free returned nonzero.
@@ -1204,57 +1204,57 @@ extern "C" bool func_002C2D68_impl(void* p) __asm__("func_002C2D68");
  * @param block  the block to free
  * @return true when MEM_free returned nonzero
  */
-extern "C" bool func_002C2D68_impl(void* block)
+extern "C" bool istr_free_impl(void* block)
 {
     return MEM_free_ret(block) != 0;
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2D88);
+INCLUDE_ASM("worldpainter/quadtree", istr_memcpy);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy();
 
 /**
  * Calls MEM_copy with the caller's arguments passed through and returns the destination (ISTR's memory copy, stored at
- * +0x2C of the table by func_002C2E78).
+ * +0x2C of the table by istr_initFuncs).
  *
  * @param dst  the destination address
  * @return @p dst
  */
-extern "C" int func_002C2D88(int dst) {
+extern "C" int istr_memcpy(int dst) {
     MEM_copy();
     return dst;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2DB0);
+INCLUDE_ASM("worldpainter/quadtree", istr_realloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MUTEX_lock_p(void*) __asm__("MUTEX_lock");
 extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
 extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
-extern "C" void* func_002C2D30(const char* name, int size, int zeroFlag);
-extern "C" void func_002C2D68(void* block);
+extern "C" void* istr_alloc(const char* name, int size, int zeroFlag);
+extern "C" void istr_free(void* block);
 extern char cMemMan_m_mutex[];
 
 /**
  * Resizes an ISTR block, realloc style.
  *
- * A null @p block allocates a new one (func_002C2D30); a zero @p size frees it (func_002C2D68) and returns 0; otherwise
+ * A null @p block allocates a new one (istr_alloc); a zero @p size frees it (istr_free) and returns 0; otherwise
  * cMemMan_internalResizeBlock resizes it with cMemMan_m_mutex locked.
  *
  * @param block  the block to resize, or 0
- * @param name  passed to func_002C2D30 (unused there)
+ * @param name  passed to istr_alloc (unused there)
  * @param size  the new size in bytes
- * @param zeroFlag  passed to func_002C2D30 for a new block
+ * @param zeroFlag  passed to istr_alloc for a new block
  * @return the block's (new) address, or 0
  */
-extern "C" void* func_002C2DB0(void* block, const char* name, int size, int zeroFlag) {
+extern "C" void* istr_realloc(void* block, const char* name, int size, int zeroFlag) {
     if (block == 0) {
-        return func_002C2D30(name, size, zeroFlag);
+        return istr_alloc(name, size, zeroFlag);
     }
     if (size == 0) {
-        func_002C2D68(block);
+        istr_free(block);
         return 0;
     } else {
         void* result;
@@ -1266,11 +1266,11 @@ extern "C" void* func_002C2DB0(void* block, const char* name, int size, int zero
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C2E40);
+INCLUDE_ASM("worldpainter/quadtree", istr_strlen16);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit declares func_002C2E40 later as void(); keep the real signature under an asm label.
-extern "C" int func_002C2E40_impl(unsigned short* s) __asm__("func_002C2E40");
+// The unit declares istr_strlen16 later as void(); keep the real signature under an asm label.
+extern "C" int istr_strlen16_impl(unsigned short* s) __asm__("istr_strlen16");
 
 /**
  * Returns the length of a 16-bit string in units, not counting the terminating 0.
@@ -1278,7 +1278,7 @@ extern "C" int func_002C2E40_impl(unsigned short* s) __asm__("func_002C2E40");
  * @param str  the 16-bit string
  * @return the number of units before the 0
  */
-extern "C" int func_002C2E40_impl(unsigned short* str)
+extern "C" int istr_strlen16_impl(unsigned short* str)
 {
     int n = 0;
     while (*str++) {
@@ -1288,13 +1288,13 @@ extern "C" int func_002C2E40_impl(unsigned short* str)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/quadtree", func_002C2E78);
+INCLUDE_ASM("worldpainter/quadtree", istr_initFuncs);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002C2D30_2E78() __asm__("func_002C2D30");
-extern "C" void func_002C2D68();
-extern void func_002C2DB0_2E78() __asm__("func_002C2DB0");
-extern "C" void func_002C2E40();
+extern void istr_alloc_2E78() __asm__("istr_alloc");
+extern "C" void istr_free();
+extern void istr_realloc_2E78() __asm__("istr_realloc");
+extern "C" void istr_strlen16();
 extern "C" void memcmp();
 extern "C" void func_0041610C();
 extern "C" void strcat();
@@ -1307,15 +1307,15 @@ struct tIstrFuncs {
     void* unk_00;                   // 0x00
     void* pfnStrcat;                // 0x04 strcat
     void* pfnStrlen;                // 0x08 strlen
-    void* pfnStrlen16;              // 0x0C func_002C2E40
+    void* pfnStrlen16;              // 0x0C istr_strlen16
     void* pfnSprintf;               // 0x10 sprintf
     void* pfnStrcpy;                // 0x14 strcpy
     void* pfnAtoi;                  // 0x18 atoi
-    void* pfnAlloc;                 // 0x1C func_002C2D30
-    void* pfnRealloc;               // 0x20 func_002C2DB0
-    void* pfnFree;                  // 0x24 func_002C2D68
+    void* pfnAlloc;                 // 0x1C istr_alloc
+    void* pfnRealloc;               // 0x20 istr_realloc
+    void* pfnFree;                  // 0x24 istr_free
     void* pfnMemset;                // 0x28 memset
-    void* pfnCopy;                  // 0x2C func_002C2D88
+    void* pfnCopy;                  // 0x2C istr_memcpy
     void* pfnMemmove;               // 0x30 func_0041610C
     void* pfnMemcmp;                // 0x34 memcmp
 };
@@ -1338,21 +1338,21 @@ CHECK_SIZE(tIstrFuncs, 0x38);
 /**
  * Fills an ISTR function table with the game's implementations.
  *
- * +0x4 strcat, +0x8 strlen, +0xC func_002C2E40 (16-bit length), +0x10 sprintf, +0x14 strcpy, +0x18 atoi, +0x1C
- * func_002C2D30 (alloc), +0x20 func_002C2DB0 (realloc), +0x24 func_002C2D68 (free), +0x28 memset, +0x2C
- * func_002C2D88 (copy), +0x30 func_0041610C and +0x34 memcmp. Nothing in retail calls it.
+ * +0x4 strcat, +0x8 strlen, +0xC istr_strlen16 (16-bit length), +0x10 sprintf, +0x14 strcpy, +0x18 atoi, +0x1C
+ * istr_alloc (alloc), +0x20 istr_realloc (realloc), +0x24 istr_free (free), +0x28 memset, +0x2C
+ * istr_memcpy (copy), +0x30 func_0041610C and +0x34 memcmp. Nothing in retail calls it.
  */
-extern "C" void func_002C2E78(tIstrFuncs* self) {
-    self->pfnAlloc = (void*)&func_002C2D30_2E78;
-    self->pfnRealloc = (void*)&func_002C2DB0_2E78;
-    self->pfnFree = (void*)&func_002C2D68;
-    self->pfnCopy = (void*)&func_002C2D88;
+extern "C" void istr_initFuncs(tIstrFuncs* self) {
+    self->pfnAlloc = (void*)&istr_alloc_2E78;
+    self->pfnRealloc = (void*)&istr_realloc_2E78;
+    self->pfnFree = (void*)&istr_free;
+    self->pfnCopy = (void*)&istr_memcpy;
     self->pfnMemset = (void*)&memset;
     self->pfnMemmove = (void*)&func_0041610C;
     self->pfnMemcmp = (void*)&memcmp;
     self->pfnStrcat = (void*)&strcat;
     self->pfnStrlen = (void*)&strlen;
-    self->pfnStrlen16 = (void*)&func_002C2E40;
+    self->pfnStrlen16 = (void*)&istr_strlen16;
     self->pfnSprintf = (void*)&sprintf;
     self->pfnStrcpy = (void*)&strcpy;
     self->pfnAtoi = (void*)&atoi;
@@ -1520,23 +1520,23 @@ void cPS2MemCard::GetDir1(unsigned short* name)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDir);
 #ifdef SKIP_ASM
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 
 /**
- * Starts a directory listing: copies @p name into the search pattern (mDirPattern) and calls func_002C48C0 with state
- * 5; cPS2MemCard_Update then runs func_002C4210 (sceMcGetDir of up to 6 entries into mDirTable).
+ * Starts a directory listing: copies @p name into the search pattern (mDirPattern) and calls cPS2MemCard_enterState with state
+ * 5; cPS2MemCard_Update then runs cPS2MemCard_issueGetDir (sceMcGetDir of up to 6 entries into mDirTable).
  *
  * @param name  the sceMcGetDir pattern (ASCII; no length check)
  */
 void cPS2MemCard::GetDir(const char* name)
 {
     strcpy(mDirPattern, name);
-    func_002C48C0(this, 5);
+    cPS2MemCard_enterState(this, 5);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4210);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueGetDir);
 #ifdef SKIP_ASM
 extern "C" int sceMcGetDir(int h, int a1, char* name, int a3, int a4, void* buf);
 extern int D_004A3940;
@@ -1546,45 +1546,45 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  * Issues the directory listing of cPS2MemCard_GetDir: clears the directory table (mDirTable, 0x1000 bytes) and calls
  * sceMcGetDir (sceMcGetDir) on the current port (mDevice) with the pattern mDirPattern, for at most 6 entries.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 6, where
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 6, where
  * cPS2MemCard_Update waits for the listing. cPS2MemCard_Update calls it in state 5.
  */
-extern "C" void func_002C4210(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueGetDir(cPS2MemCard* self)
 {
     char* buf = (char*)&self->mDirTable[0];
     MEM_fill(buf, 0, 0x1000);
     int mcResult = sceMcGetDir(self->mDevice, 0, self->mDirPattern, 0, 6, buf);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 6);
+        cPS2MemCard_enterState(self, 6);
     }
 }
 #endif
 
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4290__FPvi);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startReadFileInfo__FPvi);
 #ifdef SKIP_ASM
 /**
  * Starts reading the directory entry of a file slot: stores @p fileSlot in the current slot (mCurrentFileSlot) and
- * calls func_002C48C0 with state 34; cPS2MemCard_Update then runs func_002C42B0. Card vtable slot 76.
+ * calls cPS2MemCard_enterState with state 34; cPS2MemCard_Update then runs cPS2MemCard_issueGetFileInfo. Card vtable slot 76.
  *
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C4290(void* vself, int fileSlot)
+void* cPS2MemCard_startReadFileInfo(void* vself, int fileSlot)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mCurrentFileSlot = fileSlot;
-    return func_002C48C0((cPS2MemCard*)self, 34);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 34);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C42B0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueGetFileInfo);
 #ifdef SKIP_ASM
 extern "C" int sceMcGetDir(int h, int a1, char* name, int a3, int a4, void* buf);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -1597,10 +1597,10 @@ extern char str_pct_s_pct_s_h[];
  * (mFileSlots[mCurrentFileSlot].mFileName) into the file name (mFileName), writes "/<name>/<name>" into the path
  * (mFilePath) and calls sceMcGetDir (sceMcGetDir) for that path with one entry into mFileDirEntry.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 35.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 35.
  * cPS2MemCard_Update calls it in state 34; cPS2MemCard_GetDataSize__FPv later reads the entry's m_fileSizeByte.
  */
-extern "C" void func_002C42B0(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueGetFileInfo(cPS2MemCard* self)
 {
     char* name = self->mFileName;
     self->mFileInfoValid = 0;
@@ -1610,9 +1610,9 @@ extern "C" void func_002C42B0(cPS2MemCard* self)
     int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, &self->mFileDirEntry);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 35);
+        cPS2MemCard_enterState(self, 35);
     }
 }
 #endif
@@ -1623,19 +1623,19 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Format__FPv);
 /**
  * Starts formatting the card in the current port.
  *
- * Calls func_002C48C0 with state 17; Update (cPS2MemCard_Update) then issues sceMcFormat through func_002C4388.
+ * Calls cPS2MemCard_enterState with state 17; Update (cPS2MemCard_Update) then issues sceMcFormat through cPS2MemCard_issueFormat.
  * cPS2MemCard_DidFormatFail (slot 9) reports a failure afterwards.
  *
- * @return func_002C48C0's result
+ * @return cPS2MemCard_enterState's result
  */
 void* cPS2MemCard::Format()
 {
-    return func_002C48C0((cPS2MemCard*)this, 17);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 17);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4388);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueFormat);
 #ifdef SKIP_ASM
 extern "C" int sceMcFormat(int h, int a1);
 extern int D_004A3940;
@@ -1643,17 +1643,17 @@ extern int D_004A3940;
 /**
  * Issues the format of cPS2MemCard_Format__FPv: calls sceMcFormat (sceMcFormat) on the current port (mDevice).
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 18.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 18.
  * cPS2MemCard_Update calls it in state 17.
  */
-extern "C" void func_002C4388(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueFormat(cPS2MemCard* self)
 {
     int mcResult = sceMcFormat(self->mDevice, 0);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 18);
+        cPS2MemCard_enterState(self, 18);
     }
 }
 #endif
@@ -1664,16 +1664,16 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DeleteFileSlot__FPvi);
 /**
  * Starts deleting the save in a file slot.
  *
- * Stores @p fileSlot in mCurrentFileSlot and calls func_002C48C0 with state 19; Update (cPS2MemCard_Update) then runs
- * func_002C4410, which builds the "<name>/<name>" path from the slot and requests the sceMcDelete states.
+ * Stores @p fileSlot in mCurrentFileSlot and calls cPS2MemCard_enterState with state 19; Update (cPS2MemCard_Update) then runs
+ * cPS2MemCard_startDeleteSave, which builds the "<name>/<name>" path from the slot and requests the sceMcDelete states.
  *
  * @param fileSlot  the file slot (0..mMaxFiles-1)
- * @return func_002C48C0's result
+ * @return cPS2MemCard_enterState's result
  */
 void* cPS2MemCard::DeleteFileSlot(int fileSlot)
 {
     mCurrentFileSlot = fileSlot;
-    return func_002C48C0((cPS2MemCard*)this, 19);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 19);
 }
 #endif
 
@@ -1683,7 +1683,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDataSize__FPv);
 /**
  * Returns the size of the save file found by the last file lookup.
  *
- * The whole body reads mFileDirEntry.m_fileSizeByte (+0x490), filled by the single-entry sceMcGetDir of func_002C42B0.
+ * The whole body reads mFileDirEntry.m_fileSizeByte (+0x490), filled by the single-entry sceMcGetDir of cPS2MemCard_issueGetFileInfo.
  *
  * @return the file size in bytes
  */
@@ -1712,28 +1712,28 @@ void cPS2MemCard::SetDataSize(int val)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4410);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startDeleteSave);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 extern char str_pct_s_pct_s_h[];
 
 /**
  * Starts deleting the save in the current file slot: clears mFileInfoValid, copies the slot's name
  * (mFileSlots[mCurrentFileSlot].mFileName) into the file name (mFileName), writes "/<name>/<name>" into the path
- * (mFilePath) and calls func_002C48C0 with state 54.
+ * (mFilePath) and calls cPS2MemCard_enterState with state 54.
  *
  * States 54-59 then delete the data file, the icon files, icon.sys and finally the directory (sceMcDelete each).
  * cPS2MemCard_Update calls it in state 19, which cPS2MemCard_DeleteFileSlot__FPvi requests.
  */
-extern "C" void func_002C4410(cPS2MemCard* self)
+extern "C" void cPS2MemCard_startDeleteSave(cPS2MemCard* self)
 {
     char* name = self->mFileName;
     self->mFileInfoValid = 0;
     strcpy(name, self->mFileSlots[self->mCurrentFileSlot].mFileName);
     sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
-    func_002C48C0(self, 54);
+    cPS2MemCard_enterState(self, 54);
 }
 #endif
 
@@ -1744,7 +1744,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CheckDevice);
  * Selects a memory-card port and starts checking what is in it.
  *
  * Stores @p device in mDevice; when the card is not busy (virtual slot 11, cPS2MemCard_IsBusy) also stores it in
- * mGetInfoDevice and calls func_002C48C0 with state 3, which starts a sceMcGetInfo on the port (func_002C50E0). Update
+ * mGetInfoDevice and calls cPS2MemCard_enterState with state 3, which starts a sceMcGetInfo on the port (cPS2MemCard_startGetInfo). Update
  * (cPS2MemCard_Update) records the result in the device record.
  *
  * @param device  the port to use (0 or 1)
@@ -1754,7 +1754,7 @@ void cPS2MemCard::CheckDevice(int device)
     mDevice = device;
     if (((cMemCard*)this)->IsBusy() == 0) {
         mGetInfoDevice = device;
-        func_002C48C0(this, 3);
+        cPS2MemCard_enterState(this, 3);
     }
 }
 #endif
@@ -1786,7 +1786,7 @@ extern char str_slash_pct_s[];
 
 /**
  * Starts creating a save directory: copies @p name into the file name (mFileName), writes "/<name>" into the path
- * (mFilePath) and calls func_002C48C0 with state 20.
+ * (mFilePath) and calls cPS2MemCard_enterState with state 20.
  *
  * cPS2MemCard_Update then, once no error is pending, runs state 36 (sceMcMkdir of the path) and the icon.sys and icon
  * file writes that follow (states 37-51).
@@ -1798,7 +1798,7 @@ void cPS2MemCard::CreateFileSlot(const char* name)
     char* fileName = mFileName;
     strcpy(fileName, name);
     sprintf(mFilePath, str_slash_pct_s, fileName);
-    func_002C48C0(this, 20);
+    cPS2MemCard_enterState(this, 20);
 }
 #endif
 
@@ -1812,7 +1812,7 @@ char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 
 /**
  * Starts creating a save directory from a 16-bit name: converts @p name to ASCII into the file name (mFileName,
- * strcpy2), writes "/<name>" into the path (mFilePath) and calls func_002C48C0 with state 20, like
+ * strcpy2), writes "/<name>" into the path (mFilePath) and calls cPS2MemCard_enterState with state 20, like
  * cPS2MemCard_CreateFileSlot.
  *
  * @param name  the directory name (16-bit characters)
@@ -1822,7 +1822,7 @@ void cPS2MemCard::CreateFileSlot1(unsigned short* name)
     char* fileName = mFileName;
     strcpy2_impl(fileName, name);
     sprintf(mFilePath, str_slash_pct_s, fileName);
-    func_002C48C0(this, 20);
+    cPS2MemCard_enterState(this, 20);
 }
 #endif
 
@@ -1832,7 +1832,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_StartFileSlotWrite1);
 // PORT: strcpy2 takes (dst, src); the unit declares it with one arg
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 extern char str_pct_s_pct_s_h[];
 
 /**
@@ -1850,7 +1850,7 @@ void cPS2MemCard::StartFileSlotWrite1(unsigned short* wname, int writeBuffer, in
     sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
     mBuffer = writeBuffer;
     mTransferSize = writeSize;
-    func_002C48C0(this, 21);
+    cPS2MemCard_enterState(this, 21);
 }
 #endif
 
@@ -1859,12 +1859,12 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_StartFileSlotWrite);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 extern char str_pct_s_pct_s_h[];
 
 /**
  * Starts writing a save file: copies @p src into the file name (mFileName), writes "/<name>/<name>" into the path
- * (mFilePath), stores the buffer in mBuffer and the size in mTransferSize and calls func_002C48C0 with state 21.
+ * (mFilePath), stores the buffer in mBuffer and the size in mTransferSize and calls cPS2MemCard_enterState with state 21.
  *
  * cPS2MemCard_Update then, once no error is pending, opens the path for writing (state 22, sceMcOpen mode 0x203) and
  * writes the buffer (state 23, sceMcWrite).
@@ -1880,18 +1880,18 @@ void cPS2MemCard::StartFileSlotWrite(const char* src, int writeBuffer, int write
     sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
     mBuffer = writeBuffer;
     mTransferSize = writeSize;
-    func_002C48C0(this, 21);
+    cPS2MemCard_enterState(this, 21);
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_StartFileSlotWrite2);
 #ifdef SKIP_ASM
-extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
+extern "C" void cPS2MemCard_getFileSlotName(cPS2MemCard* self, int a1, char* dst);
 
 /**
  * Starts writing a save file into an existing file slot: copies the slot's name into a 64-byte stack buffer
- * (func_002C54D0) and passes it, @p writeBuffer and @p writeSize to the card's virtual slot 36 (cPS2MemCard_StartFileSlotWrite).
+ * (cPS2MemCard_getFileSlotName) and passes it, @p writeBuffer and @p writeSize to the card's virtual slot 36 (cPS2MemCard_StartFileSlotWrite).
  *
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @param writeBuffer  the data to write
@@ -1900,7 +1900,7 @@ extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
 void cPS2MemCard::StartFileSlotWrite2(int fileSlot, int writeBuffer, int writeSize)
 {
     char name[64];
-    func_002C54D0(this, fileSlot, name);
+    cPS2MemCard_getFileSlotName(this, fileSlot, name);
     ((cMemCard*)this)->StartFileSlotWrite(name, writeBuffer, writeSize);
 }
 #endif
@@ -1910,17 +1910,17 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_WriteData__FPvii);
 #ifdef SKIP_ASM
 /**
  * Starts writing more data to the open save file: stores the buffer in mBuffer and the size in mTransferSize and calls
- * func_002C48C0 with state 23, which issues sceMcWrite on mFileDescriptor. Card vtable slot 41.
+ * cPS2MemCard_enterState with state 23, which issues sceMcWrite on mFileDescriptor. Card vtable slot 41.
  *
  * @param buffer  the data to write
  * @param transferSize  the number of bytes to write
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
 void* cPS2MemCard::WriteData(int buffer, int transferSize)
 {
     mBuffer = buffer;
     mTransferSize = transferSize;
-    return func_002C48C0((cPS2MemCard*)this, 23);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 23);
 }
 #endif
 
@@ -1943,7 +1943,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteFailed__FPv);
 #ifdef SKIP_ASM
 /**
  * Marks the current write as failed: sets mWriteFailed to 1, and cPS2MemCard_Update then abandons the write by calling
- * func_002C48C0 with state 24, which closes the save file. On Tour's cMemCard::SetWriteFailed; card vtable slot 44.
+ * cPS2MemCard_enterState with state 24, which closes the save file. On Tour's cMemCard::SetWriteFailed; card vtable slot 44.
  */
 void cPS2MemCard::SetWriteFailed()
 {
@@ -1955,28 +1955,28 @@ void cPS2MemCard::SetWriteFailed()
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteClose__FPv);
 #ifdef SKIP_ASM
 /**
- * Closes the save file after writing: calls func_002C48C0 with state 24, which issues sceMcClose when mFileDescriptor
+ * Closes the save file after writing: calls cPS2MemCard_enterState with state 24, which issues sceMcClose when mFileDescriptor
  * is open and otherwise goes on to state 25. On Tour's cMemCard::SetWriteClose; card vtable slot 43.
  *
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
 void* cPS2MemCard::SetWriteClose()
 {
-    return func_002C48C0((cPS2MemCard*)this, 0x18);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4788);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startLoadFile);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_002C48C0(cPS2MemCard*, int);
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 extern char str_pct_s_pct_s_h[];
 
 /**
  * Starts reading a save file: copies @p src into the file name (mFileName), writes "/<name>/<name>" into the path
- * (mFilePath), stores the buffer in mBuffer and the size in mTransferSize and calls func_002C48C0 with state 27.
+ * (mFilePath), stores the buffer in mBuffer and the size in mTransferSize and calls cPS2MemCard_enterState with state 27.
  *
  * cPS2MemCard_Update then, once no error is pending, opens the path for reading (state 28, sceMcOpen mode 1) and reads
  * the buffer (state 29, sceMcRead); a read that returns fewer bytes than asked for ends in the error state with -10001.
@@ -1986,27 +1986,27 @@ extern char str_pct_s_pct_s_h[];
  * @param readBuffer  the buffer to read into
  * @param readSize  the number of bytes to read
  */
-extern "C" void func_002C4788(cPS2MemCard* self, char* src, int readBuffer, int readSize)
+extern "C" void cPS2MemCard_startLoadFile(cPS2MemCard* self, char* src, int readBuffer, int readSize)
 {
     char* name = self->mFileName;
     strcpy(name, src);
     sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
     self->mBuffer = readBuffer;
     self->mTransferSize = readSize;
-    func_002C48C0(self, 27);
+    cPS2MemCard_enterState(self, 27);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_StartFileSlotRead);
 #ifdef SKIP_ASM
-extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
-extern "C" void func_002C4788(cPS2MemCard* self, char* name, int a2, int a3);
+extern "C" void cPS2MemCard_getFileSlotName(cPS2MemCard* self, int a1, char* dst);
+extern "C" void cPS2MemCard_startLoadFile(cPS2MemCard* self, char* name, int a2, int a3);
 
 /**
  * Starts loading the save in a file slot into a buffer.
  *
- * Copies the slot's directory name into a local buffer (func_002C54D0) and hands it to func_002C4788, which builds the
+ * Copies the slot's directory name into a local buffer (cPS2MemCard_getFileSlotName) and hands it to cPS2MemCard_startLoadFile, which builds the
  * "<name>/<name>" path, records the buffer and size and requests the open/read states.
  *
  * @param fileSlot  the file slot to read
@@ -2016,8 +2016,8 @@ extern "C" void func_002C4788(cPS2MemCard* self, char* name, int a2, int a3);
 void cPS2MemCard::StartFileSlotRead(int fileSlot, int buffer, int transferSize)
 {
     char name[64];
-    func_002C54D0(this, fileSlot, name);
-    func_002C4788(this, name, buffer, transferSize);
+    cPS2MemCard_getFileSlotName(this, fileSlot, name);
+    cPS2MemCard_startLoadFile(this, name, buffer, transferSize);
 }
 #endif
 
@@ -2026,17 +2026,17 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ReadData__FPvii);
 #ifdef SKIP_ASM
 /**
  * Starts reading more data from the open save file: stores the buffer in mBuffer and the size in mTransferSize and
- * calls func_002C48C0 with state 29, which issues sceMcRead on mFileDescriptor. Card vtable slot 30.
+ * calls cPS2MemCard_enterState with state 29, which issues sceMcRead on mFileDescriptor. Card vtable slot 30.
  *
  * @param buffer  the buffer to read into
  * @param transferSize  the number of bytes to read
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
 void* cPS2MemCard::ReadData(int buffer, int transferSize)
 {
     mBuffer = buffer;
     mTransferSize = transferSize;
-    return func_002C48C0((cPS2MemCard*)this, 29);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 29);
 }
 #endif
 
@@ -2059,7 +2059,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadFailed__FPv);
 #ifdef SKIP_ASM
 /**
  * Marks the current read as failed: sets mReadFailed to 1, and cPS2MemCard_Update then abandons the read by calling
- * func_002C48C0 with state 30, which closes the save file. On Tour's cMemCard::SetReadFailed; card vtable slot 33.
+ * cPS2MemCard_enterState with state 30, which closes the save file. On Tour's cMemCard::SetReadFailed; card vtable slot 33.
  */
 void cPS2MemCard::SetReadFailed()
 {
@@ -2071,25 +2071,25 @@ void cPS2MemCard::SetReadFailed()
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadClose__FPv);
 #ifdef SKIP_ASM
 /**
- * Closes the save file after reading: calls func_002C48C0 with state 30, which issues sceMcClose when mFileDescriptor
+ * Closes the save file after reading: calls cPS2MemCard_enterState with state 30, which issues sceMcClose when mFileDescriptor
  * is open and otherwise goes on to state 31. On Tour's cMemCard::SetReadClose; card vtable slot 32.
  *
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
 void* cPS2MemCard::SetReadClose()
 {
-    return func_002C48C0((cPS2MemCard*)this, 0x1e);
+    return cPS2MemCard_enterState((cPS2MemCard*)this, 0x1e);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_enterState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_free(void* p);
 extern "C" void cMemCard_AsciiToShiftJIS(cMemCard* self, short* dst, const char* src);
-extern "C" int func_002C50E0(cPS2MemCard* self);
-extern "C" void func_002C5570(cPS2MemCard* self, int a1);
+extern "C" int cPS2MemCard_startGetInfo(cPS2MemCard* self);
+extern "C" void cPS2MemCard_markIconSysUnreadable(cPS2MemCard* self, int a1);
 extern "C" int ASYNCFILE_load(char* path, int a1);
 extern "C" void* MEM_fill(void* dst, int c, int n);
 extern "C" void MEM_copy_K(void* dst, const void* src, int n) __asm__("MEM_copy");
@@ -2145,9 +2145,9 @@ static inline int slotOf_48C0(int state, int a, int b)
  * Stores @p state in mState. Each sceMc* result goes to D_004A3940, and a negative result (for opens and reads a
  * nonzero one) moves to the error state 1 by a recursive call. State 1 records the result in the current port's record
  * (mDevices[mDevice].mLastError), frees the icon data (mIconFileData), closes an open file (then state 2) and clears
- * the transfer fields; 3 starts sceMcGetInfo (func_002C50E0); 7 finds the next named file slot and opens its icon.sys
+ * the transfer fields; 3 starts sceMcGetInfo (cPS2MemCard_startGetInfo); 7 finds the next named file slot and opens its icon.sys
  * (8), whose read (10), close (9) and directory reads of the slot's files (11-14) fill the file list (a failed read
- * marks the slot with func_002C5570); 22/23 open and write the save file, 28/29 open and read it, 24 and 30 close it;
+ * marks the slot with cPS2MemCard_markIconSysUnreadable); 22/23 open and write the save file, 28/29 open and read it, 24 and 30 close it;
  * 36-51 create the save directory and write icon.sys (title from mTitle through cMemCard_AsciiToShiftJIS, colours and
  * lights from D_00445A00..D_00445AA0) and the icon files (loaded asynchronously with ASYNCFILE_load from
  * mSourceIconPath); 54-59 delete a save's files and directory. Waiting states return without a call; any other state
@@ -2158,7 +2158,7 @@ static inline int slotOf_48C0(int state, int a, int b)
  * @param state  the new state
  * @return nothing; the return register holds whatever the last call left there
  */
-extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
+extern "C" void* cPS2MemCard_enterState(cPS2MemCard* self, int state)
 {
     self->mState = state;
     switch (state) {
@@ -2172,7 +2172,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
             int mcResult = sceMcClose(self->mFileDescriptor);
             D_004A3940 = mcResult;
             if (mcResult >= 0) {
-                func_002C48C0(self, 2);
+                cPS2MemCard_enterState(self, 2);
             }
             self->mFileDescriptor = -1;
         }
@@ -2182,14 +2182,14 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         break;
     }
     case 3:
-        func_002C50E0(self);
+        cPS2MemCard_startGetInfo(self);
         break;
     case 36: {
         self->mWriteFailed = 0;
         int mcResult = sceMcMkdir(self->mDevice, 0, self->mFilePath);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 37: {
@@ -2199,7 +2199,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         self->mFileDescriptor = -1;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 38: {
@@ -2222,7 +2222,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcWrite(self->mFileDescriptor, (int)&D_005376F8, 964);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 39: {
@@ -2230,7 +2230,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2255,7 +2255,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2265,7 +2265,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcWrite(self->mFileDescriptor, (int)self->mIconFileData, self->mIconFileSize);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 43: case 47: case 51: {
@@ -2277,7 +2277,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2288,7 +2288,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2300,7 +2300,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         self->mBuffer = 0;
         self->mTransferSize = 0;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 0x18:
@@ -2309,12 +2309,12 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
             D_004A3940 = mcResult;
             if (mcResult < 0) {
                 self->mFileDescriptor = -1;
-                func_002C48C0(self, 1);
+                cPS2MemCard_enterState(self, 1);
             } else {
                 self->mFileDescriptor = -1;
             }
         } else {
-            func_002C48C0(self, 25);
+            cPS2MemCard_enterState(self, 25);
         }
         break;
     case 0x1C: {
@@ -2323,14 +2323,14 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         self->mFileDescriptor = -1;
         if (mcResult != 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 29: {
         int mcResult = sceMcRead(self->mFileDescriptor, self->mBuffer, self->mTransferSize);
         D_004A3940 = mcResult;
         if (mcResult != 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 0x1E:
@@ -2339,12 +2339,12 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
             D_004A3940 = mcResult;
             if (mcResult < 0) {
                 self->mFileDescriptor = -1;
-                func_002C48C0(self, 1);
+                cPS2MemCard_enterState(self, 1);
             } else {
                 self->mFileDescriptor = -1;
             }
         } else {
-            func_002C48C0(self, 0x1F);
+            cPS2MemCard_enterState(self, 0x1F);
         }
         break;
     case 54: {
@@ -2352,7 +2352,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcDelete(self->mDevice, 0, self->mFilePath);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 55: case 0x38: case 57: {
@@ -2362,7 +2362,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcDelete(self->mDevice, 0, path);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 58: {
@@ -2371,14 +2371,14 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcDelete(self->mDevice, 0, path);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 59: {
         int mcResult = sceMcDelete(self->mDevice, 0, self->mFileName);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 1);
+            cPS2MemCard_enterState(self, 1);
         break;
     }
     case 7:
@@ -2386,7 +2386,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
             if (((cMemCard*)self)->HasFileName(self->mScanFileSlot)) {
                 sprintf(self->mIconFilePath, str_pct_s_pct_s_h, self->mFileSlots[self->mScanFileSlot].mFileName,
                         str_icon_sys);
-                func_002C48C0(self, 8);
+                cPS2MemCard_enterState(self, 8);
                 break;
             }
         }
@@ -2396,8 +2396,8 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C5570(self, self->mScanFileSlot);
-            func_002C48C0(self, 0x10);
+            cPS2MemCard_markIconSysUnreadable(self, self->mScanFileSlot);
+            cPS2MemCard_enterState(self, 0x10);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2407,8 +2407,8 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcRead(self->mFileDescriptor, (int)&D_005376F8, 964);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            func_002C5570(self, self->mScanFileSlot);
-            func_002C48C0(self, 0xF);
+            cPS2MemCard_markIconSysUnreadable(self, self->mScanFileSlot);
+            cPS2MemCard_enterState(self, 0xF);
         }
         break;
     }
@@ -2416,7 +2416,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcClose(self->mFileDescriptor);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            func_002C48C0(self, 0x10);
+            cPS2MemCard_enterState(self, 0x10);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2432,7 +2432,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, entry);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 0x10);
+            cPS2MemCard_enterState(self, 0x10);
         break;
     }
     case 0xC: case 13: case 0xE: {
@@ -2444,7 +2444,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, entry);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            func_002C48C0(self, 0x10);
+            cPS2MemCard_enterState(self, 0x10);
         break;
     }
     case 0xF: {
@@ -2452,7 +2452,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         D_004A3940 = mcResult;
         if (mcResult < 0) {
             self->mFileDescriptor = -1;
-            func_002C48C0(self, 0x10);
+            cPS2MemCard_enterState(self, 0x10);
         } else {
             self->mFileDescriptor = -1;
         }
@@ -2464,14 +2464,14 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         break;
     default:
         if (self->mGetInfoPending == 0)
-            func_002C50E0(self);
+            cPS2MemCard_startGetInfo(self);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C50E0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startGetInfo);
 #ifdef SKIP_ASM
 extern "C" int sceMcGetInfo(int h, int a1, int* a2, int* a3, int* a4);
 extern int D_004A3938;
@@ -2485,7 +2485,7 @@ extern int D_004A3944;
  *
  * @return 1 when the request was issued, else 0
  */
-extern "C" int func_002C50E0(cPS2MemCard* self)
+extern "C" int cPS2MemCard_startGetInfo(cPS2MemCard* self)
 {
     D_004A3938 = 0;
     self->mTransferSize = 0;
@@ -2554,7 +2554,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastError);
  * Returns the last libmc result of a port (mLastError of device record mDevices[@p i]) when it is one of the codes the
  * driver knows (0, -1 .. -7, -10001, -10002), and -10 for anything else (-8, -9, -10, other negatives, positives).
  *
- * cPS2MemCard_Update resets the port's info (func_002C5250) on -10 or -1 and the directory data (func_002C5278) on -10
+ * cPS2MemCard_Update resets the port's info (cPS2MemCard_clearDeviceInfo) on -10 or -1 and the directory data (cPS2MemCard_clearDirData) on -10
  * or -2.
  *
  * @param i  the memory-card port (0 or 1)
@@ -2601,12 +2601,12 @@ bool cPS2MemCard::DidErrorOccur()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5250);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_clearDeviceInfo);
 #ifdef SKIP_ASM
 /**
  * Clears the current port's card type (mType) and free-cluster count (mFreeClusters) in mDevices[mDevice].
  */
-extern "C" void func_002C5250(cPS2MemCard* self)
+extern "C" void cPS2MemCard_clearDeviceInfo(cPS2MemCard* self)
 {
     self->mDevices[self->mDevice].mType = 0;
     self->mDevices[self->mDevice].mFreeClusters = 0;
@@ -2614,36 +2614,36 @@ extern "C" void func_002C5250(cPS2MemCard* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5278);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_clearDirData);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int c, int n);
-extern "C" void func_002C52D8(cPS2MemCard* self);
+extern "C" void cPS2MemCard_clearFileDirEntry(cPS2MemCard* self);
 
 /**
  * Empties the directory data: clears unk_050 and mNumDirTable, the single directory entry mFileDirEntry (0x40 bytes),
- * the six file slots mFileSlots (720 bytes) and the directory table mDirTable (0x1000 bytes), then calls func_002C52D8
+ * the six file slots mFileSlots (720 bytes) and the directory table mDirTable (0x1000 bytes), then calls cPS2MemCard_clearFileDirEntry
  * (which clears mFileDirEntry again).
  */
-extern "C" void func_002C5278(cPS2MemCard* self)
+extern "C" void cPS2MemCard_clearDirData(cPS2MemCard* self)
 {
     self->unk_050 = 0;
     self->mNumDirTable = 0;
     MEM_fill(&self->mFileDirEntry, 0, 0x40);
     MEM_fill(&self->mFileSlots[0], 0, 720);
     MEM_fill(&self->mDirTable[0], 0, 0x1000);
-    func_002C52D8(self);
+    cPS2MemCard_clearFileDirEntry(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C52D8);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_clearFileDirEntry);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int c, int n);
 
 /**
  * Clears the single directory entry mFileDirEntry (0x40 bytes).
  */
-extern "C" void func_002C52D8(cPS2MemCard* self)
+extern "C" void cPS2MemCard_clearFileDirEntry(cPS2MemCard* self)
 {
     MEM_fill(&self->mFileDirEntry, 0, 0x40);
 }
@@ -2761,7 +2761,7 @@ bool cPS2MemCard::CardChanged(int device)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetStatus);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" unsigned short* strcpy3(unsigned short* dst, char* src);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern char str_sp_d[];
 extern char str_kT_MEMFreePS2[];
@@ -2776,7 +2776,7 @@ struct cPS2MemCard_GetStatus_sVEntry {
  * Writes a status line for a port into a 16-bit buffer.
  *
  * When the port's format word (mFormat of mDevices[@p idx]) is 0 or its last result (mLastError) is not 0, the line is
- * a single space (str_sp_d, widened by func_002C2540). For a result of 0 it is the front-end locale's "kT_MEMFreePS2"
+ * a single space (str_sp_d, widened by strcpy3). For a result of 0 it is the front-end locale's "kT_MEMFreePS2"
  * string (looked up through slot 4 of SSXApp->FELocale's vtable) formatted by sprintf1 with the free clusters
  * (cPS2MemCard_GetFreeSpace1, at least 0).
  *
@@ -2786,12 +2786,12 @@ struct cPS2MemCard_GetStatus_sVEntry {
 void cPS2MemCard::GetStatus(int idx, unsigned short* dst)
 {
     if (mDevices[idx].mFormat == 0) {
-        func_002C2540(dst, str_sp_d);
+        strcpy3(dst, str_sp_d);
         return;
     }
     switch (mDevices[idx].mLastError) {
     case -2:
-        func_002C2540(dst, str_sp_d);
+        strcpy3(dst, str_sp_d);
         break;
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
@@ -2803,14 +2803,14 @@ void cPS2MemCard::GetStatus(int idx, unsigned short* dst)
         break;
     }
     default:
-        func_002C2540(dst, str_sp_d);
+        strcpy3(dst, str_sp_d);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C54D0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_getFileSlotName);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -2820,7 +2820,7 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @param dst  the output buffer (64 bytes is enough)
  */
-extern "C" void func_002C54D0(cPS2MemCard* self, int fileSlot, char* dst)
+extern "C" void cPS2MemCard_getFileSlotName(cPS2MemCard* self, int fileSlot, char* dst)
 {
     strcpy(dst, self->mFileSlots[fileSlot].mFileName);
 }
@@ -2844,12 +2844,12 @@ void* cPS2MemCard::SetTitleString()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5520__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetTitleString1__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (card vtable slot 46).
  */
-void func_002C5520(void* self)
+void cPS2MemCard_SetTitleString1(void* self)
 {
 }
 #endif
@@ -2889,15 +2889,15 @@ void cPS2MemCard::SetBrokenFile(int fileSlot)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5570);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_markIconSysUnreadable);
 #ifdef SKIP_ASM
 /**
- * Marks a file slot as unreadable: sets mIconSysUnreadable of mFileSlots[@p fileSlot] to 1. func_002C48C0 and
+ * Marks a file slot as unreadable: sets mIconSysUnreadable of mFileSlots[@p fileSlot] to 1. cPS2MemCard_enterState and
  * cPS2MemCard_Update call it when the slot's icon.sys cannot be opened or read.
  *
  * @param fileSlot  the file slot index
  */
-extern "C" void func_002C5570(cPS2MemCard* self, int fileSlot)
+extern "C" void cPS2MemCard_markIconSysUnreadable(cPS2MemCard* self, int fileSlot)
 {
     self->mFileSlots[fileSlot].mIconSysUnreadable = 1;
 }
@@ -2908,7 +2908,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotBroken);
 #ifdef SKIP_ASM
 /**
  * Returns whether a file slot is flagged: its mBroken (set by cPS2MemCard_SetBrokenFile) or mIconSysUnreadable (set by
- * func_002C5570) is nonzero. Card vtable slot 65.
+ * cPS2MemCard_markIconSysUnreadable) is nonzero. Card vtable slot 65.
  *
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @return true when either flag is set
@@ -2946,23 +2946,23 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Update);
 // PORT: the unit declares these later with other signatures; bound by asm label.
 extern "C" int sceMcSync_i(int a0, int* a1, int* out) __asm__("sceMcSync");
 extern "C" int cPS2MemCard_GetLastError_i(void* self, int i) __asm__("cPS2MemCard_GetLastError");
-extern "C" void func_002C6280_v(void* self) __asm__("func_002C6280");
-extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int a1);
+extern "C" void cPS2MemCard_updateDisabledSlots_v(void* self) __asm__("cPS2MemCard_updateDisabledSlots");
+extern "C" bool cPS2MemCard_isResultInErrorRange(cPS2MemCard* self, unsigned int a1);
 extern "C" int ASYNCFILE_getstatus(int h);
 extern "C" void ASYNCFILE_release(int handle, void** address, int* size);
-extern "C" void func_002C4210(cPS2MemCard* self);
-extern "C" void func_002C42B0(cPS2MemCard* self);
-extern "C" void func_002C4388(cPS2MemCard* self);
-extern "C" void func_002C4410(cPS2MemCard* self);
-extern "C" void func_002C6848(cPS2MemCard* self);
-extern "C" void func_002C69A0(cPS2MemCard* self);
-extern "C" void func_002C6A28(cPS2MemCard* self);
-extern "C" void func_002C6A88(cPS2MemCard* self);
-extern "C" void func_002C6B00(cPS2MemCard* self);
-extern "C" void func_002C6B78(cPS2MemCard* self);
-extern "C" void func_002C6BF8(cPS2MemCard* self);
-extern "C" void func_002C6C88(cPS2MemCard* self);
-extern "C" void func_002C6D18(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueGetDir(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueGetFileInfo(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueFormat(cPS2MemCard* self);
+extern "C" void cPS2MemCard_startDeleteSave(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueListDir(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueOpenFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueCloseFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueSeekFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueFlushFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueReadFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueWriteFile(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueMakeDir(cPS2MemCard* self);
+extern "C" void cPS2MemCard_issueDeletePath(cPS2MemCard* self);
 extern int D_00487450[];
 // PORT: void-returning alias of MEM_fill (memset); the unused result changes register choice in case 6.
 extern "C" void MEM_fill_v(void* dst, int c, int n) __asm__("MEM_fill");
@@ -2976,9 +2976,9 @@ extern short D_005377B8[];
  * (mGetInfoPending) it polls sceMcSync (sceMcSync) without waiting, maps the result (ranges of libmc codes to -10, a
  * non- PS2 card to -10002, an unformatted one to -2, -1/-2 set the device's changed flag) and stores type, free
  * clusters, result and format word in the device record (mDevices). Then, for a state that waits on a libmc call, polls
- * sceMcSync the same way and moves to the next state with func_002C48C0, or to the error state 1 on a failure; the
- * request states (5, 17, 19, 34...) call their handlers (func_002C4210, func_002C4388, func_002C4410,
- * func_002C42B0...). Also finishes the directory scan (copies names, titles and dates into the file slots) and the
+ * sceMcSync the same way and moves to the next state with cPS2MemCard_enterState, or to the error state 1 on a failure; the
+ * request states (5, 17, 19, 34...) call their handlers (cPS2MemCard_issueGetDir, cPS2MemCard_issueFormat, cPS2MemCard_startDeleteSave,
+ * cPS2MemCard_issueGetFileInfo...). Also finishes the directory scan (copies names, titles and dates into the file slots) and the
  * asynchronous icon file loads. mFileInfoValid is 1 while no call is outstanding.
  */
 void cPS2MemCard::Update()
@@ -3011,7 +3011,7 @@ void cPS2MemCard::Update()
             || (unsigned)(syncResult + 79) < 10) {
             D_004A3940 = -10;
         }
-        if (func_002C63E8(this, D_004A3940) == 0) {
+        if (cPS2MemCard_isResultInErrorRange(this, D_004A3940) == 0) {
             if (D_004A3938 != 2) {
                 D_004A3940 = -10002;
             } else if (D_004A3944 == 0) {
@@ -3044,9 +3044,9 @@ void cPS2MemCard::Update()
             if (syncResult < 0) {
                 int st = mState;
                 if (st != 36 && (unsigned)(st - 54) >= 6) {
-                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8(this, syncResult) == 0) {
+                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && cPS2MemCard_isResultInErrorRange(this, syncResult) == 0) {
                         ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
-                        func_002C48C0(this, 0x10);
+                        cPS2MemCard_enterState(this, 0x10);
                         return;
                     }
                 } else {
@@ -3056,12 +3056,12 @@ void cPS2MemCard::Update()
                 }
                 if (D_004A3940 < 0) {
                     if (mState == 35 || mState == 7) {
-                        func_002C52D8(this);
+                        cPS2MemCard_clearFileDirEntry(this);
                     }
                     if (mState == 19) {
                         mCurrentFileSlot = -1;
                     }
-                    func_002C48C0(this, 1);
+                    cPS2MemCard_enterState(this, 1);
                     return;
                 }
             }
@@ -3071,12 +3071,12 @@ void cPS2MemCard::Update()
     }
     if (mReadFailed != 0) {
         mReadFailed = 0;
-        func_002C48C0(this, 0x1E);
+        cPS2MemCard_enterState(this, 0x1E);
         return;
     }
     if (mWriteFailed != 0) {
         mWriteFailed = 0;
-        func_002C48C0(this, 0x18);
+        cPS2MemCard_enterState(this, 0x18);
         return;
     }
     switch (mState) {
@@ -3094,17 +3094,17 @@ void cPS2MemCard::Update()
         }
         break;
     case 3:
-        func_002C48C0(this, 4);
+        cPS2MemCard_enterState(this, 4);
         break;
     case 5:
         if (((cMemCard*)this)->DidErrorOccur() == 0) {
-            func_002C4210(this);
+            cPS2MemCard_issueGetDir(this);
             return;
         }
         break;
     case 34:
         if (((cMemCard*)this)->DidErrorOccur() == 0) {
-            func_002C42B0(this);
+            cPS2MemCard_issueGetFileInfo(this);
             return;
         }
         break;
@@ -3125,27 +3125,27 @@ void cPS2MemCard::Update()
                 }
             }
             D_004A3940 = 0;
-            func_002C48C0(this, 7);
+            cPS2MemCard_enterState(this, 7);
             return;
         }
     case 8:
         mFileDescriptor = D_004A3940;
-        func_002C48C0(this, 10);
+        cPS2MemCard_enterState(this, 10);
         return;
     case 10:
         ((cMemCard*)this)->ShiftJISToAscii(mFileSlots[mScanFileSlot].mTitle, D_005377B8);
-        func_002C48C0(this, 9);
+        cPS2MemCard_enterState(this, 9);
         return;
     case 9:
-        func_002C48C0(this, 11);
+        cPS2MemCard_enterState(this, 11);
         return;
     case 11:
         if (mFileDirEntry.m_fileSizeByte != mDataSize) {
             ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
-            func_002C48C0(this, 0x10);
+            cPS2MemCard_enterState(this, 0x10);
         }
         __builtin_memcpy(&mFileSlots[mScanFileSlot].mModifyTime, &mFileDirEntry.m_modify, 8);
-        func_002C48C0(this, 12);
+        cPS2MemCard_enterState(this, 12);
         return;
     case 12:
     case 13:
@@ -3158,8 +3158,8 @@ void cPS2MemCard::Update()
                 k = 1;
             }
             if (mFileDirEntry.m_fileSizeByte != D_00487450[k]) {
-                func_002C5570(this, mScanFileSlot);
-                func_002C48C0(this, 0x10);
+                cPS2MemCard_markIconSysUnreadable(this, mScanFileSlot);
+                cPS2MemCard_enterState(this, 0x10);
                 return;
             }
         }
@@ -3173,11 +3173,11 @@ void cPS2MemCard::Update()
             }
         }
     case 7:
-        func_002C6280_v(this);
+        cPS2MemCard_updateDisabledSlots_v(this);
         break;
     case 35:
         if (D_004A3940 != 1) {
-            func_002C52D8(this);
+            cPS2MemCard_clearFileDirEntry(this);
         }
         D_004A3940 = 0;
         break;
@@ -3185,13 +3185,13 @@ void cPS2MemCard::Update()
         if (mDevices[mDevice].mFormat != 0) {
             break;
         }
-        func_002C4388(this);
+        cPS2MemCard_issueFormat(this);
         return;
     case 19:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C4410(this);
+        cPS2MemCard_startDeleteSave(this);
         return;
     case 40:
     case 44:
@@ -3202,7 +3202,7 @@ void cPS2MemCard::Update()
         mIconFileData = 0;
         mIconFileSize = 0;
         ASYNCFILE_release(mIconFileHandle, &mIconFileData, &mIconFileSize);
-        func_002C48C0(this, mState + 1);
+        cPS2MemCard_enterState(this, mState + 1);
         return;
     case 22:
     case 28:
@@ -3211,23 +3211,23 @@ void cPS2MemCard::Update()
     case 45:
     case 49:
         mFileDescriptor = D_004A3940;
-        func_002C48C0(this, mState + 1);
+        cPS2MemCard_enterState(this, mState + 1);
         return;
     case 20:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(this, 36);
+        cPS2MemCard_enterState(this, 36);
         return;
     case 27:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(this, 0x1C);
+        cPS2MemCard_enterState(this, 0x1C);
         return;
     case 55:
     case 56:
-        func_002C48C0(this, 58);
+        cPS2MemCard_enterState(this, 58);
         return;
     case 36:
     case 38:
@@ -3238,24 +3238,24 @@ void cPS2MemCard::Update()
     case 54:
     case 57:
     case 58:
-        func_002C48C0(this, mState + 1);
+        cPS2MemCard_enterState(this, mState + 1);
         return;
     case 21:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C48C0(this, 22);
+        cPS2MemCard_enterState(this, 22);
         return;
     case 23:
-        func_002C48C0(this, 52);
+        cPS2MemCard_enterState(this, 52);
         return;
     case 29:
         if (D_004A3940 != mTransferSize) {
             D_004A3940 = -10001;
-            func_002C48C0(this, 1);
+            cPS2MemCard_enterState(this, 1);
             return;
         }
-        func_002C48C0(this, 53);
+        cPS2MemCard_enterState(this, 53);
         return;
     case 25:
         mFileInfoValid = 0;
@@ -3269,7 +3269,7 @@ void cPS2MemCard::Update()
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6848(this);
+        cPS2MemCard_issueListDir(this);
         return;
     case 61:
         mNumDirTable = D_004A3940;
@@ -3278,49 +3278,49 @@ void cPS2MemCard::Update()
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C69A0(this);
+        cPS2MemCard_issueOpenFile(this);
         return;
     case 73:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6A28(this);
+        cPS2MemCard_issueCloseFile(this);
         return;
     case 65:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6A88(this);
+        cPS2MemCard_issueSeekFile(this);
         return;
     case 71:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6B00(this);
+        cPS2MemCard_issueFlushFile(this);
         return;
     case 67:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6B78(this);
+        cPS2MemCard_issueReadFile(this);
         return;
     case 69:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        func_002C6BF8(this);
+        cPS2MemCard_issueWriteFile(this);
         return;
     case 75:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6C88(this);
+        cPS2MemCard_issueMakeDir(this);
         return;
     case 77:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        func_002C6D18(this);
+        cPS2MemCard_issueDeletePath(this);
         return;
     case 64:
         {
@@ -3335,7 +3335,7 @@ void cPS2MemCard::Update()
         break;
     found:
         sprintf(mIconFilePath, str_pct_s_pct_s_h, mFileSlots[mScanFileSlot].mFileName, str_icon_sys);
-        func_002C48C0(this, 8);
+        cPS2MemCard_enterState(this, 8);
         return;
     case 52:
     case 53:
@@ -3349,14 +3349,14 @@ void cPS2MemCard::Update()
     }
     if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
         || cPS2MemCard_GetLastError_i(this, mDevice) == -1) {
-        func_002C5250(this);
+        cPS2MemCard_clearDeviceInfo(this);
     }
     if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
         || cPS2MemCard_GetLastError_i(this, mDevice) == -2) {
-        func_002C5278(this);
+        cPS2MemCard_clearDirData(this);
     }
     if (mState != 0) {
-        func_002C48C0(this, 0);
+        cPS2MemCard_enterState(this, 0);
     }
 }
 #endif
@@ -3384,7 +3384,7 @@ static inline unsigned short* qtLoc6128(char* key)
  * kT_MEMUnavailable when slot 55 (cPS2MemCard_IsFormatted1) fails, kT_MEMFileCorruptPS2 when the slot's mBroken or
  * mIconSysUnreadable flag is set, kT_MEMNoFreeSpace when mDisabled is set, kT_MEMEmpty again when the slot has no name
  * (slot 67, cPS2MemCard_HasFileName). Otherwise widens the save title (mFileSlots[i].unk_4C from byte 6 on) with
- * func_002C2540. The text is cut to 32 characters and copied to @p dst.
+ * strcpy3. The text is cut to 32 characters and copied to @p dst.
  *
  * @param fileSlot  the file slot
  * @param dst  the wide-character buffer that receives the text
@@ -3403,7 +3403,7 @@ void cPS2MemCard::GetTitleString(int fileSlot, unsigned short* dst)
     } else if (((cMemCard*)this)->HasFileName(fileSlot) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
-        func_002C2540(buf, &mFileSlots[fileSlot].mTitle[6]);
+        strcpy3(buf, &mFileSlots[fileSlot].mTitle[6]);
     }
     buf[32] = 0;
     strcpy1(dst, buf);
@@ -3411,7 +3411,7 @@ void cPS2MemCard::GetTitleString(int fileSlot, unsigned short* dst)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6280);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_updateDisabledSlots);
 #ifdef SKIP_ASM
 /**
  * Marks the empty file slots a new save no longer fits in.
@@ -3421,7 +3421,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6280);
  * name (slot 67, cPS2MemCard_HasFileName, returns 0) it subtracts the needed space while enough is left and otherwise
  * sets mDisabled to 1, the flag cPS2MemCard_IsFileSlotDisabled reads. cPS2MemCard_Update calls it in state 7.
  */
-extern "C" void func_002C6280(cPS2MemCard* self)
+extern "C" void cPS2MemCard_updateDisabledSlots(cPS2MemCard* self)
 {
     int i = 0;
     int remain = ((cMemCard*)self)->GetFreeSpace();
@@ -3443,7 +3443,7 @@ extern "C" void func_002C6280(cPS2MemCard* self)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_CleanUp);
 #ifdef SKIP_ASM
 extern "C" void sceMcSync(int a0, int a1, int* out);
-extern "C" void func_002C5278(cPS2MemCard* self);
+extern "C" void cPS2MemCard_clearDirData(cPS2MemCard* self);
 extern int D_004A3940;
 
 /**
@@ -3452,7 +3452,7 @@ extern int D_004A3940;
  * When a sceMcGetInfo is pending (mGetInfoPending) it waits for it (sceMcSync, sceMcSync, blocking) and sets the
  * current device's changed flag on a -1 result. Then clears mGetInfoPending, mDevice (back to port 0), the first four
  * words of device record 0 (mDevices[0]: type, free clusters, result, format word), mFileInfoValid and the directory
- * table (func_002C5278). mState is left as it is. Called by the destructor.
+ * table (cPS2MemCard_clearDirData). mState is left as it is. Called by the destructor.
  *
  */
 void cPS2MemCard::CleanUp()
@@ -3472,12 +3472,12 @@ void cPS2MemCard::CleanUp()
     self->mDevices[0].mLastError = 0;
     self->mDevices[0].mFormat = 0;
     self->mFileInfoValid = 0;
-    func_002C5278((cPS2MemCard*)self);
+    cPS2MemCard_clearDirData((cPS2MemCard*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C63E8);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_isResultInErrorRange);
 #ifdef SKIP_ASM
 /**
  * Returns whether a libmc result lies in -9999 .. -10 (as an unsigned compare of status + 9999 against 9990).
@@ -3487,7 +3487,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C63E8);
  * @param status  the result code
  * @return true for -9999 .. -10
  */
-extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int status)
+extern "C" bool cPS2MemCard_isResultInErrorRange(cPS2MemCard* self, unsigned int status)
 {
     return status + 9999 < 9990;
 }
@@ -3497,7 +3497,7 @@ extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int status)
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDeviceName);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" unsigned short* strcpy3(unsigned short* dst, char* src);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // PORT: void view of sprintf1 (defined returning int); this caller treats it as void.
 extern "C" void sprintf1_v(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf1");
@@ -3524,7 +3524,7 @@ void cPS2MemCard::GetDeviceName(int device, unsigned short* dst, int dstLen)
 {
     unsigned short fmt[8];
     unsigned short num[8];
-    func_002C2540(fmt, str_pct_d_i);
+    strcpy3(fmt, str_pct_d_i);
     sprintf1_v(num, fmt, device + 1);
     if (device < 2) {
         if (device >= 0) {
@@ -3545,14 +3545,14 @@ extern char str_sp_d[];
 /**
  * Writes a file slot's save date as text; the PS2 version has none and writes a single space.
  *
- * Widens str_sp_d (" ") into @p dst with func_002C2540; the slot is ignored.
+ * Widens str_sp_d (" ") into @p dst with strcpy3; the slot is ignored.
  *
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
 void cPS2MemCard::GetFileDate(int fileSlot, unsigned short* dst)
 {
-    func_002C2540(dst, str_sp_d);
+    strcpy3(dst, str_sp_d);
 }
 #endif
 
@@ -3564,14 +3564,14 @@ extern char str_sp_d[];
 /**
  * Writes a file slot's save time as text; the PS2 version has none and writes a single space.
  *
- * Widens str_sp_d (" ") into @p dst with func_002C2540; the slot is ignored.
+ * Widens str_sp_d (" ") into @p dst with strcpy3; the slot is ignored.
  *
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
 void cPS2MemCard::GetFileTime(int fileSlot, unsigned short* dst)
 {
-    func_002C2540(dst, str_sp_d);
+    strcpy3(dst, str_sp_d);
 }
 #endif
 
@@ -3671,42 +3671,42 @@ bool cPS2MemCard::FileExistsError()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6700__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsEncodingCorrect__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1 (card vtable slot 57).
  *
  * @return 1
  */
-int func_002C6700(void* self)
+int cPS2MemCard_IsEncodingCorrect(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6708__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsEncodingCorrect1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1 (card vtable slot 58).
  *
  * @return 1
  */
-int func_002C6708(void* self)
+int cPS2MemCard_IsEncodingCorrect1(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6710__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsRemovable1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1 (card vtable slot 61, which cPS2MemCard_IsRemovable calls).
  *
  * @return 1
  */
-int func_002C6710(void* self)
+int cPS2MemCard_IsRemovable1(void* self)
 {
     return 0x1;
 }
@@ -3737,7 +3737,7 @@ public:
 
 /**
  * Asks the card's virtual slot 61 about the current port (mDevice) and passes its result back; in cPS2MemCard_vtbl that
- * slot is func_002C6710__FPv, which always returns 1.
+ * slot is cPS2MemCard_IsRemovable1__FPv, which always returns 1.
  */
 void cPS2MemCard::IsRemovable()
 {
@@ -3806,14 +3806,14 @@ void cPS2MemCard::SpaceRequired1()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C67A8__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsDamaged1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0 (card vtable slot 50, which cPS2MemCard_IsDamaged calls).
  *
  * @return 0
  */
-int func_002C67A8(void* self)
+int cPS2MemCard_IsDamaged1(void* self)
 {
     return 0;
 }
@@ -3827,7 +3827,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsDamaged);
 
 /**
  * Asks the card's virtual slot 50 about the current port (mDevice) and passes its result back; in cPS2MemCard_vtbl that
- * slot is func_002C67A8__FPv, which always returns 0.
+ * slot is cPS2MemCard_IsDamaged1__FPv, which always returns 0.
  */
 void cPS2MemCard::IsDamaged()
 {
@@ -3850,74 +3850,74 @@ int cPS2MemCard::GetFreeDirEntries()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C67E8__FPvi);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_selectDevice__FPvi);
 #ifdef SKIP_ASM
 /**
- * Selects a port and checks its card: stores @p device in mDevice and mGetInfoDevice and calls func_002C48C0 with state
- * 3, which starts a sceMcGetInfo (func_002C50E0).
+ * Selects a port and checks its card: stores @p device in mDevice and mGetInfoDevice and calls cPS2MemCard_enterState with state
+ * 3, which starts a sceMcGetInfo (cPS2MemCard_startGetInfo).
  *
  * The network-config screen (cFEStateNetConfig) and the network-account library's card callbacks (dirtysock/tagsunk)
  * call it.
  *
  * @param device  the memory-card port (0 or 1)
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C67E8(void* vself, int device)
+void* cPS2MemCard_selectDevice(void* vself, int device)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mDevice = device;
     self->mGetInfoDevice = device;
-    return func_002C48C0((cPS2MemCard*)self, 3);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 3);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6810);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startListDir);
 #ifdef SKIP_ASM
 /**
  * Starts a full directory listing: clears mNumDirTable, copies @p name into the search pattern (mDirPattern) and calls
- * func_002C48C0 with state 60; cPS2MemCard_Update then runs func_002C6848.
+ * cPS2MemCard_enterState with state 60; cPS2MemCard_Update then runs cPS2MemCard_issueListDir.
  *
  * @param name  the sceMcGetDir pattern (ASCII; no length check)
  */
-extern "C" void func_002C6810(cPS2MemCard* self, const char* name)
+extern "C" void cPS2MemCard_startListDir(cPS2MemCard* self, const char* name)
 {
     self->mNumDirTable = 0;
     strcpy(self->mDirPattern, name);
-    func_002C48C0(self, 0x3C);
+    cPS2MemCard_enterState(self, 0x3C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6848);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueListDir);
 #ifdef SKIP_ASM
 extern "C" int sceMcGetDir(int h, int a1, char* name, int a3, int a4, void* buf);
 extern int D_004A3940;
 extern "C" void* MEM_fill(void* dst, int c, int n);
 
 /**
- * Issues the listing of func_002C6810: clears the directory table (mDirTable, 0x1000 bytes) and calls sceMcGetDir
+ * Issues the listing of cPS2MemCard_startListDir: clears the directory table (mDirTable, 0x1000 bytes) and calls sceMcGetDir
  * (sceMcGetDir) on mDevice with the pattern mDirPattern, for at most 64 entries.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 61.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 61.
  * cPS2MemCard_Update calls it in state 60.
  */
-extern "C" void func_002C6848(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueListDir(cPS2MemCard* self)
 {
     char* buf = (char*)&self->mDirTable[0];
     MEM_fill(buf, 0, 0x1000);
     int mcResult = sceMcGetDir(self->mDevice, 0, self->mDirPattern, 0, 0x40, buf);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 61);
+        cPS2MemCard_enterState(self, 61);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C68C8);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_getDirEntryName);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -3927,7 +3927,7 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param i  the entry index (0 .. mNumDirTable - 1; not checked)
  * @param dst  the output buffer (32 bytes is enough)
  */
-extern "C" void func_002C68C8(cPS2MemCard* self, int i, char* dst)
+extern "C" void cPS2MemCard_getDirEntryName(cPS2MemCard* self, int i, char* dst)
 {
 
     strcpy(dst, (char*)self->mDirTable[i].m_entryName);
@@ -3971,336 +3971,336 @@ extern "C" int cPS2MemCard_GetNumFiles(cPS2MemCard_GetNumFiles_sTree* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6968);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startOpenFile);
 #ifdef SKIP_ASM
 /**
  * Starts opening a file: stores the sceMcOpen mode in mOpenMode, copies @p name into the path (mFilePath) and calls
- * func_002C48C0 with state 63; cPS2MemCard_Update then runs func_002C69A0 and, when the open completes, stores the
+ * cPS2MemCard_enterState with state 63; cPS2MemCard_Update then runs cPS2MemCard_issueOpenFile and, when the open completes, stores the
  * descriptor in mFileDescriptor.
  *
  * @param name  the file path (ASCII; no length check)
  * @param openMode  the sceMcOpen mode flags
  */
-extern "C" void func_002C6968(cPS2MemCard* self, const char* name, int openMode)
+extern "C" void cPS2MemCard_startOpenFile(cPS2MemCard* self, const char* name, int openMode)
 {
     self->mOpenMode = openMode;
     strcpy(self->mFilePath, name);
-    func_002C48C0(self, 0x3F);
+    cPS2MemCard_enterState(self, 0x3F);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C69A0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueOpenFile);
 #ifdef SKIP_ASM
 extern "C" int sceMcOpen(int h, int a1, char* name, int a3);
 extern int D_004A3940;
 
 /**
- * Issues the open of func_002C6968: sets mFileDescriptor to -1 and calls sceMcOpen (sceMcOpen) on mDevice with the
+ * Issues the open of cPS2MemCard_startOpenFile: sets mFileDescriptor to -1 and calls sceMcOpen (sceMcOpen) on mDevice with the
  * path mFilePath and the mode mOpenMode.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 64.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 64.
  * cPS2MemCard_Update calls it in state 63.
  */
-extern "C" void func_002C69A0(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueOpenFile(cPS2MemCard* self)
 {
     self->mFileDescriptor = -1;
     int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, self->mOpenMode);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 0x40);
+        cPS2MemCard_enterState(self, 0x40);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6A08__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startCloseFile__FPv);
 #ifdef SKIP_ASM
 /**
- * Starts closing the open file: calls func_002C48C0 with state 73; cPS2MemCard_Update then runs func_002C6A28.
+ * Starts closing the open file: calls cPS2MemCard_enterState with state 73; cPS2MemCard_Update then runs cPS2MemCard_issueCloseFile.
  *
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C6A08(void* self)
+void* cPS2MemCard_startCloseFile(void* self)
 {
-    return func_002C48C0((cPS2MemCard*)self, 73);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 73);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6A28);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueCloseFile);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_002C48C0 as returning void*, but its body returns
+// PORT: the unit declares cPS2MemCard_enterState as returning void*, but its body returns
 // nothing (v0 is leftover); this caller needs the void prototype.
-extern "C" void func_002C48C0_v(void* self, int state) __asm__("func_002C48C0");
+extern "C" void cPS2MemCard_enterState_v(void* self, int state) __asm__("cPS2MemCard_enterState");
 extern "C" int sceMcClose(int h);
 extern int D_004A3940;
 
 /**
- * Issues the close of func_002C6A08: stores sceMcClose(mFileDescriptor) (sceMcClose) in D_004A3940 and calls
- * func_002C48C0 with state 74, without checking the result. cPS2MemCard_Update calls it in state 73.
+ * Issues the close of cPS2MemCard_startCloseFile: stores sceMcClose(mFileDescriptor) (sceMcClose) in D_004A3940 and calls
+ * cPS2MemCard_enterState with state 74, without checking the result. cPS2MemCard_Update calls it in state 73.
  */
-extern "C" void func_002C6A28(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueCloseFile(cPS2MemCard* self)
 {
     D_004A3940 = sceMcClose(self->mFileDescriptor);
-    func_002C48C0_v(self, 74);
+    cPS2MemCard_enterState_v(self, 74);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6A60__FPvii);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startSeekFile__FPvii);
 #ifdef SKIP_ASM
 /**
  * Starts a seek in the open file: stores the offset in mSeekOffset and the origin in mSeekOrigin and calls
- * func_002C48C0 with state 65; cPS2MemCard_Update then runs func_002C6A88.
+ * cPS2MemCard_enterState with state 65; cPS2MemCard_Update then runs cPS2MemCard_issueSeekFile.
  *
  * @param seekOffset  the offset in bytes
  * @param seekOrigin  the sceMcSeek origin
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C6A60(void* vself, int seekOffset, int seekOrigin)
+void* cPS2MemCard_startSeekFile(void* vself, int seekOffset, int seekOrigin)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mSeekOffset = seekOffset;
     self->mSeekOrigin = seekOrigin;
-    return func_002C48C0((cPS2MemCard*)self, 65);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 65);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6A88);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueSeekFile);
 #ifdef SKIP_ASM
 extern "C" int sceMcSeek(int h, int a1, int a2);
 extern int D_004A3940;
 
 /**
- * Issues the seek of func_002C6A60__FPvii: calls sceMcSeek (sceMcSeek) on mFileDescriptor with mSeekOffset and
+ * Issues the seek of cPS2MemCard_startSeekFile__FPvii: calls sceMcSeek (sceMcSeek) on mFileDescriptor with mSeekOffset and
  * mSeekOrigin.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 66.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 66.
  * cPS2MemCard_Update calls it in state 65.
  */
-extern "C" void func_002C6A88(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueSeekFile(cPS2MemCard* self)
 {
     int mcResult = sceMcSeek(self->mFileDescriptor, self->mSeekOffset, self->mSeekOrigin);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 66);
+        cPS2MemCard_enterState(self, 66);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6AE0__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startFlushFile__FPv);
 #ifdef SKIP_ASM
 /**
- * Starts flushing the open file: calls func_002C48C0 with state 71; cPS2MemCard_Update then runs func_002C6B00.
+ * Starts flushing the open file: calls cPS2MemCard_enterState with state 71; cPS2MemCard_Update then runs cPS2MemCard_issueFlushFile.
  *
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C6AE0(void* self)
+void* cPS2MemCard_startFlushFile(void* self)
 {
-    return func_002C48C0((cPS2MemCard*)self, 71);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 71);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6B00);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueFlushFile);
 #ifdef SKIP_ASM
 extern "C" int sceMcFlush(int h);
 extern int D_004A3940;
 
 /**
- * Issues the flush of func_002C6AE0__FPv: calls sceMcFlush (sceMcFlush) on mFileDescriptor.
+ * Issues the flush of cPS2MemCard_startFlushFile__FPv: calls sceMcFlush (sceMcFlush) on mFileDescriptor.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 72.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 72.
  * cPS2MemCard_Update calls it in state 71.
  */
-extern "C" void func_002C6B00(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueFlushFile(cPS2MemCard* self)
 {
     int mcResult = sceMcFlush(self->mFileDescriptor);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 72);
+        cPS2MemCard_enterState(self, 72);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6B50__FPvii);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startReadFile__FPvii);
 #ifdef SKIP_ASM
 /**
- * Starts a read from the open file: stores the buffer in mBuffer and the size in mDataSize and calls func_002C48C0 with
- * state 67; cPS2MemCard_Update then runs func_002C6B78.
+ * Starts a read from the open file: stores the buffer in mBuffer and the size in mDataSize and calls cPS2MemCard_enterState with
+ * state 67; cPS2MemCard_Update then runs cPS2MemCard_issueReadFile.
  *
  * @param buffer  the buffer to read into
  * @param ioSize  the number of bytes to read
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C6B50(void* vself, int buffer, int ioSize)
+void* cPS2MemCard_startReadFile(void* vself, int buffer, int ioSize)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mBuffer = buffer;
     self->mDataSize = ioSize;
-    return func_002C48C0((cPS2MemCard*)self, 67);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 67);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6B78);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueReadFile);
 #ifdef SKIP_ASM
 extern "C" int sceMcRead(int h, int a1, int a2);
 extern int D_004A3940;
 
 /**
- * Issues the read of func_002C6B50__FPvii: calls sceMcRead (sceMcRead) on mFileDescriptor into mBuffer for mDataSize
+ * Issues the read of cPS2MemCard_startReadFile__FPvii: calls sceMcRead (sceMcRead) on mFileDescriptor into mBuffer for mDataSize
  * bytes.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 68.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 68.
  * cPS2MemCard_Update calls it in state 67.
  */
-extern "C" void func_002C6B78(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueReadFile(cPS2MemCard* self)
 {
     int mcResult = sceMcRead(self->mFileDescriptor, self->mBuffer, self->mDataSize);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 68);
+        cPS2MemCard_enterState(self, 68);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6BD0__FPvii);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startWriteFile__FPvii);
 #ifdef SKIP_ASM
 /**
- * Starts a write to the open file: stores the buffer in mBuffer and the size in mDataSize and calls func_002C48C0 with
- * state 69; cPS2MemCard_Update then runs func_002C6BF8.
+ * Starts a write to the open file: stores the buffer in mBuffer and the size in mDataSize and calls cPS2MemCard_enterState with
+ * state 69; cPS2MemCard_Update then runs cPS2MemCard_issueWriteFile.
  *
  * @param buffer  the data to write
  * @param ioSize  the number of bytes to write
- * @return func_002C48C0's return register (it returns nothing)
+ * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* func_002C6BD0(void* vself, int buffer, int ioSize)
+void* cPS2MemCard_startWriteFile(void* vself, int buffer, int ioSize)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->mBuffer = buffer;
     self->mDataSize = ioSize;
-    return func_002C48C0((cPS2MemCard*)self, 69);
+    return cPS2MemCard_enterState((cPS2MemCard*)self, 69);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6BF8);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueWriteFile);
 #ifdef SKIP_ASM
 extern "C" int sceMcWrite(int h, int a1, int a2);
 extern int D_004A3940;
 
 /**
- * Issues the write of func_002C6BD0__FPvii: calls sceMcWrite (sceMcWrite) on mFileDescriptor from mBuffer for
+ * Issues the write of cPS2MemCard_startWriteFile__FPvii: calls sceMcWrite (sceMcWrite) on mFileDescriptor from mBuffer for
  * mDataSize bytes.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 70.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 70.
  * cPS2MemCard_Update calls it in state 69.
  */
-extern "C" void func_002C6BF8(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueWriteFile(cPS2MemCard* self)
 {
     int mcResult = sceMcWrite(self->mFileDescriptor, self->mBuffer, self->mDataSize);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 70);
+        cPS2MemCard_enterState(self, 70);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6C50);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startMakeDir);
 #ifdef SKIP_ASM
 /**
  * Starts creating a directory: stores @p requestValue in mTransferSize, copies @p name into the path (mFilePath) and
- * calls func_002C48C0 with state 75; cPS2MemCard_Update then runs func_002C6C88 (sceMcMkdir). The mkdir does not use
+ * calls cPS2MemCard_enterState with state 75; cPS2MemCard_Update then runs cPS2MemCard_issueMakeDir (sceMcMkdir). The mkdir does not use
  * mTransferSize.
  *
  * @param name  the directory path (ASCII; no length check)
  * @param requestValue  the value stored in mTransferSize
  */
-extern "C" void func_002C6C50(cPS2MemCard* self, const char* name, int requestValue)
+extern "C" void cPS2MemCard_startMakeDir(cPS2MemCard* self, const char* name, int requestValue)
 {
     self->mTransferSize = requestValue;
     strcpy(self->mFilePath, name);
-    func_002C48C0(self, 75);
+    cPS2MemCard_enterState(self, 75);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6C88);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueMakeDir);
 #ifdef SKIP_ASM
 extern "C" int sceMcMkdir(int h, int a1, char* name);
 extern int D_004A3940;
 
 /**
- * Issues the mkdir of func_002C6C50: calls sceMcMkdir (sceMcMkdir) on mDevice with the path mFilePath.
+ * Issues the mkdir of cPS2MemCard_startMakeDir: calls sceMcMkdir (sceMcMkdir) on mDevice with the path mFilePath.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 76.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 76.
  * cPS2MemCard_Update calls it in state 75.
  */
-extern "C" void func_002C6C88(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueMakeDir(cPS2MemCard* self)
 {
     int mcResult = sceMcMkdir(self->mDevice, 0, self->mFilePath);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 76);
+        cPS2MemCard_enterState(self, 76);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6CE0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startDeletePath);
 #ifdef SKIP_ASM
 /**
- * Starts deleting a file or directory: copies @p name into the path (mFilePath) and calls func_002C48C0 with state 77;
- * cPS2MemCard_Update then runs func_002C6D18 (sceMcDelete).
+ * Starts deleting a file or directory: copies @p name into the path (mFilePath) and calls cPS2MemCard_enterState with state 77;
+ * cPS2MemCard_Update then runs cPS2MemCard_issueDeletePath (sceMcDelete).
  *
  * @param name  the path (ASCII; no length check)
  */
-extern "C" void func_002C6CE0(cPS2MemCard* self, const char* name)
+extern "C" void cPS2MemCard_startDeletePath(cPS2MemCard* self, const char* name)
 {
     strcpy(self->mFilePath, name);
-    func_002C48C0(self, 77);
+    cPS2MemCard_enterState(self, 77);
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6D18);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_issueDeletePath);
 #ifdef SKIP_ASM
 extern "C" int sceMcDelete(int h, int a1, char* name);
 extern int D_004A3940;
 
 /**
- * Issues the delete of func_002C6CE0: calls sceMcDelete (sceMcDelete) on mDevice with the path mFilePath.
+ * Issues the delete of cPS2MemCard_startDeletePath: calls sceMcDelete (sceMcDelete) on mDevice with the path mFilePath.
  *
- * The result goes to D_004A3940; a negative one moves to the error state 1 (func_002C48C0), otherwise to state 78.
+ * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 78.
  * cPS2MemCard_Update calls it in state 77.
  */
-extern "C" void func_002C6D18(cPS2MemCard* self)
+extern "C" void cPS2MemCard_issueDeletePath(cPS2MemCard* self)
 {
     int mcResult = sceMcDelete(self->mDevice, 0, self->mFilePath);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        func_002C48C0(self, 1);
+        cPS2MemCard_enterState(self, 1);
     } else {
-        func_002C48C0(self, 78);
+        cPS2MemCard_enterState(self, 78);
     }
 }
 #endif

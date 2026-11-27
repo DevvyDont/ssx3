@@ -400,8 +400,8 @@ struct sMtx_EE88 {
 
 extern "C" void cIrradiance_Clear(sMtx_EE88* m);
 extern "C" void* cIrradianceDataBase_Get1(char* tbl, char* name);
-extern "C" void func_00389590(sMtx_EE88* m, void* a, char* b, float s);
-extern "C" void func_00389CB8(sMtx_EE88* m, t4Vector* v, float s);
+extern "C" void cIrradiance_addTinted(sMtx_EE88* m, void* a, char* b, float s);
+extern "C" void cIrradiance_addSunTerm(sMtx_EE88* m, t4Vector* v, float s);
 extern "C" void cAnimModel_render(void* model, int a, int b, int c);
 extern "C" void func_002F2088(void* p);
 
@@ -458,42 +458,42 @@ void cFERider::render()
     }
     switch (type) {
     case 0:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_moby), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_moby), cIrradiance_kv4White, 1.0f);
         break;
     case 1:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_kaori), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_kaori), cIrradiance_kv4White, 1.0f);
         break;
     case 2:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_allegra), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_allegra), cIrradiance_kv4White, 1.0f);
         break;
     case 3:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_mac), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_mac), cIrradiance_kv4White, 1.0f);
         break;
     case 4:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_zoe), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_zoe), cIrradiance_kv4White, 1.0f);
         break;
     case 5:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_griff), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_griff), cIrradiance_kv4White, 1.0f);
         break;
     case 6:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_elise), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_elise), cIrradiance_kv4White, 1.0f);
         break;
     case 7:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_nate), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_nate), cIrradiance_kv4White, 1.0f);
         break;
     case 8:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_psymon), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_psymon), cIrradiance_kv4White, 1.0f);
         break;
     case 9:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_viggo), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_viggo), cIrradiance_kv4White, 1.0f);
         break;
     default:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), cIrradiance_kv4White, 1.0f);
+        cIrradiance_addTinted(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), cIrradiance_kv4White, 1.0f);
         break;
     }
     int idx = cAnimModel_getBoneSkelIndex(((sModel_EE88*)self->mpAnimModel), 0, str_hips);
     pos = ((sModel_EE88*)self->mpAnimModel)->bones[idx * 2];
-    func_00389CB8(&worldMatrix, &pos, 1.0f);
+    cIrradiance_addSunTerm(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->SetIrradiance(*(const tIrradianceInfo*)&worldMatrix, 1);
@@ -520,7 +520,7 @@ extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
 extern "C" void cRiderAnimBase_expireAnimation(void* anim);
 extern "C" void func_002F1A08(void* p);
-extern "C" void func_002ECF78(void* p);
+extern "C" void cBoltOnFXInterface_updateIfDirty(void* p);
 
 
 
@@ -572,7 +572,7 @@ void cFERider::update()
         }
         self->updateModelPose();
         func_002F1A08(self->mpAttachedEmitterFX);
-        func_002ECF78(self->mpBoltOnFX);
+        cBoltOnFXInterface_updateIfDirty(self->mpBoltOnFX);
     }
 }
 #endif
@@ -990,7 +990,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
 extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
-extern "C" void func_0030EB60(void* model);
+extern "C" void cAnimModel_disableAllParts(void* model);
 extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
 struct sBoneEntF780 {
@@ -1015,7 +1015,7 @@ static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
 /**
  * Applies the variant of each equipped item part to the front-end rider's model and flags its bolt-on FX.
  *
- * Resets the model's parts (func_0030EB60), then for each item of the character's list with flag 0x10 looks up its part
+ * Resets the model's parts (cAnimModel_disableAllParts), then for each item of the character's list with flag 0x10 looks up its part
  * entry (cBEBoltDB_findBoltIndex on the item database) and, when its part index (+0x10) is not negative, sets that model part's
  * variant (cAnimModel_setModelPartVariant). Finally sets the first word of the bolt-on FX interface (+0xC74) to 1.
  */
@@ -1026,7 +1026,7 @@ void cFERider::updateAnimModelParts()
     cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, ((int*)this)[1], ((int*)this)[0]);
     int n = list->mNumBolts;
     tBEProfileBolt* it = ((&list->mBolts[0]));
-    func_0030EB60(mpAnimModel);
+    cAnimModel_disableAllParts(mpAnimModel);
     int i;
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {

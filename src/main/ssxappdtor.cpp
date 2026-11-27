@@ -2594,7 +2594,7 @@ int cMCOverlayManager::getFirstCorruptFile()
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002447F0);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_setNewFileName);
 #ifdef SKIP_ASM
 extern "C" void strcpy1(int);
 
@@ -2605,24 +2605,24 @@ extern "C" void strcpy1(int);
  *
  * @param overlayManager  the cMCOverlayManager (taken as an int)
  */
-extern "C" void func_002447F0(int overlayManager) {
+extern "C" void cMCOverlayManager_setNewFileName(int overlayManager) {
     strcpy1(overlayManager + 630);
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244810);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_setNewFileName1);
 #ifdef SKIP_ASM
-extern "C" void func_002C2540(int);
+extern "C" void strcpy3(int);
 
 /**
- * Converts an 8-bit string into the new file name (mNewFileName, +0x276) with func_002C2540.
+ * Converts an 8-bit string into the new file name (mNewFileName, +0x276) with strcpy3.
  *
  * The source string is passed through in the second argument register, which this declaration does not name.
  *
  * @param overlayManager  the cMCOverlayManager (taken as an int)
  */
-extern "C" void func_00244810(int overlayManager) {
-    func_002C2540(overlayManager + 630);
+extern "C" void cMCOverlayManager_setNewFileName1(int overlayManager) {
+    strcpy3(overlayManager + 630);
 }
 #endif
 //100%
@@ -3179,8 +3179,8 @@ extern "C" void cBucketMan_updateBucket(void*, int);
 extern "C" void cBucketMan_mergeBucket(void*, int);
 extern "C" void cBucketMan_applyBucket(void*, int);
 extern "C" void cWScriptMan_update(int);
-extern "C" void func_002294C8(int);
-extern "C" void func_003440C8(int);
+extern "C" void cCrowdMan2d_update(int);
+extern "C" void cCrowdMan3d_update(int);
 extern "C" void cMultiParticleMan_update(int);
 extern "C" void cWorldSound_TriggerWorldAudio(int, int, int);
 extern "C" void cGameViewMan_updateAll(cGameViewMan* viewMan);
@@ -3251,8 +3251,8 @@ void cGame::updateAI()
         if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
         cWScriptMan_update((int)WScriptMan);
-        func_002294C8((int)CrowdMan2d);
-        func_003440C8((int)CrowdMan3d);
+        cCrowdMan2d_update((int)CrowdMan2d);
+        cCrowdMan3d_update((int)CrowdMan3d);
         cMultiParticleMan_update((int)MultiParticleMan);
         cBucketMan_mergeBucket(obj, 1);
     } else {
@@ -3359,7 +3359,7 @@ void cGame::updateVibration()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245228__FPv);
+INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive__cFEStateProgressive__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys the progressive-scan popup state (vtable D_0047CA18) through the UI-state base destructor cUIState__cUIState.
@@ -3369,14 +3369,14 @@ INCLUDE_ASM("main/ssxappdtor", func_00245228__FPv);
  *
  * @return cUIState__cUIState's result, passed through
  */
-void* func_00245228(void* self)
+void* cFEStateProgressive__cFEStateProgressive(void* self)
 {
     return cUIState__cUIState(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245248);
+INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive_onCreateScreen);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -3395,7 +3395,7 @@ extern char str_Do_you_want_to_display_the_game_in_Progr[];
  * frame, then sets its "Title" text to "Do you want to display the game in Progr..." (the progressive-scan question).
  * Slot +0x24 (onCreateScreen) of D_0047CA18.
  */
-extern "C" void func_00245248(cUIState* self)
+extern "C" void cFEStateProgressive_onCreateScreen(cUIState* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
@@ -3411,7 +3411,7 @@ extern "C" void func_00245248(cUIState* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002452D8);
+INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -3465,7 +3465,7 @@ static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
  * @param msg  the widget event message (ignored when null)
  * @param type  the event type (only cUIState::kONNEXT is handled)
  */
-extern "C" void func_002452D8(cUIState* self, char* msg, int type)
+extern "C" void cFEStateProgressive_onWidgetEvent(cUIState* self, char* msg, int type)
 {
     if (msg == 0) {
         return;
@@ -3485,7 +3485,7 @@ extern "C" void func_002452D8(cUIState* self, char* msg, int type)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002453E0);
+INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the progressive-scan popup's menu query: 257 for cUIMenu::kONNEXT, else 0. Slot +0xA4 (onWidgetMenu) of
@@ -3495,7 +3495,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002453E0);
  * @param event  the menu event
  * @return 257 when @p event is cUIMenu::kONNEXT, else 0
  */
-extern "C" int func_002453E0(void* self, int menu, int event)
+extern "C" int cFEStateProgressive_onWidgetMenu(void* self, int menu, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -3714,7 +3714,7 @@ bool cGameLoadStateOutLodge::onGainTransition(int)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245708);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer__cGameLoadStateConquer);
 #ifdef SKIP_ASM
 extern void* D_0047C7A8[];
 extern "C" void* cUIState__cUIState(void* self);
@@ -3727,7 +3727,7 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_00245708(cGameLoadStateConquer* self)
+extern "C" void* cGameLoadStateConquer__cGameLoadStateConquer(cGameLoadStateConquer* self)
 {
     VPTR_OF(cListNode, self) = (void**)D_0047C7A8;
     return cUIState__cUIState(self);
@@ -3735,7 +3735,7 @@ extern "C" void* func_00245708(cGameLoadStateConquer* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245730);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3770,7 +3770,7 @@ public:
  * makes "CtrlPS2_default" and "default_text" visible for mapping 0, "CtrlPS2_pro" and "pro_text" otherwise (widget
  * virtual slot 9). Slot +0x24 (onCreateScreen) of D_0047C7A8.
  */
-extern "C" void func_00245730(cUIState* self)
+extern "C" void cGameLoadStateConquer_onCreateScreen(cUIState* self)
 {
     void* engine = self->mpEngine;
     void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_110ctrl_load), 0);
@@ -3802,19 +3802,19 @@ extern "C" void func_00245730(cUIState* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002458B0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the controller-layout loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
  * D_0047C7A8.
  */
-void func_002458B0(void* self)
+void cGameLoadStateConquer_onWidgetCreate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002458B8);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer_onGainTransition);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
@@ -3829,7 +3829,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int func_002458B8(cGameLoadStateConquer* self)
+extern "C" int cGameLoadStateConquer_onGainTransition(cGameLoadStateConquer* self)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {

@@ -3,8 +3,8 @@
 
 // cPS2ChunkResolve: the PS2 chunk resolver - the only cChunkResolve the game creates. On top of the base's pointer
 // fix-ups it resolves whole streamed chunks by type (resolve / unresolve: textures through the graphics manager, models,
-// instances, lights, ...) and patches models' and instances' DMA chains for VU1 (resolveModel -> func_003ABF20 ..
-// func_003AC048, resolveInstance -> func_003AC358 / func_003AC508). One instance in cWorldCache::mp_ChunkResolve.
+// instances, lights, ...) and patches models' and instances' DMA chains for VU1 (resolveModel -> cPS2ChunkResolve_resolveModelDma ..
+// cPS2ChunkResolve_patchSubMeshChain, resolveInstance -> cPS2ChunkResolve_resolveInstanceDma / cPS2ChunkResolve_patchInstanceChain). One instance in cWorldCache::mp_ChunkResolve.
 // EA's source: d:/ssx/code/source/world/ps2chunkresolve.cpp (preview assert path); retail code is in the decomp's unit
 // world/worldview.cpp (0x003AADE8 .. 0x003AC7C4).
 // Size 0x14: [R] cChunkResolve_construct (called by cWorldCache_init) does cMemMan_alloc(0x14, "cPS2ChunkResolve"),

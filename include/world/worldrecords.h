@@ -58,9 +58,9 @@ struct tMeshRecord {
     tf3Vector m_fvMin;              // 0x00 [O]; [U] worldsphtree func_4888 passes mesh / mesh + 0xC as a box
     tf3Vector m_fvMax;              // 0x0C [O]; [U] ditto
     int m_iFlags;                   // 0x18 [O]; [U] func_4888 tests bit 0
-    int m_iNumContexts;             // 0x1C [O]; [U] resolveMesh, func_003ABFC0 loop over the contexts
+    int m_iNumContexts;             // 0x1C [O]; [U] resolveMesh, cPS2ChunkResolve_fixupMesh loop over the contexts
     tMeshContextRecord** m_pContexts; // 0x20 [O] (On Tour a record pointer); [P] "meshRecord->m_pContexts[context]->
-                                    //      m_sMaterialIndex"; [U] resolveMesh fixes it up, func_003ABFC0 walks the
+                                    //      m_sMaterialIndex"; [U] resolveMesh fixes it up, cPS2ChunkResolve_fixupMesh walks the
                                     //      pointer table
 };
 
@@ -75,7 +75,7 @@ CHECK_SIZE(tMeshRecord, 0x24);
 // entry; retail reads the low halfword of entry i as the texture id).
 struct tTextureFlipRecord {
     int m_iNumTextures;             // 0x0 [O]; [U] the table at +0x4 follows it (setupTexFlip / setupMaterialRecords /
-                                    //      func_00344730 read GetTextureTable()[index])
+                                    //      tCrowdBlock3d_selectVariant read GetTextureTable()[index])
     // [O] tTextureFlipRecord_PSP::GetTextureTable(): the table right after the count.
     int* GetTextureTable() const { return (int*)(this + 1); }
 };
@@ -96,7 +96,7 @@ CHECK_SIZE(tTextureFlipID, 0x4);
 struct tMaterialRecord {
     short m_sTexture;               // 0x00 [O]; [U] cMeshAnimNode_render checks the texture's resource is cached
     char unk_002[0xE];              // 0x02 [O] m_sPad, m_iFlags (retail layout of 0x2..0xF not confirmed; +0xC is
-                                    //      copied into the tex-flip slots by func_003443A8)
+                                    //      copied into the tex-flip slots by tCrowdBlock3d_buildAnimation)
     tTextureFlipID m_TextureFlip;   // 0x10 [O] (0x8 there); [P] assert above; [U] resolveMaterial = this + 0x14 or 0;
                                     //      setupTexFlip / setupMaterialRecords read the table through it
 };
@@ -134,7 +134,7 @@ struct tModelRecord {
     float m_fAnimTime;              // 0x14 [O]; [U] cAnimObjectNode_signal / the anim-node ctors (setRateMax) use it as
                                     //      the default end time
     char unk_018[0xC];              // 0x18 [O] m_fvVertexScale (not placed)
-    void* unk_024;                  // 0x24 [U] the model's DMA data base (func_003AC048 / func_003AC508 read ctx +0x24)
+    void* unk_024;                  // 0x24 [U] the model's DMA data base (cPS2ChunkResolve_patchSubMeshChain / cPS2ChunkResolve_patchInstanceChain read ctx +0x24)
 };
 
 CHECK_OFFSET(tModelRecord, m_RID, 0x00);

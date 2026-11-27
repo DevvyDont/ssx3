@@ -280,8 +280,8 @@ CHECK_OFFSET(tSurfData, SlipFriction, 0x90);
 CHECK_SIZE(tSurfData, 0xB0);
 
 // One file of the rider's model / texture load list (On Tour struct tRiderLoader, 0x20C: origFileName[256],
-// FileName[256], FileOp, DataPtr, processingState). Retail's is 0x108, one name and the two words: [U] func_0011BD60 /
-// func_0011BE88 strcpy the name, store -1 and 0 and qsort the entries with a 264-byte stride; cRider_loadRider polls
+// FileName[256], FileOp, DataPtr, processingState). Retail's is 0x108, one name and the two words: [U] cRider_addPartModelsToLoadList /
+// cRider_addPartTexturesToLoadList strcpy the name, store -1 and 0 and qsort the entries with a 264-byte stride; cRider_loadRider polls
 // +0x100 and reads +0x104. [Staged by views2 group A.]
 struct tRiderLoader {
     char FileName[256];             // 0x000 [O] (On Tour's second name; retail keeps one); [U] the file to load
@@ -296,12 +296,12 @@ CHECK_SIZE(tRiderLoader, 0x108);
 
 // The rider's load list (On Tour struct tRiderLoadList: tRiderLoader LoadList[40]; int MdlLoadNum; int TexLoadNum).
 // [R] cRider_loadRider: cMemMan_alloc(0x2948, "LoadList") into cRider::mLoadList, zeroes 0x2940 / 0x2944, adds the
-// model files (func_0011BD60, counting MdlLoadNum) and then the texture files after them (func_0011BE88, counting
+// model files (cRider_addPartModelsToLoadList, counting MdlLoadNum) and then the texture files after them (cRider_addPartTexturesToLoadList, counting
 // TexLoadNum). [Staged by views2 group A.]
 struct tRiderLoadList {
     tRiderLoader LoadList[40];      // 0x0000 [O]; [U] models first, then textures
-    int MdlLoadNum;                 // 0x2940 [O]; [R] 0; [U] func_0011BD60 counts the model files
-    int TexLoadNum;                 // 0x2944 [O]; [R] 0; [U] func_0011BE88 counts the texture files (after the models)
+    int MdlLoadNum;                 // 0x2940 [O]; [R] 0; [U] cRider_addPartModelsToLoadList counts the model files
+    int TexLoadNum;                 // 0x2944 [O]; [R] 0; [U] cRider_addPartTexturesToLoadList counts the texture files (after the models)
 };
 
 CHECK_OFFSET(tRiderLoadList, LoadList, 0x0000);
@@ -374,7 +374,7 @@ struct cRiderState {
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (cRider_getPosition)
     /* 0x120 */ t4Vector mRotation; // [P] getRotation (unshifted); quaternion, normalised by updateOrientationImplicit
-    /* 0x130 */ t4Vector mRootPoseOverridePos; // [X] moved by AddEq by the wall-hit displacement (func_00137138)
+    /* 0x130 */ t4Vector mRootPoseOverridePos; // [X] moved by AddEq by the wall-hit displacement (cWipeoutMotion_resolveThrownBoard)
     /* 0x140 */ t4Vector mRootPoseOverrideRot; // [O] On Tour's BoardOrientation (tPose {P, Q}) sits where
                 // mRootPoseOverridePos / this field do (Q, the rotation quaternion; name ours, after [X]'s Pos);
                 // [U] cRider_updateSkeleton copies it into the board root bone's rotation when
@@ -584,15 +584,15 @@ struct cRider : public cRiderState, public cBeing {
                 // (cRider_isSafeToDelete)
     /* 0x88C */ void* mAttachedEmitterFX; // [X] object with its vptr at +0xA4
     /* 0x890 */ void* mBoltOnFX; // [X] object with its vptr at +0xC4
-    /* 0x894 */ void* mLoadList; // [X] anim name table; two different views in func_0011BD60 / func_0011BE88
-    // mLOD values (names ours). [U] func_00121F30 picks them by the scaled depth in front of the camera (below 6, below
-    // 10, else); func_002E2550 runs all spray emitters at kLOD_Near, fewer at kLOD_Mid, two at kLOD_Far.
+    /* 0x894 */ void* mLoadList; // [X] anim name table; two different views in cRider_addPartModelsToLoadList / cRider_addPartTexturesToLoadList
+    // mLOD values (names ours). [U] cRider_updateLOD picks them by the scaled depth in front of the camera (below 6, below
+    // 10, else); cDynamicSprayFX_selectEmittersForLOD runs all spray emitters at kLOD_Near, fewer at kLOD_Mid, two at kLOD_Far.
     enum eRiderLOD { kLOD_Near = 0, kLOD_Mid = 1, kLOD_Far = 2 };
-    /* 0x898 */ int mLOD; // [U] 0-2 from camera distance (func_00121F30)
+    /* 0x898 */ int mLOD; // [U] 0-2 from camera distance (cRider_updateLOD)
     /* 0x89C */ int mBoneHips; // [X] index into mAnimModel's 0x20-byte transform array
     /* 0x8A0 */ int mBoneBoardRoot; // [X] same array
     /* 0x8A4 */ int mBoneBoardChild; // [X] second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (cRider_updateSkeleton)
-    /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, func_002D5048)
+    /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, cAngerFX_render)
     /* 0x8AC */ char unk_8AC[0x4];
     /* 0x8B0 */ int LHandSkelIndex; // [O] cRider::LHandSkelIndex (+0x1460; On Tour's Head, MidSpine, LHand, LForearm,
                                     //     RHand, RForearm follow BoardChild as here, minus its ski / pole indices); [U]

@@ -93,8 +93,8 @@ CHECK_SIZE(cGMBigAirHandler, 0x7C);
 
 // cGMRaceHandler: the three-heat race event (offline event 0). Vtable 0x0047CF38 (cGMRaceHandler_vtbl): init cGMRaceHandler_init,
 // riderGateHit cGMRaceHandler_riderGateHit, raceFinish cGMRaceHandler_raceFinish, writeToReplayFrame cGMRaceHandler_writeToReplayFrame /
-// readFromReplayFrame cGMRaceHandler_readFromReplayFrame (the whole 0xD0 bytes); non-virtual helpers func_0023A4F0 (build the heat
-// line-ups), func_0023A668 (apply a line-up).
+// readFromReplayFrame cGMRaceHandler_readFromReplayFrame (the whole 0xD0 bytes); non-virtual helpers cGMRaceHandler_buildHeatLineups (build the heat
+// line-ups), cGMRaceHandler_applyHeatLineup (apply a line-up).
 struct cGMRaceHandler : public cGameModeHandler {
     // 0x00: the vptr: [R] cGMRaceHandler_vtbl; the dtor cGMRaceHandler__cGMRaceHandler stores the base's
     int unk_04;                     // 0x04 no access seen (inside the replay copy only)
@@ -102,8 +102,8 @@ struct cGMRaceHandler : public cGameModeHandler {
                                     //      clears it; raceFinish sets it (and mHeat3Ready) when the heat is repeated
     int mHeat3Ready;                // 0x0C [U] init: heat 3's set-up runs only while it is 0; heats 1 and 2 clear it;
                                     //      raceFinish sets it on a repeat
-    int mLineup[3][6];              // 0x10 [U] per heat, six character ids (the player's first): func_0023A4F0 fills
-                                    //      heat 1 and the random slots of heats 2-3, init fills the rest, func_0023A668
+    int mLineup[3][6];              // 0x10 [U] per heat, six character ids (the player's first): cGMRaceHandler_buildHeatLineups fills
+                                    //      heat 1 and the random slots of heats 2-3, init fills the rest, cGMRaceHandler_applyHeatLineup
                                     //      copies row iHeatNum - 1 into cGameModeMan's iCharacters
     unsigned int uiTime[3][10];     // 0x58 [O] uiTime (On Tour [62][3], rider-major); [U] retail is heat-major:
                                     //      init fills rows with 9s, raceFinish stores tbl[heat][rider] (360000 = DNF)

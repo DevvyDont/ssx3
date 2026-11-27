@@ -10,10 +10,10 @@ D_0 = 0x0;
 D_004D1C68 = 0x4D1C68;
 D_004D37A8 = 0x4D37A8;
 D_004D3AC8 = 0x4D3AC8;
-/* Static-init table targets named only by config/reloc_addrs.txt (func_0035FE10, batch b12 round 2). */
+/* Static-init table targets named only by config/reloc_addrs.txt (__sti__all_in_one_object_cpp, batch b12 round 2). */
 D_004FFAB0 = 0x4FFAB0;
 D_004FFB00 = 0x4FFB00;
-/* Named only by config/reloc_addrs.txt (2026-10-24): cOVState_REWARDS_updateMenu's str_up / str_down and func_001673F8's
+/* Named only by config/reloc_addrs.txt (2026-10-24): cOVState_REWARDS_updateMenu's str_up / str_down and __sti__all_in_one_camera_cpp's
    D_004C5100. */
 str_up = 0x4A2570;
 str_down = 0x4A2578;

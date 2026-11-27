@@ -124,7 +124,7 @@ enum eGMTexelFormat {
 
 // How a texture holds its VRAM (the lockType of cTextureMan_AddTexture / cPS2GraphicsMan_AddTexture). [O] On Tour's
 // enum eGMTexLockType (AddTexture(..., eGMTexLockType lockType, ...)), names and values; [U] retail fits:
-// cTextureMan_AddTexture leaves a GM_TEXTYPE_DYNAMIC texture's VRAM to the bind (func_00368660), allocates it at once
+// cTextureMan_AddTexture leaves a GM_TEXTYPE_DYNAMIC texture's VRAM to the bind (cTextureMan_ensureContextTextures), allocates it at once
 // for GM_TEXTYPE_LOCKED and for GM_TEXTYPE_WINDOW (0x2000 bytes more, locked, 32-block aligned), which
 // cTextureMan_AddLockedFrameTexture passes for its render-target texture.
 enum eGMTexLockType {
@@ -140,7 +140,7 @@ public:
     int m_SnowSparkleTextureId[8];  // 0x04C [O]; [U] ditto
     int m_RimTextureId[8];          // 0x06C [O]; [U] ditto
     int m_isInNIS[8];               // 0x08C [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
-    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]; func_0038D690 reads [6]
+    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]; cPS2BezierMan_addSnowSparklePass reads [6]
                                     //       (+0xC4) as the patch subdivision scale
     float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto
     float m_FogDensity[8];          // 0x0EC [O]; [U] ditto
@@ -445,7 +445,7 @@ CHECK_SIZE(cGraphicsMan, 0x10DC);
 // One board trail handed to cGraphicsMan::RenderMultipleBoardTrails (On Tour struct BoardTrailInfoT, 0x14;
 // [O] RenderMultipleBoardTrails(BoardTrailInfoT* pTrails, int nTrails), retail vtable slot 89,
 // cPS2GraphicsMan_RenderMultipleBoardTrails). [R] cPS2GraphicsMan_RenderMultipleBoardTrails reads the array at a 0x14
-// stride (its view sPartStrip_6D10) and cBoardTrailFX's renderer (func_002EA538, view sTrailStripA538) fills one per
+// stride (its view sPartStrip_6D10) and cBoardTrailFX's renderer (renderBoardTrails, view sTrailStripA538) fills one per
 // trail at these offsets.
 struct BoardTrailInfoT {
     tBxVertex** verts;              // 0x00 [O]; [R] the trail's vertex strips (cBoardTrailFX::BufVerts)

@@ -13,7 +13,7 @@
 // (main/all_in_one_main); destructor cFEStateNet__cFEStateNet. Retail vtable _vt$11cFEStateNet = cFEStateNet_vtbl (32 slots; slots 24-31
 // are its own virtuals: func_001DE868, cFEStateNet_validatePushState, cFEStateNet_pollPendingMessages, cFEStateNet_blinkPendingHints, func_001DE870, cFEStateNet_isProcessingEvents,
 // cFEStateNet_onNetEvent, cFEStateNet_publishPresence). Methods: fe/feasyncfile 0x1A8500-0x1ABED8, plus the out-of-line inlines
-// cFEStateNet_onInputBegin/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/cFEStateNet_isProcessingEvents in main/all_in_one_main.
+// cFEStateNet_onInputBegin/func_001DE868/func_001DE870/cFEStateNet_setLeavingOnline/cFEStateNet_setUserPopupOpen/cFEStateNet_isProcessingEvents in main/all_in_one_main.
 // EA source: probably d:/ssx/code/source/fe/festatenet.cpp (the preview's assert strings name its subclasses' files,
 // festatenetmessenger.cpp, festatenetlobby.cpp ..., not this one).
 //
@@ -108,7 +108,7 @@ struct cFEStateNet : public cUIState {
     int mDisconnectPopupOpen;       // 0x6AC [R] 0; [U] cFEStateNet_showDisconnectPopup sets it when it opens the
                                     //       "kT_POPUPCMNNetInterrupted" / "kT_POPUPCMNDisconnected" popup (only when
                                     //       clear); cFEStateNet_onDisconnectedPopupEvent/cFEStateNet_onNetInterruptedPopupEvent clear it, cFEStateNetMessenger_onNetEvent tests it
-    int mLeavingOnline;             // 0x6B0 (name ours) [R] 0; [U] set to 1 by func_001DE890 (inline setter) and by
+    int mLeavingOnline;             // 0x6B0 (name ours) [R] 0; [U] set to 1 by cFEStateNet_setLeavingOnline (inline setter) and by
                                     //       cFEStateLogin_onNetConfigPopupEvent / cFEStateOnlineMainMenu_onLogOffPopupEvent as they leave for the network config or
                                     //       main menu and log off; no read seen
     int mEventPending;              // 0x6B4 [R] 0; [U] handleEvent cFEStateNet_handleEvent: 1 while a net event
@@ -122,7 +122,7 @@ struct cFEStateNet : public cUIState {
                                     //       returns the text: the user name passed to the session calls
                                     //       (BuddyMan_sendMessage); the messenger sets it to the selected buddy
                                     //       (cFEStateNetMessenger_onFoundUserPopupEvent)
-    int mUserPopupOpen;             // 0x6C4 (name ours) [R] 0; [U] func_001DE8A0 (inline setter) and cFEStateNet_openUserPopup
+    int mUserPopupOpen;             // 0x6C4 (name ours) [R] 0; [U] cFEStateNet_setUserPopupOpen (inline setter) and cFEStateNet_openUserPopup
                                     //       (opens the user-actions popup) set it, the popup's actions clear it;
                                     //       cFEStateNet_openPlayerMessages / cFEStateNet_refreshUserPopup rebuild that popup only when it and mpPopup
                                     //       are set

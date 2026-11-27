@@ -27,7 +27,7 @@ struct cBXString;
 // An EA STL vector of cBXString* (0x10 bytes; the begin/end/capacity triple follows one word).
 struct tFEStringPtrVector {
     int unk_00;                     // 0x0 never read or written directly; the vector's address (0x6E4) is what the
-                                    //     vector helpers (func_001DB778 insert) take
+                                    //     vector helpers (tFEStringPtrVector_insertAux insert) take
     cBXString** mpStart;            // 0x4 [R] 0; [U] element i = mpStart[i]; size = mpFinish - mpStart
     cBXString** mpFinish;           // 0x8 [R] 0; [U] push_back stores here and advances it, cFEStateNetMessenger_clearNames pops from it
     cBXString** mpEndOfStorage;     // 0xC [R] 0; [U] push_back compares mpFinish with it; the dtor frees

@@ -303,7 +303,7 @@ void RoomMenu::updateusers(LobbyMan* src)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB718);
+INCLUDE_ASM("main/all_in_one_main", tLobbyEventList_clear);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
@@ -314,7 +314,7 @@ void operator_delete(int*);
  * the head's next and prev to the head. The head itself is kept. The LobbyMan destructor uses it on mEventList; the
  * async-file and lobby-tag code use it on their own lists.
  */
-extern "C" void func_001DB718(tLobbyEventList *self) {
+extern "C" void tLobbyEventList_clear(tLobbyEventList *self) {
     typedef _List_node<online_Event*> Node;
     Node *node = (Node*)((Node*)self->mpHead)->_M_next;
     while (node != ((Node*)self->mpHead)) {
@@ -328,7 +328,7 @@ extern "C" void func_001DB718(tLobbyEventList *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB778);
+INCLUDE_ASM("main/all_in_one_main", tFEStringPtrVector_insertAux);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tagDB778(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -394,7 +394,7 @@ static inline cBXString** sPtrVecDB778_copy_backward(cBXString** first, cBXStrin
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB778(tFEStringPtrVector* self, cBXString** pos, cBXString* const& x)
+extern "C" void tFEStringPtrVector_insertAux(tFEStringPtrVector* self, cBXString** pos, cBXString* const& x)
 {
     if (self->mpFinish != self->mpEndOfStorage) {
         if (self->mpFinish != 0)
@@ -421,7 +421,7 @@ extern "C" void func_001DB778(tFEStringPtrVector* self, cBXString** pos, cBXStri
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB918);
+INCLUDE_ASM("main/all_in_one_main", tFEPrivateMessageVector_insertAux);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tagDB918(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -479,7 +479,7 @@ static inline cPrivateMessage** sPtrVecDB918_copy_backward(cPrivateMessage** fir
 /**
  * Inserts a pointer into a vector of cPrivateMessage pointers at a position, growing the storage when it is full.
  *
- * The same EA STL vector insert helper as func_001DB778, instantiated for the read-message popup's
+ * The same EA STL vector insert helper as tFEStringPtrVector_insertAux, instantiated for the read-message popup's
  * tFEPrivateMessageVector: with spare capacity it shifts [pos, finish) up by one (func_0041610C) and stores the value;
  * when full it allocates twice the old size (1 when empty) from "StlBlock", copies both halves around the new value,
  * frees the old block and updates start, finish and end of storage.
@@ -489,7 +489,7 @@ static inline cPrivateMessage** sPtrVecDB918_copy_backward(cPrivateMessage** fir
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB918(tFEPrivateMessageVector* self, cPrivateMessage** pos, cPrivateMessage* const& x)
+extern "C" void tFEPrivateMessageVector_insertAux(tFEPrivateMessageVector* self, cPrivateMessage** pos, cPrivateMessage* const& x)
 {
     if (self->mpFinish != self->mpEndOfStorage) {
         if (self->mpFinish != 0)
@@ -2587,7 +2587,7 @@ void cScreenKeyboard::cursorLeft()
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD6A8);
+INCLUDE_ASM("main/all_in_one_main", cFEState_cFEState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_D6A8(void*, int) __asm__("cUIState_cUIState");
@@ -2599,7 +2599,7 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD6A8(cFEState* self) {
+extern "C" void* cFEState_cFEState(cFEState* self) {
     cUIState_cUIState_D6A8(self, 0);
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     return ((void*)self);
@@ -2607,7 +2607,7 @@ extern "C" void* func_001DD6A8(cFEState* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD6E0);
+INCLUDE_ASM("main/all_in_one_main", cFEState_cFEState1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_D6E0(void*) __asm__("cUIState_cUIState");
@@ -2621,7 +2621,7 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD6E0(cFEState* self) {
+extern "C" void* cFEState_cFEState1(cFEState* self) {
     cUIState_cUIState_D6E0(self);
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     return ((void*)self);
@@ -2629,7 +2629,7 @@ extern "C" void* func_001DD6E0(cFEState* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD718);
+INCLUDE_ASM("main/all_in_one_main", cFEState_cFEState2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState1_D718(void*) __asm__("cUIState_cUIState1");
@@ -2643,7 +2643,7 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD718(cFEState* self) {
+extern "C" void* cFEState_cFEState2(cFEState* self) {
     cUIState_cUIState1_D718(self);
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     return ((void*)self);
@@ -3193,7 +3193,7 @@ int cPopupInfo::getUseCenterAlignedText()
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's message to an ASCII string: mtMessage (+0x4) becomes type 2 with the string pointer at +0x8.
@@ -3201,14 +3201,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the ASCII string
  */
-extern "C" void func_001DDA30(cPopupInfo* popupInfo, int message) {
+extern "C" void cPopupInfo_setPopupMessage(cPopupInfo* popupInfo, int message) {
     ((int)popupInfo->mtMessage.ui) = message;
     popupInfo->mtMessage.eType = 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage1);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's message to a Unicode string: mtMessage (+0x4) becomes type 1 with the string pointer at +0x8.
@@ -3216,14 +3216,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the 16-bit string
  */
-extern "C" void func_001DDA40(cPopupInfo* popupInfo, int message) {
+extern "C" void cPopupInfo_setPopupMessage1(cPopupInfo* popupInfo, int message) {
     ((int)popupInfo->mtMessage.ui) = message;
     popupInfo->mtMessage.eType = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage2);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's message to a localised text id: mtMessage (+0x4) becomes type 3 with the id at +0x8.
@@ -3231,14 +3231,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param messageId  the text hash id
  */
-extern "C" void func_001DDA50(cPopupInfo* popupInfo, int messageId) {
+extern "C" void cPopupInfo_setPopupMessage2(cPopupInfo* popupInfo, int messageId) {
     ((int)popupInfo->mtMessage.ui) = messageId;
     popupInfo->mtMessage.eType = 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA60);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage3);
 #ifdef SKIP_ASM
 /**
  * Copies a whole popup element (type and value, 8 bytes) into a popup's message, mtMessage (+0x4).
@@ -3246,7 +3246,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA60);
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDA60(cPopupInfo* dst, tPopupElement* src) {
+extern "C" void cPopupInfo_setPopupMessage3(cPopupInfo* dst, tPopupElement* src) {
     dst->mtMessage = *src;
 }
 #endif
@@ -3266,7 +3266,7 @@ extern "C" int cPopupInfo_getPopupMessage(int popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's title to an ASCII string: mtTitle (+0xC) becomes type 2 with the string pointer at +0x10.
@@ -3274,14 +3274,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the ASCII string
  */
-extern "C" void func_001DDA80(cPopupInfo* popupInfo, int title) {
+extern "C" void cPopupInfo_setPopupTitle(cPopupInfo* popupInfo, int title) {
     ((int)popupInfo->mtTitle.ui) = title;
     popupInfo->mtTitle.eType = 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle1);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's title to a Unicode string: mtTitle (+0xC) becomes type 1 with the string pointer at +0x10.
@@ -3289,14 +3289,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the 16-bit string
  */
-extern "C" void func_001DDA90(cPopupInfo* popupInfo, int title) {
+extern "C" void cPopupInfo_setPopupTitle1(cPopupInfo* popupInfo, int title) {
     ((int)popupInfo->mtTitle.ui) = title;
     popupInfo->mtTitle.eType = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAA0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle2);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's title to a localised text id: mtTitle (+0xC) becomes type 3 with the id at +0x10.
@@ -3304,14 +3304,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAA0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param titleId  the text hash id
  */
-extern "C" void func_001DDAA0(cPopupInfo* popupInfo, int titleId) {
+extern "C" void cPopupInfo_setPopupTitle2(cPopupInfo* popupInfo, int titleId) {
     ((int)popupInfo->mtTitle.ui) = titleId;
     popupInfo->mtTitle.eType = 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAB0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle3);
 #ifdef SKIP_ASM
 /**
  * Copies a whole popup element (type and value) into a popup's title, mtTitle (+0xC).
@@ -3319,7 +3319,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAB0);
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDAB0(cPopupInfo* dst, tPopupElement* src) {
+extern "C" void cPopupInfo_setPopupTitle3(cPopupInfo* dst, tPopupElement* src) {
     dst->mtTitle = *src;
 }
 #endif
@@ -3339,7 +3339,7 @@ extern "C" int cPopupInfo_getPopupTitle(int popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAD0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's entry-box title to an ASCII string: mtEntryBoxTitle (+0x14) becomes type 2 with the pointer at +0x18.
@@ -3347,14 +3347,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAD0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the ASCII string
  */
-extern "C" void func_001DDAD0(cPopupInfo* popupInfo, int entryBoxTitle) {
+extern "C" void cPopupInfo_setPopupEntryBoxTitle(cPopupInfo* popupInfo, int entryBoxTitle) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
     popupInfo->mtEntryBoxTitle.eType = 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAE0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle1);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's entry-box title to a Unicode string: mtEntryBoxTitle (+0x14) becomes type 1 with the pointer at +0x18.
@@ -3362,14 +3362,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAE0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the 16-bit string
  */
-extern "C" void func_001DDAE0(cPopupInfo* popupInfo, int entryBoxTitle) {
+extern "C" void cPopupInfo_setPopupEntryBoxTitle1(cPopupInfo* popupInfo, int entryBoxTitle) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
     popupInfo->mtEntryBoxTitle.eType = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAF0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle2);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's entry-box title to a localised text id: mtEntryBoxTitle (+0x14) becomes type 3 with the id at +0x18.
@@ -3377,14 +3377,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAF0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitleId  the text hash id
  */
-extern "C" void func_001DDAF0(cPopupInfo* popupInfo, int entryBoxTitleId) {
+extern "C" void cPopupInfo_setPopupEntryBoxTitle2(cPopupInfo* popupInfo, int entryBoxTitleId) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitleId;
     popupInfo->mtEntryBoxTitle.eType = 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB00);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle3);
 #ifdef SKIP_ASM
 /**
  * Copies a whole popup element (type and value) into a popup's entry-box title, mtEntryBoxTitle (+0x14).
@@ -3392,7 +3392,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB00);
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDB00(cPopupInfo* dst, tPopupElement* src) {
+extern "C" void cPopupInfo_setPopupEntryBoxTitle3(cPopupInfo* dst, tPopupElement* src) {
     dst->mtEntryBoxTitle = *src;
 }
 #endif
@@ -3412,7 +3412,7 @@ extern "C" int cPopupInfo_getPopupEntryBoxTitle(int popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB20);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial);
 #ifdef SKIP_ASM
 /**
  * Sets the text a popup's entry box starts with to an ASCII string: mtEntryBoxInitial (+0x1C) becomes type 2 with the
@@ -3421,14 +3421,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB20);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the ASCII string
  */
-extern "C" void func_001DDB20(cPopupInfo* popupInfo, int entryBoxInitial) {
+extern "C" void cPopupInfo_setPopupEntryBoxInitial(cPopupInfo* popupInfo, int entryBoxInitial) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
     popupInfo->mtEntryBoxInitial.eType = 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB30);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial1);
 #ifdef SKIP_ASM
 /**
  * Sets the text a popup's entry box starts with to a Unicode string: mtEntryBoxInitial (+0x1C) becomes type 1 with the
@@ -3437,14 +3437,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB30);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the 16-bit string
  */
-extern "C" void func_001DDB30(cPopupInfo* popupInfo, int entryBoxInitial) {
+extern "C" void cPopupInfo_setPopupEntryBoxInitial1(cPopupInfo* popupInfo, int entryBoxInitial) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
     popupInfo->mtEntryBoxInitial.eType = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB40);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial2);
 #ifdef SKIP_ASM
 /**
  * Sets the text a popup's entry box starts with to a localised text id: mtEntryBoxInitial (+0x1C) becomes type 3 with
@@ -3453,14 +3453,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB40);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitialId  the text hash id
  */
-extern "C" void func_001DDB40(cPopupInfo* popupInfo, int entryBoxInitialId) {
+extern "C" void cPopupInfo_setPopupEntryBoxInitial2(cPopupInfo* popupInfo, int entryBoxInitialId) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitialId;
     popupInfo->mtEntryBoxInitial.eType = 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB50);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial3);
 #ifdef SKIP_ASM
 /**
  * Copies a whole popup element (type and value) into the text a popup's entry box starts with, mtEntryBoxInitial
@@ -3469,7 +3469,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB50);
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDB50(cPopupInfo* dst, tPopupElement* src) {
+extern "C" void cPopupInfo_setPopupEntryBoxInitial3(cPopupInfo* dst, tPopupElement* src) {
     dst->mtEntryBoxInitial = *src;
 }
 #endif
@@ -3489,7 +3489,7 @@ extern "C" int cPopupInfo_getPopupEntryBoxInitial(int popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB70);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's "post pending" text to an ASCII string: mtPostPending (+0x4C) becomes type 2 with the pointer at
@@ -3498,14 +3498,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB70);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the ASCII string
  */
-extern "C" void func_001DDB70(cPopupInfo* popupInfo, int postPending) {
+extern "C" void cPopupInfo_setPopupPostPending(cPopupInfo* popupInfo, int postPending) {
     ((int)popupInfo->mtPostPending.ui) = postPending;
     popupInfo->mtPostPending.eType = 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB80);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending1);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's "post pending" text to a Unicode string: mtPostPending (+0x4C) becomes type 1 with the pointer at
@@ -3514,14 +3514,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB80);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the 16-bit string
  */
-extern "C" void func_001DDB80(cPopupInfo* popupInfo, int postPending) {
+extern "C" void cPopupInfo_setPopupPostPending1(cPopupInfo* popupInfo, int postPending) {
     ((int)popupInfo->mtPostPending.ui) = postPending;
     popupInfo->mtPostPending.eType = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB90);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending2);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's "post pending" text to a localised text id: mtPostPending (+0x4C) becomes type 3 with the id at +0x50.
@@ -3529,14 +3529,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB90);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPendingId  the text hash id
  */
-extern "C" void func_001DDB90(cPopupInfo* popupInfo, int postPendingId) {
+extern "C" void cPopupInfo_setPopupPostPending2(cPopupInfo* popupInfo, int postPendingId) {
     ((int)popupInfo->mtPostPending.ui) = postPendingId;
     popupInfo->mtPostPending.eType = 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDBA0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending3);
 #ifdef SKIP_ASM
 /**
  * Copies a whole popup element (type and value) into a popup's "post pending" text, mtPostPending (+0x4C).
@@ -3544,7 +3544,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBA0);
  * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void func_001DDBA0(cPopupInfo* dst, tPopupElement* src) {
+extern "C" void cPopupInfo_setPopupPostPending3(cPopupInfo* dst, tPopupElement* src) {
     dst->mtPostPending = *src;
 }
 #endif
@@ -4547,7 +4547,7 @@ extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(cFEStateProfileLoad* s
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE240);
+INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad_cFEStateProfileLoad1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
@@ -4561,7 +4561,7 @@ extern int cFEStateProfileLoad_vtbl_E240[] __asm__("cFEStateProfileLoad_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE240(cFEStateProfileLoad* self) {
+extern "C" void *cFEStateProfileLoad_cFEStateProfileLoad1(cFEStateProfileLoad* self) {
     cFEMemCard_cFEMemCard_E240(self, 0, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateProfileLoad_vtbl_E240;
     return ((void*)self);
@@ -5083,7 +5083,7 @@ extern "C" void cFEStateEventSelect_onMenuGainFocus(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE558);
+INCLUDE_ASM("main/all_in_one_main", cFEStateBackground_cFEStateBackground1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E558(void *, int) __asm__("cUIState_cUIState");
@@ -5095,7 +5095,7 @@ extern int cFEStateBackground_vtbl_E558[] __asm__("cFEStateBackground_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE558(cFEStateBackground* self) {
+extern "C" void *cFEStateBackground_cFEStateBackground1(cFEStateBackground* self) {
     cUIState_cUIState_E558(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateBackground_vtbl_E558;
     return ((void*)self);
@@ -5146,7 +5146,7 @@ extern "C" void* cFEStateBackground__cFEStateBackground(cFEStateBackground* self
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE5F0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateTransition_cFEStateTransition1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E5F0(void *, int) __asm__("cUIState_cUIState");
@@ -5160,7 +5160,7 @@ extern int cFEStateTransition_vtbl_E5F0[] __asm__("cFEStateTransition_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE5F0(cFEStateTransition* self) {
+extern "C" void *cFEStateTransition_cFEStateTransition1(cFEStateTransition* self) {
     cUIState_cUIState_E5F0(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateTransition_vtbl_E5F0;
     return ((void*)self);
@@ -5462,7 +5462,7 @@ extern "C" bool cFEStateNet_fePathIsOnline(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE890);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_setLeavingOnline);
 #ifdef SKIP_ASM
 /**
  * Sets an online state's mLeavingOnline to 1.
@@ -5471,13 +5471,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE890);
  *
  * @param feStateNet  the online state (cFEStateNet)
  */
-extern "C" void func_001DE890(cFEStateNet* feStateNet) {
+extern "C" void cFEStateNet_setLeavingOnline(cFEStateNet* feStateNet) {
     feStateNet->mLeavingOnline = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_setUserPopupOpen);
 #ifdef SKIP_ASM
 /**
  * Sets an online state's mUserPopupOpen; cFEStateNet_openPlayerMessages opens the status popup only when it and mpPopup are set.
@@ -5485,7 +5485,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
  * @param feStateNet  the online state (cFEStateNet)
  * @param value  the new value
  */
-extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int value) {
+extern "C" void cFEStateNet_setUserPopupOpen(cFEStateNet* feStateNet, int value) {
     feStateNet->mUserPopupOpen = value;
 }
 #endif

@@ -48,7 +48,7 @@ rom:0x24917C reloc:MIPS_LO16 symbol:D_004FF6C0
 // object/animnode cFloatingNode_cFloatingNode (tools/gen/reloc_from_diff.py)
 rom:0x24FC84 reloc:MIPS_HI16 symbol:cFloatingNode_vtbl
 rom:0x24FC8C reloc:MIPS_LO16 symbol:cFloatingNode_vtbl
-// camera/camera func_0015E2A8 (tools/gen/reloc_from_diff.py)
+// camera/camera InitCamShakeValuesTable (tools/gen/reloc_from_diff.py)
 rom:0x5F30C reloc:MIPS_LO16 symbol:kCamShakeDependsOnDistance
 // be/belibrary cBELibrary_writeToData (tools/gen/reloc_from_diff.py)
 rom:0x4B1B0 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
@@ -312,7 +312,7 @@ rom:0xFB458 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
 rom:0xFB55C reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
 rom:0xFB664 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
 rom:0xFB770 reloc:MIPS_HI16 symbol:cBENetworkInterface_networkOpt
-// object/railmodifier func_0035FE10 (tools/gen/reloc_from_diff.py)
+// object/railmodifier __sti__all_in_one_object_cpp (tools/gen/reloc_from_diff.py)
 rom:0x260F7C reloc:MIPS_HI16 symbol:D_004FF940
 rom:0x261000 reloc:MIPS_LO16 symbol:D_004FF940
 rom:0x26108C reloc:MIPS_HI16 symbol:D_004FFA20
@@ -416,7 +416,7 @@ rom:0x14FDC4 reloc:MIPS_HI16 symbol:D_004C9780
 rom:0x14FDE8 reloc:MIPS_LO16 symbol:D_004C9780
 rom:0x14FE10 reloc:MIPS_LO16 symbol:D_004C9780
 rom:0x1500B4 reloc:MIPS_LO16 symbol:D_004C98D0
-// camera/camera func_001673F8 (tools/gen/reloc_from_diff.py)
+// camera/camera __sti__all_in_one_camera_cpp (tools/gen/reloc_from_diff.py)
 rom:0x68544 reloc:MIPS_HI16 symbol:D_004C5100
 rom:0x68564 reloc:MIPS_LO16 symbol:D_004C5100
 rom:0x68650 reloc:MIPS_LO16 symbol:D_004C5100

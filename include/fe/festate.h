@@ -6,8 +6,8 @@
 // (onGainFocus restores the "Menu" widget's selection from cFEFlowState entry (signed char)mHashName, onLoseFocus saves
 // it) and sets the controller filter / mask through the front end's custom interface. It adds no data.
 // EA's source file is not known (On Tour: fe/all_in_one_fe). Retail code: cFEState_onGainFocus / cFEState_onLoseFocus
-// in fe/festatecredits (0x00186518, 0x001865A8); the ctors func_001DD6A8 (engine 0), func_001DD6E0 (pEngine) and
-// func_001DD718 (pEngine, pParent: cUIState_cUIState1), the dtor cFEState__cFEState and setControllerFilter /
+// in fe/festatecredits (0x00186518, 0x001865A8); the ctors cFEState_cFEState (engine 0), cFEState_cFEState1 (pEngine) and
+// cFEState_cFEState2 (pEngine, pParent: cUIState_cUIState1), the dtor cFEState__cFEState and setControllerFilter /
 // setControllerMask in main/all_in_one_main (0x001DD6A8 ... 0x001DD800).
 //
 // Size 0x48:

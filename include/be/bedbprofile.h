@@ -63,7 +63,7 @@ struct tBEBoltDef {
     signed char storeNum;           // 0x02 [U] the store that sells it: cFEStateCharEquip's store lists an item only
                                     //      when this equals its mStoreNum (cFEStateCharEquip_isStoreCategoryEmpty, cFEStateCharEquip_buildItemList)
     char unk_03[0x1];               // 0x03
-    short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (func_0011BBE8,
+    short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (cRider_collectWornParts,
                                     //      cRider_OnStartObjectUse / OnEndObjectUse, beintecon, beintreward)
     char unk_06[0x8];               // 0x06
     short price;                    // 0x0E [U] the price in tens of dollars (kBoltPriceBuiltIn below; the equip

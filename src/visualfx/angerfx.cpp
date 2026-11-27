@@ -19,14 +19,14 @@ INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
 /**
  * Constructs an anger effect: allocates its two 0x2C-byte parts tagged "cAngerFX" and clears them.
  *
- * func_002D4BE0() fills the 0x58 bytes of the parts with zeros. In this unit's model the class derives
+ * cAngerFX_clearViewState() fills the 0x58 bytes of the parts with zeros. In this unit's model the class derives
  * virtually from cRider, so g++ also builds that base when constructing the complete object.
  */
 cAngerFX_ang::cAngerFX_ang()
 {
     cAngerPart_ang** slot = &parts;
     *slot = new (str_cAngerFX, 0, 0) cAngerPart_ang[2];
-    func_002D4BE0_erFX(this);
+    cAngerFX_clearViewState_erFX(this);
 }
 
 // PORT: the compiler names this ctor __12cAngerFX_angi; expose it under the address-derived name.
@@ -65,7 +65,7 @@ __asm__("_vt$15cVbDtor002D4A70$13cRiderVbC_agf = D_00488AC0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
+INCLUDE_ASM("visualfx/angerfx", cAngerFX_clearViewState);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int c, int n);
 
@@ -75,14 +75,14 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  * Calls MEM_fill. The cAngerFX constructor, cRiderHandler_resetRiderFX and cRiderHandler_readFromReplayFrame call it on
  * the cAngerFX at cRiderHandler + 0xAF0.
  */
-extern "C" void func_002D4BE0(cAngerFX* self)
+extern "C" void cAngerFX_clearViewState(cAngerFX* self)
 {
     MEM_fill(*(void**)((char*)self + 4), 0, 88);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D4C08);
+INCLUDE_ASM("visualfx/angerfx", cAngerFX_update);
 #ifdef SKIP_ASM
 void* cBEAggressionInterface_getThis();
 extern "C" int cBEAggressionInterface_getAggression(void* self, int a, int b);
@@ -150,7 +150,7 @@ static inline sPlayers_2D4C08* players_2D4C08()
  * Otherwise it stores the aggression between the two riders (cBEAggressionInterface_getAggression with both riders'
  * kRiderVt_getAIIndex) at +0x1C and picks the colour (+0x4..+0x13): D_004D5B30 for 4 or more, D_004D5B40 for 3,
  * D_004D5B50 for 2, D_004D5B60 below. The level moves toward 1.0 by 0.1 a frame at aggression 2 or more, otherwise
- * toward 0 by 1/15, and the colour's first float (drawn as the alpha by func_002D5048) becomes level * 0.8.
+ * toward 0 by 1/15, and the colour's first float (drawn as the alpha by cAngerFX_render) becomes level * 0.8.
  *
  * Three pulse counters follow: +0x20 (mod 41, started when the aggression changes), +0x24 (mod 31, started at
  * aggression 4 or more while +0x20 is 0) and +0x28 (mod 24, restarted when the aggression rises, forced to 0 while
@@ -158,7 +158,7 @@ static inline sPlayers_2D4C08* players_2D4C08()
  * D_00488EA0/D_00488FF0/D_004890F0 and D_00488F48/D_00489070/D_00489150 indexed by the three counters.
  * cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xAF0.
  */
-extern "C" void func_002D4C08(sAnger_2D4C08* self)
+extern "C" void cAngerFX_update(sAnger_2D4C08* self)
 {
     if (self->rider->isHuman() != 0) {
         return;
@@ -228,7 +228,7 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5048);
+INCLUDE_ASM("visualfx/angerfx", cAngerFX_render);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_2D5048 {
@@ -381,7 +381,7 @@ static inline void rsSetB_2D5048(sGfx_2D5048* g, int mask, int shift, int v)
  * fade) through GrMan's virtual slot 71 before popping the state. cRiderHandler_renderRiderFX and cAI_render call it on
  * cRiderHandler + 0xAF0.
  */
-extern "C" void func_002D5048(sAnger_2D4C08* self)
+extern "C" void cAngerFX_render(sAnger_2D4C08* self)
 {
     if (self->rider->isHuman() != 0) {
         return;

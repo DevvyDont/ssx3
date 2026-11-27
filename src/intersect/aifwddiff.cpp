@@ -188,19 +188,19 @@ void cAIFwdDiffCache::AddToHash(tAIFwdDiff* node)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_TesselatePatch);
 #ifdef SKIP_ASM
-extern "C" void func_00391418(void* t, void* a);
+extern "C" void vu0_runProgramWithMatrices(void* t, void* a);
 extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDiff* a);
-extern "C" void func_003914F8(void* t);
-extern "C" void func_00391480(void* t, void* a);
+extern "C" void vu0_waitReadVi1(void* t);
+extern "C" void vu0_readDataMemory(void* t, void* a);
 struct sGp2930 { int a, b; };
 extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
 
 /**
  * Tessellates a terrain patch into an AI forward-difference cache node on VU0.
  *
- * Loads the patch's 16 control points (+0x40) into VU0 and starts its micro-program (func_00391418), resets the node's
- * cached face data (cAIFwdDiffCache_InitializeCache) while VU0 runs, waits for it (func_003914F8) and copies the 10 x 10 evaluated
- * vertices from VU0 memory into the node (+0x10, func_00391480). The object at $gp+0x2930 passed to the VU0 helpers is
+ * Loads the patch's 16 control points (+0x40) into VU0 and starts its micro-program (vu0_runProgramWithMatrices), resets the node's
+ * cached face data (cAIFwdDiffCache_InitializeCache) while VU0 runs, waits for it (vu0_waitReadVi1) and copies the 10 x 10 evaluated
+ * vertices from VU0 memory into the node (+0x10, vu0_readDataMemory). The object at $gp+0x2930 passed to the VU0 helpers is
  * not used by them. Called by cAIFwdDiffCache_GetFwdDiff on a cache miss.
  *
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
@@ -209,10 +209,10 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
 void cAIFwdDiffCache::TesselatePatch(tPatchRecord* patch, tAIFwdDiff* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
-    func_00391418(patchEval, patch->m_fBm0);
+    vu0_runProgramWithMatrices(patchEval, patch->m_fBm0);
     InitializeCache(fwdDiff);
-    func_003914F8(patchEval);
-    func_00391480(patchEval, fwdDiff->mVertex);
+    vu0_waitReadVi1(patchEval);
+    vu0_readDataMemory(patchEval, fwdDiff->mVertex);
 }
 #endif
 

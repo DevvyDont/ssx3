@@ -6,7 +6,7 @@
 // class name (cPS2BezierMan_cPS2BezierMan__FPv, vtables.tsv); the allocation tag says "PS2BezierMan".
 // Size 0x9C90: [R] cBezierMan_construct__Fv (render/bezierman) does cMemMan_alloc(0x9C90, "PS2BezierMan") + the ctor
 // cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor cBezierMan_cBezierMan (vtable cBezierMan_vtbl, stores
-// TheBezierMan), vtable D_00493760, func_00372B30 on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
+// TheBezierMan), vtable D_00493760, cBezierCache_cBezierCache on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
 // then cBezierMan dtor cBezierMan__cBezierMan, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPS2BezierMan.
 // Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ cPS2BezierMan__cPS2BezierMan, 1 Init cPS2BezierMan_Init,
@@ -15,7 +15,7 @@
 // 10-12 EnableWireMode/EnableLightMaps/EnableShadows cPS2BezierMan_EnableWireMode/F0/F8__FPvi, 13-15 IsWireModeEnabled/
 // IsLightMapsEnabled/IsShadowsEnabled cPS2BezierMan_IsWireModeEnabled/08/10__FPv, 16 ClearPatches cPS2BezierMan_ClearPatches__FPv, 17 DrawPatches
 // cPS2BezierMan_DrawPatches, 18/19 SetPatchDist/GetPatchDist cBezierMan_SetPatchDist__FPvf / cBezierMan_GetPatchDist__FPv (cBezierMan's), 20 AddPatch
-// cPS2BezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (cBezierMan_vtbl):
+// cPS2BezierMan_AddPatch, 21 cPS2BezierMan_queuePatch (queues one patch by its edge LODs). cBezierMan's own slots (cBezierMan_vtbl):
 // cBezierMan_Reset__FPv (3), cBezierMan_UpdatePatchesCache__FPv (4), cBezierMan_AddPatch (21: calls slot 20). Non-virtual accessors:
 // cPS2BezierMan_GetVifCache (cache pointer + slot), cPS2BezierMan_GetBezST (lw 0x1A0), cPS2BezierMan_GetBezdST (lw 0x320).
 // Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (cBezierMan_cBezierMan stores it, cBezierMan__cBezierMan clears
@@ -30,16 +30,16 @@
 
 // A patch's tessellation (names ours, after the lists m4x4Patches / m6x6Patches / m8x8Patches): the n x n grid named by
 // its edge LODs (mEdgeLods; ePatchGrid) and the index of that grid's list and VIF cache (mLod; ePatchLod). [U]
-// func_0038B190 queues a patch whose four edge LODs are all kPatchGrid_4x4 / 6x6 / 8x8 into the list with mLod
-// kPatchLod_4x4 / 6x6 / 8x8; func_0038C788 / func_0038CA70 build an n x n grid for LOD index l with n = l * 2 + 4.
+// cPS2BezierMan_queuePatch queues a patch whose four edge LODs are all kPatchGrid_4x4 / 6x6 / 8x8 into the list with mLod
+// kPatchLod_4x4 / 6x6 / 8x8; cPS2BezierMan_buildVifCachePacket / cPS2BezierMan_emitUniformPatch build an n x n grid for LOD index l with n = l * 2 + 4.
 enum ePatchGrid { kPatchGrid_4x4 = 4, kPatchGrid_6x6 = 6, kPatchGrid_8x8 = 8 };
 enum ePatchLod { kPatchLod_4x4 = 0, kPatchLod_6x6 = 1, kPatchLod_8x8 = 2 };
 
-// One queued patch (0x10). [U] func_0038B190 stores mpPatch (a1), unk_04 (t0), mLod (0/1/2 for the 4x4/6x6/8x8 lists),
+// One queued patch (0x10). [U] cPS2BezierMan_queuePatch stores mpPatch (a1), unk_04 (t0), mLod (0/1/2 for the 4x4/6x6/8x8 lists),
 // and a halfword read from the patch record (+0x1A6/+0x1A8/+0x1AA) at 0xC.
 struct tBezierPatchEntry {
     void* mpPatch;                   // 0x0 [U]
-    int unk_04;                      // 0x4 [U] func_0038B190 stores its int argument; the draw paths index a
+    int unk_04;                      // 0x4 [U] cPS2BezierMan_queuePatch stores its int argument; the draw paths index a
                                      //     table with it (tbl + unk_04 * 8)
     int mLod;                        // 0x8 [U] 0, 1 or 2
     unsigned short unk_0C;           // 0xC [U] sh
@@ -72,8 +72,8 @@ struct cPS2BezierMan {
     void** mVtbl;                    // 0x0004 [R] cBezierMan_vtbl (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPS2BezierMan__cPS2BezierMan)
     // --- cPS2BezierMan
     char unk_0008[0x8];              // 0x0008 (no retail access found)
-    cBezierCache mPatchCache;        // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the
-                                     //        ctor and Init, func_003739D0 in Reset (render/beziercache.h; cPS2BezierMan_GetBezST
+    cBezierCache mPatchCache;        // 0x0010 [R] cBezierCache_cBezierCache / cBezierCache_allocateCaches(this + 0x10, 900, 220, 140, ...) in the
+                                     //        ctor and Init, cBezierCache_clearRecords in Reset (render/beziercache.h; cPS2BezierMan_GetBezST
                                      //        reads this + 0x1A0 = mPatchCache.mBasis, cPS2BezierMan_GetBezdST this +
                                      //        0x320 = mPatchCache.mDBasis)
     char unk_0330[0xC];              // 0x0330 (no retail access found; the 0x32C-byte span before mNearLODcm ends here)
@@ -89,14 +89,14 @@ struct cPS2BezierMan {
     void* mVifCache[3];              // 0x0440 [R] Init: new(0x38400, "4x4VifCache"), new(0xDC00, "6x6VifCache"),
                                      //        new(0x8C00, "8x8VifCache"); [U] Purge frees them
     void* mVifCachePos[3];           // 0x044C [R] Init copies mVifCache; [U] cPS2BezierMan_GetVifCache returns mVifCachePos[i] + (n << 8)
-    int mNum4x4Patches;              // 0x0458 [U] ClearPatches = 0; func_0038B190 appends (limit 900)
-    tBezierPatchEntry m4x4Patches[900];   // 0x045C [U] func_0038B190 (lod 4)
-    int mNum6x6Patches;              // 0x3C9C [U] ClearPatches = 0; func_0038B190 appends (limit 220)
-    tBezierPatchEntry m6x6Patches[220];   // 0x3CA0 [U] func_0038B190 (lod 6)
-    int mNum8x8Patches;              // 0x4A60 [U] ClearPatches = 0; func_0038B190 appends (limit 50)
-    tBezierPatchEntry m8x8Patches[50];    // 0x4A64 [U] func_0038B190 (lod 8)
-    int mNumMixedPatches;            // 0x4D84 [U] ClearPatches = 0; func_0038B190 appends (limit 75)
-    tBezierMixedPatchEntry mMixedPatches[75]; // 0x4D88 [U] func_0038B190 (edges differ)
+    int mNum4x4Patches;              // 0x0458 [U] ClearPatches = 0; cPS2BezierMan_queuePatch appends (limit 900)
+    tBezierPatchEntry m4x4Patches[900];   // 0x045C [U] cPS2BezierMan_queuePatch (lod 4)
+    int mNum6x6Patches;              // 0x3C9C [U] ClearPatches = 0; cPS2BezierMan_queuePatch appends (limit 220)
+    tBezierPatchEntry m6x6Patches[220];   // 0x3CA0 [U] cPS2BezierMan_queuePatch (lod 6)
+    int mNum8x8Patches;              // 0x4A60 [U] ClearPatches = 0; cPS2BezierMan_queuePatch appends (limit 50)
+    tBezierPatchEntry m8x8Patches[50];    // 0x4A64 [U] cPS2BezierMan_queuePatch (lod 8)
+    int mNumMixedPatches;            // 0x4D84 [U] ClearPatches = 0; cPS2BezierMan_queuePatch appends (limit 75)
+    tBezierMixedPatchEntry mMixedPatches[75]; // 0x4D88 [U] cPS2BezierMan_queuePatch (edges differ)
     char unk_5364[0x492C];           // 0x5364 [U] DrawPatches cPS2BezierMan_DrawPatches (sw 0x5364, ...); not laid out
 
     // Methods bound to their retail symbols by asm labels.

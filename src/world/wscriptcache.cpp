@@ -254,8 +254,8 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sBXStr_CBB8 { char *p; int pad[3]; sBXStr_CBB8() {} };
-extern "C" void func_003186D0_CBB8(sBXStr_CBB8*, const char*, int) __asm__("func_003186D0");
-extern "C" void func_00318630_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __asm__("func_00318630");
+extern "C" void cBXString_operatorPlus2_CBB8(sBXStr_CBB8*, const char*, int) __asm__("cBXString_operatorPlus2");
+extern "C" void cBXString_operatorPlus1_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __asm__("cBXString_operatorPlus1");
 extern "C" int ASYNCFILE_load_CBB8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
 extern char str_bar_e[];
@@ -273,8 +273,8 @@ void cWScriptCacheEntry::load(int fileName)
     sBXStr_CBB8 fullPath;
     sBXStr_CBB8 prefixed;
     mStreamed = 0;
-    func_003186D0_CBB8(&prefixed, str_bar_e, fileName);
-    func_00318630_CBB8(&fullPath, &prefixed, str_ssf);
+    cBXString_operatorPlus2_CBB8(&prefixed, str_bar_e, fileName);
+    cBXString_operatorPlus1_CBB8(&fullPath, &prefixed, str_ssf);
     mAsyncHandle = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
     cBXString_dt_CBB8(&fullPath, 2);
     cBXString_dt_CBB8(&prefixed, 2);
@@ -720,7 +720,7 @@ void sti_003AD290(int init, int prio) __asm__("func_003AD290");
  *
  * Fills 56 four-float constants (D_00509080 .. D_005093F0), zeroes D_004A5A70 and D_004A5A74, gives the 14 two-word
  * records D_004A5A78 .. D_004A5AE0 their index 0-13 (in the low byte and in the bits above it) and builds the three
- * shared DMA packets used by func_003AC048 and func_003AC508: D_00509400, D_00509410 and D_00509420 hold a zero
+ * shared DMA packets used by cPS2ChunkResolve_patchSubMeshChain and cPS2ChunkResolve_patchInstanceChain: D_00509400, D_00509410 and D_00509420 hold a zero
  * doubleword and a VIF MSCAL of the VU1 microprograms D_2400, D_2270 and D_22C8.
  *
  * @param init  1 to construct

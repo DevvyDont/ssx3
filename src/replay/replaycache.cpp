@@ -1854,7 +1854,7 @@ extern "C" void func_00272248(int *dest, int newValue) {
 }
 #endif
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272250);
+INCLUDE_ASM("replay/replaycache", cReplayFramePtr_setBlockPointer);
 #ifdef SKIP_ASM
 /**
  * Stores @p block in the word at +0x4 of @p framePtr (Block, for a cReplayFramePtr).
@@ -1864,7 +1864,7 @@ INCLUDE_ASM("replay/replaycache", func_00272250);
  * @param framePtr  the object to write
  * @param block  the value to store
  */
-extern "C" void func_00272250(cReplayFramePtr* framePtr, int block) {
+extern "C" void cReplayFramePtr_setBlockPointer(cReplayFramePtr* framePtr, int block) {
     framePtr->Block = (char*)block;
 }
 #endif
@@ -2018,7 +2018,7 @@ struct sRcBlock {
  *
  * Does nothing for a null pointer. The block header sits 8 bytes before @p pMem. The block is inserted into the
  * address-ordered free list (mpTopFreeBlock); a free block directly before it absorbs it, and it absorbs a free block
- * directly after it. cScriptMemOp's operator delete (func_002724E8) and the script channel and entity Stop methods free
+ * directly after it. cScriptMemOp's operator delete (operator_delete1) and the script channel and entity Stop methods free
  * through it.
  *
  * @param pMem           memory returned by cScriptHeap_AllocMem
@@ -2082,26 +2082,26 @@ void cScriptHeap::FreeMem(void* pMem)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00272488);
+INCLUDE_ASM("replay/replaycache", operator_new3);
 #ifdef SKIP_ASM
 extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
 extern int kScriptHeapPointerSize;
 
-// PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
-extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
+// PORT: real arity is (size, heap); the unit declares operator_new3(void*) for its callers.
+extern "C" void* operator_new3_impl(int size, void* heap) __asm__("operator_new3");
 /**
  * Allocates @p size bytes from script heap @p heap, with the heap pointer stored in front so the block can be freed
  * alone.
  *
  * Takes size + kScriptHeapPointerSize bytes with cScriptHeap_AllocMem, stores @p heap in the first word and returns the
- * memory after that header. func_002724E8 is the matching free. Declared in the unit with one argument; the real
+ * memory after that header. operator_delete1 is the matching free. Declared in the unit with one argument; the real
  * arguments are (size, heap), the form of cScriptMemOp's operator new.
  *
  * @param size  the number of bytes wanted
  * @param heap  the script heap to allocate from
  * @return the usable memory, just past the stored heap pointer
  */
-extern "C" void* func_00272488_impl(int size, void* heap)
+extern "C" void* operator_new3_impl(int size, void* heap)
 {
     char* heapBlock = (char*)cScriptHeap_AllocMem(heap, size + kScriptHeapPointerSize);
     *(void**)heapBlock = heap;
@@ -2109,41 +2109,41 @@ extern "C" void* func_00272488_impl(int size, void* heap)
 }
 #endif
 
-extern "C" void* func_00272488(void* self);
+extern "C" void* operator_new3(void* self);
 
 //99.29%
-INCLUDE_ASM("replay/replaycache", func_002724C8__FPv);
+INCLUDE_ASM("replay/replaycache", operator_new_array__FPv);
 #ifdef SKIP_ASM
 /**
- * Allocates script heap memory by forwarding its arguments (size, heap) to func_00272488.
+ * Allocates script heap memory by forwarding its arguments (size, heap) to operator_new3.
  *
  * Declared with only self; the size and heap stay in the argument registers. cScriptPlayerMain__cScriptPlayerMain uses it for its entity
  * player array.
  *
  * @return the allocated memory
  */
-void* func_002724C8(void* self)
+void* operator_new_array(void* self)
 {
-    return func_00272488(self);
+    return operator_new3(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002724E8);
+INCLUDE_ASM("replay/replaycache", operator_delete1);
 #ifdef SKIP_ASM
 extern int kScriptHeapPointerSize;
 
-// PORT: returns void; the unit declares func_002724E8 as returning void*.
-extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
+// PORT: returns void; the unit declares operator_delete1 as returning void*.
+extern "C" void operator_delete1_impl(void* p) __asm__("operator_delete1");
 /**
- * Frees memory from func_00272488: steps back over the stored heap pointer and returns the block to that script heap.
+ * Frees memory from operator_new3: steps back over the stored heap pointer and returns the block to that script heap.
  *
  * Reads the cScriptHeap pointer kScriptHeapPointerSize bytes before @p userBlock and calls cScriptHeap_FreeMem on it with the
  * block start. The script channel and entity destructors free themselves through it.
  *
- * @param userBlock  the memory func_00272488 returned
+ * @param userBlock  the memory operator_new3 returned
  */
-extern "C" void func_002724E8_impl(void* userBlock)
+extern "C" void operator_delete1_impl(void* userBlock)
 {
     char* userBytes = (char*)userBlock;
     char* allocBase = userBytes - kScriptHeapPointerSize;
@@ -2151,21 +2151,21 @@ extern "C" void func_002724E8_impl(void* userBlock)
 }
 #endif
 
-extern "C" void* func_002724E8(void* self);
+extern "C" void* operator_delete1(void* self);
 
 //99.29%
-INCLUDE_ASM("replay/replaycache", func_00272510__FPv);
+INCLUDE_ASM("replay/replaycache", operator_delete_array__FPv);
 #ifdef SKIP_ASM
 /**
- * Frees script heap memory by forwarding to func_002724E8.
+ * Frees script heap memory by forwarding to operator_delete1.
  *
- * cScriptPlayerMain_DeInit frees its entity player array (allocated with func_002724C8) through it.
+ * cScriptPlayerMain_DeInit frees its entity player array (allocated with operator_new_array) through it.
  *
- * @return func_002724E8's (meaningless) result
+ * @return operator_delete1's (meaningless) result
  */
-void* func_00272510(void* self)
+void* operator_delete_array(void* self)
 {
-    return func_002724E8(self);
+    return operator_delete1(self);
 }
 #endif
 
@@ -2173,24 +2173,24 @@ void* func_00272510(void* self)
 INCLUDE_ASM("replay/replaycache", func_00272530);
 #ifdef SKIP_ASM
 /**
- * Frees script heap memory by forwarding @p mem to func_002724E8.
+ * Frees script heap memory by forwarding @p mem to operator_delete1.
  *
- * @param mem  the memory func_00272488 returned
+ * @param mem  the memory operator_new3 returned
  */
 extern "C" void func_00272530(void *mem) {
-    func_002724E8(mem);
+    operator_delete1(mem);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272550);
 #ifdef SKIP_ASM
 /**
- * Frees script heap memory by forwarding @p userBlock to func_002724E8.
+ * Frees script heap memory by forwarding @p userBlock to operator_delete1.
  *
- * @param userBlock  the memory func_00272488 returned
+ * @param userBlock  the memory operator_new3 returned
  */
 extern "C" void func_00272550(void *userBlock) {
-    func_002724E8(userBlock);
+    operator_delete1(userBlock);
 }
 #endif
 
@@ -2354,8 +2354,8 @@ bool cScriptPlayerChannelSpline::Update(float currFrameNum)
 INCLUDE_ASM("replay/replaycache", cInSeq_cInSeq);
 #ifdef SKIP_ASM
 extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self);
-// PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
-void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
+// PORT: array new[] with a heap argument; same symbol as the unit's operator_new_array(void*).
+void* operator new[](unsigned int size, void* heap) __asm__("operator_new_array__FPv");
 
 // A pool node as new[] builds it: tScriptMainNode with its element constructor (cScriptPlayerMain's, on node + 8)
 // and a sized operator delete[] (with it new[] keeps an array cookie in front of the nodes).
@@ -2797,12 +2797,12 @@ extern "C" void* cScriptPlayerChannelBlock_cScriptPlayerChannelBlock(cScriptPlay
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock__cScriptPlayerChannelBlock);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerChannelBlock_Stop(cScriptPlayerChannelBlock* self);
-extern "C" void* func_002724E8(void* self);
+extern "C" void* operator_delete1(void* self);
 extern void* cScriptPlayerChannelBlock_vtbl[];
 
 /**
  * Destroys a block channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
- * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ * flags is set, frees it with operator_delete1 (On Tour cScriptMemOp::operator delete).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -2811,7 +2811,7 @@ extern "C" void cScriptPlayerChannelBlock__cScriptPlayerChannelBlock(cScriptPlay
     self->mVtbl = cScriptPlayerChannelBlock_vtbl;
     self->Stop();
     if (flags & 1) {
-        func_002724E8(self);
+        operator_delete1(self);
     }
 }
 #endif
@@ -3083,12 +3083,12 @@ extern "C" void* cScriptPlayerChannelEvent_cScriptPlayerChannelEvent(cScriptPlay
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent__cScriptPlayerChannelEvent);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerChannelEvent_Stop(cScriptPlayerChannelEvent* self);
-extern "C" void* func_002724E8(void* self);
+extern "C" void* operator_delete1(void* self);
 extern void* cScriptPlayerChannelEvent_vtbl[];
 
 /**
  * Destroys an event channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
- * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ * flags is set, frees it with operator_delete1 (On Tour cScriptMemOp::operator delete).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -3097,7 +3097,7 @@ extern "C" void cScriptPlayerChannelEvent__cScriptPlayerChannelEvent(cScriptPlay
     self->mVtbl = cScriptPlayerChannelEvent_vtbl;
     self->Stop();
     if (flags & 1) {
-        func_002724E8(self);
+        operator_delete1(self);
     }
 }
 #endif
@@ -3310,12 +3310,12 @@ extern "C" void* cScriptPlayerChannelObject_cScriptPlayerChannelObject(cScriptPl
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject__cScriptPlayerChannelObject);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerChannelObject_Stop(cScriptPlayerChannelObject* self);
-extern "C" void* func_002724E8(void* self);
+extern "C" void* operator_delete1(void* self);
 extern void* cScriptPlayerChannelObject_vtbl[];
 
 /**
  * Destroys an object channel: restores its vtable (+0x4), stops it (freeing its key buffer) and, when bit 0 of @p
- * flags is set, frees it with func_002724E8 (On Tour cScriptMemOp::operator delete).
+ * flags is set, frees it with operator_delete1 (On Tour cScriptMemOp::operator delete).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -3324,7 +3324,7 @@ extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(cScriptPl
     self->mVtbl = cScriptPlayerChannelObject_vtbl;
     self->Stop();
     if (flags & 1) {
-        func_002724E8(self);
+        operator_delete1(self);
     }
 }
 #endif
@@ -3618,7 +3618,7 @@ extern "C" void cScriptPlayerEntity_DeInit(cScriptPlayerEntity* self);
 /**
  * Destroys an entity player: runs cScriptPlayerEntity_DeInit(), then frees the object when asked to.
  *
- * The memory goes back to the cInSeq heap it came from, through func_002724E8.
+ * The memory goes back to the cInSeq heap it came from, through operator_delete1.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -3626,7 +3626,7 @@ extern "C" void cScriptPlayerEntity__cScriptPlayerEntity(cScriptPlayerEntity* se
 {
     self->DeInit();
     if (flags & 1) {
-        func_002724E8(self);
+        operator_delete1(self);
     }
 }
 #endif
@@ -3724,8 +3724,8 @@ void cScriptPlayerEntity::SetEntityVariation(int idx)
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetupPlay);
 #ifdef SKIP_ASM
 extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
-// PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
-extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
+// PORT: real arity is (size, heap); the unit declares operator_new3(void*) for its callers.
+extern "C" void* operator_new3_impl(int size, void* heap) __asm__("operator_new3");
 extern "C" void* cScriptPlayerChannelSpline_cScriptPlayerChannelSpline(cScriptPlayerChannelSpline* self);
 extern "C" void* cScriptPlayerChannelBlock_cScriptPlayerChannelBlock(cScriptPlayerChannelBlock* self);
 extern "C" void* cScriptPlayerChannelEvent_cScriptPlayerChannelEvent(cScriptPlayerChannelEvent* self);
@@ -3738,7 +3738,7 @@ extern "C" int cScriptPlayerMain_GetInSeqCommInterface(cScriptPlayerMain* self);
  * Clears mSetupScriptHasKeysLeft (+0x30) and the event bits (+0x34). For an entity with channels it allocates
  * mpChannelPlayers (+0x24) from the cInSeq heap (mpOwner->mpManager + 8, cScriptHeap_AllocMem) and, per channel record
  * (type +0x0, size +0x2), creates a spline (0x28 bytes), object (0x28), block (0x2C) or event (0x28) channel with
- * cScriptMemOp's operator new (func_00272488), then starts it through its vtable slot 1 (Play), ORing in whether keys
+ * cScriptMemOp's operator new (operator_new3), then starts it through its vtable slot 1 (Play), ORing in whether keys
  * are left and its event bits. Sets mIsPlaying (+0x28), asks the comm interface
  * (cScriptPlayerMain_GetInSeqCommInterface, slot 6) for the entity's comm object (mpEntityComm, +0x2C) and notifies it
  * (slot 1), and sets +0x38.
@@ -3762,22 +3762,22 @@ int cScriptPlayerEntity::SetupPlay()
             switch (channelHeader->type) {
             case kChannelSpline: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
-                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)func_00272488_impl(40, heap));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)operator_new3_impl(40, heap));
                 break;
             }
             case kChannelObject: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
-                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelObject_cScriptPlayerChannelObject((cScriptPlayerChannelObject*)func_00272488_impl(40, heap));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelObject_cScriptPlayerChannelObject((cScriptPlayerChannelObject*)operator_new3_impl(40, heap));
                 break;
             }
             case kChannelBlock: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
-                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelBlock_cScriptPlayerChannelBlock((cScriptPlayerChannelBlock*)func_00272488_impl(44, heap));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelBlock_cScriptPlayerChannelBlock((cScriptPlayerChannelBlock*)operator_new3_impl(44, heap));
                 break;
             }
             case kChannelEvent: {
                 cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)mpChannelPlayers);
-                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelEvent_cScriptPlayerChannelEvent((cScriptPlayerChannelEvent*)func_00272488_impl(40, heap));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelEvent_cScriptPlayerChannelEvent((cScriptPlayerChannelEvent*)operator_new3_impl(40, heap));
                 break;
             }
             }
@@ -3843,7 +3843,7 @@ int cScriptPlayerEntity::ExecutePlay()
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Stop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
+extern "C" void operator_delete1_impl(void* p) __asm__("operator_delete1");
 extern "C" void cScriptHeap_FreeMem(cScriptHeap* h, void* p);
 
 class cRcObj_3DC0 {
@@ -3874,7 +3874,7 @@ public:
  *
  * Does nothing unless mIsPlaying. Calls the comm interface's OnInSeqRelease (slot 2) and clears mpEntityComm;
  * each channel then gets Stop (slot 2) and is deleted by type: spline channels (no destructor) through
- * func_002724E8, the others through their virtual destructor (slot 10, flags 3). The channel array goes back
+ * operator_delete1, the others through their virtual destructor (slot 10, flags 3). The channel array goes back
  * to the owner's cInSeq heap (cScriptHeap_FreeMem) and mIsPlaying is cleared.
  */
 void cScriptPlayerEntity::Stop()
@@ -3894,7 +3894,7 @@ void cScriptPlayerEntity::Stop()
             switch (((cRcObj_3DC0*)mpChannelPlayers[i])->GetType())
             {
             case kChannelSpline:
-                func_002724E8_impl(((cRcObj_3DC0*)mpChannelPlayers[i]));
+                operator_delete1_impl(((cRcObj_3DC0*)mpChannelPlayers[i]));
                 break;
             case kChannelObject:
             {
@@ -4152,7 +4152,7 @@ int cScriptPlayerEntity::GetScriptLength()
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00274358);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_getVariationLength);
 #ifdef SKIP_ASM
 /**
  * Returns the frame count of the entity's current variation, looked up through the variation table.
@@ -4162,7 +4162,7 @@ INCLUDE_ASM("replay/replaycache", func_00274358);
  *
  * @return the length in frames
  */
-extern "C" int func_00274358(cScriptPlayerEntity* self)
+extern "C" int cScriptPlayerEntity_getVariationLength(cScriptPlayerEntity* self)
 {
     const char* base = self->mpData;
     int* tab = (int*)self->mpVariationTable;
@@ -4387,8 +4387,8 @@ extern "C" void cScriptPlayerMain__cScriptPlayerMain(cScriptPlayerMain* self, in
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Init);
 #ifdef SKIP_ASM
-// PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
-void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
+// PORT: array new[] with a heap argument; same symbol as the unit's operator_new_array(void*).
+void* operator new[](unsigned int size, void* heap) __asm__("operator_new_array__FPv");
 
 // An entity player as new[] builds it: cScriptPlayerEntity with its element constructor
 // (cScriptPlayerEntity_cScriptPlayerEntity) and a sized operator delete[] (with it new[] keeps an array cookie).
@@ -4407,7 +4407,7 @@ struct cScriptPlayerEntityNew : cScriptPlayerEntity {
  * Stores @p playerId in mID, @p owner in mpManager and @p data in mpData and mpSystemHeader; mJumpFrame = -1, mNumSteps = 0,
  * mLoopScript = 0; mpDataHeader = @p data + 0xC when the header is at least 0xD bytes. With entities it allocates
  * numEntities 0x3C-byte cScriptPlayerEntity objects from the manager's heap (owner + 8, cScriptMemOp's operator new[]
- * func_002724C8), constructs them, and calls cScriptPlayerEntity_Init on each with the data that follows the header,
+ * operator_new_array), constructs them, and calls cScriptPlayerEntity_Init on each with the data that follows the header,
  * each consuming its block. cInSeq_ReadyPlayer calls it.
  *
  * @param data   the script data (On Tour pScriptData)
@@ -4444,7 +4444,7 @@ int cScriptPlayerMain::Init(tInSeqScriptHeader* data, char* owner, int playerId)
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_DeInit);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerEntity__cScriptPlayerEntity(cScriptPlayerEntity* self, int flags);
-void* func_00272510(void* self);
+void* operator_delete_array(void* self);
 
 // The cookie g++ 2.95's new[] keeps in front of an array whose element type has a destructor (16 bytes, the
 // element count first); delete[] reads the count from it and frees from its start.
@@ -4461,7 +4461,7 @@ struct tArrayNewCookie {
  *
  * Does nothing when no script is loaded (mpData null). Otherwise calls cScriptPlayerMain_Stop,
  * cScriptPlayerEntity_DeInit on each of the numEntities entities, destroys the entity array back to front (count from
- * the 16-byte array cookie, cScriptPlayerEntity__cScriptPlayerEntity) and frees it with func_00272510. Then clears mID
+ * the 16-byte array cookie, cScriptPlayerEntity__cScriptPlayerEntity) and frees it with operator_delete_array. Then clears mID
  * (-1), mpData, mpManager, mpUserData, the header pointers, mLoopScript, mPlayState, mCurrFrame, mNumPaused and
  * mNumSteps, and sets mScriptLength and mJumpFrame to -1 and mPlaySpeed to 1.0. cInSeq_RecyclePlayer and the destructor
  * cScriptPlayerMain__cScriptPlayerMain call it.
@@ -4487,7 +4487,7 @@ void cScriptPlayerMain::DeInit()
             cScriptPlayerEntity__cScriptPlayerEntity(entity, 0);
         }
         tArrayNewCookie* array = (tArrayNewCookie*)self->mpEntityPlayers;
-        func_00272510(&array[-1]);
+        operator_delete_array(&array[-1]);
     }
     self->mNumSteps = 0;
     self->mID = -1;

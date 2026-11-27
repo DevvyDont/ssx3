@@ -87,7 +87,7 @@ CHECK_OFFSET(cFocusMan, FocusInstances, 0xDC);
 CHECK_SIZE(cFocusMan, 0x8E0);
 
 // The per-cell visitor cFocusMan's update runs over the nash cell tree (On Tour struct FocusCallback, 0xC:
-// FocusCallback(FocusQuery& q, const tBoundBox* b, int nb), operator()(const Cell&, const CellKey&)). [R] func_00144368
+// FocusCallback(FocusQuery& q, const tBoundBox* b, int nb), operator()(const Cell&, const CellKey&)). [R] FocusCallback_operatorCall
 // is that operator: it tests the cell (CellKey level / x / y / z, widened by 0.2) against each 0x20-byte box, calls
 // FocusQuery_addcell(query, cell, isleaf) and recurses into the eight children. On Tour's reference is a pointer here.
 // NOTE: src/seg/seg_1218.cpp defines the same struct locally (members list / boxes / count, with the inline operator()

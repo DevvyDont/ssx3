@@ -455,8 +455,8 @@ extern char str_cam[];
 extern void* cPS2FogParticleMan_vtbl[];
 
 extern "C" void* cBXString_cBXString2(cBXString* self, const char* s);
-extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
-extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, cBXString* b);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* o);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
@@ -521,21 +521,21 @@ void cGame::loadTrack()
     if (cBENewRaceInterface_bIsBamLocation != 0) {
         cBXString worldPath;
         cBXString locName;
-        func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x44), &locName));
+        cBXString_operatorPlus2(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x44), &locName));
         cBXString_operatorE(&name, &worldPath);
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&locName, 2);
     } else {
         cBXString worldPath;
         cBXString locName;
-        func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
+        cBXString_operatorPlus2(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
         cBXString_operatorE(&name, &worldPath);
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&locName, 2);
     }
     {
         cBXString path;
-        func_00318630(&path, &name, str_big_b);
+        cBXString_operatorPlus1(&path, &name, str_big_b);
         cBigFile_open(mpTrackBigFile, path.Str, 0);
         cBXString__cBXString(&path, 2);
     }
@@ -554,7 +554,7 @@ void cGame::loadTrack()
     {
         cBXString worldPath;
         cBXString locName;
-        func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
+        cBXString_operatorPlus2(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
         cBXString_operatorE(&dir, &worldPath);
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&locName, 2);
@@ -571,7 +571,7 @@ void cGame::loadTrack()
     {
         cBXString worldPath;
         cBXString camBasePath;
-        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(((char*)&gCamTriggerMan), (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.Str));
+        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(((char*)&gCamTriggerMan), (cBXString_operatorPlus2(&camBasePath, str_bar_b, &dir), cBXString_operatorPlus1(&worldPath, &camBasePath, str_cam), worldPath.Str));
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
@@ -900,8 +900,8 @@ extern "C" void cGameViewMan_snapAll(void* self);
 extern "C" void cReplay_reset(void* self);
 extern "C" void cSSXScriptEngine_Restart(void* self);
 extern "C" void cCamera_onRestart(void);
-extern "C" void func_00229498(void* self);
-extern "C" void func_00343BC0(void* self);
+extern "C" void cCrowdMan2d_restart(void* self);
+extern "C" void cCrowdMan3d_clearAllBlocks(void* self);
 extern "C" void cMultiParticleMan_reset(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cSSXAudio_PartialRestart(void* self);
@@ -935,8 +935,8 @@ void cGame::partialRestart()
     cReplay_reset(Replay);
     cSSXScriptEngine_Restart(ScriptEngine);
     cCamera_onRestart();
-    func_00229498(CrowdMan2d);
-    func_00343BC0(CrowdMan3d);
+    cCrowdMan2d_restart(CrowdMan2d);
+    cCrowdMan3d_clearAllBlocks(CrowdMan3d);
     cMultiParticleMan_reset(MultiParticleMan);
     void* list = (char*)&UI->mStateStack;
     cUIState* hudState = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c)));
@@ -1015,8 +1015,8 @@ void cGame::sectionLoaded()
 INCLUDE_ASM("main/gameload", cGame_sectionUnloading);
 #ifdef SKIP_ASM
 extern "C" void cRailManNode_unloadSection(int kind);
-extern "C" void func_00229408(void* self, int id);
-extern "C" void func_00343C08(void* self, int arg);
+extern "C" void cCrowdMan2d_releaseSectionQuads(void* self, int id);
+extern "C" void cCrowdMan3d_removeSectionMembers(void* self, int arg);
 extern "C" void cMultiParticleMan_unloadSection(void* self, int arg);
 extern "C" void cBucketMan_purgeBucket1(void* self, int index, int key);
 extern "C" void cFocusMan_purgesection(void* p, int arg);
@@ -1037,8 +1037,8 @@ void cGame::sectionUnloading(int id)
 {
     void* bm = &gBucketMan_bm;
     cRailManNode_unloadSection(id);
-    func_00229408(TheCrowdMan2d, id);
-    func_00343C08(TheCrowdMan3d, id);
+    cCrowdMan2d_releaseSectionQuads(TheCrowdMan2d, id);
+    cCrowdMan3d_removeSectionMembers(TheCrowdMan3d, id);
     cMultiParticleMan_unloadSection(cMultiParticleMan_TheMultiParticleMan, id);
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket1(bm, 1, id);
@@ -1286,8 +1286,8 @@ extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cBucketMan_updateBucket(void* mgr, int a);
 extern "C" void cBucketMan_applyBucket(void* mgr, int a);
 extern "C" void cWScriptMan_update(void* p);
-extern "C" void func_002294C8(void* p);
-extern "C" void func_003440C8(void* p);
+extern "C" void cCrowdMan2d_update(void* p);
+extern "C" void cCrowdMan3d_update(void* p);
 extern "C" void cMultiParticleMan_update(void* p);
 extern "C" void cWorldSound_TriggerWorldAudio(void* p, void* q, int i);
 void cInputSync_postupdate(void* p);
@@ -1555,8 +1555,8 @@ void cGame::update()
                     cBucketMan_updateBucket(&gBucketMan, 3);
                 }
                 cWScriptMan_update((char*)WScriptMan);
-                func_002294C8((char*)CrowdMan2d);
-                func_003440C8((char*)CrowdMan3d);
+                cCrowdMan2d_update((char*)CrowdMan2d);
+                cCrowdMan3d_update((char*)CrowdMan3d);
                 cMultiParticleMan_update((char*)MultiParticleMan);
                 cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {

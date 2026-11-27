@@ -3,7 +3,7 @@
 
 // The in-game sequence (InSeq) script player's channels: one per animated channel of a script entity, created by the
 // entity's Play (cScriptPlayerEntity_SetupPlay) by channel type from the entity's heap: 0 spline, 1 object, 2 block, 3 event
-// (func_00272488(size, heap) + constructor). Each channel has a vtable (slots 1..10: Play, Stop, Update, GetValue,
+// (operator_new3(size, heap) + constructor). Each channel has a vtable (slots 1..10: Play, Stop, Update, GetValue,
 // GetCustom, GetNextKeyFrame, GetType, GetOwner, IsPlaying, destructor; the spline channel has no destructor slot).
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
 // assert for these classes), hence inseq/. Retail code: unit replay/replaycache 0x002725B8-0x002738F8 plus the

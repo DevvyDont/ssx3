@@ -16,15 +16,15 @@
 // symbol list, refs/ssxdvd, has a cPS2TexMan of a different layout; Tricky also allocates "TEX MAN".)
 //
 // Size 0x6740 [R]: cPS2GraphicsMan_Init does cMemMan_alloc(0x6740, "TEX MAN"), stores this + 0x1F60 at +0x3F50 and
-// this + 0x4350 at +0x6340 (each heap's block-table pointer, i.e. the heaps' inlined constructors), calls func_00366FE8
-// (the init: TexMemType 0, cTextureMan_InitTexInfo, bound ids -1, both heaps set up by func_00365E40) and stores the object in
-// cPS2GraphicsMan::mTexMan (+0x18F4). cPS2GraphicsMan_Shutdown purges it (func_00367360) and deletes it.
+// this + 0x4350 at +0x6340 (each heap's block-table pointer, i.e. the heaps' inlined constructors), calls cTextureMan_init
+// (the init: TexMemType 0, cTextureMan_InitTexInfo, bound ids -1, both heaps set up by vramHeap_init) and stores the object in
+// cPS2GraphicsMan::mTexMan (+0x18F4). cPS2GraphicsMan_Shutdown purges it (cTextureMan_purgeAll) and deletes it.
 // Retail methods: render/ps2graphicsman 0x367150..0x369230 (the six cPSPGraphicsMan_* functions there are this class's
 // NewNonBindTexID .. PurgeBindTexIDs, named after On Tour, where the PSP port folded them into cPSPGraphicsMan), the
-// tail of object/railmodifier 0x366E90..0x367138 (init / purge / reset), and func_00396128 (render/font).
+// tail of object/railmodifier 0x366E90..0x367138 (init / purge / reset), and cTextureMan_resetBoundTextures (render/font).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] cPS2GraphicsMan_Init (allocation, heap pointers), the init func_00366FE8 / cTextureMan_InitTexInfo, the record allocations
+//   [R] cPS2GraphicsMan_Init (allocation, heap pointers), the init cTextureMan_init / cTextureMan_InitTexInfo, the record allocations
 //       cMemMan_alloc(0x58, "NBTexInfo" / "BTexInfo");
 //   [P] the July 2003 preview's assert strings in bxps2tex.cpp (member names only; no out-of-line accessor of this class
 //       exists in the preview, so no offsets);
@@ -35,50 +35,50 @@
 //   [X] refs/ssx3-rust docs/investigation/structs/render.md "TexMan" (names are guesses).
 // The two block heaps (EA's VRAM heap class, name unknown; preview members mBlocks / mFree / mTexStats, kMaxVRAMBlocks
 // 292 blocks of 0x1C bytes: address + flags VRB_USED 2 / VRB_LOCKED 0x20, size, owner id, address and size-list links)
-// are left as raw bytes here; their methods are func_00365E40..func_00366E30 (object/railmodifier).
+// are left as raw bytes here; their methods are vramHeap_init..vramHeap_freeTextureBlocks (object/railmodifier).
 
 #include "layout.h"
 
 // One texture's record (0x58 [R]: cMemMan_alloc(0x58, "NBTexInfo") in cTextureMan_NewNonBindTexID, "BTexInfo" in
 // cTextureMan_NewBindTexID). Type name: On Tour's tTexInfo (the record tLinkTexInfo points to; a different 0x14 PSP
 // layout there) - the retail type name is not attested (the preview's asserts call a record variable "Tex").
-// Filled by cTextureMan_AddTexture (create), func_00368660 (VRAM allocation on bind); 64-bit fields are GS register values.
+// Filled by cTextureMan_AddTexture (create), cTextureMan_ensureContextTextures (VRAM allocation on bind); 64-bit fields are GS register values.
 struct tTexInfo {
     int mMemAlloc;          // 0x00 [P] "Tex.mMemAlloc==bCopyMem"; [U] cTextureMan_AddTexture stores its ownsData argument;
                             //      cTextureMan_RemoveTexture frees mpTexels / mCLUTData only when set
     char mName[8];          // 0x04 (our name) [U] cTextureMan_AddTexture strncpy(mName, name, 8)
     int mFormat;            // 0x0C (our name) texel format, eGMTexelFormat (render/graphicsman.h);
-                            //      [U] cTextureMan_AddTexture stores it; func_00367B60 / func_00369098 / cTextureMan_RemoveTexture /
-                            //      func_00368660 pick the second heap for 9; func_00366E90 stores 10
+                            //      [U] cTextureMan_AddTexture stores it; cTextureMan_unlockTexture / cTextureMan_dropVramCopy / cTextureMan_RemoveTexture /
+                            //      cTextureMan_ensureContextTextures pick the second heap for 9; cTextureMan_rearrangeMipLevels stores 10
     int mSize;              // 0x10 [P] "Size <= Tex.mSize"; [U] cTextureMan_AddTexture sums the data size of all levels;
-                            //      cTextureMan_SetNewTextureData copies that many bytes; func_00366E90 sizes its temp buffer by it
-    int mVRAMSize;          // 0x14 (our name) [U] cTextureMan_AddTexture (page-rounded VRAM bytes); func_00368660 allocates it;
+                            //      cTextureMan_SetNewTextureData copies that many bytes; cTextureMan_rearrangeMipLevels sizes its temp buffer by it
+    int mVRAMSize;          // 0x14 (our name) [U] cTextureMan_AddTexture (page-rounded VRAM bytes); cTextureMan_ensureContextTextures allocates it;
                             //      cTextureMan_AddTexture compares it with the second heap's free size (+0x6344)
     int mBPP;               // 0x18 (our name; the preview's Tex.BPP()) [U] cTextureMan_AddTexture stores the GS format's bits
-                            //      per pixel; func_00368170 / func_00366E90 / cTextureMan_SetNewTextureData read it
+                            //      per pixel; cTextureMan_buildPixelUpload / cTextureMan_rearrangeMipLevels / cTextureMan_SetNewTextureData read it
     void* mpTexels;         // 0x1C (our name) [U] pixel data (all levels): cTextureMan_AddTexture copies or keeps it,
-                            //      cTextureMan_SetNewTextureData overwrites it, func_00368170 DMA-refs it, cTextureMan_RemoveTexture frees it
-    void* mCLUTData;        // 0x20 [P] "Tex.mCLUTData"; [U] cTextureMan_AddTexture, cTextureMan_SetNewTextureData, func_003684F0 (DMA ref),
+                            //      cTextureMan_SetNewTextureData overwrites it, cTextureMan_buildPixelUpload DMA-refs it, cTextureMan_RemoveTexture frees it
+    void* mCLUTData;        // 0x20 [P] "Tex.mCLUTData"; [U] cTextureMan_AddTexture, cTextureMan_SetNewTextureData, cTextureMan_buildClutUpload (DMA ref),
                             //      cTextureMan_RemoveTexture frees it
-    int mNumMips;           // 0x24 (our name) [U] extra mip levels: cTextureMan_AddTexture stores it; func_00368170 /
-                            //      func_00368970 / func_00366E90 loop 0..mNumMips
+    int mNumMips;           // 0x24 (our name) [U] extra mip levels: cTextureMan_AddTexture stores it; cTextureMan_buildPixelUpload /
+                            //      cTextureMan_selectContextTexture / cTextureMan_rearrangeMipLevels loop 0..mNumMips
     enum { kNoVRAM = -1 };  // mTexAddr / mCLUTAddr / mTexBlock / mCLUTBlock while not in VRAM (name ours; [P] below;
                             //      [R] cTextureMan_AddTexture stores it in all four)
     int mTexAddr;           // 0x28 [P] "Tex.mTexAddr != -1", "!(Tex.mTexAddr & 0x1f)"; [U] -1 = not in VRAM
-                            //      (cTextureMan_AddTexture sets -1; func_00367B60 / func_00369098 / func_00368660 test it;
-                            //      func_00368660 stores the block address; cTextureMan_LockFrameToTexture builds FRAME_1 from it)
-    int mCLUTAddr;          // 0x2C (our name) [U] CLUT VRAM address: cTextureMan_AddTexture -1; func_00368660 stores;
-                            //      func_003684F0 uploads to it; func_00368970 writes it into TEX0.CBP
+                            //      (cTextureMan_AddTexture sets -1; cTextureMan_unlockTexture / cTextureMan_dropVramCopy / cTextureMan_ensureContextTextures test it;
+                            //      cTextureMan_ensureContextTextures stores the block address; cTextureMan_LockFrameToTexture builds FRAME_1 from it)
+    int mCLUTAddr;          // 0x2C (our name) [U] CLUT VRAM address: cTextureMan_AddTexture -1; cTextureMan_ensureContextTextures stores;
+                            //      cTextureMan_buildClutUpload uploads to it; cTextureMan_selectContextTexture writes it into TEX0.CBP
     int mTexBlock;          // 0x30 [P] "Tex.mTexBlock >= 0"; [U] the texture's block index in its heap's block table
-                            //      (func_00367B60 / cTextureMan_RemoveTexture / func_00368660)
-    int mCLUTBlock;         // 0x34 [P] "Tex.mCLUTBlock >= 0"; [U] the CLUT's block index (cTextureMan_RemoveTexture / func_00368660)
+                            //      (cTextureMan_unlockTexture / cTextureMan_RemoveTexture / cTextureMan_ensureContextTextures)
+    int mCLUTBlock;         // 0x34 [P] "Tex.mCLUTBlock >= 0"; [U] the CLUT's block index (cTextureMan_RemoveTexture / cTextureMan_ensureContextTextures)
     unsigned long mTEX0;    // 0x38 (our name; GS TEX0, 64-bit) [P] Tex.Width() / Tex.Height() decode its TW / TH;
-                            //      [U] cTextureMan_AddTexture builds it, func_00368970 writes it (reg 0x06 / 0x07),
-                            //      func_003691B0 sets TFX, func_00366E90 / cTextureMan_LockFrameToTexture / cTextureMan_ShadowClearLockTexture decode it
-    unsigned long mTEX1;    // 0x40 (our name; GS TEX1) [U] cTextureMan_AddTexture, func_00368970 (reg 0x14 / 0x15),
-                            //      func_00369130 sets MMIN / MMAG / L / K
-    unsigned long mMIPTBP1; // 0x48 (our name; GS MIPTBP1 level widths) [U] cTextureMan_AddTexture, func_00368970 (0x34 / 0x35)
-    unsigned long mMIPTBP2; // 0x50 (our name; GS MIPTBP2) [U] cTextureMan_AddTexture, func_00368970 (0x36 / 0x37, 4+ levels)
+                            //      [U] cTextureMan_AddTexture builds it, cTextureMan_selectContextTexture writes it (reg 0x06 / 0x07),
+                            //      cTextureMan_setTextureFunction sets TFX, cTextureMan_rearrangeMipLevels / cTextureMan_LockFrameToTexture / cTextureMan_ShadowClearLockTexture decode it
+    unsigned long mTEX1;    // 0x40 (our name; GS TEX1) [U] cTextureMan_AddTexture, cTextureMan_selectContextTexture (reg 0x14 / 0x15),
+                            //      cTextureMan_setTextureFilter sets MMIN / MMAG / L / K
+    unsigned long mMIPTBP1; // 0x48 (our name; GS MIPTBP1 level widths) [U] cTextureMan_AddTexture, cTextureMan_selectContextTexture (0x34 / 0x35)
+    unsigned long mMIPTBP2; // 0x50 (our name; GS MIPTBP2) [U] cTextureMan_AddTexture, cTextureMan_selectContextTexture (0x36 / 0x37, 4+ levels)
 };
 
 // An id slot (4 bytes [P] "sizeof(cLinkTexInfo)==4"; On Tour tLinkTexInfo, an anonymous union): a used id holds its
@@ -100,33 +100,33 @@ struct cTextureMan {
                                          //        indexes it by texture id (self + 8 + id * 4)
     cLinkTexInfo* m_pNonBindFreeTexInfo; // 0x1F48 [O][P]; [R] cTextureMan_InitTexInfo: &m_pTexInfo[1500]; [U]
                                          //        cTextureMan_NewNonBindTexID pops, DeleteNonBindTexID pushes
-    // No texture (names ours): [U] mBoundTex / mCLUTTex are reset to kNoTexID, func_003691B0 ignores it as an id and
+    // No texture (names ours): [U] mBoundTex / mCLUTTex are reset to kNoTexID, cTextureMan_setTextureFunction ignores it as an id and
     // cTextureMan_AddTexture returns it for a format it cannot store.
     enum { kNoTexID = -1 };
-    // [U] func_0038FED0 / func_00390198 accept a texture whose sides are one of the kNumTexSides powers of two
+    // [U] tex_rearrange4BitTexture / tex_rearrange8BitTexture accept a texture whose sides are one of the kNumTexSides powers of two
     // 1024 >> 0 .. 1024 >> 10 (name ours).
     enum { kNumTexSides = 11 };
     int mBoundTex[2];                    // 0x1F4C (our name; [X] boundTex) texture id selected in GS context 1 / 2;
-                                         //        [R] func_00366FE8 -1; [U] func_00368970 compares / stores;
-                                         //        func_00368660, func_00367360, func_00367078, cTextureMan_RemoveTexture,
-                                         //        func_00369098, func_00396128 reset both to -1
-    int mCLUTTex;                        // 0x1F54 (our name) texture whose CLUT is loaded in the GS; [R] func_00366FE8 -1;
-                                         //        [U] func_00368970 stores / compares; reset -1 by the same functions
+                                         //        [R] cTextureMan_init -1; [U] cTextureMan_selectContextTexture compares / stores;
+                                         //        cTextureMan_ensureContextTextures, cTextureMan_purgeAll, cTextureMan_freeAllHeapBlocks, cTextureMan_RemoveTexture,
+                                         //        cTextureMan_dropVramCopy, cTextureMan_resetBoundTextures reset both to -1
+    int mCLUTTex;                        // 0x1F54 (our name) texture whose CLUT is loaded in the GS; [R] cTextureMan_init -1;
+                                         //        [U] cTextureMan_selectContextTexture stores / compares; reset -1 by the same functions
     int TexMemType;                      // 0x1F58 [O] (On Tour: the member before m_iNumBindTextures; placed by [U]);
-                                         //        [R] func_00366FE8 0; [U] cTextureMan_SetTextureMemType stores the memory type
-                                         //        cPS2GraphicsMan_InitTextures passes; cTextureMan_AddTexture / func_00366E90
+                                         //        [R] cTextureMan_init 0; [U] cTextureMan_SetTextureMemType stores the memory type
+                                         //        cPS2GraphicsMan_InitTextures passes; cTextureMan_AddTexture / cTextureMan_rearrangeMipLevels
                                          //        allocate texture copies with it
     char unk_1F5C[0x4];                  // 0x1F5C no access found (padding before the heaps?)
     char mMainHeap[0x23F0];              // 0x1F60 (our name) GS-memory block heap over the 4 MB of VRAM: [R]
-                                         //        func_00366FE8 func_00365E40(this + 0x1F60, 0, 0x400000, m_pTexInfo);
+                                         //        cTextureMan_init vramHeap_init(this + 0x1F60, 0, 0x400000, m_pTexInfo);
                                          //        cPS2GraphicsMan_Init stores this + 0x1F60 at its block-table pointer
-                                         //        (+0x1FF0 = 0x3F50); [U] func_003673D8 / func_00368660 / cTextureMan_AddTexture
-                                         //        read 0x3F50; func_00367360 / func_00367078 / func_00367B60 /
-                                         //        cTextureMan_RemoveTexture / func_00369098 pass it to the heap functions
+                                         //        (+0x1FF0 = 0x3F50); [U] cTextureMan_allocLockedPages / cTextureMan_ensureContextTextures / cTextureMan_AddTexture
+                                         //        read 0x3F50; cTextureMan_purgeAll / cTextureMan_freeAllHeapBlocks / cTextureMan_unlockTexture /
+                                         //        cTextureMan_RemoveTexture / cTextureMan_dropVramCopy pass it to the heap functions
     char mTempHeap[0x23F0];              // 0x4350 (our name; [X] tempVram) the second heap (8-bit format-9 textures, over
-                                         //        the display buffers): [R] func_00366FE8 func_00365E40(this + 0x4350, 0,
+                                         //        the display buffers): [R] cTextureMan_init vramHeap_init(this + 0x4350, 0,
                                          //        0x1000, m_pTexInfo); cPS2GraphicsMan_Init stores this + 0x4350 at +0x6340;
-                                         //        [U] func_00367340 re-initialises it; cTextureMan_AddTexture reads its size
+                                         //        [U] cTextureMan_initTempHeap re-initialises it; cTextureMan_AddTexture reads its size
                                          //        (+0x1FF4 = 0x6344)
 
     // Methods bound to their retail symbols by asm labels.

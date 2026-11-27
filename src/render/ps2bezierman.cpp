@@ -2,7 +2,7 @@
 #include "render/ps2bezierman.h"
 
 extern "C" void cBezierMan_cBezierMan(void* self);
-extern "C" void func_00372B30(void* self);
+extern "C" void cBezierCache_cBezierCache(void* self);
 extern "C" void cPS2BezierMan_Init(void* self);
 extern void* cPS2BezierMan_vtbl[16];
 
@@ -33,7 +33,7 @@ void* cPS2BezierMan_cPS2BezierMan(void* vself)
     cPS2BezierMan* self = (cPS2BezierMan*)vself;
     cBezierMan_cBezierMan_r(self);
     self->mVtbl = (void**)cPS2BezierMan_vtbl;
-    func_00372B30(&self->mPatchCache);
+    cBezierCache_cBezierCache(&self->mPatchCache);
     new ((char*)self + 0x8) sBezSlot_8AE0[2];
     cPS2BezierMan_Init(self);
     return ((void*)self);

@@ -228,7 +228,7 @@ struct sRefWorld_EB48 {
 };
 
 
-extern "C" void* func_003512C0(void* table, unsigned int id);
+extern "C" void* cInstanceMan_getInstanceRecord(void* table, unsigned int id);
 
 static inline void* refToPtr_EB48(unsigned int p)
 {
@@ -257,7 +257,7 @@ struct sRefH_EB48 {
  * Reads a 4-byte instance id from the frame and returns the instance record it names, or 0.
  *
  * The id is read through the stream's read slot (virtual slot 2). An id of 0xFFFFFFFF gives 0. Otherwise the instance
- * manager is asked first (func_003512C0 on SSXApp->Game->InstanceMan); if it has no record, the world cache of
+ * manager is asked first (cInstanceMan_getInstanceRecord on SSXApp->Game->InstanceMan); if it has no record, the world cache of
  * cWorld_m_pTheWorld is used: set (id & 0xFF), entry (id >> 8), whose upper 24 bits are the record address / 4.
  * cReplayFramePtr_writeReplayInstance writes what this reads.
  *
@@ -270,7 +270,7 @@ extern "C" void* cReplayFramePtr_readReplayInstance(cBxReplayFrame* stream)
     sRefH_EB48 savedId;
     stream->read((char*)&savedId, 4);
     if (~savedId.id != 0) {
-        instRecord = func_003512C0(SSXApp->Game->InstanceMan, savedId.id);
+        instRecord = cInstanceMan_getInstanceRecord(SSXApp->Game->InstanceMan, savedId.id);
         if (instRecord == 0) {
             void* cachedRecord = lookup_EB48(savedId.id);
             instRecord = cachedRecord;

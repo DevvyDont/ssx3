@@ -241,7 +241,7 @@ static inline void sphereVecAdd(t4Vector* dst, t4Vector* v)
 /**
  * Moves a rider sphere tree by an offset: its bounding centre and every sphere centre.
  *
- * Called by cRider_reactToCollision and func_00137138.
+ * Called by cRider_reactToCollision and cWipeoutMotion_resolveThrownBoard.
  *
  * @param node  the rider sphere tree (this)
  * @param offset  the offset to add (On Tour offset)

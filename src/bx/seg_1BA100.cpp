@@ -1540,14 +1540,14 @@ int cMusicSys::IsSongPlaying()
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACC0);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_clearSongPlaying);
 #ifdef SKIP_ASM
 /**
  * Clears the music system's mSongPlaying flag.
  *
  * @param musicSys  the cMusicSys
  */
-extern "C" void func_002BACC0(cMusicSys* musicSys) {
+extern "C" void cMusicSys_clearSongPlaying(cMusicSys* musicSys) {
     musicSys->mSongPlaying = 0;
 }
 #endif
@@ -1598,7 +1598,7 @@ void cMusicSys::setCurrentSongNum(int songNum)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_getMusicState);
 #ifdef SKIP_ASM
 /**
  * Returns the music system's mMusicState word.
@@ -1608,7 +1608,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
  * @param musicSys  the cMusicSys
  * @return mMusicState
  */
-extern "C" int func_002BACE8(cMusicSys* musicSys) {
+extern "C" int cMusicSys_getMusicState(cMusicSys* musicSys) {
     return (musicSys->mMusicState);
 }
 #endif
@@ -1640,7 +1640,7 @@ extern "C" int cSpeechSys_UpdateSpeechVolume(void) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD00);
+INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_getBigFileName);
 #ifdef SKIP_ASM
 /**
  * Returns big-file name @p i of the speech system, &mBigFileName[i] (20 bytes each).
@@ -1651,7 +1651,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD00);
  * @param i  the name index, 0-4
  * @return the file name
  */
-extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
+extern "C" char* cSpeechSys_getBigFileName(cSpeechSys* speechSys, int i) {
     int off = i * 20 + 344;
     return ((char*)speechSys) + off;
 }
@@ -1673,14 +1673,14 @@ tCrowdData* cCrowdSys::CROWD_GetData(int i)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD30);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_resetPeakIntro);
 #ifdef SKIP_ASM
 /**
  * Sets three cSSXAudio words: mPeakIntroDone to 0, mFirstTimeOnPeak to 1 and mInTransport to 1.
  *
  * @param audio  the cSSXAudio
  */
-extern "C" void func_002BAD30(cSSXAudio* audio) {
+extern "C" void cSSXAudio_resetPeakIntro(cSSXAudio* audio) {
     audio->mPeakIntroDone = 0;
     audio->mFirstTimeOnPeak = 1;
     audio->mInTransport = 1;
@@ -1688,29 +1688,29 @@ extern "C" void func_002BAD30(cSSXAudio* audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD48);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_isFirstTimeOnPeak);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's mFirstTimeOnPeak (set by func_002BAD30; cSSXAudio_SpeakDJBetweenEvents and cSSXAudio_ScheduleDJOpening use it).
+ * Returns cSSXAudio's mFirstTimeOnPeak (set by cSSXAudio_resetPeakIntro; cSSXAudio_SpeakDJBetweenEvents and cSSXAudio_ScheduleDJOpening use it).
  *
  * @param audio  the cSSXAudio
  * @return mFirstTimeOnPeak
  */
-extern "C" int func_002BAD48(cSSXAudio* audio) {
+extern "C" int cSSXAudio_isFirstTimeOnPeak(cSSXAudio* audio) {
     return (audio->mFirstTimeOnPeak);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD50);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_isPeakIntroDone);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's mPeakIntroDone (1 after construction, cleared by func_002BAD30).
+ * Returns cSSXAudio's mPeakIntroDone (1 after construction, cleared by cSSXAudio_resetPeakIntro).
  *
  * @param audio  the cSSXAudio
  * @return mPeakIntroDone
  */
-extern "C" int func_002BAD50(cSSXAudio* audio) {
+extern "C" int cSSXAudio_isPeakIntroDone(cSSXAudio* audio) {
     return (audio->mPeakIntroDone);
 }
 #endif
@@ -1817,7 +1817,7 @@ int cSSXAudio::GetPlayListIndex()
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADA0);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_getPathfinderCanChangeVolume);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's mPathfinderCanChangeVolume.
@@ -1825,7 +1825,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADA0);
  * @param audio  the cSSXAudio
  * @return mPathfinderCanChangeVolume
  */
-extern "C" int func_002BADA0(cSSXAudio* audio) {
+extern "C" int cSSXAudio_getPathfinderCanChangeVolume(cSSXAudio* audio) {
     return (audio->mPathfinderCanChangeVolume);
 }
 #endif
@@ -1845,7 +1845,7 @@ int cSSXAudio::GetMode()
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADB0);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetDJSpeech);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's mDJSpeech (cSSXAudio_SetDJSpeech stores 1 or 0 there).
@@ -1853,7 +1853,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADB0);
  * @param audio  the cSSXAudio
  * @return mDJSpeech
  */
-extern "C" int func_002BADB0(cSSXAudio* audio) {
+extern "C" int cSSXAudio_GetDJSpeech(cSSXAudio* audio) {
     return (audio->mDJSpeech);
 }
 #endif
@@ -1901,7 +1901,7 @@ int cSSXAudio::GetAudioUpdateState()
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADD0);
+INCLUDE_ASM("bx/seg_1BA100", octreeNode_collectType5Items);
 #ifdef SKIP_ASM
 struct Item_ADD0 { Item_ADD0* next; int pad; int type; };
 struct List_ADD0 { int count; Item_ADD0* items[1]; };
@@ -1917,7 +1917,7 @@ struct Node_ADD0 { Node_ADD0* child[8]; int pad[2]; Item_ADD0* items; };
  * @param node  the octree node
  * @param out  the list to append to (count, then the item pointers)
  */
-extern "C" void func_002BADD0(Node_ADD0* node, List_ADD0** out) {
+extern "C" void octreeNode_collectType5Items(Node_ADD0* node, List_ADD0** out) {
     Item_ADD0* it;
     for (it = node->items; it != 0; it = it->next) {
         if (it->type == 5) {
@@ -1925,14 +1925,14 @@ extern "C" void func_002BADD0(Node_ADD0* node, List_ADD0** out) {
             outList->items[outList->count++] = it;
         }
     }
-    if (node->child[0]) func_002BADD0(node->child[0], out);
-    if (node->child[1]) func_002BADD0(node->child[1], out);
-    if (node->child[2]) func_002BADD0(node->child[2], out);
-    if (node->child[3]) func_002BADD0(node->child[3], out);
-    if (node->child[4]) func_002BADD0(node->child[4], out);
-    if (node->child[5]) func_002BADD0(node->child[5], out);
-    if (node->child[6]) func_002BADD0(node->child[6], out);
-    if (node->child[7]) func_002BADD0(node->child[7], out);
+    if (node->child[0]) octreeNode_collectType5Items(node->child[0], out);
+    if (node->child[1]) octreeNode_collectType5Items(node->child[1], out);
+    if (node->child[2]) octreeNode_collectType5Items(node->child[2], out);
+    if (node->child[3]) octreeNode_collectType5Items(node->child[3], out);
+    if (node->child[4]) octreeNode_collectType5Items(node->child[4], out);
+    if (node->child[5]) octreeNode_collectType5Items(node->child[5], out);
+    if (node->child[6]) octreeNode_collectType5Items(node->child[6], out);
+    if (node->child[7]) octreeNode_collectType5Items(node->child[7], out);
 }
 #endif
 
@@ -2099,7 +2099,7 @@ extern "C" void func_002BB0E0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
+INCLUDE_ASM("bx/seg_1BA100", tWPNameField_operatorNotEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether two world-painter name fields differ: 1 when either of the two words of m_nameId differs.
@@ -2108,7 +2108,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
  * @param rhs  the name field to compare with
  * @return 1 when they differ, else 0
  */
-extern "C" int func_002BB100(tWPNameField* wpNameField, tWPNameField* rhs) {
+extern "C" int tWPNameField_operatorNotEqual(tWPNameField* wpNameField, tWPNameField* rhs) {
     int var_6;
 
     var_6 = 0;
@@ -2341,8 +2341,8 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sBXStr_B4D8 { char *p; int pad[3]; sBXStr_B4D8() {} };
-extern "C" void func_003186D0_B4D8(sBXStr_B4D8*, const char*, int) __asm__("func_003186D0");
-extern "C" void func_00318630_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __asm__("func_00318630");
+extern "C" void cBXString_operatorPlus2_B4D8(sBXStr_B4D8*, const char*, int) __asm__("cBXString_operatorPlus2");
+extern "C" void cBXString_operatorPlus1_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __asm__("cBXString_operatorPlus1");
 extern "C" int ASYNCFILE_load_B4D8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
 extern char str_bar_d[];
@@ -2350,7 +2350,7 @@ extern char str_swp[];
 /**
  * Starts an asynchronous load of a section's world-painter file.
  *
- * Clears m_iStreamed, builds the path str_bar_d + the name (func_003186D0), appends str_swp (".swp", func_00318630)
+ * Clears m_iStreamed, builds the path str_bar_d + the name (cBXString_operatorPlus2), appends str_swp (".swp", cBXString_operatorPlus1)
  * and opens it with ASYNCFILE_load; the handle goes to m_iAsyncHandle. m_iState becomes 1 (loading, finished by
  * cWorldPainterSection_update) for a positive handle, else 2 (kWPSection_Loaded, with no data).
  *
@@ -2361,8 +2361,8 @@ void cWorldPainterSection::load(int fileName)
     sBXStr_B4D8 swpPath;
     sBXStr_B4D8 basePath;
     m_iStreamed = 0;
-    func_003186D0_B4D8(&basePath, str_bar_d, fileName);
-    func_00318630_B4D8(&swpPath, &basePath, str_swp);
+    cBXString_operatorPlus2_B4D8(&basePath, str_bar_d, fileName);
+    cBXString_operatorPlus1_B4D8(&swpPath, &basePath, str_swp);
     m_iAsyncHandle = ASYNCFILE_load_B4D8(swpPath.p, 0);
     cBXString_dt_B4D8(&swpPath, 2);
     cBXString_dt_B4D8(&basePath, 2);
@@ -4946,9 +4946,9 @@ bool tWPInGameData_Surface::isEqual(const tWPData* data)
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_isEqual);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
+extern "C" int tWPNameField_operatorNotEqual_DE30(char *, char *) __asm__("tWPNameField_operatorNotEqual");
 /**
- * Returns whether the four current irradiance names (compared with func_002BB100, the tWPNameField inequality test,
+ * Returns whether the four current irradiance names (compared with tWPNameField_operatorNotEqual, the tWPNameField inequality test,
  * against the region data's names at +4, +0xC, +0x14 and +0x1C) and m_AmbientLightIntensityOffset and
  * m_RimLightIntensityOffset (against +0x24 and +0x28) all match; the m_last copies are not compared.
  *
@@ -4960,10 +4960,10 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
 bool tWPInGameData_Lighting::isEqual(const tWPData* data)
 {
     tWPData_Lighting* rhs = (tWPData_Lighting*)data;
-    if (func_002BB100_DE30((char*)&m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return false;
-    if (func_002BB100_DE30((char*)&m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return false;
+    if (tWPNameField_operatorNotEqual_DE30((char*)&m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return false;
+    if (tWPNameField_operatorNotEqual_DE30((char*)&m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return false;
+    if (tWPNameField_operatorNotEqual_DE30((char*)&m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return false;
+    if (tWPNameField_operatorNotEqual_DE30((char*)&m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return false;
     if (m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return false;
     if (m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return false;
     return true;

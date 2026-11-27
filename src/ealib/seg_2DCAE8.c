@@ -8202,7 +8202,7 @@ int THREAD_createparam_a(int *self, int arg1, int arg2, int arg3, int arg4, int 
  * Fills a ThreadParam on the stack (entry @p entryProc, stack @p stackAddr / @p stackSize, gp D_004A30F0, initial priority @p priority
  * when it is 97, 98, 99, 101, 102 or 103, else 100) and calls CreateThread. The id goes to the record's +4 even on
  * failure; on success the record's +0 gets the signature 0x50533254 ('PS2T') and the thread is started with StartThread
- * and @p startParam. THREAD_create calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
+ * and @p startParam. THREAD_create calls it with a parameter of 0; the quadtree loader (gameLink_createThread) starts its thread
  * here.
  *
  * @param entryProc  the entry routine
@@ -9774,7 +9774,7 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
  *
  * Stores the line rate in D_00450DA0: 15750 for mode 1 (NTSC), 15625 for 2 (PAL), 28800 for 3 (the 31 kHz modes); any
  * other value leaves it. THREAD_yieldticks converts ticks to H-blank counts with it. Called by the timer calibration in
- * TIMER_init, by systemInit with 1 and by func_0037BD98 (3 or 1).
+ * TIMER_init, by systemInit with 1 and by cPS2GraphicsMan_applyDisplayMode (3 or 1).
  *
  * @param videoMode  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
  */

@@ -3,7 +3,7 @@
 
 // cPS2MemCard: the PS2 memory-card driver behind the abstract cMemCard interface (util/bxmemcard.cpp:
 // cMemCard::CreateInstance cMemCard_CreateInstance = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
-// asynchronous state machine: the public calls store their arguments and call SetState (func_002C48C0), which
+// asynchronous state machine: the public calls store their arguments and call SetState (cPS2MemCard_enterState), which
 // issues the sceMc* request; Update (vtable slot 3, cPS2MemCard_Update) polls sceMcSync and moves to the next state.
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
@@ -95,7 +95,7 @@ CHECK_SIZE(tPS2MemCardTime, 0x8);
 
 // One sceMcGetDir result: libmc's sceMcTblGetDir layout (0x40 bytes; field names follow it). [U] sceMcGetDir
 // fills 0x480 (one entry) and 0x4C0 (the table); cPS2MemCard_GetDataSize (slot 18) returns 0x490 = m_fileSizeByte; Update's
-// view reads the table's names at 0x4E0 + i * 0x40 and func_002C68C8 copies them (= m_entryName).
+// view reads the table's names at 0x4E0 + i * 0x40 and cPS2MemCard_getDirEntryName copies them (= m_entryName).
 struct tPS2MemCardDirEntry {
     tPS2MemCardTime m_create;       // 0x00
     tPS2MemCardTime m_modify;       // 0x08 [U] copied into tPS2MemCardFile::mModifyTime by Update
@@ -122,11 +122,11 @@ CHECK_SIZE(tPS2MemCardDirEntry, 0x40);
 struct tPS2MemCardFile {
     int mBroken;                    // 0x00 [O] slot 40 SetBrokenFile sets 1; slot 65 IsFileSlotBroken tests it (and
                                     //       mIconSysUnreadable); Update clears it
-    int mIconSysUnreadable;         // 0x04 [U] func_002C5570 sets 1 when the slot's icon.sys fails to open or read
+    int mIconSysUnreadable;         // 0x04 [U] cPS2MemCard_markIconSysUnreadable sets 1 when the slot's icon.sys fails to open or read
                                     //       (SetState 8 / 10); slot 65 tests it; Update clears it
     int mDisabled;                  // 0x08 [O] slot 66 IsFileSlotDisabled tests it; Update clears it
     char mFileName[0x40];           // 0x0C [U] the file (directory) name: slot 67 tests strlen > 0; SetState(7/0xB/0xC)
-                                    //       and func_002C42B0 build "<name>/<name>" paths from it; Update copies
+                                    //       and cPS2MemCard_issueGetFileInfo build "<name>/<name>" paths from it; Update copies
                                     //       cPS2MemCard::mFileName
     char mTitle[0x22];              // 0x4C [U] the save title: Update copies cPS2MemCard::mTitle into it and converts it
                                     //       (cMemCard_ShiftJISToAscii ShiftJISToAscii); cPS2MemCard_GetTitleString reads +0x52
@@ -158,7 +158,7 @@ struct cPS2MemCard {
     int mDevice;                    // 0x000C [P] GetDevice; [R] Reset 0; [U] the port of every sceMc* call; indexes
                                     //       mDevices; retail slot 4 cPS2MemCard_GetDevice
     int mGetInfoDevice;             // 0x0010 [R] Reset 0; [U] the port of the pending sceMcGetInfo: slot 5
-                                    //       cPS2MemCard_CheckDevice and func_002C67E8 store it before SetState(3),
+                                    //       cPS2MemCard_CheckDevice and cPS2MemCard_selectDevice store it before SetState(3),
                                     //       Update files the results under mDevices[mGetInfoDevice]
     int mMaxFiles;                  // 0x0014 [P] GetMaxFiles, "(file >= 0) && (file < mMaxFiles)"; [R] Reset 6 (the
                                     //       mFileSlots count); retail slot 68 cPS2MemCard_GetMaxFiles
@@ -168,14 +168,14 @@ struct cPS2MemCard {
                                     //       mFileSlots); SetState(1) sets -1
     int mTransferSize;              // 0x0020 [R] Reset 0; [U] transfer size for sceMcWrite/Read in SetState(0x17/0x1D)
                                     //       ([O] ReadData / WriteData transferSize; slots 30/36/37/41 store it);
-                                    //       func_002C6C50 stores it
+                                    //       cPS2MemCard_startMakeDir stores it
     int mDataSize;                  // 0x0024 [R] Reset 0; [O] slot 19 SetDataSize stores it; Update compares it with
-                                    //       the dir entry's m_fileSizeByte; func_002C6B50/6BD0 store the
+                                    //       the dir entry's m_fileSizeByte; cPS2MemCard_startReadFile/6BD0 store the
                                     //       sceMcRead/Write size
     int mScanFileSlot;              // 0x0028 [R] Reset 0; [U] the file slot that SetState(7) .. SetState(0xF) check
                                     //       (icon.sys, directory entry); state 7 loops it over 0..mMaxFiles
     int mBuffer;                    // 0x002C [R] Reset 0; [O] ReadData / WriteData buffer: the caller's buffer for
-                                    //       sceMcWrite/Read (slots 30/36/37/41, func_002C6B50/6BD0 store it);
+                                    //       sceMcWrite/Read (slots 30/36/37/41, cPS2MemCard_startReadFile/6BD0 store it);
                                     //       SetState(1/0x17) clears it
     void* mIconFileData;            // 0x0030 [R] Reset 0; [U] the icon file's data (ASYNCFILE_release(mIconFileHandle,
                                     //       &mIconFileData, &mIconFileSize); [O] its address out-parameter is void**),
@@ -183,26 +183,26 @@ struct cPS2MemCard {
     int mIconFileSize;              // 0x0034 [R] Reset 0; [U] the icon file's size (see mIconFileData)
     int mIconFileHandle;            // 0x0038 [P] "mIconFileHandle != 0"; [R] Reset -1; [U] SetState(0x28/0x2C/0x30) =
                                     //       ASYNCFILE_load(icon path, 0x100) (async open); Update polls and releases it
-    int mFileInfoValid;             // 0x003C [R] Reset 0; [U] Update sets 0/1 (operation outcome); func_002C42B0,
-                                    //       func_002C4410, SetState(0xB) clear it; [O] slot 75 IsFileInfoValid (retail
+    int mFileInfoValid;             // 0x003C [R] Reset 0; [U] Update sets 0/1 (operation outcome); cPS2MemCard_issueGetFileInfo,
+                                    //       cPS2MemCard_startDeleteSave, SetState(0xB) clear it; [O] slot 75 IsFileInfoValid (retail
                                     //       cPS2MemCard_IsFileInfoValid) returns it
-    int mGetInfoPending;            // 0x0040 [R] Reset 0; [U] whether func_002C50E0's sceMcGetInfo was accepted; slot
-                                    //       11 (busy test), func_002C50E0, cPS2MemCard_CleanUp
+    int mGetInfoPending;            // 0x0040 [R] Reset 0; [U] whether cPS2MemCard_startGetInfo's sceMcGetInfo was accepted; slot
+                                    //       11 (busy test), cPS2MemCard_startGetInfo, cPS2MemCard_CleanUp
     int mReadFailed;                // 0x0044 [R] Reset 0; [O] slot 33 SetReadFailed sets 1 (deferred: Update then
                                     //       SetState(0x1E)); SetState(0x1C) clears it
     int mWriteFailed;               // 0x0048 [R] Reset 0; [O] slot 44 SetWriteFailed sets 1 (deferred: Update then
                                     //       SetState(0x18)); SetState(0x24) clears it
-    int unk_04C;                    // 0x004C [R] Reset 0; [U] func_002C50E0 stores 5
-    int unk_050;                    // 0x0050 [R] Reset 0; [U] func_002C5278 clears it; Update stores a count and loops
+    int unk_04C;                    // 0x004C [R] Reset 0; [U] cPS2MemCard_startGetInfo stores 5
+    int unk_050;                    // 0x0050 [R] Reset 0; [U] cPS2MemCard_clearDirData clears it; Update stores a count and loops
                                     //       over it
     int mNumDirTable;               // 0x0054 [P] GetNumDirTable, "(index >= 0) && (index < mNumDirTable)"; [R] Reset 0;
-                                    //       [U] func_002C5278 / func_002C6810 store it; Update stores it
+                                    //       [U] cPS2MemCard_clearDirData / cPS2MemCard_startListDir store it; Update stores it
     char mTitle[0x21];              // 0x0058 [U] the save title ([P] kMCTitleStringSize likely 0x21): SetState(0x26)
                                     //       converts it into the icon's title (cMemCard_AsciiToShiftJIS AsciiToShiftJIS); slot 45
                                     //       cPS2MemCard_SetTitleString fills it; Update copies it into the file slot
     char mIconFilePath[0x40];       // 0x0079 [R] Reset clears it; [U] the icon file path "<name>/<icon file>" (sprintf
                                     //       target before sceMcOpen / sceMcDelete of the icon files)
-    char mFileName[0x40];           // 0x00B9 [R] Reset clears it; [U] the file name (slots 34-37, func_002C4788)
+    char mFileName[0x40];           // 0x00B9 [R] Reset clears it; [U] the file name (slots 34-37, cPS2MemCard_startLoadFile)
     char mFilePath[0x40];           // 0x00F9 [R] Reset clears it; [U] the file path "<name>/<name>" (sprintf
                                     //       str_pct_s_pct_s_h) for sceMcOpen/Mkdir/Delete
     char mDirPattern[0x40];         // 0x0139 [R] Reset clears it; [U] the sceMcGetDir pattern (slot 6 cPS2MemCard_GetDir)
@@ -212,15 +212,15 @@ struct cPS2MemCard {
     tPS2MemCardFile mFileSlots[6];  // 0x01A4 [R] Reset clears 0x2D0 bytes; [U] indexed by mCurrentFileSlot /
                                     //       mScanFileSlot (0x78 stride), count mMaxFiles
     char pad_474[0xC];              // 0x0474 never accessed
-    tPS2MemCardDirEntry mFileDirEntry; // 0x0480 [R] Reset clears it; [U] sceMcGetDir with maxent 1 (func_002C42B0,
+    tPS2MemCardDirEntry mFileDirEntry; // 0x0480 [R] Reset clears it; [U] sceMcGetDir with maxent 1 (cPS2MemCard_issueGetFileInfo,
                                     //       SetState(0xB/0xC)); slot 18 returns +0x10
-    tPS2MemCardDirEntry mDirTable[64]; // 0x04C0 [R] Reset clears 0x1000; [U] the directory table (func_002C4210,
-                                    //       func_002C6848 sceMcGetDir; func_002C5278 clears it); mNumDirTable entries
+    tPS2MemCardDirEntry mDirTable[64]; // 0x04C0 [R] Reset clears 0x1000; [U] the directory table (cPS2MemCard_issueGetDir,
+                                    //       cPS2MemCard_issueListDir sceMcGetDir; cPS2MemCard_clearDirData clears it); mNumDirTable entries
     char mSourceIconPath[0x20];     // 0x14C0 [P] "strlen(pszInfo) < sizeof(mSourceIconPath)" (0x20 fits the gap);
                                     //       [R] Reset clears it; [U] slot 39 cPS2MemCard_SetFileSlotInfo copies it; SetState(0x28/0x2C/
                                     //       0x30) builds the icon file paths from it
-    int mOpenMode;                  // 0x14E0 [R] Reset 0; [U] sceMcOpen mode (func_002C6968 stores, func_002C69A0 uses)
-    int mSeekOffset;                // 0x14E4 [R] Reset 0; [U] sceMcSeek offset (func_002C6A60 stores, func_002C6A88)
+    int mOpenMode;                  // 0x14E0 [R] Reset 0; [U] sceMcOpen mode (cPS2MemCard_startOpenFile stores, cPS2MemCard_issueOpenFile uses)
+    int mSeekOffset;                // 0x14E4 [R] Reset 0; [U] sceMcSeek offset (cPS2MemCard_startSeekFile stores, cPS2MemCard_issueSeekFile)
     int mSeekOrigin;                // 0x14E8 [R] Reset 0; [U] sceMcSeek origin (see mSeekOffset)
     char pad_14EC[0x14];            // 0x14EC never accessed (allocation size 0x1500)
 

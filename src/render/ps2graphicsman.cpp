@@ -65,7 +65,7 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_PurgeNonBindTexIDs);
 /**
  * Does nothing useful: counts through the 500 non-bound texture ids with an empty loop body.
  *
- * The per-id work of this purge is compiled out in retail; only the loop remains. func_00367360 calls it.
+ * The per-id work of this purge is compiled out in retail; only the loop remains. cTextureMan_purgeAll calls it.
  */
 extern "C" void cTextureMan_PurgeNonBindTexIDs(void)
 {
@@ -125,7 +125,7 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_PurgeBindTexIDs);
 /**
  * Does nothing useful: counts through the 1500 bound texture ids with an empty loop body.
  *
- * The per-id work of this purge is compiled out in retail; only the loop remains. func_00367360 calls it (passing the
+ * The per-id work of this purge is compiled out in retail; only the loop remains. cTextureMan_purgeAll calls it (passing the
  * texture manager, which the definition ignores).
  */
 extern "C" void cTextureMan_PurgeBindTexIDs(void)
@@ -135,34 +135,34 @@ extern "C" void cTextureMan_PurgeBindTexIDs(void)
 }
 #endif
 
-extern "C" void* func_00365E40(void*, int, int, void*);
+extern "C" void* vramHeap_init(void*, int, int, void*);
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367340__FPvii);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_initTempHeap__FPvii);
 #ifdef SKIP_ASM
 /**
  * Sets up the texture manager's second GS memory heap (+0x4350) to cover @p size units from @p start.
  *
- * Forwards to func_00365E40 (the heap initialiser, which starts with one free block) with the texture record table
- * (+0x8) as the owner table. Texel format 9 textures, sent as PSMT8H, are allocated from this heap. func_0037BD98 calls
+ * Forwards to vramHeap_init (the heap initialiser, which starts with one free block) with the texture record table
+ * (+0x8) as the owner table. Texel format 9 textures, sent as PSMT8H, are allocated from this heap. cPS2GraphicsMan_applyDisplayMode calls
  * it after allocating the frame and z buffers, with the start of the first 24-bit buffer (page << 11, i.e. in 32-bit
  * words) and the pixel count of the 24-bit buffers from there.
  *
  * @param start  the first address of the heap, in 32-bit words
  * @param size  the heap size, in 32-bit words
- * @return nothing meaningful: func_00365E40 returns nothing, though the definition is declared void*
+ * @return nothing meaningful: vramHeap_init returns nothing, though the definition is declared void*
  */
-void* func_00367340(void* vself, int start, int size)
+void* cTextureMan_initTempHeap(void* vself, int start, int size)
 {
     cTextureMan* self = (cTextureMan*)vself;
-    return func_00365E40(self->mTempHeap, start, size, &self->m_pTexInfo[0]);
+    return vramHeap_init(self->mTempHeap, start, size, &self->m_pTexInfo[0]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367360);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_purgeAll);
 #ifdef SKIP_ASM
-extern "C" void func_00366548(void* p);
+extern "C" void vramHeap_freeUnlockedBlocks(void* p);
 // PORT: the unit defines cTextureMan_PurgeBindTexIDs(void), but this caller passes self.
 void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cTextureMan_PurgeBindTexIDs");
 
@@ -170,16 +170,16 @@ void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cTextureMan_PurgeBin
  * Purges the texture manager: frees every unlocked VRAM block and forgets the textures bound to the GS contexts.
  *
  * Runs the two id purges (cTextureMan_PurgeNonBindTexIDs, cTextureMan_PurgeBindTexIDs), frees the unlocked blocks of both GS memory heaps (+0x1F60 and
- * +0x4350, func_00366548), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
+ * +0x4350, vramHeap_freeUnlockedBlocks), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
  * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mTexMan.
  */
-extern "C" void func_00367360(cTextureMan* self)
+extern "C" void cTextureMan_purgeAll(cTextureMan* self)
 {
     int i;
     cTextureMan_PurgeNonBindTexIDs();
     cPSPGraphicsMan_PurgeBindTexIDs_1(self);
-    func_00366548(self->mMainHeap);
-    func_00366548(self->mTempHeap);
+    vramHeap_freeUnlockedBlocks(self->mMainHeap);
+    vramHeap_freeUnlockedBlocks(self->mTempHeap);
     for (i = 1; i >= 0; i--) {
         ((int*)(&self->mBoundTex[0]))[i] = -1;
     }
@@ -200,23 +200,23 @@ void func_003673D0(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003673D8);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_allocLockedPages);
 #ifdef SKIP_ASM
-extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
+extern "C" int vramHeap_allocBlock(void* heap, int size, int idx, int other, int a4, int a5);
 
 /**
  * Allocates a locked block of @p size bytes in the texture manager's main GS memory heap and returns its page number.
  *
- * Takes a page-aligned block from the heap at +0x1F60 (func_00366CE0, no owner), sets flags 0x22 on its node (used and
- * locked) and owner 0x7FFFFFFF, and returns the block's address in 8 KB pages (node flags >> 13). func_0037BD98
+ * Takes a page-aligned block from the heap at +0x1F60 (vramHeap_allocBlock, no owner), sets flags 0x22 on its node (used and
+ * locked) and owner 0x7FFFFFFF, and returns the block's address in 8 KB pages (node flags >> 13). cPS2GraphicsMan_applyDisplayMode
  * allocates the frame and z buffers with it.
  *
  * @param size  the number of bytes wanted
  * @return the block's first GS page
  */
-extern "C" int func_003673D8(cTextureMan* self, int size)
+extern "C" int cTextureMan_allocLockedPages(cTextureMan* self, int size)
 {
-    int idx = func_00366CE0(self->mMainHeap, size, -1, -1, -1, 1);
+    int idx = vramHeap_allocBlock(self->mMainHeap, size, -1, -1, -1, 1);
     char* node = *(char**)(((char*)self) + 0x3F50) + idx * 0x1C;
     *(int*)node |= 0x22;
     *(int*)(node + 8) = 0x7FFFFFFF;
@@ -228,8 +228,8 @@ extern "C" int func_003673D8(cTextureMan* self, int size)
 INCLUDE_ASM("render/ps2graphicsman", cTextureMan_AddTexture);
 #ifdef SKIP_ASM
 extern "C" void cTextureMan_NewBindTexID(cTextureMan* self, int id);
-extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
-extern "C" void func_00366E90(void* self, void* tex);
+extern "C" int vramHeap_allocBlock(void* heap, int size, int idx, int other, int a4, int a5);
+extern "C" void cTextureMan_rearrangeMipLevels(void* self, void* tex);
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
@@ -348,7 +348,7 @@ static inline int clutPsm_7440(int f)
  * TEX0 (+0x38) gets the buffer width, format, log2 size, TCC and the CLUT format; TEX1 (+0x40) the mip settings; with
  * mips, MIPTBP1/2 (+0x48/+0x50) get the level widths. @p vramMode GM_TEXTYPE_LOCKED allocates the VRAM block now (heap
  * +0x1F60, node flag 2) and GM_TEXTYPE_WINDOW allocates 0x2000 bytes more, locked (flags 0x22), with the address
- * rounded up to 32 blocks. A GM_TEXEL_INDEX8 texture becomes PSMT8H, or is converted by func_00366E90 when it owns its
+ * rounded up to 32 blocks. A GM_TEXEL_INDEX8 texture becomes PSMT8H, or is converted by cTextureMan_rearrangeMipLevels when it owns its
  * data, the free space at +0x6344 is smaller than its VRAM size and @p vramMode is GM_TEXTYPE_DYNAMIC.
  * cPS2GraphicsMan_AddTexture1 and cTextureMan_AddLockedFrameTexture call it.
  *
@@ -484,14 +484,14 @@ int cTextureMan::AddTexture(void* pixelData, void* texName, int texWidth, int te
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
     if (vramMode == GM_TEXTYPE_LOCKED) {
-        int node = func_00366CE0(mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
+        int node = vramHeap_allocBlock(mMainHeap, tex->mVRAMSize, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 2;
         *nodeFlags = fl;
         tex->mTexBlock = node;
         tex->mTexAddr = fl >> 8;
     } else if (vramMode == GM_TEXTYPE_WINDOW) {
-        int node = func_00366CE0(mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
+        int node = vramHeap_allocBlock(mMainHeap, tex->mVRAMSize + 0x2000, id, -1, -1, 1);
         int* nodeFlags = (int*)(*(char**)(((char*)this) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 0x22;
         *nodeFlags = fl;
@@ -502,7 +502,7 @@ int cTextureMan::AddTexture(void* pixelData, void* texName, int texWidth, int te
     if (tex->mMemAlloc != 0) {
         if (tex->mFormat == GM_TEXEL_INDEX8) {
             if (*(int*)(((char*)this) + 0x6344) < tex->mVRAMSize && vramMode == GM_TEXTYPE_DYNAMIC)
-                func_00366E90(this, tex);
+                cTextureMan_rearrangeMipLevels(this, tex);
             else
                 tex->mTEX0 = (tex->mTEX0 & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
         }
@@ -514,7 +514,7 @@ int cTextureMan::AddTexture(void* pixelData, void* texName, int texWidth, int te
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_unlockTexture);
 #ifdef SKIP_ASM
 /**
  * Unlocks texture @p i's VRAM block so the heap may evict it again.
@@ -525,7 +525,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
  *
  * @param i  the texture id
  */
-extern "C" void func_00367B60(cTextureMan* self, int i)
+extern "C" void cTextureMan_unlockTexture(cTextureMan* self, int i)
 {
     tTexInfo* obj = self->m_pTexInfo[i].pTexInfo;
     if (obj->mTexAddr != tTexInfo::kNoVRAM) {
@@ -540,7 +540,7 @@ extern "C" void func_00367B60(cTextureMan* self, int i)
 INCLUDE_ASM("render/ps2graphicsman", cTextureMan_RemoveTexture);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern "C" void func_003663D8(void* self, int id);
+extern "C" void vramHeap_freeBlock(void* self, int id);
 
 static inline void fill7BC0(int* p, int v)
 {
@@ -552,7 +552,7 @@ static inline void fill7BC0(int* p, int v)
 /**
  * Removes texture @p id from the texture manager: frees its VRAM blocks, owned buffers and id.  Frees the texture's
  * block (+0x30) in the main heap (+0x1F60; the second heap +0x4350 for GM_TEXEL_INDEX8) and its CLUT block (+0x34, main
- * heap) with func_003663D8 when they exist; when the texture owns its data (+0x0) frees the pixel and CLUT buffers
+ * heap) with vramHeap_freeBlock when they exist; when the texture owns its data (+0x0) frees the pixel and CLUT buffers
  * (+0x1C, +0x20). Then deletes the id (cTextureMan_DeleteBindTexID for ids below 1500, else
  * cTextureMan_DeleteNonBindTexID) and sets the per-context bound texture ids (+0x1F4C) and the loaded-CLUT texture
  * (+0x1F54) to -1. cPS2GraphicsMan_RemoveTexture calls it.
@@ -563,10 +563,10 @@ void cTextureMan::RemoveTexture(int id)
 {
     tTexInfo* tex = m_pTexInfo[id].pTexInfo;
     if (tex->mTexAddr != tTexInfo::kNoVRAM) {
-        func_003663D8(tex->mFormat != GM_TEXEL_INDEX8 ? mMainHeap : mTempHeap, tex->mTexBlock);
+        vramHeap_freeBlock(tex->mFormat != GM_TEXEL_INDEX8 ? mMainHeap : mTempHeap, tex->mTexBlock);
     }
     if (tex->mCLUTAddr != tTexInfo::kNoVRAM) {
-        func_003663D8(mMainHeap, tex->mCLUTBlock);
+        vramHeap_freeBlock(mMainHeap, tex->mCLUTBlock);
     }
     if (tex->mMemAlloc != 0) {
         if (tex->mpTexels != 0) {
@@ -614,13 +614,13 @@ int cTextureMan::AddLockedFrameTexture(int width, int height, int format)
 INCLUDE_ASM("render/ps2graphicsman", cTextureMan_SetNewTextureData);
 #ifdef SKIP_ASM
 extern "C" void* MEM_copy(void*, void*, int);
-extern "C" void func_00369098(cTextureMan* self, int idx);
+extern "C" void cTextureMan_dropVramCopy(cTextureMan* self, int idx);
 
 /**
  * Replaces the pixels and CLUT of texture @p idx and marks it for re-upload.
  *
  * When @p upload is set, copies @p data over the texture's pixel buffer (+0x1C, size +0x10) and @p clut over its CLUT
- * buffer (+0x20, 4 << bits-per-pixel bytes), each only when given. Then calls func_00369098 on the texture. @p width,
+ * buffer (+0x20, 4 << bits-per-pixel bytes), each only when given. Then calls cTextureMan_dropVramCopy on the texture. @p width,
  * @p height and the format arguments are not used. cPS2GraphicsMan_SetNewTextureData1 calls it on mTexMan.
  *
  * @param idx  the texture id
@@ -645,7 +645,7 @@ void cTextureMan::SetNewTextureData(int idx, void* data, int width, int height, 
             MEM_copy(tex->mCLUTData, clut, 4 << tex->mBPP);
         }
     }
-    func_00369098(this, idx);
+    cTextureMan_dropVramCopy(this, idx);
 }
 #endif
 
@@ -793,20 +793,20 @@ extern "C" void cTextureMan_ShadowClearLockTexture(sPs2TexSet7F18* self, int idx
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00368138);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_appendFixedPacketRef);
 #ifdef SKIP_ASM
 extern char D_0044B200[];
 
 /**
  * Appends a DMA ref tag that sends the fixed 0x22-quadword packet D_0044B200.
  *
- * Writes the tag at *@p pkt and advances it by one quadword. The texture upload builders (func_00368170, func_003684F0)
+ * Writes the tag at *@p pkt and advances it by one quadword. The texture upload builders (cTextureMan_buildPixelUpload, cTextureMan_buildClutUpload)
  * and several draw paths in render/graphicsman and render/lightman end their uploads with it.
  *
  * @param pkt  the DMA packet cursor
  */
 // PORT: 64-bit `ulong` DMA tag, pointer packed into the upper word
-extern "C" void func_00368138(cTextureMan* self, ulong** pkt)
+extern "C" void cTextureMan_appendFixedPacketRef(cTextureMan* self, ulong** pkt)
 {
     (*pkt)[0] = ((ulong)(int)D_0044B200 << 32) | 0x30000022;
     (*pkt)[1] = 0;
@@ -815,7 +815,7 @@ extern "C" void func_00368138(cTextureMan* self, ulong** pkt)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00368170);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_buildPixelUpload);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef int cQuad128_8170 __attribute__((mode(TI)));
@@ -855,7 +855,7 @@ template <class T> static inline T Max_8170(T a, T b)
  * GIF tag and a DMA ref to the level's pixels (at least 0x100 bytes), and an A+D TEXFLUSH (0x3F; end of packet on the
  * last level). Each level halves the size and moves the source and VRAM block on (VRAM in page-rounded steps). Texel
  * format GM_TEXEL_INDEX8S is sent as 32-bit at half size, GM_TEXEL_INDEX4S as 32-bit at a quarter, and GM_TEXEL_INDEX8
- * as PSMT8H with a smaller block shift. Ends the @p dma chain with func_00368138. func_00368660 calls it for textures
+ * as PSMT8H with a smaller block shift. Ends the @p dma chain with cTextureMan_appendFixedPacketRef. cTextureMan_ensureContextTextures calls it for textures
  * not yet in VRAM.
  *
  * @param self_  the texture manager (this)
@@ -864,7 +864,7 @@ template <class T> static inline T Max_8170(T a, T b)
  * @param gif  the upload chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368170(cTextureMan* self_, int idx, ulong** dma, ulong** gif)
+extern "C" void cTextureMan_buildPixelUpload(cTextureMan* self_, int idx, ulong** dma, ulong** gif)
 {
     sTexMgr_8170* self = (sTexMgr_8170*)self_;
     sBXTex_8170* texture = self->texs[idx];
@@ -953,14 +953,14 @@ extern "C" void func_00368170(cTextureMan* self_, int idx, ulong** dma, ulong** 
         height >>= 1;
         gifCursor += 22;
     }
-    func_00368138((cTextureMan*)self, &dmaCursor);
+    cTextureMan_appendFixedPacketRef((cTextureMan*)self, &dmaCursor);
     *dma = dmaCursor;
     *gif = gifCursor;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003684F0);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_buildClutUpload);
 #ifdef SKIP_ASM
 struct sPs2UpTex {
     char pad_0x00[0xC];
@@ -981,14 +981,14 @@ struct sPs2UpMgr {
  *
  * Appends to the @p gif chain an A+D BITBLTBUF/TRXPOS/TRXREG/TRXDIR set for the CLUT block (+0x2C) as 32-bit, 8 x 2 (16
  * entries, texel formats 11/12) or 16 x 16 (256 entries), an IMAGE GIF tag with a DMA ref to the CLUT (+0x20) and an
- * A+D TEXFLUSH; then ends the @p dma chain with func_00368138. func_00368660 calls it when the CLUT is not in VRAM.
+ * A+D TEXFLUSH; then ends the @p dma chain with cTextureMan_appendFixedPacketRef. cTextureMan_ensureContextTextures calls it when the CLUT is not in VRAM.
  *
  * @param idx  the texture id
  * @param dma  the DMA chain cursor
  * @param gif  the upload chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif)
+extern "C" void cTextureMan_buildClutUpload(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif)
 {
     sPs2UpTex* tex = self->texs[idx];
     ulong* gifCursor = *gif;
@@ -1027,7 +1027,7 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
     gifCursor[19] = 0xE;
     gifCursor[20] = 0;
     gifCursor[21] = 0x3F;
-    func_00368138((cTextureMan*)self, &dmaCursor);
+    cTextureMan_appendFixedPacketRef((cTextureMan*)self, &dmaCursor);
     gifCursor += 22;
     *dma = dmaCursor;
     *gif = gifCursor;
@@ -1035,13 +1035,13 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/ps2graphicsman", func_00368660);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_ensureContextTextures);
 #ifdef SKIP_ASM
-extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
-extern "C" void func_00368170(cTextureMan* self, int idx, ulong** dma, ulong** gif);
-extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma);
-extern "C" ulong* func_0038F460(void* ring, unsigned int addr, int size, int flags);
-extern "C" void* func_0038F668(void* ring, ulong* p, int a2);
+extern "C" int vramHeap_allocBlock(void* heap, int size, int idx, int other, int a4, int a5);
+extern "C" void cTextureMan_buildPixelUpload(cTextureMan* self, int idx, ulong** dma, ulong** gif);
+extern "C" void cTextureMan_selectContextTexture(cTextureMan* self, int idx, int slot, ulong** dma);
+extern "C" ulong* cPS2ScratchPad_claimBuffer(void* ring, unsigned int addr, int size, int flags);
+extern "C" void* cPS2ScratchPad_flushBufferTo(void* ring, ulong* p, int a2);
 extern void* D_004A4474;
 
 struct sUpNode_8660 {
@@ -1067,10 +1067,10 @@ struct sUpMgr_8660 {
  * Does nothing when both ids are negative. For each given texture without a VRAM block (+0x28 < 0) it forgets the
  * context's bound id, allocates a block in the main heap (+0x1F60; +0x4350 with a shift of 2 for GM_TEXEL_INDEX8)
  * protecting the other context's texture, stores the node (+0x30) and address and queues the pixel upload
- * (func_00368170) in an upload chain opened at *@p gifOut; a CLUT not in VRAM gets a 0x100- or 0x400-byte block (flag
- * 4) and func_003684F0. The upload chain is closed into *@p gifOut; when nothing was sent a 1-quadword no-op goes to
- * *@p pp instead. Finally func_00368970 emits the register settings for each given texture. The rail/particle batch
- * renderer func_00363490 calls it per draw node.
+ * (cTextureMan_buildPixelUpload) in an upload chain opened at *@p gifOut; a CLUT not in VRAM gets a 0x100- or 0x400-byte block (flag
+ * 4) and cTextureMan_buildClutUpload. The upload chain is closed into *@p gifOut; when nothing was sent a 1-quadword no-op goes to
+ * *@p pp instead. Finally cTextureMan_selectContextTexture emits the register settings for each given texture. The rail/particle batch
+ * renderer cPS2DeferManager_buildDmaChains calls it per draw node.
  *
  * @param context1Tex  texture id for context 1 (negative for none)
  * @param context2Tex  texture id for context 2 (negative for none)
@@ -1079,7 +1079,7 @@ struct sUpMgr_8660 {
  * @param gifOut  the upload buffer cursor, updated when an upload chain was built
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
+extern "C" void cTextureMan_ensureContextTextures(cTextureMan* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
 {
     ulong* cur = *pp;
     tTexInfo* objs[2];
@@ -1110,32 +1110,32 @@ extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Te
         }
         if (texRecord->mTexAddr < 0) {
             ((sUpMgr_8660*)self)->state[k] = -1;
-            int n = func_00366CE0(heap, texRecord->mVRAMSize, idx, other, evictLevel, 1);
+            int n = vramHeap_allocBlock(heap, texRecord->mVRAMSize, idx, other, evictLevel, 1);
             sUpNode_8660* nd = &heap->nodes[n];
             int fl = nd->flags;
             texRecord->mTexBlock = n;
             texRecord->mTexAddr = (fl >> 8) << shift;
             if (gif == 0)
-                gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
-            func_00368170(self, idx, &cur, &gif);
+                gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+            cTextureMan_buildPixelUpload(self, idx, &cur, &gif);
             sent = 1;
         }
         if (((int)texRecord->mCLUTData) != 0 && texRecord->mCLUTAddr < 0) {
             self->mCLUTTex = -1;
-            int n = func_00366CE0(self->mMainHeap, ((unsigned int)texRecord->mFormat) - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
+            int n = vramHeap_allocBlock(self->mMainHeap, ((unsigned int)texRecord->mFormat) - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
             int* nodeFlags = &((sUpHeap_8660*)(((char*)self) + 0x1F60))->nodes[n].flags;
             int fl = *nodeFlags | 4;
             *nodeFlags = fl;
             texRecord->mCLUTBlock = n;
             texRecord->mCLUTAddr = fl >> 8;
             if (gif == 0)
-                gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
-            func_003684F0((sPs2UpMgr*)self, idx, &cur, &gif);
+                gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+            cTextureMan_buildClutUpload((sPs2UpMgr*)self, idx, &cur, &gif);
             sent = 1;
         }
     }
     if (gif != 0)
-        *gifOut = func_0038F668(D_004A4474, gif, 4);
+        *gifOut = cPS2ScratchPad_flushBufferTo(D_004A4474, gif, 4);
     if (!sent) {
         cur[0] = 0x10000001;
         cur[1] = 0;
@@ -1144,15 +1144,15 @@ extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Te
         cur += 4;
     }
     if (context1Tex >= 0)
-        func_00368970(self, context1Tex, 0, &cur);
+        cTextureMan_selectContextTexture(self, context1Tex, 0, &cur);
     if (context2Tex >= 0)
-        func_00368970(self, context2Tex, 1, &cur);
+        cTextureMan_selectContextTexture(self, context2Tex, 1, &cur);
     *pp = cur;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00368970);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_selectContextTexture);
 #ifdef SKIP_ASM
 static inline int imax_8970(int a, int b)
 {
@@ -1216,14 +1216,14 @@ static inline int levelBlocks_8970(char* vt, int lv, int shift)
  * levels' VRAM blocks, and MIPTBP2 (0x36/0x37, +0x50) when there are 4 or more levels; TEX1 (0x14/0x15, +0x40); and
  * TEX0 (0x06/0x07, +0x38) with the texture's VRAM block and its CLUT block, remembering the texture as the loaded CLUT
  * (+0x1F54) when it has one. When the context already has it but another texture's CLUT is loaded, writes only TEX2
- * (0x16/0x17) with this texture's CLUT. Advances *@p dma. func_00368660 calls it.
+ * (0x16/0x17) with this texture's CLUT. Advances *@p dma. cTextureMan_ensureContextTextures calls it.
  *
  * @param idx  the texture id
  * @param slot  the GS context: 0 for context 1, 1 for context 2
  * @param dma  the DMA chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
+extern "C" void cTextureMan_selectContextTexture(cTextureMan* self, int idx, int slot, ulong** dma)
 {
     ulong* packet = *dma;
     int off = slot << 2;
@@ -1308,27 +1308,27 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369098);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_dropVramCopy);
 #ifdef SKIP_ASM
-extern "C" void func_00366E30(void* list, int i);
+extern "C" void vramHeap_freeTextureBlocks(void* list, int i);
 
 /**
  * Drops texture @p idx's VRAM copy so it is uploaded again, and forgets the textures bound to the GS contexts.
  *
- * When the texture has a VRAM block (+0x28 not tTexInfo::kNoVRAM), func_00366E30 frees its data and CLUT blocks in the
+ * When the texture has a VRAM block (+0x28 not tTexInfo::kNoVRAM), vramHeap_freeTextureBlocks frees its data and CLUT blocks in the
  * main heap (+0x1F60), or the second heap (+0x4350) for GM_TEXEL_INDEX8. Then sets both per-context bound ids (+0x1F4C)
  * and the loaded-CLUT texture (+0x1F54) to -1. cTextureMan_SetNewTextureData calls it after replacing a texture's data.
  *
  * @param idx  the texture id
  */
-extern "C" void func_00369098(cTextureMan* self, int idx)
+extern "C" void cTextureMan_dropVramCopy(cTextureMan* self, int idx)
 {
     tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
     if (tex->mTexAddr != tTexInfo::kNoVRAM) {
         if (tex->mFormat != GM_TEXEL_INDEX8) {
-            func_00366E30(self->mMainHeap, idx);
+            vramHeap_freeTextureBlocks(self->mMainHeap, idx);
         } else {
-            func_00366E30(self->mTempHeap, idx);
+            vramHeap_freeTextureBlocks(self->mTempHeap, idx);
         }
     }
     int unbound = -1;
@@ -1341,7 +1341,7 @@ extern "C" void func_00369098(cTextureMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369130);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_setTextureFilter);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX1 register layout)
 struct sGsTex1 {
@@ -1371,7 +1371,7 @@ struct sGfxTexTable1 {
 /**
  * Sets the filtering fields of texture @p idx's GS TEX1 register value (+0x40): MMIN, MMAG, L and K.
  *
- * Only those four bit fields change. func_0037D090__FPv calls it on mTexMan.
+ * Only those four bit fields change. cPS2GraphicsMan_setTextureFilter__FPv calls it on mTexMan.
  *
  * @param idx  the texture id
  * @param mmin  the minification filter (TEX1.MMIN)
@@ -1379,7 +1379,7 @@ struct sGfxTexTable1 {
  * @param lodL  the LOD shift (TEX1.L)
  * @param k  the LOD bias (TEX1.K)
  */
-extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, int lodL, int k)
+extern "C" void cTextureMan_setTextureFilter(sGfxTexTable1* self, int idx, int mmin, int mmag, int lodL, int k)
 {
     sGfxTex1* entry = self->entries[idx];
     sGsTex1 tex1Reg = entry->tex1;
@@ -1392,7 +1392,7 @@ extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, 
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003691B0);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_setTextureFunction);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 struct sGsTex0 {
@@ -1424,12 +1424,12 @@ struct sGfxTexTable {
  * Sets the texture function (TEX0.TFX: modulate, decal, highlight, highlight 2) of texture @p idx.
  *
  * Changes only that field of the stored TEX0 value (+0x38); an @p idx of cTextureMan::kNoTexID is ignored.
- * func_0037CBC8__FPv calls it on mTexMan.
+ * cPS2GraphicsMan_setTextureFunction__FPv calls it on mTexMan.
  *
  * @param idx  the texture id, or cTextureMan::kNoTexID
  * @param tfx  the TFX value (0-3)
  */
-extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
+extern "C" void cTextureMan_setTextureFunction(sGfxTexTable* self, int idx, int tfx)
 {
     if (idx != cTextureMan::kNoTexID) {
         self->entries[idx]->tex0.TFX = tfx;

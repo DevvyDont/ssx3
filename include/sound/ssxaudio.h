@@ -331,11 +331,11 @@ struct cSSXAudio {
                                         //        (speech line 8403, a rider about another) and clears it; reset by
                                         //        cSSXAudio_ClearPendingLines
     int mFirstTimeOnPeak;               // 0x578C (name ours, after the preview's GetFirstTimeOnPeak /
-                                        //        SetFirstTimeOnPeak accessors) [R] ctor 0; func_002BAD30 sets 1; retail
+                                        //        SetFirstTimeOnPeak accessors) [R] ctor 0; cSSXAudio_resetPeakIntro sets 1; retail
                                         //        getter 0x2BAD48 (lw); [U] cSSXAudio_HandleMusicEvent plays the peak's first-visit
                                         //        music while set; cSSXAudio_SpeakDJBetweenEvents, cSSXAudio_HandleMusicEvent (event 20) and
                                         //        cSSXAudio_RestartLocationMusic clear it; cSSXAudio_ScheduleDJOpening opens the event only while 0
-    int mPeakIntroDone;                 // 0x5790 (name ours) [R] ctor 1; func_002BAD30 clears it; retail getter
+    int mPeakIntroDone;                 // 0x5790 (name ours) [R] ctor 1; cSSXAudio_resetPeakIntro clears it; retail getter
                                         //        0x2BAD50 (lw); [U] cSSXAudio_SpeakDJBetweenEvents: while 0 the next between-events call
                                         //        plays the opening line (pick 0) and sets it
     int mChoiceLineFirstTime;           // 0x5794 (name ours) [R] ctor 1; [U] cSSXAudio_SpeakDJChoiceLine clears it once speech line
@@ -469,7 +469,7 @@ struct cSSXAudio {
     int mJumpCountdown;                 // 0x6250 (name ours) [R] ctor 0; [U] cSSXAudio_UpdateAirTimeVolume counts it down,
                                         //        cSSXAudio_SetJumpCountdown sets it; nothing reads it otherwise
     int mInTransport;                   // 0x6254 (name ours) [R] ctor 0; [U] set by cSSXAudio_HandleMusicEvent event 20 (the
-                                        //        transport start) and by func_002BAD30 (retail 0x2BAD30); cSSXAudio_EndTransportMusic
+                                        //        transport start) and by cSSXAudio_resetPeakIntro (retail 0x2BAD30); cSSXAudio_EndTransportMusic
                                         //        (the NIS list ended) runs event 19 and clears it; cSSXAudio_SpeakDJEventResult
                                         //        comments on mLastTransportTrack only while set
     int mBonusLineQueued;               // 0x6258 (name ours) [U] cSSXAudio_HandleMusicEvent sets it with
@@ -537,7 +537,7 @@ struct cSSXAudio {
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores it (and sets volume controls 9/10); cSSXAudio_SetSFXVolume re-applies controls 9/10 only when set
     int mDJSpeech;                      // 0x62B8 (name ours) [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1 (DJ volume
                                         //        control 2 on) or 0; cSSXAudio_ApplyMusicVolume re-applies control 2 only when set
-                                        //        (and the radio mode is not 2); retail accessor func_002BADB0 returns
+                                        //        (and the radio mode is not 2); retail accessor cSSXAudio_GetDJSpeech returns
                                         //        it
     tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume: entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume
     float mCharacterVolume[10];         // 0x636C (name ours) per-character voice level, indexed Moby .. Deiter: [U] DuckVolume/MixVolume (cSSXAudio_DuckVolume/cSSXAudio_UpdateDuck/cSSXAudio_MixVolume/cSSXAudio_UpdateMix): mSoundVolume[4].appliedVolume times constants gMobyScaling..

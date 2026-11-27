@@ -6829,8 +6829,8 @@ struct cBXString;
 struct cBigFile;
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
-extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, cBXString* b);
 // PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
 cBigFile* cBigFile_cBigFile1_A830(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
@@ -6868,10 +6868,10 @@ int cTrackFileMan::checkLocation(char* name, char* tag)
     tWorldSectionScan nm;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
-    func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
+    cBXString_operatorPlus2((cBXString*)&base, pre, (cBXString*)&workStr);
     cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
+    cBXString_operatorPlus1((cBXString*)&workStr, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_A830(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
     nm.sectionName = name;
@@ -6890,8 +6890,8 @@ struct cBXString;
 struct cBigFile;
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str);
-extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
+extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* a, const char* str);
+extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, cBXString* b);
 // PORT: the bigfile ctor forwards (path, flags) to cBigFile_open; bind the 3-arg form.
 cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
@@ -6946,10 +6946,10 @@ int cTrackFileMan::checkLocation1(int n, void* namesp, char* tag)
     cBigFile bf;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
-    func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
+    cBXString_operatorPlus2((cBXString*)&base, pre, (cBXString*)&workStr);
     cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
+    cBXString_operatorPlus1((cBXString*)&workStr, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_17A978(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
     int anyFound = isValidMap(base.Str, n, names);

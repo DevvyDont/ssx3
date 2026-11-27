@@ -253,7 +253,7 @@ void cGameModeMan::initGameMode(unsigned int type)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_002382B8);
+INCLUDE_ASM("main/gamemode", cGameModeMan_clearRanking);
 #ifdef SKIP_ASM
 extern int cGameModeMan_iRanking[];
 
@@ -262,7 +262,7 @@ extern int cGameModeMan_iRanking[];
  *
  * @param i  the rider index
  */
-extern "C" void func_002382B8(cGameModeMan* self, int i)
+extern "C" void cGameModeMan_clearRanking(cGameModeMan* self, int i)
 {
     cGameModeMan_iRanking[i] = -1;
 }
@@ -693,8 +693,8 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
-// PORT: func_00239938 is defined as (void); this caller passes self.
-extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
+// PORT: buildRaceCharacterLineup is defined as (void); this caller passes self.
+extern "C" void buildRaceCharacterLineup_self(void* self) __asm__("buildRaceCharacterLineup");
 extern "C" void cGMBigAirHandler_fillScoreTable(cGMBigAirHandler* self);
 extern "C" void* memset(void* dst, int c, int n);
 extern unsigned int D_00536640[];
@@ -737,7 +737,7 @@ static inline cAI* race_238E20()
  *
  * Sets the time limit from cBENewRaceInterface_getTimeLimit(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
  * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
- * line-up (func_00239938) and the AI scores (cGMBigAirHandler_fillScoreTable); it then ranks twice with sortScores (cGameModeMan_sortScores) and
+ * line-up (buildRaceCharacterLineup) and the AI scores (cGMBigAirHandler_fillScoreTable); it then ranks twice with sortScores (cGameModeMan_sortScores) and
  * puts the two leaders' characters in the race (AI + 0x20, + 0x24). Heat 2 ranks on heats 1 + 2; heat 3 is the last
  * heat and ranks on heat 3. When the game path (newRace.cGamePath) is not 0 it first sets up a single heat-3 event with fresh
  * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
@@ -768,7 +768,7 @@ void cGMBigAirHandler::init()
         memset(uiScore, 0, 0x78);
         cleanRiderRanksPoints();
         if (cGameModeHandler_pManager->bIsEventDone == true) {
-            func_00239938_self(this);
+            buildRaceCharacterLineup_self(this);
         }
         cGameModeMan* modeMan = cGameModeHandler_pManager;
         modeMan->iNextHeat = 3;
@@ -806,7 +806,7 @@ void cGMBigAirHandler::init()
         if (manager->bIsEventDone == true) {
             memset(firstHeatScores, 0, 0x78);
             cleanRiderRanksPoints();
-            func_00239938_self(this);
+            buildRaceCharacterLineup_self(this);
             this->fillScoreTable();
         }
         D_00536640[0] = 0;
@@ -1027,7 +1027,7 @@ bool cGMBigAirHandler::riderCheckpointHit(int player, int secs)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239938);
+INCLUDE_ASM("main/gamemode", buildRaceCharacterLineup);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1036,7 +1036,7 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
-extern "C" void func_0023C770(int* arr, unsigned int n);
+extern "C" void shuffleIntArray(int* arr, unsigned int n);
 
 struct sGM_239938 {
     int f0;
@@ -1053,10 +1053,10 @@ struct sGM_239938 {
  * Builds the AI line-up: the player's character, the rival, then the other characters in random order.
  *
  * Takes the human rider's character (cBENewPlayerInterface_getRiderCharID) and the rival (cBENewRaceInterface_getRival), shuffles the
- * remaining characters 0-9 with func_0023C770 and stores them in iCharacters (cheat characters 0, the player's from
+ * remaining characters 0-9 with shuffleIntArray and stores them in iCharacters (cheat characters 0, the player's from
  * cBENewPlayerInterface_getRiderCheatCharID). Off the career path (cGamePath != 0) the rival slot gets the last shuffled character instead.
  */
-extern "C" void func_00239938(void)
+extern "C" void buildRaceCharacterLineup(void)
 {
     int n = 0;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1072,7 +1072,7 @@ extern "C" void func_00239938(void)
             n++;
         }
     }
-    func_0023C770(list, n);
+    shuffleIntArray(list, n);
     cGameModeHandler_pManager->iCharacters[0] = charA;
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getRiderCheatCharID(player, humanRider);
     cGameModeHandler_pManager->iCharacters[1] = charB;
@@ -1370,8 +1370,8 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" void* memset(void* dst, int c, int n);
-extern "C" void func_0023A4F0(cGMRaceHandler* self);
-extern "C" void func_0023A668(void* self);
+extern "C" void cGMRaceHandler_buildHeatLineups(cGMRaceHandler* self);
+extern "C" void cGMRaceHandler_applyHeatLineup(void* self);
 extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_iCharRank[];
@@ -1422,7 +1422,7 @@ static inline void fillOthers_23A108(int* dst, int p)
  * Starts a heat of the three-heat timed event (kHANDLER_RACE, vtable cGMRaceHandler_vtbl; offline kGAMEEVENT_RACE).
  *
  * Sets iHeatNum from iNextHeat (forced to kFinalHeat off the career path) and five AI riders. Heat 1 builds the heat
- * line-ups (func_0023A4F0) and applies one (func_0023A668) when the event was done, fills the time table (+0x58) with
+ * line-ups (cGMRaceHandler_buildHeatLineups) and applies one (cGMRaceHandler_applyHeatLineup) when the event was done, fills the time table (+0x58) with
  * 9s and runs slot +0x2C. Heat 2 and heat 3 record the player's character and the riders that survived the last heat
  * (cGameModeMan_iCharRank) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC
  * remember which heat set-up already ran.
@@ -1451,8 +1451,8 @@ void cGMRaceHandler::init()
         gm->iSimAI = 0;
         gm->iNumberAI = 5;
         if (gm->bIsEventDone == true) {
-            func_0023A4F0(this);
-            func_0023A668(this);
+            cGMRaceHandler_buildHeatLineups(this);
+            cGMRaceHandler_applyHeatLineup(this);
         }
         memset(uiTime, 9, 0x78);
         cleanRiderRanksTime();
@@ -1479,7 +1479,7 @@ void cGMRaceHandler::init()
             int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
             mLineup[1][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
             fillOthers_23A108(&mLineup[1][1], humanRider);
-            func_0023A668(this);
+            cGMRaceHandler_applyHeatLineup(this);
         }
         {
             cGameModeMan* manager = cGameModeHandler_pManager;
@@ -1508,9 +1508,9 @@ void cGMRaceHandler::init()
         gm->bIsLastHeat = 1;
         if (mHeat3Ready == 0) {
             if (quick != 0) {
-                func_0023A4F0(this);
+                cGMRaceHandler_buildHeatLineups(this);
                 cGameModeHandler_pManager->iHeatNum = 1;
-                func_0023A668(this);
+                cGMRaceHandler_applyHeatLineup(this);
                 cGameModeHandler_pManager->iHeatNum = state;
                 memset(uiTime, 9, 0x78);
                 cleanRiderRanksTime();
@@ -1519,7 +1519,7 @@ void cGMRaceHandler::init()
                 mLineup[2][0] = cBENewPlayerInterface_getRiderCharID(player, humanRider);
                 mLineup[2][1] = cBENewRaceInterface_getRival(race);
                 fillOthers_23A108(&mLineup[2][2], humanRider);
-                func_0023A668(this);
+                cGMRaceHandler_applyHeatLineup(this);
             }
         }
         {
@@ -1548,7 +1548,7 @@ void cGMRaceHandler::init()
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A4F0);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_buildHeatLineups);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1557,16 +1557,16 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" unsigned int GMrand(void);
-extern "C" void func_0023C770(int* arr, unsigned int n);
+extern "C" void shuffleIntArray(int* arr, unsigned int n);
 
 /**
  * Builds the timed event's heat line-ups: the player, two random characters from 10-16, then the other characters.
  *
  * Draws two distinct values with GMrand (10 + rand % 7, and 10 + rand % 6 skipping the first), lists the characters 0-9
- * other than the player's and the rival's (cBENewRaceInterface_getRival), shuffles all ten with func_0023C770 and stores the player's
+ * other than the player's and the rival's (cBENewRaceInterface_getRival), shuffles all ten with shuffleIntArray and stores the player's
  * character and the shuffled values in the line-up rows at +0x10 .. +0x54.
  */
-extern "C" void func_0023A4F0(cGMRaceHandler* self)
+extern "C" void cGMRaceHandler_buildHeatLineups(cGMRaceHandler* self)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1589,7 +1589,7 @@ extern "C" void func_0023A4F0(cGMRaceHandler* self)
             break;
         }
     }
-    func_0023C770(arr, 10);
+    shuffleIntArray(arr, 10);
     self->mLineup[0][0] = charA;
     self->mLineup[0][1] = arr[0];
     self->mLineup[0][2] = arr[1];
@@ -1605,7 +1605,7 @@ extern "C" void func_0023A4F0(cGMRaceHandler* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A668);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_applyHeatLineup);
 #ifdef SKIP_ASM
 
 
@@ -1620,7 +1620,7 @@ int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 
 extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 
-extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668");
+extern "C" void cGMRaceHandler_applyHeatLineup_A668(cGMRaceHandler* self) __asm__("cGMRaceHandler_applyHeatLineup");
 /**
  * Applies the current heat's line-up row to the game-mode manager's character tables.
  *
@@ -1628,7 +1628,7 @@ extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668"
  * go to iCheatCharacters with the player's character in iCharacters. The human rider's slot gets the player's cheat
  * character (cBENewPlayerInterface_getRiderCheatCharID).
  */
-extern "C" void func_0023A668_A668(cGMRaceHandler* self)
+extern "C" void cGMRaceHandler_applyHeatLineup_A668(cGMRaceHandler* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int id = cBENewPlayerInterface_getHumanRider(iface, 0);
@@ -2953,7 +2953,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_0023C770(int* arr, unsigned int n);
+extern "C" void shuffleIntArray(int* arr, unsigned int n);
 
 struct sGM_23C618 {
     int f0;
@@ -2984,7 +2984,7 @@ struct sGM_23C618 {
 /**
  * Starts a single-heat event with newRace.iNumberAI AI riders in a random line-up.
  *
- * Puts the human rider's character in its slot and fills the others from a shuffled 0-9 list (func_0023C770) without
+ * Puts the human rider's character in its slot and fills the others from a shuffled 0-9 list (shuffleIntArray) without
  * repeating the player's character, runs slot +0x24 and clears the time limit, point target and flags. Slot +0x14 of
  * the handler vtable at cMCOverlayManager_vtbl + 0x20.
  */
@@ -3003,7 +3003,7 @@ extern "C" void cGMDebugHandler_init(cGameModeHandler* self)
     for (int i = 0; i < 10; i++) {
         arr[i] = i;
     }
-    func_0023C770(arr, 10);
+    shuffleIntArray(arr, 10);
     int j = 0;
     int* src = arr;
     for (; j < 10; j++) {
@@ -3036,7 +3036,7 @@ extern "C" void cGMDebugHandler_init(cGameModeHandler* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C770);
+INCLUDE_ASM("main/gamemode", shuffleIntArray);
 #ifdef SKIP_ASM
 extern "C" unsigned int GMrand(void);
 
@@ -3046,7 +3046,7 @@ extern "C" unsigned int GMrand(void);
  * @param arr  the array
  * @param n  number of entries
  */
-extern "C" void func_0023C770(int* arr, unsigned int n)
+extern "C" void shuffleIntArray(int* arr, unsigned int n)
 {
     int i;
     for (i = 0; i < 25; i++) {

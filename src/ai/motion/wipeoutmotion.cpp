@@ -250,20 +250,20 @@ void cWipeoutMotion::throwRider(t4Vector* initVel, t4Vector* initAngVel)
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_step);
 #ifdef SKIP_ASM
-extern "C" void func_00136F30();
+extern "C" void cWipeoutMotion_stepThrownBoard();
 extern "C" void cWipeoutMotion_stepGroundMotion(cWipeoutMotion*);
 extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion*);
 
 /**
  * Steps the wipeout physics one tick: the thrown board, then the rider on the ground or in the air.
  *
- * Calls func_00136F30 (the board, while the root pose override is on), then cWipeoutMotion_stepGroundMotion for WMS_Ground or
- * cWipeoutMotion_stepAirMotion (air predictor) for WMS_Air. func_00136F30 is declared without arguments here but still
+ * Calls cWipeoutMotion_stepThrownBoard (the board, while the root pose override is on), then cWipeoutMotion_stepGroundMotion for WMS_Ground or
+ * cWipeoutMotion_stepAirMotion (air predictor) for WMS_Air. cWipeoutMotion_stepThrownBoard is declared without arguments here but still
  * receives self.
  */
 void cWipeoutMotion::step()
 {
-    func_00136F30();
+    cWipeoutMotion_stepThrownBoard();
     if (WipeoutMotionState == 0)
     {
         this->stepGroundMotion();
@@ -278,7 +278,7 @@ void cWipeoutMotion::step()
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolve);
 #ifdef SKIP_ASM
-extern "C" void func_00137138();
+extern "C" void cWipeoutMotion_resolveThrownBoard();
 extern "C" void cWipeoutMotion_resolveGroundMotion(cWipeoutMotion*);
 extern "C" void cWipeoutMotion_resolveAirMotion(cWipeoutMotion*);
 
@@ -286,12 +286,12 @@ extern "C" void cWipeoutMotion_resolveAirMotion(cWipeoutMotion*);
  * Resolves the wipeout's collisions for this tick: the thrown board, then the rider on the ground or in the
  * air.
  *
- * Calls func_00137138 (the board against the world), then cWipeoutMotion_resolveGroundMotion for WMS_Ground or cWipeoutMotion_resolveAirMotion for
- * WMS_Air. func_00137138 is declared without arguments here but still receives self.
+ * Calls cWipeoutMotion_resolveThrownBoard (the board against the world), then cWipeoutMotion_resolveGroundMotion for WMS_Ground or cWipeoutMotion_resolveAirMotion for
+ * WMS_Air. cWipeoutMotion_resolveThrownBoard is declared without arguments here but still receives self.
  */
 void cWipeoutMotion::resolve()
 {
-    func_00137138();
+    cWipeoutMotion_resolveThrownBoard();
     if (WipeoutMotionState == 0)
     {
         this->resolveGroundMotion();
@@ -317,7 +317,7 @@ void cWipeoutMotion::loseFocus()
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136F30);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_stepThrownBoard);
 #ifdef SKIP_ASM
 
 
@@ -440,7 +440,7 @@ static inline void vu0NormalizeEq_6F30(t4Vector& v)
  * dt / 2, and integrates the quaternion mRootPoseOverrideRot by it (VU0 quaternion derivative), then renormalises it.
  * cWipeoutMotion_step calls it without arguments; self still arrives in a0.
  */
-extern "C" void func_00136F30(cWipeoutMotion* self)
+extern "C" void cWipeoutMotion_stepThrownBoard(cWipeoutMotion* self)
 {
     if (self->mRider->mUseRootPoseOverride == 0) {
         return;
@@ -473,7 +473,7 @@ extern "C" void func_00136F30(cWipeoutMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137138);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_resolveThrownBoard);
 #ifdef SKIP_ASM
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -597,7 +597,7 @@ struct t4VectorCtor : public t4Vector {
  *
  * @param vself  the cWipeoutMotion (this)
  */
-extern "C" void func_00137138(cWipeoutMotion* vself)
+extern "C" void cWipeoutMotion_resolveThrownBoard(cWipeoutMotion* vself)
 {
     cWipeoutMotion* self = vself;
     if (self->mRider->mUseRootPoseOverride == 0)
@@ -821,7 +821,7 @@ extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hi
 extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, t4Vector* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
-void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+void cRiderHandler_recordSprayBurst_137860(void* self, void* a, void* b, int c, float x) __asm__("cRiderHandler_recordSprayBurst__FPv");
 extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
 extern "C" void cRider_updateBoundBox(void* rider, int a1);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
@@ -916,7 +916,7 @@ static inline bool isHuman_137860(cRider* rider)
  * Builds a world query from the rider's sphere tree (cWorldRider_cWorldRider; terrain only for a computer rider) and intersects
  * it with the rider's overlap list (cOverlapList_terrainIntersect1, mWallHint). On a hit, cWipeoutMotion_intersectGround (On Tour intersectGround) checks
  * the ground below; if that is solid enough (>= 0.4), the rider is not moving away from it and is within 10 of it, the
- * rider lands: cAirPredictor_land (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
+ * rider lands: cAirPredictor_land (On Tour cAirPredictor::land), the impact effect (cRiderHandler_recordSprayBurst), the handler's landed
  * flag and velocity (+0x314/+0x320), the ground normal, surface, contact point and height, the velocity loses its
  * into-ground part (passed to a hit object's vtable slot 43 scaled by the frame rate), any penetration is pushed out
  * (cRider_moveFromCollision) and the wipeout state (+0x0) becomes 0 (ground).
@@ -947,7 +947,7 @@ void cWipeoutMotion::resolveAirMotion()
         if (groundParam >= 0.4000000059604645f && vn <= 0.0f && height <= 10.0f)
         {
             cAirPredictor_land_137860(mRider->mAirPredictor, &mRider->mPosition, &mRider->mVelocity);
-            func_00111AA0_137860(mRider->mRiderHandler, &hitB, &hitB.Inorm, hitB.Stype, vn);
+            cRiderHandler_recordSprayBurst_137860(mRider->mRiderHandler, &hitB, &hitB.Inorm, hitB.Stype, vn);
             cRider* landedRider = mRider;
             cRiderHandler* hd = landedRider->mRiderHandler;
             hd->WipeoutControl.IsNewImpact = 1;
@@ -1009,7 +1009,7 @@ struct sCurvePt_137D18 { float x, y; };
 extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersectInfo* hit, t4Vector* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
-void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
+void cRiderHandler_recordSprayBurst_137D18(void* self, void* a, void* b, int c, float x) __asm__("cRiderHandler_recordSprayBurst__FPv");
 extern "C" int cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern t4Vector t4vect_ZAxis;
@@ -1237,7 +1237,7 @@ static inline t4Vector getFront_137D18(cRider* rider)
  * the ground (cRider_alignRiderAxis). cWipeoutMotion_intersectGround then probes the ground: a hit updates
  * GroundVelocity, mGroundNormal, mSurfaceType, mGroundContactPoint and unk_454; sinking deeper than the material limit
  * (mAnimModel unk_140.x x material +0x18) pushes the rider out and cancels the inward velocity, a shallower dip springs
- * it back, both spawning the impact effect (func_00111AA0); more than 10 above it launches the rider
+ * it back, both spawning the impact effect (cRiderHandler_recordSprayBurst); more than 10 above it launches the rider
  * (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss. The hit object's owner (virtual slot
  * 43) gets the velocity change, and a material with +0x44 set or a triangle with flag 2 forces a reset
  * (cRider_checkForReset with 0, 1).
@@ -1300,12 +1300,12 @@ void cWipeoutMotion::stepGroundMotion()
             if (vn2 < 0.0f)
                 vu0SubEq_137D18(mRider->mVelocity, vu0Scale_137D18(hit.Inorm, vn2));
             vu0SubEq_137D18(mRider->mPosition, vu0Scale_137D18(hit.Inorm, pen + lim));
-            func_00111AA0_137D18(mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
+            cRiderHandler_recordSprayBurst_137D18(mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
         } else if (pen < 0.0f) {
             float spd = vu0Length_137D18(mRider->mVelocity);
             vu0AddEq_137D18(mRider->mVelocity, vu0Scale_137D18(mRider->mGroundNormal,
                     dt * (pen * -2700.0f / lim - vu0Dot_137D18(mRider->mVelocity, mRider->mGroundNormal))));
-            func_00111AA0_137D18(mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
+            cRiderHandler_recordSprayBurst_137D18(mRider->mRiderHandler, &hit, &hit.Inorm, hit.Stype, spd);
         } else if (10.0f < pen) {
             float vn3 = vu0Dot_137D18(mRider->mVelocity, mRider->mGroundNormal);
             if (vn3 < 0.0f)

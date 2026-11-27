@@ -2438,8 +2438,8 @@ extern float D_004A2EB0[];
 extern "C" int func_00254350(int x);
 extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_SetPosition(SSX_VD_PS2_SINGLE_BUFFERD* self, float a, float b, float c);
 void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* self, float f0, float f1);
-// PORT: the project names this func_0037D090__FPv (one arg); this caller passes six.
-void func_0037D090_6(void* ctx, int id, int a, int b, int c, int d) __asm__("func_0037D090__FPv");
+// PORT: the project names this cPS2GraphicsMan_setTextureFilter__FPv (one arg); this caller passes six.
+void cPS2GraphicsMan_setTextureFilter_6(void* ctx, int id, int a, int b, int c, int d) __asm__("cPS2GraphicsMan_setTextureFilter__FPv");
 
 struct sVE_4410a {
     short delta;
@@ -2482,7 +2482,7 @@ struct sTile_4410 {
         h = height;
         cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
         tex = ((sVE_4410a*)VPTR_OF(cGraphicsMan, g))[47].fn((char*)g + ((sVE_4410a*)VPTR_OF(cGraphicsMan, g))[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
-        func_0037D090_6(g, tex, 0, 0, 0, 0);
+        cPS2GraphicsMan_setTextureFilter_6(g, tex, 0, 0, 0, 0);
     }
 };
 
@@ -2496,7 +2496,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
  * Stores the decoder (+0x0), the vtable D_00480270 and the graphics manager (+0x8), reads the frame image header
  * (@p res + 4; data at header + 0x10, or at its offset +0x10 when flag 0x1000 is set). The image is cut into 16-pixel
  * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, func_00254350); each tile (12 bytes from the movie
- * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and func_0037D090. The tile table (+0x14,
+ * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and cPS2GraphicsMan_setTextureFilter. The tile table (+0x14,
  * name "VD: VD_TEXTURE_POINTER") holds +0x18 entries. Centres the image on the screen (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition with the screen
  * width and height from slots 10/11, depth D_004A2EB0), sets the scale to 1 (SSX_VD_PS2_SINGLE_BUFFERD_SetScale) and stores the draw layer
  * (+0x3C).

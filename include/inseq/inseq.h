@@ -25,7 +25,7 @@
 struct cInSeqComm;          // On Tour: interface, vptr only; cBXScriptEngine implements it (its base at 0x2AC)
 
 // One pool slot (On Tour tScriptMainNode, 0x50). Retail 0x58 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 with
-// new[] (func_002724C8, element constructor = cScriptPlayerMain_cScriptPlayerMain on node + 8) and links
+// new[] (operator_new_array, element constructor = cScriptPlayerMain_cScriptPlayerMain on node + 8) and links
 // +0x50/+0x54. Retail has one more word than On Tour at the node's start (as cScriptPlayerEntity and the channel
 // classes do) and its cScriptPlayerMain is 0x48 (On Tour 0x44), so On Tour's offsets are +4 / +8 here.
 struct tScriptMainNode {

@@ -957,7 +957,7 @@ void cBoardTrailFX::render()
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
+INCLUDE_ASM("visualfx/boardtrailfx", renderBoardTrails);
 #ifdef SKIP_ASM
 extern int cBoardTrail_m_NumFadeSegments;
 
@@ -972,7 +972,7 @@ extern int cBoardTrail_m_NumFadeSegments;
  * @param trails  array of trail pointers
  * @param n  number of entries in @p trails
  */
-extern "C" void func_002EA538(char** trails, int n)
+extern "C" void renderBoardTrails(char** trails, int n)
 {
     BoardTrailInfoT strips[16];
     int count = 0;
@@ -1784,7 +1784,7 @@ void cWipe_TObj::Draw(float amount)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBD88);
+INCLUDE_ASM("visualfx/boardtrailfx", cCircle_TObj_cCircle_TObj1);
 #ifdef SKIP_ASM
 
 extern void* cCircle_TObj_vtbl[];
@@ -1801,7 +1801,7 @@ extern void* cCircle_TObj_vtbl[];
  * @param posY  centre y in screen units (0..480)
  * @return @p self
  */
-extern "C" void* func_002EBD88(cCircle_TObj* self, tARGB rect, float posX, float posY)
+extern "C" void* cCircle_TObj_cCircle_TObj1(cCircle_TObj* self, tARGB rect, float posX, float posY)
 {
     cTransitionObj_cTransitionObj(self);
     *(void***)self = cCircle_TObj_vtbl;

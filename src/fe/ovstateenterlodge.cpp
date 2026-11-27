@@ -553,7 +553,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
 extern "C" void strcpy1(void* str, int a1);
-extern "C" void func_002C2540(void* str, const char* s);
+extern "C" void strcpy3(void* str, const char* s);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
 extern "C" void sprintf1_1F7958(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(void* text, void* str);
@@ -634,7 +634,7 @@ void cOVState_TOPTIMES::onCreateScreen()
         strcpy1(wtext, getPeakChallengeEventName());
         break;
     case kGAMEEVENT_RIVALPOINTS:
-        func_002C2540(wfmt, str_pct_S_Jam);
+        strcpy3(wfmt, str_pct_S_Jam);
         sprintf1_1F7958(wtext, wfmt, cBENewRaceInterface_getLocationName1(race));
         break;
     default: {
@@ -654,7 +654,7 @@ void cOVState_TOPTIMES::onCreateScreen()
             name = Loc1F7958(str_kT_cmnPipeCaps);
             break;
         }
-        func_002C2540(wfmt, str_pct_S_pct_s);
+        strcpy3(wfmt, str_pct_S_pct_s);
         sprintf1_1F7958(wtext, wfmt, cBENewRaceInterface_getLocationName1(race), name);
         break;
     }

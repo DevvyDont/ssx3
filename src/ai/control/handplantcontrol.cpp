@@ -4679,7 +4679,7 @@ extern "C" void* func_0013F8B8(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8F8);
+INCLUDE_ASM("ai/control/handplantcontrol", mergesort__);
 #ifdef SKIP_ASM
 struct sSortObj_F8F8 {
     char pad[0x78];
@@ -4698,7 +4698,7 @@ struct sSortObj_F8F8 {
  * @param cmp  unused
  */
 // Merge sort of an object-pointer array by key, using buf as scratch; the sorted result ends up in buf.
-extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp)
+extern "C" void mergesort__(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp)
 {
     int n = last - first;
     if (n == 2) {
@@ -4717,11 +4717,11 @@ extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSort
     if (n < 3)
         *bmid = *first;
     else
-        func_0013F8F8(first, mid, bmid, cmp);
+        mergesort__(first, mid, bmid, cmp);
     if (n < 4)
         *first = *mid;
     else
-        func_0013F8F8(mid, last, first, cmp);
+        mergesort__(mid, last, first, cmp);
     sSortObj_F8F8** rightCur = bmid;
     sSortObj_F8F8** bend2 = bmid + (n + 1) / 2;
     sSortObj_F8F8** leftCur = first;
@@ -4741,16 +4741,16 @@ extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSort
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
+INCLUDE_ASM("ai/control/handplantcontrol", mergesort);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // Sort entry point: small ranges are handled inline, larger ones go to the merge sort.
 struct sSortObj_FAD8;
-extern "C" void func_0013F8F8_FAD8(sSortObj_FAD8**, sSortObj_FAD8**, sSortObj_FAD8**, void*) __asm__("func_0013F8F8");
+extern "C" void mergesort___FAD8(sSortObj_FAD8**, sSortObj_FAD8**, sSortObj_FAD8**, void*) __asm__("mergesort__");
 /**
  * Merge-sorts the pointers from @p first to @p last into @p buf by each object's unsigned key at +0x78.
  *
- * A range of two or more goes to func_0013F8F8; a single pointer is copied; an empty range does nothing. Called twice
+ * A range of two or more goes to mergesort__; a single pointer is copied; an empty range does nothing. Called twice
  * by cFocusMan_update (focus and unfocus instance lists).
  *
  * @param first  the first pointer
@@ -4758,11 +4758,11 @@ extern "C" void func_0013F8F8_FAD8(sSortObj_FAD8**, sSortObj_FAD8**, sSortObj_FA
  * @param buf  receives the sorted pointers
  * @param cmp  passed on unused (an InstanceCompare in the caller)
  */
-extern "C" void func_0013FAD8(sSortObj_FAD8** first, sSortObj_FAD8** last, sSortObj_FAD8** buf, void* cmp)
+extern "C" void mergesort(sSortObj_FAD8** first, sSortObj_FAD8** last, sSortObj_FAD8** buf, void* cmp)
 {
     int n = last - first;
     if (n >= 2)
-        func_0013F8F8_FAD8(first, last, buf, cmp);
+        mergesort___FAD8(first, last, buf, cmp);
     else if (n == 1)
         *buf = *first;
 }
@@ -6584,7 +6584,7 @@ void* cRider::getShadow()
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSmoothedHeading);
 #ifdef SKIP_ASM
 /**
  * Returns the rider's mSmoothedHeading (+0x5B4).
@@ -6592,7 +6592,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
  * @param rider  the cRider
  * @return mSmoothedHeading
  */
-extern "C" float func_00140CA0(cRider* rider) {
+extern "C" float cRider_getSmoothedHeading(cRider* rider) {
     return (rider->mSmoothedHeading);
 }
 #endif
@@ -8188,7 +8188,7 @@ int cDangerMan::CalcAppliedDangerLevel(int pl)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144368);
+INCLUDE_ASM("ai/control/handplantcontrol", FocusCallback_operatorCall);
 #ifdef SKIP_ASM
 
 
@@ -8207,7 +8207,7 @@ extern "C" void FocusQuery_addcell(void* a, nash_Cell* node, int leaf);
  * @param node  the cell node (eight child pointers)
  * @param key  the cell's level and coordinates
  */
-extern "C" void func_00144368(FocusCallback* self, nash_Cell* node, nash_CellKey* key)
+extern "C" void FocusCallback_operatorCall(FocusCallback* self, nash_Cell* node, nash_CellKey* key)
 {
     int n = self->numboxes;
     int i = 0;
@@ -8241,21 +8241,21 @@ extern "C" void func_00144368(FocusCallback* self, nash_Cell* node, nash_CellKey
     k.x = key->x * 2;
     k.y = key->y * 2;
     k.z = key->z * 2;
-    if (((nash_Cell**)&node->children[0][0][0])[0]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[0], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[0]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[0], &k);
     k.x++;
-    if (((nash_Cell**)&node->children[0][0][0])[4]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[4], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[4]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[4], &k);
     k.y++;
-    if (((nash_Cell**)&node->children[0][0][0])[6]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[6], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[6]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[6], &k);
     k.x--;
-    if (((nash_Cell**)&node->children[0][0][0])[2]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[2], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[2]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[2], &k);
     k.z++;
-    if (((nash_Cell**)&node->children[0][0][0])[3]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[3], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[3]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[3], &k);
     k.x++;
-    if (((nash_Cell**)&node->children[0][0][0])[7]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[7], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[7]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[7], &k);
     k.y--;
-    if (((nash_Cell**)&node->children[0][0][0])[5]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[5], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[5]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[5], &k);
     k.x--;
-    if (((nash_Cell**)&node->children[0][0][0])[1]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[1], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[1]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[1], &k);
 }
 #endif
 

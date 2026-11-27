@@ -68,7 +68,7 @@ void cGame::renderModels(FrustumIntersector* world)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C1B0);
+INCLUDE_ASM("main/game", patchLodContext_begin);
 #ifdef SKIP_ASM
 extern void* cBezierMan_TheBezierMan;
 
@@ -137,8 +137,8 @@ static inline sMat_C1B0* viewMat_C1B0()
     return (sMat_C1B0*)ps2GraphicsMan->GetView();
 }
 
-// PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
-sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self) __asm__("func_0022C1B0");
+// PORT: the unit declares patchLodContext_begin as void(void*); the body returns self, bound by asm label.
+sRenderCam_C1B0* patchLodContext_begin_impl(sRenderCam_C1B0* self) __asm__("patchLodContext_begin");
 
 /**
  * Sets up the 0x30-byte context cGame_renderPatches uses to draw terrain patches, and starts a patch batch.
@@ -151,7 +151,7 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self) __asm__("func_0022C1B
  *
  * @return @p self
  */
-sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
+sRenderCam_C1B0* patchLodContext_begin_impl(sRenderCam_C1B0* self)
 {
     self->cam = (sCamObj_C1B0*)cBezierMan_TheBezierMan;
     self->pos = Scale_C1B0(sVec_C1B0(*(sVec_C1B0*)viewMat_C1B0()->m[3]), -1.0f);
@@ -178,7 +178,7 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C3B8);
+INCLUDE_ASM("main/game", patchLodContext_end);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -190,7 +190,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the context
  */
-extern "C" void func_0022C3B8(void* self, int flags)
+extern "C" void patchLodContext_end(void* self, int flags)
 {
     cPS2BezierMan* obj = (cPS2BezierMan*)(*(void**)self);
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
@@ -202,7 +202,7 @@ extern "C" void func_0022C3B8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C410);
+INCLUDE_ASM("main/game", patchLodContext_submitPatch);
 #ifdef SKIP_ASM
 // NOTE: D_004A2A10 is a 4-byte const fog table ({4, 4, 6, 8}) in small data. It must be const: its loads then don't
 // conflict with the stack stores of ids[], so the scheduler places the ids[0] store before them as retail does.
@@ -243,23 +243,23 @@ static inline float clamp_C410(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-// PORT: the unit declares func_0022C410(void*, int, int) for its callers; this definition takes the
+// PORT: the unit declares patchLodContext_submitPatch(void*, int, int) for its callers; this definition takes the
 // patch as a typed pointer, so it binds to the same symbol through an asm label.
-extern "C" void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag) __asm__("func_0022C410");
+extern "C" void patchLodContext_submitPatch_impl(void* vctx, sPatch_C410* patch, int flag) __asm__("patchLodContext_submitPatch");
 /**
  * Submits one terrain patch to the bezier manager with a level per edge, from the eye's distance to its corners.
  *
  * Takes the squared distances from the context's eye position to the patch's four corners (+0x170, 12 bytes each), sums
- * them per edge (corners 0-1, 2-3, 0-2, 1-3), maps each sum to c + k * sum clamped to [n, f] (the values func_0022C1B0
+ * them per edge (corners 0-1, 2-3, 0-2, 1-3), maps each sum to c + k * sum clamped to [n, f] (the values patchLodContext_begin
  * set up), and converts each level to a byte through the table D_004A2A10 ({4, 4, 6, 8}). Then calls slot 21 of the
  * context's bezier manager with the patch, the four bytes, the patch's two ids (+0x1A0, +0x1A2, as ints) and @p flag.
  * cGame_renderPatches calls it for each patch of its two lists, with flag 0 and 1.
  *
- * @param vctx  the patch-render context (func_0022C1B0)
+ * @param vctx  the patch-render context (patchLodContext_begin)
  * @param patch  the terrain patch
  * @param flag  the list pass (0 or 1), passed on to the bezier manager
  */
-void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
+void patchLodContext_submitPatch_impl(void* vctx, sPatch_C410* patch, int flag)
 {
     sRenderCam_C410* ctx = (sRenderCam_C410*)vctx;
     float lo = ctx->n;
@@ -309,9 +309,9 @@ void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", cGame_renderPatches);
 #ifdef SKIP_ASM
-extern "C" void func_0022C1B0(void* ctx);
-extern "C" void func_0022C410(void* ctx, int patch, int flag);
-extern "C" void func_0022C3B8(void* self, int flags);
+extern "C" void patchLodContext_begin(void* ctx);
+extern "C" void patchLodContext_submitPatch(void* ctx, int patch, int flag);
+extern "C" void patchLodContext_end(void* self, int flags);
 extern void* cBezierMan_TheBezierMan;
 
 
@@ -326,23 +326,23 @@ extern void* cBezierMan_TheBezierMan;
 void cGame::renderPatches(FrustumIntersector* world)
 {
     char ctx[0x30];
-    func_0022C1B0(ctx);
+    patchLodContext_begin(ctx);
     int n = world->numpatchesinside;
     int* items = (int*)(&world->patchesinside[0]);
     for (int i = 0; i < n; i++) {
-        func_0022C410(ctx, items[i], 0);
+        patchLodContext_submitPatch(ctx, items[i], 0);
     }
     n = world->numpatchescrossing;
     items = (int*)(&world->patchescrossing[0]);
     for (int i = 0; i < n; i++) {
-        func_0022C410(ctx, items[i], 1);
+        patchLodContext_submitPatch(ctx, items[i], 1);
     }
     if ((int)ViewMan->m_uiCurrentView == 0) {
         cPS2BezierMan* obj = (cPS2BezierMan*)cBezierMan_TheBezierMan;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
         vt[5].fn(vthis(obj, vt[5]));
     }
-    func_0022C3B8(ctx, 2);
+    patchLodContext_end(ctx, 2);
 }
 #endif
 
@@ -415,7 +415,7 @@ void cGame::renderLightHalos(FrustumIntersector* world, int ViewID)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022C830);
+INCLUDE_ASM("main/game", cGame_renderVideo);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -541,7 +541,7 @@ extern "C" void cWorldTriggerManager_Update(void* p);
  * cWorldTriggerManager_Update(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
  * three render paths.
  */
-extern "C" void func_0022C830(cGame* self)
+extern "C" void cGame_renderVideo(cGame* self)
 {
     unsigned int i = 0;
     if (((sViews_C830*)self->ViewMan)->count != 0) {

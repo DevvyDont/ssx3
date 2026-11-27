@@ -2407,7 +2407,7 @@ void cTexFlipModifier::setupTexFlip()
         if (item->data != 0) {
             self->src[i] = &self->out[i];
             self->src[i]->fC = item->fC;
-            // writes slots 1..3 of out[0] for every entry, as func_003443A8 does (bug in the original)
+            // writes slots 1..3 of out[0] for every entry, as tCrowdBlock3d_buildAnimation does (bug in the original)
             short* firstRecord = (short*)self->out;
             for (int j = 1; j < 4; j++) {
                 firstRecord[j] = -1;
@@ -2934,7 +2934,7 @@ extern "C" void* func_0035FDD0(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035FE10);
+INCLUDE_ASM("object/railmodifier", __sti__all_in_one_object_cpp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sV3_FE10 {
@@ -3036,8 +3036,8 @@ extern char gBucketMan;
 
 // Static initialisation of the unit's colour globals D_004FF740..D_004FFAB0, the spline basis CatmullRom,
 // D_004FFB00/D_004FFB10 and the list gBucketMan (g++ __static_initialization_and_destruction_0).
-// The unit declares func_0035FE10 returning void*; bind this definition by asm label.
-extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0035FE10");
+// The unit declares __sti__all_in_one_object_cpp returning void*; bind this definition by asm label.
+extern "C" void __sti__all_in_one_object_cpp_init(int initialize, int priority) __asm__("__sti__all_in_one_object_cpp");
 /**
  * Runs the railmodifier unit's static initialisation: builds its global vectors and matrices and the bucket manager.
  *
@@ -3048,7 +3048,7 @@ extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0
  * @param initialize  nonzero for construction
  * @param priority  init priority; only DEFAULT_INIT_PRIORITY does anything
  */
-extern "C" void func_0035FE10_init(int initialize, int priority)
+extern "C" void __sti__all_in_one_object_cpp_init(int initialize, int priority)
 {
     if (priority == DEFAULT_INIT_PRIORITY && initialize != 0) {
         new (&D_004FF740_v) sV4_FE10(1.0f, 1.0f, 1.0f, 0.5f);
@@ -7367,82 +7367,82 @@ void* cAnimDeltaNode::getNodeState()
 }
 #endif
 
-extern "C" void* func_0035FE10(int, int);
+extern "C" void* __sti__all_in_one_object_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("object/railmodifier", func_00361E10__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs this unit's static initialisation: func_0035FE10 with initialize 1 and priority 0xFFFF.
+ * Runs this unit's static initialisation: __sti__all_in_one_object_cpp with initialize 1 and priority 0xFFFF.
  *
  * The argument is not used.
  *
- * @return func_0035FE10's result
+ * @return __sti__all_in_one_object_cpp's result
  */
 void* func_00361E10(void* self)
 {
-    return func_0035FE10(1, 0xffff);
+    return __sti__all_in_one_object_cpp(1, 0xffff);
 }
 #endif
 
 // One of the table's three interrupt counters (names ours).
 struct tIntcCounter {
-    int count;                      // 0x0 [U] the VIF1 handler (func_00362340) increments the first one's
-    int reserved;                   // 0x4 [R] func_00361F60 zeroes it; nothing else reads or writes it
+    int count;                      // 0x0 [U] the VIF1 handler (intc_handleVif1) increments the first one's
+    int reserved;                   // 0x4 [R] tIntcHandlerTable_clearCounters zeroes it; nothing else reads or writes it
 };
 
 // The renderer's interrupt handler table (D_005059D8; struct name ours, the id tables' names are the preview build's
 // bxps2intc.cpp asserts): the INTC handler ids by cause and the DMAC handler ids by channel, -1 when none, and three
 // interrupt counters.
 struct tIntcHandlerTable {
-    int mIntCID[16];                // 0x00 [P] mIntCID; [R] func_00361EB8 fills -1; [U] func_00361F98 / func_00362008
-    int mDMACID[16];                // 0x40 [P] mDMACID; [R] func_00361EB8 fills -1; [U] func_00362058 / func_003620C8
-    tIntcCounter mCounters[3];      // 0x80 [R] func_00361F60 zeroes them; [U] func_00362340 counts into the first
+    int mIntCID[16];                // 0x00 [P] mIntCID; [R] tIntcHandlerTable_init fills -1; [U] tIntcHandlerTable_addIntcHandler / tIntcHandlerTable_removeIntcHandler
+    int mDMACID[16];                // 0x40 [P] mDMACID; [R] tIntcHandlerTable_init fills -1; [U] tIntcHandlerTable_addDmacHandler / tIntcHandlerTable_removeDmacHandler
+    tIntcCounter mCounters[3];      // 0x80 [R] tIntcHandlerTable_clearCounters zeroes them; [U] intc_handleVif1 counts into the first
 };
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361E30);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_installRenderHandlers);
 #ifdef SKIP_ASM
-extern "C" int func_00362340(void);
-extern "C" int func_003623A8(void);
-extern "C" void func_00361F98(tIntcHandlerTable* self, int cause, int (*handler)(void), int arg);
+extern "C" int intc_handleVif1(void);
+extern "C" int intc_handleVu1(void);
+extern "C" void tIntcHandlerTable_addIntcHandler(tIntcHandlerTable* self, int cause, int (*handler)(void), int arg);
 
 /**
- * Installs the renderer's two INTC handlers: func_00362340 for cause 5 (VIF1) and func_003623A8 for cause 7 (VU1).
+ * Installs the renderer's two INTC handlers: intc_handleVif1 for cause 5 (VIF1) and intc_handleVu1 for cause 7 (VU1).
  *
- * Both go through func_00361F98 with a 0 argument, which records each handler id in the per-cause table at +0x0.
+ * Both go through tIntcHandlerTable_addIntcHandler with a 0 argument, which records each handler id in the per-cause table at +0x0.
  */
-extern "C" void func_00361E30(tIntcHandlerTable* self)
+extern "C" void tIntcHandlerTable_installRenderHandlers(tIntcHandlerTable* self)
 {
-    func_00361F98(self, 5, func_00362340, 0);
-    func_00361F98(self, 7, func_003623A8, 0);
+    tIntcHandlerTable_addIntcHandler(self, 5, intc_handleVif1, 0);
+    tIntcHandlerTable_addIntcHandler(self, 7, intc_handleVu1, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361E80);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_removeRenderHandlers);
 #ifdef SKIP_ASM
-extern "C" void* func_00362008(tIntcHandlerTable* self, int id);
+extern "C" void* tIntcHandlerTable_removeIntcHandler(tIntcHandlerTable* self, int id);
 
 /**
- * Removes the renderer's INTC handlers for causes 5 (VIF1) and 7 (VU1) with func_00362008.
+ * Removes the renderer's INTC handlers for causes 5 (VIF1) and 7 (VU1) with tIntcHandlerTable_removeIntcHandler.
  *
- * @return func_00362008's result for cause 7
+ * @return tIntcHandlerTable_removeIntcHandler's result for cause 7
  */
-extern "C" void* func_00361E80(tIntcHandlerTable* self)
+extern "C" void* tIntcHandlerTable_removeRenderHandlers(tIntcHandlerTable* self)
 {
-    func_00362008(self, 5);
-    return func_00362008(self, 7);
+    tIntcHandlerTable_removeIntcHandler(self, 5);
+    return tIntcHandlerTable_removeIntcHandler(self, 7);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00361EB8);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_init);
 #ifdef SKIP_ASM
-extern "C" void func_00361F60(tIntcHandlerTable* self);
-extern "C" void func_00361E30(tIntcHandlerTable* self);
+extern "C" void tIntcHandlerTable_clearCounters(tIntcHandlerTable* self);
+extern "C" void tIntcHandlerTable_installRenderHandlers(tIntcHandlerTable* self);
 
-static inline void func_00361EB8_fill(int* p, int v)
+static inline void tIntcHandlerTable_init_fill(int* p, int v)
 {
     int i;
     for (i = 15; i >= 0; i--) {
@@ -7454,38 +7454,38 @@ static inline void func_00361EB8_fill(int* p, int v)
  * Sets up the renderer's interrupt handler table (D_005059D8 in cPS2GraphicsMan_Init).
  *
  * Fills the 16 INTC handler ids (+0x0) and the 16 DMAC handler ids (+0x40) with -1 (the preview build's bxps2intc.cpp
- * asserts call these mIntCID and mDMACID), clears the counters at +0x80 (func_00361F60) and installs the VIF1/VU1
- * handlers (func_00361E30).
+ * asserts call these mIntCID and mDMACID), clears the counters at +0x80 (tIntcHandlerTable_clearCounters) and installs the VIF1/VU1
+ * handlers (tIntcHandlerTable_installRenderHandlers).
  */
-extern "C" void func_00361EB8(tIntcHandlerTable* self)
+extern "C" void tIntcHandlerTable_init(tIntcHandlerTable* self)
 {
-    func_00361EB8_fill(self->mIntCID, -1);
-    func_00361EB8_fill(self->mDMACID, -1);
-    func_00361F60(self);
-    func_00361E30(self);
+    tIntcHandlerTable_init_fill(self->mIntCID, -1);
+    tIntcHandlerTable_init_fill(self->mDMACID, -1);
+    tIntcHandlerTable_clearCounters(self);
+    tIntcHandlerTable_installRenderHandlers(self);
 }
 #endif
 
-extern "C" void* func_00361E80(tIntcHandlerTable* self);
+extern "C" void* tIntcHandlerTable_removeRenderHandlers(tIntcHandlerTable* self);
 
 //99.29%
-INCLUDE_ASM("object/railmodifier", func_00361F40__FPv);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_shutdown__FPv);
 #ifdef SKIP_ASM
 /**
- * Tears down the renderer's interrupt handlers by removing the VIF1/VU1 ones (func_00361E80).
+ * Tears down the renderer's interrupt handlers by removing the VIF1/VU1 ones (tIntcHandlerTable_removeRenderHandlers).
  *
  * cPS2GraphicsMan_Purge calls it on D_005059D8.
  *
- * @return func_00361E80's result
+ * @return tIntcHandlerTable_removeRenderHandlers's result
  */
-void* func_00361F40(void* self)
+void* tIntcHandlerTable_shutdown(void* self)
 {
-    return func_00361E80((tIntcHandlerTable*)self);
+    return tIntcHandlerTable_removeRenderHandlers((tIntcHandlerTable*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361F60);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_clearCounters);
 #ifdef SKIP_ASM
 struct sRailPair {
     int a;
@@ -7495,7 +7495,7 @@ struct sRailPair {
 /**
  * Zeroes the three counter pairs at +0x80 of the interrupt handler table (the VIF1 handler counts into the first).
  */
-extern "C" void func_00361F60(tIntcHandlerTable* self)
+extern "C" void tIntcHandlerTable_clearCounters(tIntcHandlerTable* self)
 {
     int i;
     for (i = 0; i < 3; i++) {
@@ -7517,7 +7517,7 @@ void func_00361F90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361F98);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_addIntcHandler);
 #ifdef SKIP_ASM
 extern "C" int DisableIntc(int ch);
 extern "C" int AddIntcHandler(int cause, int (*handler)(void), int arg);
@@ -7533,7 +7533,7 @@ extern "C" int EnableIntc(int ch);
  * @param handler  handler function
  * @param next  argument passed through to AddIntcHandler
  */
-extern "C" void func_00361F98(tIntcHandlerTable* self, int cause, int (*handler)(void), int next)
+extern "C" void tIntcHandlerTable_addIntcHandler(tIntcHandlerTable* self, int cause, int (*handler)(void), int next)
 {
     DisableIntc(cause);
     self->mIntCID[cause] = AddIntcHandler(cause, handler, next);
@@ -7542,7 +7542,7 @@ extern "C" void func_00361F98(tIntcHandlerTable* self, int cause, int (*handler)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362008);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_removeIntcHandler);
 #ifdef SKIP_ASM
 extern "C" int DisableIntc(int ch);
 extern "C" void* RemoveIntcHandler(int ch, int id);
@@ -7555,7 +7555,7 @@ extern "C" void* RemoveIntcHandler(int ch, int id);
  * @param ch  INTC cause number
  * @return RemoveIntcHandler's result
  */
-extern "C" void* func_00362008(tIntcHandlerTable* self, int ch)
+extern "C" void* tIntcHandlerTable_removeIntcHandler(tIntcHandlerTable* self, int ch)
 {
     DisableIntc(ch);
     int* handlerSlot = &self->mIntCID[ch];
@@ -7566,7 +7566,7 @@ extern "C" void* func_00362008(tIntcHandlerTable* self, int ch)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362058);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_addDmacHandler);
 #ifdef SKIP_ASM
 extern "C" int AddDmacHandler(int, int, int);
 extern "C" void DisableDmac(int);
@@ -7583,7 +7583,7 @@ extern "C" void EnableDmac(int);
  * @param handler  handler function
  * @param next  argument passed through to AddDmacHandler
  */
-extern "C" void func_00362058(tIntcHandlerTable* owner, int channel, int handler, int next)
+extern "C" void tIntcHandlerTable_addDmacHandler(tIntcHandlerTable* owner, int channel, int handler, int next)
 {
     DisableDmac(channel);
     owner->mDMACID[channel] = AddDmacHandler(channel, handler, next);
@@ -7591,7 +7591,7 @@ extern "C" void func_00362058(tIntcHandlerTable* owner, int channel, int handler
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003620C8);
+INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_removeDmacHandler);
 #ifdef SKIP_ASM
 extern "C" void RemoveDmacHandler(int, int);
 
@@ -7602,7 +7602,7 @@ extern "C" void RemoveDmacHandler(int, int);
  *
  * @param idx  DMA channel number
  */
-extern "C" void func_003620C8(tIntcHandlerTable* self, int idx)
+extern "C" void tIntcHandlerTable_removeDmacHandler(tIntcHandlerTable* self, int idx)
 {
     DisableDmac(idx);
     int* ids = self->mDMACID;
@@ -7614,15 +7614,15 @@ extern "C" void func_003620C8(tIntcHandlerTable* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362120);
+INCLUDE_ASM("object/railmodifier", saveFpuRegisters);
 #ifdef SKIP_ASM
 /**
- * Stores all 32 FPU registers into buf as 64-bit words (the interrupt handlers' save half; func_00362230 restores).
+ * Stores all 32 FPU registers into buf as 64-bit words (the interrupt handlers' save half; restoreFpuRegisters restores).
  *
  * @param buf  0x100-byte save area
  */
 // PORT: PS2-only inline asm (dump all 32 FPU registers as 64-bit words into buf).
-extern "C" void func_00362120(void* buf)
+extern "C" void saveFpuRegisters(void* buf)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -7700,16 +7700,16 @@ extern "C" void func_00362120(void* buf)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362230);
+INCLUDE_ASM("object/railmodifier", restoreFpuRegisters);
 #ifdef SKIP_ASM
 /**
- * Reloads all 32 FPU registers from buf, as saved by func_00362120.
+ * Reloads all 32 FPU registers from buf, as saved by saveFpuRegisters.
  *
  * @param buf  0x100-byte save area
  */
 // PORT: PS2-only inline asm (reload all 32 FPU registers from buf; deliberately
 // no FPU clobbers so the compiler doesn't save/restore $f20-$f31 around it).
-extern "C" void func_00362230(void* buf)
+extern "C" void restoreFpuRegisters(void* buf)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -7787,32 +7787,32 @@ extern "C" void func_00362230(void* buf)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00362340);
+INCLUDE_ASM("object/railmodifier", intc_handleVif1);
 #ifdef SKIP_ASM
-extern "C" void func_00362120(void*);
-extern "C" void func_00362230(void*);
+extern "C" void saveFpuRegisters(void*);
+extern "C" void restoreFpuRegisters(void*);
 
 extern tIntcHandlerTable D_005059D8;
 
 /**
  * Handles the VIF1 interrupt: cancels a VIF1 interrupt stall and counts it.
  *
- * Saves the FPU registers (func_00362120). When VIF1_STAT (0x10003C00) has bit 10 set (stalled on an interrupt) it
+ * Saves the FPU registers (saveFpuRegisters). When VIF1_STAT (0x10003C00) has bit 10 set (stalled on an interrupt) it
  * writes 8 (STC, stall cancel) to VIF1_FBRST (0x10003C10). It counts the interrupt at D_005059D8 +0x80, restores the
- * FPU registers (func_00362230) and re-enables interrupts.
+ * FPU registers (restoreFpuRegisters) and re-enables interrupts.
  *
  * @return 1 (handled)
  */
-extern "C" int func_00362340(void)
+extern "C" int intc_handleVif1(void)
 {
     char buf[0x100];
-    func_00362120(buf);
+    saveFpuRegisters(buf);
     tIntcHandlerTable* table = &D_005059D8;
     if (*(int*)0x10003C00 & 0x400) {
         *(volatile int*)0x10003C10 = 8;
     }
     table->mCounters[0].count++;
-    func_00362230(buf);
+    restoreFpuRegisters(buf);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -7820,21 +7820,21 @@ extern "C" int func_00362340(void)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_003623A8);
+INCLUDE_ASM("object/railmodifier", intc_handleVu1);
 #ifdef SKIP_ASM
-extern "C" void func_00362120(void*);
-extern "C" void func_00362230(void*);
+extern "C" void saveFpuRegisters(void*);
+extern "C" void restoreFpuRegisters(void*);
 
 /**
  * Handles the VU1 interrupt: only saves and restores the FPU registers and re-enables interrupts.
  *
  * @return 1 (handled)
  */
-extern "C" int func_003623A8(void)
+extern "C" int intc_handleVu1(void)
 {
     char buf[0x100];
-    func_00362120(buf);
-    func_00362230(buf);
+    saveFpuRegisters(buf);
+    restoreFpuRegisters(buf);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -7842,7 +7842,7 @@ extern "C" int func_003623A8(void)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003623D8);
+INCLUDE_ASM("object/railmodifier", gsPacket_addScissor);
 #ifdef SKIP_ASM
 struct sGifPacket {
     int qwc;        // 0x0
@@ -7861,7 +7861,7 @@ struct sGifPacket {
  * @param height  height
  */
 // PORT: 64-bit GS register writes (ulong).
-extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int height)
+extern "C" void gsPacket_addScissor(sGifPacket* pkt, int x, int w, int y, int height)
 {
     ulong scissor = (ulong)x | ((ulong)(x + (w - 1)) << 16) | ((ulong)y << 32) | ((ulong)(y + (height - 1)) << 48);
     pkt->cur[0] = scissor;
@@ -7874,7 +7874,7 @@ extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int height)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362448);
+INCLUDE_ASM("object/railmodifier", gsPacket_addTexFlush);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sPair64 {
@@ -7885,7 +7885,7 @@ struct sPair64 {
 /**
  * Appends a TEXFLUSH GS register write (A+D pair, register 0x3F, data 0) to a packet and counts it.
  */
-extern "C" void func_00362448(void* self)
+extern "C" void gsPacket_addTexFlush(void* self)
 {
     sPair64*& cur = *(sPair64**)((char*)self + 0x4);
     cur->a = 0;
@@ -7896,7 +7896,7 @@ extern "C" void func_00362448(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362478);
+INCLUDE_ASM("object/railmodifier", gsPacket_addAlpha);
 #ifdef SKIP_ASM
 /**
  * Appends an ALPHA blend register write (A+D pair) for a blend mode to a packet.
@@ -7915,7 +7915,7 @@ INCLUDE_ASM("object/railmodifier", func_00362478);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: 64-bit GS register writes (ulong).
 // Emits one GS ALPHA register write (0x42 for context 1, 0x43 for context 2) for the given blend mode.
-extern "C" void func_00362478(sGifPacket* pkt, int mode, int fix, int ctx)
+extern "C" void gsPacket_addAlpha(sGifPacket* pkt, int mode, int fix, int ctx)
 {
     switch (ctx) {
     case 0:
@@ -7959,7 +7959,7 @@ extern "C" void func_00362478(sGifPacket* pkt, int mode, int fix, int ctx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003625C0);
+INCLUDE_ASM("object/railmodifier", gsPacket_addClamp);
 #ifdef SKIP_ASM
 /**
  * Appends a CLAMP register write (A+D pair) for a texture wrap mode to a packet.
@@ -7972,7 +7972,7 @@ INCLUDE_ASM("object/railmodifier", func_003625C0);
  * @param ctx  GS context (0 or 1)
  */
 // PORT: 64-bit GS register writes (ulong).
-extern "C" void func_003625C0(sGifPacket* pkt, int mode, int ctx)
+extern "C" void gsPacket_addClamp(sGifPacket* pkt, int mode, int ctx)
 {
     ulong reg;
     switch (ctx) {
@@ -8007,7 +8007,7 @@ extern "C" void func_003625C0(sGifPacket* pkt, int mode, int ctx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362660);
+INCLUDE_ASM("object/railmodifier", gsPacket_addZBuf);
 #ifdef SKIP_ASM
 /**
  * Appends a ZBUF register write (A+D pair) to a packet.
@@ -8022,7 +8022,7 @@ INCLUDE_ASM("object/railmodifier", func_00362660);
  * @param ctx  GS context (0 or 1)
  */
 // PORT: 64-bit GS register writes (ulong).
-extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int psm, int zmsk, int ctx)
+extern "C" void gsPacket_addZBuf(sGifPacket* pkt, unsigned int zbp, unsigned int psm, int zmsk, int ctx)
 {
     ulong reg;
     switch (ctx) {
@@ -8044,7 +8044,7 @@ extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int ps
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003626D8);
+INCLUDE_ASM("object/railmodifier", gsPacket_addTest);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sRmGsPacket {
@@ -8065,7 +8065,7 @@ struct sRmGsPacket {
  * @param aref  alpha reference
  * @param ctx  GS context (0 or 1)
  */
-extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned int aref, int ctx)
+extern "C" void gsPacket_addTest(sRmGsPacket* pkt, int ztest, int atest, unsigned int aref, int ctx)
 {
     ulong reg;
     int atst;
@@ -8120,7 +8120,7 @@ extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned i
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003627A8);
+INCLUDE_ASM("object/railmodifier", gsPacket_writeHeader);
 #ifdef SKIP_ASM
 extern ulong D_00505A80[];
 
@@ -8142,7 +8142,7 @@ struct sRmPkt27A8 {
  * @param mode  0, 1 or 2 as above
  */
 // PORT: 64-bit DMA/VIF/GIF tag writes (ulong) and addresses held in int.
-extern "C" void func_003627A8(sRmPkt27A8* self, ulong** pp, int mode)
+extern "C" void gsPacket_writeHeader(sRmPkt27A8* self, ulong** pp, int mode)
 {
     if (self->count == 0) {
         return;
@@ -8188,7 +8188,7 @@ extern "C" void func_003627A8(sRmPkt27A8* self, ulong** pp, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362978);
+INCLUDE_ASM("object/railmodifier", tDeferBucket_appendPacket);
 #ifdef SKIP_ASM
 /**
  * Appends a DMA packet to a draw bucket's chain.
@@ -8200,7 +8200,7 @@ INCLUDE_ASM("object/railmodifier", func_00362978);
  * @param tail  address of its closing tag
  */
 // PORT: 64-bit DMA tag writes (ulong) and addresses held in int.
-extern "C" void func_00362978(tDeferBucket* self, int packet, int tail)
+extern "C" void tDeferBucket_appendPacket(tDeferBucket* self, int packet, int tail)
 {
     if (self->mPacket != 0) {
         ulong* tag = (ulong*)(self->mTail | 0x30000000);
@@ -8215,10 +8215,10 @@ extern "C" void func_00362978(tDeferBucket* self, int packet, int tail)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003629B8);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_buildPresetStates);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00362CC8(cPS2DeferManager* self);
+extern "C" void cPS2DeferManager_resetFrame(cPS2DeferManager* self);
 
 
 
@@ -8253,15 +8253,15 @@ static inline cDrawStateList* save_29B8(cPS2DeferManager* self, cPS2GraphicsMan*
 /**
  * Builds the defer manager's three preset draw states.
  *
- * Clears the static base (+0x57484) and resets the manager (func_00362CC8). Starting from sDrawState_s_defaultDrawState
+ * Clears the static base (+0x57484) and resets the manager (cPS2DeferManager_resetFrame). Starting from sDrawState_s_defaultDrawState
  * in the current draw-state slot of cGraphicsMan_TheGraphicsMan, it edits the state bit fields three times and saves
  * each copy into the draw-state array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490
  * (mpPresetStates). The base is then set to the count so later resets keep them.
  */
-extern "C" void func_003629B8(cPS2DeferManager* self)
+extern "C" void cPS2DeferManager_buildPresetStates(cPS2DeferManager* self)
 {
     self->mNumStaticStates = 0;
-    func_00362CC8(self);
+    cPS2DeferManager_resetFrame(self);
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_29B8;
     *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_29B8;
     set1_29B8(ctx, 0x3, 0, 0);
@@ -8289,10 +8289,10 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362CC8);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_resetFrame);
 #ifdef SKIP_ASM
 extern "C" void InvalidDCache(void* begin, void* end);
-extern "C" void func_0038F738(void* base, int size, int mode);
+extern "C" void scratchpad_storeSpareArea(void* base, int size, int mode);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_004A5B84;
 
@@ -8311,7 +8311,7 @@ extern sRail20_2CC8 sDrawState_s_defaultDrawState;
  * draw state (+0x69CA8) to sDrawState_s_defaultDrawState, and the current matrix (+0x69CC0) and scissor (+0x69CC4) to
  * -1 with no cached matrices (+0x69CC8).
  */
-extern "C" void func_00362CC8(cPS2DeferManager* self)
+extern "C" void cPS2DeferManager_resetFrame(cPS2DeferManager* self)
 {
     self->mNumSubmitDMA = 0;
     self->mUsedStates = 0;
@@ -8321,8 +8321,8 @@ extern "C" void func_00362CC8(cPS2DeferManager* self)
     char* nodeHashTable = (char*)&self->mBucketHash[0];
     InvalidDCache(nodeHashTable, ((char*)self) + 0x67C9F);
     MEM_fill(D_004A5B84, 0, 0x400);
-    func_0038F738(stateHashTable, 0x400, 2);
-    func_0038F738(nodeHashTable, 0x400, 2);
+    scratchpad_storeSpareArea(stateHashTable, 0x400, 2);
+    scratchpad_storeSpareArea(nodeHashTable, 0x400, 2);
     self->mNumSortItems = 0;
     sRail20_2CC8* currentState = (sRail20_2CC8*)(&self->mCurrentState);
     *currentState = sDrawState_s_defaultDrawState;
@@ -8334,14 +8334,14 @@ extern "C" void func_00362CC8(cPS2DeferManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00362DE8);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_bucketRecords);
 #ifdef SKIP_ASM
 extern void* D_004A4474;
 extern "C" void SyncDCache(void* begin, void* end);
-extern "C" void* func_0038F4F8(void* ring, void* src, int size, int flags);
-extern "C" void func_0038F6A8(void* ring);
-extern "C" void func_0038F7B0();
-extern "C" unsigned int func_00364240(unsigned int* self, int key);
+extern "C" void* cPS2ScratchPad_claimAndLoadBuffer(void* ring, void* src, int size, int flags);
+extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
+extern "C" void dma_waitToScratchpadIdle();
+extern "C" unsigned int sDrawState_makeSortKey(unsigned int* self, int key);
 
 
 // A bucket: one (state, textures, matrix) combination with its DMA chain (0x20; REF structs/render.md "Bucket").
@@ -8379,7 +8379,7 @@ struct sRmBatch_2DE8 {
 // REF n2-render-layer.md: InternState, FindBucket, AppendPacket (0x362978).
 extern "C" unsigned int* cPS2DeferManager_Find(sRmBatch_2DE8* self, tDeferSubmit* e, int hash);
 extern "C" sRmNode_2DE8* cPS2DeferManager_Find1(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
-extern "C" void func_00362978(tDeferBucket* self, int packet, int tail);
+extern "C" void tDeferBucket_appendPacket(tDeferBucket* self, int packet, int tail);
 
 union sRmTexKey_2DE8 {
     int i;
@@ -8435,7 +8435,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
         if (e->mContinuation != 0 && self->last != 0) {
             node->linked = 1;
         } else {
-            unsigned int sortKey = func_00364240(state, key);
+            unsigned int sortKey = sDrawState_makeSortKey(state, key);
             int h = nodeHash_2DE8(state, key);
             n->next = self->nodeHash[h];
             self->nodeHash[h] = n;
@@ -8443,7 +8443,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
             self->items[self->nItems++].node = n;
         }
     }
-    func_00362978((tDeferBucket*)node, e->mPacket, e->mTail);
+    tDeferBucket_appendPacket((tDeferBucket*)node, e->mPacket, e->mTail);
     if (e->mContinuation != 0) {
         sRmNode_2DE8* prev = self->last;
         if (prev != 0) {
@@ -8460,13 +8460,13 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
  * Streams the 0x80-byte records (+0x80, count +0x0) through the scratchpad ring D_004A4474 in chunks. For each it finds
  * the shared state (cPS2DeferManager_Find) and, unless it continues the previous record, the bucket with the same state,
  * texture pair and matrix index (cPS2DeferManager_Find1). A new bucket is added to the hash and gets a sort item with the key
- * from func_00364240; continuation records are chained to the previous bucket. The record's packet is appended to the
- * bucket with func_00362978.
+ * from sDrawState_makeSortKey; continuation records are chained to the previous bucket. The record's packet is appended to the
+ * bucket with tDeferBucket_appendPacket.
  *
  * @param vself  the defer manager
  */
 // PORT: (int) of a pointer for hashing.
-extern "C" void func_00362DE8(cPS2DeferManager* vself)
+extern "C" void cPS2DeferManager_bucketRecords(cPS2DeferManager* vself)
 {
     sRmBatch_2DE8* self = (sRmBatch_2DE8*)vself;
     self->last = 0;
@@ -8476,9 +8476,9 @@ extern "C" void func_00362DE8(cPS2DeferManager* vself)
     int chunk = bytes / sizeof(tDeferSubmit);
     int nChunks = self->count / chunk;
     int chunkBytes = chunk * sizeof(tDeferSubmit);
-    tDeferSubmit* buf = (tDeferSubmit*)func_0038F4F8(ring, self->entries, chunkBytes, 4);
+    tDeferSubmit* buf = (tDeferSubmit*)cPS2ScratchPad_claimAndLoadBuffer(ring, self->entries, chunkBytes, 4);
     for (int i = 0; i < nChunks; i++) {
-        tDeferSubmit* next = (tDeferSubmit*)func_0038F4F8(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
+        tDeferSubmit* next = (tDeferSubmit*)cPS2ScratchPad_claimAndLoadBuffer(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
         for (int j = 0; j < chunk; j++) {
             tDeferSubmit* drawRecord = &buf[j];
             unsigned int* state = findState_2DE8(self, drawRecord);
@@ -8487,10 +8487,10 @@ extern "C" void func_00362DE8(cPS2DeferManager* vself)
             addEntry_2DE8(self, drawRecord, state, key.i);
         }
         buf = next;
-        func_0038F6A8(ring);
-        func_0038F7B0();
+        cPS2ScratchPad_advanceBuffer(ring);
+        dma_waitToScratchpadIdle();
     }
-    func_0038F7B0();
+    dma_waitToScratchpadIdle();
     for (int j = 0; j < self->count - chunk * nChunks; j++) {
         tDeferSubmit* drawRecord = &buf[j];
         unsigned int* state = findState_2DE8(self, drawRecord);
@@ -8498,29 +8498,29 @@ extern "C" void func_00362DE8(cPS2DeferManager* vself)
         key.set(drawRecord->mDrawState.m_textureState.m_texid[0], drawRecord->mDrawState.m_textureState.m_texid[1]);
         addEntry_2DE8(self, drawRecord, state, key.i);
     }
-    func_0038F6A8(ring);
+    cPS2ScratchPad_advanceBuffer(ring);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00363490);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_buildDmaChains);
 #ifdef SKIP_ASM
 extern void* D_004A4474;
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 extern const int D_004A4058[];
-extern "C" void func_00362DE8(cPS2DeferManager* self);
-extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp);
-extern "C" void func_00364050(cPS2DeferManager* self);
-extern "C" void func_003666F8();
-extern "C" void func_0038F300(void* ring, int mode);
-extern "C" void func_00396128(void* obj);
-extern "C" void func_00365F68(void* self);
-extern "C" void func_00365FA8(void* self);
-extern "C" void func_00363C20(void* self, unsigned int* state, int layer, ulong** pp);
-extern "C" void func_00368660(void* obj, int u, int v, int idx, ulong** pp, int* path);
-extern "C" void func_0036AC00(void* gs, int i, ulong** pp, int* path);
-extern "C" void func_0036C790(void* gs, int i, ulong** pp, int* path);
-extern "C" void func_003904A0(void* gs, int i, ulong** pp, int* path);
+extern "C" void cPS2DeferManager_bucketRecords(cPS2DeferManager* self);
+extern "C" void cPS2DeferManager_writeDefaultState(cPS2DeferManager* self, ulong** pp);
+extern "C" void cPS2DeferManager_sortItems(cPS2DeferManager* self);
+extern "C" void resetTextureUseTable();
+extern "C" void cPS2ScratchPad_setLayout(void* ring, int mode);
+extern "C" void cTextureMan_resetBoundTextures(void* obj);
+extern "C" void vramHeap_moveLinksToScratchpad(void* self);
+extern "C" void vramHeap_moveLinksFromScratchpad(void* self);
+extern "C" void cPS2DeferManager_writeStateChange(void* self, unsigned int* state, int layer, ulong** pp);
+extern "C" void cTextureMan_ensureContextTextures(void* obj, int u, int v, int idx, ulong** pp, int* path);
+extern "C" void cPS2GraphicsMan_queueDepthFogPass(void* gs, int i, ulong** pp, int* path);
+extern "C" void cPS2GraphicsMan_queueLightGlowPass(void* gs, int i, ulong** pp, int* path);
+extern "C" void cPS2GraphicsMan_queueScreenTintPass(void* gs, int i, ulong** pp, int* path);
 
 
 struct sRmSortItem_3490 {
@@ -8556,15 +8556,15 @@ static inline void resetState_3490(sRail20_2CC8* d)
 /**
  * Builds the frame's DMA chains from the deferred draw records.
  *
- * Buckets the records (func_00362DE8), writes the default state (func_00364360), sorts the buckets (func_00364050),
- * resets the texture use table (func_003666F8) and prepares the texture manager (cGraphicsMan_TheGraphicsMan +0x18F4:
- * func_00396128 and func_00365F68 on +0x1F60). It records each texture's last use and use count in D_0053AB80, then
+ * Buckets the records (cPS2DeferManager_bucketRecords), writes the default state (cPS2DeferManager_writeDefaultState), sorts the buckets (cPS2DeferManager_sortItems),
+ * resets the texture use table (resetTextureUseTable) and prepares the texture manager (cGraphicsMan_TheGraphicsMan +0x18F4:
+ * cTextureMan_resetBoundTextures and vramHeap_moveLinksToScratchpad on +0x1F60). It records each texture's last use and use count in D_0053AB80, then
  * splits the sorted list into three passes at the pass types in D_004A4058 (state word 2 bits 5-9). For every bucket it
- * writes the state change (func_00363C20) when the state differs, the texture setup (func_00368660) and a CALL to the
- * bucket's chain, whose tail becomes a RET. After a type-6 pass it runs func_0036AC00 per entry and resets the state;
+ * writes the state change (cPS2DeferManager_writeStateChange) when the state differs, the texture setup (cTextureMan_ensureContextTextures) and a CALL to the
+ * bucket's chain, whose tail becomes a RET. After a type-6 pass it runs cPS2GraphicsMan_queueDepthFogPass per entry and resets the state;
  * after a type-9 pass it ends both chains with END tags, reports their positions in out1/out2 and runs
- * func_0036C790/func_003904A0 per entry. Finally it ends both chains, stores the main chain's end in *pktAddr and
- * closes the texture manager (func_00365FA8).
+ * cPS2GraphicsMan_queueLightGlowPass/cPS2GraphicsMan_queueScreenTintPass per entry. Finally it ends both chains, stores the main chain's end in *pktAddr and
+ * closes the texture manager (vramHeap_moveLinksFromScratchpad).
  *
  * Likely bug: the copy of D_004A4058 holds two pass types, so the third pass switches on an unwritten stack word.
  *
@@ -8574,26 +8574,26 @@ static inline void resetState_3490(sRail20_2CC8* d)
  * @param out2  receives the second chain position after the type-9 pass
  */
 // PORT: DMA tags written as 64-bit words through uncached (| 0x30000000 / | 0x20000000) addresses held in int.
-extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int* path, int* out2)
+extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAddr, int* out1, int* path, int* out2)
 {
     sRmPassTypes_3490 split;
     int bounds[3];
     ulong* pkt;
-    func_00362DE8((cPS2DeferManager*)self);
+    cPS2DeferManager_bucketRecords((cPS2DeferManager*)self);
     *out1 = 0;
     *out2 = 0;
     pkt = (ulong*)(*pktAddr | 0x30000000);
     resetState_3490(&self->state);
-    func_00364360((cPS2DeferManager*)self, &pkt);
-    func_00364050((cPS2DeferManager*)self);
-    func_003666F8();
+    cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
+    cPS2DeferManager_sortItems((cPS2DeferManager*)self);
+    resetTextureUseTable();
     void* ring = D_004A4474;
     int saved = *(int*)ring;
-    func_0038F300(ring, 5);
+    cPS2ScratchPad_setLayout(ring, 5);
     cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
     cTextureMan* obj = gs->mTexMan;
-    func_00396128(obj);
-    func_00365F68(obj->mMainHeap);
+    cTextureMan_resetBoundTextures(obj);
+    vramHeap_moveLinksToScratchpad(obj->mMainHeap);
     if (self->nItems != 0) {
         int idx = 0;
         int pass;
@@ -8640,11 +8640,11 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                     do {
                         unsigned int* st = ((unsigned int*)n->mpState);
                         if (st != prev) {
-                            func_00363C20(self, st, n->mViewIndex, &pkt);
+                            cPS2DeferManager_writeStateChange(self, st, n->mViewIndex, &pkt);
                             prev = st;
                         }
                         int key = n->mTexKey;
-                        func_00368660(obj, ((short*)&key)[0], ((short*)&key)[1], idx++, &pkt, path);
+                        cTextureMan_ensureContextTextures(obj, ((short*)&key)[0], ((short*)&key)[1], idx++, &pkt, path);
                         if (n->mPacket != 0) {
                             pkt[0] = ((ulong)(unsigned int)n->mPacket << 32) | 0x50000000;
                             pkt[1] = 0;
@@ -8660,11 +8660,11 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             switch (split.v[pass]) {
             case 6: {
                 for (int k = 0; k < gs->mNumViews; k++)
-                    func_0036AC00(gs, k, &pkt, path);
+                    cPS2GraphicsMan_queueDepthFogPass(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                func_00364360((cPS2DeferManager*)self, &pkt);
+                cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
                 int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -8682,13 +8682,13 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 *out1 = (int)pkt & 0x0FFFFFFF;
                 *out2 = *path;
                 for (int k = 0; k < gs->mNumViews; k++)
-                    func_0036C790(gs, k, &pkt, path);
+                    cPS2GraphicsMan_queueLightGlowPass(gs, k, &pkt, path);
                 for (int k = 0; k < gs->mNumViews; k++)
-                    func_003904A0(gs, k, &pkt, path);
+                    cPS2GraphicsMan_queueScreenTintPass(gs, k, &pkt, path);
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                func_00364360((cPS2DeferManager*)self, &pkt);
+                cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
                 int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -8721,20 +8721,20 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     *pktAddr = (int)pkt & 0x0FFFFFFF;
     // PORT: EE `sync` (orders the uncached DMA-tag writes); no C equivalent.
     __asm__ __volatile__("sync");
-    func_00365FA8(obj->mMainHeap);
-    func_0038F300(ring, saved);
+    vramHeap_moveLinksFromScratchpad(obj->mMainHeap);
+    cPS2ScratchPad_setLayout(ring, saved);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00363C20);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_writeStateChange);
 #ifdef SKIP_ASM
 // FAKEMATCH: `self` is taken as an integer (`__SIZE_TYPE__ selfi`, cast to sRmRend3C20* in the body), so its pseudo is not
 // pointer-flagged and sched1's find_base_term cannot tell `self+0x68000` from the stack: the scissor load then stays after
 // the packet-header stores, as in retail (integer-typed base steering); plain form 96.29%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
-extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
+extern "C" void gsPacket_addAlpha(sGifPacket* pkt, int a, int b, int ctx);
+extern "C" void cPS2DeferManager_writeVu1ProgramSetup(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 
 
@@ -8768,23 +8768,23 @@ static inline unsigned int Bits3C20(unsigned int w, unsigned int m)
 }
 
 // PORT: 64-bit DMA/GIF tag writes (ulong); self arrives as a pointer-sized integer (__SIZE_TYPE__).
-extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int a2, ulong** pp) __asm__("func_00363C20");
+extern "C" void cPS2DeferManager_writeStateChange_impl(__SIZE_TYPE__ selfi, sDrawState* st, int a2, ulong** pp) __asm__("cPS2DeferManager_writeStateChange");
 /**
  * Writes the GS register changes needed to go from the defer manager's current draw state (+0x69CA8) to st.
  *
  * Starts with a one-quadword CNT tag. When st's VU1 program type (word 0 bits 6-9) is nonzero it emits the program
- * setup (func_00364CD0): mode 0 when the type changes, mode 1 when only the matrix/layer index changes, mode 2 when the
+ * setup (cPS2DeferManager_writeVu1ProgramSetup): mode 0 when the type changes, mode 1 when only the matrix/layer index changes, mode 2 when the
  * frame word (word 3 bits 0-29) changes. It then collects A+D writes only for fields that differ: SCISSOR from the
  * rectangle table (+0x6AED4) indexed by word 2 bits 0-4, ZBUF for both contexts on the Z-mask bit, TEST for both
  * contexts, CLAMP_1/2 (word 0 bits 2-3 / 4-5) and ALPHA_1/2 (word 1 bits 2-6 / 7-11 with FIX from word 0). It copies st
- * into the current state and closes the block with func_003627A8 mode 1.
+ * into the current state and closes the block with gsPacket_writeHeader mode 1.
  *
  * @param selfi  the defer manager (passed as an integer)
  * @param st  draw state to switch to
  * @param nodeLayer  the bucket's matrix/layer index
  * @param pp  DMA chain cursor
  */
-extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int nodeLayer, ulong** pp)
+extern "C" void cPS2DeferManager_writeStateChange_impl(__SIZE_TYPE__ selfi, sDrawState* st, int nodeLayer, ulong** pp)
 {
     sRmRend3C20* self = (sRmRend3C20*)selfi;
     sRmPkt27A8 pkt;
@@ -8799,16 +8799,16 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int node
         if (((State3C20(self)->m_bitGroups[0] & 0x3C0) >> 6) != ctx) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 0, frameWord, pp);
+            cPS2DeferManager_writeVu1ProgramSetup((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 0, frameWord, pp);
         } else if (nodeLayer != self->buf) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 1, frameWord, pp);
+            cPS2DeferManager_writeVu1ProgramSetup((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 1, frameWord, pp);
         }
         if (self->frame != frameWord) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 2, frameWord, pp);
+            cPS2DeferManager_writeVu1ProgramSetup((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 2, frameWord, pp);
         }
     }
     pkt.count = 0;
@@ -8818,63 +8818,63 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int node
     if (k != self->scissor) {
         self->scissor = k;
         if (k >= 0) {
-            func_003623D8((sGifPacket*)&pkt, self->keys[k].a, self->keys[k].c, self->keys[k].b, self->keys[k].d);
+            gsPacket_addScissor((sGifPacket*)&pkt, self->keys[k].a, self->keys[k].c, self->keys[k].b, self->keys[k].d);
         }
     }
     if (((State3C20(self)->m_bitGroups[1] & 0x400000) >> 22) != ((st->m_bitGroups[1] & 0x400000) >> 22)) {
         cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
-        func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+        gsPacket_addZBuf((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
                       (st->m_bitGroups[1] & 0x400000) >> 22, 0);
-        func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+        gsPacket_addZBuf((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
                       (st->m_bitGroups[1] & 0x400000) >> 22, 1);
     }
     if (Bits3C20(State3C20(self)->m_bitGroups[1], 0x1800000) != Bits3C20(st->m_bitGroups[1], 0x1800000) ||
         Bits3C20(State3C20(self)->m_bitGroups[1], 0x300000) != Bits3C20(st->m_bitGroups[1], 0x300000) ||
         Bits3C20(State3C20(self)->m_bitGroups[1], 0xFF000) != Bits3C20(st->m_bitGroups[1], 0xFF000)) {
-        func_003626D8((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
+        gsPacket_addTest((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
                       (st->m_bitGroups[1] & 0xFF000) >> 12, 0);
-        func_003626D8((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
+        gsPacket_addTest((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
                       (st->m_bitGroups[1] & 0xFF000) >> 12, 1);
     }
     if ((State3C20(self)->m_bitGroups[0] & 0xC) != (st->m_bitGroups[0] & 0xC)) {
-        func_003625C0((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0xC) >> 2, 0);
+        gsPacket_addClamp((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0xC) >> 2, 0);
     }
     if (((State3C20(self)->m_bitGroups[1] & 0x7C) >> 2) != ((st->m_bitGroups[1] & 0x7C) >> 2) || ((State3C20(self)->m_bitGroups[0] >> 12) & 0xFF) != ((st->m_bitGroups[0] >> 12) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0x7C) >> 2, (st->m_bitGroups[0] >> 12) & 0xFF, 0);
+        gsPacket_addAlpha((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0x7C) >> 2, (st->m_bitGroups[0] >> 12) & 0xFF, 0);
     }
     if ((State3C20(self)->m_bitGroups[0] & 0x30) != (st->m_bitGroups[0] & 0x30)) {
-        func_003625C0((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0x30) >> 4, 1);
+        gsPacket_addClamp((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0x30) >> 4, 1);
     }
     if (((State3C20(self)->m_bitGroups[1] & 0xF80) >> 7) != ((st->m_bitGroups[1] & 0xF80) >> 7) || ((State3C20(self)->m_bitGroups[0] >> 20) & 0xFF) != ((st->m_bitGroups[0] >> 20) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0xF80) >> 7, (st->m_bitGroups[0] >> 20) & 0xFF, 1);
+        gsPacket_addAlpha((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0xF80) >> 7, (st->m_bitGroups[0] >> 20) & 0xFF, 1);
     }
     self->state = *st;
-    func_003627A8(&pkt, pp, 1);
+    gsPacket_writeHeader(&pkt, pp, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00364050);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_sortItems);
 #ifdef SKIP_ASM
 
 extern tDeferSortItem D_00505B70[];
 extern void* D_004A4474;
-extern "C" void* func_0038F460(void* ring, unsigned int addr, int size, int flags);
-extern "C" void func_0038F6A8(void* ring);
+extern "C" void* cPS2ScratchPad_claimBuffer(void* ring, unsigned int addr, int size, int flags);
+extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
 
 /**
  * Sorts the defer manager's sort items (+0x67CA8, count +0x67CA4) by key with a four-pass 8-bit radix sort.
  *
- * The 4 x 257 histogram lives in the scratchpad ring (func_0038F460) and D_00505B70 is the swap buffer; after the
+ * The 4 x 257 histogram lives in the scratchpad ring (cPS2ScratchPad_claimBuffer) and D_00505B70 is the swap buffer; after the
  * fourth pass the sorted items are back in place.
  */
-extern "C" void func_00364050(cPS2DeferManager* self)
+extern "C" void cPS2DeferManager_sortItems(cPS2DeferManager* self)
 {
     void* ring = D_004A4474;
     tDeferSortItem* dst = D_00505B70;
     int n = self->mNumSortItems;
     tDeferSortItem* src = ((&self->mSortItems[0]));
-    int (*hist)[257] = (int (*)[257])func_0038F460(ring, 0, -1, 0);
+    int (*hist)[257] = (int (*)[257])cPS2ScratchPad_claimBuffer(ring, 0, -1, 0);
     MEM_fill(hist, 0, 4112);
     for (int i = 0; i < n; i++) {
         unsigned int key = src[i].mKey;
@@ -8900,12 +8900,12 @@ extern "C" void func_00364050(cPS2DeferManager* self)
         dst = src;
         src = sortedBuf;
     }
-    func_0038F6A8(ring);
+    cPS2ScratchPad_advanceBuffer(ring);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00364240);
+INCLUDE_ASM("object/railmodifier", sDrawState_makeSortKey);
 #ifdef SKIP_ASM
 /**
  * Builds the sort key for a draw state and texture pair.
@@ -8920,7 +8920,7 @@ INCLUDE_ASM("object/railmodifier", func_00364240);
  * @return the sort key
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" unsigned int func_00364240(unsigned int* self, int key)
+extern "C" unsigned int sDrawState_makeSortKey(unsigned int* self, int key)
 {
     int layerRank = 31 - ((self[2] & 0x3E0) >> 5);
     int modeRank;
@@ -8967,13 +8967,13 @@ extern "C" unsigned int func_00364240(unsigned int* self, int key)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00364360);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_writeDefaultState);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int c, int n);
-extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
-extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
+extern "C" void gsPacket_addAlpha(sGifPacket* pkt, int a, int b, int ctx);
+extern "C" void cPS2DeferManager_writeVu1ProgramSetup(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 // PORT: bound by asm label so this caller's packet type doesn't conflict with the definition.
-extern "C" void func_003627A8_4360(void* pkt, ulong** pp, int mode) __asm__("func_003627A8");
+extern "C" void gsPacket_writeHeader_4360(void* pkt, ulong** pp, int mode) __asm__("gsPacket_writeHeader");
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 
 // A copy of sDrawState (its member names).
@@ -8999,16 +8999,16 @@ struct sRmPkt4360 {
 /**
  * Writes the complete default draw state (sDrawState_s_defaultDrawState) to the DMA chain.
  *
- * After a one-quadword CNT tag it emits the VU1 program setup (func_00364CD0 mode 0) and CLAMP, ALPHA, ZBUF and TEST
- * for context 1 and then context 2, closing the block with func_003627A8 mode 1.
+ * After a one-quadword CNT tag it emits the VU1 program setup (cPS2DeferManager_writeVu1ProgramSetup mode 0) and CLAMP, ALPHA, ZBUF and TEST
+ * for context 1 and then context 2, closing the block with gsPacket_writeHeader mode 1.
  *
  * Likely bug: the context-2 ZBUF and TEST writes take their fields from word 1 one or two bits higher than the
- * context-1 writes and func_00363C20 do.
+ * context-1 writes and cPS2DeferManager_writeStateChange do.
  *
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/GIF tag writes (ulong).
-extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
+extern "C" void cPS2DeferManager_writeDefaultState(cPS2DeferManager* self, ulong** pp)
 {
     cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
     sRmGsState4360 st;
@@ -9019,28 +9019,28 @@ extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
     (*pp)[2] = 0;
     (*pp)[3] = (ulong)1 << 60;
     *pp += 4;
-    func_00364CD0(self, (st.m_bitGroups[0] & 0x3C0) >> 6, 0, st.m_bitGroups[3] & 0x3FFFFFFF, pp);
+    cPS2DeferManager_writeVu1ProgramSetup(self, (st.m_bitGroups[0] & 0x3C0) >> 6, 0, st.m_bitGroups[3] & 0x3FFFFFFF, pp);
     pkt.count = 0;
     pkt.base = *pp;
     pkt.cur = *pp + 6;
-    func_003625C0((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0xC) >> 2, 0);
-    func_00362478((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0x7C) >> 2, (st.m_bitGroups[0] >> 12) & 0xFF, 0);
-    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+    gsPacket_addClamp((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0xC) >> 2, 0);
+    gsPacket_addAlpha((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0x7C) >> 2, (st.m_bitGroups[0] >> 12) & 0xFF, 0);
+    gsPacket_addZBuf((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
             (st.m_bitGroups[1] >> 22) & 1, 0);
-    func_003626D8((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 23) & 3, (st.m_bitGroups[1] >> 20) & 3,
+    gsPacket_addTest((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 23) & 3, (st.m_bitGroups[1] >> 20) & 3,
             (st.m_bitGroups[1] & 0xFF000) >> 12, 0);
-    func_003625C0((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0x30) >> 4, 1);
-    func_00362478((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0xF80) >> 7, (st.m_bitGroups[0] >> 20) & 0xFF, 1);
-    func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
+    gsPacket_addClamp((sGifPacket*)&pkt, (st.m_bitGroups[0] & 0x30) >> 4, 1);
+    gsPacket_addAlpha((sGifPacket*)&pkt, (st.m_bitGroups[1] & 0xF80) >> 7, (st.m_bitGroups[0] >> 20) & 0xFF, 1);
+    gsPacket_addZBuf((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
             (st.m_bitGroups[1] >> 23) & 1, 1);
-    func_003626D8((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 25) & 3, (st.m_bitGroups[1] >> 22) & 3,
+    gsPacket_addTest((sRmGsPacket*)&pkt, (st.m_bitGroups[1] >> 25) & 3, (st.m_bitGroups[1] >> 22) & 3,
             (st.m_bitGroups[1] & 0xFF000) >> 12, 1);
-    func_003627A8_4360(&pkt, pp, 1);
+    gsPacket_writeHeader_4360(&pkt, pp, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003645B8);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_findOrAddViewState);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_45B8(void* dst, const void* src)
@@ -9105,7 +9105,7 @@ struct sRailXf_45B8 {
  *
  * @param in  matrix record to look up
  */
-extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
+extern "C" void cPS2DeferManager_findOrAddViewState(cPS2DeferManager* self, sRailXf_45B8* in)
 {
     int i;
     self->mActiveViewIndex = -1;
@@ -9135,7 +9135,7 @@ extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00364B88);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_findOrAddScissor);
 #ifdef SKIP_ASM
 struct sRailKey4 {
     unsigned short a, b, c, d;
@@ -9157,7 +9157,7 @@ struct sRailKeyTable {
  *
  * @param k  rectangle to look up
  */
-extern "C" void func_00364B88(sRailKeyTable* self, sRailKey4* k)
+extern "C" void cPS2DeferManager_findOrAddScissor(sRailKeyTable* self, sRailKey4* k)
 {
     int i;
     self->found = -1;
@@ -9180,21 +9180,21 @@ extern "C" void func_00364B88(sRailKeyTable* self, sRailKey4* k)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00364C90);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_setCurrentState);
 #ifdef SKIP_ASM
 /**
  * Sets the defer manager's current draw state (+0x69CA8) to a copy of the 20-byte state src.
  *
  * @param src  draw state to copy
  */
-extern "C" void func_00364C90(cPS2DeferManager* self, const sDrawState* src)
+extern "C" void cPS2DeferManager_setCurrentState(cPS2DeferManager* self, const sDrawState* src)
 {
     self->mCurrentState = *src;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00364CD0);
+INCLUDE_ASM("object/railmodifier", cPS2DeferManager_writeVu1ProgramSetup);
 #ifdef SKIP_ASM
 // VU1 microprogram chains (static .vutext DMA chains) and their constant blocks.
 extern char D_0042E590[];
@@ -9346,7 +9346,7 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
-extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsigned int w3, ulong** pp)
+extern "C" void cPS2DeferManager_writeVu1ProgramSetup(cPS2DeferManager* vself, int type, int mode, unsigned int w3, ulong** pp)
 {
     cPS2DeferManager* self = vself;
     sPkt_4CD0 pk(*pp);
@@ -9704,9 +9704,9 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00365E40);
+INCLUDE_ASM("object/railmodifier", vramHeap_init);
 #ifdef SKIP_ASM
-extern "C" void func_003660A8(void* self, int idx);
+extern "C" void vramHeap_fileBlock(void* self, int idx);
 
 // A block node (sRailNode's names, below).
 struct sRailLinkE40 {
@@ -9733,8 +9733,8 @@ struct sRailModE40 {
     sRailSlotE40 slotsA[17];    // 0x1FF8
     sRailSlotE40 slotsB[17];    // 0x21D4
     // Two more head nodes (names ours, from use): the address list's (0x23B0; its next is the first block,
-    // func_00366548 / func_003669F0 walk from it) and the spare-link stack's (0x23CC; its next is the top,
-    // func_00365FE8 pops it).
+    // vramHeap_freeUnlockedBlocks / vramHeap_evictCheapestRun walk from it) and the spare-link stack's (0x23CC; its next is the top,
+    // vramHeap_popSpareLink pops it).
     char pad_0x23B0[0xC];
     int addrHeadPrev;           // 0x23BC
     int addrHead;               // 0x23C0
@@ -9753,14 +9753,14 @@ struct sRailModE40 {
  *
  * Block 0 covers the whole size from the start address (+0x1FF4 = size), links 1-291 form the spare-link stack (head
  * +0x23DC = 1), the 17 size-class heads of both lists are emptied, the address list starts at block 0 (+0x23C0) and
- * block 0 is filed into its size class (func_003660A8). pool (+0x23E8) is the owner table freed blocks report to.
+ * block 0 is filed into its size class (vramHeap_fileBlock). pool (+0x23E8) is the owner table freed blocks report to.
  *
  * @param list  the allocator
  * @param startAddr  start address
  * @param heapSize  size
  * @param pool  owner table
  */
-extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* pool)
+extern "C" void vramHeap_init(void* list, int startAddr, int heapSize, void* pool)
 {
     sRailModE40* self = (sRailModE40*)list;
     int i;
@@ -9785,7 +9785,7 @@ extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* poo
     self->addrHeadPrev = -1;
     self->addrHeadSPrev = -1;
     self->addrHeadSNext = -1;
-    func_003660A8(self, 0);
+    vramHeap_fileBlock(self, 0);
     self->pool = pool;
     self->spareHeadPrev = -1;
     self->spareHeadSPrev = -1;
@@ -9795,38 +9795,38 @@ extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* poo
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00365F68);
+INCLUDE_ASM("object/railmodifier", vramHeap_moveLinksToScratchpad);
 #ifdef SKIP_ASM
 extern "C" void SyncDCache(void* begin, void* end);
-extern "C" int func_0038F708(void* base, int size, int mode);
+extern "C" int scratchpad_loadSpareArea(void* base, int size, int mode);
 
 /**
  * Moves a block allocator's link array into the scratchpad ring for fast access.
  *
- * Writes the 0x1FF0-byte array back from the data cache (SyncDCache), copies it with func_0038F708 and points the
- * links pointer (+0x1FF0) at the copy. func_00365FA8 undoes it.
+ * Writes the 0x1FF0-byte array back from the data cache (SyncDCache), copies it with scratchpad_loadSpareArea and points the
+ * links pointer (+0x1FF0) at the copy. vramHeap_moveLinksFromScratchpad undoes it.
  */
-extern "C" void func_00365F68(void* self)
+extern "C" void vramHeap_moveLinksToScratchpad(void* self)
 {
     SyncDCache(self, (char*)self + 0x1FEF);
-    *(int*)((char*)self + 0x1FF0) = func_0038F708(self, 0x1FF0, 2);
+    *(int*)((char*)self + 0x1FF0) = scratchpad_loadSpareArea(self, 0x1FF0, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00365FA8);
+INCLUDE_ASM("object/railmodifier", vramHeap_moveLinksFromScratchpad);
 #ifdef SKIP_ASM
 extern "C" void InvalidDCache(void* begin, void* end);
-extern "C" void func_0038F738(void* base, int size, int mode);
+extern "C" void scratchpad_storeSpareArea(void* base, int size, int mode);
 
 /**
- * Moves a block allocator's link array back from the scratchpad ring (InvalidDCache, func_0038F738) and points the
+ * Moves a block allocator's link array back from the scratchpad ring (InvalidDCache, scratchpad_storeSpareArea) and points the
  * links pointer (+0x1FF0) at it again.
  */
-extern "C" void func_00365FA8(void* self)
+extern "C" void vramHeap_moveLinksFromScratchpad(void* self)
 {
     InvalidDCache(self, (char*)self + 0x1FEF);
-    func_0038F738(self, 0x1FF0, 2);
+    scratchpad_storeSpareArea(self, 0x1FF0, 2);
     *(void**)((char*)self + 0x1FF0) = self;
 }
 #endif
@@ -9842,7 +9842,7 @@ struct sRailLink {
 //95.0% - logic verified correct; the target puts the mult result in v1 and
 // ours lands in v0. Reordering the locals does not shift the allocation.
 //100%
-INCLUDE_ASM("object/railmodifier", func_00365FE8);
+INCLUDE_ASM("object/railmodifier", vramHeap_popSpareLink);
 #ifdef SKIP_ASM
 /**
  * Pops a spare link off the allocator's stack (head +0x23DC).
@@ -9851,7 +9851,7 @@ INCLUDE_ASM("object/railmodifier", func_00365FE8);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Pop a link index off the free list headed at spareHead.
-extern "C" int func_00365FE8(sRailModE40* self)
+extern "C" int vramHeap_popSpareLink(sRailModE40* self)
 {
     int i = self->spareHead;
     self->spareHead = self->links[i].next;
@@ -9860,13 +9860,13 @@ extern "C" int func_00365FE8(sRailModE40* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366008);
+INCLUDE_ASM("object/railmodifier", vramHeap_removeFromAddressList);
 #ifdef SKIP_ASM
 struct sRailNode {
     int mBlockAddr;
     int mBlockSize;               // 0x04
-    int mOwner;                   // 0x08 (name ours) [U] the owning texture's index: func_00366CE0 stores it,
-                                  //      func_003663D8 clears that texture's block fields
+    int mOwner;                   // 0x08 (name ours) [U] the owning texture's index: vramHeap_allocBlock stores it,
+                                  //      vramHeap_freeBlock clears that texture's block fields
     int mPrev;               // 0x0c
     int mNext;               // 0x10
     int mSPrev;              // 0x14
@@ -9874,18 +9874,18 @@ struct sRailNode {
 
     // A list link (mPrev, mNext, mSPrev, mSNext; names ours): a node index, kLinkEnd at the end of a list, or a
     // size-class head, a negative word with kHeadListA or kHeadListB in kHeadListMask and the class in the low bits.
-    // [U] func_003660A8 files used blocks under heads 0x90000000 | class (list A) and free ones under 0xA0000000 |
-    // class (list B); func_00366008, func_003660A8 and func_00366238 resolve a negative link through these bits.
+    // [U] vramHeap_fileBlock files used blocks under heads 0x90000000 | class (list A) and free ones under 0xA0000000 |
+    // class (list B); vramHeap_removeFromAddressList, vramHeap_fileBlock and vramHeap_unfileBlock resolve a negative link through these bits.
     enum { kLinkEnd = -1, kHeadListMask = 0x70000000, kHeadListA = 0x10000000, kHeadListB = 0x20000000 };
-    // The mOwner value func_003663D8 treats as "no owner texture" (name ours): it clears the owner's block fields
-    // for any other value (func_003662D0 gives a split-off block -1 instead).
+    // The mOwner value vramHeap_freeBlock treats as "no owner texture" (name ours): it clears the owner's block fields
+    // for any other value (vramHeap_allocFromBlock gives a split-off block -1 instead).
     enum { kNoOwner = 0x7FFFFFFF };
 };
 
 struct sRailNodeMan {
     char pad_0x0[0x1ff0];
     sRailNode* nodes;       // 0x1ff0
-    int mHeapSize;          // 0x1ff4 (name ours) [U] func_00365E40 stores the heap size
+    int mHeapSize;          // 0x1ff4 (name ours) [U] vramHeap_init stores the heap size
     sRailNode headsA[17];   // 0x1ff8
     sRailNode headsB[18];   // 0x21d4
     char pad_0x23cc[0x10];
@@ -9897,7 +9897,7 @@ struct sRailNodeMan {
  *
  * @param idx  block index
  */
-extern "C" void func_00366008(sRailNodeMan* self, int idx)
+extern "C" void vramHeap_removeFromAddressList(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
     sRailNode* prev;
@@ -9921,7 +9921,7 @@ extern "C" void func_00366008(sRailNodeMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003660A8);
+INCLUDE_ASM("object/railmodifier", vramHeap_fileBlock);
 #ifdef SKIP_ASM
 // PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin. Volatile so it stays before
 // the size-class multiply, as in the target schedule.
@@ -9944,7 +9944,7 @@ static inline int railFloorLog2_60A8(int x)
  * @param selfp  the allocator
  * @param idx  block index
  */
-extern "C" void func_003660A8(void* selfp, int idx)
+extern "C" void vramHeap_fileBlock(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
     sRailNode* node = &self->nodes[idx];
@@ -9998,14 +9998,14 @@ extern "C" void func_003660A8(void* selfp, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366238);
+INCLUDE_ASM("object/railmodifier", vramHeap_unfileBlock);
 #ifdef SKIP_ASM
 /**
  * Removes a block from its size-class list.
  *
  * @param idx  block index
  */
-extern "C" void func_00366238(sRailNodeMan* self, int idx)
+extern "C" void vramHeap_unfileBlock(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
     sRailNode* prev;
@@ -10027,30 +10027,30 @@ extern "C" void func_00366238(sRailNodeMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003662D0);
+INCLUDE_ASM("object/railmodifier", vramHeap_allocFromBlock);
 #ifdef SKIP_ASM
-extern "C" void func_003660A8(void* self, int idx);
-// PORT: the unit declares func_00365FE8 as void; it returns the popped free index.
-extern "C" int func_00365FE8_pop(void* self) __asm__("func_00365FE8");
+extern "C" void vramHeap_fileBlock(void* self, int idx);
+// PORT: the unit declares vramHeap_popSpareLink as void; it returns the popped free index.
+extern "C" int vramHeap_popSpareLink_pop(void* self) __asm__("vramHeap_popSpareLink");
 
 /**
  * Allocates size units from a free block, splitting off the rest as a new free block when a spare link is left.
  *
  * The block leaves its size list; on an exact fit (or no spare link) the whole block is marked used. Otherwise a new
- * block (func_00365FE8) takes the remainder, with no owner, after it in the address list and in its size class. The
- * block is marked used (bit 0) and refiled (func_003660A8).
+ * block (vramHeap_popSpareLink) takes the remainder, with no owner, after it in the address list and in its size class. The
+ * block is marked used (bit 0) and refiled (vramHeap_fileBlock).
  *
  * @param idx  free block to allocate from
  * @param size  units needed
  */
-extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
+extern "C" void vramHeap_allocFromBlock(sRailNodeMan* self, int idx, int size)
 {
     sRailNode* node = &self->nodes[idx];
-    func_00366238(self, idx);
+    vramHeap_unfileBlock(self, idx);
     if (size == node->mBlockSize || self->freeHead == sRailNode::kLinkEnd) {
         node->mBlockAddr |= 1;
     } else {
-        int n = func_00365FE8_pop(self);
+        int n = vramHeap_popSpareLink_pop(self);
         sRailNode* nn = &self->nodes[n];
         nn->mBlockAddr = node->mBlockAddr + size;
         nn->mBlockSize = node->mBlockSize - size;
@@ -10062,16 +10062,16 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
             self->nodes[next].mPrev = n;
         }
         node->mNext = n;
-        func_003660A8(self, n);
+        vramHeap_fileBlock(self, n);
         node->mBlockSize = size;
         node->mBlockAddr |= 1;
     }
-    func_003660A8(self, idx);
+    vramHeap_fileBlock(self, idx);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003663D8);
+INCLUDE_ASM("object/railmodifier", vramHeap_freeBlock);
 #ifdef SKIP_ASM
 /**
  * Frees a used block, detaches it from its owner and merges it with free neighbours.
@@ -10083,7 +10083,7 @@ INCLUDE_ASM("object/railmodifier", func_003663D8);
  * @param selfp  the allocator
  * @param idx  block index
  */
-extern "C" void func_003663D8(void* selfp, int idx)
+extern "C" void vramHeap_freeBlock(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
     sRailNode* n = &self->nodes[idx];
@@ -10098,8 +10098,8 @@ extern "C" void func_003663D8(void* selfp, int idx)
         }
     }
     n->mBlockAddr &= ~0x3F;
-    func_00366238(self, idx);
-    func_003660A8(self, idx);
+    vramHeap_unfileBlock(self, idx);
+    vramHeap_fileBlock(self, idx);
     for (;;) {
         int prevIdx = n->mPrev;
         if (prevIdx >= 0 && (self->nodes[prevIdx].mBlockAddr & 1) == 0) {
@@ -10111,17 +10111,17 @@ extern "C" void func_003663D8(void* selfp, int idx)
                 return;
             }
         }
-        func_00366238(self, idx);
-        func_00366238(self, n->mNext);
+        vramHeap_unfileBlock(self, idx);
+        vramHeap_unfileBlock(self, n->mNext);
         n->mBlockSize += self->nodes[n->mNext].mBlockSize;
-        func_00366008(self, n->mNext);
-        func_003660A8(self, idx);
+        vramHeap_removeFromAddressList(self, n->mNext);
+        vramHeap_fileBlock(self, idx);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366548);
+INCLUDE_ASM("object/railmodifier", vramHeap_freeUnlockedBlocks);
 #ifdef SKIP_ASM
 struct sRailLink6548 {   // a block node (sRailNode's names)
     int flags;      // 0x0 the block address and its flag bits
@@ -10136,10 +10136,10 @@ struct sRailLink6548 {   // a block node (sRailNode's names)
 /**
  * Frees every used block of an allocator that is not locked (flag bit 1), walking the address list (+0x23C0).
  *
- * The next used block is found before each free, as freeing merges neighbours. func_00367360 (the texture manager's
+ * The next used block is found before each free, as freeing merges neighbours. cTextureMan_purgeAll (the texture manager's
  * purge) runs it on both of its allocators.
  */
-extern "C" void func_00366548(void* self)
+extern "C" void vramHeap_freeUnlockedBlocks(void* self)
 {
     char* heap = (char*)self;
     int i = *(int*)(heap + 0x23C0);
@@ -10155,7 +10155,7 @@ extern "C" void func_00366548(void* self)
         }
         if (cur->flags & 1) {
             if (((cur->flags >> 1) & 1) == 0) {
-                func_003663D8(self, i);
+                vramHeap_freeBlock(self, i);
             }
         }
         i = next;
@@ -10164,7 +10164,7 @@ extern "C" void func_00366548(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366618);
+INCLUDE_ASM("object/railmodifier", vramHeap_freeAllBlocks);
 #ifdef SKIP_ASM
 struct sRailLink6618 {   // a block node (sRailNode's names)
     int flags;      // 0x0 the block address and its flag bits
@@ -10179,7 +10179,7 @@ struct sRailLink6618 {   // a block node (sRailNode's names)
 /**
  * Frees every used block of an allocator, clearing its lock bit (flag bit 1) first.
  */
-extern "C" void func_00366618(void* self)
+extern "C" void vramHeap_freeAllBlocks(void* self)
 {
     char* heap = (char*)self;
     int i = *(int*)(heap + 0x23C0);
@@ -10197,7 +10197,7 @@ extern "C" void func_00366618(void* self)
             if ((cur->flags >> 1) & 1) {
                 cur->flags &= ~2;
             }
-            func_003663D8(self, i);
+            vramHeap_freeBlock(self, i);
         }
         i = next;
     }
@@ -10205,7 +10205,7 @@ extern "C" void func_00366618(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003666F8);
+INCLUDE_ASM("object/railmodifier", resetTextureUseTable);
 #ifdef SKIP_ASM
 extern void* D_004A5B84;
 extern char D_0053AB80[];
@@ -10239,9 +10239,9 @@ static inline unsigned int spadFree66F8()
  * Resets the 2000-entry texture use table D_0053AB80 to all-ones (-1).
  *
  * Invalidates the table's cache lines (InvalidDCache), fills the free scratchpad above D_004A5B84 with 0xFF bytes and
- * copies that into the table in chunks with func_0038F738.
+ * copies that into the table in chunks with scratchpad_storeSpareArea.
  */
-extern "C" void func_003666F8()
+extern "C" void resetTextureUseTable()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
     InvalidDCache(D_0053AB80, D_0053E9FF);
@@ -10256,13 +10256,13 @@ extern "C" void func_003666F8()
         if (left < chunk) {
             chunk = left;
         }
-        func_0038F738(&((sRailPair66F8*)D_0053AB80)[i], chunk * 8, 2);
+        scratchpad_storeSpareArea(&((sRailPair66F8*)D_0053AB80)[i], chunk * 8, 2);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003667F8);
+INCLUDE_ASM("object/railmodifier", vramHeap_findFreeBlock);
 #ifdef SKIP_ASM
 // PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin.
 static inline int railFloorLog2(int x)
@@ -10278,7 +10278,7 @@ static inline int railFloorLog2(int x)
  * @param size  units needed
  * @return the block index, or -1
  */
-extern "C" int func_003667F8(sRailNodeMan* self, int size)
+extern "C" int vramHeap_findFreeBlock(sRailNodeMan* self, int size)
 {
     int bucket;
     for (bucket = railFloorLog2(size) - 6; bucket < 17; bucket++) {
@@ -10295,7 +10295,7 @@ extern "C" int func_003667F8(sRailNodeMan* self, int size)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366888);
+INCLUDE_ASM("object/railmodifier", vramHeap_findLargestFreeBlock);
 #ifdef SKIP_ASM
 struct sRailLink6888 {   // a block node (sRailNode's names)
     int flags;      // 0x0 the block address and its flag bits
@@ -10312,7 +10312,7 @@ struct sRailLink6888 {   // a block node (sRailNode's names)
  *
  * @return the block index, or -1 when no block is free
  */
-extern "C" int func_00366888(void* self)
+extern "C" int vramHeap_findLargestFreeBlock(void* self)
 {
     char* heapBase = (char*)self;
     int i = *(int*)(heapBase + 0x23C0);
@@ -10334,9 +10334,9 @@ extern "C" int func_00366888(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003668F8);
+INCLUDE_ASM("object/railmodifier", vramHeap_evictCheapestBlock);
 #ifdef SKIP_ASM
-extern "C" void func_003663D8(void* selfp, int idx);
+extern "C" void vramHeap_freeBlock(void* selfp, int idx);
 
 // PORT: PS2-only MMI count-leading-sign-bits (plzcw); off-PS2 use a clz builtin. Volatile here: this caller's
 // schedule keeps the prologue and the loop constants on either side of it.
@@ -10352,7 +10352,7 @@ static inline int railFloorLog2v(int x)
  *
  * Walks list A of that class, skipping blocks smaller than size, locked ones (flag bit 1) and those owned by skipA or
  * skipB. A block whose owner texture is used again later this frame (its last use in D_0053AB80 is after age) costs
- * size times its use count, any other costs 0; the cheapest is freed with func_003663D8.
+ * size times its use count, any other costs 0; the cheapest is freed with vramHeap_freeBlock.
  *
  * @param size  units needed
  * @param skipA  owner to keep
@@ -10360,7 +10360,7 @@ static inline int railFloorLog2v(int x)
  * @param age  current position in the frame's draw order
  * @return true if a block was freed
  */
-extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
+extern "C" bool vramHeap_evictCheapestBlock(sRailNodeMan* self, int size, int skipA, int skipB, int age)
 {
     int i = self->headsA[railFloorLog2v(size) - 6].mSNext;
     int bestIdx = -1;
@@ -10388,16 +10388,16 @@ extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB
     if (bestIdx < 0) {
         return false;
     }
-    func_003663D8(self, bestIdx);
+    vramHeap_freeBlock(self, bestIdx);
     return true;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003669F0);
+INCLUDE_ASM("object/railmodifier", vramHeap_evictCheapestRun);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003663D8(void* selfp, int idx);
+extern "C" void vramHeap_freeBlock(void* selfp, int idx);
 
 /**
  * Frees the cheapest run of neighbouring blocks (in address order) that together hold at least @p size bytes.
@@ -10406,8 +10406,8 @@ extern "C" void func_003663D8(void* selfp, int idx);
  * window along the address-ordered block list (headed at headsB[17].next): a used block that is locked (flag bit 1) or
  * owned by @p skipA or @p skipB breaks the window. A used block whose owner's entry in the 2000-pair table D_0053AB80
  * has a > @p level adds size * b to the window's cost; free blocks cost nothing. The search stops early at cost 0.
- * Every used block in the winning window is then freed with func_003663D8 (which also merges free neighbours).
- * func_00366CE0 calls it when freeing a single block (func_003668F8) was not enough.
+ * Every used block in the winning window is then freed with vramHeap_freeBlock (which also merges free neighbours).
+ * vramHeap_allocBlock calls it when freeing a single block (vramHeap_evictCheapestBlock) was not enough.
  *
  * Likely bug: when no window qualifies, bestIdx stays -1 and the freeing loop still reads nodes[-1].
  *
@@ -10420,7 +10420,7 @@ extern "C" void func_003663D8(void* selfp, int idx);
 // locked blocks and blocks of the two given owners break a run, owners above 'level' cost size*weight.
 // The two 'skip kept blocks' loops are test-first (if + do/while): the plain while form compiles to an
 // unrotated loop (92.15%).
-extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB, int level)
+extern "C" void vramHeap_evictCheapestRun(sRailNodeMan* self, int size, int skipA, int skipB, int level)
 {
     int freeList[292];
     int bestIdx = -1;
@@ -10497,26 +10497,26 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
         i = self->nodes[i].mNext;
     }
     for (int k = 0; k < n; k++) {
-        func_003663D8(self, freeList[k]);
+        vramHeap_freeBlock(self, freeList[k]);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00366CE0);
+INCLUDE_ASM("object/railmodifier", vramHeap_allocBlock);
 #ifdef SKIP_ASM
-extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size);
-extern "C" bool func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int level);
-extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB, int level);
+extern "C" void vramHeap_allocFromBlock(sRailNodeMan* self, int idx, int size);
+extern "C" bool vramHeap_evictCheapestBlock(sRailNodeMan* self, int size, int skipA, int skipB, int level);
+extern "C" void vramHeap_evictCheapestRun(sRailNodeMan* self, int size, int skipA, int skipB, int level);
 
 /**
  * Allocates a block of at least @p size bytes from a GS memory block heap for @p owner and returns its node index.
  *
  * When @p align is set the size is rounded up to a multiple of 0x2000 (one GS page); sizes below 0x100 become 0x100. It
- * loops until a block is found: func_003667F8 looks for a free block of that size in the size-class lists, and on
- * success func_003662D0 splits it and marks it used and the node's owner field (+0x8) is set to @p owner. Otherwise it
- * evicts other textures' blocks, first the cheapest single block (func_003668F8), then, if that freed nothing, the
- * cheapest run of neighbours (func_003669F0); blocks of @p owner and @p skipB are never evicted. There is no failure
+ * loops until a block is found: vramHeap_findFreeBlock looks for a free block of that size in the size-class lists, and on
+ * success vramHeap_allocFromBlock splits it and marks it used and the node's owner field (+0x8) is set to @p owner. Otherwise it
+ * evicts other textures' blocks, first the cheapest single block (vramHeap_evictCheapestBlock), then, if that freed nothing, the
+ * cheapest run of neighbours (vramHeap_evictCheapestRun); blocks of @p owner and @p skipB are never evicted. There is no failure
  * path: if nothing can be evicted the loop never ends.
  *
  * The callers in render/ps2graphicsman pass the cTextureMan heap at +0x1F60 (or +0x4350) and read the node's VRAM
@@ -10529,7 +10529,7 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
  * @param align  non-zero to round @p size up to a 0x2000-byte page
  * @return the index of the allocated node
  */
-extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB, int level, int align)
+extern "C" int vramHeap_allocBlock(sRailNodeMan* self, int size, int owner, int skipB, int level, int align)
 {
     int idx;
     if (align) {
@@ -10539,26 +10539,26 @@ extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB,
         size = 0x100;
     }
     for (;;) {
-        idx = func_003667F8(self, size);
+        idx = vramHeap_findFreeBlock(self, size);
         if (idx >= 0) {
-            func_003662D0(self, idx, size);
+            vramHeap_allocFromBlock(self, idx, size);
             self->nodes[idx].mOwner = owner;
             return idx;
         }
-        if (!func_003668F8(self, size, owner, skipB, level)) {
-            func_003669F0(self, size, owner, skipB, level);
+        if (!vramHeap_evictCheapestBlock(self, size, owner, skipB, level)) {
+            vramHeap_evictCheapestRun(self, size, owner, skipB, level);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366DD8);
+INCLUDE_ASM("object/railmodifier", vramHeap_findOwnerBlock);
 #ifdef SKIP_ASM
 struct sRailLinkDD8 {
     int flags;      // 0x0
     int f4;
-    int owner;      // 0x8 (the owning texture index, func_00366CE0 stores it)
+    int owner;      // 0x8 (the owning texture index, vramHeap_allocBlock stores it)
     int fC;
     int next;       // 0x10
     int f14;
@@ -10569,13 +10569,13 @@ struct sRailLinkDD8 {
  * Returns the index of the first used block owned by @p key in a GS memory block heap, or -1 if there is none.
  *
  * Walks the address-ordered block list (head at +0x23C0, nodes at +0x1FF0, link at +0x10) and matches a block whose
- * flags (bit 0, used) are set and whose owner word (+0x8, where func_00366CE0 stores the owning texture index)
+ * flags (bit 0, used) are set and whose owner word (+0x8, where vramHeap_allocBlock stores the owning texture index)
  * equals @p key.
  *
  * @param key  the owner (texture index) to look for
  * @return the node index of that owner's first block in address order, or -1
  */
-extern "C" int func_00366DD8(void* self, int key)
+extern "C" int vramHeap_findOwnerBlock(void* self, int key)
 {
     char* heap = (char*)self;
     int i = *(int*)(heap + 0x23C0);
@@ -10591,54 +10591,54 @@ extern "C" int func_00366DD8(void* self, int key)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00366E30);
+INCLUDE_ASM("object/railmodifier", vramHeap_freeTextureBlocks);
 #ifdef SKIP_ASM
-extern "C" void func_003663D8(void* self, int id);
+extern "C" void vramHeap_freeBlock(void* self, int id);
 
 /**
  * Frees the GS memory blocks of texture @p i: its data block (node index at record +0x30) and its CLUT block (+0x34).
  *
  * The texture record is entry @p i of the record table whose pointer the heap keeps at +0x23E8. Each index that is not
- * negative is passed to func_003663D8, which releases the block and resets the record's address and node fields to -1.
- * func_00369098 calls it on the cTextureMan heap at +0x1F60 or, for format 9, the one at +0x4350.
+ * negative is passed to vramHeap_freeBlock, which releases the block and resets the record's address and node fields to -1.
+ * cTextureMan_dropVramCopy calls it on the cTextureMan heap at +0x1F60 or, for format 9, the one at +0x4350.
  *
  * @param i  the texture index (slot in the texture record table)
  */
-extern "C" void func_00366E30(void* self, int i)
+extern "C" void vramHeap_freeTextureBlocks(void* self, int i)
 {
     tTexInfo* entry = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[i];
     if (entry->mTexBlock >= 0) {
-        func_003663D8(self, entry->mTexBlock);
+        vramHeap_freeBlock(self, entry->mTexBlock);
     }
     if (entry->mCLUTBlock >= 0) {
-        func_003663D8(self, entry->mCLUTBlock);
+        vramHeap_freeBlock(self, entry->mCLUTBlock);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366E90);
+INCLUDE_ASM("object/railmodifier", cTextureMan_rearrangeMipLevels);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" void func_00390198(void* self, int w, int h, void* buf, char* src);
+extern "C" void tex_rearrange8BitTexture(void* self, int w, int h, void* buf, char* src);
 extern char str_TempTex[];
 
 
 /**
- * Converts the pixel data of every mip level of @p tex in place with func_00390198, then sets its format code to 10.
+ * Converts the pixel data of every mip level of @p tex in place with tex_rearrange8BitTexture, then sets its format code to 10.
  *
  * Allocates a temporary buffer of the texture's size (+0x10) with tag "TempTex" and the manager's memory type (+0x1F58)
  * XOR 0x100. For each level 0 to mipCount (+0x24) it takes the width and height from the TEX0 register value at +0x38
- * (TW, TH), copies w * h * bpp / 8 bytes (at least 0x100) of the level to the buffer and lets func_00390198 write the
+ * (TW, TH), copies w * h * bpp / 8 bytes (at least 0x100) of the level to the buffer and lets tex_rearrange8BitTexture write the
  * re-laid-out level back over the source, then halves both sizes. Frees the buffer and stores 10 in the format code at
  * +0xC (the caller only converts format 9 textures).
  *
  * @param tex  the texture record to convert
  */
-extern "C" void func_00366E90(cTextureMan* self, tTexInfo* tex)
+extern "C" void cTextureMan_rearrangeMipLevels(cTextureMan* self, tTexInfo* tex)
 {
     int n = 0;
     char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->mSize];
@@ -10656,7 +10656,7 @@ extern "C" void func_00366E90(cTextureMan* self, tTexInfo* tex)
                 bytes = 0x100;
             }
             MEM_copy(buf, src, bytes);
-            func_00390198(self, w, height, buf, src);
+            tex_rearrange8BitTexture(self, w, height, buf, src);
             src += bytes;
             w >>= 1;
             height >>= 1;
@@ -10684,20 +10684,20 @@ void cTextureMan::SetTextureMemType(int val)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00366FE8);
+INCLUDE_ASM("object/railmodifier", cTextureMan_init);
 #ifdef SKIP_ASM
 extern "C" void cTextureMan_InitTexInfo(cTextureMan* self);
-extern "C" void func_00365E40(void* list, int a, int size, void* pool);
+extern "C" void vramHeap_init(void* list, int a, int size, void* pool);
 
 /**
  * Initialises the texture manager: clears its tables and sets up both GS memory block heaps.
  *
  * Zeroes the memory type (+0x1F58), resets the texture record table and free id list with cTextureMan_InitTexInfo, marks no
- * texture bound to either context (+0x1F4C, +0x1F50) and no CLUT loaded (+0x1F54) with -1, then func_00365E40 sets up
+ * texture bound to either context (+0x1F4C, +0x1F50) and no CLUT loaded (+0x1F54) with -1, then vramHeap_init sets up
  * the heap at +0x1F60 over 0x400000 bytes (the 4 MB of GS memory) and the one at +0x4350 over 0x1000 bytes, both
  * pointing at the record table at +0x8. cPS2GraphicsMan_Init calls it right after allocating the manager.
  */
-extern "C" void func_00366FE8(cTextureMan* self)
+extern "C" void cTextureMan_init(cTextureMan* self)
 {
     self->TexMemType = 0;
     self->InitTexInfo();
@@ -10706,27 +10706,27 @@ extern "C" void func_00366FE8(cTextureMan* self)
         bound[i] = -1;
     }
     self->mCLUTTex = -1;
-    func_00365E40(self->mMainHeap, 0, 0x400000, &self->m_pTexInfo[0]);
-    func_00365E40(self->mTempHeap, 0, 0x1000, &self->m_pTexInfo[0]);
+    vramHeap_init(self->mMainHeap, 0, 0x400000, &self->m_pTexInfo[0]);
+    vramHeap_init(self->mTempHeap, 0, 0x1000, &self->m_pTexInfo[0]);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_00367078);
+INCLUDE_ASM("object/railmodifier", cTextureMan_freeAllHeapBlocks);
 #ifdef SKIP_ASM
-extern "C" void func_00366618(void* list);
+extern "C" void vramHeap_freeAllBlocks(void* list);
 
 /**
  * Frees every block in both GS memory block heaps of the texture manager and forgets the bound textures.
  *
- * Calls func_00366618 (which clears each block's locked bit and frees it) on the heap at +0x4350 and then on the one at
+ * Calls vramHeap_freeAllBlocks (which clears each block's locked bit and frees it) on the heap at +0x4350 and then on the one at
  * +0x1F60, then sets the bound texture of both contexts (+0x1F4C, +0x1F50) and the loaded CLUT texture (+0x1F54) to -1.
- * func_0037BD98 calls it before reserving the frame and depth buffers.
+ * cPS2GraphicsMan_applyDisplayMode calls it before reserving the frame and depth buffers.
  */
-extern "C" void func_00367078(cTextureMan* self)
+extern "C" void cTextureMan_freeAllHeapBlocks(cTextureMan* self)
 {
-    func_00366618(self->mTempHeap);
-    func_00366618(self->mMainHeap);
+    vramHeap_freeAllBlocks(self->mTempHeap);
+    vramHeap_freeAllBlocks(self->mMainHeap);
     int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;

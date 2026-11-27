@@ -39,7 +39,7 @@ CHECK_SIZE(cFEStateTransition, 0x50);
 // cFEStateBackground: the front end's animated background state ("snowanim"), the first state cRealFE_loadStartState
 // pushes. It plays the screen and keeps nothing.
 // EA's source file is not known (On Tour: fe/all_in_one_fe). Retail code: onCreateScreen in fe/festatetransition
-// (0x00194528); the ctors func_001DE558 (engine 0) and cFEStateBackground_cFEStateBackground (pEngine; the C definition
+// (0x00194528); the ctors cFEStateBackground_cFEStateBackground1 (engine 0) and cFEStateBackground_cFEStateBackground (pEngine; the C definition
 // declares only this) and the dtor in main/all_in_one_main (0x001DE558 ... 0x001DE5C8).
 //
 // Size 0x48: [R] cMemMan_alloc(0x48, "cFEStateBackground") in cRealFE_loadStartState (the ctor inlined:

@@ -23,8 +23,8 @@
 //   [R] retail's constructor cPS2GridMesh_cPS2GridMesh, destructors cPS2GridMesh__cPS2GridMesh / cGridMesh__cGridMesh;
 //   [P] the preview's out-of-line inlines IsOk__12cPS2GridMesh (lw 0x1C8) and SetScale__12cPS2GridMeshf (0x194, 0x198);
 //       tools/layout_xlate.py: preview == retail at 0x4, 0x194, 0x198, 0x19C, 0x1C8;
-//   [U] how retail code uses the field (Update / Update1..3, Render1, the packet helpers func_00385EB0 / func_00386128 /
-//       func_00385A38);
+//   [U] how retail code uses the field (Update / Update1..3, Render1, the packet helpers cPS2GridMesh_splitIntoBatches / func_00386128 /
+//       cPS2GridMesh_storePosition);
 //   [O] On Tour's DWARF: cGarbageMan::mNext; cPSPGridMesh (the PSP twin of this class: m_pGfxMan, m_pMem, m_iWidth,
 //       m_iHeight, m_iNumStrip, m_iStripLen, m_bUpdate, mbOK) - names used where the retail role is the same; its
 //       offsets do not apply.
@@ -53,9 +53,9 @@ struct sShortUV;
 // packet buffer. [R] func_00386128 lays the table out; [U] the Update functions write the attributes through it.
 struct tGridMeshStrip {
     int unk_00;                     // 0x0 no Update access
-    short* mPositions;              // 0x4 [U] cPS2GridMesh_Update / Update2: func_00385A38 writes the scaled positions
-    sShortUV* mUVs;                 // 0x8 [U] cPS2GridMesh_Update1: func_00385BA0 writes the fixed-point u, v
-    unsigned short* mColours;       // 0xC [U] cPS2GridMesh_Update2: func_00385AA0 writes the 16-bit colours
+    short* mPositions;              // 0x4 [U] cPS2GridMesh_Update / Update2: cPS2GridMesh_storePosition writes the scaled positions
+    sShortUV* mUVs;                 // 0x8 [U] cPS2GridMesh_Update1: cPS2GridMesh_storeUV writes the fixed-point u, v
+    unsigned short* mColours;       // 0xC [U] cPS2GridMesh_Update2: cPS2GridMesh_storeColour writes the 16-bit colours
 };
 
 CHECK_OFFSET(tGridMeshStrip, mPositions, 0x4);
@@ -75,22 +75,22 @@ struct cPS2GridMesh {
     // --- cPS2GridMesh
     int unk_008;                    // 0x008 never accessed by the class's code
     int unk_00C[32][3];             // 0x00C the packet table: 32 records of 3 words {type (0x1D / 2), count, ...}; [U]
-                                    //       func_00385EB0 builds it, func_00386128 reads it
-    int unk_18C;                    // 0x18C the packet-record count; [U] func_00385EB0 (zeroes, counts), func_00386128
+                                    //       cPS2GridMesh_splitIntoBatches builds it, func_00386128 reads it
+    int unk_18C;                    // 0x18C the packet-record count; [U] cPS2GridMesh_splitIntoBatches (zeroes, counts), func_00386128
     unsigned short m_iWidth;        // 0x190 [O] cPSPGridMesh::m_iWidth (an int there); [R] the ctor's width (sh); [U] the
                                     //       Update loops (lhu)
     unsigned short m_iHeight;       // 0x192 [O] cPSPGridMesh::m_iHeight; [R] the ctor's height (sh)
     float mScale;                   // 0x194 (name ours) the scale: [R] 20000.0; [P][U] SetScale(scale) stores it;
                                     //        Render1 reads it
     float mPosToShort;              // 0x198 (name ours) the position-to-short factor: [R] 32767 / 20000; [P][U]
-                                    //        SetScale stores 32767 / scale; func_00385A38 multiplies positions by it
+                                    //        SetScale stores 32767 / scale; cPS2GridMesh_storePosition multiplies positions by it
     char* m_pMem;                   // 0x19C [O] cPSPGridMesh::m_pMem; [R] the one "GridMeshMem" allocation (2 packet
                                     //       buffers + 2 strip tables); [P] 0x19C; [U] the dtor frees it
     int mScreenBuffer;              // 0x1A0 (name ours) the index of the buffer on screen: [R] -1; [U] Update* fill the
                                     //        other one (index == 0); Render1 swaps it when m_bUpdate is set
     int m_bUpdate;                  // 0x1A4 [O] cPSPGridMesh::m_bUpdate (bool; a word here); [R] 0; [U] Update* set it,
                                     //       Render1 clears it
-    int unk_1A8;                    // 0x1A8 one buffer's packet size: [U] func_00385EB0 stores it, func_00386128 reads it
+    int unk_1A8;                    // 0x1A8 one buffer's packet size: [U] cPS2GridMesh_splitIntoBatches stores it, func_00386128 reads it
     char* mPacketBuffer[2];         // 0x1AC (name ours) the two packet buffers: [R] m_pMem and m_pMem + size
     tGridMeshStrip* mStripTable[2]; // 0x1B4 (name ours) the two strip tables (one tGridMeshStrip per strip); [R] after
                                     //        the buffers; [U] Update* write through [index]

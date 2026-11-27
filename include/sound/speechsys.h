@@ -52,7 +52,7 @@ struct cSpeechSys {
     int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (cSpeechSys_PlayEvent compares, cSpeechSys_TriggerSpeech sets/clears)
     char unk_014[0x4];                  // 0x014 no access found
     tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (cSpeechSys_ClearRequests); [U] cSpeechSys_AddRequest/cSpeechSys_ApplyRequest/cSpeechSys_RemoveRequest/cSpeechSys_AgeRequests
-    char mBigFileName[5][0x14];         // 0x158 [R] ctor copies "audio/speech.big", "audio/english.big", "audio/french.big", "audio/german.big", "audio/spanish.big"; [U] retail accessor func_002BAD00 returns this + 0x158 + 20 * i
+    char mBigFileName[5][0x14];         // 0x158 [R] ctor copies "audio/speech.big", "audio/english.big", "audio/french.big", "audio/german.big", "audio/spanish.big"; [U] retail accessor cSpeechSys_getBigFileName returns this + 0x158 + 20 * i
     void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: cSpeechSys_vtbl (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] cSpeechSys_ApplyVolumeCallback calls slot 3 through it
 };
 

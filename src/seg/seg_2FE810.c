@@ -374,7 +374,7 @@ void *sceGsGetGParam(void);
  * Mode 0: resets the GS (CSR 0x200), stores the interlace, video mode and field/frame setting and the GS revision (CSR
  * bits 16..23), masks GS interrupts (GsPutIMR 0xFF00), removes the interrupt handler recorded in the block from INTC
  * line 2 and calls SetGsCrt. Mode 1: only flushes the GS (CSR 0x100). Mode 5: like mode 0 without the reset, the mask
- * and the handler removal. func_0037BD98 calls it.
+ * and the handler removal. cPS2GraphicsMan_applyDisplayMode calls it.
  *
  * @param mode  0, 1 or 5
  * @param interlace  interlace flag (bit 0 goes to SetGsCrt)
@@ -3615,7 +3615,7 @@ extern void func_00426358(int, int);
  * reply in D_00452800): a reply status of 0xFE turns debug output on (D_00451610 = 1); otherwise status words 1 or 2
  * below 0x200 make it return 2. Mode 5 prints "Libcdvd Exit", tears everything down (func_00400CB8) and marks the
  * semaphores gone; other modes create the semaphores (func_00400C00) and install the power-off handler (func_00400E30).
- * Called by systemInit's boot code (func_0031B008) and the EA CD code.
+ * Called by systemInit's boot code (shutdownAndLoadExec) and the EA CD code.
  *
  * @param mode  0 to initialise, 5 to exit
  * @return 1 on success, 2 when the IOP side reports an old version, 0 on failure
@@ -4051,7 +4051,7 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
  * Sets the drive's media mode (CD or DVD) with a libcdvd S-command.
  *
  * Takes the S-command channel (func_004014F8(34)), sends @p media with the function number and send/reply sizes held in
- * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from D_00452800. The boot code func_0031B008 and
+ * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from D_00452800. The boot code shutdownAndLoadExec and
  * func_00319610 call it with 2; the EA CD code passes its configured media mode.
  *
  * @param media  the media mode (2 = DVD)
@@ -4122,7 +4122,7 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
  * Sends a disc-tray request with a libcdvd S-command (RPC function 5).
  *
  * Takes the S-command channel (func_004014F8(26)), sends @p request, stores reply word 1 in @p out when given and returns the
- * reply's result word. func_0031AD20 calls it with 2 to check whether the tray has been opened.
+ * reply's result word. cd_recoverReadError calls it with 2 to check whether the tray has been opened.
  *
  * @param request  the request (2 = check the tray state)
  * @param out  receives the tray status, may be 0
@@ -10092,7 +10092,7 @@ extern void func_00426358(int, int);
  * semaphore D_004533C4 (PollSema). On success it records 1 as the pending call (D_004533C0) and keeps the lock until
  * sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock.
  *
- * cPS2MemCard's func_002C50E0 passes D_004A3938, D_004A393C and D_004A3944.
+ * cPS2MemCard's cPS2MemCard_startGetInfo passes D_004A3938, D_004A393C and D_004A3944.
  *
  * @param cardPort  the memory-card port
  * @param cardSlot  the slot
@@ -10175,7 +10175,7 @@ extern void func_00426358(int, int);
  * sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. The number of entries arrives as
  * sceMcSync's result.
  *
- * cPS2MemCard's func_002C4210 lists up to 6 entries and func_002C42B0 one entry.
+ * cPS2MemCard's cPS2MemCard_issueGetDir lists up to 6 entries and cPS2MemCard_issueGetFileInfo one entry.
  *
  * @param cardPort  the memory-card port
  * @param cardSlot  the slot

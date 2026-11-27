@@ -717,7 +717,7 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
  * cSSXAudio_UpdateAttachedSounds, cSSXAudio_HandleMusicRequest, cSSXAudio_UpdateTrackBanks, cSSXAudio_UpdateBoostBar,
  * cSSXAudio_UpdateLandedUber, cSSXAudio_UpdateTimedEvent, cSSXAudio_UpdateTone, and cSSXAudio_ResumeAudio when
  * mAudioPaused is set and cPauseState_Flags bit 1 is clear. Finally cSSXAudio_ApplyRMSData. cGame_render,
- * cRealFE_render and func_0022C830 call it.
+ * cRealFE_render and cGame_renderVideo call it.
  *
  * @param dt  the frame time
  */

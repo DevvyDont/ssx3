@@ -7,7 +7,7 @@
 //   cCamAnimFrame  - a camera path frame: position Vals[0..2], angles Vals[3..5], focal length Vals[11];
 //   cMeshAnimFrame - an animated mesh's frame: update also builds FrameMatrix from the translation/rotation.
 // cAnimNode keeps an array of cMeshAnimFrame (AnimFrames, one per animated mesh; cAnimNode_setAnimMeshCache) and the
-// crowd node another (func_003443A8, "CrowdAnimMesh"). EA's source file is unknown (no preview assert names it; the
+// crowd node another (tCrowdBlock3d_buildAnimation, "CrowdAnimMesh"). EA's source file is unknown (no preview assert names it; the
 // preview keeps the inlines getAngles__C10cAnimFrameR8t4Vector, getFrameMatrix__C14cMeshAnimFrame,
 // init__14cMeshAnimFrame, setAnimRecord__13cCamAnimFrameP11tAnimRecordf, getPosition__C13cCamAnimFrameR8t4Vector,
 // getAngles__C13cCamAnimFrameR8t3Vector, getFocalLength__C13cCamAnimFrameRf and the vtables _vt$10cAnimFrame,
@@ -20,7 +20,7 @@
 //   cAnimFrame 0x88: [O] On Tour 0x88; [R] the vptr at 0x84 is the last word any ctor writes; cMeshAnimFrame's own data
 //     starts at 0x90 (the 16-aligned t4Matrix after a 0x88-byte base). No allocation of a plain cAnimFrame in retail.
 //   cCamAnimFrame 0x88: [O] On Tour 0x88, no members of its own; [R] its ctors/dtor touch nothing past 0x84.
-//   cMeshAnimFrame 0xD0: [R] cAnimNode_setAnimMeshCache (object/animnode, "IntersectInfo") and func_003443A8
+//   cMeshAnimFrame 0xD0: [R] cAnimNode_setAnimMeshCache (object/animnode, "IntersectInfo") and tCrowdBlock3d_buildAnimation
 //     (object/debouncenode, "CrowdAnimMesh") allocate arrays with operator new[] whose element (sMeshInst_E448 /
 //     sDbMesh_43A8) is 0xD0 with the default ctor inlined, and walk them with stride 0xD0; [O] On Tour 0xD0.
 // Bases: cAnimFrame = cAnimFrameState (On Tour class, 0x40: int Seg[16]) + its own data; it declares the virtuals, so
@@ -110,7 +110,7 @@ struct cMeshAnimFrame {
     // --- cAnimFrame (0x88; above)
     int Seg[16];                    // 0x000 [O] cAnimFrameState::Seg; [R] cAnimFrame_init (via the base ctor)
     const tAnimRecord* AnimRecord;  // 0x040 [O]; [R] the (record, time) ctor stores it again after the base ctor;
-                                    //       cAnimNode_setAnimMeshCache / func_003443A8 set it with cAnimFrame_setAnimRecord
+                                    //       cAnimNode_setAnimMeshCache / tCrowdBlock3d_buildAnimation set it with cAnimFrame_setAnimRecord
     float Vals[16];                 // 0x044 [O]; [U] update reads Vals[0..5] (translation, rotation)
     void** mVtbl;                   // 0x084 [R] cMeshAnimFrame_vtbl (0x00490AD0) in both ctors and the inlined array
                                     //       ctor; the dtor restores cAnimFrame_vtbl

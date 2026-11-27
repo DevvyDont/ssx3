@@ -71,16 +71,16 @@ struct cPS2ExecutionMan {
                                     //         (a per-function view declares it volatile)
     char unk_00024[0xC];            // 0x00024 untouched (aligns the stack below to 16 bytes)
     char mTimerThreadStack[0x4000]; // 0x00030 [U] init: CreateThread stack (0x4000 bytes) of the timer thread
-                                    //         (func_0031AC08)
+                                    //         (cPS2ExecutionMan_runTimerThread)
     int mTimerThreadId;             // 0x04030 [U] init: CreateThread / StartThread(id, self); purge
                                     //       Terminate/DeleteThread
-    int mTimerSema;                 // 0x04034 [U] init: CreateSema (max 0x400); the INTC handler func_0031ABD0 signals
+    int mTimerSema;                 // 0x04034 [U] init: CreateSema (max 0x400); the INTC handler cPS2ExecutionMan_signalTimer signals
                                     //       it
                                     //         (iSignalSema), the timer thread waits on it; purge DeleteSema
-    int mTimerHalted;               // 0x04038 [U] bool: init 0, halt 1; func_0031ABD0 stops signalling mTimerSema
+    int mTimerHalted;               // 0x04038 [U] bool: init 0, halt 1; cPS2ExecutionMan_signalTimer stops signalling mTimerSema
     char unk_0403C[0x4];            // 0x0403C untouched
     char mLoadThreadStack[0x10000]; // 0x04040 [U] init: CreateThread stack (0x10000 bytes) of the loader thread
-                                    //         (func_0031AC60)
+                                    //         (cPS2ExecutionMan_runLoaderThread)
     int mLoadThreadId;              // 0x14040 [U] init: CreateThread (also kept in D_004A3ECC); halt suspends it when
                                     //         called from another thread; purge Terminate/DeleteThread
     int mLoadSema;                  // 0x14044 [U] init: CreateSema (max 0x400); load SignalSema, the loader thread
@@ -90,11 +90,11 @@ struct cPS2ExecutionMan {
                                     //         virtual load step and clears it; isLoadDone tests == 0; prepause /
                                     //         postpause test it
     char unk_1404C[0x34];           // 0x1404C untouched (aligns the VU0 buffer to 16 bytes)
-    char mVU0State[0x210];          // 0x14080 [U] VU0 register save area: init and postpause save it (func_0031A308),
-                                    //         prepause restores it (func_0031A3C0); VF1-31, ACC, MAC/status/Q/clip
-    int mIntcHandlerId;             // 0x14290 [U] init: the INTC 3 handler id (AddIntcHandler2, handler func_0031A490
+    char mVU0State[0x210];          // 0x14080 [U] VU0 register save area: init and postpause save it (vu0_saveState),
+                                    //         prepause restores it (vu0_restoreState); VF1-31, ACC, MAC/status/Q/clip
+    int mIntcHandlerId;             // 0x14290 [U] init: the INTC 3 handler id (AddIntcHandler2, handler intc_callWithFpuSaved
                                     //       with
-                                    //         func_0031ABD0); purge RemoveIntcHandler
+                                    //         cPS2ExecutionMan_signalTimer); purge RemoveIntcHandler
     char unk_14294[0x2C];           // 0x14294 never accessed by retail code
 
     // Methods bound to their retail symbols by asm labels.

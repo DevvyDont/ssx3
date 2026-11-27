@@ -5,7 +5,7 @@
 // cScriptPlayerMain owns an array of them, one per entity block of the script data, and an entity owns one
 // cScriptPlayerChannel per animated channel (inseq/scriptplayerchannel.h). No virtual functions, no base class.
 // Size 0x3C [R]: cScriptPlayerMain's Init (cScriptPlayerMain_Init) allocates numEntities x 0x3C (+ the 0x10 array cookie) from
-// the cInSeq heap with func_002724C8 and runs the constructor cScriptPlayerEntity_cScriptPlayerEntity on each 0x3C stride; the destructor loop
+// the cInSeq heap with operator_new_array and runs the constructor cScriptPlayerEntity_cScriptPlayerEntity on each 0x3C stride; the destructor loop
 // in cScriptPlayerMain_DeInit walks the same stride. On Tour's class is 0x38.
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
 // assert or out-of-line accessor for this class), hence inseq/. Retail code: unit replay/replaycache
@@ -39,7 +39,7 @@ struct tInSeqEntityHeader {
     unsigned short headerSize;        // 0x0 [O]; [U] channel records start at this + headerSize; > 8 = has a custom header
     unsigned char numChannels;        // 0x2 [O]; [U] SetupPlay/Stop/Restart/DoFrameUpdate loop to it
     unsigned char type;               // 0x3 [O]; [U] GetType (cScriptPlayerEntity_GetType); passed to the cInSeqCommEntity calls
-    int numFrames;                    // 0x4 [O]; [U] GetScriptLength (cScriptPlayerEntity_GetScriptLength, func_00274358)
+    int numFrames;                    // 0x4 [O]; [U] GetScriptLength (cScriptPlayerEntity_GetScriptLength, cScriptPlayerEntity_getVariationLength)
     char nextSectionStart;            // 0x8 [O] the custom header (mpHeader) when headerSize > 8
     char dummyPad[3];                 // 0x9 [O]
 };

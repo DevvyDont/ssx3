@@ -1028,7 +1028,7 @@ extern "C" void cMCOverlayManager_readSetFileType(void* app, int mode);
 extern "C" void cMCOverlayManager_ManagerGainState(void* app);
 extern "C" void cMCOverlayManager_getFileName(void* app, int a, char* buf, int n);
 extern "C" void cMCOverlayManager_getProductCode(char* buf, int n);
-extern "C" void func_002C2540(char* buf, char* s);
+extern "C" void strcpy3(char* buf, char* s);
 extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
 extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
@@ -1204,7 +1204,7 @@ void cFEMemCard::initFEMemCard(int mode)
     char productCode[0x200];
     char format[0x200];
     cMCOverlayManager_getFileName(app, app->mFileType, saveType, 0x100);
-    func_002C2540(format, str_pct_s_pct_s_c);
+    strcpy3(format, str_pct_s_pct_s_c);
     cMCOverlayManager_getProductCode(productCode, 0x100);
     sprintf1(&mFileName[0], format, productCode, saveType);
 }
@@ -1278,8 +1278,8 @@ extern "C" int cBESaveInterface_generateSaveProfile(void* iface, int a);
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void cMCOverlayManager_getFileName(void* app, int a, char* buf, int n);
 extern "C" void cMCOverlayManager_getProductCode(char* buf, int n);
-// PORT: the unit declares func_002C2540 as void; it returns dst (bound by asm label so the call is a call_value).
-extern "C" unsigned short* func_002C2540_59A0(char* buf, const char* s) __asm__("func_002C2540");
+// PORT: the unit declares strcpy3 as void; it returns dst (bound by asm label so the call is a call_value).
+extern "C" unsigned short* strcpy3_59A0(char* buf, const char* s) __asm__("strcpy3");
 extern "C" void sprintf1_59A0(char* dst, char* fmt, char* a, char* b, int n) __asm__("sprintf1");
 extern "C" void cMCOverlayManager_WriteFile(void* app, char* name, int a, int b);
 extern "C" void cMCOverlayManager_GetMessage(void* app, char* buf, int n);
@@ -1318,7 +1318,7 @@ extern "C" void cFEMemCard_writeStart(void)
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
         cBE_writeToData(cBE_getBE(), cFEMemCard_mInstance->mpStartReadBuffer);
         cMCOverlayManager_getFileName(app, 0, name, 65);
-        func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
+        strcpy3_59A0(fmt1, str_pct_s_pct_spct_04d);
         cMCOverlayManager_getProductCode(slot, 0x100);
         sprintf1_59A0(title, fmt1, slot, name, app->mFileCursor + 1);
         cMCOverlayManager_WriteFile(app, title, (int)cFEMemCard_mInstance->mpStartReadBuffer, size);
@@ -1328,7 +1328,7 @@ extern "C" void cFEMemCard_writeStart(void)
         int profileData = cBESaveInterface_generateSaveProfile(iface, cFEMemCard_mInstance->mPlayerIdx);
         int profileSize = cBESaveInterface_getSaveProfileSize();
         cMCOverlayManager_getFileName(app2, 1, name, 65);
-        func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
+        strcpy3_59A0(fmt2, str_pct_s_pct_spct_04d);
         cMCOverlayManager_getProductCode(slot, 0x100);
         sprintf1_59A0(title, fmt2, slot, name, app2->mFileCursor + 1);
         cMCOverlayManager_WriteFile(app2, title, profileData, profileSize);

@@ -6,7 +6,7 @@
 // cGame_load (src/main/gameload.cpp) does `operator new(0x10, "InstancesMan", 0x20000000)` + the constructor with
 // section id 0x80 and 0x40 records, kept as cGame::InstanceMan (main/game.h 0x88; the preview's getInstanceMan__C5cGame).
 // Methods: the constructor cInstanceMan_cInstanceMan (0x00351030; formerly misnamed cWScriptCompile_parseKeywords), the destructor, allocInstance /
-// allocInstance1 (take a record off the free list and stamp its id), freeInstance, copyInstance, and func_003512C0 (claim
+// allocInstance1 (take a record off the free list and stamp its id), freeInstance, copyInstance, and cInstanceMan_getInstanceRecord (claim
 // record id >> 8 when the id's section byte matches).
 // No EA path in the preview; its inline asserts "(((tInstanceManRecord*)(inst)) - Instances) < NumInstances" and
 // "instId.m_bfRID.m_uiUID < (unsigned int)NumInstances" sit in the object/ string pool after instancenode.cpp. Retail
@@ -26,7 +26,7 @@ struct tInstanceManRecord;  // On Tour 0xB0: a tInstanceRecord (0xAC) + m_PadByt
 struct cInstanceMan {
     unsigned int InstanceSectionId; // 0x0 [O]; [R] ctor stores its first argument (0x80); [U] allocInstance /
                                     //     allocInstance1 copy its low byte (lbu) into the record's id byte (+0x78);
-                                    //     func_003512C0 compares an id's low byte with it (lw)
+                                    //     cInstanceMan_getInstanceRecord compares an id's low byte with it (lw)
     int NumInstances;               // 0x4 [O]; [P] asserts "... < NumInstances"; [R] ctor: the record count (0x40)
     tInstanceList* FreeInstances;   // 0x8 [O]; [R] ctor links every record into it; [U] allocInstance / allocInstance1 /
                                     //     freeInstance pop / search / push it

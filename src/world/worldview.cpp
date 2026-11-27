@@ -1691,7 +1691,7 @@ void operator_delete(int*);
 extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
 // PORT: cBEMissionInterface_remStreamData__FPv is called with a second (byte) argument here.
 void cBEMissionInterface_remStreamData_2(void* iface, unsigned char id) __asm__("cBEMissionInterface_remStreamData__FPv");
-extern "C" void func_0016CF18(unsigned int param);
+extern "C" void gCamTriggerMan_unresolve(unsigned int param);
 extern "C" void clearRadarCourseData(void* data);
 extern "C" void cOcclusionMan_removeVisCurtain(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
@@ -1772,7 +1772,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * and free them; type 13 purges a world audio file (cWorldSound_PurgeWorldAudioFile), 15 unloads a world-painter section (cWorldPainterSection_unload),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
  * 10, 11 removes an occlusion curtain (cOcclusionMan_removeVisCurtain), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
- * types 17 and 21 go to func_0016CF18 and clearRadarCourseData. Other types need nothing.
+ * types 17 and 21 go to gCamTriggerMan_unresolve and clearRadarCourseData. Other types need nothing.
  *
  * @param msg  stream data type of the chunk (On Tour eBxStreamDataType type)
  * @param resourceId  resource id of the chunk (On Tour RID)
@@ -1850,7 +1850,7 @@ void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, cha
         cWorldSound_PurgeWorldAudioFile(cAudioInterface_getGame()->WorldSound, data, resourceId);
         break;
     case kBxStreamData_CameraFile:
-        func_0016CF18(resourceId);
+        gCamTriggerMan_unresolve(resourceId);
         break;
     case kBxStreamData_WorldPainter:
         if (cWorld_m_pTheWorld != 0) {
@@ -1910,7 +1910,7 @@ public:
     virtual int resolveModelHeirarchy(void* a1);
 };
 
-extern "C" int func_003ABF20(cPS2ChunkResolve* self, cList* a1);
+extern "C" int cPS2ChunkResolve_resolveModelDma(cPS2ChunkResolve* self, cList* a1);
 
 static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve_resolveModel_cObj* self, unsigned int id)
 {
@@ -1930,7 +1930,7 @@ static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve
  *
  * Turns its m_MeshHeirarchy and m_MaterialBlock offsets into pointers, replaces each resource id in the material
  * block's list (GetMaterialRecordList) with its pointer, then calls virtual slot 6 (probably resolveModelHeirarchy)
- * and func_003ABF20().
+ * and cPS2ChunkResolve_resolveModelDma().
  *
  * @param pModel  the model record (On Tour tModelRecord*)
  * @return always 1
@@ -1948,18 +1948,18 @@ int cPS2ChunkResolve::resolveModel(tModelRecord* pModel)
                                                                          (unsigned int)*entry);
     }
     ((cPS2ChunkResolve_resolveModel_cObj*)this)->resolveModelHeirarchy(pModel);
-    func_003ABF20(this, (cList*)pModel);
+    cPS2ChunkResolve_resolveModelDma(this, (cList*)pModel);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABF20);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_resolveModelDma);
 #ifdef SKIP_ASM
-extern "C" void func_003ABF50(void* self, void* a1);
+extern "C" void cPS2ChunkResolve_fixupModelMeshes(void* self, void* a1);
 
 /**
- * Turns a streamed model's DMA data offset (+0x24) into a pointer and fixes up its mesh packets (func_003ABF50).
+ * Turns a streamed model's DMA data offset (+0x24) into a pointer and fixes up its mesh packets (cPS2ChunkResolve_fixupModelMeshes).
  *
  * Called by cPS2ChunkResolve_resolveModel.
  *
@@ -1967,40 +1967,40 @@ extern "C" void func_003ABF50(void* self, void* a1);
  * @return 1
  */
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003ABF20(cPS2ChunkResolve* self, cList* list)
+extern "C" int cPS2ChunkResolve_resolveModelDma(cPS2ChunkResolve* self, cList* list)
 {
     *(int*)((char*)list + 0x24) += (int)list;
-    func_003ABF50(self, list);
+    cPS2ChunkResolve_fixupModelMeshes(self, list);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABF50);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_fixupModelMeshes);
 #ifdef SKIP_ASM
-extern "C" void func_003ABFC0(void* self, void* item, void* list);
+extern "C" void cPS2ChunkResolve_fixupMesh(void* self, void* item, void* list);
 
 
 
-// PORT: the unit declares func_003ABF50 as returning void (func_003ABF20 calls it that way),
+// PORT: the unit declares cPS2ChunkResolve_fixupModelMeshes as returning void (cPS2ChunkResolve_resolveModelDma calls it that way),
 // but the body returns 1; bind the int-returning body to the symbol with an asm label.
-int func_003ABF50_impl(void* self, tModelRecord* list) __asm__("func_003ABF50");
+int cPS2ChunkResolve_fixupModelMeshes_impl(void* self, tModelRecord* list) __asm__("cPS2ChunkResolve_fixupModelMeshes");
 
 /**
- * Fixes up the DMA packets of each mesh of a model: func_003ABFC0 on every non-null mesh in the model's list (count
+ * Fixes up the DMA packets of each mesh of a model: cPS2ChunkResolve_fixupMesh on every non-null mesh in the model's list (count
  * +0x4, 16-byte entries at +0x8, mesh at +0x4).
  *
  * @param list  the tModelRecord
  * @return 1
  */
-int func_003ABF50_impl(void* self, tModelRecord* list)
+int cPS2ChunkResolve_fixupModelMeshes_impl(void* self, tModelRecord* list)
 {
     int n = list->m_iNumMeshes;
     tMeshHeirarchyRecord* entry = list->m_MeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, entry++) {
         if (((void*)entry->m_Mesh) != 0) {
-            func_003ABFC0(self, ((void*)entry->m_Mesh), list);
+            cPS2ChunkResolve_fixupMesh(self, ((void*)entry->m_Mesh), list);
         }
     }
     return 1;
@@ -2008,35 +2008,35 @@ int func_003ABF50_impl(void* self, tModelRecord* list)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABFC0);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_fixupMesh);
 #ifdef SKIP_ASM
-extern "C" void func_003AC048(void* self, void* obj, void* list, int index);
+extern "C" void cPS2ChunkResolve_patchSubMeshChain(void* self, void* obj, void* list, int index);
 
-// PORT: the unit declares func_003ABFC0 as returning void (func_003ABF50 calls it that way),
+// PORT: the unit declares cPS2ChunkResolve_fixupMesh as returning void (cPS2ChunkResolve_fixupModelMeshes calls it that way),
 // but the body returns 1; bind the int-returning body to the symbol with an asm label.
-int func_003ABFC0_impl(void* self, void* item, void* list) __asm__("func_003ABFC0");
+int cPS2ChunkResolve_fixupMesh_impl(void* self, void* item, void* list) __asm__("cPS2ChunkResolve_fixupMesh");
 
 /**
- * Fixes up a mesh's DMA packets: func_003AC048 on each of its +0x1C sub-meshes (pointers at +0x20), with its index.
+ * Fixes up a mesh's DMA packets: cPS2ChunkResolve_patchSubMeshChain on each of its +0x1C sub-meshes (pointers at +0x20), with its index.
  *
  * @param vitem  the mesh
  * @param list  the tModelRecord
  * @return 1
  */
-int func_003ABFC0_impl(void* self, void* vitem, void* list)
+int cPS2ChunkResolve_fixupMesh_impl(void* self, void* vitem, void* list)
 {
     tMeshRecord* item = (tMeshRecord*)vitem;
     void** childPtr = (void**)item->m_pContexts;
     int i;
     for (i = 0; i < item->m_iNumContexts; i++, childPtr++) {
-        func_003AC048(self, *childPtr, list, i);
+        cPS2ChunkResolve_patchSubMeshChain(self, *childPtr, list, i);
     }
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC048);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_patchSubMeshChain);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
@@ -2046,8 +2046,8 @@ extern char D_00509400[];
 extern char D_00509410[];
 extern char D_00509420[];
 
-// PORT: func_003ABFC0 declares this symbol as returning void; bound by asm label.
-extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index) __asm__("func_003AC048");
+// PORT: cPS2ChunkResolve_fixupMesh declares this symbol as returning void; bound by asm label.
+extern "C" int cPS2ChunkResolve_patchSubMeshChain_impl(void* self, char* obj, char* ctx, int index) __asm__("cPS2ChunkResolve_patchSubMeshChain");
 /**
  * Patches one sub-mesh's DMA chain in place so it can be sent to VU1.
  *
@@ -2063,7 +2063,7 @@ extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index) _
  * @param index  the sub-mesh index (unused)
  * @return 1
  */
-extern "C" int func_003AC048_impl(void* vself, char* obj, char* ctx, int index)
+extern "C" int cPS2ChunkResolve_patchSubMeshChain_impl(void* vself, char* obj, char* ctx, int index)
 {
     tModelRecord* self = (tModelRecord*)vself;
     int done = 0;
@@ -2166,7 +2166,7 @@ struct cPS2ChunkResolve_resolveInstance_sLib {
     cPS2ChunkResolve_resolveInstance_sTab** tables;
 };
 
-extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* a1);
+extern "C" int cPS2ChunkResolve_resolveInstanceDma(cPS2ChunkResolve* self, tInstanceRecord* a1);
 
 static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveInstance_lookup(cPS2ChunkResolve* self, unsigned int id)
 {
@@ -2183,7 +2183,7 @@ static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveIns
  *
  * Replaces its model resource id (+0x80) with the model pointer, copies the model's +0xC word to +0x94,
  * clears +0x8C, stores the resolver's view at +0x88, rebuilds the flag word (+0x8) from it and calls
- * func_003AC358().
+ * cPS2ChunkResolve_resolveInstanceDma().
  *
  * @param pInstance  the instance record (On Tour tInstanceRecord*)
  * @return always 1
@@ -2199,28 +2199,28 @@ int cPS2ChunkResolve::resolveInstance(tInstanceRecord* pInstance)
     pInstance->m_pCollideRecord = (tCollideRecord*)(m_pDummyCollideRecord);
     int x = m_pDummyCollideRecord->InitFlags & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
-    func_003AC358((cPS2ChunkResolve*)this, pInstance);
+    cPS2ChunkResolve_resolveInstanceDma((cPS2ChunkResolve*)this, pInstance);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC358);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_resolveInstanceDma);
 #ifdef SKIP_ASM
 
-extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* a1, tModelRecord* list, void* cur);
+extern "C" void* cPS2ChunkResolve_patchInstanceChain(cPS2ChunkResolve* self, tInstanceRecord* a1, tModelRecord* list, void* cur);
 
 /**
  * Turns a streamed instance's DMA data offset (+0x98) into a pointer and fixes up its per-instance packets.
  *
- * For every sub-mesh of every mesh of the instance's model (+0x80, as in func_003ABF50), func_003AC508 patches the next
+ * For every sub-mesh of every mesh of the instance's model (+0x80, as in cPS2ChunkResolve_fixupModelMeshes), cPS2ChunkResolve_patchInstanceChain patches the next
  * chain in the instance's data, continuing where the previous one ended. Called by cPS2ChunkResolve_resolveInstance.
  *
  * @param instance  the tInstanceRecord
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
+extern "C" int cPS2ChunkResolve_resolveInstanceDma(cPS2ChunkResolve* self, tInstanceRecord* instance)
 {
     int i;
     tModelRecord* list;
@@ -2235,7 +2235,7 @@ extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
         if (object != 0) {
             int j;
             for (j = 0; j < object->m_iNumContexts; j++) {
-                cur = func_003AC508(self, instance, list, cur);
+                cur = cPS2ChunkResolve_patchInstanceChain(self, instance, list, cur);
             }
         }
     }
@@ -2244,14 +2244,14 @@ extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC438);
+INCLUDE_ASM("world/worldview", patchDmaChainNoSplit);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern char D_2320[];
 extern char D_2358[];
 
 /**
- * Patches a DMA chain in place like func_003AC048 without the split handling, using the microprograms D_2320 (first
+ * Patches a DMA chain in place like cPS2ChunkResolve_patchSubMeshChain without the split handling, using the microprograms D_2320 (first
  * pair) and D_2358.
  *
  * Offsets are relative to @p ctx's +0x24 data. No C caller in the source.
@@ -2262,7 +2262,7 @@ extern char D_2358[];
  * @param tagPtr  the first DMA tag
  * @return the address after the ret tag
  */
-extern "C" char* func_003AC438(int ignored0, int ignored1, char* ctx, char* tagPtr)
+extern "C" char* patchDmaChainNoSplit(int ignored0, int ignored1, char* ctx, char* tagPtr)
 {
     int done = 0;
     int first = 1;
@@ -2299,7 +2299,7 @@ extern "C" char* func_003AC438(int ignored0, int ignored1, char* ctx, char* tagP
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC508);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_patchInstanceChain);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); pointers held in int; VU microprogram addresses.
 extern char D_2270[];
@@ -2307,11 +2307,11 @@ extern char D_22C8[];
 extern char D_00509400[];
 
 /**
- * Patches one per-instance DMA chain in place, like func_003AC048.
+ * Patches one per-instance DMA chain in place, like cPS2ChunkResolve_patchSubMeshChain.
  *
  * The first ref of each pair points into the model's data (+0x24 of @p list), the second into the instance's own data
  * (+0x98 of @p instance). MSCAL addresses are D_2270 for the first pair and D_22C8 after; a pair whose address has bit 31 set
- * gets the extra refs to D_00509400 (or two more converted refs) as in func_003AC048.
+ * gets the extra refs to D_00509400 (or two more converted refs) as in cPS2ChunkResolve_patchSubMeshChain.
  *
  * @param instance  the tInstanceRecord
  * @param list  the tModelRecord
@@ -2320,7 +2320,7 @@ extern char D_00509400[];
  */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
-extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance, tModelRecord* list, void* cur)
+extern "C" void* cPS2ChunkResolve_patchInstanceChain(cPS2ChunkResolve* self, tInstanceRecord* instance, tModelRecord* list, void* cur)
 {
     tModelRecord* ctx = (tModelRecord*)list;
     char* tagPtr = (char*)cur;

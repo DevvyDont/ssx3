@@ -209,7 +209,7 @@ struct tParticleEmitter {
     float BlurAlpha;                // 0x030 [O]; [U] init: 1 / NumBlur
     float BlurStep;                 // 0x034 [O]; [U] init: blurstep * damp
     float SeedX0;                   // 0x038 [O]; [U] randomize; setupEmitter stores seed >= 0 here; stepContinous moves
-                                    //       it (func_0036D400); [P] cBaseClass_DynamicEmitter::setSeed (swc1 0x58 =
+                                    //       it (vu0_advanceRandom); [P] cBaseClass_DynamicEmitter::setSeed (swc1 0x58 =
                                     //       0x20 + 0x38)
     float SeedX1;                   // 0x03C [O]; [U] randomize, stepContinous
     float SeedV0;                   // 0x040 [O]; [U] randomize, stepContinous

@@ -31,7 +31,7 @@ extern "C" int FILESYS_setopts(void* cfg);
 extern "C" void FILESYS_init(int a, int b, int c);
 extern "C" void ASYNCFILE_init(int a, int b);
 extern "C" void func_003E4000(void);
-extern "C" void func_0031AD20(void);
+extern "C" void cd_recoverReadError(void);
 extern "C" void SYNCTASK_del(void (*fn)(void));
 extern "C" void SYNCTASK_add(void (*fn)(void), int a, int b);
 extern "C" void FILESYS_setcurrentpath(void* p);
@@ -52,7 +52,7 @@ struct sIoCfg_SysInit {
  * Loads SIO2MAN, PADMAN, LIBSD, SNDDRV, MCMAN and MCSERV.IRX, seeds BXsrand() from a clock reading, hands the
  * memory from just past a 64-byte-aligned scratch block (+0x800) up to EndOfHeap() to
  * cMemMan_initialize(), installs MEM_alloc/MEM_free as the file system's allocator, runs FILESYS_init(48,
- * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for func_0031AD20 and finally passes
+ * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for cd_recoverReadError and finally passes
  * "cd:" to FILESYS_setcurrentpath() (probably selecting the default file device).
  */
 // Boot-time setup: IOP modules, timers, random seed, heap, file system and the per-frame sync task.
@@ -87,7 +87,7 @@ extern "C" void systemInit(void)
     FILESYS_init(0x30, 500, 0x20);
     ASYNCFILE_init(0x10, 0);
     SYNCTASK_del(func_003E4000);
-    SYNCTASK_add(func_0031AD20, 0, 0);
+    SYNCTASK_add(cd_recoverReadError, 0, 0);
     FILESYS_setcurrentpath(str_cd);
 }
 #endif
@@ -136,7 +136,7 @@ int main_impl(int argc, char** argv)
 #endif
 
 //100%
-INCLUDE_ASM("bx/ps2main", func_0031B008);
+INCLUDE_ASM("bx/ps2main", shutdownAndLoadExec);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cAppManB008 {
@@ -164,7 +164,7 @@ extern "C" void LoadExecPS2(int, int, int);
  * @param argc  argument count
  * @param argv  argument strings
  */
-extern "C" void func_0031B008(int path, int argc, int argv)
+extern "C" void shutdownAndLoadExec(int path, int argc, int argv)
 {
     cAppMan_TheAppMan_B008->loadexecpurge();
     sceCdMmode(2);

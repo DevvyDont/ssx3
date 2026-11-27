@@ -120,13 +120,13 @@ INCLUDE_ASM("replay/replay2", cScriptHeap_AllocMem);
 
 INCLUDE_ASM("replay/replay2", cScriptHeap_FreeMem);
 
-INCLUDE_ASM("replay/replay2", func_00272488);
+INCLUDE_ASM("replay/replay2", operator_new3);
 
-INCLUDE_ASM("replay/replay2", func_002724C8);
+INCLUDE_ASM("replay/replay2", operator_new_array);
 
-INCLUDE_ASM("replay/replay2", func_002724E8);
+INCLUDE_ASM("replay/replay2", operator_delete1);
 
-INCLUDE_ASM("replay/replay2", func_00272510);
+INCLUDE_ASM("replay/replay2", operator_delete_array);
 
 INCLUDE_ASM("replay/replay2", GetCubicSplineValue);
 

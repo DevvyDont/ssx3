@@ -18,7 +18,7 @@
 // A FLAT layout: every field at its retail offset. Evidence tags: [R] retail constructor / allocation; [P] the July
 // 2003 preview's assert strings in bxps2deferman.cpp/.h, which name the counters (the preview's offsets are smaller:
 // kMaxDrawStates etc. differ, so each was mapped by the counter's role); [U] retail use (render/font.cpp
-// cPS2DeferManager_Find / Find1; object/railmodifier.cpp func_003629B8 .. func_00364CD0; render/bezierman.cpp;
+// cPS2DeferManager_Find / Find1; object/railmodifier.cpp cPS2DeferManager_buildPresetStates .. cPS2DeferManager_writeVu1ProgramSetup; render/bezierman.cpp;
 // render/particle.cpp cPS2GraphicsMan_RenderModel and the sPtRing* views); [X] refs/ssx3-rust's render notes
 // (docs/investigation/phase3-render.md: "Record", "Bucket", "MatrixRecord"; names are guesses).
 // The element struct names other than cDrawStateList ([P]) are ours (tDefer*).
@@ -27,7 +27,7 @@
 #include "bx/math3d.h"
 #include "render/ps2graphicsman.h"
 
-// One submitted draw (0x80): [U] func_00362DE8 (view sRmEntry_2DE8) walks the mNumSubmitDMA of them;
+// One submitted draw (0x80): [U] cPS2DeferManager_bucketRecords (view sRmEntry_2DE8) walks the mNumSubmitDMA of them;
 // cPS2GraphicsMan_RenderModel / the particle and font code fill them. [X] "Record".
 struct tDeferSubmit {
     sDrawState mDrawState;          // 0x00 [R] the ctor fills the texture ids with -1; [U] interned by Find (w[4], tex[2])
@@ -57,17 +57,17 @@ CHECK_OFFSET(cDrawStateList, mDrawState, 0x00);
 CHECK_OFFSET(cDrawStateList, mpNext, 0x14);
 CHECK_SIZE(cDrawStateList, 0x18);
 
-// One bucket (0x20): a (state, texture, view) combination and its DMA chain. [U] func_00362DE8 / func_00363490
-// (views sRmNode_2DE8 / sRmNode_3490), cPS2DeferManager_Find1, func_00362978 (appends a packet: self = a bucket).
+// One bucket (0x20): a (state, texture, view) combination and its DMA chain. [U] cPS2DeferManager_bucketRecords / cPS2DeferManager_buildDmaChains
+// (views sRmNode_2DE8 / sRmNode_3490), cPS2DeferManager_Find1, tDeferBucket_appendPacket (appends a packet: self = a bucket).
 // [X] "Bucket".
 struct tDeferBucket {
     cDrawStateList* mpState;        // 0x00 [P] Find(const cDrawStateList*, ...); [U] Find1 compares it
     int mTexKey;                    // 0x04 [P] cTexKey (passed by value; two shorts); [U] Find1 compares it
     int mViewIndex;                 // 0x08 [P] Find's int argument; [U] Find1 compares it (sRmNode::layer/mtxIndex)
-    int mPacket;                    // 0x0C [U] func_00362978: first packet (0 = empty)
-    int mTail;                      // 0x10 [U] func_00362978: last packet's end (the next packet is chained there)
-    int mLinked;                    // 0x14 [U] func_00362DE8: set for a continuation bucket (not hashed)
-    tDeferBucket* mpLink;           // 0x18 [U] func_00362DE8 / func_00363490: the continuation chain
+    int mPacket;                    // 0x0C [U] tDeferBucket_appendPacket: first packet (0 = empty)
+    int mTail;                      // 0x10 [U] tDeferBucket_appendPacket: last packet's end (the next packet is chained there)
+    int mLinked;                    // 0x14 [U] cPS2DeferManager_bucketRecords: set for a continuation bucket (not hashed)
+    tDeferBucket* mpLink;           // 0x18 [U] cPS2DeferManager_bucketRecords / cPS2DeferManager_buildDmaChains: the continuation chain
     tDeferBucket* mpNext;           // 0x1C [U] the hash chain (mBucketHash) Find1 walks
 };
 
@@ -81,10 +81,10 @@ CHECK_OFFSET(tDeferBucket, mpLink, 0x18);
 CHECK_OFFSET(tDeferBucket, mpNext, 0x1C);
 CHECK_SIZE(tDeferBucket, 0x20);
 
-// One sort element (8): [U] func_00364050 radix-sorts them by key (4 passes of 8 bits); [P] "length <=
+// One sort element (8): [U] cPS2DeferManager_sortItems radix-sorts them by key (4 passes of 8 bits); [P] "length <=
 // kMaxSortElements" (1024) in the preview's sort.
 struct tDeferSortItem {
-    unsigned int mKey;              // 0x0 [U] func_00364240(state, texKey) (sRmSortItem::key)
+    unsigned int mKey;              // 0x0 [U] sDrawState_makeSortKey(state, texKey) (sRmSortItem::key)
     tDeferBucket* mpBucket;         // 0x4 [U] (sRmSortItem::node)
 };
 
@@ -92,7 +92,7 @@ CHECK_OFFSET(tDeferSortItem, mKey, 0x0);
 CHECK_OFFSET(tDeferSortItem, mpBucket, 0x4);
 CHECK_SIZE(tDeferSortItem, 0x8);
 
-// One view state (0x180): the matrices and viewport constants a bucket's packets are drawn with. [U] func_003645B8
+// One view state (0x180): the matrices and viewport constants a bucket's packets are drawn with. [U] cPS2DeferManager_findOrAddViewState
 // (view sRailXf_45B8) interns them, comparing 0xE0..0x17F; [X] "MatrixRecord" (the member names, m-prefixed).
 struct tDeferViewState {
     t4Matrix mWorld;                // 0x000 [U] copied (m0); [X] world
@@ -117,7 +117,7 @@ CHECK_OFFSET(tDeferViewState, mScreenScale, 0x160);
 CHECK_OFFSET(tDeferViewState, mScreenOffset, 0x170);
 CHECK_SIZE(tDeferViewState, 0x180);
 
-// One view port / scissor rectangle (8): [U] func_00364B88 (view sRailKey4) interns them; func_00363C20 (view
+// One view port / scissor rectangle (8): [U] cPS2DeferManager_findOrAddScissor (view sRailKey4) interns them; cPS2DeferManager_writeStateChange (view
 // sRmKey3C20) reads the active one.
 struct tDeferViewPort {
     unsigned short unk_0;           // 0x0 [U] compared (a)
@@ -134,47 +134,47 @@ CHECK_SIZE(tDeferViewPort, 0x8);
 
 struct cPS2DeferManager {
     int mNumSubmitDMA;              // 0x00000 [P] "mNumSubmitDMA < kMaxSubmitDMA" reads the manager's first word;
-                                    //         [U] func_00362CC8 0; func_00362DE8 loops over it (sRmBatch_2DE8::count)
+                                    //         [U] cPS2DeferManager_resetFrame 0; cPS2DeferManager_bucketRecords loops over it (sRmBatch_2DE8::count)
     char unk_00004[0x7C];           // 0x00004 not accessed
-    tDeferSubmit mSubmits[0xA28];   // 0x00080 [R] ctor (2600 records, stride 0x80); [U] func_00362DE8 (entries)
+    tDeferSubmit mSubmits[0xA28];   // 0x00080 [R] ctor (2600 records, stride 0x80); [U] cPS2DeferManager_bucketRecords (entries)
     int mUsedDrawStates;            // 0x51480 [P] "mUsedDrawStates < kMaxDrawStates" in Find, "mUsedDrawStates ==
-                                    //         kMaxStaticStates" after the presets; [U] Find appends at it; func_00362CC8
+                                    //         kMaxStaticStates" after the presets; [U] Find appends at it; cPS2DeferManager_resetFrame
                                     //         resets it to mNumStaticStates
     cDrawStateList mDrawStates[0x400]; // 0x51484 [R] ctor (1024); [P] kMaxDrawStates 1024; [U] Find (sGlyphCache::entries)
-    int mNumStaticStates;           // 0x57484 [U] func_003629B8 0, then the count after the 3 presets
-                                    //         (sRmBatch_29B8::base); func_00362CC8 copies it to mUsedDrawStates
-    cDrawStateList* mpPresetStates[3]; // 0x57488 (name ours) [U] func_003629B8 saves the three presets (blend modes
+    int mNumStaticStates;           // 0x57484 [U] cPS2DeferManager_buildPresetStates 0, then the count after the 3 presets
+                                    //         (sRmBatch_29B8::base); cPS2DeferManager_resetFrame copies it to mUsedDrawStates
+    cDrawStateList* mpPresetStates[3]; // 0x57488 (name ours) [U] cPS2DeferManager_buildPresetStates saves the three presets (blend modes
                                     //         1/17, 1/2, then 5/3 with alpha sort 1); cPS2GraphicsMan_RenderModel
                                     //         picks [0], [2] or [1] by its flags (& 0x660000: 0 or 0x600000, 0x20000,
                                     //         0x200000)
     int mUsedStates;                // 0x57494 [P] "mUsedStates < kMaxStates" (preview kMaxStates 2048) after a failed
-                                    //         bucket Find; [U] func_00362CC8 0; func_00362DE8 appends at it (nNodes)
-    tDeferBucket mBuckets[0x800];   // 0x57498 [R] ctor (2048 empty ctors); [U] func_00362DE8 (nodes)
+                                    //         bucket Find; [U] cPS2DeferManager_resetFrame 0; cPS2DeferManager_bucketRecords appends at it (nNodes)
+    tDeferBucket mBuckets[0x800];   // 0x57498 [R] ctor (2048 empty ctors); [U] cPS2DeferManager_bucketRecords (nodes)
     char unk_67498[0x8];            // 0x67498 not accessed (sRmBatch_2DE8 places an unused stateHash here)
-    cDrawStateList* mStateHash[0x100]; // 0x674A0 [U] Find walks bucket [hash]; func_00362CC8 invalidates/clears it
-    tDeferBucket* mBucketHash[0x100];  // 0x678A0 [U] Find1 walks bucket [hash]; func_00362DE8 pushes; func_00362CC8 clears
-    tDeferBucket* mpLastBucket;     // 0x67CA0 [U] func_00362DE8: the previous bucket (continuations chain to it)
-    int mNumSortItems;              // 0x67CA4 [P] "length <= kMaxSortElements"; [U] func_00362CC8 0; func_00362DE8
-                                    //         appends; func_00364050 sorts that many; func_00363490 walks them
-    tDeferSortItem mSortItems[0x400]; // 0x67CA8 [P] kMaxSortElements 1024; [U] func_00364050 (src), func_00363490
-    sDrawState mCurrentState;       // 0x69CA8 [R] ctor (texture ids -1); [U] func_00362CC8 = sDrawState::s_defaultDrawState;
-                                    //         func_00364C90 copies one in; func_00363C20 reads it
-    unsigned int unk_69CBC;         // 0x69CBC [U] func_00363C20 (sRmRend3C20::frame)
-    int mActiveViewIndex;           // 0x69CC0 (name ours) [U] the active view state: func_00362CC8 -1; func_003645B8
+    cDrawStateList* mStateHash[0x100]; // 0x674A0 [U] Find walks bucket [hash]; cPS2DeferManager_resetFrame invalidates/clears it
+    tDeferBucket* mBucketHash[0x100];  // 0x678A0 [U] Find1 walks bucket [hash]; cPS2DeferManager_bucketRecords pushes; cPS2DeferManager_resetFrame clears
+    tDeferBucket* mpLastBucket;     // 0x67CA0 [U] cPS2DeferManager_bucketRecords: the previous bucket (continuations chain to it)
+    int mNumSortItems;              // 0x67CA4 [P] "length <= kMaxSortElements"; [U] cPS2DeferManager_resetFrame 0; cPS2DeferManager_bucketRecords
+                                    //         appends; cPS2DeferManager_sortItems sorts that many; cPS2DeferManager_buildDmaChains walks them
+    tDeferSortItem mSortItems[0x400]; // 0x67CA8 [P] kMaxSortElements 1024; [U] cPS2DeferManager_sortItems (src), cPS2DeferManager_buildDmaChains
+    sDrawState mCurrentState;       // 0x69CA8 [R] ctor (texture ids -1); [U] cPS2DeferManager_resetFrame = sDrawState::s_defaultDrawState;
+                                    //         cPS2DeferManager_setCurrentState copies one in; cPS2DeferManager_writeStateChange reads it
+    unsigned int unk_69CBC;         // 0x69CBC [U] cPS2DeferManager_writeStateChange (sRmRend3C20::frame)
+    int mActiveViewIndex;           // 0x69CC0 (name ours) [U] the active view state: cPS2DeferManager_resetFrame -1; cPS2DeferManager_findOrAddViewState
                                     //         sets the index it found or added (sRailXfTable_45B8::found); the
                                     //         submitters store it as tDeferSubmit::mViewIndex
     int mActivePortIndex;           // 0x69CC4 [P] "mActivePortIndex >= 0" (the word after the view index); [U]
-                                    //         func_00362CC8 -1; func_00364B88 sets it (sRailKeyTable::found)
-    // mActivePortIndex when no scissor port is active (name ours): [U] func_00362CC8 resets it to -1, and
-    // cPS2GraphicsMan_PopViewport re-registers the saved scissor (func_00364B88) when the saved index is -1.
+                                    //         cPS2DeferManager_resetFrame -1; cPS2DeferManager_findOrAddScissor sets it (sRailKeyTable::found)
+    // mActivePortIndex when no scissor port is active (name ours): [U] cPS2DeferManager_resetFrame resets it to -1, and
+    // cPS2GraphicsMan_PopViewport re-registers the saved scissor (cPS2DeferManager_findOrAddScissor) when the saved index is -1.
     enum { kNoActivePort = -1 };
-    int mIndexView;                 // 0x69CC8 [P] "mIndexView < kMaxNumViewState"; [U] func_00362CC8 0;
-                                    //         func_003645B8 appends at it (sRailXfTable_45B8::count)
+    int mIndexView;                 // 0x69CC8 [P] "mIndexView < kMaxNumViewState"; [U] cPS2DeferManager_resetFrame 0;
+                                    //         cPS2DeferManager_findOrAddViewState appends at it (sRailXfTable_45B8::count)
     int unk_69CCC;                  // 0x69CCC not accessed (alignment of mViewStates)
-    tDeferViewState mViewStates[12];// 0x69CD0 [R] ctor (12 empty ctors); [U] func_003645B8 (entries)
-    int mIndexPort;                 // 0x6AED0 [P] "mIndexPort < kMaxNumViewPort"; [U] func_00362CC8 0; func_00364B88
+    tDeferViewState mViewStates[12];// 0x69CD0 [R] ctor (12 empty ctors); [U] cPS2DeferManager_findOrAddViewState (entries)
+    int mIndexPort;                 // 0x6AED0 [P] "mIndexPort < kMaxNumViewPort"; [U] cPS2DeferManager_resetFrame 0; cPS2DeferManager_findOrAddScissor
                                     //         appends at it (sRailKeyTable::count)
-    tDeferViewPort mViewPorts[64];  // 0x6AED4 [P] kMaxNumViewPort 64; [U] func_00364B88 (keys), func_00363C20
+    tDeferViewPort mViewPorts[64];  // 0x6AED4 [P] kMaxNumViewPort 64; [U] cPS2DeferManager_findOrAddScissor (keys), cPS2DeferManager_writeStateChange
     char unk_6B0D4[0x2C];           // 0x6B0D4 not accessed by any matched or asm method (size from the allocation)
 
     // Methods bound to their retail symbols by asm labels.

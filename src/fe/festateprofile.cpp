@@ -727,7 +727,7 @@ extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
 extern "C" void cMCOverlayManager_readSetFileType(void* mp, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
-extern "C" void func_002C2540(void* dst, char* src);
+extern "C" void strcpy3(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern int cFEStateProfileLoad_mScreenAction;
@@ -787,12 +787,12 @@ void cFEStateProfileLoad::onWidgetEvent(cUIThing* item, unsigned int event)
         cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
             cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, name);
-            func_002C2540(mp->mNewFileName, name);
+            strcpy3(mp->mNewFileName, name);
         } else {
             strcpy2(fmt, GetText_K18FD90(str_kT_MEMPlayerName_b));
             sprintf(buf, fmt, self->mPlayerIdx + 1);
             cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, buf);
-            func_002C2540(mp->mNewFileName, buf);
+            strcpy3(mp->mNewFileName, buf);
         }
         player->submit();
         startSave();

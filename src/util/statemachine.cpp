@@ -6,7 +6,7 @@
 INCLUDE_ASM("util/statemachine", cConsoleConfig_setTimeString);
 #ifdef SKIP_ASM
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
-extern "C" void func_002C25B8(char* dst, const char* src, int size);
+extern "C" void strncpy1(char* dst, const char* src, int size);
 extern char str_pct_02d_pct_02d_pct_02d_c[];
 extern char str_pct_02d_pct_02d_pct_02d_AM[];
 extern char str_pct_02d_pct_02d_pct_02d_PM[];
@@ -16,10 +16,10 @@ extern char str_pct_02d_pct_02d_pct_02d_PM[];
  *
  * kCTime_24HR prints the 24-hour time. kCTime_12HR adds " AM" before noon; from 12 on it adds " PM" and prints
  * hour % 13 - 12 as the hour, which gives 0 for 12 and negative values from 13 on. Any other mode copies an
- * uninitialised buffer. The text goes to @p dst through func_002C25B8(), a bounded copy of 16-bit units.
+ * uninitialised buffer. The text goes to @p dst through strncpy1(), a bounded copy of 16-bit units.
  *
  * @param dst   destination buffer
- * @param size  most units func_002C25B8() copies
+ * @param size  most units strncpy1() copies
  * @param hour  hour, 0-23
  * @param min   minutes
  * @param sec   seconds
@@ -40,7 +40,7 @@ void cConsoleConfig::setTimeString(char* dst, int size, int hour, int min, int s
         }
         break;
     }
-    func_002C25B8(dst, buf, size);
+    strncpy1(dst, buf, size);
 }
 #endif
 
@@ -56,10 +56,10 @@ extern char str_pct_02d_pct_02d_pct_04d[];
  * kCDate_YYYYMMDD prints "yyyy:mm:dd" (str_pct_04d_pct_02d_pct_02d, year, month, day), kCDate_MMDDYYYY "mm:dd:yyyy" and
  * kCDate_DDMMYYYY "dd:mm:yyyy" (both str_pct_02d_pct_02d_pct_04d). Any other mode copies an uninitialised buffer. The
  * text goes to
- * @p dst through func_002C25B8(), a bounded copy of 16-bit units, as in cConsoleConfig_setTimeString.
+ * @p dst through strncpy1(), a bounded copy of 16-bit units, as in cConsoleConfig_setTimeString.
  *
  * @param dst  destination buffer
- * @param size  most units func_002C25B8() copies
+ * @param size  most units strncpy1() copies
  * @param day  day of the month
  * @param month  month, 1-12
  * @param year  year
@@ -79,7 +79,7 @@ void cConsoleConfig::setDateString(char* dst, int size, int day, int month, int 
         sprintf2(buf, str_pct_02d_pct_02d_pct_04d, day, month, year);
         break;
     }
-    func_002C25B8(dst, buf, size);
+    strncpy1(dst, buf, size);
 }
 #endif
 //100%
