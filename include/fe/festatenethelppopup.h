@@ -93,6 +93,7 @@ struct cFEStateNetHelpPopup : public cUIState {
     virtual void onUpdate() __asm__("cFEStateNetHelpPopup_onUpdate");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateNetHelpPopup_onWidgetCreate");
     void setOption(int optionNum, int textId, int iconIndex) __asm__("cFEStateNetHelpPopup_setOption__FPviii");
+    virtual int handleEvent(int msg, void* msgParam) __asm__("cFEStateNetHelpPopup_handleEvent");
 };
 
 CHECK_OFFSET(cFEStateNetHelpPopup, miNumOptions, 0x048);

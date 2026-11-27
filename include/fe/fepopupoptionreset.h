@@ -40,6 +40,12 @@ struct cFEPopupOptionReset : public cUIState {
     char mAccept;                   // 0x048 [O][P] getData (lb); [R] the allocators store 0 (sb); [U] onWidgetEvent: 1
                                     //       on "yes", 0 on "no" (sb), then pops the popup; getData returns it
     char unk_049[0x3];              // 0x049 padding
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cFEPopupOptionReset__cFEPopupOptionReset stays a C function (g++ 2.95 takes no asm label on a
+    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cFEPopupOptionReset();
+    virtual void onCreateScreen() __asm__("cFEPopupOptionReset_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEPopupOptionReset, mAccept, 0x048);

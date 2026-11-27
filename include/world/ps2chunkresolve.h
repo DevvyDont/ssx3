@@ -49,6 +49,7 @@ struct cPS2ChunkResolve {
     int resolveModel(tModelRecord* pModel) __asm__("cPS2ChunkResolve_resolveModel");
     int resolveInstance(tInstanceRecord* pInstance) __asm__("cPS2ChunkResolve_resolveInstance");
     void purge() __asm__("cPS2ChunkResolve_purge__FPv");
+    void init(Nash* pNash) __asm__("cPS2ChunkResolve_init");
 };
 CHECK_OFFSET(cPS2ChunkResolve, mp_World, 0x0);
 CHECK_OFFSET(cPS2ChunkResolve, m_pDummyCollideRecord, 0x4);

@@ -284,12 +284,11 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onLoseTransition__FPv);
 /**
  * Handles the popup's lose transition by reporting it finished immediately.
  *
- * @return always 1
+ * @return always true
  */
-int cScreenPopup_onLoseTransition(void* vself)
+bool cScreenPopup::onLoseTransition()
 {
-    cScreenPopup* self = (cScreenPopup*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3045,20 +3044,20 @@ extern char str_kT_16BuyMusicTrack[];
  * @param cost  price of the song
  * @param money  cash the player has (cFEStateRequestLine_showBuyPopup() passes its cash total)
  */
-extern "C" void cBuyPopupInfo_initBuySong(cBuyPopupInfo* self, int songName, int cost, int money)
+void cBuyPopupInfo::initBuySong(int songName, int cost, int money)
 {
     int three = 3;
     int hash = GetHashValue32(str_kT_OVRSong);
-    ((int*)self)[4] = songName;
-    ((int*)self)[5] = three;
-    ((int*)self)[3] = 2;
-    ((int*)self)[6] = hash;
+    ((int*)this)[4] = songName;
+    ((int*)this)[5] = three;
+    ((int*)this)[3] = 2;
+    ((int*)this)[6] = hash;
     hash = GetHashValue32(str_kT_16BuyMusicTrack);
-    ((int*)self)[1] = money;
-    ((int*)self)[7] = three;
-    ((int*)self)[0] = cost;
-    ((int*)self)[2] = -1;
-    ((int*)self)[8] = hash;
+    ((int*)this)[1] = money;
+    ((int*)this)[7] = three;
+    ((int*)this)[0] = cost;
+    ((int*)this)[2] = -1;
+    ((int*)this)[8] = hash;
 }
 #endif
 
@@ -3144,20 +3143,20 @@ extern char str_kT_OVRCMNBuyItem[];
  * @param cost  price (the caller passes the item's price times 10)
  * @param money  cash the player has
  */
-extern "C" void cBuyPopupInfo_initBuyBolt(cBuyPopupInfo* self, int boltName, int cost, int money)
+void cBuyPopupInfo::initBuyBolt(int boltName, int cost, int money)
 {
     int three = 3;
     int hash = GetHashValue32(str_kT_CMNItemColon);
-    ((int*)self)[4] = boltName;
-    ((int*)self)[5] = three;
-    ((int*)self)[3] = 2;
-    ((int*)self)[6] = hash;
+    ((int*)this)[4] = boltName;
+    ((int*)this)[5] = three;
+    ((int*)this)[3] = 2;
+    ((int*)this)[6] = hash;
     hash = GetHashValue32(str_kT_OVRCMNBuyItem);
-    ((int*)self)[1] = money;
-    ((int*)self)[7] = three;
-    ((int*)self)[0] = cost;
-    ((int*)self)[2] = -1;
-    ((int*)self)[8] = hash;
+    ((int*)this)[1] = money;
+    ((int*)this)[7] = three;
+    ((int*)this)[0] = cost;
+    ((int*)this)[2] = -1;
+    ((int*)this)[8] = hash;
 }
 #endif
 
@@ -3664,10 +3663,10 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleEvent);
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent's result, or 0
  */
-extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, void* pParam)
+int cKeyboardPopup::handleEvent(int msg, void* pParam)
 {
-    if (self->mbReferEventsToParent != 0) {
-        cUIState* obj = self->mpParentState;
+    if (mbReferEventsToParent != 0) {
+        cUIState* obj = mpParentState;
         if (((void*)obj) != 0) {
             return obj->handleEvent(msg, pParam);
         }

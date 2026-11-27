@@ -179,6 +179,7 @@ struct cWipeoutMotion {
     void loseFocus() __asm__("cWipeoutMotion_loseFocus__FPv");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cWipeoutMotion_readFromReplayFrame");
+    int getWipeoutMotionState() __asm__("cWipeoutMotion_getWipeoutMotionState");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);

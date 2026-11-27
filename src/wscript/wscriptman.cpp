@@ -2162,10 +2162,10 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionTrick);
  *
  * @param src  the trick definition
  */
-extern "C" void cWScriptMan_updateMissionTrick(cWScriptMan* self, tTrickNameDef* src)
+void cWScriptMan::updateMissionTrick(tTrickNameDef* src)
 {
-    self->MissionTrickEnable = 1;
-    self->MissionTrick = *src;
+    MissionTrickEnable = 1;
+    MissionTrick = *src;
 }
 #endif
 

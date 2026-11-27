@@ -155,6 +155,9 @@ struct cMoveNode : public cInstanceNode {
     virtual bool hasIntersect() const __asm__("cMoveNode_hasIntersect");
     virtual bool hasFocusCount() const __asm__("cMoveNode_hasFocusCount");
     virtual int getFocusCount() const __asm__("cMoveNode_getFocusCount");
+    void addPosition(const t4Vector* pos) __asm__("cMoveNode_addPosition");
+    void addParent(tInstanceRecord* parentinst, int mesh, const t4Vector* pos) __asm__("cMoveNode_addParent");
+    virtual const t4Matrix* getInstAnimMats(tInstanceRecord* inst) __asm__("cMoveNode_getInstAnimMats");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

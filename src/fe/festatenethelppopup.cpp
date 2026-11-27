@@ -45,10 +45,10 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_handleEvent);
  * @param msgParam  the event data (On Tour: void *pParam)
  * @return the parent's result, or 0
  */
-extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int msg, void* msgParam)
+int cFEStateNetHelpPopup::handleEvent(int msg, void* msgParam)
 {
-    if (self->mbReferEventsToParent != 0) {
-        cUIState* obj = self->mpParentState;
+    if (mbReferEventsToParent != 0) {
+        cUIState* obj = mpParentState;
         if (((void*)obj) != 0) {
             return obj->handleEvent(msg, msgParam);
         }

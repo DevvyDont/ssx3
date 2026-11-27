@@ -310,6 +310,8 @@ CHECK_SIZE(tParticleEmitter, 0x150);
 struct cBxReplayFrame;
 struct t4Matrix;
 
+struct t4Vector;
+
 struct cStaticEmitter {
     float Duration;                 // 0x000 [O]; [R] setupEmitter (cStaticEmitter_setupEmitter); [U] update counts it down by one app
                                     //       tick (negative = endless, 0 = stopped), setTime cStaticEmitter_setTime, replay
@@ -340,6 +342,7 @@ struct cStaticEmitter {
     void render1() __asm__("cStaticEmitter_render1");
     void writeToReplayFrame(cBxReplayFrame* out) __asm__("cStaticEmitter_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cStaticEmitter_readFromReplayFrame");
+    void render(const tBoundBox* bbox, const t4Vector* pos) __asm__("cStaticEmitter_render");
 };
 
 CHECK_OFFSET(cStaticEmitter, Duration, 0x00);

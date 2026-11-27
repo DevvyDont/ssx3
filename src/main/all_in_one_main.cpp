@@ -2363,11 +2363,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getVKey);
 /**
  * Returns the virtual key code of the last typed key: +0x10 (On Tour miVKey).
  *
- * @param input  the input (this)
  * @return the virtual key code
  */
-extern "C" int cFEInput_getVKey(cFEInput* input) {
-    return (input->miVKey);
+int cFEInput::getVKey() const
+{
+    return (miVKey);
 }
 #endif
 
@@ -5700,11 +5700,12 @@ extern char str_111resetopts[];
  * Stores GetHashValue32("111resetopts") in mHashName (+0xC), adds the screen with cUIEngine_addScreenByHashName on the
  * engine (+0x10), keeps it at +0x40 and, when it exists, calls cUIScreen_playFrame(screen, 0, 0).
  */
-extern "C" void cFEPopupOptionReset_onCreateScreen(cFEPopupOptionReset* self) {
+void cFEPopupOptionReset::onCreateScreen()
+{
     int hashName = GetHashValue32_EA20(str_111resetopts);
-    self->mHashName = hashName;
-    cUIScreen* screen = cUIEngine_addScreenByHashName_EA20(self->mpEngine, self, hashName, 0);
-    self->mpScreen = screen;
+    mHashName = hashName;
+    cUIScreen* screen = cUIEngine_addScreenByHashName_EA20(mpEngine, this, hashName, 0);
+    mpScreen = screen;
     if (screen != 0) {
         cUIScreen_playFrame_EA20(screen, 0, 0);
     }

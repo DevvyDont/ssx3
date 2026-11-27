@@ -25,7 +25,7 @@ extern char str_option_continue[];
  *
  * @param w  the widget being created
  */
-extern "C" void cOVState_REPLAY_onWidgetCreate(cOVState_REPLAY* self, cUIThing* w)
+void cOVState_REPLAY::onWidgetCreate(cUIThing* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(str_option_savereplay)) {

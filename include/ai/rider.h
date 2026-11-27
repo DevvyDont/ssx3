@@ -878,6 +878,8 @@ struct cRider : public cRiderState, public cBeing {
     void reactToCollision(tCollideInfo* info, int id) __asm__("cRider_reactToCollision");
     void turnFromCollision(tIntersectInfo* hitInfo) __asm__("cRider_turnFromCollision");
     bool checkRailBodyCollisions() __asm__("cRider_checkRailBodyCollisions");
+    virtual void vibrationReset() __asm__("cRider_vibrationReset__FPv");
+    virtual void vibrationUpdate() __asm__("cRider_vibrationUpdate__FPv");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

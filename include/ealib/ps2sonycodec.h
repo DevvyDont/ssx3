@@ -80,6 +80,9 @@ struct PS2_SONY_FRAME : RCMP_FRAME, RCON_DLNode {
 #endif
 
 // PS2_SONY_CODEC_INTERNAL. 0x80 [R] func_003B11A0 allocates 0x80.
+struct RCMP_CHUNK;
+struct RCMP_DECODER;
+
 struct PS2_SONY_CODEC_INTERNAL {
     // --- RCMP::CODEC
     void** mVtbl;                       // 0x00 [R] ctor PS2_SONY_CODEC_INTERNAL_vtbl; the dtor ends with RCMP::CODEC's RCMP_CODEC_vtbl
@@ -109,6 +112,8 @@ struct PS2_SONY_CODEC_INTERNAL {
     // Methods bound to their retail symbols by asm labels.
     void* DecodeFrame() __asm__("PS2_SONY_CODEC_INTERNAL_DecodeFrame");
     void* GetFrame(unsigned int limit) __asm__("PS2_SONY_CODEC_INTERNAL_GetFrame");
+    int Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk) __asm__("PS2_SONY_CODEC_INTERNAL_Init");
+    void ReleaseFrame(PS2_SONY_FRAME* item) __asm__("PS2_SONY_CODEC_INTERNAL_ReleaseFrame");
 };
 
 // The MPEG-2 video constants the unit's mpeg2decode header parser tests: start codes, extension ids, scalable modes,

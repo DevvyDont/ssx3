@@ -2710,11 +2710,11 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
  * @param bbox  bounding box to cull against (On Tour const tBoundBox&)
  * @param pos  emitter position (On Tour const t4Vector&)
  */
-extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbox, const t4Vector* pos)
+void cStaticEmitter::render(const tBoundBox* bbox, const t4Vector* pos)
 {
-    *(&self->BoundBox) = *bbox;
-    self->Emitter.X0 = *pos;
-    self->render1();
+    *(&BoundBox) = *bbox;
+    Emitter.X0 = *pos;
+    render1();
 }
 #endif
 

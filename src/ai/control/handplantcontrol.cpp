@@ -6518,9 +6518,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationReset__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 16 (kRiderVt_vibrationReset).
  */
-void cRider_vibrationReset(void* vself)
+void cRider::vibrationReset()
 {
-    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6554,9 +6553,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_vibrationUpdate__FPv);
 /**
  * Does nothing: the cRider base version of virtual slot 19 (kRiderVt_vibrationUpdate).
  */
-void cRider_vibrationUpdate(void* vself)
+void cRider::vibrationUpdate()
 {
-    cRider* self = (cRider*)vself;
 }
 #endif
 
@@ -6984,8 +6982,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getWipeoutMotionState)
  *
  * @return the eWMotionState value: WMS_Ground (0) or WMS_Air (1)
  */
-extern "C" int cWipeoutMotion_getWipeoutMotionState(cWipeoutMotion* self) {
-    return *((int*)self);
+int cWipeoutMotion::getWipeoutMotionState()
+{
+    return *((int*)this);
 }
 #endif
 //100%

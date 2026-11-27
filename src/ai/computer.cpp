@@ -2154,34 +2154,34 @@ extern "C" void cAI_RefreshGroupAI_impl(cAI* self) __asm__("cAI_RefreshGroupAI")
  * five words after it. It then stores the rider's distance left (cRider_getDistanceLeft) in TotalPathDistance and
  * sets PrevRanking to -1.
  */
-extern "C" void cAI_RefreshGroupAI_impl(cAI* self)
+void cAI::RefreshGroupAI()
 {
     int i;
-    for (i = 0; i < self->NumberOfRidersAllocated; i++)
+    for (i = 0; i < NumberOfRidersAllocated; i++)
     {
         int j;
         for (j = 0; j < 6; j++)
         {
-            sRiderPair* relation = &self->Riders[i]->mRelations[j];
+            sRiderPair* relation = &Riders[i]->mRelations[j];
             int visible = 0;
-            if (i != j && j < self->NumberOfRidersAllocated)
-                visible = cRider_isLoaded(self->Riders[i]) != 0;
+            if (i != j && j < NumberOfRidersAllocated)
+                visible = cRider_isLoaded(Riders[i]) != 0;
             relation->mValid = visible;
-            if (j < self->NumberOfRidersAllocated)
+            if (j < NumberOfRidersAllocated)
             {
-                self->Riders[i]->mRelations[j].IsHuman = self->Riders[j]->isHuman();
+                Riders[i]->mRelations[j].IsHuman = Riders[j]->isHuman();
             }
-            self->Riders[i]->mRelations[j].mDistance = 10000000000.0f;
-            self->Riders[i]->mRelations[j].mAngle = 0.0f;
-            self->Riders[i]->mRelations[j].CollideTick = 0;
-            self->Riders[i]->mRelations[j].OverlapTick = 0;
-            self->Riders[i]->mRelations[j].PunchTick = 0;
-            self->Riders[i]->mRelations[j].mAggressive = 0;
-            self->Riders[i]->mRelations[j].unk_20 = 0;
+            Riders[i]->mRelations[j].mDistance = 10000000000.0f;
+            Riders[i]->mRelations[j].mAngle = 0.0f;
+            Riders[i]->mRelations[j].CollideTick = 0;
+            Riders[i]->mRelations[j].OverlapTick = 0;
+            Riders[i]->mRelations[j].PunchTick = 0;
+            Riders[i]->mRelations[j].mAggressive = 0;
+            Riders[i]->mRelations[j].unk_20 = 0;
         }
         int none = -1;
-        self->Riders[i]->TotalPathDistance = cRider_getDistanceLeft(self->Riders[i]);
-        self->Riders[i]->PrevRanking = none;
+        Riders[i]->TotalPathDistance = cRider_getDistanceLeft(Riders[i]);
+        Riders[i]->PrevRanking = none;
     }
 }
 #endif

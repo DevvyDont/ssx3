@@ -19,6 +19,8 @@
 
 struct tInstanceRecord;
 
+struct t4Vector;
+
 struct cParentModifier : public cPositionModifier {
     // cPositionModifier (object/positionmodifier.h, 0x90): the vptr at 0x00:
     //   [R] ctors store cPositionModifier_vtbl (cPositionModifier; cParentModifier: cParentModifier_vtbl); dtor
@@ -38,6 +40,8 @@ struct cParentModifier : public cPositionModifier {
     virtual ~cParentModifier();
     virtual void updateRootTransform() __asm__("cParentModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParentModifier_writeToReplayFrame");
+    void* cParentModifier1(tInstanceRecord* parentInstance, int meshIndex, const t4Vector* pos)
+        __asm__("cParentModifier_cParentModifier1");
 };
 
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);

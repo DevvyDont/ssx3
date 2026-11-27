@@ -247,6 +247,8 @@ struct cWorldView {
     void recursiveTreeFocus(tBxBSPNode* sec_, int cam, int loaded) __asm__("cWorldView_recursiveTreeFocus");
     void purge() __asm__("cWorldView_purge__FPv");
     void setFocus(int id, const t4Vector& pos, float fRadius) __asm__("cWorldView_setFocus");
+    void recursiveFlushPages(tBxBSPNode* node) __asm__("cWorldView_recursiveFlushPages");
+    void recursiveIsEmptyPages(tBxBSPNode* node, int* ok) __asm__("cWorldView_recursiveIsEmptyPages");
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

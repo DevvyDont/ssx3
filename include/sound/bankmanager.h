@@ -89,6 +89,9 @@ struct cBankInstance {
     void UnAttach() __asm__("cBankInstance_UnAttach");
     void OnBeginAsyncLoad() __asm__("cBankInstance_OnBeginAsyncLoad");
     void* OnAsyncMainMemAlloc(int size, int flags) __asm__("cBankInstance_OnAsyncMainMemAlloc");
+    void Attach(void* mainMemData, int mainMemSize) __asm__("cBankInstance_Attach");
+    void OnEndAsyncLoad(int id, int flag, const char* name, void* pBuffer, int dataSize)
+        __asm__("cBankInstance_OnEndAsyncLoad");
 };
 
 struct cBankManager {

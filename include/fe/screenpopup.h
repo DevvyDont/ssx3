@@ -196,6 +196,7 @@ struct cScreenPopup : public cUIState {
     virtual void onCreateScreen() __asm__("cScreenPopup_onCreateScreen");
     virtual bool onGainTransition(int first) __asm__("cScreenPopup_onGainTransition");
     virtual void onUpdate() __asm__("cScreenPopup_onUpdate");
+    virtual bool onLoseTransition() __asm__("cScreenPopup_onLoseTransition__FPv");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

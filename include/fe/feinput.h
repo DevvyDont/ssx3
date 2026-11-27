@@ -33,6 +33,9 @@ struct cFEInput : public cUIInput {
     virtual ~cFEInput();
     virtual bool isActive() __asm__("cFEInput_isActive");
     virtual int getAsciiKey() const __asm__("cFEInput_getAsciiKey");
+    virtual bool keyPressed() const __asm__("cFEInput_keyPressed");
+    virtual void update() __asm__("cFEInput_update");
+    virtual int getVKey() const __asm__("cFEInput_getVKey");
 };
 
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);

@@ -2825,17 +2825,17 @@ INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
  *
  * @return 1 when one of them is active, otherwise 0
  */
-extern "C" int cFEInput_keyPressed(cFEInput* self)
+bool cFEInput::keyPressed() const
 {
     int pressed = 0;
-    if (cInput_getState(self->mpInput, 114) || cInput_getState(self->mpInput, 115) ||
-        cInput_getState(self->mpInput, 116) || cInput_getState(self->mpInput, 117) ||
-        cInput_getState(self->mpInput, 118) || cInput_getState(self->mpInput, 119) ||
-        cInput_getState(self->mpInput, 0x78) || cInput_getState(self->mpInput, 121) ||
-        cInput_getState(self->mpInput, 122) || cInput_getState(self->mpInput, 123) ||
-        cInput_getState(self->mpInput, 125) || cInput_getState(self->mpInput, 0x7C) ||
-        cInput_getState(self->mpInput, 144) || cInput_getState(self->mpInput, 146) ||
-        cInput_getState(self->mpInput, 145) || cInput_getState(self->mpInput, 113))
+    if (cInput_getState(mpInput, 114) || cInput_getState(mpInput, 115) ||
+        cInput_getState(mpInput, 116) || cInput_getState(mpInput, 117) ||
+        cInput_getState(mpInput, 118) || cInput_getState(mpInput, 119) ||
+        cInput_getState(mpInput, 0x78) || cInput_getState(mpInput, 121) ||
+        cInput_getState(mpInput, 122) || cInput_getState(mpInput, 123) ||
+        cInput_getState(mpInput, 125) || cInput_getState(mpInput, 0x7C) ||
+        cInput_getState(mpInput, 144) || cInput_getState(mpInput, 146) ||
+        cInput_getState(mpInput, 145) || cInput_getState(mpInput, 113))
         pressed = 1;
     return pressed;
 }
@@ -2899,14 +2899,14 @@ struct sDebugFE1804B8 {
  * key press; when it returns one, key-ready becomes 1. cFEInput_getKeyReady, cFEInput_getVKey and cFEInput_getAsciiKey
  * return the results. The last virtual of cFEInput; On Tour's PSP version is empty.
  */
-extern "C" void cFEInput_update(cFEInput* self)
+void cFEInput::update()
 {
-    self->mbKeyReady = 0;
+    mbKeyReady = 0;
     if (Keyboard != 0) {
-        self->miAsciiKey = 0;
-        self->miVKey = 0;
-        if (func_00266BA8(Keyboard, 0, &self->miVKey, &self->miAsciiKey) != 0)
-            self->mbKeyReady = 1;
+        miAsciiKey = 0;
+        miVKey = 0;
+        if (func_00266BA8(Keyboard, 0, &miVKey, &miAsciiKey) != 0)
+            mbKeyReady = 1;
     }
 }
 #endif

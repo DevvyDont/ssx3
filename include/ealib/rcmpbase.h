@@ -109,6 +109,7 @@ struct RCMP_DECODER {
     void ReleaseFrame(int frame) __asm__("RCMP_DECODER_ReleaseFrame");
     RCMP_CHUNK* GetChunk() __asm__("RCMP_DECODER_GetChunk");                // [O] CHUNK* GetChunk()
     void ReleaseChunk(RCMP_CHUNK* chunk) __asm__("RCMP_DECODER_ReleaseChunk"); // [O] ReleaseChunk(CHUNK* Data)
+    RCMP_DECODER* DECODER(RCMP_CODEC_IDATA* idata) __asm__("RCMP_DECODER_DECODER");
 };
 
 CHECK_OFFSET(RCMP_RCMP_SYSTEM, AllocMemFunc, 0x0);

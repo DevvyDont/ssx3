@@ -76,6 +76,8 @@ struct cGMBigAirHandler : public cGameModeHandler {
     virtual void init() __asm__("cGMBigAirHandler_init");
     virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMBigAirHandler_riderCheckpointHit");
     virtual unsigned int getHeatScore(int col, int row) __asm__("cGMBigAirHandler_getHeatScore");
+    virtual void raceFinish(int idx) __asm__("cGMBigAirHandler_raceFinish");
+    void fillScoreTable() __asm__("cGMBigAirHandler_fillScoreTable");
 };
 
 CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
@@ -126,6 +128,7 @@ struct cGMMPRaceHandler : public cGameModeHandler {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cGMMPRaceHandler();
     virtual void init() __asm__("cGMMPRaceHandler_init");
+    virtual void raceFinish(int idx) __asm__("cGMMPRaceHandler_raceFinish");
 };
 
 CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);

@@ -131,6 +131,7 @@ struct cUITemplate_MAP {
     void showEventPath(char* name) __asm__("cUITemplate_MAP_showEventPath");
     void setWidgetHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetHiliteColor");
     void setWidgetUnHiliteColor(cUIText* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
+    void setupLocationInfo() __asm__("cUITemplate_MAP_setupLocationInfo");
 };
 
 CHECK_OFFSET(cUITemplate_MAP, mShowInfo, 0x000);

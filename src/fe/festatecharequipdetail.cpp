@@ -759,27 +759,27 @@ static inline float clamp_9A38(float v, float lo, float hi)
  * @param in  the controller input (cUIInput)
  * @return 1 when any camera control was used, otherwise 0
  */
-extern "C" int cFEStateCharEquip_onInputBegin(cFEStateCharEquip* self, cUIInput* in)
+bool cFEStateCharEquip::onInputBegin(cUIInput* in)
 {
     int handled = 0;
-    if (!isMode1_9A38(self)) {
-    int mode = self->mCameraState;
+    if (!isMode1_9A38(this)) {
+    int mode = mCameraState;
     if (mode == cFEStateCharEquip::kCameraRider || mode == cFEStateCharEquip::kCameraToRider) {
     if (in->isCamRotate()) {
-        self->mPlayerRotation += in->getCamRotate() * 3.0f;
-        while (self->mPlayerRotation >= 360.0f)
-            self->mPlayerRotation -= 360.0f;
-        while (self->mPlayerRotation < 0.0f)
-            self->mPlayerRotation += 360.0f;
+        mPlayerRotation += in->getCamRotate() * 3.0f;
+        while (mPlayerRotation >= 360.0f)
+            mPlayerRotation -= 360.0f;
+        while (mPlayerRotation < 0.0f)
+            mPlayerRotation += 360.0f;
         handled = 1;
     }
     if (in->isCamZoom()) {
         // PORT: <? (GNU min operator)
-        self->mZoom = clamp_9A38(self->mZoom + in->getCamZoom() * -0.10000000149011612f, 0.0f, 1.0f);
+        mZoom = clamp_9A38(mZoom + in->getCamZoom() * -0.10000000149011612f, 0.0f, 1.0f);
         handled = 1;
     }
     if (in->isCamPan()) {
-        self->mPan = clamp_9A38(self->mPan + in->getCamPan() * -0.10000000149011612f, -1.0f, 1.0f);
+        mPan = clamp_9A38(mPan + in->getCamPan() * -0.10000000149011612f, -1.0f, 1.0f);
         handled = 1;
     }
     }

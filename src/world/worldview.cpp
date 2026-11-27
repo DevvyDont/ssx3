@@ -1462,12 +1462,12 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve_init);
  *
  * @param pNash  the texture manager handle cWorldCache_init passes on (On Tour Nash* pNash)
  */
-extern "C" void cPS2ChunkResolve_init(cPS2ChunkResolve* self, Nash* pNash)
+void cPS2ChunkResolve::init(Nash* pNash)
 {
     cWorld* w = cWorld_m_pTheWorld;
-    self->mp_Nash = pNash;
-    self->mp_World = w;
-    self->m_iNumImages = w->m_pWorldCache->mp_DataHeader->m_iTable[9];
+    mp_Nash = pNash;
+    mp_World = w;
+    m_iNumImages = w->m_pWorldCache->mp_DataHeader->m_iTable[9];
 }
 #endif
 

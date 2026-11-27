@@ -1713,7 +1713,7 @@ void cWorldView::update()
         case kSection_UnLoading:
             if (mp_WorldCache->isPageEmpty(mp_Section[i].m_BSP.m_iGlobalHull)) {
                 int ok = 1;
-                cWorldView_recursiveIsEmptyPages(this, mp_Section[i].m_BSP.m_pRoot, &ok);
+                this->recursiveIsEmptyPages(mp_Section[i].m_BSP.m_pRoot, &ok);
                 if (ok) {
                     mp_SectionState[i].state = kSection_Empty;
                     mp_WorldCache->deactivateSectionMem(i);
@@ -1730,7 +1730,7 @@ void cWorldView::update()
             break;
         case kSection_UnLoadQueue:
             mp_WorldCache->flushPage(mp_Section[i].m_BSP.m_iGlobalHull);
-            cWorldView_recursiveFlushPages(this, mp_Section[i].m_BSP.m_pRoot);
+            this->recursiveFlushPages(mp_Section[i].m_BSP.m_pRoot);
             mp_SectionState[i].state = kSection_UnLoading;
             break;
         }
@@ -1752,16 +1752,16 @@ extern "C" void cWorldCache_flushPage(cWorldCache* cache, unsigned short id);
  *
  * @param node  the tBxBSPNode
  */
-extern "C" void cWorldView_recursiveFlushPages(cWorldView* self, tBxBSPNode* node)
+void cWorldView::recursiveFlushPages(tBxBSPNode* node)
 {
     if (node->m_pHull != 0) {
-        cWorldCache_flushPage(self->mp_WorldCache, node->m_pHull->m_uiHullIndex);
+        cWorldCache_flushPage(mp_WorldCache, node->m_pHull->m_uiHullIndex);
     }
     if (node->m_pInChild != 0) {
-        cWorldView_recursiveFlushPages(self, node->m_pInChild);
+        recursiveFlushPages(node->m_pInChild);
     }
     if (node->m_pOutChild != 0) {
-        cWorldView_recursiveFlushPages(self, node->m_pOutChild);
+        recursiveFlushPages(node->m_pOutChild);
     }
 }
 #endif
@@ -1777,19 +1777,19 @@ extern "C" bool cWorldCache_isPageEmpty(cWorldCache* self, int a1);
  * @param node  the tBxBSPNode
  * @param ok  set on entry; cleared when a page is still loaded
  */
-extern "C" void cWorldView_recursiveIsEmptyPages(cWorldView* self, tBxBSPNode* node, int* ok)
+void cWorldView::recursiveIsEmptyPages(tBxBSPNode* node, int* ok)
 {
     if (*ok != 0) {
         tBxBSPHull* pageRef = node->m_pHull;
-        if (pageRef != 0 && self->mp_WorldCache->isPageEmpty(pageRef->m_uiHullIndex) == 0) {
+        if (pageRef != 0 && mp_WorldCache->isPageEmpty(pageRef->m_uiHullIndex) == 0) {
             *ok = 0;
             return;
         }
         if (node->m_pInChild != 0) {
-            cWorldView_recursiveIsEmptyPages(self, node->m_pInChild, ok);
+            recursiveIsEmptyPages(node->m_pInChild, ok);
         }
         if (node->m_pOutChild != 0 && *ok != 0) {
-            cWorldView_recursiveIsEmptyPages(self, node->m_pOutChild, ok);
+            recursiveIsEmptyPages(node->m_pOutChild, ok);
         }
     }
 }

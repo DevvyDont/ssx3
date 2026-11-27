@@ -61,6 +61,7 @@ struct cOVState_REPLAY : public cOVState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVState_REPLAY();
     virtual void onUpdate() __asm__("cOVState_REPLAY_onUpdate");
+    virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_REPLAY_onWidgetCreate");
 };
 
 CHECK_OFFSET(cOVState_REPLAY, mShowPopupMenu, 0x9C);

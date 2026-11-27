@@ -118,6 +118,7 @@ struct cQuadTree {
         __asm__("cQuadTree_exportTree");
     int calcUsedNodes(unsigned short *node) __asm__("cQuadTree_calcUsedNodes");
     void resolve() __asm__("cQuadTree_resolve__FPv");
+    void exportNode(tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node) __asm__("cQuadTree_exportNode");
 };
 
 CHECK_OFFSET(cQuadTree, m_scale, 0x00);

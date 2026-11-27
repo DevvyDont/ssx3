@@ -454,7 +454,7 @@ extern "C" int func_003AE450(RCMP_AV_PLAYER* self, int framesToBuffer, int timeO
         RCMP_CODEC_IDATA_CODEC_IDATA1(&idata, &self->mStreamer, (RCMP_GetDataFn)func_003AECB8,
                                       (RCMP_ReleaseDataFn)func_003AED20, framesToBuffer);
         self->mpDecoder =
-            RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_DECODER)), &idata);
+            ((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_DECODER)))->DECODER(&idata);
     }
     self->mCurrFrame = RCMP_DECODER_GetFrame(self->mpDecoder, 0);
     RCMP_AV_MS_TIMER* msTimer = (RCMP_AV_MS_TIMER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_AV_MS_TIMER));
@@ -1147,8 +1147,7 @@ struct RCMP_AV_SUBTITLE_NEWBLOCK {
  * @param width  width
  * @param height  height
  */
-extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int count, int posX, int posY,
-                                            int width, int height)
+void RCMP_AV_SUBTITLE_ARRAY::Init(unsigned int count, int posX, int posY, int width, int height)
 {
     RCMP_AV_SUBTITLE_NEWBLOCK* raw;
     RCMP_AV_SUBTITLE* arr;
@@ -1169,17 +1168,17 @@ extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(RCMP_AV_SUBTITLE_ARRAY* self, unsign
             subtitle++;
         } while (i != -1);
     }
-    self->mSubTitle = arr;
-    self->mNumberOfSubtitle = count;
+    mSubTitle = arr;
+    mNumberOfSubtitle = count;
     if (count != 0) {
         f03D0_F0C8(arr, 0);
     }
-    for (k = 0; k < self->mNumberOfSubtitle; k++) {
-        f03A8_F0C8(&self->mSubTitle[k], posX);
-        f03B0_F0C8(&self->mSubTitle[k], posY);
-        f03B8_F0C8(&self->mSubTitle[k], width);
-        f03C0_F0C8(&self->mSubTitle[k], height);
-        f03C8_F0C8(&self->mSubTitle[k], k);
+    for (k = 0; k < mNumberOfSubtitle; k++) {
+        f03A8_F0C8(&mSubTitle[k], posX);
+        f03B0_F0C8(&mSubTitle[k], posY);
+        f03B8_F0C8(&mSubTitle[k], width);
+        f03C0_F0C8(&mSubTitle[k], height);
+        f03C8_F0C8(&mSubTitle[k], k);
     }
 }
 #endif
@@ -1737,14 +1736,14 @@ extern void* RCMP_DECODER_vtbl[];
  * @param idata  the CODEC_IDATA to copy
  * @return self
  */
-extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_CODEC_IDATA* idata)
+RCMP_DECODER* RCMP_DECODER::DECODER(RCMP_CODEC_IDATA* idata)
 {
-    self->mVtbl = RCMP_DECODER_vtbl;
-    RCMP_CODEC_IDATA_CODEC_IDATA(&self->m_IData);
-    self->m_IData = *idata;
-    self->m_codec = 0;
-    self->m_FirstChunk = 0;
-    return self;
+    mVtbl = RCMP_DECODER_vtbl;
+    RCMP_CODEC_IDATA_CODEC_IDATA(&m_IData);
+    m_IData = *idata;
+    m_codec = 0;
+    m_FirstChunk = 0;
+    return this;
 }
 #endif
 
@@ -2407,20 +2406,20 @@ extern "C" int func_003B0B10(void* self, void* a1, PS2_SONY_CODEC_INTERNAL* a2);
  * @param firstChunk  the first CHUNK
  * @return 2 (usable)
  */
-extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
+int PS2_SONY_CODEC_INTERNAL::Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
 {
-    self->mpDecoder = script;
-    self->mCurrentFrameNumber = 0;
-    self->mChunksFed = 0;
-    if (self->mpWorkBuffer != 0) {
-        RCMP_rcmp_sys.FreeMemFunc(self->mpWorkBuffer);
-        self->mpWorkBuffer = 0;
+    mpDecoder = script;
+    mCurrentFrameNumber = 0;
+    mChunksFed = 0;
+    if (mpWorkBuffer != 0) {
+        RCMP_rcmp_sys.FreeMemFunc(mpWorkBuffer);
+        mpWorkBuffer = 0;
     }
-    if (self->mpChunkBuffer != 0) {
-        RCMP_rcmp_sys.FreeMemFunc(self->mpChunkBuffer);
-        self->mpChunkBuffer = 0;
+    if (mpChunkBuffer != 0) {
+        RCMP_rcmp_sys.FreeMemFunc(mpChunkBuffer);
+        mpChunkBuffer = 0;
     }
-    self->unk_04 = 1;
+    unk_04 = 1;
     void* data = firstChunk->m_DataToDecode;
     ld = &D_00509648;
     Initialize_Buffer(data);
@@ -2437,32 +2436,32 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
     D_00509500_s = (mode != 0 && D_00509524_s == 0) ? (D_005094F8_s + 31) / 32 * 2 : (D_005094F8_s + 15) / 16;
     int w = D_005094FC_s * 16;
     D_005094D4_s = w;
-    self->mWidth = w;
+    mWidth = w;
     int codedHeight = D_00509500_s * 16;
     D_005094D8_s = codedHeight;
-    self->mHeight = codedHeight;
+    mHeight = codedHeight;
     D_005094DC_s = w >> 1;
     D_005094E0_s = codedHeight >> 1;
-    int n = self->mpDecoder->m_IData.m_MaxFramesOutstanding;
+    int n = mpDecoder->m_IData.m_MaxFramesOutstanding;
     for (int i = 0; i < n; i++) {
-        int cw = self->mWidth;
-        int ch = self->mHeight;
+        int cw = mWidth;
+        int ch = mHeight;
         PS2_SONY_FRAME* newFrame = func_003B07F8(
             (PS2_SONY_FRAME*)RCMP_rcmp_sys.AllocMemFunc(D_004953E8, sizeof(PS2_SONY_FRAME), 0, 0,
                                                          RCMP_rcmp_sys.m_DefaultMemDir),
             cw, ch);
-        self->mFreeFrames.AddHead(newFrame);
+        mFreeFrames.AddHead(newFrame);
     }
-    self->mpWorkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996,
+    mpWorkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_mpegbuff, mWidth * mHeight * 9 / 2 + 5996,
                                                     0, 0, RCMP_rcmp_sys.m_DefaultMemDir | 0x400);
-    self->mpChunkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_chunkbuff, 0x32000, 0, 0,
+    mpChunkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_chunkbuff, 0x32000, 0, 0,
                                                      RCMP_rcmp_sys.m_DefaultMemDir | 0x400);
     // ORIGINAL-PTR: the chunk buffer is written through the EE's uncached-accelerated segment (address & 0x0FFFFFFF |
     // 0x30000000, a hardware address alias as the Sony SDK's UNCACHED() is for 0x20000000)
-    self->mpChunkBufferUncached = (char*)(((unsigned int)self->mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
+    mpChunkBufferUncached = (char*)(((unsigned int)mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
     sceMpegInit();
-    sceMpegCreate(self->mMpeg, self->mpWorkBuffer, self->mWidth * self->mHeight * 9 / 2 + 5996);
-    sceMpegAddCallback(self->mMpeg, 1, (void*)func_003B0B10, self);
+    sceMpegCreate(mMpeg, mpWorkBuffer, mWidth * mHeight * 9 / 2 + 5996);
+    sceMpegAddCallback(mMpeg, 1, (void*)func_003B0B10, this);
     return 2;
 }
 #endif
@@ -2618,13 +2617,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_ReleaseFrame);
  *
  * @param item  the frame
  */
-extern "C" void PS2_SONY_CODEC_INTERNAL_ReleaseFrame(PS2_SONY_CODEC_INTERNAL* self, PS2_SONY_FRAME* item)
+void PS2_SONY_CODEC_INTERNAL::ReleaseFrame(PS2_SONY_FRAME* item)
 {
     if (--item->mReferenceCount > 0) {
         return;
     }
     item->Remove();
-    self->mFreeFrames.AddTail(item);
+    mFreeFrames.AddTail(item);
 }
 #endif
 

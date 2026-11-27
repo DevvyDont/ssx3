@@ -176,13 +176,13 @@ extern "C" int SNDbankadd(void* sema, void* bankImage);
  * @param mainMemData  address of the bank image in main memory
  * @param mainMemSize  size of the image in bytes
  */
-extern "C" void cBankInstance_Attach(cBankInstance* self, void* mainMemData, int mainMemSize)
+void cBankInstance::Attach(void* mainMemData, int mainMemSize)
 {
-    self->UnAttach();
-    self->mpMainMemData = (char*)mainMemData;
-    self->mMainMemDataSize = mainMemSize;
-    SNDbankadd(&self->mBankHandle, mainMemData);
-    self->mBankStatus = USED;
+    UnAttach();
+    mpMainMemData = (char*)mainMemData;
+    mMainMemDataSize = mainMemSize;
+    SNDbankadd(&mBankHandle, mainMemData);
+    mBankStatus = USED;
 }
 #endif
 
@@ -328,17 +328,16 @@ extern cBankManager* gpBankManager;
  * @param pBuffer  the load buffer (unused)
  * @param dataSize  the number of bytes loaded (unused)
  */
-extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* self, int id, int flag, const char* name, void* pBuffer,
-                                             int dataSize)
+void cBankInstance::OnEndAsyncLoad(int id, int flag, const char* name, void* pBuffer, int dataSize)
 {
     ((cSoundManager*)gpBankManager->BankMonitor.mpVSoundSys->pManager)->RestoreSoundMemLoadLimits();
-    self->mBankHandle = id;
+    mBankHandle = id;
     if (flag == 0) {
-        self->mBankStatus = USED;
+        mBankStatus = USED;
     } else {
-        self->mBankStatus = EMPTY;
+        mBankStatus = EMPTY;
     }
-    strcpy(self->mBankFilename, name);
+    strcpy(mBankFilename, name);
 }
 #endif
 
@@ -650,7 +649,7 @@ extern "C" void cBankInstance_Attach(cBankInstance* inst, void* a, int b);
  */
 void cBankManager::BANK_Attach(int i, void* mainMemData, int mainMemSize)
 {
-    cBankInstance_Attach(&mBank[i], mainMemData, mainMemSize);
+    mBank[i].Attach(mainMemData, mainMemSize);
 }
 #endif
 
@@ -754,7 +753,7 @@ extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* inst, int a, int b, 
 void cBankManager::ASYNCSYS_OnEndAsyncLoad(int i, int soundHandle, int endState, const char* pFilename,
                                            void* pBuffer, int dataSize)
 {
-    cBankInstance_OnEndAsyncLoad(&mBank[i], soundHandle, endState, pFilename, pBuffer, dataSize);
+    mBank[i].OnEndAsyncLoad(soundHandle, endState, pFilename, pBuffer, dataSize);
 }
 #endif
 

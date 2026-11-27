@@ -40,6 +40,8 @@ struct cBuyPopupInfo {
     // Methods bound to their retail symbols by asm labels.
     void clear() __asm__("cBuyPopupInfo_clear");
     void initBuySongByCredit(int song, int credit) __asm__("cBuyPopupInfo_initBuySongByCredit");
+    void initBuySong(int songName, int cost, int money) __asm__("cBuyPopupInfo_initBuySong");
+    void initBuyBolt(int boltName, int cost, int money) __asm__("cBuyPopupInfo_initBuyBolt");
 };
 
 CHECK_OFFSET(cBuyPopupInfo, mCost, 0x00);

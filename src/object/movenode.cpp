@@ -432,9 +432,9 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  *
  * @param pos  offset to apply
  */
-extern "C" void cMoveNode_addPosition(cMoveNode* self, const t4Vector* pos)
+void cMoveNode::addPosition(const t4Vector* pos)
 {
-    self->addTransformModifier((cTransformModifier*)cPositionModifier_cPositionModifier(
+    addTransformModifier((cTransformModifier*)cPositionModifier_cPositionModifier(
         (cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
 }
 #endif
@@ -478,10 +478,10 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  * @param mesh  the parent's mesh index (On Tour int mesh)
  * @param pos  the offset from the parent (On Tour const t4Vector& offset)
  */
-extern "C" void cMoveNode_addParent(cMoveNode* self, tInstanceRecord* parentinst, int mesh, const t4Vector* pos)
+void cMoveNode::addParent(tInstanceRecord* parentinst, int mesh, const t4Vector* pos)
 {
-    self->addTransformModifier((cTransformModifier*)cParentModifier_cParentModifier1(
-        (cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
+    addTransformModifier((cTransformModifier*)((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0))
+                             ->cParentModifier1(parentinst, mesh, pos));
 }
 #endif
 
@@ -877,15 +877,15 @@ static inline const t4Matrix* VCall23_60C0(char*& o, tInstanceRecord* a)
  * @return the matrices (On Tour const t4Matrix*), or 0
  */
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
-extern "C" const t4Matrix* cMoveNode_getInstAnimMats(cMoveNode* self, tInstanceRecord* inst)
+const t4Matrix* cMoveNode::getInstAnimMats(tInstanceRecord* inst)
 {
-    char** modBlock = (char**)self->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier != 0) {
         const t4Matrix* animMats = VCall23_60C0(transformModifier, inst);
         if (animMats != 0) return animMats;
     }
-    return self->getAnimMats();
+    return getAnimMats();
 }
 #endif
 
@@ -2028,14 +2028,13 @@ extern char cParentModifier_vtbl[];
  * @param pos  offset from it
  * @return self
  */
-extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, tInstanceRecord* parentInstance, int meshIndex,
-                                                  const t4Vector* pos)
+void* cParentModifier::cParentModifier1(tInstanceRecord* parentInstance, int meshIndex, const t4Vector* pos)
 {
-    cPositionModifier_cPositionModifier((cPositionModifier*)self, pos);
-    VPTR_AT(self, 0) = (void**)cParentModifier_vtbl;
-    self->ParentInst = parentInstance;
-    self->Mesh = meshIndex;
-    return ((void*)self);
+    cPositionModifier_cPositionModifier((cPositionModifier*)this, pos);
+    VPTR_AT(this, 0) = (void**)cParentModifier_vtbl;
+    ParentInst = parentInstance;
+    Mesh = meshIndex;
+    return ((void*)this);
 }
 #endif
 

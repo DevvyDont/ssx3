@@ -199,7 +199,7 @@ void cQuadTree::exportTree(char** out, int* size, void* ctx, float (*fixFloat)(v
     *header = *this;
     int cnt = 0;
     tQuadTreeNode* nodeData = (tQuadTreeNode*)(header + 1);
-    cQuadTree_exportNode(this, nodeData, &cnt, map, &m_nodes[m_root]);
+    this->exportNode(nodeData, &cnt, map, &m_nodes[m_root]);
     for (i = 0; i < cnt; i++, nodeData++) {
         unsigned short* children = nodeData->m_sub.m_children;
         if (children[0] & 1) {
@@ -241,17 +241,17 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportNode);
  * @param node  the node to export
  */
 // PORT: node index computed from pointers cast to unsigned int
-extern "C" void cQuadTree_exportNode(cQuadTree* self, tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node)
+void cQuadTree::exportNode(tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node)
 {
     int i;
     unsigned short* childPtr;
     out[*count].m_leaf.m_key = node->m_leaf.m_key;
     out[*count].m_leaf.m_data = node->m_leaf.m_data;
-    map[(unsigned short)(((unsigned int)node - (unsigned int)self->m_nodes) >> 3)] = (*count)++;
+    map[(unsigned short)(((unsigned int)node - (unsigned int)m_nodes) >> 3)] = (*count)++;
     if (node->m_sub.m_children[0] & 1) {
         childPtr = node->m_sub.m_children;
         for (i = 0; i < 4; i++) {
-            cQuadTree_exportNode(self, out, count, map, &self->m_nodes[*childPtr++ >> 1]);
+            exportNode(out, count, map, &m_nodes[*childPtr++ >> 1]);
         }
     }
 }
