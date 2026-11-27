@@ -9254,7 +9254,7 @@ void cWScriptMission::missionPass()
     unsigned int next = cBEMissionInterface_getNextMissionID(missions, (int)ProcessId);
     if (next != kWScriptId_None) {
         cBEMissionInterface_setIsShowIcon(missions, (int)ProcessId, 0);
-        if ((int)MissionScriptCode[1] != 0) {
+        if (MissionScriptCode[1] != 0) {
             cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
         }
         if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
@@ -9262,7 +9262,7 @@ void cWScriptMission::missionPass()
             cBEMissionInterface_setIsReady(missions, next, 1);
             cBEMissionInterface_setIsShowIcon(missions, next, 1);
         }
-    } else if ((int)MissionScriptCode[1] != 0) {
+    } else if (MissionScriptCode[1] != 0) {
         cWScriptMan_runScriptCode(Manager, this, (int)MissionScriptCode[1]);
     }
     cWScriptMan_updateWorld(Manager);

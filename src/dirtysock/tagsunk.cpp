@@ -2,6 +2,7 @@
 #include "be/beinterface.h"
 #include "online/privatemessage.h"
 #include "util/bxps2memcard.h"
+#include "util/bxmemcard.h"
 #include "seg/buddyapi.h"
 #include "ealib/lobbyapi.h"
 #include "bx/bxstring.h"
@@ -38,20 +39,19 @@ extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char*
  * @param buf    tag record to add the field to
  * @param size   size of @p buf in bytes
  * @param key    field name
- * @param value  the string, passed as an int; must not be null
+ * @param value  the string; must not be null
  * @return cDirtysock_tag_TagFieldSetString()'s result
  */
-// PORT: the unit declares value as int (callers pass a string pointer in it).
-extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, int value)
+extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, const char* value)
 {
     char escaped[256];
     int result;
-    if (*(const char*)value == '\'') {
+    if (*value == '\'') {
         escaped[0] = '`';
-        strcpy(escaped + 1, (const char*)value);
+        strcpy(escaped + 1, value);
         result = cDirtysock_tag_TagFieldSetString(buf, size, key, escaped);
     } else {
-        result = cDirtysock_tag_TagFieldSetString(buf, size, key, (const char*)value);
+        result = cDirtysock_tag_TagFieldSetString(buf, size, key, value);
     }
     return result;
 }
@@ -1243,7 +1243,7 @@ extern "C" void func_0025AA98(LobbyMan* self)
 INCLUDE_ASM("dirtysock/tagsunk", func_0025AAE0);
 #ifdef SKIP_ASM
 extern char str_TEXT[];
-extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, int value);
+extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, const char* value);
 extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 
 /**
@@ -1252,9 +1252,9 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
  * The field is written with cDirtysock_tag_TagFieldSetUnk() (a leading apostrophe gets a backquote) into a 0x200-byte
  * record and sent with func_003E8B10() without a reply callback; mState and mTimeout are left alone.
  *
- * @param value  the message text (a string pointer passed as an int)
+ * @param value  the message text
  */
-extern "C" void func_0025AAE0(LobbyMan* self, int value)
+extern "C" void func_0025AAE0(LobbyMan* self, const char* value)
 {
     char buf[0x200];
     if (*(int*)self != 0) {
@@ -3566,7 +3566,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025DA90);
 extern "C" char* func_0025DA90(LobbyMan* self)
 {
     char* roomName;
-    if ((int)self->mpLobbyApi == 0) {
+    if (self->mpLobbyApi == 0) {
         return 0;
     }
     roomName = self->mRoomName;
@@ -6567,7 +6567,7 @@ extern "C" long f_261460(void* p) __asm__("func_00261460");
 extern "C" long f_261460(void* buddyMan)
 {
     BuddyMan* buddyBytes = (BuddyMan*)buddyMan;
-    return (int)buddyBytes->mpBuddyApi != 0 && (buddyBytes->mState ^ 1) != 0 && buddyBytes->mbLoggedIn != 0;
+    return buddyBytes->mpBuddyApi != 0 && (buddyBytes->mState ^ 1) != 0 && buddyBytes->mbLoggedIn != 0;
 }
 #endif
 
@@ -6676,8 +6676,8 @@ extern "C" void func_00261530(BuddyMan* vself)
         }
         func_003F0BE0(((void*)self->mpBuddyApi));
         func_003F07A0(((void*)self->mpBuddyApi));
-        (*(void**)&self->mpBuddyApi) = 0;
-        (*(int*)&self->mpRoster) = 0;
+        self->mpBuddyApi = 0;
+        self->mpRoster = 0;
     }
 }
 #endif
@@ -7731,9 +7731,9 @@ extern "C" void func_003F16D8(void* ctx, char* buf, void* cb, void* user, int a4
  * func_003F16D8() on mpBuddyApi with the callback func_00268FE0, this BuddyMan as its user data and miMsgTimeout again.
  *
  * @param name  recipient's name
- * @param messageText    message text, passed as an int
+ * @param messageText    message text
  */
-extern "C" void func_00262690(BuddyMan* self, const char* name, int messageText)
+extern "C" void func_00262690(BuddyMan* self, const char* name, const char* messageText)
 {
     char buf[0x1000];
     buf[0] = 0;
@@ -7821,7 +7821,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002628C0);
  */
 extern "C" int func_002628C0(BuddyMan* self, int sel)
 {
-    if ((int)self->mpBuddyApi == 0) {
+    if (self->mpBuddyApi == 0) {
         return -1;
     }
     switch (sel) {
@@ -10783,20 +10783,6 @@ extern "C" void func_002659C0(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002659E8);
 #ifdef SKIP_ASM
-struct cDsObj2659E8 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void CheckDevice(int a);
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual int IsBusy();
-};
-
 extern void* D_004A33D8;
 extern int MemCardDevice;
 
@@ -10809,8 +10795,8 @@ extern int MemCardDevice;
  */
 extern "C" void func_002659E8(cSharedLoginMan* self)
 {
-    if (((cDsObj2659E8*)D_004A33D8)->IsBusy() == 0) {
-        ((cDsObj2659E8*)D_004A33D8)->CheckDevice(MemCardDevice);
+    if (((cMemCard*)D_004A33D8)->IsBusy() == 0) {
+        ((cMemCard*)D_004A33D8)->CheckDevice(MemCardDevice);
     }
 }
 #endif
@@ -10818,29 +10804,6 @@ extern "C" void func_002659E8(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265A38);
 #ifdef SKIP_ASM
-struct cDsObj265A38 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual int GetFreeSpace();
-};
-
 extern void* D_004A33D8;
 
 /**
@@ -10852,7 +10815,7 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265A38(cSharedLoginMan* self)
 {
-    return ((cDsObj265A38*)D_004A33D8)->GetFreeSpace();
+    return ((cMemCard*)D_004A33D8)->GetFreeSpace();
 }
 #endif
 
@@ -10867,20 +10830,6 @@ extern "C" void func_00265E80(cSharedLoginMan* state);
 extern "C" void func_00265EC8(cSharedLoginMan* state);
 extern "C" void func_00265F00(cSharedLoginMan* state);
 extern "C" int func_003F80E0(int* status);
-
-struct cDsObj265A68 {
-    virtual void v01();
-    virtual void v02();
-    virtual void Update();
-    virtual void v04();
-    virtual void CheckDevice(int a);
-    virtual void v06();
-    virtual void v07();
-    virtual void Format();
-    virtual void v09();
-    virtual void v10();
-    virtual int IsBusy();
-};
 
 /**
  * Updates the shared-login manager's card state machine one step.
@@ -10898,33 +10847,33 @@ struct cDsObj265A68 {
 // Advances the DirtySock login state machine one step; each "wait" state checks that the socket is idle.
 extern "C" void func_00265A68(int* state)
 {
-    ((cDsObj265A68*)D_004A33D8)->Update();
+    ((cMemCard*)D_004A33D8)->Update();
     int status = 0;
     switch (*state) {
     case 0:
         break;
     case 2:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             func_00265D98((cSharedLoginMan*)state);
         }
         break;
     case 6:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             func_00265E40((cSharedLoginMan*)state);
         }
         break;
     case 10:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             func_00265E80((cSharedLoginMan*)state);
         }
         break;
     case 14:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             func_00265EC8((cSharedLoginMan*)state);
         }
         break;
     case 18:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             func_00265F00((cSharedLoginMan*)state);
         }
         break;
@@ -10948,18 +10897,18 @@ extern "C" void func_00265A68(int* state)
     case 12:
     case 16:
     case 21:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            ((cDsObj265A68*)D_004A33D8)->CheckDevice(0);
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+            ((cMemCard*)D_004A33D8)->CheckDevice(0);
         }
         break;
     case 19:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            ((cDsObj265A68*)D_004A33D8)->Format();
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+            ((cMemCard*)D_004A33D8)->Format();
             *state = 20;
         }
         break;
     case 20:
-        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
             if (D_004A3940 != 0) {
                 *state = 22;
             } else {
@@ -10976,64 +10925,6 @@ extern "C" void func_00265A68(int* state)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265CB0);
 #ifdef SKIP_ASM
-struct cDsObj265CB0 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual bool IsAvailable1();
-    virtual void v54();
-    virtual bool IsFormatted1();
-};
-
 extern void* D_004A33D8;
 
 /**
@@ -11046,8 +10937,8 @@ extern void* D_004A33D8;
  */
 extern "C" bool func_00265CB0(cSharedLoginMan* self)
 {
-    if (((cDsObj265CB0*)D_004A33D8)->IsAvailable1() != 0) {
-        return !((cDsObj265CB0*)D_004A33D8)->IsFormatted1();
+    if (((cMemCard*)D_004A33D8)->IsAvailable1() != 0) {
+        return !((cMemCard*)D_004A33D8)->IsFormatted();
     }
     return false;
 }
@@ -11056,56 +10947,6 @@ extern "C" bool func_00265CB0(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265D08);
 #ifdef SKIP_ASM
-struct cDsObj265D08 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-};
-
 extern void* D_004A33D8;
 
 /**
@@ -11116,79 +10957,13 @@ extern void* D_004A33D8;
  */
 extern "C" void func_00265D08(cSharedLoginMan* self)
 {
-    ((cDsObj265D08*)D_004A33D8)->v47();
+    ((cMemCard*)D_004A33D8)->ClearCardChanged();
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265D38);
 #ifdef SKIP_ASM
-struct cDsObj265D38 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual int CardChanged1();
-};
-
 extern void* D_004A33D8;
 
 /**
@@ -11199,69 +10974,13 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265D38(cSharedLoginMan* self)
 {
-    return ((cDsObj265D38*)D_004A33D8)->CardChanged1();
+    return ((cMemCard*)D_004A33D8)->CardChanged();
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265D68);
 #ifdef SKIP_ASM
-struct cDsObj265D68 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual bool IsAvailable1();
-};
-
 extern void* D_004A33D8;
 
 /**
@@ -11272,7 +10991,7 @@ extern void* D_004A33D8;
  */
 extern "C" bool func_00265D68(cSharedLoginMan* self)
 {
-    return !((cDsObj265D68*)D_004A33D8)->IsAvailable1();
+    return !((cMemCard*)D_004A33D8)->IsAvailable1();
 }
 #endif
 
@@ -11511,11 +11230,6 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" int func_003FA1D0(int code, void* out);
 extern "C" void func_002C6810(void* obj, void* a1);
 
-struct sDsErr265FB8 {
-    char a;
-    char b;
-};
-
 /**
  * Memory-card callback 0 of the network-account library: starts a directory search on the card.
  *
@@ -11528,8 +11242,8 @@ struct sDsErr265FB8 {
  */
 extern "C" void func_00265FB8(void* pattern, int code)
 {
-    sDsErr265FB8 err;
-    func_003FA1D0(code, &err);
+    unsigned char portSlot[2];
+    func_003FA1D0(code, portSlot);
     MEM_fill(D_00537190, 0, 0x40);
     func_002C6810(D_004A33D8, pattern);
     D_004A33D4 = 2;
@@ -11542,11 +11256,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266010);
 extern int D_004A33D4;
 extern "C" int func_003FA1D0(int code, void* out);
 
-struct sDsErr266010 {
-    char a;
-    char b;
-};
-
 /**
  * Memory-card callback 1 of the network-account library: asks for the card's free space.
  *
@@ -11557,8 +11266,8 @@ struct sDsErr266010 {
  */
 extern "C" void func_00266010(int code)
 {
-    sDsErr266010 err;
-    func_003FA1D0(code, &err);
+    unsigned char portSlot[2];
+    func_003FA1D0(code, portSlot);
     D_004A33D4 = 9;
 }
 #endif
@@ -11569,11 +11278,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266038);
 extern int D_004A33D4;
 extern "C" int func_003FA1D0(int code, void* out);
 
-struct sDsErr266038 {
-    char a;
-    char b;
-};
-
 /**
  * Memory-card callback 2 of the network-account library: sets up a query that func_00266358 answers with 0x800.
  *
@@ -11583,8 +11287,8 @@ struct sDsErr266038 {
  */
 extern "C" void func_00266038(int code)
 {
-    sDsErr266038 err;
-    func_003FA1D0(code, &err);
+    unsigned char portSlot[2];
+    func_003FA1D0(code, portSlot);
     D_004A33D4 = 10;
 }
 #endif
@@ -11599,11 +11303,6 @@ extern int D_004A33E4;
 extern "C" int func_003FA1D0(int code, void* out);
 void func_002C67E8(void* self, int a1);
 
-struct sDsErr266060 {
-    unsigned char a;
-    unsigned char b;
-};
-
 /**
  * Memory-card callback 3 of the network-account library: starts checking the card in a port.
  *
@@ -11615,9 +11314,9 @@ struct sDsErr266060 {
  */
 extern "C" void func_00266060(int code)
 {
-    sDsErr266060 err;
-    func_003FA1D0(code, &err);
-    MemCardDevice = err.a;
+    unsigned char portSlot[2];
+    func_003FA1D0(code, portSlot);
+    MemCardDevice = portSlot[0];
     D_004A33E4 = 9;
     func_002C67E8(D_004A33D8, MemCardDevice);
     D_004A33D4 = 1;
@@ -11630,11 +11329,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002660A0);
 extern int D_004A33D4;
 extern "C" int func_003FA1D0(int code, void* out);
 
-struct sDsErr2660A0 {
-    char a;
-    char b;
-};
-
 /**
  * Memory-card callback 4 of the network-account library: does no card work and reports success.
  *
@@ -11645,8 +11339,8 @@ struct sDsErr2660A0 {
  */
 extern "C" void func_002660A0(int code)
 {
-    sDsErr2660A0 err;
-    func_003FA1D0(code, &err);
+    unsigned char portSlot[2];
+    func_003FA1D0(code, portSlot);
     D_004A33D4 = 0x3;
 }
 #endif
@@ -11660,11 +11354,6 @@ extern char str_pct_s_pct_s_g[];
 extern "C" int func_003FA1D0(int code, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_002C6968(void* obj, char* str, int a2);
-
-struct sDsErr2660C8 {
-    unsigned char a;
-    unsigned char b;
-};
 
 /**
  * Memory-card callback 5 of the network-account library: opens a file on the card.
@@ -11680,9 +11369,9 @@ struct sDsErr2660C8 {
  */
 extern "C" void func_002660C8(const char* dirName, const char* fileName, int code, int openMode)
 {
-    sDsErr2660C8 err;
+    unsigned char portSlot[2];
     char buf[80];
-    func_003FA1D0(code, &err);
+    func_003FA1D0(code, portSlot);
     sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
     func_002C6968(D_004A33D8, buf, openMode);
     D_004A33D4 = 4;
@@ -11717,11 +11406,6 @@ extern "C" int func_003FA1D0(int code, void* out);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_002C6C50(void* obj, char* str, int a2);
 
-struct sDsErr266170 {
-    unsigned char a;
-    unsigned char b;
-};
-
 /**
  * Memory-card callback 7 of the network-account library: creates a directory on the card.
  *
@@ -11735,9 +11419,9 @@ struct sDsErr266170 {
  */
 extern "C" void func_00266170(const char* name, int requestValue, int code)
 {
-    sDsErr266170 err;
+    unsigned char portSlot[2];
     char buf[80];
-    func_003FA1D0(code, &err);
+    func_003FA1D0(code, portSlot);
     strcpy(buf, name);
     func_002C6C50(D_004A33D8, buf, requestValue);
     D_004A33D4 = 11;
@@ -11754,11 +11438,6 @@ extern "C" int func_003FA1D0(int code, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_002C6CE0(void* obj, char* str);
 
-struct sDsErr2661D8 {
-    unsigned char a;
-    unsigned char b;
-};
-
 /**
  * Memory-card callback 8 of the network-account library: deletes a file on the card.
  *
@@ -11772,9 +11451,9 @@ struct sDsErr2661D8 {
  */
 extern "C" void func_002661D8(const char* dirName, const char* fileName, int code)
 {
-    sDsErr2661D8 err;
+    unsigned char portSlot[2];
     char buf[80];
-    func_003FA1D0(code, &err);
+    func_003FA1D0(code, portSlot);
     sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
     func_002C6CE0(D_004A33D8, buf);
     D_004A33D4 = 0xC;
@@ -11790,11 +11469,6 @@ extern "C" int func_003FA1D0(int code, void* out);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_002C6CE0(void* obj, char* str);
 
-struct sDsErr266240 {
-    unsigned char a;
-    unsigned char b;
-};
-
 /**
  * Memory-card callback 9 of the network-account library: deletes a directory on the card.
  *
@@ -11806,9 +11480,9 @@ struct sDsErr266240 {
  */
 extern "C" void func_00266240(const char* name, int code)
 {
-    sDsErr266240 err;
+    unsigned char portSlot[2];
     char buf[80];
-    func_003FA1D0(code, &err);
+    func_003FA1D0(code, portSlot);
     strcpy(buf, name);
     func_002C6CE0(D_004A33D8, buf);
     D_004A33D4 = 13;
@@ -11937,29 +11611,6 @@ void func_002C67E8(void* self, int a1);
 extern "C" void func_002C68C8(void* self, int i, char* out);
 extern "C" int func_003FA360(char* name);
 
-struct cDsObj266358 {
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual int IsBusy();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual int GetFreeSpace();
-};
-
 /**
  * Memory-card callback 15 of the network-account library: polls the card operation started by the other callbacks.
  *
@@ -11989,7 +11640,7 @@ extern "C" int func_00266358(int* status, int* out)
         *out = 0x800;
         return 0;
     }
-    if (((cDsObj266358*)D_004A33D8)->IsBusy()) {
+    if (((cMemCard*)D_004A33D8)->IsBusy()) {
         *status = 1;
         return 0;
     }
@@ -12033,7 +11684,7 @@ extern "C" int func_00266358(int* status, int* out)
         *out = D_004A3940;
         break;
     case 9:
-        *out = ((cDsObj266358*)D_004A33D8)->GetFreeSpace() << 10;
+        *out = ((cMemCard*)D_004A33D8)->GetFreeSpace() << 10;
         break;
     }
     return 0;
@@ -12243,7 +11894,7 @@ extern "C" void cUsbKeyboard__cUsbKeyboard(int, int);
 extern "C" void func_002667C0(void) {
     if ((*(int*)&Keyboard) != 0) {
         cUsbKeyboard__cUsbKeyboard((*(int*)&Keyboard), 3);
-        (*(int*)&Keyboard) = 0;
+        Keyboard = 0;
     }
 }
 #endif

@@ -6,6 +6,8 @@
 #include "ealib/mtdecf.h"
 #include "ealib/sfilter.h"
 #include "ealib/snd.h"
+#define EALIB_SMIDI_NO_GLOBAL
+#include "ealib/smidi.h"
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
 #ifdef SKIP_ASM
@@ -380,8 +382,8 @@ int SHAPE_size(SHAPEIMAGE* shp) {
     case 0x7C:
         return (*(int*)&shp->width << 3) + 8;
     case 105:
-        if (*(unsigned short*)&shp->height & 0x10) {
-            payloadSize = *(unsigned short*)&shp->width;
+        if ((unsigned short)shp->height & 0x10) {
+            payloadSize = (unsigned short)shp->width;
             if (payloadSize == 0) payloadSize = 0xF0;
             return payloadSize + 0x10;
         }
@@ -1304,20 +1306,11 @@ int sizerefpack(unsigned char *packed, int *outlen) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_getopts);
 #ifdef SKIP_ASM
-struct Cfg_4DD8 {
-    char pad00[0x20];
-    struct SNDSYSSET sub;
-    char padC0[0xD4 - 0xC0];
-};
-struct G_4DD8 {
-    struct Cfg_4DD8 cfg;
-    struct SNDSYSSET saved;
-};
 extern int gotcaps;
 extern int D_0044C460;
 extern int SNDPLATFORM_outputcaps_4DD8() __asm__("SNDPLATFORM_outputcaps");
 
-int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) __asm__("SNDSYS_getopts");
+int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) __asm__("SNDSYS_getopts");
 
 /**
  * Copies the sound system's options into a caller's buffer, setting the defaults on first use.
@@ -1327,10 +1320,10 @@ int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) __asm__("SNDSYS_getopts");
  * 0xD4-byte block at sndgs out. Called by SNDSYSI_init and the game's sound setup (System_SetRandomSeed ...
  * System_Init), which change fields and pass them to SNDSYS_setopts.
  *
- * @param out  receives the 0xD4-byte options
+ * @param out  receives the 0xD4-byte options (sndgs.sso)
  * @return SNDPLATFORM_outputcaps's result from the first call
  */
-int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) {
+int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) {
     if (gotcaps == 0) {
         D_0044C460 = SNDPLATFORM_outputcaps_4DD8();
         gotcaps = 1;
@@ -1338,9 +1331,9 @@ int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) {
         sndgs.sso.set.sndheapthreshold = 90;
         sndgs.sso.set.stealequalpriorityvoices = 1;
         sndgs.sso.set.updateperiod = -1.0f;
-        *(struct SNDSYSSET*)&sndgs.prevset = *(struct SNDSYSSET*)&sndgs.sso.set;
+        sndgs.prevset = sndgs.sso.set;
     }
-    *out = *(struct Cfg_4DD8*)&sndgs.sso;
+    *out = sndgs.sso;
     return D_0044C460;
 }
 #endif
@@ -1354,67 +1347,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_setopts);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-struct sA8E8Cfg {                   /* 0xA0: the current setup (+0x20, D_0050A908) and a saved copy (+0xD4) */
-    char pad00[0x4];
-    int f04;
-    unsigned short f08;             /* number of slots (f1F4) */
-    unsigned short f0A;
-    unsigned short f0C;
-    unsigned char f0E;
-    unsigned char f0F;
-    unsigned char f10;
-    char pad11[0x14 - 0x11];
-    float f14;
-    char pad18[0x1C - 0x18];
-    unsigned char f1C;
-    char pad1D;
-    unsigned char f1E;
-    unsigned char f1F;
-    unsigned char f20;
-    unsigned char f21;
-    unsigned char f22;
-    char pad23[0x26 - 0x23];
-    unsigned char f26;
-    unsigned char f27;
-    unsigned char f28;
-    unsigned char f29;
-    unsigned char f2A;
-    char f2B;
-    unsigned char f2C;
-    char pad2D;
-    short f2E[3];
-    char pad34[0x44 - 0x34];
-    unsigned int f44;
-    int f48;
-    char *f4C;                      /* also D_0050A954 */
-    char pad50[0x58 - 0x50];
-    unsigned short f58[5][6];       /* row n: n + 1 angles */
-    char pad94[0xA0 - 0x94];
-};
-struct sA8E8Tail {                  /* +0xC0 (D_0050A9A8) */
-    int f00;
-    int f04;
-    void (*f08)(void);              /* D_0050A9B0 */
-    int f0C;
-    int f10;
-};
-struct sA8E8Setup {                 /* 0xD4: what SNDSYS_getopts hands out */
-    unsigned short f00;
-    unsigned short f02;
-    unsigned char f04;
-    unsigned char f05;
-    unsigned char f06;
-    unsigned char f07;
-    unsigned char f08;
-    char pad09[0xC - 0x9];
-    unsigned char f0C;
-    char pad0D[0x13 - 0xD];
-    unsigned char f13;
-    short f14[3];
-    short f1A[3];
-    struct sA8E8Cfg cfg;
-    struct sA8E8Tail tail;
-};
 struct sA8E8Node {                  /* +0x1B4 list */
     struct sA8E8Node *next;
     int f04;
@@ -1449,8 +1381,8 @@ struct sA8E8Bus {                   /* 0x14, at +0x1F8 / +0x20C / +0x220, indexe
     struct sA8E8Pan f0C;
 };
 struct sA8E8 {
-    struct sA8E8Setup setup;
-    struct sA8E8Cfg saved;
+    struct SNDSYSOPTS setup;
+    struct SNDSYSSET saved;
     signed char f174;               /* also D_0050AA5C */
     char f175;
     volatile unsigned char f176;    /* lock depth */
@@ -1487,10 +1419,10 @@ struct sA8E8 {
     volatile unsigned int f330;
     volatile unsigned short f334;
 };
-extern struct sA8E8Cfg D_0050A908;      /* sndgs.setup.cfg */
-extern struct sA8E8Tail D_0050A9A8;     /* sndgs.setup.tail */
+extern struct SNDSYSSET D_0050A908;     /* sndgs.sso.set */
+extern struct SNDSYSVEC D_0050A9A8;     /* sndgs.sso.vec */
 extern int SNDPLATFORM_outputset(void);
-int SNDSYS_setopts_impl(struct sA8E8Setup *p) __asm__("SNDSYS_setopts");
+int SNDSYS_setopts_impl(SNDSYSOPTS *p) __asm__("SNDSYS_setopts");
 /**
  * Applies sound system options: copies them in, updates the driver and saves a copy.
  *
@@ -1501,12 +1433,12 @@ int SNDSYS_setopts_impl(struct sA8E8Setup *p) __asm__("SNDSYS_setopts");
  * @param sysOpts  the options (as filled by SNDSYS_getopts)
  * @return 0
  */
-int SNDSYS_setopts_impl(struct sA8E8Setup *sysOpts) {
-    __builtin_memcpy(&D_0050A908, &sysOpts->cfg, sizeof(struct sA8E8Cfg));
-    D_0050A9A8 = sysOpts->tail;
+int SNDSYS_setopts_impl(SNDSYSOPTS *sysOpts) {
+    __builtin_memcpy(&D_0050A908, &sysOpts->set, sizeof(struct SNDSYSSET));
+    D_0050A9A8 = sysOpts->vec;
     SNDPLATFORM_outputset();
-    /* sndgs.saved = sndgs.setup.cfg, addressed from D_0050A9A8 as in the target */
-    __builtin_memcpy((char *)&D_0050A9A8 + 0x14, (char *)&D_0050A9A8 - 0xA0, sizeof(struct sA8E8Cfg));
+    /* sndgs.prevset = sndgs.sso.set, addressed from D_0050A9A8 as in the target */
+    __builtin_memcpy((char *)&D_0050A9A8 + 0x14, (char *)&D_0050A9A8 - 0xA0, sizeof(struct SNDSYSSET));
     return 0;
 }
 #endif
@@ -1520,8 +1452,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_init);
 extern char str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug;
 extern void memset_5158(void *, int, int) __asm__("memset");
 void SNDMEMI_init_5158(struct sA8E8Heap *a0, int a1) __asm__("SNDMEMI_init");
-int SNDSYS_getopts_5158(struct sA8E8Setup *out) __asm__("SNDSYS_getopts");
-int SNDSYS_setopts_impl(struct sA8E8Setup *p) __asm__("SNDSYS_setopts");
+int SNDSYS_getopts_5158(SNDSYSOPTS *out) __asm__("SNDSYS_getopts");
+int SNDSYS_setopts_impl(SNDSYSOPTS *p) __asm__("SNDSYS_setopts");
 void SNDI_randomseed(int arg0);
 void SNDI_mutexalloc(void);
 void SNDSYS_entercritical(void);
@@ -1560,16 +1492,16 @@ int SNDSYSI_init_impl(void *buf, int size, int headerVersion) {
     memset_5158(buf, 0, size);
     SNDMEMI_init_5158(buf, size);
     if (sndgs.voicestotal == 0) {
-        result = SNDSYS_getopts_5158(&(*(struct sA8E8Setup*)&sndgs.sso));
+        result = SNDSYS_getopts_5158(&sndgs.sso);
         if (result < 0) return result;
-        SNDSYS_setopts_impl(&(*(struct sA8E8Setup*)&sndgs.sso));
+        SNDSYS_setopts_impl(&sndgs.sso);
     }
     SNDI_randomseed(((int)sndgs.sso.set.randomseed));
     SNDI_mutexalloc();
     sndgs.installed = 1;
     SNDSYS_entercritical();
-    *(struct CHANPUB**)&sndgs.chan = SNDMEMI_alloc_5158(sndgs.voicestotal * 140);
-    *(struct BANKLIST**)&sndgs.banklist = SNDMEMI_alloc_5158(sndgs.sso.set.maxbanks << 4);
+    sndgs.chan = SNDMEMI_alloc_5158(sndgs.voicestotal * 140);
+    sndgs.banklist = SNDMEMI_alloc_5158(sndgs.sso.set.maxbanks << 4);
     SNDSYS_leavecritical();
     sndgs.servertick = 0;
     sndgs.mastervol = 0x7F;
@@ -1624,7 +1556,7 @@ extern void SNDI_freespkrtable_5320() __asm__("SNDI_freespkrtable");
 extern void func_003B8A38_5320() __asm__("func_003B8A38");
 extern void SNDPLATFORM_restore_5320() __asm__("SNDPLATFORM_restore");
 extern void SNDSYS_entercritical_5320() __asm__("SNDSYS_entercritical");
-extern void SNDMEMI_free_5320(int) __asm__("SNDMEMI_free");
+extern void SNDMEMI_free_5320(void *) __asm__("SNDMEMI_free");
 extern void SNDSYS_leavecritical_5320() __asm__("SNDSYS_leavecritical");
 extern int SNDMEMI_restore_5320() __asm__("SNDMEMI_restore");
 extern void SNDI_mutexfree_5320() __asm__("SNDI_mutexfree");
@@ -1654,8 +1586,8 @@ int SNDSYS_restore(void) {
     if (sndgs.bankremove) sndgs.bankremove(-1);
     SNDPLATFORM_restore_5320();
     SNDSYS_entercritical_5320();
-    SNDMEMI_free_5320(((int)(struct CHANPUB*)sndgs.chan));
-    SNDMEMI_free_5320(((int)(struct BANKLIST*)sndgs.banklist));
+    SNDMEMI_free_5320(sndgs.chan);
+    SNDMEMI_free_5320(sndgs.banklist);
     SNDSYS_leavecritical_5320();
     memResult = SNDMEMI_restore_5320();
     sndgs.installed = 0;
@@ -1978,9 +1910,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_add100hzclient);
  *
  * @param client  the client function
  */
-void SNDSYS_add100hzclient(int client) {
+void SNDSYS_add100hzclient(void (*client)(void)) {
     if (sndgs.installed != 0) {
-        sndgs.serverclient100hz[sndgs.numserverclients100hz] = (void (*)(void))client;
+        sndgs.serverclient100hz[sndgs.numserverclients100hz] = client;
         sndgs.numserverclients100hz++;
     }
 }
@@ -2032,9 +1964,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_adduserdataclient);
  *
  * @param client  the callback, called with an event record
  */
-void SNDSYS_adduserdataclient(int client) {
+void SNDSYS_adduserdataclient(void (*client)(void *)) {
     if (sndgs.installed != 0) {
-        sndgs.userdataclient[sndgs.numuserdataclients] = (void (*)(void*))client;
+        sndgs.userdataclient[sndgs.numuserdataclients] = client;
         sndgs.numuserdataclients++;
     }
 }
@@ -2151,9 +2083,6 @@ void SNDMEMI_constrain(int *freeAddr, int *freeSpace) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_init);
 #ifdef SKIP_ASM
-struct G_5BD0 { char pad[0x234]; struct SNDMEMSTATE *cur; };
-
-extern struct G_5BD0 sndgs_5BD0 __asm__("sndgs");
 /**
  * Sets up the sound system's memory heap in a buffer.
  *
@@ -2165,15 +2094,17 @@ extern struct G_5BD0 sndgs_5BD0 __asm__("sndgs");
  * @param heapSize  its size in bytes
  */
 void SNDMEMI_init(struct SNDMEMSTATE *heap, int heapSize) {
-    sndgs_5BD0.cur = heap;
+    // ORIGINAL-PTR: EA's sound heap carves one raw buffer (On Tour: SNDMEMI_init(void* pheap, int size)): the state
+    // at its start, the 16-byte aligned data after it and the allocation records growing down from its end
+    sndgs.mm = heap;
     heap->heapsize = heapSize;
-    (*(int*)&sndgs_5BD0.cur->r) = (int)heap + heapSize - 8;
+    sndgs.mm->r = (struct SNDMEMREC *)((char *)heap + heapSize - 8);
     heapSize -= 0xF;
-    (*(int*)&sndgs_5BD0.cur->pheap) = (int)heap + 0x18;
-    (*(int*)&sndgs_5BD0.cur->pheap) += 0xF;
-    (*(int*)&sndgs_5BD0.cur->pheap) &= 0xFFFFFFF0;
-    sndgs_5BD0.cur->endaddr = heapSize - 0x20;
-    sndgs_5BD0.cur->lowmark = heapSize;
+    sndgs.mm->pheap = (char *)(heap + 1);
+    sndgs.mm->pheap += 0xF;
+    sndgs.mm->pheap = (char *)((unsigned int)sndgs.mm->pheap & 0xFFFFFFF0);
+    sndgs.mm->endaddr = heapSize - 0x20;
+    sndgs.mm->lowmark = heapSize;
 }
 #endif
 
@@ -2323,7 +2254,7 @@ int SNDPLATFORM_outputlatency(void);
  */
 int SNDPROFILE_outputlatency(void) {
     int latencyMs;
-    if (*(char*)&sndgs.installed != 0) {
+    if (sndgs.installed != 0) {
         latencyMs = SNDPLATFORM_outputlatency();
     } else {
         latencyMs = 0;
@@ -2568,7 +2499,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadercopy);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Passes a and slot n's old data to func_0041610C, then stores a in the slot.
 extern int SNDbankheadersize_6548(int) __asm__("SNDbankheadersize");
-extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
+extern int func_0041610C_6548(void *, void *, int) __asm__("func_0041610C");
 struct G_6548 { char p[0x1F4]; struct BANKLIST *slots; };
 /**
  * Copies a bank's header to new memory and makes the bank use the copy.
@@ -2580,14 +2511,14 @@ struct G_6548 { char p[0x1F4]; struct BANKLIST *slots; };
  * @param n  the bank handle
  * @return 0, or SNDbankheadersize's negative result
  */
-int SNDbankheadercopy(int destMem, int n) {
+int SNDbankheadercopy(void *destMem, int n) {
     int result = 0;
     int x = SNDbankheadersize_6548(n);
     if (x < 0) {
         result = x;
     } else {
-        func_0041610C_6548(destMem, ((int)sndgs.banklist[n].phdr), x);
-        (*(int*)&sndgs.banklist[n].phdr) = destMem;
+        func_0041610C_6548(destMem, sndgs.banklist[n].phdr, x);
+        sndgs.banklist[n].phdr = destMem;
     }
     return result;
 }
@@ -2630,8 +2561,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SNDBANKI_valid_6670() __asm__("SNDBANKI_valid");
-extern void SNDI_patchtohdr_6670(int, int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, int, int) __asm__("SNDI_patchtohdr");
-extern int SNDBANKI_getppatch_6670(int, int) __asm__("SNDBANKI_getppatch");
+extern void SNDI_patchtohdr_6670(struct BANKVER5 *, unsigned char *, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, int, int)
+    __asm__("SNDI_patchtohdr");
+extern unsigned char *SNDBANKI_getppatch_6670(struct BANKVER5 *, int) __asm__("SNDBANKI_getppatch");
 
 /**
  * Reads a bank patch's sample format, attributes and description without keeping its data.
@@ -2649,15 +2581,15 @@ extern int SNDBANKI_getppatch_6670(int, int) __asm__("SNDBANKI_getppatch");
  * @return 0, or -8
  */
 int func_003B6670(int bankHandle, int patchNum, SNDSAMPLEFORMAT* formatOut, SNDSAMPLEATTR *attrOut, int descOut) {
-    int off, patch, i;
+    unsigned char *patch;
+    int i;
     int *chanBuf;
     if (SNDBANKI_valid_6670() < 0) return -8;
-    off = bankHandle * 0x10;
-    patch = SNDBANKI_getppatch_6670(*(int *)(off + ((int)(struct BANKLIST*)sndgs.banklist)), patchNum);
+    patch = SNDBANKI_getppatch_6670(sndgs.banklist[bankHandle].phdr, patchNum);
     if (patch == 0) return -8;
     i = 0;
     SNDSYS_entercritical();
-    SNDI_patchtohdr_6670(*(int *)(off + ((int)(struct BANKLIST*)sndgs.banklist)), patch, formatOut, attrOut, descOut, 0);
+    SNDI_patchtohdr_6670(sndgs.banklist[bankHandle].phdr, patch, formatOut, attrOut, descOut, 0);
     if (formatOut->channels != 0) {
         chanBuf = (int *)attrOut->ptsdata;
         do {
@@ -2686,9 +2618,9 @@ extern void SNDPLATFORM_asyncresolvetimbre_6788(void *, int, int) __asm__("SNDPL
 /**
  * Resolves a patch's sample addresses against uploaded sample data and sends its user data.
  *
- * Walks the patch's tags (SNDI_parsetimbre into a 208-byte header); for each whose render bits (+0x18) match the mask it
- * resolves the sample with SNDPLATFORM_asyncresolvetimbre and dispatches its user data with type 0 (SNDBANKI_userdatacallback). Called by
- * SNDbankadd.
+ * Walks the patch's tags (SNDI_parsetimbre into a SNDIPATCHHEADER); for each whose render bits (rendermode) match the
+ * mask it resolves the sample with SNDPLATFORM_asyncresolvetimbre and dispatches its user data with type 0
+ * (SNDBANKI_userdatacallback). Called by SNDbankadd.
  *
  * @param renderMask  which render kinds to resolve (0x100 or 8)
  * @param taggedPatch  the patch
@@ -2697,16 +2629,16 @@ extern void SNDPLATFORM_asyncresolvetimbre_6788(void *, int, int) __asm__("SNDPL
  * @return 0
  */
 int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOffset) {
-    char sp[208];
+    SNDIPATCHHEADER timbre;
     char *cursor;
     int moreTags;
 
     cursor = taggedPatch + 4;
     do {
-        moreTags = SNDI_parsetimbre_6788(&cursor, sp);
-        if (*(unsigned short *)(sp + 0x18) & renderMask) {
-            SNDPLATFORM_asyncresolvetimbre_6788(sp, sampleData, firstOffset);
-            SNDBANKI_userdatacallback_6788(sp, 0);
+        moreTags = SNDI_parsetimbre_6788(&cursor, &timbre);
+        if (timbre.rendermode & renderMask) {
+            SNDPLATFORM_asyncresolvetimbre_6788(&timbre, sampleData, firstOffset);
+            SNDBANKI_userdatacallback_6788(&timbre, 0);
         }
     } while (moreTags != 0);
     return 0;
@@ -2742,8 +2674,8 @@ int SNDBANK_play(int bankHandle, int patchNum, int playOpts) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_startstream);
 #ifdef SKIP_ASM
-extern int SNDCTRL_filteradd(int, int);
-extern int SNDPKTPLAY_start(int, int, int, int);
+extern int SNDCTRL_filteradd(int, SNDFILTERDEF *);
+extern int SNDPKTPLAY_start(int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, SNDPLAYOPTS *);
 
 /**
  * Starts a stream's voice with its current format and header.
@@ -2756,11 +2688,10 @@ extern int SNDPKTPLAY_start(int, int, int, int);
  */
 void SNDSTRMI_startstream(SNDSTREAMCHANNEL *stream) {
     int i = 0;
-    stream->shandle = SNDPKTPLAY_start(stream->packetinstancehandle, (int)&stream->cursf, (int)&stream->cursa,
-                                       (int)&stream->po);
+    stream->shandle = SNDPKTPLAY_start(stream->packetinstancehandle, &stream->cursf, &stream->cursa, &stream->po);
     do {
         if (stream->filter[i].filter != 0) {
-            SNDCTRL_filteradd(stream->shandle, (int)&stream->filter[i]);
+            SNDCTRL_filteradd(stream->shandle, &stream->filter[i]);
         }
         i++;
     } while (i == 0);
@@ -2918,7 +2849,7 @@ void SNDSTRMI_framescallback(int packetChan, unsigned int n, struct SNDSTREAMCHA
     while (1) {
         struct SNDSTREAMREQUEST *request;
         i++;
-        request = (*(struct SNDSTREAMREQUEST**)&stream->allocatedrequests);
+        request = (struct SNDSTREAMREQUEST *)stream->allocatedrequests.phead;
         if (i >= 201) {
             SNDSTRMI_removerequest(request->sndrequesthandle);
             return;
@@ -2969,21 +2900,6 @@ struct sA0A0Hdr {                   /* 0x68 */
     char pad30[0x48 - 0x30];
     int f48[4];
     int f58[4];
-};
-struct sA0A0Parm {                  /* 0x18, handed to SNDPKTPLAY_start */
-    signed char f00;
-    signed char f01;
-    char pad02[0x4 - 0x2];
-    char f04;
-    char f05;
-    char pad06[0x8 - 0x6];
-    short f08;
-    short f0A;
-    short f0C;
-    short f0E;
-    char pad10[0x14 - 0x10];
-    short f14;
-    char pad16[0x18 - 0x16];
 };
 struct sA0A0Trk {                   /* 0x18 */
     char pad00[0x10];
@@ -3589,7 +3505,7 @@ int SNDSTRM_destroy_7838(int streamHandle) {
     }
     SNDPKTPLAY_destroy(stream->packetinstancehandle);
     w = stream->streamhandle;
-    borrowed = (*(volatile unsigned char*)&stream->fromtap);
+    borrowed = (unsigned char)stream->fromtap;
     sndss_7838[streamHandle] = 0;
     if (borrowed == 0)
         STREAM_destroy(w);
@@ -4048,7 +3964,7 @@ int func_003B86C0_7F18(int) __asm__("func_003B86C0");
  * Returns a stream's current volume.
  *
  * Asks the voice with func_003B86C0; when the stream has no live voice it returns the volume in the stream's play
- * options (+0xEC).
+ * options (po.vol).
  *
  * @param streamHandle  the stream handle
  * @return the volume, or -8 for an unknown stream
@@ -4063,7 +3979,7 @@ int func_003B7F18(int streamHandle) {
     }
     volume = func_003B86C0_7F18(stream->shandle);
     if (volume < 0) {
-        volume = (*(struct sA0A0Parm*)&stream->po).f00;
+        volume = stream->po.vol;
     }
     return volume;
 }
@@ -4079,7 +3995,7 @@ int SND3dpos(int, int, int);
 /**
  * Sets a stream's 3D position (azimuth and elevation).
  *
- * Stores both in the stream's play options (+0xEC) (+0x08, +0x0A) and passes them to the voice with SND3dpos. Used
+ * Stores both in the stream's play options (po.azimuth, po.elevation) and passes them to the voice with SND3dpos. Used
  * by the game's stream system.
  *
  * @param streamHandle  the stream handle
@@ -4094,8 +4010,8 @@ int func_003B7F60(int streamHandle, int azimuth, int elevation) {
     if (stream == 0) {
         return -8;
     }
-    (*(struct sA0A0Parm*)&stream->po).f08 = azimuth;
-    (*(struct sA0A0Parm*)&stream->po).f0A = elevation;
+    stream->po.azimuth = azimuth;
+    stream->po.elevation = elevation;
     SND3dpos(stream->shandle, azimuth, elevation);
     return 0;
 }
@@ -4175,7 +4091,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
 /**
  * Sets a stream's effect send level for an effect bus.
  *
- * Stores the level in the stream's play options (+0xEC) (+0x05, whatever the bus) and passes both to the voice with
+ * Stores the level in the stream's play options (po.fxlevel0, whatever the bus) and passes both to the voice with
  * func_003B88C8. Used by the game's bank monitor.
  *
  * @param streamHandle  the stream handle
@@ -4190,7 +4106,7 @@ int func_003B8050(int streamHandle, int busIndex, int fxLevel) {
     if (stream == 0) {
         return -8;
     }
-    (*(struct sA0A0Parm*)&stream->po).f05 = fxLevel;
+    stream->po.fxlevel0 = fxLevel;
     func_003B88C8(stream->shandle, busIndex, fxLevel);
     return 0;
 }
@@ -4309,7 +4225,7 @@ int SNDmastervol(int masterVol) {
     sndgs.mastervol = masterVol;
     for (i = 0; i < sndgs.voicestotal; i++) {
         channel = &sndgs.chan[i];
-        if ((*(char*)&channel->status) == 1 && channel->handle >= 0) {
+        if ((channel->status) == 1 && channel->handle >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
         }
@@ -4638,7 +4554,7 @@ int func_003B8700(int soundHandle, int dryLevel) {
         setChan = -1;
         while (iSNDpatchkey_8700(chanIndex, &setChan) != 0) {
             
-            *(char*)&sndgs.chan[setChan].drylevel = dryLevel;
+            sndgs.chan[setChan].drylevel = dryLevel;
             func_003C2EC8_8700(setChan);
         }
     }
@@ -4718,7 +4634,7 @@ int SNDCTRL_timemult(int soundHandle, int timeMult) {
         setChan = -1;
         while (iSNDpatchkey_8838(chanIndex, &setChan) != 0) {
             int i = setChan;
-            *(short*)&sndgs.chan[i].timemult = timeMult;
+            sndgs.chan[i].timemult = timeMult;
             SNDPLATFORM_timemult_8838(i, timeMult);
         }
     }
@@ -4749,13 +4665,11 @@ extern void SNDPLATFORM_setfxlevel_88C8(int, int) __asm__("SNDPLATFORM_setfxleve
 int func_003B88C8(int soundHandle, int busIndex, int fxLevel) {
     int setChan;
     int chanIndex;
-    char *sndState;
     chanIndex = SNDVOICEI_get_88C8();
     if (chanIndex >= 0) {
         setChan = -1;
-        sndState = ((char*)&sndgs);
         while (iSNDpatchkey_88C8(chanIndex, &setChan) != 0) {
-            *(char *)(setChan * 0x8C + *(int *)(sndState + 0x1F0) + busIndex + 0x61) = fxLevel;
+            sndgs.chan[setChan].fxsendlevel[busIndex] = fxLevel;
             func_003BA740_88C8(busIndex, setChan);
             SNDPLATFORM_setfxlevel_88C8(setChan, busIndex);
         }
@@ -4956,7 +4870,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDCTRL_filteradd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int iSNDpatchkey_8CC8(int, int *) __asm__("iSNDpatchkey");
-extern void SNDPLATFORM_filteradd_8CC8(int, int) __asm__("SNDPLATFORM_filteradd");
+extern void SNDPLATFORM_filteradd_8CC8(int, SNDFILTERDEF *) __asm__("SNDPLATFORM_filteradd");
 
 /**
  * Applies a setting to each voice of a sound through SNDPLATFORM_filteradd.
@@ -4967,7 +4881,7 @@ extern void SNDPLATFORM_filteradd_8CC8(int, int) __asm__("SNDPLATFORM_filteradd"
  * @param filterDesc  the filter definition (On Tour: SNDFILTERDEF* psfd), passed to SNDPLATFORM_filteradd
  * @return the channel index, or -8 for a dead handle
  */
-int SNDCTRL_filteradd(int soundHandle, int filterDesc) {
+int SNDCTRL_filteradd(int soundHandle, SNDFILTERDEF *filterDesc) {
     int setVoice;
     int voice;
 
@@ -5043,8 +4957,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiupdatefade);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* sndms: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). Layout from every use in this
-   unit; field names are their offsets. */
+/* sndms: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). These offset-named views of
+   smidi.h's SNDMIDISTATE / SNDSEQINSTANCE / SNDMIDIPARTIAL / SNDMIDICHAN stay for SNDI_midiparsenoteon, whose
+   body is frozen (a marked fake match); every other function uses the smidi.h types through typed aliases. */
 struct sA120Chan {                  /* 4 bytes, one per MIDI channel (sA120Song.f30[]) */
     unsigned int b00 : 10;
     unsigned int b10 : 7;           /* volume */
@@ -5085,6 +5000,8 @@ struct sA120 {
 };
 extern struct sA120 sndms;
 extern struct sA120Voice D_0050A820[];  /* sndms.f700 */
+extern SNDMIDISTATE sndms_8DE8 __asm__("sndms");
+extern SNDMIDIPARTIAL D_0050A820_8DE8[] __asm__("D_0050A820"); /* sndms.smp */
 extern int SNDseqstop_8DE8(int) __asm__("SNDseqstop");
 extern int f_85F0_8DE8(int, int) __asm__("SNDvol");
 
@@ -5092,43 +5009,42 @@ int SNDI_midiupdatefade_impl(int) __asm__("SNDI_midiupdatefade");
 /**
  * Steps a sequence's volume fade and applies it to its playing notes.
  *
- * Adds the step (+0x18) to the volume (+0x14) and stops at the target (+0x1C). Below 0 the sequence is stopped
- * (SNDseqstop) and it returns 1; otherwise every note voice of the sequence gets channel volume * sequence volume /
- * 128 through SNDvol.
+ * Adds the step (fadepertick) to the volume (progvol) and stops at the target (fadetargetvol). Below 0 the sequence is
+ * stopped (SNDseqstop) and it returns 1; otherwise every note voice of the sequence gets channel volume * sequence
+ * volume / 128 through SNDvol.
  *
- * Sequences live in sndms (16 records of 0x70 bytes: +0x08 read position, +0x0C loop start, +0x10 handle, +0x14
- * volume 16.16, +0x18 fade step, +0x1C fade target, +0x20 base azimuth, +0x22 pitch multiplier, +0x24 tempo percent,
- * +0x27 ticks to wait, +0x28 state, +0x2C/+0x2E bank handles, +0x30 sixteen channel words); D_0050A820 holds 24 note
- * voices (handle, sequence, channel, key, velocity).
+ * Sequences live in sndms (smidi.h: 16 SNDSEQINSTANCE records, then the 24 SNDMIDIPARTIAL note voices, also
+ * D_0050A820).
  *
  * @param id  the sequence slot
  * @return 1 when the fade stopped the sequence, else 0
  */
 int SNDI_midiupdatefade_impl(int id) {
-    struct sA120Song *seqInst = &sndms.f000[id];
-    struct sA120Voice *voiceSlot;
+    SNDSEQINSTANCE *seqInst = &sndms_8DE8.ssi[id];
+    SNDMIDIPARTIAL *voiceSlot;
     int i;
-    seqInst->f14 = seqInst->f14 + seqInst->f18;
-    if (seqInst->f18 < 0) {
-        if (!(seqInst->f1C < seqInst->f14)) {
-            seqInst->f14 = seqInst->f1C;
-            seqInst->f18 = 0;
+    seqInst->progvol = seqInst->progvol + seqInst->fadepertick;
+    if (seqInst->fadepertick < 0) {
+        if (!(seqInst->fadetargetvol < seqInst->progvol)) {
+            seqInst->progvol = seqInst->fadetargetvol;
+            seqInst->fadepertick = 0;
         }
     } else {
-        if (!(seqInst->f14 < seqInst->f1C)) {
-            seqInst->f14 = seqInst->f1C;
-            seqInst->f18 = 0;
+        if (!(seqInst->progvol < seqInst->fadetargetvol)) {
+            seqInst->progvol = seqInst->fadetargetvol;
+            seqInst->fadepertick = 0;
         }
     }
-    if (seqInst->f14 < 0) {
-        SNDseqstop_8DE8(seqInst->f10);
+    if (seqInst->progvol < 0) {
+        SNDseqstop_8DE8(seqInst->seqhandle);
         return 1;
     }
     i = 23;
-    voiceSlot = D_0050A820;
+    voiceSlot = D_0050A820_8DE8;
     do {
-        if (voiceSlot->f04 == id && voiceSlot->f00 >= 0) {
-            f_85F0_8DE8(voiceSlot->f00, (unsigned int)(seqInst->f30[voiceSlot->f05].b10 * (seqInst->f14 >> 16)) >> 7);
+        if (voiceSlot->seqindex == id && voiceSlot->shandle >= 0) {
+            f_85F0_8DE8(voiceSlot->shandle,
+                        (unsigned int)(seqInst->smc[voiceSlot->channel].vol * (seqInst->progvol >> 16)) >> 7);
         }
         i--;
         voiceSlot++;
@@ -5141,8 +5057,7 @@ int SNDI_midiupdatefade_impl(int id) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiseqover);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_8EE8 { int id; signed char owner; char pad[3]; };
-extern struct E_8EE8 D_0050A820_8EE8[] __asm__("D_0050A820");
+extern SNDMIDIPARTIAL D_0050A820_8EE8[] __asm__("D_0050A820");
 extern int SNDVOICEI_get_8EE8(int) __asm__("SNDVOICEI_get");
 
 /**
@@ -5157,7 +5072,8 @@ int SNDI_midiseqover(int seqIndex) {
     int i;
     int isOver = 1;
     for (i = 0; i < 0x18; i++) {
-        if (D_0050A820_8EE8[i].owner == seqIndex && D_0050A820_8EE8[i].id >= 0 && SNDVOICEI_get_8EE8(D_0050A820_8EE8[i].id) >= 0) {
+        if (D_0050A820_8EE8[i].seqindex == seqIndex && D_0050A820_8EE8[i].shandle >= 0
+            && SNDVOICEI_get_8EE8(D_0050A820_8EE8[i].shandle) >= 0) {
             isOver = 0;
             break;
         }
@@ -5254,31 +5170,31 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsenoteoff);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct V_9140 { int h; signed char ch; signed char a; signed char b; signed char st; };
-struct Ch_9140 { char pad[8]; int cnt; char pad2[0x64]; };
-extern char sndms_9140[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9140 __asm__("sndms");
 extern void SNDrelease_9140(int) __asm__("SNDrelease");
 
 /**
  * Plays a MIDI note-off: releases the matching note voice.
  *
- * Skips the velocity byte (advances the sequence read position +0x08) and releases the first note voice of the sequence
- * with that channel and key that is still sounding (SNDrelease), marking it released.
+ * Skips the velocity byte (advances the sequence read position psongpos) and releases the first note voice of the
+ * sequence with that channel and key that is still sounding (SNDrelease), marking it released.
  *
  * @param ch  the sequence slot
  * @param midiChannel  the MIDI channel
  * @param keyNum  the key
  */
 void SNDI_midiparsenoteoff(int ch, int midiChannel, int keyNum) {
-    struct V_9140 *voiceSlot;
+    SNDMIDIPARTIAL *voiceSlot;
+    SNDSEQINSTANCE *seqInst = sndms_9140.ssi;
     int i;
 
-    ((struct Ch_9140 *)sndms_9140)[ch].cnt++;
-    voiceSlot = (struct V_9140 *)(sndms_9140 + 0x700);
+    seqInst[ch].psongpos++;
+    voiceSlot = sndms_9140.smp;
     for (i = 0; i < 0x18; i++, voiceSlot++) {
-        if (voiceSlot->ch == ch && voiceSlot->a == midiChannel && voiceSlot->b == keyNum && voiceSlot->st >= 0) {
-            SNDrelease_9140(voiceSlot->h);
-            voiceSlot->st = -1;
+        if (voiceSlot->seqindex == ch && voiceSlot->channel == midiChannel && voiceSlot->key == keyNum
+            && voiceSlot->velocity >= 0) {
+            SNDrelease_9140(voiceSlot->shandle);
+            voiceSlot->velocity = -1;
             return;
         }
     }
@@ -5388,11 +5304,7 @@ void SNDI_midiparsecontrol(int seqIndex, struct Bits_91E0 *bits, int x, int cmd)
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsepitchbend);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct B_93C8 { unsigned int lo : 17; unsigned int f : 7; unsigned int hi : 8; };
-struct E_93C8 { int id; signed char owner; signed char sub; short pad; };
-struct R_93C8 { char pad0[8]; unsigned char *cur; char pad1[0x70 - 12]; };
-struct G_93C8 { struct R_93C8 r[16]; struct E_93C8 e[24]; };
-extern struct G_93C8 D_a120_93C8 __asm__("sndms");
+extern SNDMIDISTATE D_a120_93C8 __asm__("sndms");
 extern void fC6B8_93C8(int, int) __asm__("SNDpitchbend");
 
 /**
@@ -5406,17 +5318,17 @@ extern void fC6B8_93C8(int, int) __asm__("SNDpitchbend");
  * @param channel  the MIDI channel
  * @param data  the low data byte
  */
-void SNDI_midiparsepitchbend(int seqIndex, struct B_93C8 *midiChan, int channel, int data) {
-    struct R_93C8 *seqInst = &D_a120_93C8.r[seqIndex];
+void SNDI_midiparsepitchbend(int seqIndex, SNDMIDICHAN *midiChan, int channel, int data) {
+    SNDSEQINSTANCE *seqInst = &D_a120_93C8.ssi[seqIndex];
     int value, i;
-    struct E_93C8 *partial = &D_a120_93C8.e[0];
+    SNDMIDIPARTIAL *partial = &D_a120_93C8.smp[0];
     i = 23;
-    value = (*seqInst->cur++ << 7) + data;
-    midiChan->f = value / 128;
+    value = (*seqInst->psongpos++ << 7) + data;
+    midiChan->bend = value / 128;
     do {
         i -= 1;
-        if (partial->owner == seqIndex && partial->sub == channel) {
-            fC6B8_93C8(partial->id, midiChan->f);
+        if (partial->seqindex == seqIndex && partial->channel == channel) {
+            fC6B8_93C8(partial->shandle, midiChan->bend);
         }
         partial += 1;
     } while (i >= 0);
@@ -5428,15 +5340,13 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiprocesstick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* sndms: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). Layout from every use in this
-   unit; field names are their offsets. */
-extern struct sA120 sndms;
 extern int f8EE8_94B0(int) __asm__("SNDI_midiseqover");
 extern void f9920_94B0(int) __asm__("SNDseqstop");
-extern void f8F78_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsenoteon");
+extern void f8F78_94B0(int, SNDMIDICHAN *, int, int) __asm__("SNDI_midiparsenoteon");
 extern void f9140_94B0(int, int, int) __asm__("SNDI_midiparsenoteoff");
-extern void f91E0_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsecontrol");
-extern void f93C8_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsepitchbend");
+extern void f91E0_94B0(int, SNDMIDICHAN *, int, int) __asm__("SNDI_midiparsecontrol");
+extern void f93C8_94B0(int, SNDMIDICHAN *, int, int) __asm__("SNDI_midiparsepitchbend");
+extern SNDMIDISTATE sndms_94B0 __asm__("sndms");
 
 /**
  * Runs one tick of a sequence: waits out the delay, then parses events until the next delay.
@@ -5449,32 +5359,32 @@ extern void f93C8_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midipars
  * @param seqIndex  the sequence slot
  */
 void SNDI_midiprocesstick(int seqIndex) {
-    struct sA120Song *seqInst = &sndms.f000[seqIndex];
+    SNDSEQINSTANCE *seqInst = &sndms_94B0.ssi[seqIndex];
     unsigned char ev, statusByte, dataByte;
     unsigned char *readPos;
     int hi, lo;
 
-    readPos = seqInst->f08;
+    readPos = seqInst->psongpos;
     readPos++;
-    seqInst->f08 = readPos;
-    seqInst->f27--;
+    seqInst->psongpos = readPos;
+    seqInst->nextevent--;
     hi = *readPos & 0xF0;
-    seqInst->f08 = readPos + 1;
+    seqInst->psongpos = readPos + 1;
     dataByte = readPos[1];
-    seqInst->f08 = readPos - 1;
+    seqInst->psongpos = readPos - 1;
     if (hi == 0xF0 && dataByte == 47) {
-        if (f8EE8_94B0(seqIndex) != 0) f9920_94B0(seqInst->f10);
+        if (f8EE8_94B0(seqIndex) != 0) f9920_94B0(seqInst->seqhandle);
         return;
     }
-    if (seqInst->f27 != 0) return;
+    if (seqInst->nextevent != 0) return;
     for (;;) {
-        struct sA120Chan *midiChan;
-        ev = *seqInst->f08++;
-        statusByte = *seqInst->f08++;
-        dataByte = *seqInst->f08++;
+        SNDMIDICHAN *midiChan;
+        ev = *seqInst->psongpos++;
+        statusByte = *seqInst->psongpos++;
+        dataByte = *seqInst->psongpos++;
         hi = statusByte & 0xF0;
         lo = statusByte & 0xF;
-        midiChan = &seqInst->f30[lo];
+        midiChan = &seqInst->smc[lo];
         switch (hi) {
         case 144:
             f8F78_94B0(seqIndex, midiChan, lo, dataByte);
@@ -5489,24 +5399,24 @@ void SNDI_midiprocesstick(int seqIndex) {
             f93C8_94B0(seqIndex, midiChan, lo, dataByte);
             break;
         case 0xC0:
-            midiChan->b24 = dataByte;
+            midiChan->patch = dataByte;
             break;
         case 0xF0:
             if (dataByte == 47) {
                 if (f8EE8_94B0(seqIndex) != 0) {
-                    f9920_94B0(seqInst->f10);
+                    f9920_94B0(seqInst->seqhandle);
                 } else {
                     ev = 1;
-                    seqInst->f08 -= 3;
-                    seqInst->f27++;
+                    seqInst->psongpos -= 3;
+                    seqInst->nextevent++;
                 }
             }
             break;
         }
         if (ev != 0) break;
-        if (seqInst->f28 != 3) break;
+        if (seqInst->status != 3) break;
     }
-    seqInst->f27 = ev;
+    seqInst->nextevent = ev;
 }
 #endif
 
@@ -5516,33 +5426,32 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiserver);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SNDI_midiupdatefade_96B8(int) __asm__("SNDI_midiupdatefade");
 extern void SNDI_midiprocesstick_96B8(int) __asm__("SNDI_midiprocesstick");
-struct E_96B8 { int f0; unsigned int f4; char pad[0x18 - 8]; int f18; char pad2[0x24 - 0x1C]; unsigned short u24; char pad4[2]; signed char st; char pad3[0x70 - 0x29]; };
-extern struct E_96B8 sndms_96B8[] __asm__("sndms");
+extern SNDMIDISTATE sndms_96B8 __asm__("sndms");
 
 /**
  * Runs the sequencer at 100 Hz: fades and ticks every playing sequence.
  *
  * For each sequence in state 3 whose fade (SNDI_midiupdatefade, only while a step is set) did not stop it, advances its tick
- * counter and runs SNDI_midiprocesstick until the processed ticks catch up with counter * tempo percent (+0x24) / 100.
+ * counter and runs SNDI_midiprocesstick until the processed ticks catch up with counter * tempo percent (tempo) / 100.
  */
 void SNDI_midiserver(void) {
     int i;
-    struct E_96B8 *seqInst;
+    SNDSEQINSTANCE *seqInst;
     signed char st;
     unsigned int lim;
     int tickCount;
     for (i = 0; i < 16; i++) {
-        seqInst = &sndms_96B8[i];
-        st = seqInst->st;
-        if (st == 3 && (seqInst->f18 == 0 || SNDI_midiupdatefade_96B8(i) == 0)) {
-            tickCount = seqInst->f0;
-            lim = (unsigned int)(tickCount * seqInst->u24) / 100u;
-            seqInst->f0 = tickCount + 1;
-            if (lim >= seqInst->f4 && seqInst->st == st) {
+        seqInst = &sndms_96B8.ssi[i];
+        st = seqInst->status;
+        if (st == 3 && (seqInst->fadepertick == 0 || SNDI_midiupdatefade_96B8(i) == 0)) {
+            tickCount = seqInst->servertick;
+            lim = (unsigned int)(tickCount * seqInst->tempo) / 100u;
+            seqInst->servertick = tickCount + 1;
+            if (lim >= seqInst->miditick && seqInst->status == st) {
                 do {
                     SNDI_midiprocesstick_96B8(i);
-                    seqInst->f4++;
-                } while (lim >= seqInst->f4 && seqInst->st == 3);
+                    seqInst->miditick++;
+                } while (lim >= seqInst->miditick && seqInst->status == 3);
             }
         }
     }
@@ -5554,16 +5463,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDmidiinit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct E_97D8 { int id; signed char owner; signed char b5; char b6; char b7; };
-struct C_97D8 { char pad[0x10]; int f10; char pad2[0x14]; char f28; char pad3[0x47]; };
-struct G_97D8 { char pad[0x1E8]; int (*f1E8)(void); };
-extern struct E_97D8 D_0050A820_97D8[] __asm__("D_0050A820");
-extern struct C_97D8 sndms_97D8[] __asm__("sndms");
+extern SNDMIDIPARTIAL D_0050A820_97D8[] __asm__("D_0050A820");
+extern SNDMIDISTATE sndms_97D8 __asm__("sndms");
 extern void SNDSYS_add100hzclient_97D8(void *) __asm__("SNDSYS_add100hzclient");
 extern void SNDI_midiserver_97D8(void) __asm__("SNDI_midiserver");
 extern int SNDmidirestore_97D8(void) __asm__("SNDmidirestore");
-
-extern struct G_97D8 sndgs_97D8 __asm__("sndgs");
 /**
  * Starts the MIDI sequencer: clears all sequences and note voices and adds its 100 Hz client.
  *
@@ -5574,23 +5478,21 @@ extern struct G_97D8 sndgs_97D8 __asm__("sndgs");
  */
 int SNDmidiinit(void) {
     int i;
-    struct C_97D8 *seqInst;
 
     SNDSYS_entercritical();
     for (i = 0; i < 24; i++) {
-        D_0050A820_97D8[i].b5 = -1;
-        D_0050A820_97D8[i].b6 = 0;
-        D_0050A820_97D8[i].b7 = 0;
-        D_0050A820_97D8[i].id = -1;
+        D_0050A820_97D8[i].channel = -1;
+        D_0050A820_97D8[i].key = 0;
+        D_0050A820_97D8[i].velocity = 0;
+        D_0050A820_97D8[i].shandle = -1;
     }
-    seqInst = sndms_97D8;
-    do {
-        seqInst->f10 = -1;
-        seqInst->f28 = 0;
-        seqInst++;
-    } while ((int)seqInst < (int)(sndms_97D8 + 16));
+    for (i = 0; i < 16; i++) {
+        SNDSEQINSTANCE *seqInst = &sndms_97D8.ssi[i];
+        seqInst->seqhandle = -1;
+        seqInst->status = 0;
+    }
     SNDSYS_add100hzclient_97D8(SNDI_midiserver_97D8);
-    sndgs_97D8.f1E8 = SNDmidirestore_97D8;
+    sndgs.midirestore = (void (*)(void))SNDmidirestore_97D8;
     SNDSYS_leavecritical();
     return 0;
 }
@@ -5615,7 +5517,7 @@ int SNDmidirestore(void) {
     SNDSYS_entercritical();
     SNDmidistopall_9880();
     SNDSYS_remove100hzclient_9880(SNDI_midiserver_9880);
-    *(int*)&sndgs.midirestore = 0;
+    sndgs.midirestore = 0;
     SNDSYS_leavecritical();
     return 0;
 }
@@ -5625,11 +5527,10 @@ int SNDmidirestore(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDmidistopall);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { int a[4]; int v; int pad[0x17]; } E_98C0;
 extern void SNDSYS_entercritical();
 extern void SNDSYS_leavecritical();
 extern void SNDseqstop(int);
-extern E_98C0 sndms_A120_98C0[] __asm__("sndms");
+extern SNDMIDISTATE sndms_A120_98C0 __asm__("sndms");
 
 /**
  * Stops all 16 sequences (SNDseqstop on each slot's handle) inside the critical section.
@@ -5637,19 +5538,12 @@ extern E_98C0 sndms_A120_98C0[] __asm__("sndms");
  * @return 0
  */
 int SNDmidistopall(void) {
-    E_98C0 *tbl;
-    int *seqHandlePtr;
     int i;
 
-    i = 0xF;
     SNDSYS_entercritical();
-    tbl = sndms_A120_98C0;
-    seqHandlePtr = &tbl->v;
-    do {
-        i -= 1;
-        SNDseqstop(*seqHandlePtr);
-        seqHandlePtr += 0x1C;
-    } while (i >= 0);
+    for (i = 0; i < 16; i++) {
+        SNDseqstop(sndms_A120_98C0.ssi[i].seqhandle);
+    }
     SNDSYS_leavecritical();
     return 0;
 }
@@ -5660,9 +5554,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDseqstop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct C_9920 { char pad[0x10]; int f10; char pad2[0x14]; signed char f28; char pad3[0x47]; };
-struct V_9920 { int h; signed char ch; signed char b5; char b6; char b7; };
-extern struct C_9920 sndms_9920[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9920 __asm__("sndms");
 extern void SNDstop_9920(int) __asm__("SNDstop");
 
 int SNDseqstop_9920(int h) __asm__("SNDseqstop");
@@ -5679,25 +5571,25 @@ int SNDseqstop_impl(int h) __asm__("SNDseqstop");
  */
 int SNDseqstop_impl(int seqHandle) {
     int ch = SNDI_midigetseqindex(seqHandle);
-    struct C_9920 *seqInst;
-    struct V_9920 *voiceSlot;
+    SNDSEQINSTANCE *seqInst;
+    SNDMIDIPARTIAL *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    seqInst = &sndms_9920[ch];
-    if (seqInst->f28 != 0) {
-        voiceSlot = (struct V_9920 *)((char *)sndms_9920 + 0x700);
+    seqInst = &sndms_9920.ssi[ch];
+    if (seqInst->status != 0) {
+        voiceSlot = sndms_9920.smp;
         for (i = 0; i < 24; i++, voiceSlot++) {
-            if (voiceSlot->ch == ch) {
-                if (voiceSlot->h >= 0) SNDstop_9920(voiceSlot->h);
-                voiceSlot->b5 = -1;
-                voiceSlot->b6 = 0;
-                voiceSlot->b7 = 0;
-                voiceSlot->h = -1;
+            if (voiceSlot->seqindex == ch) {
+                if (voiceSlot->shandle >= 0) SNDstop_9920(voiceSlot->shandle);
+                voiceSlot->channel = -1;
+                voiceSlot->key = 0;
+                voiceSlot->velocity = 0;
+                voiceSlot->shandle = -1;
             }
         }
-        seqInst->f10 = -1;
-        seqInst->f28 = 2;
+        seqInst->seqhandle = -1;
+        seqInst->status = 2;
         return 0;
     }
     return -1;
@@ -5708,22 +5600,18 @@ int SNDseqstop_impl(int seqHandle) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_play);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* sndms: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). Layout from every use in this
-   unit; field names are their offsets. */
-extern struct sA120 sndms;
-struct H_9A00 { signed char f00; char pad01[7]; unsigned short f08; char pad0A[2]; unsigned short f0C; char pad0E[2]; unsigned short f10; };
+/* sndms: the MIDI sequence player (smidi.h). */
+extern SNDMIDISTATE sndms_9A00 __asm__("sndms");
 
 /**
  * Starts playing a MIDI sequence in a free sequence slot.
  *
- * Skips an "MD" header (8 bytes) or a "MIDx" tag (4 bytes), bumps the handle counter (+0x7C0 by 0x20) and takes the
- * first free slot: volume from the options' +0x00, base azimuth +0x08, pitch multiplier +0x0C and tempo (+0x10 * 100 >>
- * 12, in percent), the two banks, state 3 (playing) and default channels (volume 0x7F, bend 0x40, no program).
+ * Skips an "MD" header (8 bytes) or a "MIDx" tag (4 bytes), bumps the handle counter (lasthandle by 0x20) and takes the
+ * first free slot: volume from the options' vol, base azimuth, pitch multiplier and tempo (tempomult * 100 >> 12, in
+ * percent), the two banks, state 3 (playing) and default channels (volume 0x7F, bend 0x40, no program).
  *
- * Sequences live in sndms (16 records of 0x70 bytes: +0x08 read position, +0x0C loop start, +0x10 handle, +0x14
- * volume 16.16, +0x18 fade step, +0x1C fade target, +0x20 base azimuth, +0x22 pitch multiplier, +0x24 tempo percent,
- * +0x27 ticks to wait, +0x28 state, +0x2C/+0x2E bank handles, +0x30 sixteen channel words); D_0050A820 holds 24 note
- * voices (handle, sequence, channel, key, velocity).
+ * Sequences live in sndms (smidi.h: 16 SNDSEQINSTANCE records, then the 24 SNDMIDIPARTIAL note voices, also
+ * D_0050A820).
  *
  * @param hdr  the play options
  * @param data  the sequence data
@@ -5731,9 +5619,9 @@ struct H_9A00 { signed char f00; char pad01[7]; unsigned short f08; char pad0A[2
  * @param drumBankHandle  the bank for channel 9 (drums)
  * @return the sequence handle, or -9 when all slots are busy
  */
-int SNDMIDI_play(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int drumBankHandle) {
+int SNDMIDI_play(SNDPLAYOPTS *hdr, unsigned char *data, int bankHandle, int drumBankHandle) {
     int ret = -9;
-    struct sA120Song *seqInst;
+    SNDSEQINSTANCE *seqInst;
     int i;
     int j;
     if (*(short *)data == 17485) {
@@ -5741,34 +5629,34 @@ int SNDMIDI_play(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int dr
     } else if (*(int *)data == 0x7844494D) {
         data += 4;
     }
-    sndms.f7C0 += 0x20;
-    if (sndms.f7C0 < 0) sndms.f7C0 = 0;
+    sndms_9A00.lasthandle += 0x20;
+    if (sndms_9A00.lasthandle < 0) sndms_9A00.lasthandle = 0;
     for (i = 0; i < 16; i++) {
-        seqInst = &sndms.f000[i];
-        if (seqInst->f10 < 0) {
-            seqInst->f04 = 0;
-            seqInst->f00 = 0;
-            seqInst->f24 = (hdr->f10 * 100) >> 12;
-            seqInst->f10 = sndms.f7C0 | i;
-            seqInst->f08 = data;
-            seqInst->f2C = bankHandle;
-            seqInst->f2E = drumBankHandle;
-            seqInst->f26 = 0xFF;
-            seqInst->f27 = 1;
-            seqInst->f18 = 0;
-            seqInst->f0C = 0;
-            seqInst->f14 = hdr->f00 << 16;
-            seqInst->f28 = 3;
-            seqInst->f20 = hdr->f08;
-            seqInst->f22 = hdr->f0C;
+        seqInst = &sndms_9A00.ssi[i];
+        if (seqInst->seqhandle < 0) {
+            seqInst->miditick = 0;
+            seqInst->servertick = 0;
+            seqInst->tempo = (hdr->tempomult * 100) >> 12;
+            seqInst->seqhandle = sndms_9A00.lasthandle | i;
+            seqInst->psongpos = data;
+            seqInst->bhandle = bankHandle;
+            seqInst->drumbhandle = drumBankHandle;
+            seqInst->numrepeats = 0xFF;
+            seqInst->nextevent = 1;
+            seqInst->fadepertick = 0;
+            seqInst->prepeatpos = 0;
+            seqInst->progvol = hdr->vol << 16;
+            seqInst->status = 3;
+            seqInst->azimuth = hdr->azimuth;
+            seqInst->pitchmult = hdr->pitchmult;
             for (j = 0; j < 16; j++) {
-                struct sA120Chan *midiChan = &seqInst->f30[j];
-                midiChan->b00 = 0;
-                midiChan->b10 = 0x7F;
-                midiChan->b17 = 0x40;
-                midiChan->b24 = -1;
+                SNDMIDICHAN *midiChan = &seqInst->smc[j];
+                midiChan->azimuth10 = 0;
+                midiChan->vol = 0x7F;
+                midiChan->bend = 0x40;
+                midiChan->patch = -1;
             }
-            ret = seqInst->f10;
+            ret = seqInst->seqhandle;
             break;
         }
     }
@@ -5781,16 +5669,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_pitchmult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct C_9B68 { char pad[0x22]; unsigned short f22; char pad2[4]; signed char f28; char pad3[0x47]; };
-struct V_9B68 { int h; signed char ch; char pad[3]; };
-extern struct C_9B68 sndms_9B68[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9B68 __asm__("sndms");
 extern int SNDpitchmult_9B68(int, int) __asm__("SNDpitchmult");
 
 /**
  * Sets a playing sequence's pitch multiplier.
  *
- * Stores it (+0x22; new notes copy it) and passes it to every playing note voice with SNDpitchmult. Fails with -1 when
- * the value changes and the sequence is not playing.
+ * Stores it (pitchmult; new notes copy it) and passes it to every playing note voice with SNDpitchmult. Fails with -1
+ * when the value changes and the sequence is not playing.
  *
  * @param seqHandle  the sequence handle
  * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
@@ -5799,18 +5685,18 @@ extern int SNDpitchmult_9B68(int, int) __asm__("SNDpitchmult");
 int SNDMIDI_pitchmult(int seqHandle, int pitchMult) {
     int result = -1;
     int ch = SNDI_midigetseqindex(seqHandle);
-    struct C_9B68 *seqInst;
-    struct V_9B68 *voiceSlot;
+    SNDSEQINSTANCE *seqInst;
+    SNDMIDIPARTIAL *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    seqInst = &sndms_9B68[ch];
-    if (pitchMult != seqInst->f22) {
-        if (seqInst->f28 != 3) goto out;
-        seqInst->f22 = pitchMult;
-        voiceSlot = (struct V_9B68 *)((char *)sndms_9B68 + 0x700);
+    seqInst = &sndms_9B68.ssi[ch];
+    if (pitchMult != seqInst->pitchmult) {
+        if (seqInst->status != 3) goto out;
+        seqInst->pitchmult = pitchMult;
+        voiceSlot = sndms_9B68.smp;
         for (i = 23; i >= 0; i--, voiceSlot++) {
-            if (voiceSlot->ch == ch && voiceSlot->h >= 0) SNDpitchmult_9B68(voiceSlot->h, pitchMult);
+            if (voiceSlot->seqindex == ch && voiceSlot->shandle >= 0) SNDpitchmult_9B68(voiceSlot->shandle, pitchMult);
         }
     }
     result = 0;
@@ -5824,9 +5710,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_azimuth);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct C_9C20 { char pad[0x20]; unsigned short f20; char pad2[6]; signed char f28; char pad3[7]; int w30[16]; };
-struct V_9C20 { int h; signed char ch; signed char b5; char pad[2]; };
-extern struct C_9C20 sndms_9C20[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9C20 __asm__("sndms");
 extern void SND3dpos_9C20(int, unsigned short, int) __asm__("SND3dpos");
 
 int SNDMIDI_azimuth(int h, int v) __asm__("SNDMIDI_azimuth");
@@ -5834,7 +5718,7 @@ int SNDMIDI_azimuth(int h, int v) __asm__("SNDMIDI_azimuth");
 /**
  * Sets a playing sequence's base azimuth.
  *
- * Stores it (+0x20) and repositions every playing note with SND3dpos at base + the note channel's pan (elevation
+ * Stores it (azimuth) and repositions every playing note with SND3dpos at base + the note channel's pan (elevation
  * 0). Fails with -1 when the value changes and the sequence is not playing.
  *
  * @param seqHandle  the sequence handle
@@ -5844,20 +5728,20 @@ int SNDMIDI_azimuth(int h, int v) __asm__("SNDMIDI_azimuth");
 int SNDMIDI_azimuth(int seqHandle, int azimuth) {
     int result = -1;
     int ch = SNDI_midigetseqindex(seqHandle);
-    struct C_9C20 *seqInst;
-    struct V_9C20 *voiceSlot;
+    SNDSEQINSTANCE *seqInst;
+    SNDMIDIPARTIAL *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    seqInst = &sndms_9C20[ch];
-    if (azimuth != seqInst->f20) {
-        if (seqInst->f28 != 3) goto out;
-        seqInst->f20 = azimuth;
-        voiceSlot = (struct V_9C20 *)((char *)sndms_9C20 + 0x700);
+    seqInst = &sndms_9C20.ssi[ch];
+    if (azimuth != seqInst->azimuth) {
+        if (seqInst->status != 3) goto out;
+        seqInst->azimuth = azimuth;
+        voiceSlot = sndms_9C20.smp;
         for (i = 23; i >= 0; i--, voiceSlot++) {
-            if (voiceSlot->ch == ch && voiceSlot->h >= 0) {
-                azimuth = seqInst->f20 + ((*(int *)((char *)seqInst + (voiceSlot->b5 << 2) + 0x30) & 0x3FF) << 6);
-                SND3dpos_9C20(voiceSlot->h, azimuth, 0);
+            if (voiceSlot->seqindex == ch && voiceSlot->shandle >= 0) {
+                azimuth = seqInst->azimuth + (seqInst->smc[voiceSlot->channel].azimuth10 << 6);
+                SND3dpos_9C20(voiceSlot->shandle, azimuth, 0);
             }
         }
     }
@@ -5872,8 +5756,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDseqpause);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDstop_9D00(int) __asm__("SNDstop");
-extern int sndms_9D00[] __asm__("sndms");
-typedef struct { int a; signed char b; char pad[3]; } E_9D00;
+extern SNDMIDISTATE sndms_9D00 __asm__("sndms");
 
 /**
  * Pauses a sequence: stops its notes and sets state 5.
@@ -5886,8 +5769,8 @@ typedef struct { int a; signed char b; char pad[3]; } E_9D00;
 int SNDseqpause(int seqHandle) {
     int status, seqIndex, i;
 
-    E_9D00 *voiceSlot;
-    char *seqInst;
+    SNDMIDIPARTIAL *voiceSlot;
+    SNDSEQINSTANCE *seqInst;
 
     SNDSYS_entercritical();
     seqIndex = SNDI_midigetseqindex(seqHandle);
@@ -5895,15 +5778,15 @@ int SNDseqpause(int seqHandle) {
         SNDSYS_leavecritical();
         return seqIndex;
     }
-    seqInst = (char*)sndms_9D00 + seqIndex * 0x70;
-    if (*(signed char*)(seqInst + 0x28) == 3) {
-        voiceSlot = (E_9D00*)(((char*)sndms_9D00) + 0x700);
-        *(signed char*)(seqInst + 0x28) = 5;
+    seqInst = &sndms_9D00.ssi[seqIndex];
+    if (seqInst->status == 3) {
+        voiceSlot = sndms_9D00.smp;
+        seqInst->status = 5;
         i = 23;
         do {
             i--;
-            if (voiceSlot->b == seqIndex) {
-                if (voiceSlot->a >= 0) SNDstop_9D00(voiceSlot->a);
+            if (voiceSlot->seqindex == seqIndex) {
+                if (voiceSlot->shandle >= 0) SNDstop_9D00(voiceSlot->shandle);
             }
             voiceSlot++;
         } while (i >= 0);
@@ -5922,7 +5805,7 @@ extern void SNDSYS_entercritical();
 extern void SNDSYS_leavecritical();
 extern int SNDI_midigetseqindex(int);
 extern int SNDseqstatus_9DC8(int) __asm__("SNDseqstatus");
-extern char sndms_9DC8[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9DC8 __asm__("sndms");
 
 /**
  * Resumes a paused sequence (state 5 back to 3).
@@ -5935,7 +5818,7 @@ extern char sndms_9DC8[] __asm__("sndms");
 int SNDseqresume(int seqHandle) {
     int seqindex;
     int status;
-    char *pssi;
+    SNDSEQINSTANCE *pssi;
 
     SNDSYS_entercritical();
     seqindex = SNDI_midigetseqindex(seqHandle);
@@ -5943,9 +5826,9 @@ int SNDseqresume(int seqHandle) {
         SNDSYS_leavecritical();
         return seqindex;
     }
-    pssi = sndms_9DC8 + seqindex * 0x70;
-    if (*(signed char *)(pssi + 0x28) == 5) {
-        *(signed char *)(pssi + 0x28) = 3;
+    pssi = &sndms_9DC8.ssi[seqindex];
+    if (pssi->status == 5) {
+        pssi->status = 3;
     }
     status = SNDseqstatus_9DC8(seqHandle);
     SNDSYS_leavecritical();
@@ -5957,7 +5840,7 @@ int SNDseqresume(int seqHandle) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDseqvol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndms_9E48[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9E48 __asm__("sndms");
 extern int SNDI_midigetseqindex_9E48() __asm__("SNDI_midigetseqindex");
 extern void SNDvol(int, unsigned int);
 
@@ -5980,25 +5863,24 @@ int SNDseqvol(int seqHandle, int vol) {
     }
     {
         int key = vol << 16;
-        char *seqInst = sndms_9E48 + idx * 0x70;
-        *(int *)(seqInst + 0x18) = 0;
-        if (*(int *)(seqInst + 0x14) != key) {
-            if (*(signed char *)(seqInst + 0x28) == 3) {
-                char *voiceSlot;
+        SNDSEQINSTANCE *seqInst = &sndms_9E48.ssi[idx];
+        seqInst->fadepertick = 0;
+        if (seqInst->progvol != key) {
+            if (seqInst->status == 3) {
+                SNDMIDIPARTIAL *voiceSlot;
                 int i;
-                *(int *)(seqInst + 0x14) = key;
-                voiceSlot = sndms_9E48 + 0x700;
+                seqInst->progvol = key;
+                voiceSlot = sndms_9E48.smp;
                 i = 23;
                 do {
-                    if (*(signed char *)(voiceSlot + 4) == idx) {
-                        int voiceHandle = *(int *)voiceSlot;
+                    if (voiceSlot->seqindex == idx) {
+                        int voiceHandle = voiceSlot->shandle;
                         if (voiceHandle >= 0) {
-                            unsigned x = *(unsigned *)(seqInst + (*(signed char *)(voiceSlot + 5) << 2) + 0x30);
-                            SNDvol(voiceHandle, ((x >> 10 & 0x7F) * vol) >> 7);
+                            SNDvol(voiceHandle, (unsigned int)(seqInst->smc[voiceSlot->channel].vol * vol) >> 7);
                         }
                     }
                     i -= 1;
-                    voiceSlot += 8;
+                    voiceSlot++;
                 } while (i >= 0);
             } else {
                 ret = -1;
@@ -6013,13 +5895,13 @@ int SNDseqvol(int seqHandle, int vol) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDseqautovol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndms_9F38[] __asm__("sndms");
+extern SNDMIDISTATE sndms_9F38 __asm__("sndms");
 
 /**
  * Fades a playing sequence's volume to a target over a number of 100 Hz ticks.
  *
- * Sets the target (+0x1C) and the per-tick step (+0x18) from the current volume; SNDI_midiupdatefade applies it. A time of 0
- * or less counts as 1; a sequence that is not playing is left alone.
+ * Sets the target (fadetargetvol) and the per-tick step (fadepertick) from the current volume; SNDI_midiupdatefade
+ * applies it. A time of 0 or less counts as 1; a sequence that is not playing is left alone.
  *
  * @param seqHandle  the sequence handle
  * @param fadeTicks  the fade time in ticks
@@ -6028,16 +5910,16 @@ extern char sndms_9F38[] __asm__("sndms");
  */
 int SNDseqautovol(int seqHandle, int fadeTicks, int targetVol) {
     int seqIndex;
-    char *seqInst;
+    SNDSEQINSTANCE *seqInst;
     int targetFixed;
     seqIndex = SNDI_midigetseqindex(seqHandle);
     if (seqIndex < 0) return seqIndex;
-    seqInst = sndms_9F38 + seqIndex * 0x70;
-    if (*(signed char *)(seqInst + 0x28) == 3) {
+    seqInst = &sndms_9F38.ssi[seqIndex];
+    if (seqInst->status == 3) {
         if (fadeTicks <= 0) fadeTicks = 1;
         targetFixed = targetVol << 16;
-        *(int *)(seqInst + 0x1C) = targetFixed;
-        *(int *)(seqInst + 0x18) = (targetFixed - *(int *)(seqInst + 0x14)) / fadeTicks;
+        seqInst->fadetargetvol = targetFixed;
+        seqInst->fadepertick = (targetFixed - seqInst->progvol) / fadeTicks;
     }
     return 0;
 }
@@ -6048,26 +5930,26 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDseqstatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char SNDI_midigetseqindex_9FC8(void) __asm__("SNDI_midigetseqindex");
-extern char sndms_A120[] __asm__("sndms");
+extern SNDMIDISTATE sndms_A120 __asm__("sndms");
 
 /**
  * Returns a sequence's status.
  *
- * The handle passes through in $a0 to SNDI_midigetseqindex. The state byte (+0x28): 3 playing, 5 paused, 2 stopped; a playing
- * sequence with a fade step set reports 6.
+ * The handle passes through in $a0 to SNDI_midigetseqindex. The state byte (status): 3 playing, 5 paused, 2 stopped; a
+ * playing sequence with a fade step set reports 6.
  *
  * @return the status, or -8 for an invalid handle
  */
 signed char SNDseqstatus(void) {
     signed char var_5;
-    char *temp_2;
+    SNDSEQINSTANCE *temp_2;
 
     var_5 = SNDI_midigetseqindex_9FC8();
     if (var_5 >= 0) {
-        temp_2 = sndms_A120 + var_5 * 0x70;
-        var_5 = *(signed char *)(temp_2 + 0x28);
+        temp_2 = &sndms_A120.ssi[var_5];
+        var_5 = temp_2->status;
         if (var_5 == 3) {
-            var_5 = (*(int *)(temp_2 + 0x18) != 0) ? 6 : var_5;
+            var_5 = (temp_2->fadepertick != 0) ? 6 : var_5;
         }
     }
     return var_5;
@@ -6813,7 +6695,7 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPL
             }
         }
         pv->builtinazimuth = fC570_B140(pan);
-        pv->initialdetune = (*(unsigned short*)&pph->detune);
+        pv->initialdetune = ((unsigned short)pph->detune);
         pv->initialdetune = pv->initialdetune - (pph->basekey - keynum) * 100;
         if (masterranddetune) {
             pv->initialdetune = pv->initialdetune + masterranddetune;
@@ -6842,8 +6724,8 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPL
         pv->paenvelope = pph->penvelope;
         pv->envvol = pph->initialenvvol << 16;
         pv->curenvelope = 0;
-        pv->numenvelopes = (*(unsigned char*)&pph->numenvelopes);
-        pv->releaseenvelope = (*(unsigned char*)&pph->releaseenvelope);
+        pv->numenvelopes = ((unsigned char)pph->numenvelopes);
+        pv->releaseenvelope = ((unsigned char)pph->releaseenvelope);
         pv->envduration = pv->paenvelope->duration;
         if (pv->envduration < 0) {
             pv->envduration = 0x7FFFFFFF;
@@ -6853,7 +6735,7 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPL
         pv->ppitchlfo = pph->plfopitch;
         pv->vollfolength = pph->lfovollength;
         pv->pitchlfolength = pph->lfopitchlength;
-        pv->pitchlfodepth = (*(unsigned short*)&pph->lfopitchdepth);
+        pv->pitchlfodepth = ((unsigned short)pph->lfopitchdepth);
         if (pph->lfovolrand) {
             pv->curvollfoentry = fC5C8_B140() % pph->lfovolrand;
         } else {
@@ -6871,7 +6753,7 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPL
         pv->bhandle = bhandle;
         pv->patnum = patnum;
         pv->azimuth = pv->builtinazimuth + pspo->azimuth;
-        pv->elevation = (*(unsigned short*)&pspo->elevation);
+        pv->elevation = ((unsigned short)pspo->elevation);
         pv->sustainend = pph->sustainend;
         pv->frames = pph->totalframes;
         pv->samplerate = pph->samplerate;
@@ -6881,8 +6763,8 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPL
         for (i = 0; i < pph->numchan; i++) {
             pv->azimuthOffsets[i] = pph->azimuth[i];
         }
-        pv->drylevel = (*(unsigned char*)&pspo->drylevel);
-        pv->progfxlevel[0] = (*(unsigned char*)&pph->fxlevel0);
+        pv->drylevel = ((unsigned char)pspo->drylevel);
+        pv->progfxlevel[0] = ((unsigned char)pph->fxlevel0);
         pv->fxsendlevel[0] = fxlevel0;
         fA740_B140(0, voice);
         fA7B0_B140(voice);
@@ -6968,7 +6850,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
             }
             first = 1;
         }
-        if (x >= (signed char)(*(unsigned char*)&rec.velmin) && x <= (signed char)(*(unsigned char*)&rec.velmax) && y >= (signed char)(*(unsigned char*)&rec.keymin) && y <= (signed char)(*(unsigned char*)&rec.keymax)) {
+        if (x >= rec.velmin && x <= rec.velmax && y >= rec.keymin && y <= rec.keymax) {
             ret = f_B140_B588(bankHandle, patchNum, self, pos, &rec, y, x, masterDetune);
             if (ret < 0) {
                 goto fail;
@@ -11428,7 +11310,7 @@ int SNDPLATFORM_outputset(void) {
 
     requested = D_0050A908_0E28;
     if (sndgs.installed) {
-        *(struct SNDSYSSET*)&sndgs.sso.set = *(struct SNDSYSSET*)&sndgs.prevset;
+        sndgs.sso.set = sndgs.prevset;
         if (sndgs.prevset.outputspdifmode != requested.outputspdifmode) {
             return 0;
         }
@@ -11485,7 +11367,7 @@ int SNDPLATFORM_outputset(void) {
         requested.maxstreams = 0x20;
     }
     f8148_0E28(requested.resamplequality);
-    if ((unsigned int)sndgs.sso.set.fastramaddr != 0 && (((unsigned int)requested.fastramaddr) & 0xF)) {
+    if (sndgs.sso.set.fastramaddr != 0 && (((unsigned int)requested.fastramaddr) & 0xF)) {
         (*(unsigned int*)&requested.fastramaddr) = ((((unsigned int)requested.fastramaddr) + 0xF) >> 4) << 4;
         requested.fastramsize -= 0x10;
     }
@@ -11504,7 +11386,7 @@ int SNDPLATFORM_outputset(void) {
         return 0;
     }
     sndgs.voicestotal = requested.voicesmaincpu + requested.voicesiopcpu + requested.voicesspu;
-    *(struct SNDSYSSET*)&sndgs.sso.set = requested;
+    sndgs.sso.set = requested;
     return 0;
 }
 #endif
@@ -14264,7 +14146,7 @@ int f_4EC8(int *out) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_filteradd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void MIX_filteradd_5068(int, int, int) __asm__("MIX_filteradd");
+extern void MIX_filteradd_5068(int, int, SNDFILTERDEF *) __asm__("MIX_filteradd");
 struct G_5068 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 
 /**
@@ -14279,7 +14161,7 @@ struct G_5068 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
  * release)
  * @return 0, or -7 for a channel that is not on the mixer
  */
-int SNDPLATFORM_filteradd(int channelIndex, int filterDesc) {
+int SNDPLATFORM_filteradd(int channelIndex, SNDFILTERDEF *filterDesc) {
     struct CHANPUB *channel;
     int i;
     channel = &sndgs.chan[channelIndex];
@@ -15525,8 +15407,8 @@ struct S_6018 { char pad[0x178]; signed char n; char pad2[0x23]; int v[1]; };
  *
  * @param client  the client function
  */
-void iSNDserveraddclient(int client) {
-    sndgs.serverclient[sndgs.numserverclients] = (void (*)(void))client;
+void iSNDserveraddclient(void (*client)(void)) {
+    sndgs.serverclient[sndgs.numserverclients] = client;
     sndgs.numserverclients = sndgs.numserverclients + 1;
 }
 #endif
@@ -15883,7 +15765,7 @@ struct G_6500 { char pad[0x28]; unsigned short count; char pad2[0x1F4 - 0x2A]; s
 int SNDBANKI_alloc(void) {
     int i;
     for (i = 0; i < sndgs.sso.set.maxbanks; i++) {
-        if (((int)sndgs.banklist[i].phdr) == 0) {
+        if ((sndgs.banklist[i].phdr) == 0) {
             return i;
         }
     }
@@ -16128,26 +16010,26 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             pVoice->builtinazimuth = 0;
             pVoice->azimuth = pspo->azimuth;
             pVoice->bhandle = -1;
-            pVoice->initialdetune = (*(unsigned short*)&pssa->detune);
+            pVoice->initialdetune = ((unsigned short)pssa->detune);
             pVoice->progpitch = pspo->pitchmult;
             pVoice->fadePer100Hz = 0;
             pVoice->programmedVol = pspo->vol << 16;
             pVoice->envduration = 0x7FFFFFFF;
             pVoice->envvol = 0x7F0000;
             pVoice->envpertick = 0;
-            pVoice->builtinvol = (*(unsigned char*)&pssa->vol);
-            pVoice->pitchbend = (*(unsigned char*)&pspo->bend);
+            pVoice->builtinvol = ((unsigned char)pssa->vol);
+            pVoice->pitchbend = ((unsigned char)pspo->bend);
             pVoice->numenvelopes = 1;
             pVoice->curenvelope = 0;
             pVoice->releaseenvelope = 0;
-            pVoice->progfxlevel[0] = (*(unsigned char*)&pssa->fxlevel0);
-            pVoice->drylevel = (*(unsigned char*)&pspo->drylevel);
-            pVoice->fxsendlevel[0] = (*(unsigned char*)&pspo->fxlevel0);
+            pVoice->progfxlevel[0] = ((unsigned char)pssa->fxlevel0);
+            pVoice->drylevel = ((unsigned char)pspo->drylevel);
+            pVoice->fxsendlevel[0] = ((unsigned char)pspo->fxlevel0);
             pVoice->bendrange = pssa->bendrange * 100;
             pVoice->patchkey = 0;
             pVoice->ismaster = 0;
-            (*(struct ENVELOPE**)&pVoice->paenvelope) = 0;
-            (*(int*)&pVoice->pvoltable) = 0;
+            (pVoice->paenvelope) = 0;
+            pVoice->pvoltable = 0;
             pVoice->pbendtable = 0;
             pVoice->pvollfo = 0;
             pVoice->ppitchlfo = 0;
@@ -16721,7 +16603,7 @@ int SNDI_gettag(struct SNDTAGINFO *tagInfo) {
         tagInfo->ptag = tagInfo->ptag + 4;
     }
     tagInfo->ptag = tagInfo->ptag + 1;
-    (*(unsigned char**)&tagInfo->tagptr) = tagInfo->ptag;
+    (tagInfo->tagptr) = tagInfo->ptag;
     if (tagInfo->tagsize < 5) {
         tagInfo->tagval = SNDI_getb_7388(tagInfo->ptag, tagInfo->tagsize);
     }
@@ -16845,7 +16727,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIXI_volramp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Obj_7AB0 {
-    int (*fn)(struct Obj_7AB0 *self, int a, int b, void *c, int d);
+    int (*fn)(struct Obj_7AB0 *self, int a, float *b, void *c, int d);
 };
 struct Snd_7AB0 {
     char pad00[0x3C];
@@ -16877,7 +16759,7 @@ extern void MIXI_interpolatemix_7AB0(struct Snd_7AB0 *snd, void *name, float fro
 int SNDMIXI_volramp(struct S_7AB0 *mixVoice) {
     int i;
 
-    if (mixVoice->obj->fn(mixVoice->obj, 0x10, ((int)sndmix.ptempbuf[0]), ((struct Snd_7AB0*)sndmix.ptempbuf[1]), 0) <= 0) {
+    if (mixVoice->obj->fn(mixVoice->obj, 0x10, sndmix.ptempbuf[0], ((struct Snd_7AB0*)sndmix.ptempbuf[1]), 0) <= 0) {
         for (i = 0; i < 1; i++) {
             mixVoice->a[i] = mixVoice->b[i];
         }
@@ -17060,7 +16942,7 @@ INCLUDE_ASM("ealib/seg_2B4578", MIX_destroy);
 #ifdef SKIP_ASM
 extern void f_58A0_8018(void) __asm__("SNDSYS_entercritical");
 extern void f_58D8_8018(void) __asm__("SNDSYS_leavecritical");
-extern void f_5E98_8018(int) __asm__("SNDMEMI_free");
+extern void f_5E98_8018(void *) __asm__("SNDMEMI_free");
 extern void f_7AA8_8018(float) __asm__("SNDMIX_setmasterlowpass");
 /**
  * Destroys the software mixer: frees its buffers.
@@ -17071,15 +16953,15 @@ extern void f_7AA8_8018(float) __asm__("SNDMIX_setmasterlowpass");
  */
 void MIX_destroy(void) {
     int i;
-    int buffer;
+    float *buffer;
     f_58A0_8018();
     if (sndmix.smv != 0) {
-        f_5E98_8018((int)sndmix.smv);
+        f_5E98_8018(sndmix.smv);
         sndmix.smv = 0;
     }
     for (i = 0; i < 2; i++) {
-        buffer = (int)sndmix.punalignedtempbuf[i];
-        if ((buffer & 0x70000000) == 0x70000000) {
+        buffer = sndmix.punalignedtempbuf[i];
+        if (((unsigned int)buffer & 0x70000000) == 0x70000000) {
             sndmix.punalignedtempbuf[i] = 0;
         } else if (buffer != 0) {
             f_5E98_8018(buffer);
@@ -17087,8 +16969,8 @@ void MIX_destroy(void) {
         }
     }
     for (i = 0; i < sndmix.mc.outputchannels; i++) {
-        buffer = (int)sndmix.punalignedmixbuf[i];
-        if ((buffer & 0x70000000) == 0x70000000) {
+        buffer = sndmix.punalignedmixbuf[i];
+        if (((unsigned int)buffer & 0x70000000) == 0x70000000) {
             sndmix.punalignedmixbuf[i] = 0;
         } else if (buffer != 0) {
             f_5E98_8018(buffer);
@@ -17184,14 +17066,14 @@ void MIX_playinit(int id, int fmt, int ch, int sampleData, int loopStart, int st
     int n, k;
 
     ent = &sndmix_8158.ents[id];
-    (*(int*)&ent->filterhead) = 0;
-    (*(struct Obj_8158**)&ent->pups) = 0;
+    ent->filterhead = 0;
+    ent->pups = 0;
     ent->unk_50 = 0;
     ent->unk_58 = 0;
-    (*(int*)&ent->phps) = 0;
-    (*(struct Obj_8158**)&ent->ptss) = 0;
+    ent->phps = 0;
+    ent->ptss = 0;
     initParams.bits16 = 1;
-    (*(int*)&initParams.unpackgetframe) = 0;
+    initParams.unpackgetframe = 0;
     n = -1;
     if (fmt == 8) {
         n = 0;
@@ -17218,7 +17100,7 @@ void MIX_playinit(int id, int fmt, int ch, int sampleData, int loopStart, int st
         }
     }
     if (sndmix_8158.fn[n][k] != 0) {
-        (*(struct Obj_8158**)&ent->pups) = f_5C60_8158(sndmix_8158.size[n][k]);
+        (ent->pups) = f_5C60_8158(sndmix_8158.size[n][k]);
         (*(int*)&initParams.psample) = sampleData;
         (*(int*)&initParams.ploopstart) = loopStart;
         initParams.numchan = channelCount;
@@ -17272,7 +17154,7 @@ void MIX_play(int voice) {
     float *channelGain;
     i = 0;
     voiceState = &sndmix.smv[voice];
-    *(int*)&voiceState->lastmixed = 0;
+    voiceState->lastmixed = 0.0f;
     sendGain = (float *)(&voiceState->wetbusgainprev[0]);
     voiceState->gainchanged = 0;
     do {
@@ -17459,7 +17341,7 @@ void MIX_audioslice(int *outs, int n) {
     }
     for (j = 0; j < sndmix_85D0.cnt; j++) {
         voiceState = &sndmix_85D0.tab[j];
-        if ((*(signed char*)&voiceState->status) == 2) {
+        if ((voiceState->status) == 2) {
             if (voiceState->gainchanged != 0) {
                 k = f7AB0_85D0(voiceState);
                 voiceState->gainchanged = 0;
@@ -17552,9 +17434,9 @@ INCLUDE_ASM("ealib/seg_2B4578", MIX_getframe);
  */
 int MIX_getframe(int idx) {
     SNDMIXVOICE* voiceState = &sndmix.smv[idx];
-    int (*fn)(int) = (int (*)(int))voiceState->unpackgetframe;
+    int (*fn)(void *) = (int (*)(void *))voiceState->unpackgetframe;
     if (fn != 0) {
-        return fn((int)voiceState->pups);
+        return fn(voiceState->pups);
     }
     return -1;
 }
@@ -17704,7 +17586,7 @@ void func_003C8B80(int voice, int level) {
         if (voiceState->q == 0) {
             struct SFILTERNODE *n = (struct SFILTERNODE *)f_5C60_8B80(80);
             voiceState->q = n;
-            (*(int*)&n->restorefn) = 0;
+            n->restorefn = 0;
             voiceState->q->priority = 0x78;
             f_B528_8B80(voiceState->q);
             f_8F48_8B80(voiceState->sub, voiceState->q);
@@ -17750,10 +17632,10 @@ void MIX_sethighpass(int voice, int cutoff) {
     voiceState = &sndmix.smv[voice];
     if (cutoff > 0) {
         if ((char*)voiceState->phps == 0) {
-            char *hpfState = SNDMEMI_alloc_8C30(288);
-            voiceState->phps = (HPFSTATE*)hpfState;
-            *(int*)(hpfState + 4) = 0;
-            *(short*)&voiceState->phps->sfn.priority = 80;
+            HPFSTATE *hpfState = (HPFSTATE *)SNDMEMI_alloc_8C30(288);
+            voiceState->phps = hpfState;
+            hpfState->sfn.restorefn = 0;
+            voiceState->phps->sfn.priority = 80;
             voiceState->phps->sfn.requester = 0;
             SFILTER_createHPFFIR8_8C30((char*)voiceState->phps);
             SFILTER_add_8C30(&voiceState->filterhead, (char*)voiceState->phps);
@@ -17804,7 +17686,7 @@ void MIX_filteradd(int voice, int channelIndex, SNDFILTERDEF* filterDesc) {
     temp_2->priority = (unsigned short) (*(unsigned short*)&filterDesc->priority);
     ((int)temp_2->filterfn) = (int) ((int)filterDesc->filter);
     ((int)temp_2->restorefn) = (int) ((int)filterDesc->filterrestore);
-    (*(signed char*)&temp_2->requester) = 0;
+    (temp_2->requester) = 0;
     SFILTER_add_8E28(voiceState + 0x40, temp_2);
 }
 #endif
@@ -17985,28 +17867,28 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_connect);
  * @return 0, or -1 for a bad slot or a used input
  */
 int SFILTER_connect(SFILTERNODE* source, SFILTERNODE* dest, int outSlot, int inSlot) {
-    if (outSlot == 1 && inSlot == 1 && (int)dest->pfnnext == 0) {
+    if (outSlot == 1 && inSlot == 1 && dest->pfnnext == 0) {
         source->pfnprev1 = (SFILTERNODE*)((int)dest);
         dest->pfnnext = (SFILTERNODE*)((int)source);
-        *(char*)&dest->requester = inSlot;
+        dest->requester = inSlot;
         return 0;
     }
-    if (outSlot == 1 && inSlot == 2 && (int)dest->pfnnext2 == 0) {
+    if (outSlot == 1 && inSlot == 2 && dest->pfnnext2 == 0) {
         source->pfnprev1 = (SFILTERNODE*)((int)dest);
         dest->pfnnext2 = (SFILTERNODE*)((int)source);
-        *(char*)&dest->requester = outSlot;
+        dest->requester = outSlot;
         return 0;
     }
-    if (outSlot == 2 && inSlot == 1 && (int)dest->pfnnext == 0) {
+    if (outSlot == 2 && inSlot == 1 && dest->pfnnext == 0) {
         source->pfnprev2 = (SFILTERNODE*)((int)dest);
         dest->pfnnext = (SFILTERNODE*)((int)source);
-        *(char*)&dest->requester = outSlot;
+        dest->requester = outSlot;
         return 0;
     }
-    if (outSlot == 2 && inSlot == 2 && (int)dest->pfnnext2 == 0) {
+    if (outSlot == 2 && inSlot == 2 && dest->pfnnext2 == 0) {
         source->pfnprev2 = (SFILTERNODE*)((int)dest);
         dest->pfnnext2 = (SFILTERNODE*)((int)source);
-        *(char*)&dest->requester = inSlot;
+        dest->requester = inSlot;
         return 0;
     }
     return -1;
@@ -18152,7 +18034,7 @@ int SFILTER_unpackgetframemtf(UNPACKMTFSTATE* node) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtf);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int CMTBLKDecf_Decode_9360(int, int **, int) __asm__("CMTBLKDecf_Decode");
+extern int CMTBLKDecf_Decode_9360(struct CMTBLKDecf *, int **, int) __asm__("CMTBLKDecf_Decode");
 extern void memset_9360(int *, int, int) __asm__("memset");
 
 /**
@@ -18175,7 +18057,7 @@ int SFILTER_unpackmtf(UNPACKMTFSTATE* node, int count, int srcBuffer, int *buffe
     if ((unsigned int) (node->curframe) >= (unsigned int) (node->totalframes)) {
         return -1;
     }
-    temp_2 = CMTBLKDecf_Decode_9360(((int)node->pDecoder), &cursor, count);
+    temp_2 = CMTBLKDecf_Decode_9360(node->pDecoder, &cursor, count);
     node->curframe = (unsigned int) (node->curframe + temp_2);
     cursor = cursor + temp_2;
     if (temp_2 < count) {
@@ -18188,7 +18070,7 @@ int SFILTER_unpackmtf(UNPACKMTFSTATE* node, int count, int srcBuffer, int *buffe
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtfrestore);
 #ifdef SKIP_ASM
-extern void CMTBLKDecf_operator_delete(int);
+extern void CMTBLKDecf_operator_delete(struct CMTBLKDecf *);
 
 /**
  * Release function of a one-shot MicroTalk node: destroys its decoder (+0x28) with CMTBLKDecf_operator_delete.
@@ -18196,11 +18078,11 @@ extern void CMTBLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackmtfrestore(UNPACKMTFSTATE* node) {
-    int temp_4;
+    struct CMTBLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKMTFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CMTBLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKMTFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CMTBLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -18236,7 +18118,7 @@ void SFILTER_unpackmtfinit(struct UNPACKMTFSTATE *self, struct UNPACKINITPARAMS 
     self->curframe = 0;
     self->platformver = cfg->platformver;
     cfg->unpackgetframe = SFILTER_unpackgetframemtf_9420;
-    (*(void**)&self->sfn.restorefn) = SFILTER_unpackmtfrestore_9420;
+    (self->sfn.restorefn) = SFILTER_unpackmtfrestore_9420;
     (*(int*)&self->pDecoder) = CMTBLKDecf_CMTBLKDecf_9420(CMTBLKDecf_operator_new_9420(3432));
     curState = CMTBLKDecf_GetState_9420(((int)self->pDecoder));
     newState = curState;
@@ -18269,9 +18151,9 @@ int SFILTER_unpackgetframemtlf(UNPACKMTLFSTATE* node) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtlf);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int CMTBLKDecf_Decode_9520(int, int *, int) __asm__("CMTBLKDecf_Decode");
-extern void CMTBLKDecf_SetState_9520(int, void *, int) __asm__("CMTBLKDecf_SetState");
-extern void CMTBLKDecf_Feed_9520(int, int, int, int) __asm__("CMTBLKDecf_Feed");
+extern int CMTBLKDecf_Decode_9520(struct CMTBLKDecf *, float **, int) __asm__("CMTBLKDecf_Decode");
+extern void CMTBLKDecf_SetState_9520(struct CMTBLKDecf *, MTFSTATE *, int) __asm__("CMTBLKDecf_SetState");
+extern void CMTBLKDecf_Feed_9520(struct CMTBLKDecf *, void *, int, int) __asm__("CMTBLKDecf_Feed");
 
 /**
  * Decodes frames of a looped MicroTalk sample into a float buffer (a filter node's process function).
@@ -18286,26 +18168,26 @@ extern void CMTBLKDecf_Feed_9520(int, int, int, int) __asm__("CMTBLKDecf_Feed");
  * @param buffer  the float destination
  * @return 1
  */
-int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, int buffer) {
+int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, float *buffer) {
     MTFSTATE state;
-    int cursor;
+    float *cursor;
     int n, loopLength;
 
     cursor = buffer;
     if (count > 0) {
         do {
-            n = CMTBLKDecf_Decode_9520((int)node->pDecoder, &cursor, count);
+            n = CMTBLKDecf_Decode_9520(node->pDecoder, &cursor, count);
             count -= n;
-            cursor += n * 4;
+            cursor += n;
             node->curframe = node->curframe + n;
             if (n < count) {
                 node->curframe = node->loopstart;
                 state.bufframes = 0;
                 state.shiftreg = 0;
                 state.doWholeInit = 1;
-                CMTBLKDecf_SetState_9520((int)node->pDecoder, &state, 0);
+                CMTBLKDecf_SetState_9520(node->pDecoder, &state, 0);
                 loopLength = (node->loopend - node->loopstart) + 1;
-                CMTBLKDecf_Feed_9520((int)node->pDecoder, (int)node->ploop, loopLength * 4, loopLength);
+                CMTBLKDecf_Feed_9520(node->pDecoder, node->ploop, loopLength * 4, loopLength);
             }
         } while (count > 0);
     }
@@ -18316,7 +18198,7 @@ int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, int buff
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtlfrestore);
 #ifdef SKIP_ASM
-extern void CMTBLKDecf_operator_delete(int);
+extern void CMTBLKDecf_operator_delete(struct CMTBLKDecf *);
 
 /**
  * Release function of a looped MicroTalk node: destroys its decoder (+0x1C) with CMTBLKDecf_operator_delete.
@@ -18324,11 +18206,11 @@ extern void CMTBLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackmtlfrestore(UNPACKMTLFSTATE* node) {
-    int temp_4;
+    struct CMTBLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKMTLFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CMTBLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKMTLFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CMTBLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -18358,7 +18240,7 @@ void SFILTER_unpackmtlfinit(struct UNPACKMTLFSTATE *self, struct UNPACKINITPARAM
     struct MTFSTATE newState;
     struct MTFSTATE curState;
     (*(void**)&self->sfn) = SFILTER_unpackmtlf_9618;
-    (*(void**)&self->sfn.restorefn) = SFILTER_unpackmtlfrestore_9618;
+    (self->sfn.restorefn) = SFILTER_unpackmtlfrestore_9618;
     (*(int*)&self->ploop) = ((int)cfg->ploopstart);
     self->curframe = 0;
     self->loopstart = cfg->sustainstart;
@@ -18421,7 +18303,7 @@ int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
         if (got < n) {
             n -= got;
             self->psample = (unsigned char*)f_6DE0_96F0(self->packetinstancehandle, self->samplechan, (char*)&self->totalframes, &last);
-            if ((int)self->psample != 0) {
+            if (self->psample != 0) {
                 self->curframe = 0;
                 if (self->platformver < 3) {
                     if (last == 0) {
@@ -18469,7 +18351,7 @@ int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackmtpfrestore);
 #ifdef SKIP_ASM
-extern void CMTBLKDecf_operator_delete(int);
+extern void CMTBLKDecf_operator_delete(struct CMTBLKDecf *);
 
 /**
  * Release function of a packet-fed MicroTalk node: destroys its decoder (+0x34) with CMTBLKDecf_operator_delete.
@@ -18477,11 +18359,11 @@ extern void CMTBLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackmtpfrestore(UNPACKMTPFSTATE* node) {
-    int temp_4;
+    struct CMTBLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKMTPFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CMTBLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKMTPFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CMTBLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -18512,9 +18394,9 @@ extern int CMTBLKDecf_CMTBLKDecf_9960(int) __asm__("CMTBLKDecf_CMTBLKDecf");
 void SFILTER_unpackmtpfinit(UNPACKMTPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackmtpf_9960;
     node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960(source->voice));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_9960(source->voice);
+    (node->samplechan) = SNDDRV_getsamplechan_9960(source->voice);
     ((int)node->psample) = 0;
-    (*(short*)&node->curframe) = 0;
+    (node->curframe) = 0;
     node->platformver = source->platformver;
     node->totalframes = source->totalframes;
     ((int*)node->sfn.restorefn) = SFILTER_unpackmtpfrestore_9960;
@@ -18717,7 +18599,7 @@ int SFILTER_unpackpf_9C08(char *vvnode, int n, int srcBuffer, int *buf) {
     while (n > 0) {
         if (node->curframe >= node->totalframes) {
             node->psample = (signed char*)SNDPKTPLAYI_get_9C08(node->packetinstancehandle, node->samplechan, &blockLen, &last);
-            if ((int)node->psample == 0) {
+            if (node->psample == 0) {
                 if ((int)node->prevframesunpacked != 0) {
                     memset_9C08(buf, 0, n * 4);
                 }
@@ -18761,7 +18643,7 @@ extern void SFILTER_unpackpf(void);
 void SFILTER_unpackpfinit(UNPACKPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = (int*)&SFILTER_unpackpf;
     node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(source->voice));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan(source->voice);
+    (node->samplechan) = SNDDRV_getsamplechan(source->voice);
     node->totalframes = -1;
     ((int)node->psample) = 0;
     node->curframe = 0;
@@ -18960,7 +18842,7 @@ int SFILTER_unpackgetframexaf(UNPACKXAFSTATE* node) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackxafrestore);
 #ifdef SKIP_ASM
-extern void CEAXABLKDecf_operator_delete(int);
+extern void CEAXABLKDecf_operator_delete(struct CEAXABLKDecf *);
 
 /**
  * Release function of a one-shot EA-XA node: destroys its decoder (+0x1C) with CEAXABLKDecf_operator_delete.
@@ -18968,11 +18850,11 @@ extern void CEAXABLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackxafrestore(UNPACKXAFSTATE* node) {
-    int temp_4;
+    struct CEAXABLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKXAFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CEAXABLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKXAFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CEAXABLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -19124,7 +19006,7 @@ int SFILTER_unpackgetframexalf(UNPACKXALFSTATE* node) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackxalfrestore);
 #ifdef SKIP_ASM
-extern void CEAXABLKDecf_operator_delete(int);
+extern void CEAXABLKDecf_operator_delete(struct CEAXABLKDecf *);
 
 /**
  * Release function of a looped EA-XA node: destroys its decoder (+0x1C) with CEAXABLKDecf_operator_delete.
@@ -19132,11 +19014,11 @@ extern void CEAXABLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackxalfrestore(UNPACKXALFSTATE* node) {
-    int temp_4;
+    struct CEAXABLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKXALFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CEAXABLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKXALFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CEAXABLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -19256,7 +19138,7 @@ int SFILTER_unpackxapf(struct UNPACKXAPFSTATE *self, int n, int srcBuffer, int *
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackxapfrestore);
 #ifdef SKIP_ASM
-extern void CEAXABLKDecf_operator_delete(int);
+extern void CEAXABLKDecf_operator_delete(struct CEAXABLKDecf *);
 
 /**
  * Release function of a packet-fed EA-XA node: destroys its decoder (+0x1C) with CEAXABLKDecf_operator_delete.
@@ -19264,11 +19146,11 @@ extern void CEAXABLKDecf_operator_delete(int);
  * @param node  the decoder node
  */
 void SFILTER_unpackxapfrestore(UNPACKXAPFSTATE* node) {
-    int temp_4;
+    struct CEAXABLKDecf *decoder;
 
-    temp_4 = (int)((UNPACKXAPFSTATE *)node)->pDecoder;
-    if (temp_4 != 0) {
-        CEAXABLKDecf_operator_delete(temp_4);
+    decoder = ((UNPACKXAPFSTATE *)node)->pDecoder;
+    if (decoder != 0) {
+        CEAXABLKDecf_operator_delete(decoder);
     }
 }
 #endif
@@ -19299,7 +19181,7 @@ void SFILTER_unpackxapfinit(UNPACKXAPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackxapf_A610;
     ((int*)node->sfn.restorefn) = SFILTER_unpackxapfrestore_A610;
     node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610(source->voice));
-    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_A610(source->voice);
+    (node->samplechan) = SNDDRV_getsamplechan_A610(source->voice);
     node->platformver = (int) (source->platformver);
     ((int)node->psample) = 0;
     node->totalframes = (int) (source->totalframes);
@@ -19329,8 +19211,8 @@ int SFILTER_ft16_C(struct FT16STATE *self, int n, float *src, short *dst) __asm_
 // 95.40): clamps n floats to [-32768, 32767], converts them to int and packs them to 16-bit samples, 16 per pass.
 // A port replaces it with a C clamp-and-convert loop.
 int SFILTER_ft16_C(struct FT16STATE *self, int n, float *src, short *dst) {
-    if (((int*)self->sfn.pfnnext)) {
-        int framesIn = ((int (*)(int *, int, short *, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, dst, src, self->sfn.requester);
+    if (self->sfn.pfnnext) {
+        int framesIn = self->sfn.pfnnext->filterfn(self->sfn.pfnnext, n, dst, src, self->sfn.requester);
         if (framesIn <= 0) return framesIn;
     }
     // PORT: PS2-only VU0 hand-written loop (clamp floats to the 16-bit range and pack); one inline asm block.
@@ -19456,7 +19338,7 @@ int SFILTER_createLPFRC(LPFRCSTATE* node) {
     node->sfn.pfnnext2 = 0;
     node->sfn.pfnprev1 = 0;
     node->sfn.pfnprev2 = 0;
-    (*(signed char*)&node->sfn.clean) = 0;
+    (node->sfn.clean) = 0;
     node->sfn.restorefn = 0;
     (*(int*)&node->lpf) = 0;
     return 0;
@@ -19754,7 +19636,7 @@ int transferframes(TIMESTRETCHSTATE* stretcher, int *remaining, int *outCursor) 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", stretchframesneeded);
 #ifdef SKIP_ASM
-extern int determineaction_AEA0(float, int, int *, float *) __asm__("determineaction");
+extern int determineaction_AEA0(float, int, unsigned char **, float *) __asm__("determineaction");
 /**
  * Returns how many more input frames the time-stretcher needs to produce a number of output frames.
  *
@@ -19767,7 +19649,7 @@ extern int determineaction_AEA0(float, int, int *, float *) __asm__("determineac
  * @return the input frames to fetch, or 0
  */
 int stretchframesneeded(struct TIMESTRETCHSTATE *stretchState, int n) {
-    int pos;
+    unsigned char *pos;
     float err;
     int tot;
     int shift;
@@ -19776,7 +19658,7 @@ int stretchframesneeded(struct TIMESTRETCHSTATE *stretchState, int n) {
     int used;
     if (stretchState->outputsamples < n) {
         n -= stretchState->outputsamples;
-        pos = ((int)stretchState->psideband);
+        pos = stretchState->psideband;
         err = stretchState->sampleerror;
         tot = 0;
         shift = 0;
@@ -20254,7 +20136,7 @@ void func_003CBC58(int n) {
     char *buf;
 
     f_6210_BC58(done, 0, 0x18);
-    if (((int)sndmix.wetbusactive) != 0) {
+    if ((sndmix.wetbusactive) != 0) {
         f_51E8_BC58(((int)sndmix.wetbusactive), D_00515D80_BC58, n * 4);
         f_6210_BC58(D_00515D80_BC58, 0, n * 4);
         return;
@@ -21114,7 +20996,7 @@ void *CEAXABLKDecf_CEAXABLKDecf(CEAXABLKDecf* decoder) {
 INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_Feed);
 #ifdef SKIP_ASM
 /**
- * Gives an EA-XA decoder data to decode: the frame count (+0x08), size (+0x0C) and data (+0xA0).
+ * Gives an EA-XA decoder data to decode: the frame count (+0x08), size (+0x0C) and data (xap.psrc).
  *
  * @param decoder  the decoder
  * @param data  the EA-XA data
@@ -21122,7 +21004,7 @@ INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_Feed);
  * @param sampleCount  the frames it holds
  * @return 0, or -1 for null data or while the decoder still has frames left
  */
-int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, int data, int byteSize, int sampleCount) {
+int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, unsigned char *data, int byteSize, int sampleCount) {
     if (data == 0) {
         return -1;
     }
@@ -21131,7 +21013,7 @@ int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, int data, int byteSize, int sampleC
     }
     decoder->xav.numsamples = sampleCount;
     decoder->xav.sampledatasize = byteSize;
-    ((int)decoder->xap.psrc) = data;
+    decoder->xap.psrc = data;
     return 0;
 }
 #endif
@@ -22793,8 +22675,8 @@ int SFILTER_amplf_C(struct AMPLFSTATE *self, int n, float *src, float *dst) __as
 // $4/$6/$7 and the scale through $2 itself): dst[k] = src[k] * self->f1C over n floats, 16 per pass. A port replaces it
 // with the C loop.
 int SFILTER_amplf_C(struct AMPLFSTATE *self, int n, float *src, float *dst) {
-    if (((int*)self->sfn.pfnnext)) {
-        int inputResult = ((int (*)(int *, int, float *, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, dst, src, self->sfn.requester);
+    if (self->sfn.pfnnext) {
+        int inputResult = self->sfn.pfnnext->filterfn(self->sfn.pfnnext, n, dst, src, self->sfn.requester);
         if (inputResult <= 0) return inputResult;
     }
     // PORT: PS2-only VU0 hand-written loop (scale 4x4 blocks by a factor); one inline asm block.
@@ -22852,7 +22734,7 @@ int SFILTER_createAMPLF(AMPLFSTATE* node) {
     node->sfn.pfnnext2 = 0;
     node->sfn.pfnprev1 = 0;
     node->sfn.pfnprev2 = 0;
-    (*(signed char*)&node->sfn.clean) = 0;
+    (node->sfn.clean) = 0;
     node->sfn.restorefn = 0;
     (*(int*)&node->gain) = 0;
     return 0;
@@ -22878,7 +22760,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_mixer);
 #ifdef SKIP_ASM
 extern void ff_F178(void *) __asm__("SNDMEMI_free");
 extern void *fa_F178(int) __asm__("SNDMEMI_alloc");
-int SFILTER_mixer_C(struct MIXERSTATE *self, int n, int a2, float *a3) __asm__("SFILTER_mixer");
+int SFILTER_mixer_C(struct MIXERSTATE *self, int n, void *srcBuf, float *dstBuf) __asm__("SFILTER_mixer");
 /**
  * Filter-graph callback of the mixer node: sums its two input nodes into @p dstBuf.
  *
@@ -22894,16 +22776,16 @@ int SFILTER_mixer_C(struct MIXERSTATE *self, int n, int a2, float *a3) __asm__("
  */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4/$5/$6 itself): a3[k] += self->f1C[k] over n floats, 16 per pass. A port replaces it with the C loop.
-int SFILTER_mixer_C(struct MIXERSTATE *self, int n, int srcBuf, float *dstBuf) {
+int SFILTER_mixer_C(struct MIXERSTATE *self, int n, void *srcBuf, float *dstBuf) {
     int inputResult;
     if (self->tempbufframes < n) {
         if (((void*)self->ptempbuf)) ff_F178(((void*)self->ptempbuf));
         self->tempbufframes = n;
-        (*(void**)&self->ptempbuf) = fa_F178(n << 2);
+        (self->ptempbuf) = fa_F178(n << 2);
     }
-    inputResult = ((int (*)(int *, int, int, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, srcBuf, dstBuf, 1);
+    inputResult = self->sfn.pfnnext->filterfn(self->sfn.pfnnext, n, srcBuf, dstBuf, 1);
     if (inputResult <= 0) return inputResult;
-    inputResult = ((int (*)(int *, int, int, void *, int))*((int*)self->sfn.pfnnext2))(((int*)self->sfn.pfnnext2), n, srcBuf, ((void*)self->ptempbuf), 2);
+    inputResult = self->sfn.pfnnext2->filterfn(self->sfn.pfnnext2, n, srcBuf, self->ptempbuf, 2);
     if (inputResult <= 0) return inputResult;
     {
             // PORT: PS2-only VU0 hand-written loop (add a scratch buffer into the destination, 4x4 floats per step).
@@ -22947,7 +22829,7 @@ int SFILTER_mixer_C(struct MIXERSTATE *self, int n, int srcBuf, float *dstBuf) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_mixerrestore);
 #ifdef SKIP_ASM
-extern void SNDMEMI_free(int);
+extern void SNDMEMI_free(void *);
 
 /**
  * Frees a mixer node's scratch buffer (+0x1C) with SNDMEMI_free, if it has one. The node's restore function.
@@ -22957,11 +22839,11 @@ extern void SNDMEMI_free(int);
  * @param node  the mixer node
  */
 void SFILTER_mixerrestore(MIXERSTATE* node) {
-    int temp_4;
+    float *buffer;
 
-    temp_4 = (int)((MIXERSTATE *)node)->ptempbuf;
-    if (temp_4 != 0) {
-        SNDMEMI_free(temp_4);
+    buffer = ((MIXERSTATE *)node)->ptempbuf;
+    if (buffer != 0) {
+        SNDMEMI_free(buffer);
     }
 }
 #endif
@@ -22989,7 +22871,7 @@ int SFILTER_createMIX(MIXERSTATE* node) {
     node->sfn.pfnnext2 = 0;
     node->sfn.pfnprev1 = 0;
     node->sfn.pfnprev2 = 0;
-    *(signed char*)&node->sfn.clean = 0;
+    node->sfn.clean = 0;
     node->ptempbuf = 0;
     node->tempbufframes = 0;
     return 0;
@@ -23009,13 +22891,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF300);
  *
  * @param sv  the resonator state
  * @param n  the number of samples
- * @param in_  the input floats
- * @param out_  the output floats
+ * @param in  the input floats
+ * @param out  the output floats
  */
-void func_003CF300(void *sv, int n, int in_, int out_) {
+void func_003CF300(void *sv, int n, float *in, float *out) {
     struct RESONSTATE *resonState = (struct RESONSTATE *)sv;
-    float *in = (float *)in_;
-    float *out = (float *)out_;
     int sampleRate = resonState->samplerate;
     float t, radius, scaledIn, sample;
     if (resonState->bw < (2.0f * (float)sampleRate) / 3.1415927f && (t = resonState->resonfreq, t > 0.0f) && t < (float)(sampleRate >> 1)) {
@@ -23047,7 +22927,7 @@ void func_003CF300(void *sv, int n, int in_, int out_) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_reson);
 #ifdef SKIP_ASM
-extern void func_003CF300(void *, int, int, int);
+extern void func_003CF300(void *, int, float *, float *);
 
 /**
  * Filter-graph callback of the resonator node: pulls up to @p count frames from its input node and resonates them.
@@ -23061,10 +22941,10 @@ extern void func_003CF300(void *, int, int, int);
  * @param dstBuf  the output buffer
  * @return the frames produced, or the input's result when it is 0 or less
  */
-int SFILTER_reson(RESONSTATE* node, int count, int srcBuf, int dstBuf) {
-    int (**obj)(void *, int, int, int, int);
+int SFILTER_reson(RESONSTATE* node, int count, float *srcBuf, float *dstBuf) {
+    int (**obj)(void *, int, float *, float *, int);
     int n;
-    obj = (int (**)(void *, int, int, int, int))((RESONSTATE *)node)->sfn.pfnnext;
+    obj = (int (**)(void *, int, float *, float *, int))((RESONSTATE *)node)->sfn.pfnnext;
     if (obj != 0) {
         n = (*obj)(obj, count, dstBuf, srcBuf, ((RESONSTATE *)node)->sfn.requester);
         if (n <= 0) {
@@ -23099,11 +22979,11 @@ int SFILTER_createRESON(RESONSTATE* effect) {
     effect->sfn.pfnnext2 = 0;
     effect->sfn.pfnprev1 = 0;
     effect->sfn.pfnprev2 = 0;
-    *(signed char*)&effect->sfn.clean = 0;
+    effect->sfn.clean = 0;
     effect->sfn.restorefn = 0;
-    *(int*)&effect->xn = 0;
-    *(int*)&effect->ynminus1 = 0;
-    *(int*)&effect->ynminus2 = 0;
+    effect->xn = 0.0f;
+    effect->ynminus1 = 0.0f;
+    effect->ynminus2 = 0.0f;
     return 0;
 }
 #endif
@@ -23152,8 +23032,8 @@ void SFILTER_modifyRESON(RESONSTATE* effect, int *params) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_splitter);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int SNDMEMI_alloc_F5D0(int) __asm__("SNDMEMI_alloc");
-extern void SNDMEMI_free_F5D0(int) __asm__("SNDMEMI_free");
+extern void *SNDMEMI_alloc_F5D0(int) __asm__("SNDMEMI_alloc");
+extern void SNDMEMI_free_F5D0(void *) __asm__("SNDMEMI_free");
 extern void Util_MemCpy_F5D0(char *, char *, int) __asm__("Util_MemCpy");
 
 /**
@@ -23171,7 +23051,8 @@ extern void Util_MemCpy_F5D0(char *, char *, int) __asm__("Util_MemCpy");
  * @return @p n, or the input's result when it is 0 or less
  */
 int SFILTER_splitter(SPLITSTATE* self, int n, char *workBuf, char *dst) {
-    int bytes, oldBuf, result;
+    int bytes, result;
+    void *oldBuf;
     int *obj;
     if (self->mustempty != 0) {
         self->mustempty = 0;
@@ -23179,11 +23060,11 @@ int SFILTER_splitter(SPLITSTATE* self, int n, char *workBuf, char *dst) {
     }
     bytes = n * 4;
     if (self->sizebuf < n) {
-        oldBuf = (int)self->pdatabuf;
+        oldBuf = self->pdatabuf;
         if (oldBuf != 0) {
             SNDMEMI_free_F5D0(oldBuf);
         }
-        self->pdatabuf = (void*)SNDMEMI_alloc_F5D0(bytes);
+        self->pdatabuf = SNDMEMI_alloc_F5D0(bytes);
         self->sizebuf = n;
     }
     if (self->isempty != 0) {
@@ -23206,7 +23087,7 @@ int SFILTER_splitter(SPLITSTATE* self, int n, char *workBuf, char *dst) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_splitrestore);
 #ifdef SKIP_ASM
-extern void SNDMEMI_free(int);
+extern void SNDMEMI_free(void *);
 
 /**
  * Frees a splitter node's copy buffer (+0x1C) with SNDMEMI_free, if it has one. The node's restore function.
@@ -23216,11 +23097,11 @@ extern void SNDMEMI_free(int);
  * @param effect  the splitter node
  */
 void SFILTER_splitrestore(SPLITSTATE* effect) {
-    int temp_4;
+    void *buffer;
 
-    temp_4 = (int)((SPLITSTATE *)effect)->pdatabuf;
-    if (temp_4 != 0) {
-        SNDMEMI_free(temp_4);
+    buffer = ((SPLITSTATE *)effect)->pdatabuf;
+    if (buffer != 0) {
+        SNDMEMI_free(buffer);
     }
 }
 #endif
@@ -23285,20 +23166,20 @@ int SFILTER_src(SRCSTATE* self, int n, int workBuf, void *dst) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_initSOURCE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void SFILTER_src_F798(void) __asm__("SFILTER_src");
+int SFILTER_src_F798(void *, int, void *, void *, int) __asm__("SFILTER_src");
 
 /**
  * Points a source filter node at its sample data and installs SFILTER_src as its filter function.
  *
- * Stores @p buffer at +0x1C and clears the restore function (+0x4). Called by func_003CBC58.
+ * Stores @p buffer as the node's data (pdata) and clears the restore function. Called by func_003CBC58.
  *
  * @param effect  the source node
  * @param buffer  the float samples it will hand out
  */
-void SFILTER_initSOURCE(SRCSTATE* effect, int buffer) {
-    effect->pdata = (float*)buffer;
+void SFILTER_initSOURCE(SRCSTATE* effect, float *buffer) {
+    effect->pdata = buffer;
     effect->sfn.restorefn = 0;
-    *(void (**)(void))&effect->sfn = SFILTER_src_F798;
+    effect->sfn.filterfn = SFILTER_src_F798;
 }
 #endif
 
@@ -23306,7 +23187,8 @@ void SFILTER_initSOURCE(SRCSTATE* effect, int buffer) {
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createSOURCE);
 #ifdef SKIP_ASM
 /**
- * Resets a source filter node: clears its links (+0x8..+0x14), the clean flag (+0x1B) and the data pointer (+0x1C).
+ * Resets a source filter node: clears its links (sfn.pfnnext .. pfnprev2), the clean flag (sfn.clean) and the data
+ * pointer (pdata).
  *
  * Quirk: it installs no filter function; SFILTER_initSOURCE does that when the data is attached. func_003CC070 calls it for
  * effect type 0.
@@ -23315,12 +23197,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createSOURCE);
  * @return 0
  */
 int SFILTER_createSOURCE(SRCSTATE* effect) {
-    ((int)effect->sfn.pfnnext) = 0;
-    ((int)effect->sfn.pfnnext2) = 0;
-    ((int)effect->sfn.pfnprev1) = 0;
-    ((int)effect->sfn.pfnprev2) = 0;
-    (*(signed char*)&effect->sfn.clean) = 0;
-    ((int)effect->pdata) = 0;
+    effect->sfn.pfnnext = 0;
+    effect->sfn.pfnnext2 = 0;
+    effect->sfn.pfnprev1 = 0;
+    effect->sfn.pfnprev2 = 0;
+    effect->sfn.clean = 0;
+    effect->pdata = 0;
     return 0;
 }
 #endif
@@ -23351,8 +23233,8 @@ int SFILTER_echo_C(struct ECHOSTATE *self, int n, float *srcBuf, float *dstBuf) 
     float *dst;
     int rem;
     int chunk;
-    if (((int*)self->sfn.pfnnext)) {
-        chunk = ((int (*)(int *, int, float *, float *, int))*((int*)self->sfn.pfnnext))(((int*)self->sfn.pfnnext), n, dstBuf, srcBuf, self->sfn.requester);
+    if (self->sfn.pfnnext) {
+        chunk = self->sfn.pfnnext->filterfn(self->sfn.pfnnext, n, dstBuf, srcBuf, self->sfn.requester);
         if (chunk <= 0) return chunk;
     }
     src = srcBuf;
@@ -23432,7 +23314,7 @@ int SFILTER_echo_C(struct ECHOSTATE *self, int n, float *srcBuf, float *dstBuf) 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_echorestore);
 #ifdef SKIP_ASM
-void SNDMEMI_free(int);
+void SNDMEMI_free(void *);
 
 /**
  * Frees an echo node's delay line: SNDMEMI_free on the allocation (+0x20), then clears it and the aligned pointer
@@ -23441,11 +23323,11 @@ void SNDMEMI_free(int);
  * @param effect  the echo node
  */
 void SFILTER_echorestore(ECHOSTATE* effect) {
-    int temp_4;
+    float *buffer;
 
-    temp_4 = (int)effect->punaligneddelaybuf;
-    if (temp_4 != 0) {
-        SNDMEMI_free(temp_4);
+    buffer = effect->punaligneddelaybuf;
+    if (buffer != 0) {
+        SNDMEMI_free(buffer);
         effect->punaligneddelaybuf = 0;
         effect->pdelaybuf = 0;
     }
@@ -23475,7 +23357,7 @@ int SFILTER_createECHO(ECHOSTATE* effect) {
     effect->sfn.pfnnext2 = 0;
     effect->sfn.pfnprev1 = 0;
     effect->sfn.pfnprev2 = 0;
-    *(signed char*)&effect->sfn.clean = 0;
+    effect->sfn.clean = 0;
     effect->punaligneddelaybuf = 0;
     effect->pdelaybuf = 0;
     return 0;

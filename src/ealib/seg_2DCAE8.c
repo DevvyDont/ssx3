@@ -1035,6 +1035,9 @@ static __inline__ int FILESYS_validop(int ophandle) {
  * @return the status, or -3
  */
 int FILESYS_opstatus(int ophandle) {
+    // ORIGINAL-PTR: [O] the handle is an int (On Tour: FILESYS_opstatus(int ophandle)) and OP_def the union that
+    //     splits it; [R] retail stores the argument and reads its index byte through its address (lbu 0x3 off
+    //     the spilled word), so EA read the bit-fields in place.
     if (FILESYS_validop(ophandle) == 0) return -3;
     // status is volatile (FILEOPERATION_def): retail keeps this load out of the b delay slot
     return gFileDevice.oplist[((OP_def *)&ophandle)->sep.index].status;
@@ -1070,8 +1073,8 @@ typedef struct { unsigned char a, b, c, d; } T_CF40;
  * @param opHandle  the operation handle
  * @return the user data
  */
-int FILESYS_opuserdata(T_CF40 opHandle) {
-    return (int)gFileDevice.oplist[opHandle.d].userdata;
+void *FILESYS_opuserdata(T_CF40 opHandle) {
+    return gFileDevice.oplist[opHandle.d].userdata;
 }
 #endif
 
@@ -1184,6 +1187,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_cancelop);
  * @param ophandle  the operation handle
  */
 void FILESYS_cancelop(int ophandle) {
+    // ORIGINAL-PTR: [O] the handle is an int (On Tour: FILESYS_cancelop(int ophandle)) and OP_def the union that
+    //     splits it; [R] retail stores the argument and reads its index byte through its address (lbu 0x3 off
+    //     the spilled word), so EA read the bit-fields in place.
     int opType;
     if (FILESYS_validop(ophandle) != 0) {
         opType = ((unsigned int)ophandle >> 20) & 0xF;
@@ -1233,7 +1239,7 @@ struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_waitop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int THREAD_iscurrent(char *);
+extern int THREAD_iscurrent(THREAD *);
 extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 
@@ -1253,6 +1259,9 @@ static inline int hValid_D1D8(int h) {
  * @return the operation's result, or -3 for an invalid handle
  */
 int FILESYS_waitop(int ophandle) {
+    // ORIGINAL-PTR: [O] the handle is an int (On Tour: FILESYS_waitop(int ophandle)) and OP_def the union that
+    //     splits it; [R] retail stores the argument and reads its index byte through its address (lbu 0x3 off
+    //     the spilled word), so EA read the bit-fields in place.
     FILEOPERATION_def *fop = &gFileDevice.oplist[((OP_def *)&ophandle)->sep.index];
     if (!hValid_D1D8(ophandle)) {
         return -3;
@@ -1344,7 +1353,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_exists);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *f_E670_D438() __asm__("reserveop");
-extern int f_E800_D438() __asm__("reservehandle");
+extern struct HANDLE_def *f_E800_D438() __asm__("reservehandle");
 extern void f_E668_D438(int *) __asm__("iFILE_perror");
 extern char *f_strncpy_D438(char *, char *, int) __asm__("strncpy");
 extern void f_Exec_D438(int *) __asm__("iFILESYS_ExecCommand");
@@ -1360,27 +1369,27 @@ extern void f_Exec_D438(int *) __asm__("iFILESYS_ExecCommand");
  * @param userData  the user data
  * @return the operation handle
  */
-int FILESYS_exists(char *fileName, int priority, int userData) {
+int FILESYS_exists(char *fileName, int priority, void *userData) {
     struct FILEOPERATION_def *fileOp = (struct FILEOPERATION_def *)f_E670_D438();
-    (*(int*)&fileOp->userdata) = userData;
+    fileOp->userdata = userData;
     fileOp->priority = priority;
-    (*(unsigned int*)&fileOp->op) = ((*(unsigned int*)&fileOp->op) & 0xFF0FFFFF) | 0x800000;
+    fileOp->op.id = (fileOp->op.id & 0xFF0FFFFF) | 0x800000;
     fileOp->value = 1;
-    (*(char**)&fileOp->handle) = (char *)f_E800_D438();
-    if (((char*)fileOp->handle) == 0) {
+    fileOp->handle = f_E800_D438();
+    if (fileOp->handle == 0) {
         fileOp->error = 2;
         f_E668_D438((int *)fileOp);
     }
     f_strncpy_D438(fileOp->handle->name, fileName, 0x100);
     f_Exec_D438((int *)fileOp);
-    return (*(unsigned int*)&fileOp->op);
+    return fileOp->op.id;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_open);
 #ifdef SKIP_ASM
-extern int reservehandle();
+extern struct HANDLE_def *reservehandle();
 extern void iFILE_perror();
 
 /**
@@ -1396,15 +1405,15 @@ extern void iFILE_perror();
  * @param userdata  user data passed to the completion callback
  * @return the operation handle
  */
-int FILESYS_open(char *name, int modeflags, int priority, int userdata) {
+int FILESYS_open(char *name, int modeflags, int priority, void *userdata) {
     FILEOPERATION_def* fop = (FILEOPERATION_def*)reserveop();
-    int fileHandle;
-    fop->userdata = (void*)userdata;
+    struct HANDLE_def *fileHandle;
+    fop->userdata = userdata;
     fop->value = modeflags;
     fop->priority = priority;
     *(int *)fop = (*(int *)fop & 0xFF0FFFFF) | 0x200000;
     fileHandle = reservehandle();
-    fop->handle = (struct HANDLE_def*)fileHandle;
+    fop->handle = fileHandle;
     if (fileHandle == 0) {
         fop->error = 2;
         iFILE_perror(((char*)fop));
@@ -1438,6 +1447,8 @@ int FILESYS_close_impl(int filehandle, int priority, void *userdata) __asm__("FI
  * @return the operation handle
  */
 int FILESYS_close_impl(int filehandle, int priority, void *userdata) {
+    // ORIGINAL-PTR: [O] EA's API hands file handles out as ints (On Tour: FILESYS_close(int filehandle, ...),
+    //     FILESYS_open returns int) while FILEOPERATION_def::handle is the HANDLE_def* the int carries.
     FILEOPERATION_def *fop;
     struct FILEBIG_def *n;
 
@@ -1523,9 +1534,11 @@ extern void iFILE_perror();
  * @param userData  the user data
  * @return the operation handle
  */
-int FILESYS_write(int file, int offset, int buffer, int size, int priority, int userData) {
+int FILESYS_write(int file, int offset, void *buffer, int size, int priority, void *userData) {
+    // ORIGINAL-PTR: [O] EA's API hands file handles out as ints (On Tour: FILESYS_write(int filehandle, ...),
+    //     FILESYS_open returns int) while FILEOPERATION_def::handle is the HANDLE_def* the int carries.
     FILEOPERATION_def* cmd = (FILEOPERATION_def*)reserveop();
-    cmd->userdata = (void*)userData;
+    cmd->userdata = userData;
     *(int *)cmd = (*(int *)cmd & 0xFF0FFFFF) | 0x500000;
     if (file == 0) {
         cmd->error = 6;
@@ -1535,7 +1548,7 @@ int FILESYS_write(int file, int offset, int buffer, int size, int priority, int 
     cmd->priority = priority;
     cmd->amount = size;
     cmd->value = offset;
-    cmd->data = (void*)buffer;
+    cmd->data = buffer;
     iFILESYS_ExecCommand(((char*)cmd));
     return *(int *)cmd;
 }
@@ -1545,33 +1558,33 @@ int FILESYS_write(int file, int offset, int buffer, int size, int priority, int 
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_size);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *reserveop_D7E0() __asm__("reserveop");
-extern void iFILE_perror_D7E0(int *) __asm__("iFILE_perror");
+extern struct FILEOPERATION_def *reserveop_D7E0() __asm__("reserveop");
+extern void iFILE_perror_D7E0(struct FILEOPERATION_def *) __asm__("iFILE_perror");
 
 /**
- * Creates a size operation (type 6) for an open file; returns its handle. The size (the handle's +0x4) is stored as the
- * result (+0x18) and the operation completes at once; a null file sets error 6 instead.
+ * Creates a size operation (type 6) for an open file; returns its handle. The size (the handle's length) is stored as
+ * the result (value) and the operation completes at once; a null file sets error 6 instead.
  *
  * @param file  the file handle
  * @param priority  the priority
  * @param userData  the user data
  * @return the operation handle
  */
-int FILESYS_size(int *file, int priority, int userData) {
-    int *temp_2;
+int FILESYS_size(struct HANDLE_def *file, int priority, void *userData) {
+    struct FILEOPERATION_def *fop;
 
-    temp_2 = reserveop_D7E0();
-    temp_2[5] = userData;
-    temp_2[4] = priority;
-    temp_2[0] = (temp_2[0] & 0xFF0FFFFF) | 0x600000;
+    fop = reserveop_D7E0();
+    fop->userdata = userData;
+    fop->priority = priority;
+    fop->op.id = (fop->op.id & 0xFF0FFFFF) | 0x600000;
     if (file != 0) {
-        temp_2[6] = file[1];
-        *(volatile int *)&temp_2[2] = 1;
+        fop->value = file->length;
+        fop->status = 1;
     } else {
-        temp_2[3] = 6;
-        iFILE_perror_D7E0(temp_2);
+        fop->error = 6;
+        iFILE_perror_D7E0(fop);
     }
-    return temp_2[0];
+    return fop->op.id;
 }
 #endif
 
@@ -1580,6 +1593,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_null);
 #ifdef SKIP_ASM
 extern int *reserveop();
 extern void iFILESYS_ExecCommand(int);
+extern struct FILEOPERATION_def *reserveop_D878(void) __asm__("reserveop");
+extern void iFILESYS_ExecCommand_D878(struct FILEOPERATION_def *) __asm__("iFILESYS_ExecCommand");
 
 /**
  * Queues an operation of type 7 that carries no file and no data (a no-op that completes in queue order); returns its
@@ -1590,13 +1605,13 @@ extern void iFILESYS_ExecCommand(int);
  * @param userData  the user data
  * @return the operation handle
  */
-int FILESYS_null(int fileDevice, int priority, int userData) {
-    int *cmd = reserveop();
-    cmd[5] = userData;
-    cmd[4] = priority;
-    cmd[0] = (cmd[0] & 0xFF0FFFFF) | 0x700000;
-    iFILESYS_ExecCommand((int)cmd);
-    return cmd[0];
+int FILESYS_null(int fileDevice, int priority, void *userData) {
+    struct FILEOPERATION_def *fop = reserveop_D878();
+    fop->userdata = userData;
+    fop->priority = priority;
+    fop->op.id = (fop->op.id & 0xFF0FFFFF) | 0x700000;
+    iFILESYS_ExecCommand_D878(fop);
+    return fop->op.id;
 }
 #endif
 
@@ -1679,6 +1694,9 @@ extern char iFILE_addbigreadcallback_DA10[] __asm__("iFILE_addbigreadcallback");
  * @param bigRec  the archive record
  */
 void iFILE_addbigopencallback(int opHandle, int opStatus, struct FILEBIG_def *bigRec) {
+    // ORIGINAL-PTR: [O] the handle is an int (On Tour: iFILE_addbigopencallback(int ophandle, ...)) and
+    //     OP_def the union that splits it; [R] retail stores the argument and reads its index byte through its
+    //     address (lbu 0x3 off the spilled word), so EA read the bit-fields in place.
     int priority = gFileDevice.oplist[((OP_def *)&opHandle)->sep.index].priority;
     int fileHandle = FILESYS_completeop_DA10(opHandle);
     if (opStatus != 1) {
@@ -1785,7 +1803,7 @@ extern void iFILE_delbigclosecallback_DC30(int, int, int) __asm__("iFILE_delbigc
  * @param userData  the user data
  * @return the operation handle
  */
-int FILESYS_delbig(HANDLE_def *bigHandle, int priority, int userData) {
+int FILESYS_delbig(HANDLE_def *bigHandle, int priority, void *userData) {
     FILEBIG_def *prev;
     FILEBIG_def *big;
     FILEOPERATION_def *fileOp;
@@ -1796,7 +1814,7 @@ int FILESYS_delbig(HANDLE_def *bigHandle, int priority, int userData) {
     big = gFileDevice.bigfilelist;
     fileOp = reserveop_DC30();
     openFile = gFileDevice.handlelist;
-    fileOp->userdata = (void *)userData;
+    fileOp->userdata = userData;
     fileOp->priority = priority;
     fileOp->op.sep.type = 10;
     if (bigHandle->bigoffset != 0) {
@@ -3073,7 +3091,7 @@ void loadfileopencallback(int opHandle, int opStatus, struct REQUESTSTRUCTtag *r
         if (request->fop != 0) {
             FILESYS_callbackop(request->fop, loadfileclosecallback_F2C0);
         }
-    } else if (((unsigned int)request->loadaddr) == 0) {
+    } else if ((request->loadaddr) == 0) {
         int remaining = request->readsize;
         request->fop = FILESYS_read(n, request->foffset, ((int)request->destaddr), remaining <= 0x8000 ? remaining : 0x8000, 99, request);
         if (request->fop != 0) {
@@ -3172,7 +3190,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_restore);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int numrequests;
 extern int ASYNCFILE_cancel(int);
-extern int THREAD_iscurrent(char *);
+extern int THREAD_iscurrent(THREAD *);
 extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 extern void MUTEX_destroy_F570(char *) __asm__("MUTEX_destroy");
@@ -3234,9 +3252,9 @@ int ASYNCFILE_load(int name, int memtype) {
         req->bytesread = 0;
         req->releaseflag = 0;
         req->cancelflag = 0;
-        (*(int*)&req->callback) = 0;
+        req->callback = 0;
         req->foffset = 0;
-        (*(int*)&req->destaddr) = 0;
+        req->destaddr = 0;
         (*(int*)&req->loadaddr) = 1;
         req->fop = f_D4E8_F690(name, 1, 100, req);
         if (req->fop != 0) {
@@ -3277,8 +3295,8 @@ int ASYNCFILE_loadat(int fileName, int address, int maxSize) {
     request->bytesread = 0;
     request->releaseflag = 0;
     request->cancelflag = 0;
-    (*(int*)&request->loadaddr) = 0;
-    (*(int*)&request->callback) = 0;
+    request->loadaddr = 0;
+    request->callback = 0;
     request->foffset = 0;
     request->fop = FILESYS_open(fileName, 1, 100, request);
     if (request->fop == 0) return 0;
@@ -3351,7 +3369,7 @@ void ASYNCFILE_setcallback_impl(int h, void (*fn)(int)) __asm__("ASYNCFILE_setca
 void ASYNCFILE_setcallback_impl(int reqId, void (*fn)(int)) {
     REQUESTSTRUCTtag* request = (REQUESTSTRUCTtag*)locaterequest_F8E8(reqId);
     int done;
-    if (((char*)request) == 0 || (int)request->callback != 0) {
+    if (((char*)request) == 0 || request->callback != 0) {
         return;
     }
     MUTEX_lock(hlafile_mutex_9C08);
@@ -8421,21 +8439,21 @@ extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
  * Tells whether a thread is the calling thread.
  *
  * For a null @p thread it compares GetThreadId with the main thread's id (D_00450DFC, set by THREAD_init); -1 always
- * matches; otherwise it compares with the record's +4. The file and stream code uses it with 0 to run the sync tasks
- * only on the main thread.
+ * matches; otherwise it compares with the record's threadId. The file and stream code uses it with 0 to run the sync
+ * tasks only on the main thread.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return 1 when it is the calling thread, 0 otherwise
  */
-int THREAD_iscurrent(char *thread) {
+int THREAD_iscurrent(THREAD *thread) {
     int cur = GetThreadId();
     if (thread == 0) {
         return cur == D_00450DFC_0DFC[0];
     }
-    if (thread == (char *)-1) {
+    if (thread == (THREAD *)-1) {
         return 1;
     }
-    return cur == *(int *)(thread + 4);
+    return cur == thread->threadId;
 }
 #endif
 
@@ -8491,22 +8509,22 @@ extern int D_00450DFC_5508[] __asm__("D_00450DFC");
 /**
  * Changes a thread's priority.
  *
- * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and calls iChangeThreadPriority
- * inside the timer interrupt (flag bInTimerSubroutine), ChangeThreadPriority otherwise.
+ * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's threadId) and calls
+ * iChangeThreadPriority inside the timer interrupt (flag bInTimerSubroutine), ChangeThreadPriority otherwise.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @param priority  the new kernel priority
  * @return 1
  */
-int THREAD_setpriority(void *thread, int priority) {
+int THREAD_setpriority(THREAD *thread, int priority) {
     int var_4;
 
     if (thread == 0) {
         var_4 = D_00450DFC_5508[0];
-    } else if (thread == (void *)0xFFFFFFFF) {
+    } else if (thread == (THREAD *)0xFFFFFFFF) {
         var_4 = GetThreadId_5508();
     } else {
-        var_4 = (*(int *)((char*)(thread) + (4)));
+        var_4 = thread->threadId;
     }
     if (bInTimerSubroutine_5508[0] != 0) {
         iChangeThreadPriority_5508(var_4, priority);

@@ -102,6 +102,10 @@ CHECK_OFFSET(SNDMIDISTATE, smp, 0x700);
 CHECK_OFFSET(SNDMIDISTATE, lasthandle, 0x7C0);
 CHECK_SIZE(SNDMIDISTATE, 0x7C4);
 
+// The player's global. ealib/seg_2B4578 declares its own sndms (the view its frozen FAKEMATCH block of
+// SNDI_midiparsenoteon reads), so it includes this header with EALIB_SMIDI_NO_GLOBAL defined.
+#ifndef EALIB_SMIDI_NO_GLOBAL
 extern struct SNDMIDISTATE sndms;                  // [O] smidaz.c; [R] 0x0050A120
+#endif
 
 #endif /* EALIB_SMIDI_H */
