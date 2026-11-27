@@ -42,6 +42,18 @@ typedef union
 
 CHECK_SIZE(ieee_double_shape_type, 0x8);
 
+/* A double's high word: [L] libc/stdlib/mprec.h (IEEE branch). Exp_1 is the high word of 1.0, Sign_bit its sign bit,
+   Ebits the exponent's width and Exp_shift the exponent's shift (also the count of fraction bits in the high word).
+   mprec.c's b2d builds words with them; fdlibm (s_floor.c, e_log.c) spells the same values in hex. */
+#define Exp_shift 20
+#define Ebits     11
+#define Exp_1     ((unsigned int)0x3ff00000)
+#define Sign_bit  ((unsigned int)0x80000000)
+
+/* The unbiased exponent of an infinity or NaN: the 11-bit exponent field all ones (0x7ff) less the bias 0x3ff
+   ([L] s_floor.c tests `j0==0x400`, commented "inf or NaN"). Name ours. */
+#define DOUBLE_EXP_INF_NAN 0x400
+
 /* Get a 32 bit int from a float.  [L] */
 #define GET_FLOAT_WORD(i,d)                                     \
 do {                                                            \

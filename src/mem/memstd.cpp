@@ -1961,7 +1961,7 @@ INCLUDE_ASM("mem/memstd", cMoviePlayer_syncPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_003AE6C8(void* p, float f);
-extern "C" int func_003AE780(void* p);
+extern "C" bool func_003AE780(void* p);
 extern "C" int func_003AE860(void* p);
 extern "C" void SYNCTASK_run(int);
 extern "C" void THREAD_yield(int);
@@ -2080,7 +2080,7 @@ void cMoviePlayer::asyncRender(int force)
 //100%
 INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncUpdate);
 #ifdef SKIP_ASM
-extern "C" int func_003AE780(void* p);
+extern "C" bool func_003AE780(void* p);
 extern "C" void* func_003AE6C8(void* p, float f);
 extern "C" int func_003AE860(void* p);
 

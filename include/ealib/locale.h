@@ -25,6 +25,13 @@ typedef struct LOCALE_INDEX LOCALE_INDEX;
 typedef struct LOCALE_LANGUAGE LOCALE_LANGUAGE;
 #endif
 
+// The values LOCALE_getstate reads and LOCALE_setstate writes (LOCALE_setstate takes only LOCALE_LANGUAGEID). [O] On
+// Tour's enum LOCALESTATE (names and values); [U] LOCALE_getstate's cases read languageid, languagecount, the current
+// language's stringcount and flag bit 0.
+enum LOCALESTATE {
+    LOCALE_LANGUAGEID = 0, LOCALE_LANGUAGECOUNT = 1, LOCALE_STRINGCOUNT = 2, LOCALE_HASINDEX = 3
+};
+
 // The file header chunk (0x10 [O]); the per-language offset table follows it.
 struct LOCALE_HEADER {
     unsigned int chunkid;           // 0x0 [O]

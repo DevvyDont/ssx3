@@ -1193,7 +1193,7 @@ void FILESYS_cancelop(int ophandle) {
     int opType;
     if (FILESYS_validop(ophandle) != 0) {
         opType = ((unsigned int)ophandle >> 20) & 0xF;
-        if (opType != 3 && opType != 10) {
+        if (opType != FOPTYPE_close && opType != FOPTYPE_delbig) {
             gFileDevice.oplist[((OP_def *)&ophandle)->sep.index].cancelled = 1;
         }
     }
@@ -1308,23 +1308,23 @@ int FILESYS_completeop_a(int ophandle) {
         break;
     case 1:
         switch (slot->op.sep.type) {
-        case 2:
-        case 9:
+        case FOPTYPE_open:
+        case FOPTYPE_addbig:
             ret = (int)slot->handle;
             break;
-        case 3:
-        case 7:
-        case 10:
+        case FOPTYPE_close:
+        case FOPTYPE_null:
+        case FOPTYPE_delbig:
             ret = slot->status;
             break;
-        case 6:
-        case 8:
+        case FOPTYPE_size:
+        case FOPTYPE_exist:
             ret = slot->value;
             break;
-        case 4:
+        case FOPTYPE_read:
             ret = slot->amount;
             break;
-        case 5:
+        case FOPTYPE_write:
             fileHandle = slot->handle;
             ret = slot->amount;
             sum = ret + slot->value;
@@ -1337,7 +1337,7 @@ int FILESYS_completeop_a(int ophandle) {
     case -2:
     case -1: {
         int type = ((unsigned int)slot->op.id >> 20) & 0xF;
-        if (type == 2 || type == 9) {
+        if (type == FOPTYPE_open || type == FOPTYPE_addbig) {
             freehandle_p(slot->handle);
         }
         break;
@@ -1377,7 +1377,7 @@ int FILESYS_exists(char *fileName, int priority, void *userData) {
     fileOp->value = 1;
     fileOp->handle = f_E800_D438();
     if (fileOp->handle == 0) {
-        fileOp->error = 2;
+        fileOp->error = FERR_NoHandles;
         f_E668_D438((int *)fileOp);
     }
     f_strncpy_D438(fileOp->handle->name, fileName, 0x100);
@@ -1415,7 +1415,7 @@ int FILESYS_open(char *name, int modeflags, int priority, void *userdata) {
     fileHandle = reservehandle();
     fop->handle = fileHandle;
     if (fileHandle == 0) {
-        fop->error = 2;
+        fop->error = FERR_NoHandles;
         iFILE_perror(((char*)fop));
     }
     strncpy(fop->handle->name, name, 0x100);
@@ -1454,13 +1454,13 @@ int FILESYS_close_impl(int filehandle, int priority, void *userdata) {
 
     fop = reserveop_D5A0();
     n = gFileDevice.bigfilelist;
-    fop->op.sep.type = 3;
+    fop->op.sep.type = FOPTYPE_close;
     fop->priority = priority;
     fop->userdata = userdata;
     fop->handle = (struct HANDLE_def *)filehandle;
     for (; n != 0; n = n->next) {
         if ((int)n->handle == filehandle) {
-            fop->error = 3;
+            fop->error = FERR_BigClose;
             iFILE_perror_D5A0(fop);
             break;
         }
@@ -1502,9 +1502,9 @@ int FILESYS_read_impl(HANDLE_def *filehandle, int offset, void *buffer, int byte
     fop = reserveop_D648();
     fop->userdata = userdata;
     fop->priority = priority;
-    fop->op.sep.type = 4;
+    fop->op.sep.type = FOPTYPE_read;
     if (filehandle == 0) {
-        fop->error = 6;
+        fop->error = FERR_InvalidHandle;
         iFILE_perror_D648(fop);
     }
     fop->handle = filehandle;
@@ -1541,7 +1541,7 @@ int FILESYS_write(int file, int offset, void *buffer, int size, int priority, vo
     cmd->userdata = userData;
     *(int *)cmd = (*(int *)cmd & 0xFF0FFFFF) | 0x500000;
     if (file == 0) {
-        cmd->error = 6;
+        cmd->error = FERR_InvalidHandle;
         iFILE_perror(((char*)cmd));
     }
     cmd->handle = (struct HANDLE_def*)file;
@@ -1581,7 +1581,7 @@ int FILESYS_size(struct HANDLE_def *file, int priority, void *userData) {
         fop->value = file->length;
         fop->status = 1;
     } else {
-        fop->error = 6;
+        fop->error = FERR_InvalidHandle;
         iFILE_perror_D7E0(fop);
     }
     return fop->op.id;
@@ -1700,7 +1700,7 @@ void iFILE_addbigopencallback(int opHandle, int opStatus, struct FILEBIG_def *bi
     int priority = gFileDevice.oplist[((OP_def *)&opHandle)->sep.index].priority;
     int fileHandle = FILESYS_completeop_DA10(opHandle);
     if (opStatus != 1) {
-        bigRec->fop->error = 4;
+        bigRec->fop->error = FERR_BigOpen;
         iFILESYS_ExecCommand_DA10(bigRec->fop);
     } else {
         opHandle = FILESYS_read_DA10(fileHandle, 0, bigRec->header, 0x800, priority, bigRec);
@@ -1816,15 +1816,15 @@ int FILESYS_delbig(HANDLE_def *bigHandle, int priority, void *userData) {
     openFile = gFileDevice.handlelist;
     fileOp->userdata = userData;
     fileOp->priority = priority;
-    fileOp->op.sep.type = 10;
+    fileOp->op.sep.type = FOPTYPE_delbig;
     if (bigHandle->bigoffset != 0) {
-        fileOp->error = 7;
+        fileOp->error = FERR_DelBig;
     }
     for (i = 0; i < gFileDevice.maxopen; i++, openFile++) {
         /* a file inside an archive (bigoffset set) keeps the archive's node in info */
         if (openFile != 0 && openFile->bigoffset != 0 && ((FILEBIG_def *)openFile->info)->handle == bigHandle) {
             fileOp->status = -2;
-            fileOp->error = 8;
+            fileOp->error = FERR_RemoveBig;
             break;
         }
     }
@@ -1833,7 +1833,7 @@ int FILESYS_delbig(HANDLE_def *bigHandle, int priority, void *userData) {
         big = big->next;
     }
     if (big == 0) {
-        fileOp->error = 5;
+        fileOp->error = FERR_NoExist;
     }
     if (prev != 0) {
         prev->next = big->next;
@@ -2040,8 +2040,8 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
         return;
     }
     switch ((((unsigned int)fileOp->op.id) >> 20) & 0xF) {
-    case 2:
-    case 8:
+    case FOPTYPE_open:
+    case FOPTYPE_exist:
         file[0] = 0;
         if (strchr_FX(fileOp->handle->name, '|')) {
             if (*fileOp->handle->name == '|') {
@@ -2066,7 +2066,7 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
         found = 0;
         if ((mode & 1) && FILEDEV_open_FX(fileOp->handle->name, fileOp->value, fileOp->handle)) {
             found = 1;
-            if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == 8) {
+            if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == FOPTYPE_exist) {
                 FILEDEV_close_FX(fileOp->handle->info);
             } else {
                 fileOp->handle->length = FILEDEV_getsize_FX(fileOp->handle->info);
@@ -2084,13 +2084,13 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
                 }
             }
         }
-        if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == 8) {
+        if (((((unsigned int)fileOp->op.id) >> 20) & 0xF) == FOPTYPE_exist) {
             freehandle_FX(fileOp->handle);
             fileOp->value = found;
         }
         iFILESYS_CommandCompleteCallback_FX(found);
         break;
-    case 3:
+    case FOPTYPE_close:
         fileOp->error = 1;
         hd = fileOp->handle;
         if (hd != 0) {
@@ -2104,7 +2104,7 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
         }
         iFILESYS_CommandCompleteCallback_FX(fileOp->error == 0);
         break;
-    case 4:
+    case FOPTYPE_read:
         if (fileOp->amount > 0) {
             if (fileOp->handle->bigoffset != 0) {
                 FILEDEV_readreq_FX(((struct HANDLE_def*)((struct FILEBIG_def *)fileOp->handle->info)->handle)->info, ((int)fileOp->data), fileOp->handle->bigoffset + fileOp->value, fileOp->amount);
@@ -2115,16 +2115,16 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
             iFILESYS_CommandCompleteCallback_FX(1);
         }
         break;
-    case 5:
+    case FOPTYPE_write:
         FILEDEV_write_FX(fileOp->handle->info, ((int)fileOp->data), fileOp->value, fileOp->amount);
         break;
-    case 6:
+    case FOPTYPE_size:
         fileOp->value = fileOp->handle->length;
         iFILESYS_CommandCompleteCallback_FX(1);
         break;
-    case 7:
-    case 9:
-    case 10:
+    case FOPTYPE_null:
+    case FOPTYPE_addbig:
+    case FOPTYPE_delbig:
         iFILESYS_CommandCompleteCallback_FX(fileOp->error == 0);
         break;
     }
@@ -3528,7 +3528,7 @@ int validatehandle_impl(int **handle, int **strmptr, int ***tapptr) {
         return 1;
     }
     temp_7 = *handle;
-    if (*temp_7 != 0x4D525453) {
+    if (*temp_7 != STREAM_HEADER_ID) {
         return 1;
     }
     *tapptr = handle;
@@ -4226,7 +4226,7 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
         return 0;
     }
     strm = (STREAMHEADERtag *)mem;
-    strm->id = 0x4D525453;
+    strm->id = STREAM_HEADER_ID;
     MUTEX_create_06D8(&strm->mutex);
     /* PORT: pointer arithmetic done in int */
     // ORIGINAL-PTR: carves one caller-supplied block (allocator-style): the request / filter / tap arrays follow the
@@ -6003,7 +6003,7 @@ int BIG_typeofheader(unsigned char *header) {
         type = 1;
     } else {
         magic = (byte0 << 24) | (byte1 << 16) | (header[2] << 8) | header[3];
-        if (magic == 0x42494746) {
+        if (magic == 'BIGF') {
             type = 2;
         } else {
             type = (((magic & 0xFFFFFF00) ^ 0x42494700) != 0) ? 0 : 3;
@@ -9837,7 +9837,7 @@ NetGameLinkRefT *NetGameLinkCreate(int commRef, int owner, int n) {
     func_003F4E80_66F0(block->statbuf, 336);
     func_003F4E80_66F0(block->recvbuf, block->recvsize);
     func_003F4E80_66F0(block->sendreadpos, 4);
-    func_003F4C98_66F0(msg, 0x676D6C6B, 0x63726561);
+    func_003F4C98_66F0(msg, 'gmlk', 'crea');
     func_003F4C68_66F0(msg, 1, commRef, n, (int)&block->sendreadpos, 4, 0, 0, 1, (int)block);
     return block;
 }
@@ -9861,7 +9861,7 @@ extern void func_003F4C98(int *, int, int);
  * @param linkRef  the game link ref
  */
 void NetGameLinkDestroy(int *linkRef) {
-    func_003F4C98(D_0051EE98_67F8, 0x676D6C6B, 0x64657374);
+    func_003F4C98(D_0051EE98_67F8, 'gmlk', 'dest');
     func_003F4C68(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
     RpcFree(linkRef);
 }
@@ -9927,7 +9927,7 @@ char *NetGameLinkStatus(G_6958 *self) {
     }
     if (self->f4 == 0) {
         self->f4 = 1;
-        func_003F4C98_6958(D_0051EEA8_6958, 0x676D6C6B, 0x73746174);
+        func_003F4C98_6958(D_0051EEA8_6958, 'gmlk', 'stat');
         if (was == 0) {
             func_003F4C68_6958(D_0051EEA8_6958, 0, self->f0, 0, 0, 0, self->f158, 336, func_003E6878_6958, self);
         } else {
@@ -10035,7 +10035,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
         *(int *)(self + 0x160) = 0;
         *(int *)(self + 0x164) = -1;
         *(int *)(self + 0x170) = NetTick();
-        func_003F4C98_6B10(D_0051EEB8_6B10, 0x676D6C6B, 0x72656376);
+        func_003F4C98_6B10(D_0051EEB8_6B10, 'gmlk', 'recv');
         func_003F4C68_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
     }
     return ret;
@@ -10074,7 +10074,7 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
     w = self->f178;
     if (self->f174 - (w - *(int *)&readPos) < len) return 0;
     self->f178 = w + len;
-    func_003F4C98_6C80(D_0051EEC8_6C80, 0x676D6C6B, 0x73656E64);
+    func_003F4C98_6C80(D_0051EEC8_6C80, 'gmlk', 'send');
     func_003F4C68_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
     return 1;
 }
@@ -10103,7 +10103,7 @@ int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
 int NetGameLinkControl_impl(int *link, int selector, int value) {
     int out;
 
-    func_003F4C98_6D78(D_0051EED8_6D78, 0x676D6C6B, 0x6374726C);
+    func_003F4C98_6D78(D_0051EED8_6D78, 'gmlk', 'ctrl');
     func_003F4C68_6D78(D_0051EED8_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
     return out;
 }
@@ -10128,7 +10128,7 @@ int NetGameUtilCreate(void) {
     int msg[4];
     int result;
 
-    func_003F4C98_6E08(msg, 0x676D7574, 0x63726561);
+    func_003F4C98_6E08(msg, 'gmut', 'crea');
     func_003F4C68_6E08(msg, 1, 0, 0, 0, 0, 0, 0, 1, &result);
     return result;
 }
@@ -10152,7 +10152,7 @@ extern int func_003F4C98_6E70(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilDestroy(int utilRef) {
     int request[4];
 
-    func_003F4C98_6E70(request, 0x676D7574, 0x64657374);
+    func_003F4C98_6E70(request, 'gmut', 'dest');
     func_003F4C68_6E70(request, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
@@ -10172,7 +10172,7 @@ extern int func_003F4C98_6ED8(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilReset(int handle) {
     int msg[4];
 
-    func_003F4C98_6ED8(msg, 0x676D7574, 0x72736574);
+    func_003F4C98_6ED8(msg, 'gmut', 'rset');
     func_003F4C68_6ED8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
@@ -10200,7 +10200,7 @@ int NetGameUtilConnect_impl(int handle, int connectKind, int address) {
     int msg[4];
     int result;
 
-    func_003F4C98_6F40(msg, 0x676D7574, 0x636F6E6E);
+    func_003F4C98_6F40(msg, 'gmut', 'conn');
     func_003F4C68_6F40(msg, 1, handle, connectKind, address, -1, 0, 0, 1, &result);
     return result;
 }
@@ -10226,7 +10226,7 @@ struct S_6FC8 { int a[4]; int out; };
 int NetGameUtilComplete(int handle) {
     struct S_6FC8 msg;
 
-    func_003F4C98_6FC8(&msg, 0x676D7574, 0x636F6D70);
+    func_003F4C98_6FC8(&msg, 'gmut', 'comp');
     func_003F4C68_6FC8(&msg, 1, handle, 0, 0, 0, 0, 0, 1, &msg.out);
     return msg.out;
 }
@@ -10253,7 +10253,7 @@ int func_003E7038_impl(int handle, int selector) {
     int msg[4];
     int result;
 
-    func_003F4C98_7038(msg, 0x676D7574, 0x73746174);
+    func_003F4C98_7038(msg, 'gmut', 'stat');
     func_003F4C68_7038(msg, 1, handle, selector, 0, 0, 0, 0, 1, &result);
     return result;
 }
@@ -10277,7 +10277,7 @@ extern int func_003F4C98_70B8(int *, int, int) __asm__("func_003F4C98");
 void func_003E70B8(int handle) {
     int msg[4];
 
-    func_003F4C98_70B8(msg, 0x676D7574, 0x73746174);
+    func_003F4C98_70B8(msg, 'gmut', 'stat');
     func_003F4C68_70B8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
@@ -10306,7 +10306,7 @@ void func_003E7120(int util, int kind, int name) {
     int request[4];
 
     sprintf_7120(advertText, D_004A4860_7120, kind, name);
-    func_003F4C98_7120(request, 0x676D7574, 0x61647674);
+    func_003F4C98_7120(request, 'gmut', 'advt');
     func_003F4C68_7120(request, 1, util, 0, advertText, -1, 0, 0, 1, 0);
 }
 #endif
@@ -10326,7 +10326,7 @@ extern int func_003F4C98_71B0(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilWithdraw(int handle) {
     int msg[4];
 
-    func_003F4C98_71B0(msg, 0x676D7574, 0x77697468);
+    func_003F4C98_71B0(msg, 'gmut', 'with');
     func_003F4C68_71B0(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
@@ -10358,7 +10358,7 @@ int func_003E7218_impl(int util, int kind, char *name) {
     if (name == 0) {
         name = D_004A4868_7218;
     }
-    func_003F4C98_7218(request, 0x676D7574, 0x6C6F6361);
+    func_003F4C98_7218(request, 'gmut', 'loca');
     func_003F4C68_7218(request, 1, util, 0, (int)name, -1, 0, 0, 1, &foundAddress);
     return foundAddress;
 }
@@ -10392,7 +10392,7 @@ int NetGameUtilQuery_impl(int util, char *kind, int buffer, int bufferSize) {
     if (kind == 0) {
         kind = D_004A4868_72A0;
     }
-    func_003F4C98_72A0(request, 0x676D7574, 0x71756572);
+    func_003F4C98_72A0(request, 'gmut', 'quer');
     func_003F4C68_72A0(request, 5, util, 0, (int)kind, -1, buffer, bufferSize, 1, &count);
     return count;
 }
@@ -10422,7 +10422,7 @@ char *func_003E7340(void) {
     char *block = RpcAlloc_7340(2132);
     memset_7340(block, 0, 2132);
     *(unsigned int *)(block + 0x10) = (unsigned int)(block + 0x53) & 0xFFFFFFC0;
-    func_003F4C98_7340(buf, 0x70696E67, 0x63726561);
+    func_003F4C98_7340(buf, 'ping', 'crea');
     func_003F4C68_7340(buf, 1, 0, 0, 0, 0, 0, 0, 1, block + 0xC);
     return block;
 }
@@ -10447,7 +10447,7 @@ struct S_73E0 { int a[4]; };
 void func_003E73E0(void *block) {
     struct S_73E0 msg;
 
-    func_003F4C98_73E0(&msg, 0x70696E67, 0x64657374);
+    func_003F4C98_73E0(&msg, 'ping', 'dest');
     func_003F4C68_73E0(&msg, 0, *(int *)((char*)block + 0xC), 0, 0, 0, 0, 0, 1, 0);
     RpcFree_73E0(block);
 }
@@ -10478,7 +10478,7 @@ int func_003E7450_impl(char *block, int address, int payload, int payloadLen) {
     int msg[4];
     int result;
 
-    func_003F4C98_7450(msg, 0x70696E67, 0x72657175);
+    func_003F4C98_7450(msg, 'ping', 'requ');
     func_003F4C68_7450(msg, 1, *(int *)(block + 0xC), address, payload, payloadLen, 0, 0, 1, &result);
     return result;
 }
@@ -10575,7 +10575,7 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *respons
             InvalidDCache_7500(self->f10, self->f10 + 0x7FF);
             self->f0 = -1;
         }
-        func_003F4C98_7500(D_0051EEE8_7500, 0x70696E67, 0x72657370);
+        func_003F4C98_7500(D_0051EEE8_7500, 'ping', 'resp');
         func_003F4C68_7500(D_0051EEE8_7500, 1, self->fC, 0, 0, 0, self->f10, 0x800, func_003E74E8_7500, self);
     }
     return res;
@@ -10647,12 +10647,12 @@ void *func_003E7718(char *lobby, int tag, int callback, int context) {
         *(int*)n = *(int*)(lobby + 0x54C);
         head = *(char**)(lobby + 0x53C);
         *(int*)(lobby + 0x54C) = (*(int*)(lobby + 0x54C) + 1) & 0x7FFFFFFF;
-        if (head != 0 && *(int*)(head + 4) != 0x70696E67) {
+        if (head != 0 && *(int*)(head + 4) != 'ping') {
             do {
                 cur = *pp;
                 nx = *(char**)(cur + 0x40);
                 pp = (char**)(cur + 0x40);
-            } while (nx != 0 && *(int*)(nx + 4) != 0x70696E67);
+            } while (nx != 0 && *(int*)(nx + 4) != 'ping');
         }
         cur = *pp;
         *pp = n;
@@ -10684,7 +10684,7 @@ int func_003E77F0(char *self, N_77F0 *dst, int key) {
     N_77F0 *n;
     memset_77F0(dst, 0, 68);
     n = *(N_77F0 **)(self + 0x53C);
-    if (n != 0 && (n->key == key || key == 0x44515545)) {
+    if (n != 0 && (n->key == key || key == 'DQUE')) {
         *(N_77F0 **)(self + 0x53C) = n->next;
         *dst = *n;
         func_00259210_77F0(n);
@@ -10722,7 +10722,7 @@ int func_003E7918(struct L_7918 *list, struct N_7918 *out, char *name, int id, i
 
     while (*pp != 0) {
         n = *pp;
-        if (n->tag == 0x70696E67 &&
+        if (n->tag == 'ping' &&
             ((n->id == id && strcmp_7918(name, n->name) == 0) || (id == -1 && n->fC < cutoff))) {
             *pp = n->next;
             *out = *n;
@@ -10901,7 +10901,7 @@ void func_003E7C40(char *self) {
                                               str_empty_k);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
             ev.unk_00 = 0;
-            ev.mKind = 0x70696E67;
+            ev.mKind = 'ping';
             ev.mStatus = 0;
             ev.mpTagText = evbuf;
             evbuf[0] = 0;
@@ -10937,7 +10937,7 @@ void func_003E7C40(char *self) {
     while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
             ev.unk_00 = 0;
-            ev.mKind = 0x70696E67;
+            ev.mKind = 'ping';
             ev.mStatus = -1;
             ev.mpTagText = evbuf;
             evbuf[0] = 0;
@@ -10986,12 +10986,12 @@ void func_003E7F70(LobbyApiRefT* lobby, int reason, int flags) {
     int sp[4];
     int (*fn)(char *, int *, int);
 
-    lobby->mState = 0x7465726D;
+    lobby->mState = 'term';
     lobby->mEventFlags |= flags;
     func_003E7F58((struct LobbyApiRefT *)lobby);
     fn = (int (*)(char*, int*, int))lobby->mEventProcs[3][0];
     if (fn != 0) {
-        sp[0] = 3; sp[1] = 0x64697363; sp[2] = reason; sp[3] = 0;
+        sp[0] = 3; sp[1] = 'disc'; sp[2] = reason; sp[3] = 0;
         fn(((char*)lobby), sp, lobby->mEventProcs[3][1]);
     }
 }
@@ -11075,7 +11075,7 @@ struct S_80C0 { int f0, f4, f8, fC; char pad[0x310 - 0x10]; struct E_80C0 e[8]; 
 void func_003E80C0(struct S_80C0 *lobby) {
     int i, entryRef;
     char *request;
-    lobby->fC = 0x6F66666C;
+    lobby->fC = 'offl';
     func_003F5738_80C0(lobby->f0);
     for (i = 0; i < 8; i++) {
         if (lobby->e[i].a != 0) {
@@ -11194,7 +11194,7 @@ int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int call
     func_003E7AC0_8260();
     lobby->f50C = 0;
     func_003E7F58_8260(lobby);
-    if (func_003E7718_8260(lobby, 0x736B6579, callback, context) == 0) {
+    if (func_003E7718_8260(lobby, 'skey', callback, context) == 0) {
         return -1;
     }
     func_003F5738_8260(lobby->f0);
@@ -11202,7 +11202,7 @@ int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int call
     func_003E76A8_8260(lobby, D_00495F30_8260, lobby->f3B4, lobby->f3B0);
     cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->f34);
     func_003F5910_8260(lobby->f0, 0x40646972, 0, buf, -1);
-    lobby->fC = 0x72646972;
+    lobby->fC = 'rdir';
     lobby->f10 = func_003F5D88_8260(lobby->f0) + 0x1D4C0;
     lobby->f14 = func_003F5D88_8260(lobby->f0);
     lobby->f3B8 = 0;
@@ -11269,9 +11269,9 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
             self->s[i].h = func_003EE778_8368(1000, 2000);
             self->s[i].f4 = func_003EE1E8_8368(100, 100, 0);
             state = self->state;
-            if (state != 0x6F66666C && state != 0x72646972 && state != 0x636F6E6E && buf[0] != 0) {
+            if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48C8);
-                func_003F5910_8368(self->lobby, 0x73656C65, 0, buf, -1);
+                func_003F5910_8368(self->lobby, 'sele', 0, buf, -1);
             }
         }
     }
@@ -11287,9 +11287,9 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
             func_003EE260_8368(self->s[i].f4);
             self->s[i].f4 = 0;
             state = self->state;
-            if (state != 0x6F66666C && state != 0x72646972 && state != 0x636F6E6E && buf[0] != 0) {
+            if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48D0);
-                func_003F5910_8368(self->lobby, 0x73656C65, 0, buf, -1);
+                func_003F5910_8368(self->lobby, 'sele', 0, buf, -1);
             }
         }
     }
@@ -11552,11 +11552,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A70);
  * @return the field, or 0 when unknown or empty
  */
 char *func_003E8A70(LobbyApiRefT* lobby, int k) {
-    if (k == 0x75736572 || k == 0x61636374) return lobby->mAccount;
-    if (k == 0x70657273) return lobby->mPersona;
-    if (k == 0x726F6F6D) return lobby->mRoomName;
-    if (k == 0x706C6179) return (lobby->mGameWhen == 0) ? 0 : lobby->mGameSession;
-    if (k == 0x646F776E) return (lobby->mDownText[0] == 0) ? 0 : lobby->mDownText;
+    if (k == 'user' || k == 'acct') return lobby->mAccount;
+    if (k == 'pers') return lobby->mPersona;
+    if (k == 'room') return lobby->mRoomName;
+    if (k == 'play') return (lobby->mGameWhen == 0) ? 0 : lobby->mGameSession;
+    if (k == 'down') return (lobby->mDownText[0] == 0) ? 0 : lobby->mDownText;
     return 0;
 }
 #endif
@@ -11572,7 +11572,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8AF8);
  * @param key  the field FourCC
  */
 void func_003E8AF8(LobbyApiRefT* lobby, int key) {
-    if (key == 0x706C6179) {
+    if (key == 'play') {
         lobby->mGameWhen = 0;
     }
 }
@@ -11642,14 +11642,14 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     int entryRef;
 
     st = self->fC;
-    if (st != 0x69646C65 && st != 0x61757468 && st != 0x61636374 && st != 0x736B6579) {
+    if (st != 'idle' && st != 'auth' && st != 'acct' && st != 'skey') {
         return -1;
     }
     n = func_003E7718_8B10(self, cmd, callback, context);
     if (n == 0) {
         return -2;
     }
-    if (cmd == 0x61757468 || cmd == 0x61636374 || cmd == 0x70617373) {
+    if (cmd == 'auth' || cmd == 'acct' || cmd == 'pass') {
         cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, tags);
         func_003ECB00_8B10(buf, 0x200, self->f34);
         cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F,
@@ -11664,7 +11664,7 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
         }
         tags = buf;
     }
-    if (cmd == 0x736E6170) {
+    if (cmd == 'snap') {
         k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, str_CHAN_b), 0);
         if (k >= 4 && k < 8 && self->s[k].h != 0) {
             while ((entryRef = func_003EE9A0_8B10(self->s[k].h)) != 0) {
@@ -11751,10 +11751,10 @@ int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int callback, int c
     char buf[0x100];
     N_8DC0 *n;
     int st = self->fC;
-    if (st != 0x636F6E6E && st != 0x69646C65 && st != 0x61757468 && st != 0x61636374) return -1;
+    if (st != 'conn' && st != 'idle' && st != 'auth' && st != 'acct') return -1;
     if (self->f4 == 0) return -2;
     if (self->f540 >= 0x40) return -3;
-    n = func_003E7718_8DC0(self, 0x70696E67, callback, context);
+    n = func_003E7718_8DC0(self, 'ping', callback, context);
     if (n == 0) return -4;
     n->addr = addr;
     n->t = func_003F5D88_8DC0(self->f0) + x;
@@ -11784,11 +11784,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8F08);
  */
 int func_003E8F08(LobbyApiRefT* lobby, unsigned key) {
     int extAddr, localAddr;
-    if (key == 0x73746174) return lobby->mState;
-    if (key == 0x72666C67) return lobby->mRoomFlags;
-    if (key == 0x6578746E) return lobby->mExternalAddr;
-    if (key == 0x6C6F636C) return lobby->mLocalAddr;
-    if (key == 0x696E6174) {
+    if (key == 'stat') return lobby->mState;
+    if (key == 'rflg') return lobby->mRoomFlags;
+    if (key == 'extn') return lobby->mExternalAddr;
+    if (key == 'locl') return lobby->mLocalAddr;
+    if (key == 'inat') {
         extAddr = lobby->mExternalAddr;
         if (extAddr != 0) {
             localAddr = lobby->mLocalAddr;
@@ -11797,8 +11797,8 @@ int func_003E8F08(LobbyApiRefT* lobby, unsigned key) {
         }
         return 0;
     }
-    if (key == 0x6D6F7265) return lobby->mMore;
-    if (key == 0x736C6F74) return lobby->mSlots;
+    if (key == 'more') return lobby->mMore;
+    if (key == 'slot') return lobby->mSlots;
     return 0;
 }
 #endif
@@ -11860,9 +11860,9 @@ void func_003E8FD0(void *out, int *event) {
     if (eventKind == -1) {
         eventKind = 0x2A2A2A2A;
         if (eventCode == -1) {
-            eventCode = 0x636F6E6E;
+            eventCode = 'conn';
         } else if (eventCode == (int)0xFEFEFEFE) {
-            eventCode = 0x64697363;
+            eventCode = 'disc';
         } else {
             eventCode = 0x2D2D2D2D;
         }
@@ -12071,7 +12071,7 @@ extern char str_PING_b_94F0[] __asm__("str_PING_b");
  */
 void func_003E94F0(void *lobby, void *event) {
     int n;
-    if (*(int *)((char *)event + 4) == 0x70696E67) {
+    if (*(int *)((char *)event + 4) == 'ping') {
         n = cDirtysock_tag_TagFieldGetNumber_94F0(cDirtysock_tag_TagFieldFind_94F0(*(int *)((char *)event + 0xC), str_PING_b_94F0), 0);
         if (n == 0) {
             func_003E76A8_94F0(lobby, str_server_ICMP_timeout_94F0);
@@ -12333,17 +12333,17 @@ void func_003E95C8(struct Lob_95C8 *self)
         return;
     }
     now = func_003F5D88_95C8(self->f0);
-    if (self->fC != 0x6F66666C) {
+    if (self->fC != 'offl') {
         int diff = now - self->f14;
         if (self->f14 != 0 && diff > 5000) {
             self->f10 += diff;
         }
         if ((int)(self->f10 - now) < 0) {
-            func_003E7F70_95C8(self, 0x74696D65, 0x800);
+            func_003E7F70_95C8(self, 'time', 0x800);
         }
     }
     self->f14 = now;
-    if (self->fC == 0x7465726D || self->fC == 0x6F66666C) {
+    if (self->fC == 'term' || self->fC == 'offl') {
         return;
     }
     func_003E7C40_95C8(self);
@@ -12369,10 +12369,10 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (rec.fn != 0) {
                 rec.fn(self, &ev, rec.ctx);
             }
-            if (self->fC == 0x72646972) {
+            if (self->fC == 'rdir') {
                 if (kind == 0x40646972) {
-                    int port = func_003F57C8_95C8(self->f0, 0x6C707274);
-                    self->f500 = func_003F57C8_95C8(self->f0, 0x6C616472);
+                    int port = func_003F57C8_95C8(self->f0, 'lprt');
+                    self->f500 = func_003F57C8_95C8(self->f0, 'ladr');
                     if (TagFind_95C8(data, D_004A4910_95C8) == 0) {
                         self->f3B4 = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
                         self->f3B0 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4918_95C8), 0);
@@ -12381,14 +12381,14 @@ void func_003E95C8(struct Lob_95C8 *self)
                     TagGetString_95C8(TagFind_95C8(data, str_MASK_95C8), self->f4BC, 0x40, D_004A4888_95C8);
                     func_003F5738_95C8(self->f0);
                     if (self->f3B4 != 0) {
-                        self->fC = 0x636F6E6E;
+                        self->fC = 'conn';
                         func_003E9590_95C8(self);
                         func_003E76A8_95C8(self, D_00495F30_95C8, self->f3B4, self->f3B0);
                         func_003F5638_95C8(self->f0, self->f3B4, self->f3B0);
                         buf[0] = 0;
                         TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->f500);
                         TagSetNumber_95C8(buf, 0x100, D_004A4918_95C8, port);
-                        func_003F5910_95C8(self->f0, 0x61646472, 0, buf, -1);
+                        func_003F5910_95C8(self->f0, 'addr', 0, buf, -1);
                         break;
                     }
                     TagGetString_95C8(TagFind_95C8(data, D_004A4928_95C8), self->f3B8, 0x100, D_004A4888_95C8);
@@ -12399,53 +12399,53 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (kind == -1 && code == -1) {
                 buf[0] = 0;
                 TagSetBinary_95C8(buf, 0x100, D_004A4930_95C8, D_00495FB0_95C8, 10);
-                func_003F5910_95C8(self->f0, 0x736B6579, 0, buf, -1);
+                func_003F5910_95C8(self->f0, 'skey', 0, buf, -1);
                 self->f504 = 1;
-                self->fC = 0x736B6579;
-                kind = 0x636F6E6E;
+                self->fC = 'skey';
+                kind = 'conn';
                 code = 0;
             }
-            if (self->fC == 0x736B6579 && (kind == 0x736B6579 || kind == 0x73656C65) && code == 0) {
-                if (kind == 0x736B6579) {
+            if (self->fC == 'skey' && (kind == 'skey' || kind == 'sele') && code == 0) {
+                if (kind == 'skey') {
                     TagGetBinary_95C8(TagFind_95C8(data, D_004A4930_95C8), self->f24, 0x10);
                 }
                 self->f8 |= 1;
-                self->fC = 0x69646C65;
-                kind = 0x636F6E6E;
+                self->fC = 'idle';
+                kind = 'conn';
                 code = 0;
                 self->f18 = now;
                 if (self->cb[3].fn != 0) {
                     ev.type = 3;
-                    ev.kind = 0x636F6E6E;
+                    ev.kind = 'conn';
                     ev.code = 0;
                     ev.data = 0;
                     self->cb[3].fn(self, &ev, self->cb[3].ctx);
                 }
             }
-            if (kind == -1 && code == (int)0xFEFEFEFE && self->fC != 0x636F6E6E) {
+            if (kind == -1 && code == (int)0xFEFEFEFE && self->fC != 'conn') {
                 func_003E7F70_95C8(self, 0xFEFEFEFE, 0x800);
             }
-            if (code == 0x61757468) {
-                func_003E7F70_95C8(self, 0x61757468, 2);
+            if (code == 'auth') {
+                func_003E7F70_95C8(self, 'auth', 2);
             }
-            if (kind == 0x61757468 && code == 0) {
-                self->fC = 0x61757468;
+            if (kind == 'auth' && code == 0) {
+                self->fC = 'auth';
                 self->f8 |= 2;
                 TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->f134, 0x40, D_004A4888_95C8);
                 self->f4FC = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
             }
-            if (kind == 0x61636374 && code == 0) {
-                self->fC = 0x61636374;
+            if (kind == 'acct' && code == 0) {
+                self->fC = 'acct';
                 self->f8 |= 2;
             }
-            if (kind == 0x736E6170 && --self->f50C == 0 && code == 0) {
+            if (kind == 'snap' && --self->f50C == 0 && code == 0) {
                 self->f508 = TagGetNumber_95C8(TagFind_95C8(data, str_CHAN_b_95C8), 0);
             }
-            if (kind == 0x73656C65 && code == 0) {
+            if (kind == 'sele' && code == 0) {
                 self->f504 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4938_95C8), 0);
                 self->f510 = TagGetNumber_95C8(TagFind_95C8(data, D_004A4940_95C8), 0);
             }
-            if (kind == 0x70657273 && code == 0) {
+            if (kind == 'pers' && code == 0) {
                 TagGetString_95C8(TagFind_95C8(data, D_004A4948_95C8), self->f174, 0x40, D_004A4888_95C8);
                 self->f18 = now;
             }
@@ -12467,7 +12467,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 self->f8 |= 0x200;
                 if (self->cb[4].fn != 0) {
                     ev.type = 4;
-                    ev.kind = 0x706C6179;
+                    ev.kind = 'play';
                     ev.data = data;
                     ev.code = 0;
                     self->cb[4].fn(self, &ev, self->cb[4].ctx);
@@ -12477,15 +12477,15 @@ void func_003E95C8(struct Lob_95C8 *self)
                 struct Cb_95C8 *cb = &self->cb[1];
                 if (cb->fn != 0) {
                     ev.type = 1;
-                    ev.kind = 0x63686174;
+                    ev.kind = 'chat';
                     ev.code = 0;
                     ev.data = data;
                     ev.code = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
                     if (ev.code & 4) {
-                        ev.kind = 0x63617374;
+                        ev.kind = 'cast';
                     }
                     if (ev.code & 0x10000) {
-                        ev.kind = 0x70726976;
+                        ev.kind = 'priv';
                     }
                     cb->fn(self, &ev, cb->ctx);
                 }
@@ -12678,13 +12678,13 @@ void func_003E95C8(struct Lob_95C8 *self)
                 }
                 self->f8 |= 0x80;
             }
-            if ((kind == 0x6D6F7665 || kind == 0x726F6F6D) && code == 0) {
+            if ((kind == 'move' || kind == 'room') && code == 0) {
                 int ident = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A48_95C8), -1);
                 if (ident >= 0) {
                     func_003E7B00_95C8(self, ident, TagGetNumber_95C8(TagFind_95C8(data, D_004A4A50_95C8), 0));
                 }
             }
-            if (kind == 0x6D6F7665) {
+            if (kind == 'move') {
                 int room = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A58_95C8), 0);
                 int count = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A60_95C8), 0);
                 if (room != self->f1B8) {

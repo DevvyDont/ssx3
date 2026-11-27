@@ -785,11 +785,11 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
         }
         break;
     }
-    case 0x63686174: // 'chat'
+    case 'chat': // 'chat'
         if (func_002623B0((BuddyMan*)Mgr_9B10(), (int)name) == 0)
             func_0025AB40(self, name, text);
         break;
-    case 0x63617374: { // 'cast'
+    case 'cast': { // 'cast'
         sBXStr_9B10 res = func_00318630(sBXStr_9B10(str_broadcast), text);
         func_0025AB40(self, name, res.p);
         break;
@@ -1005,14 +1005,14 @@ extern "C" void func_0025A650(LobbyMan* self)
         return;
     if (self->mpConfig != 0)
         return;
-    if (func_003E8A70(self->mpLobbyApi, 0x70657273) == 0)
+    if (func_003E8A70(self->mpLobbyApi, 'pers') == 0)
         return;
-    if (*func_003E8A70(self->mpLobbyApi, 0x70657273) == 0)
+    if (*func_003E8A70(self->mpLobbyApi, 'pers') == 0)
         return;
     self->mpConfig = NetGameUtilCreate();
     if (self->mpConfig == 0)
         return;
-    func_003E7120(self->mpConfig, str_SSX_PS2_2004, func_003E8A70(self->mpLobbyApi, 0x70657273));
+    func_003E7120(self->mpConfig, str_SSX_PS2_2004, func_003E8A70(self->mpLobbyApi, 'pers'));
 }
 #endif
 
@@ -1260,7 +1260,7 @@ extern "C" void func_0025AAE0(LobbyMan* self, const char* value)
     if (*(int*)self != 0) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetUnk(buf, 0x200, str_TEXT, value);
-        func_003E8B10(self->mpLobbyApi, 0x6D657367, buf, 0, 0);
+        func_003E8B10(self->mpLobbyApi, 'mesg', buf, 0, 0);
     }
 }
 #endif
@@ -1366,7 +1366,7 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag);
 extern "C" void func_0025EED8(LobbyMan* self);
 extern "C" int* func_002591D0();
 extern "C" void func_00263BA8(cGameConnMan* p, int arg);
-extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
+extern "C" bool cCommSystem_isChannelOpen(void* comm, int chan);
 extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_003EE620(void* p);
 extern "C" void func_00261490(BuddyMan* p);
@@ -1524,17 +1524,17 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
-                    event[2] = 0x646E7366; // 'dnsf'
+                    event[2] = 'dnsf';
                     post_AC50(((char*)self), event);
                 }
                 if (lookupStatus != 0)
                     closeConn_AC50(((char*)self));
             } else if (state == 3) {
                 if (ev == 0x400) {
-                    char* downReason = func_003E8A70(self->mpLobbyApi, 0x646F776E);
+                    char* downReason = func_003E8A70(self->mpLobbyApi, 'down');
                     int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
-                    event[2] = 0x646F776E; // 'down'
+                    event[2] = 'down';
                     *(void***)((char*)event + 0x4) = D_004811B0;
                     cBXString_cBXString2((char*)event + 0xC, downReason);
                     post_AC50(((char*)self), event);
@@ -1544,7 +1544,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
-                    event[2] = 0x74696D65; // 'time'
+                    event[2] = 'time';
                     post_AC50(((char*)self), event);
                     closeConn_AC50(((char*)self));
                 }
@@ -1607,7 +1607,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
-                    event[2] = 0x74696D65; // 'time'
+                    event[2] = 'time';
                     post_AC50(((char*)self), event);
                     self->mFindingPlayer = 0;
                     closeConn_AC50(((char*)self));
@@ -1866,7 +1866,7 @@ void LobbyMan::onlobbyconnect(LobbyApiMsgT* msg)
 {
     mState = 1;
     if (msg->mStatus == 0) {
-        func_003E8B10(mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
+        func_003E8B10(mpLobbyApi, 'sele', str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 201;
         event->mVtbl = online_Event_vtbl;
@@ -1969,7 +1969,7 @@ extern "C" void func_0025B9C8(LobbyMan* self, tLobbyAccount* msg)
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_MINAGE, 13);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_LANG, func_00259198());
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 4, 0x61636374, buf, (int)func_00268BD0, 20.0f);
+    func_0025B608(self, 4, 'acct', buf, (int)func_00268BD0, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
@@ -2175,7 +2175,7 @@ extern "C" void func_0025BF18(LobbyMan* self, tLobbyAccount* msg)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, (const char*)msg->mMail);
     }
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 5, 0x65646974, buf, (int)func_00268BF8, 20.0f);
+    func_0025B608(self, 5, 'edit', buf, (int)func_00268BF8, 20.0f);
     int type = 205;
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
@@ -2299,7 +2299,7 @@ extern "C" void func_0025C1E0(LobbyMan* self, const char* value)
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, value);
     int type = 209;
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 6, 0x6C6F7374, buf, (int)func_00268C20, 20.0f);
+    func_0025B608(self, 6, 'lost', buf, (int)func_00268C20, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
@@ -2422,7 +2422,7 @@ extern "C" void func_0025C3F8(LobbyMan* self, const char* value)
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, value);
     int type = 208;
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 7, 0x6C6F7374, buf, (int)func_00268C48, 20.0f);
+    func_0025B608(self, 7, 'lost', buf, (int)func_00268C48, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
@@ -2605,7 +2605,7 @@ extern "C" void func_0025C610(LobbyMan* self)
     int type = 211;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_HWMASK, caps);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 8, 0x61757468, buf, (int)func_00268C70, 20.0f);
+    func_0025B608(self, 8, 'auth', buf, (int)func_00268C70, 20.0f);
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -2860,7 +2860,7 @@ extern "C" void func_0025CD50_impl(char* vself, const char* name)
     if (self->mHaveCPAT != 0)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CDEV, self->mCPAT);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608((LobbyMan*)self, 9, 0x70657273, buf, (int)func_00268C98, 20.0f);
+    func_0025B608((LobbyMan*)self, 9, 'pers', buf, (int)func_00268C98, 20.0f);
     int type = 217;
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = type;
@@ -2957,7 +2957,7 @@ extern "C" void func_0025CFE0(LobbyMan* self)
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, (const char*)self->mPersona);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 27, 0x6F6E6C6E, buf, (int)func_00268CC0, 20.0f);
+    func_0025B608(self, 27, 'onln', buf, (int)func_00268CC0, 20.0f);
 }
 #endif
 
@@ -3104,7 +3104,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
         int type = 213;
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 10, 0x63706572, buf, (int)func_00268CE8, 20.0f);
+        func_0025B608(self, 10, 'cper', buf, (int)func_00268CE8, 20.0f);
         LobbyMan* lobbyMan = self;
         cBXString_operatorE1(&lobbyMan->mPersonas[lobbyMan->mNumPersonas], name);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -3242,7 +3242,7 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, *(const char**)((char*)&self->mPersonas[0] + (idx << 2)));
         int type = 215;
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 11, 0x64706572, buf, (int)func_00268D10, 20.0f);
+        func_0025B608(self, 11, 'dper', buf, (int)func_00268D10, 20.0f);
         self->mDeletePersonaIdx = idx;
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
@@ -3413,7 +3413,7 @@ extern "C" void func_0025D770(LobbyMan* self, int idx)
             name = str_empty_i;
         }
         cDirtysock_tag_TagFieldSetString(buf, 0x100, key, name);
-        func_003E8B10(self->mpLobbyApi, 0x7065656B, buf, 0, 0);
+        func_003E8B10(self->mpLobbyApi, 'peek', buf, 0, 0);
     }
 }
 #endif
@@ -3473,7 +3473,7 @@ extern "C" void func_0025D860(LobbyMan* self, void* name, int password)
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, (const char*)password);
         }
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0xC, 0x6D6F7665, buf, (int)func_00268D38, 20.0f);
+        func_0025B608(self, 0xC, 'move', buf, (int)func_00268D38, 20.0f);
     }
 }
 #endif
@@ -3610,7 +3610,7 @@ extern "C" void func_0025DAC0(LobbyMan* self, int namePrefix, int nameSuffix, co
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, password);
         }
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 17, 0x726F6F6D, buf, (int)func_00268D60, 20.0f);
+        func_0025B608(self, 17, 'room', buf, (int)func_00268D60, 20.0f);
     }
 }
 #endif
@@ -3840,7 +3840,7 @@ extern "C" void func_0025DF00(LobbyMan* self, const char* name)
         const char* key = str_LANG;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, key, func_00259198());
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0x10, 0x72657074, buf, (int)func_00268DB0, 20.0f);
+        func_0025B608(self, 0x10, 'rept', buf, (int)func_00268DB0, 20.0f);
     }
 }
 #endif
@@ -3937,7 +3937,7 @@ extern "C" void func_0025E0C8(LobbyMan* self, int value)
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_NAME, value);
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0xE, 0x6E657773, buf, (int)func_00268DD8, 20.0f);
+        func_0025B608(self, 0xE, 'news', buf, (int)func_00268DD8, 20.0f);
     }
 }
 #endif
@@ -4083,7 +4083,7 @@ extern "C" void func_0025E348(sDsSlotSessK2* self, int slot)
     if (self->active != 0) {
         int old = self->slot;
         self->slot = slot;
-        self->slotTag = func_003E8F08(self->ctx, 0x736C6F74);
+        self->slotTag = func_003E8F08(self->ctx, 'slot');
         if (func_0025F338((LobbyMan*)self) < self->limit[slot]) {
             if (self->handles[self->slot] != 0) {
                 func_003E8688(self->ctx, 4, self->handles[self->slot]);
@@ -4158,7 +4158,7 @@ extern "C" void func_0025E420(LobbyMan* self_, int start, int range, int prevSlo
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_SEQN, self->slot);
     func_003E8D70(self->ctx, self->limitB[prevSlot]);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608((LobbyMan*)self, self->active, 0x736E6170, buf, (int)func_00268E00, 20.0f);
+    func_0025B608((LobbyMan*)self, self->active, 'snap', buf, (int)func_00268E00, 20.0f);
     self->limitB[self->slot] = self->f40;
 }
 #endif
@@ -4282,7 +4282,7 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
             self->mFindingPlayer = 1;
             // PORT: function pointer passed through func_0025B608's int parameter.
-            func_0025B608(self, *(int*)self, 0x75736572, buf, (int)func_00268E28, 20.0f);
+            func_0025B608(self, *(int*)self, 'user', buf, (int)func_00268E28, 20.0f);
         }
     }
 }
@@ -4433,7 +4433,7 @@ extern "C" void func_0025EAA0(LobbyMan* self, const char* name)
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
     // PORT: function pointer passed through func_003E8B10's int parameter.
-    func_003E8B10(self->mpLobbyApi, 0x6F6E6C6E, buf, (int)func_00268E50, ((char*)self));
+    func_003E8B10(self->mpLobbyApi, 'onln', buf, (int)func_00268E50, ((char*)self));
 }
 #endif
 //100%
@@ -4588,7 +4588,7 @@ extern "C" void func_0025EE20(LobbyMan* self, const void* data, int matchType)
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_DeathRace);
             cDirtysock_tag_TagFieldSetStructure(buf, 0x100, str_QMFP, data, 20, str_l);
             // PORT: function pointer passed through func_0025B608's int parameter.
-            func_0025B608(self, 18, 0x7175696B, buf, (int)func_00268E78, 20.0f);
+            func_0025B608(self, 18, 'quik', buf, (int)func_00268E78, 20.0f);
         }
     }
 }
@@ -4664,7 +4664,7 @@ extern "C" void func_0025EED8(LobbyMan* self)
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_star);
         self->mTimeout = 20.0f;
         // PORT: function pointer passed through func_003E8B10's int parameter.
-        self->mRequestId = func_003E8B10(self->mpLobbyApi, 0x7175696B, buf, (int)func_00268E78, ((char*)self));
+        self->mRequestId = func_003E8B10(self->mpLobbyApi, 'quik', buf, (int)func_00268E78, ((char*)self));
     }
     *(int*)self = 1;
     int type = 231;
@@ -5068,7 +5068,7 @@ extern "C" bool func_0025F430(LobbyMan* self)
     if (*(int*)self == 0) {
         return false;
     }
-    room = func_003E8A70(self->mpLobbyApi, 0x726F6F6D);
+    room = func_003E8A70(self->mpLobbyApi, 'room');
     return room != 0 && *room != 0;
 }
 #endif
@@ -5280,7 +5280,7 @@ extern "C" void func_0025F740(LobbyMan* selfp, int type)
             selfp->mTimeout = 20.0f;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, str_star);
-            func_003E8B10(selfp->mpLobbyApi, 0x6368616C, buf, 0, 0);
+            func_003E8B10(selfp->mpLobbyApi, 'chal', buf, 0, 0);
             *(int*)selfp = 1;
         }
         if (type != 0) {
@@ -5307,7 +5307,7 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
  */
 extern "C" void func_0025F858(LobbyMan* self)
 {
-    func_003E8B10(self->mpLobbyApi, 0x6368616C, str_empty_i, 0, 0);
+    func_003E8B10(self->mpLobbyApi, 'chal', str_empty_i, 0, 0);
     *(int*)self = 1;
 }
 #endif
@@ -5422,7 +5422,7 @@ extern "C" void func_0025FA48(LobbyMan* self, const char* name)
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3240);
     *(int*)self = 1;
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 21, 0x6368616C, buf, (int)func_00268EA0, 20.0f);
+    func_0025B608(self, 21, 'chal', buf, (int)func_00268EA0, 20.0f);
 }
 #endif
 
@@ -5449,7 +5449,7 @@ extern "C" void func_0025FAD0(LobbyMan* self, const char* name)
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3250);
     *(int*)self = 1;
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 0x18, 0x6368616C, buf, (int)func_00268EA0, 20.0f);
+    func_0025B608(self, 0x18, 'chal', buf, (int)func_00268EA0, 20.0f);
 }
 #endif
 
@@ -5506,7 +5506,7 @@ extern "C" void* func_0025FB80(LobbyMan* self, int recipient, void* text)
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_TEXT, (const char*)text);
     cDirtysock_tag_TagFieldSetFlags(buf, 0x100, str_ATTR, 0x40004000);
     // PORT: function pointer passed through func_003E8B10's int parameter.
-    return (void*)func_003E8B10(self->mpLobbyApi, 0x6D657367, buf, (int)func_00268EC8, self);
+    return (void*)func_003E8B10(self->mpLobbyApi, 'mesg', buf, (int)func_00268EC8, self);
 }
 #endif
 
@@ -6094,7 +6094,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI1, opp->fA4);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE1, opp->fA8);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608((LobbyMan*)self, *(int*)self, 0x72616E6B, buf, (int)func_00268EF0, 20.0f);
+    func_0025B608((LobbyMan*)self, *(int*)self, 'rank', buf, (int)func_00268EF0, 20.0f);
     postMsg(self, 0x100);
 }
 #endif
@@ -6479,7 +6479,7 @@ extern "C" void func_00261248(BuddyMan* self_, void* name_, int port, void* a3_,
     if (self_->mpBuddyApi == 0)
     {
         func_002614E8(self_, (void*)resource);
-        func_003F0818(self_->mpBuddyApi, resource, 0x73737833, func_00259198(), 0);
+        func_003F0818(self_->mpBuddyApi, resource, 'ssx3', func_00259198(), 0);
     }
     strcpy(((char*)self_), name);
     self_->miPort = port;
@@ -9036,7 +9036,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* cSetupMan_mSetupMan;
 extern void* VoipMan;
-extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
+extern "C" bool cCommSystem_isChannelOpen(void* comm, int chan);
 extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_00264098(void);
 extern "C" void func_00266DF8(cVoipMan* self);
@@ -13409,7 +13409,7 @@ void* online_AcctTooYoungEvent::clone()
     online_AcctTooYoungEvent* copy = (online_AcctTooYoungEvent*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     int age = mAge;
     copy->mType = 258;
-    copy->mError = 0x746F6F79;
+    copy->mError = 'tooy';
     copy->mVtbl = online_AcctTooYoungEvent_vtbl;
     copy->mAge = age;
     return copy;
@@ -13456,7 +13456,7 @@ extern char online_AcctLockedEvent_vtbl[];
 static inline void Init268308(online_AcctLockedEvent* m, const char* a, const char* b)
 {
     m->mType = 0x102;
-    m->mError = 0x6C6F636B;
+    m->mError = 'lock';
     (*(char**)&m->mVtbl) = online_AcctLockedEvent_vtbl;
     cBXString_cBXString2(((char*)&m->mDate), a);
     cBXString_cBXString2(((char*)&m->mIntro), b);
@@ -13523,7 +13523,7 @@ extern "C" void* func_002683F0(void* self)
 {
     int* eventCopy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     const char* message = *(const char**)((char*)self + 0xC);
-    eventCopy[2] = 0x646F776E;
+    eventCopy[2] = 'down';
     *(void***)((char*)eventCopy + 0x4) = D_004811B0;
     eventCopy[0] = 258;
     cBXString_cBXString2((char*)eventCopy + 0xC, message);

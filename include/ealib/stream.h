@@ -81,6 +81,9 @@ struct TAPSTRUCTtag {
 };
 
 // STREAMHEADERtag (0x180 [O] [R]).
+// The id word of a live stream header (name ours): [R] the bytes "STRM" in memory, a little-endian word; [U]
+// STREAM_create stores it, validatehandle checks it.
+#define STREAM_HEADER_ID 0x4D525453
 struct STREAMHEADERtag {
     int id;                             // 0x000 [O]; [R] 'STRM' (0x4D525453); [U] validatehandle
     MUTEX mutex;                        // 0x004 [O]; [R] MUTEX_create; [U] locked around queue / usage changes

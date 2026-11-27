@@ -54,7 +54,7 @@ struct cDSockChannel {
     // Methods bound to their retail symbols by asm labels.
     bool isConnected() __asm__("cDSockChannel_isConnected");
     unsigned char readPacket(char *dst, int maxlen) __asm__("cDSockChannel_readPacket");
-    int writePacket(const void *data, int len) __asm__("cDSockChannel_writePacket");
+    bool writePacket(const void *data, int len) __asm__("cDSockChannel_writePacket");
     void listen(int addr, int port) __asm__("cDSockChannel_listen");
     void connect(int addr, int port) __asm__("cDSockChannel_connect");
     void disconnect() __asm__("cDSockChannel_disconnect");

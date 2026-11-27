@@ -364,16 +364,16 @@ INCLUDE_ASM("seg/seg_3113A0_eh", old_find_exception_handler);
 void *old_find_exception_handler(void *pc, old_exception_table *tab) {
     int best, i;
     if (tab) {
-        best = -1;
+        best = NO_EH_REGION;
         for (i = 0; tab[i].start_region != (void *)-1; i++) {
             if (pc >= tab[i].start_region && pc < tab[i].end_region) {
-                if (best == -1
+                if (best == NO_EH_REGION
                     || (tab[best].end_region >= tab[i].end_region && tab[best].start_region <= tab[i].start_region))
                     best = i;
             } else if (best >= 0 && pc < tab[i].start_region)
                 break;
         }
-        if (best != -1)
+        if (best != NO_EH_REGION)
             return tab[best].exception_handler;
     }
     return 0;

@@ -113,6 +113,49 @@ struct __sFILE {
 #define __SOFF  0x1000              // set iff _offset is in fact correct
 #define __SMOD  0x2000              // true => fgetline modified _p text
 
+// [L] stdio.h: the end-of-file / error result and fseek's whence values (sys/unistd.h has the same three for lseek).
+#define EOF     (-1)
+#define SEEK_SET 0                  // set file offset to offset
+#define SEEK_CUR 1                  // set file offset to current plus offset
+#define SEEK_END 2                  // set file offset to EOF plus offset
+
+// [L] stdio/fseek.c: a seek callback's failure result (stdio.c's __sseek spells the same value -1L).
+#define POS_ERR (-(_fpos_t)1)
+
+// The -1 a POSIX-style system call (_close, _fstat, _lseek, _open, _read, _write) returns on failure: newlib's reent
+// wrappers ([L] reent/closer.c, fstatr.c, ...: `(ret = _close (fd)) == -1 && errno != 0`) test it (name ours).
+#define SYSCALL_FAILED (-1)
+
+// [L] sys/errno.h: the errno values the library stores.
+#define EINVAL 22                   // Invalid argument
+#define ESPIPE 29                   // Illegal seek
+#define ERANGE 34                   // Math result not representable
+
+// [L] locale.h: setlocale's categories (this library handles LC_ALL and LC_CTYPE only).
+#define LC_ALL      0
+#define LC_COLLATE  1
+#define LC_CTYPE    2
+#define LC_MONETARY 3
+#define LC_NUMERIC  4
+#define LC_TIME     5
+
+// _dtoa_r's conversion modes: [L] stdlib/dtoa.c's comment above _dtoa_r numbers them (0 shortest, 1 shortest with
+// the Steele & White stopping rule, 2 ndigits significant digits as ecvt, 3 ndigits past the point as fcvt, 4 and 5 as
+// 2 and 3 with left-to-right digit generation; 6-9 as 2-5 without the floating-point estimate). Names ours.
+enum dtoa_mode
+{
+  DTOA_SHORTEST = 0,
+  DTOA_SHORTEST_STEELE_WHITE = 1,
+  DTOA_SIGNIFICANT_DIGITS = 2,
+  DTOA_FRACTION_DIGITS = 3,
+  DTOA_SIGNIFICANT_DIGITS_LTR = 4,
+  DTOA_FRACTION_DIGITS_LTR = 5
+};
+
+// The *decpt _dtoa_r gives an infinity or NaN: [L] dtoa.c "If d is +-Infinity or NaN, then *decpt is set to 9999"
+// (ecvtbuf.c's print_f / print_e / _gcvt test `decpt == 9999`). Name ours.
+#define DTOA_DECPT_INF_NAN 9999
+
 // [L] newlib time.h's struct tm (inside _reent's _new union).
 struct tm
 {

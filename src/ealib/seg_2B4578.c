@@ -80,11 +80,11 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
         TYPE_3578(shape) &= 0x7F;
     } else {
         fmt = 0;
-        if (TYPE_3578(shape) == 0x60) {
+        if (TYPE_3578(shape) == kSHAPE_DXT1) {
             fmt = 1;
-        } else if (TYPE_3578(shape) == 97) {
+        } else if (TYPE_3578(shape) == kSHAPE_DXT3) {
             fmt = 3;
-        } else if (TYPE_3578(shape) == 98) {
+        } else if (TYPE_3578(shape) == kSHAPE_DXT5) {
             fmt = 5;
         }
         if (fmt) {
@@ -101,11 +101,11 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
             }
             hdr.w = w;
             hdr.h = alignedHeight;
-            TYPE_3578(&hdr) = 5;
+            TYPE_3578(&hdr) = kSHAPE_RGB32;
             size = f_3BB0_3578(&hdr);
             shape = SHAPE_memalloc_3578(D_004956E8_3578, size + clonelen, 0);
             memcpy_3578(shape, old, 16);
-            TYPE_3578(shape) = 5;
+            TYPE_3578(shape) = kSHAPE_RGB32;
             shape->w = w;
             shape->h = alignedHeight;
             for (i = 0, w2 = w, mipHeight = alignedHeight; i < (int)(shape->wC >> 28) + 1; i++) {
@@ -149,14 +149,14 @@ int SHAPE_cluttype(int bpp) {
     switch (bpp) {
     case 15:
     case 16:
-        var_5 = 0x20;
+        var_5 = kSHAPE_CLUT16;
         break;
     case 18:
     case 24:
         var_5 = 0;
         break;
     case 32:
-        var_5 = 33;
+        var_5 = kSHAPE_CLUT32;
         break;
     }
     return var_5;
@@ -258,7 +258,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_longname);
  * Finds a shape's long name in its chain of attached blocks.
  *
  * Follows each block's 24-bit next offset (the upper three bytes of its first word) until it reaches a
- * block of type 0x70.
+ * block of type kSHAPE_BLOCK_LONGNAME (0x70).
  *
  * @param shp  the shape header
  * @return the name text just after that block's 4-byte header, or 0 if the chain has none
@@ -267,7 +267,7 @@ unsigned char *SHAPE_longname(unsigned char *shp) {
     while (shp) {
         int off;
         unsigned char *n;
-        if (*shp == 0x70) {
+        if (*shp == kSHAPE_BLOCK_LONGNAME) {
             return shp + 4;
         }
         off = *(int *)shp >> 8;
@@ -317,7 +317,7 @@ int SHAPE_size1(int shptype, int width, int height, unsigned int mipmaps, int sw
     if (bpp == 15) {
         bpp = 16;
     }
-    if ((shptype == 0x20 || shptype == 33) && swizzled) {
+    if ((shptype == kSHAPE_CLUT16 || shptype == kSHAPE_CLUT32) && swizzled) {
         if ((unsigned int)((width & 0x1F) - 0x10) < 8U) {
             width = (width & ~0x1F) + 0x18;
         } else if ((unsigned int)((width & 0x1F) - 8) < 8U) {
@@ -334,7 +334,7 @@ int SHAPE_size1(int shptype, int width, int height, unsigned int mipmaps, int sw
             if (mipheight < 1) {
                 mipheight = 1;
             }
-            if (shptype == 0x60 || shptype == 97 || shptype == 98) {
+            if (shptype == kSHAPE_DXT1 || shptype == kSHAPE_DXT3 || shptype == kSHAPE_DXT5) {
                 mipwidth = (mipwidth + 3) & ~3;
                 mipheight = (mipheight + 3) & ~3;
             }
@@ -375,13 +375,13 @@ int SHAPE_size(SHAPEIMAGE* shp) {
     char *metalData;
     unsigned int shapeType = *(unsigned char *)shp;
     switch (shapeType) {
-    case 0x70:
+    case kSHAPE_BLOCK_LONGNAME:
         return strlen_3BB0((char*)&shp->width) + 5;
-    case 111:
+    case kSHAPE_BLOCK_COMMENT:
         return *(int*)&shp->width + 8;
-    case 0x7C:
+    case kSHAPE_BLOCK_ENTRY_TABLE:
         return (*(int*)&shp->width << 3) + 8;
-    case 105:
+    case kSHAPE_BLOCK_METALBIN:
         if ((unsigned short)shp->height & 0x10) {
             payloadSize = (unsigned short)shp->width;
             if (payloadSize == 0) payloadSize = 0xF0;
@@ -493,7 +493,8 @@ __asm__(
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
 #ifdef SKIP_ASM
 /**
- * Finds the shape's attached block of type 0x69 and returns its data when its flag bit 0x10 is set.
+ * Finds the shape's attached metal-bin block (kSHAPE_BLOCK_METALBIN, 0x69) and returns its data when its flag bit 0x10
+ * is set.
  *
  * Starts with the shape itself and follows each block's next offset (the top 24 bits of its first word, 0 ends the
  * chain). The data starts after the 16-byte block header; the flag is the halfword at +6. Called by the movie frame
@@ -513,7 +514,7 @@ void *func_003B3D40(int *shape) {
     var_5 = shape;
     var_6 = 0;
     if (var_5 != 0) {
-        if (*(unsigned char *)var_5 == 105) {
+        if (*(unsigned char *)var_5 == kSHAPE_BLOCK_METALBIN) {
             var_6 = (char *)var_5 + 0x10;
             var_2_2 = *(unsigned short *)((char *)var_5 + 6);
             goto block_10;
@@ -524,7 +525,7 @@ loop_5:
             temp_4 = (temp_2 != 0) ? (int *)((char *)var_5 + temp_2) : 0;
             var_5 = temp_4;
             if (temp_4 != 0) {
-                if (*(unsigned char *)temp_4 != 105) {
+                if (*(unsigned char *)temp_4 != kSHAPE_BLOCK_METALBIN) {
                     goto loop_5;
                 }
                 var_2_2 = *(unsigned short *)((char *)temp_4 + 6);
@@ -550,10 +551,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_type);
 int SHAPE_type(int bpp) {
     int type = 0;
     switch (bpp) {
-    case 4: type = 1; break;
-    case 8: type = 2; break;
-    case 0xF: case 0x10: case 555: case 1555: type = 3; break;
-    case 0x20: case 8888: type = 5; break;
+    case 4: type = kSHAPE_PAL4; break;
+    case 8: type = kSHAPE_PAL8; break;
+    case 0xF: case 0x10: case 555: case 1555: type = kSHAPE_RGB15; break;
+    case 0x20: case 8888: type = kSHAPE_RGB32; break;
     }
     return type;
 }
@@ -592,10 +593,10 @@ int SHAPE_getpixeloffset(SHAPEIMAGE *shp, int x, int y, int level) {
     if (bpp == 15) {
         bpp = 16;
     }
-    if (shp->type == 0x60) {
+    if (shp->type == kSHAPE_DXT1) {
         bpp = 64;
     }
-    if (shp->type == 0x60) {
+    if (shp->type == kSHAPE_DXT1) {
         w = (w + 3) >> 2;
         height = (height + 3) >> 2;
     }
@@ -609,11 +610,11 @@ int SHAPE_getpixeloffset(SHAPEIMAGE *shp, int x, int y, int level) {
             height >>= 1;
         }
     }
-    if (shp->type == 0x60) {
+    if (shp->type == kSHAPE_DXT1) {
         px = x / 4;
         py = y / 4;
     }
-    if ((shp->type == 0x20 || shp->type == 33) && (shp->flags & 0x2000)) {
+    if ((shp->type == kSHAPE_CLUT16 || shp->type == kSHAPE_CLUT32) && (shp->flags & 0x2000)) {
         bitOffset = px;
         if ((unsigned int)((px & 0x1F) - 8) <= 15) {
             bitOffset = px ^ 0x18;
@@ -680,10 +681,10 @@ char *SHAPE_getpixeladr(SHAPEIMAGE *img, int x, int y, int mip) {
         bpp = 16;
     }
     off = 0;
-    if (img->type == 0x60) {
+    if (img->type == kSHAPE_DXT1) {
         bpp = 64;
     }
-    if (img->type == 0x60) {
+    if (img->type == kSHAPE_DXT1) {
         w = (w + 3) >> 2;
         height = (height + 3) >> 2;
     }
@@ -697,18 +698,18 @@ char *SHAPE_getpixeladr(SHAPEIMAGE *img, int x, int y, int mip) {
             height >>= 1;
         }
     }
-    if (img->type == 0x60) {
+    if (img->type == kSHAPE_DXT1) {
         px = x / 4;
         py = y / 4;
     }
-    if ((img->type == 0x20 || img->type == 33) && (img->flags & 0x2000)) {
+    if ((img->type == kSHAPE_CLUT16 || img->type == kSHAPE_CLUT32) && (img->flags & 0x2000)) {
         pos = px;
         if ((unsigned int)((pos & 0x1F) - 8) < 16) {
             pos ^= 0x18;
         }
-        if (img->type == 33) {
+        if (img->type == kSHAPE_CLUT32) {
             pos <<= 5;
-        } else if (img->type == 0x20) {
+        } else if (img->type == kSHAPE_CLUT16) {
             pos <<= 4;
         }
         ofs = pos;
@@ -963,7 +964,7 @@ void SHAPE_cloneat(char *dst, char *src) {
             *(int *)prev = *(unsigned char *)prev;
             if (size != 0) {
                 MEM_move_neat(prev, curShape, size);
-                if (*(unsigned char *)prev == 105 && size >= 21) {
+                if (*(unsigned char *)prev == kSHAPE_BLOCK_METALBIN && size >= 21) {
                     sprintf_neat(prev + 0x10, str_EAGLpct_d_neat, ((SHAPE *)prev)->width);
                 }
             }
@@ -3109,10 +3110,10 @@ extern void STREAM_release_7080(int, int *) __asm__("STREAM_release");
 int SNDSTRMI_parsechunk(int streamSlot, int *chunk) {
     struct SNDSTREAMCHANNEL *stream = sndss_7080[streamSlot];
     int readMore;
-    if (*chunk == 0x6C444353) {
+    if (*chunk == kSNDCHUNK_SCDl) {
         SNDSTRMI_parsedata_7080(stream, chunk);
         readMore = 1;
-    } else if (*chunk == 0x6C484353) {
+    } else if (*chunk == kSNDCHUNK_SCHl) {
         SNDSTRMI_parseheader_7080(streamSlot);
         readMore = 0;
     } else {
@@ -5443,7 +5444,7 @@ void SNDI_midiserver(void) {
     for (i = 0; i < 16; i++) {
         seqInst = &sndms_96B8.ssi[i];
         st = seqInst->status;
-        if (st == 3 && (seqInst->fadepertick == 0 || SNDI_midiupdatefade_96B8(i) == 0)) {
+        if (st == kSNDSEQ_Playing && (seqInst->fadepertick == 0 || SNDI_midiupdatefade_96B8(i) == 0)) {
             tickCount = seqInst->servertick;
             lim = (unsigned int)(tickCount * seqInst->tempo) / 100u;
             seqInst->servertick = tickCount + 1;
@@ -5451,7 +5452,7 @@ void SNDI_midiserver(void) {
                 do {
                     SNDI_midiprocesstick_96B8(i);
                     seqInst->miditick++;
-                } while (lim >= seqInst->miditick && seqInst->status == 3);
+                } while (lim >= seqInst->miditick && seqInst->status == kSNDSEQ_Playing);
             }
         }
     }
@@ -5624,9 +5625,9 @@ int SNDMIDI_play(SNDPLAYOPTS *hdr, unsigned char *data, int bankHandle, int drum
     SNDSEQINSTANCE *seqInst;
     int i;
     int j;
-    if (*(short *)data == 17485) {
+    if (*(short *)data == kSNDMIDI_TagMD) {
         data += 8;
-    } else if (*(int *)data == 0x7844494D) {
+    } else if (*(int *)data == kSNDMIDI_TagMIDx) {
         data += 4;
     }
     sndms_9A00.lasthandle += 0x20;
@@ -5692,7 +5693,7 @@ int SNDMIDI_pitchmult(int seqHandle, int pitchMult) {
     if (ch < 0) return ch;
     seqInst = &sndms_9B68.ssi[ch];
     if (pitchMult != seqInst->pitchmult) {
-        if (seqInst->status != 3) goto out;
+        if (seqInst->status != kSNDSEQ_Playing) goto out;
         seqInst->pitchmult = pitchMult;
         voiceSlot = sndms_9B68.smp;
         for (i = 23; i >= 0; i--, voiceSlot++) {
@@ -5735,7 +5736,7 @@ int SNDMIDI_azimuth(int seqHandle, int azimuth) {
     if (ch < 0) return ch;
     seqInst = &sndms_9C20.ssi[ch];
     if (azimuth != seqInst->azimuth) {
-        if (seqInst->status != 3) goto out;
+        if (seqInst->status != kSNDSEQ_Playing) goto out;
         seqInst->azimuth = azimuth;
         voiceSlot = sndms_9C20.smp;
         for (i = 23; i >= 0; i--, voiceSlot++) {
@@ -5779,9 +5780,9 @@ int SNDseqpause(int seqHandle) {
         return seqIndex;
     }
     seqInst = &sndms_9D00.ssi[seqIndex];
-    if (seqInst->status == 3) {
+    if (seqInst->status == kSNDSEQ_Playing) {
         voiceSlot = sndms_9D00.smp;
-        seqInst->status = 5;
+        seqInst->status = kSNDSEQ_Paused;
         i = 23;
         do {
             i--;
@@ -5827,8 +5828,8 @@ int SNDseqresume(int seqHandle) {
         return seqindex;
     }
     pssi = &sndms_9DC8.ssi[seqindex];
-    if (pssi->status == 5) {
-        pssi->status = 3;
+    if (pssi->status == kSNDSEQ_Paused) {
+        pssi->status = kSNDSEQ_Playing;
     }
     status = SNDseqstatus_9DC8(seqHandle);
     SNDSYS_leavecritical();
@@ -5866,7 +5867,7 @@ int SNDseqvol(int seqHandle, int vol) {
         SNDSEQINSTANCE *seqInst = &sndms_9E48.ssi[idx];
         seqInst->fadepertick = 0;
         if (seqInst->progvol != key) {
-            if (seqInst->status == 3) {
+            if (seqInst->status == kSNDSEQ_Playing) {
                 SNDMIDIPARTIAL *voiceSlot;
                 int i;
                 seqInst->progvol = key;
@@ -5915,7 +5916,7 @@ int SNDseqautovol(int seqHandle, int fadeTicks, int targetVol) {
     seqIndex = SNDI_midigetseqindex(seqHandle);
     if (seqIndex < 0) return seqIndex;
     seqInst = &sndms_9F38.ssi[seqIndex];
-    if (seqInst->status == 3) {
+    if (seqInst->status == kSNDSEQ_Playing) {
         if (fadeTicks <= 0) fadeTicks = 1;
         targetFixed = targetVol << 16;
         seqInst->fadetargetvol = targetFixed;
@@ -5948,8 +5949,8 @@ signed char SNDseqstatus(void) {
     if (var_5 >= 0) {
         temp_2 = &sndms_A120.ssi[var_5];
         var_5 = temp_2->status;
-        if (var_5 == 3) {
-            var_5 = (temp_2->fadepertick != 0) ? 6 : var_5;
+        if (var_5 == kSNDSEQ_Playing) {
+            var_5 = (temp_2->fadepertick != 0) ? kSNDSEQ_Fading : var_5;
         }
     }
     return var_5;
@@ -11444,7 +11445,7 @@ void SNDDRV_getEndedVoices(void) {
                     groupVoice = sndgs.chan[i].voices[j];
                     D_0050AD00_1298.tbl->e[groupVoice].key = 0;
                     f_A550_1298(groupVoice);
-                    if (sndgs.sso.set.outputspdifmode == 2) {
+                    if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                         D_0050AD00_1298.tbl->e[groupVoice + 0x18].key = 0;
                     }
                 }
@@ -12353,7 +12354,7 @@ int SNDPLATFORM_stop(int idx) {
         for (i = 0; i < channel->numchan; i++) {
             D_0050AD00_2440.m->a[channel->voices[i]].v = 0;
             f_A550_2440(channel->voices[i]);
-            if (sndgs.sso.set.outputspdifmode == 2)
+            if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts)
                 D_0050AD00_2440.m->a[channel->voices[i] + 0x18].v = 0;
         }
     } else if (channel->rendermode & 0x100) {
@@ -12432,7 +12433,7 @@ int SNDPLATFORM_setpitch(int idx) {
         }
         for (i = 0; i < channel->numchan; i++) {
             D_0050AD00_25E0.tbl->a[channel->voices[i]].v = hwPitch;
-            if (sndgs.sso.set.outputspdifmode == 2) {
+            if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                 D_0050AD00_25E0.tbl->a[channel->voices[i] + 0x18].v = hwPitch;
             }
         }
@@ -12485,7 +12486,7 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
             } else {
                 *D_0050AD00_27E0.mask &= ~(1L << ch->voices[i]);
             }
-            if (sndgs.sso.set.outputspdifmode == 2) {
+            if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                 if (ch->fxsend[0] != 0) {
                     *D_0050AD00_27E0.mask |= 1L << (ch->voices[i] + 0x18);
                 } else {
@@ -12562,7 +12563,7 @@ void func_003C2A50(int id) {
     ch = &((struct CHANPUB*)sndgs.chan)[id];
     if (ch->rendermode & 8) {
         for (i = 0; i < ch->numchan; i++) {
-            if (sndgs.sso.set.outputspdifmode != 2) {
+            if (sndgs.sso.set.outputspdifmode != kSNDSPDIF_Dts) {
                 D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
                 D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
             } else {
@@ -12624,7 +12625,7 @@ void func_003C2EC8(int idx) {
         for (i = 0; i < channel->numchan; i++) {
             if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << channel->voices[i];
             else D_0050AD00_2EC8.m->mask &= ~(1L << channel->voices[i]);
-            if (sndgs.sso.set.outputspdifmode == 2) {
+            if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                 if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << (channel->voices[i] + 0x18);
                 else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->voices[i] + 0x18));
             }
@@ -13344,7 +13345,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
             D_0050AD00_3EE0.x1AB8 += 0x800000;
             D_0050AD00_3EE0.tbl->a[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
             D_0050AD00_3EE0.x840[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
-            if (sndgs.sso.set.outputspdifmode == 2) {
+            if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                 D_0050AD00_3EE0.tbl->a[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
                 D_0050AD00_3EE0.x840[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
             }
@@ -14513,22 +14514,22 @@ int SNDSYS_getopts_i(void *) __asm__("SNDSYS_getopts");
  *
  * @param kind  the output mode (as System_GetOutputModeName names them)
  * @param out  receives 1 when supported, else 0
- * @return 0
+ * @return RESULT_OK
  */
 int System_CapOutputMode(unsigned int kind, int *out) {
     unsigned char info[0xE0];
     *out = 0;
     SNDSYS_getopts_i(info);
     switch (kind) {
-    case 1:
+    case OUTPUTMODE_STEREO:
         if (info[5] >= 2U) {
             *out = 1;
         }
         break;
-    case 0:
-    case 4:
-    case 5:
-    case 8:
+    case OUTPUTMODE_MONO:
+    case OUTPUTMODE_DTS4POINT0:
+    case OUTPUTMODE_DTS5POINT1:
+    case OUTPUTMODE_PROLOGIC2:
         *out = 1;
         break;
     }
@@ -14557,41 +14558,41 @@ extern char str_Dolby_ProLogic_II[];
  *
  * @param kind  the output mode
  * @param out  receives the name
- * @return 0, or -5 for an unknown mode
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown mode
  */
 int System_GetOutputModeName(unsigned int kind, char **out) {
     switch (kind) {
-    case 0:
+    case OUTPUTMODE_MONO:
         *out = str_Mono;
         break;
-    case 1:
+    case OUTPUTMODE_STEREO:
         *out = str_Stereo;
         break;
-    case 2:
+    case OUTPUTMODE_4POINT0:
         *out = str_4_0;
         break;
-    case 3:
+    case OUTPUTMODE_5POINT1:
         *out = str_5_1;
         break;
-    case 4:
+    case OUTPUTMODE_DTS4POINT0:
         *out = str_DTS_4_0;
         break;
-    case 5:
+    case OUTPUTMODE_DTS5POINT1:
         *out = str_DTS_5_1;
         break;
-    case 6:
+    case OUTPUTMODE_DD5POINT1:
         *out = str_Dolby_Digital_5_1;
         break;
-    case 7:
+    case OUTPUTMODE_PROLOGIC:
         *out = str_Dolby_ProLogic;
         break;
-    case 8:
+    case OUTPUTMODE_PROLOGIC2:
         *out = str_Dolby_ProLogic_II;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14608,16 +14609,16 @@ int System_CapOutputMode_5600(int, int *) __asm__("System_CapOutputMode");
  * System_Init builds the render modes and output channels from it. No callers in the game.
  *
  * @param outputMode  the output mode
- * @return 0, or -5 when unsupported
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) when unsupported
  */
 int System_SetOutputMode(int outputMode) {
     int buf[4];
     System_CapOutputMode_5600(outputMode, buf);
     if (buf[0] == 0) {
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
     outputmode_5600[0] = outputMode;
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14647,32 +14648,32 @@ extern int SNDSYS_getopts_5660(struct SNDSYSOPTS *) __asm__("SNDSYS_getopts");
 /**
  * Returns the supported output rate closest to a requested one for a device.
  *
- * Devices 0 and 1 round up to 24000, 36000 or 48000 (anything above 36000 gives 48000). Reads the options but does not
- * use them. No callers in the game.
+ * Devices 0 and 1 (DEVICE_MAIN, DEVICE_IOP) round up to 24000, 36000 or 48000 (anything above 36000 gives 48000). Reads
+ * the options but does not use them. No callers in the game.
  *
  * @param mode  the device (0 or 1)
  * @param rate  the requested rate
  * @param out  receives the supported rate
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_CapOutputSampleRate(int mode, int rate, int *out) {
     struct SNDSYSOPTS cfg;
     SNDSYS_getopts_5660(&cfg);
     switch (mode) {
-    case 0:
+    case DEVICE_MAIN:
         if (rate <= 24000) *out = 24000;
         else if (rate <= 36000) *out = 36000;
         else *out = 48000;
         break;
-    case 1:
+    case DEVICE_IOP:
         if (rate <= 24000) *out = 24000;
         else if (rate <= 36000) *out = 36000;
         else *out = 48000;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14692,7 +14693,7 @@ extern int SNDSYS_getopts_5710(void *) __asm__("SNDSYS_getopts");
  *
  * @param index  the device (0 or 1)
  * @param value  the rate in Hz
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_SetOutputSampleRate(int index, int value) {
     SNDSYSOPTS opts;
@@ -14700,17 +14701,17 @@ int System_SetOutputSampleRate(int index, int value) {
     { int lim = 0xFFFF; value = value > lim ? lim : value; }
     opts.set.outputrate = value & 0xFF;
     switch (index) {
-    case 0:
+    case DEVICE_MAIN:
         opts.set.outputrate = value;
         break;
-    case 1:
+    case DEVICE_IOP:
         opts.set.outputrateiopcpu = value;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
     SNDSYS_setopts(&opts);
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14726,7 +14727,7 @@ extern void SNDSYS_getopts_5788(SNDSYSOPTS *) __asm__("SNDSYS_getopts");
  *
  * @param index  the device
  * @param outValue  receives the rate (0 for an unknown device)
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_GetOutputSampleRate(int index, int *outValue) {
     SNDSYSOPTS opts;
@@ -14734,16 +14735,16 @@ int System_GetOutputSampleRate(int index, int *outValue) {
     *outValue = 0;
     SNDSYS_getopts_5788(&opts);
     switch (index) {
-    case 0:
+    case DEVICE_MAIN:
         *outValue = opts.set.outputrate;
         break;
-    case 1:
+    case DEVICE_IOP:
         *outValue = opts.set.outputrateiopcpu;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14760,19 +14761,19 @@ extern int SNDSYS_getopts_57F0(void *) __asm__("SNDSYS_getopts");
  *
  * @param index  the device
  * @param outValue  receives the limit (0 for an unknown device)
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_CapVoices(int index, int *outValue) {
     unsigned char buf[0xE0];
     *outValue = 0;
     SNDSYS_getopts_57F0(buf);
     switch (index) {
-    case 0: *outValue = buf[6]; break;
-    case 1: *outValue = buf[7]; break;
-    case 2: *outValue = buf[8]; break;
-    default: return -5;
+    case DEVICE_MAIN: *outValue = buf[6]; break;
+    case DEVICE_IOP: *outValue = buf[7]; break;
+    case DEVICE_HARDWARE: *outValue = buf[8]; break;
+    default: return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14786,32 +14787,33 @@ extern int SNDSYS_getopts_5880(void *) __asm__("SNDSYS_getopts");
 extern void SNDSYS_setopts_5880(void *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets a device's voice count (options byte +0x2E, +0x2F or +0x30) and applies the options.
+ * Sets a device's voice count (set.voicesmaincpu, voicesiopcpu or voicesspu: options byte +0x2E, +0x2F or +0x30) and
+ * applies the options.
  *
  * No callers in the game.
  *
  * @param which  the device (0-2)
  * @param value  the number of voices
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_SetVoices(int which, int value) {
-    char sp[0xE0];
-    SNDSYS_getopts_5880(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5880(&opts);
     switch (which) {
-    case 0:
-        sp[0x2E] = value;
+    case DEVICE_MAIN:
+        opts.set.voicesmaincpu = value;
         break;
-    case 1:
-        sp[0x2F] = value;
+    case DEVICE_IOP:
+        opts.set.voicesiopcpu = value;
         break;
-    case 2:
-        sp[0x30] = value;
+    case DEVICE_HARDWARE:
+        opts.set.voicesspu = value;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
-    SNDSYS_setopts_5880(sp);
-    return 0;
+    SNDSYS_setopts_5880(&opts);
+    return RESULT_OK;
 }
 #endif
 
@@ -14819,22 +14821,23 @@ int System_SetVoices(int which, int value) {
 INCLUDE_ASM("ealib/seg_2B4578", System_GetVoices);
 #ifdef SKIP_ASM
 /**
- * Reads a device's voice count (options byte +0x2E, +0x2F or +0x30). No callers in the game.
+ * Reads a device's voice count (set.voicesmaincpu, voicesiopcpu or voicesspu: options byte +0x2E, +0x2F or +0x30). No
+ * callers in the game.
  *
  * @param index  the device (0-2)
  * @param outValue  receives the count
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_GetVoices(int index, int *outValue) {
-    unsigned char buf[0xE0];
-    SNDSYS_getopts_5880(buf);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5880(&opts);
     switch (index) {
-    case 0: *outValue = buf[0x2E]; break;
-    case 1: *outValue = buf[0x2F]; break;
-    case 2: *outValue = buf[0x30]; break;
-    default: return -5;
+    case DEVICE_MAIN: *outValue = opts.set.voicesmaincpu; break;
+    case DEVICE_IOP: *outValue = opts.set.voicesiopcpu; break;
+    case DEVICE_HARDWARE: *outValue = opts.set.voicesspu; break;
+    default: return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14853,23 +14856,23 @@ extern void SNDSYS_setopts_5998(void *) __asm__("SNDSYS_setopts");
  *
  * @param index  the device
  * @param value  the quality (0-1)
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_SetResampleQuality(int index, float value) {
     SNDSYSOPTS opts;
     SNDSYS_getopts_5998(&opts);
     switch (index) {
-    case 0:
+    case DEVICE_MAIN:
         opts.set.resamplequality = (int)(value * 100.0f);
         break;
-    case 1:
+    case DEVICE_IOP:
         opts.set.iopcpuresamplequality = (int)(value * 100.0f);
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
     SNDSYS_setopts_5998(&opts);
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -14882,26 +14885,27 @@ INCLUDE_ASM("ealib/seg_2B4578", System_GetResampleQuality);
 extern void SNDSYS_getopts_5A28(void *) __asm__("SNDSYS_getopts");
 
 /**
- * Reads a device's resampling quality: options byte +0x40 or +0x41 times 0.01. No callers in the game.
+ * Reads a device's resampling quality: set.resamplequality or iopcpuresamplequality (options byte +0x40 or +0x41)
+ * times 0.01. No callers in the game.
  *
  * @param which  the device
  * @param out  receives the quality
- * @return 0, or -5 for an unknown device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for an unknown device
  */
 int System_GetResampleQuality(int which, float *out) {
-    unsigned char sp[0xE0];
-    SNDSYS_getopts_5A28(sp);
+    SNDSYSOPTS opts;
+    SNDSYS_getopts_5A28(&opts);
     switch (which) {
-    case 0:
-        *out = sp[0x40] * 0.01f;
+    case DEVICE_MAIN:
+        *out = opts.set.resamplequality * 0.01f;
         break;
-    case 1:
-        *out = sp[0x41] * 0.01f;
+    case DEVICE_IOP:
+        *out = opts.set.iopcpuresamplequality * 0.01f;
         break;
     default:
-        return -5;
+        return RESULT_ERR_INVOPT;
     }
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -15128,14 +15132,14 @@ extern int heapsize;
 /**
  * Starts the sound system with the selected output mode, in the heap set by Memory_SetHeap.
  *
- * Builds the render-mode list (set.numrendermodes / set.rendermode): 0x24 and 0x28 always, 0x120 when there are
- * IOP-CPU voices (set.voicesiopcpu), and 0x44, 0x140, 0x48 for Dolby Pro Logic II (mode 8, outputmode). Output
+ * Builds the render-mode list (set.numrendermodes / set.rendermode): 0x24 and 0x28 always, 0x120 when there are IOP-CPU
+ * voices (set.voicesiopcpu), and 0x44, 0x140, 0x48 for Dolby Pro Logic II (OUTPUTMODE_PROLOGIC2, outputmode). Output
  * channels: 1 for mono, 4 / 5 for DTS 4.0 / 5.1 (outputspdifmode 2, DTS), 2 otherwise; outputlfe is cleared. The IOP
- * output rate follows the main one unless they are equal or 36000 / 24000. Then SNDSYS_setopts and
- * SNDSYSI_init(pheap, heapsize, @p headerVersion).
+ * output rate follows the main one unless they are equal or 36000 / 24000. Then SNDSYS_setopts and SNDSYSI_init(pheap,
+ * heapsize, @p headerVersion).
  *
  * @param headerVersion  passed to SNDSYSI_init as its third argument
- * @return 0
+ * @return RESULT_OK
  */
 int System_Init(int headerVersion) {
     SNDSYSOPTS info;
@@ -15144,42 +15148,42 @@ int System_Init(int headerVersion) {
 
     SNDSYS_getopts(&info);
     info.set.numrendermodes = 0;
-    if (outputmode == 8) {
+    if (outputmode == OUTPUTMODE_PROLOGIC2) {
         info.set.rendermode[0] = 68;
         info.set.numrendermodes = 1;
     }
     info.set.rendermode[info.set.numrendermodes] = 36;
     info.set.numrendermodes += 1;
     if (info.set.voicesiopcpu != 0) {
-        if (outputmode == 8) {
+        if (outputmode == OUTPUTMODE_PROLOGIC2) {
             info.set.rendermode[info.set.numrendermodes] = 320;
             info.set.numrendermodes += 1;
         }
         info.set.rendermode[info.set.numrendermodes] = 288;
         info.set.numrendermodes += 1;
     }
-    if (outputmode == 8) {
+    if (outputmode == OUTPUTMODE_PROLOGIC2) {
         info.set.rendermode[info.set.numrendermodes] = 72;
         info.set.numrendermodes += 1;
     }
     info.set.rendermode[info.set.numrendermodes] = 40;
-    info.set.outputspdifmode = 1;
+    info.set.outputspdifmode = kSNDSPDIF_Pcm;
     info.set.outputlfe = 0;
     info.set.numrendermodes += 1;
     switch (outputmode) {
-    case 0:
+    case OUTPUTMODE_MONO:
         info.set.outputchannels = 1;
         break;
-    case 4:
+    case OUTPUTMODE_DTS4POINT0:
         info.set.outputchannels = 4;
-        info.set.outputspdifmode = 2;
+        info.set.outputspdifmode = kSNDSPDIF_Dts;
         break;
-    case 5:
+    case OUTPUTMODE_DTS5POINT1:
         info.set.outputchannels = 5;
-        info.set.outputspdifmode = 2;
+        info.set.outputspdifmode = kSNDSPDIF_Dts;
         break;
-    case 1:
-    case 8:
+    case OUTPUTMODE_STEREO:
+    case OUTPUTMODE_PROLOGIC2:
         info.set.outputchannels = 2;
         break;
     }
@@ -15190,7 +15194,7 @@ int System_Init(int headerVersion) {
     }
     SNDSYS_setopts_i(&info);
     SNDSYSI_init(pheap, heapsize, headerVersion);
-    return 0;
+    return RESULT_OK;
 }
 #endif
 
@@ -15244,15 +15248,15 @@ extern int heapsize_5E30[] __asm__("heapsize");
  * @param device  the device (only 0)
  * @param heap  the heap
  * @param heapSize  its size
- * @return 0, or -5 for another device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for another device
  */
 int Memory_SetHeap(int device, int heap, int heapSize) {
-    if (device == 0) {
+    if (device == DEVICE_MAIN) {
         pheap_5E30[0] = heap;
         heapsize_5E30[0] = heapSize;
-        return 0;
+        return RESULT_OK;
     }
-    return -5;
+    return RESULT_ERR_INVOPT;
 }
 #endif
 
@@ -15320,26 +15324,27 @@ int Memory_SetHeapFastRam(int firstValue, int secondValue) {
 INCLUDE_ASM("ealib/seg_2B4578", Memory_SetHeapThreshold);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void SNDSYS_setopts_5F18(char *) __asm__("SNDSYS_setopts");
+void SNDSYS_setopts_5F18(SNDSYSOPTS *) __asm__("SNDSYS_setopts");
 
 /**
- * Sets device 0's heap threshold: threshold * 100 into options byte +0x4B, then applies the options.
+ * Sets device 0's heap threshold: threshold * 100 into set.sndheapthreshold (options byte +0x4B), then applies the
+ * options.
  *
  * SNDSYS_getopts defaults the byte to 90. No callers in the game.
  *
- * @param index  the device (only 0)
+ * @param index  the device (only DEVICE_MAIN)
  * @param value  the threshold (0-1)
- * @return 0, or -5 for another device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for another device
  */
 int Memory_SetHeapThreshold(int index, float value) {
-    char buf[0xE0];
-    if (index == 0) {
-        SNDSYS_getopts(buf);
-        buf[0x4B] = (int)(value * 100.0f);
-        SNDSYS_setopts_5F18(buf);
-        return 0;
+    SNDSYSOPTS opts;
+    if (index == DEVICE_MAIN) {
+        SNDSYS_getopts(&opts);
+        opts.set.sndheapthreshold = (int)(value * 100.0f);
+        SNDSYS_setopts_5F18(&opts);
+        return RESULT_OK;
     }
-    return -5;
+    return RESULT_ERR_INVOPT;
 }
 #endif
 
@@ -15349,22 +15354,22 @@ INCLUDE_ASM("ealib/seg_2B4578", Memory_GetHeapThreshold);
 extern void SNDSYS_getopts(void *);
 
 /**
- * Reads device 0's heap threshold: options byte +0x4B times 0.01. No callers in the game.
+ * Reads device 0's heap threshold: set.sndheapthreshold (options byte +0x4B) times 0.01. No callers in the game.
  *
- * @param index  the device (only 0)
+ * @param index  the device (only DEVICE_MAIN)
  * @param outValue  receives the threshold (0 for another device)
- * @return 0, or -5 for another device
+ * @return RESULT_OK, or RESULT_ERR_INVOPT (-5) for another device
  */
 int Memory_GetHeapThreshold(int index, float *outValue) {
-    unsigned char buf[0xE0];
+    SNDSYSOPTS opts;
 
     *outValue = 0.0f;
-    if (index == 0) {
-        SNDSYS_getopts(buf);
-        *outValue = (float)buf[0x4B] * 0.01f;
-        return 0;
+    if (index == DEVICE_MAIN) {
+        SNDSYS_getopts(&opts);
+        *outValue = (float)opts.set.sndheapthreshold * 0.01f;
+        return RESULT_OK;
     }
-    return -5;
+    return RESULT_ERR_INVOPT;
 }
 #endif
 

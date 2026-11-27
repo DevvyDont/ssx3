@@ -23,6 +23,9 @@ struct malloc_chunk
 typedef struct malloc_chunk* mchunkptr; /* [L] */
 typedef struct malloc_chunk* mbinptr;   /* [L] a bin header (only fd / bk are real; see bin_at) */
 
+/* [L] mallocr.c: "MORECORE_FAILURE (default: -1) The value returned upon failure of MORECORE" (MORECORE is sbrk). */
+#define MORECORE_FAILURE -1
+
 #ifndef DECOMP_NO_LAYOUT_CHECKS
 typedef char check_malloc_chunk_size[(sizeof(struct malloc_chunk) == 0x10) ? 1 : -1];
 typedef char check_malloc_chunk_fd[(DECOMP_OFFSETOF(struct malloc_chunk, fd) == 0x8) ? 1 : -1];

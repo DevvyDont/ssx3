@@ -22,6 +22,19 @@ typedef struct FILEBIG_def FILEBIG_def;
 typedef struct FILE_FILEDEVICE FILE_FILEDEVICE;
 #endif
 
+// The operation types (OP_def's type bits) and the operation errors (FILEOPERATION_def::error). [O] On Tour's enums
+// FILEOPTYPE and FILEERR (names and values); [U] FILESYS_read stores type 4, FILESYS_delbig 10, FILESYS_completeop
+// returns the handle for an open / addbig, the value for a size / exist and the amount for a read; a null file handle
+// sets error 6.
+enum FILEOPTYPE {
+    FOPTYPE_unused = 0, FOPTYPE_used = 1, FOPTYPE_open = 2, FOPTYPE_close = 3, FOPTYPE_read = 4, FOPTYPE_write = 5,
+    FOPTYPE_size = 6, FOPTYPE_null = 7, FOPTYPE_exist = 8, FOPTYPE_addbig = 9, FOPTYPE_delbig = 10
+};
+enum FILEERR {
+    FERR_NormalEnd = 0, FERR_NoOps = 1, FERR_NoHandles = 2, FERR_BigClose = 3, FERR_BigOpen = 4, FERR_NoExist = 5,
+    FERR_InvalidHandle = 6, FERR_DelBig = 7, FERR_RemoveBig = 8, FERR_NumErrors = 9
+};
+
 // An open file, retail version (0x110 [R]: FILESYS_initadr / FILESYS_overhead size the handle table as maxopenfiles * 272;
 // the unit's view sFsHd). [O] struct HANDLE_def (0x118: info, data, length, bigoffset, DVDstartsector, checkforEOF,
 // name[255]); retail has no data / checkforEOF, so every later member sits lower. [U] the FILESYS open command

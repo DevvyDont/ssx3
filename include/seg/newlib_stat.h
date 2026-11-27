@@ -2,7 +2,7 @@
 #define SEG_NEWLIB_STAT_H
 
 // newlib 1.9.0's struct stat, as the game's C library fills it (src/seg/seg_325220.c: _fstat, libgloss's fstat stub
-// that _fstat_r calls: "Always pretend to be a tty").
+// that _fstat_r calls: "Always pretend to be a tty"), and the unistd / libgloss constants of those system calls.
 //
 // [L] refs/newlib-1.9.0-src/newlib-1.9.0/newlib/libc/include/sys/stat.h (the struct, the non-svr4 branch) with the
 // member types of libc/include/sys/types.h for a MIPS target (dev_t short, ino_t unsigned short, mode_t unsigned int,
@@ -40,6 +40,14 @@ struct stat {
 #define S_IFMT  0170000             // [L] type of file
 #define S_IFCHR 0020000             // [L] character special
 #define S_IFREG 0100000             // [L] regular
+
+// [L] sys/unistd.h: the standard descriptors (_write sends 1 and 2 to the console).
+#define STDIN_FILENO    0           // [L] standard input file descriptor
+#define STDOUT_FILENO   1           // [L] standard output file descriptor
+#define STDERR_FILENO   2           // [L] standard error file descriptor
+
+// [L] libgloss/glue.h: the one process id of a libgloss target (libgloss's getpid.c returns it; kill.c exits for it).
+#define __MYPID 1
 
 // CHECK_OFFSET pastes the type name, so the checks of `struct stat` are spelled out (as in seg/newlib_reent.h).
 #ifndef DECOMP_NO_LAYOUT_CHECKS

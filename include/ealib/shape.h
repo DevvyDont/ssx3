@@ -51,8 +51,17 @@ struct SHAPE {
 // shapetypetobpp gives 4, 8, 15, 24, 32 and 16 bits per pixel for types 1 .. 6; [U] cPS2GraphicsMan_AddTexture and
 // SetNewTextureData give types 1 and 2 a palette (the next shape) and the PSMT4 / PSMT8 texel formats, type 3 the
 // 16-bit and type 5 the 32-bit one.
+// The other codes of the type byte, for images and for the blocks chained after them (names ours): [U] SHAPE_unpack
+// decodes 0x60, 0x61 and 0x62 with undxtpack formats 1, 3 and 5 (DXT1 / DXT3 / DXT5) into 32 bpp; SHAPE_cluttype gives
+// 0x20 for a 15- or 16-bit palette and 0x21 for a 32-bit one; SHAPE_longname returns the text of the 0x70 block;
+// SHAPE_createat (ealib/seg_2AEDC0) chains a 0x6F block for [O] its commentsize and a 0x69 block for its metalbinsize;
+// SHAPE_size sizes a 0x7C block as a count at +4 and that many 8-byte entries (its meaning is unknown).
 enum eSHAPEType {
-    kSHAPE_PAL4 = 1, kSHAPE_PAL8 = 2, kSHAPE_RGB15 = 3, kSHAPE_RGB24 = 4, kSHAPE_RGB32 = 5, kSHAPE_RGB16 = 6
+    kSHAPE_PAL4 = 1, kSHAPE_PAL8 = 2, kSHAPE_RGB15 = 3, kSHAPE_RGB24 = 4, kSHAPE_RGB32 = 5, kSHAPE_RGB16 = 6,
+    kSHAPE_CLUT16 = 0x20, kSHAPE_CLUT32 = 0x21,
+    kSHAPE_DXT1 = 0x60, kSHAPE_DXT3 = 0x61, kSHAPE_DXT5 = 0x62,
+    kSHAPE_BLOCK_METALBIN = 0x69, kSHAPE_BLOCK_COMMENT = 0x6F, kSHAPE_BLOCK_LONGNAME = 0x70,
+    kSHAPE_BLOCK_ENTRY_TABLE = 0x7C
 };
 
 // The first two bytes of RefPack-packed data (names ours). [U] unpackz decodes data whose second byte is 0xFB and whose

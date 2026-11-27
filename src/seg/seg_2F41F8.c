@@ -1,5 +1,6 @@
 #include "common.h"
 #include "seg/dirtynet.h"
+#include "ui/virtualkey.h"
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F31F8);
@@ -612,7 +613,7 @@ extern void f3CC0(int, unsigned char *, int) __asm__("NetConnStatus");
 char *NetConnMAC(void) {
     unsigned char macBytes[16];
     if (D_004512E8[0] == 0) {
-        f3CC0(0x6d616378, macBytes, 0x10);
+        f3CC0('macx', macBytes, 0x10);
         D_004512E8[1] = str_0123456789abcdefUSBD_IRX[macBytes[0] >> 4];
         D_004512E8[2] = str_0123456789abcdefUSBD_IRX[macBytes[0] & 0xF];
         D_004512E8[3] = str_0123456789abcdefUSBD_IRX[macBytes[1] >> 4];
@@ -2782,17 +2783,17 @@ int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
     int ok = 1;
     unsigned modifierBits = 0;
     switch (key) {
-    case 91: modifierBits = flags & 0x8; break;
-    case 163: modifierBits = flags & 0x10; break;
-    case 161: modifierBits = flags & 0x20; break;
-    case 160:
-    case 0x10: modifierBits = flags & 0x2; break;
-    case 18:
-    case 164: modifierBits = flags & 0x4; break;
-    case 17: modifierBits = flags & 0x11; break;
-    case 92: modifierBits = flags & 0x80; break;
-    case 162: modifierBits = flags & 0x1; break;
-    case 165: modifierBits = flags & 0x40; break;
+    case kVK_LWin: modifierBits = flags & 0x8; break;
+    case kVK_RControl: modifierBits = flags & 0x10; break;
+    case kVK_RShift: modifierBits = flags & 0x20; break;
+    case kVK_LShift:
+    case kVK_Shift: modifierBits = flags & 0x2; break;
+    case kVK_Menu:
+    case kVK_LMenu: modifierBits = flags & 0x4; break;
+    case kVK_Control: modifierBits = flags & 0x11; break;
+    case kVK_RWin: modifierBits = flags & 0x80; break;
+    case kVK_LControl: modifierBits = flags & 0x1; break;
+    case kVK_RMenu: modifierBits = flags & 0x40; break;
     default: ok = 0; break;
     }
     if (ok) *out = modifierBits;
@@ -2817,9 +2818,9 @@ int func_003F67E0(int lockFlags, unsigned int mode, int *out) {
     int handled = 1;
     int lockState = 0;
     switch (mode) {
-    case 144: lockState = lockFlags & 1; break;
-    case 20: lockState = lockFlags & 2; break;
-    case 145: lockState = lockFlags & 4; break;
+    case kVK_NumLock: lockState = lockFlags & 1; break;
+    case kVK_Capital: lockState = lockFlags & 2; break;
+    case kVK_Scroll: lockState = lockFlags & 4; break;
     default: handled = 0; break;
     }
     if (handled) *out = lockState;

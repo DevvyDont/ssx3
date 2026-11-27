@@ -43,9 +43,17 @@ extern sRpcVer D_0052EE28;      /* fileio (follows D_0052EE00) */
 extern sRpcVer D_0052F2A8;      /* loadfile (follows D_0052F280) */
 
 
+/* The size of the name and argument buffers of a loadfile or IOP heap request ([U] the senders strncpy a name into
+   IOP_NAME_SIZE bytes and force the last to NUL; func_0042B840 copies at most IOP_NAME_SIZE argument bytes).
+   Name ours. */
+#define IOP_NAME_SIZE 0xFC
+
 /* loadfile RPC (0x80000006) command block D_0052F080, 0x200 bytes, sent to D_0052F280 */
-typedef struct { char b[0xFC]; } sLfData;
-typedef struct { int f0; int f4; char n1[0xFC]; char n2[0xFC]; } sLfCmd;
+typedef struct { char b[IOP_NAME_SIZE]; } sLfData;
+typedef struct { int f0; int f4; char n1[IOP_NAME_SIZE]; char n2[IOP_NAME_SIZE]; } sLfCmd;
+/* The value size of the loader's IOP memory get / set requests ([U] func_0042BBF8 and func_0042BCE8 move a byte,
+   halfword or word for 0, 1 and 2; above 2 is refused). Names ours. */
+enum eIopValueSize { IOP_VALUE_BYTE = 0, IOP_VALUE_HALFWORD = 1, IOP_VALUE_WORD = 2 };
 typedef struct { union { unsigned char b; unsigned short h; int w; } f0; int f4; } sLfGetCmd;            /* 3 */
 typedef struct { int f0; int f4; union { unsigned char b; unsigned short h; unsigned w; } f8; } sLfSetCmd; /* 2 */
 typedef union {
@@ -113,6 +121,9 @@ extern sSifRpcState D_0052D680;
 
 
 /* wake-up request queue of the helper thread started by InitThread (512 {type, thread id} entries) */
+/* An entry's request type ([U] iWakeupThread, iRotateThreadReadyQueue and iSuspendThread queue 0, 1 and 2; the helper
+   thread func_00424AA0 calls WakeupThread, RotateThreadReadyQueue and SuspendThread for them). Names ours. */
+enum eWakeRequest { WAKE_REQUEST_WAKEUP = 0, WAKE_REQUEST_ROTATE_READY_QUEUE = 1, WAKE_REQUEST_SUSPEND = 2 };
 typedef struct {
     int f0;
     unsigned idx;
@@ -126,6 +137,13 @@ typedef struct { int data; int addr; int size; int attr; } sSifDmaData;
 extern int sceSifSetDma(sSifDmaData *sdd, int n);
 extern int isceSifSetDma(sSifDmaData *sdd, int n);
 
+
+/* A semaphore id before CreateSema has made one ([U] the call lock D_00455214 and the table lock D_00455218 start as
+   -1; func_00427938 and func_00427438 create them then). Name ours. */
+#define NO_SEMAPHORE (-1)
+/* A free entry of the pending no-wait call table D_00455188 ([U] sceRead, sceWrite, sceLseek and sceLseek64 claim an
+   entry that holds -1; func_00427590 sets a finished call's entry back to -1). Name ours. */
+#define FIO_NOWAIT_FREE (-1)
 
 /* library state used by more than one function */
 extern int D_00455168;
@@ -149,6 +167,22 @@ extern int D_00455230;
 extern int D_00456538;
 
 
+/* The size of every name and data buffer in a fileio request packet ([U] the sce* calls copy a name up to
+   FIO_BUFFER_SIZE - 1 characters and NUL-terminate the last byte; sceDevctl, sceIoctl2, sceFormat and sceMount refuse
+   longer data; func_00427590 caps a reply's data there). Name ours. */
+#define FIO_BUFFER_SIZE 0x400
+
+/* The fileio RPC function numbers, named after the sce* call that sends each ([U] its sceSifCallRpc to D_0052EE00, or
+   the number it passes to func_00428E18). 15 and 16 come from func_00429420 and func_00429540, which have no retail
+   names. Names ours. */
+enum eFioRpcFunc {
+    FIO_RPC_OPEN = 0, FIO_RPC_CLOSE = 1, FIO_RPC_READ = 2, FIO_RPC_WRITE = 3, FIO_RPC_LSEEK = 4, FIO_RPC_IOCTL = 5,
+    FIO_RPC_REMOVE = 6, FIO_RPC_MKDIR = 7, FIO_RPC_RMDIR = 8, FIO_RPC_DOPEN = 9, FIO_RPC_DCLOSE = 10,
+    FIO_RPC_DREAD = 11, FIO_RPC_GETSTAT = 12, FIO_RPC_CHSTAT = 13, FIO_RPC_FORMAT = 14, FIO_RPC_RENAME = 17,
+    FIO_RPC_CHDIR = 18, FIO_RPC_SYNC = 19, FIO_RPC_MOUNT = 20, FIO_RPC_UMOUNT = 21, FIO_RPC_LSEEK64 = 22,
+    FIO_RPC_DEVCTL = 23, FIO_RPC_SYMLINK = 24, FIO_RPC_READLINK = 25, FIO_RPC_IOCTL2 = 26
+};
+
 /* fileio RPC send block D_0052D700: one packet layout per RPC function number (sent to D_0052EE00) */
 typedef struct { int f0; int f4; int f8; int fC; } sFioCmd4;                                    /* 15 */
 typedef struct { int f0; int f4; int f8; int fC; int f10; } sFioFdCmd;                          /* 1, 10, 11 */
@@ -156,17 +190,30 @@ typedef struct { int f0; int f4; int f8; int fC; int f10; int f14; int f18; } sF
 typedef struct { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; } sFioReadCmd; /* 2 */
 typedef struct { int f0; int f4; int f8; int fC; unsigned f10; int f14; int f18; char data[16]; int f2C; } sFioWriteCmd; /* 3 */
 typedef struct { int f0; int f4; int f8; int fC; long f10; int f18; int f1C; } sFioLseek64Cmd;  /* 22 */
-typedef struct { int f0; int f4; int f8; char name[0x400]; } sFioPathCmd;                       /* 6, 8, 9, 16, 18, 21 */
-typedef struct { int f0; int f4; int f8; int fC; char name[0x400]; } sFioPathModeCmd;           /* 7, 12 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; char name[0x400]; } sFioPathArgCmd;   /* 19, 25 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; char name[0x400]; int f414; } sFioOpenCmd; /* 0 */
-typedef struct { int f0; int f4; int f8; char name[0x400]; char name2[0x400]; } sFioPath2Cmd;   /* 17, 24 */
-typedef struct { int f0; int f4; int f8; char name[0x400]; char name2[0x400]; char data[0x400]; int fC0C; } sFioFormatCmd; /* 14 */
-typedef struct { int f0; int f4; int f8; char name[0x400]; char name2[0x400]; char data[0x400]; int fC0C; int fC10; } sFioMountCmd; /* 20 */
+typedef struct { int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; } sFioPathCmd;            /* 6, 8, 9, 16, 18, 21 */
+typedef struct { int f0; int f4; int f8; int fC; char name[FIO_BUFFER_SIZE]; } sFioPathModeCmd;           /* 7, 12 */
+typedef struct { int f0; int f4; int f8; int fC; int f10; char name[FIO_BUFFER_SIZE]; } sFioPathArgCmd;   /* 19, 25 */
+typedef struct { int f0; int f4; int f8; int fC; int f10; char name[FIO_BUFFER_SIZE]; int f414; } sFioOpenCmd; /* 0 */
+typedef struct {
+    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE];
+} sFioPath2Cmd; /* 17, 24 */
+typedef struct {
+    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
+    int fC0C;
+} sFioFormatCmd; /* 14 */
+typedef struct {
+    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char name2[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
+    int fC0C; int fC10;
+} sFioMountCmd; /* 20 */
 typedef struct { int w[16]; } sFioStat;
-typedef struct { int f0; int f4; int f8; int fC; sFioStat v; char name[0x400]; } sFioChstatCmd; /* 13 */
-typedef struct { int f0; int f4; int f8; char name[0x400]; char data[0x400]; int f80C; int f810; int f814; int f818; } sFioDevctlCmd; /* 23 */
-typedef struct { int f0; int f4; int f8; int fC; int f10; char data[0x400]; int f414; int f418; int f41C; } sFioIoctl2Cmd; /* 26 */
+typedef struct { int f0; int f4; int f8; int fC; sFioStat v; char name[FIO_BUFFER_SIZE]; } sFioChstatCmd; /* 13 */
+typedef struct {
+    int f0; int f4; int f8; char name[FIO_BUFFER_SIZE]; char data[FIO_BUFFER_SIZE];
+    int f80C; int f810; int f814; int f818;
+} sFioDevctlCmd; /* 23 */
+typedef struct {
+    int f0; int f4; int f8; int fC; int f10; char data[FIO_BUFFER_SIZE]; int f414; int f418; int f41C;
+} sFioIoctl2Cmd; /* 26 */
 typedef union {
     sFioOpenCmd open;           /* 0 */
     sFioFdCmd close;            /* 1 */
@@ -270,7 +317,8 @@ INCLUDE_ASM("seg/seg_325220", _write);
 extern int func_00425260(void);
 extern int func_00425040(int, int);
 /**
- * Writes bytes to the console: descriptors 1 and 2 go to the DECI2 TTY channel; returns the count or -1.
+ * Writes bytes to the console: descriptors 1 and 2 (STDOUT_FILENO, STDERR_FILENO) go to the DECI2 TTY channel; returns
+ * the count or -1.
  *
  * Opens the channel with func_00425260 on first use (flag D_00455168) and sends with func_00425040. Other descriptors,
  * or a channel that cannot be opened, return -1 without setting errno. _write_r and the console buffers
@@ -282,7 +330,7 @@ extern int func_00425040(int, int);
  * @return the bytes taken, or -1
  */
 int _write(int fileDesc, int buffer, int byteCount) {
-    if (fileDesc == 1 || fileDesc == 2) {
+    if (fileDesc == STDOUT_FILENO || fileDesc == STDERR_FILENO) {
         if (D_00455168 == 0) {
             if (func_00425260() == 0) {
                 return -1;
@@ -468,12 +516,12 @@ long _fstat(int fileDesc, struct stat *statBuf) {
 INCLUDE_ASM("seg/seg_325220", func_00424570);
 #ifdef SKIP_ASM
 /**
- * Returns 1, the only process id.
+ * Returns 1 (libgloss's __MYPID), the only process id.
  *
- * @return 1
+ * @return __MYPID (1)
  */
 int func_00424570(void) {
-    return 1;
+    return __MYPID;
 }
 #endif
 
@@ -482,14 +530,14 @@ INCLUDE_ASM("seg/seg_325220", func_00424578);
 #ifdef SKIP_ASM
 extern void Exit(int a0);
 /**
- * Ends the program with Exit(sigNum) when pid is 1; for any other pid it does nothing.
+ * Ends the program with Exit(sigNum) when pid is 1 (__MYPID); for any other pid it does nothing.
  *
  * @param pid     the process id
  * @param sigNum  the signal number, used as the exit status
  * @return 0 (only reached for other pids)
  */
 int func_00424578(int pid, int sigNum) {
-    if (pid == 1) {
+    if (pid == __MYPID) {
         Exit(sigNum);
     }
     return 0;
@@ -872,9 +920,10 @@ extern void SuspendThread(int);
  * Runs forever as the helper thread that carries out thread requests queued from interrupt handlers.
  *
  * Each time the semaphore D_0052B3A0 is signalled it takes the next 2-byte entry {type, thread id} from the 512-entry
- * ring (read index in the first word, entries from +8) and calls WakeupThread (type 0), RotateThreadReadyQueue (type 1,
- * the id being a priority) or SuspendThread (type 2). Any other type prints "## internel error in libkernl.a!" (sic)
- * with func_00425C28. InitThread starts it with D_0052B3A8.
+ * ring (read index in the first word, entries from +8) and calls WakeupThread (WAKE_REQUEST_WAKEUP),
+ * RotateThreadReadyQueue (WAKE_REQUEST_ROTATE_READY_QUEUE, the id being a priority) or SuspendThread
+ * (WAKE_REQUEST_SUSPEND). Any other type prints "## internel error in libkernl.a!" (sic) with func_00425C28. InitThread
+ * starts it with D_0052B3A8.
  *
  * @param wakeQueue  the request queue
  */
@@ -889,13 +938,13 @@ void func_00424AA0(sWakeQueue *wakeQueue) {
         j = i << 1;
         wakeQueue->f0 = i + 1;
         switch (*(entryTypes + j)) {
-        case 0:
+        case WAKE_REQUEST_WAKEUP:
             WakeupThread(*(entryThreads + j));
             break;
-        case 1:
+        case WAKE_REQUEST_ROTATE_READY_QUEUE:
             RotateThreadReadyQueue(*(entryThreads + j));
             break;
-        case 2:
+        case WAKE_REQUEST_SUSPEND:
             SuspendThread(*(entryThreads + j));
             break;
         default:
@@ -985,7 +1034,7 @@ int iWakeupThread_r(int threadId) {
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = 0;
+    D_0052B3A8.e[i].a = WAKE_REQUEST_WAKEUP;
     D_0052B3A8.e[i].b = id;
     iSignalSema(D_0052B3A0);
     return id;
@@ -1012,7 +1061,7 @@ int iRotateThreadReadyQueue(unsigned priority) {
     }
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = 1;
+    D_0052B3A8.e[i].a = WAKE_REQUEST_ROTATE_READY_QUEUE;
     D_0052B3A8.e[i].b = priority;
     iSignalSema(D_0052B3A0);
     return priority;
@@ -1040,7 +1089,7 @@ int iSuspendThread_r(int threadId) {
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = 2;
+    D_0052B3A8.e[i].a = WAKE_REQUEST_SUSPEND;
     D_0052B3A8.e[i].b = id;
     iSignalSema(D_0052B3A0);
     return id;
@@ -1344,7 +1393,7 @@ void func_00425358(int outChar) {
         func_0042CA58_v(D_0052BB80);
     }
     idx = D_00455174;
-    if (outChar == 10) {
+    if (outChar == '\n') {
         D_00455174 = 0;
         D_0052BB80[idx] = outChar;
         D_0052BB80[idx + 1] = 0;
@@ -1368,9 +1417,9 @@ extern void func_00425320(int c);
  * @param outChar  the character
  */
 void func_00425408(int outChar) {
-    if (outChar == 10) {
-        func_00425320(13);
-        func_00425320(10);
+    if (outChar == '\n') {
+        func_00425320('\r');
+        func_00425320('\n');
     } else {
         func_00425320(outChar);
     }
@@ -1381,6 +1430,9 @@ void func_00425408(int outChar) {
 INCLUDE_ASM("seg/seg_325220", func_00425440);
 #ifdef SKIP_ASM
 int f5440(long a0) __asm__("func_00425440");
+/* The two guard bits kept below the result while it is shifted down ([U] rounded up only when both are set).
+   Name ours. */
+#define GUARD_BITS 3
 /**
  * Converts a non-negative double, given as its 64-bit pattern, to an integer.
  *
@@ -1407,7 +1459,7 @@ int f5440(long bits) {
     if (exponent < 0) {
         exponent = -exponent;
         mantissa >>= (int)(exponent - 2);
-        if ((mantissa & 3) == 3) {
+        if ((mantissa & GUARD_BITS) == GUARD_BITS) {
             mantissa = (mantissa >> 2) + 1;
         } else {
             mantissa >>= 2;
@@ -3210,7 +3262,7 @@ extern int CreateSema(int *p);
  */
 void func_00427438(void) {
     int buf[8];
-    if (D_00455218 == -1) {
+    if (D_00455218 == NO_SEMAPHORE) {
         buf[5] = 0;
         buf[2] = 1;
         buf[1] = 1;
@@ -3300,11 +3352,12 @@ extern void iSignalSema(int);
  * one of the 0x440-byte buffers at D_0052E380, read through the uncached mirror (| 0x20000000): buffer 0, or the buffer
  * the packet's word 3 names when D_00455210 is set (the index is kept in D_00455208). Words 0..3 of the buffer are the
  * waiter's semaphore (negative for a no-wait call), the request number, the destination and the size; for a waiting
- * caller the result at +0x10 is copied to the destination (func_0041605C, memcpy). Then per request: 2 (read) writes
- * the unaligned head and tail bytes (up to 64 each, two counts, two addresses and two byte blocks from +0x14) to both
- * the cached and uncached views of the destination; 11 copies a 0x144-byte directory entry and 12 a 0x40-byte status
- * block to the address at +0x14; 23, 25 and 26 copy the length at +0x18 (capped at 0x400) of data from +0x1C. Finally a
- * no-wait call's entry is cleared to -1 in D_00455188, while a waiting caller's semaphore is signalled (iSignalSema).
+ * caller the result at +0x10 is copied to the destination (func_0041605C, memcpy). Then per request: FIO_RPC_READ (2)
+ * writes the unaligned head and tail bytes (up to 64 each, two counts, two addresses and two byte blocks from +0x14) to
+ * both the cached and uncached views of the destination; FIO_RPC_DREAD copies a 0x144-byte directory entry and
+ * FIO_RPC_GETSTAT a 0x40-byte status block to the address at +0x14; FIO_RPC_DEVCTL, FIO_RPC_READLINK and FIO_RPC_IOCTL2
+ * copy the length at +0x18 (capped at 0x400) of data from +0x1C. Finally a no-wait call's entry is cleared to -1 in
+ * D_00455188, while a waiting caller's semaphore is signalled (iSignalSema).
  *
  * @param cmdPacket  the received SIF command packet
  */
@@ -3327,7 +3380,7 @@ void func_00427590(int *cmdPacket) {
     if (sema >= 0)
         func_0041605C(dst, replyBuf + 0x10, size);
     switch (cmd) {
-    case 2: {
+    case FIO_RPC_READ: {
         struct L7590 *readFixup = (struct L7590 *)(replyBuf + 0x14);
         char *fixupDst;
         char *fixupUncached;
@@ -3351,21 +3404,21 @@ void func_00427590(int *cmdPacket) {
         }
         break;
     }
-    case 11:
+    case FIO_RPC_DREAD:
         *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
         *(struct B7590 *)buf = *(struct B7590 *)(replyBuf + 0x18);
         break;
-    case 0xC:
+    case FIO_RPC_GETSTAT:
         *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
         *(struct C7590 *)buf = *(struct C7590 *)(replyBuf + 0x18);
         break;
-    case 23:
-    case 25:
-    case 26:
+    case FIO_RPC_DEVCTL:
+    case FIO_RPC_READLINK:
+    case FIO_RPC_IOCTL2:
         *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
         *(struct W7590 *)&len = *(struct W7590 *)(replyBuf + 0x18);
-        if (len > 0x400)
-            len = 0x400;
+        if (len > FIO_BUFFER_SIZE)
+            len = FIO_BUFFER_SIZE;
         func_0041605C(buf, replyBuf + 0x1C, len);
         break;
     }
@@ -3373,7 +3426,7 @@ void func_00427590(int *cmdPacket) {
         sema = -sema;
         for (i = 0; i < 0x20; i++) {
             if (D_00455188[i] == sema) {
-                D_00455188[i] = -1;
+                D_00455188[i] = FIO_NOWAIT_FREE;
                 break;
             }
         }
@@ -3392,7 +3445,7 @@ extern int CreateSema(int *p);
  */
 void func_00427938(void) {
     int buf[8];
-    if (D_00455214 == -1) {
+    if (D_00455214 == NO_SEMAPHORE) {
         buf[5] = 0;
         buf[2] = 1;
         buf[1] = 1;
@@ -3663,15 +3716,15 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
     nameChar = (openCmd->name[0] = filePath[0]);
     n = 0;
     if (nameChar != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             nameChar = (openCmd->name[n] = filePath[n]);
             if (nameChar == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        openCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        openCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     idx = fileSlot - D_0052EC00;
     openCmd->fC = flags & 0x7FFFFFFF;
@@ -3847,7 +3900,7 @@ int sceLseek(int fileDesc, int offset, int whence)
     WaitSema_i(D_0045521C);
     for (i = 0; i < 0x20; i++)
     {
-      if (D_00455188[i] == (-1))
+      if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
         D_00455188[i] = lseekCmd->f0;
         lseekCmd->f0 = -lseekCmd->f0;
@@ -3947,7 +4000,7 @@ int sceRead(int fileDesc, int readBuf, int readSize)
     WaitSema_i(D_0045521C);
     for (i = 0; i < 0x20; i++)
     {
-      if (D_00455188[i] == (-1))
+      if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
         D_00455188[i] = readCmd->f0;
         readCmd->f0 = -readCmd->f0;
@@ -4052,7 +4105,7 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
     WaitSema_i(D_0045521C);
     for (i = 0; i < 0x20; i++)
     {
-      if (D_00455188[i] == (-1))
+      if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
         D_00455188[i] = writeCmd->f0;
         writeCmd->f0 = -writeCmd->f0;
@@ -4258,7 +4311,7 @@ int sceIoctl2_d(int fileDesc, int request, void *data, unsigned len, int outBuf,
         func_004279B8();
         return -9;
     }
-    if (len > 0x400 || outLen > 0x400) {
+    if (len > FIO_BUFFER_SIZE || outLen > FIO_BUFFER_SIZE) {
         func_004279B8();
         return -22;
     }
@@ -4332,15 +4385,15 @@ int func_00428E18_d(char *pathName, int rpcFunc) {
     }
     n = 0;
     if ((pathCmd->name[0] = pathName[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((pathCmd->name[n] = pathName[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        pathCmd->name[0x3FF] = 0;
-        n = 0x3FF;
+    if (n == FIO_BUFFER_SIZE) {
+        pathCmd->name[FIO_BUFFER_SIZE - 1] = 0;
+        n = FIO_BUFFER_SIZE - 1;
     }
     buf[1] = 1;
     buf[2] = 0;
@@ -4377,7 +4430,7 @@ extern int func_00428E18(int a0, int a1);
  * @return the IOP's result (0 or a negative error), or -11 when the RPC fails
  */
 int sceRemove(int path) {
-    return func_00428E18(path, 6);
+    return func_00428E18(path, FIO_RPC_REMOVE);
 }
 #endif
 
@@ -4414,15 +4467,15 @@ int sceMkdir_d(char *dirPath, int dirMode) {
     }
     n = 0;
     if ((mkdirCmd->name[0] = dirPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((mkdirCmd->name[n] = dirPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        mkdirCmd->name[0x3FF] = 0;
-        n = 0x3FF;
+    if (n == FIO_BUFFER_SIZE) {
+        mkdirCmd->name[FIO_BUFFER_SIZE - 1] = 0;
+        n = FIO_BUFFER_SIZE - 1;
     }
     mkdirCmd->fC = dirMode;
     buf[1] = 1;
@@ -4460,7 +4513,7 @@ extern int func_00428E18(int a0, int a1);
  * @return the IOP's result, or -11 when the RPC fails
  */
 int sceRmdir(int path) {
-    return func_00428E18(path, 8);
+    return func_00428E18(path, FIO_RPC_RMDIR);
 }
 #endif
 
@@ -4502,31 +4555,31 @@ int sceFormat_d(char *devName, char *blockDev, char *data, int len) {
     }
     n = 0;
     if ((formatCmd->name[0] = devName[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((formatCmd->name[n] = devName[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        formatCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        formatCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     if (blockDev == 0) {
         formatCmd->name2[0] = 0;
     } else {
         n = 0;
         if ((formatCmd->name2[0] = blockDev[0]) != 0) {
-            while (++n < 0x400) {
+            while (++n < FIO_BUFFER_SIZE) {
                 if ((formatCmd->name2[n] = blockDev[n]) == 0) {
                     break;
                 }
             }
         }
-        if (n == 0x400) {
-            formatCmd->name2[0x3FF] = 0;
+        if (n == FIO_BUFFER_SIZE) {
+            formatCmd->name2[FIO_BUFFER_SIZE - 1] = 0;
         }
     }
-    if (len > 0x400) {
+    if (len > FIO_BUFFER_SIZE) {
         func_004279B8();
         return -7;
     }
@@ -4659,7 +4712,7 @@ int sceDopen(int dirPath) {
     if (dirSlot == 0) {
         return -19;
     }
-    result = func_00428E18(dirPath, 9);
+    result = func_00428E18(dirPath, FIO_RPC_DOPEN);
     if (result < 0) {
         WaitSema_i(D_00455218);
         dirSlot->f4 = 0;
@@ -4837,16 +4890,16 @@ int sceGetstat(char *filePath, int statBuf) {
     nameChar = (getstatCmd->name[0] = filePath[0]);
     i = 0;
     if (nameChar != 0) {
-        while (++i < 0x400) {
+        while (++i < FIO_BUFFER_SIZE) {
             nameChar = (getstatCmd->name[i] = filePath[i]);
             if (nameChar == 0) {
                 break;
             }
         }
     }
-    if (i == 0x400) {
-        getstatCmd->name[0x3FF] = 0;
-        i = 0x3FF;
+    if (i == FIO_BUFFER_SIZE) {
+        getstatCmd->name[FIO_BUFFER_SIZE - 1] = 0;
+        i = FIO_BUFFER_SIZE - 1;
     }
     getstatCmd->fC = statBuf;
     buf[1] = 1;
@@ -4911,16 +4964,16 @@ int sceChstat_d(char *filePath, sFioStat *src, int changeMask) {
     nameChar = (chstatCmd->name[0] = filePath[0]);
     n = 0;
     if (nameChar != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             nameChar = (chstatCmd->name[n] = filePath[n]);
             if (nameChar == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        chstatCmd->name[0x3FF] = 0;
-        n = 0x3FF;
+    if (n == FIO_BUFFER_SIZE) {
+        chstatCmd->name[FIO_BUFFER_SIZE - 1] = 0;
+        n = FIO_BUFFER_SIZE - 1;
     }
     chstatCmd->v = *src;
     chstatCmd->fC = changeMask;
@@ -4983,25 +5036,25 @@ int sceRename_d(char *oldPath, char *newPath) {
     }
     n = 0;
     if ((renameCmd->name[0] = oldPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((renameCmd->name[n] = oldPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        renameCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        renameCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     n = 0;
     if ((renameCmd->name2[0] = newPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((renameCmd->name2[n] = newPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        renameCmd->name2[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        renameCmd->name2[FIO_BUFFER_SIZE - 1] = 0;
     }
     buf[1] = 1;
     buf[2] = 0;
@@ -5039,7 +5092,7 @@ extern int func_00428E18(int a0, int a1);
  * @return the IOP's result, or -11 when the RPC fails
  */
 int sceChdir(int path) {
-    return func_00428E18(path, 18);
+    return func_00428E18(path, FIO_RPC_CHDIR);
 }
 #endif
 
@@ -5075,15 +5128,15 @@ int sceSync_d(char *devPath, int syncFlag) {
     }
     n = 0;
     if ((syncCmd->name[0] = devPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((syncCmd->name[n] = devPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        syncCmd->name[0x3FF] = 0;
-        n = 0x3FF;
+    if (n == FIO_BUFFER_SIZE) {
+        syncCmd->name[FIO_BUFFER_SIZE - 1] = 0;
+        n = FIO_BUFFER_SIZE - 1;
     }
     syncCmd->f10 = syncFlag;
     buf[1] = 1;
@@ -5148,27 +5201,27 @@ int sceMount_d(char *fsDevice, char *blockDev, int mountFlag, char *data, int le
     }
     n = 0;
     if ((mountCmd->name[0] = fsDevice[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((mountCmd->name[n] = fsDevice[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        mountCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        mountCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     n = 0;
     if ((mountCmd->name2[0] = blockDev[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((mountCmd->name2[n] = blockDev[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        mountCmd->name2[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        mountCmd->name2[FIO_BUFFER_SIZE - 1] = 0;
     }
-    if (len > 0x400) {
+    if (len > FIO_BUFFER_SIZE) {
         func_004279B8();
         return -7;
     }
@@ -5213,7 +5266,7 @@ extern int func_00428E18(int a0, int a1);
  * @return the IOP's result, or -11 when the RPC fails
  */
 int sceUmount(int path) {
-    return func_00428E18(path, 21);
+    return func_00428E18(path, FIO_RPC_UMOUNT);
 }
 #endif
 
@@ -5277,7 +5330,7 @@ long sceLseek64(int fileDesc, long offset, int whence)
     WaitSema_i(D_0045521C);
     for (i = 0; i < 0x20; i++)
     {
-      if (D_00455188[i] == (-1))
+      if (D_00455188[i] == FIO_NOWAIT_FREE)
       {
         D_00455188[i] = lseek64Cmd->f0;
         lseek64Cmd->f0 = -lseek64Cmd->f0;
@@ -5352,16 +5405,16 @@ int sceDevctl_d(char *devName, int devCmd, char *data, unsigned len, int outBuf,
     }
     n = 0;
     if ((devctlCmd->name[0] = devName[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((devctlCmd->name[n] = devName[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        devctlCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        devctlCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
-    if (len > 0x400 || outLen > 0x400) {
+    if (len > FIO_BUFFER_SIZE || outLen > FIO_BUFFER_SIZE) {
         func_004279B8();
         return -22;
     }
@@ -5430,25 +5483,25 @@ int sceSymlink_d(char *oldPath, char *linkPath) {
     }
     n = 0;
     if ((symlinkCmd->name[0] = oldPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((symlinkCmd->name[n] = oldPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        symlinkCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        symlinkCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
     n = 0;
     if ((symlinkCmd->name2[0] = linkPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((symlinkCmd->name2[n] = linkPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        symlinkCmd->name2[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        symlinkCmd->name2[FIO_BUFFER_SIZE - 1] = 0;
     }
     buf[1] = 1;
     buf[2] = 0;
@@ -5511,17 +5564,17 @@ int sceReadlink_d(char *linkPath, int targetBuf, unsigned len) {
     }
     n = 0;
     if ((readlinkCmd->name[0] = linkPath[0]) != 0) {
-        while (++n < 0x400) {
+        while (++n < FIO_BUFFER_SIZE) {
             if ((readlinkCmd->name[n] = linkPath[n]) == 0) {
                 break;
             }
         }
     }
-    if (n == 0x400) {
-        readlinkCmd->name[0x3FF] = 0;
+    if (n == FIO_BUFFER_SIZE) {
+        readlinkCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
-    if (len >= 0x400) {
-        len = 0x3FF;
+    if (len >= FIO_BUFFER_SIZE) {
+        len = FIO_BUFFER_SIZE - 1;
     }
     readlinkCmd->f10 = targetBuf;
     readlinkCmd->fC = len;
@@ -5680,7 +5733,7 @@ int func_0042AD08(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifLoadIopHeap);
 #ifdef SKIP_ASM
-struct S2AD28 { int cmd; char name[0xFC]; };
+struct S2AD28 { int cmd; char name[IOP_NAME_SIZE]; };
 extern struct S2AD28 D_0052EF80;
 /**
  * Loads a file into IOP memory through the heap RPC server.
@@ -5702,17 +5755,17 @@ int sceSifLoadIopHeap(char *filePath, int iopAddr) {
     if ((D_0052EF80.name[0] = filePath[0]) != 0) {
         do {
             i++;
-            if (i >= 0xFC) {
+            if (i >= IOP_NAME_SIZE) {
                 break;
             }
         } while ((D_0052EF80.name[i] = filePath[i]) != 0);
     }
-    if (i == 0xFC) {
-        D_0052EF80.name[0xFB] = 0;
-        i = 251;
+    if (i == IOP_NAME_SIZE) {
+        D_0052EF80.name[IOP_NAME_SIZE - 1] = 0;
+        i = IOP_NAME_SIZE - 1;
     }
     D_0052EF80.cmd = iopAddr;
-    D_0052EF80.name[0xFB] = 0;
+    D_0052EF80.name[IOP_NAME_SIZE - 1] = 0;
     if (sceSifCallRpc(&D_0052EEC0, 3, 0, &D_0052EF80, i + 5, &D_0052EF00, 4, 0, 0) < 0) {
         return -1;
     }
@@ -6060,8 +6113,8 @@ int sceSifSearchModuleByName(char *modName) {
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, modName, 0xFC);
-    D_0052F080.cmd.n1[0xFB] = 0;
+    strncpy(D_0052F080.cmd.n1, modName, IOP_NAME_SIZE);
+    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
     if (sceSifCallRpc(&D_0052F280, 9, 0, &D_0052F080, 0x200, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
@@ -6169,12 +6222,12 @@ int func_0042B840_i(char *modPath, int argLen, sLfData *argBlock, int *resultOut
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, modPath, 0xFC);
-    D_0052F080.cmd.n1[0xFB] = 0;
+    strncpy(D_0052F080.cmd.n1, modPath, IOP_NAME_SIZE);
+    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
     if (argBlock != 0) {
         if (argLen >= 253) {
             *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
-            D_0052F080.cmd.f0 = 0xFC;
+            D_0052F080.cmd.f0 = IOP_NAME_SIZE;
         } else {
             func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
             D_0052F080.cmd.f0 = argLen;
@@ -6261,10 +6314,10 @@ int func_0042BAA8_i(char *elfPath, char *sectionName, int *execData, int rpcFunc
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, elfPath, 0xFC);
-    D_0052F080.cmd.n1[0xFB] = 0;
-    strncpy(D_0052F080.cmd.n2, sectionName, 0xFC);
-    D_0052F080.cmd.n2[0xFB] = 0;
+    strncpy(D_0052F080.cmd.n1, elfPath, IOP_NAME_SIZE);
+    D_0052F080.cmd.n1[IOP_NAME_SIZE - 1] = 0;
+    strncpy(D_0052F080.cmd.n2, sectionName, IOP_NAME_SIZE);
+    D_0052F080.cmd.n2[IOP_NAME_SIZE - 1] = 0;
     if (sceSifCallRpc(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
@@ -6324,14 +6377,14 @@ extern int func_0042B068(void);
  *
  * @param iopAddr  IOP address
  * @param valueOut  where the value is stored
- * @param valueType  size: 0 byte, 1 halfword, 2 word
+ * @param valueType  size: IOP_VALUE_BYTE, IOP_VALUE_HALFWORD or IOP_VALUE_WORD (0..2)
  * @return 0, 0xFFFEFFFE for a bad size, or 0xFFFEFFFF when the RPC fails
  */
 int func_0042BBF8(int iopAddr, void *valueOut, unsigned valueType) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
-    if (valueType > 2) {
+    if (valueType > IOP_VALUE_WORD) {
         return 0xFFFEFFFE;
     }
     D_0052F080.get.f0.w = iopAddr;
@@ -6339,11 +6392,11 @@ int func_0042BBF8(int iopAddr, void *valueOut, unsigned valueType) {
     if (sceSifCallRpc(&D_0052F280, 3, 0, &D_0052F080, 0x20, &D_0052F080, 0x20, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    if (valueType == 0) {
+    if (valueType == IOP_VALUE_BYTE) {
         *(unsigned char *)valueOut = D_0052F080.get.f0.b;
-    } else if (valueType == 1) {
+    } else if (valueType == IOP_VALUE_HALFWORD) {
         *(unsigned short *)valueOut = D_0052F080.get.f0.h;
-    } else if (valueType == 2) {
+    } else if (valueType == IOP_VALUE_WORD) {
         *(int *)valueOut = D_0052F080.get.f0.w;
     } else {
         return 0xFFFEFFFE;
@@ -6365,7 +6418,7 @@ extern int func_0042B068(void);
  *
  * @param iopAddr  IOP address
  * @param valueIn  the value to write
- * @param valueType  size: 0 byte, 1 halfword, 2 word
+ * @param valueType  size: IOP_VALUE_BYTE, IOP_VALUE_HALFWORD or IOP_VALUE_WORD (0..2)
  * @return 0, 0xFFFEFFFE for a bad size, or 0xFFFEFFFF when the RPC fails
  */
 int func_0042BCE8(int iopAddr, void *valueIn, int valueType) {
@@ -6374,11 +6427,11 @@ int func_0042BCE8(int iopAddr, void *valueIn, int valueType) {
     }
     D_0052F080.set.f0 = iopAddr;
     D_0052F080.set.f4 = valueType;
-    if (valueType == 0) {
+    if (valueType == IOP_VALUE_BYTE) {
         D_0052F080.set.f8.b = *(unsigned char *)valueIn;
-    } else if (valueType == 1) {
+    } else if (valueType == IOP_VALUE_HALFWORD) {
         D_0052F080.set.f8.h = *(unsigned short *)valueIn;
-    } else if (valueType == 2) {
+    } else if (valueType == IOP_VALUE_WORD) {
         D_0052F080.set.f8.w = *(unsigned *)valueIn;
     } else {
         return 0xFFFEFFFE;
@@ -7655,6 +7708,8 @@ SYSCALL_STUB(ExpandScratchPad, 89)
 INCLUDE_ASM("seg/seg_325220", func_0042CD58);
 #ifdef SKIP_ASM
 extern int GetMemorySize(void);
+/* The main memory of a retail console, 32 MB ([U] the doc below). Name ours. */
+#define RETAIL_MEMORY_SIZE (32 * 1024 * 1024)
 extern int func_0042CD98(void);
 extern int _InitTLB(void);
 /**
@@ -7666,7 +7721,7 @@ extern int _InitTLB(void);
  * @return the result of the call made
  */
 int func_0042CD58(void) {
-    if (GetMemorySize() == 0x2000000) {
+    if (GetMemorySize() == RETAIL_MEMORY_SIZE) {
         return func_0042CD98();
     }
     return _InitTLB();

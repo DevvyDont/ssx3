@@ -1215,26 +1215,25 @@ extern void g17008_smakebuf(struct __sFILE *) __asm__("__smakebuf");
 extern int g17008_srefill(struct __sFILE *) __asm__("__srefill");
 int fseek_(struct __sFILE *fp, long offset, int whence) __asm__("fseek");
 /**
- * Repositions a stdio stream, seeking inside the buffer when it can, and returns 0 or -1.
+ * Repositions a stdio stream, seeking inside the buffer when it can, and returns 0 or EOF (-1).
  *
  * Runs the stdio set-up check (stream data from _impure_ptr, __sinit once) and first flushes a stream that is both
- * appending and writing (flags 0x108). A stream without a seek callback sets errno 29 (ESPIPE), a bad whence errno 22
- * (EINVAL). For whence 1 (current) it flushes with fflush, finds the current offset (cached +0x50 when flag
- * 0x1000 is set, else the seek callback), corrects it for buffered read or write data and continues as an absolute
- * seek.
+ * appending and writing (flags 0x108). A stream without a seek callback sets errno ESPIPE (29), a bad whence errno
+ * EINVAL (22). For SEEK_CUR (1) it flushes with fflush, finds the current offset (cached +0x50 when flag 0x1000 is set,
+ * else the seek callback), corrects it for buffered read or write data and continues as an absolute seek.
  *
  * A buffer is made with __smakebuf when there is none. Unbuffered, read-write or line-buffered streams (flags 0x81A)
- * take the plain path. Otherwise only a regular file (_fstat_r st_mode 0x8000, seek callback __sseek) may be
- * optimised: it gets flag 0x400 and a block size of 0x400, while anything else gets 0x800 and the plain path. Whence 2
- * adds the file size from _fstat_r. When the target lies inside the current buffer (flag 0x2000 clear) it only
- * moves the buffer pointer; else it seeks the descriptor to the buffer start, refills with __srefill and skips the
- * bytes before the target. The plain path flushes, calls the seek callback with the original offset and whence, and
- * empties the buffer. Each success clears the EOF flag 0x20.
+ * take the plain path. Otherwise only a regular file (_fstat_r st_mode 0x8000, seek callback __sseek) may be optimised:
+ * it gets flag 0x400 and a block size of 0x400, while anything else gets 0x800 and the plain path. SEEK_END (2) adds
+ * the file size from _fstat_r. When the target lies inside the current buffer (flag 0x2000 clear) it only moves the
+ * buffer pointer; else it seeks the descriptor to the buffer start, refills with __srefill and skips the bytes before
+ * the target. The plain path flushes, calls the seek callback with the original offset and whence, and empties the
+ * buffer. Each success clears the EOF flag 0x20.
  *
  * @param stream  the stream
  * @param offset  the byte offset
- * @param whence  0 from the start, 1 from the current position, 2 from the end
- * @return 0 on success, -1 on failure
+ * @param whence  SEEK_SET from the start, SEEK_CUR from the current position, SEEK_END from the end
+ * @return 0 on success, EOF on failure
  */
 int fseek_(struct __sFILE *stream, long offset, int whence) {
     _fpos_t (*seekfn)(void *, _fpos_t, int);
@@ -1251,18 +1250,18 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
     if (stream->_flags & __SAPP && stream->_flags & __SWR)
         g17008_fflush(stream);
     if ((seekfn = stream->_seek) == 0) {
-        ptr->_errno = 29;
-        return -1;
+        ptr->_errno = ESPIPE;
+        return EOF;
     }
     switch (whence) {
-    case 1:
+    case SEEK_CUR:
         g17008_fflush(stream);
         if (stream->_flags & __SOFF)
             curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(stream->_cookie, 0, 1);
-            if (curoff == -1)
-                return -1;
+            curoff = (*seekfn)(stream->_cookie, 0, SEEK_CUR);
+            if (curoff == POS_ERR)
+                return EOF;
         }
         if (stream->_flags & __SRD) {
             curoff -= stream->_r;
@@ -1271,16 +1270,16 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
         } else if (stream->_flags & __SWR && stream->_p != 0)
             curoff += stream->_p - stream->_bf._base;
         offset += curoff;
-        whence = 0;
+        whence = SEEK_SET;
         havepos = 1;
         break;
-    case 0:
-    case 2:
+    case SEEK_SET:
+    case SEEK_END:
         havepos = 0;
         break;
     default:
-        ptr->_errno = 22;
-        return -1;
+        ptr->_errno = EINVAL;
+        return EOF;
     }
     if (stream->_bf._base == 0)
         g17008_smakebuf(stream);
@@ -1295,7 +1294,7 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
         stream->_blksize = 0x400;
         stream->_flags |= __SOPT;
     }
-    if (whence == 0)
+    if (whence == SEEK_SET)
         target = offset;
     else {
         if (g17008_fstat(ptr, stream->_file, &st))
@@ -1306,8 +1305,8 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
         if (stream->_flags & __SOFF)
             curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(stream->_cookie, 0, 1);
-            if (curoff == -1)
+            curoff = (*seekfn)(stream->_cookie, 0, SEEK_CUR);
+            if (curoff == POS_ERR)
                 goto dumb;
         }
         curoff -= stream->_r;
@@ -1332,7 +1331,7 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
         return 0;
     }
     curoff = target & -stream->_blksize;
-    if ((*seekfn)(stream->_cookie, curoff, 0) == -1)
+    if ((*seekfn)(stream->_cookie, curoff, SEEK_SET) == POS_ERR)
         goto dumb;
     stream->_r = 0;
     stream->_flags &= ~__SEOF;
@@ -1345,8 +1344,8 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
     }
     return 0;
 dumb:
-    if (g17008_fflush(stream) || (*seekfn)(stream->_cookie, offset, whence) == -1)
-        return -1;
+    if (g17008_fflush(stream) || (*seekfn)(stream->_cookie, offset, whence) == POS_ERR)
+        return EOF;
     stream->_p = stream->_bf._base;
     stream->_r = 0;
     stream->_flags &= ~__SEOF;
@@ -1748,13 +1747,13 @@ extern long _lseek_r(struct _reent *, int, int, int);
  *
  * @param stream  the stream (its own cookie)
  * @param offset  the offset
- * @param whence  0 start, 1 current, 2 end
- * @return the new offset, or -1
+ * @param whence  SEEK_SET, SEEK_CUR or SEEK_END
+ * @return the new offset, or POS_ERR (-1)
  */
 long __sseek(struct __sFILE *stream, int offset, int whence) {
     long newOffset = _lseek_r(stream->_data, stream->_file, offset, whence);
     short *flagsPtr = &stream->_flags;
-    if (newOffset == -1) {
+    if (newOffset == POS_ERR) {
         *flagsPtr &= ~__SOFF;
     } else {
         stream->_offset = newOffset;
@@ -3983,7 +3982,7 @@ unsigned long _strtoul_r_(int *ptr, char *nptr, char **endptr, int base) {
     }
     if (any < 0) {
         acc = -1;
-        *ptr = 34;
+        *ptr = ERANGE;
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
@@ -4317,6 +4316,14 @@ char *func_0041AEE8(int value, char *buf, unsigned int base)
 
 INCLUDE_ASM("seg/seg_316FB8", func_0041AF88);
 
+/* The modes of the console output buffers func_0041B550 / func_0041C938 ([U] the formatter func_0041B728 passes 0
+   with bytes to buffer and 1, with none, to write the buffer out; any other mode buffers too). Names ours. */
+enum print_buffer_mode
+{
+    PRINT_BUFFER_APPEND = 0,
+    PRINT_BUFFER_FLUSH = 1
+};
+
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041B528);
 #ifdef SKIP_ASM
@@ -4342,22 +4349,23 @@ extern char D_0052AE98[];
 extern int _write(int, const void *, int);
 int func_0041B550_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041B550");
 /**
- * Buffers bytes for a descriptor in a 128-byte buffer, or flushes that buffer (mode 1), and returns a count.
+ * Buffers bytes for a descriptor in a 128-byte buffer, or flushes that buffer (PRINT_BUFFER_FLUSH), and returns a
+ * count.
  *
- * Mode 1 writes the D_00454CD8 buffered bytes of D_0052AE98 with _write and resets the count and the cursor
+ * PRINT_BUFFER_FLUSH writes the D_00454CD8 buffered bytes of D_0052AE98 with _write and resets the count and the cursor
  * D_00454CDC. Other modes copy n bytes in, writing the buffer out each time it holds 128; a write that returns 0 stops
  * with 0. The buffer is shared by every descriptor. func_0041B728 uses it.
  *
  * @param fd    the descriptor
  * @param buf   the bytes
  * @param n     the byte count
- * @param mode  1 to flush, else to buffer
- * @return the flush's write result for mode 1, else n (0 when a write returned 0)
+ * @param mode  PRINT_BUFFER_FLUSH to flush, else (PRINT_BUFFER_APPEND) to buffer
+ * @return the flush's write result for a flush, else n (0 when a write returned 0)
  */
 int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
-    if (mode == 1) {
+    if (mode == PRINT_BUFFER_FLUSH) {
         writeResult = _write(fd, D_0052AE98, D_00454CD8);
         D_00454CD8 = 0;
         D_00454CDC = D_0052AE98;
@@ -4426,6 +4434,13 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041C788);
 #ifdef SKIP_ASM
 extern void *g_c788_memcpy(void *, const void *, unsigned) __asm__("func_0041605C");
 char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) __asm__("func_0041C788");
+/* What the scan has seen so far ([U] a . moves 0 to 1, an e or E gives 2 and ends the scan). Names ours. */
+enum number_scan_state
+{
+    NUMBER_SCAN_INTEGER = 0,
+    NUMBER_SCAN_FRACTION = 1,
+    NUMBER_SCAN_EXPONENT = 2
+};
 /**
  * Copies a number string with commas inserted every three digits before the decimal point and returns dest.
  *
@@ -4447,7 +4462,7 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
     struct { int state; char *point; } st;
     char *cursor;
     if (dest == 0 || start == 0 || end == 0) return 0;
-    st.state = 0;
+    st.state = NUMBER_SCAN_INTEGER;
     st.point = end;
     cursor = start;
     if (!(end < cursor)) {
@@ -4455,17 +4470,17 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
             switch (*cursor) {
             case '.':
                 st.point = cursor;
-                if (st.state == 0) st.state = 1;
+                if (st.state == NUMBER_SCAN_INTEGER) st.state = NUMBER_SCAN_FRACTION;
                 break;
             case 'E':
             case 'e':
-                st.state = 2;
+                st.state = NUMBER_SCAN_EXPONENT;
                 break;
             }
             cursor++;
-        } while (!(end < cursor) && st.state != 2);
+        } while (!(end < cursor) && st.state != NUMBER_SCAN_EXPONENT);
     }
-    if (st.state == 2) return start;
+    if (st.state == NUMBER_SCAN_EXPONENT) return start;
     cursor = end;
     if (start < cursor) {
         do {
@@ -4498,7 +4513,7 @@ extern int D_00454CE0;
 extern char D_0052AF18[];
 int func_0041C938_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041C938");
 /**
- * Buffers bytes for a descriptor in a second 128-byte buffer, or flushes it (mode 1), and returns a count.
+ * Buffers bytes for a descriptor in a second 128-byte buffer, or flushes it (PRINT_BUFFER_FLUSH), and returns a count.
  *
  * The same code as func_0041B550 with its own buffer D_0052AF18, count D_00454CE0 and cursor D_00454CE4; writes with
  * _write. func_0041CA70 uses it.
@@ -4506,13 +4521,13 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041C9
  * @param fd    the descriptor
  * @param buf   the bytes
  * @param n     the byte count
- * @param mode  1 to flush, else to buffer
- * @return the flush's write result for mode 1, else n (0 when a write returned 0)
+ * @param mode  PRINT_BUFFER_FLUSH to flush, else (PRINT_BUFFER_APPEND) to buffer
+ * @return the flush's write result for a flush, else n (0 when a write returned 0)
  */
 int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
-    if (mode == 1) {
+    if (mode == PRINT_BUFFER_FLUSH) {
         writeResult = _write(fd, D_0052AF18, D_00454CE0);
         D_00454CE0 = 0;
         D_00454CE4 = D_0052AF18;
@@ -5274,7 +5289,7 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
     }
     if (any < 0) {
         acc = neg ? 0x8000000000000000L : 0x7FFFFFFFFFFFFFFFL;
-        *ptr = 34;
+        *ptr = ERANGE;
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
@@ -5331,7 +5346,7 @@ char *_setlocale_r_(struct _reent *p, int category, char *locale) __asm__("_setl
 /**
  * Sets or queries the locale for a category and returns the locale name, or null when it is not supported.
  *
- * Only "C" and "" are accepted, plus "C-JIS", "C-EUCJP" and "C-SJIS" for category 2 (LC_CTYPE). Setting LC_CTYPE (or
+ * Only "C" and "" are accepted, plus "C-JIS", "C-EUCJP" and "C-SJIS" for category LC_CTYPE (2). Setting LC_CTYPE (or
  * LC_ALL, 0) saves the previous ctype name in last_lc_ctype, copies the new one to lc_ctype and sets MB_CUR_MAX
  * (__mb_cur_max) to 8 for C-JIS, 2 for the other two-part names, else 1. A successful set records the category (+0x30)
  * and locale (+0x34) in the struct. The second "C" comparison in the LC_CTYPE test repeats the first, as in newlib.
@@ -5344,10 +5359,10 @@ char *_setlocale_r_(struct _reent *p, int category, char *locale) __asm__("_setl
  */
 char *_setlocale_r_(struct _reent *reent, int category, char *locale) {
     if (locale) {
-        if (category != 2) {
+        if (category != LC_CTYPE) {
             if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, str_empty_b))
                 return 0;
-            if (category == 0) {
+            if (category == LC_ALL) {
                 strcpy_(last_lc_ctype, lc_ctype);
                 strcpy_(lc_ctype, locale);
                 *(int *)__mb_cur_max = 1;
@@ -5368,9 +5383,9 @@ char *_setlocale_r_(struct _reent *reent, int category, char *locale) {
         }
         reent->_current_locale = locale;
         reent->_current_category = category;
-        return category == 2 ? last_lc_ctype : D_0049A7D0b;
+        return category == LC_CTYPE ? last_lc_ctype : D_0049A7D0b;
     }
-    return category == 2 ? lc_ctype : D_0049A7D0b;
+    return category == LC_CTYPE ? lc_ctype : D_0049A7D0b;
 }
 #endif
 
@@ -5563,7 +5578,7 @@ double floor(double x)
 		if(huge_ED60+x>0.0) {/* return 0*sign(x) if |x|<1 */
 		    if(i0>=0) {i0=i1=0;}
 		    else if(((i0&0x7fffffff)|i1)!=0)
-			{ i0=0xbff00000;i1=0;}
+			{ i0=Sign_bit|Exp_1;i1=0;}	/* -1.0 */
 		}
 	    } else {
 		i = (0x000fffff)>>exponent;
@@ -5574,14 +5589,14 @@ double floor(double x)
 		}
 	    }
 	} else if (exponent>51) {
-	    if(exponent==0x400) return x+x;	/* inf or NaN */
+	    if(exponent==DOUBLE_EXP_INF_NAN) return x+x;	/* inf or NaN */
 	    else return x;		/* x is integral */
 	} else {
 	    i = ((unsigned int)(0xffffffff))>>(exponent-20);
 	    if((i1&i)==0) return x;	/* x is integral */
 	    if(huge_ED60+x>0.0) { 		/* raise inexact flag */
 		if(i0<0) {
-		    if(exponent==20) i0+=1;
+		    if(exponent==Exp_shift) i0+=1;
 		    else {
 			j = i1+(1<<(52-exponent));
 			if(j<i1) i0 +=1 ; 	/* got a carry */
@@ -5839,7 +5854,7 @@ double __ieee754_log_2(double x)
 	k += (hx>>20)-1023;
 	hx &= 0x000fffff;
 	i = (hx+0x95f64)&0x100000;
-	SET_HIGH_WORD_0041F3A8(x,hx|(i^0x3ff00000));	/* normalize x or x/2 */
+	SET_HIGH_WORD_0041F3A8(x,hx|(i^Exp_1));	/* normalize x or x/2 */
 	k += (i>>20);
 	frac = x-1.0;
 	if((0x000fffff&(2+hx))<3) {	/* |f| < 2**-20 */
@@ -5982,7 +5997,7 @@ int _close_r(struct _reent *err, int fileDesc) {
     int closeResult;
     errno = 0;
     closeResult = _close(fileDesc);
-    if (closeResult == -1 && errno)
+    if (closeResult == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return closeResult;
 }
@@ -6008,7 +6023,7 @@ int _fstat_r(struct _reent *err, int fileDesc, struct stat *statBuf) {
     int fstatResult;
     errno = 0;
     fstatResult = _fstat(fileDesc, statBuf);
-    if (fstatResult == -1 && errno)
+    if (fstatResult == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return fstatResult;
 }
@@ -6035,7 +6050,7 @@ long _lseek_r(struct _reent *err, int fileDesc, int offset, int whence) {
     int newOffset;
     errno = 0;
     newOffset = _lseek(fileDesc, offset, whence);
-    if (newOffset == -1 && errno)
+    if (newOffset == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return newOffset;
 }
@@ -6062,7 +6077,7 @@ int _open_r(struct _reent *err, const char *path, int openFlags, int permissions
     int fileDesc;
     errno = 0;
     fileDesc = _open(path, openFlags, permissions);
-    if (fileDesc == -1 && errno)
+    if (fileDesc == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return fileDesc;
 }
@@ -6089,7 +6104,7 @@ long _read_r(struct _reent *err, int fileDesc, void *buffer, int byteCount) {
     int bytesRead;
     errno = 0;
     bytesRead = _read(fileDesc, buffer, byteCount);
-    if (bytesRead == -1 && errno)
+    if (bytesRead == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return bytesRead;
 }
@@ -6103,18 +6118,18 @@ extern unsigned _sbrk(int);
 /**
  * Moves the heap break and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno errno, calls _sbrk and stores errno through err when it returns all ones with
- * errno set.
+ * Clears the global errno errno, calls _sbrk and stores errno through err when it returns MORECORE_FAILURE (all
+ * ones) with errno set.
  *
  * @param err  receives errno on failure
  * @param increment    the byte change (negative to shrink)
- * @return the previous break, or 0xFFFFFFFF on failure
+ * @return the previous break, or MORECORE_FAILURE (0xFFFFFFFF) on failure
  */
 unsigned _sbrk_r(int *err, int increment) {
     unsigned oldBreak;
     errno = 0;
     oldBreak = _sbrk(increment);
-    if (oldBreak == 0xFFFFFFFF && errno)
+    if (oldBreak == (unsigned)MORECORE_FAILURE && errno)
         *err = errno;
     return oldBreak;
 }
@@ -6141,7 +6156,7 @@ long _write_r(struct _reent *err, int fileDesc, const void *buffer, int byteCoun
     int bytesWritten;
     errno = 0;
     bytesWritten = _write(fileDesc, buffer, byteCount);
-    if (bytesWritten == -1 && errno)
+    if (bytesWritten == SYSCALL_FAILED && errno)
         err->_errno = errno;
     return bytesWritten;
 }
@@ -7337,19 +7352,19 @@ double _b2d(struct Bigint *bigint, int *expOut) {
     y = *--xa;
     k = _hi0bits(y);
     *expOut = 32 - k;
-    if (k < 11) {
-        result.w.hi = 0x3ff00000 | y >> (11 - k);
+    if (k < Ebits) {
+        result.w.hi = Exp_1 | y >> (Ebits - k);
         w = xa > xa0 ? *--xa : 0;
-        result.w.lo = y << (21 + k) | w >> (11 - k);
+        result.w.lo = y << (32 - Ebits + k) | w >> (Ebits - k);
         goto ret_d;
     }
     z = xa > xa0 ? *--xa : 0;
-    if (k -= 11) {
-        result.w.hi = 0x3ff00000 | y << k | z >> (32 - k);
+    if (k -= Ebits) {
+        result.w.hi = Exp_1 | y << k | z >> (32 - k);
         y = xa > xa0 ? *--xa : 0;
         result.w.lo = z << k | y >> (32 - k);
     } else {
-        result.w.hi = 0x3ff00000 | y;
+        result.w.hi = Exp_1 | y;
         result.w.lo = z;
     }
 ret_d:
@@ -7511,14 +7526,14 @@ void print_f_(struct _reent *ptr, char *buf, double invalue, int ndigit, int typ
  * @param ndigit   the fraction digits
  * @param type     the conversion character (unused)
  * @param dot      nonzero to always print the point
- * @param mode     the _dtoa_r mode (3 for fixed point)
+ * @param mode     the _dtoa_r mode (DTOA_FRACTION_DIGITS for fixed point)
  */
 void print_f_(struct _reent *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) {
     int decpt;
     int sign;
     char *digits, *start, *end;
     start = digits = g21530_dtoa(ptr, invalue, mode, ndigit, &decpt, &sign, &end);
-    if (decpt == 9999) {
+    if (decpt == DTOA_DECPT_INF_NAN) {
         g21530_strcpy(buf, digits);
         return;
     }
@@ -7580,8 +7595,8 @@ void print_e_(struct _reent *ptr, char *buf, double invalue, int ndigit, char ty
     int i = ndigit;
     int sign;
     char *digits, *end;
-    digits = g216E8_dtoa(ptr, invalue, 2, i + 1, &decpt, &sign, &end);
-    if (decpt == 9999) {
+    digits = g216E8_dtoa(ptr, invalue, DTOA_SIGNIFICANT_DIGITS, i + 1, &decpt, &sign, &end);
+    if (decpt == DTOA_DECPT_INF_NAN) {
         g216E8_strcpy(buf, digits);
         return;
     }
@@ -7815,14 +7830,14 @@ _gcvt_ (struct _reent *ptr, double invalue, int ndigit, char *buf, char type, in
       if (invalue < 1.0)
 	{
 	  /* what we want is ndigits after the point */
-	  digitStr = _dtoa_r_1B98 (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
+	  digitStr = _dtoa_r_1B98 (ptr, invalue, DTOA_FRACTION_DIGITS, ndigit, &decpt, &sign, &end);
 	}
       else
 	{
-	  digitStr = _dtoa_r_1B98 (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
+	  digitStr = _dtoa_r_1B98 (ptr, invalue, DTOA_SIGNIFICANT_DIGITS, ndigit, &decpt, &sign, &end);
 	}
 
-      if (decpt == 9999)
+      if (decpt == DTOA_DECPT_INF_NAN)
 	{
 	  strcpy_1B98 (buf, digitStr);
 	  return save;
@@ -8285,7 +8300,7 @@ _dtoa_r_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *dec
   if ((word0_00422780 (d) & Exp_mask_00422780) == Exp_mask_00422780)
     {
       /* Infinity or NaN */
-      *decpt = 9999;
+      *decpt = DTOA_DECPT_INF_NAN;
       cursor =
 	!word1_00422780 (d) && !(word0_00422780 (d) & 0xfffff) ? "Infinity" :
 	"NaN";
@@ -8393,24 +8408,24 @@ _dtoa_r_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *dec
   leftright = 1;
   switch (mode)
     {
-    case 0:
-    case 1:
+    case DTOA_SHORTEST:
+    case DTOA_SHORTEST_STEELE_WHITE:
       ilim = ilim1 = -1;
       i = 18;
       ndigits = 0;
       break;
-    case 2:
+    case DTOA_SIGNIFICANT_DIGITS:
       leftright = 0;
       /* no break */
-    case 4:
+    case DTOA_SIGNIFICANT_DIGITS_LTR:
       if (ndigits <= 0)
 	ndigits = 1;
       ilim = ilim1 = i = ndigits;
       break;
-    case 3:
+    case DTOA_FRACTION_DIGITS:
       leftright = 0;
       /* no break */
-    case 5:
+    case DTOA_FRACTION_DIGITS_LTR:
       i = ndigits + k + 1;
       ilim = i;
       ilim1 = i - 1;

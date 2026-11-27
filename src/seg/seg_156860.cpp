@@ -100,7 +100,7 @@ extern "C" cCommSystem *cCommSystem_cCommSystem_(cCommSystem *self) {
     self->mNetConnError = 0;
     self->mBroadBand = 0;
     self->mInterfaceType = 1;
-    self->mNetConnState = 1;
+    self->mNetConnState = kNetConn_Idle;
     ccs_3B18(str_www_ea_com);
     return self;
 }
@@ -182,43 +182,43 @@ void cCommSystem::update()
     int i;
     NetConnIdle();
     switch (mNetConnState) {
-    case 0:
-    case 1:
-    case 6:
+    case kNetConn_None:
+    case kNetConn_Idle:
+    case kNetConn_Failed:
         break;
-    case 2:
-        if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) == 0) {
+    case kNetConn_ConnectRequested:
+        if (NetConnStatus_5A20('onln', 0, 0) == 0) {
             NetConnConnect(cCommSystem_mNetConns + 0x80 + (mActiveNetConn << 8), 0);
-            mNetConnState = 3;
+            mNetConnState = kNetConn_Starting;
         }
         break;
-    case 3: {
-        if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) != 0 && NetConnStatus_5A20(0x686F7374, 0, 0) != 0) {
-            mNetConnState = 4;
+    case kNetConn_Starting: {
+        if (NetConnStatus_5A20('onln', 0, 0) != 0 && NetConnStatus_5A20('host', 0, 0) != 0) {
+            mNetConnState = kNetConn_WaitingForAddress;
             mNetConnTimeOut = 1800;
-            mInterfaceType = NetConnStatus_5A20(0x74797065, 0, 0);
-            int bb = NetConnStatus_5A20(0x62626E64, 0, 0);
+            mInterfaceType = NetConnStatus_5A20('type', 0, 0);
+            int bb = NetConnStatus_5A20('bbnd', 0, 0);
             if (bb == 1) {
                 mBroadBand = bb;
             }
         }
-        int conn = NetConnStatus_5A20(0x636F6E6E, 0, 0);
+        int conn = NetConnStatus_5A20('conn', 0, 0);
         if ((conn >> 24) == '-') {
             netConnFailed(conn);
             mNetConnTimeOut = 0;
         }
         break;
     }
-    case 4: {
+    case kNetConn_WaitingForAddress: {
         int addr;
         netConnLocalAddr(&addr);
         if (addr != 0) {
             mNetConnTimeOut = 0;
-            mNetConnState = 5;
+            mNetConnState = kNetConn_Connected;
         }
         break;
     }
-    case 5:
+    case kNetConn_Connected:
         for (i = 0; i < 1; i++) {
             cCommChannel* channel = mChannels[i];
             if (channel != 0) {
@@ -231,7 +231,7 @@ void cCommSystem::update()
     if (mNetConnTimeOut > 0) {
         mNetConnTimeOut--;
         if (mNetConnTimeOut <= 0) {
-            netConnFailed(0x74696D65);
+            netConnFailed('time');
             mNetConnTimeOut = 0;
         }
     }
@@ -315,9 +315,9 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelOpen);
  * Tells whether a channel slot of the connection manager holds a channel.
  *
  * @param channelIndex  the channel slot
- * @return 1 when the slot is set, else 0
+ * @return true when the slot is set
  */
-int cCommSystem::isChannelOpen(int channelIndex)
+bool cCommSystem::isChannelOpen(int channelIndex)
 {
     return mChannels[channelIndex] != 0;
 }
@@ -520,7 +520,7 @@ void cCommSystem::netConnConnect(int configIndex)
     mActiveNetConn = configIndex;
     mInterfaceType = 1;
     mNetConnTimeOut = 9000;
-    mNetConnState = 2;
+    mNetConnState = kNetConn_ConnectRequested;
     mBroadBand = 0;
 }
 #endif
@@ -544,7 +544,7 @@ void cCommSystem::netConnDisconnect()
         NetConnDisconnect();
     }
     mNetConnTimeOut = 0;
-    mNetConnState = 1;
+    mNetConnState = kNetConn_Idle;
     mNetConnError = 0;
 }
 #endif
@@ -569,7 +569,7 @@ void cCommSystem::netConnFailed(int errorCode)
         NetConnDisconnect();
     }
     mNetConnError = errorCode;
-    mNetConnState = 6;
+    mNetConnState = kNetConn_Failed;
     mNetConnTimeOut = 0;
 }
 #endif
@@ -592,7 +592,7 @@ void cCommSystem::netConnLocalAddr(int *localAddr)
     int temp_2;
 
     *localAddr = 0;
-    temp_2 = NetConnStatus_6038(0x61646472, 0, 0);
+    temp_2 = NetConnStatus_6038('addr', 0, 0);
     if (temp_2 & 0xFFFFFF00) {
         *localAddr = temp_2;
     }
@@ -999,7 +999,7 @@ extern "C" void *cDSockChannel_cDSockChannel(cDSockChannel* channel) {
     cCommChannel_cCommChannel(channel);
     channel->mVtbl = (void**)cDSockChannel_vtbl;
     channel->mLatency = 0.10000000149011612f;
-    channel->mState = 0;
+    channel->mState = cDSockChannel::kState_Closed;
     channel->mGameUtil = 0;
     channel->mGameLink = 0;
     channel->mPacketError = 0;
@@ -1053,7 +1053,7 @@ extern "C" int NetGameLinkRecv_6730(NetGameLinkRefT *, char *, int) __asm__("Net
 unsigned char cDSockChannel::readPacket(char *dst, int maxlen)
 {
     unsigned char buf[264];
-    if (mState == 2) {
+    if (mState == kState_Connected) {
         while (NetGameLinkRecv_6730(mGameLink, (char *)buf, 1) > 0) {
             if (buf[2] == 5) {
                 if (buf[3] != 0 && maxlen >= (int)buf[3]) {
@@ -1086,21 +1086,21 @@ extern "C" int NetGameLinkSend(NetGameLinkRefT *, void *, int);
  *
  * @param data  payload to send
  * @param len   payload size in bytes; 0 or less sends nothing
- * @return 1 when NetGameLinkSend reports a positive result, otherwise 0
+ * @return true when NetGameLinkSend reports a positive result
  */
-int cDSockChannel::writePacket(const void *data, int len)
+bool cDSockChannel::writePacket(const void *data, int len)
 {
     char buf[264];
-    if (mState != 2) return 0;
+    if (mState != kState_Connected) return false;
     int error = mError;
-    if (error != 0) return 0;
+    if (error != 0) return false;
     if (len > 0) {
         buf[2] = 5;
         buf[3] = len;
         MEM_copy(buf + 4, data, len);
         return error < NetGameLinkSend(mGameLink, buf, 1);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -1136,7 +1136,7 @@ void cDSockChannel::listen(int addr, int port)
     if (gameUtil != 0) {
         sprintf_6860(buf, str_pct_s_pct_d_pct_d, addr, n, n);
         NetGameUtilConnect_6860(mGameUtil, 257, buf);
-        mState = 1;
+        mState = kState_Connecting;
     }
 }
 #endif
@@ -1174,7 +1174,7 @@ void cDSockChannel::connect(int addr, int port)
     if (gameUtil != 0) {
         sprintf_68F8(buf, str_pct_s_pct_d_pct_d, addr, n, n);
         NetGameUtilConnect_68F8(mGameUtil, 258, buf);
-        mState = 1;
+        mState = kState_Connecting;
     }
 }
 #endif
@@ -1197,7 +1197,7 @@ extern "C" void NetGameUtilDestroy(NetGameUtilRefT *);
  */
 void cDSockChannel::disconnect()
 {
-    if (mState != 0) {
+    if (mState != kState_Closed) {
         cCommChannel_channelClose();
         NetGameLinkRefT *gameLink = mGameLink;
         if (gameLink != 0) {
@@ -1209,7 +1209,7 @@ void cDSockChannel::disconnect()
             NetGameUtilDestroy(gameUtil);
             mGameUtil = 0;
         }
-        mState = 0;
+        mState = kState_Closed;
     }
 }
 #endif
@@ -1230,15 +1230,15 @@ extern "C" void cDSockChannel_updateConnected(cDSockChannel* self);
 void cDSockChannel::update()
 {
     switch (mState) {
-    case 1:
+    case kState_Connecting:
         updateConnecting();
         break;
-    case 2:
+    case kState_Connected:
         updateConnected();
         break;
-    case 0:
-    case 3:
-    case 4:
+    case kState_Closed:
+    case kState_TimedOut:
+    case kState_PacketError:
         break;
     }
 }
@@ -1264,7 +1264,7 @@ void cDSockChannel::updateConnecting()
         NetGameLinkRefT *gameLink = NetGameLinkCreate(commRef, 0, 9084);
         mGameLink = gameLink;
         if (gameLink != 0) {
-            mState = 2;
+            mState = kState_Connected;
         }
     }
 }
@@ -1289,7 +1289,7 @@ void cDSockChannel::updateConnected()
     NetGameLinkStatT* st = NetGameLinkStatus(mGameLink);
     if (st) {
         if ((int)(st->tick - st->rcvdlast) > 30000) {
-            mState = 3;
+            mState = kState_TimedOut;
             mError = 1;
             return;
         }
@@ -1304,7 +1304,7 @@ void cDSockChannel::updateConnected()
         mLatency = (mLatency * 4.0f + latency) * 0.20000000298023224f;
     }
     if (mPacketError) {
-        mState = 4;
+        mState = kState_PacketError;
         mError = 1;
     }
 }
@@ -1440,7 +1440,7 @@ extern "C" cGameComm* cGameComm_cGameComm(void* vself, int port, int isServer)
     cGameComm* self = (cGameComm*)vself;
     self->mChannel = port;
     self->mServer = isServer;
-    cGameComm_setState_6C78(self, 0);
+    cGameComm_setState_6C78(self, kGameComm_Init);
     self->mBEBufferSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(SSXApp->BE, 7));
     self->mWaitingTimer = 30;
     self->mConnected = 1;
@@ -1579,10 +1579,10 @@ extern "C" void func_0031AD18(void);
 /**
  * Switches the handshake and race state machine (mState) to a new tGameComm state.
  *
- * Entering GameActive (14) computes the latency (cGameComm_calcLatency), arms a 3600-frame link timeout and clears
- * the flag D_004A3ED0 (func_0031AD18); GameOver (15) clears the waiting message and the peer's pause; the
- * states 1, 3, ..., 13 arm an 1800-frame timeout. func_00258870 skips arming while either side is paused
- * before the start gate.
+ * Entering GameActive (14) computes the latency (cGameComm_calcLatency), arms a 3600-frame link timeout and clears the
+ * flag D_004A3ED0 (func_0031AD18); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
+ * 13 (each step's start, not its Wait) arm an 1800-frame timeout. func_00258870 skips arming while either side is
+ * paused before the start gate.
  *
  * @param mode  the new tGameComm state
  */
@@ -1590,20 +1590,31 @@ extern "C" void func_0031AD18(void);
 void cGameComm::setState(int mode)
 {
     switch (mode) {
-    case 14:
+    case kGameComm_GameActive:
         calcLatency();
         func_00258870(this, 3600, 0);
         func_0031AD18();
         mState = mode;
         return;
-    case 15:
+    case kGameComm_GameOver:
         mWaitingMessage = 0;
         mPauseMenu[1] = 0;
         break;
-    case 1: case 3: case 5: case 7: case 9: case 11: case 13:
+    case kGameComm_SendSettings:
+    case kGameComm_RecvSettings:
+    case kGameComm_SendBE:
+    case kGameComm_RecvBE:
+    case kGameComm_SendLatency:
+    case kGameComm_RecvLatency:
+    case kGameComm_InitGameActive:
         func_00258870(this, 1800, 0);
         break;
-    case 2: case 4: case 6: case 8: case 10: case 12:
+    case kGameComm_SendSettingsWait:
+    case kGameComm_RecvSettingsWait:
+    case kGameComm_SendBEWait:
+    case kGameComm_RecvBEWait:
+    case kGameComm_SendLatencyWait:
+    case kGameComm_RecvLatencyWait:
         break;
     }
     mState = mode;
@@ -1722,144 +1733,144 @@ void cGameComm::update()
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     if (mServer != 0) {
         switch ((unsigned int)mState) {
-        case 0:
+        case kGameComm_Init:
             cGameComm_setState_70D8(((char*)this), 1);
             break;
-        case 1:
+        case kGameComm_SendSettings:
             cGameComm_asyncWrite_70D8(((char*)this), &mServerSettings, 44);
             cGameComm_setState_70D8(((char*)this), 2);
             break;
-        case 2:
+        case kGameComm_SendSettingsWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 3);
             }
             break;
-        case 3:
+        case kGameComm_RecvSettings:
             cGameComm_asyncRead_70D8(((char*)this), &mClientBroadBand, 20);
             cGameComm_setState_70D8(((char*)this), 4);
             break;
-        case 4:
+        case kGameComm_RecvSettingsWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 5);
             }
             break;
-        case 5:
+        case kGameComm_SendBE:
             cBENetworkInterface_getSyncData_70D8(iface, 0, mBEBuffer);
             cGameComm_asyncWrite_70D8(((char*)this), mBEBuffer, mBEBufferSize);
             cGameComm_setState_70D8(((char*)this), 6);
             break;
-        case 6:
+        case kGameComm_SendBEWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 7);
             }
             break;
-        case 7:
+        case kGameComm_RecvBE:
             cGameComm_asyncRead_70D8(((char*)this), mBEBuffer, mBEBufferSize);
             cGameComm_setState_70D8(((char*)this), 8);
             break;
-        case 8:
+        case kGameComm_RecvBEWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cBENetworkInterface_setSyncData_70D8(iface, 1, mBEBuffer);
                 cGameComm_setState_70D8(((char*)this), 9);
             }
             break;
-        case 9:
+        case kGameComm_SendLatency:
             mNetLatency[0] = cCommSystem_getLatency_70D8(cCommSystem_mCommSystem, mChannel);
             cGameComm_asyncWrite_70D8(((char*)this), &mNetLatency[0], 4);
             cGameComm_setState_70D8(((char*)this), 10);
             break;
-        case 10:
+        case kGameComm_SendLatencyWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 11);
             }
             break;
-        case 11:
+        case kGameComm_RecvLatency:
             cGameComm_asyncRead_70D8(((char*)this), &mNetLatency[1], 4);
             cGameComm_setState_70D8(((char*)this), 12);
             break;
-        case 12:
+        case kGameComm_RecvLatencyWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 13);
             }
             break;
-        case 13:
+        case kGameComm_InitGameActive:
             cGameComm_setState_70D8(((char*)this), 14);
             break;
-        case 14:
+        case kGameComm_GameActive:
             cGameComm_checkActive_70D8(((char*)this));
             break;
-        case 15:
+        case kGameComm_GameOver:
             break;
         }
     } else {
         switch ((unsigned int)mState) {
-        case 0:
+        case kGameComm_Init:
             cGameComm_setState_70D8(((char*)this), 3);
             break;
-        case 3:
+        case kGameComm_RecvSettings:
             cGameComm_asyncRead_70D8(((char*)this), &mServerSettings, 44);
             cGameComm_setState_70D8(((char*)this), 4);
             break;
-        case 4:
+        case kGameComm_RecvSettingsWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 1);
             }
             break;
-        case 1:
+        case kGameComm_SendSettings:
             cGameComm_asyncWrite_70D8(((char*)this), &mClientBroadBand, 20);
             cGameComm_setState_70D8(((char*)this), 2);
             break;
-        case 2:
+        case kGameComm_SendSettingsWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 7);
             }
             break;
-        case 7:
+        case kGameComm_RecvBE:
             cGameComm_asyncRead_70D8(((char*)this), mBEBuffer, mBEBufferSize);
             cGameComm_setState_70D8(((char*)this), 8);
             break;
-        case 8:
+        case kGameComm_RecvBEWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cBENetworkInterface_setSyncData_70D8(iface, 0, mBEBuffer);
                 cGameComm_setState_70D8(((char*)this), 5);
             }
             break;
-        case 5:
+        case kGameComm_SendBE:
             cBENetworkInterface_getSyncData_70D8(iface, 1, mBEBuffer);
             cGameComm_asyncWrite_70D8(((char*)this), mBEBuffer, mBEBufferSize);
             cGameComm_setState_70D8(((char*)this), 6);
             break;
-        case 6:
+        case kGameComm_SendBEWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 11);
             }
             break;
-        case 11:
+        case kGameComm_RecvLatency:
             cGameComm_asyncRead_70D8(((char*)this), &mNetLatency[0], 4);
             cGameComm_setState_70D8(((char*)this), 12);
             break;
-        case 12:
+        case kGameComm_RecvLatencyWait:
             if (cGameComm_asyncReadComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 9);
             }
             break;
-        case 9:
+        case kGameComm_SendLatency:
             mNetLatency[1] = cCommSystem_getLatency_70D8(cCommSystem_mCommSystem, mChannel);
             cGameComm_asyncWrite_70D8(((char*)this), &mNetLatency[1], 4);
             cGameComm_setState_70D8(((char*)this), 10);
             break;
-        case 10:
+        case kGameComm_SendLatencyWait:
             if (cGameComm_asyncWriteComplete_70D8(((char*)this)) != 0) {
                 cGameComm_setState_70D8(((char*)this), 13);
             }
             break;
-        case 13:
+        case kGameComm_InitGameActive:
             cGameComm_setState_70D8(((char*)this), 14);
             break;
-        case 14:
+        case kGameComm_GameActive:
             cGameComm_checkActive_70D8(((char*)this));
             break;
-        case 15:
+        case kGameComm_GameOver:
             break;
         }
     }
@@ -1881,7 +1892,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
  */
 void cGameComm::localDisconnected(int force)
 {
-    if (((force != 0) || ((mError == 0) && (mState < 0xF))) && (mLocalEndTime == 0)) {
+    if (((force != 0) || ((mError == 0) && (mState < kGameComm_GameOver))) && (mLocalEndTime == 0)) {
         mLocalEndTime = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
     mConnected = 0;
@@ -1908,7 +1919,7 @@ void cGameComm::setCommError()
         int *significant = (int *)(&mCommErrorWasSignificant);
         int isSignificant = 0;
         if (mLocalFinishedRace == 0 || mRemoteFinishedRace == 0) {
-            int lateState = mState >= 0xF;
+            int lateState = mState >= kGameComm_GameOver;
             if (!lateState) isSignificant = 1;
         }
         *significant = isSignificant;
@@ -2389,7 +2400,7 @@ void cGameComm::updateCmdQueue()
             mPauseMenu[1] = 0;
             mConnected = 0;
             mRemoteDisconnected = 1;
-            if (mError == 0 && mState < 15) {
+            if (mError == 0 && mState < kGameComm_GameOver) {
                 mRemoteEndGame = 1;
             }
             break;
@@ -2882,7 +2893,7 @@ void cGameComm::setUnPauseTimer()
     mUnPauseTimer = 0;
     game = ((SSXApp)->Game);
     if (game->mCurrentStateID != 2 && mError == 0 && mAlone == 0 && mConnected != 0
-        && mState < 0xF
+        && mState < kGameComm_GameOver
         && ((gameAI = game->AI, gameAI->CurrentAIState != 4) || gameAI->CountdownTicksLeft < 151)
         && gameAI->EndOfRaceTimer <= 0 && mPauseMenu[0] == 0 && mPauseMenu[1] == 0) {
         mUnPauseTimer = 180;
@@ -2919,7 +2930,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
  */
 void cGameComm::gameStartGate()
 {
-    if (mState < 0xF) {
+    if (mState < kGameComm_GameOver) {
         mLinkTimeout = 0;
         mGameStartGate = 1;
     }
@@ -2946,7 +2957,7 @@ extern "C" void func_00262768_8988(BuddyMan *, int, int, const char *, const cha
  */
 void cGameComm::gameStartRace()
 {
-    if (mState < 0xF) {
+    if (mState < kGameComm_GameOver) {
         if (BuddyMan_mBuddyMan == 0) {
             func_00260F80_8988();
         }
@@ -2985,7 +2996,7 @@ void cGameComm::gameEnded()
 {
     mRaceInProgress = 0;
     mSyncInput = 0;
-    if (mState < 0xF) {
+    if (mState < kGameComm_GameOver) {
         cGameComm_setState_8A48(this, 0xF);
     }
     if (mLocalEndTime == 0) {

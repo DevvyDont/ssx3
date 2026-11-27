@@ -4,6 +4,10 @@
 /* EA's speech driver (names ours, from use: the library's own names are not known). Its banks and tables are
    little-endian blobs that the code reads byte by byte, except for the halfword fields the headers below name. */
 
+/* The marker D_004A4820 holds while the driver is initialised (name ours): [U] func_003D6840 stores it last; the
+   shutdown, the hook installers and the per-frame update test it. 0x01789A34 is 24681012 in decimal. */
+#define SPEECH_INITIALISED_MARKER 24681012
+
 /* A speech key (func_003D8008 packs one): a bank entry's id and the ids of the bank it belongs to. */
 typedef struct SPCHKEY {
     unsigned short entryId;         /* 0x0 the entry's id (its first halfword) */
@@ -358,7 +362,7 @@ void func_003D8278(void);
  * block D_0044FF90, then func_003D6D30 and func_003D8278 (clears the bank slots).
  */
 void func_003D67F8(void) {
-    if (D_004A4820 == 0x01789A34) {
+    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
         D_004A4820 = 0;
         D_0044FF90_67F8.a = 0;
         D_0044FF90_67F8.b = 0;
@@ -431,7 +435,7 @@ int func_003D6840(int playCallback, int seed, int workBuf) {
     }
     func_003D6D40();
     func_003D71D8();
-    D_004A4820 = 0x01789A34;
+    D_004A4820 = SPEECH_INITIALISED_MARKER;
     return 1;
 }
 #endif
@@ -451,7 +455,7 @@ extern int D_004A4820;
  * @param y  the tag event hook (+0x8)
  */
 void func_003D6940(int x, int y) {
-    if (D_004A4820 == 0x01789A34) {
+    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
         D_0044FF90_6940.a = x;
         D_0044FF90_6940.b = y;
     }
@@ -471,7 +475,7 @@ extern int D_004A4820;
  * @param hookFunc  the hook
  */
 void func_003D6968(int hookFunc) {
-    if (D_004A4820 == 0x01789A34) {
+    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
         D_0044FFA0[0] = hookFunc;
     }
 }
@@ -490,7 +494,7 @@ extern int D_004A4820;
  * @param hookFunc  the hook
  */
 void func_003D6988(int hookFunc) {
-    if (D_004A4820 == 0x01789A34) {
+    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
         D_0044FF9C[0] = hookFunc;
     }
 }
@@ -719,7 +723,7 @@ extern int *D_004A4824_6CC0 __asm__("D_004A4824");
  */
 int func_003D6CC0(int slot) {
     int table = 0;
-    if (D_004A4820 == 0x01789A34 && D_004A4824_6CC0 != 0) {
+    if (D_004A4820 == SPEECH_INITIALISED_MARKER && D_004A4824_6CC0 != 0) {
         table = D_004A4824_6CC0[slot];
     }
     return table;
@@ -4386,16 +4390,16 @@ int LOCALE_getstate(unsigned char *table, int sel) {
     LOCALE_LANGUAGE *language;
 
     switch (sel) {
-    case 0:
+    case LOCALE_LANGUAGEID:
         return get16_B9D8(&header->languageid);
-    case 1:
+    case LOCALE_LANGUAGECOUNT:
         return get16_B9D8(&header->languagecount);
-    case 2:
+    case LOCALE_STRINGCOUNT:
         // ORIGINAL-PTR: a locale file blob: the per-language offset table follows the header chunk and holds byte
         // offsets from the file start.
         language = (LOCALE_LANGUAGE *)(table + get32_B9D8((unsigned int *)(header + 1) + header->languageid));
         return get32_B9D8(&language->stringcount);
-    case 3:
+    case LOCALE_HASINDEX:
         return get32_B9D8(&header->flags) & 1;
     }
     return 0;
@@ -4406,8 +4410,8 @@ int LOCALE_getstate(unsigned char *table, int sel) {
 INCLUDE_ASM("ealib/seg_2D7498", LOCALE_setstate);
 #ifdef SKIP_ASM
 /**
- * Sets a value of a locale file's header: only state 0, the current languageid, is writable (stored, then rewritten
- * little-endian byte by byte).
+ * Sets a value of a locale file's header: only LOCALE_LANGUAGEID (0), the current languageid, is writable (stored, then
+ * rewritten little-endian byte by byte).
  *
  * @param table  the locale file
  * @param which  the state
@@ -4415,7 +4419,7 @@ INCLUDE_ASM("ealib/seg_2D7498", LOCALE_setstate);
  */
 void LOCALE_setstate(void *table, int which, unsigned int value) {
     LOCALE_HEADER *header = table;
-    if (which == 0) {
+    if (which == LOCALE_LANGUAGEID) {
         unsigned char *field = (unsigned char *)&header->languageid;
         header->languageid = value;
         field[0] = value;

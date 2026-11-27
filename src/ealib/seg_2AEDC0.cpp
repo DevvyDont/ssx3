@@ -538,23 +538,23 @@ extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER*);
  * Computes the goal frame as (func_003AE9A0's synced time + the offset at +0x40) * 0.001 * the decoder's frame rate
  * (RCMP_DECODER_GetFrameRate), stores it at +0x48, and compares it with the current frame number (+0x44) plus 1.
  *
- * @return 1 when the goal frame has reached the next frame, else 0
+ * @return true when the goal frame has reached the next frame
  */
-extern "C" int func_003AE780(RCMP_AV_PLAYER* self)
+extern "C" bool func_003AE780(RCMP_AV_PLAYER* self)
 {
     unsigned int elapsed = func_003AE9A0(self);
     float rate = self->mpDecoder->GetFrameRate();
     self->mGoalFrame = (float)(elapsed + self->mTimeOffsetMs) * 0.001f * rate;
     if (self->mGoalFrame < (float)self->mCurrentFrameNumber + 1.0f)
-        return 0;
-    return 1;
+        return false;
+    return true;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE860);
 #ifdef SKIP_ASM
-extern "C" int func_003AEFA8(RCMP_AV_AUDIO* audio);
+extern "C" bool func_003AEFA8(RCMP_AV_AUDIO* audio);
 
 /**
  * Tells whether the movie player's audio has finished.
@@ -737,7 +737,7 @@ extern char D_00495210[];
 
 extern "C" unsigned char* STREAM_get(int handle);
 extern "C" void SYNCTASK_run(int a);
-extern "C" int func_003B11F0(int v);
+extern "C" bool func_003B11F0(int v);
 void* RCMP_CHUNK_CHUNK(void* self);
 extern "C" void* func_003B11A0();
 // PORT: RCMP_DECODER_ChooseCodec returns its vcall's int result; the unit defines it void.
@@ -1055,9 +1055,9 @@ extern "C" int SNDSTRM_requeststatus(int id, SNDREQUESTSTATUS* out);
  * Reads the stream's status (SNDSTRM_status on +0xC) and its current request's status (SNDSTRM_requeststatus), between
  * SNDSYS_entercritical and SNDSYS_leavecritical. Called by func_003AE860.
  *
- * @return 1 when the request has no time left (third status word 0), 0 otherwise or when a query fails
+ * @return true when the request has no time left (third status word 0), false otherwise or when a query fails
  */
-extern "C" int func_003AEFA8(RCMP_AV_AUDIO* self)
+extern "C" bool func_003AEFA8(RCMP_AV_AUDIO* self)
 {
     SNDREQUESTSTATUS b;
     SNDSTREAMSTATUS a;
@@ -1067,7 +1067,7 @@ extern "C" int func_003AEFA8(RCMP_AV_AUDIO* self)
         return b.timetoend == 0;
     }
     SNDSYS_leavecritical();
-    return 0;
+    return false;
 }
 #endif
 
@@ -1338,13 +1338,13 @@ extern "C" int MyStrCmpi(const char*, const char*) __asm__("MyStrCmpi");
 extern "C" unsigned int FindJust(char* text, unsigned int len)
 {
     unsigned int i;
-    char ch = 9;
+    char ch = '\t';
     unsigned int justify;
     unsigned int j;
 
     for (i = 0; i < len; i++) {
         char curChar = text[i];
-        if (curChar == 9 || curChar == 13) {
+        if (curChar == '\t' || curChar == '\r') {
             text[i] = 0;
             ch = curChar;
             break;
@@ -1381,9 +1381,9 @@ extern "C" long strtol(unsigned char *s, unsigned char **end, int base);
  * @param pp  in: the text pointer (not advanced)
  * @param plen  in/out: the remaining length
  * @param out  receives the value
- * @return 1 when a number was read, else 0
+ * @return true when a number was read
  */
-extern "C" int ReadNumber(unsigned char **pp, unsigned int *plen, int *out) {
+extern "C" bool ReadNumber(unsigned char **pp, unsigned int *plen, int *out) {
     unsigned int i;
     int ch = 9;
     unsigned char *end;
@@ -1403,10 +1403,10 @@ extern "C" int ReadNumber(unsigned char **pp, unsigned int *plen, int *out) {
         (*pp)[i] = (unsigned char)ch;
     }
     if (end == *pp) {
-        return 0;
+        return false;
     }
     *out = (int)value;
-    return 1;
+    return true;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2382,7 +2382,7 @@ extern char D_004953E8[];
 extern char str_RCMP_mpegbuff[];
 extern char str_RCMP_chunkbuff[];
 extern "C" void Initialize_Buffer(void* data);
-extern "C" int Get_Hdr(void);
+extern "C" bool Get_Hdr(void);
 extern "C" PS2_SONY_FRAME* func_003B07F8(PS2_SONY_FRAME* self, unsigned int w, int h);
 extern "C" void sceMpegInit(void);
 extern "C" void sceMpegCreate(void* a, void* b, int size);
@@ -2671,17 +2671,17 @@ extern int D_00495448[];
  * Compares with the two tags in D_00495448. Called by func_003AEAD0 on each stream block's big-endian tag.
  *
  * @param chunkTag  the four-character tag as a big-endian word
- * @return 1 for an MPEG chunk, else 0
+ * @return true for an MPEG chunk
  */
-extern "C" int func_003B11F0(int chunkTag)
+extern "C" bool func_003B11F0(int chunkTag)
 {
     unsigned int i;
     for (i = 0; i < 2; i++) {
         if (D_00495448[i] == chunkTag) {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -2867,24 +2867,24 @@ extern "C" void picture_header(void);
  * (sequence_header), 0x1B8 a group of pictures (group_of_pictures_header), 0x100 a picture header (picture_header, then
  * returns 1), 0x1B7 (sequence end) returns 0; other codes are skipped. Called by the Sony codec's Init.
  *
- * @return 1 after a picture header, 0 at the sequence end
+ * @return true after a picture header, false at the sequence end
  */
-extern "C" int Get_Hdr(void)
+extern "C" bool Get_Hdr(void)
 {
     for (;;) {
         next_start_code_noarg();
         switch ((int)Get_Bits32()) {
-        case 435:
+        case SEQUENCE_HEADER_CODE:
             sequence_header();
             break;
-        case 440:
+        case GROUP_START_CODE:
             group_of_pictures_header();
             break;
-        case 439:
-            return 0;
-        case 0x100:
+        case SEQUENCE_END_CODE:
+            return false;
+        case PICTURE_START_CODE:
             picture_header();
-            return 1;
+            return true;
         }
     }
 }
@@ -2907,7 +2907,7 @@ void next_start_code_impl(void* self) __asm__("next_start_code");
 void next_start_code_impl(void* self)
 {
     Flush_Buffer(ld->Incnt & 7);
-    while (Show_Bits(0x18) != 1) {
+    while (Show_Bits(0x18) != START_CODE_PREFIX) {
         Flush_Buffer(8);
     }
 }
@@ -3050,11 +3050,11 @@ extern "C" void picture_header(void)
     D_00509554[0] = Get_Bits(10);
     D_00509558[0] = Get_Bits(3);
     D_0050955C[0] = Get_Bits(0x10);
-    if (D_00509558[0] == 2 || D_00509558[0] == 3) {
+    if (D_00509558[0] == P_TYPE || D_00509558[0] == B_TYPE) {
         D_00509560[0] = Get_Bits(1);
         D_00509564[0] = Get_Bits(3);
     }
-    if (D_00509558[0] == 3) {
+    if (D_00509558[0] == B_TYPE) {
         D_00509568[0] = Get_Bits(1);
         D_0050956C[0] = Get_Bits(3);
     }
@@ -3096,7 +3096,7 @@ extern "C" int slice_header(void)
     } else {
         verticalExtension = 0;
     }
-    if (ld->scalable_mode == 1) {
+    if (ld->scalable_mode == SC_DP) {
         ld->priority_breakpoint = Get_Bits(7);
     }
     quantizerScaleCode = Get_Bits(5);
@@ -3151,19 +3151,19 @@ extern "C" void extension_and_user_data(void)
 {
     unsigned int tok;
     next_start_code_v();
-    while ((tok = Show_Bits(0x20)) == 437 || tok == 434) {
-        if (tok == 437) {
+    while ((tok = Show_Bits(0x20)) == EXTENSION_START_CODE || tok == USER_DATA_START_CODE) {
+        if (tok == EXTENSION_START_CODE) {
             Flush_Buffer32();
             switch (Get_Bits_u(4)) {
-            case 1: sequence_extension(); break;
-            case 2: sequence_display_extension(); break;
-            case 3: quant_matrix_extension(); break;
-            case 5: sequence_scalable_extension(); break;
-            case 7: picture_display_extension(); break;
-            case 8: picture_coding_extension(); break;
-            case 9: picture_spatial_scalable_extension(); break;
-            case 10: picture_temporal_scalable_extension(); break;
-            case 4: copyright_extension(); break;
+            case SEQUENCE_EXTENSION_ID: sequence_extension(); break;
+            case SEQUENCE_DISPLAY_EXTENSION_ID: sequence_display_extension(); break;
+            case QUANT_MATRIX_EXTENSION_ID: quant_matrix_extension(); break;
+            case SEQUENCE_SCALABLE_EXTENSION_ID: sequence_scalable_extension(); break;
+            case PICTURE_DISPLAY_EXTENSION_ID: picture_display_extension(); break;
+            case PICTURE_CODING_EXTENSION_ID: picture_coding_extension(); break;
+            case PICTURE_SPATIAL_SCALABLE_EXTENSION_ID: picture_spatial_scalable_extension(); break;
+            case PICTURE_TEMPORAL_SCALABLE_EXTENSION_ID: picture_temporal_scalable_extension(); break;
+            case COPYRIGHT_EXTENSION_ID: copyright_extension(); break;
             case 6: break;
             }
             next_start_code_v();
@@ -3394,7 +3394,7 @@ extern "C" void sequence_scalable_extension(void)
 
     layer_id = Get_Bits_i(4);
 
-    if (ld->scalable_mode == 2) { /* SC_SPAT */
+    if (ld->scalable_mode == SC_SPAT) {
         lower_layer_prediction_horizontal_size = Get_Bits_i(14);
         marker_bit(str_sequence_scalable_extension);
         lower_layer_prediction_vertical_size = Get_Bits_i(14);
@@ -3404,7 +3404,7 @@ extern "C" void sequence_scalable_extension(void)
         vertical_subsampling_factor_n = Get_Bits_i(5);
     }
 
-    if (ld->scalable_mode == 4) /* SC_TEMP */
+    if (ld->scalable_mode == SC_TEMP)
         Error(str_temporal_scalability_not_implemented);
 }
 #endif
@@ -3440,7 +3440,7 @@ extern "C" void picture_display_extension(void)
         } else {
             n = D_00509588[0] != 0 ? 3 : 2;
         }
-    } else if (D_00509584[0] != 3) {
+    } else if (D_00509584[0] != FRAME_PICTURE) {
         n = 1;
     } else {
         n = D_00509598[0] != 0 ? 3 : 2;
@@ -3688,7 +3688,7 @@ extern "C" void Update_Temporal_Reference_Tacking_Data(void)
         return;
     }
     int last;
-    if (D_00509558[0] != 3 && D_00509554[0] != (last = D_0044C3CC[0])) {
+    if (D_00509558[0] != B_TYPE && D_00509554[0] != (last = D_0044C3CC[0])) {
         if (D_0044C3C8[0] != 0) {
             D_0044C3C8[0] = 0;
             D_0044C378[0] += 0x400;
@@ -4194,10 +4194,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", hasAlpha);
  * @param buf   the compressed data
  * @param size  number of pixels (blocks are counted as size / 16)
  * @param type  DXT type (On Tour: dxttype)
- * @return 1 at the first block that fails the test, 0 when all pass
+ * @return true at the first block that fails the test, false when all pass
  */
 // PORT: 64-bit `long` compares (ld); `long` is 8 bytes on this compiler.
-extern "C" int hasAlpha(void* buf, int size, int type)
+extern "C" bool hasAlpha(void* buf, int size, int type)
 {
     if (type == 3) {
         unsigned long* pixel32 = (unsigned long*)buf;
@@ -4206,10 +4206,10 @@ extern "C" int hasAlpha(void* buf, int size, int type)
         for (i = 0; i < n; i++) {
             unsigned long first = *pixel32++;
             if (first != 0xFFFFFFFF) {
-                return 1;
+                return true;
             }
             if (*pixel32 != first) {
-                return 1;
+                return true;
             }
             pixel32 += 3;
         }
@@ -4219,19 +4219,19 @@ extern "C" int hasAlpha(void* buf, int size, int type)
         int i;
         for (i = 0; i < n; i++) {
             if (*pixel16 != 0xFFFF) {
-                return 1;
+                return true;
             }
             pixel16 += 16;
         }
     }
-    return 0;
+    return false;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2AEDC0", undxtpack);
 #ifdef SKIP_ASM
-extern "C" int hasAlpha(void* buf, int size, int type);
+extern "C" bool hasAlpha(void* buf, int size, int type);
 extern "C" void decodeRGB(char* src, int pitch, char* dst);
 extern "C" void decodeAlpha(char* src, int pitch, char* dst, int fmt);
 

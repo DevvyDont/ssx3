@@ -38,6 +38,18 @@ struct tCommMsgElem {
     char mData[240];             // 0x0C [O]
 };
 
+// mNetConnState's values (names ours, from the roles on mNetConnState below: [R] the constructor's 1; [U]
+// cCommSystem_update's switch, netConnConnect's 2, netConnDisconnect's 1, netConnFailed's 6). Nothing stores 0.
+enum eNetConnState {
+    kNetConn_None = 0,
+    kNetConn_Idle = 1,
+    kNetConn_ConnectRequested = 2,
+    kNetConn_Starting = 3,
+    kNetConn_WaitingForAddress = 4,
+    kNetConn_Connected = 5,
+    kNetConn_Failed = 6
+};
+
 struct cCommSystem {
     cCommChannel* mChannels[1];  // 0x00 [O] (On Tour [4]); [R] cleared; [U] openDSockChannel (0x255BF8) stores the new
                                  //      cDSockChannel; closeChannel (cCommSystem_closeChannel), isChannelOpen (cCommSystem_isChannelOpen) and the
@@ -62,7 +74,7 @@ struct cCommSystem {
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cCommSystem_update");
     void closeChannel(int channelIndex) __asm__("cCommSystem_closeChannel");
-    int isChannelOpen(int channelIndex) __asm__("cCommSystem_isChannelOpen");
+    bool isChannelOpen(int channelIndex) __asm__("cCommSystem_isChannelOpen");
     int isChannelConnected(int channelIndex) __asm__("cCommSystem_isChannelConnected");
     float getLatency(int channelIndex) __asm__("cCommSystem_getLatency");
     int readPacket(int channelIndex, void *data, int maxSize) __asm__("cCommSystem_readPacket");

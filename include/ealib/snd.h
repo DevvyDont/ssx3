@@ -711,6 +711,36 @@ enum eSndSeqStatus { kSNDSEQ_Stopped = 2, kSNDSEQ_Playing = 3, kSNDSEQ_Paused = 
 // for 8; cAsyncSys_ASYNCSYS_Update does the same.
 enum eSndBankAddResult { kSNDBANKADD_Uploaded = 7, kSNDBANKADD_Resident = 8 };
 
+// EA::Snd's result codes, output modes and devices: [O] On Tour's DWARF enums EA::Snd::Result, OutputMode and Device
+// (the enumerators' names and values; the tags are ours, since EA's live in namespace EA::Snd) and the System
+// functions that use them (Result CapOutputMode(OutputMode mode, bool* psupported), Result CapVoices(Device device,
+// int* pvoices), Result GetOutputModeName(OutputMode mode, const char** pmodename), ...). [R] retail's
+// System_GetOutputModeName names modes 0..8 in On Tour's order ("Mono" .. "Dolby ProLogic II"); [U] System_CapVoices
+// reads the main-CPU, IOP-CPU and SPU voice maxima for devices 0, 1 and 2.
+enum eSndResult {
+    RESULT_OK = 0, RESULT_ERR_FILEERROR = -1, RESULT_ERR_MEMERROR = -2, RESULT_ERR_INVPLAYERTYPE = -3,
+    RESULT_ERR_NOTINIT = -4, RESULT_ERR_INVOPT = -5, RESULT_ERR_GENERAL = -6, RESULT_ERR_ALREADYINUSE = -7,
+    RESULT_ERR_UNSUPPORTEDOPT = -8, RESULT_ERR_DRIVER = -9, RESULT_ERR_INVPARAM = -10, RESULT_ERR_INVDATAFORMAT = -11
+};
+enum eSndOutputMode {
+    OUTPUTMODE_MONO = 0, OUTPUTMODE_STEREO = 1, OUTPUTMODE_4POINT0 = 2, OUTPUTMODE_5POINT1 = 3,
+    OUTPUTMODE_DTS4POINT0 = 4, OUTPUTMODE_DTS5POINT1 = 5, OUTPUTMODE_DD5POINT1 = 6, OUTPUTMODE_PROLOGIC = 7,
+    OUTPUTMODE_PROLOGIC2 = 8, OUTPUTMODE_MAX = 9
+};
+enum eSndDevice { DEVICE_MAIN = 0, DEVICE_IOP = 1, DEVICE_HARDWARE = 2, DEVICE_HARDWARE3D = 3, DEVICE_MAX = 4 };
+
+// SNDSYSSET::outputspdifmode's output paths (bits; names ours). [U] System_Init sets 2 for the DTS output modes and 1
+// for the others; SNDPLATFORM_outputset and the voice code test the two bits, and the SPU voice paths check for 2.
+enum eSndSpdifMode { kSNDSPDIF_Pcm = 1, kSNDSPDIF_Dts = 2 };
+
+// The tags of an EA stream file's chunks, their first four bytes read as a little-endian word (names ours). [U]
+// SNDSTRMI_parsechunk sends "SCDl" chunks to SNDSTRMI_parsedata and "SCHl" chunks to SNDSTRMI_parseheader.
+enum eSndStreamChunk { kSNDCHUNK_SCDl = 0x6C444353, kSNDCHUNK_SCHl = 0x6C484353 };
+
+// The headers SNDMIDI_play skips before a sequence (names ours): [U] an 8-byte header starting "MD" (its first two
+// bytes read as a little-endian halfword) or a 4-byte "MIDx" tag (a little-endian word).
+enum eSndMidiTag { kSNDMIDI_TagMD = 0x444D, kSNDMIDI_TagMIDx = 0x7844494D };
+
 // BANKLIST, retail version (0x10 [R]: SNDSYSI_init allocates maxbanks * 16 bytes for sndgs.banklist; On Tour 0x8): one
 // slot of the loaded-bank table, indexed by the bank handle. [O] SNDGLOBALSTATE::banklist is BANKLIST* and BANKLIST is
 // {BANKVER5* phdr; signed char locked; char pad[3];}; retail keeps two more words between them ([U] SNDbankadd, view

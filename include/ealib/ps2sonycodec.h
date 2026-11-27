@@ -111,6 +111,44 @@ struct PS2_SONY_CODEC_INTERNAL {
     void* GetFrame(unsigned int limit) __asm__("PS2_SONY_CODEC_INTERNAL_GetFrame");
 };
 
+// The MPEG-2 video constants the unit's mpeg2decode header parser tests: start codes, extension ids, scalable modes,
+// picture coding types and picture structures. Names as in the MSSG reference decoder's mpeg2dec.h (not in refs/);
+// values per ISO/IEC 13818-2 (start codes 00 00 01 xx, extension_start_code_identifier, picture_coding_type,
+// picture_structure; scalable_mode is the spec's value + 1, "to make SC_DP != SC_NONE"). [U] Get_Hdr dispatches on the
+// start codes, extension_and_user_data on the extension ids, picture_header reads the vectors of P and B pictures.
+#define START_CODE_PREFIX                      0x000001 /* name ours: the 24 bits before a start code's last byte */
+#define PICTURE_START_CODE                     0x100
+#define USER_DATA_START_CODE                   0x1B2
+#define SEQUENCE_HEADER_CODE                   0x1B3
+#define EXTENSION_START_CODE                   0x1B5
+#define SEQUENCE_END_CODE                      0x1B7
+#define GROUP_START_CODE                       0x1B8
+
+#define SEQUENCE_EXTENSION_ID                  1
+#define SEQUENCE_DISPLAY_EXTENSION_ID          2
+#define QUANT_MATRIX_EXTENSION_ID              3
+#define COPYRIGHT_EXTENSION_ID                 4
+#define SEQUENCE_SCALABLE_EXTENSION_ID         5
+#define PICTURE_DISPLAY_EXTENSION_ID           7
+#define PICTURE_CODING_EXTENSION_ID            8
+#define PICTURE_SPATIAL_SCALABLE_EXTENSION_ID  9
+#define PICTURE_TEMPORAL_SCALABLE_EXTENSION_ID 10
+
+#define SC_NONE 0
+#define SC_DP   1
+#define SC_SPAT 2
+#define SC_SNR  3
+#define SC_TEMP 4
+
+#define I_TYPE 1
+#define P_TYPE 2
+#define B_TYPE 3
+#define D_TYPE 4
+
+#define TOP_FIELD     1
+#define BOTTOM_FIELD  2
+#define FRAME_PICTURE 3
+
 // layer_data: mpeg2decode's per-layer state (the MSSG reference decoder's struct layer_data, EA's memory-buffer
 // variant: no file, read buffer or end pointer before the bit reader). The unit's copy of the mpeg2decode header parser
 // reads through the global ld (D_0050A088), which PS2_SONY_CODEC_INTERNAL_Init points at the base layer D_00509648.

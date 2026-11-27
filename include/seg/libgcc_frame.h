@@ -62,6 +62,10 @@ typedef struct old_exception_table
   void *exception_handler;          /* 0x8 [L]; [U] old_find_exception_handler returns it */
 } old_exception_table;
 
+/* old_find_exception_handler's index before a region has matched ([L] libgcc2.c: `int best = -1;`, then
+   `best == -1` / `best != -1`). Name ours. */
+#define NO_EH_REGION (-1)
+
 typedef struct exception_table
 {
   void *start_region;               /* 0x0 [L] */
