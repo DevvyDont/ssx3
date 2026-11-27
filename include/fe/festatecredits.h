@@ -34,6 +34,13 @@ struct cFEStateCredits : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateCredits1() __asm__("cFEStateCredits_cFEStateCredits1");
+    // onCreateScreen stays a C function (cFEStateCredits_onCreateScreen): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void onCreateScreen() __asm__("cFEStateCredits_onCreateScreen");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateCredits_onGainFocus");
+    virtual void onRender2D() __asm__("cFEStateCredits_onRender2D");
+    virtual void onUpdate() __asm__("cFEStateCredits_onUpdate");
+    virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateCredits_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateCredits, mpWidget, 0x048);

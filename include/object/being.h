@@ -39,11 +39,11 @@ public:
     virtual void applyBoost(t4Vector* v);                    // 4  cRider_applyBoost
     virtual t4Vector* getPosition();                         // 5  cRider_getPosition
     virtual t4Matrix* getTransform();                        // 6  cBeing_getTransform
-    virtual int getAIIndex();                                // 7  cRider_getAIIndex
-    virtual bool isHuman();                                  // 8  cRider_isHuman
-    virtual bool isComputer();                               // 9  cRider_isComputer
+    virtual int getAIIndex() __asm__("cBeing_getAIIndex__FPv");                                // 7  cRider_getAIIndex
+    virtual bool isHuman() __asm__("cBeing_isHuman__FPv");                                  // 8  cRider_isHuman
+    virtual bool isComputer() __asm__("cBeing_isComputer__FPv");                               // 9  cRider_isComputer
     virtual void transport(t4Matrix* mat);                   // 10 cRider_transport
-    virtual void resetToPath();                              // 11 cBeing_resetToPath
+    virtual void resetToPath() __asm__("cBeing_resetToPath__FPv");                              // 11 cBeing_resetToPath
     virtual void initForMission(t4Matrix* mat);              // 12 cRider_initForMission
     virtual void flagEventSpeedBoost(float sec);             // 13 cRider_flagEventSpeedBoost
     virtual void flagEventTrickBoost(float sec);             // 14 cRider_flagEventTrickBoost

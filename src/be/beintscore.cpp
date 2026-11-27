@@ -64,7 +64,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* vself)
 {
     cBEScoreInterface* self = (cBEScoreInterface*)vself;
     VPTR_OF(cBEInterface, self) = cBEScoreInterface_vtbl;
-    cBEScoreInterface_discard((cBEScoreInterface*)self);
+    self->cBEScoreInterface::discard();
     return ((void*)self);
 }
 #endif
@@ -95,11 +95,10 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * bNewHighScore[0..1] become 0 and mNewTrackHighScoreIndex[0..1] -1; the two human profiles' 0xB0-byte
  * LastEventStats slots are zeroed and each slot's rank set to -1.
  *
- * @param scoreIface  the score interface (this)
  */
-extern "C" void cBEScoreInterface_discard(cBEScoreInterface* scoreIface)
+void cBEScoreInterface::discard()
 {
-    cBEScoreInterface* self = scoreIface;
+    cBEScoreInterface* self = this;
     self->bNewHighScore[0] = 0;
     self->bNewHighScore[1] = 0;
     self->mNewTrackHighScoreIndex[0] = -1;

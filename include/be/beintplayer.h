@@ -94,6 +94,10 @@ struct cBENewPlayerInterface : public cBEInterface {
     short getDifficultyDifference(int flag) __asm__("cBENewPlayerInterface_getDifficultyDifference");
     signed char getRiderCharID(int riderIndex) __asm__("cBENewPlayerInterface_getRiderCharID__FPvi");
     signed char getPlayerCharID(int index) __asm__("cBENewPlayerInterface_getPlayerCharID__FPvi");
+    // submit stays a C function (cBENewPlayerInterface_submit): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBENewPlayerInterface_submit");
+    virtual void discard() __asm__("cBENewPlayerInterface_discard");
 };
 
 extern cBENewPlayerInterface* cBENewPlayerInterface_instance;

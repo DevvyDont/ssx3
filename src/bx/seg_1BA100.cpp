@@ -5356,11 +5356,12 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
-    frame->read((char*)&self->m_Type, 4);
-    frame->read((char*)&self->m_wpTravelDistance, 4);
-    frame->read((char*)&self->m_Value, 4);
-    frame->read((char*)&self->m_wpTravelDistance, 4);
+void tWPInGameData_MusicTrigger::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_Type, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
+    frame->read((char*)&m_Value, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5373,12 +5374,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_readFromReplayFrame);
  *
  * Slot 65 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; the order matches the class's writeToReplayFrame (tWPInGameData_Mix_writeToReplayFrame).
  *
- * @param mix  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Mix_readFromReplayFrame(tWPInGameData_Mix* mix, cReplayFramePtr* frame) {
-    frame->read((char*)&mix->m_MixPreset, 4);
-    frame->read((char*)&mix->m_wpTravelDistance, 4);
+void tWPInGameData_Mix::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_MixPreset, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5392,12 +5393,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Ambience_writeToReplayFrame).
  *
- * @param ambience  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Ambience_readFromReplayFrame(tWPInGameData_Ambience* ambience, cReplayFramePtr* frame) {
-    frame->read((char*)&ambience->m_BankID, 4);
-    frame->read((char*)&ambience->m_wpTravelDistance, 4);
+void tWPInGameData_Ambience::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_BankID, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5411,12 +5412,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Speech_writeToReplayFrame).
  *
- * @param speech  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Speech_readFromReplayFrame(tWPInGameData_Speech* speech, cReplayFramePtr* frame) {
-    frame->read((char*)&speech->m_SpeechID, 4);
-    frame->read((char*)&speech->m_wpTravelDistance, 4);
+void tWPInGameData_Speech::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_SpeechID, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5430,12 +5431,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Camera_writeToReplayFrame).
  *
- * @param camera  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Camera_readFromReplayFrame(tWPInGameData_Camera* camera, cReplayFramePtr* frame) {
-    frame->read((char*)&camera->m_DrawDistance, 4);
-    frame->read((char*)&camera->m_wpTravelDistance, 4);
+void tWPInGameData_Camera::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_DrawDistance, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5454,19 +5455,20 @@ static inline void Wr_E518(cReplayFramePtr* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, cReplayFramePtr* frame) {
-    Wr_E518(frame, &self->m_FogDensity, 4);
-    Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, &self->m_FogNear, 4);
-    Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, &self->m_FogFar, 4);
-    Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, &self->m_FogColourR, 4);
-    Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, &self->m_FogColourG, 4);
-    Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, &self->m_FogColourB, 4);
-    Wr_E518(frame, ((char*)self), 4);
+void tWPInGameData_Fog::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    Wr_E518(frame, &m_FogDensity, 4);
+    Wr_E518(frame, ((char*)this), 4);
+    Wr_E518(frame, &m_FogNear, 4);
+    Wr_E518(frame, ((char*)this), 4);
+    Wr_E518(frame, &m_FogFar, 4);
+    Wr_E518(frame, ((char*)this), 4);
+    Wr_E518(frame, &m_FogColourR, 4);
+    Wr_E518(frame, ((char*)this), 4);
+    Wr_E518(frame, &m_FogColourG, 4);
+    Wr_E518(frame, ((char*)this), 4);
+    Wr_E518(frame, &m_FogColourB, 4);
+    Wr_E518(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5485,21 +5487,22 @@ static inline void Wr_E698(cReplayFramePtr* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, cReplayFramePtr* frame) {
-    Wr_E698(frame, &self->m_LightGlowCutoff, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowCutoffScale, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowCopyIntensity, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowSourceIntensity, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowFrameIntensity, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowBlend2, 4);
-    Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, &self->m_LightGlowBlend3, 4);
-    Wr_E698(frame, ((char*)self), 4);
+void tWPInGameData_LightGlow::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    Wr_E698(frame, &m_LightGlowCutoff, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowCutoffScale, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowCopyIntensity, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowSourceIntensity, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowFrameIntensity, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowBlend2, 4);
+    Wr_E698(frame, ((char*)this), 4);
+    Wr_E698(frame, &m_LightGlowBlend3, 4);
+    Wr_E698(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5518,19 +5521,20 @@ static inline void Wr_E850(cReplayFramePtr* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, cReplayFramePtr* frame) {
-    Wr_E850(frame, &self->m_ScreenTintScaleR, 4);
-    Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, &self->m_ScreenTintScaleG, 4);
-    Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, &self->m_ScreenTintScaleB, 4);
-    Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, &self->m_ScreenTintOffsetR, 4);
-    Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, &self->m_ScreenTintOffsetG, 4);
-    Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, &self->m_ScreenTintOffsetB, 4);
-    Wr_E850(frame, ((char*)self), 4);
+void tWPInGameData_ScreenTint::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    Wr_E850(frame, &m_ScreenTintScaleR, 4);
+    Wr_E850(frame, ((char*)this), 4);
+    Wr_E850(frame, &m_ScreenTintScaleG, 4);
+    Wr_E850(frame, ((char*)this), 4);
+    Wr_E850(frame, &m_ScreenTintScaleB, 4);
+    Wr_E850(frame, ((char*)this), 4);
+    Wr_E850(frame, &m_ScreenTintOffsetR, 4);
+    Wr_E850(frame, ((char*)this), 4);
+    Wr_E850(frame, &m_ScreenTintOffsetG, 4);
+    Wr_E850(frame, ((char*)this), 4);
+    Wr_E850(frame, &m_ScreenTintOffsetB, 4);
+    Wr_E850(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5544,12 +5548,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_readFromReplayFrame);
  * Slot 65 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_SkyBox_writeToReplayFrame).
  *
- * @param skyBox  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_SkyBox_readFromReplayFrame(tWPInGameData_SkyBox* skyBox, cReplayFramePtr* frame) {
-    frame->read((char*)&skyBox->m_SkyBoxRotation, 4);
-    frame->read((char*)&skyBox->m_wpTravelDistance, 4);
+void tWPInGameData_SkyBox::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_SkyBoxRotation, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5604,12 +5608,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_readFromReplayFrame);
  * Slot 65 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Surface_writeToReplayFrame).
  *
- * @param surface  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Surface_readFromReplayFrame(tWPInGameData_Surface* surface, cReplayFramePtr* frame) {
-    frame->read((char*)&surface->m_SnowSparkleDensity, 4);
-    frame->read((char*)&surface->m_wpTravelDistance, 4);
+void tWPInGameData_Surface::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_SnowSparkleDensity, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5722,11 +5726,12 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
-    frame->read((char*)&self->m_Level, 4);
-    frame->read((char*)&self->m_wpTravelDistance, 4);
-    frame->read((char*)&self->m_PointRate, 4);
-    frame->read((char*)&self->m_wpTravelDistance, 4);
+void tWPInGameData_Danger::readFromReplayFrame(cReplayFramePtr* frame)
+{
+    frame->read((char*)&m_Level, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
+    frame->read((char*)&m_PointRate, 4);
+    frame->read((char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5741,11 +5746,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_writeToReplayFrame);
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
-    frame->write((const char*)&self->m_Type, 4);
-    frame->write((const char*)&self->m_wpTravelDistance, 4);
-    frame->write((const char*)&self->m_Value, 4);
-    frame->write((const char*)&self->m_wpTravelDistance, 4);
+void tWPInGameData_MusicTrigger::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_Type, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
+    frame->write((const char*)&m_Value, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5758,12 +5764,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; tWPInGameData_Mix_readFromReplayFrame reads them back in the same order.
  *
- * @param mix  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Mix_writeToReplayFrame(tWPInGameData_Mix* mix, cReplayFramePtr* frame) {
-    frame->write((const char*)&mix->m_MixPreset, 4);
-    frame->write((const char*)&mix->m_wpTravelDistance, 4);
+void tWPInGameData_Mix::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_MixPreset, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5776,12 +5782,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; tWPInGameData_Ambience_readFromReplayFrame reads them back in the same order.
  *
- * @param ambience  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Ambience_writeToReplayFrame(tWPInGameData_Ambience* ambience, cReplayFramePtr* frame) {
-    frame->write((const char*)&ambience->m_BankID, 4);
-    frame->write((const char*)&ambience->m_wpTravelDistance, 4);
+void tWPInGameData_Ambience::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_BankID, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5794,12 +5800,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; tWPInGameData_Speech_readFromReplayFrame reads them back in the same order.
  *
- * @param speech  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Speech_writeToReplayFrame(tWPInGameData_Speech* speech, cReplayFramePtr* frame) {
-    frame->write((const char*)&speech->m_SpeechID, 4);
-    frame->write((const char*)&speech->m_wpTravelDistance, 4);
+void tWPInGameData_Speech::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_SpeechID, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5812,12 +5818,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; tWPInGameData_Camera_readFromReplayFrame reads them back in the same order.
  *
- * @param camera  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Camera_writeToReplayFrame(tWPInGameData_Camera* camera, cReplayFramePtr* frame) {
-    frame->write((const char*)&camera->m_DrawDistance, 4);
-    frame->write((const char*)&camera->m_wpTravelDistance, 4);
+void tWPInGameData_Camera::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_DrawDistance, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5929,12 +5935,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; tWPInGameData_SkyBox_readFromReplayFrame reads them back in the same order.
  *
- * @param skyBox  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_SkyBox_writeToReplayFrame(tWPInGameData_SkyBox* skyBox, cReplayFramePtr* frame) {
-    frame->write((const char*)&skyBox->m_SkyBoxRotation, 4);
-    frame->write((const char*)&skyBox->m_wpTravelDistance, 4);
+void tWPInGameData_SkyBox::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_SkyBoxRotation, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -5988,12 +5994,12 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_writeToReplayFrame);
  *
  * Slot 64 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; tWPInGameData_Surface_readFromReplayFrame reads them back in the same order.
  *
- * @param surface  the in-game data
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void tWPInGameData_Surface_writeToReplayFrame(tWPInGameData_Surface* surface, cReplayFramePtr* frame) {
-    frame->write((const char*)&surface->m_SnowSparkleDensity, 4);
-    frame->write((const char*)&surface->m_wpTravelDistance, 4);
+void tWPInGameData_Surface::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_SnowSparkleDensity, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif
 
@@ -6107,10 +6113,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_writeToReplayFrame);
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
-    frame->write((const char*)&self->m_Level, 4);
-    frame->write((const char*)&self->m_wpTravelDistance, 4);
-    frame->write((const char*)&self->m_PointRate, 4);
-    frame->write((const char*)&self->m_wpTravelDistance, 4);
+void tWPInGameData_Danger::writeToReplayFrame(cReplayFramePtr* frame) const
+{
+    frame->write((const char*)&m_Level, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
+    frame->write((const char*)&m_PointRate, 4);
+    frame->write((const char*)&m_wpTravelDistance, 4);
 }
 #endif

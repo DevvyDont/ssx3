@@ -82,6 +82,13 @@ struct cDebounceNode : public cMoveNode {
     // Methods bound to their retail symbols by asm labels.
     void* cDebounceNode1(void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
         __asm__("cDebounceNode_cDebounceNode1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // updateNode stays a C function (cDebounceNode_updateNode): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual bool updateNode() __asm__("cDebounceNode_updateNode");
+    virtual void loseFocus() __asm__("cDebounceNode_loseFocus");
+    virtual void expire(int check) __asm__("cDebounceNode_expire");
 };
 
 CHECK_OFFSET(cDebounceNode, Life, 0x2C);

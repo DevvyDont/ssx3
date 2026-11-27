@@ -140,6 +140,11 @@ struct cFEStateAuthDNASError : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAuthDNASError1() __asm__("cFEStateAuthDNASError_cFEStateAuthDNASError1");
+    // onWidgetCreate stays a C function (cFEStateAuthDNASError_onWidgetCreate): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateAuthDNASError_onWidgetCreate");
+    virtual bool onGainTransition(int on) __asm__("cFEStateAuthDNASError_onGainTransition");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateAuthDNASError_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateAuthDNASError, mpustrBody, 0x6D0);

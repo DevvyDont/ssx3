@@ -1260,7 +1260,7 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self, cBxReplayFrame* stream)
+void cBEMissionInterface::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
@@ -1268,7 +1268,7 @@ extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self
     stream->write(base + off, 276);
     char* base2 = base + 0x114;
     stream->write(base2 + off, 352);
-    stream->write((const char*)&self->bIsActive, 4);
+    stream->write((const char*)&bIsActive, 4);
 }
 #endif
 
@@ -1285,7 +1285,7 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* self, cBxReplayFrame* stream)
+void cBEMissionInterface::readFromReplayFrame(cBxReplayFrame* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
@@ -1293,7 +1293,7 @@ extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* sel
     stream->read(base + off, 276);
     char* base2 = base + 0x114;
     stream->read(base2 + off, 352);
-    stream->read((char*)&self->bIsActive, 4);
+    stream->read((char*)&bIsActive, 4);
 }
 #endif
 

@@ -104,6 +104,10 @@ public:
     virtual bool DidErrorOccur() = 0;                                         // slot 73
     virtual bool FileExistsError();                                           // slot 74
     virtual bool IsFileInfoValid() = 0;                                       // slot 75
+
+    // Methods bound to their retail symbols by asm labels.
+    void AsciiToShiftJIS(short* dst, const char* src) __asm__("cMemCard_AsciiToShiftJIS");
+    void ShiftJISToAscii(char* dst, const short* src) __asm__("cMemCard_ShiftJISToAscii");
 };
 
 CHECK_SIZE(cMemCard, 0x4);

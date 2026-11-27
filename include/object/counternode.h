@@ -67,6 +67,10 @@ struct cCounterNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cCounterNode1(void* bucket, void* inst, tMakeCounterData* counterData) __asm__("cCounterNode_cCounterNode1");
+    // update stays a C function (cCounterNode_update): declared first, it is the vtable's key function, which keeps the
+    // vtable out of the units defining the other overrides
+    virtual void update() __asm__("cCounterNode_update");
+    virtual void signal(int msg, float level) __asm__("cCounterNode_signal");
 };
 
 CHECK_OFFSET(cCounterNode, Count, 0x1C);

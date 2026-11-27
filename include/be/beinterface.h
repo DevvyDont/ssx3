@@ -39,7 +39,7 @@ public:
     int bIsActive;                                               // 0x008 [O] bool; [R] the getThis functions set 0
     // 0x00C: the vptr. Slots [R] cBEInterface_vtbl, names and order [O]:
     virtual void submit();                                       // slot 1 cBEInterface_submit (empty)
-    virtual void discard();                                      // slot 2 cBEInterface_discard (empty)
+    virtual void discard() __asm__("cBEInterface_discard__FPv"); // slot 2 cBEInterface_discard (empty)
     virtual void writeToReplayFrame(cBxReplayFrame* data);       // slot 3 cBEInterface_writeToReplayFrame (empty)
     virtual void readFromReplayFrame(cBxReplayFrame* data);      // slot 4 cBEInterface_readFromReplayFrame (empty)
 };

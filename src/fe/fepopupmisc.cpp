@@ -4335,7 +4335,7 @@ extern void* cUISoundInterface_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUISoundInterface__cUISoundInterface(void* self, int flags)
+extern "C" void cUISoundInterface__cUISoundInterface(cUISoundInterface* self, int flags)
 {
     *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
@@ -4350,8 +4350,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_playSound__FPv);
 /**
  * Does nothing: the base UI sound interface plays no sound (entry 2 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_playSound(void* self)
+void cUISoundInterface_playSound(void* vself)
 {
+    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4361,8 +4362,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundInitialize__FPv);
 /**
  * Does nothing: the base UI sound interface needs no set-up (entry 3 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_soundInitialize(void* self)
+void cUISoundInterface_soundInitialize(void* vself)
 {
+    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4372,8 +4374,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundShutdown__FPv);
 /**
  * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of cUISoundInterface_vtbl).
  */
-void cUISoundInterface_soundShutdown(void* self)
+void cUISoundInterface_soundShutdown(void* vself)
 {
+    cUISoundInterface* self = (cUISoundInterface*)vself;
 }
 #endif
 
@@ -4423,8 +4426,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onUpdate__FPv);
 /**
  * Does nothing: the base UI custom interface has no per-frame work (entry 2 of cUICustomInterface_vtbl).
  */
-void cUICustomInterface_onUpdate(void* self)
+void cUICustomInterface_onUpdate(void* vself)
 {
+    cUICustomInterface* self = (cUICustomInterface*)vself;
 }
 #endif
 
@@ -4436,8 +4440,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onScreenEvent__FPv);
  *
  * @return 0 (not handled)
  */
-int cUICustomInterface_onScreenEvent(void* self)
+int cUICustomInterface_onScreenEvent(void* vself)
 {
+    cUICustomInterface* self = (cUICustomInterface*)vself;
     return 0;
 }
 #endif
@@ -4450,8 +4455,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getNextState__FPv);
  *
  * @return 0 (no state)
  */
-int cUICustomInterface_getNextState(void* self)
+int cUICustomInterface_getNextState(void* vself)
 {
+    cUICustomInterface* self = (cUICustomInterface*)vself;
     return 0;
 }
 #endif
@@ -4464,8 +4470,9 @@ INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getPrevState__FPv);
  *
  * @return 0 (no state)
  */
-int cUICustomInterface_getPrevState(void* self)
+int cUICustomInterface_getPrevState(void* vself)
 {
+    cUICustomInterface* self = (cUICustomInterface*)vself;
     return 0;
 }
 #endif

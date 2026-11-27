@@ -90,6 +90,12 @@ struct cFEStateChatRoom : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateChatRoom1() __asm__("cFEStateChatRoom_cFEStateChatRoom1");
+    // onUpdate stays a C function (cFEStateChatRoom_onUpdate): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void onUpdate() __asm__("cFEStateChatRoom_onUpdate");
+    virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateChatRoom_onWidgetCreate");
+    virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChatRoom_onGainTransition");
+    virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateChatRoom_onInputBegin");
 };
 
 CHECK_OFFSET(cFEStateChatRoom, mpQualityIcon, 0x6D0);

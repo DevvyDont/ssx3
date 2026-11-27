@@ -299,8 +299,9 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_update__FPv);
  *
  * cPS2GraphicsMan_update calls it.
  */
-void cGraphicsMan_update(void* self)
+void cGraphicsMan_update(void* vself)
 {
+    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -404,8 +405,9 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeleteGridMesh__FPvi);
  * @param gridMesh  the grid mesh object (a garbage-can node) to queue
  * @return whatever cGarbageMan_Trash leaves in v0; that callee has no return statement, so the value is meaningless
  */
-void* cGraphicsMan_DeleteGridMesh(void* self, int gridMesh)
+void* cGraphicsMan_DeleteGridMesh(void* vself, int gridMesh)
 {
+    cGraphicsMan* self = (cGraphicsMan*)vself;
     return cGarbageMan_Trash(gridMesh);
 }
 #endif
@@ -422,8 +424,9 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
  * @param vscreenGrabHandle  the handle to reset (On Tour screenGrabHandle)
  * @return -1
  */
-int cGraphicsMan_CreateScreenGrabTexture(void* self, void* vscreenGrabHandle)
+int cGraphicsMan_CreateScreenGrabTexture(void* vself, void* vscreenGrabHandle)
 {
+    cGraphicsMan* self = (cGraphicsMan*)vself;
     tScreenGrabHandle* screenGrabHandle = (tScreenGrabHandle*)vscreenGrabHandle;
     int invalidId = -1;
     *(int*)screenGrabHandle = 0;

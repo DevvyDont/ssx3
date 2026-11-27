@@ -84,6 +84,10 @@ struct cConveyorNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cConveyorNode1(void* bucket, cBxReplayFrame* stream) __asm__("cConveyorNode_cConveyorNode1");
+    // update stays a C function (cConveyorNode_update): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void update() __asm__("cConveyorNode_update");
+    virtual void render() __asm__("cConveyorNode_render");
 };
 
 CHECK_OFFSET(cConveyorNode, Vel, 0x1C);

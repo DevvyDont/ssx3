@@ -45,7 +45,7 @@ public:
     // _vt$16cGameModeHandler. Slots [R] that table (11, names from its retail entries cGameModeHandler_*); types [O]
     // (class cGameModeHandler) where On Tour has the method (purge and the two cleanRiderRanks* are retail's only).
     virtual ~cGameModeHandler();                                          // 1
-    virtual void init();                                                  // 2
+    virtual void init() __asm__("cGameModeHandler_init__FPv");                                                  // 2
     virtual void purge() __asm__("cGameModeHandler_purge");                                                 // 3
     virtual void cleanRiderRanksPoints();                                 // 4
     virtual void cleanRiderRanksTime();                                   // 5

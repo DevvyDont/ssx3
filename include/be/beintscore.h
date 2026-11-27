@@ -111,6 +111,10 @@ struct cBEScoreInterface : public cBEInterface {
     void setBestMedalOnTrack(int rider, int locationID, int eventID, int medal)
         __asm__("cBEScoreInterface_setBestMedalOnTrack");
     signed char getCurrentHighlightLevel(int highlight) __asm__("cBEScoreInterface_getCurrentHighlightLevel__FPvi");
+    // submit stays a C function (cBEScoreInterface_submit): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBEScoreInterface_submit__FPv");
+    virtual void discard() __asm__("cBEScoreInterface_discard");
 };
 
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);

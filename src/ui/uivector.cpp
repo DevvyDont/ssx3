@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
 #include "ui/uidata.h"
 #include "bx/math3d.h"
 #include "ui/uianimation.h"
@@ -1526,11 +1527,11 @@ extern void* cUISoundInterface_vtbl[];
  *
  * @param flags  bit 0 set to free the memory
  */
-extern "C" void cUISoundInterface__cUISoundInterface1(int* self, int flags)
+extern "C" void cUISoundInterface__cUISoundInterface1(cUISoundInterface* self, int flags)
 {
     *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

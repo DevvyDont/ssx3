@@ -47,6 +47,12 @@ struct cBEAggressionInterface : public cBEInterface {
     int getAggression(int targetRider, int rider) __asm__("cBEAggressionInterface_getAggression");
     void applyAggression(int iRider1, int iRider2, int event) __asm__("cBEAggressionInterface_applyAggression");
     int getState(int targetRider, int rider) __asm__("cBEAggressionInterface_getState");
+    // submit stays a C function (cBEAggressionInterface_submit): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBEAggressionInterface_submit__FPv");
+    virtual void discard() __asm__("cBEAggressionInterface_discard__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBEAggressionInterface_writeToReplayFrame");
+    virtual void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cBEAggressionInterface_readFromReplayFrame");
 };
 
 CHECK_SIZE(cBEAggressionInterface, 0x10);

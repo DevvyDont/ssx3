@@ -422,6 +422,14 @@ struct tWPInGameData_MusicTrigger : public tWPInGameData {
     int m_lastType;                  // 0x0C [O]; [R] ctor default; [U] blend stores the target
     int m_Value;                     // 0x10 [O]; [R] ctor default; [U] getter vtable slot 2 (tWPInGameData_MusicTrigger_Value) returns this + 0x10
     int m_lastValue;                 // 0x14 [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_MusicTrigger_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_MusicTrigger_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_MusicTrigger_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const
+        __asm__("tWPInGameData_MusicTrigger_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_MusicTrigger, m_Type, 0x08);
@@ -436,6 +444,13 @@ struct tWPInGameData_Mix : public tWPInGameData {
     // --- tWPInGameData_Mix (alloc tag "tWPIGD_Mix", 0x10 bytes)
     int m_MixPreset;                 // 0x08 [O]; [R] ctor default; [U] getter vtable slot 3 (tWPInGameData_Mix_MixPreset) returns this + 0x8
     int m_lastMixPreset;             // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Mix_setDefaults): declared first, it is the vtable's key function,
+    // which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Mix_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Mix_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Mix_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Mix, m_MixPreset, 0x08);
@@ -448,6 +463,13 @@ struct tWPInGameData_Ambience : public tWPInGameData {
     // --- tWPInGameData_Ambience (alloc tag "tWPIGD_Ambience", 0x10 bytes)
     int m_BankID;                    // 0x08 [O]; [R] ctor default; [U] getter vtable slot 4 (tWPInGameData_Ambience_BankID) returns this + 0x8
     int m_lastBankID;                // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Ambience_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Ambience_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Ambience_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Ambience_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Ambience, m_BankID, 0x08);
@@ -460,6 +482,13 @@ struct tWPInGameData_Speech : public tWPInGameData {
     // --- tWPInGameData_Speech (alloc tag "tWPIGD_Speech", 0x10 bytes)
     int m_SpeechID;                  // 0x08 [O]; [R] ctor default; [U] getter vtable slot 5 (tWPInGameData_Speech_SpeechID) returns this + 0x8
     int m_lastSpeechID;              // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Speech_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Speech_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Speech_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Speech_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Speech, m_SpeechID, 0x08);
@@ -472,6 +501,13 @@ struct tWPInGameData_Camera : public tWPInGameData {
     // --- tWPInGameData_Camera (alloc tag "tWPIGD_Camera", 0x10 bytes)
     float m_DrawDistance;            // 0x08 [O]; [R] ctor default; [U] getter vtable slot 6 (tWPInGameData_Camera_DrawDistance) returns this + 0x8
     float m_lastDrawDistance;        // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Camera_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Camera_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Camera_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Camera_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Camera, m_DrawDistance, 0x08);
@@ -494,6 +530,12 @@ struct tWPInGameData_Fog : public tWPInGameData {
     float m_lastFogColourG;          // 0x2C [O]; [R] ctor default; [U] blend stores the target
     float m_FogColourB;              // 0x30 [O]; [R] ctor default; [U] getter vtable slot 12 (tWPInGameData_Fog_FogColourB) returns this + 0x30
     float m_lastFogColourB;          // 0x34 [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Fog_setDefaults): declared first, it is the vtable's key function,
+    // which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Fog_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Fog_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Fog, m_FogDensity, 0x08);
@@ -528,6 +570,12 @@ struct tWPInGameData_LightGlow : public tWPInGameData {
     float m_lastLightGlowBlend2;     // 0x34 [O]; [R] ctor default; [U] blend stores the target
     float m_LightGlowBlend3;         // 0x38 [O]; [R] ctor default; [U] getter vtable slot 19 (tWPInGameData_LightGlow_LightGlowBlend3) returns this + 0x38
     float m_lastLightGlowBlend3;     // 0x3C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_LightGlow_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_LightGlow_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_LightGlow_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_LightGlow, m_LightGlowCutoff, 0x08);
@@ -562,6 +610,12 @@ struct tWPInGameData_ScreenTint : public tWPInGameData {
     float m_lastScreenTintOffsetG;   // 0x2C [O]; [R] ctor default; [U] blend stores the target
     float m_ScreenTintOffsetB;       // 0x30 [O]; [R] ctor default; [U] getter vtable slot 25 (tWPInGameData_ScreenTint_ScreenTintOffsetB) returns this + 0x30
     float m_lastScreenTintOffsetB;   // 0x34 [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_ScreenTint_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_ScreenTint_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_ScreenTint_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_ScreenTint, m_ScreenTintScaleR, 0x08);
@@ -584,6 +638,13 @@ struct tWPInGameData_SkyBox : public tWPInGameData {
     // --- tWPInGameData_SkyBox (alloc tag "tWPIGD_SkyBox", 0x10 bytes)
     float m_SkyBoxRotation;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 26 (tWPInGameData_SkyBox_SkyBoxRotation) returns this + 0x8
     float m_lastSkyBoxRotation;      // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_SkyBox_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_SkyBox_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_SkyBox_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_SkyBox_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_SkyBox, m_SkyBoxRotation, 0x08);
@@ -612,6 +673,11 @@ struct tWPInGameData_Sun : public tWPInGameData {
     float m_lastLensIntensity;       // 0x44 [O]; [R] ctor default; [U] blend stores the target
     float m_SunRadius;               // 0x48 [O]; [R] ctor default; [U] getter vtable slot 35 (tWPInGameData_Sun_SunRadius) returns this + 0x48
     float m_lastSunRadius;           // 0x4C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Sun_setDefaults): declared first, it is the vtable's key function,
+    // which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Sun_setDefaults");
 };
 
 CHECK_OFFSET(tWPInGameData_Sun, m_SunPitchOffset, 0x08);
@@ -640,6 +706,13 @@ struct tWPInGameData_Surface : public tWPInGameData {
     // --- tWPInGameData_Surface (alloc tag "tWPIGD_Surface", 0x10 bytes)
     float m_SnowSparkleDensity;      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 36 (tWPInGameData_Surface_SnowSparkleDensity) returns this + 0x8
     float m_lastSnowSparkleDensity;  // 0x0C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Surface_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Surface_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Surface_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Surface_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Surface, m_SnowSparkleDensity, 0x08);
@@ -662,6 +735,11 @@ struct tWPInGameData_Lighting : public tWPInGameData {
     float m_lastAmbientLightIntensityOffset; // 0x4C [O]; [R] ctor default; [U] blend stores the target
     float m_RimLightIntensityOffset; // 0x50 [O]; [R] ctor default; [U] getter vtable slot 42 (tWPInGameData_Lighting_RimLightIntensityOffset) returns this + 0x50
     float m_lastRimLightIntensityOffset; // 0x54 [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Lighting_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Lighting_setDefaults");
 };
 
 CHECK_OFFSET(tWPInGameData_Lighting, m_LightIrradianceName, 0x08);
@@ -720,6 +798,11 @@ struct tWPInGameData_Weather : public tWPInGameData {
     float m_lastSnowFluffColourG;    // 0x94 [O]; [R] ctor default; [U] blend stores the target
     float m_SnowFluffColourB;        // 0x98 [O]; [R] ctor default; [U] getter vtable slot 61 (tWPInGameData_Weather_SnowFluffColourB) returns this + 0x98
     float m_lastSnowFluffColourB;    // 0x9C [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Weather_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Weather_setDefaults");
 };
 
 CHECK_OFFSET(tWPInGameData_Weather, m_SnowIntensity, 0x08);
@@ -770,6 +853,13 @@ struct tWPInGameData_Danger : public tWPInGameData {
     int m_lastLevel;                 // 0x0C [O]; [R] ctor default; [U] blend stores the target
     float m_PointRate;               // 0x10 [O]; [R] ctor default; [U] getter vtable slot 63 (tWPInGameData_Danger_PointRate) returns this + 0x10
     float m_lastPointRate;           // 0x14 [O]; [R] ctor default; [U] blend stores the target
+
+    // Methods bound to their retail symbols by asm labels.
+    // setDefaults stays a C function (tWPInGameData_Danger_setDefaults): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void setDefaults() __asm__("tWPInGameData_Danger_setDefaults");
+    virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_Danger_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* frame) const __asm__("tWPInGameData_Danger_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Danger, m_Level, 0x08);

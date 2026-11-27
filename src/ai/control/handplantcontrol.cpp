@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/being.h"
 #include "be/beinterface.h"
 #include "be/beintnewrace.h"
 #include "intersect/bxnash.h"
@@ -5167,11 +5168,11 @@ extern void* cBeing_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBeing__cBeing(int* self, int flags)
+extern "C" void cBeing__cBeing(cBeing* self, int flags)
 {
     *(void***)self = cBeing_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -5188,8 +5189,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getVelocity__FPv);
  *
  * @return t4vect_Zero
  */
-void* cBeing_getVelocity(void* self)
+void* cBeing_getVelocity(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
     return (void*)t4vect_Zero;
 }
 #endif
@@ -5205,8 +5207,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isIntersecting__FPv);
  *
  * @return 0
  */
-int cBeing_isIntersecting(void* self)
+int cBeing_isIntersecting(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
     return 0;
 }
 #endif
@@ -5217,8 +5220,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_applyBoost__FPv);
 /**
  * Applies no boost: cBeing's applyBoost has an empty body.
  */
-void cBeing_applyBoost(void* self)
+void cBeing_applyBoost(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5232,8 +5236,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getPosition__FPv);
  *
  * @return t4vect_Zero
  */
-void* cBeing_getPosition(void* self)
+void* cBeing_getPosition(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
     return (void*)t4vect_Zero;
 }
 #endif
@@ -5251,8 +5256,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getTransform__FPv);
  *
  * @return t4mat_Identity
  */
-void* cBeing_getTransform(void* self)
+void* cBeing_getTransform(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
     return (void*)t4mat_Identity;
 }
 #endif
@@ -5267,7 +5273,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getAIIndex__FPv);
  *
  * @return 0
  */
-int cBeing_getAIIndex(void* self)
+int cBeing::getAIIndex()
 {
     return 0;
 }
@@ -5281,9 +5287,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isHuman__FPv);
  *
  * @return 0
  */
-int cBeing_isHuman(void* self)
+bool cBeing::isHuman()
 {
-    return 0;
+    return false;
 }
 #endif
 
@@ -5295,9 +5301,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isComputer__FPv);
  *
  * @return 0
  */
-int cBeing_isComputer(void* self)
+bool cBeing::isComputer()
 {
-    return 0;
+    return false;
 }
 #endif
 
@@ -5307,8 +5313,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_transport__FPv);
 /**
  * Does nothing: cBeing's transport has an empty body.
  */
-void cBeing_transport(void* self)
+void cBeing_transport(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5318,7 +5325,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_resetToPath__FPv);
 /**
  * Does nothing: cBeing's resetToPath has an empty body.
  */
-void cBeing_resetToPath(void* self)
+void cBeing::resetToPath()
 {
 }
 #endif
@@ -5329,8 +5336,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_initForMission__FPv);
 /**
  * Does nothing: cBeing's initForMission has an empty body.
  */
-void cBeing_initForMission(void* self)
+void cBeing_initForMission(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5340,8 +5348,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventSpeedBoost__FPv);
 /**
  * Ignores a speed-boost event: cBeing's flagEventSpeedBoost has an empty body.
  */
-void cBeing_flagEventSpeedBoost(void* self)
+void cBeing_flagEventSpeedBoost(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5351,8 +5360,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickBoost__FPv);
 /**
  * Ignores a trick-boost event: cBeing's flagEventTrickBoost has an empty body.
  */
-void cBeing_flagEventTrickBoost(void* self)
+void cBeing_flagEventTrickBoost(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 
@@ -5362,8 +5372,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickMultiplier__FPv)
 /**
  * Ignores a trick-multiplier event: cBeing's flagEventTrickMultiplier has an empty body.
  */
-void cBeing_flagEventTrickMultiplier(void* self)
+void cBeing_flagEventTrickMultiplier(void* vself)
 {
+    cBeing* self = (cBeing*)vself;
 }
 #endif
 

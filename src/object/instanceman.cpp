@@ -1211,16 +1211,16 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
  *
  * @param check  nonzero to give the instance's script the first chance (On Tour expire's runscript)
  */
-extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
+void cMeshAnimNode::expire(int check)
 {
-    if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
+    if (check != 0 && cInstanceNode_runExpireScript(this) != 0) {
         return;
     }
-    if (self->Type == cMeshAnimNode::kMeshAnimExpire_Dead) {
-        cInstanceNode_makeThisDead(self);
+    if (Type == cMeshAnimNode::kMeshAnimExpire_Dead) {
+        cInstanceNode_makeThisDead(this);
     }
-    if (self->Type == cMeshAnimNode::kMeshAnimExpire_Delete && ((void*)self) != 0) {
-        delete self;
+    if (Type == cMeshAnimNode::kMeshAnimExpire_Delete && ((void*)this) != 0) {
+        delete this;
     }
 }
 #endif
@@ -1238,15 +1238,15 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
  * 8-9 and the upper half, copies the upper half down, sets bit 1) and deletes the node. Mode 0 replaces the
  * node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead).
  */
-extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
+void cMeshAnimNode::loseFocus()
 {
-    if (self->Type != 0) {
-        self->Instance->m_iFlags &= 0xFFFF0300;
-        self->Instance->m_iFlags |= self->Instance->m_iFlags >> 16;
-        self->Instance->m_iFlags |= 2;
-        delete self;
+    if (Type != 0) {
+        Instance->m_iFlags &= 0xFFFF0300;
+        Instance->m_iFlags |= Instance->m_iFlags >> 16;
+        Instance->m_iFlags |= 2;
+        delete this;
     } else {
-        cInstanceNode_makeThisDead(self);
+        cInstanceNode_makeThisDead(this);
     }
 }
 #endif
@@ -1351,32 +1351,32 @@ static inline void setOffset_352810(t4Matrix& m, const t4Vector& v)
  * graphics manager's slot 95 with an identity root and flags 0x420. The fade is 1, or Life itself (not Life /
  * FadeTime) when FadeTime (+0x24) is not negative and Life is at most FadeTime.
  */
-extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
+void cMeshAnimNode::render()
 {
-    if (self->Life <= 0.0f) {
+    if (Life <= 0.0f) {
         return;
     }
-    int numMaterials = self->Instance->m_Model->m_MaterialBlock->m_iNumMaterials;
+    int numMaterials = Instance->m_Model->m_MaterialBlock->m_iNumMaterials;
     for (int i = 0; i < numMaterials; i++) {
-        tMaterialRecord* pMaterialRecord = self->Instance->m_MaterialBlock->GetMaterialRecordList()[i];
+        tMaterialRecord* pMaterialRecord = Instance->m_MaterialBlock->GetMaterialRecordList()[i];
         tResourceID resourceId(0xFF, pMaterialRecord->m_sTexture);
         if (!cacheValid_352810(cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
             return;
         }
     }
     t4MatrixCtor animMats[24];
-    tModelRecord* pModel = (tModelRecord*)self->Instance->m_Model;
+    tModelRecord* pModel = (tModelRecord*)Instance->m_Model;
     for (int i = 0; i < pModel->m_iNumMeshes; i++) {
-        QuatToMat_352810(&animMats[i], ((&self->Qrot[0]))[i]);
-        setOffset_352810(animMats[i], ((&self->Pos[0]))[i]);
+        QuatToMat_352810(&animMats[i], ((&Qrot[0]))[i]);
+        setOffset_352810(animMats[i], ((&Pos[0]))[i]);
     }
     float fade = 1.0f;
-    if (self->FadeTime >= 0.0f && self->Life <= self->FadeTime) {
-        fade = self->Life;
+    if (FadeTime >= 0.0f && Life <= FadeTime) {
+        fade = Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     tRenderModelSlot* vt = (tRenderModelSlot*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
-    vt[95].fn(vthis(ps2GraphicsMan, vt[95]), self->Instance, self->Instance->m_MaterialBlock, &t4mat_Identity, animMats,
+    vt[95].fn(vthis(ps2GraphicsMan, vt[95]), Instance, Instance->m_MaterialBlock, &t4mat_Identity, animMats,
               0, 1056, fade);
 }
 #endif

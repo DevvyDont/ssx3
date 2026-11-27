@@ -53,6 +53,10 @@ struct cBEEconInterface : public cBEInterface {
         __asm__("cBEEconInterface_getCostForNextIncrement");
     int getTotalMoneyEarned(int iHuman, int charType) __asm__("cBEEconInterface_getTotalMoneyEarned__FPvii");
     int getAttribCost(int levelIndex) __asm__("cBEEconInterface_getAttribCost__FPvi");
+    // submit stays a C function (cBEEconInterface_submit): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBEEconInterface_submit__FPv");
+    virtual void discard() __asm__("cBEEconInterface_discard__FPv");
 };
 
 extern cBEEconInterface* cBEEconInterface_instance;

@@ -1554,10 +1554,11 @@ INCLUDE_ASM("ui/uiscreen", cUISoundInterface_cUISoundInterface__FPv);
  *
  * @return @p self
  */
-void* cUISoundInterface_cUISoundInterface(void* self)
+void* cUISoundInterface_cUISoundInterface(void* vself)
 {
+    cUISoundInterface* self = (cUISoundInterface*)vself;
     *(int*)self = (int)(void*)cUISoundInterface_vtbl;
-    return self;
+    return ((void*)self);
 }
 #endif
 

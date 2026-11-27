@@ -84,6 +84,12 @@ struct cMeshAnimNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void init() __asm__("cMeshAnimNode_init");
+    // update stays a C function (cMeshAnimNode_update): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void update() __asm__("cMeshAnimNode_update");
+    virtual void expire(int check) __asm__("cMeshAnimNode_expire");
+    virtual void loseFocus() __asm__("cMeshAnimNode_loseFocus");
+    virtual void render() __asm__("cMeshAnimNode_render");
 };
 
 CHECK_OFFSET(cMeshAnimNode, Life, 0x01C);

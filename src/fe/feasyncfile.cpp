@@ -11554,12 +11554,12 @@ extern char str_slider2[];
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cUIThing* obj)
+void cFEStateChatRoom::onWidgetCreate(cUIThing* obj)
 {
     char buf[32];
     int id = obj->mHashName;
     if (id == GetHashValue32(str_TextRoomName)) {
-        self->mpTextRoomName = (cUIText*)obj;
+        mpTextRoomName = (cUIText*)obj;
         obj->setVisible(1);
     } else if (id == GetHashValue32(str_TextChatWindowTitle)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_235MessageHistory));
@@ -11579,10 +11579,10 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cUIThing
         } else {
             cUIMenu_setScrollableMenu(obj, n);
         }
-        self->mpMenu[0] = (cUIMenu*)obj;
+        mpMenu[0] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(str_MenuChat)) {
         obj->setFocus(1);
-        self->mpMenu[1] = (cUIMenu*)obj;
+        mpMenu[1] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(str_Txt_Select)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_BTNSelect));
     } else if (id == GetHashValue32(str_Txt_Options)) {
@@ -11592,18 +11592,18 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cUIThing
     } else if (id == GetHashValue32(str_Txt_Buddies)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_BTNBuddies));
     } else if (id == GetHashValue32(str_slider1)) {
-        self->mpSlider1 = (cUIScrollBar*)obj;
+        mpSlider1 = (cUIScrollBar*)obj;
         obj->mAttr |= 1;
     } else if (id == GetHashValue32(str_TextScrollChat)) {
-        self->mpTextScrollChat = (cUITextScroll*)obj;
+        mpTextScrollChat = (cUITextScroll*)obj;
     } else if (id == GetHashValue32(str_slider2)) {
-        self->mpSlider2 = (cUIScrollBar*)obj;
+        mpSlider2 = (cUIScrollBar*)obj;
         obj->mAttr |= 1;
     }
     for (int i = 0; i < 6; i++) {
         sprintf(buf, str_qualitypct_d, i + 1);
         if (id == GetHashValue32(buf)) {
-            self->mpQualityIcon[i] = obj;
+            mpQualityIcon[i] = obj;
             break;
         }
     }
@@ -11756,20 +11756,20 @@ extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
  * @param bFirstTime  nonzero the first time the state opens (On Tour bFirstTime)
  * @return 0
  */
-extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int bFirstTime)
+bool cFEStateChatRoom::onGainTransition(int bFirstTime)
 {
     if (bFirstTime != 0) {
         int i;
-        cUIScrollBar_setScrollVisibile(self->mpSlider1, 0);
-        cUIScrollBar_setScrollVisibile(self->mpSlider2, 0);
+        cUIScrollBar_setScrollVisibile(mpSlider1, 0);
+        cUIScrollBar_setScrollVisibile(mpSlider2, 0);
         for (i = 0; i < 2; i++) {
-            if (self->mpMenu[i] != 0) {
-                self->mpMenu[i]->setFocus(1);
+            if (mpMenu[i] != 0) {
+                mpMenu[i]->setFocus(1);
             }
         }
-        func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
+        func_001B3978(this, LobbyMan_mLobbyMan->mPersona);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -12022,14 +12022,14 @@ extern char str_empty_d[];
  * @param obj  the input (On Tour cUIInput* pInput)
  * @return true when the keyboard was opened (input consumed), else false
  */
-extern "C" bool cFEStateChatRoom_onInputBegin(cFEStateChatRoom* self, cUIInput* obj)
+bool cFEStateChatRoom::onInputBegin(cUIInput* obj)
 {
     if (obj->isLShift1() != 0) {
-        func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), str_empty_d, 0, 4, 0x3F);
-        self->mpKeyboard->meType = 0;
-        cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
-        cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-        self->mpKeyboard->mbReferEventsToParent = 1;
+        func_001A9150(((cFEStateNet*)this), 0, GetHashValue32(str_kT_POPUP235Chat), str_empty_d, 0, 4, 0x3F);
+        mpKeyboard->meType = 0;
+        cKeyboardPopup_setIncludeQuickKeyRow(mpKeyboard, 1);
+        cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
+        mpKeyboard->mbReferEventsToParent = 1;
         return true;
     }
     return false;
@@ -14683,29 +14683,29 @@ static inline void PlayLabel_001B6C98(void* vvself, char* label)
  * @param on  nonzero the first time the state opens (On Tour bFirstTime)
  * @return 1 (the transition is done)
  */
-extern "C" int cFEStateAuthDNASError_onGainTransition(cFEStateAuthDNASError* self, int on)
+bool cFEStateAuthDNASError::onGainTransition(int on)
 {
     if (on) {
-        if (strlen1(self->mpustrFooter) == 0) {
-            PlayLabel_001B6C98(self, str_short);
-            self->mpFooter->setVisible(0);
+        if (strlen1(mpustrFooter) == 0) {
+            PlayLabel_001B6C98(this, str_short);
+            mpFooter->setVisible(0);
         } else {
-            PlayLabel_001B6C98(self, str_full);
-            cUIText_setUnicodeStringWrap(self->mpFooter, self->mpustrFooter);
+            PlayLabel_001B6C98(this, str_full);
+            cUIText_setUnicodeStringWrap(mpFooter, mpustrFooter);
         }
-        if (strlen1(self->mpustrBody) == 0) {
-            self->mpBody->setVisible(0);
+        if (strlen1(mpustrBody) == 0) {
+            mpBody->setVisible(0);
         } else {
-            cUIText_setUnicodeStringWrap(self->mpBody, self->mpustrBody);
+            cUIText_setUnicodeStringWrap(mpBody, mpustrBody);
         }
-        if (strlen1(self->mpustrTitle) == 0) {
-            self->mpTitle->setVisible(0);
+        if (strlen1(mpustrTitle) == 0) {
+            mpTitle->setVisible(0);
         } else {
-            cUIText_setUnicodeStringWrap(self->mpTitle, self->mpustrTitle);
+            cUIText_setUnicodeStringWrap(mpTitle, mpustrTitle);
         }
-        PlayLabel_001B6C98(self, str_Animation_Start);
+        PlayLabel_001B6C98(this, str_Animation_Start);
     }
-    return 1;
+    return true;
 }
 #endif
 
@@ -14771,18 +14771,18 @@ extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, cUIThing* a1, int m
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateAuthDNASError_onWidgetEvent(cFEStateAuthDNASError* self, cUIThing* pWidget, unsigned int msg)
+void cFEStateAuthDNASError::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
     switch (msg) {
     case cUIState::kONNEXT:
     case cUIState::kONPREV:
-        self->mpParentState->onPopupEvent(self, 0xF);
+        mpParentState->onPopupEvent(this, 0xF);
         break;
     case cUIState::kONOPTION:
     case cUIState::kONMISC:
         break;
     default:
-        cFEStateNet_onWidgetEvent(((cFEStateNet*)self), pWidget, msg);
+        cFEStateNet_onWidgetEvent(((cFEStateNet*)this), pWidget, msg);
         break;
     }
 }

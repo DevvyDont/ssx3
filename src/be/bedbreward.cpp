@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beinterface.h"
 #include "be/beintecon.h"
 #include "be/beintsavefile.h"
 #include "be/beintcharacter.h"
@@ -230,8 +231,9 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_submit__FPv);
 /**
  * Does nothing: the base back-end interface's submit (vtable slot 1 of cBEInterface's vtable cBEInterface_vtbl).
  */
-void cBEInterface_submit(void* self)
+void cBEInterface_submit(void* vself)
 {
+    cBEInterface* self = (cBEInterface*)vself;
 }
 #endif
 
@@ -241,7 +243,7 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_discard__FPv);
 /**
  * Does nothing: the base back-end interface's discard (vtable slot 2 of cBEInterface's vtable cBEInterface_vtbl).
  */
-void cBEInterface_discard(void* self)
+void cBEInterface::discard()
 {
 }
 #endif
@@ -252,8 +254,9 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cBEInterface's writeToReplayFrame has an empty body.
  */
-void cBEInterface_writeToReplayFrame(void* self)
+void cBEInterface_writeToReplayFrame(void* vself)
 {
+    cBEInterface* self = (cBEInterface*)vself;
 }
 #endif
 
@@ -263,8 +266,9 @@ INCLUDE_ASM("be/bedbreward", cBEInterface_readFromReplayFrame__FPv);
 /**
  * Reads nothing from the replay frame: cBEInterface's readFromReplayFrame has an empty body.
  */
-void cBEInterface_readFromReplayFrame(void* self)
+void cBEInterface_readFromReplayFrame(void* vself)
 {
+    cBEInterface* self = (cBEInterface*)vself;
 }
 #endif
 
@@ -588,9 +592,8 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_discard__FPv);
 /**
  * Does nothing: the mission interface's discard (slot 2 of its vtable cBEMissionInterface_vtbl).
  */
-void cBEMissionInterface_discard(void* vself)
+void cBEMissionInterface::discard()
 {
-    cBEMissionInterface* self = (cBEMissionInterface*)vself;
 }
 #endif
 
@@ -1723,9 +1726,8 @@ INCLUDE_ASM("be/bedbreward", cBECharacterInterface_discard__FPv);
 /**
  * Does nothing: the character interface's discard (slot 2 of its vtable cBECharacterInterface_vtbl).
  */
-void cBECharacterInterface_discard(void* vself)
+void cBECharacterInterface::discard()
 {
-    cBECharacterInterface* self = (cBECharacterInterface*)vself;
 }
 #endif
 
@@ -1747,9 +1749,8 @@ INCLUDE_ASM("be/bedbreward", cBESaveInterface_discard__FPv);
 /**
  * Does nothing: the save interface's discard (slot 2 of its vtable cBESaveInterface_vtbl).
  */
-void cBESaveInterface_discard(void* vself)
+void cBESaveInterface::discard()
 {
-    cBESaveInterface* self = (cBESaveInterface*)vself;
 }
 #endif
 
@@ -1901,9 +1902,8 @@ INCLUDE_ASM("be/bedbreward", cBEEconInterface_discard__FPv);
 /**
  * Does nothing: the economy interface's discard (slot 2 of its vtable cBEEconInterface_vtbl).
  */
-void cBEEconInterface_discard(void* vself)
+void cBEEconInterface::discard()
 {
-    cBEEconInterface* self = (cBEEconInterface*)vself;
 }
 #endif
 

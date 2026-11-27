@@ -110,10 +110,10 @@ public:
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPrevState)
+void cFEStateCredits::onGainFocus(cUIState* pPrevState)
 {
-    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll));
-    self->mpTextScroll = (cUITextScroll*)textScroll;
+    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextScroll));
+    mpTextScroll = (cUITextScroll*)textScroll;
     if (textScroll != 0)
     {
         float pos[4];
@@ -121,55 +121,55 @@ extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPr
         int i;
         textScroll->getSize(pos);
         pos[0] = 600.0f;
-        ((cUIObjK185BA0*)self->mpTextScroll)->setSize(pos);
-        ((cUIObjK185BA0*)self->mpTextScroll)->setVisible(0);
+        ((cUIObjK185BA0*)mpTextScroll)->setSize(pos);
+        ((cUIObjK185BA0*)mpTextScroll)->setVisible(0);
         for (i = 0; i < 7; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS006a));
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS006b));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS006a));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS006b));
         for (i = 7; i < 47; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
         for (i = 49; i < 75; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS074a));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS074a));
         for (i = 75; i < 81; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS087));
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS088));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS087));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS088));
         for (i = 90; i < 146; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS147));
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS148));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS147));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(str_kT_CREDITS148));
         sprintf(buf, str_kT_CREDITSpct_03d, 150);
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 151);
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 152);
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 153);
-        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         for (i = 154; i < 168; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(mpTextScroll, GetHashValue32(buf));
         }
     }
-    ((cFEState*)self)->cFEState::onGainFocus(pPrevState);
+    ((cFEState*)this)->cFEState::onGainFocus(pPrevState);
 }
 #endif
 
@@ -210,16 +210,16 @@ static inline void DrawText_185F40(char* vfont, unsigned short* s, float x, floa
  * white at the scroll's scale, other lines in its colour at a scale 0.1 smaller. The position wraps from one
  * end to the other in the scroll direction (0x64). Ends with the base state render cUIState_onRender2D().
  */
-extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
+void cFEStateCredits::onRender2D()
 {
-    cUITextScroll* textScroll = self->mpTextScroll;
+    cUITextScroll* textScroll = mpTextScroll;
     if (((char*)textScroll) != 0)
     {
         t3Vector pos = *(&textScroll->mPosition);
         t3Vector size = *(&textScroll->mScale);
         tARGB box;
         ((cUIThing*)textScroll)->getSize((t3Vector*)&box);
-        cFont* font = (cFont*)cUITextScroll_getFont(self->mpTextScroll);
+        cFont* font = (cFont*)cUITextScroll_getFont(mpTextScroll);
         if (((char*)font) != 0)
         {
             float lineH = (float)font->MaxCharHeight * font->BaseScale[1];
@@ -231,10 +231,10 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
             white.B = 1.0f;
             float scaledHeight = size.y * lineH;
             float bh = box.R;
-            tARGB save = *(&self->mpTextScroll->mColour);
+            tARGB save = *(&mpTextScroll->mColour);
             ((sRS_185F40*)GrMan->m_pCurrentDrawState)->mode = 21;
             signed char rows = (int)scaledHeight + 3;
-            int scroll = self->mPixelOffset;
+            int scroll = mPixelOffset;
             int first = scroll / rows;
             int rem = scroll % rows;
             signed char count = (int)(bh / (float)rows);
@@ -242,7 +242,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                 rem = -scroll % rows;
             for (int i = 0; i < count; i++)
             {
-                unsigned short* line = cUITextScroll_getStringByIndex(self->mpTextScroll, i + first);
+                unsigned short* line = cUITextScroll_getStringByIndex(mpTextScroll, i + first);
                 float frows = (float)rows;
                 if (line != 0)
                 {
@@ -250,18 +250,18 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     while (*line == ' ')
                         line++;
                     t3Vector newPos = pos;
-                    if (self->mPixelOffset > 0)
+                    if (mPixelOffset > 0)
                         newPos.y -= frem;
                     else
                         newPos.y += frem;
-                    if (*line == '~' && self->mpDolbyIcon != 0)
+                    if (*line == '~' && mpDolbyIcon != 0)
                     {
                         tARGB iconSize;
                         any = 1;
-                        ((cUIThing*)self->mpDolbyIcon)->getSize((t3Vector*)&iconSize);
+                        ((cUIThing*)mpDolbyIcon)->getSize((t3Vector*)&iconSize);
                         newPos.x = (640.0f - iconSize.A) * 0.5f;
-                        *(t3Vector*)((char*)self->mpDolbyIcon + 0x44) = newPos;
-                        ((cUIThing*)self->mpDolbyIcon)->setVisible(1);
+                        *(t3Vector*)((char*)mpDolbyIcon + 0x44) = newPos;
+                        ((cUIThing*)mpDolbyIcon)->setVisible(1);
                     }
                     else
                     {
@@ -289,18 +289,18 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
             }
             if (!any)
             {
-                if (self->mpDolbyIcon != 0)
-                    ((cUIThing*)self->mpDolbyIcon)->setVisible(0);
+                if (mpDolbyIcon != 0)
+                    ((cUIThing*)mpDolbyIcon)->setVisible(0);
             }
             int total = count * rows;
-            int lim = self->mpTextScroll->mLineSize * rows + total;
-            if (self->mPixelOffset < -total && self->mPixelDelta < 0)
-                self->mPixelOffset = lim;
-            if (lim < self->mPixelOffset && self->mPixelDelta > 0)
-                self->mPixelOffset = -total;
+            int lim = mpTextScroll->mLineSize * rows + total;
+            if (mPixelOffset < -total && mPixelDelta < 0)
+                mPixelOffset = lim;
+            if (lim < mPixelOffset && mPixelDelta > 0)
+                mPixelOffset = -total;
         }
     }
-    cUIState_onRender2D(((char*)self));
+    cUIState_onRender2D(((char*)this));
 }
 #endif
 
@@ -315,10 +315,10 @@ extern "C" void* cUIState_onUpdate(void* self);
  * Adds the scroll speed (+0x64, which input moves between -8 and 8) to the scroll position (+0x60), then calls
  * cUIState_onUpdate().
  */
-extern "C" void cFEStateCredits_onUpdate(cFEStateCredits* self)
+void cFEStateCredits::onUpdate()
 {
-    self->mPixelOffset += self->mPixelDelta;
-    cUIState_onUpdate(self);
+    mPixelOffset += mPixelDelta;
+    cUIState_onUpdate(this);
 }
 #endif
 
@@ -335,17 +335,17 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
  * @param pInput  the controller input (cUIInput)
  * @return true when up or down was pressed
  */
-extern "C" bool cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
+bool cFEStateCredits::onInputBegin(cUIInput* pInput)
 {
     if (pInput->isUp()) {
-        if (self->mPixelDelta >= -7) {
-            self->mPixelDelta -= 1;
+        if (mPixelDelta >= -7) {
+            mPixelDelta -= 1;
         }
         return true;
     }
     if (pInput->isDown()) {
-        if (self->mPixelDelta < 8) {
-            self->mPixelDelta += 1;
+        if (mPixelDelta < 8) {
+            mPixelDelta += 1;
         }
         return true;
     }

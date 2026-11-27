@@ -341,7 +341,7 @@ extern "C" short func_002C2338(unsigned char c);
  * @param dst  the 16-bit output buffer
  * @param src  the ASCII string
  */
-extern "C" void cMemCard_AsciiToShiftJIS(void* self, short* dst, const char* src)
+void cMemCard::AsciiToShiftJIS(short* dst, const char* src)
 {
     while (*src != 0) {
         *dst++ = func_002C2338(*src++);
@@ -364,7 +364,7 @@ extern "C" char func_002C2430(short c);
  * @param dst  the ASCII output buffer
  * @param src  the 16-bit Shift-JIS string
  */
-extern "C" void cMemCard_ShiftJISToAscii(void* self, char* dst, const short* src)
+void cMemCard::ShiftJISToAscii(char* dst, const short* src)
 {
     for (; *src != 0; src++, dst++) {
         *dst = func_002C2430(*src);
@@ -2094,7 +2094,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C48C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_free(void* p);
-extern "C" void cMemCard_AsciiToShiftJIS(void* self, short* dst, const char* src);
+extern "C" void cMemCard_AsciiToShiftJIS(cMemCard* self, short* dst, const char* src);
 extern "C" int func_002C50E0(cPS2MemCard* self);
 extern "C" void func_002C5570(cPS2MemCard* self, int a1);
 extern "C" int ASYNCFILE_load(char* path, int a1);
@@ -2213,7 +2213,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         char* title = self->mTitle;
         MEM_fill(&D_005376F8, 0, 964);
         memcpy(&D_005376F8, str_PS2D, 5);
-        cMemCard_AsciiToShiftJIS(self, D_005376F8.title, title);
+        ((cMemCard*)self)->AsciiToShiftJIS(D_005376F8.title, title);
         if (self->mTitleOffsLF > 0)
             D_005376F8.offsLF = self->mTitleOffsLF;
         else
@@ -3142,7 +3142,7 @@ extern "C" void cPS2MemCard_Update(cPS2MemCard* self)
         func_002C48C0(self, 10);
         return;
     case 10:
-        cMemCard_ShiftJISToAscii(self, self->mFileSlots[self->mScanFileSlot].mTitle, D_005377B8);
+        ((cMemCard*)self)->ShiftJISToAscii(self->mFileSlots[self->mScanFileSlot].mTitle, D_005377B8);
         func_002C48C0(self, 9);
         return;
     case 9:

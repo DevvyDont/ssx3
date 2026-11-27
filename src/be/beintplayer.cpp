@@ -38,7 +38,7 @@ cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPla
 {
     self->field_0x8 = 0;
     self->vtable = cBENewPlayerInterface_vtbl;
-    cBENewPlayerInterface_discard((cBENewPlayerInterface*)self);
+    ((cBENewPlayerInterface*)self)->cBENewPlayerInterface::discard();
     ((cBENewPlayerInterface*)self)->defaultCtrl();
     return self;
 }
@@ -118,7 +118,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_discard);
 /**
  * Throws away player-table edits: copies cBELibrary_playerDB back over the working table cBENewPlayerInterface_tempPlayers.
  */
-extern "C" void cBENewPlayerInterface_discard(cBENewPlayerInterface* self)
+void cBENewPlayerInterface::discard()
 {
     memcpy(cBENewPlayerInterface_tempPlayers, cBELibrary_playerDB, sizeof(cBENewPlayerInterface_tempPlayers));
 }

@@ -68,7 +68,7 @@ public:
  * @param obj  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
-extern "C" int cListNode_traverseFlat(void* self, cListNode_traverseFlat_cVirt* obj)
+extern "C" int cListNode_traverseFlat(cListNode* self, cListNode_traverseFlat_cVirt* obj)
 {
     return obj->onListNode(self);
 }
@@ -93,7 +93,7 @@ public:
  * @param obj  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
-extern "C" int cListNode_traverseRecurse(void* self, cListNode_traverseRecurse_cVirt* obj)
+extern "C" int cListNode_traverseRecurse(cListNode* self, cListNode_traverseRecurse_cVirt* obj)
 {
     return obj->onListNode(self);
 }

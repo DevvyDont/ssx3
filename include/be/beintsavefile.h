@@ -45,6 +45,10 @@ struct cBESaveInterface : public cBEInterface {
     bool loadSaveGame(char* buf) __asm__("cBESaveInterface_loadSaveGame");
     bool loadSaveProfile(char* buf, int idx) __asm__("cBESaveInterface_loadSaveProfile");
     int getSaveGameSize() __asm__("cBESaveInterface_getSaveGameSize__FPv");
+    // submit stays a C function (cBESaveInterface_submit): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBESaveInterface_submit__FPv");
+    virtual void discard() __asm__("cBESaveInterface_discard__FPv");
 };
 
 CHECK_SIZE(cBESaveInterface, 0x10);

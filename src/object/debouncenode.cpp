@@ -84,15 +84,15 @@ extern const char str_DeadNode_b[];
  *
  * The node deletes itself; with expire mode 0 (+0x30) the instance then gets a new dead node ("DeadNode").
  */
-extern "C" void cDebounceNode_loseFocus(cDebounceNode* self)
+void cDebounceNode::loseFocus()
 {
-    if (self->Life >= 0) {
-        if (self->Type == 0) {
-            void* parent = self->Instance;
-            delete self;
+    if (Life >= 0) {
+        if (Type == 0) {
+            void* parent = Instance;
+            delete this;
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
-            delete self;
+            delete this;
         }
     }
 }
@@ -134,23 +134,23 @@ extern const char str_RestoreNode_b[];
  *
  * @param check  nonzero to run the instance's script first (On Tour runscript)
  */
-extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
+void cDebounceNode::expire(int check)
 {
-    if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
+    if (check != 0 && cInstanceNode_runExpireScript(this) != 0) {
         return;
     }
-    if (self->Life >= 0) {
-        int mode = self->Type;
+    if (Life >= 0) {
+        int mode = Type;
         if (mode == cDebounceNode::kExpire_Dead) {
-            void* parent = self->Instance;
-            delete self;
+            void* parent = Instance;
+            delete this;
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == cDebounceNode::kExpire_Restore) {
-            void* parent = self->Instance;
-            delete self;
+            void* parent = Instance;
+            delete this;
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
-            delete self;
+            delete this;
         }
     }
 }
@@ -620,10 +620,10 @@ static inline int instancePageLoaded(cWorldCache* cache, tInstanceRecord* inst)
  * t4mat_Identity, puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager
  * slot 96 with that texture matrix and mode 2.
  */
-extern "C" void cConveyorNode_render(cConveyorNode* self)
+void cConveyorNode::render()
 {
     cWorldCache* cache = cWorld_m_pTheWorld->m_pWorldCache;
-    if (!instancePageLoaded(cache, self->Instance)) {
+    if (!instancePageLoaded(cache, Instance)) {
         return;
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
@@ -631,13 +631,13 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         void* clipThis = vthis(gfx, vt[93]);
         t4Vector cullBox[2];
-        cullBox[0].x = self->Instance->m_fvMin.m[0];
-        cullBox[0].y = self->Instance->m_fvMin.m[1];
-        cullBox[0].z = self->Instance->m_fvMin.m[2];
+        cullBox[0].x = Instance->m_fvMin.m[0];
+        cullBox[0].y = Instance->m_fvMin.m[1];
+        cullBox[0].z = Instance->m_fvMin.m[2];
         cullBox[0].w = 1.0f;
-        cullBox[1].x = self->Instance->m_fvMax.m[0];
-        cullBox[1].y = self->Instance->m_fvMax.m[1];
-        cullBox[1].z = self->Instance->m_fvMax.m[2];
+        cullBox[1].x = Instance->m_fvMax.m[0];
+        cullBox[1].y = Instance->m_fvMax.m[1];
+        cullBox[1].z = Instance->m_fvMax.m[2];
         cullBox[1].w = 1.0f;
         sVEntry<void>* viewVt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
         int res = ((tClipBoundBoxFn*)vt[93].fn)(clipThis, &cullBox[0], &cullBox[1],
@@ -648,10 +648,10 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     }
     t4Matrix xf;
     MatCopy_343588(&xf, &t4mat_Identity);
-    xf.row[3].x = self->UV[0];
-    xf.row[3].y = self->UV[1];
+    xf.row[3].x = UV[0];
+    xf.row[3].y = UV[1];
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
-    ((tRenderModelFn*)vt[96].fn)(vthis(gfx, vt[96]), self->Instance, 0, &xf, 2);
+    ((tRenderModelFn*)vt[96].fn)(vthis(gfx, vt[96]), Instance, 0, &xf, 2);
 }
 #endif
 
@@ -766,7 +766,7 @@ INCLUDE_ASM("object/debouncenode", cCounterNode_signal);
  * @param msg    signal number (On Tour signal)
  * @param level  the signal's argument: the level 1-10 (On Tour arg)
  */
-extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
+void cCounterNode::signal(int msg, float level)
 {
     int bit = 0;
     int fire = 0;
@@ -792,27 +792,27 @@ extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
         bit = 0x200;
     if (msg == cCounterNode::kCounterSignal_Level)
     {
-        int seenLevels = self->Counted;
+        int seenLevels = Counted;
         if ((seenLevels & bit) == 0)
         {
             fire = 1;
-            self->Counted = seenLevels | bit;
+            Counted = seenLevels | bit;
         }
     }
     else if (msg == cCounterNode::kCounterSignal_LevelInOrder)
     {
-        int seenLevels = self->Counted;
+        int seenLevels = Counted;
         if ((seenLevels & bit) == 0)
         {
             if (level == 1.0f)
             {
                 fire = 1;
-                self->Counted = seenLevels | 1;
+                Counted = seenLevels | 1;
             }
             else if (seenLevels & (bit >> 1))
             {
                 fire = 1;
-                self->Counted = seenLevels | bit;
+                Counted = seenLevels | bit;
             }
         }
     }
@@ -822,9 +822,9 @@ extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
     }
     if (fire)
     {
-        int remaining = self->Count;
+        int remaining = Count;
         if (remaining > 0)
-            self->Count = remaining - 1;
+            Count = remaining - 1;
     }
 }
 #endif

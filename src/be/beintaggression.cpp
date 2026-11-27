@@ -52,9 +52,8 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_discard__FPv);
 /**
  * Does nothing: the aggression interface's discard (slot 2 of its vtable cBEAggressionInterface_vtbl).
  */
-void cBEAggressionInterface_discard(void* vself)
+void cBEAggressionInterface::discard()
 {
-    cBEAggressionInterface* self = (cBEAggressionInterface*)vself;
 }
 #endif
 
@@ -308,7 +307,7 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface* self, cBxReplayFrame* stream)
+void cBEAggressionInterface::writeToReplayFrame(cBxReplayFrame* stream)
 {
     int n = D_005305E0[0];
     stream->write((const char*)&n, 4);
@@ -339,7 +338,7 @@ int cBELibrary_getCharacterID(int);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterface* self, cBxReplayFrame* stream)
+void cBEAggressionInterface::readFromReplayFrame(cBxReplayFrame* stream)
 {
     int n;
     stream->read((char*)&n, 4);

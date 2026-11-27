@@ -2085,11 +2085,11 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGameModeHandler__cGameModeHandler(int* self, int flags)
+extern "C" void cGameModeHandler__cGameModeHandler(cGameModeHandler* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -2117,7 +2117,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_init__FPv);
  * Slot +0x14 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it with their heat set-up (for example
  * cGMBigAirHandler_init, cGMRaceHandler_init).
  */
-void cGameModeHandler_init(void* self)
+void cGameModeHandler::init()
 {
 }
 #endif
@@ -2133,8 +2133,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderCheckpointHit__FPv);
  *
  * @return 1
  */
-int cGameModeHandler_riderCheckpointHit(void* self)
+int cGameModeHandler_riderCheckpointHit(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
     return 0x1;
 }
 #endif
@@ -2147,8 +2148,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderGateHit__FPv);
  *
  * Slot +0x3C of the base handler vtable cGameModeHandler_vtbl and of most event handlers.
  */
-void cGameModeHandler_riderGateHit(void* self)
+void cGameModeHandler_riderGateHit(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2161,8 +2163,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
  * Slot +0x44 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it to record a rider's result (for
  * example cGMBigAirHandler_raceFinish, cGMRaceHandler_raceFinish).
  */
-void cGameModeHandler_raceFinish(void* self)
+void cGameModeHandler_raceFinish(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2176,8 +2179,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_getHeatScore__FPv);
  *
  * @return 0
  */
-int cGameModeHandler_getHeatScore(void* self)
+int cGameModeHandler_getHeatScore(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
     return 0;
 }
 #endif
@@ -2190,8 +2194,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_writeToReplayFrame__FPv);
  *
  * Slot +0x54 of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_writeToReplayFrame overrides it for the scored event.
  */
-void cGameModeHandler_writeToReplayFrame(void* self)
+void cGameModeHandler_writeToReplayFrame(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 
@@ -2203,8 +2208,9 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_readFromReplayFrame__FPv);
  *
  * Slot +0x5C of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_readFromReplayFrame overrides it for the scored event.
  */
-void cGameModeHandler_readFromReplayFrame(void* self)
+void cGameModeHandler_readFromReplayFrame(void* vself)
 {
+    cGameModeHandler* self = (cGameModeHandler*)vself;
 }
 #endif
 

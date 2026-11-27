@@ -53,6 +53,10 @@ struct cBECharacterInterface : public cBEInterface {
     void* getShortNameByCharacter(int player, int index) __asm__("cBECharacterInterface_getShortNameByCharacter");
     void* getNickName(int rider) __asm__("cBECharacterInterface_getNickName");
     int getWeight(int riderIndex) __asm__("cBECharacterInterface_getWeight__FPvi");
+    // submit stays a C function (cBECharacterInterface_submit): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBECharacterInterface_submit__FPv");
+    virtual void discard() __asm__("cBECharacterInterface_discard__FPv");
 };
 
 extern cBECharacterInterface* cBECharacterInterface_instance;

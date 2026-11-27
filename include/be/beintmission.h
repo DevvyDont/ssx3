@@ -104,6 +104,12 @@ struct cBEMissionInterface : public cBEInterface {
     void remStreamData() __asm__("cBEMissionInterface_remStreamData__FPv");
     void* getPictureFileName(int id) __asm__("cBEMissionInterface_getPictureFileName");
     int getAudioType(int id) __asm__("cBEMissionInterface_getAudioType");
+    // submit stays a C function (cBEMissionInterface_submit): declared first, it is the vtable's key function, which
+    // keeps the vtable out of the units defining the other overrides
+    virtual void submit() __asm__("cBEMissionInterface_submit__FPv");
+    virtual void discard() __asm__("cBEMissionInterface_discard__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBEMissionInterface_writeToReplayFrame");
+    virtual void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cBEMissionInterface_readFromReplayFrame");
 };
 
 extern cBEMissionInterface* cBEMissionInterface_instance;
