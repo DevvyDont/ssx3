@@ -246,7 +246,7 @@ struct tParticleEmitter {
     void setSize(float startsize, float endsize, float sizerandomness) __asm__("tParticleEmitter_setSize");
     void setLife(float minlife, float maxlife) __asm__("tParticleEmitter_setLife");
     void setEternal() __asm__("tParticleEmitter_setEternal");
-    void setPoint(long long *point) __asm__("tParticleEmitter_setPoint");
+    void setPoint(const t4Vector *point) __asm__("tParticleEmitter_setPoint");
     void setLine(t4Vector* start, t4Vector* end) __asm__("tParticleEmitter_setLine");
     void setPlane(t4Vector* center, t4Vector* axis0, t4Vector* axis1) __asm__("tParticleEmitter_setPlane");
     void setMotion(t4Vector* delta, float time) __asm__("tParticleEmitter_setMotion");

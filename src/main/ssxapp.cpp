@@ -34,7 +34,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
 #ifdef SKIP_ASM
 extern "C" void* cAppMan_cAppMan(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern int cBXString_EmptyString;
+extern char* cBXString_EmptyString;
 extern void* cSSXApp_vtbl[];
 
 
@@ -51,9 +51,9 @@ extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
 {
     cAppMan_cAppMan((self));
     self->mVtbl = cSSXApp_vtbl;
-    self->UserName = (char*)cBXString_EmptyString;
-    self->Password = (char*)cBXString_EmptyString;
-    self->CommandLineTrack = (char*)cBXString_EmptyString;
+    self->UserName = cBXString_EmptyString;
+    self->Password = cBXString_EmptyString;
+    self->CommandLineTrack = cBXString_EmptyString;
     self->mAudioBigFile = 0;
     self->mMusicBigFile = 0;
     self->mMusic2BigFile = 0;
@@ -137,7 +137,7 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 void cSSXApp::init(int argc, char** argv)
 {
     SSXApp = (cSSXApp*)this;
-    *(void**)&ConsoleConfig = cConsoleConfig_construct();
+    ConsoleConfig = (cConsoleConfig*)cConsoleConfig_construct();
     cPadCache* volatile pm = (cPadCache*)cMemMan_alloc(12028, str_PadCache, 0, 0);
     cPadCache_init(pm);
     PadCache = pm;
@@ -154,9 +154,9 @@ void cSSXApp::init(int argc, char** argv)
         InputPads[i] = (cInputPad*)inputPad;
         *inputPad = 0;
     }
-    *(int*)&Game = 0;
-    *(int*)&DebugFE = 0;
-    *(int*)&RealFE = 0;
+    Game = 0;
+    DebugFE = 0;
+    RealFE = 0;
     parseCommandLine(argc, argv);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
@@ -171,7 +171,7 @@ void cSSXApp::init(int argc, char** argv)
     LoadIndicator = new (str_LoadIndicator, 0, 0) cLoadIndicatorNew;
     cAppMan_setNextModule((cAppMan*)this, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC,
             str_PreStartScreen, 0x100, 0)));
-    *(void**)&GameModeMan = cGameModeMan_getGM();
+    GameModeMan = (cGameModeMan*)cGameModeMan_getGM();
     void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
     *(void**)&mFEAsyncManager = feAsyncManager;
     cFEAsyncManager_Init(feAsyncManager);
@@ -953,9 +953,9 @@ extern char str_GameModule[];
 void cSSXApp::startGameLoad()
 {
     void* game = cGame_cGame(cMemMan_alloc(556, str_GameModule, 0, 0));
-    *(void**)&Game = game;
+    Game = (cGame*)game;
     cAppMan_setNextModule((cAppMan*)this, (unsigned int)game);
-    *(void**)&GameModeMan = cGameModeMan_getGM();
+    GameModeMan = (cGameModeMan*)cGameModeMan_getGM();
 }
 #endif
 
@@ -978,11 +978,11 @@ void cSSXApp::startFELoad()
     cFEPopupConfirm_mUsePreFE = 0;
     if (UseRealFE != 0) {
         void* frontEnd = cRealFE_cRealFE(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
-        *(void**)&RealFE = frontEnd;
+        RealFE = (cFE*)frontEnd;
         cAppMan_setNextModule((cAppMan*)this, (unsigned int)frontEnd);
     } else {
         void* frontEnd = cDebugFE_cDebugFE(cMemMan_alloc(568, str_FEModule, 0, 0));
-        *(void**)&DebugFE = frontEnd;
+        DebugFE = (cDebugFE*)frontEnd;
         cAppMan_setNextModule((cAppMan*)this, (unsigned int)frontEnd);
     }
 }
@@ -1209,7 +1209,7 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
 void cSSXApp::initLocale()
 {
     if (FELocale == 0) {
-        *(void**)&FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, str_FELocale, 0, 0));
+        FELocale = (cFELocale*)cFELocale_cFELocale(cMemMan_alloc(0xC0, str_FELocale, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     cFELocale* loc = FELocale;
@@ -2683,7 +2683,7 @@ void FrustumIntersector::AddAllInstancesCrossing(CellClipT* list, int count)
             n = n->next;
         }
     }
-    if ((int)lastinstance != 0) {
+    if (lastinstance != 0) {
         FrustumIntersector_crossinginstance(this, 0, 0);
     }
 }
@@ -2712,7 +2712,7 @@ void FrustumIntersector::AddAllPatchesCrossing(CellClipT* list, int count)
             n = n->next;
         }
     }
-    if ((int)lastpatch != 0) {
+    if (lastpatch != 0) {
         FrustumIntersector_crossingpatch(this, 0, 0);
     }
 }
@@ -2749,7 +2749,7 @@ void FrustumIntersector::AddAllTypedCrossing(CellClipT* items, int n)
             }
         }
     }
-    if ((int)lastfogvolume != 0) {
+    if (lastfogvolume != 0) {
         FrustumIntersector_crossingfogvolume(this, 0, 0);
     }
 }

@@ -36,6 +36,7 @@ typedef struct SNDMEMREC SNDMEMREC;
 typedef struct SNDMEMSTATE SNDMEMSTATE;
 typedef struct SNDIPACKETCALLBACK SNDIPACKETCALLBACK;
 typedef struct SNDREQUESTSTATUS SNDREQUESTSTATUS;
+typedef struct SNDSTREAMSTATUS SNDSTREAMSTATUS;
 typedef struct BANKLIST BANKLIST;
 typedef struct SNDTIMERCLIENT SNDTIMERCLIENT;
 typedef struct SNDUSERDATAMSG SNDUSERDATAMSG;
@@ -677,6 +678,20 @@ CHECK_OFFSET(SNDREQUESTSTATUS, currenttime, 0x4);
 CHECK_OFFSET(SNDREQUESTSTATUS, timetoend, 0x8);
 CHECK_OFFSET(SNDREQUESTSTATUS, timebuffered, 0xC);
 CHECK_SIZE(SNDREQUESTSTATUS, 0x10);
+
+// SNDSTREAMSTATUS (0xC [O] sststat.c: int SNDSTRM_status(int sndstreamhandle, SNDSTREAMSTATUS* psss)): a stream's
+// status. [R] retail SNDSTRM_status (ealib/seg_2B4578) fills the three words: the queued requests, the first one's
+// handle and the buffered time in ms; [U] the movie player's audio object (ealib/seg_2AEDC0) reads currentrequest.
+struct SNDSTREAMSTATUS {
+    int outstandingrequests;        // 0x0 [O]; [R]
+    int currentrequest;             // 0x4 [O]; [R] the request handle at the head of the queue
+    int timebuffered;               // 0x8 [O]; [R]
+};
+
+CHECK_OFFSET(SNDSTREAMSTATUS, outstandingrequests, 0x0);
+CHECK_OFFSET(SNDSTREAMSTATUS, currentrequest, 0x4);
+CHECK_OFFSET(SNDSTREAMSTATUS, timebuffered, 0x8);
+CHECK_SIZE(SNDSTREAMSTATUS, 0xC);
 
 // SNDREQUESTSTATUS::state (names ours). [R] SNDSTRM_requeststatus: 0 until the request's header has been parsed (and
 // for an invalid handle), 1 while it is queued behind the request at the head, 2 while it is the head request (the one

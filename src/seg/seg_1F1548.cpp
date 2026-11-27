@@ -549,7 +549,7 @@ extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cAttachedDynami
     emitter->mBoneIndex = 0;
     emitter->mVtbl = (void**)cAttachedDynamicEmitter_vtbl;
     emitter->mStopped = 0;
-    *(int*)&emitter->mPhase = 0; // stored as an integer zero (sw zero)
+    emitter->mPhase = 0.0f;
     return emitter;
 }
 #endif
@@ -583,7 +583,7 @@ extern "C" void func_002F9838();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 extern "C" void* operator_new__FUi_17D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_AttachedEmitterTypeData[];
-extern int cAttachedEmitterFX_mEmitterDataArray;
+extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter type records (0x110 bytes each) */
 
 /**
  * Allocates and fills the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
@@ -593,7 +593,7 @@ extern int cAttachedEmitterFX_mEmitterDataArray;
  * set up.
  */
 extern "C" void func_002F17D0(void) {
-    cAttachedEmitterFX_mEmitterDataArray = (int)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
+    cAttachedEmitterFX_mEmitterDataArray = (char*)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
     func_002F83B0();
     func_002F9838();
 }
@@ -602,10 +602,10 @@ extern "C" void func_002F17D0(void) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1810);
 #ifdef SKIP_ASM
-extern "C" void cMemMan_free__FPv(int);
+extern "C" void cMemMan_free__FPv(void*);
 extern "C" void func_002F8FF8__FPv();
 extern "C" void func_002FA5F8__FPv();
-extern int cAttachedEmitterFX_mEmitterDataArray;
+extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter type records (0x110 bytes each) */
 
 /**
  * Frees the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray and clears the pointer.
@@ -1092,7 +1092,7 @@ struct Obj2130 : Base2130 {
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(cAttachedDynamicEmitter*);
 extern char str_cAttachedDynamicEmitter[];
-extern int cAttachedEmitterFX_mEmitterDataArray;
+extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter type records (0x110 bytes each) */
 
 /**
  * Creates an attached dynamic emitter of a type on a bone in the first free emitter slot.
@@ -1114,12 +1114,12 @@ extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int b
         if (*slot == 0) {
             Obj2130 *n = (Obj2130 *)cAttachedDynamicEmitter_cAttachedDynamicEmitter(
                 (cAttachedDynamicEmitter*)cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
-            int typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
+            char* typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
             *slot = n;
             // +0x200 bone, +0x204 stopped flag, +0x20C type record: cAttachedDynamicEmitter's own fields (no header)
             *(int *)((char*)*slot + 0x200) = boneIndex;
             *(int *)((char*)*slot + 0x204) = 0;
-            *(int *)((char*)*slot + 0x20C) = typeData;
+            *(char **)((char*)*slot + 0x20C) = typeData;
             Obj2130 *emitter = *slot;
             emitter->v2(*(int *)((char*)emitter + 0x20C), ((cBaseClass_DynamicEmitter*)emitter)->m_emitter.SeedX0);
             (*slot)->v1();
@@ -2139,12 +2139,12 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
         } while (i != -1);
     }
     splashManager->mLastCameraPositionValid = 0;
-    *(int*)&splashManager->mLastCameraPosition = 0;
-    *(int*)&splashManager->mLastCameraPosition.y = 0;
-    *(int*)&splashManager->mLastCameraPosition.z = 0;
+    splashManager->mLastCameraPosition.x = 0.0f;
+    splashManager->mLastCameraPosition.y = 0.0f;
+    splashManager->mLastCameraPosition.z = 0.0f;
     splashManager->mLastCameraPosition.w = 1.0f;
-    *(int*)&splashManager->mLastCameraSpeed = 0;
-    *(int*)&splashManager->mNumSplashesToAdd = 0;
+    splashManager->mLastCameraSpeed = 0.0f;
+    splashManager->mNumSplashesToAdd = 0.0f;
     cSplashManager_reset(splashManager);
     return ((char*)splashManager);
 }
@@ -2328,10 +2328,10 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_reset);
  */
 extern "C" void cSplashManager_reset(cSplashManager* splashManager) {
     splashManager->mLastCameraPositionValid = 0;
-    *(int*)&splashManager->mNumSplashesToAdd = 0;
+    splashManager->mNumSplashesToAdd = 0.0f;
     splashManager->mNumActiveDrops = 0;
     splashManager->mNumActiveCrystals = 0;
-    *(int*)&splashManager->mLastSnowfallIntensity = 0;
+    splashManager->mLastSnowfallIntensity = 0.0f;
 }
 #endif
 
@@ -2747,9 +2747,9 @@ struct tSunLensInit : tSunLens {
 extern "C" void *cSunHalo_cSunHalo(cSunHalo* sunHalo) {
     cHalo_cHalo(sunHalo);
     new (sunHalo->mSunLens) tSunLensInit[16];
-    *(int*)&sunHalo->mfOcclude = 0;
-    *(short*)&sunHalo->mbRequestZSample = 0;
-    *(short*)&sunHalo->mbOnScreen = 0;
+    sunHalo->mfOcclude = 0.0f;
+    sunHalo->mbRequestZSample = 0;
+    sunHalo->mbOnScreen = 0;
     cSunHalo_InitLens(sunHalo);
     return ((void*)sunHalo);
 }
@@ -3196,7 +3196,6 @@ extern "C" void cSunHalo_Process(cSunHalo* self, sCam_4DB8* cam, int flag)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", getRealTimeLights);
 #ifdef SKIP_ASM
-extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
 
 /**
  * Fetches the real-time lights for a lit object from the game's world light manager.
@@ -3207,7 +3206,7 @@ extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
  * @param litObject  the object being lit
  */
 extern "C" void getRealTimeLights(tInstanceRecord* litObject) {
-    cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (litObject->m_iFlags) >> 0xC) & 1);
+    SSXApp->Game->WorldLightMan->getRealTimeLights(litObject, ((int) (litObject->m_iFlags) >> 0xC) & 1);
 }
 #endif
 

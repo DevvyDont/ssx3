@@ -4,6 +4,8 @@
 #include "ai/player.h"
 #include "ealib/rcmpbase.h"
 #include "ealib/avsubtitle.h"
+#include "ealib/avplayer.h"
+#include "ealib/snd.h"
 #include "ealib/ps2sonycodec.h"
 
 extern RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
@@ -11,7 +13,8 @@ extern RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADDC0);
 #ifdef SKIP_ASM
-extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+extern "C" void func_003ADEC8(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
+                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio);
 
 /**
  * Constructs a movie player that plays video only, with the source type given.
@@ -29,9 +32,10 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" void* func_003ADDC0(void* self, int videoSource, int videoBufferSize, int sourceType, int noAudio)
+extern "C" RCMP_AV_PLAYER* func_003ADDC0(RCMP_AV_PLAYER* self, char* videoSource, int videoBufferSize, int sourceType,
+                                         int noAudio)
 {
-    *(int*)((char*)self + 0x60) = 0;
+    self->mStreamer.m_Streamer = 0;
     func_003ADEC8(self, videoSource, 0, videoBufferSize, 0, 0, 0, sourceType, noAudio);
     return self;
 }
@@ -40,7 +44,8 @@ extern "C" void* func_003ADDC0(void* self, int videoSource, int videoBufferSize,
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE08);
 #ifdef SKIP_ASM
-extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+extern "C" void func_003ADEC8(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
+                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio);
 
 /**
  * Constructs a movie player with separate video and audio sources.
@@ -60,9 +65,10 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" void* func_003ADE08(void* self, int videoSource, int videoBufferSize, int audioSource, int audioBufferSize, int sourceType, int noAudio)
+extern "C" RCMP_AV_PLAYER* func_003ADE08(RCMP_AV_PLAYER* self, char* videoSource, int videoBufferSize,
+                                         char* audioSource, int audioBufferSize, int sourceType, int noAudio)
 {
-    *(int*)((char*)self + 0x60) = 0;
+    self->mStreamer.m_Streamer = 0;
     func_003ADEC8(self, videoSource, 0, videoBufferSize, audioSource, 0, audioBufferSize, sourceType, noAudio);
     return self;
 }
@@ -71,7 +77,8 @@ extern "C" void* func_003ADE08(void* self, int videoSource, int videoBufferSize,
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE58);
 #ifdef SKIP_ASM
-extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+extern "C" void func_003ADEC8(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
+                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio);
 
 /**
  * Constructs a movie player with every source parameter given.
@@ -92,17 +99,21 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" void* func_003ADE58(void* self, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
+extern "C" RCMP_AV_PLAYER* func_003ADE58(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize,
+                                         int videoBufferSize, char* audioSource, int audioDataSize,
+                                         int audioBufferSize, int sourceType, int noAudio)
 {
-    *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, sourceType, noAudio);
+    self->mStreamer.m_Streamer = 0;
+    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize,
+                  sourceType, noAudio);
     return self;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE90);
 #ifdef SKIP_ASM
-extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+extern "C" void func_003ADEC8(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
+                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio);
 
 /**
  * Constructs a movie player that plays video (and audio) already in memory.
@@ -118,10 +129,13 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" void* func_003ADE90(void* self, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int noAudio)
+extern "C" RCMP_AV_PLAYER* func_003ADE90(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize,
+                                         int videoBufferSize, char* audioSource, int audioDataSize,
+                                         int audioBufferSize, int noAudio)
 {
-    *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, 2, noAudio);
+    self->mStreamer.m_Streamer = 0;
+    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, 2,
+                  noAudio);
     return self;
 }
 #endif
@@ -129,29 +143,22 @@ extern "C" void* func_003ADE90(void* self, int videoSource, int videoDataSize, i
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADEC8);
 #ifdef SKIP_ASM
-struct sAlloc_ADEC8 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* (*free)(void* p);
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_ADEC8 RCMP_rcmp_sys_ADEC8 __asm__("RCMP_rcmp_sys");
 extern char str_AV_VideoStreamBuffer[];
 extern char str_AV_AudioStreamBuffer[];
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void STREAM_setpriority(int h, int a, int b);
-extern "C" int STREAM_queuemem(int h, int a, int b, int c);
-extern "C" int ASYNCFILE_load(int a, int flags);
+extern "C" int STREAM_queuemem(int handle, char* data, int size, int endChunkId);
+extern "C" int ASYNCFILE_load(char* name, int memDir);
 extern "C" int STREAM_create(int a, int b, int c, void* buf, int size);
 extern "C" void STREAM_setfilter(int h, int a, int b, int c, int d);
 extern "C" int STREAM_taphandle(int h, int a);
-extern "C" int STREAM_queuefile(int h, int a, int b, int c);
+extern "C" int STREAM_queuefile(int handle, char* name, int offset, int endChunkId);
 
-static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
+static inline bool wsCanAlloc_ADEC8(RCMP_RCMP_SYSTEM* a)
 {
-    return a->alloc != 0 && a->free != 0;
+    return a->AllocMemFunc != 0 && a->FreeMemFunc != 0;
 }
 
 /**
@@ -169,7 +176,6 @@ static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
  *
  * STREAM_setpriority(stream, 152, 52) is called on both streams first; func_003AE450 later calls it with 151, 51.
  *
- * @param selfp  the player object
  * @param videoSource  the video file name or data address
  * @param videoDataSize  size of the in-memory video data (type 2)
  * @param videoBufferSize  size of the video stream buffer
@@ -179,80 +185,83 @@ static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
  * @param sourceType  source type: 0 stream, 1 async load, 2 memory
  * @param noAudio  nonzero to play without sound
  */
-extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
+extern "C" void func_003ADEC8(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
+                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
 {
-    char* self = (char*)selfp;
     if (func_003B5440() == 0) {
         noAudio = 1;
     }
-    MEM_fill(self, 0, 0x78);
-    *(int*)(self + 0x18) = sourceType;
-    *(int*)(self + 0x1C) = noAudio;
-    *(int*)(self + 0x20) = 0;
-    *(int*)(self + 0x28) = 0;
-    *(int*)(self + 0x24) = 0;
-    *(int*)(self + 0x2C) = 0;
-    *(int*)(self + 0x44) = 0;
-    *(int*)(self + 0x5C) = 0;
-    *(int*)(self + 0x64) = 0;
-    *(int*)(self + 0x0) = 0;
-    *(int*)(self + 0x70) = 0;
-    *(int*)(self + 0x74) = 0;
-    *(int*)(self + 0xC) = videoSource;
-    *(int*)(self + 0x10) = audioSource;
-    if (!wsCanAlloc_ADEC8(&RCMP_rcmp_sys_ADEC8)) {
+    MEM_fill(self, 0, sizeof(RCMP_AV_PLAYER));
+    self->mSourceType = sourceType;
+    self->mbNoAudio = noAudio;
+    self->mpVideoFileData = 0;
+    self->mpAudioFileData = 0;
+    self->mVideoLoad = 0;
+    self->mAudioLoad = 0;
+    self->mCurrentFrameNumber = 0;
+    self->mpTimer = 0;
+    self->mpDecoder = 0;
+    self->mpAudio = 0;
+    self->mSubtitles = 0;
+    self->mCurrFrame = 0;
+    self->mVideoSource = videoSource;
+    self->mAudioSource = audioSource;
+    if (!wsCanAlloc_ADEC8(&RCMP_rcmp_sys)) {
         func_003E62B0();
         return;
     }
     if (audioSource != 0) {
-        *(int*)(self + 0x14) = 1;
-        *(void**)(self + 0x4) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
-        *(void**)(self + 0x8) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
-        *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), videoBufferSize);
-        *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), audioBufferSize);
-        STREAM_setpriority(*(int*)(self + 0x34), 152, 52);
-        STREAM_setpriority(*(int*)(self + 0x30), 152, 52);
-        STREAM_setfilter(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
-        STREAM_setfilter(*(int*)(self + 0x30), 2, 0, 0, -2);
-        if (*(int*)(self + 0x1C) == 0) {
-            STREAM_setfilter(*(int*)(self + 0x34), 1, 0xFFFF, 17235, 1);
+        self->mbSeparateAudio = 1;
+        self->mpVideoStreamBuffer =
+            RCMP_rcmp_sys.AllocMemFunc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+        self->mpAudioStreamBuffer =
+            RCMP_rcmp_sys.AllocMemFunc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+        self->mVideoStream = STREAM_create(2, 2, 1, self->mpVideoStreamBuffer, videoBufferSize);
+        self->mAudioStream = STREAM_create(2, 2, 1, self->mpAudioStreamBuffer, audioBufferSize);
+        STREAM_setpriority(self->mAudioStream, 152, 52);
+        STREAM_setpriority(self->mVideoStream, 152, 52);
+        STREAM_setfilter(self->mVideoStream, 1, 0xFF, 77, 1);
+        STREAM_setfilter(self->mVideoStream, 2, 0, 0, -2);
+        if (self->mbNoAudio == 0) {
+            STREAM_setfilter(self->mAudioStream, 1, 0xFFFF, 17235, 1);
         } else {
-            STREAM_setfilter(*(int*)(self + 0x34), 1, 0xFFFF, 17235, -1);
+            STREAM_setfilter(self->mAudioStream, 1, 0xFFFF, 17235, -1);
         }
-        STREAM_setfilter(*(int*)(self + 0x34), 2, 0, 0, -2);
-        int type = *(int*)(self + 0x18);
+        STREAM_setfilter(self->mAudioStream, 2, 0, 0, -2);
+        int type = self->mSourceType;
         if (type == 1) {
-            *(int*)(self + 0x2C) = ASYNCFILE_load(audioSource, RCMP_rcmp_sys_ADEC8.flags);
-            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, RCMP_rcmp_sys_ADEC8.flags);
+            self->mAudioLoad = ASYNCFILE_load(audioSource, RCMP_rcmp_sys.m_DefaultMemDir);
+            self->mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
         } else if (type == 0) {
-            *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), audioSource, 0, 0);
-            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
+            self->mAudioQueue = STREAM_queuefile(self->mAudioStream, audioSource, 0, 0);
+            self->mVideoQueue = STREAM_queuefile(self->mVideoStream, videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
-            *(int*)(self + 0x3C) = STREAM_queuemem(*(int*)(self + 0x34), *(int*)(self + 0x10), audioDataSize, 0);
+            self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mVideoSource, videoDataSize, 0);
+            self->mAudioQueue = STREAM_queuemem(self->mAudioStream, self->mAudioSource, audioDataSize, 0);
         }
     } else {
-        *(int*)(self + 0x14) = 0;
-        *(void**)(self + 0x4) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
-        *(void**)(self + 0x8) = 0;
-        *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), videoBufferSize);
-        *(int*)(self + 0x34) = STREAM_taphandle(*(int*)(self + 0x30), 2);
-        STREAM_setpriority(*(int*)(self + 0x34), 152, 52);
-        STREAM_setpriority(*(int*)(self + 0x30), 152, 52);
-        STREAM_setfilter(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
-        STREAM_setfilter(*(int*)(self + 0x30), 3, 0, 0, -2);
-        if (*(int*)(self + 0x1C) == 0) {
-            STREAM_setfilter(*(int*)(self + 0x30), 2, 0xFFFF, 17235, 2);
+        self->mbSeparateAudio = 0;
+        self->mpVideoStreamBuffer =
+            RCMP_rcmp_sys.AllocMemFunc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+        self->mpAudioStreamBuffer = 0;
+        self->mVideoStream = STREAM_create(2, 3, 2, self->mpVideoStreamBuffer, videoBufferSize);
+        self->mAudioStream = STREAM_taphandle(self->mVideoStream, 2);
+        STREAM_setpriority(self->mAudioStream, 152, 52);
+        STREAM_setpriority(self->mVideoStream, 152, 52);
+        STREAM_setfilter(self->mVideoStream, 1, 0xFF, 77, 1);
+        STREAM_setfilter(self->mVideoStream, 3, 0, 0, -2);
+        if (self->mbNoAudio == 0) {
+            STREAM_setfilter(self->mVideoStream, 2, 0xFFFF, 17235, 2);
         } else {
-            STREAM_setfilter(*(int*)(self + 0x30), 2, 0xFFFF, 17235, -1);
+            STREAM_setfilter(self->mVideoStream, 2, 0xFFFF, 17235, -1);
         }
-        int type = *(int*)(self + 0x18);
+        int type = self->mSourceType;
         if (type == 1) {
-            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, RCMP_rcmp_sys_ADEC8.flags);
+            self->mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
         } else if (type == 0) {
-            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
+            self->mVideoQueue = STREAM_queuefile(self->mVideoStream, videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
+            self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mVideoSource, videoDataSize, 0);
         }
     }
 }
@@ -269,91 +278,88 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE2F8);
  * @param player  the movie player
  * @param table  the subtitle array (two words: entries, count), or 0 for none
  */
-extern "C" void func_003AE2F8(cPlayer* player, int table) {
-    (*(int *)((char*)(player) + 0x70)) = table;
+extern "C" void func_003AE2F8(RCMP_AV_PLAYER* player, RCMP_AV_SUBTITLE_ARRAY* table) {
+    player->mSubtitles = table;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE300);
 #ifdef SKIP_ASM
-struct sWSVtE300 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
+// The file system's options record as the RCMP library was built against it: 0x20 bytes [R] (func_003AE300 asks for
+// that size, and FILESYS_getopts copies only as many bytes as the record's size word says). Retail's FILESYSOPTS
+// (ealib/filesys.h) adds a table pointer at 0x20; the members before it are the same.
+struct RCMP_FILESYSOPTS {
+    int size;                           // 0x00 [O] FILESYSOPTS::size
+    void* (*malloc)(char*, int, int);   // 0x04 [O] FILESYSOPTS::malloc
+    int (*free)(void*);                 // 0x08 [O] FILESYSOPTS::free; [U] frees the loaded movie files
+    int settings[5];                    // 0x0C FILESYSOPTS's unk_0C .. REAL_filedevice (not read here)
 };
 
-// Memory interface record filled by FILESYS_getopts (size field first).
-struct sWSMemIfE300 {
-    int size;                   // 0x0
-    int f4;                     // 0x4
-    void* (*release)(void*);    // 0x8
-    int pad[5];
-};
-
-extern "C" void func_003AEE30(void* self, int flags);
-extern "C" int FILESYS_getopts(sWSMemIfE300* mi);
-extern "C" void STREAM_destroy(void* p);
+extern "C" void func_003AEE30(RCMP_AV_AUDIO* self, int flags);
+extern "C" int FILESYS_getopts(RCMP_FILESYSOPTS* opts);
+extern "C" void STREAM_destroy(int handle);
 
 /**
  * Destroys a movie player: its decoder, audio object, timer, streams and buffers.
  *
  * Deletes the decoder (+0x64) through its slot-1 destructor with flags 3, the audio object (+0x0) with func_003AEE30,
  * frees the timer (+0x5C), destroys the video STREAM (+0x30) and, with separate audio, the audio STREAM (+0x34). Loaded
- * file data (+0x20, +0x28) is released through the memory interface FILESYS_getopts fills; the stream buffers (+0x4,
- * +0x8) and, when flags bit 0 is set, the player itself go to the RCMP free function (RCMP_rcmp_sys.FreeMemFunc).
+ * file data (+0x20, +0x28) is freed through the file system options' free function (FILESYS_getopts); the stream
+ * buffers (+0x4, +0x8) and, when flags bit 0 is set, the player itself go to the RCMP free function
+ * (RCMP_rcmp_sys.FreeMemFunc).
  *
  * @param flags  bit 0 frees the player itself
  */
-extern "C" void func_003AE300(char* self, int flags)
+extern "C" void func_003AE300(RCMP_AV_PLAYER* self, int flags)
 {
-    char* decoder = *(char**)(self + 0x64);
+    RCMP_DECODER* decoder = self->mpDecoder;
     if (decoder != 0) {
-        sWSVtE300* vt = *(sWSVtE300**)(decoder + 0x18);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)decoder->mVtbl;
         vt[1].fn(vthis(decoder, vt[1]), 3);
-        *(void**)(self + 0x64) = 0;
+        self->mpDecoder = 0;
     }
-    if (*(void**)(self + 0x0) != 0) {
-        func_003AEE30(*(void**)(self + 0x0), 3);
-        *(void**)(self + 0x0) = 0;
+    if (self->mpAudio != 0) {
+        func_003AEE30(self->mpAudio, 3);
+        self->mpAudio = 0;
     }
-    if (*(void**)(self + 0x5C) != 0) {
-        RCMP_rcmp_sys.FreeMemFunc(*(void**)(self + 0x5C));
-        *(void**)(self + 0x5C) = 0;
+    if (self->mpTimer != 0) {
+        RCMP_rcmp_sys.FreeMemFunc(self->mpTimer);
+        self->mpTimer = 0;
     }
-    STREAM_destroy(*(void**)(self + 0x30));
-    *(void**)(self + 0x30) = 0;
-    if (*(int*)(self + 0x14) != 0) {
-        STREAM_destroy(*(void**)(self + 0x34));
-        *(void**)(self + 0x34) = 0;
+    STREAM_destroy(self->mVideoStream);
+    self->mVideoStream = 0;
+    if (self->mbSeparateAudio != 0) {
+        STREAM_destroy(self->mAudioStream);
+        self->mAudioStream = 0;
     }
     {
-        void* fileData = *(void**)(self + 0x20);
+        char* fileData = self->mpVideoFileData;
         if (fileData != 0) {
-            sWSMemIfE300 mi;
-            mi.size = 0x20;
-            FILESYS_getopts(&mi);
-            mi.release(fileData);
-            *(void**)(self + 0x20) = 0;
+            RCMP_FILESYSOPTS opts;
+            opts.size = sizeof(RCMP_FILESYSOPTS);
+            FILESYS_getopts(&opts);
+            opts.free(fileData);
+            self->mpVideoFileData = 0;
         }
     }
     {
-        void* fileData = *(void**)(self + 0x28);
+        char* fileData = self->mpAudioFileData;
         if (fileData != 0) {
-            sWSMemIfE300 mi;
-            mi.size = 0x20;
-            FILESYS_getopts(&mi);
-            mi.release(fileData);
-            *(void**)(self + 0x28) = 0;
+            RCMP_FILESYSOPTS opts;
+            opts.size = sizeof(RCMP_FILESYSOPTS);
+            FILESYS_getopts(&opts);
+            opts.free(fileData);
+            self->mpAudioFileData = 0;
         }
     }
-    if (*(void**)(self + 0x4) != 0) {
-        RCMP_rcmp_sys.FreeMemFunc(*(void**)(self + 0x4));
-        *(void**)(self + 0x4) = 0;
+    if (self->mpVideoStreamBuffer != 0) {
+        RCMP_rcmp_sys.FreeMemFunc(self->mpVideoStreamBuffer);
+        self->mpVideoStreamBuffer = 0;
     }
-    if (*(void**)(self + 0x8) != 0) {
-        RCMP_rcmp_sys.FreeMemFunc(*(void**)(self + 0x8));
-        *(void**)(self + 0x8) = 0;
+    if (self->mpAudioStreamBuffer != 0) {
+        RCMP_rcmp_sys.FreeMemFunc(self->mpAudioStreamBuffer);
+        self->mpAudioStreamBuffer = 0;
     }
     if (flags & 1) {
         RCMP_rcmp_sys.FreeMemFunc(self);
@@ -364,49 +370,35 @@ extern "C" void func_003AE300(char* self, int flags)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE450);
 #ifdef SKIP_ASM
-struct sAlloc_AE450 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* free;
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_AE450 RCMP_rcmp_sys_AE450 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
-struct sTimer_AE450 {
-    unsigned int start;     // 0x0
-    int pad4;
-    long ticks;             // 0x8
-    int period;             // 0x10
-    int pad14;
-};
-
-struct RCMP_DECODER_DECODER_sObj;
-struct RCMP_DECODER_DECODER_sKey;
-extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_DECODER_DECODER_sKey* key);
-// PORT: the unit declares RCMP_CODEC_IDATA_CODEC_IDATA1 with int params; it stores pointers.
-extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1_AE450(void* self, void* a1, void* a2, void* a3, int a4) __asm__("RCMP_CODEC_IDATA_CODEC_IDATA1");
+typedef void (*RCMP_GetDataFn)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK** out);
+typedef void (*RCMP_ReleaseDataFn)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK* chunk);
+extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_CODEC_IDATA* idata);
+extern "C" RCMP_CODEC_IDATA* RCMP_CODEC_IDATA_CODEC_IDATA1(RCMP_CODEC_IDATA* self, RCMP_STREAMER* streamer,
+                                                          RCMP_GetDataFn getData, RCMP_ReleaseDataFn releaseData,
+                                                          int framesToBuffer);
 void* func_003AECB8(void* self, void* a1);
 void* func_003AED20(void* self, void* a1, int a2);
-extern "C" void* func_003AED40(void* self, int a1, int a2);
-extern "C" int func_003AEEF8(void* self);
+extern "C" RCMP_AV_AUDIO* func_003AED40(RCMP_AV_AUDIO* self, int a1, int a2);
+extern "C" int func_003AEEF8(RCMP_AV_AUDIO* self);
 extern "C" void STREAM_setpriority(int h, int a, int b);
-extern "C" int STREAM_queuemem(int h, int a, int b, int c);
-extern "C" void ASYNCFILE_release(int h, void* data, int* size);
+extern "C" int STREAM_queuemem(int handle, char* data, int size, int endChunkId);
+extern "C" void ASYNCFILE_release(int h, char** data, int* size);
 extern "C" int RCMP_DECODER_GetFrame(void* p, int a1);
 extern "C" unsigned int TIMER_gettick();
 extern "C" unsigned int TIMER_getfrequency();
-extern "C" void RCMP_AV_MS_TIMER_Update(void* timer);
-extern "C" void* func_003AE888(void*, int);
+extern "C" void RCMP_AV_MS_TIMER_Update(RCMP_AV_MS_TIMER* timer);
+extern "C" void* func_003AE888(RCMP_AV_PLAYER*, int);
 
-static inline void* wsAlloc_AE450(sAlloc_AE450* a, int size)
+static inline void* wsAlloc_AE450(RCMP_RCMP_SYSTEM* a, int size)
 {
-    return a->alloc(D_00495210, size, 0, 0, a->flags);
+    return a->AllocMemFunc(D_00495210, size, 0, 0, a->m_DefaultMemDir);
 }
 
-static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
+static inline bool wsCanAlloc_AE450(RCMP_RCMP_SYSTEM* a)
 {
-    return a->alloc != 0 && a->free != 0;
+    return a->AllocMemFunc != 0 && a->FreeMemFunc != 0;
 }
 
 /**
@@ -430,54 +422,57 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
  * @return the first decoded frame (+0x74)
  */
 // PORT: 64-bit long tick counter
-extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
+extern "C" int func_003AE450(RCMP_AV_PLAYER* self, int framesToBuffer, int timeOffsetMs)
 {
-    STREAM_setpriority(*(int*)(self + 0x34), 151, 51);
-    STREAM_setpriority(*(int*)(self + 0x30), 151, 51);
-    if (*(int*)(self + 0x24) != 0) {
+    STREAM_setpriority(self->mAudioStream, 151, 51);
+    STREAM_setpriority(self->mVideoStream, 151, 51);
+    if (self->mVideoLoad != 0) {
         int size;
-        ASYNCFILE_release(*(int*)(self + 0x24), self + 0x20, &size);
-        *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0x20), size, 0);
+        ASYNCFILE_release(self->mVideoLoad, &self->mpVideoFileData, &size);
+        self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mpVideoFileData, size, 0);
     }
-    if (*(int*)(self + 0x2C) != 0) {
+    if (self->mAudioLoad != 0) {
         int size;
-        ASYNCFILE_release(*(int*)(self + 0x2C), self + 0x28, &size);
-        *(int*)(self + 0x3C) = STREAM_queuemem(*(int*)(self + 0x34), *(int*)(self + 0x28), size, 0);
+        ASYNCFILE_release(self->mAudioLoad, &self->mpAudioFileData, &size);
+        self->mAudioQueue = STREAM_queuemem(self->mAudioStream, self->mpAudioFileData, size, 0);
     }
-    if (*(int*)(self + 0x14) == 0) {
-        *(int*)(self + 0x3C) = *(int*)(self + 0x38);
+    if (self->mbSeparateAudio == 0) {
+        self->mAudioQueue = self->mVideoQueue;
     }
-    if (*(int*)(self + 0x1C) == 0) {
-        char* audioObj = (char*)func_003AED40(wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
-        *(char**)(self + 0x0) = audioObj;
-        *(unsigned int*)(self + 0x54) = *(int*)(audioObj + 0xC) >= 0;
+    if (self->mbNoAudio == 0) {
+        RCMP_AV_AUDIO* audio = func_003AED40((RCMP_AV_AUDIO*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_AV_AUDIO)),
+                                             self->mAudioStream, self->mAudioQueue);
+        self->mpAudio = audio;
+        self->mbTrackingAudio = audio->mStream >= 0;
     } else {
-        *(unsigned int*)(self + 0x54) = 0;
+        self->mbTrackingAudio = 0;
     }
-    *(void**)(self + 0x64) = 0;
-    if (wsCanAlloc_AE450(&RCMP_rcmp_sys_AE450)) {
-        char key[0x10];
-        *(char**)(self + 0x60) = self;
-        RCMP_CODEC_IDATA_CODEC_IDATA1_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, framesToBuffer);
-        *(RCMP_DECODER**)(self + 0x64) = RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 0x1C), (RCMP_DECODER_DECODER_sKey*)key);
+    self->mpDecoder = 0;
+    if (wsCanAlloc_AE450(&RCMP_rcmp_sys)) {
+        RCMP_CODEC_IDATA idata;
+        self->mStreamer.m_Streamer = self;
+        RCMP_CODEC_IDATA_CODEC_IDATA1(&idata, &self->mStreamer, (RCMP_GetDataFn)func_003AECB8,
+                                      (RCMP_ReleaseDataFn)func_003AED20, framesToBuffer);
+        self->mpDecoder =
+            RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_DECODER)), &idata);
     }
-    *(int*)(self + 0x74) = RCMP_DECODER_GetFrame(*(void**)(self + 0x64), 0);
-    sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 0x18);
-    msTimer->ticks = 0;
-    msTimer->start = TIMER_gettick();
-    msTimer->period = 0x1000;
-    *(sTimer_AE450**)(self + 0x5C) = msTimer;
+    self->mCurrFrame = RCMP_DECODER_GetFrame(self->mpDecoder, 0);
+    RCMP_AV_MS_TIMER* msTimer = (RCMP_AV_MS_TIMER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_AV_MS_TIMER));
+    msTimer->m_AccTime = 0;
+    msTimer->m_OldTime = TIMER_gettick();
+    msTimer->m_Speed = 0x1000;
+    self->mpTimer = msTimer;
     RCMP_AV_MS_TIMER_Update(msTimer);
-    unsigned int ms = (unsigned int)(msTimer->ticks * 1000) / TIMER_getfrequency();
-    *(int*)(self + 0x40) = timeOffsetMs;
-    *(int*)(self + 0x50) = 0;
-    *(int*)(self + 0x58) = 0;
-    *(unsigned int*)(self + 0x4C) = ms;
-    if (*(void**)(self + 0x0) != 0) {
-        func_003AEEF8(*(void**)(self + 0x0));
+    unsigned int ms = (unsigned int)(msTimer->m_AccTime * 1000) / TIMER_getfrequency();
+    self->mTimeOffsetMs = timeOffsetMs;
+    self->mOldAudioTime = 0;
+    self->mFilteredError = 0;
+    self->mStartTimeMs = ms;
+    if (self->mpAudio != 0) {
+        func_003AEEF8(self->mpAudio);
     }
     func_003AE888(self, 0x1000);
-    return *(int*)(self + 0x74);
+    return self->mCurrFrame;
 }
 #endif
 
@@ -497,19 +492,18 @@ extern "C" int RCMP_DECODER_GetCurrentFrameNumber(RCMP_DECODER* self);
  * @param position  the goal frame number
  * @return the frame object (+0x74), or 0
  */
-extern "C" int func_003AE6C8(void* self, float position)
+extern "C" int func_003AE6C8(RCMP_AV_PLAYER* self, float position)
 {
-    *(float*)((char*)self + 0x48) = position;
-    *(int*)((char*)self + 0x74) = RCMP_DECODER_GetFrame(*(void**)((char*)self + 0x64), fptoui(position));
-    *(int*)((char*)self + 0x44) = ((RCMP_DECODER*)(*(void**)((char*)self + 0x64)))->GetCurrentFrameNumber();
-    return *(int*)((char*)self + 0x74);
+    self->mGoalFrame = position;
+    self->mCurrFrame = RCMP_DECODER_GetFrame(self->mpDecoder, fptoui(position));
+    self->mCurrentFrameNumber = self->mpDecoder->GetCurrentFrameNumber();
+    return self->mCurrFrame;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE718);
 #ifdef SKIP_ASM
-extern "C" int RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(int, int);
 
 /**
  * Returns the subtitle that applies to the movie player's current frame.
@@ -519,12 +513,12 @@ extern "C" int RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(int, int);
  *
  * @return the subtitle entry, or 0 without a table
  */
-extern "C" int func_003AE718(void *self) {
-    if (*(int *)((char *)self + 0x70) != 0) {
-        if (*(int *)((char *)self + 0x74) != 0) {
-            return RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(*(int *)((char *)self + 0x70), *(int *)((char *)self + 0x44));
+extern "C" RCMP_AV_SUBTITLE* func_003AE718(RCMP_AV_PLAYER* self) {
+    if (self->mSubtitles != 0) {
+        if (self->mCurrFrame != 0) {
+            return self->mSubtitles->FindSubtitle(self->mCurrentFrameNumber);
         }
-        return RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(*(int *)((char *)self + 0x70), fptoui(*(float *)((char *)self + 0x48)));
+        return self->mSubtitles->FindSubtitle(fptoui(self->mGoalFrame));
     }
     return 0;
 }
@@ -535,7 +529,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE780);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" unsigned int func_003AE9A0_E780(void* self) __asm__("func_003AE9A0");
+extern "C" unsigned int func_003AE9A0(RCMP_AV_PLAYER* self);
 extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER*);
 
 /**
@@ -546,12 +540,12 @@ extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER*);
  *
  * @return 1 when the goal frame has reached the next frame, else 0
  */
-extern "C" int func_003AE780(char* self)
+extern "C" int func_003AE780(RCMP_AV_PLAYER* self)
 {
-    unsigned int elapsed = func_003AE9A0_E780(self);
-    float rate = ((RCMP_DECODER*)(*(void**)(self + 0x64)))->GetFrameRate();
-    *(float*)(self + 0x48) = (float)(elapsed + *(unsigned int*)(self + 0x40)) * 0.001f * rate;
-    if (*(float*)(self + 0x48) < (float)*(unsigned int*)(self + 0x44) + 1.0f)
+    unsigned int elapsed = func_003AE9A0(self);
+    float rate = self->mpDecoder->GetFrameRate();
+    self->mGoalFrame = (float)(elapsed + self->mTimeOffsetMs) * 0.001f * rate;
+    if (self->mGoalFrame < (float)self->mCurrentFrameNumber + 1.0f)
         return 0;
     return 1;
 }
@@ -560,7 +554,7 @@ extern "C" int func_003AE780(char* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE860);
 #ifdef SKIP_ASM
-extern "C" int func_003AEFA8(void* p);
+extern "C" int func_003AEFA8(RCMP_AV_AUDIO* audio);
 
 /**
  * Tells whether the movie player's audio has finished.
@@ -569,9 +563,9 @@ extern "C" int func_003AEFA8(void* p);
  *
  * @return func_003AEFA8's answer, or 1 when there is no audio object
  */
-extern "C" int func_003AE860(void** self)
+extern "C" int func_003AE860(RCMP_AV_PLAYER* self)
 {
-    void* audio = *self;
+    RCMP_AV_AUDIO* audio = self->mpAudio;
     int result = 1;
     if (audio != 0) {
         result = func_003AEFA8(audio);
@@ -583,14 +577,7 @@ extern "C" int func_003AE860(void** self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE888);
 #ifdef SKIP_ASM
-struct func_003AE888_sTimer {
-    unsigned int last;
-    int pad4;
-    ulong accum;
-    unsigned int rate;
-};
-
-extern "C" int func_003AEE98(void* self, int v);
+extern "C" int func_003AEE98(RCMP_AV_AUDIO* self, int v);
 extern "C" unsigned int TIMER_gettick();
 
 /**
@@ -604,29 +591,29 @@ extern "C" unsigned int TIMER_gettick();
  * @return 0
  */
 // PORT: accum is a 64-bit ulong
-extern "C" void* func_003AE888(void* self, int speed)
+extern "C" void* func_003AE888(RCMP_AV_PLAYER* self, int speed)
 {
     if ((unsigned int)speed > 0x4000) {
         speed = 0x4000;
     }
     int newRate = speed;
-    if (*(void**)self != 0) {
-        func_003AEE98(*(void**)self, newRate);
+    if (self->mpAudio != 0) {
+        func_003AEE98(self->mpAudio, newRate);
     }
-    func_003AE888_sTimer* timer = *(func_003AE888_sTimer**)((char*)self + 0x5C);
+    RCMP_AV_MS_TIMER* timer = self->mpTimer;
     unsigned int now = TIMER_gettick();
-    if (timer->rate == 0x1000) {
-        timer->accum += (ulong)(now - timer->last);
+    if (timer->m_Speed == 0x1000) {
+        timer->m_AccTime += (ulong)(now - timer->m_OldTime);
     } else {
-        timer->accum += ((ulong)timer->rate * (ulong)(now - timer->last)) >> 12;
+        timer->m_AccTime += ((ulong)timer->m_Speed * (ulong)(now - timer->m_OldTime)) >> 12;
     }
-    timer->rate = newRate;
-    timer->last = now;
+    timer->m_Speed = newRate;
+    timer->m_OldTime = now;
     return 0;
 }
 #endif
 
-extern "C" void* func_003AE888(void*, int);
+extern "C" void* func_003AE888(RCMP_AV_PLAYER*, int);
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE938__FPv);
@@ -640,11 +627,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE938__FPv);
  */
 void* func_003AE938(void* self)
 {
-    return func_003AE888(self, 0);
+    return func_003AE888((RCMP_AV_PLAYER*)self, 0);
 }
 #endif
 
-extern "C" void* func_003AE888(void*, int);
+extern "C" void* func_003AE888(RCMP_AV_PLAYER*, int);
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE958__FPv);
@@ -658,34 +645,34 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE958__FPv);
  */
 void* func_003AE958(void* self)
 {
-    return func_003AE888(self, 0x1000);
+    return func_003AE888((RCMP_AV_PLAYER*)self, 0x1000);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE978);
 #ifdef SKIP_ASM
-extern "C" int func_003AEF48(int);
+extern "C" int func_003AEF48(RCMP_AV_AUDIO* audio, int volume);
 
 /**
  * Sets the movie player's audio volume.
  *
- * Forwards the volume (the second argument, which the declaration omits) to the audio object (+0x0) with func_003AEF48.
- * Nothing in the code or data calls it.
+ * Forwards the volume to the audio object (+0x0) with func_003AEF48. Nothing in the code or data calls it.
  *
  * @param player  the movie player
+ * @param volume  the new volume
  * @return func_003AEF48's result, or 0 without audio
  */
-extern "C" int func_003AE978(int *player) {
-    int temp_4;
-    int var_2;
+extern "C" int func_003AE978(RCMP_AV_PLAYER* player, int volume) {
+    RCMP_AV_AUDIO* audio;
+    int result;
 
-    temp_4 = *player;
-    var_2 = 0;
-    if (temp_4 != 0) {
-        var_2 = func_003AEF48(temp_4);
+    audio = player->mpAudio;
+    result = 0;
+    if (audio != 0) {
+        result = func_003AEF48(audio, volume);
     }
-    return var_2;
+    return result;
 }
 #endif
 
@@ -695,40 +682,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE9A0);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDPROFILE_outputlatency();
-extern "C" int SNDSTRM_status(int id, void* out);
-extern "C" int SNDSTRM_requeststatus(int id, void* out);
+extern "C" int SNDSTRM_status(int id, SNDSTREAMSTATUS* out);
+extern "C" int SNDSTRM_requeststatus(int id, SNDREQUESTSTATUS* out);
 extern "C" unsigned int TIMER_getfrequency();
-extern "C" void RCMP_AV_MS_TIMER_Update(void* timer);
-
-// PORT: accum is a 64-bit ulong
-struct func_003AE9A0_sTimer {
-    unsigned int last;
-    int pad4;
-    ulong accum;
-    unsigned int rate;
-};
-
-struct func_003AE9A0_sInfo {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xC;
-};
-
-struct func_003AE9A0_sOwner {
-    char pad[0xC];
-    int id;
-};
-
-struct func_003AE9A0_sSync {
-    func_003AE9A0_sOwner* owner;
-    char pad04[0x48];
-    int offset;
-    int last;
-    int enabled;
-    int drift;
-    func_003AE9A0_sTimer* timer;
-};
+extern "C" void RCMP_AV_MS_TIMER_Update(RCMP_AV_MS_TIMER* timer);
 
 /**
  * Returns the movie player's playback time in ms, kept in step with the audio.
@@ -743,29 +700,29 @@ struct func_003AE9A0_sSync {
  *
  * @return the playback time in ms
  */
-extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
+extern "C" unsigned int func_003AE9A0(RCMP_AV_PLAYER* self)
 {
-    func_003AE9A0_sInfo requestStatus;
-    func_003AE9A0_sInfo streamStatus;
-    func_003AE9A0_sTimer* msTimer = self->timer;
+    SNDREQUESTSTATUS requestStatus;
+    SNDSTREAMSTATUS streamStatus;
+    RCMP_AV_MS_TIMER* msTimer = self->mpTimer;
     RCMP_AV_MS_TIMER_Update(msTimer);
-    unsigned int ms = (unsigned int)(msTimer->accum * 1000) / TIMER_getfrequency();
-    int res = ms - self->offset;
-    if (self->enabled != 0) {
+    unsigned int ms = (unsigned int)(msTimer->m_AccTime * 1000) / TIMER_getfrequency();
+    int res = ms - self->mStartTimeMs;
+    if (self->mbTrackingAudio != 0) {
         SNDSYS_entercritical();
-        SNDSTRM_status(self->owner->id, &streamStatus);
-        SNDSTRM_requeststatus(streamStatus.field_0x4, &requestStatus);
+        SNDSTRM_status(self->mpAudio->mStream, &streamStatus);
+        SNDSTRM_requeststatus(streamStatus.currentrequest, &requestStatus);
         SNDSYS_leavecritical();
-        int audioMs = requestStatus.field_0x4 - SNDPROFILE_outputlatency();
-        if (self->last < audioMs) {
-            self->last = audioMs;
-            self->drift = self->drift - self->drift / 8 + (audioMs - res);
-            int av = -self->drift;
-            if (av < self->drift) av = self->drift;
+        int audioMs = requestStatus.currenttime - SNDPROFILE_outputlatency();
+        if (self->mOldAudioTime < audioMs) {
+            self->mOldAudioTime = audioMs;
+            self->mFilteredError = self->mFilteredError - self->mFilteredError / 8 + (audioMs - res);
+            int av = -self->mFilteredError;
+            if (av < self->mFilteredError) av = self->mFilteredError;
             if (av > 264) {
-                self->offset -= self->drift / 8;
-                self->drift = 0;
-                res = ms - self->offset;
+                self->mStartTimeMs -= self->mFilteredError / 8;
+                self->mFilteredError = 0;
+                res = ms - self->mStartTimeMs;
             }
         }
     }
@@ -776,16 +733,9 @@ extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AEAD0);
 #ifdef SKIP_ASM
-struct sAlloc_AEAD0 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* free;
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_AEAD0 RCMP_rcmp_sys_AEAD0 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
-extern "C" unsigned char* STREAM_get(void* q);
+extern "C" unsigned char* STREAM_get(int handle);
 extern "C" void SYNCTASK_run(int a);
 extern "C" int func_003B11F0(int v);
 void* RCMP_CHUNK_CHUNK(void* self);
@@ -793,23 +743,18 @@ extern "C" void* func_003B11A0();
 // PORT: RCMP_DECODER_ChooseCodec returns its vcall's int result; the unit defines it void.
 extern "C" int RCMP_DECODER_ChooseCodec_i(void* self, void* obj, void* item) __asm__("RCMP_DECODER_ChooseCodec");
 extern "C" void RCMP_DECODER_FreeChosenCodec(RCMP_DECODER* self);
-extern "C" void* STREAM_release(void* p, int a1);
-extern "C" int STREAM_isendofstream(void* q);
-
-struct sChunk_AEAD0 {
-    unsigned char* data;    // 0x0
-    unsigned char* body;    // 0x4
-    unsigned int size;      // 0x8
-};
+extern "C" void* STREAM_release(int handle, void* chunk);
+extern "C" int STREAM_isendofstream(int handle);
 
 static inline unsigned int le32_AEAD0(unsigned char* p)
 {
     return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
 }
 
-// PORT: chunk pointers passed through int parameters of some callees. The unit declares
-// func_003AEAD0(int, void*) for its caller; the real body takes (self, ctx, out), bound by asm label.
-extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out) __asm__("func_003AEAD0");
+// The unit declares func_003AEAD0(player, decoder) for its caller func_003AECB8, which passes the output pointer
+// through; the real body takes (self, decoder, out), bound by asm label.
+extern "C" void func_003AEAD0_impl(RCMP_AV_PLAYER* self, RCMP_DECODER* decoder, RCMP_CHUNK** out)
+    __asm__("func_003AEAD0");
 /**
  * Fetches the next video chunk from the movie player's stream for the decoder.
  *
@@ -823,13 +768,13 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out) __
  * RCMP_DECODER_FreeChosenCodec unless that returns 2. Quirks: the kind-2 branch (data without header) is unreachable, and the tag
  * copied into a local name buffer is never used.
  *
- * @param ctx  the RCMP DECODER asking for data
+ * @param decoder  the RCMP DECODER asking for data
  * @param out  receives the new CHUNK, or 0
  */
-extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
+extern "C" void func_003AEAD0_impl(RCMP_AV_PLAYER* self, RCMP_DECODER* decoder, RCMP_CHUNK** out)
 {
     int kind = 0;
-    void* videoStream = *(void**)(self + 0x30);
+    int videoStream = self->mVideoStream;
     *out = 0;
     for (;;) {
         unsigned char* blockData = STREAM_get(videoStream);
@@ -839,30 +784,34 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
             if (func_003B11F0(tag))
                 kind = 3;
             if (kind != 0) {
-                sChunk_AEAD0* newChunk = (sChunk_AEAD0*)RCMP_CHUNK_CHUNK(RCMP_rcmp_sys_AEAD0.alloc(D_00495210, 0xC, 0, 0, RCMP_rcmp_sys_AEAD0.flags));
+                RCMP_CHUNK* newChunk = (RCMP_CHUNK*)RCMP_CHUNK_CHUNK(
+                    RCMP_rcmp_sys.AllocMemFunc(D_00495210, sizeof(RCMP_CHUNK), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
                 *out = newChunk;
-                newChunk->data = blockData;
+                newChunk->m_UserChunkData = blockData;
                 if (kind == 2) {
                     unsigned int size = le32_AEAD0(blockData + 4);
-                    newChunk->body = blockData;
-                    newChunk->size = size;
+                    newChunk->m_DataToDecode = blockData;
+                    newChunk->m_DataToDecodeSize = size;
                 } else {
                     unsigned int size = le32_AEAD0(blockData + 4);
-                    newChunk->body = blockData + 8;
-                    newChunk->size = size;
+                    newChunk->m_DataToDecode = blockData + 8;
+                    newChunk->m_DataToDecodeSize = size;
                 }
-                if (*(int*)(ctx + 0x14) != 0)
+                if (decoder->m_codec != 0)
                     return;
                 if (kind != 3)
                     return;
-                if (RCMP_DECODER_ChooseCodec_i(ctx, func_003B11A0(), newChunk) != 2)
-                    ((RCMP_DECODER*)ctx)->FreeChosenCodec();
+                if (RCMP_DECODER_ChooseCodec_i(decoder, func_003B11A0(), newChunk) != 2)
+                    decoder->FreeChosenCodec();
                 return;
             }
-            char name[8];
-            *(unsigned int*)name = tag;
-            name[4] = 0;
-            STREAM_release(videoStream, (int)blockData);
+            union {
+                unsigned int tag;
+                char text[8];
+            } name;
+            name.tag = tag;
+            name.text[4] = 0;
+            STREAM_release(videoStream, blockData);
         }
         if (STREAM_isendofstream(videoStream))
             return;
@@ -870,7 +819,7 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
 }
 #endif
 
-extern "C" void* func_003AEAD0(int, void*);
+extern "C" void* func_003AEAD0(RCMP_AV_PLAYER*, void*);
 
 //99.44%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AECB8__FPvT0);
@@ -887,14 +836,14 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AECB8__FPvT0);
  */
 void* func_003AECB8(void* self, void* context)
 {
-    return func_003AEAD0(*(int*)context, self);
+    return func_003AEAD0((RCMP_AV_PLAYER*)((RCMP_STREAMER*)context)->m_Streamer, self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AECE0);
 #ifdef SKIP_ASM
-extern "C" void* STREAM_release(void* p, int a1);
+extern "C" void* STREAM_release(int handle, void* chunk);
 
 /**
  * Releases a video chunk: returns its block to the stream and frees the CHUNK.
@@ -902,21 +851,20 @@ extern "C" void* STREAM_release(void* p, int a1);
  * Hands the CHUNK's block (m_UserChunkData) back to the video STREAM (+0x30) with STREAM_release, then frees the CHUNK
  * with the RCMP free function (RCMP_rcmp_sys.FreeMemFunc). Likely bug: it reads the CHUNK before checking it for null.
  *
- * @param chunkAddr  the CHUNK
+ * @param chunk  the CHUNK
  * @return the free function's result
  */
-extern "C" void* func_003AECE0(int self, int chunkAddr)
+extern "C" void* func_003AECE0(RCMP_AV_PLAYER* self, RCMP_CHUNK* chunk)
 {
-    int* obj = (int*)chunkAddr;
-    void* lastResult = STREAM_release(*(void**)(self + 0x30), *obj);
-    if (obj != 0) {
-        lastResult = RCMP_rcmp_sys.FreeMemFunc(obj);
+    void* lastResult = STREAM_release(self->mVideoStream, chunk->m_UserChunkData);
+    if (chunk != 0) {
+        lastResult = RCMP_rcmp_sys.FreeMemFunc(chunk);
     }
     return lastResult;
 }
 #endif
 
-extern "C" void* func_003AECE0(int, int);
+extern "C" void* func_003AECE0(RCMP_AV_PLAYER*, RCMP_CHUNK*);
 
 //99.38%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AED20__FPvT0i);
@@ -932,27 +880,22 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AED20__FPvT0i);
  */
 void* func_003AED20(void* self, void* context, int chunk)
 {
-    return func_003AECE0(*(int*)context, chunk);
+    // ORIGINAL-PTR: the retail symbol func_003AED20__FPvT0i mangles the chunk parameter as int, so the original
+    // converted it back to the CHUNK pointer too
+    return func_003AECE0((RCMP_AV_PLAYER*)((RCMP_STREAMER*)context)->m_Streamer, (RCMP_CHUNK*)chunk);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AED40);
 #ifdef SKIP_ASM
-struct func_003AED40_sAlloc {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* free;
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern func_003AED40_sAlloc RCMP_rcmp_sys_v __asm__("RCMP_rcmp_sys");
 extern char str_AV_audiobuff[];
 
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
-extern "C" int SNDplaysetdef(void* desc);
+extern "C" int SNDplaysetdef(SNDPLAYOPTS* desc);
 extern "C" int SNDSTRM_overheadtap(int a, int b);
-extern "C" int func_003B7E38(int a, void* desc, int b, int c, void* mem, int size);
+extern "C" int func_003B7E38(int a, SNDPLAYOPTS* desc, int b, int c, void* mem, int size);
 extern "C" int func_003B7DE8(int h, int a, int b);
 
 /**
@@ -967,23 +910,23 @@ extern "C" int func_003B7DE8(int h, int a, int b);
  * @param sourceHandle  the audio source handle to queue
  * @return self
  */
-extern "C" void* func_003AED40(void* self, int sourceStream, int sourceHandle)
+extern "C" RCMP_AV_AUDIO* func_003AED40(RCMP_AV_AUDIO* self, int sourceStream, int sourceHandle)
 {
-    char desc[0x18];
+    SNDPLAYOPTS desc;
     if (func_003B5440() == 0) {
         func_003E62B0();
     } else {
-        *(void**)((char*)self + 0x4) = 0;
-        *(int*)((char*)self + 0x10) = -1;
-        *(int*)((char*)self + 0xC) = -1;
-        SNDplaysetdef(desc);
+        self->mpBuffer = 0;
+        self->mRequest = -1;
+        self->mStream = -1;
+        SNDplaysetdef(&desc);
         int size = SNDSTRM_overheadtap(1, 0x1E);
-        void* mem = RCMP_rcmp_sys_v.alloc(str_AV_audiobuff, size, 0, 0, RCMP_rcmp_sys_v.flags);
-        *(void**)((char*)self + 0x4) = mem;
-        int streamHandle = func_003B7E38(sourceStream, desc, 1, 0x1E, mem, size);
-        *(int*)((char*)self + 0xC) = streamHandle;
-        *(int*)((char*)self + 0x10) = func_003B7DE8(streamHandle, -1, sourceHandle);
-        *(float*)self = 1.0f;
+        void* mem = RCMP_rcmp_sys.AllocMemFunc(str_AV_audiobuff, size, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+        self->mpBuffer = mem;
+        int streamHandle = func_003B7E38(sourceStream, &desc, 1, 0x1E, mem, size);
+        self->mStream = streamHandle;
+        self->mRequest = func_003B7DE8(streamHandle, -1, sourceHandle);
+        self->mVolume = 1.0f;
     }
     return self;
 }
@@ -992,7 +935,7 @@ extern "C" void* func_003AED40(void* self, int sourceStream, int sourceHandle)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AEE30);
 #ifdef SKIP_ASM
-extern "C" void SNDSTRM_destroy(void* a);
+extern "C" void SNDSTRM_destroy(int handle);
 
 /**
  * Destroys the movie player's audio object.
@@ -1002,12 +945,12 @@ extern "C" void SNDSTRM_destroy(void* a);
  *
  * @param flags  bit 0 frees the object itself
  */
-extern "C" void func_003AEE30(void* self, int flags)
+extern "C" void func_003AEE30(RCMP_AV_AUDIO* self, int flags)
 {
-    if (*(void**)((char*)self + 0x4) != 0) {
-        SNDSTRM_destroy(*(void**)((char*)self + 0xC));
-        RCMP_rcmp_sys.FreeMemFunc(*(void**)((char*)self + 0x4));
-        *(void**)((char*)self + 0x4) = 0;
+    if (self->mpBuffer != 0) {
+        SNDSTRM_destroy(self->mStream);
+        RCMP_rcmp_sys.FreeMemFunc(self->mpBuffer);
+        self->mpBuffer = 0;
     }
     if (flags & 1) {
         RCMP_rcmp_sys.FreeMemFunc(self);
@@ -1030,12 +973,12 @@ extern "C" int SNDSTRM_pitchmult(int h, int v);
  * @param speed  the speed in 1/0x1000 units
  * @return SNDSTRM_pitchmult's result, or 0 without a stream
  */
-extern "C" int func_003AEE98(void* self, int speed)
+extern "C" int func_003AEE98(RCMP_AV_AUDIO* self, int speed)
 {
     int result;
-    if (*(int*)((char*)self + 0xC) != -1) {
+    if (self->mStream != -1) {
         SNDSYS_entercritical();
-        result = SNDSTRM_pitchmult(*(int*)((char*)self + 0xC), speed);
+        result = SNDSTRM_pitchmult(self->mStream, speed);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1057,12 +1000,12 @@ extern "C" int SNDSTRM_modifyhold(int h, int a1);
  *
  * @return SNDSTRM_modifyhold's result, or 0 without a request
  */
-extern "C" int func_003AEEF8(void* self)
+extern "C" int func_003AEEF8(RCMP_AV_AUDIO* self)
 {
     int result;
-    if (*(int*)((char*)self + 0x10) != -1) {
+    if (self->mRequest != -1) {
         SNDSYS_entercritical();
-        result = SNDSTRM_modifyhold(*(int*)((char*)self + 0x10), 0);
+        result = SNDSTRM_modifyhold(self->mRequest, 0);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1075,7 +1018,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AEF48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003B7E70(int, int);
-int func_003AEF48_impl(void *self, int arg) __asm__("func_003AEF48");
+
 
 /**
  * Sets the audio object's volume.
@@ -1085,12 +1028,12 @@ int func_003AEF48_impl(void *self, int arg) __asm__("func_003AEF48");
  * @param volume  the new volume
  * @return func_003B7E70's result, or 0 without a stream
  */
-int func_003AEF48_impl(void *self, int volume) {
+extern "C" int func_003AEF48(RCMP_AV_AUDIO* self, int volume) {
     int result;
 
-    if (*(int *)((char *)self + 0xC) != -1) {
+    if (self->mStream != -1) {
         SNDSYS_entercritical();
-        result = func_003B7E70(*(int *)((char *)self + 0xC), volume);
+        result = func_003B7E70(self->mStream, volume);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1103,15 +1046,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AEFA8);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
-extern "C" int SNDSTRM_status(int id, void* out);
-extern "C" int SNDSTRM_requeststatus(int id, void* out);
-
-struct func_003AEFA8_sInfo {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xC;
-};
+extern "C" int SNDSTRM_status(int id, SNDSTREAMSTATUS* out);
+extern "C" int SNDSTRM_requeststatus(int id, SNDREQUESTSTATUS* out);
 
 /**
  * Tells whether the audio object's stream has finished playing.
@@ -1121,14 +1057,14 @@ struct func_003AEFA8_sInfo {
  *
  * @return 1 when the request has no time left (third status word 0), 0 otherwise or when a query fails
  */
-extern "C" int func_003AEFA8(void* self)
+extern "C" int func_003AEFA8(RCMP_AV_AUDIO* self)
 {
-    func_003AEFA8_sInfo b;
-    func_003AEFA8_sInfo a;
+    SNDREQUESTSTATUS b;
+    SNDSTREAMSTATUS a;
     SNDSYS_entercritical();
-    if (SNDSTRM_status(*(int*)((char*)self + 0xC), &a) >= 0 && SNDSTRM_requeststatus(a.field_0x4, &b) >= 0) {
+    if (SNDSTRM_status(self->mStream, &a) >= 0 && SNDSTRM_requeststatus(a.currentrequest, &b) >= 0) {
         SNDSYS_leavecritical();
-        return b.field_0x8 == 0;
+        return b.timetoend == 0;
     }
     SNDSYS_leavecritical();
     return 0;
@@ -1189,16 +1125,13 @@ extern "C" void f03C0_F0C8(void*, int) __asm__("RCMP_AV_SUBTITLE_SetHeight");
 extern "C" void f03C8_F0C8(void*, unsigned int) __asm__("RCMP_AV_SUBTITLE_SetStrID");
 extern "C" void f03D0_F0C8(void*, int) __asm__("RCMP_AV_SUBTITLE_SetFrameNumber");
 extern char D_00495260[];
-struct sAlloc_F0C8 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void (*free)(void* p);
-    int flags;
+// g++ 2.95's array-new block for the subtitles: the element count in a 0x10-byte header, then the elements (the
+// operator delete[] of RCMP_AV_SUBTITLE reads the count back).
+struct RCMP_AV_SUBTITLE_NEWBLOCK {
+    unsigned int count;                 // 0x00
+    int pad04[3];
+    RCMP_AV_SUBTITLE elements[1];       // 0x10
 };
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_F0C8 RCMP_rcmp_sys_F0C8 __asm__("RCMP_rcmp_sys");
-
-struct sElem_F0C8 { char pad[0x34]; };
-struct sSelf_F0C8 { sElem_F0C8* arr; unsigned int count; };
 
 /**
  * Fills a subtitle array with a number of default subtitles at one position and size.
@@ -1208,45 +1141,45 @@ struct sSelf_F0C8 { sElem_F0C8* arr; unsigned int count; };
  * RCMP_AV_SUBTITLE_SetPosY), size (RCMP_AV_SUBTITLE_SetWidth, RCMP_AV_SUBTITLE_SetHeight) and its index as string id (RCMP_AV_SUBTITLE_SetStrID). It does not free
  * earlier entries. Nothing in the code or data calls it.
  *
- * @param vself  the subtitle array
  * @param count  number of subtitles
  * @param posX  x position
  * @param posY  y position
  * @param width  width
  * @param height  height
  */
-extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(void* vself, unsigned int count, int posX, int posY, int width, int height)
+extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int count, int posX, int posY,
+                                            int width, int height)
 {
-    sSelf_F0C8* self = (sSelf_F0C8*)vself;
-    unsigned int* raw;
-    char* arr;
-    char* subtitle;
+    RCMP_AV_SUBTITLE_NEWBLOCK* raw;
+    RCMP_AV_SUBTITLE* arr;
+    RCMP_AV_SUBTITLE* subtitle;
     int i;
     unsigned int k;
 
     i = count - 1;
-    raw = (unsigned int*)RCMP_rcmp_sys_F0C8.alloc(D_00495260, count * 52 + 0x10, 0, 0, RCMP_rcmp_sys_F0C8.flags);
-    arr = (char*)raw + 0x10;
-    *raw = count;
+    raw = (RCMP_AV_SUBTITLE_NEWBLOCK*)RCMP_rcmp_sys.AllocMemFunc(D_00495260, count * sizeof(RCMP_AV_SUBTITLE) + 0x10,
+                                                                 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    arr = raw->elements;
+    raw->count = count;
     subtitle = arr;
     if (count != 0) {
         do {
             i--;
-            ((RCMP_AV_SUBTITLE*)subtitle)->AV_SUBTITLE();
-            subtitle += 0x34;
+            subtitle->AV_SUBTITLE();
+            subtitle++;
         } while (i != -1);
     }
-    self->arr = (sElem_F0C8*)arr;
-    self->count = count;
+    self->mSubTitle = arr;
+    self->mNumberOfSubtitle = count;
     if (count != 0) {
         f03D0_F0C8(arr, 0);
     }
-    for (k = 0; k < self->count; k++) {
-        f03A8_F0C8(&self->arr[k], posX);
-        f03B0_F0C8(&self->arr[k], posY);
-        f03B8_F0C8(&self->arr[k], width);
-        f03C0_F0C8(&self->arr[k], height);
-        f03C8_F0C8(&self->arr[k], k);
+    for (k = 0; k < self->mNumberOfSubtitle; k++) {
+        f03A8_F0C8(&self->mSubTitle[k], posX);
+        f03B0_F0C8(&self->mSubTitle[k], posY);
+        f03B8_F0C8(&self->mSubTitle[k], width);
+        f03C0_F0C8(&self->mSubTitle[k], height);
+        f03C8_F0C8(&self->mSubTitle[k], k);
     }
 }
 #endif
@@ -1383,10 +1316,11 @@ extern "C" int MyStrCmpi(const char* lhs, const char* rhs)
 INCLUDE_ASM("ealib/seg_2AEDC0", FindJust);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sNames_F428 { const char* e[5]; };
-struct sVals_F428 { unsigned int e[5]; };
-extern const sNames_F428 D_00495290;
-extern const sVals_F428 D_004952A8;
+// The keyword table and its values, copied into locals by value (as an initialised local array would be).
+struct sJustifyNames { const char* e[5]; };
+struct sJustifyValues { unsigned int e[5]; };
+extern const sJustifyNames D_00495290;
+extern const sJustifyValues D_004952A8;
 extern "C" int MyStrCmpi(const char*, const char*) __asm__("MyStrCmpi");
 
 /**
@@ -1416,8 +1350,8 @@ extern "C" unsigned int FindJust(char* text, unsigned int len)
             break;
         }
     }
-    sNames_F428 names = D_00495290;
-    sVals_F428 vals = D_004952A8;
+    sJustifyNames names = D_00495290;
+    sJustifyValues vals = D_004952A8;
     justify = 0xFFFFFFFF;
     for (j = 0; j < 5; j++) {
         if (MyStrCmpi(names.e[j], text) == 0) {
@@ -1712,7 +1646,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetA);
  */
 void RCMP_AV_SUBTITLE::SetA(signed char value)
 {
-    (*(signed char*)&mA) = value;
+    mA = value;
 }
 #endif
 //100%
@@ -1727,7 +1661,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetR);
  */
 void RCMP_AV_SUBTITLE::SetR(signed char value)
 {
-    (*(signed char*)&mR) = value;
+    mR = value;
 }
 #endif
 //100%
@@ -1742,7 +1676,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetG);
  */
 void RCMP_AV_SUBTITLE::SetG(signed char value)
 {
-    (*(signed char*)&mG) = value;
+    mG = value;
 }
 #endif
 //100%
@@ -1757,7 +1691,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetB);
  */
 void RCMP_AV_SUBTITLE::SetB(signed char value)
 {
-    (*(signed char*)&mB) = value;
+    mB = value;
 }
 #endif
 
@@ -1776,10 +1710,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_RCMP_SYSTEM_RCMP_SYSTEM__FPv);
 void* RCMP_RCMP_SYSTEM_RCMP_SYSTEM(void* vself)
 {
     RCMP_RCMP_SYSTEM* self = (RCMP_RCMP_SYSTEM*)vself;
-    int zero = 0;
-    *(int*)self = zero;
-    self->mVtbl = (void**)((int)(void*)RCMP_RCMP_SYSTEM_vtbl);
-    self->FreeMemFunc = (void*(*)(void*))zero;
+    self->AllocMemFunc = 0;
+    self->mVtbl = RCMP_RCMP_SYSTEM_vtbl;
+    self->FreeMemFunc = 0;
     return ((void*)self);
 }
 #endif
@@ -1790,9 +1723,6 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_DECODER);
 void* RCMP_CODEC_IDATA_CODEC_IDATA(void* self);
 extern void* RCMP_DECODER_vtbl[];
 
-struct RCMP_DECODER_DECODER_sKey {
-    int v[4];
-};
 
 
 /**
@@ -1804,16 +1734,16 @@ struct RCMP_DECODER_DECODER_sKey {
  * The DECODER is 0x1C bytes: +0x0 first CHUNK, +0x4 CODEC_IDATA (streamer, get-data function, release function, frame
  * count), +0x14 the chosen codec, +0x18 vptr (RCMP_DECODER_vtbl).
  *
- * @param key  the CODEC_IDATA to copy
+ * @param idata  the CODEC_IDATA to copy
  * @return self
  */
-extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_DECODER_DECODER_sKey* key)
+extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_CODEC_IDATA* idata)
 {
     self->mVtbl = RCMP_DECODER_vtbl;
-    RCMP_CODEC_IDATA_CODEC_IDATA(&(*(RCMP_DECODER_DECODER_sKey*)&self->m_IData));
-    (*(RCMP_DECODER_DECODER_sKey*)&self->m_IData) = *key;
-    (*(int*)&self->m_codec) = 0;
-    (*(int*)&self->m_FirstChunk) = 0;
+    RCMP_CODEC_IDATA_CODEC_IDATA(&self->m_IData);
+    self->m_IData = *idata;
+    self->m_codec = 0;
+    self->m_FirstChunk = 0;
     return self;
 }
 #endif
@@ -2020,16 +1950,16 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_GetChunk);
  *
  * @return the CHUNK, or 0 when there is no more data
  */
-int RCMP_DECODER::GetChunk()
+RCMP_CHUNK* RCMP_DECODER::GetChunk()
 {
-    int chunk;
-    int pendingChunk = ((int)m_FirstChunk);
+    RCMP_CHUNK* chunk;
+    RCMP_CHUNK* pendingChunk = m_FirstChunk;
     if (pendingChunk != 0) {
-        (*(int*)&m_FirstChunk) = 0;
+        m_FirstChunk = 0;
         chunk = pendingChunk;
         return pendingChunk;
     }
-    ((void (*)(RCMP_DECODER*, int, int*))m_IData.m_GetDataFunc)(this, (*(int*)&m_IData), &chunk);
+    m_IData.m_GetDataFunc(this, m_IData.m_Streamer, &chunk);
     return chunk;
 }
 #endif
@@ -2046,9 +1976,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_ReleaseChunk);
  *
  * @param chunk  the CHUNK
  */
-void RCMP_DECODER::ReleaseChunk(int chunk)
+void RCMP_DECODER::ReleaseChunk(RCMP_CHUNK* chunk)
 {
-    ((void (*)(RCMP_DECODER*, void*, int))m_IData.m_ReleaseDataFunc)(this, (*(void**)&m_IData), chunk);
+    m_IData.m_ReleaseDataFunc(this, m_IData.m_Streamer, chunk);
 }
 #endif
 
@@ -2065,10 +1995,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_CHUNK_CHUNK__FPv);
 void* RCMP_CHUNK_CHUNK(void* vself)
 {
     RCMP_CHUNK* self = (RCMP_CHUNK*)vself;
-    int zero = 0;
-    self->m_DataToDecode = (void*)zero;
-    self->m_DataToDecodeSize = zero;
-    *(int*)self = zero;
+    self->m_DataToDecode = 0;
+    self->m_DataToDecodeSize = 0;
+    self->m_UserChunkData = 0;
     return ((void*)self);
 }
 #endif
@@ -2087,11 +2016,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_CODEC_IDATA_CODEC_IDATA__FPv);
 void* RCMP_CODEC_IDATA_CODEC_IDATA(void* vself)
 {
     RCMP_CODEC_IDATA* self = (RCMP_CODEC_IDATA*)vself;
-    int zero = 0;
-    *(int*)self = zero;
+    self->m_Streamer = 0;
     self->m_MaxFramesOutstanding = 2;
-    self->m_GetDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK**))zero;
-    self->m_ReleaseDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK*))zero;
+    self->m_GetDataFunc = 0;
+    self->m_ReleaseDataFunc = 0;
     return ((void*)self);
 }
 #endif
@@ -2110,13 +2038,15 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_CODEC_IDATA_CODEC_IDATA1);
  * @param framesToBuffer  number of frames the codec keeps
  * @return self
  */
-extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1(RCMP_CODEC_IDATA* self, int context, int fetchFn, int releaseFn, int framesToBuffer)
+extern "C" RCMP_CODEC_IDATA* RCMP_CODEC_IDATA_CODEC_IDATA1(RCMP_CODEC_IDATA* self, RCMP_STREAMER* context,
+                                                          RCMP_GetDataFn fetchFn, RCMP_ReleaseDataFn releaseFn,
+                                                          int framesToBuffer)
 {
     self->m_MaxFramesOutstanding = framesToBuffer;
-    *(int*)self = context;
-    self->m_GetDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK**))fetchFn;
-    self->m_ReleaseDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK*))releaseFn;
-    return ((void*)self);
+    self->m_Streamer = context;
+    self->m_GetDataFunc = fetchFn;
+    self->m_ReleaseDataFunc = releaseFn;
+    return self;
 }
 #endif
 
@@ -2209,12 +2139,12 @@ static inline char* func_003B07F8_data(char* p)
  * @param height  height in pixels
  * @return self
  */
-extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int height)
+extern "C" PS2_SONY_FRAME* func_003B07F8(PS2_SONY_FRAME* self, unsigned int w, int height)
 {
     self->m_FrameType = 2;
-    *(int*)((char*)self + 0x8) = 3;
-    *(int*)((char*)self + 0xC) = 3;
-    *(int*)((char*)self + 0x10) = 0;
+    self->Next = (RCON_DLNode*)3;
+    self->Prev = (RCON_DLNode*)3;
+    self->mReferenceCount = 0;
     char* img = (char*)SHAPE_create(w, height, 0x20, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir, 0, 0xF0);
     self->m_Shp = (SHAPE*)img;
     char* hdr = (char*)func_003B3D40(img);
@@ -2224,7 +2154,7 @@ extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int height)
     unsigned int size = ((w >> 4) * height >> 4) << 10;
     MEM_fill(func_003B07F8_data((char*)self->m_Shp), 0, size);
     *(char*)self->m_Shp = 5;
-    return ((void*)self);
+    return self;
 }
 #endif
 
@@ -2241,14 +2171,14 @@ extern "C" void SHAPE_destroy(SHAPE* buf);
  *
  * @param flags  bit 0 frees the frame itself
  */
-extern "C" void func_003B08E0(RCMP_FRAME* self, int flags)
+extern "C" void func_003B08E0(PS2_SONY_FRAME* self, int flags)
 {
     if (self->m_Shp != 0) {
-        SHAPE_destroy((SHAPE*)((char*)self->m_Shp));
+        SHAPE_destroy(self->m_Shp);
         self->m_Shp = 0;
     }
-    *(int*)((char*)self + 0x8) = 7;
-    *(int*)((char*)self + 0xC) = 7;
+    self->Next = (RCON_DLNode*)7;
+    self->Prev = (RCON_DLNode*)7;
     if (flags & 1) {
         RCMP_rcmp_sys.FreeMemFunc(self);
     }
@@ -2324,7 +2254,7 @@ static inline void wsUnlink_09A0(RCON_DLNode* n)
     next->Prev = prev;
     n->Prev = (RCON_DLNode*)0xB;
     n->Next = (RCON_DLNode*)0xB;
-    if (obj) func_003B08E0((RCMP_FRAME*)obj, 3);
+    if (obj) func_003B08E0((PS2_SONY_FRAME*)obj, 3);
 }
 
 /**
@@ -2359,7 +2289,7 @@ extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0B10);
 #ifdef SKIP_ASM
-extern "C" void func_003B0B40(void* a, void* b, void* c);
+extern "C" void func_003B0B40(PS2_SONY_CODEC_INTERNAL* source, void* consumer, void* callbackArg);
 
 /**
  * Feeds the MPEG decoder more input when it runs out (decoder callback).
@@ -2371,7 +2301,7 @@ extern "C" void func_003B0B40(void* a, void* b, void* c);
  * @param source  the Sony codec object (callback data)
  * @return 1
  */
-extern "C" int func_003B0B10(void* self, void* callbackArg, void* source)
+extern "C" int func_003B0B10(void* self, void* callbackArg, PS2_SONY_CODEC_INTERNAL* source)
 {
     func_003B0B40(source, self, callbackArg);
     return 1;
@@ -2381,25 +2311,8 @@ extern "C" int func_003B0B10(void* self, void* callbackArg, void* source)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0B40);
 #ifdef SKIP_ASM
-extern "C" void RCMP_DECODER_ReleaseChunk(void* req, void* blk);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void sceMpegAddBs(void* dst, void* src, int size);
-
-struct func_003B0B40_sBlock {
-    int f0;
-    void* data;
-    int size;
-};
-
-struct func_003B0B40_sScript {
-    char pad00[0x14];
-    int count;
-    char pad18[0x10];
-    RCMP_DECODER* req;
-    char pad2C[0x4C];
-    void* hdr;
-    char* buf;
-};
 
 /**
  * Copies the next input CHUNK into the codec's chunk buffer and hands it to the MPEG decoder.
@@ -2409,57 +2322,47 @@ struct func_003B0B40_sScript {
  * sequence end codes) so the decoder stops. It releases the CHUNK (RCMP_DECODER_ReleaseChunk), counts it (+0x14) and passes the
  * buffer (+0x78) and size to sceMpegAddBs.
  *
- * @param source  the Sony codec object
  * @param consumer  the MPEG decoder state passed to sceMpegAddBs
  * @param callbackArg  the callback argument (unused)
  */
-// PORT: RCMP_DECODER_GetChunk returns the block pointer as int.
-extern "C" void func_003B0B40(void* source, void* consumer, void* callbackArg)
+extern "C" void func_003B0B40(PS2_SONY_CODEC_INTERNAL* self, void* consumer, void* callbackArg)
 {
-    func_003B0B40_sScript* self = (func_003B0B40_sScript*)source;
     void* data = 0;
-    func_003B0B40_sBlock* blk = (func_003B0B40_sBlock*)self->req->GetChunk();
+    RCMP_CHUNK* blk = self->mpDecoder->GetChunk();
     if (blk != 0) {
-        data = blk->data;
+        data = blk->m_DataToDecode;
     }
     int total;
     int i;
     if (data != 0) {
-        i = blk->size;
+        i = blk->m_DataToDecodeSize;
         total = (i + 7) & ~0xF;
         i -= 8;
-        MEM_copy(self->buf, data, i);
+        MEM_copy(self->mpChunkBufferUncached, data, i);
         for (; i < total + 0x10; i += 4) {
-            *(int*)(self->buf + i) = 0;
+            *(int*)(self->mpChunkBufferUncached + i) = 0;
         }
     } else {
         total = 0x10;
         for (i = 0; i < 0x10; i += 4) {
-            *(int*)(self->buf + i) = 0xB7010000;
+            *(int*)(self->mpChunkBufferUncached + i) = 0xB7010000;
         }
     }
     if (blk != 0) {
-        RCMP_DECODER_ReleaseChunk(self->req, blk);
+        self->mpDecoder->ReleaseChunk(blk);
     }
-    self->count++;
-    sceMpegAddBs(consumer, self->hdr, total);
+    self->mChunksFed++;
+    sceMpegAddBs(consumer, self->mpChunkBuffer, total);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_Init);
 #ifdef SKIP_ASM
-struct sAlloc_B0C58 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* (*free)(void* p);
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_B0C58 RCMP_rcmp_sys_B0C58 __asm__("RCMP_rcmp_sys");
 // mpeg2decode: struct layer_data *ld (current layer), outside small data like the other MPEG globals
 struct layer_data;
 extern layer_data* ld __asm__("D_0050A088") __attribute__((section(".bss")));
-extern int D_00509648[];
+extern layer_data D_00509648;
 // MPEG decoder globals: plain scalars outside small data (the original TU kept them out of $gp)
 #define BSS_B0C58 __attribute__((section(".bss")))
 extern int D_005094F4_s __asm__("D_005094F4") BSS_B0C58;
@@ -2480,22 +2383,11 @@ extern char str_RCMP_mpegbuff[];
 extern char str_RCMP_chunkbuff[];
 extern "C" void Initialize_Buffer(void* data);
 extern "C" int Get_Hdr(void);
-extern "C" void* func_003B07F8(RCMP_FRAME* self, unsigned int w, int h);
+extern "C" PS2_SONY_FRAME* func_003B07F8(PS2_SONY_FRAME* self, unsigned int w, int h);
 extern "C" void sceMpegInit(void);
 extern "C" void sceMpegCreate(void* a, void* b, int size);
 extern "C" void* sceMpegAddCallback(void* a, int n, void* fn, void* arg);
-extern "C" int func_003B0B10(void* self, void* a1, void* a2);
-
-struct sWSNode_B0C58 {
-    sWSNode_B0C58* next;
-    sWSNode_B0C58* prev;
-};
-
-
-struct sData_B0C58 {
-    int f0;
-    void* data;
-};
+extern "C" int func_003B0B10(void* self, void* a1, PS2_SONY_CODEC_INTERNAL* a2);
 
 
 /**
@@ -2515,25 +2407,25 @@ struct sData_B0C58 {
  * @param firstChunk  the first CHUNK
  * @return 2 (usable)
  */
-extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_DECODER* script, sData_B0C58* firstChunk)
+extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
 {
-    (*(RCMP_DECODER**)&self->mpDecoder) = script;
+    self->mpDecoder = script;
     self->mCurrentFrameNumber = 0;
-    self->unk_14 = 0;
+    self->mChunksFed = 0;
     if (self->mpWorkBuffer != 0) {
-        RCMP_rcmp_sys_B0C58.free(self->mpWorkBuffer);
+        RCMP_rcmp_sys.FreeMemFunc(self->mpWorkBuffer);
         self->mpWorkBuffer = 0;
     }
     if (self->mpChunkBuffer != 0) {
-        RCMP_rcmp_sys_B0C58.free(self->mpChunkBuffer);
+        RCMP_rcmp_sys.FreeMemFunc(self->mpChunkBuffer);
         self->mpChunkBuffer = 0;
     }
     self->unk_04 = 1;
-    void* data = firstChunk->data;
-    ld = (layer_data*)D_00509648;
+    void* data = firstChunk->m_DataToDecode;
+    ld = &D_00509648;
     Initialize_Buffer(data);
     Get_Hdr();
-    int mode = D_00509648[1056 / 4];
+    int mode = D_00509648.MPEG2_Flag;
     if (mode == 0) {
         D_00509524_s = 1;
         D_005095A0_s = 1;
@@ -2551,22 +2443,23 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
     self->mHeight = codedHeight;
     D_005094DC_s = w >> 1;
     D_005094E0_s = codedHeight >> 1;
-    int n = ((int)(self->mpDecoder)->m_IData.m_MaxFramesOutstanding);
+    int n = self->mpDecoder->m_IData.m_MaxFramesOutstanding;
     for (int i = 0; i < n; i++) {
         int cw = self->mWidth;
         int ch = self->mHeight;
-        char* newFrame = (char*)func_003B07F8((RCMP_FRAME*)RCMP_rcmp_sys_B0C58.alloc(D_004953E8, 20, 0, 0, RCMP_rcmp_sys_B0C58.flags), cw, ch);
-        sWSNode_B0C58* node = newFrame ? (sWSNode_B0C58*)(newFrame + 8) : 0;
-        sWSNode_B0C58* head = &(*(sWSNode_B0C58*)&self->mFreeFrames);
-        sWSNode_B0C58* old = head->next;
-        head->next = node;
-        old->prev = node;
-        node->next = old;
-        node->prev = head;
+        PS2_SONY_FRAME* newFrame = func_003B07F8(
+            (PS2_SONY_FRAME*)RCMP_rcmp_sys.AllocMemFunc(D_004953E8, sizeof(PS2_SONY_FRAME), 0, 0,
+                                                         RCMP_rcmp_sys.m_DefaultMemDir),
+            cw, ch);
+        self->mFreeFrames.AddHead(newFrame);
     }
-    self->mpWorkBuffer = RCMP_rcmp_sys_B0C58.alloc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996, 0, 0, RCMP_rcmp_sys_B0C58.flags | 0x400);
-    self->mpChunkBuffer = RCMP_rcmp_sys_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, RCMP_rcmp_sys_B0C58.flags | 0x400);
-    (*(void**)&self->mpChunkBufferUncached) = (void*)(((unsigned int)self->mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
+    self->mpWorkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996,
+                                                    0, 0, RCMP_rcmp_sys.m_DefaultMemDir | 0x400);
+    self->mpChunkBuffer = RCMP_rcmp_sys.AllocMemFunc(str_RCMP_chunkbuff, 0x32000, 0, 0,
+                                                     RCMP_rcmp_sys.m_DefaultMemDir | 0x400);
+    // ORIGINAL-PTR: the chunk buffer is written through the EE's uncached-accelerated segment (address & 0x0FFFFFFF |
+    // 0x30000000, a hardware address alias as the Sony SDK's UNCACHED() is for 0x20000000)
+    self->mpChunkBufferUncached = (char*)(((unsigned int)self->mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
     sceMpegInit();
     sceMpegCreate(self->mMpeg, self->mpWorkBuffer, self->mWidth * self->mHeight * 9 / 2 + 5996);
     sceMpegAddCallback(self->mMpeg, 1, (void*)func_003B0B10, self);
@@ -2616,9 +2509,7 @@ extern "C" float PS2_SONY_CODEC_INTERNAL_GetFrameRate()
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_DecodeFrame);
 #ifdef SKIP_ASM
-struct sWSPool;
-struct sWSItem;
-extern "C" sWSItem* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self);
+extern "C" PS2_SONY_FRAME* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self);
 extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
 
 /**
@@ -2634,8 +2525,7 @@ extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
  */
 void* PS2_SONY_CODEC_INTERNAL::DecodeFrame()
 {
-    // func_003B10D0's sWSItem is the frame; it starts with its RCMP::FRAME (m_FrameType, m_Shp)
-    RCMP_FRAME* frame = (RCMP_FRAME*)func_003B10D0(this);
+    PS2_SONY_FRAME* frame = func_003B10D0(this);
     // the frame's SHAPE, read as SHAPEIMAGE (same layout; retail tests the 0xC word whole)
     SHAPEIMAGE* shp = (SHAPEIMAGE*)frame->m_Shp;
     char* data;
@@ -2696,43 +2586,6 @@ void* PS2_SONY_CODEC_INTERNAL::GetFrame(unsigned int limit)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B10D0);
 #ifdef SKIP_ASM
-struct sWSNode {
-    sWSNode* next;
-    sWSNode* prev;
-
-    void unlink()
-    {
-        sWSNode* n = next;
-        sWSNode* p = prev;
-        p->next = n;
-        n->prev = p;
-        prev = next = (sWSNode*)0xB;
-    }
-};
-
-struct sWSList {
-    sWSNode head;
-
-    void addTail(sWSNode* n)
-    {
-        sWSNode* tail = head.prev;
-        tail->next = n;
-        head.prev = n;
-        n->prev = tail;
-        n->next = &head;
-    }
-};
-
-struct sWSItemBase {
-    int a;
-    int b;
-};
-
-struct sWSItem : sWSItemBase, sWSNode {
-    int refs; // 0x10
-};
-
-
 /**
  * Moves the first frame of the codec's free list to its used list and returns it.
  *
@@ -2740,15 +2593,15 @@ struct sWSItem : sWSItemBase, sWSNode {
  *
  * @return the frame, or 0 when the free list (+0x20) is empty
  */
-extern "C" sWSItem* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self)
+extern "C" PS2_SONY_FRAME* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self)
 {
-    sWSNode* n = (*(sWSList*)&self->mFreeFrames).head.next;
-    if (n != &(*(sWSList*)&self->mFreeFrames).head) {
-        sWSItem* item;
-        n->unlink();
-        item = static_cast<sWSItem*>(n);
-        (*(sWSList*)&self->mUsedFrames).addTail(item);
-        item->refs = 1;
+    RCON_DLNode* n = self->mFreeFrames.HeadNode.Next;
+    if (n != &self->mFreeFrames.HeadNode) {
+        PS2_SONY_FRAME* item;
+        n->Remove();
+        item = static_cast<PS2_SONY_FRAME*>(n);
+        self->mUsedFrames.AddTail(item);
+        item->mReferenceCount = 1;
         return item;
     }
     return 0;
@@ -2765,26 +2618,19 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_ReleaseFrame);
  *
  * @param item  the frame
  */
-extern "C" void PS2_SONY_CODEC_INTERNAL_ReleaseFrame(PS2_SONY_CODEC_INTERNAL* self, sWSItem* item)
+extern "C" void PS2_SONY_CODEC_INTERNAL_ReleaseFrame(PS2_SONY_CODEC_INTERNAL* self, PS2_SONY_FRAME* item)
 {
-    if (--item->refs > 0) {
+    if (--item->mReferenceCount > 0) {
         return;
     }
-    item->unlink();
-    (*(sWSList*)&self->mFreeFrames).addTail(item);
+    item->Remove();
+    self->mFreeFrames.AddTail(item);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B11A0);
 #ifdef SKIP_ASM
-struct sAlloc_11A0 {
-    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
-    void* (*free)(void* p);
-    int flags;
-};
-// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_11A0 RCMP_rcmp_sys_11A0 __asm__("RCMP_rcmp_sys");
 /**
  * Allocates and constructs a Sony MPEG codec object (0x80 bytes).
  *
@@ -2795,7 +2641,8 @@ extern sAlloc_11A0 RCMP_rcmp_sys_11A0 __asm__("RCMP_rcmp_sys");
  */
 extern "C" void* func_003B11A0(void)
 {
-    return PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL((PS2_SONY_CODEC_INTERNAL*)RCMP_rcmp_sys_11A0.alloc(D_004953E8, 0x80, 0, 0, RCMP_rcmp_sys_11A0.flags));
+    return PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL((PS2_SONY_CODEC_INTERNAL*)RCMP_rcmp_sys.AllocMemFunc(
+        D_004953E8, sizeof(PS2_SONY_CODEC_INTERNAL), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
 }
 #endif
 
@@ -2885,7 +2732,7 @@ extern "C" unsigned int Show_Bits(int numBits)
 }
 #endif
 
-extern "C" void* Get_Bits(int);
+extern "C" unsigned int Get_Bits(int);
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", Get_Bits1__FPv);
@@ -2897,7 +2744,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", Get_Bits1__FPv);
  *
  * @return the bit
  */
-void* Get_Bits1(void* self)
+unsigned int Get_Bits1(void* self)
 {
     return Get_Bits(1);
 }
@@ -2942,18 +2789,16 @@ extern "C" void Flush_Buffer(int n);
 /**
  * Reads and consumes n bits from the MPEG bit reader.
  *
- * Show_Bits then Flush_Buffer. Declared as returning void* although the value is a bit field.
+ * Show_Bits then Flush_Buffer (mpeg2decode getbits.c: unsigned int Get_Bits(int N)).
  *
  * @param n  how many bits
  * @return the bits, right-aligned
  */
-// PORT: returns a bit-field value as void* to fit the unit's existing
-// `extern "C" void* Get_Bits(int)` declaration (really unsigned int).
-extern "C" void* Get_Bits(int n)
+extern "C" unsigned int Get_Bits(int n)
 {
     unsigned int bits = Show_Bits(n);
     Flush_Buffer(n);
-    return (void*)bits;
+    return bits;
 }
 #endif
 
@@ -3073,15 +2918,15 @@ INCLUDE_ASM("ealib/seg_2AEDC0", sequence_header);
 #ifdef SKIP_ASM
 extern int D_005094F4[];
 extern int D_005094F8[];
-extern void* D_0050950C[];
+extern int D_0050950C[];
 extern int D_00509510[];
 extern int D_00509514[];
 extern int D_00509518[];
-extern void* D_0050951C[];
+extern int D_0050951C[];
 extern unsigned char D_0044C218[];
 extern unsigned char D_0044C298[];
 extern char str_sequence_header[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 extern "C" void extension_and_user_data(void);
 
 // mpeg2decode's struct layer_data: ealib/ps2sonycodec.h; the unit declares `ld` (D_0050A088).
@@ -3103,24 +2948,24 @@ extern "C" void sequence_header(void)
     int pos;
 
     pos = ld->Bitcnt;  // mpeg2decode reads it unconditionally; only its VERBOSE trace uses pos
-    D_005094F4[0] = (int)Get_Bits(0xC);
-    D_005094F8[0] = (int)Get_Bits(0xC);
+    D_005094F4[0] = Get_Bits(0xC);
+    D_005094F8[0] = Get_Bits(0xC);
     D_0050950C[0] = Get_Bits(4);
-    D_00509510[0] = (int)Get_Bits(4);
-    D_00509514[0] = (int)Get_Bits(18);
+    D_00509510[0] = Get_Bits(4);
+    D_00509514[0] = Get_Bits(18);
     marker_bit(str_sequence_header);
-    D_00509518[0] = (int)Get_Bits(10);
+    D_00509518[0] = Get_Bits(10);
     D_0050951C[0] = Get_Bits(1);
     if ((ld->load_intra_quantizer_matrix = Get_Bits(1)) != 0) {
         for (i = 0; i < 64; i++)
-            ld->intra_quantizer_matrix[D_0044C218[i]] = (int)Get_Bits(8);
+            ld->intra_quantizer_matrix[D_0044C218[i]] = Get_Bits(8);
     } else {
         for (i = 0; i < 64; i++)
             ld->intra_quantizer_matrix[i] = D_0044C298[i];
     }
     if ((ld->load_non_intra_quantizer_matrix = Get_Bits(1)) != 0) {
         for (i = 0; i < 64; i++)
-            ld->non_intra_quantizer_matrix[D_0044C218[i]] = (int)Get_Bits(8);
+            ld->non_intra_quantizer_matrix[D_0044C218[i]] = Get_Bits(8);
     } else {
         for (i = 0; i < 64; i++)
             ld->non_intra_quantizer_matrix[i] = 16;
@@ -3136,19 +2981,19 @@ extern "C" void sequence_header(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", group_of_pictures_header);
 #ifdef SKIP_ASM
-extern int D_00509648[];
+extern layer_data D_00509648;
 extern int D_0044C378[];
 extern int D_0044C37C[];
 extern int D_0044C380[];
-extern void* D_00509628[];
-extern void* D_0050962C[];
-extern void* D_00509630[];
-extern void* D_00509634[];
-extern void* D_00509638[];
-extern void* D_0050963C[];
-extern void* D_00509640[];
+extern int D_00509628[];
+extern int D_0050962C[];
+extern int D_00509630[];
+extern int D_00509634[];
+extern int D_00509638[];
+extern int D_0050963C[];
+extern int D_00509640[];
 extern char str_group_of_pictures_header[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 extern "C" void extension_and_user_data(void);
 
 /**
@@ -3160,7 +3005,7 @@ extern "C" void extension_and_user_data(void);
  */
 extern "C" void group_of_pictures_header(void)
 {
-    if (ld == (layer_data*)D_00509648) {
+    if (ld == &D_00509648) {
         D_0044C378[0] = D_0044C37C[0] + 1;
         D_0044C380[0] = 1;
     }
@@ -3181,11 +3026,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", picture_header);
 #ifdef SKIP_ASM
 extern int D_00509554[];
 extern int D_00509558[];
-extern void* D_0050955C[];
-extern void* D_00509560[];
-extern void* D_00509564[];
-extern void* D_00509568[];
-extern void* D_0050956C[];
+extern int D_0050955C[];
+extern int D_00509560[];
+extern int D_00509564[];
+extern int D_00509568[];
+extern int D_0050956C[];
 extern "C" void extension_and_user_data(void);
 extern "C" int extra_bit_information(void);
 extern "C" void Update_Temporal_Reference_Tacking_Data(void);
@@ -3199,12 +3044,11 @@ extern "C" void Update_Temporal_Reference_Tacking_Data(void);
  * Then the extra-bit information (extra_bit_information), extensions (extension_and_user_data) and the temporal reference tracking
  * (Update_Temporal_Reference_Tacking_Data).
  */
-// PORT: Get_Bits really returns unsigned int (unit declares void*)
 extern "C" void picture_header(void)
 {
-    *(int*)((char*)ld + 0x430) = 0;
-    D_00509554[0] = (int)Get_Bits(10);
-    D_00509558[0] = (int)Get_Bits(3);
+    ld->pict_scal = 0;
+    D_00509554[0] = Get_Bits(10);
+    D_00509558[0] = Get_Bits(3);
     D_0050955C[0] = Get_Bits(0x10);
     if (D_00509558[0] == 2 || D_00509558[0] == 3) {
         D_00509560[0] = Get_Bits(1);
@@ -3244,31 +3088,31 @@ extern "C" int slice_header(void)
     int v;
     int quantizerScaleCode;
 
-    if (*(int*)((char*)ld + 0x420) != 0) {
+    if (ld->MPEG2_Flag != 0) {
         verticalExtension = 0;
         if (D_005094F8_B1878[0] >= 2801) {
-            verticalExtension = (int)Get_Bits(3);
+            verticalExtension = Get_Bits(3);
         }
     } else {
         verticalExtension = 0;
     }
-    if (*(int*)((char*)ld + 0x424) == 1) {
-        *(int*)((char*)ld + 0x434) = (int)Get_Bits(7);
+    if (ld->scalable_mode == 1) {
+        ld->priority_breakpoint = Get_Bits(7);
     }
-    quantizerScaleCode = (int)Get_Bits(5);
+    quantizerScaleCode = Get_Bits(5);
     {
-        char *layer = (char*)ld;
-        *(int*)(layer + 0x438) = *(int*)(layer + 0x420) != 0
-            ? (*(int*)(layer + 0x428) != 0 ? (int)D_0044C2D8[quantizerScaleCode] : quantizerScaleCode * 2)
+        layer_data* layer = ld;
+        layer->quantizer_scale = layer->MPEG2_Flag != 0
+            ? (layer->q_scale_type != 0 ? (int)D_0044C2D8[quantizerScaleCode] : quantizerScaleCode * 2)
             : quantizerScaleCode;
     }
     if (Get_Bits(1) != 0) {
-        *(int*)((char*)ld + 0x43C) = (int)Get_Bits(1);
+        ld->intra_slice = Get_Bits(1);
         Get_Bits(1);
         Get_Bits(6);
         extra_bit_information();
     } else {
-        *(int*)((char*)ld + 0x43C) = 0;
+        ld->intra_slice = 0;
     }
     return verticalExtension;
 }
@@ -3352,13 +3196,8 @@ extern float D_00509504[];
 struct sD_00509508;
 extern float D_0044C388[];
 extern char str_sequence_extension[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 
-struct sMpegCtx1AB0 {
-    char pad[0x420];
-    int f420;
-    int f424;
-};
 
 /**
  * Parses an MPEG-2 sequence extension and computes the frame rate.
@@ -3373,21 +3212,21 @@ struct sMpegCtx1AB0 {
 // Parse an MPEG-2 sequence extension.
 extern "C" void sequence_extension(void)
 {
-    sMpegCtx1AB0* layer = (sMpegCtx1AB0*)ld;
-    layer->f420 = 1;
-    layer->f424 = 0;
+    layer_data* layer = ld;
+    layer->MPEG2_Flag = 1;
+    layer->scalable_mode = 0;
     D_005095DC[0] = 0;
-    D_00509520[0] = (int)Get_Bits(8);
-    D_00509524[0] = (int)Get_Bits(1);
-    D_00509528[0] = (int)Get_Bits(2);
-    int hext = (int)Get_Bits(2);
-    int vext = (int)Get_Bits(2);
-    int brext = (int)Get_Bits(0xC);
+    D_00509520[0] = Get_Bits(8);
+    D_00509524[0] = Get_Bits(1);
+    D_00509528[0] = Get_Bits(2);
+    int hext = Get_Bits(2);
+    int vext = Get_Bits(2);
+    int brext = Get_Bits(0xC);
     marker_bit(str_sequence_extension);
-    int vbvext = (int)Get_Bits(8);
-    D_0050952C[0] = (int)Get_Bits(1);
-    D_00509530[0] = (int)Get_Bits(2);
-    D_00509534[0] = (int)Get_Bits(5);
+    int vbvext = Get_Bits(8);
+    D_0050952C[0] = Get_Bits(1);
+    D_00509530[0] = Get_Bits(2);
+    D_00509534[0] = Get_Bits(5);
     D_00509508.value = D_0044C388[D_00509510[0]] * ((float)(D_00509530[0] + 1) / (float)(D_00509534[0] + 1));
     if ((D_00509520[0] >> 7) & 1) {
         if ((D_00509520[0] & 0xF) == 5) {
@@ -3409,15 +3248,15 @@ extern "C" void sequence_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", sequence_display_extension);
 #ifdef SKIP_ASM
-extern void* D_00509538[];
-extern void* D_0050953C[];
-extern void* D_00509540[];
-extern void* D_00509544[];
-extern void* D_00509548[];
-extern void* D_0050954C[];
-extern void* D_00509550[];
+extern int D_00509538[];
+extern int D_0050953C[];
+extern int D_00509540[];
+extern int D_00509544[];
+extern int D_00509548[];
+extern int D_0050954C[];
+extern int D_00509550[];
 extern char str_sequence_display_extension[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 
 /**
  * Parses an MPEG-2 sequence display extension.
@@ -3445,18 +3284,6 @@ extern "C" void sequence_display_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", quant_matrix_extension);
 #ifdef SKIP_ASM
-struct sWSTables1D58 {
-    char pad0[0x10];
-    void* a10[64];              // 0x010
-    void* a110[64];             // 0x110
-    void* a210[64];             // 0x210
-    void* a310[64];             // 0x310
-    void* p410;                 // 0x410
-    void* p414;                 // 0x414
-    void* p418;                 // 0x418
-    void* p41C;                 // 0x41C
-};
-
 extern unsigned char D_0044C218[];
 
 
@@ -3471,56 +3298,56 @@ extern "C" void quant_matrix_extension(void)
 {
     layer_data** gd = &ld;
     {
-        void* loadFlag = Get_Bits(1);
-        ((sWSTables1D58*)*gd)->p410 = loadFlag;
+        unsigned int loadFlag = Get_Bits(1);
+        (*gd)->load_intra_quantizer_matrix = loadFlag;
         if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* quantValue = Get_Bits(8);
+                unsigned int quantValue = Get_Bits(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* layer = ((sWSTables1D58*)ld);
-                layer->a10[k] = quantValue;
-                layer->a210[k] = quantValue;
+                layer_data* layer = ld;
+                layer->intra_quantizer_matrix[k] = quantValue;
+                layer->chroma_intra_quantizer_matrix[k] = quantValue;
             }
         }
     }
     {
-        void* loadFlag = Get_Bits(1);
-        ((sWSTables1D58*)ld)->p414 = loadFlag;
+        unsigned int loadFlag = Get_Bits(1);
+        ld->load_non_intra_quantizer_matrix = loadFlag;
         if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* quantValue = Get_Bits(8);
+                unsigned int quantValue = Get_Bits(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* layer = ((sWSTables1D58*)ld);
-                layer->a110[k] = quantValue;
-                layer->a310[k] = quantValue;
+                layer_data* layer = ld;
+                layer->non_intra_quantizer_matrix[k] = quantValue;
+                layer->chroma_non_intra_quantizer_matrix[k] = quantValue;
             }
         }
     }
     {
-        void* loadFlag = Get_Bits(1);
-        ((sWSTables1D58*)ld)->p418 = loadFlag;
+        unsigned int loadFlag = Get_Bits(1);
+        ld->load_chroma_intra_quantizer_matrix = loadFlag;
         if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* quantValue = Get_Bits(8);
+                unsigned int quantValue = Get_Bits(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* layer = ((sWSTables1D58*)ld);
-                layer->a210[k] = quantValue;
+                layer_data* layer = ld;
+                layer->chroma_intra_quantizer_matrix[k] = quantValue;
             }
         }
     }
     {
-        void* loadFlag = Get_Bits(1);
-        ((sWSTables1D58*)ld)->p41C = loadFlag;
+        unsigned int loadFlag = Get_Bits(1);
+        ld->load_chroma_non_intra_quantizer_matrix = loadFlag;
         if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* quantValue = Get_Bits(8);
+                unsigned int quantValue = Get_Bits(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* layer = ((sWSTables1D58*)ld);
-                layer->a310[k] = quantValue;
+                layer_data* layer = ld;
+                layer->chroma_non_intra_quantizer_matrix[k] = quantValue;
             }
         }
     }
@@ -3541,7 +3368,7 @@ extern int vertical_subsampling_factor_m __asm__("D_005095F0");
 extern int vertical_subsampling_factor_n __asm__("D_005095F4");
 extern char str_sequence_scalable_extension[];
 extern char str_temporal_scalability_not_implemented[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 // Get_Bits returning int: with the unit's void* (or mpeg2decode's unsigned int) declaration GCC keeps the
 // globals' %hi parts in s-registers across the calls.
 extern "C" int Get_Bits_i(int n) __asm__("Get_Bits");
@@ -3589,11 +3416,11 @@ extern int D_00509524[];
 extern int D_00509584[];
 extern int D_00509588[];
 extern int D_00509598[];
-extern void* D_005095C0[];
-extern void* D_005095D0[];
+extern int D_005095C0[];
+extern int D_005095D0[];
 extern char str_picture_display_extension_first_marker_b[];
 extern char str_picture_display_extension_second_marker[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 
 /**
  * Parses an MPEG-2 picture display extension (frame centre offsets).
@@ -3630,22 +3457,22 @@ extern "C" void picture_display_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", picture_coding_extension);
 #ifdef SKIP_ASM
-extern void* D_00509570[];
-extern void* D_00509580[];
+extern int D_00509570[];
+extern int D_00509580[];
 extern int D_00509584[];
 extern int D_00509588[];
-extern void* D_0050958C[];
-extern void* D_00509590[];
-extern void* D_00509594[];
+extern int D_0050958C[];
+extern int D_00509590[];
+extern int D_00509594[];
 extern int D_00509598[];
-extern void* D_0050959C[];
-extern void* D_005095A0[];
-extern void* D_005095A4[];
-extern void* D_005095A8[];
-extern void* D_005095AC[];
-extern void* D_005095B0[];
-extern void* D_005095B4[];
-extern void* D_005095B8[];
+extern int D_0050959C[];
+extern int D_005095A0[];
+extern int D_005095A4[];
+extern int D_005095A8[];
+extern int D_005095AC[];
+extern int D_005095B0[];
+extern int D_005095B4[];
+extern int D_005095B8[];
 
 /**
  * Parses an MPEG-2 picture coding extension.
@@ -3662,14 +3489,14 @@ extern "C" void picture_coding_extension(void)
     D_00509570[2] = Get_Bits(4);
     D_00509570[3] = Get_Bits(4);
     D_00509580[0] = Get_Bits(2);
-    D_00509584[0] = (int)Get_Bits(2);
-    D_00509588[0] = (int)Get_Bits(1);
+    D_00509584[0] = Get_Bits(2);
+    D_00509588[0] = Get_Bits(1);
     D_0050958C[0] = Get_Bits(1);
     D_00509590[0] = Get_Bits(1);
-    *(void**)((char*)ld + 0x428) = Get_Bits(1);
+    ld->q_scale_type = Get_Bits(1);
     D_00509594[0] = Get_Bits(1);
-    *(void**)((char*)ld + 0x42C) = Get_Bits(1);
-    D_00509598[0] = (int)Get_Bits(1);
+    ld->alternate_scan = Get_Bits(1);
+    D_00509598[0] = Get_Bits(1);
     D_0050959C[0] = Get_Bits(1);
     D_005095A0[0] = Get_Bits(1);
     D_005095A4[0] = Get_Bits(1);
@@ -3686,15 +3513,15 @@ extern "C" void picture_coding_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", picture_spatial_scalable_extension);
 #ifdef SKIP_ASM
-extern void* D_005095F8[];
+extern int D_005095F8[];
 extern int D_005095FC[];
 extern int D_00509600[];
-extern void* D_00509604[];
-extern void* D_00509608[];
-extern void* D_0050960C[];
+extern int D_00509604[];
+extern int D_00509608[];
+extern int D_0050960C[];
 extern char str_picture_spatial_scalable_extension_first[];
 extern char str_picture_spatial_scalable_extension_secon[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 
 /**
  * Reads an MPEG-2 picture spatial scalable extension header (as in the reference mpeg2decode's gethdr.c).
@@ -3703,18 +3530,17 @@ void* marker_bit(void* self);
  * checked marker bit), the spatial-temporal weight table index and two lower-layer field flags, and marks the
  * stream as spatially scalable (ld+0x430).
  */
-// PORT: Get_Bits really returns unsigned int (unit declares void*)
 extern "C" void picture_spatial_scalable_extension(void)
 {
-    *(int*)((char*)ld + 0x430) = 1;
+    ld->pict_scal = 1;
     D_005095F8[0] = Get_Bits(10);
     marker_bit(str_picture_spatial_scalable_extension_first);
-    D_005095FC[0] = (int)Get_Bits(0xF);
+    D_005095FC[0] = Get_Bits(0xF);
     if (D_005095FC[0] >= 0x4000) {
         D_005095FC[0] -= 0x8000;
     }
     marker_bit(str_picture_spatial_scalable_extension_secon);
-    D_00509600[0] = (int)Get_Bits(0xF);
+    D_00509600[0] = Get_Bits(0xF);
     if (D_00509600[0] >= 0x4000) {
         D_00509600[0] -= 0x8000;
     }
@@ -3746,7 +3572,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", extra_bit_information);
 #ifdef SKIP_ASM
 // PORT: Get_Bits1 takes a void* it never reads; this caller passes nothing, so it binds
 // a no-argument declaration to the mangled symbol.
-void* Get_Bits1_noarg() __asm__("Get_Bits1__FPv");
+unsigned int Get_Bits1_noarg() __asm__("Get_Bits1__FPv");
 
 /**
  * Skips the extra information bytes after a header and counts them.
@@ -3776,7 +3602,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", marker_bit__FPv);
  *
  * @return the bit (Get_Bits(1))
  */
-void* marker_bit(void* self)
+unsigned int marker_bit(void* self)
 {
     return Get_Bits(1);
 }
@@ -3803,16 +3629,16 @@ void* user_data(void* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", copyright_extension);
 #ifdef SKIP_ASM
-extern void* D_00509610[];
-extern void* D_00509614[];
-extern void* D_00509618[];
-extern void* D_0050961C[];
-extern void* D_00509620[];
-extern void* D_00509624[];
+extern int D_00509610[];
+extern int D_00509614[];
+extern int D_00509618[];
+extern int D_0050961C[];
+extern int D_00509620[];
+extern int D_00509624[];
 extern char str_copyright_extension_first_marker_bit[];
 extern char str_copyright_extension_second_marker_bit[];
 extern char str_copyright_extension_third_marker_bit[];
-void* marker_bit(void* self);
+unsigned int marker_bit(void* self);
 
 /**
  * Reads an MPEG-2 copyright extension header into globals (as in the reference mpeg2decode's gethdr.c).
@@ -3838,7 +3664,7 @@ extern "C" void copyright_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", Update_Temporal_Reference_Tacking_Data);
 #ifdef SKIP_ASM
-extern int D_00509648[];
+extern layer_data D_00509648;
 extern int D_00509554[];
 extern int D_00509558[];
 extern int D_0044C378[];
@@ -3858,7 +3684,7 @@ extern int D_0050A098[];
  */
 extern "C" void Update_Temporal_Reference_Tacking_Data(void)
 {
-    if (ld != (layer_data*)D_00509648) {
+    if (ld != &D_00509648) {
         return;
     }
     int last;

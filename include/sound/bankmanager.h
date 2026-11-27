@@ -132,13 +132,14 @@ struct cBankManager {
     void BANK_DeallocMem(int i) __asm__("cBankManager_BANK_DeallocMem");
     void BANK_ShareBank(int i, int j) __asm__("cBankManager_BANK_ShareBank");
     void BANK_UnshareBank(int i) __asm__("cBankManager_BANK_UnshareBank");
-    void BANK_Attach(int i, int mainMemData, int mainMemSize) __asm__("cBankManager_BANK_Attach");
+    void BANK_Attach(int i, void* mainMemData, int mainMemSize) __asm__("cBankManager_BANK_Attach");
     void BANK_UnAttach(int i) __asm__("cBankManager_BANK_UnAttach");
     void ASYNCSYS_OnBeginAsyncLoad(int i) __asm__("cBankManager_ASYNCSYS_OnBeginAsyncLoad");
     void ASYNCSYS_OnAsyncMainMemAlloc(int i, int size, int memflags)
         __asm__("cBankManager_ASYNCSYS_OnAsyncMainMemAlloc");
     void ASYNCSYS_OnAsyncMainMemSize(int i) __asm__("cBankManager_ASYNCSYS_OnAsyncMainMemSize");
-    void ASYNCSYS_OnEndAsyncLoad(int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
+    void ASYNCSYS_OnEndAsyncLoad(int i, int soundHandle, int endState, const char* pFilename, void* pBuffer,
+                                 int dataSize)
         __asm__("cBankManager_ASYNCSYS_OnEndAsyncLoad");
 };
 

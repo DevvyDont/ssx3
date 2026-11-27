@@ -16,7 +16,7 @@
 // with 3, ~DLNode with 7, Remove with 0xB; an empty list's head points at itself).
 // The decoded frames (0x14 bytes each, allocated by PS2_SONY_CODEC_INTERNAL_Init) are the PS2 counterpart of On Tour's
 // PspSonyFrame (an RCMP::FRAME, an RCON::DLNode at +0x8, mReferenceCount at +0x10); retail gives the class no name, so
-// it has no struct here (func_003B07F8 / func_003B08E0 are its ctor / dtor).
+// PS2_SONY_FRAME below is ours (func_003B07F8 / func_003B08E0 are its ctor / dtor).
 //
 // Vtable PS2_SONY_CODEC_INTERNAL_vtbl (_vt$23PS2_SONY_CODEC_INTERNAL): slot 1 PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL, 2 _Init,
 // 3 _GetFrame, 4 _GetCurrentFrameNumber__FPv, 5 _GetFrameRate, 6 _ReleaseFrame (RCMP::CODEC's virtual order).
@@ -31,12 +31,53 @@
 struct RCON_DLNode {
     RCON_DLNode* Next;                  // 0x0 [O]
     RCON_DLNode* Prev;                  // 0x4 [O]
+
+#ifdef __cplusplus
+    // [O] DLNode::Remove(): unlinks the node and marks its links 0xB (retail inlines it).
+    void Remove()
+    {
+        RCON_DLNode* n = Next;
+        RCON_DLNode* p = Prev;
+        p->Next = n;
+        n->Prev = p;
+        Prev = Next = (RCON_DLNode*)0xB;
+    }
+#endif
 };
 
 // RCON::DLList (0x8 [O]): the head node of a circular list.
 struct RCON_DLList {
     RCON_DLNode HeadNode;               // 0x0 [O]; empty when HeadNode.Next == &HeadNode
+
+#ifdef __cplusplus
+    // [O] DLList::AddHead(DLNode*) / AddTail(DLNode*) (retail inlines them).
+    void AddHead(RCON_DLNode* node)
+    {
+        RCON_DLNode* old = HeadNode.Next;
+        HeadNode.Next = node;
+        old->Prev = node;
+        node->Next = old;
+        node->Prev = &HeadNode;
+    }
+    void AddTail(RCON_DLNode* node)
+    {
+        RCON_DLNode* tail = HeadNode.Prev;
+        tail->Next = node;
+        HeadNode.Prev = node;
+        node->Prev = tail;
+        node->Next = &HeadNode;
+    }
+#endif
 };
+
+// The Sony codec's decoded frame (0x14 [R] PS2_SONY_CODEC_INTERNAL_Init allocates 20 bytes; name ours). [O] On Tour's
+// PspSonyFrame : FRAME, TDLNode has the same bases and mReferenceCount after them (its FRAME has a vptr, so its
+// members sit 4 bytes higher). [R] ctor func_003B07F8 (type 2, links 3, count 0), dtor func_003B08E0 (links 7).
+#ifdef __cplusplus
+struct PS2_SONY_FRAME : RCMP_FRAME, RCON_DLNode {
+    int mReferenceCount;                // 0x10 [O]; [R] ctor 0; [U] func_003B10D0 sets 1, ReleaseFrame counts down
+};
+#endif
 
 // PS2_SONY_CODEC_INTERNAL. 0x80 [R] func_003B11A0 allocates 0x80.
 struct PS2_SONY_CODEC_INTERNAL {
@@ -49,7 +90,7 @@ struct PS2_SONY_CODEC_INTERNAL {
     int mHeight;                        // 0x0C [O] (PspSonyCodec); [U] Init: coded height
     unsigned int mCurrentFrameNumber;   // 0x10 [O] (PspSonyCodec); [U] Init 0, DecodeFrame ++, GetFrame compares,
                                         //      GetCurrentFrameNumber__FPv returns it
-    int unk_14;                         // 0x14 [U] Init 0; func_003B0B40 counts the chunks fed to the decoder
+    int mChunksFed;                     // 0x14 [U] Init 0; func_003B0B40 counts the chunks fed to the decoder
     RCON_DLList mUsedFrames;            // 0x18 [O]; [R] ctor: empty list; [U] func_003B10D0 adds, ReleaseFrame removes;
                                         //      the dtor destroys what is left (func_003B08E0)
     RCON_DLList mFreeFrames;            // 0x20 [O]; [R] ctor: empty list; [U] Init adds the new frames, func_003B10D0
@@ -86,10 +127,11 @@ struct layer_data {
     int non_intra_quantizer_matrix[64];         // 0x110 [U] sequence_header
     int chroma_intra_quantizer_matrix[64];      // 0x210 [U] sequence_header copies the intra matrix
     int chroma_non_intra_quantizer_matrix[64];  // 0x310 [U] sequence_header copies the non-intra matrix
-    void* load_intra_quantizer_matrix;          // 0x410 [U] sequence_header (the unit's Get_Bits returns void*)
-    void* load_non_intra_quantizer_matrix;      // 0x414 [U] sequence_header
-    int load_chroma_intra_quantizer_matrix;     // 0x418 [U] sequence_header clears it
-    int load_chroma_non_intra_quantizer_matrix; // 0x41C [U] sequence_header clears it
+    int load_intra_quantizer_matrix;            // 0x410 [U] sequence_header, quant_matrix_extension (mpeg2decode:
+                                                //       int)
+    int load_non_intra_quantizer_matrix;        // 0x414 [U] sequence_header, quant_matrix_extension
+    int load_chroma_intra_quantizer_matrix;     // 0x418 [U] sequence_header clears it; quant_matrix_extension
+    int load_chroma_non_intra_quantizer_matrix; // 0x41C [U] sequence_header clears it; quant_matrix_extension
     int MPEG2_Flag;                             // 0x420 [U] slice_header tests it; PS2_SONY_CODEC_INTERNAL_Init
                                                 //       reads it
     int scalable_mode;                          // 0x424 [U] slice_header: == 1 (data partitioning) reads 7 bits
@@ -120,6 +162,11 @@ CHECK_OFFSET(layer_data, priority_breakpoint, 0x434);
 CHECK_OFFSET(layer_data, quantizer_scale, 0x438);
 CHECK_OFFSET(layer_data, intra_slice, 0x43C);
 
+#ifdef __cplusplus
+CHECK_OFFSET(PS2_SONY_FRAME, mReferenceCount, 0x10);
+CHECK_SIZE(PS2_SONY_FRAME, 0x14);
+#endif
+
 CHECK_OFFSET(RCON_DLNode, Next, 0x0);
 CHECK_OFFSET(RCON_DLNode, Prev, 0x4);
 CHECK_SIZE(RCON_DLNode, 0x8);
@@ -132,7 +179,7 @@ CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, unk_04, 0x04);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mWidth, 0x08);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mHeight, 0x0C);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mCurrentFrameNumber, 0x10);
-CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, unk_14, 0x14);
+CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mChunksFed, 0x14);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mUsedFrames, 0x18);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mFreeFrames, 0x20);
 CHECK_OFFSET(PS2_SONY_CODEC_INTERNAL, mpDecoder, 0x28);

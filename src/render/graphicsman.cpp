@@ -1524,7 +1524,7 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_init);
 #ifdef SKIP_ASM
 
-extern cQuad128 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
 static inline t4Vector vu0DivGM(const t4Vector& v, float s)
@@ -1564,7 +1564,7 @@ void tParticleEmitter::init(int w, int numblur, float x, float y, float damp, t4
     NumParticles = w;
     NumBlur = numblur;
     TimeStep = x * damp / (float)w;
-    *(t4Vector*)&Force = vu0DivGM(vu0DivGM(*force, damp), damp);
+    Force = vu0DivGM(vu0DivGM(*force, damp), damp);
     Damp = damp;
     BlurAlpha = 1.0f / (float)NumBlur;
     BlurStep = y * damp;
@@ -1573,8 +1573,8 @@ void tParticleEmitter::init(int w, int numblur, float x, float y, float damp, t4
     one.y = 1.0f;
     one.z = 0.0f;
     one.w = 0.0f;
-    *(cQuad128*)&UpperUV = t4vect_Zero;
-    *(t4Vector*)&LowerUV = one;
+    UpperUV = t4vect_Zero;
+    LowerUV = one;
 }
 #endif
 
@@ -1658,7 +1658,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setEternal);
  */
 void tParticleEmitter::setEternal()
 {
-    *(int*)&LifeR = 0;
+    LifeR = 0.0f;
     Life0 = 1e20f;
 }
 #endif
@@ -1673,13 +1673,11 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPoint);
  * @param particleEmitter  the emitter
  * @param point  the emission point (a 16-byte vector)
  */
-// PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
-// 16-byte type.
-void tParticleEmitter::setPoint(long long *point)
+void tParticleEmitter::setPoint(const t4Vector *point)
 {
-    *(long long*)&X0 = (long long) *point;
-    *(long long*)&Xr0 = (long long) t4vect_Zero;
-    *(long long*)&Xr1 = (long long) t4vect_Zero;
+    X0 = *point;
+    Xr0 = t4vect_Zero;
+    Xr1 = t4vect_Zero;
 }
 #endif
 //100%
@@ -1728,9 +1726,9 @@ static inline t4Vector vu0Scale_CE80(const t4Vector& v, float s)
  */
 void tParticleEmitter::setLine(t4Vector* start, t4Vector* end)
 {
-    *(t4Vector*)&X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
-    *(t4Vector*)&Xr0 = vu0Sub_CE80(*end, *start);
-    *(cQuad128*)&Xr1 = t4vect_Zero;
+    X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
+    Xr0 = vu0Sub_CE80(*end, *start);
+    Xr1 = t4vect_Zero;
 }
 #endif
 
@@ -1796,13 +1794,13 @@ static inline t4Vector vu0ScaleGM(const t4Vector& v, float s)
  */
 void tParticleEmitter::setPlane(t4Vector* center, t4Vector* axis0, t4Vector* axis1)
 {
-    *(t4Vector*)&X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
-    *(t4Vector*)&Xr0 = vu0ScaleGM(*axis0, 2.0f);
-    *(t4Vector*)&Xr1 = vu0ScaleGM(*axis1, 2.0f);
+    X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
+    Xr0 = vu0ScaleGM(*axis0, 2.0f);
+    Xr1 = vu0ScaleGM(*axis1, 2.0f);
 }
 #endif
 
-extern cQuad128 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setMotion);
@@ -1818,7 +1816,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setMotion);
  */
 void tParticleEmitter::setMotion(t4Vector* delta, float time)
 {
-    *(t4Vector*)&Xi = vu0DivGM(vu0ScaleGM(*delta, TimeStep), time * Damp);
+    Xi = vu0DivGM(vu0ScaleGM(*delta, TimeStep), time * Damp);
 }
 #endif
 
@@ -1830,7 +1828,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_stopMotion);
  */
 void tParticleEmitter::stopMotion()
 {
-    *(cQuad128*)&Xi = t4vect_Zero;
+    Xi = t4vect_Zero;
 }
 #endif
 
@@ -2001,7 +1999,7 @@ void tParticleEmitter::setVelocity(const t4Vector* dir, float spread)
     t4Vector norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
     *(&Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
     *(&Vr1) = gmScaleD020(gmCrossD020(*(&V0), norm), spread);
-    *(cQuad128*)(&Vr2) = t4vect_Zero;
+    Vr2 = t4vect_Zero;
     gmSubFromD020(*(&V0), gmScaleD020(gmAddD020(gmAddD020(*(&Vr0), *(&Vr1)), *(&Vr2)), 1.5f));
 }
 #endif
@@ -2097,11 +2095,10 @@ static inline t4Vector gmScaleD1F0(const t4Vector& v, float s)
 void tParticleEmitter::setVelocity1(const t4Vector* baseVel, const t4Vector* randVel0, const t4Vector* randVel1,
                                     const t4Vector* randVel2)
 {
-    *(t4Vector*)&Vr0 = gmDivD1F0(*randVel0, Damp);
-    *(t4Vector*)&Vr1 = gmDivD1F0(*randVel1, Damp);
-    *(t4Vector*)&Vr2 = gmDivD1F0(*randVel2, Damp);
-    *(t4Vector*)&V0 = gmSubD1F0(gmDivD1F0(*baseVel, Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(t4Vector*)&Vr0,
-            *(t4Vector*)&Vr1), *(t4Vector*)&Vr2), 1.5f));
+    Vr0 = gmDivD1F0(*randVel0, Damp);
+    Vr1 = gmDivD1F0(*randVel1, Damp);
+    Vr2 = gmDivD1F0(*randVel2, Damp);
+    V0 = gmSubD1F0(gmDivD1F0(*baseVel, Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(Vr0, Vr1), Vr2), 1.5f));
 }
 #endif
 
@@ -2127,10 +2124,10 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setColour);
 void tParticleEmitter::setColour(t4Vector* colStart, t4Vector* colEnd, t4Vector* colRand0, t4Vector* colRand1,
                                  float time)
 {
-    *(t4Vector*)&C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
-    *(t4Vector*)&Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * Damp);
-    *(t4Vector*)&Cr0 = *colRand0;
-    *(t4Vector*)&Cr1 = *colRand1;
+    C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
+    Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * Damp);
+    Cr0 = *colRand0;
+    Cr1 = *colRand1;
 }
 #endif
 
@@ -2393,7 +2390,7 @@ extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
     self->mVtbl = (void**)cStaticEmitter_vtbl;
     tParticleEmitter_tParticleEmitter((char*)&self->Emitter);
     self->m_initialized = 0;
-    *(int*)&self->mCurrentFlipTexture = 0;
+    self->mCurrentFlipTexture = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -2703,9 +2700,6 @@ void cStaticEmitter::update(float dt)
 //100%
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_render);
 #ifdef SKIP_ASM
-struct sGmQuad {
-    float v[4];
-} __attribute__((aligned(16)));
 
 
 extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
@@ -2716,10 +2710,10 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
  * @param bbox  bounding box to cull against (On Tour const tBoundBox&)
  * @param pos  emitter position (On Tour const t4Vector&)
  */
-extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbox, const sGmQuad* pos)
+extern "C" void cStaticEmitter_render(cStaticEmitter* self, const tBoundBox* bbox, const t4Vector* pos)
 {
     *(&self->BoundBox) = *bbox;
-    *(sGmQuad*)&self->Emitter.X0 = *pos;
+    self->Emitter.X0 = *pos;
     self->render1();
 }
 #endif
@@ -2856,8 +2850,8 @@ extern void* cBaseClass_DynamicEmitter_vtbl[];
 extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self)
 {
     self->mNumFlipTextures = 0;
-    *(int*)&self->mCurrentFlipTexture = 0;
-    *(int*)&self->mFlipTextureRate = 0;
+    self->mCurrentFlipTexture = 0.0f;
+    self->mFlipTextureRate = 0.0f;
     self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
     tParticleEmitter_tParticleEmitter((char*)&self->m_emitter);
     self->m_initialized = 0;

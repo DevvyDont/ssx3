@@ -1,6 +1,149 @@
 #include "common.h"
 #include "ealib/locale.h"
 
+/* EA's speech driver (names ours, from use: the library's own names are not known). Its banks and tables are
+   little-endian blobs that the code reads byte by byte, except for the halfword fields the headers below name. */
+
+/* A speech key (func_003D8008 packs one): a bank entry's id and the ids of the bank it belongs to. */
+typedef struct SPCHKEY {
+    unsigned short entryId;         /* 0x0 the entry's id (its first halfword) */
+    unsigned char subId;            /* 0x2 the bank's sub id (SPCHBANKHDR::subId) */
+    unsigned char bankId;           /* 0x3 the bank's id (SPCHBANKHDR::bankId) */
+} SPCHKEY;
+
+/* A speech bank's fixed header (func_003D6498 registers banks). entryCount halfword entry offsets follow it (entry i
+   lies entryOffsets[i] * 4 bytes from the bank), padded to 4 bytes, then usageCount usage bytes (func_003D6618). */
+typedef struct SPCHBANKHDR {
+    unsigned short magic;           /* 0x00 3075 (0xC03): func_003D6498 registers only such data */
+    unsigned char pad02[6];
+    unsigned char bankId;           /* 0x08 func_003DA3A8; a key's byte 3 */
+    unsigned char subId;            /* 0x09 func_003DA3A8; a key's byte 2 */
+    unsigned char pad0A[6];
+    unsigned short entryCount;      /* 0x10 the entry offsets' count */
+    unsigned char usageCount;       /* 0x12 the usage bytes' count */
+    unsigned char pad13;
+    unsigned short value14;         /* 0x14 func_003D82B0 returns it (its meaning is not known) */
+    unsigned short minPriority;     /* 0x16 func_003D7760: in channel mode 1 a request below it is held back */
+    unsigned short entryOffsets[1]; /* 0x18 */
+} SPCHBANKHDR;
+
+/* One of the 8 bank slots D_0044FFB8 (func_003D6498 fills them, func_003D8278 clears them). */
+typedef struct SPCHBANKSLOT {
+    unsigned char *data;            /* the bank (SPCHBANKHDR first), 0 when the slot is free */
+    unsigned int key;               /* the key (channel) it was registered under */
+} SPCHBANKSLOT;
+
+/* An id list {count, ids} (func_003D8530 clears one; func_003D7760 / func_003D8540 search one). */
+typedef struct SPCHIDLIST {
+    int count;
+    unsigned short *ids;
+} SPCHIDLIST;
+
+/* A bank entry: one speech event (the bank's entry offsets lead to it). variantCount halfword variant offsets follow
+   the header (variant i lies variantOffsets[i] * 4 bytes from the entry), padded to 4 bytes; then tagCount 3-byte tag
+   entries {tag id, argument index, type} and constraintCount 3-byte constraints, each list padded to 4 bytes. With
+   flag 0x8 a further halfword table follows (func_003D7A50), and with flag 0x10 the follow-up list {count, ids}. */
+typedef struct SPCHEVENT {
+    unsigned short id;              /* 0x0 a key's entryId */
+    unsigned short lifetime;        /* 0x2 ticks a queued request lives (0: no limit) */
+    unsigned short priority;        /* 0x4 */
+    unsigned char variantCount;     /* 0x6 */
+    unsigned char counts;           /* 0x7 SPCH_TAG_COUNT / SPCH_CONSTRAINT_COUNT */
+    signed char maxRepeat;          /* 0x8 plays in a row allowed (func_003DA9C8; 0 or less: no limit) */
+    signed char mode;               /* 0x9 100: a newer request flags the channel's queue (func_003D7D58) */
+    unsigned char flags;            /* 0xA 0x1 held below the bank's minimum, 0x4 never pruned, 0x8 / 0x10 above */
+    unsigned char pad0B;
+    unsigned short variantOffsets[1]; /* 0xC */
+} SPCHEVENT;
+
+/* SPCHEVENT::counts holds the tag count in its low nibble and the constraint count in its high one (signed). */
+#define SPCH_TAG_COUNT(counts) ((counts) & 0xF)
+#define SPCH_CONSTRAINT_COUNT(counts) ((signed char)(counts) >> 4)
+
+/* A bank entry's tag entry (func_003DB040, func_003DB208) or constraint (func_003D9ED0). */
+typedef struct SPCHTAG {
+    unsigned char id;               /* the tag id */
+    unsigned char argIndex;         /* the request argument it reads */
+    unsigned char type;
+} SPCHTAG;
+
+/* A tag entry widened to words, the copy the tag readers make of one. */
+typedef struct SPCHTAGWORDS {
+    int id;
+    int argIndex;
+    int type;
+} SPCHTAGWORDS;
+
+/* A bank entry's follow-up list (flag 0x10): the ids that may follow it (func_003D7A50). */
+typedef struct SPCHFOLLOWLIST {
+    unsigned char count;
+    unsigned char pad01;
+    unsigned short ids[1];
+} SPCHFOLLOWLIST;
+
+/* A request's 20 argument words, as func_003D76F0 posts them: word 0 is the request's key, words 1 to 19 its
+   arguments (the tags' argument indices pick them). */
+typedef union SPCHARGS {
+    SPCHKEY key;
+    int words[20];
+} SPCHARGS;
+
+/* A queued speech request, one of 16 in the request state D_0044FFF8 (from +0x64). A request can chain continuation
+   records (next), which carry continuation != 0. */
+typedef struct SPCHREQUEST {
+    unsigned int time;              /* 0x00 the tick it was queued */
+    unsigned short seq;             /* 0x04 its sequence number */
+    unsigned char active;           /* 0x06 */
+    unsigned char channel;          /* 0x07 */
+    short continuation;             /* 0x08 */
+    short next;                     /* 0x0A the next chained record, -1 for none */
+    SPCHEVENT *event;               /* 0x0C the bank entry it plays */
+    SPCHARGS args;                  /* 0x10 */
+} SPCHREQUEST;
+
+/* The request state D_0044FFF8 (func_003D71D8 resets it). */
+typedef struct SPCHREQSTATE {
+    int queued[8];                  /* 0x000 the chain heads queued per channel */
+    int head[8];                    /* 0x020 per channel: a request index, -1 for none (func_003D80B0) */
+    int latest[8];                  /* 0x040 per channel: the latest request's index, -1 for none */
+    int newerFlagged;               /* 0x060 func_003D7D58: a newer mode-100 request waits on the channel */
+    SPCHREQUEST requests[16];       /* 0x064 */
+} SPCHREQSTATE;
+
+/* A speech channel's current line, D_00450660 [8] (func_003D69A8 resets it: entry id 0xFFFF, count 0). */
+typedef struct SPCHCHANNEL {
+    SPCHKEY line;                   /* 0x0 the line playing (entryId 0xFFFF: none) */
+    int repeatCount;                /* 0x4 how many times in a row it played (func_003D9BD8; func_003DA9C8 limits it) */
+} SPCHCHANNEL;
+
+/* A speech table row as func_003DB838 reads it. */
+struct sShapeInfo { int len; int start; int n; unsigned char col[4]; };
+/* A phrase slot's selection: its table slot, candidates (start, len in the set's row list) and chosen candidate. */
+struct sSel { short x; short y; unsigned char start; unsigned char len; unsigned char cur; unsigned char flag; };
+/* A phrase's selection: one sSel per slot, the slot count, and the shared candidate row list. */
+struct sSelSet { struct sSel ent[12]; unsigned char n; unsigned char ntbl; unsigned char tbl[200]; };
+struct sTblEnt { unsigned short a; unsigned short b; };
+/* A phrase template (a bank entry's variant): +0x4 holds its kind (low 2 bits) and slot count (>> 2); the slot list
+   (word offsets of the slots' conditions) starts at +0x8. */
+struct sLayer { char pad[4]; unsigned char cnt; unsigned char n5; unsigned char n6; char pad7; unsigned char list[1]; };
+/* A slot's condition: its table reference {id, argument index, kind} and up to 4 column rules. */
+struct sCond {
+    unsigned short id; unsigned char idx; unsigned char mode; signed char n; char pad5[3];
+    unsigned char a[8]; unsigned char b[4]; unsigned int m[4];
+};
+
+/* A speech table's header (the tables in the slot list D_004A4824; func_003D69F0 adds them). */
+typedef struct SPCHTABLEHDR {
+    unsigned short id;              /* 0x0 func_003D6D50 / func_003D6DB8 match it */
+    unsigned short subId;           /* 0x2 func_003D6DB8 */
+    unsigned char flags;            /* 0x4 low 4 bits: the column count; 0x80: a random-subset table */
+    unsigned char rowCount;         /* 0x5 */
+    unsigned char historyLength;    /* 0x6 */
+    unsigned char startScale;       /* 0x7 row starts are in units of (startScale + 1) * 256 (func_003DB838) */
+    unsigned short totalLength;     /* 0x8 the samples' total length, in those units */
+    unsigned short entryCount;      /* 0xA func_003D6CF8's range (0xFFFF: no limit) */
+} SPCHTABLEHDR;
+
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6498);
 #ifdef SKIP_ASM
@@ -68,8 +211,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6618);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_6618 { unsigned char *p; unsigned int x; };
-extern struct E_6618 D_0044FFB8_6618[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_6618[] __asm__("D_0044FFB8");
 
 /**
  * Resets the usage bytes of every registered speech bank with a key: sets the +0x12 bytes that follow the bank's header
@@ -80,10 +222,10 @@ extern struct E_6618 D_0044FFB8_6618[] __asm__("D_0044FFB8");
 void func_003D6618(unsigned long key) {
     int i, j;
     for (i = 0; i < 8; i++) {
-        unsigned char *bankData = D_0044FFB8_6618[i].p;
-        if (bankData != 0 && D_0044FFB8_6618[i].x == key) {
-            unsigned char *usage = bankData + (((*(unsigned short *)(bankData + 0x10) * 2 + 3) & 0xFFFFFFFC) + 0x18);
-            for (j = 0; j < D_0044FFB8_6618[i].p[0x12]; j++) {
+        unsigned char *bankData = D_0044FFB8_6618[i].data;
+        if (bankData != 0 && D_0044FFB8_6618[i].key == key) {
+            unsigned char *usage = bankData + (((((SPCHBANKHDR *)bankData)->entryCount * 2 + 3) & 0xFFFFFFFC) + 0x18);
+            for (j = 0; j < D_0044FFB8_6618[i].data[0x12]; j++) {
                 usage[j] = 0xFF;
             }
         }
@@ -588,7 +730,7 @@ int func_003D6CC0(int slot) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6CF8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char **D_004A4824_6CF8 __asm__("D_004A4824");
+extern SPCHTABLEHDR **D_004A4824_6CF8 __asm__("D_004A4824");
 
 /**
  * Returns whether @p entryIndex is below the entry count (halfword +0xA) of the speech table in slot @p slot; 0 when the
@@ -603,7 +745,7 @@ int func_003D6CF8(int slot, unsigned int entryIndex) {
     unsigned short *countPtr;
 
     if (D_004A4824_6CF8 != 0 && slot >= 0) {
-        countPtr = (unsigned short *)(D_004A4824_6CF8[slot] + 0xA);
+        countPtr = &D_004A4824_6CF8[slot]->entryCount;
         if (*countPtr != 0xFFFF) {
             inRange = entryIndex < *countPtr;
         }
@@ -886,8 +1028,7 @@ int func_003D70B0(void) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7110);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_7110 { unsigned char *p; int x; };
-extern struct E_7110 D_0044FFB8_7110[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_7110[] __asm__("D_0044FFB8");
 
 static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned short id) {
     unsigned short n = *(unsigned short *)(base + 0x10);
@@ -911,16 +1052,16 @@ static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned shor
  * @param eventKey  the 4-byte key {entry id, bank ids}
  * @return the bank entry, or 0
  */
-unsigned short *func_003D7110(unsigned char *eventKey) {
-    struct E_7110 *res;
-    struct E_7110 *bankSlot = D_0044FFB8_7110;
+unsigned short *func_003D7110(SPCHKEY *eventKey) {
+    SPCHBANKSLOT *res;
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_7110;
     unsigned short *ret = 0;
-    struct E_7110 **pres = &res;
+    SPCHBANKSLOT **pres = &res;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == eventKey[2] && bankData[8] == eventKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == eventKey->subId && bankData[8] == eventKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -930,7 +1071,7 @@ unsigned short *func_003D7110(unsigned char *eventKey) {
     } while (i < 8);
 done:
     if (found) {
-        ret = lookup_7110(res->p, *(unsigned short *)eventKey);
+        ret = lookup_7110(res->data, eventKey->entryId);
     }
     return ret;
 }
@@ -1046,6 +1187,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D76F0);
 #ifdef SKIP_ASM
 int func_003D7418(unsigned char *arg0);
 
+// PORT: SN-specific va_start (gcc 2.95 EE EABI form); use <stdarg.h> off-PS2.
+#define SPCH_post_va_start(ap)                                           \
+    (ap = (char *)__builtin_next_arg()                                   \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+#define SPCH_post_va_arg_int(ap) (*(int *)((ap += 8) - 8))
+
 /**
  * Posts a speech request: copies the packed key @p speechKey (func_003D8008) and @p n further int arguments into a 20-word
  * buffer and hands it to func_003D7418, the request queue. func_003D6840 installs it as D_004A482C, the game's speech
@@ -1054,18 +1201,16 @@ int func_003D7418(unsigned char *arg0);
  * @param speechKey  the packed speech key
  * @param n  the number of extra arguments
  */
-// PORT: SN-specific va_start (gcc 2.95 EE EABI form); use <stdarg.h> off-PS2.
 void func_003D76F0(int speechKey, int n, ...) {
     int buf[20];
     int *cursor;
     char *ap;
-    ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
+    SPCH_post_va_start(ap);
     buf[0] = speechKey;
     if (n > 0) {
         cursor = &buf[1];
         do {
-            ap += 8;
-            *cursor++ = *(int *)(ap - 8);
+            *cursor++ = SPCH_post_va_arg_int(ap);
         } while (--n != 0);
     }
     func_003D7418((unsigned char *)buf);
@@ -1075,26 +1220,23 @@ void func_003D76F0(int speechKey, int n, ...) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7760);
 #ifdef SKIP_ASM
+// FAKEMATCH: `*&` read of the request's key (k = *&...args.key) forms its address first; plain form 97.60%.
+// Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
+// behaviour-preserving steering only); replace it when an honest spelling matches.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct H_7760 { unsigned short h0; unsigned short h2; unsigned short h4; unsigned char pad6[4]; unsigned char flags; };
-struct R_7760 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; struct H_7760 *p; int arr[20]; };
-struct G_7760 { int z[8]; int a[8]; int b[8]; int n; struct R_7760 r[16]; };
-extern struct G_7760 D_0044FFF8_7760 __asm__("D_0044FFF8");
-struct E_7760 { unsigned char *p; int x; };
-extern struct E_7760 D_0044FFB8_7760[] __asm__("D_0044FFB8");
+extern SPCHREQSTATE D_0044FFF8_7760 __asm__("D_0044FFF8");
+extern SPCHBANKSLOT D_0044FFB8_7760[] __asm__("D_0044FFB8");
 extern int D_004506A0_7760[] __asm__("D_004506A0");
 extern int D_004A483C;
-struct K_7760 { unsigned char b[4]; };
-struct L_7760 { int n; unsigned short *ids; };
 int func_003DB9A0(void);
 void func_003D7C38(unsigned int);
 
-static __inline__ int find_7760(unsigned char *arg0, struct E_7760 **pres) {
+static __inline__ int find_7760(SPCHKEY *key, SPCHBANKSLOT **pres) {
     int found = 0;
     int i = 0;
     do {
-        unsigned char *q = D_0044FFB8_7760[i].p;
-        if (q != 0 && q[9] == arg0[2] && q[8] == arg0[3]) {
+        unsigned char *q = D_0044FFB8_7760[i].data;
+        if (q != 0 && q[9] == key->subId && q[8] == key->bankId) {
             *pres = &D_0044FFB8_7760[i];
             found = 1;
             goto done;
@@ -1118,30 +1260,30 @@ done:
  * @param channel  the channel
  * @return the record index, or -1
  */
-int func_003D7760(struct L_7760 *list, int channel) {
+int func_003D7760(SPCHIDLIST *list, int channel) {
     int best = -1;
     unsigned int bestAge = 0xFFFFFFFF;
     int maxPri = 0;
     unsigned short bestH = 0;
     unsigned int now;
     int i, j;
-    struct H_7760 *reqHeader;
+    SPCHEVENT *reqHeader;
     int expired, inList, blocked;
     unsigned int age;
 
     now = func_003DB9A0() + D_004A483C;
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_7760.r[i].c == 0) continue;
-        if (D_0044FFF8_7760.r[i].d != channel) continue;
-        if (D_0044FFF8_7760.r[i].s8 != 0) continue;
+        if (D_0044FFF8_7760.requests[i].active == 0) continue;
+        if (D_0044FFF8_7760.requests[i].channel != channel) continue;
+        if (D_0044FFF8_7760.requests[i].continuation != 0) continue;
         expired = 0;
         blocked = 0;
         inList = 1;
-        reqHeader = D_0044FFF8_7760.r[i].p;
+        reqHeader = D_0044FFF8_7760.requests[i].event;
         if (list != 0) {
-            unsigned short id = reqHeader->h0;
+            unsigned short id = reqHeader->id;
             int idFound = 0;
-            for (j = 0; j < list->n; j++) {
+            for (j = 0; j < list->count; j++) {
                 if (list->ids[j] == id) {
                     idFound = 1;
                     break;
@@ -1149,16 +1291,16 @@ int func_003D7760(struct L_7760 *list, int channel) {
             }
             inList = idFound;
         }
-        age = now - D_0044FFF8_7760.r[i].f0;
-        if (reqHeader->h2 != 0 && reqHeader->h2 < age) {
+        age = now - D_0044FFF8_7760.requests[i].time;
+        if (reqHeader->lifetime != 0 && reqHeader->lifetime < age) {
             expired = 1;
         }
         if (D_004506A0_7760[channel] == 1 && (reqHeader->flags & 1)) {
-            struct K_7760 k;
-            struct E_7760 *res;
+            SPCHKEY k;
+            SPCHBANKSLOT *res;
             int belowMin = 0;
-            k = *(struct K_7760 *)D_0044FFF8_7760.r[i].arr;
-            if (find_7760((unsigned char *)&k, &res) && reqHeader->h4 < *(unsigned short *)(res->p + 0x16)) {
+            k = *&D_0044FFF8_7760.requests[i].args.key; /* read through its address: retail forms it first */
+            if (find_7760(&k, &res) && reqHeader->priority < ((SPCHBANKHDR *)res->data)->minPriority) {
                 belowMin = 1;
             }
             blocked = belowMin;
@@ -1169,15 +1311,16 @@ int func_003D7760(struct L_7760 *list, int channel) {
         }
         if (!inList) continue;
         if (blocked) continue;
-        if (maxPri < reqHeader->h4) {
+        if (maxPri < reqHeader->priority) {
             best = i;
             bestAge = age;
-            maxPri = reqHeader->h4;
-            bestH = D_0044FFF8_7760.r[best].h;
-        } else if (reqHeader->h4 == maxPri && (age < bestAge || (age == bestAge && bestH < D_0044FFF8_7760.r[i].h))) {
+            maxPri = reqHeader->priority;
+            bestH = D_0044FFF8_7760.requests[best].seq;
+        } else if (reqHeader->priority == maxPri &&
+                   (age < bestAge || (age == bestAge && bestH < D_0044FFF8_7760.requests[i].seq))) {
             best = i;
             bestAge = age;
-            bestH = D_0044FFF8_7760.r[best].h;
+            bestH = D_0044FFF8_7760.requests[best].seq;
         }
     }
     return best;
@@ -1188,13 +1331,9 @@ int func_003D7760(struct L_7760 *list, int channel) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7A50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_7A50 { unsigned short h; int w; };
-extern struct E_7A50 D_00450660_7A50[] __asm__("D_00450660");
-struct L_7A50 { int n; unsigned short *ids; };
-struct B_7A50 { unsigned char pad[6]; unsigned char b6; unsigned char lo : 4; signed char hi : 4; unsigned char pad8[2];
-    unsigned char f0 : 1; unsigned char f1 : 1; unsigned char f2 : 1; unsigned char f3 : 1; unsigned char f4 : 1; };
-unsigned short *func_003D7110(unsigned char *arg0);
-int func_003D7760_7A50(struct L_7A50 *list, int arg1) __asm__("func_003D7760");
+extern SPCHCHANNEL D_00450660_7A50[] __asm__("D_00450660");
+unsigned short *func_003D7110(SPCHKEY *arg0);
+int func_003D7760_7A50(SPCHIDLIST *list, int arg1) __asm__("func_003D7760");
 
 /**
  * Picks the next speech request for a channel, preferring the follow-ups the channel's current line allows.
@@ -1207,26 +1346,30 @@ int func_003D7760_7A50(struct L_7A50 *list, int arg1) __asm__("func_003D7760");
  * @return the record index, or -1
  */
 int func_003D7A50(int idx) {
-    struct L_7A50 list;
+    SPCHIDLIST list;
     int ok = 0;
-    struct B_7A50 *bankEntry;
+    unsigned char *entryData;
+    SPCHEVENT *bankEntry;
     unsigned char *followList;
     int reqIndex;
 
-    list.n = 0;
+    list.count = 0;
     list.ids = 0;
-    if (D_00450660_7A50[idx].h != 0xFFFF) {
-        bankEntry = (struct B_7A50 *)func_003D7110((unsigned char *)&D_00450660_7A50[idx]);
+    if (D_00450660_7A50[idx].line.entryId != 0xFFFF) {
+        entryData = (unsigned char *)func_003D7110(&D_00450660_7A50[idx].line);
+        bankEntry = (SPCHEVENT *)entryData;
         if (bankEntry != 0) {
             int hasList = 0;
-            if (((unsigned char *)bankEntry)[0xA] >> 4 & 1) {
-                followList = (unsigned char *)bankEntry + (((bankEntry->b6 * 2 + 3) & 0xFFFFFFFC) + 0xC) + ((bankEntry->lo * 3 + 3) & ~3) + ((bankEntry->hi * 3 + 3) & ~3);
+            if (entryData[0xA] >> 4 & 1) {
+                followList = entryData + (((bankEntry->variantCount * 2 + 3) & 0xFFFFFFFC) + 0xC) +
+                             ((SPCH_TAG_COUNT(bankEntry->counts) * 3 + 3) & ~3) +
+                             ((SPCH_CONSTRAINT_COUNT(bankEntry->counts) * 3 + 3) & ~3);
                 hasList = 1;
-                if (((unsigned char *)bankEntry)[0xA] >> 3 & 1) {
-                    followList += (bankEntry->b6 * 2 + 7) & 0xFFFFFFFC;
+                if (entryData[0xA] >> 3 & 1) {
+                    followList += (bankEntry->variantCount * 2 + 7) & 0xFFFFFFFC;
                 }
-                list.n = *followList;
-                list.ids = (unsigned short *)(followList + 2);
+                list.count = ((SPCHFOLLOWLIST *)followList)->count;
+                list.ids = ((SPCHFOLLOWLIST *)followList)->ids;
             }
             ok = hasList;
         }
@@ -1445,7 +1588,6 @@ out:
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8008);
 #ifdef SKIP_ASM
-typedef struct { short a; signed char b; signed char c; } D8008_S;
 
 /**
  * Packs a speech key: @p bankId in byte 3, @p subId in byte 2 and @p entryId in the low halfword (the bank entry id). The two
@@ -1457,10 +1599,10 @@ typedef struct { short a; signed char b; signed char c; } D8008_S;
  * @return the packed key
  */
 int func_003D8008(int bankId, int subId, int entryId) {
-    D8008_S packed;
-    packed.c = bankId;
-    packed.b = subId;
-    packed.a = entryId;
+    SPCHKEY packed;
+    packed.bankId = bankId;
+    packed.subId = subId;
+    packed.entryId = entryId;
     return *(int *)&packed;
 }
 #endif
@@ -1613,8 +1755,7 @@ void func_003D8190(void) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D81F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E82B0 { unsigned char *p; int x; };
-extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
 /**
  * Looks up the key the speech bank for a speech key was registered under (func_003D6498's key).
@@ -1625,16 +1766,16 @@ extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  * @param regKeyOut  receives the bank's registration key when found
  * @return 1 when found, else 0
  */
-int func_003D81F0(unsigned char *speechKey, int *regKeyOut) {
-    struct E82B0 *res;
-    struct E82B0 *bankSlot = D_0044FFB8_82B0;
+int func_003D81F0(SPCHKEY *speechKey, int *regKeyOut) {
+    SPCHBANKSLOT *res;
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
     int ret = 0;
-    struct E82B0 **pres = &res;
+    SPCHBANKSLOT **pres = &res;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == speechKey[2] && bankData[8] == speechKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == speechKey->subId && bankData[8] == speechKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -1645,7 +1786,7 @@ int func_003D81F0(unsigned char *speechKey, int *regKeyOut) {
 done:
     if (found) {
         ret = 1;
-        *regKeyOut = res->x;
+        *regKeyOut = res->key;
     }
     return ret;
 }
@@ -1679,7 +1820,7 @@ void func_003D8278(void) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D82B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
 /**
  * Returns halfword +0x14 of the speech bank registered for a speech key (matched as in func_003D81F0), or 0.
@@ -1687,16 +1828,16 @@ extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  * @param speechKey  the 4-byte speech key
  * @return the bank's +0x14 value, 0 when no bank matches
  */
-unsigned short func_003D82B0(unsigned char *speechKey) {
-    struct E82B0 *res;
-    struct E82B0 *bankSlot = D_0044FFB8_82B0;
+unsigned short func_003D82B0(SPCHKEY *speechKey) {
+    SPCHBANKSLOT *res;
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
     unsigned short ret = 0;
-    struct E82B0 **pres = &res;
+    SPCHBANKSLOT **pres = &res;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == speechKey[2] && bankData[8] == speechKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == speechKey->subId && bankData[8] == speechKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -1706,7 +1847,7 @@ unsigned short func_003D82B0(unsigned char *speechKey) {
     } while (i < 8);
 done:
     if (found) {
-        ret = *(unsigned short *)(res->p + 0x14);
+        ret = ((SPCHBANKHDR *)res->data)->value14;
     }
     return ret;
 }
@@ -1716,7 +1857,7 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8330);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
 /**
  * Looks up the sub id (+0x9) of the speech bank registered for a speech key (matched as in func_003D81F0).
@@ -1725,16 +1866,16 @@ extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  * @param subIdOut  receives the bank's +0x9 byte when found
  * @return 1 when found, else 0
  */
-int func_003D8330(unsigned char *speechKey, int *subIdOut) {
-    struct E82B0 *res;
-    struct E82B0 *bankSlot = D_0044FFB8_82B0;
+int func_003D8330(SPCHKEY *speechKey, int *subIdOut) {
+    SPCHBANKSLOT *res;
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
     int ret = 0;
-    struct E82B0 **pres = &res;
+    SPCHBANKSLOT **pres = &res;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == speechKey[2] && bankData[8] == speechKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == speechKey->subId && bankData[8] == speechKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -1745,7 +1886,7 @@ int func_003D8330(unsigned char *speechKey, int *subIdOut) {
 done:
     if (found) {
         ret = 1;
-        *subIdOut = res->p[9];
+        *subIdOut = res->data[9];
     }
     return ret;
 }
@@ -1755,8 +1896,7 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", func_003D83B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_83B8 { unsigned char *p; int x; };
-extern struct E_83B8 D_0044FFB8_83B8[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_83B8[] __asm__("D_0044FFB8");
 
 /**
  * Looks up the usage bytes of the speech bank registered for a speech key (the area func_003D6618 resets).
@@ -1765,16 +1905,16 @@ extern struct E_83B8 D_0044FFB8_83B8[] __asm__("D_0044FFB8");
  * @param usageOut  receives the bank's usage area when found
  * @return 1 when found, else 0
  */
-int func_003D83B8(unsigned char *speechKey, unsigned char **usageOut) {
-    struct E_83B8 *res;
-    struct E_83B8 *bankSlot = D_0044FFB8_83B8;
+int func_003D83B8(SPCHKEY *speechKey, unsigned char **usageOut) {
+    SPCHBANKSLOT *res;
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_83B8;
     int ret = 0;
-    struct E_83B8 **pres = &res;
+    SPCHBANKSLOT **pres = &res;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == speechKey[2] && bankData[8] == speechKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == speechKey->subId && bankData[8] == speechKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -1784,9 +1924,9 @@ int func_003D83B8(unsigned char *speechKey, unsigned char **usageOut) {
     } while (i < 8);
 done:
     if (found) {
-        unsigned char *bankBase = res->p;
+        unsigned char *bankBase = res->data;
         ret = 1;
-        *usageOut = bankBase + (((*(unsigned short *)(bankBase + 0x10) * 2 + 3) & 0xFFFFFFFC) + 0x18);
+        *usageOut = bankBase + (((((SPCHBANKHDR *)bankBase)->entryCount * 2 + 3) & 0xFFFFFFFC) + 0x18);
     }
     return ret;
 }
@@ -1809,7 +1949,7 @@ unsigned short *func_003D8460(void *header, int key) {
     unsigned short *var_6;
     unsigned short temp_8;
 
-    temp_8 = (*(unsigned short *)((char*)(header) + (0x10)));
+    temp_8 = ((SPCHBANKHDR *)header)->entryCount;
     var_7 = 0;
     if (temp_8 != 0) {
         var_6 = header + 0x18;
@@ -1835,8 +1975,7 @@ block_4:
 INCLUDE_ASM("ealib/seg_2D7498", func_003D84A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_84A0 { unsigned char *p; int x; };
-extern struct E_84A0 D_0044FFB8_84A0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT D_0044FFB8_84A0[] __asm__("D_0044FFB8");
 
 /**
  * Finds the speech bank slot (D_0044FFB8) for a speech key: the first whose ids (+0x9, +0x8) match key bytes 2 and 3.
@@ -1846,13 +1985,13 @@ extern struct E_84A0 D_0044FFB8_84A0[] __asm__("D_0044FFB8");
  * @param pres  receives the slot when found
  * @return 1 when found, else 0
  */
-int func_003D84A0(unsigned char *speechKey, struct E_84A0 **pres) {
-    struct E_84A0 *bankSlot = D_0044FFB8_84A0;
+int func_003D84A0(SPCHKEY *speechKey, SPCHBANKSLOT **pres) {
+    SPCHBANKSLOT *bankSlot = D_0044FFB8_84A0;
     int found = 0;
     int i = 0;
     do {
-        unsigned char *bankData = bankSlot->p;
-        if (bankData != 0 && bankData[9] == speechKey[2] && bankData[8] == speechKey[3]) {
+        unsigned char *bankData = bankSlot->data;
+        if (bankData != 0 && bankData[9] == speechKey->subId && bankData[8] == speechKey->bankId) {
             *pres = bankSlot;
             found = 1;
             goto done;
@@ -1893,9 +2032,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8530);
  *
  * @param idList  the list
  */
-void func_003D8530(void *idList) {
-    *(int *)((char *)idList + 0) = 0;
-    *(int *)((char *)idList + 4) = 0;
+void func_003D8530(SPCHIDLIST *idList) {
+    idList->count = 0;
+    idList->ids = 0;
 }
 #endif
 
@@ -1909,12 +2048,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8540);
  * @param list  the list
  * @return 1 when present, else 0
  */
-int func_003D8540(int wantedId, int *list) {
+int func_003D8540(int wantedId, SPCHIDLIST *list) {
     unsigned key = wantedId & 0xFFFF;
     int i;
     int found = 0;
-    for (i = 0; i < list[0]; i++) {
-        if ((*(unsigned short **)(list + 1))[i] == key) {
+    for (i = 0; i < list->count; i++) {
+        if (list->ids[i] == key) {
             found = 1;
             break;
         }
@@ -1928,9 +2067,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8598);
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D85C8);
 #ifdef SKIP_ASM
-struct K_85C8 { unsigned char b[4]; };
-struct Rule_85C8 { int pad0; signed char n; unsigned char pad5[3]; unsigned char k[8]; unsigned char c[4]; int m[4]; };
-int func_003D83B8(unsigned char *arg0, unsigned char **arg1);
+int func_003D83B8(SPCHKEY *arg0, unsigned char **arg1);
 
 /**
  * Returns whether a set of tag values meets a rule's column conditions (up to 4; a rule with 5 or more fails).
@@ -1946,7 +2083,7 @@ int func_003D83B8(unsigned char *arg0, unsigned char **arg1);
  * @param vals  the tag values to test
  * @return 1 when every condition holds, else 0
  */
-int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl, unsigned char *vals) {
+int func_003D85C8(unsigned char *obj, struct sCond *rule, SPCHARGS *tbl, unsigned char *vals) {
     int ok = 1;
     int n = rule->n;
     int i;
@@ -1958,17 +2095,17 @@ int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl
             unsigned int value = vals[i];
             unsigned int mask;
             int k;
-            int *mp;
+            unsigned int *mp;
             ok = 0;
             if (value < 32) {
                 mask = 1 << value;
-                k = rule->k[i];
+                k = rule->a[i];
                 mp = &rule->m[i];
                 if (mask & *mp) {
                     if (k == 0 || k == 0xFE) {
                         ok = 1;
                     } else if (k == 0xFF) {
-                        unsigned int cond = rule->c[i];
+                        unsigned int cond = rule->b[i];
                         if (cond & 0x80) {
                             unsigned char *maskTable;
                             cond &= 0x7F;
@@ -1976,17 +2113,17 @@ int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl
                             ok = 0;
                             if (mask & ((int *)maskTable)[cond]) ok = 1;
                         } else {
-                            struct K_85C8 key;
+                            SPCHKEY key;
                             unsigned char *res;
-                            key = *(struct K_85C8 *)tbl;
-                            if (func_003D83B8((unsigned char *)&key, &res)) {
+                            key = tbl->key;
+                            if (func_003D83B8(&key, &res)) {
                                 ok = 0;
                                 if (value == res[cond]) ok = 1;
                             }
                         }
                     } else {
                         ok = 0;
-                        if (mask & ((int *)tbl)[k]) ok = 1;
+                        if (mask & *(tbl->words + k)) ok = 1; /* pointer form: retail adds the index first */
                     }
                 }
             } else {
@@ -2024,7 +2161,7 @@ int func_003D8780(short *state, unsigned char *node, int idx) {
         int current = state[1];
         if (current != -1) {
             int isSet = 0;
-            if (current < *(unsigned short *)(node + 0xA)) {
+            if (current < ((SPCHTABLEHDR *)node)->entryCount) {
                 int bit = w * current + idx;
                 unsigned char flags = node[4];
                 int colCount = flags & 0xF;
@@ -2068,7 +2205,6 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D88C8);
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8CB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct H_8CB0 { char pad[6]; unsigned char n; char pad2[5]; unsigned short ids[1]; };
 extern unsigned int D_004506E0_8CB0[] __asm__("D_004506E0");
 
 #define WEIGHT_8CB0(p) ((*(p) & 0x1F) * D_004506E0_8CB0[*(p) >> 5])
@@ -2083,9 +2219,9 @@ extern unsigned int D_004506E0_8CB0[] __asm__("D_004506E0");
  * @param optionSet  the option set
  * @param out  receives the option indices in order
  */
-void func_003D8CB0(struct H_8CB0 *optionSet, unsigned char *out) {
+void func_003D8CB0(SPCHEVENT *optionSet, unsigned char *out) {
     int w[100];
-    int n = optionSet->n;
+    int n = optionSet->variantCount;
     int total = 0;
     int k;
     int i;
@@ -2093,7 +2229,9 @@ void func_003D8CB0(struct H_8CB0 *optionSet, unsigned char *out) {
     unsigned char *e;
 
     for (i = 0; i < n; i++) {
-        e = (unsigned char *)optionSet + optionSet->ids[i] * 4;
+        // ORIGINAL-PTR: an entry's variants lie at the word offsets its variant table gives (a variable-length
+        // record), so they have no fixed member
+        e = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
         w[i] = WEIGHT_8CB0(e);
         total += WEIGHT_8CB0(e);
     }
@@ -2109,7 +2247,7 @@ void func_003D8CB0(struct H_8CB0 *optionSet, unsigned char *out) {
         w[i] = 0;
     }
     for (i = 0; i < n; i++) {
-        e = (unsigned char *)optionSet + optionSet->ids[i] * 4;
+        e = (unsigned char *)optionSet + optionSet->variantOffsets[i] * 4;
         if (WEIGHT_8CB0(e) == 0) {
             out[k++] = i;
         }
@@ -2123,13 +2261,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8E58);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char **D_004A4824_8E58 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
-struct sShapeInfo { int len; int start; int n; unsigned char col[4]; };
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
-struct sSel { short x; short y; unsigned char start; unsigned char len; unsigned char cur; unsigned char flag; };
-struct sSelSet { struct sSel ent[12]; unsigned char n; unsigned char ntbl; unsigned char tbl[200]; };
-struct sTblEnt { unsigned short a; unsigned short b; };
-struct sLayer { char pad[4]; unsigned char cnt; unsigned char n5; unsigned char n6; char pad7; unsigned char list[1]; };
-struct sCond { unsigned short id; unsigned char idx; unsigned char mode; signed char n; char pad5[3]; unsigned char a[8]; unsigned char b[4]; unsigned int m[4]; };
 
 /**
  * Checks a phrase's chosen rows against its shared variables: returns 1 when they agree, 0 on a conflict or an
@@ -2159,6 +2291,8 @@ int func_003D8E58(struct sSelSet *selSet, struct sLayer *phrase) {
     int bv;
     int varBits;
 
+    // ORIGINAL-PTR: a template's variable words follow its variable-length slot list, so their offset comes from
+    // the slot count
     tab = (int *)((unsigned char *)phrase + ((((phrase->cnt >> 2) + 3) & 0x7C) + 8) + phrase->n6 * 4);
     for (varIndex = 0; varIndex < phrase->n5; varIndex++) {
         tab[varIndex] = 0;
@@ -2171,7 +2305,7 @@ int func_003D8E58(struct sSelSet *selSet, struct sLayer *phrase) {
         redo = 1;
         i = 0;
         if (cnt != 0) {
-            lp = (unsigned char *)phrase + 8;
+            lp = phrase->list;
             do {
                 if (selSet->ent[i].flag == 0) {
                     selSet->ent[i].flag = 1;
@@ -2340,6 +2474,8 @@ int func_003D9088(struct sSelSet *self, unsigned char *hdr, struct sTblEnt *tbl,
                 lp = hdr + 8;
                 do {
                     struct sSel *slot = &self->ent[i];
+                    // ORIGINAL-PTR: the slot conditions lie at the word offsets the slot list gives (a
+                    // variable-length record), so they have no fixed member
                     struct sCond *cond = (struct sCond *)(hdr + lp[i] * 4);
                     if (!check_9088(hdr, cond)) {
                         all = 0;
@@ -2477,22 +2613,17 @@ int func_003D93C0(struct sLayer *phrase, struct sSelSet *selSet, int thr) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003D95B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_95B8 { short x; char pad[2]; unsigned char start; unsigned char len; unsigned char cur; unsigned char flag; };
-struct H_95B8 { struct E_95B8 ent[12]; char pad[2]; unsigned char tbl[1]; };
-struct O_95B8 { int len; int start; int n; unsigned char col[4]; };
-struct L_95B8 { char pad[4]; unsigned char cnt; unsigned char n5; char pad2[2]; unsigned char list[1]; };
-struct C_95B8 { char pad[4]; signed char n; char pad2[3]; unsigned char a[8]; unsigned char b[8]; };
-extern int func_003D83B8_95B8(void *, unsigned char **) __asm__("func_003D83B8");
-extern int func_003DB838_95B8(unsigned char *, int, struct O_95B8 *) __asm__("func_003DB838");
-extern int func_003D93C0_95B8(struct L_95B8 *, struct H_95B8 *, int) __asm__("func_003D93C0");
+extern int func_003D83B8_95B8(SPCHKEY *, unsigned char **) __asm__("func_003D83B8");
+extern int func_003DB838_95B8(unsigned char *, int, struct sShapeInfo *) __asm__("func_003DB838");
+extern int func_003D93C0_95B8(struct sLayer *, struct sSelSet *, int) __asm__("func_003D93C0");
 extern unsigned char **D_004A4824_95B8 __asm__("D_004A4824");
 extern int func_003DB5C0(int, int);
 
-static __inline__ void shuffle_95B8(struct L_95B8 *l, struct H_95B8 *h) {
+static __inline__ void shuffle_95B8(struct sLayer *l, struct sSelSet *h) {
     int i = 0;
     int j;
     int n = l->cnt >> 2;
-    struct E_95B8 *e;
+    struct sSel *e;
     unsigned char *p;
     unsigned char *q;
     unsigned char t;
@@ -2509,19 +2640,19 @@ static __inline__ void shuffle_95B8(struct L_95B8 *l, struct H_95B8 *h) {
     }
 }
 
-static __inline__ void apply_95B8(void *a0, struct H_95B8 *h, struct L_95B8 *l) {
-    struct O_95B8 o;
+static __inline__ void apply_95B8(SPCHKEY *a0, struct sSelSet *h, struct sLayer *l) {
+    struct sShapeInfo o;
     unsigned char *out;
     int n;
     int i;
     int j;
-    struct C_95B8 *c;
+    struct sCond *c;
 
     if (func_003D83B8_95B8(a0, &out) != 0) {
         i = 0;
         n = l->cnt >> 2;
         for (; i < n; i++) {
-            c = (struct C_95B8 *)((int *)l + l->list[i]);
+            c = (struct sCond *)((int *)l + l->list[i]);
             for (j = 0; j < c->n; j++) {
                 if (c->a[j] == 0xFE && !(c->b[j] & 0x80)) {
                     if (func_003DB838_95B8(D_004A4824_95B8[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
@@ -2548,7 +2679,7 @@ static __inline__ void apply_95B8(void *a0, struct H_95B8 *h, struct L_95B8 *l) 
  * @param thr  the length limit in percent of the buffer
  * @return 1 on success, else 0
  */
-int func_003D95B8(void *speechKey, struct H_95B8 *selSet, struct L_95B8 *phrase, int mode, int thr) {
+int func_003D95B8(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLayer *phrase, int mode, int thr) {
     int ok;
     int i;
     int n;
@@ -2581,20 +2712,20 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D9830);
 extern unsigned char **D_004A4824_9830 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
 extern int D_004A4830_9830 __asm__("D_004A4830");
 extern int D_004A4838_9830 __asm__("D_004A4838");
-struct sKey4 { unsigned char b[4]; };
-struct sFF90Msg { int id; int start; int len; struct sKey4 k; int f10; int f14; int f18; };
+struct sFF90Msg { int id; int start; int len; SPCHKEY k; int f10; int f14; int f18; };
 struct sFF90 {
     int (*f00)(struct sFF90Msg *);                  /* func_003D9830 */
     int (*f04)(unsigned char *, int, int, int);     /* func_003DB208 */
     void (*f08)(void *, int, int, int);             /* func_003DAE48, func_003DB040 */
-    int (*f0C)(struct sKey4 *);                     /* func_003D7EC8 */
+    int (*f0C)(SPCHKEY *);                     /* func_003D7EC8 */
     int (*f10)(int, void *);                        /* func_003DA418 */
     int f14;
 };
 struct sFFA8 { int f00; int f04; int (*f08)(); int f0C; };
 extern struct sFF90 D_0044FF90_9830 __asm__("D_0044FF90");
-struct s0700Q { short x; short idx; unsigned short y; short d; };
-struct G_9830 { int f0, f4, f8; struct s0700Q q[0x30]; };
+/* A play list line (D_00450700 +0xC, 0x30 of them): its speech table slot, repeat index and row. */
+struct sPlayLine { short x; short idx; unsigned short y; short d; };
+struct G_9830 { int f0, f4, f8; struct sPlayLine q[0x30]; };
 extern struct G_9830 D_00450700_9830 __asm__("D_00450700");
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
 
@@ -2619,7 +2750,7 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
  * @param firstEntry  the first play list entry
  * @return the total length * 100 / D_004A4838 (0 without a buffer size)
  */
-int func_003D9830(unsigned char *phrase, struct sKey4 *k, int firstEntry) {
+int func_003D9830(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
     struct sShapeInfo rowInfo;
     struct sFF90Msg playMsg;
     int w30;
@@ -2632,15 +2763,15 @@ int func_003D9830(unsigned char *phrase, struct sKey4 *k, int firstEntry) {
     int tableLen;
     int x;
     int y;
-    struct s0700Q *listEntry;
+    struct sPlayLine *listEntry;
     unsigned char *table;
 
     sum = 0;
     pct = 0;
     w34 = 0;
     if (D_0044FF90_9830.f00 != 0) {
-        func_003D8330(k->b, &w30);
-        func_003D81F0(k->b, &w34);
+        func_003D8330(k, &w30);
+        func_003D81F0(k, &w34);
         n = phrase[4] >> 2;
         if (n != 0) {
             cnt = n;
@@ -2653,7 +2784,7 @@ int func_003D9830(unsigned char *phrase, struct sKey4 *k, int firstEntry) {
                     clearBit_9830(table, y);
                 }
                 if (func_003DB838(table, y, &rowInfo)) {
-                    tableLen = *(unsigned short *)(table + 8) * ((table[7] + 1) << 8);
+                    tableLen = ((SPCHTABLEHDR *)table)->totalLength * ((table[7] + 1) << 8);
                     st = rowInfo.start;
                     if (listEntry->idx != -1) {
                         st = listEntry->idx * tableLen + st;
@@ -2665,7 +2796,7 @@ int func_003D9830(unsigned char *phrase, struct sKey4 *k, int firstEntry) {
                     playMsg.k = *k;
                     playMsg.f18 = w30;
                     playMsg.f10 = w34;
-                    playMsg.f14 = *(unsigned short *)(table + 2);
+                    playMsg.f14 = ((SPCHTABLEHDR *)table)->subId;
                     D_0044FF90_9830.f00(&playMsg);
                     func_003D6EE8(table, y);
                 }
@@ -2775,20 +2906,22 @@ void func_003D9AC8(struct H_9AC8 *selSet, int id, int eventEntry, unsigned char 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9BD8);
 #ifdef SKIP_ASM
+// FAKEMATCH: `*&` read of the record's key (key = *&...data.key) forms its address first; plain form 94.29%.
+// Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
+// behaviour-preserving steering only); replace it when an honest spelling matches.
 // From peak3project's fork (github.com/peak3project/ssx3).
                   /* 0x01789A34 while initialised (func_003D6840) */
 extern unsigned char **D_004A4824_9BD8 __asm__("D_004A4824");
 
 extern struct sFF90 D_0044FF90;
 
-/* D_00450660: one entry per bucket (func_003D69A8 resets h to 0xFFFF). */
-struct s0660 { unsigned short h; int w; };
+extern SPCHCHANNEL D_00450660[8];
 
-extern struct s0660 D_00450660[8];
+struct s0700Req {
+    int f0; unsigned char *f4; unsigned char b8; unsigned char b9; unsigned char ba; unsigned char bb; SPCHARGS data;
+};
 
-struct s0700Req { int f0; unsigned char *f4; unsigned char b8; unsigned char b9; unsigned char ba; unsigned char bb; int data[20]; };
-
-struct s0700 { int f0; int f4; int f8; struct s0700Q q[0x30]; struct s0700Req r[8]; };
+struct s0700 { int f0; int f4; int f8; struct sPlayLine q[0x30]; struct s0700Req r[8]; };
 
 extern struct s0700 D_00450700;
 
@@ -2796,10 +2929,10 @@ extern struct s0700 D_00450700;
 int func_003D8330_9BD8(unsigned char *arg0, int *arg1) __asm__("func_003D8330");
 
 // (prototype from their definition at line 1963)
-int func_003D9830_9BD8(unsigned char *h, struct sKey4 *k, int a2) __asm__("func_003D9830");
+int func_003D9830_9BD8(unsigned char *h, SPCHKEY *k, int a2) __asm__("func_003D9830");
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern void func_003DB040_9BD8(struct sKey4 *, int, int, int *) __asm__("func_003DB040");
+extern void func_003DB040_9BD8(SPCHKEY *, int, int, int *) __asm__("func_003DB040");
 extern int func_003DB3E0_9BD8(int, int) __asm__("func_003DB3E0");
 
 /* The body of func_003DAE48, inlined. */
@@ -2858,7 +2991,7 @@ int func_003D9BD8_impl(int id) __asm__("func_003D9BD8");
  * @return the number of lines sent, 0 when the list is not this channel's
  */
 int func_003D9BD8_impl(int id) {
-    struct sKey4 key;
+    SPCHKEY key;
     int ret = 0;
     int n;
     int k;
@@ -2866,17 +2999,17 @@ int func_003D9BD8_impl(int id) {
     if (reqOwned_9BD8(id)) {
         n = D_00450700.f4;
         for (k = 0; k < n; k++) {
-            key = *(struct sKey4 *)D_00450700.r[k].data;
-            func_003DB040_9BD8(&key, D_00450700.r[k].f0, D_00450700.r[k].b8, D_00450700.r[k].data);
+            key = *&D_00450700.r[k].data.key; /* read through its address: retail forms it first */
+            func_003DB040_9BD8(&key, D_00450700.r[k].f0, D_00450700.r[k].b8, D_00450700.r[k].data.words);
             layerHits_9BD8(&key, D_00450700.r[k].f0, (struct sLayer *)D_00450700.r[k].f4, ret);
             func_003D9830_9BD8(D_00450700.r[k].f4, &key, ret);
             ret += D_00450700.r[k].f4[4] >> 2;
             if (k == 0) {
-                if (*(unsigned short *)&key == D_00450660[id].h) {
-                    D_00450660[id].w++;
+                if (key.entryId == D_00450660[id].line.entryId) {
+                    D_00450660[id].repeatCount++;
                 } else {
-                    *(struct sKey4 *)&D_00450660[id] = key;
-                    D_00450660[id].w = 1;
+                    D_00450660[id].line = key;
+                    D_00450660[id].repeatCount = 1;
                 }
             }
         }
@@ -2889,18 +3022,6 @@ int func_003D9BD8_impl(int id) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9ED0);
 #ifdef SKIP_ASM
-struct H_9ED0 {
-    char pad[6];
-    unsigned char n6;
-    unsigned char lo : 4;
-    signed char hi : 4;
-};
-struct T_9ED0 {
-    int a, b, c;
-};
-struct B_9ED0 {
-    unsigned char a, b, c;
-};
 /**
  * Returns whether a phrase template's set variables agree with the request: each set variable word i must share a bit
  * with request word @p masks [b] of the event's constraint i (3-byte entries after its tag events, count in the high
@@ -2911,22 +3032,26 @@ struct B_9ED0 {
  * @param masks  the request's argument words
  * @return 1 when they agree, else 0
  */
-int func_003D9ED0(struct H_9ED0 *eventEntry, unsigned char *phrase, int *masks) {
-    struct T_9ED0 constraint;
+int func_003D9ED0(SPCHEVENT *eventEntry, unsigned char *phrase, int *masks) {
+    SPCHTAGWORDS constraint;
     int *varWords;
-    struct B_9ED0 *constraints;
+    SPCHTAG *constraints;
     int n, ok, i;
 
-    n = eventEntry->hi;
+    n = SPCH_CONSTRAINT_COUNT(eventEntry->counts);
     ok = 1;
     if (n != 0) {
+        // ORIGINAL-PTR: both lists sit after variable-length tables (the template's condition offsets, the entry's
+        // variant offsets and tags), so their offsets come from those counts, not from a member
         varWords = (int *)(phrase + ((((phrase[4] >> 2) + 3) & 0xFFFFFFFC) + 8));
-        constraints = (struct B_9ED0 *)((unsigned char *)eventEntry + ((((eventEntry->n6 * 2) + 3) & 0xFFFFFFFC) + 0xC) + ((eventEntry->lo * 3 + 3) & ~3));
+        constraints = (SPCHTAG *)((unsigned char *)eventEntry +
+                                  ((((eventEntry->variantCount * 2) + 3) & 0xFFFFFFFC) + 0xC) +
+                                  ((SPCH_TAG_COUNT(eventEntry->counts) * 3 + 3) & ~3));
         for (i = 0; i < n; i++) {
-            constraint.a = constraints[i].a;
-            constraint.b = constraints[i].b;
-            constraint.c = constraints[i].c;
-            if (varWords[i] != 0 && !(varWords[i] & masks[constraint.b])) {
+            constraint.id = constraints[i].id;
+            constraint.argIndex = constraints[i].argIndex;
+            constraint.type = constraints[i].type;
+            if (varWords[i] != 0 && !(varWords[i] & masks[constraint.argIndex])) {
                 ok = 0;
                 break;
             }
@@ -2949,8 +3074,8 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA3A8);
  * @param subIdOut  receives the sub id (+0x9)
  */
 void func_003DA3A8(void *data, int *bankIdOut, int *subIdOut) {
-    *bankIdOut = (int) (*(unsigned char *)((char*)(data) + (8)));
-    *subIdOut = (int) (*(unsigned char *)((char*)(data) + (9)));
+    *bankIdOut = ((SPCHBANKHDR *)data)->bankId;
+    *subIdOut = ((SPCHBANKHDR *)data)->subId;
 }
 #endif
 
@@ -3012,12 +3137,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA418);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_A418 { int pad[4]; int (*cb)(int, void *); };
-struct E_A418 { char data[0x60]; };
 extern struct G_A418 D_0044FF90_A418 __asm__("D_0044FF90");
-/* D_0044FFF8's request entries are 0x60 bytes from +0x64; each one's data starts 0x10 in. */
-struct T_A418 { char head[0x74]; struct E_A418 e[16]; };
-extern struct T_A418 D_0044FFF8_A418 __asm__("D_0044FFF8");
-extern int func_003D9FB0_A418(struct E_A418 *) __asm__("func_003D9FB0");
+extern SPCHREQSTATE D_0044FFF8_A418 __asm__("D_0044FFF8");
+extern int func_003D9FB0_A418(SPCHARGS *) __asm__("func_003D9FB0");
 
 /**
  * Builds speech request @p idx into the play list (func_003D9FB0); returns the result, negative results as 0.
@@ -3030,7 +3152,7 @@ extern int func_003D9FB0_A418(struct E_A418 *) __asm__("func_003D9FB0");
  * @return the build result, at least 0
  */
 int func_003DA418(int idx) {
-    struct E_A418 *reqArgs = &D_0044FFF8_A418.e[idx];
+    SPCHARGS *reqArgs = &D_0044FFF8_A418.requests[idx].args;
     int result;
     int i;
     int k;
@@ -3064,17 +3186,19 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA4E0);
  * @param rule  the condition rule (count at +0x4)
  * @param values  the chosen tag values
  */
-void func_003DA4E0(unsigned char *node, unsigned char *rule, unsigned char *values) {
+void func_003DA4E0(unsigned char *node, struct sCond *rule, unsigned char *values) {
     int i;
     signed char n;
     unsigned char cond;
     unsigned char *base;
     int *w;
     i = 0;
-    n = rule[4];
+    n = rule->n;
+    // A template's variable words follow its variable-length slot list, so their offset comes from the slot count
+    // (a word's address is summed as an integer below: every pointer form reorders the add)
     base = node + ((((node[4] >> 2) + 3) & 0x7C) + 8) + node[6] * 4;
     if (n > 0) {
-        unsigned char *entry = rule + 0x10;
+        unsigned char *entry = rule->b;
         do {
             if (entry[-8] == 0xFE) {
                 cond = entry[0];
@@ -3093,24 +3217,18 @@ void func_003DA4E0(unsigned char *node, unsigned char *rule, unsigned char *valu
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA578);
 #ifdef SKIP_ASM
-struct S_A578 {
-    char pad[4];
-    signed char n;
-    char pad2[3];
-    unsigned char arr[1];
-};
 /**
  * Returns whether any of a rule's conditions (count +0x4, kinds from +0x8) is a bind (kind 0xFE).
  *
  * @param rule  the condition rule
  * @return 1 when it binds, else 0
  */
-int func_003DA578(struct S_A578 *rule) {
+int func_003DA578(struct sCond *rule) {
     int i;
     int found = 0;
     int n = rule->n;
     for (i = 0; i < n; i++) {
-        if (rule->arr[i] == 0xFE) {
+        if (rule->a[i] == 0xFE) {
             found = 1;
             break;
         }
@@ -3124,6 +3242,11 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA5C8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 enum E_A5C8 { E_A5C8_0, E_A5C8_1, E_A5C8_2 };
+/* A request argument word; its low halfword alone is a table's sub id or an entry index. */
+typedef union SPCHARGWORD {
+    unsigned int word;
+    unsigned short low;
+} SPCHARGWORD;
 /**
  * Resolves a phrase slot's speech table from its reference; the out-of-line copy of the step func_003D9088 inlines.
  *
@@ -3136,10 +3259,10 @@ enum E_A5C8 { E_A5C8_0, E_A5C8_1, E_A5C8_2 };
  * @param out  receives the table slot and the entry index (-1 when unused)
  * @return 1 when a table was found, else 0
  */
-int func_003DA5C8(unsigned char *ref, unsigned int *tbl, short *out) {
-    unsigned int idx = ref[2];
-    int kind = ref[3];
-    unsigned short id = *(unsigned short *)ref;
+int func_003DA5C8(struct sCond *ref, SPCHARGWORD *tbl, short *out) {
+    unsigned int idx = ref->idx;
+    int kind = ref->mode;
+    unsigned short id = ref->id;
     int handle;
     out[1] = -1;
     out[0] = -1;
@@ -3151,13 +3274,13 @@ int func_003DA5C8(unsigned char *ref, unsigned int *tbl, short *out) {
         if (idx >= 20) {
             out[0] = -1;
         } else {
-            out[0] = func_003D6DB8(id, *(unsigned short *)&tbl[idx]);
+            out[0] = func_003D6DB8(id, tbl[idx].low);
         }
         break;
     case 2:
         handle = func_003D6D50(id);
-        if (func_003D6CF8(handle, tbl[idx]) != 0) {
-            out[1] = *(unsigned short *)&tbl[idx];
+        if (func_003D6CF8(handle, tbl[idx].word) != 0) {
+            out[1] = tbl[idx].low;
         } else {
             handle = -1;
         }
@@ -3179,15 +3302,15 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA6B0);
  * @param node  the speech table
  * @param index  the row
  */
-void func_003DA6B0(char *node, int index) {
-    int temp_8;
-    int temp_3;
-    unsigned char *temp_4;
+void func_003DA6B0(unsigned char *node, int index) {
+    int colCount;
+    int byteIndex;
+    unsigned char *maskByte;
 
-    temp_8 = *(unsigned char *)(node + 4) & 0xF;
-    temp_3 = index / 8;
-    temp_4 = (unsigned char *)(node + ((*(unsigned char *)(node + 5) * (temp_8 + 2) + 0xF) & 0x3FFC) + temp_8 * 4 + (temp_3 + 1));
-    *temp_4 &= ~(1 << (index - temp_3 * 8));
+    colCount = node[4] & 0xF;
+    byteIndex = index / 8;
+    maskByte = node + ((node[5] * (colCount + 2) + 0xF) & 0x3FFC) + colCount * 4 + (byteIndex + 1);
+    *maskByte &= ~(1 << (index - byteIndex * 8));
 }
 #endif
 
@@ -3220,10 +3343,10 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA750);
  * @param bit  the row
  * @return nonzero when the transition is allowed
  */
-int func_003DA750(char *state, unsigned char *node, int bit) {
-    int current = *(short *)(state + 2);
+int func_003DA750(short *state, unsigned char *node, int bit) {
+    int current = state[1];
     int res = 0;
-    if (current < *(unsigned short *)(node + 0xA)) {
+    if (current < ((SPCHTABLEHDR *)node)->entryCount) {
         int k = 0;
         unsigned char *matrix, *rowsEnd;
         unsigned char mask;
@@ -3248,11 +3371,6 @@ int func_003DA750(char *state, unsigned char *node, int bit) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA810);
 #ifdef SKIP_ASM
-struct S_A810 {
-    char pad[0x61];
-    unsigned char n;
-    signed char buf[1];
-};
 
 /**
  * Appends a row to a selection set's candidate list (count +0x61, at most 200; rows from +0x62).
@@ -3261,12 +3379,12 @@ struct S_A810 {
  * @param value  the row
  * @return 1 when added, 0 when the list is full
  */
-int func_003DA810(struct S_A810 *list, int value) {
+int func_003DA810(struct sSelSet *list, int value) {
     int added = 0;
-    if (list->n < 200U) {
+    if (list->ntbl < 200U) {
         added = 1;
-        list->buf[list->n] = value;
-        list->n++;
+        list->tbl[list->ntbl] = value;
+        list->ntbl++;
     }
     return added;
 }
@@ -3275,10 +3393,6 @@ int func_003DA810(struct S_A810 *list, int value) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA848);
 #ifdef SKIP_ASM
-struct S_A848 {
-    char pad[8];
-    unsigned char arr[1];
-};
 /**
  * Returns whether a speech table suits a slot condition: for each table column whose condition kind (+0x8 [i]) names an
  * argument word (not 0, 0xFE or 0xFF), the table's column mask (after its rows) must share a bit with that word.
@@ -3288,7 +3402,7 @@ struct S_A848 {
  * @param masks  the request's argument words
  * @return 1 when it suits, else 0
  */
-int func_003DA848(struct S_A848 *sel, unsigned char *node, int *masks) {
+int func_003DA848(struct sCond *sel, unsigned char *node, int *masks) {
     int *colMasks;
     int n;
     int ok;
@@ -3298,10 +3412,12 @@ int func_003DA848(struct S_A848 *sel, unsigned char *node, int *masks) {
     ok = 1;
     n = node[4] & 0xF;
     i = 0;
+    // ORIGINAL-PTR: a speech table's column masks follow its variable-length rows, so their offset comes from the
+    // row and column counts
     colMasks = (int *)(node + ((node[5] * (n + 2) + 0xF) & 0x3FFC));
     if (n != 0) {
         do {
-            value = sel->arr[i];
+            value = sel->a[i];
             if (value != 0 && value != 0xFF && value != 0xFE) {
                 if (!(colMasks[i] & masks[value])) {
                     ok = 0;
@@ -3341,10 +3457,7 @@ int func_003DA8E0(int len) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA910);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_A910 { short x; unsigned short y; unsigned short z; unsigned char idx; unsigned char pad; };
-struct H_A910 { struct E_A910 ent[12]; char pad[2]; unsigned char tbl[1]; };
-struct O_A910 { int len; int start; int n; unsigned char col[4]; };
-extern int func_003DB838_A910(unsigned char *, int, struct O_A910 *) __asm__("func_003DB838");
+extern int func_003DB838_A910(unsigned char *, int, struct sShapeInfo *) __asm__("func_003DB838");
 extern unsigned char **D_004A4824_A910 __asm__("D_004A4824");
 extern int D_004A4838;
 
@@ -3356,15 +3469,15 @@ extern int D_004A4838;
  * @param selSet  the selection set
  * @return the percentage
  */
-int func_003DA910(unsigned char *phrase, struct H_A910 *selSet) {
-    struct O_A910 rowInfo;
+int func_003DA910(unsigned char *phrase, struct sSelSet *selSet) {
+    struct sShapeInfo rowInfo;
     int total = 0;
     int i;
     int pct;
     int cnt = phrase[4] >> 2;
 
     for (i = 0; i < cnt; i++) {
-        if (func_003DB838_A910(D_004A4824_A910[selSet->ent[i].x], selSet->tbl[selSet->ent[i].idx], &rowInfo)) {
+        if (func_003DB838_A910(D_004A4824_A910[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur], &rowInfo)) {
             total += rowInfo.len;
         }
     }
@@ -3416,14 +3529,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DAA10);
  * @param mode  the request mode
  * @return 1 when it suits, else 0
  */
-int func_003DAA10(void *node, int mode) {
-    int temp_3;
+int func_003DAA10(struct sLayer *node, int mode) {
+    int kind;
 
-    temp_3 = (*(unsigned char *)((char*)(node) + (4))) & 3;
-    if (((temp_3 == 1) && (mode == 2)) || ((temp_3 == 2) && (mode != temp_3))) {
+    kind = node->cnt & 3;
+    if (((kind == 1) && (mode == 2)) || ((kind == 2) && (mode != kind))) {
         return 1;
     }
-    return temp_3 == 0;
+    return kind == 0;
 }
 #endif
 
@@ -3438,6 +3551,8 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DAA50);
 void func_003DAA50(unsigned char *node) {
     int *maskTable;
     int i;
+    // ORIGINAL-PTR: a template's variable words follow its variable-length slot list, so their offset comes from
+    // the slot count
     maskTable = (int *)(node + ((((node[4] >> 2) + 3) & 0x7C) + 8) + (node[6] * 4));
     for (i = 0; i < node[5]; i++) {
         maskTable[i] = 0;
@@ -3448,13 +3563,6 @@ void func_003DAA50(unsigned char *node) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAAB0);
 #ifdef SKIP_ASM
-struct S_AAB0 {
-    char pad[4];
-    signed char n;
-    char pad2[3];
-    unsigned char a[8];
-    unsigned char b[8];
-};
 /**
  * Returns whether every variable a rule requires (kind 0xFF with target bit 0x80) is already set in the phrase
  * template; the check func_003D9088 inlines.
@@ -3463,7 +3571,7 @@ struct S_AAB0 {
  * @param rule  the condition rule
  * @return 1 when all are set, else 0
  */
-int func_003DAAB0(unsigned char *node, struct S_AAB0 *rule) {
+int func_003DAAB0(unsigned char *node, struct sCond *rule) {
     int ok = 1;
     int i;
     int *tab;
@@ -3473,6 +3581,8 @@ int func_003DAAB0(unsigned char *node, struct S_AAB0 *rule) {
         if (rule->a[i] == 0xFF) {
             cond = rule->b[i];
             if (cond != 0xFF && (cond & 0x80)) {
+                // ORIGINAL-PTR: a template's variable words follow its variable-length slot list, so their offset
+                // comes from the slot count
                 tab = (int *)(node + ((((node[4] >> 2) + 3) & 0xFFFFFFFC) + 8) + ((node[6] * 4 + 3) & 0xFFFFFFFC));
                 if (tab != 0) {
                     cond &= 0x7F;
@@ -3580,8 +3690,8 @@ extern int func_003DB5C0_ACA8(unsigned char, short) __asm__("func_003DB5C0");
  * @param selSlot  the selection slot
  * @return 1
  */
-int func_003DACA8(void *selSlot) {
-    (*(signed char *)((char*)(selSlot) + (6))) = (signed char) ((*(unsigned char *)((char*)(selSlot) + (4))) + func_003DB5C0_ACA8((*(unsigned char *)((char*)(selSlot) + (5))), (*(short *)((char*)(selSlot) + (0)))));
+int func_003DACA8(struct sSel *selSlot) {
+    selSlot->cur = (signed char)(selSlot->start + func_003DB5C0_ACA8(selSlot->len, selSlot->x));
     return 1;
 }
 #endif
@@ -3590,13 +3700,8 @@ int func_003DACA8(void *selSlot) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003DACE8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_ACE8 { short x; unsigned short y; unsigned short z; unsigned char idx; unsigned char pad; };
-struct H_ACE8 { struct E_ACE8 ent[12]; char pad[2]; unsigned char tbl[1]; };
-struct O_ACE8 { int len; int start; int n; unsigned char col[4]; };
-struct L_ACE8 { char pad[4]; unsigned char cnt; char pad2[3]; unsigned char list[1]; };
-struct C_ACE8 { char pad[4]; signed char n; char pad2[3]; unsigned char a[8]; unsigned char b[8]; };
-extern int func_003D83B8_ACE8(void *, unsigned char **) __asm__("func_003D83B8");
-extern int func_003DB838_ACE8(unsigned char *, int, struct O_ACE8 *) __asm__("func_003DB838");
+extern int func_003D83B8_ACE8(SPCHKEY *, unsigned char **) __asm__("func_003D83B8");
+extern int func_003DB838_ACE8(unsigned char *, int, struct sShapeInfo *) __asm__("func_003DB838");
 extern unsigned char **D_004A4824_ACE8 __asm__("D_004A4824");
 
 /**
@@ -3607,22 +3712,25 @@ extern unsigned char **D_004A4824_ACE8 __asm__("D_004A4824");
  * @param selSet  the selection set
  * @param phrase  the phrase template
  */
-void func_003DACE8(void *speechKey, struct H_ACE8 *selSet, struct L_ACE8 *phrase) {
-    struct O_ACE8 rowInfo;
+void func_003DACE8(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLayer *phrase) {
+    struct sShapeInfo rowInfo;
     unsigned char *out;
     int n;
     int i;
     int j;
-    struct C_ACE8 *slotCond;
+    struct sCond *slotCond;
 
     if (func_003D83B8_ACE8(speechKey, &out) != 0) {
         i = 0;
         n = phrase->cnt >> 2;
         for (; i < n; i++) {
-            slotCond = (struct C_ACE8 *)((int *)phrase + phrase->list[i]);
+            // ORIGINAL-PTR: a template's slot conditions lie at the word offsets its slot list gives (a variable-length
+            // record), so they have no fixed member
+            slotCond = (struct sCond *)((int *)phrase + phrase->list[i]);
             for (j = 0; j < slotCond->n; j++) {
                 if (slotCond->a[j] == 0xFE && !(slotCond->b[j] & 0x80)) {
-                    if (func_003DB838_ACE8(D_004A4824_ACE8[selSet->ent[i].x], selSet->tbl[selSet->ent[i].idx], &rowInfo)) {
+                    if (func_003DB838_ACE8(D_004A4824_ACE8[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur],
+                                           &rowInfo)) {
                         out[slotCond->b[j]] = rowInfo.col[j];
                     }
                 }
@@ -3638,7 +3746,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DAE48);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char **D_004A4824_AE48 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
 extern struct sFF90 D_0044FF90_AE48 __asm__("D_0044FF90");
-struct G_AE48 { int f0, f4, f8; struct s0700Q q[0x30]; };
+struct G_AE48 { int f0, f4, f8; struct sPlayLine q[0x30]; };
 extern struct G_AE48 D_00450700_AE48 __asm__("D_00450700");
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
@@ -3674,6 +3782,8 @@ void func_003DAE48(void *speechKey, int eventEntry, struct sLayer *phrase, int f
         func_003D8330(speechKey, &out);
         cnt = phrase->cnt >> 2;
         for (i = 0; i < cnt; i++) {
+            // ORIGINAL-PTR: a template's slot conditions lie at the word offsets its slot list gives (a variable-length
+            // record), so they have no fixed member
             tbl = (unsigned char *)phrase + phrase->list[i] * 4 + 0xC;
             for (j = 0; j < 4; j++) {
                 tagRef = tbl[j];
@@ -3700,19 +3810,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DAFD0);
  *
  * @param selSet  the selection set
  */
-void func_003DAFD0(void *selSet) {
-    int var_3;
-    signed char *var_2;
+void func_003DAFD0(struct sSelSet *selSet) {
+    int i;
 
-    (*(signed char *)((char*)(selSet) + (0x61))) = 0;
-    var_3 = 11;
-    (*(signed char *)((char*)(selSet) + (0x60))) = 0;
-    var_2 = selSet + 0x5F;
-    do {
-        *var_2 = 0;
-        var_3 -= 1;
-        var_2 -= 8;
-    } while (var_3 >= 0);
+    selSet->ntbl = 0;
+    selSet->n = 0;
+    for (i = 11; i >= 0; i--) {
+        selSet->ent[i].flag = 0;
+    }
 }
 #endif
 
@@ -3738,21 +3843,10 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB040);
 struct S_B040 {
     int a;
     int b;
-    void (*cb)(unsigned char *, int, int, int);
+    void (*cb)(SPCHKEY *, int, int, int);
 };
 extern struct S_B040 D_0044FF90_B040 __asm__("D_0044FF90");
 
-/* Sequence data header: +6 entry count, +7 low nibble = event count, +0xC entry offsets (in words). */
-struct Hdr_B040 {
-    unsigned char pad0[0xC];
-    unsigned short offs[1];
-};
-
-struct Ev_B040 {
-    int a;
-    int b;
-    int type;
-};
 
 /**
  * Reports a bank event's tag events to the event hook D_0044FF90 +0x8 (installed by func_003D6940).
@@ -3766,8 +3860,8 @@ struct Ev_B040 {
  * @param idx  the variant index
  * @param tbl  the request's argument words
  */
-void func_003DB040(unsigned char *ctx, unsigned char *data, int idx, int *tbl) {
-    struct Ev_B040 ev;
+void func_003DB040(SPCHKEY *ctx, unsigned char *data, int idx, int *tbl) {
+    SPCHTAGWORDS ev;
     int time;
     int count;
     int i;
@@ -3776,19 +3870,19 @@ void func_003DB040(unsigned char *ctx, unsigned char *data, int idx, int *tbl) {
     if (D_0044FF90_B040.cb != 0) {
         func_003D8330(ctx, &time);
         count = data[7] & 0xF;
-        track = data + ((struct Hdr_B040 *)data)->offs[idx] * 4;
+        track = data + ((SPCHEVENT *)data)->variantOffsets[idx] * 4;
         events = data + (((data[6] * 2 + 3) & 0x3FC) + 0xC);
         for (i = 0; i < count; i++) {
             int type;
             int tagId;
             int argIndex;
             /* 3-byte tag entries (id, argument index, type) read straight off the subscript: retail adds index first */
-            ev.a = events[i * 3];
-            ev.b = events[i * 3 + 1];
+            ev.id = events[i * 3];
+            ev.argIndex = events[i * 3 + 1];
             ev.type = events[i * 3 + 2];
             type = ev.type;
-            tagId = ev.a;
-            argIndex = ev.b;
+            tagId = ev.id;
+            argIndex = ev.argIndex;
             switch (type) {
             case 0:
             case 3: {
@@ -3828,15 +3922,7 @@ void func_003DB040(unsigned char *ctx, unsigned char *data, int idx, int *tbl) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB208);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct H_B208 {
-    char pad[6];
-    unsigned char n6;
-    unsigned char lo : 4;
-    unsigned char hi : 4;
-};
-struct B_B208 { unsigned char a, b, c; };
-struct T_B208 { int a, b, c; };
-struct F_B208 { int pad; int (*cb)(unsigned char *, int, int, int); int pad2[3]; };
+struct F_B208 { int pad; int (*cb)(SPCHKEY *, int, int, int); int pad2[3]; };
 extern struct F_B208 D_0044FF90_B208 __asm__("D_0044FF90");
 
 /**
@@ -3852,8 +3938,8 @@ extern struct F_B208 D_0044FF90_B208 __asm__("D_0044FF90");
  * @param negmask  receives the bits of tags the hook could not answer
  * @return the bits of the tags that hold
  */
-int func_003DB208(unsigned char *speechKey, struct H_B208 *eventEntry, int *vals, unsigned char *negmask) {
-    struct T_B208 tagEnt;
+int func_003DB208(SPCHKEY *speechKey, SPCHEVENT *eventEntry, int *vals, unsigned char *negmask) {
+    SPCHTAGWORDS tagEnt;
     int out;
     int res = 0;
     unsigned char neg = 0;
@@ -3865,26 +3951,27 @@ int func_003DB208(unsigned char *speechKey, struct H_B208 *eventEntry, int *vals
     int bit;
     int tagId;
     unsigned char mask;
-    struct B_B208 *tbl;
+    SPCHTAG *tbl;
 
     func_003D8330(speechKey, &out);
-    n = eventEntry->lo;
-    tbl = (struct B_B208 *)((unsigned char *)eventEntry + (((eventEntry->n6 * 2 + 3) & 0x3FC) + 0xC));
+    n = SPCH_TAG_COUNT(eventEntry->counts);
+    // ORIGINAL-PTR: the tags follow the variable-length variant-offset table, so their offset comes from its count
+    tbl = (SPCHTAG *)((unsigned char *)eventEntry + (((eventEntry->variantCount * 2 + 3) & 0x3FC) + 0xC));
     for (; k < 21; k++) {
         for (j = 0; j < n; j++) {
             bit = 0;
-            tagEnt.a = tbl[j].a;
-            tagEnt.b = tbl[j].b;
-            tagEnt.c = tbl[j].c;
+            tagEnt.id = tbl[j].id;
+            tagEnt.argIndex = tbl[j].argIndex;
+            tagEnt.type = tbl[j].type;
             if (k == 20) {
-                if (tagEnt.b != 0) continue;
+                if (tagEnt.argIndex != 0) continue;
                 argValue = 0;
             } else {
-                if (tagEnt.b != k) continue;
+                if (tagEnt.argIndex != k) continue;
                 argValue = vals[k];
             }
             mask = 1 << (7 - j);
-            tagId = tagEnt.a;
+            tagId = tagEnt.id;
             if (D_0044FF90_B208.cb != 0) {
                 hookResult = D_0044FF90_B208.cb(speechKey, tagId, argValue, out);
             } else {
@@ -3926,7 +4013,6 @@ int func_003DB3B8(unsigned char flags, unsigned char ignoreMask, unsigned char *
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB3E0);
 #ifdef SKIP_ASM
-typedef struct { char pad[6]; unsigned char n; } H_B3E0;
 /**
  * Returns the tag id (first byte) of a bank event's tag entry @p idx, or -1 when @p idx is 8 or more.
  *
@@ -3934,10 +4020,11 @@ typedef struct { char pad[6]; unsigned char n; } H_B3E0;
  * @param idx  the tag entry
  * @return the tag id, or -1
  */
-int func_003DB3E0(H_B3E0 *header, unsigned int idx) {
+int func_003DB3E0(SPCHEVENT *header, unsigned int idx) {
     int triple[3];
     int result = -1;
-    unsigned char *tbl = (unsigned char *)header + (((header->n * 2 + 3) & 0x3FC) + 0xC);
+    // ORIGINAL-PTR: the tags follow the variable-length variant-offset table, so their offset comes from its count
+    unsigned char *tbl = (unsigned char *)header + (((header->variantCount * 2 + 3) & 0x3FC) + 0xC);
 
     if (idx < 8) {
         unsigned char *entry = (unsigned char *)(idx * 3 + (unsigned)tbl); // PORT: ptr in int
@@ -4216,7 +4303,7 @@ int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *info) {
         while (done == 0) {
             if (idx >= cnt) {
                 done = 1;
-                end = *(unsigned short *)(shp + 8) * scale;
+                end = ((SPCHTABLEHDR *)shp)->totalLength * scale;
             } else if (next[0] & 0x80) {
                 next += stride;
                 idx++;
@@ -4236,14 +4323,19 @@ int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *info) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB978);
 #ifdef SKIP_ASM
-struct S_B978 { int a; int b; int c; unsigned char r, g, bl, al; };
 /**
  * Resets a speech row info: length 0, start -1, column count 0, tags 0xFF.
  *
  * @param info  the row info
  */
-void func_003DB978(struct S_B978 *info) {
-    info->b = -1; info->a = 0; info->c = 0; info->r = 0xFF; info->g = 0xFF; info->bl = 0xFF; info->al = 0xFF;
+void func_003DB978(struct sShapeInfo *info) {
+    info->start = -1;
+    info->len = 0;
+    info->n = 0;
+    info->col[0] = 0xFF;
+    info->col[1] = 0xFF;
+    info->col[2] = 0xFF;
+    info->col[3] = 0xFF;
 }
 #endif
 

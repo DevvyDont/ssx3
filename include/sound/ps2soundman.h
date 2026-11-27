@@ -33,6 +33,19 @@ struct tPS2SoundMemNode {
     int next;     // 0x14 [R] Init i - 1 (unused-node chain); [U] free-list link, -1 ends it
 };
 
+// cSoundManager [O]: On Tour's sound back-end interface (only a vptr, size 0x4), the declared type of
+// cSoundSys::pManager. Its virtuals in On Tour's order, which is cPS2SoundManager_vtbl's [R]. cPS2SoundManager below
+// is FLAT (its vptr is the member mVtbl), so a virtual call goes through a cSoundManager pointer to it.
+struct cSoundManager {
+    virtual void Init(int mode);
+    virtual int SetMode(int mode);
+    virtual void Shutdown();
+    virtual int AllocSoundMem(int size);
+    virtual void DeallocSoundMem(int memHandle);
+    virtual void SetSoundMemLoadLimits(int memHandle);
+    virtual void RestoreSoundMemLoadLimits();
+    virtual ~cSoundManager();
+};
 struct cPS2SoundManager {
     void** mVtbl;                     // 0x000 [R] cPS2SoundManager_vtbl (_vt$16cPS2SoundManager), stored by the ctor and dtor (cSoundManager has no data: the vptr is first)
     void* mSoundHeap;                 // 0x004 [P] "mSoundHeap == NULL" (preview dtor lw 4); [R] Init: operator new(0x32000, "mSoundHeap"), passed to the sound driver; Shutdown / dtor cMemMan_free() it
