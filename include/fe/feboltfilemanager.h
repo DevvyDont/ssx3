@@ -24,8 +24,8 @@
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [P] the July 2003 preview's assert strings (fe/feboltfilemanager.cpp);
 //   [R] retail's init / destructor (func_0019CE68 / func_0019CF40 / func_0019D4B8);
-//   [U] how retail code uses the field (src/fe/festatecharequipdetail.cpp, the per-function views sTableK19D250,
-//       sSlotK19D*, sEquipTable*_D*, sFileCache / sFileSlot);
+//   [U] how retail code uses the field (src/fe/festatecharequipdetail.cpp: the cache's methods func_0019CE68 ...
+//       func_0019E3A8, and the sFileCache / sFileSlot view of func_0019DF20 / func_0019E070);
 //   [O] SSX On Tour's DWARF, the sibling record tFEAsyncFile (names of the shared fields).
 
 #include "layout.h"
@@ -76,8 +76,8 @@ struct tBoltFile {
     int refCount;                   // 0x114 [P] mFiles[charID][fileIndex].refCount (== 0 / > 0); [U] func_0019DA10
                                     //       adds a use, func_0019DC20 gives it back; eviction needs 0
     int fileSize;                   // 0x118 [O] tFEAsyncFile::fileSize; [U] BXFILE_sizez / unpacksizez; mMemUsed sums it
-    unsigned int unk_11C;           // 0x11C [U] the least-recently-used / queue stamp (a bank's unk_B4008 counter, 0 =
-                                    //       deferred); eviction and func_0019D140 pick the lowest (sltu)
+    unsigned int stamp;             // 0x11C [U] the least-recently-used / queue stamp (name ours; a bank's unk_B4008
+                                    //       counter, 0 = deferred); eviction and func_0019D140 pick the lowest (sltu)
 };
 
 CHECK_OFFSET(tBoltFile, flags, 0x000);
@@ -88,7 +88,7 @@ CHECK_OFFSET(tBoltFile, async, 0x10C);
 CHECK_OFFSET(tBoltFile, fileType, 0x110);
 CHECK_OFFSET(tBoltFile, refCount, 0x114);
 CHECK_OFFSET(tBoltFile, fileSize, 0x118);
-CHECK_OFFSET(tBoltFile, unk_11C, 0x11C);
+CHECK_OFFSET(tBoltFile, stamp, 0x11C);
 CHECK_SIZE(tBoltFile, 0x120);
 
 struct cFEBoltFileManager {
@@ -98,7 +98,7 @@ struct cFEBoltFileManager {
                                     //       file size, release subtracts it; func_0019D578 keeps it <= 9,999,999
     int mNumLoadThreads;            // 0xB4004 [P] mNumLoadThreads < kMaxLoadThreads; [R] init 0; [U] func_0019D8B8 counts
                                     //       an async load up, func_0019D250 / func_0019DC20 down; queued loads start at 0
-    int unk_B4008[10];              // 0xB4008 [R] init 1 per bank; [U] each bank's next stamp (tBoltFile::unk_11C)
+    int unk_B4008[10];              // 0xB4008 [R] init 1 per bank; [U] each bank's next stamp (tBoltFile::stamp)
 };
 
 CHECK_OFFSET(cFEBoltFileManager, mFiles, 0x00000);
@@ -106,5 +106,40 @@ CHECK_OFFSET(cFEBoltFileManager, mMemUsed, 0xB4000);
 CHECK_OFFSET(cFEBoltFileManager, mNumLoadThreads, 0xB4004);
 CHECK_OFFSET(cFEBoltFileManager, unk_B4008, 0xB4008);
 CHECK_SIZE(cFEBoltFileManager, 0xB4030);
+
+// The file-index hash table beside the cache (names ours: [R] func_0019CE68 allocates it as cMemMan_alloc(8004,
+// "BoltFileIndexManager") into D_004A1968, so the class is cBoltFileIndexManager). The rider manager keeps, per
+// profile index and item id, the cache slots of the item's model-part and part-texture files in it (func_0019CBE0 /
+// func_0019CC30 and func_0019CCE8 / func_0019CD38). Retail code: fe/festatecharequipdetail func_0019C880 ...
+// func_0019CD38; no vtable. [R] func_0019CB60 (reset) / func_0019C938 (lookup) / func_0019CA70 (release).
+struct tBoltFileIndexNode {
+    int key;                        // 0x0 [U] (profile index << 16) | item id (func_0019C938); -1 when free
+    short partTextureMask;          // 0x4 [U] bit per profile index: partTextureFile is set (func_0019CCE8 / _CD38)
+    short modelPartMask;            // 0x6 [U] bit per profile index: modelPartFile is set (func_0019CBE0 / _CC30)
+    short partTextureFile;          // 0x8 [U] the cache slot of the item's kBoltFileType_PartTexture file
+    short modelPartFile;            // 0xA [U] the cache slot of the item's kBoltFileType_ModelPart file
+    short prev;                     // 0xC [U] the previous node's index in its bucket chain or the free list, -1 none
+    short next;                     // 0xE [U] the next node's index, -1 none
+};
+
+CHECK_OFFSET(tBoltFileIndexNode, key, 0x0);
+CHECK_OFFSET(tBoltFileIndexNode, partTextureMask, 0x4);
+CHECK_OFFSET(tBoltFileIndexNode, modelPartMask, 0x6);
+CHECK_OFFSET(tBoltFileIndexNode, partTextureFile, 0x8);
+CHECK_OFFSET(tBoltFileIndexNode, modelPartFile, 0xA);
+CHECK_OFFSET(tBoltFileIndexNode, prev, 0xC);
+CHECK_OFFSET(tBoltFileIndexNode, next, 0xE);
+CHECK_SIZE(tBoltFileIndexNode, 0x10);
+
+struct cBoltFileIndexManager {
+    tBoltFileIndexNode mNodes[400];     // 0x0000 [R] func_0019CB60 fills 6400 bytes with 0xFF and chains them
+    tBoltFileIndexNode* mBuckets[400];  // 0x1900 [R] func_0019CB60 clears 1600 bytes; [U] chain heads by key % 400
+    tBoltFileIndexNode* mpFreeList;     // 0x1F40 [R] func_0019CB60 points it at node 0; [U] func_0019C880 pops it
+};
+
+CHECK_OFFSET(cBoltFileIndexManager, mNodes, 0x0000);
+CHECK_OFFSET(cBoltFileIndexManager, mBuckets, 0x1900);
+CHECK_OFFSET(cBoltFileIndexManager, mpFreeList, 0x1F40);
+CHECK_SIZE(cBoltFileIndexManager, 0x1F44);
 
 #endif /* FE_FEBOLTFILEMANAGER_H */

@@ -1,5 +1,8 @@
 #include "common.h"
 #include "seg/newlib_reent.h"
+#include "seg/newlib_stat.h"
+#include "seg/newlib_fdlibm.h"
+#include "seg/newlib_malloc.h"
 
 // PORT: PS2 kernel syscall stub: the syscall number goes in $3. Defined under a second C name with an
 // asm label because this file declares these symbols with their argument lists elsewhere.
@@ -1102,13 +1105,13 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _fopen_r);
 #ifdef SKIP_ASM
-extern int __sflags(int, char *, int *);
-extern char *__sfp(int);
-extern int _open_r(int *, int, int, int);
+extern int __sflags(struct _reent *, const char *, int *);
+extern struct __sFILE *__sfp(struct _reent *);
+extern int _open_r(struct _reent *, const char *, int, int);
 extern long __sread(), __swrite(), __sseek();
 extern void __sclose();
-extern long fseek(char *, int, int);
-char *_fopen_r_(int ptr, char *file, char *mode) __asm__("_fopen_r");
+extern int fseek(struct __sFILE *, long, int);
+struct __sFILE *_fopen_r_(struct _reent *ptr, const char *file, const char *mode) __asm__("_fopen_r");
 /**
  * Opens a file as a stdio stream for the given reentrancy struct and returns the stream, or null.
  *
@@ -1124,25 +1127,25 @@ char *_fopen_r_(int ptr, char *file, char *mode) __asm__("_fopen_r");
  * @param mode  the mode string ("r", "w", "a", optionally with "+")
  * @return the new stream, or null when the mode is bad, no FILE is free or the open fails
  */
-char *_fopen_r_(int ptr, char *file, char *mode) {
-    char *stream;
+struct __sFILE *_fopen_r_(struct _reent *ptr, const char *file, const char *mode) {
+    struct __sFILE *stream;
     int fileDesc, flags, oflags;
     if ((flags = __sflags(ptr, mode, &oflags)) == 0)
         return 0;
     if ((stream = __sfp(ptr)) == 0)
         return 0;
-    if ((fileDesc = _open_r(*(int **)(stream + 0x54), (int)file, oflags, 438)) < 0) {
-        *(short *)(stream + 0xC) = 0;
+    if ((fileDesc = _open_r(stream->_data, file, oflags, 0666)) < 0) {
+        stream->_flags = 0;
         return 0;
     }
-    *(short *)(stream + 0xE) = fileDesc;
-    *(short *)(stream + 0xC) = flags;
-    *(char **)(stream + 0x1C) = stream;
-    *(void **)(stream + 0x20) = __sread;
-    *(void **)(stream + 0x24) = __swrite;
-    *(void **)(stream + 0x28) = __sseek;
-    *(void **)(stream + 0x2C) = __sclose;
-    if (flags & 0x100)
+    stream->_file = fileDesc;
+    stream->_flags = flags;
+    stream->_cookie = stream;
+    stream->_read = (int (*)(void *, char *, int))__sread;
+    stream->_write = (int (*)(void *, const char *, int))__swrite;
+    stream->_seek = (_fpos_t (*)(void *, _fpos_t, int))__sseek;
+    stream->_close = (int (*)(void *))__sclose;
+    if (flags & __SAPP)
         fseek(stream, 0, 2);
     return stream;
 }
@@ -1170,8 +1173,8 @@ void fopen(int fileName, int mode) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _cleanup_r);
 #ifdef SKIP_ASM
-extern void fflush(void);
-extern int _fwalk(int, void (*)(void));
+extern int fflush(struct __sFILE *);
+extern int _fwalk(struct _reent *, int (*)(struct __sFILE *));
 /**
  * Flushes every open stream of a reentrancy struct.
  *
@@ -1180,7 +1183,7 @@ extern int _fwalk(int, void (*)(void));
  *
  * @param reent  the reentrancy struct
  */
-void _cleanup_r(int reent) {
+void _cleanup_r(struct _reent *reent) {
     _fwalk(reent, fflush);
 }
 #endif
@@ -1188,15 +1191,15 @@ void _cleanup_r(int reent) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _cleanup);
 #ifdef SKIP_ASM
-extern int _impure_ptr;
-extern void _cleanup_r(int);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern void _cleanup_r(struct _reent *);
 /**
  * Flushes every open stream of the global reentrancy struct _impure_ptr.
  *
  * Calls _cleanup_r(_impure_ptr). exit calls it.
  */
 void _cleanup(void) {
-    _cleanup_r(_impure_ptr);
+    _cleanup_r(_impure_ptr_reent);
 }
 #endif
 
@@ -1206,8 +1209,8 @@ INCLUDE_ASM("seg/seg_316FB8", fseek);
 extern struct _reent *g17008_impure __asm__("_impure_ptr");
 extern void g17008_init(struct _reent *) __asm__("__sinit");
 extern int g17008_fflush(struct __sFILE *) __asm__("fflush");
-extern int g17008_fstat(struct _reent *, int, int *) __asm__("_fstat_r");
-extern long g17008_sseek(int, long, int) __asm__("__sseek");
+extern int g17008_fstat(struct _reent *, int, struct stat *) __asm__("_fstat_r");
+extern _fpos_t g17008_sseek(void *, _fpos_t, int) __asm__("__sseek");
 extern void g17008_smakebuf(struct __sFILE *) __asm__("__smakebuf");
 extern int g17008_srefill(struct __sFILE *) __asm__("__srefill");
 int fseek_(struct __sFILE *fp, long offset, int whence) __asm__("fseek");
@@ -1234,38 +1237,38 @@ int fseek_(struct __sFILE *fp, long offset, int whence) __asm__("fseek");
  * @return 0 on success, -1 on failure
  */
 int fseek_(struct __sFILE *stream, long offset, int whence) {
-    long (*seekfn)(int, long, int);
+    _fpos_t (*seekfn)(void *, _fpos_t, int);
     long target, curoff;
     unsigned n;
-    int st[104 / 4];
+    struct stat st;
     int havepos;
     struct _reent *ptr;
-    if (((struct _reent*)stream->_data) == 0)
-        (*(struct _reent**)&stream->_data) = g17008_impure;
-    if (((struct _reent*)stream->_data)->__sdidinit == 0)
-        g17008_init(((struct _reent*)stream->_data));
-    ptr = ((struct _reent*)stream->_data);
-    if ((*(int *)&(*(unsigned short*)&stream->_flags) & 0x108) == 264)
+    if (stream->_data == 0)
+        stream->_data = g17008_impure;
+    if (stream->_data->__sdidinit == 0)
+        g17008_init(stream->_data);
+    ptr = stream->_data;
+    if (stream->_flags & __SAPP && stream->_flags & __SWR)
         g17008_fflush(stream);
-    if ((seekfn = ((long (*)(int, long, int))stream->_seek)) == 0) {
+    if ((seekfn = stream->_seek) == 0) {
         ptr->_errno = 29;
         return -1;
     }
     switch (whence) {
     case 1:
         g17008_fflush(stream);
-        if ((*(unsigned short*)&stream->_flags) & 0x1000)
+        if (stream->_flags & __SOFF)
             curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(((int)stream->_cookie), 0, 1);
+            curoff = (*seekfn)(stream->_cookie, 0, 1);
             if (curoff == -1)
                 return -1;
         }
-        if ((*(unsigned short*)&stream->_flags) & 4) {
+        if (stream->_flags & __SRD) {
             curoff -= stream->_r;
             if (stream->_ub._base)
                 curoff -= stream->_ur;
-        } else if ((*(unsigned short*)&stream->_flags) & 8 && stream->_p != 0)
+        } else if (stream->_flags & __SWR && stream->_p != 0)
             curoff += stream->_p - stream->_bf._base;
         offset += curoff;
         whence = 0;
@@ -1281,29 +1284,29 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
     }
     if (stream->_bf._base == 0)
         g17008_smakebuf(stream);
-    if ((*(unsigned short*)&stream->_flags) & 0x81A)
+    if (stream->_flags & (__SWR | __SRW | __SNBF | __SNPT))
         goto dumb;
-    if (((*(unsigned short*)&stream->_flags) & 0x400) == 0) {
-        if (seekfn != g17008_sseek || stream->_file < 0 || g17008_fstat(ptr, stream->_file, st) ||
-            (st[1] & 0xF000) != 0x8000) {
-            (*(unsigned short*)&stream->_flags) |= 0x800;
+    if ((stream->_flags & __SOPT) == 0) {
+        if (seekfn != g17008_sseek || stream->_file < 0 || g17008_fstat(ptr, stream->_file, &st) ||
+            (st.st_mode & S_IFMT) != S_IFREG) {
+            stream->_flags |= __SNPT;
             goto dumb;
         }
         stream->_blksize = 0x400;
-        (*(unsigned short*)&stream->_flags) |= 0x400;
+        stream->_flags |= __SOPT;
     }
     if (whence == 0)
         target = offset;
     else {
-        if (g17008_fstat(ptr, stream->_file, st))
+        if (g17008_fstat(ptr, stream->_file, &st))
             goto dumb;
-        target = *(long *)&st[4] + offset;
+        target = st.st_size + offset;
     }
     if (!havepos) {
-        if ((*(unsigned short*)&stream->_flags) & 0x1000)
+        if (stream->_flags & __SOFF)
             curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(((int)stream->_cookie), 0, 1);
+            curoff = (*seekfn)(stream->_cookie, 0, 1);
             if (curoff == -1)
                 goto dumb;
         }
@@ -1321,18 +1324,18 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
         curoff -= n;
         n += stream->_r;
     }
-    if (((*(unsigned short*)&stream->_flags) & 0x2000) == 0 && target >= curoff && target < curoff + n) {
+    if ((stream->_flags & __SMOD) == 0 && target >= curoff && target < curoff + n) {
         int bufOffset = target - curoff;
         stream->_p = stream->_bf._base + bufOffset;
         stream->_r = n - bufOffset;
-        (*(unsigned short*)&stream->_flags) &= ~0x20;
+        stream->_flags &= ~__SEOF;
         return 0;
     }
     curoff = target & -stream->_blksize;
-    if ((*seekfn)(((int)stream->_cookie), curoff, 0) == -1)
+    if ((*seekfn)(stream->_cookie, curoff, 0) == -1)
         goto dumb;
     stream->_r = 0;
-    (*(unsigned short*)&stream->_flags) &= ~0x20;
+    stream->_flags &= ~__SEOF;
     n = target - curoff;
     if (n) {
         if (g17008_srefill(stream) || stream->_r < n)
@@ -1342,11 +1345,11 @@ int fseek_(struct __sFILE *stream, long offset, int whence) {
     }
     return 0;
 dumb:
-    if (g17008_fflush(stream) || (*seekfn)(((int)stream->_cookie), offset, whence) == -1)
+    if (g17008_fflush(stream) || (*seekfn)(stream->_cookie, offset, whence) == -1)
         return -1;
     stream->_p = stream->_bf._base;
     stream->_r = 0;
-    (*(unsigned short*)&stream->_flags) &= ~0x20;
+    stream->_flags &= ~__SEOF;
     return 0;
 }
 #endif
@@ -1360,21 +1363,19 @@ INCLUDE_ASM("seg/seg_316FB8", _fwalk);
  * Walks the glue list that starts at +0x1D8 of the struct (next, count, FILE array of 0x58-byte entries) and calls the
  * function for each FILE whose flags (+0xC) are nonzero.
  *
- * @param r_   the reentrancy struct
- * @param fn_  the function to call with each stream
+ * @param reent  the reentrancy struct
+ * @param fn     the function to call with each stream
  * @return the bitwise OR of the function's results (0 when no stream is open)
  */
-int _fwalk(int r_, void (*fn_)(void)) {
-    char *reent = (char *)r_;
-    int (*fn)(char *) = (int (*)(char *))fn_;
+int _fwalk(struct _reent *reent, int (*fn)(struct __sFILE *)) {
     struct _glue *glue;
-    char *stream;
+    struct __sFILE *stream;
     int n;
     int ret = 0;
-    for (glue = (struct _glue *)(reent + 0x1D8); glue; glue = ((struct G17418*)glue->_next)) {
-        stream = ((char*)glue->_iobs);
-        for (n = glue->_niobs; --n >= 0; stream += 0x58)
-            if (*(short *)(stream + 0xC))
+    for (glue = &reent->__sglue; glue; glue = glue->_next) {
+        stream = glue->_iobs;
+        for (n = glue->_niobs; --n >= 0; stream++)
+            if (stream->_flags)
                 ret |= fn(stream);
     }
     return ret;
@@ -1384,24 +1385,8 @@ int _fwalk(int r_, void (*fn_)(void)) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __smakebuf);
 #ifdef SKIP_ASM
-struct F174B0 {
-    char *p;
-    int r;
-    int w;
-    unsigned short flags;
-    short file;
-    char *base;
-    int size;
-    char pad1[0x28 - 0x18];
-    void *seek;
-    char pad2[0x43 - 0x2C];
-    char nbuf[9];
-    int blksize;
-    int offset;
-    int data;
-};
 extern long __sseek();
-extern int _fstat_r(int *, int, int);
+extern int _fstat_r(struct _reent *, int, struct stat *);
 /**
  * Gives a stdio stream its buffer: in this build always the stream's own one-byte buffer, making it unbuffered.
  *
@@ -1415,26 +1400,26 @@ extern int _fstat_r(int *, int, int);
  *
  * @param stream  the stream
  */
-void __smakebuf(struct F174B0 *stream) {
-    int st[104 / 4];
-    if (stream->flags & 2) {
-        stream->p = stream->nbuf;
-        stream->base = stream->nbuf;
-        stream->size = 1;
+void __smakebuf(struct __sFILE *stream) {
+    struct stat st;
+    if (stream->_flags & __SNBF) {
+        stream->_p = stream->_nbuf;
+        stream->_bf._base = stream->_nbuf;
+        stream->_bf._size = 1;
         return;
     }
-    if (stream->file < 0 || _fstat_r((int *)stream->data, stream->file, (int)st) < 0) {
-        stream->flags |= 0x800;
-    } else if ((st[1] & 0xF000) == 0x8000 && stream->seek == (void *)__sseek) {
-        stream->blksize = 0x400;
-        stream->flags |= 0x400;
+    if (stream->_file < 0 || _fstat_r(stream->_data, stream->_file, &st) < 0) {
+        stream->_flags |= __SNPT;
+    } else if ((st.st_mode & S_IFMT) == S_IFREG && stream->_seek == (_fpos_t (*)(void *, _fpos_t, int))__sseek) {
+        stream->_blksize = 0x400;
+        stream->_flags |= __SOPT;
     } else {
-        stream->flags |= 0x800;
+        stream->_flags |= __SNPT;
     }
-    stream->flags |= 2;
-    stream->size = 1;
-    stream->p = stream->nbuf;
-    stream->base = stream->nbuf;
+    stream->_flags |= __SNBF;
+    stream->_bf._size = 1;
+    stream->_p = stream->_nbuf;
+    stream->_bf._base = stream->_nbuf;
 }
 #endif
 
@@ -1467,8 +1452,8 @@ INCLUDE_ASM("seg/seg_316FB8", printf);
 #define printf_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern int _impure_ptr;
-extern int vfprintf(int, int, char *);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern int vfprintf(struct __sFILE *, const char *, char *);
 /**
  * Prints formatted text to the standard output stream of the global reentrancy struct.
  *
@@ -1477,65 +1462,44 @@ extern int vfprintf(int, int, char *);
  *
  * @param fmt  the format string
  */
-void printf(int fmt, ...) {
+void printf(const char *fmt, ...) {
     char *ap;
-    int *reent;
+    struct _reent *reent;
     printf_va_start(ap);
-    reent = (int *)_impure_ptr;
-    ((int *)reent[2])[0x54 / 4] = (int)reent;
-    vfprintf(reent[2], fmt, ap);
+    reent = _impure_ptr_reent;
+    reent->_stdout->_data = reent;
+    vfprintf(reent->_stdout, fmt, ap);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", lflush);
 #ifdef SKIP_ASM
-extern void fflush(void);
+extern int fflush(struct __sFILE *);
 /**
- * Flushes the stream it is given (the per-stream callback of the refill path).
+ * Flushes the stream it is given (the per-stream callback of the refill path) and returns fflush's result.
  *
- * Declared without parameters: the stream arrives in the first argument register and goes straight on to fflush.
  * __srefill passes it to _fwalk to flush the other streams before a read.
  *
  * Quirk: there is no line-buffered-writer test, so every open stream is flushed, not only the line-buffered ones.
+ *
+ * @param stream  the stream
+ * @return fflush's result
  */
-void lflush(void) {
-    fflush();
+int lflush(struct __sFILE *stream) {
+    return fflush(stream);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __srefill);
 #ifdef SKIP_ASM
-/* the stdio FILE as __svfscanf's view (it calls __srefill_impl below); __srefill itself uses struct __sFILE */
-struct F7648 {
-    unsigned char *p;
-    int r;
-    int w;
-    unsigned short flags;
-    short file;
-    unsigned char *base;
-    int size;
-    int lbfsize;
-    int cookie;
-    int (*rd)(int, unsigned char *, int);
-    int pad24;
-    int pad28;
-    int pad2C;
-    unsigned char *ubbase;
-    int ubsize;
-    unsigned char *up;
-    int ur;
-    char pad40[0x54 - 0x40];
-    struct _reent *data;
-};
 extern struct _reent *g7648_impure __asm__("_impure_ptr");
 extern void g7648_init(struct _reent *) __asm__("__sinit");
 extern int g7648_fflush(struct __sFILE *) __asm__("fflush");
 extern void g7648_smakebuf(struct __sFILE *) __asm__("__smakebuf");
 extern int g7648_fwalk(struct _reent *, void *) __asm__("_fwalk");
 extern void g7648_lflush(void) __asm__("lflush");
-int __srefill_impl(struct F7648 *fp) __asm__("__srefill");
 int __srefill_(struct __sFILE *stream) __asm__("__srefill");
 /* newlib's CHECK_INIT (stdio/local.h), a do { } while (0) macro: make sure stdio is set up (98.89 without the macro's
    loop) */
@@ -1620,18 +1584,18 @@ INCLUDE_ASM("seg/seg_316FB8", _sprintf_r);
  * @param buf    the output buffer
  * @param fmt    the format string
  */
-void _sprintf_r(int reent, char *buf, int fmt, ...) {
+void _sprintf_r(struct _reent *reent, char *buf, const char *fmt, ...) {
     char *ap;
     struct __sFILE strStream;
     _sprintf_r_va_start(ap);
-    (*(char**)&strStream._p) = buf;
+    strStream._p = (unsigned char *)buf;
     strStream._w = 0x7FFFFFFF;
-    strStream._flags = 520;
-    (*(char**)&strStream._bf) = buf;
+    strStream._flags = __SWR | __SSTR;
+    strStream._bf._base = (unsigned char *)buf;
     strStream._bf._size = 0x7FFFFFFF;
-    (*(int*)&strStream._data) = reent;
-    vfprintf((int)&strStream, fmt, ap);
-    *((char*)strStream._p) = 0;
+    strStream._data = reent;
+    vfprintf(&strStream, fmt, ap);
+    *strStream._p = 0;
 }
 #endif
 
@@ -1641,17 +1605,7 @@ INCLUDE_ASM("seg/seg_316FB8", sprintf);
 #define sprintf_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-struct Fsprintf {
-    char *p;
-    int r;
-    int w;
-    short flags, file;
-    char *base;
-    int size;
-    int pad[0x54 / 4 - 6];
-    int ent;
-};
-extern int _impure_ptr;
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
 /**
  * Formats into a string buffer with no size limit (newlib's sprintf, writing through a string FILE).
  *
@@ -1663,18 +1617,18 @@ extern int _impure_ptr;
  * @param buf  destination buffer
  * @param fmt  the format string (typed int here), followed by its arguments
  */
-void sprintf(char *buf, int fmt, ...) {
+void sprintf(char *buf, const char *fmt, ...) {
     char *ap;
-    struct Fsprintf strFile;
+    struct __sFILE strFile;
     sprintf_va_start(ap);
-    strFile.p = buf;
-    strFile.w = 0x7FFFFFFF;
-    strFile.flags = 520;
-    strFile.base = buf;
-    strFile.size = 0x7FFFFFFF;
-    strFile.ent = _impure_ptr;
-    vfprintf((int)&strFile, fmt, ap);
-    *strFile.p = 0;
+    strFile._p = (unsigned char *)buf;
+    strFile._w = 0x7FFFFFFF;
+    strFile._flags = __SWR | __SSTR;
+    strFile._bf._base = (unsigned char *)buf;
+    strFile._bf._size = 0x7FFFFFFF;
+    strFile._data = _impure_ptr_reent;
+    vfprintf(&strFile, fmt, ap);
+    *strFile._p = 0;
 }
 #endif
 
@@ -1686,9 +1640,12 @@ INCLUDE_ASM("seg/seg_316FB8", eofread);
  *
  * sscanf installs it as the read callback of its string stream.
  *
+ * @param cookie  the stream (unused)
+ * @param buf     the destination (unused)
+ * @param len     the bytes wanted (unused)
  * @return always 0
  */
-int eofread(void) {
+int eofread(void *cookie, char *buf, int len) {
     return 0;
 }
 #endif
@@ -1699,9 +1656,9 @@ INCLUDE_ASM("seg/seg_316FB8", sscanf);
 #define sscanf_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern int strlen(char *);
-extern int _impure_ptr;
-extern int __svfscanf(struct __sFILE *, int, char *);
+extern int strlen(const char *);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern int __svfscanf(struct __sFILE *, const char *, char *);
 /**
  * Scans formatted input from a string and returns the number of fields assigned.
  *
@@ -1713,17 +1670,17 @@ extern int __svfscanf(struct __sFILE *, int, char *);
  * @param fmt  the scanf format
  * @return the number of fields assigned, or -1 when the input ends before the first conversion
  */
-int sscanf(char *str, int fmt, ...) {
+int sscanf(const char *str, const char *fmt, ...) {
     char *ap;
     struct __sFILE strStream;
-    strStream._flags = 4;
-    (*(char**)&strStream._p) = str;
-    (*(char**)&strStream._bf) = str;
+    strStream._flags = __SRD;
+    strStream._p = (unsigned char *)str;
+    strStream._bf._base = (unsigned char *)str;
     strStream._bf._size = strStream._r = strlen(str);
-    (*(int (**)(void))&strStream._read) = eofread;
-    (*(int*)&strStream._ub) = 0;
-    (*(int*)&strStream._lb) = 0;
-    (*(int*)&strStream._data) = _impure_ptr;
+    strStream._read = eofread;
+    strStream._ub._base = 0;
+    strStream._lb._base = 0;
+    strStream._data = _impure_ptr_reent;
     sscanf_va_start(ap);
     return __svfscanf(&strStream, fmt, ap);
 }
@@ -1732,7 +1689,7 @@ int sscanf(char *str, int fmt, ...) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __sread);
 #ifdef SKIP_ASM
-extern long _read_r(int *, int, int, int);
+extern long _read_r(struct _reent *, int, void *, int);
 /**
  * Reads from a stream's descriptor (the read callback of file streams) and returns the byte count or -1.
  *
@@ -1744,12 +1701,12 @@ extern long _read_r(int *, int, int, int);
  * @param count   bytes wanted
  * @return the bytes read, or -1
  */
-long __sread(int *stream, int buf, int count) {
-    int bytesRead = _read_r((int *)stream[84 / 4], ((short *)stream)[7], buf, count);
+long __sread(struct __sFILE *stream, char *buf, int count) {
+    int bytesRead = _read_r(stream->_data, stream->_file, buf, count);
     if (bytesRead >= 0) {
-        stream[80 / 4] += bytesRead;
+        stream->_offset += bytesRead;
     } else {
-        ((unsigned short *)stream)[6] &= 0xEFFF;
+        stream->_flags &= ~__SOFF;
     }
     return bytesRead;
 }
@@ -1758,8 +1715,8 @@ long __sread(int *stream, int buf, int count) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __swrite);
 #ifdef SKIP_ASM
-extern long _write_r(int *, int, int, int);
-int __swrite_(int *f, int a, int b) __asm__("__swrite");
+extern long _write_r(struct _reent *, int, const void *, int);
+int __swrite_(struct __sFILE *f, const char *a, int b) __asm__("__swrite");
 /**
  * Writes to a stream's descriptor (the write callback of file streams) and returns the byte count or -1.
  *
@@ -1771,18 +1728,18 @@ int __swrite_(int *f, int a, int b) __asm__("__swrite");
  * @param count   bytes to write
  * @return the bytes written, or -1
  */
-int __swrite_(int *stream, int buf, int count) {
-    if (((unsigned short *)stream)[6] & 0x100)
-        _lseek_r((int *)stream[84 / 4], ((short *)stream)[7], 0, 2);
-    ((unsigned short *)stream)[6] &= 0xEFFF;
-    return _write_r((int *)stream[84 / 4], ((short *)stream)[7], buf, count);
+int __swrite_(struct __sFILE *stream, const char *buf, int count) {
+    if (stream->_flags & __SAPP)
+        _lseek_r(stream->_data, stream->_file, 0, 2);
+    stream->_flags &= ~__SOFF;
+    return _write_r(stream->_data, stream->_file, buf, count);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __sseek);
 #ifdef SKIP_ASM
-extern long _lseek_r(int *, int, int, int);
+extern long _lseek_r(struct _reent *, int, int, int);
 /**
  * Seeks a stream's descriptor (the seek callback of file streams) and returns the new offset or -1.
  *
@@ -1794,14 +1751,14 @@ extern long _lseek_r(int *, int, int, int);
  * @param whence  0 start, 1 current, 2 end
  * @return the new offset, or -1
  */
-long __sseek(int *stream, int offset, int whence) {
-    long newOffset = _lseek_r((int *)stream[84 / 4], ((short *)stream)[7], offset, whence);
-    unsigned short *flagsPtr = (unsigned short *)stream + 6;
+long __sseek(struct __sFILE *stream, int offset, int whence) {
+    long newOffset = _lseek_r(stream->_data, stream->_file, offset, whence);
+    short *flagsPtr = &stream->_flags;
     if (newOffset == -1) {
-        *flagsPtr &= 0xEFFF;
+        *flagsPtr &= ~__SOFF;
     } else {
-        stream[80 / 4] = newOffset;
-        *flagsPtr |= 0x1000;
+        stream->_offset = newOffset;
+        *flagsPtr |= __SOFF;
     }
     return newOffset;
 }
@@ -1810,7 +1767,7 @@ long __sseek(int *stream, int offset, int whence) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __sclose);
 #ifdef SKIP_ASM
-extern int _close_r(int, int);
+extern int _close_r(struct _reent *, int);
 /**
  * Closes a stream's descriptor (the close callback of file streams).
  *
@@ -1819,8 +1776,8 @@ extern int _close_r(int, int);
  *
  * @param stream  the stream (its own cookie)
  */
-void __sclose(int *stream) {
-    _close_r(stream[84 / 4], ((short *)stream)[7]);
+void __sclose(struct __sFILE *stream) {
+    _close_r(stream->_data, stream->_file);
 }
 #endif
 
@@ -1856,8 +1813,8 @@ extern char __mb_cur_max[];
 extern const short D_00499D90[17]; /* static const short basefix[17] */
 extern int mbtowc_r_7AB8(int, unsigned short *, char *, int, int *) __asm__("_mbtowc_r");
 extern char *__sccl(char *, char *);
-extern unsigned fread(char *buf, unsigned size, unsigned count, int *fp);
-extern int ungetc_7AB8(int, struct F7648 *) __asm__("ungetc");
+extern unsigned fread(char *buf, unsigned size, unsigned count, struct __sFILE *fp);
+extern int ungetc_7AB8(int, struct __sFILE *) __asm__("ungetc");
 extern unsigned long g7AB8_strtol() __asm__("strtol");
 extern unsigned long g7AB8_strtoul() __asm__("strtoul");
 extern double g7AB8_atof(char *) __asm__("atof");
@@ -1884,9 +1841,9 @@ extern double g7AB8_atof(char *) __asm__("atof");
 #define u_char_00417AB8 char
 #define u_long_00417AB8 unsigned long
 
-#define BufferEmpty_00417AB8 (fp->r <= 0 && __srefill_impl(fp))
+#define BufferEmpty_00417AB8 (fp->_r <= 0 && __srefill_(fp))
 
-int __svfscanf_(struct F7648 *fp, char *fmt0, char *ap) __asm__("__svfscanf");
+int __svfscanf_(struct __sFILE *fp, char *fmt0, char *ap) __asm__("__svfscanf");
 /**
  * Scans formatted input from a stream (the scanf engine) and returns the number of fields assigned.
  *
@@ -1904,7 +1861,7 @@ int __svfscanf_(struct F7648 *fp, char *fmt0, char *ap) __asm__("__svfscanf");
  * @return the number of fields assigned, or -1 when the input fails before the first conversion
  */
 int
-__svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
+__svfscanf_(struct __sFILE *fp, char *fmt0, char *ap)
 {
   register u_char_00417AB8 *fmt = (u_char_00417AB8 *) fmt0;
   register int c;		/* character from format, or conversion */
@@ -1949,9 +1906,9 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	    {
 	      if (BufferEmpty_00417AB8)
 		return nassigned;
-	      if (!isspace_00417AB8 (*fp->p))
+	      if (!isspace_00417AB8 (*fp->_p))
 		break;
-	      nread++, fp->r--, fp->p++;
+	      nread++, fp->_r--, fp->_p++;
 	    }
 	  continue;
 	}
@@ -1977,9 +1934,9 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
             {
 	      if (BufferEmpty_00417AB8)
 	        goto input_failure;
-	      if (*fp->p != *lptr)
+	      if (*fp->_p != *lptr)
 	        goto match_failure;
-	      fp->r--, fp->p++;
+	      fp->_r--, fp->_p++;
 	      nread++;
               ++lptr;
             }
@@ -2128,13 +2085,13 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
        */
       if ((flags & NOSKIP) == 0)
 	{
-	  while (isspace_00417AB8 (*fp->p))
+	  while (isspace_00417AB8 (*fp->_p))
 	    {
 	      nread++;
-	      if (--fp->r > 0)
-		fp->p++;
+	      if (--fp->_r > 0)
+		fp->_p++;
 	      else
-	      if (__srefill_impl (fp))
+	      if (__srefill_ (fp))
 		goto input_failure;
 	    }
 	  /*
@@ -2160,12 +2117,12 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 
 	      for (;;)
 		{
-		  if ((n = fp->r) < width)
+		  if ((n = fp->_r) < width)
 		    {
 		      sum += n;
 		      width -= n;
-		      fp->p += n;
-		      if (__srefill_impl (fp))
+		      fp->_p += n;
+		      if (__srefill_ (fp))
 			{
 			  if (sum == 0)
 			    goto input_failure;
@@ -2175,8 +2132,8 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 		  else
 		    {
 		      sum += width;
-		      fp->r -= width;
-		      fp->p += width;
+		      fp->_r -= width;
+		      fp->_p += width;
 		      break;
 		    }
 		}
@@ -2184,7 +2141,7 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	    }
 	  else
 	    {
-	      unsigned int charsRead = fread ((void *) va_arg_00417AB8 (ap, char *), 1, width, (int *) fp);
+	      unsigned int charsRead = fread ((void *) va_arg_00417AB8 (ap, char *), 1, width, fp);
 
 	      if (charsRead == 0)
 		goto input_failure;
@@ -2201,9 +2158,9 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  if (flags & SUPPRESS)
 	    {
 	      n = 0;
-	      while (ccltab[*fp->p])
+	      while (ccltab[*fp->_p])
 		{
-		  n++, fp->r--, fp->p++;
+		  n++, fp->_r--, fp->_p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
@@ -2219,10 +2176,10 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  else
 	    {
 	      strStart = strPtr = va_arg_00417AB8 (ap, char *);
-	      while (ccltab[*fp->p])
+	      while (ccltab[*fp->_p])
 		{
-		  fp->r--;
-		  *strPtr++ = *fp->p++;
+		  fp->_r--;
+		  *strPtr++ = *fp->_p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
@@ -2248,9 +2205,9 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  if (flags & SUPPRESS)
 	    {
 	      n = 0;
-	      while (!isspace_00417AB8 (*fp->p))
+	      while (!isspace_00417AB8 (*fp->_p))
 		{
-		  n++, fp->r--, fp->p++;
+		  n++, fp->_r--, fp->_p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
@@ -2261,10 +2218,10 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  else
 	    {
 	      strStart = strPtr = va_arg_00417AB8 (ap, char *);
-	      while (!isspace_00417AB8 (*fp->p))
+	      while (!isspace_00417AB8 (*fp->_p))
 		{
-		  fp->r--;
-		  *strPtr++ = *fp->p++;
+		  fp->_r--;
+		  *strPtr++ = *fp->_p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
@@ -2285,7 +2242,7 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  flags |= SIGNOK | NDIGITS | NZDIGITS;
 	  for (strPtr = buf; width; width--)
 	    {
-	      c = *fp->p;
+	      c = *fp->_p;
 	      /*
 	       * Switch on the character; `goto ok' if we
 	       * accept it as a part of number.
@@ -2376,10 +2333,10 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	       * c is legal: store it and look at the next.
 	       */
 	      *strPtr++ = c;
-	      if (--fp->r > 0)
-		fp->p++;
+	      if (--fp->_r > 0)
+		fp->_p++;
 	      else
-	      if (__srefill_impl (fp))
+	      if (__srefill_ (fp))
 		break;		/* EOF */
 	    }
 	  /*
@@ -2405,6 +2362,7 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 
 	      *strPtr = 0;
 	      res = (*ccfn) (buf, (char **) 0, base);
+	      /* ORIGINAL-PTR: newlib libc/stdio/vfscanf.c __svfscanf: (_PTR) (unsigned _POINTER_INT) res */
 	      if (flags & POINTER)
 		*(va_arg_00417AB8 (ap, void **)) = (void *) (unsigned int) res;
 	      else if (flags & SHORT)
@@ -2436,7 +2394,7 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	  flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
 	  for (strPtr = buf; width; width--)
 	    {
-	      c = *fp->p;
+	      c = *fp->_p;
 	      /*
 	       * This code mimicks the integer conversion
 	       * code, but is much simpler.
@@ -2487,10 +2445,10 @@ __svfscanf_(struct F7648 *fp, char *fmt0, char *ap)
 	      break;
 	    fok:
 	      *strPtr++ = c;
-	      if (--fp->r > 0)
-		fp->p++;
+	      if (--fp->_r > 0)
+		fp->_p++;
 	      else
-	      if (__srefill_impl (fp))
+	      if (__srefill_ (fp))
 		break;		/* EOF */
 	    }
 	  /*
@@ -2609,18 +2567,8 @@ char *__sccl(char *tab, char *fmt) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", vsprintf);
 #ifdef SKIP_ASM
-struct Fvsprintf {
-    char *p;
-    int r;
-    int w;
-    short flags, file;
-    char *base;
-    int size;
-    int pad[0x54 / 4 - 6];
-    int ent;
-};
-extern int _impure_ptr;
-extern int vfprintf(int, int, char *);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern int vfprintf(struct __sFILE *, const char *, char *);
 /**
  * Formats a variable argument list into a caller buffer with no length limit.
  *
@@ -2632,16 +2580,16 @@ extern int vfprintf(int, int, char *);
  * @param fmt  the format string
  * @param ap   the argument pointer
  */
-void vsprintf(char *buf, int fmt, char *ap) {
-    struct Fvsprintf strStream;
-    strStream.p = buf;
-    strStream.w = 0x7FFFFFFF;
-    strStream.flags = 520;
-    strStream.base = buf;
-    strStream.size = 0x7FFFFFFF;
-    strStream.ent = _impure_ptr;
-    vfprintf((int)&strStream, fmt, ap);
-    *strStream.p = 0;
+void vsprintf(char *buf, const char *fmt, char *ap) {
+    struct __sFILE strStream;
+    strStream._p = (unsigned char *)buf;
+    strStream._w = 0x7FFFFFFF;
+    strStream._flags = __SWR | __SSTR;
+    strStream._bf._base = (unsigned char *)buf;
+    strStream._bf._size = 0x7FFFFFFF;
+    strStream._data = _impure_ptr_reent;
+    vfprintf(&strStream, fmt, ap);
+    *strStream._p = 0;
 }
 #endif
 
@@ -2664,18 +2612,18 @@ extern int _impure_ptr;
  * @param ap   the argument pointer
  * @return the character count, or -1 when it is larger than n
  */
-int vsnprintf(char *buf, unsigned n, int fmt, char *ap) {
+int vsnprintf(char *buf, unsigned n, const char *fmt, char *ap) {
     struct __sFILE strStream;
     int charCount;
-    (*(char**)&strStream._p) = buf;
+    strStream._p = (unsigned char *)buf;
     strStream._w = n;
-    strStream._flags = 520;
-    (*(char**)&strStream._bf) = buf;
+    strStream._flags = __SWR | __SSTR;
+    strStream._bf._base = (unsigned char *)buf;
     strStream._bf._size = n;
-    (*(int*)&strStream._data) = _impure_ptr;
-    charCount = vfprintf((int)&strStream, fmt, ap);
+    strStream._data = _impure_ptr_reent;
+    charCount = vfprintf(&strStream, fmt, ap);
     if (n < (unsigned)charCount) charCount = -1;
-    *((char*)strStream._p) = 0;
+    *strStream._p = 0;
     return charCount;
 }
 #endif
@@ -2766,10 +2714,10 @@ void *bsearch(void *key, char *base, unsigned nmemb, unsigned size, int (*compar
 //100%
 INCLUDE_ASM("seg/seg_316FB8", malloc);
 #ifdef SKIP_ASM
-extern int _impure_ptr;
-extern void __malloc_lock(int);
-extern void __malloc_unlock(int);
-extern int _malloc_r(int, int);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern void __malloc_lock(struct _reent *);
+extern void __malloc_unlock(struct _reent *);
+extern void *_malloc_r(struct _reent *, unsigned int);
 /**
  * Allocates memory from the C heap under the heap lock and returns it, or null.
  *
@@ -2779,11 +2727,11 @@ extern int _malloc_r(int, int);
  * @param byteCount  bytes wanted
  * @return the block, or null
  */
-int malloc(int byteCount) {
-    int block;
-    __malloc_lock(_impure_ptr);
-    block = _malloc_r(_impure_ptr, byteCount);
-    __malloc_unlock(_impure_ptr);
+void *malloc(unsigned int byteCount) {
+    void *block;
+    __malloc_lock(_impure_ptr_reent);
+    block = _malloc_r(_impure_ptr_reent, byteCount);
+    __malloc_unlock(_impure_ptr_reent);
     return block;
 }
 #endif
@@ -2791,10 +2739,10 @@ int malloc(int byteCount) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", free);
 #ifdef SKIP_ASM
-extern int _impure_ptr;
-extern void __malloc_lock(int);
-extern void __malloc_unlock(int);
-extern void _free_r(int, int);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+extern void __malloc_lock(struct _reent *);
+extern void __malloc_unlock(struct _reent *);
+extern void _free_r(struct _reent *, void *);
 /**
  * Returns a block to the C heap under the heap lock.
  *
@@ -2803,10 +2751,10 @@ extern void _free_r(int, int);
  *
  * @param block  the block, or null
  */
-void free(int block) {
-    __malloc_lock(_impure_ptr);
-    _free_r(_impure_ptr, block);
-    __malloc_unlock(_impure_ptr);
+void free(void *block) {
+    __malloc_lock(_impure_ptr_reent);
+    _free_r(_impure_ptr_reent, block);
+    __malloc_unlock(_impure_ptr_reent);
 }
 #endif
 
@@ -2816,7 +2764,6 @@ INCLUDE_ASM("seg/seg_316FB8", _mbtowc_r);
 /* newlib stdlib/mbtowc_r.c (_mbtowc_r) with stdlib/mbctype.h; neither file carries its own notice (newlib's
  * default: Copyright (c) 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is
  * freely granted, provided that this notice is preserved.) */
-typedef unsigned short wchar_t_8958;
 
 #define ESC_CHAR_8958 0x1b
 #define _issjis1_8958(c)    (((c) >= 0x81 && (c) <= 0x9f) || ((c) >= 0xe0 && (c) <= 0xef))
@@ -2825,14 +2772,14 @@ typedef unsigned short wchar_t_8958;
 #define _isjis_8958(c)      ((c) >= 0x21 && (c) <= 0x7e)
 
 typedef enum { ESCAPE, DOLLAR, BRACKET, AT, B, J,
-               NUL, JIS_CHAR, OTHER, JIS_C_NUM } JIS_CHAR_TYPE_8958;
+               NUL, JIS_CHAR, OTHER, JIS_C_NUM } JIS_CHAR_TYPE;
 typedef enum { ASCII, A_ESC, A_ESC_DL, JIS, JIS_1, JIS_2, J_ESC, J_ESC_BR,
-               J2_ESC, J2_ESC_BR, DONE, INV, JIS_S_NUM } JIS_STATE_8958;
-typedef enum { COPY_A, COPY_J, COPY_J2, MAKE_A, MAKE_J, NOOP, EMPTY, ERROR } JIS_ACTION_8958;
+               J2_ESC, J2_ESC_BR, DONE, INV, JIS_S_NUM } JIS_STATE;
+typedef enum { COPY_A, COPY_J, COPY_J2, MAKE_A, MAKE_J, NOOP, EMPTY, ERROR } JIS_ACTION;
 
 /* the file's static state/action tables, in .data */
-extern JIS_STATE_8958 JIS_state_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454948");
-extern JIS_ACTION_8958 JIS_action_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454AF8");
+extern JIS_STATE JIS_state_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454948");
+extern JIS_ACTION JIS_action_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454AF8");
 extern unsigned int strlen_8958(const char *) __asm__("strlen");
 extern int strcmp_8958(const char *, const char *) __asm__("strcmp");
 
@@ -2851,9 +2798,9 @@ extern int strcmp_8958(const char *, const char *) __asm__("strcmp");
  * @return the bytes used, 0 for a NUL character, or -1 for an invalid or incomplete sequence
  */
 int
-_mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned int n, int *state)
+_mbtowc_r (struct _reent *reent, wchar_t *pwc, const char *src, unsigned int n, int *state)
 {
-  wchar_t_8958 scratchWc;
+  wchar_t scratchWc;
   unsigned char *srcBytes = (unsigned char *)src;
 
   if (pwc == 0)
@@ -2877,7 +2824,7 @@ _mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned in
             return -1;
           if (_issjis2_8958 (char2))
             {
-              *pwc = (((wchar_t_8958)*srcBytes) << 8) + (wchar_t_8958)(*(srcBytes+1));
+              *pwc = (((wchar_t)*srcBytes) << 8) + (wchar_t)(*(srcBytes+1));
               return 2;
             }
           else
@@ -2896,7 +2843,7 @@ _mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned in
             return -1;
           if (_iseucjp_8958 (char2))
             {
-              *pwc = (((wchar_t_8958)*srcBytes) << 8) + (wchar_t_8958)(*(srcBytes+1));
+              *pwc = (((wchar_t)*srcBytes) << 8) + (wchar_t)(*(srcBytes+1));
               return 2;
             }
           else
@@ -2905,9 +2852,9 @@ _mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned in
     }
   else if (!strcmp_8958 (reent->_current_locale, "C-JIS"))
     {
-      JIS_STATE_8958 curr_state;
-      JIS_ACTION_8958 action;
-      JIS_CHAR_TYPE_8958 ch;
+      JIS_STATE curr_state;
+      JIS_ACTION action;
+      JIS_CHAR_TYPE ch;
       unsigned char *ptr;
       int i, curr_ch;
 
@@ -2962,22 +2909,23 @@ _mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned in
               break;
             case EMPTY:
               *state = 0;
-              *pwc = (wchar_t_8958)0;
+              *pwc = (wchar_t)0;
               return i;
             case COPY_A:
 	      *state = 0;
-              *pwc = (wchar_t_8958)*ptr;
+              *pwc = (wchar_t)*ptr;
               return (i + 1);
             case COPY_J:
               *state = 0;
-              *pwc = (((wchar_t_8958)*ptr) << 8) + (wchar_t_8958)(*(ptr+1));
+              *pwc = (((wchar_t)*ptr) << 8) + (wchar_t)(*(ptr+1));
               return (i + 1);
             case COPY_J2:
               *state = 1;
-              *pwc = (((wchar_t_8958)*ptr) << 8) + (wchar_t_8958)(*(ptr+1));
+              *pwc = (((wchar_t)*ptr) << 8) + (wchar_t)(*(ptr+1));
               return (ptr - srcBytes) + 2;
             case MAKE_A:
             case MAKE_J:
+              // ORIGINAL-PTR: newlib stdlib/mbtowc_r.c _mbtowc_r: ptr = (char *)(t + i + 1)
               ptr = (char *)(srcBytes + i + 1);
               break;
             case ERROR:
@@ -2994,7 +2942,7 @@ _mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned in
   if (src == 0)
     return 0;  /* not state-dependent */
 
-  *pwc = (wchar_t_8958)*srcBytes;
+  *pwc = (wchar_t)*srcBytes;
 
   if (*srcBytes == '\0')
     return 0;
@@ -3019,7 +2967,7 @@ extern int D_00455248;
  *
  * @param reent  the reentrancy struct (ignored)
  */
-void __malloc_lock(int reent) {
+void __malloc_lock(struct _reent *reent) {
     int id = GetThreadId();
     if (D_00454CA8 == id) {
         D_00454CAC++;
@@ -3046,7 +2994,7 @@ extern int D_00455248;
  *
  * @param reent  the reentrancy struct (ignored)
  */
-void __malloc_unlock(int reent) {
+void __malloc_unlock(struct _reent *reent) {
     if (--D_00454CAC == 0) {
         D_00454CA8 = -1;
         SignalSema(D_00455248);
@@ -3098,7 +3046,7 @@ void fcvtf(int numDigits, int decptOut, int signOut) {
 INCLUDE_ASM("seg/seg_316FB8", gcvtf);
 #ifdef SKIP_ASM
 extern int fptodp(void);
-extern int gcvt(int, int, int);
+extern char *gcvt(int, int, char *);
 /**
  * Formats a float %g-style into a caller buffer (gcvt of the widened value).
  *
@@ -3108,7 +3056,7 @@ extern int gcvt(int, int, int);
  * @param numDigits  significant digits
  * @param buf        the output buffer
  */
-void gcvtf(int numDigits, int buf) {
+void gcvtf(int numDigits, char *buf) {
     gcvt(fptodp(), numDigits, buf);
 }
 #endif
@@ -3156,9 +3104,9 @@ void ecvtf(int numDigits, int decptOut, int signOut) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", gcvt);
 #ifdef SKIP_ASM
-extern int _impure_ptr;
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
 extern int dpcmp(int, int);
-extern int _gcvt(int, int, int, char *, int, int);
+extern char *_gcvt(struct _reent *, int, int, char *, int, int);
 /**
  * Formats a double %g-style into a caller buffer, with a leading minus for negative values.
  *
@@ -3167,17 +3115,16 @@ extern int _gcvt(int, int, int, char *, int, int);
  *
  * @param value     the double, passed in the first (64-bit) argument register
  * @param prec  significant digits
- * @param buf_  the output buffer
+ * @param buf   the output buffer
  * @return the buffer, or 0 if _gcvt failed
  */
-int gcvt(int value, int prec, int buf_) {
-    char *buf = (char *)buf_;
+char *gcvt(int value, int prec, char *buf) {
     char *cursor = buf;
     if (dpcmp(value, 0) < 0) {
         *cursor++ = '-';
         prec--;
     }
-    return _gcvt(_impure_ptr, value, prec, cursor, 'g', 0) ? (int)buf : 0;
+    return _gcvt(_impure_ptr_reent, value, prec, cursor, 'g', 0) ? buf : 0;
 }
 #endif
 
@@ -4392,7 +4339,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041B550);
 extern char *D_00454CDC;
 extern int D_00454CD8;
 extern char D_0052AE98[];
-extern int _write(int, int, int);
+extern int _write(int, const void *, int);
 int func_0041B550_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041B550");
 /**
  * Buffers bytes for a descriptor in a 128-byte buffer, or flushes that buffer (mode 1), and returns a count.
@@ -4411,7 +4358,7 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
     if (mode == 1) {
-        writeResult = _write(fd, (int)D_0052AE98, D_00454CD8);
+        writeResult = _write(fd, D_0052AE98, D_00454CD8);
         D_00454CD8 = 0;
         D_00454CDC = D_0052AE98;
         return writeResult;
@@ -4421,7 +4368,7 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
         D_00454CDC++;
         D_00454CD8++;
         if (D_00454CD8 >= 128) {
-            writeResult = _write(fd, (int)D_0052AE98, D_00454CD8);
+            writeResult = _write(fd, D_0052AE98, D_00454CD8);
             D_00454CDC = D_0052AE98;
             D_00454CD8 = 0;
             if (writeResult == 0)
@@ -4435,8 +4382,8 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", vfprintf);
 #ifdef SKIP_ASM
-extern int func_0041B728_f(int, int, char *, char *) __asm__("func_0041B728");
-extern int func_0041CA70_i(int, int, char *, char *) __asm__("func_0041CA70");
+extern int func_0041B728_f(struct _reent *, struct __sFILE *, const char *, char *) __asm__("func_0041B728");
+extern int func_0041CA70_i(struct _reent *, struct __sFILE *, const char *, char *) __asm__("func_0041CA70");
 /**
  * Formats to a stream, choosing the float-capable formatter only when the format needs it.
  *
@@ -4449,8 +4396,8 @@ extern int func_0041CA70_i(int, int, char *, char *) __asm__("func_0041CA70");
  * @param ap      the argument pointer
  * @return the formatter's result (the character count, or -1)
  */
-int vfprintf(int stream, int fmt, char *ap) {
-    char *cursor = (char *)fmt;
+int vfprintf(struct __sFILE *stream, const char *fmt, char *ap) {
+    const char *cursor = fmt;
     while (*cursor) {
         if (*cursor == '%' && cursor[1]) {
             cursor++;
@@ -4463,12 +4410,12 @@ int vfprintf(int stream, int fmt, char *ap) {
             case 'e':
             case 'f':
             case 'g':
-                return func_0041B728_f(*(int *)(stream + 0x54), stream, (char *)fmt, ap);
+                return func_0041B728_f(stream->_data, stream, fmt, ap);
             }
         }
         cursor++;
     }
-    return func_0041CA70_i(*(int *)(stream + 0x54), stream, (char *)fmt, ap);
+    return func_0041CA70_i(stream->_data, stream, fmt, ap);
 }
 #endif
 
@@ -4497,34 +4444,34 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
     char *buf = __builtin_alloca(len);
     char *w = buf + len - 1;
     int cnt = 0;
-    int st[2];
+    struct { int state; char *point; } st;
     char *cursor;
     if (dest == 0 || start == 0 || end == 0) return 0;
-    st[0] = 0;
-    st[1] = (int)end;
+    st.state = 0;
+    st.point = end;
     cursor = start;
     if (!(end < cursor)) {
         do {
             switch (*cursor) {
             case '.':
-                st[1] = (int)cursor;
-                if (st[0] == 0) st[0] = 1;
+                st.point = cursor;
+                if (st.state == 0) st.state = 1;
                 break;
             case 'E':
             case 'e':
-                st[0] = 2;
+                st.state = 2;
                 break;
             }
             cursor++;
-        } while (!(end < cursor) && st[0] != 2);
+        } while (!(end < cursor) && st.state != 2);
     }
-    if (st[0] == 2) return start;
+    if (st.state == 2) return start;
     cursor = end;
     if (start < cursor) {
         do {
             *w = *cursor;
             w--;
-            if (!((char *)st[1] < cursor)) {
+            if (!(st.point < cursor)) {
                 if (cnt % 3 == 0 && cnt != 0) {
                     *w = ',';
                     len++;
@@ -4566,7 +4513,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
     if (mode == 1) {
-        writeResult = _write(fd, (int)D_0052AF18, D_00454CE0);
+        writeResult = _write(fd, D_0052AF18, D_00454CE0);
         D_00454CE0 = 0;
         D_00454CE4 = D_0052AF18;
         return writeResult;
@@ -4576,7 +4523,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
         D_00454CE4++;
         D_00454CE0++;
         if (D_00454CE0 >= 128) {
-            writeResult = _write(fd, (int)D_0052AF18, D_00454CE0);
+            writeResult = _write(fd, D_0052AF18, D_00454CE0);
             D_00454CE4 = D_0052AF18;
             D_00454CE0 = 0;
             if (writeResult == 0)
@@ -4610,11 +4557,6 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041CA70);
 //100%
 INCLUDE_ASM("seg/seg_316FB8", malloc_extend_top);
 #ifdef SKIP_ASM
-struct mchunk {
-    unsigned prev_size, size;
-    struct mchunk *fd, *bk;
-};
-typedef struct mchunk *mchunkptr;
 extern unsigned D_00454CE8[];
 extern unsigned long D_004550F0;
 extern unsigned long D_004550F8;
@@ -4745,6 +4687,8 @@ void malloc_extend_top_(int ptr, unsigned nb) {
             set_head_size(old_top, old_top_size);
             chunk_at_offset(old_top, old_top_size)->size = 5;
             chunk_at_offset(old_top, old_top_size + 4)->size = 5;
+            // ORIGINAL-PTR: newlib stdlib/mallocr.c malloc_extend_top: fREe(chunk2mem(old_top)), and chunk2mem is
+            // ((Void_t*)((char*)(p) + 2*SIZE_SZ))
             if (old_top_size >= 16)
                 _free_r_free(ptr, (char *)old_top + 8);
         }
@@ -4769,12 +4713,11 @@ INCLUDE_ASM("seg/seg_316FB8", _malloc_r);
  * Configuration as the retail code shows: MALLOC_ALIGNMENT 16, SIZE_T_SMALLER_THAN_LONG (EE long is 64-bit),
  * no HAVE_MMAP. av_ (__malloc_av_) is D_00454CE8, one 0x408-byte object (config/symbol_addrs.txt).
  */
-typedef mchunkptr mbinptr_0041DBF8;
 #define SIZE_SZ_0041DBF8                (sizeof(unsigned int))
 #define MALLOC_ALIGNMENT_0041DBF8       16
 #define MALLOC_ALIGN_0041DBF8           MALLOC_ALIGNMENT_0041DBF8
 #define MALLOC_ALIGN_MASK_0041DBF8      (MALLOC_ALIGNMENT_0041DBF8 - 1)
-#define MINSIZE_0041DBF8                (sizeof(struct mchunk))
+#define MINSIZE_0041DBF8                (sizeof(struct malloc_chunk))
 #define chunk2mem_0041DBF8(p)   ((void*)((char*)(p) + 2*SIZE_SZ_0041DBF8))
 #define request2size_0041DBF8(req) \
  (((long)((req) + (SIZE_SZ_0041DBF8 + MALLOC_ALIGN_MASK_0041DBF8)) < \
@@ -4789,9 +4732,9 @@ typedef mchunkptr mbinptr_0041DBF8;
 #define set_head_0041DBF8(p, s)        ((p)->size = (s))
 #define set_foot_0041DBF8(p, s)   (((mchunkptr)((char*)(p) + (s)))->prev_size = (s))
 #define av__0041DBF8 D_00454CE8
-#define bin_at_0041DBF8(i)      ((mbinptr_0041DBF8)((char*)&(av__0041DBF8[2*(i) + 2]) - 2*SIZE_SZ_0041DBF8))
-#define next_bin_0041DBF8(b)    ((mbinptr_0041DBF8)((char*)(b) + 2 * sizeof(mbinptr_0041DBF8)))
-#define prev_bin_0041DBF8(b)    ((mbinptr_0041DBF8)((char*)(b) - 2 * sizeof(mbinptr_0041DBF8)))
+#define bin_at_0041DBF8(i)      ((mbinptr)((char*)&(av__0041DBF8[2*(i) + 2]) - 2*SIZE_SZ_0041DBF8))
+#define next_bin_0041DBF8(b)    ((mbinptr)((char*)(b) + 2 * sizeof(mbinptr)))
+#define prev_bin_0041DBF8(b)    ((mbinptr)((char*)(b) - 2 * sizeof(mbinptr)))
 #define top_0041DBF8            (bin_at_0041DBF8(0)->fd)
 #define last_remainder_0041DBF8 (bin_at_0041DBF8(1))
 #define first_0041DBF8(b) ((b)->fd)
@@ -4858,10 +4801,8 @@ typedef mchunkptr mbinptr_0041DBF8;
   (last_remainder_0041DBF8->fd = last_remainder_0041DBF8->bk = last_remainder_0041DBF8)
 #define MALLOC_LOCK_0041DBF8 __malloc_lock(reent_ptr)
 #define MALLOC_UNLOCK_0041DBF8 __malloc_unlock(reent_ptr)
-extern void g41DBF8_extend_top(int, unsigned int) __asm__("malloc_extend_top");
+extern void g41DBF8_extend_top(struct _reent *, unsigned int) __asm__("malloc_extend_top");
 
-/* the unit declares this as int _malloc_r(int, int) (malloc, malloc) */
-void *_malloc_r_(int, unsigned int) __asm__("_malloc_r");
 /**
  * Allocates a block from the C heap and returns it, or null (no locking).
  *
@@ -4874,12 +4815,12 @@ void *_malloc_r_(int, unsigned int) __asm__("_malloc_r");
  * @param bytes      bytes wanted
  * @return the block, or null
  */
-void *_malloc_r_(int reent_ptr, unsigned int bytes)
+void *_malloc_r(struct _reent *reent_ptr, unsigned int bytes)
 {
   mchunkptr victim;                  /* inspected/selected chunk */
   unsigned int victim_size;          /* its size */
   int       idx;                     /* index for bin traversal */
-  mbinptr_0041DBF8 bin;              /* associated bin */
+  mbinptr bin;              /* associated bin */
   mchunkptr remainder;               /* remainder from a split */
   long      remainder_size;          /* its size */
   int       remainder_index;         /* its bin index */
@@ -4887,7 +4828,7 @@ void *_malloc_r_(int reent_ptr, unsigned int bytes)
   int       startidx;                /* first bin of a traversed block */
   mchunkptr fwd;                     /* misc temp for linking */
   mchunkptr bck;                     /* misc temp for linking */
-  mbinptr_0041DBF8 q;                /* misc temp */
+  mbinptr q;                /* misc temp */
 
   unsigned int nb  = request2size_0041DBF8(bytes);  /* padded request size; */
 
@@ -5129,6 +5070,8 @@ void _free_r_(int ptr, void *mem) {
     if (mem == 0)
         return;
     __malloc_lock_lock(ptr);
+    // ORIGINAL-PTR: newlib stdlib/mallocr.c fREe (_free_r): p = mem2chunk(mem), and mem2chunk is
+    // ((mchunkptr)((char*)(mem) - 2*SIZE_SZ))
     p = (mchunkptr)((char *)mem - 8);
     hd = p->size;
     sz = hd & ~1u;
@@ -5232,6 +5175,8 @@ int _malloc_trim_r_(int reent_ptr, unsigned int retainBytes)
   else
   {
     /* Test to make sure no one else called sbrk */
+    // ORIGINAL-PTR: newlib stdlib/mallocr.c malloc_trim (_malloc_trim_r): this comparison and the top_size
+    // subtraction below are the source's own
     current_brk = (char*)(_sbrk_r_sbrk (reent_ptr, 0));
     if (current_brk != (char*)(top) + top_size)
     {
@@ -5382,7 +5327,7 @@ extern char __mb_cur_max[], lc_ctype[], last_lc_ctype[];
 extern int strcmp_cmp(char *, char *) __asm__("strcmp");
 extern char *strcpy_(char *, char *) __asm__("strcpy");
 extern unsigned strlen_(char *) __asm__("strlen");
-char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
+char *_setlocale_r_(struct _reent *p, int category, char *locale) __asm__("_setlocale_r");
 /**
  * Sets or queries the locale for a category and returns the locale name, or null when it is not supported.
  *
@@ -5397,7 +5342,7 @@ char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
  * @return for LC_CTYPE the previous ctype locale name after a set or the current one after a query, else "C"; null for
  *         an unsupported locale
  */
-char *_setlocale_r_(int *reent, int category, char *locale) {
+char *_setlocale_r_(struct _reent *reent, int category, char *locale) {
     if (locale) {
         if (category != 2) {
             if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, str_empty_b))
@@ -5421,8 +5366,8 @@ char *_setlocale_r_(int *reent, int category, char *locale) {
             else
                 *(int *)__mb_cur_max = 1;
         }
-        reent[13] = (int)locale;
-        reent[0xC] = category;
+        reent->_current_locale = locale;
+        reent->_current_category = category;
         return category == 2 ? last_lc_ctype : D_0049A7D0b;
     }
     return category == 2 ? lc_ctype : D_0049A7D0b;
@@ -5829,29 +5774,22 @@ INCLUDE_ASM("seg/seg_316FB8", __ieee754_log_2);
  * is preserved.
  * ====================================================
  */
-typedef union {
-    double value;
-    struct {
-        unsigned int lsw;
-        unsigned int msw;
-    } parts;
-} ieee_double_shape_type_0041F3A8;
 #define EXTRACT_WORDS_0041F3A8(ix0,ix1,d)			\
 do {								\
-  ieee_double_shape_type_0041F3A8 ew_u;				\
+  ieee_double_shape_type ew_u;				\
   ew_u.value = (d);						\
   (ix0) = ew_u.parts.msw;					\
   (ix1) = ew_u.parts.lsw;					\
 } while (0)
 #define GET_HIGH_WORD_0041F3A8(i,d)				\
 do {								\
-  ieee_double_shape_type_0041F3A8 gh_u;				\
+  ieee_double_shape_type gh_u;				\
   gh_u.value = (d);						\
   (i) = gh_u.parts.msw;						\
 } while (0)
 #define SET_HIGH_WORD_0041F3A8(d,v)				\
 do {								\
-  ieee_double_shape_type_0041F3A8 sh_u;				\
+  ieee_double_shape_type sh_u;				\
   sh_u.value = (d);						\
   sh_u.parts.msw = (v);						\
   (d) = sh_u.value;						\
@@ -6040,12 +5978,12 @@ extern int _close(int);
  * @param fileDesc    the descriptor
  * @return _close's result (-1)
  */
-int _close_r(int err, int fileDesc) {
+int _close_r(struct _reent *err, int fileDesc) {
     int closeResult;
     errno = 0;
     closeResult = _close(fileDesc);
     if (closeResult == -1 && errno)
-        *(int *)err = errno;
+        err->_errno = errno;
     return closeResult;
 }
 #endif
@@ -6054,7 +5992,7 @@ int _close_r(int err, int fileDesc) {
 INCLUDE_ASM("seg/seg_316FB8", _fstat_r);
 #ifdef SKIP_ASM
 extern int errno;
-extern int _fstat(int, int);
+extern int _fstat(int, struct stat *);
 /**
  * Reads a descriptor's file status and copies a failure's errno into a reentrancy struct.
  *
@@ -6066,12 +6004,12 @@ extern int _fstat(int, int);
  * @param statBuf    the stat buffer
  * @return 0, or -1 on failure
  */
-int _fstat_r(int *err, int fileDesc, int statBuf) {
+int _fstat_r(struct _reent *err, int fileDesc, struct stat *statBuf) {
     int fstatResult;
     errno = 0;
     fstatResult = _fstat(fileDesc, statBuf);
     if (fstatResult == -1 && errno)
-        *err = errno;
+        err->_errno = errno;
     return fstatResult;
 }
 #endif
@@ -6093,12 +6031,12 @@ extern int _lseek(int, int, int);
  * @param whence    the whence code
  * @return the new offset, here always -1
  */
-long _lseek_r(int *err, int fileDesc, int offset, int whence) {
+long _lseek_r(struct _reent *err, int fileDesc, int offset, int whence) {
     int newOffset;
     errno = 0;
     newOffset = _lseek(fileDesc, offset, whence);
     if (newOffset == -1 && errno)
-        *err = errno;
+        err->_errno = errno;
     return newOffset;
 }
 #endif
@@ -6107,7 +6045,7 @@ long _lseek_r(int *err, int fileDesc, int offset, int whence) {
 INCLUDE_ASM("seg/seg_316FB8", _open_r);
 #ifdef SKIP_ASM
 extern int errno;
-extern int _open(int, int, int);
+extern int _open(const char *, int, int);
 /**
  * Opens a file descriptor and copies a failure's errno into a reentrancy struct.
  *
@@ -6120,12 +6058,12 @@ extern int _open(int, int, int);
  * @param permissions    the permission bits
  * @return the descriptor, here always -1
  */
-int _open_r(int *err, int path, int openFlags, int permissions) {
+int _open_r(struct _reent *err, const char *path, int openFlags, int permissions) {
     int fileDesc;
     errno = 0;
     fileDesc = _open(path, openFlags, permissions);
     if (fileDesc == -1 && errno)
-        *err = errno;
+        err->_errno = errno;
     return fileDesc;
 }
 #endif
@@ -6134,7 +6072,7 @@ int _open_r(int *err, int path, int openFlags, int permissions) {
 INCLUDE_ASM("seg/seg_316FB8", _read_r);
 #ifdef SKIP_ASM
 extern int errno;
-extern int _read(int, int, int);
+extern int _read(int, void *, int);
 /**
  * Reads from a descriptor and copies a failure's errno into a reentrancy struct.
  *
@@ -6147,12 +6085,12 @@ extern int _read(int, int, int);
  * @param byteCount    bytes wanted
  * @return the bytes read, or -1
  */
-long _read_r(int *err, int fileDesc, int buffer, int byteCount) {
+long _read_r(struct _reent *err, int fileDesc, void *buffer, int byteCount) {
     int bytesRead;
     errno = 0;
     bytesRead = _read(fileDesc, buffer, byteCount);
     if (bytesRead == -1 && errno)
-        *err = errno;
+        err->_errno = errno;
     return bytesRead;
 }
 #endif
@@ -6186,7 +6124,7 @@ unsigned _sbrk_r(int *err, int increment) {
 INCLUDE_ASM("seg/seg_316FB8", _write_r);
 #ifdef SKIP_ASM
 extern int errno;
-extern int _write(int, int, int);
+extern int _write(int, const void *, int);
 /**
  * Writes to a descriptor and copies a failure's errno into a reentrancy struct.
  *
@@ -6199,12 +6137,12 @@ extern int _write(int, int, int);
  * @param byteCount    the byte count
  * @return the bytes written, or -1
  */
-long _write_r(int *err, int fileDesc, int buffer, int byteCount) {
+long _write_r(struct _reent *err, int fileDesc, const void *buffer, int byteCount) {
     int bytesWritten;
     errno = 0;
     bytesWritten = _write(fileDesc, buffer, byteCount);
     if (bytesWritten == -1 && errno)
-        *err = errno;
+        err->_errno = errno;
     return bytesWritten;
 }
 #endif
@@ -6351,20 +6289,20 @@ extern long __sread(), __swrite(), __sseek();
  * @param file    the descriptor
  * @param ent     the reentrancy struct
  */
-void std(struct __sFILE *stream, short flags, short file, int ent) {
-    (*(int*)&stream->_p) = 0;
+void std(struct __sFILE *stream, short flags, short file, struct _reent *ent) {
+    stream->_p = 0;
     stream->_r = 0;
     stream->_w = 0;
     stream->_flags = flags;
     stream->_file = file;
-    (*(int*)&stream->_bf) = 0;
+    stream->_bf._base = 0;
     stream->_lbfsize = 0;
-    (*(int*)&stream->_cookie) = (int)stream;
-    (*(void**)&stream->_read) = __sread;
-    (*(void**)&stream->_write) = __swrite;
-    (*(void**)&stream->_seek) = __sseek;
-    (*(void**)&stream->_close) = (void *)__sclose;
-    (*(int*)&stream->_data) = ent;
+    stream->_cookie = stream;
+    stream->_read = (int (*)(void *, char *, int))__sread;
+    stream->_write = (int (*)(void *, const char *, int))__swrite;
+    stream->_seek = (_fpos_t (*)(void *, _fpos_t, int))__sseek;
+    stream->_close = (int (*)(void *))__sclose;
+    stream->_data = ent;
 }
 #endif
 
@@ -6382,15 +6320,16 @@ extern void *memset(void *, int, int);
  * @param cnt    the number of FILEs
  * @return the glue block, or null when out of memory
  */
-int *__sfmoreglue(int reent, int cnt) {
-    int sz = cnt * 88;
-    int *glue = (int *)_malloc_r(reent, sz + 0xC);
+struct _glue *__sfmoreglue(struct _reent *reent, int cnt) {
+    int sz = cnt * sizeof(struct __sFILE);
+    struct _glue *glue = (struct _glue *)_malloc_r(reent, sz + sizeof(struct _glue));
     if (!glue)
         return 0;
-    glue[1] = cnt;
-    glue[0] = 0;
-    glue[2] = (int)(glue + 3);
-    memset(glue + 3, 0, sz);
+    glue->_niobs = cnt;
+    glue->_next = 0;
+    // ORIGINAL-PTR: newlib stdio/findfp.c __sfmoreglue: p = (FILE *) (g + 1), the FILEs follow the glue header
+    glue->_iobs = (struct __sFILE *)(glue + 1);
+    memset(glue + 1, 0, sz);
     return glue;
 }
 #endif
@@ -6420,8 +6359,6 @@ INCLUDE_ASM("seg/seg_316FB8", __sfp);
 extern void __sinit_0010(struct _reent *) __asm__("__sinit");
 extern struct _glue *__sfmoreglue_0010(struct _reent *, int) __asm__("__sfmoreglue");
 
-/* the unit declares __sfp(int) for its caller _fopen_r */
-struct __sFILE *__sfp_0010(struct _reent *d) __asm__("__sfp");
 /**
  * Finds a free FILE struct, adding more when all are taken, and returns it reset, or null.
  *
@@ -6433,7 +6370,7 @@ struct __sFILE *__sfp_0010(struct _reent *d) __asm__("__sfp");
  * @return the FILE, or null
  */
 struct __sFILE *
-__sfp_0010 (struct _reent *reent)
+__sfp (struct _reent *reent)
 {
   struct __sFILE *stream;
   int n;
@@ -6441,13 +6378,13 @@ __sfp_0010 (struct _reent *reent)
 
   if (!reent->__sdidinit)
     __sinit_0010 (reent);
-  for (glue = &(*(struct _glue*)&reent->__sglue);; glue = ((struct _glue_0010*)glue->_next))
+  for (glue = &reent->__sglue;; glue = glue->_next)
     {
-      for (stream = ((struct __sFILE*)glue->_iobs), n = glue->_niobs; --n >= 0; stream++)
+      for (stream = glue->_iobs, n = glue->_niobs; --n >= 0; stream++)
 	if (stream->_flags == 0)
 	  goto found;
-      if (((struct _glue_0010*)glue->_next) == 0 &&
-	  ((*(struct _glue_0010**)&glue->_next) = __sfmoreglue_0010 (reent, NDYNAMIC_0010)) == 0)
+      if (glue->_next == 0 &&
+	  (glue->_next = __sfmoreglue_0010 (reent, NDYNAMIC_0010)) == 0)
 	break;
     }
   reent->_errno = ENOMEM_0010;
@@ -6458,16 +6395,16 @@ found:
   stream->_p = 0;		/* no current pointer */
   stream->_w = 0;			/* nothing to read or write */
   stream->_r = 0;
-  (*(struct __sbuf*)&stream->_bf)._base = 0;		/* no buffer */
-  (*(struct __sbuf*)&stream->_bf)._size = 0;
+  stream->_bf._base = 0;		/* no buffer */
+  stream->_bf._size = 0;
   stream->_lbfsize = 0;		/* not line buffered */
   stream->_file = -1;		/* no file */
   /* fp->_cookie = <any>; */	/* caller sets cookie, _read/_write etc */
-  (*(struct __sbuf*)&stream->_ub)._base = 0;		/* no ungetc buffer */
-  (*(struct __sbuf*)&stream->_ub)._size = 0;
-  (*(struct __sbuf*)&stream->_lb)._base = 0;		/* no line buffer */
-  (*(struct __sbuf*)&stream->_lb)._size = 0;
-  (*(struct _reent**)&stream->_data) = reent;
+  stream->_ub._base = 0;		/* no ungetc buffer */
+  stream->_ub._size = 0;
+  stream->_lb._base = 0;		/* no line buffer */
+  stream->_lb._size = 0;
+  stream->_data = reent;
   return stream;
 }
 #endif
@@ -6485,16 +6422,16 @@ INCLUDE_ASM("seg/seg_316FB8", __sinit);
  *
  * @param reent  the reentrancy struct
  */
-void __sinit(char *reent) {
-    char *stdinStream = reent + 0x1E4;
-    *(void **)(reent + 0x3C) = (void *)_cleanup_r;
-    *(int *)(reent + 0x38) = 1;
-    std((void *)stdinStream, 4, 0, (int)reent);
-    std((void *)(reent + 0x23C), 9, 1, (int)reent);
-    std((void *)(reent + 0x294), 10, 2, (int)reent);
-    *(char **)(reent + 0x1E0) = stdinStream;
-    *(int *)(reent + 0x1DC) = 3;
-    *(int *)(reent + 0x1D8) = 0;
+void __sinit(struct _reent *reent) {
+    struct __sFILE *stdinStream = &reent->__sf[0];
+    reent->__cleanup = _cleanup_r;
+    reent->__sdidinit = 1;
+    std(stdinStream, __SRD, 0, reent);
+    std(&reent->__sf[1], __SWR | __SLBF, 1, reent);
+    std(&reent->__sf[2], __SWR | __SNBF, 2, reent);
+    reent->__sglue._iobs = stdinStream;
+    reent->__sglue._niobs = 3;
+    reent->__sglue._next = 0;
 }
 #endif
 
@@ -6614,7 +6551,7 @@ void func_00420228(char *dst, char *src, unsigned n) {
 INCLUDE_ASM("seg/seg_316FB8", fread);
 #ifdef SKIP_ASM
 extern void func_00420228(char *, char *, unsigned);
-extern int __srefill(int *);
+extern int __srefill(struct __sFILE *);
 /**
  * Reads count items of size bytes from a stream into a buffer and returns the number of whole items read.
  *
@@ -6627,26 +6564,26 @@ extern int __srefill(int *);
  * @param stream  the stream
  * @return count, or fewer on end of file or error (0 when size * count is 0)
  */
-unsigned fread(char *buf, unsigned size, unsigned count, int *stream) {
+unsigned fread(char *buf, unsigned size, unsigned count, struct __sFILE *stream) {
     unsigned resid, total, avail;
     char *dst;
     if ((resid = count * size) == 0)
         return 0;
-    if (stream[1] < 0)
-        stream[1] = 0;
+    if (stream->_r < 0)
+        stream->_r = 0;
     total = resid;
     dst = buf;
-    while (resid > (avail = stream[1])) {
-        func_00420228(dst, (char *)stream[0], avail);
+    while (resid > (avail = stream->_r)) {
+        func_00420228(dst, (char *)stream->_p, avail);
         dst += avail;
-        stream[0] = stream[0] + avail;
+        stream->_p = stream->_p + avail;
         resid -= avail;
         if (__srefill(stream))
             return (total - resid) / size;
     }
-    func_00420228(dst, (char *)stream[0], resid);
-    stream[1] -= resid;
-    stream[0] += resid;
+    func_00420228(dst, (char *)stream->_p, resid);
+    stream->_r -= resid;
+    stream->_p += resid;
     return count;
 }
 #endif
@@ -6789,7 +6726,7 @@ ungetc (int ch, register struct __sFILE *stream)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _Balloc);
 #ifdef SKIP_ASM
-extern int *_calloc_r(int *, int, int);
+extern void *_calloc_r(struct _reent *, unsigned int, unsigned int);
 /**
  * Allocates a Bigint of 2^k words, reusing one from the reentrancy struct's free list when it can.
  *
@@ -6797,31 +6734,30 @@ extern int *_calloc_r(int *, int, int);
  * otherwise a new Bigint of 0x18 + (2^k - 1) * 4 bytes is allocated with _calloc_r and its k and maxwds set. sign
  * and wds are cleared.
  *
- * @param ep_  the reentrancy struct
+ * @param ptr  the reentrancy struct
  * @param k    the size class (2^k words)
  * @return the Bigint, or null when out of memory
  */
-int *_Balloc(int ep_, int k) {
-    int *ep = (int *)ep_;
+struct _Bigint *_Balloc(struct _reent *ptr, int k) {
     int x;
-    int *rv;
-    if (ep[76 / 4] == 0) {
-        ep[76 / 4] = (int)_calloc_r(ep, 4, 16);
-        if (ep[76 / 4] == 0)
+    struct _Bigint *rv;
+    if (ptr->_freelist == 0) {
+        ptr->_freelist = (struct _Bigint **)_calloc_r(ptr, sizeof(struct _Bigint *), 16);
+        if (ptr->_freelist == 0)
             return 0;
     }
-    rv = ((int **)ep[0x4C / 4])[k];
+    rv = ptr->_freelist[k];
     if (rv) {
-        ((int **)ep[0x4C / 4])[k] = (int *)*rv;
+        ptr->_freelist[k] = rv->_next;
     } else {
         x = 1 << k;
-        rv = _calloc_r(ep, 1, 0x18 + (x - 1) * 4);
+        rv = (struct _Bigint *)_calloc_r(ptr, 1, sizeof(struct _Bigint) + (x - 1) * sizeof(rv->_x));
         if (rv == 0)
             return 0;
-        rv[1] = k;
-        rv[2] = x;
+        rv->_k = k;
+        rv->_maxwds = x;
     }
-    rv[3] = rv[4] = 0;
+    rv->_sign = rv->_wds = 0;
     return rv;
 }
 #endif
@@ -6836,11 +6772,10 @@ INCLUDE_ASM("seg/seg_316FB8", _Bfree);
  *
  * @param bigint  the Bigint, or null
  */
-void _Bfree(int *self, int *bigint) {
+void _Bfree(struct _reent *self, struct _Bigint *bigint) {
     if (bigint) {
-        int i = bigint[1];
-        bigint[0] = ((int *)self[0x4C / 4])[i];
-        ((int **)self[0x4C / 4])[i] = bigint;
+        bigint->_next = self->_freelist[bigint->_k];
+        self->_freelist[bigint->_k] = bigint;
     }
 }
 #endif
@@ -6853,8 +6788,8 @@ struct Bigint {
     int k, maxwds, sign, wds;
     unsigned x[1];
 };
-extern int *_Balloc(int, int);
-extern void _Bfree(int *, int *);
+extern struct _Bigint *_Balloc(struct _reent *, int);
+extern void _Bfree(struct _reent *, struct _Bigint *);
 extern void *func_0041605C(void *, void *, int);
 /**
  * Multiplies a Bigint by a small integer and adds another, growing it when needed, and returns the result.
@@ -6868,7 +6803,7 @@ extern void *func_0041605C(void *, void *, int);
  * @param addend      the value added
  * @return the Bigint holding bigint * multiplier + addend
  */
-struct Bigint *_multadd(int ptr, struct Bigint *bigint, int multiplier, int addend) {
+struct Bigint *_multadd(struct _reent *ptr, struct Bigint *bigint, int multiplier, int addend) {
     int i, wds;
     unsigned *x, y, xi, z, carry;
     struct Bigint *larger;
@@ -6887,7 +6822,7 @@ struct Bigint *_multadd(int ptr, struct Bigint *bigint, int multiplier, int adde
         if (wds >= bigint->maxwds) {
             larger = (struct Bigint *)_Balloc(ptr, bigint->k + 1);
             func_0041605C(&larger->sign, &bigint->sign, bigint->wds * 4 + 8);
-            _Bfree((int *)ptr, (int *)bigint);
+            _Bfree(ptr, (struct _Bigint *)bigint);
             bigint = larger;
         }
         bigint->x[wds++] = carry;
@@ -6900,7 +6835,7 @@ struct Bigint *_multadd(int ptr, struct Bigint *bigint, int multiplier, int adde
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _s2b);
 #ifdef SKIP_ASM
-extern struct Bigint *_multadd(int, struct Bigint *, int, int);
+extern struct Bigint *_multadd(struct _reent *, struct Bigint *, int, int);
 /**
  * Builds a Bigint from a decimal digit string and returns it.
  *
@@ -6914,7 +6849,7 @@ extern struct Bigint *_multadd(int, struct Bigint *, int, int);
  * @param y9      the value of the first nine digits
  * @return the Bigint
  */
-struct Bigint *_s2b(int ptr, char *digits, int nd0, int nd, int y9) {
+struct Bigint *_s2b(struct _reent *ptr, char *digits, int nd0, int nd, int y9) {
     struct Bigint *bigint;
     int i, k;
     int x, y;
@@ -7032,7 +6967,7 @@ int _lo0bits(unsigned *y) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _i2b);
 #ifdef SKIP_ASM
-extern int *_Balloc(int, int);
+extern struct _Bigint *_Balloc(struct _reent *, int);
 /**
  * Returns a new one-word Bigint holding a small integer.
  *
@@ -7042,10 +6977,10 @@ extern int *_Balloc(int, int);
  * @param value  the value
  * @return the Bigint
  */
-int *_i2b(int reent, int value) {
-    int *bigint = _Balloc(reent, 1);
-    bigint[5] = value;
-    bigint[4] = 1;
+struct _Bigint *_i2b(struct _reent *reent, int value) {
+    struct _Bigint *bigint = _Balloc(reent, 1);
+    bigint->_x[0] = value;
+    bigint->_wds = 1;
     return bigint;
 }
 #endif
@@ -7053,7 +6988,7 @@ int *_i2b(int reent, int value) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _multiply);
 #ifdef SKIP_ASM
-extern int *_Balloc(int, int);
+extern struct _Bigint *_Balloc(struct _reent *, int);
 /**
  * Multiplies two Bigints and returns a new Bigint with the product.
  *
@@ -7065,7 +7000,7 @@ extern int *_Balloc(int, int);
  * @param rhs  the other factor
  * @return the product
  */
-struct Bigint *_multiply(int ptr, struct Bigint *lhs, struct Bigint *rhs) {
+struct Bigint *_multiply(struct _reent *ptr, struct Bigint *lhs, struct Bigint *rhs) {
     struct Bigint *product;
     int i, k, wa, wb, wc;
     unsigned *x, *xa, *xae, *xb, *xbe, *xc, *xc0;
@@ -7132,10 +7067,10 @@ struct Bigint *_multiply(int ptr, struct Bigint *lhs, struct Bigint *rhs) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _pow5mult);
 #ifdef SKIP_ASM
-extern struct Bigint *_multadd(int, struct Bigint *, int, int);
-extern struct Bigint *_multiply(int, struct Bigint *, struct Bigint *);
-extern int *_i2b(int, int);
-extern void _Bfree(int *, int *);
+extern struct Bigint *_multadd(struct _reent *, struct Bigint *, int, int);
+extern struct Bigint *_multiply(struct _reent *, struct Bigint *, struct Bigint *);
+extern struct _Bigint *_i2b(struct _reent *, int);
+extern void _Bfree(struct _reent *, struct _Bigint *);
 extern int D_0049A8E8[];
 /**
  * Multiplies a Bigint by 5^k and returns the result.
@@ -7149,21 +7084,21 @@ extern int D_0049A8E8[];
  * @param k    the power of 5
  * @return the product
  */
-struct Bigint *_pow5mult(int ptr, struct Bigint *number, int k) {
+struct Bigint *_pow5mult(struct _reent *ptr, struct Bigint *number, int k) {
     struct Bigint *product, *fivePower, *nextFivePower;
     int i;
     if ((i = k & 3))
         number = _multadd(ptr, number, D_0049A8E8[i - 1], 0);
     if (!(k >>= 2))
         return number;
-    if (!(fivePower = ((struct Bigint **)ptr)[0x48 / 4])) {
-        fivePower = ((struct Bigint **)ptr)[0x48 / 4] = (struct Bigint *)_i2b(ptr, 625);
+    if (!(fivePower = (struct Bigint *)ptr->_p5s)) {
+        fivePower = (struct Bigint *)(ptr->_p5s = _i2b(ptr, 625));
         fivePower->next = 0;
     }
     for (;;) {
         if (k & 1) {
             product = _multiply(ptr, number, fivePower);
-            _Bfree((int *)ptr, (int *)number);
+            _Bfree(ptr, (struct _Bigint *)number);
             number = product;
         }
         if (!(k >>= 1))
@@ -7181,8 +7116,8 @@ struct Bigint *_pow5mult(int ptr, struct Bigint *number, int k) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _lshift);
 #ifdef SKIP_ASM
-extern int *_Balloc(int, int);
-extern void _Bfree(int *, int *);
+extern struct _Bigint *_Balloc(struct _reent *, int);
+extern void _Bfree(struct _reent *, struct _Bigint *);
 /**
  * Shifts a Bigint left by k bits into a new Bigint, frees the old one and returns the new one.
  *
@@ -7194,7 +7129,7 @@ extern void _Bfree(int *, int *);
  * @param k       the shift in bits
  * @return the shifted Bigint
  */
-struct Bigint *_lshift(int ptr, struct Bigint *bigint, int k) {
+struct Bigint *_lshift(struct _reent *ptr, struct Bigint *bigint, int k) {
     int i, kOrShift, n, newWords;	/* kOrShift: the result's size class k, then 32 - k */
     struct Bigint *shifted;
     unsigned *x, *x1, *xe, z;
@@ -7223,7 +7158,7 @@ struct Bigint *_lshift(int ptr, struct Bigint *bigint, int k) {
             *x1++ = *x++;
         while (x < xe);
     shifted->wds = newWords - 1;
-    _Bfree((int *)ptr, (int *)bigint);
+    _Bfree(ptr, (struct _Bigint *)bigint);
     return shifted;
 }
 #endif
@@ -7269,7 +7204,7 @@ int __mcmp(struct Bigint28 *lhs, struct Bigint28 *rhs) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __mdiff);
 #ifdef SKIP_ASM
-extern int *_Balloc(int, int);
+extern struct _Bigint *_Balloc(struct _reent *, int);
 /**
  * Returns a new Bigint holding |lhs - rhs|, with sign set when rhs was larger.
  *
@@ -7281,7 +7216,7 @@ extern int *_Balloc(int, int);
  * @param rhs  the subtrahend
  * @return the difference
  */
-struct Bigint *__mdiff(int ptr, struct Bigint *lhs, struct Bigint *rhs) {
+struct Bigint *__mdiff(struct _reent *ptr, struct Bigint *lhs, struct Bigint *rhs) {
     struct Bigint *difference;
     int i, wa, wb;
     int borrow, y, z;
@@ -7425,7 +7360,7 @@ ret_d:
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _d2b);
 #ifdef SKIP_ASM
-extern int *_Balloc(int, int);
+extern struct _Bigint *_Balloc(struct _reent *, int);
 extern int _lo0bits(unsigned *);
 extern int _hi0bits(unsigned);
 /**
@@ -7440,7 +7375,7 @@ extern int _hi0bits(unsigned);
  * @param bits    receives the significant bit count
  * @return the mantissa Bigint
  */
-struct Bigint *_d2b(int ptr, double _d, int *expOut, int *bits) {
+struct Bigint *_d2b(struct _reent *ptr, double _d, int *expOut, int *bits) {
     struct Bigint *bigint;
     int de, i, k;
     unsigned *x, y, z;
@@ -7558,10 +7493,10 @@ double _mprec_log10(int n) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", print_f);
 #ifdef SKIP_ASM
-struct R21530;
-extern char *g21530_dtoa(struct R21530 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
+extern char *g21530_dtoa(struct _reent *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *g21530_strcpy(char *, char *) __asm__("strcpy");
-void print_f_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) __asm__("print_f");
+void print_f_(struct _reent *ptr, char *buf, double invalue, int ndigit, int type, int dot,
+        int mode) __asm__("print_f");
 /**
  * Formats a double in fixed-point form (%f style) into a buffer.
  *
@@ -7578,7 +7513,7 @@ void print_f_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int typ
  * @param dot      nonzero to always print the point
  * @param mode     the _dtoa_r mode (3 for fixed point)
  */
-void print_f_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) {
+void print_f_(struct _reent *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) {
     int decpt;
     int sign;
     char *digits, *start, *end;
@@ -7622,10 +7557,9 @@ void print_f_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int typ
 //100%
 INCLUDE_ASM("seg/seg_316FB8", print_e);
 #ifdef SKIP_ASM
-struct R216E8;
-extern char *g216E8_dtoa(struct R216E8 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
+extern char *g216E8_dtoa(struct _reent *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *g216E8_strcpy(char *, char *) __asm__("strcpy");
-void print_e_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, char type, int dot) __asm__("print_e");
+void print_e_(struct _reent *ptr, char *buf, double invalue, int ndigit, char type, int dot) __asm__("print_e");
 /**
  * Formats a double in exponent form (%e style) into a buffer.
  *
@@ -7641,7 +7575,7 @@ void print_e_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, char ty
  * @param type     'e', 'E', 'g' or 'G'
  * @param dot      nonzero to always print the point
  */
-void print_e_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, char type, int dot) {
+void print_e_(struct _reent *ptr, char *buf, double invalue, int ndigit, char type, int dot) {
     int decpt;
     int i = ndigit;
     int sign;
@@ -7758,15 +7692,10 @@ char *fcvtbuf_(double invalue, int ndigit, int *decpt, int *sign, char *buf) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", ecvtbuf);
 #ifdef SKIP_ASM
-struct Reent51 {
-    int pad0[0x50 / 4];
-    int cvtlen;
-    char *cvtbuf;
-};
-extern int _impure_ptr;
-#define REENT ((struct Reent51 *)_impure_ptr)
-extern char *_realloc_r(struct Reent51 *, char *, int);
-extern char *_dtoa_r(struct Reent51 *, double, int, int, int *, int *, char **);
+extern struct _reent *_impure_ptr_reent __asm__("_impure_ptr");
+#define REENT _impure_ptr_reent
+extern char *_realloc_r(struct _reent *, char *, int);
+extern char *_dtoa_r(struct _reent *, double, int, int, int *, int *, char **);
 char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) __asm__("ecvtbuf");
 /**
  * Converts a double to exactly ndigit significant decimal digits (ecvt style) and returns the digit string.
@@ -7787,15 +7716,15 @@ char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) {
     int i = 0;
     int newlen;
     if (buf == 0) {
-        if (ndigit >= REENT->cvtlen) {
+        if (ndigit >= REENT->_cvtlen) {
             newlen = ndigit + 1;
-            buf = _realloc_r(REENT, REENT->cvtbuf, newlen);
+            buf = _realloc_r(REENT, REENT->_cvtbuf, newlen);
             if (buf == 0)
                 return 0;
-            REENT->cvtlen = newlen;
-            REENT->cvtbuf = buf;
+            REENT->_cvtlen = newlen;
+            REENT->_cvtbuf = buf;
         }
-        buf = REENT->cvtbuf;
+        buf = REENT->_cvtbuf;
     }
     save = buf;
     digitStr = _dtoa_r(REENT, value, 2, ndigit, decpt, sign, &end);
@@ -7820,13 +7749,12 @@ INCLUDE_ASM("seg/seg_316FB8", _gcvt);
 /* newlib stdlib/ecvtbuf.c (_gcvt). The file carries no notice of its own (newlib's default: Copyright (c)
  * 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is freely granted, provided
  * that this notice is preserved.) */
-struct _reent_1B98;
 extern double _mprec_log10_1B98(int) __asm__("_mprec_log10");
-extern void print_e_1B98(struct _reent_1B98 *, char *, double, int, char, int) __asm__("print_e");
-extern char *_dtoa_r_1B98(struct _reent_1B98 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
+extern void print_e_1B98(struct _reent *, char *, double, int, char, int) __asm__("print_e");
+extern char *_dtoa_r_1B98(struct _reent *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *strcpy_1B98(char *, const char *) __asm__("strcpy");
 
-char *_gcvt_(struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+char *_gcvt_(struct _reent *ptr, double invalue, int ndigit, char *buf, char type, int dot)
     __asm__("_gcvt");
 /**
  * Formats the magnitude of a double %g-style into a buffer (newlib ecvtbuf.c's _gcvt).
@@ -7846,7 +7774,7 @@ char *_gcvt_(struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, cha
  * @return buf
  */
 char *
-_gcvt_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+_gcvt_ (struct _reent *ptr, double invalue, int ndigit, char *buf, char type, int dot)
 {
   char *save = buf;
 
@@ -8020,6 +7948,8 @@ void *_realloc_r_(int ptr, void *oldmem, unsigned bytes) {
     if (oldmem == 0)
         return _malloc_r_malloc(ptr, bytes);
     __malloc_lock_lock(ptr);
+    // ORIGINAL-PTR: newlib stdlib/mallocr.c rEALLOc (_realloc_r): mem2chunk(oldmem) and the chunk2mem results
+    // below are ((char*)(p) -/+ 2*SIZE_SZ)
     newp = oldp = (mchunkptr)((char *)oldmem - 8);
     newsize = oldsize = chunksize(oldp);
     nb = (bytes + 19 < 31) ? 16 : ((bytes + 19) & ~15u);
@@ -8295,7 +8225,7 @@ extern int g2780_cmp(struct Bigint *, struct Bigint *) __asm__("__mcmp");
 extern struct Bigint *g2780_diff(struct _reent_00422780 *, struct Bigint *, struct Bigint *) __asm__("__mdiff");
 extern struct Bigint *g2780_d2b(struct _reent_00422780 *, double, int *, int *) __asm__("_d2b");
 
-/* the unit declares this with struct Reent51 * (ecvtbuf, ecvtbuf) */
+/* the unit declares this with struct _reent * (ecvtbuf) */
 char *_dtoa_r_(struct _reent_00422780 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 /**
  * Converts a double to a decimal digit string (David Gay's dtoa, newlib 1.9) and reports the decimal point and sign.

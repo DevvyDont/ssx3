@@ -8,6 +8,7 @@
 #include "util/bxmemcard.h"
 #include "util/bxps2memcard.h"
 #include "util/menusys.h"
+#include "animation/gameanimmap.h"
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_float);
 #ifdef SKIP_ASM
@@ -239,11 +240,11 @@ extern "C" int get_data(unsigned char **src, tCommDataBlock **out) {
     unsigned int i = 0;
     tCommDataBlock *newData = (tCommDataBlock*)cMemMan_alloc_2868(8, str_Comm_Data_Block, 0x100, 0);
     newData->Size = 0;
-    (*(unsigned char**)&newData->Data) = 0;
+    newData->Data = 0;
     *out = newData;
     int total = get_uint_2868(src, newData);
     tCommDataBlock *reloaded = *out;
-    (*(unsigned char**)&reloaded->Data) = (unsigned char*)operator_new_tag_2868(reloaded->Size, str_Comm_Data, 0x100, 0);
+    reloaded->Data = (char*)operator_new_tag_2868(reloaded->Size, str_Comm_Data, 0x100, 0);
     tCommDataBlock *current = *out;
     for (i = 0; i < current->Size; i++) {
         total += get_char_2868(src, (unsigned char*)&current->Data[i]);
@@ -686,9 +687,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setArg);
  *
  * @param itemArg  the new value
  */
-void cMenuItem::setArg(int itemArg)
+void cMenuItem::setArg(void* itemArg)
 {
-    Arg = (void*)itemArg;
+    Arg = itemArg;
 }
 #endif
 
@@ -700,9 +701,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getArg);
  *
  * @return Arg
  */
-int cMenuItem::getArg()
+void* cMenuItem::getArg()
 {
-    return ((int)Arg);
+    return Arg;
 }
 #endif
 
@@ -729,9 +730,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getItem);
  * @param itemIndex  the item index
  * @return the item
  */
-int cMenu::getItem(int itemIndex)
+cMenuItem* cMenu::getItem(int itemIndex)
 {
-    return (int)Items[itemIndex];
+    return Items[itemIndex];
 }
 #endif
 
@@ -757,9 +758,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getMenuSys);
  *
  * @return MenuSys
  */
-int cMenu::getMenuSys()
+cMenuSys* cMenu::getMenuSys()
 {
-    return ((int)MenuSys);
+    return MenuSys;
 }
 #endif
 
@@ -771,9 +772,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getFont);
  *
  * @return the font
  */
-int cMenu::getFont()
+cFont* cMenu::getFont()
 {
-    return (int)MenuSys->Font;
+    return MenuSys->Font;
 }
 #endif
 
@@ -786,9 +787,9 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getFont);
  *
  * @return the font
  */
-int cMenuItem::getFont()
+cFont* cMenuItem::getFont()
 {
-    return (int)Menu->MenuSys->Font;
+    return Menu->MenuSys->Font;
 }
 #endif
 
@@ -816,9 +817,9 @@ INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setValue);
  *
  * @param value  the flag's address
  */
-void cBoolMenuItem::setValue(int value)
+void cBoolMenuItem::setValue(int* value)
 {
-    Flag = (int*)value;
+    Flag = value;
 }
 #endif
 
@@ -830,9 +831,9 @@ INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cBoolMenuItem::setCaption(int value)
+void cBoolMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -862,10 +863,10 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnumTags);
  * @param numTags  the number of entries
  * @param tagTable  the entries, 8 bytes each
  */
-void cEnumMenuItem::setEnumTags(int numTags, int tagTable)
+void cEnumMenuItem::setEnumTags(int numTags, const tCFMEnumTag* tagTable)
 {
     NumTags = numTags;
-    Tags = (const tCFMEnumTag*)tagTable;
+    Tags = tagTable;
 }
 #endif
 
@@ -877,9 +878,9 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnum);
  *
  * @param value  the int's address
  */
-void cEnumMenuItem::setEnum(int value)
+void cEnumMenuItem::setEnum(int* value)
 {
-    Enum = (int*)value;
+    Enum = value;
 }
 #endif
 
@@ -891,9 +892,9 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cEnumMenuItem::setCaption(int value)
+void cEnumMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -905,9 +906,9 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_getCaption);
  *
  * @return the caption
  */
-int cEnumMenuItem::getCaption()
+const char* cEnumMenuItem::getCaption()
 {
-    return ((int)Caption);
+    return Caption;
 }
 #endif
 
@@ -935,9 +936,9 @@ INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_setMenu);
  *
  * @param value  the sub-menu
  */
-void cSubMenuItem::setMenu(int value)
+void cSubMenuItem::setMenu(cMenu* value)
 {
-    Sub = (cMenu*)value;
+    Sub = value;
 }
 #endif
 
@@ -949,9 +950,9 @@ INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_getSubMenu);
  *
  * @return the sub-menu
  */
-int cSubMenuItem::getSubMenu()
+cMenu* cSubMenuItem::getSubMenu()
 {
-    return ((int)Sub);
+    return Sub;
 }
 #endif
 
@@ -979,9 +980,9 @@ INCLUDE_ASM("seg/seg_1D3510", cPopMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cPopMenuItem::setCaption(int value)
+void cPopMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1009,9 +1010,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setStateText);
  *
  * @param value  the text
  */
-void cCommandMenuItem::setStateText(int value)
+void cCommandMenuItem::setStateText(const char* value)
 {
-    State = (const char*)value;
+    State = value;
 }
 #endif
 
@@ -1023,9 +1024,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cCommandMenuItem::setCaption(int value)
+void cCommandMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1037,9 +1038,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getCaption);
  *
  * @return the caption
  */
-int cCommandMenuItem::getCaption()
+const char* cCommandMenuItem::getCaption()
 {
-    return ((int)Caption);
+    return Caption;
 }
 #endif
 
@@ -1051,9 +1052,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setData);
  *
  * @param value  the data
  */
-void cCommandMenuItem::setData(int value)
+void cCommandMenuItem::setData(void* value)
 {
-    Data = (void*)value;
+    Data = value;
 }
 #endif
 
@@ -1065,9 +1066,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getData);
  *
  * @return the data
  */
-int cCommandMenuItem::getData()
+void* cCommandMenuItem::getData()
 {
-    return ((int)Data);
+    return Data;
 }
 #endif
 
@@ -1095,9 +1096,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cCallbackMenuItem::setCaption(int value)
+void cCallbackMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1109,9 +1110,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_getCaption);
  *
  * @return the caption
  */
-int cCallbackMenuItem::getCaption()
+const char* cCallbackMenuItem::getCaption()
 {
-    return ((int)Caption);
+    return Caption;
 }
 #endif
 
@@ -1137,9 +1138,9 @@ INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setCaption);
  *
  * @param value  the text
  */
-void cNullMenuItem::setCaption(int value)
+void cNullMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1151,9 +1152,9 @@ INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setStateText);
  *
  * @param value  the text
  */
-void cNullMenuItem::setStateText(int value)
+void cNullMenuItem::setStateText(const char* value)
 {
-    State = (const char*)value;
+    State = value;
 }
 #endif
 
@@ -1195,9 +1196,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setValue);
  *
  * @param value  the byte's address
  */
-void cCharMenuItem::setValue(int value)
+void cCharMenuItem::setValue(signed char* value)
 {
-    Value = (signed char*)value;
+    Value = value;
 }
 #endif
 
@@ -1209,9 +1210,9 @@ INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cCharMenuItem::setCaption(int value)
+void cCharMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1239,9 +1240,9 @@ INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setValue);
  *
  * @param value  the int's address
  */
-void cIntMenuItem::setValue(int value)
+void cIntMenuItem::setValue(int* value)
 {
-    Value = (int*)value;
+    Value = value;
 }
 #endif
 
@@ -1253,9 +1254,9 @@ INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cIntMenuItem::setCaption(int value)
+void cIntMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1283,9 +1284,9 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValue);
  *
  * @param value  the float's address
  */
-void cFloatMenuItem::setValue(int value)
+void cFloatMenuItem::setValue(float* value)
 {
-    Value = (float*)value;
+    Value = value;
 }
 #endif
 
@@ -1313,9 +1314,9 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cFloatMenuItem::setCaption(int value)
+void cFloatMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1390,9 +1391,9 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setValue);
  *
  * @param value  the float's address
  */
-void cAngleMenuItem::setValue(int value)
+void cAngleMenuItem::setValue(float* value)
 {
-    Value = (float*)value;
+    Value = value;
 }
 #endif
 
@@ -1420,9 +1421,9 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cAngleMenuItem::setCaption(int value)
+void cAngleMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1549,9 +1550,9 @@ INCLUDE_ASM("seg/seg_1D3510", cRGBTitleMenuItem_setCaption);
  *
  * @param value  the title text
  */
-void cRGBTitleMenuItem::setCaption(int value)
+void cRGBTitleMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1588,9 +1589,9 @@ INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cARGBMenuItem::setCaption(int value)
+void cARGBMenuItem::setCaption(const char* value)
 {
-    TitleItem.Caption = (const char*)value;
+    TitleItem.Caption = value;
 }
 #endif
 
@@ -1618,9 +1619,9 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorTitleMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cVectorTitleMenuItem::setCaption(int value)
+void cVectorTitleMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1655,9 +1656,9 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cVectorMenuItem::setCaption(int value)
+void cVectorMenuItem::setCaption(const char* value)
 {
-    TitleItem.Caption = (const char*)value;
+    TitleItem.Caption = value;
 }
 #endif
 
@@ -1685,9 +1686,9 @@ INCLUDE_ASM("seg/seg_1D3510", cGraphMenuItem_setCaption);
  *
  * @param value  the caption text
  */
-void cGraphMenuItem::setCaption(int value)
+void cGraphMenuItem::setCaption(const char* value)
 {
-    Caption = (const char*)value;
+    Caption = value;
 }
 #endif
 
@@ -1808,75 +1809,76 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D40C0);
 #ifdef SKIP_ASM
 inline void* operator new(unsigned int, void* p) { return p; }
 
-struct sColor_40C0 {
-    float r, g, b, a;
-    sColor_40C0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
-};
+// The unit's copies of header constants (g++ builds each in every unit that includes the header): 56 colours and an
+// invalid animation id, (-1, -1) like the scripter unit's kAnimIDInvalid. initColour builds a colour in place as EA's
+// tARGB(float ia, float ir, float ig, float ib) constructor does ([O] On Tour struct tARGB); the flat tARGB here has
+// no constructor.
+static inline void initColour(tARGB* c, float a, float r, float g, float b)
+{
+    tARGB* p = new (c) tARGB;
+    p->A = a;
+    p->R = r;
+    p->G = g;
+    p->B = b;
+}
 
-struct sSlot_40C0 {
-    unsigned a : 8;
-    unsigned b : 24;
-    int c;
-    sSlot_40C0(int n) { a = n; b = n; }
-};
-
-extern sSlot_40C0 D_004A54C0;
-extern sColor_40C0 D_004D53F0;
-extern sColor_40C0 D_004D5400;
-extern sColor_40C0 D_004D5410;
-extern sColor_40C0 D_004D5420;
-extern sColor_40C0 D_004D5430;
-extern sColor_40C0 D_004D5440;
-extern sColor_40C0 D_004D5450;
-extern sColor_40C0 D_004D5460;
-extern sColor_40C0 D_004D5470;
-extern sColor_40C0 D_004D5480;
-extern sColor_40C0 D_004D5490;
-extern sColor_40C0 D_004D54A0;
-extern sColor_40C0 D_004D54B0;
-extern sColor_40C0 D_004D54C0;
-extern sColor_40C0 D_004D54D0;
-extern sColor_40C0 D_004D54E0;
-extern sColor_40C0 D_004D54F0;
-extern sColor_40C0 D_004D5500;
-extern sColor_40C0 D_004D5510;
-extern sColor_40C0 D_004D5520;
-extern sColor_40C0 D_004D5530;
-extern sColor_40C0 D_004D5540;
-extern sColor_40C0 D_004D5550;
-extern sColor_40C0 D_004D5560;
-extern sColor_40C0 D_004D5570;
-extern sColor_40C0 D_004D5580;
-extern sColor_40C0 D_004D5590;
-extern sColor_40C0 D_004D55A0;
-extern sColor_40C0 D_004D55B0;
-extern sColor_40C0 D_004D55C0;
-extern sColor_40C0 D_004D55D0;
-extern sColor_40C0 D_004D55E0;
-extern sColor_40C0 D_004D55F0;
-extern sColor_40C0 D_004D5600;
-extern sColor_40C0 D_004D5610;
-extern sColor_40C0 D_004D5620;
-extern sColor_40C0 D_004D5630;
-extern sColor_40C0 D_004D5640;
-extern sColor_40C0 D_004D5650;
-extern sColor_40C0 D_004D5660;
-extern sColor_40C0 D_004D5670;
-extern sColor_40C0 D_004D5680;
-extern sColor_40C0 D_004D5690;
-extern sColor_40C0 D_004D56A0;
-extern sColor_40C0 D_004D56B0;
-extern sColor_40C0 D_004D56C0;
-extern sColor_40C0 D_004D56D0;
-extern sColor_40C0 D_004D56E0;
-extern sColor_40C0 D_004D56F0;
-extern sColor_40C0 D_004D5700;
-extern sColor_40C0 D_004D5710;
-extern sColor_40C0 D_004D5720;
-extern sColor_40C0 D_004D5730;
-extern sColor_40C0 D_004D5740;
-extern sColor_40C0 D_004D5750;
-extern sColor_40C0 D_004D5760;
+extern tAnimID D_004A54C0;
+extern tARGB D_004D53F0;
+extern tARGB D_004D5400;
+extern tARGB D_004D5410;
+extern tARGB D_004D5420;
+extern tARGB D_004D5430;
+extern tARGB D_004D5440;
+extern tARGB D_004D5450;
+extern tARGB D_004D5460;
+extern tARGB D_004D5470;
+extern tARGB D_004D5480;
+extern tARGB D_004D5490;
+extern tARGB D_004D54A0;
+extern tARGB D_004D54B0;
+extern tARGB D_004D54C0;
+extern tARGB D_004D54D0;
+extern tARGB D_004D54E0;
+extern tARGB D_004D54F0;
+extern tARGB D_004D5500;
+extern tARGB D_004D5510;
+extern tARGB D_004D5520;
+extern tARGB D_004D5530;
+extern tARGB D_004D5540;
+extern tARGB D_004D5550;
+extern tARGB D_004D5560;
+extern tARGB D_004D5570;
+extern tARGB D_004D5580;
+extern tARGB D_004D5590;
+extern tARGB D_004D55A0;
+extern tARGB D_004D55B0;
+extern tARGB D_004D55C0;
+extern tARGB D_004D55D0;
+extern tARGB D_004D55E0;
+extern tARGB D_004D55F0;
+extern tARGB D_004D5600;
+extern tARGB D_004D5610;
+extern tARGB D_004D5620;
+extern tARGB D_004D5630;
+extern tARGB D_004D5640;
+extern tARGB D_004D5650;
+extern tARGB D_004D5660;
+extern tARGB D_004D5670;
+extern tARGB D_004D5680;
+extern tARGB D_004D5690;
+extern tARGB D_004D56A0;
+extern tARGB D_004D56B0;
+extern tARGB D_004D56C0;
+extern tARGB D_004D56D0;
+extern tARGB D_004D56E0;
+extern tARGB D_004D56F0;
+extern tARGB D_004D5700;
+extern tARGB D_004D5710;
+extern tARGB D_004D5720;
+extern tARGB D_004D5730;
+extern tARGB D_004D5740;
+extern tARGB D_004D5750;
+extern tARGB D_004D5760;
 
 /**
  * Constructs this unit's static four-float values (a g++ static-initialization function).
@@ -1890,63 +1892,63 @@ extern sColor_40C0 D_004D5760;
 extern "C" void func_002D40C0(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
-        new (&D_004D53F0) sColor_40C0(1.0f, 1.0f, 1.0f, 0.5f);
-        new (&D_004D5400) sColor_40C0(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
-        new (&D_004D5410) sColor_40C0(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
-        new (&D_004D5420) sColor_40C0(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
-        new (&D_004D5430) sColor_40C0(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
-        new (&D_004D5440) sColor_40C0(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
-        new (&D_004D5450) sColor_40C0(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
-        new (&D_004D5460) sColor_40C0(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
-        new (&D_004D5470) sColor_40C0(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
-        new (&D_004D5480) sColor_40C0(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
-        new (&D_004D5490) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D54A0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
-        new (&D_004D54B0) sColor_40C0(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
-        new (&D_004D54C0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D54D0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D54E0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
-        new (&D_004D54F0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
-        new (&D_004D5500) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D5510) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
-        new (&D_004D5520) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
-        new (&D_004D5530) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
-        new (&D_004D5540) sColor_40C0(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
-        new (&D_004D5550) sColor_40C0(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
-        new (&D_004D5560) sColor_40C0(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
-        new (&D_004D5570) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D5580) sColor_40C0(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
-        new (&D_004D5590) sColor_40C0(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
-        new (&D_004D55A0) sColor_40C0(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
-        new (&D_004D55B0) sColor_40C0(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
-        new (&D_004D55C0) sColor_40C0(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
-        new (&D_004D55D0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D55E0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D55F0) sColor_40C0(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
-        new (&D_004D5600) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D5610) sColor_40C0(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
-        new (&D_004D5620) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D5630) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004D5640) sColor_40C0(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
-        new (&D_004D5650) sColor_40C0(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
-        new (&D_004D5660) sColor_40C0(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
-        new (&D_004D5670) sColor_40C0(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
-        new (&D_004D5680) sColor_40C0(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
-        new (&D_004D5690) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
-        new (&D_004D56A0) sColor_40C0(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
-        new (&D_004D56B0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004D56C0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004D56D0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004D56E0) sColor_40C0(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
-        new (&D_004D56F0) sColor_40C0(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
-        new (&D_004D5700) sColor_40C0(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
-        new (&D_004D5710) sColor_40C0(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
-        new (&D_004D5720) sColor_40C0(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
-        new (&D_004D5730) sColor_40C0(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
-        new (&D_004D5740) sColor_40C0(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
-        new (&D_004D5750) sColor_40C0(1.0f, 0.0f, 1.0f, 0.0f);
-        new (&D_004D5760) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004A54C0) sSlot_40C0(-1);
+        initColour(&D_004D53F0, 1.0f, 1.0f, 1.0f, 0.5f);
+        initColour(&D_004D5400, 0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        initColour(&D_004D5410, 0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        initColour(&D_004D5420, 0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        initColour(&D_004D5430, 0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        initColour(&D_004D5440, 0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        initColour(&D_004D5450, 0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        initColour(&D_004D5460, 0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        initColour(&D_004D5470, 0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        initColour(&D_004D5480, 0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        initColour(&D_004D5490, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D54A0, 1.0f, 0.0f, 0.0f, 0.0f);
+        initColour(&D_004D54B0, 1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        initColour(&D_004D54C0, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D54D0, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D54E0, 1.0f, 0.0f, 0.0f, 0.0f);
+        initColour(&D_004D54F0, 1.0f, 0.0f, 0.0f, 0.0f);
+        initColour(&D_004D5500, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D5510, 1.0f, 0.5f, 1.0f, 0.5f);
+        initColour(&D_004D5520, 1.0f, 0.5f, 1.0f, 0.5f);
+        initColour(&D_004D5530, 1.0f, 0.5f, 1.0f, 0.5f);
+        initColour(&D_004D5540, 1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        initColour(&D_004D5550, 1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        initColour(&D_004D5560, 0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        initColour(&D_004D5570, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D5580, 1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        initColour(&D_004D5590, 1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        initColour(&D_004D55A0, 1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        initColour(&D_004D55B0, 1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        initColour(&D_004D55C0, 1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        initColour(&D_004D55D0, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D55E0, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D55F0, 1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        initColour(&D_004D5600, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D5610, 1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        initColour(&D_004D5620, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D5630, 1.0f, 1.0f, 0.0f, 0.0f);
+        initColour(&D_004D5640, 0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        initColour(&D_004D5650, 1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        initColour(&D_004D5660, 1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        initColour(&D_004D5670, 1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        initColour(&D_004D5680, 1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        initColour(&D_004D5690, 1.0f, 1.0f, 1.0f, 1.0f);
+        initColour(&D_004D56A0, 1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        initColour(&D_004D56B0, 1.0f, 1.0f, 0.0f, 0.0f);
+        initColour(&D_004D56C0, 1.0f, 1.0f, 0.0f, 0.0f);
+        initColour(&D_004D56D0, 1.0f, 1.0f, 0.0f, 0.0f);
+        initColour(&D_004D56E0, 1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        initColour(&D_004D56F0, 1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        initColour(&D_004D5700, 1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        initColour(&D_004D5710, 1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        initColour(&D_004D5720, 1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        initColour(&D_004D5730, 1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        initColour(&D_004D5740, 1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        initColour(&D_004D5750, 1.0f, 0.0f, 1.0f, 0.0f);
+        initColour(&D_004D5760, 1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004A54C0) tAnimID(-1, -1);
     }
 }
 #endif

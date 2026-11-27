@@ -18,6 +18,33 @@
 
 #include "layout.h"
 
+// The 8-byte key the DNAS module's parameter block carries (name ours): [U] func_002562D0 copies D_004A2ED8 into
+// DNASMan::unk_074 as one two-word value (an unaligned 64-bit copy, ldl / ldr / sdl / sdr).
+struct tDNASKey {
+    int word[2];
+};
+
+// The 4-byte XOR key "CONFIG.DAT" is stored with (name ours): [U] func_00256510 copies D_004A2EE8 as one word and
+// XORs byte i of the loaded file with b[i % 4].
+struct tDNASFileKey {
+    unsigned char b[4];
+};
+
+// The 908-byte result block the DNAS module fills (name ours): [U] func_002565E0 clears it (MEM_fill), passes it to
+// func_003FD128 and copies three wide strings out of it into DNASMan's ErrorText1..3 (USTR_copy). The strings' lengths
+// are only bounded by the next string's start.
+struct tDNASResult {
+    char unk_000[0x8];              // 0x000 no access seen
+    unsigned short Text1[0x20];     // 0x008 [U] func_002565E0: copied to ErrorText1
+    unsigned short Text2[0x80];     // 0x048 [U] func_002565E0: copied to ErrorText2
+    unsigned short Text3[0x122];    // 0x148 [U] func_002565E0: copied to ErrorText3 (to the end of the block)
+};
+
+CHECK_OFFSET(tDNASResult, Text1, 0x008);
+CHECK_OFFSET(tDNASResult, Text2, 0x048);
+CHECK_OFFSET(tDNASResult, Text3, 0x148);
+CHECK_SIZE(tDNASResult, 0x38C);
+
 struct DNASMan {
     int State;                          // 0x000 [P] (asserts on kDNAS_LoadingElf / kDNAS_LoadingAuth / kDNAS_Checking);
                                         //       [R] 0; [U] func_00256258 1 (loading the program), func_00256460 2
@@ -47,7 +74,7 @@ struct DNASMan {
                                         //       0x24)); not written otherwise
     char* unk_06C;                      // 0x06C [U] func_002562D0: AuthData (parameter block)
     int unk_070;                        // 0x070 [U] func_002562D0: AuthSize
-    char unk_074[8];                    // 0x074 [U] func_002562D0: the 8-byte key D_004A2ED8 (unaligned copy, sdl /
+    tDNASKey unk_074;                   // 0x074 [U] func_002562D0: the 8-byte key D_004A2ED8 (unaligned copy, sdl /
                                         //       sdr)
     char unk_07C[0x8];                  // 0x07C no access seen
     int unk_084;                        // 0x084 [U] func_002562D0: 8 (the key length)
@@ -61,8 +88,8 @@ struct DNASMan {
     int unk_0B8;                        // 0x0B8 [U] func_002562D0 0
     int unk_0BC;                        // 0x0BC [U] func_002562D0: AuthMode
     int unk_0C0;                        // 0x0C0 [U] func_002562D0 1 (end of the parameter block)
-    char unk_0C4[0x38C];                // 0x0C4 [U] func_002565E0: the 908-byte check result (MEM_fill, then
-                                        //       func_003FD128 fills it; wide strings at +0xCC, +0x10C, +0x20C)
+    tDNASResult Result;                 // 0x0C4 (name ours) [U] func_002565E0: the 908-byte check result (MEM_fill,
+                                        //       then func_003FD128 fills it; wide strings at +0xCC, +0x10C, +0x20C)
     unsigned short ErrorText1[0x100];   // 0x450 (name ours) [U] func_002565E0: USTR_copy of the result's first text;
                                         //       cFEStateAuthDNAS_onUpdate shows it (error text)
     unsigned short ErrorText2[0x100];   // 0x650 (name ours) [U] func_002565E0: the second text; shown by
@@ -95,7 +122,7 @@ CHECK_OFFSET(DNASMan, unk_0A8, 0x0A8);
 CHECK_OFFSET(DNASMan, unk_0B8, 0x0B8);
 CHECK_OFFSET(DNASMan, unk_0BC, 0x0BC);
 CHECK_OFFSET(DNASMan, unk_0C0, 0x0C0);
-CHECK_OFFSET(DNASMan, unk_0C4, 0x0C4);
+CHECK_OFFSET(DNASMan, Result, 0x0C4);
 CHECK_OFFSET(DNASMan, ErrorText1, 0x450);
 CHECK_OFFSET(DNASMan, ErrorText2, 0x650);
 CHECK_OFFSET(DNASMan, ErrorText3, 0x850);

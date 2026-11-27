@@ -149,30 +149,33 @@ int __user_type_info_dcast(int *thisType, int *desired, int isPublic, int objPtr
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __si_type_info_dcast);
 #ifdef SKIP_ASM
+}  // extern "C"  (a member function definition cannot have C linkage)
+
+/* tinfo.cc __si_type_info::dcast (GCC runtime, GPL v2+ with the runtime linking exception) */
 /**
  * dynamic_cast step for a single-inheritance class: matches this class or recurses into the base.
  *
- * Returns objPtr when func_00414B98 says this class is the desired type; otherwise calls the dcast slot of the base
- * type_info (+8) through its vtable (old-style entry: pointer at +0x14, this-delta at +0x10) with the same arguments.
- * Fills the dcast slot of the __si_type_info vtable D_004999E8.
+ * Returns addr when this class is the desired type (type_info::operator==, func_00414B98); otherwise the base's
+ * dcast (a virtual call: vtable slot 2) with the same arguments. Fills the dcast slot of the __si_type_info vtable
+ * D_004999E8.
  *
- * @param thisType  this class's type_info
- * @param desired   the type_info cast to
- * @param isPublic  nonzero to allow only public bases
- * @param objPtr    the object pointer
- * @param subType   the static type of the source subobject, or null
- * @param subPtr    the source subobject pointer
+ * @param to              the type_info cast to
+ * @param require_public  nonzero to allow only public bases
+ * @param addr            the object pointer
+ * @param sub             the static type of the source subobject, or null
+ * @param subptr          the source subobject pointer
  * @return the adjusted pointer, or 0 when the cast fails
  */
-int __si_type_info_dcast(int *thisType, int desired, int isPublic, int objPtr, int subType, int subPtr) {
-    int *baseType;
-    short *vt;
-    if (func_00414B98(thisType, (int *)desired) != 0)
-        return objPtr;
-    baseType = (int *)thisType[2];
-    vt = (short *)baseType[1];
-    return ((int (*)(int *, int, int, int, int, int))((int *)vt)[5])((int *)((char *)baseType + vt[8]), desired, isPublic, objPtr, subType, subPtr);
+void * __si_type_info::
+dcast (const type_info& to, int require_public, void *addr,
+       const type_info *sub, void *subptr) const
+{
+  if (*this == to)
+    return addr;
+  return base.dcast (to, require_public, addr, sub, subptr);
 }
+
+extern "C" {
 #endif
 
 //100%
@@ -216,6 +219,7 @@ dcast (const type_info& desired, int is_public, void *objptr,
       if (is_public && base_list[i].access != PUBLIC)
 	continue;
 
+      // ORIGINAL-PTR: gcc-2.95.3 cp/tinfo.cc __class_type_info::dcast: (char *)objptr + base_list[i].offset
       void *candidate = (char *)objptr + base_list[i].offset;
       if (base_list[i].is_virtual)
 	candidate = *(void **)candidate;
@@ -813,7 +817,8 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __is_pointer);
 #ifdef SKIP_ASM
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern int *__tf19__pointer_type_info_a(void) __asm__("__tf19__pointer_type_info");
-extern int __dynamic_cast_a(int, char *, int, char *, char *, void *) __asm__("__dynamic_cast");
+extern void *__dynamic_cast_a(const type_info &(*)(void), const type_info &(*)(void), int, void *,
+                               const type_info &(*)(void), void *) __asm__("__dynamic_cast");
 /**
  * Returns whether a type_info describes a pointer type.
  *
@@ -826,10 +831,12 @@ extern int __dynamic_cast_a(int, char *, int, char *, char *, void *) __asm__("_
  * @return 1 for a pointer type_info, else 0
  */
 int __is_pointer(int *typePtr) {
-    int pointerType = 0;
+    void *pointerType = 0;
     if (typePtr) {
         short *vt = (short *)typePtr[1];
-        pointerType = __dynamic_cast_a(((int *)vt)[1], (char *)__tf19__pointer_type_info_a, 1, (char *)typePtr + vt[0], (char *)__tf9type_info_a, typePtr);
+        pointerType = __dynamic_cast_a((const type_info &(*)(void))((int *)vt)[1],
+                                       (const type_info &(*)(void))__tf19__pointer_type_info_a, 1,
+                                       (char *)typePtr + vt[0], (const type_info &(*)(void))__tf9type_info_a, typePtr);
     }
     return pointerType != 0;
 }
@@ -966,31 +973,26 @@ void __rtti_array(int *storage, int typeName) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __dynamic_cast);
 #ifdef SKIP_ASM
-int __dynamic_cast_a(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) __asm__("__dynamic_cast");
+void *__dynamic_cast_a(const type_info &(*from)(void), const type_info &(*to)(void), int require_public, void *address,
+                       const type_info &(*sub)(void), void *subptr) __asm__("__dynamic_cast");
 /**
  * Performs a run-time checked cast: asks the source object's dynamic type to find the target type in it.
  *
- * Calls fromFn for the object's dynamic type_info, then that type_info's dcast (vtable slot 2: pointer at +0x14,
- * this-delta at +0x10) with toFn's type_info, requirePublic, the address, subFn's type_info and subPtr.
+ * Calls from for the object's dynamic type_info, then that type_info's dcast (a virtual call: vtable slot 2) with
+ * to's type_info, require_public, the address, sub's type_info and subptr.
  *
- * @param fromFn         type_info function of the object's dynamic type
- * @param toFn           type_info function of the target type
- * @param requirePublic  nonzero to allow only public bases
- * @param address        the complete object
- * @param subFn          type_info function of the source expression's static type
- * @param subPtr         the source pointer
+ * @param from            type_info function of the object's dynamic type
+ * @param to              type_info function of the target type
+ * @param require_public  nonzero to allow only public bases
+ * @param address         the complete object
+ * @param sub             type_info function of the source expression's static type
+ * @param subptr          the source pointer
  * @return the adjusted pointer, or 0 when the cast fails
  */
-int __dynamic_cast_a(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) {
-    char *fromType = ((char *(*)(void))fromFn)();
-    int *vt = *(int **)(fromType + 4);
-    char *th = fromType + *(short *)((char *)vt + 0x10);
-    int toType;
-    int subType;
-    vt = (int *)((char *)vt + 0x10);
-    toType = ((int (*)(void))toFn)();
-    subType = ((int (*)(void))subFn)();
-    return ((int (*)(char *, int, int, char *, int, void *))vt[1])(th, toType, requirePublic, address, subType, subPtr);
+void *__dynamic_cast_a(const type_info &(*from)(void), const type_info &(*to)(void), int require_public, void *address,
+                       const type_info &(*sub)(void), void *subptr) {
+  return static_cast <const __user_type_info &> (from ()).dcast
+    (to (), require_public, address, &(sub ()), subptr);
 }
 #endif
 

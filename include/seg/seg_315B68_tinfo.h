@@ -64,8 +64,9 @@ public:
   __si_type_info (const char *n, const __user_type_info &b)
     : __user_type_info (n), base (b) { }
 
+  // (retail symbol: the body is landed C in seg_315B68_tinfo.cpp)
   virtual void *dcast (const type_info &, int, void *,
-		       const type_info * = 0, void * = 0) const;
+		       const type_info * = 0, void * = 0) const __asm__ ("__si_type_info_dcast");
 };
 
 // type_info for a general class.

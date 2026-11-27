@@ -118,7 +118,7 @@ static inline t4Vector vNorm_0250(const t4Vector& v)
 float cComputer::calcTilt(const t4Vector* direction)
 {
     cRider* rider = RiderHandler.GroundMotion.mRider;
-    t4Vector riderSide = *(t4Vector*)&rider->mMatrix;
+    t4Vector riderSide = rider->mMatrix.row[0];
     t4Vector riderUp = *(&rider->mMatrix.row[2]);
     t4Vector planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
     float slope = -vDot_0250(vNorm_0250(planarDir), riderUp);
@@ -370,10 +370,8 @@ t4Vector cComputer_calculateTargetPos_0610(char* vself)
 INCLUDE_ASM("seg/seg_1218", cComputer_followPathCruise);
 #ifdef SKIP_ASM
 
-// EA's cruise logic member-function pointer ([O] cComputer::mCruiseLogic, "void ::* cruiseLogic"); g++ 2.95 lays a
-// PMF out as tComputerCruiseLogic (delta, index, pfn), the type of the cruiseLogic member.
-typedef void (cComputer::*tCruiseLogicFn)(tCruiseCmd*);
-extern "C" tCruiseLogicFn cComputer_mCruiseLogic[4];
+// EA's cruise logic table ([O] cComputer::mCruiseLogic, member-function pointers like cruiseLogic).
+extern "C" cComputer::tCruiseLogicFn cComputer_mCruiseLogic[4];
 
 extern "C" void cComputer_calculateTargetPos_0680(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0680(void*, t4Vector*) __asm__("cComputer_calcTurn");
@@ -465,20 +463,20 @@ void cComputer::followPathCruise(tCruiseCmd* cruiseCmd)
             cruiseCmd->BoostHeld = 1;
         cComputer_setupCrouch_0680(this, cruiseCmd);
     }
-    // Retail reads mTargetID below at 0x80 past this pointer, not off this (probably through EA's cComputerState
-    // base, which the flat ai/computer.h does not model).
-    float* spd = &mDesiredSpeed;
+    // Retail reaches mDesiredSpeed and mTargetID below through the cComputerState base at +0xDF0.
+    cComputerState* state = (cComputerState*)&mDesiredSpeed;
     z = 0;
-    if (cComputer_checkForJumpEvent_0680((char*)this, spd, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
+    if (cComputer_checkForJumpEvent_0680((char*)this, &state->mDesiredSpeed, &below, &toPipe, &toRail, &isSpin,
+            &isFlip)) {
         mTargetID = -1;
-        *(tCruiseLogicFn*)&cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
+        cruiseLogic = cComputer_mCruiseLogic[0];
         mCruiseLogicID = 0;
     } else if (cComputer_checkForTargets_0680((char*)this, &z)) {
         if (z) {
-            *(tCruiseLogicFn*)&cruiseLogic = cComputer_mCruiseLogic[3]; // same layout
+            cruiseLogic = cComputer_mCruiseLogic[3];
             mCruiseLogicID = 3;
-        } else if (!SSXApp->Game->AI->Riders[*(int*)((char*)spd + 0x80)]->isHuman()) {
-            *(tCruiseLogicFn*)&cruiseLogic = cComputer_mCruiseLogic[2]; // same layout
+        } else if (!SSXApp->Game->AI->Riders[state->mTargetID]->isHuman()) {
+            cruiseLogic = cComputer_mCruiseLogic[2];
             mCruiseLogicID = 2;
         }
     }
@@ -540,7 +538,7 @@ void cComputer::jumpSetupCruise(tCruiseCmd* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip;
     if (!checkForJumpEvent((float*)(&mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
-        *(tCruiseLogicFn*)&cruiseLogic = cComputer_mCruiseLogic[1]; // same layout, see tCruiseLogicFn
+        cruiseLogic = cComputer_mCruiseLogic[1];
         mCruiseLogicID = 1;
         cComputer_followPathCruise(((char*)this), cmd);
         return;
@@ -573,12 +571,6 @@ INCLUDE_ASM("seg/seg_1218", cComputer_attackTargetCruise);
 
 // cComputer from mDesiredSpeed on, the way retail reads mTargetID (0x80 past &mDesiredSpeed; probably EA's
 // cComputerState base, which the flat ai/computer.h does not model).
-struct sCtl_0B90 {
-    float speed;
-    char pad4[0x80 - 4];
-    int target;
-};
-
 extern "C" void cComputer_calculateTargetPos_0B90(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0B90(void*, t4Vector*) __asm__("cComputer_calcTurn");
 extern "C" void cComputer_setupRecklessCrouch_0B90(void*, void*) __asm__("cComputer_setupRecklessCrouch");
@@ -706,8 +698,8 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, tCruiseCmd* cmd)
     int z;
     sRiderPair* rec = Rec_0B90(self);
     cAI* list = SSXApp->Game->AI;
-    sCtl_0B90* ctl = (sCtl_0B90*)(&self->mDesiredSpeed);
-    cRider* tgt = list->Riders[ctl->target];
+    cComputerState* ctl = (cComputerState*)(&self->mDesiredSpeed);
+    cRider* tgt = list->Riders[ctl->mTargetID];
     float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0B90(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
@@ -741,16 +733,17 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, tCruiseCmd* cmd)
     }
     cmd->CruiseTurn = (int)(steer * 31.0f);
     z = 1;
-    ctl = (sCtl_0B90*)(&self->mDesiredSpeed);
-    if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->speed, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
+    ctl = (cComputerState*)(&self->mDesiredSpeed);
+    if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->mDesiredSpeed, &below, &toPipe, &toRail, &isSpin,
+            &isFlip)) {
         self->mTargetID = -1;
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
+        self->cruiseLogic = cComputer_mCruiseLogic[0];
         self->mCruiseLogicID = 0;
     } else if (!cComputer_checkForTargets_0B90(((char*)self), &z)) {
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout
+        self->cruiseLogic = cComputer_mCruiseLogic[1];
         self->mCruiseLogicID = 1;
-    } else if (!z && !list->Riders[ctl->target]->isHuman()) {
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[2]; // same layout
+    } else if (!z && !list->Riders[ctl->mTargetID]->isHuman()) {
+        self->cruiseLogic = cComputer_mCruiseLogic[2];
         self->mCruiseLogicID = 2;
     }
 }
@@ -762,12 +755,6 @@ INCLUDE_ASM("seg/seg_1218", cComputer_avoidTargetCruise);
 
 // cComputer from mDesiredSpeed on, the way retail reads mTargetID (0x80 past &mDesiredSpeed; probably EA's
 // cComputerState base, which the flat ai/computer.h does not model).
-struct sCtl_0F88 {
-    float speed;
-    char pad4[0x80 - 4];
-    int target;
-};
-
 extern "C" void cComputer_calculateTargetPos_0F88(t4Vector*, void*) __asm__("cComputer_calculateTargetPos");
 extern "C" float cComputer_calcTurn_0F88(void*, t4Vector*) __asm__("cComputer_calcTurn");
 extern "C" void cComputer_setupRecklessCrouch_0F88(void*, void*) __asm__("cComputer_setupRecklessCrouch");
@@ -845,9 +832,9 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, tCruiseCmd* cmd)
     t4Vector targetPos;
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
-    sCtl_0F88* ctl = (sCtl_0F88*)(&self->mDesiredSpeed);
+    cComputerState* ctl = (cComputerState*)(&self->mDesiredSpeed);
     sRiderPair* rec = Rec_0F88(self);
-    cRider* tgt = SSXApp->Game->AI->Riders[ctl->target];
+    cRider* tgt = SSXApp->Game->AI->Riders[ctl->mTargetID];
     float diff = rec->mAngle - self->RiderHandler.GroundMotion.mRider->PathHeading;
     float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0F88(*(&self->RiderHandler.GroundMotion.mRider->mVelocity));
@@ -886,13 +873,13 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, tCruiseCmd* cmd)
     z = 0;
     if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[0]; // same layout
+        self->cruiseLogic = cComputer_mCruiseLogic[0];
         self->mCruiseLogicID = 0;
     } else if (!cComputer_checkForTargets_0F88(((char*)self), &z)) {
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout
+        self->cruiseLogic = cComputer_mCruiseLogic[1];
         self->mCruiseLogicID = 1;
     } else if (z) {
-        *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[3]; // same layout
+        self->cruiseLogic = cComputer_mCruiseLogic[3];
         self->mCruiseLogicID = 3;
     }
 }
@@ -1802,12 +1789,12 @@ struct sList1033F8 {
  * @param id  the cFocusBox to remove, compared with each record's box pointer
  */
 // Removes the entry with the given id from the list, shifting the rest down.
-void cFocusMan::removebox(int id)
+void cFocusMan::removebox(cFocusBox* id)
 {
     int i;
     LastUpdateTick = -1;
     for (i = 0; i < NumBoxes; i++) {
-        if (((int)((&Boxes[0]))[i].Box) == id) {
+        if (((&Boxes[0]))[i].Box == id) {
             for (i++; i < NumBoxes; i++) {
                 ((&Boxes[0]))[i - 1] = ((&Boxes[0]))[i];
             }
@@ -2552,13 +2539,13 @@ static inline float vAbs_4358(float x)
  * @param dt  the time step
  * @return true when the sequence was expired, else false
  */
-bool cRiderAnim::onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_PREWIND(void* x, cAnimSequence* anim, float dt)
 {
     cRider* rider = Rider;
     float absSlew15 = vAbs_4358(rider->mSlewed[15].cur);
     float absSlew16 = vAbs_4358(rider->mSlewed[16].cur);
     float framePercent = (absSlew16 < absSlew15) ? absSlew15 : absSlew16;
-    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)&anim->CurrentAnimID[4]);
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * anim->SubAnims[0].TotalTime);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return true;
@@ -2598,10 +2585,10 @@ static inline float clamp_43F8(float v, float lo, float hi)
  * @param dt  the time step
  * @return true when the sequence was expired, else false
  */
-bool cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cAnimSequence* anim, float dt)
 {
     int slot = 165;
-    switch (*(int*)anim) {
+    switch (anim->SequenceID) {
     case kAID_IntoAirAdjL: slot = 165; break;
     case kAID_IntoAirAdjFwdL: slot = 171; break;
     case kAID_IntoAirAdjFwd: slot = 168; break;
@@ -2621,7 +2608,7 @@ bool cRiderAnim::onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt)
     float w = framePercent * 0.75f + 0.25f;
     cAnimSequence_setSubAnimWeight(anim, 0, 1.0f - w);
     cAnimSequence_setSubAnimWeight(anim, 1, w);
-    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)&anim->CurrentAnimID[4]);
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * anim->SubAnims[0].TotalTime);
     float stepTime = dt * 0.01666666753590107f;
     cAnimSequence_updateSubAnim(anim, 1, stepTime);
     if (cAnimSequence_updateWeight(anim, stepTime)) {
@@ -2667,10 +2654,10 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_GATEROCK);
  * @param dt  the time step
  * @return true when the sequence was expired, else false
  */
-bool cRiderAnim::onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_GATEROCK(void* x, cAnimSequence* anim, float dt)
 {
     cAnimSequence_setSubAnimTime(anim, 0,
-            *(float*)&anim->CurrentAnimID[4] * Rider->mRiderHandler->GateControl.GateAnticipate);
+            anim->SubAnims[0].TotalTime * Rider->mRiderHandler->GateControl.GateAnticipate);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return true;
@@ -2765,16 +2752,16 @@ static inline float clamp_4728(float v, float lo, float hi)
  * @param dt  the time step
  * @return true when the sequence was expired, else false
  */
-bool cRiderAnim::onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_BP_INTO(void* x, cAnimSequence* anim, float dt)
 {
     float framePercent;
-    int animId = *(int*)anim;
+    int animId = anim->SequenceID;
     if (animId == kAID_NoseOutof || animId == kAID_TailOutof) {
         framePercent = clamp_4728(1.0f - Rider->mSlewed[10].cur, 0.0f, 1.0f);
     } else {
         framePercent = Rider->mSlewed[10].cur;
     }
-    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)&anim->CurrentAnimID[4]);
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * anim->SubAnims[0].TotalTime);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return true;
@@ -2810,10 +2797,10 @@ static inline float clamp_47F0(float v, float lo, float hi)
  * @param dt  the time step
  * @return true when the sequence was expired, else false
  */
-bool cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt)
+bool cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cAnimSequence* anim, float dt)
 {
     float framePercent;
-    int animId = *(int*)anim;
+    int animId = anim->SequenceID;
     if (animId == kAID_TailPivotL) {
         framePercent = 1.0f - vAbs_47F0(Rider->mSlewed[12].cur);
     } else if (animId == kAID_TailPivotR) {
@@ -2821,7 +2808,7 @@ bool cRiderAnim::onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt)
     } else {
         framePercent = vAbs_47F0(Rider->mSlewed[12].cur);
     }
-    cAnimSequence_setSubAnimTime(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)&anim->CurrentAnimID[4]);
+    cAnimSequence_setSubAnimTime(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * anim->SubAnims[0].TotalTime);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return true;
@@ -3013,7 +3000,7 @@ extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cR
  */
 int cRiderAnim::onExpireBLENDTO_AIR(int sequencer, int sequence)
 {
-    if ((int)FERider != 0) {
+    if (FERider != 0) {
         return cRiderAnimBase_playBlendIn_4B48(this, sequencer, sequence, 436);
     }
     return cRiderAnimBase_playBlendIn_4B48(this, sequencer, sequence, 287);
@@ -3205,7 +3192,7 @@ extern "C" int cRiderAnim_onExpireNOP(int riderAnim, void* sequencer, void* sequ
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_triggerAnimSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cSSXAudio_PlayAniTag_4CC8(int, int, int) __asm__("cSSXAudio_PlayAniTag");
+extern "C" void cSSXAudio_PlayAniTag_4CC8(int, cRider *, int) __asm__("cSSXAudio_PlayAniTag");
 extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
 
 /**
@@ -3218,10 +3205,10 @@ extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
  */
 void cRiderAnim::triggerAnimSound(int soundId)
 {
-    int temp_2 = ((int)Rider);
+    cRider* rider = Rider;
     int maskedSoundId = soundId & 0xFFFF;
-    if (temp_2 != 0) {
-        cSSXAudio_PlayAniTag_4CC8(gSSXAudio_seg_1218, temp_2, maskedSoundId);
+    if (rider != 0) {
+        cSSXAudio_PlayAniTag_4CC8(gSSXAudio_seg_1218, rider, maskedSoundId);
     }
 }
 #endif
@@ -3277,8 +3264,8 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToRider);
 void cRiderAnim::linkToRider(cRider* rider)
 {
     FERider = 0;
-    Rider = (cRider*)((void*)rider);
-    AnimModel = (cAnimModel*)((int) ((int)rider->mAnimModel));
+    Rider = rider;
+    AnimModel = rider->mAnimModel;
 }
 #endif
 
@@ -3295,9 +3282,9 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToFERider);
  */
 void cRiderAnim::linkToFERider(cFERider* feRider)
 {
-    FERider = (cFERider*)((void*)feRider);
+    FERider = feRider;
     Rider = 0;
-    AnimModel = (cAnimModel*)((int) ((int)feRider->mpAnimModel));
+    AnimModel = feRider->mpAnimModel;
 }
 #endif
 
@@ -4376,7 +4363,7 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline t4VectorInitW Cross_65B0(const t4VectorInitW& a, const t4VectorInitW& b)
+static inline t4VectorInitW Cross_65B0(const t4Vector& a, const t4Vector& b)
 {
     t4VectorInitW r;
     __asm__(
@@ -4508,7 +4495,7 @@ static inline void Rotate_65B0(cRider* self, const t4VectorInitW& axis, float an
  */
 void cRider::turnFromCollision(tIntersectInfo* hitInfo)
 {
-    t4VectorInitW n = Norm_65B0(Cross_65B0(Up_65B0(this), *(t4VectorInitW*)&hitInfo->Inorm));
+    t4VectorInitW n = Norm_65B0(Cross_65B0(Up_65B0(this), hitInfo->Inorm));
     t4VectorInitW inPlaneDir = Cross_65B0(Up_65B0(this), n);
     float x = Dot_65B0(Fwd_65B0(this), inPlaneDir);
     float y = Dot_65B0(Fwd_65B0(this), n);
@@ -4529,7 +4516,7 @@ void cRider::turnFromCollision(tIntersectInfo* hitInfo)
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_updateCollideInfo);
 #ifdef SKIP_ASM
-extern "C" void cRiderSphereTree_Update1(int);
+extern "C" void cRiderSphereTree_Update1(cRiderSphereTree*);
 
 /**
  * Refreshes the rider's collision sphere tree.
@@ -4541,7 +4528,7 @@ extern "C" void cRiderSphereTree_Update1(int);
  */
 void cRider::updateCollideInfo()
 {
-    cRiderSphereTree_Update1(((int)mSphereTree));
+    cRiderSphereTree_Update1(mSphereTree);
 }
 #endif
 
@@ -4786,8 +4773,8 @@ bool cRider::checkRailBoardCollisions()
     sAnimModelBone* bone = &mAnimModel->bones[mBoneBoardRoot];
     t4VectorInit side = Side_6848(bone);
     t4VectorInit up = Up_6848(bone);
-    float sideDot = Dot_6848(*(t4Vector*)&side, land.Inorm);
-    float upDot = Dot_6848(*(t4Vector*)&up, land.Inorm);
+    float sideDot = Dot_6848(side, land.Inorm);
+    float upDot = Dot_6848(up, land.Inorm);
     float angle = Atan2_6848(upDot, sideDot);
     int prev = RAIL_STYLE(this);
     if (cRider_getControlState_57B8(this) == CS_BoardPress) {
@@ -5200,7 +5187,7 @@ static inline float Dot(const t4Vector& a, const t4Vector& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract; sVec4 operands).
-static inline sVec4 SubV(const sVec4& a, const sVec4& b)
+static inline sVec4 SubV(const t4Vector& a, const t4Vector& b)
 {
     sVec4 r;
     __asm__(
@@ -5249,7 +5236,7 @@ static inline float Clamp(float v, float lo, float hi)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar; sVec4 operands).
-static inline sVec4 DivV(const sVec4& v, float s)
+static inline sVec4 DivV(const t4Vector& v, float s)
 {
     sVec4 r;
     int t;
@@ -5298,7 +5285,7 @@ extern "C" void cHandplantMotion_init(float, void*, tIntersectInfo*);
 extern "C" void cHandplantControl_init(float, void*, tIntersectInfo*, int);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, sVec4 operands).
-static inline sVec4 ScaleV_7578(const sVec4& v, float s)
+static inline sVec4 ScaleV_7578(const t4Vector& v, float s)
 {
     sVec4 r;
     int t;
@@ -5314,7 +5301,7 @@ static inline sVec4 ScaleV_7578(const sVec4& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add, sVec4 operands; "memory" clobber).
-static inline sVec4 AddV_7578(const sVec4& a, const sVec4& b)
+static inline sVec4 AddV_7578(const t4Vector& a, const t4Vector& b)
 {
     sVec4 r;
     __asm__(
@@ -5364,29 +5351,29 @@ bool cRider::checkHandplantCollisions()
         if ((unsigned int)(cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) - 18) < 3)
             return false;
     }
-    float spd = Len(*(sVec4*)&mVelocity);
+    float spd = Len(mVelocity);
     sVec4 dir;
     tIntersectInfo hit;
     if (spd > Kph_7578(100.0f))
-        dir = DivV(*(sVec4*)&mVelocity, spd);
+        dir = DivV(mVelocity, spd);
     else
         dir = Front_7578(this);
-    sVec4 probePos = AddV_7578(*(sVec4*)&mPosition, ScaleV_7578(dir, 300.0f));
+    sVec4 probePos = AddV_7578(mPosition, ScaleV_7578(dir, 300.0f));
     if (!cOverlapList_splineIntersect_7578(mOverlapList, &probePos, &hit, 2, 300.0f))
         return false;
-    if (Abs((*(sVec4*)&hit.Inorm).z) > 0.8999999761581421f)
+    if (Abs(hit.Inorm.z) > 0.8999999761581421f)
         return false;
-    sVec4 toHit = SubV((*(sVec4*)&hit.Ipos), probePos);
+    sVec4 toHit = SubV(hit.Ipos, probePos);
     if (Len(toHit) > 300.0f)
         return false;
-    toHit = SubV((*(sVec4*)&hit.Ipos), *(sVec4*)&mPosition);
-    if (Dot(*(sVec4*)&mVelocity, toHit) < 0.0f)
+    toHit = SubV(hit.Ipos, mPosition);
+    if (Dot(mVelocity, toHit) < 0.0f)
         return false;
     spd = Max_7578(spd, Kph_7578(1000.0f));
     float speedRatio = Clamp(Kph_7578(5000.0f) / spd, 0.5f, 1.5f);
     float enterSec = speedRatio * 0.5f;
-    if (Dot((*(sVec4*)&hit.Inorm), *(sVec4*)&mVelocity) < 0.0f)
-        ScaleEq((*(sVec4*)&hit.Inorm), -1.0f);
+    if (Dot(hit.Inorm, mVelocity) < 0.0f)
+        ScaleEq(hit.Inorm, -1.0f);
     cRider_setControlState_2(((char*)this), CS_Void);
     cHandplantMotion_init(enterSec, &mRiderHandler->HandplantMotion, &hit);
     cHandplantControl_init(enterSec, &mRiderHandler->HandplantControl, &hit, mRiderHandler->HandplantMotion.IsToeside);
@@ -5647,13 +5634,6 @@ void cRider::checkOpponentCollisions()
 INCLUDE_ASM("seg/seg_1218", cRider_doOpponentCollision);
 #ifdef SKIP_ASM
 
-struct sInfo_7E70 {
-    t4Vector pos;
-    t4Vector dir;
-    t4Vector normal;
-    float speed;
-} __attribute__((aligned(16)));
-
 class cAI_7E70 {
 public:
     virtual void vm1();
@@ -5668,8 +5648,8 @@ int cRider_getMotionState(void*);
 int AIrand();
 extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void*, t4Vector*, t4Vector*, float);
-extern "C" void cRider_flagEventWipeout_7E70(char*, int, int, int, sInfo_7E70*) __asm__("cRider_flagEventWipeout");
-extern "C" void cRider_doBump_7E70(char*, sInfo_7E70*, int) __asm__("cRider_doBump");
+extern "C" void cRider_flagEventWipeout_7E70(char*, int, int, int, tCollideInfo*) __asm__("cRider_flagEventWipeout");
+extern "C" void cRider_doBump_7E70(char*, tCollideInfo*, int) __asm__("cRider_doBump");
 extern "C" void cRider_flagEventPunchKnockdown(void*, void*);
 extern "C" void cRider_flagEventBumpKnockdown(void*, void*);
 extern "C" void cRider_flagEventPunch(void*, void*);
@@ -5862,11 +5842,11 @@ void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float spe
     if (absSpd < 39.99532699584961f)
         return;
     float otherDist = mRelations[other->mAIIndex].mDistance;
-    sInfo_7E70 info;
-    info.pos = Add_7E70(*(&mPosition), Scale_7E70(*n, otherDist));
-    info.dir = Norm_7E70(*(&mVelocity));
-    info.normal = *n;
-    info.speed = clampedSpeed;
+    tCollideInfo info;
+    info.Pos = Add_7E70(*(&mPosition), Scale_7E70(*n, otherDist));
+    info.Direct = Norm_7E70(*(&mVelocity));
+    info.Reflect = *n;
+    info.Vel = clampedSpeed;
     if ((D_005308D0_7E70[0] >> 5) & 1)
         absSpd = 599.9739990234375f;
     if (absSpd > 599.9739990234375f) {
@@ -6490,16 +6470,16 @@ void cComputer_Init_self(char* vself)
     self->mIsUber = 0;
     self->mIsTweak = 0;
     self->mToPipe = 0;
-    *(int*)&self->mHoldToLandTime = 0;
-    *(int*)&self->mSpinAxis = 0;
-    *(int*)&self->mFlipAxis = 0;
-    *(int*)&self->mGrabStartTime = 0;
-    *(int*)&self->mGrabEndTime = 0;
-    *(int*)&self->mDesiredSpeed = 0;
+    self->mHoldToLandTime = 0.0f;
+    self->mSpinAxis = 0.0f;
+    self->mFlipAxis = 0.0f;
+    self->mGrabStartTime = 0.0f;
+    self->mGrabEndTime = 0.0f;
+    self->mDesiredSpeed = 0.0f;
     self->mWanderTime = 0;
     self->mBadHeadingTime = 0;
     self->mCruiseLogicID = 0;
-    *(int*)&self->mBlockTimer = 0;
+    self->mBlockTimer = 0.0f;
     self->mShouldIBlock = 0;
     self->mStartJumpPos = t4vect_Origin;
     self->mEndJumpPos = t4vect_Origin;
@@ -6507,7 +6487,7 @@ void cComputer_Init_self(char* vself)
     cComputer_initRiderDifficulty(self);
     self->mTargetID = -1;
     self->mAccuracy = 1.0f;
-    *(tCruiseLogicFn*)&self->cruiseLogic = cComputer_mCruiseLogic[1]; // same layout, see tCruiseLogicFn
+    self->cruiseLogic = cComputer_mCruiseLogic[1];
     self->mCruiseLogicID = 1;
     do {
         MEM_fill_8E88(&self->GrabHistoryCounter[0], 0, 0x3C);
@@ -6686,7 +6666,7 @@ void cComputer::getControlCmd(tControlCmd* _cmd)
         break;
     }
     if (state != CS_Spin) {
-        *(int*)&mGrabEndTime = 0;
+        mGrabEndTime = 0.0f;
     }
 }
 #endif
@@ -6717,9 +6697,7 @@ void cComputer::writeToReplayFrame(cBxReplayFrame* data)
 INCLUDE_ASM("seg/seg_1218", cComputer_readFromReplayFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-class cObj_A8E8;
-typedef void (cObj_A8E8::*Fn_A8E8)();
-extern "C" Fn_A8E8 cComputer_mCruiseLogic_A8E8[4] __asm__("cComputer_mCruiseLogic");
+extern "C" cComputer::tCruiseLogicFn cComputer_mCruiseLogic_A8E8[4] __asm__("cComputer_mCruiseLogic");
 extern "C" void cRiderHandler_readFromReplayFrame(void* self, void* src);
 
 /**
@@ -6736,7 +6714,7 @@ void cComputer::readFromReplayFrame(cBxReplayFrame* data)
     cRiderHandler_readFromReplayFrame(((char*)this), data);
     data->read((char*)&mDesiredSpeed, 336);
     short state = mCruiseLogicID;
-    *(Fn_A8E8*)&cruiseLogic = cComputer_mCruiseLogic_A8E8[state];
+    cruiseLogic = cComputer_mCruiseLogic_A8E8[state];
     mCruiseLogicID = state;
 }
 #endif
@@ -6791,11 +6769,6 @@ extern "C" void cComputer_getCruiseCmd(cObj_A960* self, tCruiseCmd* cruiseCmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_getPrewindCmd);
 #ifdef SKIP_ASM
-struct sV4_AA70
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
-
 struct sRec_AA70 {
     int type;
     int flags;
@@ -6809,11 +6782,11 @@ public:
     virtual int Query(sRec_AA70* buf, int max, float x, float y);
 };
 
-extern "C" sV4_AA70 cPath_getPathPos_AA70(cTrack_AA70*, int, float) __asm__("cPath_getPathPos");
-extern "C" float cComputer_calcTurn_AA70(void*, sV4_AA70*) __asm__("cComputer_calcTurn");
+extern "C" t4Vector cPath_getPathPos_AA70(cTrack_AA70*, int, float) __asm__("cPath_getPathPos");
+extern "C" float cComputer_calcTurn_AA70(void*, t4Vector*) __asm__("cComputer_calcTurn");
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
-static inline float Len_AA70(const sV4_AA70& v)
+static inline float Len_AA70(const t4Vector& v)
 {
     float r;
     int t;
@@ -6834,9 +6807,9 @@ static inline float Len_AA70(const sV4_AA70& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_AA70 Sub_AA70(const sV4_AA70& a, const sV4_AA70& b)
+static inline t4Vector Sub_AA70(const t4Vector& a, const t4Vector& b)
 {
-    sV4_AA70 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6848,9 +6821,9 @@ static inline sV4_AA70 Sub_AA70(const sV4_AA70& a, const sV4_AA70& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
+static inline t4Vector Scale_AA70(const t4Vector& v, float s)
 {
-    sV4_AA70 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6881,12 +6854,12 @@ void cComputer::getPrewindCmd(tPrewindCmd* cmd)
     int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
     const int kNoJumpEvent = -1; // sel: no jump event in range
     int sel = kNoJumpEvent;
-    if (Len_AA70(*(sV4_AA70*)&RiderHandler.GroundMotion.mRider->mVelocity) < mDesiredSpeed - 138.88890075683594f)
+    if (Len_AA70(RiderHandler.GroundMotion.mRider->mVelocity) < mDesiredSpeed - 138.88890075683594f)
         cmd->BoostHeld = 1;
     if (mToPipe) {
-        sV4_AA70 jumpSpan = Sub_AA70(*(sV4_AA70*)&mEndJumpPos, *(sV4_AA70*)&mStartJumpPos);
-        sV4_AA70 fromJumpStart = Sub_AA70(*(sV4_AA70*)&RiderHandler.GroundMotion.mRider->mPosition,
-                *(sV4_AA70*)&mStartJumpPos);
+        t4Vector jumpSpan = Sub_AA70(mEndJumpPos, mStartJumpPos);
+        t4Vector fromJumpStart = Sub_AA70(RiderHandler.GroundMotion.mRider->mPosition,
+                mStartJumpPos);
         if (Len_AA70(fromJumpStart) < Len_AA70(jumpSpan) - 50.0f)
             cmd->JumpHeld = 1;
         return;
@@ -6901,10 +6874,10 @@ void cComputer::getPrewindCmd(tPrewindCmd* cmd)
     float* ctl = (float*)(&mDesiredSpeed);
     if (sel != kNoJumpEvent) {
         cRider* riderBytes = RiderHandler.GroundMotion.mRider;
-        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)&riderBytes->PathPos, *(sV4_AA70*)&riderBytes->mPosition);
+        t4Vector half = Sub_AA70(riderBytes->PathPos, riderBytes->mPosition);
         half = Scale_AA70(half, 0.5f);
-        sV4_AA70 pos = cPath_getPathPos_AA70(trk, 0, buf[sel].b);
-        sV4_AA70 toTarget = Sub_AA70(pos, half);
+        t4Vector pos = cPath_getPathPos_AA70(trk, 0, buf[sel].b);
+        t4Vector toTarget = Sub_AA70(pos, half);
         cmd->PrewindTurn = (int)(cComputer_calcTurn_AA70(((char*)this), &toTarget) * 31.0f);
     }
     cmd->PrewindSpin = (int)(ctl[18] * 31.0f);
@@ -6958,7 +6931,7 @@ void cComputer::getBoardPressCmd(tBoardPressCmd* cmd)
     }
     if (pressMarkerFound) {
         cmd->BoardPress = (int)(pressDir * 31.0f);
-        t4Vector sideAxis = *(t4Vector*)&RiderHandler.GroundMotion.mRider->mMatrix;
+        t4Vector sideAxis = RiderHandler.GroundMotion.mRider->mMatrix.row[0];
         float z = sideAxis.z + sideAxis.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
@@ -7035,7 +7008,7 @@ void cComputer::getRailslideCmd(tRailslideCmd* cmd)
         cComputer_setupPrewindState_AED8(((char*)this), isSpin, isFlip, toRail, toPipe);
         return;
     }
-    t4Vector sideAxis = *(t4Vector*)&RiderHandler.GroundMotion.mRider->mMatrix;
+    t4Vector sideAxis = RiderHandler.GroundMotion.mRider->mMatrix.row[0];
     float z = sideAxis.z + sideAxis.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
@@ -7047,7 +7020,7 @@ void cComputer::getRailslideCmd(tRailslideCmd* cmd)
         cmd->RailSpin = (int)(spinSign * 31.0f);
     }
     int speedMarkerFound = checkForSpeedZone((float*)(&mDesiredSpeed), &ok);
-    float len = vLen_AED8(*(t4Vector*)&RiderHandler.GroundMotion.mRider->mVelocity);
+    float len = vLen_AED8(RiderHandler.GroundMotion.mRider->mVelocity);
     if (speedMarkerFound && ok && len < mDesiredSpeed - 138.88890075683594f)
         *(unsigned int*)cmd |= 0x10000;
 }
@@ -7679,7 +7652,7 @@ static inline float vLen_C0A8(const t4Vector& v)
 void cComputer::setupCrouch(void* cmd)
 {
     tCruiseCmd* crouchCmd = (tCruiseCmd*)cmd;
-    float len = vLen_C0A8(*(t4Vector*)&RiderHandler.GroundMotion.mRider->mVelocity);
+    float len = vLen_C0A8(RiderHandler.GroundMotion.mRider->mVelocity);
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;

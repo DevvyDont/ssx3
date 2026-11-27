@@ -44,6 +44,7 @@ struct cUIText;
 struct cUIIcon;
 struct cUIMenu;
 struct cTextureElement;
+struct tBEBoltDef;
 
 struct cFEStateCharEquip : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -89,8 +90,9 @@ struct cFEStateCharEquip : public cFEState {
                                     //       [mCurrentStackPos], back pops it
     int mCurrentStackPos;           // 0x120 [O] (On Tour's member after mStoreNum); [R] 0; [U] the depth into
                                     //       mCategoryStack (onWidgetMenu event 7 steps it down)
-    void* mpItems[0x20D];           // 0x124 [U] (no On Tour member) the listed items (BE library entries: +0x30
-                                    //       name, +0x34 flags) built by func_0019B180 (MEM_fill(mpItems, 0, 2100))
+    tBEBoltDef* mpItems[0x20D];     // 0x124 [U] (no On Tour member) the listed items (the BE library's bolt
+                                    //       definitions, be/bedbprofile.h) built by func_0019B180 (MEM_fill(mpItems,
+                                    //       0, 2100))
     int mNumItems;                  // 0x958 [R] 0; [U] the count of mpItems (func_0019B180 clears and appends,
                                     //       func_0019B458 removes one); func_0019B618 passes its low byte (lbu) to
                                     //       cUIMenu_setScrollableMenu

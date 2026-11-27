@@ -2,8 +2,8 @@
 #define SEG_NEWLIB_MALLOC_H
 
 /* The chunk header of newlib's malloc (Doug Lea's malloc 2.6.4, libc/stdlib/mallocr.c), which the game's _malloc_r /
-   _free_r / malloc_extend_top in seg/seg_316FB8 are (views group D: mbinptr_0041DBF8; the unit's own `struct mchunk` /
-   mchunkptr, defined once at malloc_extend_top and reused, is the same struct under a shorter name).
+   _free_r / malloc_extend_top in seg/seg_316FB8 are (views group D: mbinptr_0041DBF8; the unit's former copy, `struct
+   mchunk` / mchunkptr, was the same struct under a shorter name).
    [L] refs/newlib-1.9.0-src/newlib-1.9.0/newlib/libc/stdlib/mallocr.c ("A version of malloc/free/realloc written by
    Doug Lea and released to the public domain."): struct malloc_chunk {INTERNAL_SIZE_T prev_size, size; struct
    malloc_chunk *fd, *bk;}, typedef struct malloc_chunk* mchunkptr / mbinptr; INTERNAL_SIZE_T is size_t (32-bit on

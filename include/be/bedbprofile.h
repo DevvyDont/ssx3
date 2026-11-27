@@ -59,21 +59,36 @@ enum { kNoBoltGroup = -1 };
 // and every walker steps 0x38. Laid out through the members the matched code reads; belibrary, beintecon,
 // beintreward, feridermanager and lensfx still read the record through their own views.
 struct tBEBoltDef {
-    char unk_00[0x4];               // 0x00
+    char unk_00[0x2];               // 0x00
+    signed char storeNum;           // 0x02 [U] the store that sells it: cFEStateCharEquip's store lists an item only
+                                    //      when this equals its mStoreNum (func_0019B098, func_0019B180)
+    char unk_03[0x1];               // 0x03
     short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (func_0011BBE8,
                                     //      cRider_OnStartObjectUse / OnEndObjectUse, beintecon, beintreward)
-    char unk_06[0xA];               // 0x06
+    char unk_06[0x8];               // 0x06
+    short price;                    // 0x0E [U] the price in tens of dollars (kBoltPriceBuiltIn below; the equip
+                                    //      screen shows and charges it x 10 when positive)
     signed char modelPart;          // 0x10 [U] the rider model part it replaces: cRider_OnStartObjectUse hides it at
                                     //      LODs 0-3 and cRider_OnEndObjectUse shows it (< 0: none)
-    char unk_11[0x7];               // 0x11
+    char unk_11[0x3];               // 0x11
+    char* name;                     // 0x14 [U] the item's name: the equip screen's rows (an ASCII string, or for a
+                                    //      category the hashed string id), the buy popup's boltName ([O] On Tour
+                                    //      cBuyPopupInfo::initBuyBolt(const char* boltName, ...)); the bolts file
+                                    //      loader relocates it (func_0014BE70)
     const char* lodPartNames[4];    // 0x18 [U] cRider_parsePartsFromBuf: the MDF archive part per LOD (0: none)
-    char unk_28[0xC];               // 0x28
+    char unk_28[0x8];               // 0x28
+    char* pictureName;              // 0x30 [U] the item's picture: cFEStateCharEquip_getIconID looks its icon up by it
+                                    //      and startLargePreviewLoad builds the preview file name from it
     int flags;                      // 0x34 [U] 0x40 hidden in NIS sequences (cRider_OnStartObjectUse / OnEndObjectUse);
                                     //      0x100 / 0x200 / 0x400 the item kind (beintreward)
 };
+CHECK_OFFSET(tBEBoltDef, storeNum, 0x02);
 CHECK_OFFSET(tBEBoltDef, id, 0x04);
+CHECK_OFFSET(tBEBoltDef, price, 0x0E);
 CHECK_OFFSET(tBEBoltDef, modelPart, 0x10);
+CHECK_OFFSET(tBEBoltDef, name, 0x14);
 CHECK_OFFSET(tBEBoltDef, lodPartNames, 0x18);
+CHECK_OFFSET(tBEBoltDef, pictureName, 0x30);
 CHECK_OFFSET(tBEBoltDef, flags, 0x34);
 CHECK_SIZE(tBEBoltDef, 0x38);
 

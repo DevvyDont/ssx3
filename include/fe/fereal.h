@@ -35,6 +35,7 @@
 #include "layout.h"
 #include "camera/camera.h"        // cSimpleCamera (cFE::mCamera)
 #include "fe/feridermanager.h"     // cFERiderManager (cFE::mRiderManager)
+#include "online/connman.h"        // cConnMan, cGameConnMan (cRealFE::mConnMan / mGameConnMan)
 
 struct cUIEngine;
 struct cFXLoader;
@@ -65,10 +66,10 @@ struct cRealFE {
                                     //       cFE__cFE destroys it when set
     char unk_B5AA4[0xC];            // 0xB5AA4 tail padding (cFE is 16-byte aligned; no access)
     // --- cRealFE
-    char mConnMan[0xC];             // 0xB5AB0 [P] getConnMan returns this + 0xB5AB0 (cConnMan); [R] cConnMan_cConnMan
+    cConnMan mConnMan;              // 0xB5AB0 [P] getConnMan returns this + 0xB5AB0 (cConnMan); [R] cConnMan_cConnMan
                                     //       (state word 0, its vptr cConnMan_vtbl at +0x8: 0xC bytes); [U] update calls
                                     //       func_00263828 on it when online
-    char mGameConnMan[0x18];        // 0xB5ABC [P] getGameConnMan returns this + 0xB5ABC (cGameConnMan); [R]
+    cGameConnMan mGameConnMan;      // 0xB5ABC [P] getGameConnMan returns this + 0xB5ABC (cGameConnMan); [R]
                                     //       cGameConnMan_cGameConnMan (vptr cGameConnMan_vtbl at +0x14: 0x18 bytes); [U]
                                     //       update calls func_00263CF0 on it when online
     cMoviePlayer* mpMoviePlayer;    // 0xB5AD4 [O]; [R] 0; [U] update creates it (cMemMan_alloc(68, "MoviePlayer")), plays

@@ -225,16 +225,16 @@ struct cGameComm {
     void updateTimeout() __asm__("cGameComm_updateTimeout");
     void displayError() __asm__("cGameComm_displayError");
     void updateDisplayError() __asm__("cGameComm_updateDisplayError");
-    int readPacket(int ch, int dst, int maxsize) __asm__("cGameComm_readPacket");
+    int readPacket(int ch, void* dst, int maxsize) __asm__("cGameComm_readPacket");
     void updateReadQueue() __asm__("cGameComm_updateReadQueue");
     void updateWriteQueue() __asm__("cGameComm_updateWriteQueue");
     void updateCmdQueue() __asm__("cGameComm_updateCmdQueue");
     void freePacket(int *packet) __asm__("cGameComm_freePacket");
     int asyncReadComplete() __asm__("cGameComm_asyncReadComplete");
-    void asyncRead(int data, int size) __asm__("cGameComm_asyncRead");
+    void asyncRead(void* data, int size) __asm__("cGameComm_asyncRead");
     void asyncReadUpdate() __asm__("cGameComm_asyncReadUpdate");
     int asyncWriteComplete() __asm__("cGameComm_asyncWriteComplete");
-    void asyncWrite(int data, int size) __asm__("cGameComm_asyncWrite");
+    void asyncWrite(void* data, int size) __asm__("cGameComm_asyncWrite");
     void asyncWriteUpdate() __asm__("cGameComm_asyncWriteUpdate");
     void calcLatency() __asm__("cGameComm_calcLatency");
     float getLatency() __asm__("cGameComm_getLatency");
@@ -249,7 +249,7 @@ struct cGameComm {
     void gameExit() __asm__("cGameComm_gameExit");
     void sendExitGame() __asm__("cGameComm_sendExitGame");
     void sendUnplugCmd() __asm__("cGameComm_sendUnplugCmd");
-    void sendChat(int message) __asm__("cGameComm_sendChat");
+    void sendChat(const char* message) __asm__("cGameComm_sendChat");
     void updateMessageDisplay() __asm__("cGameComm_updateMessageDisplay");
     void updateSyncPacket(int frame, int value) __asm__("cGameComm_updateSyncPacket");
 };

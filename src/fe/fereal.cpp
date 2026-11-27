@@ -782,8 +782,8 @@ extern "C" void* cRealFE_cRealFE(cRealFE* self)
 {
     cFE_cFE(self);
     *(void***)self = cRealFE_vtbl;
-    cConnMan_cConnMan(self->mConnMan);
-    cGameConnMan_cGameConnMan(self->mGameConnMan);
+    cConnMan_cConnMan(&self->mConnMan);
+    cGameConnMan_cGameConnMan(&self->mGameConnMan);
     self->mpMoviePlayer = 0;
     self->mMovieSkippable = 0;
     self->mWaitRenderNum = 0;
@@ -811,8 +811,8 @@ extern "C" void cFE__cFE(void* self, int flags);
 extern "C" void cRealFE__cRealFE(cRealFE* self, int flags)
 {
     *(void***)self = cRealFE_vtbl;
-    cGameConnMan__cGameConnMan(self->mGameConnMan, 2);
-    cConnMan__cConnMan(self->mConnMan, 2);
+    cGameConnMan__cGameConnMan(&self->mGameConnMan, 2);
+    cConnMan__cConnMan(&self->mConnMan, 2);
     cFE__cFE(self, flags);
 }
 #endif
@@ -1424,8 +1424,8 @@ noh:
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
         if (EnableOnline != 0) {
-            func_00263828(mConnMan);
-            func_00263CF0(mGameConnMan);
+            func_00263828(&mConnMan);
+            func_00263CF0(&mGameConnMan);
             if (LobbyMan_mLobbyMan != 0) {
                 func_0025AC50(LobbyMan_mLobbyMan);
             }

@@ -87,14 +87,14 @@ struct cRiderAnim {
     void onUpdateASYNC_BRAKE(void *sequencer, char *sequence, float dt) __asm__("cRiderAnim_onUpdateASYNC_BRAKE");
     int onUpdateASYNC_UBERGRIND(void *sequencer, int *sequence, float deltaTime)
         __asm__("cRiderAnim_onUpdateASYNC_UBERGRIND");
-    bool onUpdateASYNC_PREWIND(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
-    bool onUpdateASYNC_AIR_ADJ(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
-    bool onUpdateASYNC_GATEROCK(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
+    bool onUpdateASYNC_PREWIND(void* x, cAnimSequence* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
+    bool onUpdateASYNC_AIR_ADJ(void* x, cAnimSequence* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
+    bool onUpdateASYNC_GATEROCK(void* x, cAnimSequence* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
     int onUpdateASYNC_HANDPLANT(void *sequencer, int *sequence, float deltaTime)
         __asm__("cRiderAnim_onUpdateASYNC_HANDPLANT");
     int onUpdateASYNC_BP_BAL(void* x, int* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_BAL");
-    bool onUpdateASYNC_BP_INTO(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
-    bool onUpdateASYNC_BP_PIVOT(void* x, cRiderAnim* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
+    bool onUpdateASYNC_BP_INTO(void* x, cAnimSequence* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
+    bool onUpdateASYNC_BP_PIVOT(void* x, cAnimSequence* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
     bool onUpdateFWD(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
     bool onUpdateHOLD_LAST(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
     bool onUpdateCYCLE(void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateCYCLE");

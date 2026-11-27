@@ -73,7 +73,7 @@ struct cFocusMan {
     void purgesection(int sectionId) __asm__("cFocusMan_purgesection");
     void reset() __asm__("cFocusMan_reset");
     void addbox(cFocusBox *focusBox) __asm__("cFocusMan_addbox");
-    void removebox(int id) __asm__("cFocusMan_removebox");
+    void removebox(cFocusBox* id) __asm__("cFocusMan_removebox");
     void writeToReplayFrame(cBxReplayFrame* data) __asm__("cFocusMan_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* data) __asm__("cFocusMan_readFromReplayFrame");
 };

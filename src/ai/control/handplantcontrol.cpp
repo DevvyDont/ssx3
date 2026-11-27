@@ -7710,7 +7710,7 @@ int cComputer::isAboutToRail(float fparg0)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setCruiseLogic);
 #ifdef SKIP_ASM
-extern tComputerCruiseLogic cComputer_mCruiseLogic[];
+extern cComputer::tCruiseLogicFn cComputer_mCruiseLogic[];
 
 /**
  * Selects a computer rider's cruise logic: copies entry @p idx of the cruise-logic table (cComputer_mCruiseLogic) into
@@ -7722,7 +7722,7 @@ extern tComputerCruiseLogic cComputer_mCruiseLogic[];
  */
 void cComputer::setCruiseLogic(int idx)
 {
-    *(&cruiseLogic) = cComputer_mCruiseLogic[idx];
+    cruiseLogic = cComputer_mCruiseLogic[idx];
     mCruiseLogicID = idx;
 }
 #endif

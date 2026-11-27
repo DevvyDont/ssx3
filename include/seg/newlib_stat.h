@@ -36,6 +36,11 @@ struct stat {
     long st_spare4[2];              // 0x58 [L]
 };
 
+// st_mode's file type bits ([L] sys/stat.h: _IFMT, _IFCHR, _IFREG and their S_ names)
+#define S_IFMT  0170000             // [L] type of file
+#define S_IFCHR 0020000             // [L] character special
+#define S_IFREG 0100000             // [L] regular
+
 // CHECK_OFFSET pastes the type name, so the checks of `struct stat` are spelled out (as in seg/newlib_reent.h).
 #ifndef DECOMP_NO_LAYOUT_CHECKS
 typedef char check_stat_st_dev[(DECOMP_OFFSETOF(struct stat, st_dev) == 0x00) ? 1 : -1];

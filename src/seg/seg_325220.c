@@ -863,6 +863,7 @@ void iDisableDmac(void) {
 INCLUDE_ASM("seg/seg_325220", func_00424AA0);
 #ifdef SKIP_ASM
 extern char D_0049AAE0[];
+extern int func_00425C28_pf(const char *, ...) __asm__("func_00425C28");
 extern int WaitSema_i(int) __asm__("WaitSema");
 extern void RotateThreadReadyQueue(int);
 extern void WakeupThread(int);
@@ -877,16 +878,16 @@ extern void SuspendThread(int);
  *
  * @param wakeQueue  the request queue
  */
-void func_00424AA0(unsigned *wakeQueue) {
+void func_00424AA0(sWakeQueue *wakeQueue) {
     unsigned i;
     unsigned j;
-    unsigned char *entryTypes = (unsigned char *)wakeQueue + 8;
-    unsigned char *entryThreads = (unsigned char *)wakeQueue + 9;
+    unsigned char *entryTypes = (unsigned char *)&wakeQueue->e[0].a;
+    unsigned char *entryThreads = (unsigned char *)&wakeQueue->e[0].b;
     for (;;) {
         WaitSema_i(D_0052B3A0);
-        i = *wakeQueue & 0x1FF;
+        i = wakeQueue->f0 & 0x1FF;
         j = i << 1;
-        *wakeQueue = i + 1;
+        wakeQueue->f0 = i + 1;
         switch (*(entryTypes + j)) {
         case 0:
             WakeupThread(*(entryThreads + j));
@@ -898,7 +899,7 @@ void func_00424AA0(unsigned *wakeQueue) {
             SuspendThread(*(entryThreads + j));
             break;
         default:
-            func_00425C28((int)D_0049AAE0);
+            func_00425C28_pf(D_0049AAE0);
             break;
         }
     }
@@ -916,7 +917,7 @@ extern void StartThread(int, void *);
 extern int GetThreadId(void);
 extern void ChangeThreadPriority(int, int);
 extern void DeleteSema(int);
-extern void func_00424AA0(unsigned *);
+extern void func_00424AA0(sWakeQueue *);
 int InitThread_i(void) __asm__("InitThread");
 /**
  * Creates and starts the helper thread for interrupt-context thread requests and returns its id, or -1.

@@ -68,6 +68,60 @@ struct tSpinCmd;
 struct tWipeoutCmd;
 union tControlCmd;
 
+// EA's cComputerState ([O] class cComputerState, a base of cComputer), the retail layout of the block cComputer
+// inlines at 0xDF0 (see the notes above: 4-byte bools, 15-entry tables; size 0x150, [R] cComputer_writeToReplayFrame /
+// readFromReplayFrame copy 336 bytes from +0xDF0). The members are cComputer's own, at offsets less 0xDF0. Code that
+// reached them through the base (retail addresses mTargetID as +0x80 from a +0xDF0 pointer: followPathCruise,
+// attackTargetCruise, avoidTargetCruise) uses this type for the base subobject.
+struct cComputerState {
+    float mDesiredSpeed;       // 0x000 cComputer::mDesiredSpeed
+    float mAccuracy;           // 0x004
+    float mRiderDifficulty;    // 0x008
+    float mTrickDifficulty;    // 0x00C
+    short mPathDifficulty;     // 0x010 cComputer::ePathDifficulty
+    char pad_012[0x2];
+    int mShouldTakeShortcuts;  // 0x014 (bool)
+    int mShouldBeRandom;       // 0x018 (bool)
+    int mGrabID;               // 0x01C cComputer::kNoGrab or a grab
+    int mIsSpinTrick;          // 0x020 (bool)
+    int mIsGonnaMessUp;        // 0x024 (bool)
+    int mIsNaturalAir;         // 0x028 (bool)
+    int mToPipe;               // 0x02C (bool)
+    int mToRail;               // 0x030 (bool)
+    int mIsUber;               // 0x034 (bool)
+    int mIsTweak;              // 0x038 (bool)
+    float mHoldToLandTime;     // 0x03C
+    float mGrabStartTime;      // 0x040
+    float mGrabEndTime;        // 0x044
+    float mSpinAxis;           // 0x048
+    float mFlipAxis;           // 0x04C
+    int mBoardPressTimer;      // 0x050
+    char pad_054[0xC];         // 0x054 t4Vector alignment
+    t4Vector mStartJumpPos;    // 0x060
+    t4Vector mEndJumpPos;      // 0x070
+    int mTargetID;             // 0x080 cComputer::kNoTarget or a rider index
+    int mWanderTime;           // 0x084
+    int mBadHeadingTime;       // 0x088
+    int GrabHistoryCounter[15]; // 0x08C
+    int UberHistoryCounter[15]; // 0x0C8
+    int TweakHistoryCounter[15]; // 0x104
+    float mBlockTimer;         // 0x140
+    int mShouldIBlock;         // 0x144 (bool)
+    short mCruiseLogicID;      // 0x148
+    char pad_14A[0x6];         // 0x14A 16-byte alignment (t4Vector members)
+};
+
+CHECK_OFFSET(cComputerState, mPathDifficulty, 0x010);
+CHECK_OFFSET(cComputerState, mGrabID, 0x01C);
+CHECK_OFFSET(cComputerState, mBoardPressTimer, 0x050);
+CHECK_OFFSET(cComputerState, mStartJumpPos, 0x060);
+CHECK_OFFSET(cComputerState, mTargetID, 0x080);
+CHECK_OFFSET(cComputerState, GrabHistoryCounter, 0x08C);
+CHECK_OFFSET(cComputerState, TweakHistoryCounter, 0x104);
+CHECK_OFFSET(cComputerState, mBlockTimer, 0x140);
+CHECK_OFFSET(cComputerState, mCruiseLogicID, 0x148);
+CHECK_SIZE(cComputerState, 0x150);
+
 struct cComputer {
     // ---- base cRiderHandler (0x000-0xDF0), as in cPlayer ----
     cRiderHandler RiderHandler;    // 0x000 cRiderHandler base (ai/riderhandler.h): [O] class cComputer : cRiderHandler;
@@ -126,7 +180,10 @@ struct cComputer {
     char pad_F3A[0x6];         // 0xF3A cComputerState is 16-byte aligned (t4Vector members)
     // ---- cComputer ----
     cInput* Input;             // 0xF40 [P] setInput (preview 0xEF0); [R] cComputer_setInput; [O]
-    tComputerCruiseLogic cruiseLogic; // 0xF44 [P] setCruiseLogic (preview 0xEF4); [R] Init = mCruiseLogic[1],
+    // EA's cruise logic: a member-function pointer ([O] "void ::* cruiseLogic"; g++ 2.95 lays it out as
+    // tComputerCruiseLogic).
+    typedef void (cComputer::*tCruiseLogicFn)(tCruiseCmd*);
+    tCruiseLogicFn cruiseLogic;    // 0xF44 [P] setCruiseLogic (preview 0xEF4); [R] Init = mCruiseLogic[1],
                                //       cComputer_setCruiseLogic; [U] cComputer_getCruiseCmd calls through it; [O] "void ::* cruiseLogic"
     char pad_F4C[0x4];         // 0xF4C the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xF50-0x1A90) ----

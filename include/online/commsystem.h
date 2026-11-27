@@ -65,10 +65,10 @@ struct cCommSystem {
     int isChannelOpen(int channelIndex) __asm__("cCommSystem_isChannelOpen");
     int isChannelConnected(int channelIndex) __asm__("cCommSystem_isChannelConnected");
     float getLatency(int channelIndex) __asm__("cCommSystem_getLatency");
-    int readPacket(int channelIndex, int data, int maxSize) __asm__("cCommSystem_readPacket");
-    int writePacket(int channelIndex, int data, int size) __asm__("cCommSystem_writePacket");
+    int readPacket(int channelIndex, void *data, int maxSize) __asm__("cCommSystem_readPacket");
+    int writePacket(int channelIndex, const void *data, int size) __asm__("cCommSystem_writePacket");
     int getError(int channelIndex) __asm__("cCommSystem_getError");
-    int * allocCommMsgElem() __asm__("cCommSystem_allocCommMsgElem");
+    tCommMsgElem* allocCommMsgElem() __asm__("cCommSystem_allocCommMsgElem");
     void freeCommMsgElem(tCommMsgElem* node) __asm__("cCommSystem_freeCommMsgElem");
     void netConnConnect(int configIndex) __asm__("cCommSystem_netConnConnect");
     void netConnDisconnect() __asm__("cCommSystem_netConnDisconnect");
