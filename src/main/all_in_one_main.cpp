@@ -68,7 +68,7 @@ extern int D_00467DD8[];
  * initializer.
  *
  * The items are "You've been Challenged!", "by", an empty line, a spacer and the Accept and Decline items.
- * Accept and Decline later call func_0017E490 / func_0017E4F0 with the owner stored at +0x130 / +0x134.
+ * Accept and Decline later call cDebugLobbyScreen_acceptChallenge / cDebugLobbyScreen_declineChallenge with the owner stored at +0x130 / +0x134.
  *
  * @param acceptOwner  the Accept functor (one word: the owning screen), copied to mAcceptScreen (+0x130)
  * @param declineOwner  the Decline functor (one word: the owning screen), copied to mDeclineScreen (+0x134)
@@ -222,7 +222,7 @@ INCLUDE_ASM("main/all_in_one_main", LobbyMenu_updaterooms);
 
 
 extern "C" int LobbyMan_getnumrooms(void* src);
-extern "C" void* func_0025F150(void* src, int i);
+extern "C" void* LobbyMan_getRoomNameAt(void* src, int i);
 extern "C" void cMenuItem_activate(void* item, int enable);
 extern char str_Receiving_Room_List[];
 
@@ -230,7 +230,7 @@ extern char str_Receiving_Room_List[];
  * Fills the debug "Select Room" menu with the lobby's room names.
  *
  * Asks LobbyMan_getnumrooms for the room count and gives command item i (12 items of 0x24 bytes from +0x168) the name from
- * func_0025F150(src, i), activates it and sets its ID to i. With no rooms yet, the first item shows "Receiving Room
+ * LobbyMan_getRoomNameAt(src, i), activates it and sets its ID to i. With no rooms yet, the first item shows "Receiving Room
  * List" with ID -1 (which the menu's command handler LobbyMenu_onCommand ignores). The remaining items are deactivated.
  *
  * The object is the Select Room menu (built by LobbyMenu_LobbyMenu).
@@ -243,7 +243,7 @@ void LobbyMenu::updaterooms(LobbyMan* src)
     int n = LobbyMan_getnumrooms(src);
     for (; i < n; i++) {
         cCommandMenuItem* it = &((&mRoomItems[0]))[i];
-        it->Caption = (const char*)func_0025F150(src, i);
+        it->Caption = (const char*)LobbyMan_getRoomNameAt(src, i);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
@@ -264,16 +264,16 @@ INCLUDE_ASM("main/all_in_one_main", RoomMenu_updateusers);
 #ifdef SKIP_ASM
 
 
-extern "C" int func_0025F1B0(void* src);
-extern "C" void* func_0025F1E0(void* src, int i, int flags);
+extern "C" int LobbyMan_getNumUsers(void* src);
+extern "C" void* LobbyMan_getUserName(void* src, int i, int flags);
 extern "C" void cMenuItem_activate(void* item, int enable);
 extern char str_No_users_in_room[];
 
 /**
  * Fills the debug "Room Occupants" menu with the users in the current room.
  *
- * Asks func_0025F1B0 for the user count and gives command item i (24 items of 0x24 bytes from +0x16C) the name from
- * func_0025F1E0(src, i, 0), activates it and sets its ID to i. An empty room shows "No users in room" with ID
+ * Asks LobbyMan_getNumUsers for the user count and gives command item i (24 items of 0x24 bytes from +0x16C) the name from
+ * LobbyMan_getUserName(src, i, 0), activates it and sets its ID to i. An empty room shows "No users in room" with ID
  * kItem_NoUsers (which the command handler RoomMenu_onCommand ignores). The remaining items are deactivated.
  *
  * The object is the Room Occupants menu (built by RoomMenu_RoomMenu).
@@ -283,10 +283,10 @@ extern char str_No_users_in_room[];
 void RoomMenu::updateusers(LobbyMan* src)
 {
     int i = 0;
-    int n = func_0025F1B0(src);
+    int n = LobbyMan_getNumUsers(src);
     for (; i < n; i++) {
         cCommandMenuItem* it = &((&mUserItems[0]))[i];
-        it->Caption = (const char*)func_0025F1E0(src, i, 0);
+        it->Caption = (const char*)LobbyMan_getUserName(src, i, 0);
         cMenuItem_activate(it, 1);
         it->ID = i;
     }
@@ -518,19 +518,19 @@ extern "C" void func_001DB918(tFEPrivateMessageVector* self, cPrivateMessage** p
 //100%
 INCLUDE_ASM("main/all_in_one_main", AbortMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E558(cDebugLobbyScreen* screen);
+extern "C" void cDebugLobbyScreen_abortChallenge(cDebugLobbyScreen* screen);
 
 /**
- * Handles the debug "Abort" menu's command: hands control back to the debug front end via func_0017E558.
+ * Handles the debug "Abort" menu's command: hands control back to the debug front end via cDebugLobbyScreen_abortChallenge.
  *
- * It is the onCommand slot of the Abort menu's vtable AbortMenu_vtbl. func_0017E558 pushes the Room Occupants menu, sets
- * the debug front end's state to 0xC and calls func_0025F628 on the lobby manager.
+ * It is the onCommand slot of the Abort menu's vtable AbortMenu_vtbl. cDebugLobbyScreen_abortChallenge pushes the Room Occupants menu, sets
+ * the debug front end's state to 0xC and calls LobbyMan_cancelChallenge on the lobby manager.
  *
  * @return 0
  */
 int AbortMenu::onCommand()
 {
-    func_0017E558(mScreen);
+    cDebugLobbyScreen_abortChallenge(mScreen);
     return 0;
 }
 #endif
@@ -538,16 +538,16 @@ int AbortMenu::onCommand()
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E490(cDebugLobbyScreen* screen);
-extern "C" void func_0017E4F0(cDebugLobbyScreen* screen);
+extern "C" void cDebugLobbyScreen_acceptChallenge(cDebugLobbyScreen* screen);
+extern "C" void cDebugLobbyScreen_declineChallenge(cDebugLobbyScreen* screen);
 
 /**
  * Handles the debug challenge menu's commands: Accept or Decline.
  *
  * It is the onCommand slot of the challenge menu's vtable D_0046D3D0 (built by
- * ChallengeResponseMenu_ChallengeResponseMenu). Item ID kItem_Accept calls func_0017E490 with the owner at +0x130,
- * which answers the challenge through func_0025FB58; ID kItem_Decline calls func_0017E4F0 with the owner at +0x134,
- * which declines through func_0025FC28.
+ * ChallengeResponseMenu_ChallengeResponseMenu). Item ID kItem_Accept calls cDebugLobbyScreen_acceptChallenge with the owner at +0x130,
+ * which answers the challenge through LobbyMan_lockChallenge; ID kItem_Decline calls cDebugLobbyScreen_declineChallenge with the owner at +0x134,
+ * which declines through LobbyMan_sendDecline.
  *
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
@@ -558,9 +558,9 @@ int ChallengeResponseMenu::onCommand(cMenuItem* item)
 
     temp_3 = item->ID;
     if (temp_3 == kItem_Accept) {
-        func_0017E490(mAcceptScreen);
+        cDebugLobbyScreen_acceptChallenge(mAcceptScreen);
     } else if (temp_3 == kItem_Decline) {
-        func_0017E4F0(mDeclineScreen);
+        cDebugLobbyScreen_declineChallenge(mDeclineScreen);
     }
     return 0;
 }
@@ -569,21 +569,21 @@ int ChallengeResponseMenu::onCommand(cMenuItem* item)
 //100%
 INCLUDE_ASM("main/all_in_one_main", ChatMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E418(cDebugLobbyScreen* screen, const char* messageText);
+extern "C" void cDebugLobbyScreen_sendChatLine(cDebugLobbyScreen* screen, const char* messageText);
 
 /**
  * Handles the debug "Chat Menu" command: sends the chosen line as a lobby chat message.
  *
  * It is the onCommand slot of the chat menu's vtable ChatMenu_vtbl (built by ChatMenu_ChatMenu). It passes the item's caption
- * (+0x14, one of the canned lines in D_00467D70) to func_0017E418 with the debug front end at +0x130, which returns to
- * the Room Occupants menu and sends the text with func_0025AAE0 ("mesg").
+ * (+0x14, one of the canned lines in D_00467D70) to cDebugLobbyScreen_sendChatLine with the debug front end at +0x130, which returns to
+ * the Room Occupants menu and sends the text with LobbyMan_sendChatMessage ("mesg").
  *
  * @param item  the chosen command item
  * @return 0
  */
 int ChatMenu::onCommand(cCommandMenuItem* item)
 {
-    func_0017E418(mScreen, item->Caption);
+    cDebugLobbyScreen_sendChatLine(mScreen, item->Caption);
     return 0;
 }
 #endif
@@ -592,14 +592,14 @@ int ChatMenu::onCommand(cCommandMenuItem* item)
 INCLUDE_ASM("main/all_in_one_main", RoomMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E368_BB48(cDebugLobbyScreen* screen, int user) __asm__("func_0017E368");
-extern "C" void func_0017E3B8_BB48(cDebugLobbyScreen* screen) __asm__("func_0017E3B8");
+extern "C" void cDebugLobbyScreen_selectOccupant_BB48(cDebugLobbyScreen* screen, int user) __asm__("cDebugLobbyScreen_selectOccupant");
+extern "C" void cDebugLobbyScreen_openChatMenu_BB48(cDebugLobbyScreen* screen) __asm__("cDebugLobbyScreen_openChatMenu");
 
 /**
  * Handles the debug "Room Occupants" menu's commands.
  *
  * It is the onCommand slot of vtable RoomMenu_vtbl (built by RoomMenu_RoomMenu). The "Chat" item (ID kItem_Chat) calls
- * func_0017E3B8 with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with
+ * cDebugLobbyScreen_openChatMenu with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls cDebugLobbyScreen_selectOccupant with
  * the owner at +0x130 and the occupant's index; the placeholder line (ID kItem_NoUsers) does nothing.
  *
  * @param item  the chosen item; its ID is at +0x8
@@ -609,9 +609,9 @@ int RoomMenu::onCommand(cMenuItem* item)
 {
     int itemValue = item->ID;
     if (itemValue == kItem_Chat) {
-        func_0017E3B8_BB48(mChatScreen);
+        cDebugLobbyScreen_openChatMenu_BB48(mChatScreen);
     } else if (itemValue != kItem_NoUsers) {
-        func_0017E368_BB48(mSelectUserScreen, itemValue);
+        cDebugLobbyScreen_selectOccupant_BB48(mSelectUserScreen, itemValue);
     }
     return 0;
 }
@@ -620,13 +620,13 @@ int RoomMenu::onCommand(cMenuItem* item)
 //100%
 INCLUDE_ASM("main/all_in_one_main", LobbyMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E2F8(cDebugLobbyScreen* screen, int room);
+extern "C" void cDebugLobbyScreen_joinRoom(cDebugLobbyScreen* screen, int room);
 
 /**
  * Handles the debug "Select Room" menu's command: joins the chosen room.
  *
  * It is the onCommand slot of vtable LobbyMenu_vtbl (built by LobbyMenu_LobbyMenu). For an item ID of 0 or more it calls
- * func_0017E2F8 with the debug front end at +0x130 and the room index (state 11, then func_0025D800 on the lobby
+ * cDebugLobbyScreen_joinRoom with the debug front end at +0x130 and the room index (state 11, then LobbyMan_joinRoomAt on the lobby
  * manager); the "Receiving Room List" placeholder (ID -1) is ignored.
  *
  * @param item  the chosen item; its ID is at +0x8
@@ -638,7 +638,7 @@ int LobbyMenu::onCommand(cMenuItem* item)
 
     temp_5 = item->ID;
     if (temp_5 >= 0) {
-        func_0017E2F8(mScreen, temp_5);
+        cDebugLobbyScreen_joinRoom(mScreen, temp_5);
     }
     return 0;
 }
@@ -647,13 +647,13 @@ int LobbyMenu::onCommand(cMenuItem* item)
 //100%
 INCLUDE_ASM("main/all_in_one_main", PersonaMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E290(cDebugLobbyScreen* screen, int persona);
+extern "C" void cDebugLobbyScreen_selectPersona(cDebugLobbyScreen* screen, int persona);
 
 /**
  * Handles the debug "Select Persona" menu's command: selects the chosen persona.
  *
- * It is the onCommand slot of vtable PersonaMenu_vtbl (built by PersonaMenu_PersonaMenu). It calls func_0017E290 with the debug front
- * end stored at +0x4E0 and the item's ID (the persona index), which sets state 7 and calls func_0025CD28 on the lobby
+ * It is the onCommand slot of vtable PersonaMenu_vtbl (built by PersonaMenu_PersonaMenu). It calls cDebugLobbyScreen_selectPersona with the debug front
+ * end stored at +0x4E0 and the item's ID (the persona index), which sets state 7 and calls LobbyMan_selectPersonaAt on the lobby
  * manager.
  *
  * @param item  the chosen item; its ID is at +0x8
@@ -661,7 +661,7 @@ extern "C" void func_0017E290(cDebugLobbyScreen* screen, int persona);
  */
 int PersonaMenu::onCommand(cMenuItem* item)
 {
-    func_0017E290(mScreen, item->ID);
+    cDebugLobbyScreen_selectPersona(mScreen, item->ID);
     return 0;
 }
 #endif
@@ -670,20 +670,20 @@ int PersonaMenu::onCommand(cMenuItem* item)
 INCLUDE_ASM("main/all_in_one_main", CreatePersonaMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E1C0_BBE8(cDebugLobbyScreen* screen, void *name) __asm__("func_0017E1C0");
+extern "C" void cDebugLobbyScreen_createPersona_BBE8(cDebugLobbyScreen* screen, void *name) __asm__("cDebugLobbyScreen_createPersona");
 
 /**
  * Handles the debug "Create Persona" menu's command: creates a persona with the typed name.
  *
- * It is the onCommand slot of vtable CreatePersonaMenu_vtbl (built by CreatePersonaMenu_CreatePersonaMenu). It calls func_0017E1C0 with the debug front
+ * It is the onCommand slot of vtable CreatePersonaMenu_vtbl (built by CreatePersonaMenu_CreatePersonaMenu). It calls cDebugLobbyScreen_createPersona with the debug front
  * end at +0x130 and the persona name buffer at +0x180 (the text-entry item at +0x168), which sets state 8 and calls
- * func_0025D1B8 on the lobby manager. It ignores which item was chosen.
+ * LobbyMan_createPersona on the lobby manager. It ignores which item was chosen.
  *
  * @return 0
  */
 int CreatePersonaMenu::onCommand()
 {
-    func_0017E1C0_BBE8(mScreen, &mPersonaNameItem.Text[0]);
+    cDebugLobbyScreen_createPersona_BBE8(mScreen, &mPersonaNameItem.Text[0]);
     return 0;
 }
 #endif
@@ -691,13 +691,13 @@ int CreatePersonaMenu::onCommand()
 //100%
 INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu_onCommand);
 #ifdef SKIP_ASM
-extern "C" void func_0017E228(cDebugLobbyScreen* screen, int persona);
+extern "C" void cDebugLobbyScreen_deletePersona(cDebugLobbyScreen* screen, int persona);
 
 /**
  * Handles the debug "Delete Persona" menu's command: deletes the chosen persona.
  *
- * It is the onCommand slot of vtable DeletePersonaMenu_vtbl (built by DeletePersonaMenu_DeletePersonaMenu). It calls func_0017E228 with the debug front
- * end at +0x130 and the item's ID (the persona index set by DeletePersonaMenu_setpersonas), which sets state 9 and calls func_0025D428
+ * It is the onCommand slot of vtable DeletePersonaMenu_vtbl (built by DeletePersonaMenu_DeletePersonaMenu). It calls cDebugLobbyScreen_deletePersona with the debug front
+ * end at +0x130 and the item's ID (the persona index set by DeletePersonaMenu_setpersonas), which sets state 9 and calls LobbyMan_deletePersona
  * on the lobby manager.
  *
  * @param item  the chosen item; its ID is at +0x8
@@ -705,7 +705,7 @@ extern "C" void func_0017E228(cDebugLobbyScreen* screen, int persona);
  */
 int DeletePersonaMenu::onCommand(cMenuItem* item)
 {
-    func_0017E228(mScreen, item->ID);
+    cDebugLobbyScreen_deletePersona(mScreen, item->ID);
     return 0;
 }
 #endif
@@ -714,15 +714,15 @@ int DeletePersonaMenu::onCommand(cMenuItem* item)
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E030_BC38(cDebugLobbyScreen* screen, char* name, char* password)
-    __asm__("func_0017E030");
+extern "C" void cDebugLobbyScreen_createAccount_BC38(cDebugLobbyScreen* screen, char* name, char* password)
+    __asm__("cDebugLobbyScreen_createAccount");
 
 /**
  * Handles the debug "Create Account" menu's command: creates an account with the typed name and password.
  *
- * It is the onCommand slot of vtable AccountDetailsMenu_vtbl (built by AccountDetailsMenu_AccountDetailsMenu). It calls func_0017E030 with the debug front
+ * It is the onCommand slot of vtable AccountDetailsMenu_vtbl (built by AccountDetailsMenu_AccountDetailsMenu). It calls cDebugLobbyScreen_createAccount with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that fills the lobby manager's
- * mNewAccount form and sends it with func_0025B9C8. It ignores which item was chosen.
+ * mNewAccount form and sends it with LobbyMan_createAccount. It ignores which item was chosen.
  *
  * The object is the Create Account menu.
  *
@@ -730,7 +730,7 @@ extern "C" void func_0017E030_BC38(cDebugLobbyScreen* screen, char* name, char* 
  */
 int AccountDetailsMenu::onCommand()
 {
-    func_0017E030_BC38(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
+    cDebugLobbyScreen_createAccount_BC38(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -739,15 +739,15 @@ int AccountDetailsMenu::onCommand()
 INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0017E118_BC68(cDebugLobbyScreen* screen, char* name, char* password)
-    __asm__("func_0017E118");
+extern "C" void cDebugLobbyScreen_login_BC68(cDebugLobbyScreen* screen, char* name, char* password)
+    __asm__("cDebugLobbyScreen_login");
 
 /**
  * Handles the debug "Login" menu's command: logs in with the typed name and password.
  *
- * It is the onCommand slot of vtable AccountDetailsMenu1_vtbl (built by AccountDetailsMenu_AccountDetailsMenu1). It calls func_0017E118 with the debug front
+ * It is the onCommand slot of vtable AccountDetailsMenu1_vtbl (built by AccountDetailsMenu_AccountDetailsMenu1). It calls cDebugLobbyScreen_login with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that copies them into the lobby
- * manager's mUserName / mPassword and calls func_0025C610. It ignores which item was chosen.
+ * manager's mUserName / mPassword and calls LobbyMan_authenticate. It ignores which item was chosen.
  *
  * The object is the Login menu.
  *
@@ -755,7 +755,7 @@ extern "C" void func_0017E118_BC68(cDebugLobbyScreen* screen, char* name, char* 
  */
 int AccountDetailsMenu::onCommand1()
 {
-    func_0017E118_BC68(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
+    cDebugLobbyScreen_login_BC68(mScreen, (char*)&mLoginNameItem.Text[0], (char*)&mPasswordItem.Text[0]);
     return 0;
 }
 #endif
@@ -1612,7 +1612,7 @@ extern "C" int cFE_getRiderManager1(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", cFE_getBoltFileManager);
 #ifdef SKIP_ASM
 /**
- * Returns the front end's member at +0x1A70 (the object cFE_cFE builds with func_0019CDF0).
+ * Returns the front end's member at +0x1A70 (the object cFE_cFE builds with cFEBoltFileManager_cFEBoltFileManager).
  *
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x1A70
@@ -2451,7 +2451,7 @@ extern int cUIGroup_vtbl[];
  * cUIScreen_vtbl, builds the attribute word (tAttrScreen_tAttrScreen, +0x14) and the thread list (cList_cList, +0x18), zeroes the
  * keyframe, object-block and object-list pointers (+0x34..+0x3C), builds the root group (cUIThing_cUIThing at +0x40,
  * cUIGroup_vtbl at +0x48, its cList at +0xB4), zeroes the state pointer at +0xD0 and finally stores the keyboard vtable
- * cScreenKeyboard_vtbl. Unlike func_00180508 it sets none of the keyboard's own fields.
+ * cScreenKeyboard_vtbl. Unlike cScreenKeyboard_cScreenKeyboard1 it sets none of the keyboard's own fields.
  *
  * @return @p self
  */
@@ -2493,7 +2493,7 @@ extern "C" int cScreenKeyboard_getInputText(int screen) {
 INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_getCurrentKey);
 #ifdef SKIP_ASM
 /**
- * Returns the on-screen keyboard's current key, the word at +0x170 (func_00180508 starts it at 10).
+ * Returns the on-screen keyboard's current key, the word at +0x170 (cScreenKeyboard_cScreenKeyboard1 starts it at 10).
  *
  * @return the word at +0x170
  */
@@ -2507,7 +2507,7 @@ int cScreenKeyboard::getCurrentKey()
 INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
 #ifdef SKIP_ASM
 /**
- * Sets the on-screen keyboard's word at +0xD8 (func_00180508 starts it at 0).
+ * Sets the on-screen keyboard's word at +0xD8 (cScreenKeyboard_cScreenKeyboard1 starts it at 0).
  *
  * @param includeNumbers  the new value
  */
@@ -2521,7 +2521,7 @@ void cScreenKeyboard::setIncludeNumbers(int includeNumbers)
 INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
 #ifdef SKIP_ASM
 /**
- * Sets the on-screen keyboard's word at +0xDC (func_00180508 starts it at 0).
+ * Sets the on-screen keyboard's word at +0xDC (cScreenKeyboard_cScreenKeyboard1 starts it at 0).
  *
  * @param includeShift  the new value
  */
@@ -2535,7 +2535,7 @@ void cScreenKeyboard::setIncludeShift(int includeShift)
 INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
 #ifdef SKIP_ASM
 /**
- * Sets the on-screen keyboard's word at +0xE0 (func_00180508 starts it at 0).
+ * Sets the on-screen keyboard's word at +0xE0 (cScreenKeyboard_cScreenKeyboard1 starts it at 0).
  *
  * @param includeSpace  the new value
  */
@@ -2551,7 +2551,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorRight);
 /**
  * Moves the on-screen keyboard's text cursor one place right, unless that would reach the length limit.
  *
- * Increments the cursor position at +0x16C only while the result stays below the limit at +0xD4 (func_00180508 sets
+ * Increments the cursor position at +0x16C only while the result stays below the limit at +0xD4 (cScreenKeyboard_cScreenKeyboard1 sets
  * 45).
  *
  */
@@ -4317,7 +4317,7 @@ extern void* cFEStateOptionsHUD_vtbl[];
  * Constructs the HUD options state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine, then
  * stores its vtable cFEStateOptionsHUD_vtbl at +0x8.
  *
- * cFEStateOptionsHUD_vtbl is the vtable func_0018C0E8 stores in the state fereal.cpp allocates as "cFEStateOptionsHUD".
+ * cFEStateOptionsHUD_vtbl is the vtable cFEStateOptionsHUD_cFEStateOptionsHUD1 stores in the state fereal.cpp allocates as "cFEStateOptionsHUD".
  *
  * @return @p self
  */
@@ -5399,7 +5399,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_onInputBegin);
 /**
  * Returns an online state's mBlockInput as its onInputBegin result (slot +0x44 of the online states' vtables).
  *
- * func_001A9668 and func_001A9710 set the word to 1 before pushing the login state.
+ * cFEStateNet_onDisconnectedPopupEvent and cFEStateNet_onNetInterruptedPopupEvent set the word to 1 before pushing the login state.
  *
  * @param feStateNet  the online state (cFEStateNet)
  * @return mBlockInput
@@ -5467,7 +5467,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE890);
 /**
  * Sets an online state's mLeavingOnline to 1.
  *
- * func_001BF5A8 and func_001C0138 set the same word; no read of it is known.
+ * cFEStateLogin_onNetConfigPopupEvent and cFEStateOnlineMainMenu_onLogOffPopupEvent set the same word; no read of it is known.
  *
  * @param feStateNet  the online state (cFEStateNet)
  */
@@ -5480,7 +5480,7 @@ extern "C" void func_001DE890(cFEStateNet* feStateNet) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
 #ifdef SKIP_ASM
 /**
- * Sets an online state's mUserPopupOpen; func_001ABB30 opens the status popup only when it and mpPopup are set.
+ * Sets an online state's mUserPopupOpen; cFEStateNet_openPlayerMessages opens the status popup only when it and mpPopup are set.
  *
  * @param feStateNet  the online state (cFEStateNet)
  * @param value  the new value
@@ -5549,7 +5549,7 @@ extern "C" int func_001DE908(void) {
 
 /**
  * Does nothing: slot +0x104 of cFEBlankPopup_vtbl and cFEStateNetAccountMem_vtbl, where the cFEStateNet vtable has
- * func_001A8830.
+ * cFEStateNet_publishPresence.
  */
 extern "C" void func_001DE910(void) {
 }

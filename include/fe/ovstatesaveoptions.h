@@ -5,7 +5,7 @@
 // "title_Save_Records"; overlay id 19), a cFEMemCard with mType 2 (settings). Retail code: cOVState_SAVEOPTIONS_* in
 // fe/ovstatepause (EA's d:/ssx/code/source/fe/ovstatepause.cpp; the class is probably declared in its ovstatepause.h,
 // which the preview's asserts also name) and fe/all_in_one_fe (destructor cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS,
-// the engine-less ctor copy func_002220C0).
+// the engine-less ctor copy cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS1).
 //
 // Size 0x274:
 //   [R] cOVStateManager_triggerOverlay / triggerPopup: operator new(628, "cOVStateOverlay") for overlay 19, then

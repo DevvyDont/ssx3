@@ -19,7 +19,7 @@
 // "ChatEvent", 0x20000000). cBXString members are one char* (bx/bxstring.h).
 // A FLAT layout per class, like main/game.h: bases written out inline. Evidence tags:
 //   [R] the retail destructors (slot 1) / clone (slot 2) and the allocations at the posting sites
-//       (src/dirtysock/tagsunk.cpp: LobbyMan_on*, func_0025AC50, func_002636F0);
+//       (src/dirtysock/tagsunk.cpp: LobbyMan_on*, LobbyMan_update, cConnMan_disconnect);
 //   [U] how retail code uses the field.
 // The destructors store online_Event_vtbl (g++ drops the dead stores of the derived vtables), so they do not show
 // the class tree; AcctTooYoungEvent / AcctLockedEvent carry ErrorEvent's type (258) and code word (0x8), so they
@@ -43,7 +43,7 @@ enum tNetEventType {
     kNetEvent_PersonaDeleted = 216,           // LobbyMan_onpersonadeleted
     kNetEvent_PersonaSelected = 218,          // LobbyMan_onpersonaselected
     kNetEvent_RoomSelected = 220,             // LobbyMan_onroomselected
-    kNetEvent_Chat = 222,                     // func_0025AB40 (a ChatEvent)
+    kNetEvent_Chat = 222,                     // LobbyMan_postChatEvent (a ChatEvent)
     kNetEvent_RoomListUpdate = 223,           // LobbyMan_onroomlistupdate
     kNetEvent_RankListUpdate = 225,           // LobbyMan_onranklistupdate
     kNetEvent_News = 226,                     // LobbyMan_onNewsRetrieved (a NewsEvent)
@@ -53,11 +53,11 @@ enum tNetEventType {
     kNetEvent_BuddyRosterUpdate = 262,        // BuddyMan_onrosterupdate
     kNetEvent_BuddyAdd = 266,                 // BuddyMan_onBuddyAdd
     kNetEvent_BuddyDelete = 267,              // BuddyMan_onBuddyDelete
-    kNetEvent_ConnectionMsg = 277,            // LobbyMan_onconnectionmsg (and func_0025AC50)
+    kNetEvent_ConnectionMsg = 277,            // LobbyMan_onconnectionmsg (and LobbyMan_update)
     kNetEvent_NetError = 278                  // online::NetErrorEvent
 };
 
-// online::Event: size 8 ([R] online_Event_clone allocates 8; func_0025F628 / func_0025FC70 / func_002642B8 post
+// online::Event: size 8 ([R] online_Event_clone allocates 8; LobbyMan_cancelChallenge / LobbyMan_sendLockChallenge / cSetupMan_update post
 // plain 8-byte events of types 218, 238, 246, 256, 272 ...). Vtable online_Event_vtbl (0x004812B0).
 struct online_Event {
     int mType;                      // 0x0 [R] every poster stores it first (222 chat, 226 news, 227 find player,
@@ -87,7 +87,7 @@ enum tLobbyMsgCode {
 // The four-character error codes of online::ErrorEvent::mError (the lobby's replies) and online::NetErrorEvent::mError
 // (the disconnect reasons, '-' first), written as EA's multi-character constants: the comment gives the ASCII of the
 // value's bytes from the most significant down. Names ours, after the ASCII. [U] the front end's error handlers
-// (func_001A9CC0, func_001AAF90, func_001A4E28, func_001ADC30, func_001BAC90, func_001BD8C8, func_001BDA88, ...) pick
+// (cFEStateNet_buildErrorPopup, cFEStateNet_getNetErrorText, cFEStateNetMessenger_showFindUserError, cFEStateSelectPersona_handlePersonaError, cFEStateCreateStep2_handleAccountError, cFEStateLobbyMenu_handleJoinRoomError, cFEStateLobbyMenu_handleCreateRoomError, ...) pick
 // a popup text per code.
 enum tOnlineErrorCode {
     kLobbyErr_ajoi = 0x616A6F69,        // 'ajoi'
@@ -189,7 +189,7 @@ enum tOnlineErrorCode {
 };
 
 // The setup screen's update events (names ours; [R] tag "cSetupMan::Update"). cSetupMan's local senders
-// (func_00265458, func_00265568 in dirtysock/tagsunk) and its message handlers (func_00269478 ... func_00269CF0 in
+// (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule in dirtysock/tagsunk) and its message handlers (func_00269478 ... func_00269CF0 in
 // bx/bxstringctor) allocate one and push it onto LobbyMan's mEventList for the front end.
 // Types 253 / 254, size 0xC ([R] func_00269608 / func_00269AE0 / func_00269B90 allocate 0xC with type 253, vtable
 // D_004813E0; func_002696F8 / func_00269C40 / func_00269CF0 type 254, vtable D_004813C0). Their clones (vtable slot 2)
@@ -208,14 +208,14 @@ CHECK_OFFSET(online_SetupEvent, mVtbl, 0x4);
 CHECK_OFFSET(online_SetupEvent, mFlag, 0x8);
 CHECK_SIZE(online_SetupEvent, 0xC);
 
-// The bragging-rights row event: type 251, size 0x10, vtable D_00481150 ([R] func_00265458, func_00269478,
+// The bragging-rights row event: type 251, size 0x10, vtable D_00481150 ([R] cSetupMan_sendBraggingSelection, func_00269478,
 // func_002697D0 and func_00269890 allocate 0x10).
 struct online_SetupRowEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 251
     void** mVtbl;                   // 0x4 [R] D_00481150
     // --- the setup row event
-    int mFlag;                      // 0x8 [R] 1 from func_00269478 and func_002697D0; 0 from func_00265458 and
+    int mFlag;                      // 0x8 [R] 1 from func_00269478 and func_002697D0; 0 from cSetupMan_sendBraggingSelection and
                                     //     func_00269890
     int mRow;                       // 0xC [R] the highlighted row (the menu's current row, or the message's)
 };
@@ -224,14 +224,14 @@ CHECK_OFFSET(online_SetupRowEvent, mFlag, 0x8);
 CHECK_OFFSET(online_SetupRowEvent, mRow, 0xC);
 CHECK_SIZE(online_SetupRowEvent, 0x10);
 
-// The race-rule event: type 252, size 0x14, vtable D_00481130 ([R] func_00265568, func_00269538, func_00269948 and
+// The race-rule event: type 252, size 0x14, vtable D_00481130 ([R] cSetupMan_sendBraggingRule, func_00269538, func_00269948 and
 // func_00269A18 allocate 0x14).
 struct online_SetupRuleEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 252
     void** mVtbl;                   // 0x4 [R] D_00481130
     // --- the setup rule event
-    int mFlag;                      // 0x8 [R] 1 from func_00269538 and func_00269948; 0 from func_00265568 and
+    int mFlag;                      // 0x8 [R] 1 from func_00269538 and func_00269948; 0 from cSetupMan_sendBraggingRule and
                                     //     func_00269A18
     int mRuleSlot;                  // 0xC [R] the rule slot
     int mRuleValue;                 // 0x10 [R] its new value
@@ -250,7 +250,7 @@ struct online_ErrorEvent {
     void** mVtbl;                   // 0x4 [R] online_ErrorEvent_vtbl
     // --- online::ErrorEvent
     int mError;                     // 0x8 [R] clone copies it; [U] a four-character code ('time', 'dnsf' from
-                                    //     func_0025AC50) or the LobbyApi reply's error (LobbyMan_onPlayerFound ...)
+                                    //     LobbyMan_update) or the LobbyApi reply's error (LobbyMan_onPlayerFound ...)
 
     // Methods bound to their retail symbols by asm labels.
     void* clone() __asm__("online_ErrorEvent_clone");
@@ -261,14 +261,14 @@ CHECK_OFFSET(online_ErrorEvent, mVtbl, 0x4);
 CHECK_OFFSET(online_ErrorEvent, mError, 0x8);
 CHECK_SIZE(online_ErrorEvent, 0xC);
 
-// online::BuddyErrorEvent: type 259, size 0xC ([R] func_0025AC50 allocates 0xC). Vtable online_BuddyErrorEvent_vtbl
+// online::BuddyErrorEvent: type 259, size 0xC ([R] LobbyMan_update allocates 0xC). Vtable online_BuddyErrorEvent_vtbl
 // (0x00481270). Its clone builds an ErrorEvent (type 258, online_ErrorEvent_vtbl), as in the preview.
 struct online_BuddyErrorEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 259
     void** mVtbl;                   // 0x4 [R] online_BuddyErrorEvent_vtbl
     // --- online::BuddyErrorEvent
-    int mError;                     // 0x8 [R] func_0025AC50 stores BuddyMan's miError; clone copies it
+    int mError;                     // 0x8 [R] LobbyMan_update stores BuddyMan's miError; clone copies it
 
     // Methods bound to their retail symbols by asm labels.
     void* clone() __asm__("online_BuddyErrorEvent_clone");
@@ -279,14 +279,14 @@ CHECK_OFFSET(online_BuddyErrorEvent, mVtbl, 0x4);
 CHECK_OFFSET(online_BuddyErrorEvent, mError, 0x8);
 CHECK_SIZE(online_BuddyErrorEvent, 0xC);
 
-// online::NetErrorEvent: type 278, size 0xC ([R] func_002636F0 allocates 0xC with the tag "NetErrorEvent"). Vtable
+// online::NetErrorEvent: type 278, size 0xC ([R] cConnMan_disconnect allocates 0xC with the tag "NetErrorEvent"). Vtable
 // online_NetErrorEvent_vtbl (0x00481250).
 struct online_NetErrorEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 278
     void** mVtbl;                   // 0x4 [R] online_NetErrorEvent_vtbl
     // --- online::NetErrorEvent
-    int mError;                     // 0x8 [R] func_002636F0 stores its argument (the disconnect reason); clone copies it
+    int mError;                     // 0x8 [R] cConnMan_disconnect stores its argument (the disconnect reason); clone copies it
 
     // Methods bound to their retail symbols by asm labels.
     void* clone() __asm__("online_NetErrorEvent_clone");
@@ -406,17 +406,17 @@ CHECK_OFFSET(online_PingEvent, mName, 0x8);
 CHECK_OFFSET(online_PingEvent, mPing, 0xC);
 CHECK_SIZE(online_PingEvent, 0x10);
 
-// online::ChatEvent: type 222, size 0x10 ([R] func_0025AB40 and online_ChatEvent_clone allocate 0x10 bytes tagged
+// online::ChatEvent: type 222, size 0x10 ([R] LobbyMan_postChatEvent and online_ChatEvent_clone allocate 0x10 bytes tagged
 // "ChatEvent"). Vtable 0x00481230 (D_00481230: 1 online_ChatEvent__ChatEvent, 2 online_ChatEvent_clone). Retail only
 // (not in the preview), so the class and member names are ours.
 struct online_ChatEvent {
     // --- online::Event
-    int mType;                      // 0x0 [R] 222 (func_0025AB40, clone)
+    int mType;                      // 0x0 [R] 222 (LobbyMan_postChatEvent, clone)
     void** mVtbl;                   // 0x4 [R] D_00481230; the destructor stores online_Event_vtbl back
     // --- online::ChatEvent
-    char* mSender;                  // 0x8 [R] cBXString: func_0025AB40 copies its sender argument (the chat line's
+    char* mSender;                  // 0x8 [R] cBXString: LobbyMan_postChatEvent copies its sender argument (the chat line's
                                     //     sender, from LobbyMan_onchatmsg); clone copies it; destroyed second
-    char* mText;                    // 0xC [R] cBXString: the message text (func_0025AB40's text argument); destroyed
+    char* mText;                    // 0xC [R] cBXString: the message text (LobbyMan_postChatEvent's text argument); destroyed
                                     //     first
 };
 

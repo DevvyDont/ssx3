@@ -295,11 +295,11 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBEBoltInterface_getThis();
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" void* func_0014AD50(void* self, int rider);
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(void* self, int i);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getRiderCharProfile(void* self, int rider);
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
 extern "C" int cRider_getCheatIdentity(void* self);
 extern "C" int cRider_getIdentity(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
@@ -327,10 +327,10 @@ struct sLensItem_CCB8 {
  * Rebuilds a bolt-on effect set from the character's equipment: makes sure every needed emitter exists and releases the
  * rest.
  *
- * Finds the character record: for a rider (+0x4) func_0014AD50 with its kRiderVt_getAIIndex and the id from
- * cRider_getCheatIdentity (cRider_getIdentity below 10); for a front-end character (+0x8) func_0014AD28 with the
- * current UI state's +0x44 and the id. Then walks the character's 0x38-byte bolt definitions (func_0014D988 count,
- * func_0014D998) and, for each one with a kind (+0x11, not -1) whose part is fitted (the record's table at +0x288 for
+ * Finds the character record: for a rider (+0x4) cBEBoltInterface_getRiderCharProfile with its kRiderVt_getAIIndex and the id from
+ * cRider_getCheatIdentity (cRider_getIdentity below 10); for a front-end character (+0x8) cBEBoltInterface_getCharProfile with the
+ * current UI state's +0x44 and the id. Then walks the character's 0x38-byte bolt definitions (cBEBoltDB_getNumCharBolts count,
+ * cBEBoltDB_getCharBolts) and, for each one with a kind (+0x11, not -1) whose part is fitted (the record's table at +0x288 for
  * slot +0x4; normal characters below 10 also need flag 0x10), marks func_002ECBC0's entry for each of its two items
  * (+0x12, +0x13) as used; kinds of 50 and up use kinds k-50 and k-49. Unused entries' emitters are released with
  * func_002F2218. Clears the dirty flag (+0x0).
@@ -349,21 +349,21 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     int id = -1;
     cRider* rider = self->mpRider;
     if (rider != 0) {
-        tbl = (cBECharProfileDB*)func_0014AD50(lib, rider->getAIIndex());
+        tbl = (cBECharProfileDB*)cBEBoltInterface_getRiderCharProfile(lib, rider->getAIIndex());
         id = cRider_getCheatIdentity(self->mpRider);
         if (id < 10) {
             id = cRider_getIdentity(self->mpRider);
         }
     } else if (self->mpCharId != 0) {
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&SSXApp->RealFE->mpUI->mStateStack);
-        tbl = (cBECharProfileDB*)func_0014AD28(lib, st->mUserNum, *self->mpCharId);
+        tbl = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(lib, st->mUserNum, *self->mpCharId);
         id = *self->mpCharId;
     }
-    void* lib2 = func_0014BDB8_noarg();
+    void* lib2 = cBEBoltInterface_getBoltDB_noarg();
     int n;
     tBoltOnFXEntry* ents = &self->mEntries[0];
-    n = func_0014D988(lib2, id);
-    sLensItem_CCB8* item = (sLensItem_CCB8*)func_0014D998(lib2, id);
+    n = cBEBoltDB_getNumCharBolts(lib2, id);
+    sLensItem_CCB8* item = (sLensItem_CCB8*)cBEBoltDB_getCharBolts(lib2, id);
     for (int i = 0; i < n; i++, item++) {
         int k = item->kind;
         if (k == sLensItem_CCB8::kNone) {

@@ -11,8 +11,8 @@
 // mHashName
 // 0x4B) and the default cFEStateNetQuickMessages_cFEStateNetQuickMessages1 (fe/fepopupmisc); destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages (fe/fepopupmisc; slot 1). Retail
 // vtable cFEStateNetQuickMessages_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickMessages_onCreateScreen, 7 cFEStateNetQuickMessages_onGainTransition, 12 onUpdate cFEStateNetQuickMessages_onUpdate, 17
-// onPopupEvent cFEStateNetQuickMessages_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate, 19 onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent, 25 func_001C21C0
-// (help), 31 cFEStateNet's func_001A8E40). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
+// onPopupEvent cFEStateNetQuickMessages_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate, 19 onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent, 25 cFEStateNetQuickMessages_fillHelpPopup
+// (help), 31 cFEStateNet's cFEStateNet_onNetEvent). Methods: fe/feasyncfile 0x1C20F8-0x1C2C50.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
@@ -39,20 +39,20 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
     //       stores 0x4B
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateNetQuickMessages
-    int mbChanged;                  // 0x6D0 [U] onCreateScreen cFEStateNetQuickMessages_onCreateScreen clears it; func_001C2A18 (a message
-                                    //       edited) and func_001C2BA8 (popup 0xF: defaults restored, cBEOptionInterface_resetAllQuickKeys)
+    int mbChanged;                  // 0x6D0 [U] onCreateScreen cFEStateNetQuickMessages_onCreateScreen clears it; cFEStateNetQuickMessages_handleKeyboardText (a message
+                                    //       edited) and cFEStateNetQuickMessages_onResetMessagesPopupEvent (popup 0xF: defaults restored, cBEOptionInterface_resetAllQuickKeys)
                                     //       set 1; onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent on "back" asks
                                     //       "kT_POPUP206SaveQuickMessage" when set, else returns to
                                     //       cFEStateNetSSXWorld
     cUIText* mpMessage[10];         // 0x6D4 [U] onWidgetCreate cFEStateNetQuickMessages_onWidgetCreate: widgets "message00".."message09"
-                                    //       (miMiscData = i); func_001C2468 writes "Q<i+1>: " + message i into
-                                    //       mpMessage[i] (func_001C2578)
+                                    //       (miMiscData = i); cFEStateNetQuickMessages_showMessageRow writes "Q<i+1>: " + message i into
+                                    //       mpMessage[i] (cFEStateNetQuickMessages_setFittedText)
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateNetQuickMessages1() __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages1");

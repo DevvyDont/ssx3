@@ -116,13 +116,13 @@ INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_cHUDRadar);
 #ifdef SKIP_ASM
 extern char cHUDRadar_vtbl[];
 extern int D_004A276C;
-extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
+extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* a, tRect* r);
 
 /**
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
  *
- * Installs its vtable cHUDRadar_vtbl at +0x38, lays it out over the whole 640 x 480 screen with func_0020EC18 and counts
- * the instance in D_004A276C (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and func_0021CBA0 call it.
+ * Installs its vtable cHUDRadar_vtbl at +0x38, lays it out over the whole 640 x 480 screen with cHUDRadar_calcLayout and counts
+ * the instance in D_004A276C (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and cOVStateHUD1P_cOVStateHUD1P1 call it.
  *
  * @return @p self
  */
@@ -134,7 +134,7 @@ extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
     screenRect.Y = 0.0f;
     screenRect.W = 640.0f;
     screenRect.H = 480.0f;
-    func_0020EC18(self, &screenRect, &screenRect);
+    cHUDRadar_calcLayout(self, &screenRect, &screenRect);
     D_004A276C++;
     return ((void*)self);
 }
@@ -151,7 +151,7 @@ void operator_delete(int*);
 /**
  * Destroys a course-progress tracker: restores its vtable cHUDRadar_vtbl and drops the instance count D_004A276C.
  *
- * When the last tracker goes, D_004A2768 is cleared so the next layout (func_0020EB50) looks the icon textures and the
+ * When the last tracker goes, D_004A2768 is cleared so the next layout (cHUDRadar_init) looks the icon textures and the
  * font up again. It is the only slot of cHUDRadar_vtbl (+0xC); cOVStateHUD1P__cOVStateHUD1P calls it for the panels'
  * trackers.
  *
@@ -172,10 +172,10 @@ extern "C" void cHUDRadar__cHUDRadar(cHUDRadar* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_init);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
+extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* a, tRect* r);
 extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
 extern "C" int cUIFontInterface_getFontByHashName(void* bank, int hash);
 extern int D_004A2764;
@@ -195,13 +195,13 @@ extern sTex_20EB50 D_004C8C58[];
  * On the first call after the last tracker was destroyed (D_004A2768 clear) it looks up the 11 icon records of
  * D_004C8C58 (name hash, width, height, texture) in the UI texture bank (SSXApp->Game->UI + 0x58,
  * cUITextureBank_getElementByHashname) and the "fefont" font in the UI's font bank (cUIFontInterface_getFontByHashName on UI + 0x8) into
- * D_004A2764, and sets D_004A2768. Then func_0020EC18 does the layout. cOVStateHUD1P_onCreateScreen calls it for both
+ * D_004A2764, and sets D_004A2768. Then cHUDRadar_calcLayout does the layout. cOVStateHUD1P_onCreateScreen calls it for both
  * panels' trackers.
  *
  * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
  * @param area  the rectangle (x, y, w, h) the tracker fills
  */
-extern "C" void func_0020EB50(cHUDRadar* self, tRect* screenRect, tRect* area)
+extern "C" void cHUDRadar_init(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     if (D_004A2768 == 0) {
         cUIEngine* res = SSXApp->Game->UI;
@@ -213,12 +213,12 @@ extern "C" void func_0020EB50(cHUDRadar* self, tRect* screenRect, tRect* area)
         D_004A2764 = cUIFontInterface_getFontByHashName(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
-    func_0020EC18(self, screenRect, area);
+    cHUDRadar_calcLayout(self, screenRect, area);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EC18);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_calcLayout);
 #ifdef SKIP_ASM
 extern int D_004A2764;
 extern int D_004A2768;
@@ -240,7 +240,7 @@ extern float D_004C8C58_f[] __asm__("D_004C8C58");
  * @param area  the rectangle (x, y, w, h)
  */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
-extern "C" void func_0020EC18(cHUDRadar* self, tRect* screenRect, tRect* area)
+extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     float textHeight;
     if (D_004A2768 != 0) {
@@ -263,7 +263,7 @@ extern "C" void func_0020EC18(cHUDRadar* self, tRect* screenRect, tRect* area)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020ED20);
+INCLUDE_ASM("fe/ovstatetrophy", updateRadarRiders);
 #ifdef SKIP_ASM
 struct sTrophySlot20ED20 {
     int active;
@@ -273,22 +273,22 @@ struct sPad16;
 extern sPad16 D_004C8BC8;
 extern char* cHUDRadar_mpRadarHeader;
 extern int D_004A2760;
-extern "C" void func_00210618(int i);
+extern "C" void updateRadarRider(int i);
 
 /**
  * Updates every rider's course progress for the trackers.
  *
- * When course data is loaded (cHUDRadar_mpRadarHeader) it runs func_00210618 for each rider of the race (SSXApp->Game->AI, count at
+ * When course data is loaded (cHUDRadar_mpRadarHeader) it runs updateRadarRider for each rider of the race (SSXApp->Game->AI, count at
  * +0x78), clears that rider's reset flag in D_004C8BC8 and finally clears D_004A2760 so the trackers may draw.
  * cOVStateHUD1P_onUpdate calls it.
  */
-extern "C" void func_0020ED20(void)
+extern "C" void updateRadarRiders(void)
 {
     if (cHUDRadar_mpRadarHeader != 0) {
         char* race = (char*)SSXApp->Game->AI;
         int i;
         for (i = 0; i < *(int*)(race + 0x78); i++) {
-            func_00210618(i);
+            updateRadarRider(i);
             ((sTrophySlot20ED20*)&D_004C8BC8)[i].active = 0;
         }
         D_004A2760 = 0;
@@ -297,7 +297,7 @@ extern "C" void func_0020ED20(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EDA0);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_renderTracker);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -386,7 +386,7 @@ struct sTex_EDA0 {
     float u1;       // 0x14
     float v1;       // 0x18
 };
-// Trophy-room icon table (func_0020EB50 loads the textures): name hash, icon size, texture.
+// Trophy-room icon table (cHUDRadar_init loads the textures): name hash, icon size, texture.
 struct sIcon_EDA0 {
     int name;
     float w;
@@ -410,7 +410,7 @@ struct sMarker_EDA0 {
     float dist;
 };
 
-// The trophy box (func_0020EC18 lays it out).
+// The trophy box (cHUDRadar_calcLayout lays it out).
 struct sTrophyBox_EDA0 {
     float x, y;         // 0x00 text position
     float top;          // 0x08
@@ -508,7 +508,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  *
  * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
  */
-extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
+extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
 {
     if (D_004A2760 != 0)
         return;
@@ -865,7 +865,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020FB40);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_renderSplitTracker);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -958,7 +958,7 @@ struct sTex_FB40 {
     float u1;       // 0x14
     float v1;       // 0x18
 };
-// Trophy-room icon table (func_0020EB50 loads the textures): name hash, icon size, texture.
+// Trophy-room icon table (cHUDRadar_init loads the textures): name hash, icon size, texture.
 struct sIcon_FB40 {
     int name;
     float w;
@@ -1016,11 +1016,11 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  * Draws the split-screen course-progress tracker for @p rider: a thin vertical line along one side of the panel with
  * racer and marker icons beside it.
  *
- * It has func_0020EDA0's early-outs and lateral-offset smoothing (the offsets are updated but not used here). The line
+ * It has cHUDRadar_renderTracker's early-outs and lateral-offset smoothing (the offsets are updated but not used here). The line
  * (icon 0, 5.5 px wide) runs down the left edge of the tracker rectangle (+0x20..+0x2C) when @p right is set and down
  * its right edge otherwise, covering the 10000-unit window centred on the viewer at +0x30 pixels per unit. Each racer
  * inside the window is drawn beside the line at its distance (the viewer icon 8, humans icon 10, AI racers icon 9;
- * layers 12, 13, 14), and so are the course markers (half of icon 5 + type, with func_0020EDA0's type-1 rule). Icons
+ * layers 12, 13, 14), and so are the course markers (half of icon 5 + type, with cHUDRadar_renderTracker's type-1 rule). Icons
  * point away from the line (uvs mirrored on the left side), are skipped when they reach either end and fade out over
  * the 60 px nearest the ends. The viewer is kept in +0x34. cOVStateHUD1P_onRender2D calls it for each panel in
  * two-player games, with @p right = (panel index != 0).
@@ -1029,7 +1029,7 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  * @param right  nonzero: line at the rectangle's left edge with the icons to its right; 0: line at the right edge,
  *               icons to the left
  */
-extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
+extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int right)
 {
     if (D_004A2760 != 0)
         return;
@@ -1331,18 +1331,18 @@ struct sPad16 { char x; int pad[3]; };
 extern sPad16 D_004C8BC8;
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002105B0);
+INCLUDE_ASM("fe/ovstatetrophy", setRadarRiderResetFlag);
 #ifdef SKIP_ASM
 /**
  * Flags rider @p riderIndex's course-progress slot for a reset.
  *
- * Sets the first word of slot @p riderIndex of D_004C8BC8 (0x18-byte slots): the next update (func_00210618) then takes the
- * rider's real progress instead of limiting the change, and func_00210820 invalidates the slot's smoothed offset.
+ * Sets the first word of slot @p riderIndex of D_004C8BC8 (0x18-byte slots): the next update (updateRadarRider) then takes the
+ * rider's real progress instead of limiting the change, and getRadarRiderLateralPos invalidates the slot's smoothed offset.
  * cRider_putAt calls it when a rider is moved.
  *
  * @param riderIndex  the rider's index in the race
  */
-extern "C" void func_002105B0(int riderIndex)
+extern "C" void setRadarRiderResetFlag(int riderIndex)
 {
     char* slot = (char*)&D_004C8BC8 + riderIndex * 0x18;
     *(int*)slot = 1;
@@ -1350,35 +1350,35 @@ extern "C" void func_002105B0(int riderIndex)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002105D0);
+INCLUDE_ASM("fe/ovstatetrophy", setRadarCourseData);
 #ifdef SKIP_ASM
 extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
 extern char* D_004A2758;
-extern "C" void func_002108F8(void);
+extern "C" void resetRadarRiders(void);
 
 /**
  * Installs the course-progress data of a resolved world chunk (kind 21 in cPS2ChunkResolve_resolve).
  *
  * Stores @p data in cHUDRadar_mpRadarHeader, its segment table (data + the offset at +0x4) in D_004A2754 and its marker table (data
- * + the offset at +0xC) in D_004A2758, then resets every rider slot (func_002108F8). The data also holds the segment
+ * + the offset at +0xC) in D_004A2758, then resets every rider slot (resetRadarRiders). The data also holds the segment
  * count (+0x0), the marker count (+0x8) and the course length (+0x10).
  *
  * @param data  the chunk's data
  */
-extern "C" void func_002105D0(char* data)
+extern "C" void setRadarCourseData(char* data)
 {
     char* segments = data + *(int*)(data + 4);
     char* markers = data + *(int*)(data + 0xC);
     cHUDRadar_mpRadarHeader = data;
     D_004A2754 = segments;
     D_004A2758 = markers;
-    func_002108F8();
+    resetRadarRiders();
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210608);
+INCLUDE_ASM("fe/ovstatetrophy", clearRadarCourseData);
 #ifdef SKIP_ASM
 extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
@@ -1387,7 +1387,7 @@ extern char* D_004A2758;
 /**
  * Forgets the course-progress data: clears cHUDRadar_mpRadarHeader, D_004A2754 and D_004A2758 (cPS2ChunkResolve_unresolve calls it).
  */
-extern "C" void func_00210608(void)
+extern "C" void clearRadarCourseData(void)
 {
     cHUDRadar_mpRadarHeader = 0;
     D_004A2754 = 0;
@@ -1396,13 +1396,13 @@ extern "C" void func_00210608(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
+INCLUDE_ASM("fe/ovstatetrophy", updateRadarRider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
 float cRider_getDistanceLeft(void* rider);
-extern "C" float func_00210820(int i);
+extern "C" float getRadarRiderLateralPos(int i);
 
 struct sTrophyEntry_210618 {
     int active;
@@ -1427,11 +1427,11 @@ extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
  * (+0x10) minus cRider_getDistanceLeft; unless the slot's reset flag is set it may change by at most 138.89 per call.
  * At or below 0 the slot gets segment 0 and distance 0; at or past the last segment's start it gets the last segment
  * and the full course length; otherwise the segment index is walked from its previous value to the segment holding the
- * distance (0x14-byte segments, start distance at +0x10). The lateral position comes from func_00210820.
+ * distance (0x14-byte segments, start distance at +0x10). The lateral position comes from getRadarRiderLateralPos.
  *
  * @param i  the rider's index in the race
  */
-extern "C" void func_00210618(int i)
+extern "C" void updateRadarRider(int i)
 {
     char* course = cHUDRadar_mpRadarHeader;
     sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
@@ -1455,7 +1455,7 @@ extern "C" void func_00210618(int i)
     {
         D_004C8BC8_210618[i].seg = 0;
         D_004C8BC8_210618[i].dist = 0.0f;
-        D_004C8BC8_210618[i].pos = func_00210820(i);
+        D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
     }
     else
     {
@@ -1464,7 +1464,7 @@ extern "C" void func_00210618(int i)
         {
             D_004C8BC8_210618[i].seg = last;
             D_004C8BC8_210618[i].dist = *(float*)(course + 0x10);
-            D_004C8BC8_210618[i].pos = func_00210820(i);
+            D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
         }
         else
         {
@@ -1475,14 +1475,14 @@ extern "C" void func_00210618(int i)
                 k--;
             D_004C8BC8_210618[i].seg = k;
             D_004C8BC8_210618[i].dist = travelled;
-            D_004C8BC8_210618[i].pos = func_00210820(i);
+            D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210820);
+INCLUDE_ASM("fe/ovstatetrophy", getRadarRiderLateralPos);
 #ifdef SKIP_ASM
 class cPosObj_210820 {
 public:
@@ -1531,7 +1531,7 @@ static inline float sy_210820(sZone_210820* z)
  * @param idx  the rider's index in the race
  * @return the lateral position
  */
-extern "C" float func_00210820(int idx)
+extern "C" float getRadarRiderLateralPos(int idx)
 {
     sZone_210820* zones = (sZone_210820*)D_004A2754;
     char* world = (char*)SSXApp->Game->AI;
@@ -1548,7 +1548,7 @@ extern "C" float func_00210820(int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_002108F8);
+INCLUDE_ASM("fe/ovstatetrophy", resetRadarRiders);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sTrophySlot2108F8 {
@@ -1572,9 +1572,9 @@ static inline void resetSlot2108F8(sTrophySlot2108F8* s)
  * Resets all six rider slots of the course-progress table D_004C8BC8.
  *
  * Each slot gets its reset flag set and its segment, distance, position and smoothed offset cleared; then D_004A2760 is
- * set so the trackers wait for the next update (func_0020ED20).
+ * set so the trackers wait for the next update (updateRadarRiders).
  */
-extern "C" void func_002108F8(void)
+extern "C" void resetRadarRiders(void)
 {
     int i;
     for (i = 0; i < 6; i++) {
@@ -1585,7 +1585,7 @@ extern "C" void func_002108F8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210940);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onCreateScreen);
 #ifdef SKIP_ASM
 struct sColor_210940 {
     float r, g, b, a;
@@ -1639,7 +1639,7 @@ extern sRect_210940 D_004C8D08;
  * as mpScrollBar. Ends with cOVState_onCreateScreen; returns early when the screen cannot be added. "AgreementSlider"
  * is used without a null check.
  */
-extern "C" void func_00210940(cOVState* self)
+extern "C" void cOVState_PRIVATEMESSAGE_onCreateScreen(cOVState* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_282ReadPrivateMessage_b), 0);
@@ -1679,33 +1679,33 @@ extern "C" void func_00210940(cOVState* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onGainTransition);
 #ifdef SKIP_ASM
 extern char str_empty_e[];
 extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
-extern "C" void func_00210BD8(cOVState* self, char* name, int a);
-extern "C" void func_00210F40(void* self, int a1, char* a2, char* a3, int a4, int a5, int a6);
+extern "C" void cOVState_PRIVATEMESSAGE_addChatLine(cOVState* self, char* name, int a);
+extern "C" void cOVState_PRIVATEMESSAGE_openKeyboard(void* self, int a1, char* a2, char* a3, int a4, int a5, int a6);
 
 /**
  * Starts the chat overlay: on the first transition it shows a waiting incoming message, or else opens the keyboard.
  *
  * When @p ok is set it reads an incoming chat packet into the buffer at +0x9C (cGameComm_getQueuedChat, up to 65 bytes) and
- * appends it as the opponent's line (func_00210BD8); without one it opens the keyboard (func_00210F40 with empty texts
+ * appends it as the opponent's line (cOVState_PRIVATEMESSAGE_addChatLine); without one it opens the keyboard (cOVState_PRIVATEMESSAGE_openKeyboard with empty texts
  * and a 61-character limit).
  *
- * Likely bug: 65 bytes are allowed into the buffer at +0x9C, which ends at +0xDC, where func_00210FA0 keeps a word.
+ * Likely bug: 65 bytes are allowed into the buffer at +0x9C, which ends at +0xDC, where cOVState_PRIVATEMESSAGE_createKeyboard keeps a word.
  *
  * @param ok  nonzero on the first transition
  * @return 1 (the transition is done)
  */
-extern "C" int func_00210B58(void* self, int ok)
+extern "C" int cOVState_PRIVATEMESSAGE_onGainTransition(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            func_00210BD8((cOVState*)self, name, 0);
+            cOVState_PRIVATEMESSAGE_addChatLine((cOVState*)self, name, 0);
         } else {
-            func_00210F40(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
+            cOVState_PRIVATEMESSAGE_openKeyboard(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
         }
     }
     return 1;
@@ -1713,7 +1713,7 @@ extern "C" int func_00210B58(void* self, int ok)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210BD8);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_addChatLine);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1723,7 +1723,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
-extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" void trimAndRestoreTextScroll(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern char str_textScrollChat_b[];
 extern char str_colon_sp_b[];
 
@@ -1734,13 +1734,13 @@ extern char str_colon_sp_b[];
  * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
  * mLinesOffset, builds the line in a cBXString from our name (cBENetworkInterface_networkOpt.strMyName) when @p
  * ownMessage is set or the opponent's (cBENetworkInterface_networkOpt.strOpponentName) otherwise, ": " (str_colon_sp_b)
- * and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8 trims the scroller to 30 lines and
+ * and @p name, adds it with cUITextScroll_addAsciiString, then trimAndRestoreTextScroll trims the scroller to 30 lines and
  * restores its scroll state from the saved values.
  *
  * @param name  the message text
  * @param ownMessage  nonzero for our own message, 0 for the opponent's
  */
-extern "C" void func_00210BD8(cOVState* self, char* name, int ownMessage)
+extern "C" void cOVState_PRIVATEMESSAGE_addChatLine(cOVState* self, char* name, int ownMessage)
 {
     cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b)));
     if (((char*)obj) == 0) {
@@ -1765,18 +1765,18 @@ extern "C" void func_00210BD8(cOVState* self, char* name, int ownMessage)
         cUITextScroll_addAsciiString(obj, lineText.Str);
         cBXString__cBXString(&lineText, 2);
     }
-    func_001A83D8(obj, 0x1E, 8, lineCount, selectedIndex, linesOffset, 0, 1);
+    trimAndRestoreTextScroll(obj, 0x1E, 8, lineCount, selectedIndex, linesOffset, 0, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* cUIStateStack_popToState(void* list);
 extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
-extern "C" void func_00210BD8(cOVState* self, char* name, int a);
+extern "C" void cOVState_PRIVATEMESSAGE_addChatLine(cOVState* self, char* name, int a);
 
 /**
  * Updates the chat overlay each frame: closes it when the online pause runs out and shows incoming messages.
@@ -1784,9 +1784,9 @@ extern "C" void func_00210BD8(cOVState* self, char* name, int a);
  * After cOVState_onUpdate, if cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout has reached 0, it
  * closes the engine's popups (cUIStateStack_popToState on the state stack) and sets this state's mAttrState to mode 7 with
  * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (cGameComm_getQueuedChat, up to 65
- * bytes) and appends it as the opponent's line (func_00210BD8).
+ * bytes) and appends it as the opponent's line (cOVState_PRIVATEMESSAGE_addChatLine).
  */
-extern "C" void func_00210D20(cOVState* self)
+extern "C" void cOVState_PRIVATEMESSAGE_onUpdate(cOVState* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1800,14 +1800,14 @@ extern "C" void func_00210D20(cOVState* self)
     if ((int)self->mpScreen != 0) {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            func_00210BD8(self, name, 0);
+            cOVState_PRIVATEMESSAGE_addChatLine(self, name, 0);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onPopupEvent);
 #ifdef SKIP_ASM
 /**
  * Forgets the chat overlay's keyboard popup (+0xE0) when that popup reports kONPOPUPDESTROY.
@@ -1815,7 +1815,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
  * @param popup  the popup that sent the event
  * @param event  the event id; only kONPOPUPDESTROY is handled
  */
-extern "C" void func_00210DD0(void* self, int popup, int event)
+extern "C" void cOVState_PRIVATEMESSAGE_onPopupEvent(void* self, int popup, int event)
 {
     if (event == cUIState::kONPOPUPDESTROY) {
         if (popup == *(int*)((char*)self + 0xe0)) {
@@ -1826,7 +1826,7 @@ extern "C" void func_00210DD0(void* self, int popup, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onWidgetEvent);
 #ifdef SKIP_ASM
 extern char str_empty_e[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
@@ -1841,8 +1841,8 @@ extern "C" int strlen(const char* s);
  *
  * Ignored without a screen. kONPREV, while no keyboard is open, pops the top state (cUIStateStack_pop on the engine's
  * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. kONNEXT, while no keyboard is open, opens the
- * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it.
- * kONKEYBOARDEND first shows any incoming message (cGameComm_getQueuedChat, func_00210BD8), then sends the keyboard's
+ * keyboard (cOVState_PRIVATEMESSAGE_openKeyboard, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it.
+ * kONKEYBOARDEND first shows any incoming message (cGameComm_getQueuedChat, cOVState_PRIVATEMESSAGE_addChatLine), then sends the keyboard's
  * mszEditString (+0x74) when it is not empty (cGameComm_sendChat on cGameComm_mGameComm) and appends it as our own
  * line. Other events go to cOVState_onWidgetEvent. kONKEYBOARDEND reads the keyboard at +0xE0 without checking that one
  * is open.
@@ -1850,7 +1850,7 @@ extern "C" int strlen(const char* s);
  * @param item  the widget (not read)
  * @param key  the event id
  */
-extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
+extern "C" void cOVState_PRIVATEMESSAGE_onWidgetEvent(cOVState* self, void* item, unsigned int key)
 {
     if ((int)self->mpScreen == 0) {
         return;
@@ -1864,19 +1864,19 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
         break;
     case cUIState::kONNEXT:
         if (*(int*)((char*)self + 0xE0) == 0) {
-            func_00210F40(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
+            cOVState_PRIVATEMESSAGE_openKeyboard(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
             cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
         }
         break;
     case cUIState::kONKEYBOARDEND: {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            func_00210BD8(self, name, 0);
+            cOVState_PRIVATEMESSAGE_addChatLine(self, name, 0);
         }
         char* typedText = *(char**)((char*)self + 0xE0) + 0x74;
         if (strlen(typedText) != 0) {
             cGameComm_sendChat(cGameComm_mGameComm, typedText);
-            func_00210BD8(self, typedText, 1);
+            cOVState_PRIVATEMESSAGE_addChatLine(self, typedText, 1);
         }
         break;
     }
@@ -1888,36 +1888,36 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_openKeyboard);
 #ifdef SKIP_ASM
-extern "C" void func_00210FA0(cOVState* self, int a1, int a2, int a3, int a4);
+extern "C" void cOVState_PRIVATEMESSAGE_createKeyboard(cOVState* self, int a1, int a2, int a3, int a4);
 extern "C" void cKeyboardPopup_setStatic2(void* p, char* a);
 extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
 
 /**
  * Opens the chat overlay's keyboard with a prompt and a starting text.
  *
- * func_00210FA0 creates and pushes the keyboard popup, cKeyboardPopup_setStatic2 sets its static (prompt) text to @p staticText and
+ * cOVState_PRIVATEMESSAGE_createKeyboard creates and pushes the keyboard popup, cKeyboardPopup_setStatic2 sets its static (prompt) text to @p staticText and
  * cKeyboardPopup_setInputText its edit text to @p inputText.
  *
- * @param textObj  stored at +0xDC by func_00210FA0 (the callers pass 0)
+ * @param textObj  stored at +0xDC by cOVState_PRIVATEMESSAGE_createKeyboard (the callers pass 0)
  * @param staticText  the prompt text (a char*)
  * @param inputText  the initial edit text (a char*)
  * @param password  nonzero for a password keyboard
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void func_00210F40(void* self, int textObj, char* staticText, char* inputText, int password, int miscData,
+extern "C" void cOVState_PRIVATEMESSAGE_openKeyboard(void* self, int textObj, char* staticText, char* inputText, int password, int miscData,
         int maxChars)
 {
-    func_00210FA0((cOVState*)self, textObj, password, miscData, maxChars);
+    cOVState_PRIVATEMESSAGE_createKeyboard((cOVState*)self, textObj, password, miscData, maxChars);
     cKeyboardPopup_setStatic2(*(void**)((char*)self + 0xE0), staticText);
     cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), inputText);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_00210FA0);
+INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_createKeyboard);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
@@ -1941,7 +1941,7 @@ extern char str_cKeyboardPopup_b[];
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void func_00210FA0(cOVState* self, int textObj, int password, int miscData, int maxChars)
+extern "C" void cOVState_PRIVATEMESSAGE_createKeyboard(cOVState* self, int textObj, int password, int miscData, int maxChars)
 {
     void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), self->mpEngine, self, password, 0xF);
     *(void**)((char*)self + 0xE0) = w;

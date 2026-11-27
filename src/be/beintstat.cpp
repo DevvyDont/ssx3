@@ -605,7 +605,7 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
 INCLUDE_ASM("be/beintstat", cBELibrary_loadData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0014C6A0(void*);
+extern "C" void cBEBoltDB_load(void*);
 extern "C" void cBERewardDB_init(void*, int);
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* FILE_load(const char* name, int flags);
@@ -639,7 +639,7 @@ extern int cBELibrary_grabPointsDB[0x2A8 / 4];
 /**
  * Sets up the career databases at boot: rewards, race and player setup, character data, profiles and grab points.
  *
- * func_0014C6A0 and cBERewardDB_init first; the race DB gets riders 0-5 in order and the 6 player entries are cleared
+ * cBEBoltDB_load and cBERewardDB_init first; the race DB gets riders 0-5 in order and the 6 player entries are cleared
  * (character slot flag set, byte +0x11 = 4). The character file is copied into cBELibrary_characterDB (0x550 bytes) and freed;
  * cBELibrary_statDefault gets each character's id, its 7 base stats from cBELibrary_IPCharacterStats plus 5, and 11 for the maxima. cBELibrary_optionDB is
  * cleared, the profiles of the 3 profile slots are initialised (cBEProfileLib_init with reload), and cBELibrary_grabPointsDB
@@ -651,7 +651,7 @@ extern "C" void cBELibrary_loadData(void)
     void* buf;
     int* grabPoints;
 
-    func_0014C6A0(D_004A6750);
+    cBEBoltDB_load(D_004A6750);
     cBERewardDB_init(cBELibrary_rewardDB, 0);
     memset(&cBELibrary_raceDB, 0, 76);
     for (i = 0; i < 6; i++) {

@@ -225,7 +225,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsigned long m);
 extern "C" void cBERewardInterface_setOwnedSongList(void* iface, int a, int b, unsigned long m);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028C2D0(void* p, unsigned long m);
+extern "C" void cSSXAudio_SetRadioPlayList(void* p, unsigned long m);
 extern "C" void cUIStateStack_pop(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
@@ -308,7 +308,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         cBERewardInterface_setPlayList(iface, self->mUserNum, self->mCharID, self->mPlaylist);
         cBERewardInterface_setOwnedSongList(iface, self->mUserNum, self->mCharID, self->mOwnedSong);
-        func_0028C2D0(cAudioInterface_bxAudio(), self->mPlaylist);
+        cSSXAudio_SetRadioPlayList(cAudioInterface_bxAudio(), self->mPlaylist);
         if (self->mInStore != 0) {
             cSSXAudio* pl = cAudioInterface_bxAudio();
             sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)pl->MusicSys.mVtbl;
@@ -349,15 +349,15 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cFEStateRequestLine_updatePlayList_77D0(void* self) __asm__("cFEStateRequestLine_updatePlayList");
 
 extern "C" void cFEStateRequestLine_updateCurrentlyPlaying_77D0(void* self) __asm__("cFEStateRequestLine_updateCurrentlyPlaying");
-extern "C" void func_0028CF98(void* p, int a, int b, long c, int d);
-extern "C" void func_002B4978(void* list, int idx);
+extern "C" void cSSXAudio_StartLocationMusic(void* p, int a, int b, long c, int d);
+extern "C" void cMusicSys_PreviewSong(void* list, int idx);
 
 /**
  * Handles menu keys on the song request list.
  *
  * kONNEXT returns 0x10 (refuse) for the last playlist song, for an unowned song outside the store, and in the
  * store when there is no free credit and too little cash. kONOPTION plays an owned song in game (sound manager
- * +0x508, func_0028CF98) or previews it in the front end (func_002B4978); kSCROLLUPDATE scrolls the list to the row;
+ * +0x508, cSSXAudio_StartLocationMusic) or previews it in the front end (cMusicSys_PreviewSong); kSCROLLUPDATE scrolls the list to the row;
  * kONMISC gives 0.
  *
  * @param requestLine  the cFEStateRequestLine (raw pointer)
@@ -405,10 +405,10 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
                     return 0x10;
                 }
                 cAudioInterface_bxAudio()->MusicSys.mCurrentSongNum = idx;
-                func_0028CF98(cAudioInterface_bxAudio(), 0, 0, -1, 1);
+                cSSXAudio_StartLocationMusic(cAudioInterface_bxAudio(), 0, 0, -1, 1);
                 cFEStateRequestLine_updateCurrentlyPlaying_77D0(self);
             } else {
-                func_002B4978(&cAudioInterface_bxAudio()->MusicSys, idx);
+                cMusicSys_PreviewSong(&cAudioInterface_bxAudio()->MusicSys, idx);
             }
         }
         break;
@@ -640,8 +640,8 @@ extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void* func_002B40F0(void* self, int i);
-extern "C" void* func_002B4120(void* self, int i);
+extern "C" void* cMusicSys_GetSongTitle(void* self, int i);
+extern "C" void* cMusicSys_GetSongArtist(void* self, int i);
 extern char str_cFEStateRequestLine[];
 extern char str_kT_16NowPlaying[];
 extern char str_kT_16Artist[];
@@ -651,7 +651,7 @@ extern char str_kT_16Artist[];
  *
  * Returns at once unless both now-playing texts exist (mpCurSongTitle, mpCurSongArtist). When the audio object's
  * current song (+0x508 of cAudioInterface_bxAudio) is below its song count (+0x504), takes that song's title
- * (func_002B40F0) and artist (func_002B4120) from the music list at +0x118. A non-empty title shows the title text
+ * (cMusicSys_GetSongTitle) and artist (cMusicSys_GetSongArtist) from the music list at +0x118. A non-empty title shows the title text
  * (setVisible) and sets it to the localised "NowPlaying" format (FELocale, hash of str_kT_16NowPlaying) printed with
  * the title through sprintf1 into a temporary 16-bit buffer (operator new tagged "cFEStateRequestLine", freed after
  * cUIText_setUnicodeString); an empty title hides it. The artist text gets the same treatment with the "Artist" format.
@@ -666,8 +666,8 @@ void cFEStateRequestLine::updateCurrentlyPlaying()
     }
     int cur = cAudioInterface_bxAudio()->MusicSys.mCurrentSongNum;
     if (cur < cAudioInterface_bxAudio()->MusicSys.mNumFESongs) {
-        char* name = (char*)func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, cur);
-        char* artist = (char*)func_002B4120(&cAudioInterface_bxAudio()->MusicSys, cur);
+        char* name = (char*)cMusicSys_GetSongTitle(&cAudioInterface_bxAudio()->MusicSys, cur);
+        char* artist = (char*)cMusicSys_GetSongArtist(&cAudioInterface_bxAudio()->MusicSys, cur);
         if (strlen(name) != 0) {
             self->mpCurSongTitle->setVisible(1);
             cFELocale* db = SSXApp->FELocale;
@@ -1133,17 +1133,17 @@ void cFEStateRequestLine::showBuyPopup(int idx)
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongTitle);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void* func_002B40F0(void* self, int i);
+extern "C" void* cMusicSys_GetSongTitle(void* self, int i);
 
 /**
- * Returns a song title from the audio object's music list (gSSXAudio + 0x118) through func_002B40F0().
+ * Returns a song title from the audio object's music list (gSSXAudio + 0x118) through cMusicSys_GetSongTitle().
  *
  * @param i  the song index
  * @return the song title
  */
 void* cFEStateRequestLine::getSongTitle(int i)
 {
-    return func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, i);
+    return cMusicSys_GetSongTitle(&cAudioInterface_bxAudio()->MusicSys, i);
 }
 #endif
 
@@ -1151,18 +1151,18 @@ void* cFEStateRequestLine::getSongTitle(int i)
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongArtist);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void* func_002B4120(void* self, int i);
+extern "C" void* cMusicSys_GetSongArtist(void* self, int i);
 
 /**
  * Returns the artist of a request-line song from the audio object's music list (cAudioInterface_bxAudio + 0x118) through
- * func_002B4120.
+ * cMusicSys_GetSongArtist.
  *
  * @param i  the song index
  * @return the artist string
  */
 void* cFEStateRequestLine::getSongArtist(int i)
 {
-    return func_002B4120(&cAudioInterface_bxAudio()->MusicSys, i);
+    return cMusicSys_GetSongArtist(&cAudioInterface_bxAudio()->MusicSys, i);
 }
 #endif
 
@@ -1267,19 +1267,19 @@ extern "C" const char* getDollarString(void* amount_)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198DA0);
+INCLUDE_ASM("fe/messagecenter", compareEquipItems);
 #ifdef SKIP_ASM
 /**
  * Compares two item pointers for qsort, ordering them by the signed short at +0xA of the items they point to,
  * ascending.
  *
- * Both arguments (@p self, @p other) point at array elements, each a pointer to an item. func_0019B180 passes it to
+ * Both arguments (@p self, @p other) point at array elements, each a pointer to an item. cFEStateCharEquip_buildItemList passes it to
  * qsort to sort its list of equipment item pointers.
  *
  * @param other  the second element
  * @return the first item's key minus the second's
  */
-extern "C" int func_00198DA0(void* self, void* other)
+extern "C" int compareEquipItems(void* self, void* other)
 {
     void* lhs = *(void**)self;
     void* rhs = *(void**)other;

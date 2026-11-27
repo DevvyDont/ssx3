@@ -220,7 +220,7 @@ extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startFELoad(void* app);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F768(void* snd);
+extern "C" void cSSXAudio_StartLoadingLoop(void* snd);
 
 // A tRGB built from its three components (the clear colour passed to SetScreenClearColour).
 struct tRGBInit : tRGB {
@@ -231,7 +231,7 @@ struct tRGBInit : tRGB {
  * Starts loading the front end when the load screen gains focus.
  *
  * Uploads the textures (cGraphicsMan_UploadTextures()), starts the front-end load (cSSXApp_startFELoad()), turns depth
- * fog off, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)) and calls func_0028F768 on the
+ * fog off, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)) and calls cSSXAudio_StartLoadingLoop on the
  * audio object. The object itself is not used, so the C takes no arguments.
  */
 extern "C" void cFELoadScreen_gainFocus(void)
@@ -243,7 +243,7 @@ extern "C" void cFELoadScreen_gainFocus(void)
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ps2GraphicsMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
-    func_0028F768(cAudioInterface_bxAudio());
+    cSSXAudio_StartLoadingLoop(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -253,14 +253,14 @@ INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_purge);
 extern "C" void cUIEngine__cUIEngine(void* self, int a1);
 extern "C" void cGraphicsMan_PurgeTextures(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028FA98(void* self, float f);
+extern "C" void cSSXAudio_StopLoadingLoop(void* self, float f);
 
 /**
  * Unloads the front-end load screen's textures and UI object.
  *
  * Flushes the renderer (graphics manager slot 19), removes SplashTexID when it is >= 0 (slot 50, RemoveTexture),
  * destroys mpUI (cUIEngine__cUIEngine with flags 3), removes the two mTexID ids when non-zero, purges the textures
- * (cGraphicsMan_PurgeTextures()) and calls func_0028FA98 on the audio object with 1.0.
+ * (cGraphicsMan_PurgeTextures()) and calls cSSXAudio_StopLoadingLoop on the audio object with 1.0.
  */
 void cFELoadScreen::purge()
 {
@@ -281,7 +281,7 @@ void cFELoadScreen::purge()
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    func_0028FA98(cAudioInterface_bxAudio(), 1.0f);
+    cSSXAudio_StopLoadingLoop(cAudioInterface_bxAudio(), 1.0f);
 }
 #endif
 

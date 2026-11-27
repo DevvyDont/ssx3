@@ -1701,7 +1701,7 @@ INCLUDE_ASM("seg/seg_14B10", cRider_checkForReaction);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int AITick();
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_0029FF80(int snd, void* rider, int side);
+extern "C" void cSSXAudio_SpeakCheer(int snd, void* rider, int side);
 int cRider_getControlState(void* self);
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
@@ -1719,7 +1719,7 @@ static inline float vAbs_115B58(float x)
  * EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff) flagged at the AI tick at +0x354 (header ReactionEventTick; On Tour
  * ReactionEventTick). Nothing happens while channel 2's animation category is 5 or 10 or channel 1 plays anything.
  * Within 180 ticks of the flag it plays 0x13B for types 1 .. 3 (with the animation filter at +0x8C8 for that play;
- * types 1 and 2 also cue func_0029FF80), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
+ * types 1 and 2 also cue cSSXAudio_SpeakCheer), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
  * the control state is 0. The reaction is then cleared (type 0, tick -1), also when it is older than 180 ticks.
  */
 void cRider::checkForReaction()
@@ -1746,13 +1746,13 @@ void cRider::checkForReaction()
             mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
             mRiderAnim->GraftMask = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 0);
+            cSSXAudio_SpeakCheer(cAudioInterface_bxAudio(), ((char*)this), 0);
             break;
         case 2:
             mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
             mRiderAnim->GraftMask = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 1);
+            cSSXAudio_SpeakCheer(cAudioInterface_bxAudio(), ((char*)this), 1);
             break;
         case 3:
             mRiderAnim->GraftMask = GraftFromUpperSpine;

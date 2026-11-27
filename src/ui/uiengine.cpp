@@ -974,7 +974,7 @@ void cUIIcon::setUIData(tUIBaseObject* pObj)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
+INCLUDE_ASM("ui/uiengine", SwapFloats__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Swaps two floats.
@@ -984,7 +984,7 @@ INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
  * @param first  the first float
  * @param second  the second float
  */
-void func_00398A60(void* first, void* second)
+void SwapFloats(void* first, void* second)
 {
     float saved = *(float*)first;
     *(float*)first = *(float*)second;
@@ -1186,10 +1186,10 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
         SetTexture_8A78(ctx, -1);
     }
     if (self->flags & 2) {
-        func_00398A60(&verts[0].u, &verts[1].u);
-        func_00398A60(&verts[0].v, &verts[1].v);
-        func_00398A60(&verts[2].u, &verts[3].u);
-        func_00398A60(&verts[2].v, &verts[3].v);
+        SwapFloats(&verts[0].u, &verts[1].u);
+        SwapFloats(&verts[0].v, &verts[1].v);
+        SwapFloats(&verts[2].u, &verts[3].u);
+        SwapFloats(&verts[2].v, &verts[3].v);
     }
     for (char i = 0; i < GetTurns_8A78(self); i++) {
         float swapUV = verts[0].u;

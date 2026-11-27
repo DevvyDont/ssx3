@@ -32,7 +32,7 @@ rom:0x14783C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14785C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14787C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
 rom:0x14789C reloc:MIPS_LO16 symbol:cBENewRaceInterface_newRace
-// fe/ovstatepause func_001FD320: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(str_kT_HELPBeatPostedTimePass)` (its %lo is at rom 0xFEA14).
+// fe/ovstatepause cOVState_CHALLENGE_PREEVENT_onGainTransition: the bnel delay slot holds reorg's copy of the target's `lui $4, %hi(str_kT_HELPBeatPostedTimePass)` (its %lo is at rom 0xFEA14).
 rom:0xFEA00 reloc:MIPS_HI16 symbol:str_kT_HELPBeatPostedTimePass
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
@@ -281,7 +281,7 @@ rom:0x1BD11C reloc:MIPS_LO16 symbol:D_004D4428
 rom:0x1BD330 reloc:MIPS_HI16 symbol:D_004D45A8
 rom:0x1BD3A0 reloc:MIPS_LO16 symbol:D_004D45A8
 rom:0x1BD3A8 reloc:MIPS_LO16 symbol:D_004D45B8
-// ui/uivector func_003A3F48 (tools/gen/reloc_from_diff.py)
+// ui/uivector __sti__all_in_one_ui_cpp (tools/gen/reloc_from_diff.py)
 rom:0x2A52BC reloc:MIPS_HI16 symbol:D_00508530
 rom:0x2A52C4 reloc:MIPS_LO16 symbol:D_00508530
 rom:0x2A532C reloc:MIPS_HI16 symbol:D_00508570

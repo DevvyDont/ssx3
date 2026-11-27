@@ -50,12 +50,12 @@ CHECK_SIZE(tLastEventRiderStats, 0xB0);
 // tBEHighScore* getHighScoreTable(eBELocationID, eBEGameEvent); [R] retail cBELibrary_getHighScoreTable returns
 // &cBELibrary_highScores[cBELibrary_getScoreType(location, event)] with a 0x64-byte stride (5 entries of 0x14; the
 // array is 2600 bytes = 26 x 0x64), so retail's name is 12 bytes. [U] cBEScoreInterface's high-score getters
-// (func_001550E8 / func_00155130 return uiHighScore, func_00155190 the character's entry for cCharacter,
-// func_00155208 strUserName).
+// (cBEScoreInterface_getHighScore / cBEScoreInterface_getCurrentHighScore return uiHighScore, cBEScoreInterface_getCurrentHighScoreCharacter the character's entry for cCharacter,
+// cBEScoreInterface_getCurrentHighScoreName strUserName).
 struct tBEHighScore {
-    unsigned int uiHighScore;        // 0x00 [O]; [U] the score (func_001550E8 / func_00155130 return it)
-    int cCharacter;                  // 0x04 [O]; [U] the character id (func_00155190 indexes D_00530990 with it)
-    char strUserName[12];            // 0x08 [O] (24 bytes in On Tour); [R] the 0x14-byte entry stride; [U] func_00155208
+    unsigned int uiHighScore;        // 0x00 [O]; [U] the score (cBEScoreInterface_getHighScore / cBEScoreInterface_getCurrentHighScore return it)
+    int cCharacter;                  // 0x04 [O]; [U] the character id (cBEScoreInterface_getCurrentHighScoreCharacter indexes D_00530990 with it)
+    char strUserName[12];            // 0x08 [O] (24 bytes in On Tour); [R] the 0x14-byte entry stride; [U] cBEScoreInterface_getCurrentHighScoreName
                                      //      returns it
 };
 

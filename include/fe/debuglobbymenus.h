@@ -11,7 +11,7 @@
 // The template instantiations are written below as one flat struct per class layout: both AccountDetailsMenu
 // instantiations (cDebugLobbyScreen::OnCreate at vtable AccountDetailsMenu_vtbl, ::OnLogin at AccountDetailsMenu1_vtbl) share one struct.
 // A functor argument (cDebugLobbyScreen::OnX, one word: the screen) is copied into the menu, and the menu's onCommand
-// (cMenu vtable slot 3) passes that word to the matching cDebugLobbyScreen callback (func_0017E030 ... func_0017E558).
+// (cMenu vtable slot 3) passes that word to the matching cDebugLobbyScreen callback (cDebugLobbyScreen_createAccount ... cDebugLobbyScreen_abortChallenge).
 // Sizes: each is the end of its last row (the embedding strides of util/menu.h) and equals the char[] member size
 // cDebugLobbyScreen gives it (mLoginMenu 0x594, mContinueMenu 0x148, mPersonaMenu 0x5E0, mRoomMenu 0x318,
 // mOccupantsMenu 0x4F0, mChatMenu 0x38C, mChallengedMenu 0x1EC, mAbortMenu 0x158); the destructors in
@@ -77,7 +77,7 @@ struct AccountDetailsMenu {
                                      //       AccountDetailsMenu1_vtbl (OnLogin)
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnCreate / OnLogin: the owning screen); [U]
-                                     //       onCommand passes it to func_0017E030 / func_0017E118
+                                     //       onCommand passes it to cDebugLobbyScreen_createAccount / cDebugLobbyScreen_login
     cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, title ("Create Account"
                                      //       / "Login")); destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -171,7 +171,7 @@ struct CreatePersonaMenu {
     void** mVtbl;                    // 0x12C [R] CreatePersonaMenu_CreatePersonaMenu stores CreatePersonaMenu_vtbl
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnCreatePersona: the owning screen); [U]
-                                     //       CreatePersonaMenu_onCommand passes it to func_0017E1C0
+                                     //       CreatePersonaMenu_onCommand passes it to cDebugLobbyScreen_createPersona
     cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Create Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -218,7 +218,7 @@ struct DeletePersonaMenu {
     void** mVtbl;                    // 0x12C [R] DeletePersonaMenu_DeletePersonaMenu stores DeletePersonaMenu_vtbl
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeletePersona: the owning screen); [U]
-                                     //       DeletePersonaMenu_onCommand passes it to func_0017E228
+                                     //       DeletePersonaMenu_onCommand passes it to cDebugLobbyScreen_deletePersona
     cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Delete Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -269,7 +269,7 @@ struct PersonaMenu {
                                      //       dtor; [U] PersonaMenu_setpersonas fills it (DeletePersonaMenu_setpersonas)
     cDebugLobbyScreen* mScreen;      // 0x4E0 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectPersona: the owning screen); [U]
-                                     //       PersonaMenu_onCommand passes it to func_0017E290
+                                     //       PersonaMenu_onCommand passes it to cDebugLobbyScreen_selectPersona
     cNullMenuItem mTitleItem;        // 0x4E4 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x4E4, "Select Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x500 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x500, h); destroyed by the
@@ -323,7 +323,7 @@ struct LobbyMenu {
     void** mVtbl;                    // 0x12C [R] LobbyMenu_LobbyMenu stores LobbyMenu_vtbl
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectRoom: the owning screen); [U]
-                                     //       LobbyMenu_onCommand passes it to func_0017E2F8
+                                     //       LobbyMenu_onCommand passes it to cDebugLobbyScreen_joinRoom
     cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Select Room");
                                      //       destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -372,10 +372,10 @@ struct RoomMenu {
     void** mVtbl;                    // 0x12C [R] RoomMenu_RoomMenu stores RoomMenu_vtbl
     cDebugLobbyScreen* mSelectUserScreen; // 0x130 [R] ctor stores the first word of its functor argument (preview
                                      //       template argument cDebugLobbyScreen::OnSelectUser: the owning screen); [U]
-                                     //       RoomMenu_onCommand passes it to func_0017E368 (a user row)
+                                     //       RoomMenu_onCommand passes it to cDebugLobbyScreen_selectOccupant (a user row)
     cDebugLobbyScreen* mChatScreen;  // 0x134 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnChat: the owning screen); [U]
-                                     //       RoomMenu_onCommand passes it to func_0017E3B8 (ID -2, "Chat")
+                                     //       RoomMenu_onCommand passes it to cDebugLobbyScreen_openChatMenu (ID -2, "Chat")
     cNullMenuItem mTitleItem;        // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "Room Occupants");
                                      //       destroyed by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x154 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x154, h); destroyed by the
@@ -424,7 +424,7 @@ struct ChatMenu {
     void** mVtbl;                    // 0x12C [R] ChatMenu_ChatMenu stores ChatMenu_vtbl
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnMessage: the owning screen); [U]
-                                     //       ChatMenu_onCommand passes it to func_0017E418
+                                     //       ChatMenu_onCommand passes it to cDebugLobbyScreen_sendChatLine
     cNullMenuItem mTitleItem;        // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Chat Menu"); destroyed
                                      //       by the dtor
     cSpaceMenuItem mSpaceItem;       // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -474,10 +474,10 @@ struct ChallengeResponseMenu {
     void** mVtbl;                    // 0x12C [R] ctor (0x001DB148) stores D_0046D3D0
     cDebugLobbyScreen* mAcceptScreen; // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAcceptChallenge: the owning screen); [U]
-                                     //       ChallengeResponseMenu_onCommand ID 0 calls func_0017E490 with it
+                                     //       ChallengeResponseMenu_onCommand ID 0 calls cDebugLobbyScreen_acceptChallenge with it
     cDebugLobbyScreen* mDeclineScreen; // 0x134 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeclineChallenge: the owning screen); [U]
-                                     //       ChallengeResponseMenu_onCommand ID 1 calls func_0017E4F0 with it
+                                     //       ChallengeResponseMenu_onCommand ID 1 calls cDebugLobbyScreen_declineChallenge with it
     cNullMenuItem mTitleItem;        // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "You've been
                                      //       Challenged!"); destroyed by the dtor
     cNullMenuItem mByItem;           // 0x154 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x154, "by"); destroyed by the
@@ -527,7 +527,7 @@ struct AbortMenu {
     void** mVtbl;                    // 0x12C [R] AbortMenu_AbortMenu stores AbortMenu_vtbl
     cDebugLobbyScreen* mScreen;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAbortChallenge: the owning screen); [U]
-                                     //       AbortMenu_onCommand passes it to func_0017E558
+                                     //       AbortMenu_onCommand passes it to cDebugLobbyScreen_abortChallenge
     cCommandMenuItem mAbortItem;     // 0x134 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Abort"); destroyed by
                                      //       the dtor
 

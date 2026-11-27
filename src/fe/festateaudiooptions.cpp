@@ -125,7 +125,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void cBERewardInterface_setRadioMode(void* iface, int player, int a2, int a3);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028BF78(void* audio, int a1);
+extern "C" void cSSXAudio_SetRadioMode(void* audio, int a1);
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* p, char* a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void cUIStateStack_pop(void* stack, int a1);
@@ -199,7 +199,7 @@ static inline void setText_AOWE(cUIText* t, char* str)
 static inline void applyMode_AOWE(sAudioOptions_AOWE* self)
 {
     cBERewardInterface_setRadioMode(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->player, self->f70, self->sel);
-    func_0028BF78(cAudioInterface_bxAudio(), self->sel);
+    cSSXAudio_SetRadioMode(cAudioInterface_bxAudio(), self->sel);
 }
 
 static inline void* vcall_AOWE(sAudioOptions_AOWE* self, int slot, sWidget_AOWE* w)

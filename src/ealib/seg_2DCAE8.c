@@ -10131,7 +10131,7 @@ extern void func_003F4C98_6E08(int *, int, int) __asm__("func_003F4C98");
  * Creates a DirtySock game-util (connection setup) object on the IOP.
  *
  * Sends 'gmut'/'crea' and waits for the IOP's reference. cDSockChannel_connect and cDSockChannel_listen store it as
- * mGameUtil; LobbyMan's func_0025A650 creates its mpConfig with it to advertise the persona.
+ * mGameUtil; LobbyMan's LobbyMan_createConfig creates its mpConfig with it to advertise the persona.
  *
  * @return the IOP game-util reference
  */
@@ -10306,7 +10306,7 @@ extern int D_004A4860_7120[] __asm__("D_004A4860");
  * Advertises a name of a given kind on the network through the IOP game util.
  *
  * Joins @p kind and @p name with a tab ("%s\t%s", D_004A4860) and sends the text with 'gmut'/'advt'. LobbyMan's
- * func_0025A650 calls it with its config util, "SSX-PS2-2004" and the persona name.
+ * LobbyMan_createConfig calls it with its config util, "SSX-PS2-2004" and the persona name.
  *
  * @param util  the IOP game-util reference
  * @param kind  the advert kind (game id string)
@@ -10355,7 +10355,7 @@ int func_003E7218_impl(int a, int b, char *c) __asm__("func_003E7218");
  * Looks up the address of an advertised name through the IOP game util.
  *
  * Sends 'gmut'/'loca' with @p util and the string @p name (an empty string when null) and waits for the address. @p kind is not
- * sent. LobbyMan's func_0025A730 uses it to find a persona's host.
+ * sent. LobbyMan's LobbyMan_getConfigValue uses it to find a persona's host.
  *
  * @param util  the IOP game-util reference
  * @param kind  the advert kind (unused)
@@ -11033,7 +11033,7 @@ extern void func_003E80C0_7FF0(void *) __asm__("func_003E80C0");
  * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p tagString is duplicated as tags when it contains '=',
  * otherwise stored as the "VERS" tag. Creates the lobby protocol (func_003F5478(0x8000), +0) and a ping object
  * (func_003E7340, +4), stores the debug routine and its data (+0x548, +0x544; see func_003E76A8) and resets everything
- * with func_003E80C0. LobbyMan (func_0025A948) creates its mpLobbyApi with it.
+ * with func_003E80C0. LobbyMan (LobbyMan_createLobbyApi) creates its mpLobbyApi with it.
  *
  * @param tagString  the default tags, or a version string, or 0
  * @param debugData  data passed to the debug routine
@@ -11168,7 +11168,7 @@ typedef struct { char pad[0x514]; E8248_pair e[1]; } E8248_S;
  * Sets one of the lobby's five event routines (+0x514 + 8 * @p i: routine, context).
  *
  * Slot 0 receives every message, 1 chat messages, 3 connection events and 4 game-session ("play") events
- * (func_003E95C8); LobbyMan (func_0025A948) installs 0, 1, 3 and 4.
+ * (func_003E95C8); LobbyMan (LobbyMan_createLobbyApi) installs 0, 1, 3 and 4.
  *
  * @param table  the lobby
  * @param i  the routine slot (0-4)
@@ -11627,7 +11627,7 @@ extern void cDirtysock_tag_TagFieldSetNumber_8B10(char *, int, char *, int) __as
 extern void cDirtysock_tag_TagFieldSetString_8B10(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern void func_00259210_8B10(void *) __asm__("func_00259210");
 extern int *func_003E7718_8B10(void *, int, int, int) __asm__("func_003E7718");
-extern int func_003ECB00_8B10(char *, int, char *) __asm__("func_003ECB00");
+extern int cDirtysock_tag_TagFieldMerge_8B10(char *, int, char *) __asm__("cDirtysock_tag_TagFieldMerge");
 extern void *func_003EE480_8B10(int, int) __asm__("func_003EE480");
 extern int func_003EE9A0_8B10(int) __asm__("func_003EE9A0");
 extern void func_003F35D0_8B10(char *, int, char *, char *, int, int) __asm__("func_003F35D0");
@@ -11658,11 +11658,11 @@ struct O_8B10 {
  *
  * Allowed only in the states 'idle', 'auth', 'acct' and 'skey' (else -1). Queues a request record with the routine and
  * context (func_003E7718; -2 when that fails). For 'auth', 'acct' and 'pass' the tags are copied, the lobby's default
- * tags (+0x34) merged in (func_003ECB00) and PASS replaced: without a session key (+0x24 empty) by TagFieldSetCrypt
+ * tags (+0x34) merged in (cDirtysock_tag_TagFieldMerge) and PASS replaced: without a session key (+0x24 empty) by TagFieldSetCrypt
  * with the MASK text from the '@dir' reply (+0x4BC) plus a MASK tag holding its SESS number (+0x4B8); with one by '~'
  * and the password encrypted with it (func_003F35D0). A 'snap' command empties the list slot named by its CHAN tag
  * (4-7), clears +0x508 and counts a pending snapshot (+0x50C). The command goes out with func_003F5910. LobbyMan's
- * requests (func_0025B608 and others) use it.
+ * requests (LobbyMan_sendRequest and others) use it.
  *
  * @param cmd  the command FourCC
  * @param tags  the command's tag text
@@ -11688,7 +11688,7 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     }
     if (cmd == 'auth' || cmd == 'acct' || cmd == 'pass') {
         cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, tags);
-        func_003ECB00_8B10(buf, 0x200, self->mTags);
+        cDirtysock_tag_TagFieldMerge_8B10(buf, 0x200, self->mTags);
         cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, str_PASS_b), str + 1, 0x1F,
                                               str_empty_k);
         if (self->mSessionKey[0] == 0) {
@@ -12201,7 +12201,7 @@ struct User_95C8 {                  /* 0x138 */
     char name[0x20];
     char ping[8];                   /* the P tag (names ours, from the tags) */
     int addr;
-    int rank;                       /* the R tag (as Rank_95C8's; func_0025F288 reads it as the rank) */
+    int rank;                       /* the R tag (as Rank_95C8's; LobbyMan_getUserInfo reads it as the rank) */
     char stats[0x80];               /* the S tag */
     char extra[0x80];               /* the X tag */
 };

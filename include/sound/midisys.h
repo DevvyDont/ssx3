@@ -21,8 +21,8 @@
 
 struct cBankManager;
 
-// One cMidiSys::mMidiBanks level (8 bytes; member names are ours). [U] MIDI_Begin (func_002A8450) stores (bank,
-// data) at [mInst]; MIDI_End (func_002A86B8) plays data from bank, passes them to cBankMonitorInstance SetMIDI
+// One cMidiSys::mMidiBanks level (8 bytes; member names are ours). [U] MIDI_Begin (cMidiSys_OpenMidiOpts) stores (bank,
+// data) at [mInst]; MIDI_End (cMidiSys_PlayMidi) plays data from bank, passes them to cBankMonitorInstance SetMIDI
 // (cBankMonitorInstance_SetMIDI, On Tour SetMIDI(void* pData, int Bank)) and to the delay-echo monitors.
 struct tMidiBank {
     int mBank;    // 0x0 [U] cBankManager bank index (BANK_Handle'd before playing)
@@ -36,7 +36,7 @@ struct cMidiSys {
     int* mPatch;                  // 0x008 [O] cBankSys::mPatch; [R] cBankSys ctor "mPath"
     void** mVtbl;                 // 0x00C [R] cBankSys_vtbl (cMidiSys ctor/dtor; cBankSys's primary vtable)
     // --- cMidiSys
-    tMidiBank* mMidiBanks;        // 0x010 [R] operator new(0x20, "MIDIBANKS") (4 play-option levels); dtor cMemMan_free()s it; [U] func_002A8450 / func_002A86B8
+    tMidiBank* mMidiBanks;        // 0x010 [R] operator new(0x20, "MIDIBANKS") (4 play-option levels); dtor cMemMan_free()s it; [U] cMidiSys_OpenMidiOpts / cMidiSys_PlayMidi
 };
 
 CHECK_OFFSET(tMidiBank, mBank, 0x0);

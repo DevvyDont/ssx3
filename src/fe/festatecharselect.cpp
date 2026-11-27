@@ -388,7 +388,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern "C" void* func_001887A0(void* mem, void* owner, int a2);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* mem, void* owner, int a2);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* mem, void* owner, int a2, unsigned char a3);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
@@ -526,7 +526,7 @@ void cFEStateCharSelect::onWidgetEvent(cUIThing* pWidget, unsigned int event)
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, mUserNum, mCurrentCtrl);
         refresh_17E8(iface);
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)mpEngine, 1);
+        cUIState* st = (cUIState*)cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
         cFERider_setVisible(riderSlot_17E8((this)), 0);

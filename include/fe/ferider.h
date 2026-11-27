@@ -68,7 +68,7 @@ struct cFERider {
     int mBoneMap[14];               // 0xC7C [O]; [U] initBoneMap fills it; getBonePosition & co. index it;
                                     //       updateModelPose resets bones [12] and [13] (0xCAC, 0xCB0, the board)
     int mCompiledModel;             // 0xCB4 [O] (bool); [R] 0; [U] compileModel sets it, cFERider_loadModels clears it
-    int mDoneLoadingTextures;       // 0xCB8 [O] (bool); [R] 0; [U] cFERider_isDoneLoadingTextures / func_0019FA78 set it,
+    int mDoneLoadingTextures;       // 0xCB8 [O] (bool); [R] 0; [U] cFERider_isDoneLoadingTextures / cFERider_releasePartTextures set it,
                                     //       queueLoadExtraTextures / cFERider_loadTextures clear it
     int mDoneLoadingModels;         // 0xCBC [O] (bool); [R] 0; [U] update sets it once cFERider_isDoneLoadingModels succeeds
     int mDoneUpdatingModelParts;    // 0xCC0 [O] (bool); [R] 0; [U] update runs updateAnimModelParts once and sets it

@@ -3,13 +3,13 @@
 
 // BuddyApiRefT: the state of DirtySock's BuddyApi (C), the client for EA's buddy / messenger server: login ('AUTH'),
 // presence (PROD / STAT / RSRC / SHOW), the roster and ignore lists, add / delete / send requests and incoming
-// messages. BuddyMan (online/buddyman.h) owns one as mpBuddyApi: func_002614E8 creates it with func_003F0710 (0x50C bytes
+// messages. BuddyMan (online/buddyman.h) owns one as mpBuddyApi: BuddyMan_createBuddyApi creates it with func_003F0710 (0x50C bytes
 // from func_002591E8, zero-filled). Retail code: unit seg/seg_2F0F40, func_003F00D8 .. func_003F17D8 (its MD5 helpers
 // func_003F2220 / func_003F30F0 / func_003F3128 work on their own context). EA source: DirtySock buddyapi.c (retail's
 // "buddyapi" label); no On Tour / preview layout.
 //
 // Name: DirtySock's BuddyApiRefT, from the July 2003 preview's mangled BuddyMan callbacks (on*__8BuddyManP12BuddyApiMsgT
-// P12BuddyApiRefTP12BuddyApiMsgTPv) together with retail's data flow: func_002614E8 stores func_003F0710's result in
+// P12BuddyApiRefTP12BuddyApiMsgTPv) together with retail's data flow: BuddyMan_createBuddyApi stores func_003F0710's result in
 // the member include/online/buddyman.h types as BuddyApiRefT* mpBuddyApi (+0xC8), and the BuddyApi functions all take it
 // first. Member names are ours, from retail use (the DirtySock tag each text carries is quoted); the request slot is
 // left as a plain array.

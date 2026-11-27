@@ -769,7 +769,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByStruct);
 // result as fresh memory (no aliasing with the record or the vtables).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cUIThing_cUIThing(void* self, void* screen, int a2);
-extern "C" void* func_0021CCC8(void* self);
+extern "C" void* tAttrIcon_tAttrIcon1(void* self);
 extern "C" void* cList_cList(void* self);
 extern "C" void* tAttrMenu_tAttrMenu(void* self);
 extern "C" void* tAttrPair_tAttrPair(void* self);
@@ -819,7 +819,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         cUIIcon* created = (cUIIcon*)alloc_D078(sizeof(cUIIcon), str_UIIcon);
         cUIThing_cUIThing(created, this, 0);
         VPTR_OF(cListNode, created) = cUIIcon_vtbl;
-        func_0021CCC8(&created->mAttrIcon);
+        tAttrIcon_tAttrIcon1(&created->mAttrIcon);
         created->mTextureID = -1;
         created->mpTextureElem = 0;
         created->setUIData(rec);

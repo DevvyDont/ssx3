@@ -251,7 +251,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
-extern "C" int func_001E3408(void);
+extern "C" int countUnreadMessages(void);
 extern "C" void cOVState_onUpdate(void* self);
 extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
@@ -268,14 +268,14 @@ extern char str_trans_out[];
  * Pulses the "NewMail" icon while messages are waiting and closes the pause menu when an online pause times
  * out.
  *
- * The pulse runs in kOVSTATE_PAUSE_COMPETE, _BIGCHAL and _SPOKE when func_001E3408() reports mail. When the online
+ * The pulse runs in kOVSTATE_PAUSE_COMPETE, _BIGCHAL and _SPOKE when countUnreadMessages() reports mail. When the online
  * pause or overlay timeout reaches 0 it sends an unpause, plays "trans_out", removes the PDA and pops the pause state.
  */
 extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
 {
     int st = self->mPauseMenuType;
     if ((st == kOVSTATE_PAUSE_COMPETE || st == kOVSTATE_PAUSE_BIGCHAL || st == kOVSTATE_PAUSE_SPOKE)
-        && func_001E3408() > 0)
+        && countUnreadMessages() > 0)
     {
         float phase = self->mNewMailAlpha + self->mNewMailAlphaDiff;
         self->mNewMailAlpha = phase;

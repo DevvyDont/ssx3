@@ -80,41 +80,41 @@ struct cFEStateCharEquip : public cFEState {
     int mCharID;                    // 0x0BC [O]; [R] cBENewPlayerInterface_getPlayerCharID(player, mUserNum)
     int mMoneyAvailable;            // 0x0C0 [O]; [R] cBEEconInterface_getMoney(.., mUserNum, mCharID); [U] buying
                                     //       subtracts the price, the store rows colour by it
-    int mCurrentPolyCount;          // 0x0C4 [O]; [R] func_0014B478(shop, mUserNum, mCharID) (the equip points)
+    int mCurrentPolyCount;          // 0x0C4 [O]; [R] cBEBoltInterface_getUsedEquipPoints(shop, mUserNum, mCharID) (the equip points)
     int mEquipMode;                 // 0x0C8 [O]; [R] 1 = store (inStore), 0 = inventory; [U] isInStore tests == 1,
                                     //       switchEquipMode flips it
     int mStoreNum;                  // 0x0CC [O]; [R] the last hub's peak (1/2/3) with a store or mode switch, else -1;
-                                    //       [U] the store lists only items of this store number (func_0019B180)
+                                    //       [U] the store lists only items of this store number (cFEStateCharEquip_buildItemList)
     int mCategoryStack[20];         // 0x0D0 [U] (no On Tour member) MEM_fill(.., kBolt_None, 80) in the ctor and
                                     //       switchEquipMode; onWidgetEvent pushes the opened category id at
                                     //       [mCurrentStackPos], back pops it
     int mCurrentStackPos;           // 0x120 [O] (On Tour's member after mStoreNum); [R] 0; [U] the depth into
                                     //       mCategoryStack (onWidgetMenu event 7 steps it down)
     tBEBoltDef* mpItems[0x20D];     // 0x124 [U] (no On Tour member) the listed items (the BE library's bolt
-                                    //       definitions, be/bedbprofile.h) built by func_0019B180 (MEM_fill(mpItems,
+                                    //       definitions, be/bedbprofile.h) built by cFEStateCharEquip_buildItemList (MEM_fill(mpItems,
                                     //       0, 2100))
-    int mNumItems;                  // 0x958 [R] 0; [U] the count of mpItems (func_0019B180 clears and appends,
-                                    //       func_0019B458 removes one); func_0019B618 passes its low byte (lbu) to
+    int mNumItems;                  // 0x958 [R] 0; [U] the count of mpItems (cFEStateCharEquip_buildItemList clears and appends,
+                                    //       cFEStateCharEquip_removeItem removes one); cFEStateCharEquip_redrawRows passes its low byte (lbu) to
                                     //       cUIMenu_setScrollableMenu
     int mLargePreviewDelay;         // 0x95C [O]; [R] -1; [U] startLargePreviewLoad sets 20 or 1, updatePreviewLoad
                                     //       counts it down, cancelLargePreviewLoad sets -1
     char mLargePreviewFileName[255]; // 0x960 [O]; [R] [0] = 0; [U] startLargePreviewLoad builds the file name here
     char unk_A5F[0x1];              // 0xA5F padding
     int mIconsLoaded;               // 0xA60 [O] (bool); [R] 0; [U] the out-of-line isIconsLoaded cFEStateCharEquip_isIconsLoaded (lw);
-                                    //       onUpdate sets it once the icon file is in (func_0019E238)
-    int mIconsFileIndex;            // 0xA64 [O]; [R] -1, then func_0019DA10(RealFE + 0x1A70, mCharID, name, 9, 1, 0);
-                                    //       [R] the dtor releases it (func_0019DC20) and sets -1
+                                    //       onUpdate sets it once the icon file is in (cFEBoltFileManager_isFileLoaded)
+    int mIconsFileIndex;            // 0xA64 [O]; [R] -1, then cFEBoltFileManager_requestFile(RealFE + 0x1A70, mCharID, name, 9, 1, 0);
+                                    //       [R] the dtor releases it (cFEBoltFileManager_releaseFile) and sets -1
     int mIconTextureID;             // 0xA68 [O]; [R] -1; [U] the dtor releases it (graphics manager slot 50)
     int mPreviewTextureFileIndex;   // 0xA6C [O]; [R] -1; [U] updatePreviewLoad queues the large preview file here
     int mPreviewTextureID;          // 0xA70 [O]; [R] -1; the dtor releases it
     int mOldPreviewTextureID;       // 0xA74 [O]; [R] -1; the dtor releases it
-    int mRowPoints[6];              // 0xA78 [U] (no On Tour member) [R] -99999 x6; func_0019B7E0 stores each inventory
-                                    //       row's change in equip points, func_0019AA08 / onWidgetMenu read it
+    int mRowPoints[6];              // 0xA78 [U] (no On Tour member) [R] -99999 x6; cFEStateCharEquip_drawInventoryRow stores each inventory
+                                    //       row's change in equip points, cFEStateCharEquip_updateInventoryPreview / onWidgetMenu read it
     cTextureElement* mpGreenDollarSignElem; // 0xA90 [O]; [R] the texture bank's "dollargreen" element
     cTextureElement* mpRedDollarSignElem;   // 0xA94 [O]; [R] "dollarred"
     cTextureElement* mpCheckMarkElem;       // 0xA98 [O]; [R] "checkbox"
     cTextureElement* mpEmptyBoxElem;        // 0xA9C [O]; [R] "empty_box"
-    cTextureElement* mpPlusElem;            // 0xAA0 [O]; [R] 0; [U] func_0019BA60 shows it for a store category
+    cTextureElement* mpPlusElem;            // 0xAA0 [O]; [R] 0; [U] cFEStateCharEquip_drawStoreRow shows it for a store category
     float mZoom;                    // 0xAA4 [O]; [P] preview 0x3A34; [U] onCreateScreen 0, onInputBegin clamps 0..1,
                                     //       update3DPositions
     float mPan;                     // 0xAA8 [O]; [P] 0x3A38; [U] onCreateScreen -1, onInputBegin clamps -1..1

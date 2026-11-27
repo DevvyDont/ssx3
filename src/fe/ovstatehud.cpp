@@ -247,7 +247,7 @@ extern tHUDPictureDB gTextPictDB[];
  * Lays out a HUD text line with inline pictures: splits its 16-bit text into text and picture segments and measures
  * them.
  *
- * The line object (filled by func_001E94E0 / makeTextPictLine) holds the total width (+0x0), height (+0x4), font (+0x8),
+ * The line object (filled by makeTextPictLineAscii / makeTextPictLine) holds the total width (+0x0), height (+0x4), font (+0x8),
  * text y offset (+0xC), scale (+0x10, +0x14), segment count (+0x18), six (width, pointer) segments (+0x1C) and the text
  * (+0x4C). First the font's Scale is set to BaseScale times the line scale. Each '@' ends the current text segment (it
  * is overwritten with 0) and starts a picture name that runs to the next space or the end; the name's GetHashValue32 is
@@ -333,7 +333,7 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovstatehud", func_001E94E0);
+INCLUDE_ASM("fe/ovstatehud", makeTextPictLineAscii);
 #ifdef SKIP_ASM
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" void splitTextPictLine(tTextPictLine* self);
@@ -350,7 +350,7 @@ struct sVec2f { float x, y; };
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void func_001E94E0(tTextPictLine* self, char* str, cFont* font, sVec2f* scale)
+extern "C" void makeTextPictLineAscii(tTextPictLine* self, char* str, cFont* font, sVec2f* scale)
 {
     func_002C2540((unsigned short*)(&self->text[0]), str);
     self->pFont = font;
@@ -589,7 +589,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 // (prototype from their definition at line 316)
-extern "C" void func_001E94E0_reen(void* self, char* str, int a2, sVec2f* pos) __asm__("func_001E94E0");
+extern "C" void makeTextPictLineAscii_reen(void* self, char* str, int a2, sVec2f* pos) __asm__("makeTextPictLineAscii");
 
 // (prototype from their definition at line 328)
 extern "C" void makeTextPictLine_reen(void* self, unsigned short* str, int a2, sVec2f* pos) __asm__("makeTextPictLine");
@@ -597,7 +597,7 @@ extern "C" void makeTextPictLine_reen(void* self, unsigned short* str, int a2, s
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
 extern "C" void cOVStateHUD1P_calcElemPos_reen(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags) __asm__("cOVStateHUD1P_calcElemPos");
-extern "C" void func_0020EB50(void* self, void* screen, void* rect);
+extern "C" void cHUDRadar_init(void* self, void* screen, void* rect);
 extern "C" void USTR_strcpyA(unsigned short* dst, const char* src);
 extern "C" void USTR_sprintf(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
@@ -940,8 +940,8 @@ void cOVStateHUD1P::onCreateScreen()
         r.y = outPos.y;
         r.w = size.x;
         r.h = size.y;
-        func_0020EB50(self->panels[0].trophy, &scr, &r);
-        func_0020EB50(self->panels[1].trophy, &scr, &r);
+        cHUDRadar_init(self->panels[0].trophy, &scr, &r);
+        cHUDRadar_init(self->panels[1].trophy, &scr, &r);
     } else {
         t2Vector a;
         t2Vector size;
@@ -961,14 +961,14 @@ void cOVStateHUD1P::onCreateScreen()
         trophyRect0.y = outPos.y;
         trophyRect0.w = size.x;
         trophyRect0.h = size.y;
-        func_0020EB50(self->panels[0].trophy, &scr, &trophyRect0);
+        cHUDRadar_init(self->panels[0].trophy, &scr, &trophyRect0);
         cOVStateHUD1P_calcElemPos_reen(self, &outPos.x, &a.x, &size.x, &sc.x, D_00477B40.alignX, D_00477B40.alignY, 1);
         tRect_9AD0 trophyRect1;
         trophyRect1.x = outPos.x;
         trophyRect1.y = outPos.y;
         trophyRect1.w = size.x;
         trophyRect1.h = size.y;
-        func_0020EB50(self->panels[1].trophy, &scr, &trophyRect1);
+        cHUDRadar_init(self->panels[1].trophy, &scr, &trophyRect1);
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     self->bank428 = findFont_9AD0(*(void**)(self->engine + 8), str_fefont);
@@ -1053,9 +1053,9 @@ void cOVStateHUD1P::onCreateScreen()
     self->f188 = 0;
     self->f18C = 0xFFFFFFFF;
     self->rnd = BXrand() & 1;
-    func_001E94E0_reen(self->box560, D_004A21D0[self->rnd], self->bank428, &D_004A4F50);
-    func_001E94E0_reen(self->box6AC, D_004A21D8, self->bank428, &D_004A4F50);
-    func_001E94E0_reen(self->box7F8, D_004A21D8, self->bank428, &D_004A4F50);
+    makeTextPictLineAscii_reen(self->box560, D_004A21D0[self->rnd], self->bank428, &D_004A4F50);
+    makeTextPictLineAscii_reen(self->box6AC, D_004A21D8, self->bank428, &D_004A4F50);
+    makeTextPictLineAscii_reen(self->box7F8, D_004A21D8, self->bank428, &D_004A4F50);
     unsigned short fmt[32];
     USTR_strcpyA(fmt, str_pct_s_at_skip_pct_s);
     unsigned short* name = getLocString_9AD0(str_kT_OVRCMNPress);
@@ -1073,7 +1073,7 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_handleEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
-extern "C" void* func_002B40F0(void* self, int i);
+extern "C" void* cMusicSys_GetSongTitle(void* self, int i);
 
 /**
  * Handles a notification sent to the HUD (virtual slot 24): sets its flags, counters and message texts.
@@ -1129,7 +1129,7 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         break;
     case 5: {
         self->mRenderFlags &= ~0x10000;
-        char* name = (char*)func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, -1);
+        char* name = (char*)cMusicSys_GetSongTitle(&cAudioInterface_bxAudio()->MusicSys, -1);
         unsigned int hash = 0xF0000000;
         if (name != 0 && *name != 0) {
             self->mRenderFlags |= 0x10000;

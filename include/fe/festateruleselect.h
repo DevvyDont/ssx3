@@ -123,7 +123,7 @@ enum eBRAGRIGHTs {
 // fields' evidence. The ctor runs cFEStateNet_cFEStateNet(this, pEngine, 0), stores cFEStateBraggingRights_vtbl
 // (0x0046AF68, 32 slots: 1 dtor, 4 onCreateScreen, 6 onGainFocus, 7 onGainTransition, 12 onUpdate, 13 onMenuGainFocus,
 // 15 onRender2D, 17 onPopupEvent, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu, 24 handleEvent, 25
-// func_00193C00, 31 func_001941B0; the rest cFEStateNet's / cUIState's), constructs both menus and stores mHashName 20.
+// cFEStateBraggingRights_fillHelpPopup, 31 cFEStateBraggingRights_onNetEvent; the rest cFEStateNet's / cUIState's), constructs both menus and stores mHashName 20.
 // Evidence tags: [R] retail's constructor / allocation size; [U] how retail code uses the field (C bodies in
 // src/fe/festatebigradio.cpp, src/fe/festateruleselect.cpp, src/fe/fepopupmisc.cpp, and the asm); [O] SSX On Tour's
 // DWARF (class cFEStateBraggingRights, cBraggingRightsMenu): names, types and order.
@@ -135,7 +135,7 @@ struct cFEStateBraggingRights : public cFEStateNet {
     // cFEStateBraggingRights's notes on cUIState's fields:
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -144,16 +144,16 @@ struct cFEStateBraggingRights : public cFEStateNet {
     cBraggingRightsMenu mMenuCtrl[2]; // 0x6D0 [O]; [R] cBraggingRightsMenu_cBraggingRightsMenu x2 (0x6D0, 0x704); [U]
                                     //       onWidgetCreate stores each column's group and list boxes; onGainFocus /
                                     //       onWidgetEvent / onWidgetMenu / updateConfirmedState test mbConfirmed
-                                    //       (0x6F8 / 0x72C); onCreateScreen / func_001941B0 index the list boxes
+                                    //       (0x6F8 / 0x72C); onCreateScreen / cFEStateBraggingRights_onNetEvent index the list boxes
     char* mpGameEventMapping;       // 0x738 [O]; [R] 0; [U] onCreateScreen picks one of six rule-id byte tables
                                     //       (D_004A1710 ... D_004A1738) by game mode; onCreateScreen / onWidgetEvent /
-                                    //       func_001941B0 read rule ids from it (lb; EE char is signed)
+                                    //       cFEStateBraggingRights_onNetEvent read rule ids from it (lb; EE char is signed)
 
-    // A row without a rule in mpGameEventMapping (names ours): [U] onWidgetEvent and func_001941B0 skip
+    // A row without a rule in mpGameEventMapping (names ours): [U] onWidgetEvent and cFEStateBraggingRights_onNetEvent skip
     // updateBE for it.
     enum { kNoRule = -1 };
     // The miMiscData of the "cancel challenge" popup (names ours): [U] onWidgetEvent tags the popup it opens with
-    // kT_POPUPCMNCancelChallenge with it; onPopupEvent hands that popup's events to func_00194440.
+    // kT_POPUPCMNCancelChallenge with it; onPopupEvent hands that popup's events to cFEStateBraggingRights_onCancelChallengePopupEvent.
     enum { kCancelChallengePopup = 2104 };
 
     // Methods bound to their retail symbols by asm labels.

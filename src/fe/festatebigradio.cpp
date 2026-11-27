@@ -284,7 +284,7 @@ extern "C" void cBraggingRightsMenu_setEnableItem_2DB0(void* panel, void* screen
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int idx);
 extern "C" void cUIMenu_setSelectedByIndex_3338(void* menu, int idx) __asm__("cUIMenu_setSelectedByIndex");
 extern "C" void memset_3338(void* dst, int c, int n) __asm__("memset");
-extern "C" void func_00265700(void* snd);
+extern "C" void cSetupMan_unlockBragging(void* snd);
 extern char str_11[];
 
 struct sStr3_3338 { char c[3]; };
@@ -300,7 +300,7 @@ static inline int get6F8_3338(void* p) { return *(int*)((char*)p + 0x6F8); }
  * One panel online, else two. The UI input is pointed at the player's controller (input slot 44); when input
  * slot 40 is set and the panel is unlocked, the input goes to the panel's menu (slot 15). Back (input slot 6)
  * on a locked panel unlocks it, rebuilds it, selects its first row and plays the label "11" or "21"; online
- * that is also sent to the peer (func_00265700).
+ * that is also sent to the peer (cSetupMan_unlockBragging).
  */
 void cFEStateBraggingRights::onUpdate()
 {
@@ -340,7 +340,7 @@ void cFEStateBraggingRights::onUpdate()
                 if (frame != cUIScreen::kNoFrame)
                     cUIScreen_playFrame(mpScreen, frame, 1);
                 if (isNet_2DB0())
-                    func_00265700(cSetupMan_mSetupMan);
+                    cSetupMan_unlockBragging(cSetupMan_mSetupMan);
             }
         }
     }
@@ -524,12 +524,12 @@ extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, in
 extern "C" int cBraggingRightsMenu_findListBoxP_38F8(void* panel, void* item) __asm__("cBraggingRightsMenu_findListBoxP");
 extern "C" int cUIListBox_getCurrentEntryData_38F8(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void cBraggingRightsMenu_setConfirmed_38F8(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
-extern "C" void func_00265688(void* snd);
-extern "C" void func_00265568(void* snd, int slot, int value);
+extern "C" void cSetupMan_lockBragging(void* snd);
+extern "C" void cSetupMan_sendBraggingRule(void* snd, int slot, int value);
 extern "C" void cUIStateStack_push(void* list, void* obj);
-extern "C" void* func_001A9C50(void* self);
-extern "C" void func_001A9BC0(void* self, void* popup);
-void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* cFEStateNet_createPopup(void* self);
+extern "C" void cFEStateNet_showPopup(void* self, void* popup);
+void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
 extern "C" void cFEStateNet_onWidgetEvent(void* self, void* widget);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_kT_POPUPCMNCancelChallenge[];
@@ -582,7 +582,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
         do {
             if (cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[i], w) != cBraggingRightsMenu::kNotFound) {
                 if (isOn_38F8() && i == 0)
-                    func_00265688(cSetupMan_mSetupMan);
+                    cSetupMan_lockBragging(cSetupMan_mSetupMan);
                 cBraggingRightsMenu_setConfirmed_38F8(&self->mMenuCtrl[i], 1);
                 self->updateConfirmedState();
                 break;
@@ -602,16 +602,16 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
     }
     case cUIState::kONPREV:
         if (isOn_38F8()) {
-            cScreenPopup* popup = (cScreenPopup*)((char*)func_001A9C50(((char*)self)));
+            cScreenPopup* popup = (cScreenPopup*)((char*)cFEStateNet_createPopup(((char*)self)));
             char* sub = (char*)&popup->info;
             popup->info.meType = 2;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
             popup->info.mtMessage.eType = 3;
-            func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
-            func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
+            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
+            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
             popup->info.miMiscData = cFEStateBraggingRights::kCancelChallengePopup;
             popup->info.miDefaultOption = 1;
-            func_001A9BC0(((char*)self), popup);
+            cFEStateNet_showPopup(((char*)self), popup);
         } else {
             void* nextState = vcall_38F8(((char*)self), 5, w);
             if (nextState != 0)
@@ -632,7 +632,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
         if (isOn_38F8()) {
             void* snd = cSetupMan_mSetupMan;
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[0], w);
-            func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
+            cSetupMan_sendBraggingRule(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
             panel = w->mMiscData;
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[panel], w);
@@ -646,7 +646,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193C00);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_fillHelpPopup);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
@@ -669,7 +669,7 @@ extern char str_kT_HELP65Cancel[];
  *
  * @param popup  the help popup (cFEStateNetHelpPopup)
  */
-extern "C" void func_00193C00(cFEStateBraggingRights* self, cFEStateNetHelpPopup* popup)
+extern "C" void cFEStateBraggingRights_fillHelpPopup(cFEStateBraggingRights* self, cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP65BraggingRights);
@@ -689,7 +689,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetMenu);
 extern int D_004A1A70;
 extern void* cSetupMan_mSetupMan;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
-extern "C" void func_00265458(void* snd, int id);
+extern "C" void cSetupMan_sendBraggingSelection(void* snd, int id);
 static inline int isOn00193CF8()
 {
     return D_004A1A70 == cFEStateNet::kFEPathOnline;
@@ -722,7 +722,7 @@ int cFEStateBraggingRights::onWidgetMenu(cUIMenu* ctrl, unsigned int msg, unsign
         return 0x100;
     case cUIMenu::kSCROLLCHANGE:
         if (isOn00193CF8() && found) {
-            func_00265458(cSetupMan_mSetupMan, ctrl->mScrollItemCurrent);
+            cSetupMan_sendBraggingSelection(cSetupMan_mSetupMan, ctrl->mScrollItemCurrent);
         }
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;
@@ -767,7 +767,7 @@ static inline int other_193DE0(int p)
  * kBRAGRIGHTS_STARTINHOLE (word +0x4) go into the other player's record; kBRAGRIGHTS_TAKENOUBER (bit 4),
  * kBRAGRIGHTS_TAKELEAKYAD (bit 5), kBRAGRIGHTS_TAKELV1CHAR (bit 1) and kBRAGRIGHTS_TAKEHALFPOINTS (bit 2) into the
  * player's own. Other rules are ignored. The bragging-rights widget handler
- * calls it when a choice changes, and func_001941B0 when the online peer reports one.
+ * calls it when a choice changes, and cFEStateBraggingRights_onNetEvent when the online peer reports one.
  *
  * @param player  the player whose panel set the rule (0 or 1)
  * @param which   the rule (eBRAGRIGHTs)
@@ -908,7 +908,7 @@ extern "C" void* cFEStateBraggingRights_handleEvent(cFEStateBraggingRights* self
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onPopupEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
-extern "C" void func_00194440(cFEStateBraggingRights* self, cUIState* a1, int a2);
+extern "C" void cFEStateBraggingRights_onCancelChallengePopupEvent(cFEStateBraggingRights* self, cUIState* a1, int a2);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 static inline int isOn00194168()
@@ -928,7 +928,7 @@ extern "C" void cFEStateBraggingRights_onPopupEvent(cFEStateBraggingRights* self
 {
     if (isOn00194168()) {
         if (pPopup->miMiscData == cFEStateBraggingRights::kCancelChallengePopup) {
-            func_00194440(self, pPopup, Event);
+            cFEStateBraggingRights_onCancelChallengePopupEvent(self, pPopup, Event);
         } else {
             cFEStateNet_onPopupEvent(self, pPopup, Event);
         }
@@ -937,7 +937,7 @@ extern "C" void cFEStateBraggingRights_onPopupEvent(cFEStateBraggingRights* self
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_001941B0);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onNetEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: several callees are declared with other parameter types elsewhere; bind local views by asm label
@@ -948,14 +948,14 @@ extern "C" int cBraggingRightsMenu_findListBoxP_41B0(void* panel, void* item) __
 extern "C" int cUIListBox_getCurrentEntryData_41B0(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void cBraggingRightsMenu_setConfirmed_41B0(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
 extern "C" void cBraggingRightsMenu_setEnableItem_41B0(void* panel, void* screen) __asm__("cBraggingRightsMenu_setEnableItem");
-extern "C" void func_001AB288_41B0(void* self) __asm__("func_001AB288");
-extern "C" int func_0025DA90_41B0(void* self) __asm__("func_0025DA90");
+extern "C" void cFEStateNet_showChallengeLostPopup_41B0(void* self) __asm__("cFEStateNet_showChallengeLostPopup");
+extern "C" int LobbyMan_getRoomName_41B0(void* self) __asm__("LobbyMan_getRoomName");
 extern "C" void* cFEStateChatRoom_cFEStateChatRoom_41B0(void* mem,
     cUIEngine* a1) __asm__("cFEStateChatRoom_cFEStateChatRoom");
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(void* mem,
         cUIEngine* a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
-extern "C" void func_001A8A40_41B0(void* self, void* obj) __asm__("func_001A8A40");
-extern "C" int func_001A8E40_41B0(void* self, int msg, void* data) __asm__("func_001A8E40");
+extern "C" void cFEStateNet_pushState_41B0(void* self, void* obj) __asm__("cFEStateNet_pushState");
+extern "C" int cFEStateNet_onNetEvent_41B0(void* self, int msg, void* data) __asm__("cFEStateNet_onNetEvent");
 extern "C" void* cMemMan_alloc_41B0(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_cFEStateChatRoom[];
 extern char str_cFEStateOnlineMainMenu[];
@@ -977,15 +977,15 @@ struct sRadioMsg_41B0 {
  * the given panel's list idx, selects it and stores the value for the row's rule (+0x738 table; cFEStateBraggingRights_updateBE) unless
  * the rule is kNoRule. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels
  * (cFEStateBraggingRights_updateConfirmedState). 254 unlocks it, recolours it (cBraggingRightsMenu_setEnableItem),
- * selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274 and 275 call func_001AB288. 268
- * hands func_001A8A40 a new chat room (cFEStateChatRoom, 1852 bytes) when func_0025DA90(LobbyMan_mLobbyMan) is true,
- * else a new online main menu (1744 bytes). Others go to func_001A8E40.
+ * selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274 and 275 call cFEStateNet_showChallengeLostPopup. 268
+ * hands cFEStateNet_pushState a new chat room (cFEStateChatRoom, 1852 bytes) when LobbyMan_getRoomName(LobbyMan_mLobbyMan) is true,
+ * else a new online main menu (1744 bytes). Others go to cFEStateNet_onNetEvent.
  *
  * @param msg   the message
  * @param data  the message data (+0x8 panel, +0xC row or list index, +0x10 key)
- * @return 0, or func_001A8E40's result for other messages
+ * @return 0, or cFEStateNet_onNetEvent's result for other messages
  */
-extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41B0* data)
+extern "C" int cFEStateBraggingRights_onNetEvent(cFEStateBraggingRights* self, int msg, sRadioMsg_41B0* data)
 {
     switch (msg) {
     case 251:
@@ -1012,14 +1012,14 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         self->updateConfirmedState();
         break;
     case 238: case 241: case 248: case 250: case 274: case 275:
-        func_001AB288_41B0(((char*)self));
+        cFEStateNet_showChallengeLostPopup_41B0(((char*)self));
         break;
     case 268:
-        if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
-            func_001A8A40_41B0(((char*)self), cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852,
+        if (LobbyMan_getRoomName_41B0(LobbyMan_mLobbyMan)) {
+            cFEStateNet_pushState_41B0(((char*)self), cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852,
                     str_cFEStateChatRoom, 0, 0), self->mpEngine));
         } else {
-            func_001A8A40_41B0(((char*)self),
+            cFEStateNet_pushState_41B0(((char*)self),
                     cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744,
                     str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
         }
@@ -1036,35 +1036,35 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         break;
     }
     default:
-        return func_001A8E40_41B0(((char*)self), msg, data);
+        return cFEStateNet_onNetEvent_41B0(((char*)self), msg, data);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00194440);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCancelChallengePopupEvent);
 #ifdef SKIP_ASM
 extern void* cSetupMan_mSetupMan;
-extern "C" void func_00265768(void* snd, int id);
+extern "C" void cSetupMan_cancelSetup(void* snd, int id);
 void func_001A94D8(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 /**
  * Handles an event of the bragging-rights screen's cancel-challenge popup (id kCancelChallengePopup).
  *
- * kONSCREENPOPUPOPTION0 (confirmed) cancels the online race setup (func_00265768(cSetupMan_mSetupMan, 249) when
+ * kONSCREENPOPUPOPTION0 (confirmed) cancels the online race setup (cSetupMan_cancelSetup(cSetupMan_mSetupMan, 249) when
  * cSetupMan_mSetupMan is set) and calls the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent.
  * cFEStateBraggingRights_onPopupEvent calls it online for that popup.
  *
  * @param popup  the popup
  * @param popupEvent  the popup event
  */
-extern "C" void func_00194440(cFEStateBraggingRights* self, cUIState* popup, int popupEvent)
+extern "C" void cFEStateBraggingRights_onCancelChallengePopupEvent(cFEStateBraggingRights* self, cUIState* popup, int popupEvent)
 {
     if (popupEvent == cUIState::kONSCREENPOPUPOPTION0) {
         if (cSetupMan_mSetupMan != 0) {
-            func_00265768(cSetupMan_mSetupMan, 249);
+            cSetupMan_cancelSetup(cSetupMan_mSetupMan, 249);
         }
         func_001A94D8(self);
     } else {

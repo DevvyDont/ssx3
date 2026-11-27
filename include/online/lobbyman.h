@@ -8,13 +8,13 @@
 // on*__8LobbyManP12LobbyApiMsgTP12LobbyApiRefTP12LobbyApiMsgTPv) and is posted to the front end as an
 // online::Event on mEventList. No C++ base class and no virtual functions (no vptr store in the constructor).
 //
-// Size 0x300: [R] func_0025B650 creates the singleton with cMemMan_alloc(0x300, "LobbyMan", 0x20000000) +
+// Size 0x300: [R] LobbyMan_createInstance creates the singleton with cMemMan_alloc(0x300, "LobbyMan", 0x20000000) +
 // the constructor LobbyMan_LobbyMan (which stores every field up to the second tLobbyAccount, 0x2B0 + 0x50 = 0x300);
-// func_0025B688 destroys it (destructor LobbyMan__LobbyMan). Instance: D_004A3028 (EA: LobbyMan::mLobbyMan, preview
+// LobbyMan_destroyInstance destroys it (destructor LobbyMan__LobbyMan). Instance: D_004A3028 (EA: LobbyMan::mLobbyMan, preview
 // assert "!mLobbyMan" in the create function).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor LobbyMan_LobbyMan / destructor LobbyMan__LobbyMan / func_00260F10 (account-form reset);
+//   [R] retail's constructor LobbyMan_LobbyMan / destructor LobbyMan__LobbyMan / LobbyMan_resetNewAccount (account-form reset);
 //   [P] the July 2003 preview's asserts in lobbyman.cpp, read at the preview offset: "state == ..." (preview 0x4),
 //       "authenticated" (lw 0x8), "loggedin" (lw 0xC), "!disconnected" (lw 0x10), "idx >= 0 && idx < numpersonas"
 //       / "numpersonas < max_personas" (lw 0x40), "idx < getnumrooms()" (lw 0x30). From 0x14 on retail inserted
@@ -36,29 +36,29 @@
 struct LobbyApiRefT;    // DirtySock LobbyApi instance (preview mangled name P12LobbyApiRefT)
 
 // An account form (0x50 bytes; field names are ours, from the LobbyApi tags): mNewAccount at 0x260 is what the
-// account screens fill and pass to createaccount (func_0025B9C8(D_004A3028, D_004A3028 + 0x260)) /
-// editaccount (func_0025BF18); mAccount at 0x2B0 is the logged-in account (onauthentication fills it).
+// account screens fill and pass to createaccount (LobbyMan_createAccount(D_004A3028, D_004A3028 + 0x260)) /
+// editaccount (LobbyMan_editAccount); mAccount at 0x2B0 is the logged-in account (onauthentication fills it).
 // [R] built by cBXString_cBXString__FP10cBXString2 (bx/bxstringctor.cpp: 5 strings + a string[4]); the
 // LobbyMan destructor destroys the 5 strings one by one and the [4] as an array.
 struct tLobbyAccount {
     char* mName;            // 0x00 [U] "NAME" (createaccount, editaccount); onauthentication copies mUserName
     char* mPassword;        // 0x04 [U] "PASS" (createaccount); editaccount sends it as "CHNG" (the new password)
     char* mConfirmPassword; // 0x08 (name ours) [U] onauthentication copies mPassword into it; the account form keeps
-                            //      the "StaticConfirmPassword" entry in it (func_001B9820, keyboard id 12),
-                            //      func_001B9FA0 compares it with mPassword, func_001B9558 tests it is non-empty
+                            //      the "StaticConfirmPassword" entry in it (cFEStateCreateStep1_handleKeyboardText, keyboard id 12),
+                            //      cFEStateCreateStep1_checkPassword compares it with mPassword, cFEStateCreateStep1_isFormFilled tests it is non-empty
     char* mMail;            // 0x0C [U] "MAIL" (createaccount, editaccount); onauthentication stores the server's
     char* mParentMail;      // 0x10 [U] "PMAIL" (createaccount, sent when non-empty)
-    char* mNameOptions[4];  // 0x14 [U] "OPTS": func_0025BC48 splits the server's comma list of suggested names
+    char* mNameOptions[4];  // 0x14 [U] "OPTS": LobbyMan_readNameOptions splits the server's comma list of suggested names
                             //      (onaccountcreated after a refusal); [R] destroyed as an array
-    int mNumNameOptions;    // 0x24 [U] func_0025BC48 counts them (up to 4)
-    int mBornMonth;         // 0x28 [U] "BORN" "%4d%02d%02d" second field; [R] func_00260F10 sets 1
-    int mBornDay;           // 0x2C [U] "BORN" third field; [R] func_00260F10 sets 1
-    int mBornYear;          // 0x30 [U] "BORN" first field; [R] func_00260F10 sets 0x7C1 (1985)
-    int mGender;            // 0x34 [U] "GEND": non-zero 'F', else 'M'; [R] func_00260F10 sets 0
-    int mSpam[2];           // 0x38 [U] "SPAM" "%c%c" ('Y'/'N' each); [R] func_00260F10 sets 1, 1;
+    int mNumNameOptions;    // 0x24 [U] LobbyMan_readNameOptions counts them (up to 4)
+    int mBornMonth;         // 0x28 [U] "BORN" "%4d%02d%02d" second field; [R] LobbyMan_resetNewAccount sets 1
+    int mBornDay;           // 0x2C [U] "BORN" third field; [R] LobbyMan_resetNewAccount sets 1
+    int mBornYear;          // 0x30 [U] "BORN" first field; [R] LobbyMan_resetNewAccount sets 0x7C1 (1985)
+    int mGender;            // 0x34 [U] "GEND": non-zero 'F', else 'M'; [R] LobbyMan_resetNewAccount sets 0
+    int mSpam[2];           // 0x38 [U] "SPAM" "%c%c" ('Y'/'N' each); [R] LobbyMan_resetNewAccount sets 1, 1;
                             //      onauthentication stores the server's two flags (0x2E8 / 0x2EC)
-    int mLegalAccepted;     // 0x40 (name ours) [R] func_00260F10 sets 0; [U] cFEStateCreateStep2_onWidgetEvent
-                            //      stores "LBLegalYesNo" == 1; func_001BBC40 shows "kT_POPUP211AcceptLegal" when 0
+    int mLegalAccepted;     // 0x40 (name ours) [R] LobbyMan_resetNewAccount sets 0; [U] cFEStateCreateStep2_onWidgetEvent
+                            //      stores "LBLegalYesNo" == 1; cFEStateCreateStep2_checkLegalAccepted shows "kT_POPUP211AcceptLegal" when 0
     int mChangePassword;    // 0x44 [U] editaccount sends "PASS"/"CHNG" only when set
     int mChangeSpam;        // 0x48 [U] editaccount sends "SPAM" only when set
     int mChangeMail;        // 0x4C [U] editaccount sends "MAIL" only when set
@@ -82,16 +82,16 @@ CHECK_OFFSET(tLobbyAccount, mChangeSpam, 0x48);
 CHECK_OFFSET(tLobbyAccount, mChangeMail, 0x4C);
 CHECK_SIZE(tLobbyAccount, 0x50);
 
-// A player's lobby stats (0x14 bytes, copied as a whole: cFEStateChallengeReceivedPopup_onCreateScreen / the setup manager func_002642B8 store
-// the opponent's into mOpponentStats with one block copy). Filled from the "onln" reply (func_0025D048).
+// A player's lobby stats (0x14 bytes, copied as a whole: cFEStateChallengeReceivedPopup_onCreateScreen / the setup manager cSetupMan_update store
+// the opponent's into mOpponentStats with one block copy). Filled from the "onln" reply (LobbyMan_handleStatsReply).
 struct tLobbyStats {
-    int mRank;              // 0x00 [U] tag "R"; the setup manager sends it to the opponent (func_00264CB8)
-    int mWins;              // 0x04 (name ours) [U] "STAT" field 2; [R] func_001AFA60 shows it as the wins of
+    int mRank;              // 0x00 [U] tag "R"; the setup manager sends it to the opponent (cSetupMan_sendRank)
+    int mWins;              // 0x04 (name ours) [U] "STAT" field 2; [R] showOpponentStats shows it as the wins of
                             //      "kT_CMNWinRatio"
-    int mGamesPlayed;       // 0x08 (name ours) [U] "STAT" fields 2 + 3 + 4; [R] func_001AFA60: "kT_CMNGamesPlayed"
-    int mDisconnects;       // 0x0C (name ours) [U] "STAT" field 6; [R] func_001AFA60: "kT_CMNDisconnects"
-    int mPing;              // 0x10 (name ours) [U] func_0025F288: a room user's "P" text as a number, which
-                            //      func_001B3BF0 draws as the connection-quality meter; func_0025D048 stores -1
+    int mGamesPlayed;       // 0x08 (name ours) [U] "STAT" fields 2 + 3 + 4; [R] showOpponentStats: "kT_CMNGamesPlayed"
+    int mDisconnects;       // 0x0C (name ours) [U] "STAT" field 6; [R] showOpponentStats: "kT_CMNDisconnects"
+    int mPing;              // 0x10 (name ours) [U] LobbyMan_getUserInfo: a room user's "P" text as a number, which
+                            //      cFEStateChatRoom_updateQualityIcons draws as the connection-quality meter; LobbyMan_handleStatsReply stores -1
 };
 
 CHECK_OFFSET(tLobbyStats, mRank, 0x00);
@@ -144,17 +144,17 @@ CHECK_SIZE(tLobbyEventList, 0x8);
 struct LobbyApiMsgT;
 
 struct LobbyMan {
-    // A room-list index for no room (name ours): [U] func_0025D770 ('peek') and func_0025D800 (join) use an empty
-    // room name for it instead of looking the room up (func_0025F150).
+    // A room-list index for no room (name ours): [U] LobbyMan_peekRoom ('peek') and LobbyMan_joinRoomAt (join) use an empty
+    // room name for it instead of looking the room up (LobbyMan_getRoomNameAt).
     enum { kRoomIndex_None = -1 };
 
     int mState;                     // 0x000 [P] "state == ..." asserts (preview offset 0x4); [R] ctor 0;
-                                    //       [U] func_0025B608 (send request) stores the new state; values above
-    int mServerAddr;                // 0x004 [R] ctor 0; [U] connect (func_0025B6D8) / update (func_0025AC50) store
+                                    //       [U] LobbyMan_sendRequest (send request) stores the new state; values above
+    int mServerAddr;                // 0x004 [R] ctor 0; [U] connect (LobbyMan_connect) / update (LobbyMan_update) store
                                     //       the lobby server's address and connect to it on port 11000 (0x2AF8);
                                     //       the online pause-error overlay pings it (func_002583A8)
     int mAuthenticated;             // 0x008 [P] assert "authenticated" (lw 0x8); [U] onauthentication sets 1,
-                                    //       disconnect (func_0025B800) clears
+                                    //       disconnect (LobbyMan_disconnect) clears
     int mLoggedIn;                  // 0x00C [P] assert "loggedin" (lw 0xC); [U] onNewsRetrieved ("new0") sets 1,
                                     //       disconnect clears; update polls the room/user lists only when set
     int mDisconnected;              // 0x010 [P] assert "!disconnected" (lw 0x10); [U] onconnectionmsg sets 1,
@@ -162,26 +162,26 @@ struct LobbyMan {
     int mbUseCachedAddr;            // 0x014 (name ours) [R] ctor 0; [U] connect stores its argument (non-zero: use
                                     //       the known address, state 3; zero: look the server name up, state 2)
     int mHaveCPAT;                  // 0x018 [R] ctor 0; [U] onauthentication: 1 when the reply has "CPAT";
-                                    //       selectpersona (func_0025CD50) then sends mCPAT as "CDEV"
+                                    //       selectpersona (LobbyMan_selectPersona) then sends mCPAT as "CDEV"
     char mCPAT[0x24];               // 0x01C [U] onauthentication decodes "CPAT" into it (func_003EFD30, up to 0x21)
-    int mRequestId;                 // 0x040 [U] func_0025B608 stores the LobbyApi request (func_003E8B10); the
+    int mRequestId;                 // 0x040 [U] LobbyMan_sendRequest stores the LobbyApi request (func_003E8B10); the
                                     //       cancel paths pass it to func_003E8D70; the rank list keeps it per slot
-    int mFindingPlayer;             // 0x044 [R] ctor 0; [U] findplayer ("user", func_0025E6D0) sets 1,
+    int mFindingPlayer;             // 0x044 [R] ctor 0; [U] findplayer ("user", LobbyMan_findPlayer) sets 1,
                                     //       onPlayerFound clears, update times it out
     char* mUserName;                // 0x048 [R] ctor empty cBXString; [U] "NAME" in login/editaccount; 16 readers
                                     //       outside the unit copy it (front-end account screens)
     char* mPassword;                // 0x04C [R] ctor empty cBXString; [U] "PASS" in login/editaccount; the buddy
                                     //       login (onNewsRetrieved) passes it to BuddyMan
-    int mDeletePersonaIdx;          // 0x050 [U] deletepersona (func_0025D428) stores the index, onpersonadeleted
+    int mDeletePersonaIdx;          // 0x050 [U] deletepersona (LobbyMan_deletePersona) stores the index, onpersonadeleted
                                     //       removes that entry
     LobbyApiRefT* mpLobbyApi;       // 0x054 [P] preview "lobbyapi" (offset 0x28 there); [R] ctor 0;
-                                    //       [U] func_0025A948 stores func_003E7FF0's handle; every request uses it
+                                    //       [U] LobbyMan_createLobbyApi stores func_003E7FF0's handle; every request uses it
     void* mpHostLookup;             // 0x058 [R] ctor 0; [U] connect stores SocketLookup(mServerName, 0) (a
                                     //       DirtySock host lookup: result +0x4, poll fn +0x8, release fn +0xC);
                                     //       update polls/frees it through those
-    void* mpRoomList;               // 0x05C [P] getnumrooms() reads it (preview 0x30); [U] func_0025A778:
+    void* mpRoomList;               // 0x05C [P] getnumrooms() reads it (preview 0x30); [U] LobbyMan_openLists:
                                     //       func_003E85B0(api, 0, onroomlistupdate thunk); LobbyMan_getnumrooms/F150/F180
-    void* mpUserList;               // 0x060 [U] func_003E85B0(api, 1, onuserlistupdate thunk); func_0025F1B0..
+    void* mpUserList;               // 0x060 [U] func_003E85B0(api, 1, onuserlistupdate thunk); LobbyMan_getNumUsers..
     void* mpRankList;               // 0x064 [U] func_003E85B0(api, 2, onranklistupdate thunk)
     int unk_068;                    // 0x068 no access seen
     int mNumPersonas;               // 0x06C [P] "idx < numpersonas", "numpersonas < max_personas" (preview 0x40);
@@ -191,26 +191,26 @@ struct LobbyMan {
     char* mPersona;                 // 0x080 [U] selectpersona copies the chosen name; sent as "PERS" (onln, buddy
                                     //       login, find player); 8 readers outside the unit
     char* mRoomName;                // 0x084 [U] onroomselected ("move" reply) stores "NAME", resets on error;
-                                    //       func_0025DA90 returns it when connected and non-empty
+                                    //       LobbyMan_getRoomName returns it when connected and non-empty
     char* mGameName;                // 0x088 [U] onplaymsg: "NAME" of the game session
     char* mChallengeMessage;        // 0x08C [U] cFEStateChallengeReceivedPopup_onCreateScreen copies the received
-                                    //       challenge's chat message (cChallenger::mMessage) into it; func_00263CF0
+                                    //       challenge's chat message (cChallenger::mMessage) into it; cGameConnMan_update
                                     //       hands the word to the setup manager (name ours)
     char* mHostName;                // 0x090 [U] onplaymsg: "HOST"
     char* mOppoName;                // 0x094 [U] onplaymsg: "OPPO"
     char* mOpponent;                // 0x098 [U] onplaymsg: the one of HOST/OPPO that is not "SELF"; challenge
-                                    //       (func_0025F4C0) stores the challenged name; onchatmsg compares; 15 readers
+                                    //       (LobbyMan_challengePlayer) stores the challenged name; onchatmsg compares; 15 readers
     char* mAuth;                    // 0x09C [U] onplaymsg: "AUTH"
     int mWhen;                      // 0x0A0 [U] onplaymsg: "WHEN" (TagFieldGetTime)
-    int mMatchType;                 // 0x0A4 [U] the game-kind argument of challenge (func_0025F4C0, func_0025FB58)
-                                    //       and quickmatch (func_0025EE20); onplaymsg passes it to func_00259098
-    int mHostAddr;                  // 0x0A8 [U] onplaymsg: "FROM" address (func_0025A730 may override it)
+    int mMatchType;                 // 0x0A4 [U] the game-kind argument of challenge (LobbyMan_challengePlayer, LobbyMan_lockChallenge)
+                                    //       and quickmatch (LobbyMan_startQuickMatch); onplaymsg passes it to func_00259098
+    int mHostAddr;                  // 0x0A8 [U] onplaymsg: "FROM" address (LobbyMan_getConfigValue may override it)
     int mOppoAddr;                  // 0x0AC [U] onplaymsg: "ADDR" address
     int mSeed;                      // 0x0B0 [U] onplaymsg: "SEED"
     int mIsHost;                    // 0x0B4 [U] onplaymsg: "SELF" == "HOST"; challenge sets 1
-    tLobbyStats mStats;             // 0x0B8 [U] "onln" reply (func_0025D048); challenge sends them
-    tLobbyStats mOpponentStats;     // 0x0CC [U] block-copied in by cFEStateChallengeReceivedPopup_onCreateScreen / func_002642B8
-    float mTimeout;                 // 0x0E0 [U] func_0025B608 stores the request timeout (20.0), connect 30.0;
+    tLobbyStats mStats;             // 0x0B8 [U] "onln" reply (LobbyMan_handleStatsReply); challenge sends them
+    tLobbyStats mOpponentStats;     // 0x0CC [U] block-copied in by cFEStateChallengeReceivedPopup_onCreateScreen / cSetupMan_update
+    float mTimeout;                 // 0x0E0 [U] LobbyMan_sendRequest stores the request timeout (20.0), connect 30.0;
                                     //       update subtracts the frame time and gives up when it goes negative
     float mCountdown;               // 0x0E4 (name ours) [U] update subtracts the frame time (no other writer seen)
     char* mServerName;              // 0x0E8 [R] ctor cBXString(.., "ps2ssx04.ea.com"); [U] connect looks it up
@@ -218,18 +218,18 @@ struct LobbyMan {
                                     //       node pointer at 0xF0 (ctor allocates the 0xC-byte head node "StlBlock",
                                     //       dtor func_001DB718 + delete); [U] every reply pushes an Event before
                                     //       the head node (mEventList.mpHead); 51 functions outside the class
-    void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] func_0025A650 creates it (NetGameUtilCreate) from the
-                                    //       logged-in "pers" config; func_0025A730 looks keys up; func_0025A6F8 frees
-    int mRankSlot;                  // 0x0F8 [R] ctor 0; [U] func_0025E348 selects the rank-list slot (0..28)
+    void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] LobbyMan_createConfig creates it (NetGameUtilCreate) from the
+                                    //       logged-in "pers" config; LobbyMan_getConfigValue looks keys up; LobbyMan_destroyConfig frees
+    int mRankSlot;                  // 0x0F8 [R] ctor 0; [U] LobbyMan_selectRankList selects the rank-list slot (0..28)
     int unk_0FC;                    // 0x0FC [R] ctor 0 (no other access)
-    void* mpSlotTag;                // 0x100 [R] ctor 0; [U] func_0025E348 stores func_003E8F08(api, 'slot')
-    int mRankCount[29];             // 0x104 [U] func_0025A778 sets all -1; onRanklistRetrieved: "START" + "RANGE"
-                                    //       per "SEQN" slot; func_0025E348 compares the slot's row count with it
-    int mRankRequest[29];           // 0x178 [U] func_0025A778 sets all -1; func_0025E420 cancels the slot's old
+    void* mpSlotTag;                // 0x100 [R] ctor 0; [U] LobbyMan_selectRankList stores func_003E8F08(api, 'slot')
+    int mRankCount[29];             // 0x104 [U] LobbyMan_openLists sets all -1; onRanklistRetrieved: "START" + "RANGE"
+                                    //       per "SEQN" slot; LobbyMan_selectRankList compares the slot's row count with it
+    int mRankRequest[29];           // 0x178 [U] LobbyMan_openLists sets all -1; LobbyMan_requestRankRows cancels the slot's old
                                     //       request and stores mRequestId ("snap" request)
-    void* mRankSnapshot[29];        // 0x1EC [R] ctor zeroes 29 words; [U] func_0025E420 opens a snapshot per slot
-                                    //       (func_003E85B0(api, 4, ..)); func_0025A850 frees them
-    tLobbyAccount mNewAccount;      // 0x260 [R] ctor builds it, func_00260F10 resets it; [U] createaccount's form
+    void* mRankSnapshot[29];        // 0x1EC [R] ctor zeroes 29 words; [U] LobbyMan_requestRankRows opens a snapshot per slot
+                                    //       (func_003E85B0(api, 4, ..)); LobbyMan_releaseRankSnapshots frees them
+    tLobbyAccount mNewAccount;      // 0x260 [R] ctor builds it, LobbyMan_resetNewAccount resets it; [U] createaccount's form
     tLobbyAccount mAccount;         // 0x2B0 [R] ctor builds it; [U] onauthentication fills it
 
     // Methods bound to their retail symbols by asm labels.
@@ -314,7 +314,7 @@ CHECK_OFFSET(LobbyMan, mNewAccount, 0x260);
 CHECK_OFFSET(LobbyMan, mAccount, 0x2B0);
 CHECK_SIZE(LobbyMan, 0x300);
 
-// The lobby manager (LobbyMan::mLobbyMan; preview assert "!mLobbyMan"): set when func_0025B650 creates it.
+// The lobby manager (LobbyMan::mLobbyMan; preview assert "!mLobbyMan"): set when LobbyMan_createInstance creates it.
 extern LobbyMan* LobbyMan_mLobbyMan;
 
 #endif /* ONLINE_LOBBYMAN_H */

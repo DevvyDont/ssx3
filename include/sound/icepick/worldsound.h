@@ -135,7 +135,7 @@ CHECK_SIZE(tInstanceAudio, 0x18);
 // cAudioOverlapList_update is in the same retail unit).
 struct cAudioOverlapList {
     int numoverlaps;                // 0x000 [O]; [R] cWorldSound_cWorldSound stores 0; [U] cAudioOverlapList_update
-                                    //       clears it before re-querying, the query helper func_002B83F8 appends
+                                    //       clears it before re-querying, the query helper nash_privy_QueryHelper_help1 appends
                                     //       (overlaps[numoverlaps++], no bound check in retail); TriggerWorldAudio /
                                     //       RemoveInstanceFromOverlapList loop over it
     tInstanceAudio* overlaps[64];   // 0x004 [O]; [U] TriggerWorldAudio passes each non-zero entry to
@@ -158,7 +158,7 @@ CHECK_SIZE(cAudioOverlapList, 0x120);
 
 // The nash query's callback that collects audio instances into an overlap list (On Tour struct AudioOverlapCallback,
 // 0x4). [U] cAudioOverlapList_update passes one, for both the crossing and the inside cells, to the query helper
-// func_002B83F8 (On Tour QueryHelper::help(const AudioOverlapCallback& oncross, const AudioOverlapCallback& oninside,
+// nash_privy_QueryHelper_help1 (On Tour QueryHelper::help(const AudioOverlapCallback& oncross, const AudioOverlapCallback& oninside,
 // const PointProximityTest& test, const Cell* cell, const CellKey& cellkey)), which appends the cells' kSNT_AudioVolume
 // nodes to the list.
 struct AudioOverlapCallback {
@@ -167,7 +167,7 @@ struct AudioOverlapCallback {
 
 // The nash query's point test (On Tour struct PointProximityTest, 0x4): the position the cells are tested against.
 struct PointProximityTest {
-    const t4Vector* position;        // 0x0 [O] (const t4Vector& in On Tour); [U] func_002B83F8 tests each cell with it
+    const t4Vector* position;        // 0x0 [O] (const t4Vector& in On Tour); [U] nash_privy_QueryHelper_help1 tests each cell with it
 };
 
 CHECK_OFFSET(AudioOverlapCallback, overlaplist, 0x0);

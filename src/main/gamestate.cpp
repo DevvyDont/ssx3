@@ -131,7 +131,7 @@ extern "C" void cGFGateState_runScript(cGFGateState* self, int a1);
 extern "C" cUIState* cUIStateStack_findState(void* list, int hash);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_CountdownGateDrop(void* p);
-void func_0028C8C0(void* self, int val);
+void cSSXAudio_SetJumpCountdown(void* self, int val);
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cSSXAudio_CountdownBeep(void* p, int secs);
 extern cGame* cGameState_mpGame;
@@ -173,7 +173,7 @@ void cGFGateState::update()
             obj->handleEvent(6, 0);
         }
         cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
-        func_0028C8C0(cAudioInterface_bxAudio(), 0x78);
+        cSSXAudio_SetJumpCountdown(cAudioInterface_bxAudio(), 0x78);
         cGameState_gotoNextState(this);
     }
     int frames = cGameState_mpGame->AI->CountdownTicksLeft;
@@ -492,8 +492,8 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i,
 
 extern "C" int cSSXScriptEngine_IsLoadTrackComplete(void* self);
 extern "C" void cSSXScriptEngine_AddToNISListByVideoCategory(void* self, int i, int a, int b);
-extern "C" void func_0028CD48(void* self);
-extern "C" void func_002B3A70(void* self);
+extern "C" void cSSXAudio_PlayPkTransSong(void* self);
+extern "C" void cMusicSys_PauseSong(void* self);
 extern "C" int cAI_isReadyToPurgeComputerActors(void* p);
 extern "C" void cAI_cleanupAfterRace(void* p);
 extern "C" void cAI_cleanupActors(void* p);
@@ -531,8 +531,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         if (self->mPlayFirstTimeBCVideo != 0) {
             if (locationId == 14) {
                 cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 29, 3);
-                func_0028CD48(cAudioInterface_bxAudio());
-                func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
+                cSSXAudio_PlayPkTransSong(cAudioInterface_bxAudio());
+                cMusicSys_PauseSong(&cAudioInterface_bxAudio()->MusicSys);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
             } else {
@@ -688,8 +688,8 @@ extern "C" void cBENewPlayerInterface_setLastHub(void* player, int a, int b);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
-extern "C" void func_002B3A98(void* p);
-extern "C" void func_002A4B68(void* p);
+extern "C" void cMusicSys_ResumeSong(void* p);
+extern "C" void cSSXAudio_StopSpeechForPkTrans(void* p);
 extern cGame* cGameState_mpGame;
 extern void* cWScriptMan_TheWScriptMan;
 
@@ -750,8 +750,8 @@ void cGFTrackStartState::gainFocus()
     } else if (mPlayFirstTimeBCVideo) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
-    func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
-    func_002A4B68(cAudioInterface_bxAudio());
+    cMusicSys_ResumeSong(&cAudioInterface_bxAudio()->MusicSys);
+    cSSXAudio_StopSpeechForPkTrans(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2050,17 +2050,17 @@ void* cGFPostEventState::readFromReplayFrame()
 INCLUDE_ASM("main/gamestate", cGFPodiumState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
-extern "C" void func_0028CDF8(void* mgr);
+extern "C" void cSSXAudio_PlayCharTune(void* mgr);
 
 /**
- * Enters the podium state: calls func_0028CDF8() on the audio object and turns the AI's computer actors on.
+ * Enters the podium state: calls cSSXAudio_PlayCharTune() on the audio object and turns the AI's computer actors on.
  *
  * cAudioInterface_bxAudio() returns gSSXAudio; the AI's ComputerActorsActive (+0x8C) is set to 1. On Tour's version takes
  * this and a startup flag, which the body does not use.
  */
 extern "C" void cGFPodiumState_gainFocus(void)
 {
-    func_0028CDF8(cAudioInterface_bxAudio());
+    cSSXAudio_PlayCharTune(cAudioInterface_bxAudio());
     SSXApp->Game->AI->ComputerActorsActive = 1;
 }
 #endif

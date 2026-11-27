@@ -60,7 +60,7 @@ extern "C" void cFELocale_loadOV(void* p);
 extern "C" void cSSXScriptEngine_Load(void* eng);
 extern "C" void* cFont_cFont(void* p, const char* name, int a);
 extern "C" void cGameComm_syncGame(void* comm);
-void func_0014BD98(void* iface);
+void cBEBoltInterface_refreshVisibleBolts(void* iface);
 extern "C" void cBucketMan_init(void* bm, int n);
 extern "C" void cBucketMan_setsortflag(void* bm, int a);
 extern "C" void cCameraTriggerMan_init(void* p);
@@ -266,7 +266,7 @@ extern "C" void cGame_load(cGame* self)
     self->DebugFont = (cFont*)cFont_cFont(operator new(132, str_DebugFont_b, 0, 0), str_data_fonts_debugfnt_sfn_b, 0);
     if (cGameComm_mGameComm != 0)
         cGameComm_syncGame(cGameComm_mGameComm);
-    func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
+    cBEBoltInterface_refreshVisibleBolts(cBE_getInterface_Fv(cBE_getBE(), 9));
     cBucketMan_init(bm, 9);
     cBucketMan_setsortflag(bm, 1);
     cCameraTriggerMan_init(((char*)&gCamTriggerMan));
@@ -1099,7 +1099,7 @@ INCLUDE_ASM("main/gameload", cGame_exit);
 struct cAppMan;
 void cReplay_stopAutoReplay(void* self);
 extern "C" void cGameComm_gameExit(void* p);
-extern "C" void func_00266DF8(void* p);
+extern "C" void cVoipMan_disconnect(void* p);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* cPreFELoadScreen_cPreFELoadScreen(void* self);
@@ -1126,7 +1126,7 @@ void cGame::exit(int toFrontEnd)
         cGameComm_gameExit(cGameComm_mGameComm);
     }
     if (VoipMan != 0) {
-        func_00266DF8(VoipMan);
+        cVoipMan_disconnect(VoipMan);
     }
     // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
     // int, so the original converted the new module's pointer to it too
@@ -1266,7 +1266,7 @@ extern "C" void cSSXAudio_PlayIconSound(void* p, int a, int b, float c);
 extern "C" void cWScriptMan_doMissionCmd(void* p, int a, int b, int c);
 extern "C" void cUIEngine_update(void* p);
 extern "C" void tMissionMenuQueue_getNextEntry(void* p);
-extern "C" void func_0029ED18(void* p);
+extern "C" void cSSXAudio_StopRiderLoops(void* p);
 // PORT: the unit defines cGame_activatePauseMenu(char* self); this caller passes a second argument (a1 = 0).
 extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_activatePauseMenu");
 // cFadeScreen_update returns nothing (its body has no return value); the unit declares it void*.
@@ -1293,7 +1293,7 @@ extern "C" void cWorldSound_TriggerWorldAudio(void* p, void* q, int i);
 void cInputSync_postupdate(void* p);
 extern "C" void NetConnIdle(void);
 extern "C" void cFEAsyncManager_Update(void* p);
-extern "C" void func_001E1458(void);
+extern "C" void updateTimedMessages(void);
 extern "C" void cBXLoadIndicator_Update(void* p);
 
 extern void* PadCache;
@@ -1441,7 +1441,7 @@ static inline int updateState_2306B8(cGame* self)
         cOVStateManager_triggerOverlay(0x22);
         pushState_2306B8(12);
         D_004A20CC = 0xFFFFFFFF;
-        func_0029ED18(cAudioInterface_bxAudio());
+        cSSXAudio_StopRiderLoops(cAudioInterface_bxAudio());
         return 0;
     }
     if (cMenuSys_isActive(((char*)self->MenuSys)) != 0) {
@@ -1599,7 +1599,7 @@ void cGame::update()
     if ((void*)SSXApp->mFEAsyncManager != 0) {
         cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
     }
-    func_001E1458();
+    updateTimedMessages();
     cBXLoadIndicator_Update((char*)LoadIndicator);
 }
 #endif

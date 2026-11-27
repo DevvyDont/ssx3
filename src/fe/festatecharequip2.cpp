@@ -40,31 +40,31 @@ INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePreviewLoad);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateHelpText);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A9B8);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePreview);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019AA08);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateInventoryPreview);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019AB78);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateStorePreview);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateCharacterModel);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019AFD0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_hasInventoryItemInCategory);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B098);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_isStoreCategoryEmpty);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B180);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_buildItemList);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B458);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_removeItem);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B518);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_drawInventoryRows);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B598);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_drawStoreRows);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B618);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_redrawRows);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019B7E0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_drawInventoryRow);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BA60);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_drawStoreRow);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateBankWidget);
 
@@ -74,79 +74,79 @@ INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePolyBar);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePolyEquipPreviewBar);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BE80);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_buySelectedItem);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BEE8);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_toggleSelectedItem);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_update3DPositions);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C7E8);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_openBuyPopup);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C880);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_allocNode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C8D0);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getPrevNode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C8F8);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getNextNode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C920);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getNodeIndex);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019C938);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_findNode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CA70);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_freeNode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CB38);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_cBoltFileIndexManager);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CB60);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_reset);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CBE0);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getModelPartFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CC30);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_setModelPartFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CCE8);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getPartTextureFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CD38);
+INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_setPartTextureFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CDF0);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_cFEBoltFileManager);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CE20);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager__cFEBoltFileManager);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CE68);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_init);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019CF40);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_purge);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D000);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_unpackFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D140);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_startNextQueuedLoad);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D250);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_update);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D3B0);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_findFreeSlot);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D428);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_findFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D4B8);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_freeFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D578);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_makeRoom);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D738);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_evictBytes);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019D8B8);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_loadFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019DA10);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_requestFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019DC20);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_releaseFile);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019DD10);
+INCLUDE_ASM("fe/festatecharequip2", compareDeferredModelPartFiles);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019DE18);
+INCLUDE_ASM("fe/festatecharequip2", compareDeferredPartTextureFiles);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019DF20);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_startDeferredModelPartLoads);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E070);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_startDeferredPartTextureLoads);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E238);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_isFileLoaded);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E2B0);
+INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_getFileDataValue);
 
 INCLUDE_ASM("fe/festatecharequip2", cFERider_cFERider);
 

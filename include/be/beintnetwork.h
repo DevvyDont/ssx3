@@ -50,7 +50,7 @@ struct tBENetworkDB {
                                      //       [U] cGameComm_syncGame / syncWait / gameExit, setSyncData (cBENetworkInterface_setSyncData),
                                      //       preInitBE (cBENetworkInterface_preInitBE) and the results report pick the host side by it
     int iPort;                       // 0x00C [O]; [P] get/setPort; [R] cBENetworkInterface_setPort / cBENetworkInterface_getPort (D_00534B3C);
-                                     //       [U] debugfe (func_0017D0A8, func_0017DE70) and tagsunk func_002639E0 read
+                                     //       [U] debugfe (connectDebugDirectLink, cDebugLobbyScreen_startOnlineRace) and tagsunk cGameConnMan_connect read
                                      //       it as an unsigned short (lhu) for openDSockChannel
     float fLatency;                  // 0x010 [O]; [P] get/setLatency (float); [R] cBENetworkInterface_setLatency / cBENetworkInterface_getLatency
                                      //       (D_00534B40); [U] cGameComm_syncGame stores cGameComm::mLatency, cGame_load
@@ -72,13 +72,13 @@ struct tBENetworkDB {
                                      //       bytes, getter cBENetworkInterface_getMyStats (D_00534E60); tRiderStats is 0xAC
                                      //       (ai/ridermetrix.h; views group D: sBEBlk_C418 is this record)
     tRiderStats OpponentStats;       // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
-    char strMyName[0x10];            // 0x488 (name ours, after MyStats) [R] func_0014EBD8 (strcpy) / func_0015C5B8
+    char strMyName[0x10];            // 0x488 (name ours, after MyStats) [R] cBENetworkInterface_setMyName (strcpy) / cBENetworkInterface_getMyName
                                      //       (D_00534FB8); [U] this player's name (from the lobby session +0x80,
-                                     //       func_00259098); prefixes our own chat lines (ovstatetrophy func_00210BD8)
-    char strOpponentName[0x10];      // 0x498 (name ours, after OpponentStats) [R] func_0014EBB8 / func_0015C5A8
+                                     //       func_00259098); prefixes our own chat lines (ovstatetrophy cOVState_PRIVATEMESSAGE_addChatLine)
+    char strOpponentName[0x10];      // 0x498 (name ours, after OpponentStats) [R] cBENetworkInterface_setOpponentName / cBENetworkInterface_getOpponentName
                                      //       (D_00534FC8); [U] the opponent's name (lobby session +0x98); prefixes
                                      //       received chat (cOVState_onUpdate_HandleIncomingChat), shown by
-                                     //       func_00210940
+                                     //       cOVState_PRIVATEMESSAGE_onCreateScreen
     unsigned char oppCharacterAttributes[7]; // 0x4A8 [O] (On Tour 0x326); [R] setOpponentAttributes cBENetworkInterface_setOpponentAttributes
                                      //       copies 7 bytes, getOpponentAttributes cBENetworkInterface_getOpponentAttributes, getOverallOpponentLevel
                                      //       cBENetworkInterface_getOverallOpponentLevel sums them / 35 (D_00534FD8)

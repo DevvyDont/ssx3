@@ -7,7 +7,7 @@
 // the preview keeps __12cOVState_MAPP9cUIEngine12tOVStateEnum, _$_12cOVState_MAP and
 // onMenuGainFocus__12cOVState_MAPP8cUIGroup).
 // Retail code: cOVState_MAP_* in fe/ovstatemap (0x002086A8 ... 0x0020A088) and fe/all_in_one_fe (ctor
-// cOVState_MAP_cOVState_MAP, destructor, onMenuGainFocus, the engine-less ctor copy func_002212C8).
+// cOVState_MAP_cOVState_MAP, destructor, onMenuGainFocus, the engine-less ctor copy cOVState_MAP_cOVState_MAP1).
 //
 // Size 0x1D4:
 //   [R] cOVStateManager_triggerOverlay builds overlay 32 inline in operator new(468, "cOVStateOverlay");
@@ -40,7 +40,7 @@ struct cUIText;
 
 struct cOVState_MAP : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] cOVState_MAP_vtbl (0x00473320, 25 slots), stored by cOVState_MAP_cOVState_MAP / func_002212C8 / the
+    //   [R] cOVState_MAP_vtbl (0x00473320, 25 slots), stored by cOVState_MAP_cOVState_MAP / cOVState_MAP_cOVState_MAP1 / the
     //       inlined ctor in cOVStateManager_triggerOverlay after cOVState_vtbl
     // cOVState_MAP's notes on cUIState's fields:
     //   mpEngine: [U] onCreateScreen adds "38session" to it; onWidgetEvent pops its state stack

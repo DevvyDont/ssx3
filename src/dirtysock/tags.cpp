@@ -140,19 +140,19 @@ found:
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EB578);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetDivider);
 #ifdef SKIP_ASM
 extern signed char D_004A4A70;
 
 /**
  * Sets the tag-record divider character D_004A4A70 and returns the previous one.
  *
- * D_004A4A70 starts as '\n'; func_003EBD70() and func_003ECBD8() write it between fields.
+ * D_004A4A70 starts as '\n'; cDirtysock_tag_TagFieldAppendBlockMarker() and cDirtysock_tag_TagFieldPrintf() write it between fields.
  *
  * @param divider  the new divider character
  * @return the divider character it replaced
  */
-extern "C" signed char func_003EB578(signed char divider) {
+extern "C" signed char cDirtysock_tag_TagFieldSetDivider(signed char divider) {
     signed char temp_2;
 
     temp_2 = D_004A4A70;
@@ -161,7 +161,7 @@ extern "C" signed char func_003EB578(signed char divider) {
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EB588);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldNormalizeSeparators);
 #ifdef SKIP_ASM
 /**
  * Normalizes a tag record in place, rewriting the control-character runs between its fields.
@@ -179,7 +179,7 @@ INCLUDE_ASM("dirtysock/tags", func_003EB588);
 // Normalizes a record in place: header control runs become `sep` (stopping at the first
 // key line), a trailing sep becomes a newline (or the end), then each control run in the
 // body becomes one '\n' (a run of the same char stays separate lines).
-extern "C" void func_003EB588(unsigned char* dst, unsigned char sep)
+extern "C" void cDirtysock_tag_TagFieldNormalizeSeparators(unsigned char* dst, unsigned char sep)
 {
     unsigned char* buf = dst;
     unsigned char* src = dst;
@@ -276,7 +276,7 @@ extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003EB840);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFindJoined);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* cDirtysock_tag_TagFieldFind_B840(char* record, char* name) __asm__("cDirtysock_tag_TagFieldFind");
@@ -295,7 +295,7 @@ extern "C" void strcat_EB840(char* dst, const char* src) __asm__("strcat");
  * @param name    second part of the field name, or 0
  * @return cDirtysock_tag_TagFieldFind()'s result: the field's value, or 0 when it is missing
  */
-extern "C" char* func_003EB840(char* record, char* prefix, char* name)
+extern "C" char* cDirtysock_tag_TagFieldFindJoined(char* record, char* prefix, char* name)
 {
     char buf[256];
     char* field;
@@ -312,7 +312,7 @@ extern "C" char* func_003EB840(char* record, char* prefix, char* name)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFindTextBlock);
 #ifdef SKIP_ASM
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
 extern char str_tilde_tilde[];
@@ -320,13 +320,13 @@ extern char str_tilde_tilde[];
 /**
  * Returns the text block that follows the "~~" field of a tag record.
  *
- * Finds the field named "~~" (str_tilde_tilde; func_003EBD70() appends it as "~~=\n") and skips the characters 1..0x20
+ * Finds the field named "~~" (str_tilde_tilde; cDirtysock_tag_TagFieldAppendBlockMarker() appends it as "~~=\n") and skips the characters 1..0x20
  * (control characters and spaces) after it.
  *
  * @param record  the tag record to search
  * @return the first character of the block, or 0 when there is no "~~" field or nothing follows it
  */
-extern "C" unsigned char* func_003EB8B8(char* record)
+extern "C" unsigned char* cDirtysock_tag_TagFieldFindTextBlock(char* record)
 {
     unsigned char* cursor = cDirtysock_tag_TagFieldFind(record, str_tilde_tilde);
     if (cursor != 0) {
@@ -390,7 +390,7 @@ extern "C" int cDirtysock_tag_TagFieldDelete(unsigned char* record, char* name)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldRename);
 #ifdef SKIP_ASM
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
 extern "C" unsigned int strlen(const char* s);
@@ -410,7 +410,7 @@ extern "C" unsigned int strlen(const char* s);
  * @param value   the new name
  * @return 0 when renamed, -1 when the field is missing or by the inverted room check
  */
-extern "C" int func_003EB9E8(unsigned char* record, int len, char* name, const signed char* value)
+extern "C" int cDirtysock_tag_TagFieldRename(unsigned char* record, int len, char* name, const signed char* value)
 {
     unsigned char* nameEnd = cDirtysock_tag_TagFieldFind((char*)record, name);
     unsigned char* start;
@@ -496,7 +496,7 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFirstName);
 #ifdef SKIP_ASM
 /**
  * Copies the name of the first field in a tag record into a buffer.
@@ -511,7 +511,7 @@ INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
  * @return the number of characters copied (0 when there is no name)
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
+extern "C" int cDirtysock_tag_TagFieldGetFirstName(const unsigned char* rec, char* buf, int len)
 {
     int n = 0;
     if (len > 0)
@@ -535,21 +535,21 @@ extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetTextBlock);
 #ifdef SKIP_ASM
 /**
  * Replaces everything from a tag record's first block marker on with "=\n" plus a text block.
  *
  * Truncates the record at the first '=' or ':' that is followed by a control character (the end of the record when
  * there is none). With a null @p value it stops there; otherwise it writes "=\n" and as much of @p value as fits in @p
- * len, terminated. func_003EB8B8() and func_003ECE38() read such a block back.
+ * len, terminated. cDirtysock_tag_TagFieldFindTextBlock() and cDirtysock_tag_TagFieldCopyTextBlock() read such a block back.
  *
  * @param record  the tag record to edit
  * @param len     size of the record buffer in bytes
  * @param value   the block text, or 0 to just cut the record
  * @return 0 on success, -1 when fewer than 5 bytes remain after the cut
  */
-extern "C" int func_003EBCB0(char* record, int len, const char* value)
+extern "C" int cDirtysock_tag_TagFieldSetTextBlock(char* record, int len, const char* value)
 {
     char* cursor = record;
     char* end;
@@ -583,7 +583,7 @@ extern "C" int func_003EBCB0(char* record, int len, const char* value)
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EBD70);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldAppendBlockMarker);
 #ifdef SKIP_ASM
 extern signed char D_004A4A70;
 extern signed char D_004A4A80[];
@@ -592,13 +592,13 @@ extern signed char D_004A4A80[];
  * Appends the "~~=\n" block marker to a tag record.
  *
  * When the record's last character is printable and not already the divider D_004A4A70, it first appends the divider
- * (if there is room). The marker string is D_004A4A80; func_003EB8B8() finds the text after it.
+ * (if there is room). The marker string is D_004A4A80; cDirtysock_tag_TagFieldFindTextBlock() finds the text after it.
  *
  * @param buf  the tag record, terminated
  * @param len  size of the record buffer in bytes
  * @return 0 when the marker was appended, -1 when fewer than 5 bytes are left
  */
-extern "C" int func_003EBD70(unsigned char* buf, int len)
+extern "C" int cDirtysock_tag_TagFieldAppendBlockMarker(unsigned char* buf, int len)
 {
     const signed char* marker = D_004A4A80;
     int ret = -1;
@@ -1137,7 +1137,7 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetDateTime);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
@@ -1162,7 +1162,7 @@ extern "C" unsigned long func_003EB090(sDsTmK2* tm);
  * @param adj     seconds subtracted from the converted time (a time-zone offset)
  * @return cDirtysock_tag_TagFieldSetEpoch()'s result
  */
-extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mon, int day, int hour, int min, int sec, int adj)
+extern "C" int cDirtysock_tag_TagFieldSetDateTime(char* record, int len, char* name, int year, int mon, int day, int hour, int min, int sec, int adj)
 {
     sDsTmK2 tm;
     int secs;
@@ -1180,7 +1180,7 @@ extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mo
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetPackedDateTime);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
@@ -1189,8 +1189,8 @@ extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 /**
  * Stores a packed date and time in a tag record as epoch seconds.
  *
- * Like func_003EC8B8(), but the date comes packed as year << 16 | month << 8 | day and the time as hour << 16 | minute
- * << 8 | second (the layout func_003EDE80() returns).
+ * Like cDirtysock_tag_TagFieldSetDateTime(), but the date comes packed as year << 16 | month << 8 | day and the time as hour << 16 | minute
+ * << 8 | second (the layout cDirtysock_tag_TagFieldGetPackedDateTime() returns).
  *
  * @param record  the tag record to edit
  * @param len     size of the record buffer in bytes
@@ -1200,7 +1200,7 @@ extern "C" unsigned long func_003EB090(sDsTmK2* tm);
  * @param adj     seconds subtracted from the converted time (a time-zone offset)
  * @return cDirtysock_tag_TagFieldSetEpoch()'s result
  */
-extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int time, int adj)
+extern "C" int cDirtysock_tag_TagFieldSetPackedDateTime(char* record, int len, char* name, int date, int time, int adj)
 {
     sDsTmK2 tm;
     int secs;
@@ -1218,7 +1218,7 @@ extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int ti
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003ECA88);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldCopyField);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* cDirtysock_tag_TagFieldFind_CA88(char* record, char* name) __asm__("cDirtysock_tag_TagFieldFind");
@@ -1236,7 +1236,7 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
  * @param data    the tag record to copy it from
  * @return cDirtysock_tag__TagFieldSetupTerm()'s result, or 0 when @p data has no such field
  */
-extern "C" int func_003ECA88(char* record, int len, char* name, char* data)
+extern "C" int cDirtysock_tag_TagFieldCopyField(char* record, int len, char* name, char* data)
 {
     char* field = cDirtysock_tag_TagFieldFind_CA88(data, name);
     int result = 0;
@@ -1254,7 +1254,7 @@ extern "C" int func_003ECA88(char* record, int len, char* name, char* data)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003ECB00);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldMerge);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
@@ -1271,7 +1271,7 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
  * @return how many terms cDirtysock_tag__TagFieldSetupTerm() reported as set (result > 0)
  */
 // TagFieldMerge: apply every field of `data` to the record; returns how many were set.
-extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
+extern "C" int cDirtysock_tag_TagFieldMerge(char* record, int len, unsigned char* data)
 {
     int count = 0;
     for (;;) {
@@ -1298,15 +1298,15 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003ECBD8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldPrintf);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_003ECBD8_va_list;
-#define func_003ECBD8_va_start(ap)                                       \
+typedef char* cDirtysock_tag_TagFieldPrintf_va_list;
+#define cDirtysock_tag_TagFieldPrintf_va_start(ap)                                       \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-#define func_003ECBD8_va_arg(ap, T) (ap += 8, *(T*)(ap - 8))
+#define cDirtysock_tag_TagFieldPrintf_va_arg(ap, T) (ap += 8, *(T*)(ap - 8))
 
 extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
 extern char D_004A4A90[];
@@ -1329,10 +1329,10 @@ extern char D_004A4A90[];
  */
 // TagFieldPrintf-style formatter: copies fmt into buf, turning whitespace runs into the
 // field separator and %s/%d/%a/%f/%e/%r into tag fields from the arguments.
-extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
+extern "C" int cDirtysock_tag_TagFieldPrintf(char* buf, int len, const char* fmt, ...)
 {
-    func_003ECBD8_va_list args;
-    func_003ECBD8_va_start(args);
+    cDirtysock_tag_TagFieldPrintf_va_list args;
+    cDirtysock_tag_TagFieldPrintf_va_start(args);
     int size = len;
     unsigned char fmtChar = *fmt++;
     while (fmtChar != 0 && len >= 2) {
@@ -1353,17 +1353,17 @@ extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
             }
             *buf = 0;
             if (fmtChar == 's') {
-                n = cDirtysock_tag_TagFieldSetString(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, char*));
+                n = cDirtysock_tag_TagFieldSetString(buf, len, D_004A4A90, cDirtysock_tag_TagFieldPrintf_va_arg(args, char*));
             } else if (fmtChar == 'd') {
-                n = cDirtysock_tag_TagFieldSetNumber(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
+                n = cDirtysock_tag_TagFieldSetNumber(buf, len, D_004A4A90, cDirtysock_tag_TagFieldPrintf_va_arg(args, int));
             } else if (fmtChar == 'a') {
-                n = cDirtysock_tag_TagFieldSetAddress(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
+                n = cDirtysock_tag_TagFieldSetAddress(buf, len, D_004A4A90, cDirtysock_tag_TagFieldPrintf_va_arg(args, unsigned int));
             } else if (fmtChar == 'f') {
-                n = cDirtysock_tag_TagFieldSetFlags(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
+                n = cDirtysock_tag_TagFieldSetFlags(buf, len, D_004A4A90, cDirtysock_tag_TagFieldPrintf_va_arg(args, int));
             } else if (fmtChar == 'e') {
-                n = cDirtysock_tag_TagFieldSetEpoch(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
+                n = cDirtysock_tag_TagFieldSetEpoch(buf, len, D_004A4A90, cDirtysock_tag_TagFieldPrintf_va_arg(args, unsigned int));
             } else if (fmtChar == 'r') {
-                const char* rawText = func_003ECBD8_va_arg(args, char*);
+                const char* rawText = cDirtysock_tag_TagFieldPrintf_va_arg(args, char*);
                 while (*rawText != 0 && len > 0) {
                     *buf++ = *rawText++;
                     len--;
@@ -1382,7 +1382,7 @@ extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003ECE38);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldCopyTextBlock);
 #ifdef SKIP_ASM
 /**
  * Copies the text block that follows a tag record's first "=\n" (or ":\n") marker.
@@ -1400,7 +1400,7 @@ INCLUDE_ASM("dirtysock/tags", func_003ECE38);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
-extern "C" unsigned char* func_003ECE38(unsigned char* src, int ignored, char* out, int size, const char* dflt)
+extern "C" unsigned char* cDirtysock_tag_TagFieldCopyTextBlock(unsigned char* src, int ignored, char* out, int size, const char* dflt)
 {
     int i;
     unsigned char* cursor = src;
@@ -1552,7 +1552,7 @@ extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003ED0F8);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetDelimItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -1579,7 +1579,7 @@ extern unsigned char D_004962C0[];
  *         when @p iLength is 0 or less
  */
 // TagFieldGetString variant that first skips iIndex fields split by iDelim.
-extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, const char* pDefval, int iIndex, int iDelim)
+extern "C" int cDirtysock_tag_TagFieldGetDelimItem(const char* pData, char* pBuffer, int iLength, const char* pDefval, int iIndex, int iDelim)
 {
     int iSize;
     unsigned char cQuote;
@@ -2042,7 +2042,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("dirtysock/tags", func_003EDD70);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetDateTime);
 #ifdef SKIP_ASM
 extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int dflt);
 
@@ -2064,7 +2064,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
  * @return 0 on success, -1 when the field is missing or below 2 or the conversion fails
  */
 // TagFieldGetDate-style accessor: split a time tag into calendar fields.
-extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset)
+extern "C" int cDirtysock_tag_TagFieldGetDateTime(char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset)
 {
     sDsTmK2 tm;
     sDsTmK2* calendar;
@@ -2092,13 +2092,13 @@ extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* h
 
 
 //100%
-INCLUDE_ASM("dirtysock/tags", func_003EDE80);
+INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetPackedDateTime);
 #ifdef SKIP_ASM
 /**
  * Reads a time field from a tag record as a packed date and a packed time.
  *
- * Like func_003EDD70(), but stores year << 16 | month << 8 | day in @p date and hour << 16 | minute << 8 | second in @p
- * time (the layout func_003EC9A0() takes).
+ * Like cDirtysock_tag_TagFieldGetDateTime(), but stores year << 16 | month << 8 | day in @p date and hour << 16 | minute << 8 | second in @p
+ * time (the layout cDirtysock_tag_TagFieldSetPackedDateTime() takes).
  *
  * @param data    the field value
  * @param date    receives the packed date, or 0
@@ -2106,7 +2106,7 @@ INCLUDE_ASM("dirtysock/tags", func_003EDE80);
  * @param offset  seconds added before the conversion (a time-zone offset)
  * @return 0 on success, -1 when the field is missing or below 2 or the conversion fails
  */
-extern "C" int func_003EDE80(char* data, unsigned int* date, unsigned int* time, int offset)
+extern "C" int cDirtysock_tag_TagFieldGetPackedDateTime(char* data, unsigned int* date, unsigned int* time, int offset)
 {
     sDsTmK2 tm;
     sDsTmK2* calendar;

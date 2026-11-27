@@ -19,13 +19,13 @@ void* cList_first(cList* list);
 int GetHashValue32(char*);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
+extern "C" tBEUber* cBEBAGTInterface_getUberVariants(void* iface, int player, int slot, void* out);
 extern "C" int cBEBAGTInterface_chooseUberVar(void* iface, int player, int slot, int a3);
-extern "C" int func_00150048(void* iface, int player, int slot, int idx);
-extern "C" int func_0014FFB8(void* iface, int player, int slot, int idx);
+extern "C" int cBEBAGTInterface_isUberOffered(void* iface, int player, int slot, int idx);
+extern "C" int cBEBAGTInterface_isUberForSale(void* iface, int player, int slot, int idx);
 extern "C" const char* gGetGrabName(unsigned short id);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
-extern "C" void func_00183D08(void* obj, int colour, float a);
+extern "C" void fitThingToTexture(void* obj, int colour, float a);
 extern "C" void cUIText_getTextExtent(void* obj, void* out);
 extern "C" void cUIThing_getAbsPosition(void* obj, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -81,7 +81,7 @@ static inline void setHighlight_3DE0(char* o, int c)
 
 static inline void setTab_3DE0(char* t, int c)
 {
-    func_00183D08(t, c, 0.8f);
+    fitThingToTexture(t, c, 0.8f);
     setHighlight_3DE0(t, c);
 }
 
@@ -134,10 +134,10 @@ void cFEStateUberTrick::updateTrickMenu()
         slot = *(signed char*)(rider + 0x18);
     int shown = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, mUserNum, slot, &count);
+    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)cBEBAGTInterface_getUberVariants(iface, mUserNum, slot, &count);
     cur = cBEBAGTInterface_chooseUberVar(iface, mUserNum, slot, 1);
     for (int j = 0; j < count; j++) {
-        if (func_00150048(iface, mUserNum, slot, j)) {
+        if (cBEBAGTInterface_isUberOffered(iface, mUserNum, slot, j)) {
             cUIThing* uiObj = (cUIThing*)labels[shown];
             if (((char*)uiObj) != 0) {
                 cUIText_setAsciiString((cUIText*)uiObj, gGetGrabName(tbl[j].name));
@@ -148,7 +148,7 @@ void cFEStateUberTrick::updateTrickMenu()
             uiObj = (cUIThing*)marks[shown];
             if (((char*)uiObj) != 0) {
                 uiCall_3DE0(((char*)uiObj), 9, 1);
-                if (func_0014FFB8(iface, mUserNum, slot, j))
+                if (cBEBAGTInterface_isUberForSale(iface, mUserNum, slot, j))
                     setHighlight_3DE0(((char*)uiObj), (int)mpDollarSign);
                 else if (cur == j)
                     setHighlight_3DE0(((char*)uiObj), (int)mpCheckmark);
@@ -261,7 +261,7 @@ void* cList_first(cList* list);
 int GetHashValue32(char*);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
+extern "C" tBEUber* cBEBAGTInterface_getUberVariants(void* iface, int player, int slot, void* out);
 extern "C" int cBEEconInterface_getMoney(void* iface, int player, int charID);
 extern "C" const char* getDollarString(int id);
 
@@ -270,7 +270,7 @@ extern "C" const char* getDollarString(int id);
  * player's money.
  *
  * Takes the selected items' mMiscData of the category menu (+0x4C) and trick menu (+0x50), gets the category's trick
- * table with func_0014FF90 on cBE interface 6 for the player (+0x44), and on the first screen of the state's list
+ * table with cBEBAGTInterface_getUberVariants on cBE interface 6 for the player (+0x44), and on the first screen of the state's list
  * (+0x24) sets "cost_num" to getDollarString of the trick entry's cost (halfword at +0x6 of its 8-byte entry) and
  * "have_num" to getDollarString of cBEEconInterface_getMoney (interface 11) for the player and their character
  * (cBENewPlayerInterface_getPlayerCharID on interface 1). A missing text object is skipped.
@@ -282,7 +282,7 @@ void cFEStateUberTrick::updateTrickMenuEntry()
     signed char categoryIndex = ((sWSMPlayer4520*)mpMainMenu)->rider->slot;
     signed char trickIndex = ((sWSMPlayer4520*)mpTrickMenu)->rider->slot;
     char buf[16];
-    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), mUserNum, categoryIndex, buf);
+    tBEUber* tbl = cBEBAGTInterface_getUberVariants(cBE_getInterface_Fv(cBE_getBE(), 6), mUserNum, categoryIndex, buf);
     void* screen = cList_first((cList*)((char*)&mScreens));
     cUIText* costText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costText != 0) {

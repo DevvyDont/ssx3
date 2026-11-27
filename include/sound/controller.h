@@ -53,7 +53,7 @@ struct cController {
     // --- cSpeechSys (sound/speechsys.h, non-virtual 0x1C0)
     cSpeechSys SpeechSys;           // 0x5560 [R] ctor cSpeechSys_cSpeechSys(this + 0x5560, 0, ...); the ctor / dtor store
                                     //        SpeechSys.mVtbl (0x571C) = cSpeechSys_vtbl; [U] cController_Update passes
-                                    //        this + 0x5560 to the speech update (func_002B0C78)
+                                    //        this + 0x5560 to the speech update (cSpeechSys_Update)
     // --- cController
     int execFlag;                   // 0x5720 [O] (cController's only member in On Tour); [R] ctor 0
     char unk_5724[0x4];             // 0x5724 padding (the non-virtual part ends 8-aligned; cSoundSys starts at 0x5728)

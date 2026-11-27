@@ -7,15 +7,15 @@
 // cFEStateOptionsController: the front end's controller options screen ("22control"): per-pad vibration on/off and
 // default/pro button layout lists, with a short test buzz when vibration is switched on.
 // EA's source: d:/ssx/code/source/fe/festateoptions.cpp (preview strings); retail code: fe/festateoptions
-// (func_0018C658 ... 0x0018D108) and the default-ctor copy, the destructor and the empty onLoseFocus in
+// (cFEStateOptionsController_cFEStateOptionsController1 ... 0x0018D108) and the default-ctor copy, the destructor and the empty onLoseFocus in
 // main/all_in_one_main (0x001DE080 ... 0x001DE0E8).
 //
 // Size 0x54:
-//   [R] cMemMan_alloc(0x54, "cFEStateOptionsController") + func_0018C658(mem, engine) in cFECustom_getNextState
+//   [R] cMemMan_alloc(0x54, "cFEStateOptionsController") + cFEStateOptionsController_cFEStateOptionsController1(mem, engine) in cFECustom_getNextState
 //       (state 31); the ctors write up to the byte at 0x50.
 //   [O] On Tour's class is 0x54 too, with the same members at the same offsets.
 // Base: cFEState (no data; vtable cFEState_vtbl) : cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). The ctor
-// func_0018C658 runs cUIState_cUIState(this, pEngine), stores cFEStateOptionsController_vtbl (0x0046C480, 24 slots: 1
+// cFEStateOptionsController_cFEStateOptionsController1 runs cUIState_cUIState(this, pEngine), stores cFEStateOptionsController_vtbl (0x0046C480, 24 slots: 1
 // dtor, 4 onCreateScreen, 5 onDestroyScreen, 11 onLoseFocus cFEStateOptionsController_onLoseFocus, 12 onUpdate, 17 onPopupEvent, 19
 // onWidgetEvent, 20 onWidgetMenu, 21 onWidgetPair; vtables.tsv stops at slot 10), mHashName 0x1F and mVibrateOn 0;
 // the destructor stores cFEState_vtbl and runs cUIState__cUIState.
@@ -163,17 +163,17 @@ CHECK_SIZE(cFEStateOptionsDeviceSelect, 0x23C);
 // cFEStateOptions: the front end's options menu ("18options", state id 0x18): entries "1" ... "8" open the game, sound,
 // HUD, controller, save/load, network-name keyboard and device-select states; leaving with unsaved changes first asks
 // "save options?" (saveOptionPrompt pushes a cFEPopupOptionReset). EA's source: fe/festateoptions.cpp (see above).
-// Retail code: the engine ctor func_001887A0 (splat puts it at the end of fe/festatelegal),
+// Retail code: the engine ctor cFEStateOptions_cFEStateOptions1 (splat puts it at the end of fe/festatelegal),
 // cFEStateOptions_onCreateScreen ... cFEStateOptions_saveOptionPrompt in fe/festateoptions (0x00188800 ...
 // 0x00188E58), and the engine-less ctor and the dtor in main/all_in_one_main (0x001DDEE8, 0x001DDF20).
 //
 // Size 0x54:
-//   [R] cMemMan_alloc(84, "cFEStateOptions" / "FEOptions") + func_001887A0(mem, engine, reset) in
+//   [R] cMemMan_alloc(84, "cFEStateOptions" / "FEOptions") + cFEStateOptions_cFEStateOptions1(mem, engine, reset) in
 //       cFECustom_getNextState (fe/fereal), fe/festatecharsetup and fe/ovstates; the last member is the pointer at
 //       0x50.
 //   [O] On Tour's class is 0x50: two bools (0x48, 0x49) then mpKeyboard (0x4C); retail's bools are words.
 // Base: cFEState (no data; vtable cFEState_vtbl) : cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). The ctor
-// func_001887A0 runs cUIState_cUIState(this, pEngine), stores mHashName 0x18 and cFEStateOptions_vtbl (0x0046C7C0,
+// cFEStateOptions_cFEStateOptions1 runs cUIState_cUIState(this, pEngine), stores mHashName 0x18 and cFEStateOptions_vtbl (0x0046C7C0,
 // 24 slots: 1 dtor, 4 onCreateScreen, 8 onInputBegin, 17 onPopupEvent, 18 onWidgetCreate, 19 onWidgetEvent,
 // 20 onWidgetMenu; the rest cFEState's / cUIState's) and, when reset is set, clears flow-state entry 0x18; the dtor
 // stores cFEState_vtbl and runs cUIState__cUIState.

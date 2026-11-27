@@ -7,7 +7,7 @@
 //
 // cOVTemplate_PauseMenu: the pause-menu template (screen "31paus_freeride": up to 8 option rows, the PDA icons,
 // the new-mail pulse). Retail vtable cOVTemplate_PauseMenu_vtbl (0x473170); constructors
-// cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(engine, id) and func_002214F8 (no engine), destructor
+// cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(engine, id) and cOVTemplate_PauseMenu_cOVTemplate_PauseMenu1 (no engine), destructor
 // cOVTemplate_PauseMenu__cOVTemplate_PauseMenu. Size 0x114: every subclass is allocated with
 // cMemMan_alloc(0x114, "cOVStateOverlay") (overlay ids 1-6) and nothing touches a word past 0x110.
 // Its six subclasses add no members (On Tour: all 0xD8 = cOVTemplate_PauseMenu's size; retail: the same 0x114
@@ -23,7 +23,7 @@
 //
 // cOVState_PAUSE_ONLINE_ERROR: the online "connection problem" pause (overlay id 39, screen with Continue /
 // Cancel and a ping status). Allocated 0xA4; vtable cOVState_PAUSE_ONLINE_ERROR_vtbl (0x472AB0); constructors
-// cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR (stores 0xA0 = 1, 0x9C = 0) and func_00221C80.
+// cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR (stores 0xA0 = 1, 0x9C = 0) and cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR1.
 //
 // All three derive from cOVState (fe/ovstate.h, 0x9C).
 //

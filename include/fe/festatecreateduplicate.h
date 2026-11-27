@@ -9,12 +9,12 @@
 // both builds; no assert of its own), so this header could also be merged into fe/festatenetcreate.h.
 //
 // Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + cFEStateCreateDuplicate_cFEStateCreateDuplicate(mem, pEngine, bAccount) at both sites
-// (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable cFEStateCreateDuplicate_vtbl,
+// (cFEStateSelectPersona_handlePersonaError with 0, cFEStateCreateStep2_handleAccountError). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable cFEStateCreateDuplicate_vtbl,
 // mHashName 0x4F, mNeedsLobby = 0) and the default cFEStateCreateDuplicate_cFEStateCreateDuplicate1 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
 // slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable cFEStateCreateDuplicate_vtbl (32 slots: 4 onCreateScreen
 // cFEStateCreateDuplicate_onCreateScreen, 12 onUpdate cFEStateCreateDuplicate_onUpdate, 17 onPopupEvent cFEStateCreateDuplicate_onPopupEvent, 18 onWidgetCreate cFEStateCreateDuplicate_onWidgetCreate,
-// 19 onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent, 25 func_001BC190 (help), 29 func_001E0E40, 31 func_001BC4F0 (net events)).
+// 19 onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent, 25 cFEStateCreateDuplicate_fillHelpPopup (help), 29 cFEStateCreateDuplicate_isOnlineState, 31 cFEStateCreateDuplicate_onNetEvent (net events)).
 // Methods: fe/feasyncfile 0x1BBD08-0x1BC990.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
@@ -44,25 +44,25 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
     //       stores 0x4F
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateCreateDuplicate
-    int mbAccount;                  // 0x6D0 [R] the ctor's 3rd argument (0 from cFEStateSelectPersona func_001ADC30:
-                                    //       a persona name; func_001BAC90: the account name); [U] onWidgetCreate
-                                    //       cFEStateCreateDuplicate_onWidgetCreate / onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent / help func_001BC190 pick the
+    int mbAccount;                  // 0x6D0 [R] the ctor's 3rd argument (0 from cFEStateSelectPersona cFEStateSelectPersona_handlePersonaError:
+                                    //       a persona name; cFEStateCreateStep2_handleAccountError: the account name); [U] onWidgetCreate
+                                    //       cFEStateCreateDuplicate_onWidgetCreate / onWidgetEvent cFEStateCreateDuplicate_onWidgetEvent / help cFEStateCreateDuplicate_fillHelpPopup pick the
                                     //       account or persona texts and actions by it
-    int mbAskSave;                  // 0x6D4 [U] func_001BC990 (popup 0x82C, the cFEStateNetAccountMem result): 1 on
+    int mbAskSave;                  // 0x6D4 [U] cFEStateCreateDuplicate_onAccountMemPopupEvent (popup 0x82C, the cFEStateNetAccountMem result): 1 on
                                     //       0x11, 0 on 0xF/0x10/0x14; on 0x16 it opens "kT_POPUP204SaveAccount"
-                                    //       (0x81F) when set, else verifies the account (func_0025C610); then clears
+                                    //       (0x81F) when set, else verifies the account (LobbyMan_authenticate); then clears
                                     //       it
     tLobbyAccount* mpAccount;       // 0x6D8 [U] onCreateScreen cFEStateCreateDuplicate_onCreateScreen stores (char*)LobbyMan_mLobbyMan + 0x260
-                                    //       (the new-account form, online/lobbyman.h); func_001BC400 shows its
+                                    //       (the new-account form, online/lobbyman.h); cFEStateCreateDuplicate_showNameSuggestions shows its
                                     //       mNameOptions[0..mNumNameOptions) in "SelectName0".."3"; onWidgetEvent
-                                    //       assigns the chosen option or the typed name to its mName; func_001BC818 /
-                                    //       func_001BC990 pass mName / mPassword on
+                                    //       assigns the chosen option or the typed name to its mName; cFEStateCreateDuplicate_onSaveAccountPopupEvent /
+                                    //       cFEStateCreateDuplicate_onAccountMemPopupEvent pass mName / mPassword on
     int unk_6DC;                    // 0x6DC no access seen (inside the 0x6E0 allocation)
 
     // Methods bound to their retail symbols by asm labels.

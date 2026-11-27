@@ -15,7 +15,7 @@
 // (fe/fepopupmisc); destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
 // Retail vtable cFEStateNetQuickPlayPopup_vtbl (32 slots: 4 onCreateScreen cFEStateNetQuickPlayPopup_onCreateScreen, 10 cFEStateNetQuickPlayPopup_onLoseTransition, 12
 // onUpdate cFEStateNetQuickPlayPopup_onUpdate, 17 onPopupEvent cFEStateNetQuickPlayPopup_onPopupEvent, 18 onWidgetCreate cFEStateNetQuickPlayPopup_onWidgetCreate, 19 onWidgetEvent
-// cFEStateNetQuickPlayPopup_onWidgetEvent, 20 cFEStateNetQuickPlayPopup_onWidgetMenu, 21 cFEStateNetQuickPlayPopup_onWidgetPair, 25 func_001C1488 (help), 31 func_001C19C8 (net events)).
+// cFEStateNetQuickPlayPopup_onWidgetEvent, 20 cFEStateNetQuickPlayPopup_onWidgetMenu, 21 cFEStateNetQuickPlayPopup_onWidgetPair, 25 cFEStateNetQuickPlayPopup_fillHelpPopup (help), 31 cFEStateNetQuickPlayPopup_onNetEvent (net events)).
 // Methods: fe/feasyncfile 0x1C0F40-0x1C1B88.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
@@ -47,7 +47,7 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     //       stores 0x48
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -55,29 +55,29 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     // --- cFEStateNetQuickPlayPopup
     int miSearchOptions[5];         // 0x6D0 [U] onWidgetEvent cFEStateNetQuickPlayPopup_onWidgetEvent stores the five list boxes' values ([0]
                                     //       mpLBRanked .. [4] mpLBSlopeStyle) when the search starts and passes the
-                                    //       array to func_0025EE20(LobbyMan, miSearchOptions, mCurrentCtrl)
+                                    //       array to LobbyMan_startQuickMatch(LobbyMan, miSearchOptions, mCurrentCtrl)
     cUIText* mpTextSearching;       // 0x6E4 [U] onWidgetCreate cFEStateNetQuickPlayPopup_onWidgetCreate: widget "TextSearching" (hidden); shown
-                                    //       while searching, "kT_233AbortingQuickmatch" on abort; func_001C1B88 hides
+                                    //       while searching, "kT_233AbortingQuickmatch" on abort; cFEStateNetQuickPlayPopup_onTimeoutPopupEvent hides
                                     //       it
     int miBlinkFrames;              // 0x6E8 [U] onWidgetEvent sets 30 when the search starts; onUpdate cFEStateNetQuickPlayPopup_onUpdate
                                     //       counts it down while mbSearching and wraps to 30
     int mbSearching;                // 0x6EC [R] 0 (both ctors); [U] onWidgetEvent: 1 when OK starts the search, the
-                                    //       OK button then aborts it (func_0025EED8); func_001C1B88 (popup 0xF/0x14)
-                                    //       and the net-event handler func_001C19C8 (0xE7) clear it; message 7 passes
+                                    //       OK button then aborts it (LobbyMan_cancelQuickMatch); cFEStateNetQuickPlayPopup_onTimeoutPopupEvent (popup 0xF/0x14)
+                                    //       and the net-event handler cFEStateNetQuickPlayPopup_onNetEvent (0xE7) clear it; message 7 passes
                                     //       to cFEStateNet only while it is 0
     int mbQuickMatchTimeout;        // 0x6F0 (name ours) [U] onWidgetEvent clears it when the search starts; the
-                                    //        net-event handler func_001C19C8 sets 1 on 0xE6 and, on 0xE7, opens
+                                    //        net-event handler cFEStateNetQuickPlayPopup_onNetEvent sets 1 on 0xE6 and, on 0xE7, opens
                                     //        "kT_POPUP233QuickMatchTimeout" when set, else ends the search
     cUIText* mpTextOK;              // 0x6F4 [U] onWidgetCreate: widget "TextOK"; onWidgetEvent compares the selected
                                     //       widget with it and relabels it "kT_BTNCancel" while searching ("kT_BTNOK"
-                                    //       again in func_001C1B88)
-    cUIThing* mpStaticRanked;       // 0x6F8 [R] 0; [U] onWidgetCreate: widget "StaticRanked"; func_001C17F8(self, on)
+                                    //       again in cFEStateNetQuickPlayPopup_onTimeoutPopupEvent)
+    cUIThing* mpStaticRanked;       // 0x6F8 [R] 0; [U] onWidgetCreate: widget "StaticRanked"; cFEStateNetQuickPlayPopup_setOptionsLocked(self, on)
                                     //       calls slot 8 of this and the 14 widgets after it
     cUIThing* mpStaticRace;         // 0x6FC [R] 0; [U] widget "StaticRace"
     cUIThing* mpStaticBigAir;       // 0x700 [R] 0; [U] widget "StaticBigAir"
     cUIThing* mpStaticSuperpipe;    // 0x704 [R] 0; [U] widget "StaticSuperpipe"
     cUIThing* mpStaticSlopeStyle;   // 0x708 [R] 0; [U] widget "StaticSlopeStyle"
-    cUIListBox* mpLBRanked;         // 0x70C [R] 0; [U] widget "LBRanked" (yes / no, func_001A9AB8); its value is
+    cUIListBox* mpLBRanked;         // 0x70C [R] 0; [U] widget "LBRanked" (yes / no, cFEStateNet_fillOnOffListBox); its value is
                                     //       miSearchOptions[0] and D_00534B34 (ranked)
     cUIListBox* mpLBRace;           // 0x710 [R] 0; [U] widget "LBRace"; miSearchOptions[1]
     cUIListBox* mpLBBigAir;         // 0x714 [R] 0; [U] widget "LBBigAir"; miSearchOptions[2]

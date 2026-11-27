@@ -17,7 +17,7 @@
 // destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable cFEStateNetCreateRoomPopup_vtbl (32 slots;
 // vtables.tsv lists 24: 4 onCreateScreen cFEStateNetCreateRoomPopup_onCreateScreen, 10 cFEStateNetCreateRoomPopup_onLoseTransition, 12 onUpdate
 // cFEStateNetCreateRoomPopup_onUpdate, 18 onWidgetCreate cFEStateNetCreateRoomPopup_onWidgetCreate, 19 onWidgetEvent cFEStateNetCreateRoomPopup_onWidgetEvent, 21 cFEStateNetCreateRoomPopup_onWidgetPair, 25
-// func_001BED58 (help), 31 func_001BED28). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
+// cFEStateNetCreateRoomPopup_fillHelpPopup (help), 31 cFEStateNetCreateRoomPopup_onNetEvent). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
@@ -47,14 +47,14 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     //       stores 0x47
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateNetCreateRoomPopup
     cUIText* mpTextRoomName;        // 0x6D0 [U] onWidgetCreate cFEStateNetCreateRoomPopup_onWidgetCreate: widget "EnterRoomName"; onWidgetEvent
-                                    //       cFEStateNetCreateRoomPopup_onWidgetEvent edits it with the keyboard (func_001A9150,
+                                    //       cFEStateNetCreateRoomPopup_onWidgetEvent edits it with the keyboard (cFEStateNet_openKeyboardWithLabelID,
                                     //       "kT_POPUP231NewRoom") and shows mszRoomName in it
     cUIText* mpTextPassword;        // 0x6D4 [U] onWidgetCreate: widget "EnterPassword"; onWidgetEvent edits it
                                     //       ("kT_POPUP231AddPassword") and shows mszPassword in it
@@ -63,7 +63,7 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
                                     //       selection (cUIListBox_getCurrentEntryData)
     char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] cBXString_EmptyString (both ctors), destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
-                                    //       keyboard id 1); func_001BEC78 refuses an empty name
+                                    //       keyboard id 1); cFEStateNetCreateRoomPopup_checkRoomName refuses an empty name
                                     //       ("kT_POPUP231UniqueRoom")
     char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] cBXString_EmptyString, destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned D_004A1A6C by onWidgetCreate and

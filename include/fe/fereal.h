@@ -59,19 +59,19 @@ struct cRealFE {
                                     //       this + 0xB0; [R] cFERiderManager_cFERiderManager(&mRiderManager); [U] load / purge /
                                     //       render / update pass its address
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (name from the accessor; On
-                                    //       Tour has no such member); [R] func_0019CDF0(this + 0x1A70) (its ctor),
-                                    //       func_0019CE20(.., 2) in cFE__cFE; extent: up to mFXLoader; [U] load / purge /
-                                    //       update (func_0019CE68 / func_0019CF40 / func_0019D250) pass its address
+                                    //       Tour has no such member); [R] cFEBoltFileManager_cFEBoltFileManager(this + 0x1A70) (its ctor),
+                                    //       cFEBoltFileManager__cFEBoltFileManager(.., 2) in cFE__cFE; extent: up to mFXLoader; [U] load / purge /
+                                    //       update (cFEBoltFileManager_init / cFEBoltFileManager_purge / cFEBoltFileManager_update) pass its address
     cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
                                     //       cFE__cFE destroys it when set
     char unk_B5AA4[0xC];            // 0xB5AA4 tail padding (cFE is 16-byte aligned; no access)
     // --- cRealFE
     cConnMan mConnMan;              // 0xB5AB0 [P] getConnMan returns this + 0xB5AB0 (cConnMan); [R] cConnMan_cConnMan
                                     //       (state word 0, its vptr cConnMan_vtbl at +0x8: 0xC bytes); [U] update calls
-                                    //       func_00263828 on it when online
+                                    //       cConnMan_update on it when online
     cGameConnMan mGameConnMan;      // 0xB5ABC [P] getGameConnMan returns this + 0xB5ABC (cGameConnMan); [R]
                                     //       cGameConnMan_cGameConnMan (vptr cGameConnMan_vtbl at +0x14: 0x18 bytes); [U]
-                                    //       update calls func_00263CF0 on it when online
+                                    //       update calls cGameConnMan_update on it when online
     cMoviePlayer* mpMoviePlayer;    // 0xB5AD4 [O]; [R] 0; [U] update creates it (cMemMan_alloc(68, "MoviePlayer")), plays
                                     //       and destroys it; render draws it; loseFocus destroys it
     int mMovieSkippable;            // 0xB5AD8 [O] (bool); [R] 0; [U] update sets it for the intro movie (bit 4) and ends
@@ -146,7 +146,7 @@ struct cFE {
                                     //       getHuman use this + 0xB0; [R] cFERiderManager_cFERiderManager /
                                     //       __cFERiderManager(&mRiderManager)
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (no On Tour member); [R]
-                                    //       func_0019CDF0(this + 0x1A70) (its ctor), func_0019CE20(.., 2) in cFE__cFE;
+                                    //       cFEBoltFileManager_cFEBoltFileManager(this + 0x1A70) (its ctor), cFEBoltFileManager__cFEBoltFileManager(.., 2) in cFE__cFE;
                                     //       extent: up to mFXLoader
     cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
                                     //       cFE__cFE destroys it when set

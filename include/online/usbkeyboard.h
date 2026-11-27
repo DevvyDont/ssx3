@@ -2,15 +2,15 @@
 #define ONLINE_USBKEYBOARD_H
 
 // cUsbKeyboard: the USB keyboard reader for the online front end (chat, account forms). It starts Sony's USB keyboard
-// library, and once per frame (func_002668E8, from cSSXApp_preUpdate) copies each connected keyboard's new key codes
+// library, and once per frame (cUsbKeyboard_update, from cSSXApp_preUpdate) copies each connected keyboard's new key codes
 // into a 64-entry ring per keyboard; the front end's input (cFEInput_update, cMenuSys_input) takes them one pair at a
-// time (func_00266BA8).
+// time (cUsbKeyboard_readKey).
 // EA's source: d:/ssx/code/source/online/usbkeyboard.cpp and ../source/online/usbkeyboard.h (the July 2003 preview's
 // assert strings: "!Keyboard", "(device >= 0) && (device < kMaxKeyboard)", "device >= 0", and the allocation tag
-// "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, Keyboard: func_00266788
-// creates it, func_002667C0 destroys it. No On Tour counterpart.
+// "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, Keyboard: cUsbKeyboard_createInstance
+// creates it, cUsbKeyboard_destroyInstance destroys it. No On Tour counterpart.
 //
-// Size 0x464: [R] func_00266788: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor cUsbKeyboard_cUsbKeyboard, which
+// Size 0x464: [R] cUsbKeyboard_createInstance: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor cUsbKeyboard_cUsbKeyboard, which
 // sets mEnabled (0x460) and MEM_fill's the 0x460 bytes of slots. No vtable, no base class (the destructor cUsbKeyboard__cUsbKeyboard
 // is called directly).
 //
@@ -22,10 +22,10 @@
 
 // One keyboard's key ring (0x8C bytes).
 struct tUsbKeyboardSlot {
-    int mCount;                     // 0x00 [U] keys written so far: func_002668E8 stores at mKeys[mCount % 64] and
-                                    //      increments; func_00266B80 clears it
-    int mRead;                      // 0x04 [U] keys taken: func_00266BA8 reads mKeys[mRead % 64] while mRead < mCount;
-                                    //      func_002668E8 drops the oldest (mRead + 1) once 64 are waiting
+    int mCount;                     // 0x00 [U] keys written so far: cUsbKeyboard_update stores at mKeys[mCount % 64] and
+                                    //      increments; cUsbKeyboard_clearKeys clears it
+    int mRead;                      // 0x04 [U] keys taken: cUsbKeyboard_readKey reads mKeys[mRead % 64] while mRead < mCount;
+                                    //      cUsbKeyboard_update drops the oldest (mRead + 1) once 64 are waiting
     unsigned char mKeys[64][2];     // 0x08 [U] the translated key pair (func_003F68F0's two result bytes)
     unsigned int mFlags;            // 0x88 [U] bit 0 a keyboard is connected (func_003F6520), bits 1..3 bit 0 of the
                                     //      read block's first word, bit 4 func_003F6838(.., 0x10); the whole word is

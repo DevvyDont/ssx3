@@ -6,7 +6,7 @@
 // widths. Plain struct, no vtable, no methods; the free functions that take it as their first argument (On Tour's
 // DWARF: splitTextPictLine(tTextPictLine*), makeTextPictLine(tTextPictLine*, const unsigned short*, cFont*, const
 // t2Vector&), drawTextPictLine(tTextPictLine*, t2Vector, const t2Vector&, const tARGB&, int, int)) are retail
-// splitTextPictLine (split), makeTextPictLine (make; func_001E94E0 is a char* variant that widens the string first) and
+// splitTextPictLine (split), makeTextPictLine (make; makeTextPictLineAscii is a char* variant that widens the string first) and
 // drawTextPictLine (draw), all in the decomp's unit fe/ovstatehud. cOVStateHUD1P embeds four (fe/ovstatehud.h:
 // mTextUberHelp 0x560, mTextRecoverHelp 0x6AC, mTextRecoverHelpAlt 0x7F8, mSkipMessage 0xB48, each char[0x14C]).
 // Size 0x14C: [O] On Tour's struct is 0x14C with the same members; [R] the four members of cOVStateHUD1P are 0x14C

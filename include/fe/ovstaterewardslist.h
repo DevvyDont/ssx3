@@ -4,7 +4,7 @@
 // cOVStateRewardsList: the in-game rewards list overlay ("rewardslist"): widget events 5 / 6 ask the custom
 // interface (the engine's first word) for the next / previous state and push it.
 // EA's source: d:/ssx/code/source/fe/ovstaterewardslist.cpp (preview assert strings). Retail code: onCreateScreen /
-// onWidgetEvent in fe/ovstaterewardslist (0x00200218, 0x00200288); the ctors func_00222100 (engine 0) / cOVStateRewardsList_cOVStateRewardsList
+// onWidgetEvent in fe/ovstaterewardslist (0x00200218, 0x00200288); the ctors cOVStateRewardsList_cOVStateRewardsList1 (engine 0) / cOVStateRewardsList_cOVStateRewardsList
 // (pEngine, id) and the dtor in fe/all_in_one_fe (0x00222100 ... 0x002221C8).
 //
 // Size 0x9C: [O] On Tour's class is 0x90 = On Tour's cOVState (no members of its own); retail's cOVState is 0x9C

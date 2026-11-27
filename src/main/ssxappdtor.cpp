@@ -3011,7 +3011,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
 extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
 extern "C" void cUIEngine_update(void* p);
-extern "C" void func_0029ED18(void* snd);
+extern "C" void cSSXAudio_StopRiderLoops(void* snd);
 extern "C" void cMenuSys_input(void* p);
 extern "C" int cGame_activatePauseMenu(char* self, int a);
 extern "C" int cOVStateManager_allowPauseMenu(void);
@@ -3131,7 +3131,7 @@ bool cGame::updateUI()
         cPauseState_Stack[++cPauseState_StackIdx] = 0xC;
         cPauseState_Flags = D_00442920[0];
         D_004A20CC_4B48 = 0xFFFFFFFF;
-        func_0029ED18(cAudioInterface_bxAudio());
+        cSSXAudio_StopRiderLoops(cAudioInterface_bxAudio());
         return false;
     }
     if (cMenuSys_isActive(((void*)MenuSys)) != 0) {
@@ -3531,7 +3531,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_00246CF8(void* self, int a1);
+extern "C" void cGameLoadState_showPlayerStats(void* self, int a1);
 extern char str_102MPMatch[];
 extern char str_99QPEvent[];
 
@@ -3540,7 +3540,7 @@ extern char str_99QPEvent[];
  * "99QPEvent".
  *
  * Fetches the BE interface 0 first (result unused), adds the screen to the UI engine (+0x10) with this state as owner,
- * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
+ * keeps it at +0x40 and plays its first frame, then fills both players' panels with cGameLoadState_showPlayerStats(self, 0) and (self,
  * 1). Slot +0x24 (onCreateScreen) of cGameLoadState_vtbl.
  */
 void cGameLoadState::onCreateScreen()
@@ -3561,8 +3561,8 @@ void cGameLoadState::onCreateScreen()
             cUIScreen_playFrame(screen, 0, 0);
         }
     }
-    func_00246CF8(this, 0);
-    func_00246CF8(this, 1);
+    cGameLoadState_showPlayerStats(this, 0);
+    cGameLoadState_showPlayerStats(this, 1);
 }
 #endif
 
@@ -3578,7 +3578,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the match / event loading screen and optionally refreshes the player panels.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * str_pct on the screen at +0x40; with @p refresh set it also runs func_00246CF8 for players 0 and 1. Slot +0x3C
+ * str_pct on the screen at +0x40; with @p refresh set it also runs cGameLoadState_showPlayerStats for players 0 and 1. Slot +0x3C
  * (onGainTransition) of cGameLoadState_vtbl.
  *
  * @param refresh  non-zero to refresh both player panels
@@ -3593,8 +3593,8 @@ bool cGameLoadState::onGainTransition(int refresh)
         cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
-        func_00246CF8(this, 0);
-        func_00246CF8(this, 1);
+        cGameLoadState_showPlayerStats(this, 0);
+        cGameLoadState_showPlayerStats(this, 1);
     }
     return false;
 }

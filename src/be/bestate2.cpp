@@ -18,7 +18,7 @@ INCLUDE_ASM("be/bestate2", cBEPreRaceState_onEnter);
 
 INCLUDE_ASM("be/bestate2", cBEProfileLib_init);
 
-INCLUDE_ASM("be/bestate2", func_00156810);
+INCLUDE_ASM("be/bestate2", cBEProfileLib_resetAllRelations);
 
 INCLUDE_ASM("be/bestate2", cBEProfileLib_copy);
 

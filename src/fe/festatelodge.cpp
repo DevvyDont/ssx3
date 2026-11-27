@@ -29,7 +29,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 
 /**
  * Opens the lodge screen ("28lodge"), reads the user's cheat character and disables lodge option 7.
@@ -49,7 +49,7 @@ void cFEStateLodge::onCreateScreen()
     }
     mCheatCharID = cBENewPlayerInterface_getPlayerCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
     D_00441B14[0] = 0;
-    func_0028F140(cAudioInterface_bxAudio(), 1);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 1);
     bToNextState = 0;
     mPathToSaveProfile = 18;
     mbIsYesOrNo = 0;

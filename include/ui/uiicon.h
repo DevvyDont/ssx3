@@ -3,7 +3,7 @@
 
 // cUIIcon: a UI object drawn as a textured sprite (record type 0x11). Size 0x88: cUIScreen_createObjectByStruct does
 // operator new(0x88, "UIIcon") + the cUIThing ctor cUIThing_cUIThing, stores cUIIcon_vtbl (D_00494AA8), constructs mAttrIcon
-// (func_0021CCC8 on this + 0x74), mTextureID = -1, mpTextureElem = 0. Default ctors cUIIcon_cUIIcon1 / cUIIcon_cUIIcon
+// (tAttrIcon_tAttrIcon1 on this + 0x74), mTextureID = -1, mpTextureElem = 0. Default ctors cUIIcon_cUIIcon1 / cUIIcon_cUIIcon
 // (ui/uivector) do the same. Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below.
 // Methods: vtable slots 0 ~cUIIcon (cUIIcon__cUIIcon__FPv), 9 setUIData (cUIIcon_setUIData, ui/uiengine), 16 render2D
 // (cUIIcon_render2D = func_00398A78, ui/uiengine), 21 getType; out-of-line inline accessors in ui/uivector
@@ -35,7 +35,7 @@ struct cUIIcon : public cUIThing {
     // --- cUIIcon
     // cUIIcon's own slots ([R] cUIIcon_vtbl; types [O] On Tour's class cUIIcon):
     virtual char getType();                                               // 22 cUIIcon_getType__FPv
-    tAttrIcon mAttrIcon;             // 0x074 [O] tAttrIcon; [R] its ctor func_0021CCC8 (cUIScreen_createObjectByStruct) /
+    tAttrIcon mAttrIcon;             // 0x074 [O] tAttrIcon; [R] its ctor tAttrIcon_tAttrIcon1 (cUIScreen_createObjectByStruct) /
                                      //       tAttrIcon_tAttrIcon clears the low nibble; [U] accessors cUIIcon_isTiled..cUIIcon_setIconRotate
                                      //       (lw/sw 0x74), cUIIcon_setUIData stores the record flags
     int mTextureID;                  // 0x078 [O]; [R] = -1; [U] cUIIcon_getTexture getTextureID (lw), cUIIcon_setTexture setTextureID

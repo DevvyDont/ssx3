@@ -433,24 +433,24 @@ int cBankSys::SFX_End()
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_00290B58);
+INCLUDE_ASM("sound/soundsys", AudioTable_evaluate);
 #ifdef SKIP_ASM
 
-// Named _impl: a later block declares func_00290B58 with its own curve struct.
-extern "C" float func_00290B58_impl(AudioTable* c, float x) __asm__("func_00290B58");
+// Named _impl: a later block declares AudioTable_evaluate with its own curve struct.
+extern "C" float AudioTable_evaluate_impl(AudioTable* c, float x) __asm__("AudioTable_evaluate");
 /**
  * Evaluates a 5-point piecewise-linear curve at a value, clamping to the end values outside its keys.
  *
  * The curve holds 5 ascending keys at +0x0 and their values at +0x14. Between two keys it interpolates linearly; below
  * the first key it returns the first value and from the last key on the last value. It returns 0 only when no case
  * applies (a NaN input or unsorted keys). The audio code keeps its volume and pitch curves in D_00482AF8..D_00482DA0
- * and gAudioTables (func_00290C10).
+ * and gAudioTables (AudioTable_evaluateByIndex).
  *
  * @param curvePoints  the curve
  * @param x  the input value
  * @return the curve's value at @p x
  */
-extern "C" float func_00290B58_impl(AudioTable* curvePoints, float x)
+extern "C" float AudioTable_evaluate_impl(AudioTable* curvePoints, float x)
 {
     for (int i = 1; i < 5; i++) {
         if (curvePoints->x[i - 1] <= x && x < curvePoints->x[i]) {
@@ -467,14 +467,14 @@ extern "C" float func_00290B58_impl(AudioTable* curvePoints, float x)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_00290C10);
+INCLUDE_ASM("sound/soundsys", AudioTable_evaluateByIndex);
 #ifdef SKIP_ASM
 
-extern "C" float func_00290B58(AudioTable* c, float v);
+extern "C" float AudioTable_evaluate(AudioTable* c, float v);
 extern AudioTable gAudioTables[];
 
 /**
- * Evaluates audio curve gAudioTables[i] at a value (func_00290B58).
+ * Evaluates audio curve gAudioTables[i] at a value (AudioTable_evaluate).
  *
  * cSSXAudio_GetGruntVol uses curve 3.
  *
@@ -482,9 +482,9 @@ extern AudioTable gAudioTables[];
  * @param inputValue  the input value
  * @return the curve's value
  */
-extern "C" float func_00290C10(int i, float inputValue)
+extern "C" float AudioTable_evaluateByIndex(int i, float inputValue)
 {
-    return func_00290B58(&gAudioTables[i], inputValue);
+    return AudioTable_evaluate(&gAudioTables[i], inputValue);
 }
 #endif
 
@@ -511,13 +511,13 @@ static inline float sndVu0Length(const t4Vector& v)
     return r;
 }
 
-extern "C" float func_00290C10(int i, float v);
+extern "C" float AudioTable_evaluateByIndex(int i, float v);
 
 /**
  * Returns a rider's grunt volume (0..127) from the length of its velocity, through audio curve 3.
  *
  * Gets the rider's velocity (getVelocity), takes its 4-component length (VU0) and maps
- * it through func_00290C10(3, ...), clamped to 0..127. cSSXAudio_PlayGrunt uses it as the grunt's volume.
+ * it through AudioTable_evaluateByIndex(3, ...), clamped to 0..127. cSSXAudio_PlayGrunt uses it as the grunt's volume.
  *
  * @param src  the rider
  * @return the volume, 0..127
@@ -525,7 +525,7 @@ extern "C" float func_00290C10(int i, float v);
 int cSSXAudio::GetGruntVol(cRider* src)
 {
     t4Vector* velocity = (t4Vector*)src->getVelocity();
-    int level = (int)func_00290C10(3, sndVu0Length(*velocity));
+    int level = (int)AudioTable_evaluateByIndex(3, sndVu0Length(*velocity));
     if (level > 127) {
         level = 127;
     }
@@ -590,7 +590,7 @@ void cSSXAudio::SetCurTrickPower(cRider* rider, float value)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_00290FD0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetTrickPowerLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cRider_getMotionState(void*);
@@ -608,7 +608,7 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
  * @param which  the view index (also indexes mCurTrickPower)
  * @return 0, 1 or 2 by trick power, or 3
  */
-extern "C" int func_00290FD0(cSSXAudio* self, int which)
+extern "C" int cSSXAudio_GetTrickPowerLevel(cSSXAudio* self, int which)
 {
     int result = 3;
     cRider* rider = cSSXAudio_GetFocusRider_p(self, which);
@@ -684,7 +684,7 @@ extern tSndCallback D_004A3680[];
  * Does nothing while mWindPlaying is set. Opens a play-option level with the default options (the inlined SFX_Begin)
  * for bank 0, patch 0x20, points the level's volume control at mWindVolume, clears its +0x7C option, arms the callback
  * key D_004A3680 (cSSXAudio_HandleWind, empty), plays it with cBankSys_SFX_End and sets mWindPlaying. The handle is not kept:
- * cSSXAudio_EndWind stops the sound through the same callback key. Called by func_0028C8C8.
+ * cSSXAudio_EndWind stops the sound through the same callback key. Called by cSSXAudio_UpdateAirTimeVolume.
  *
  * @param vself  the audio system (cSSXAudio)
  */
@@ -1608,7 +1608,7 @@ extern AudioTable D_00482B20;
 /**
  * Computes a chatter loop's volume and pitch bend from the rider's audio speed through two curves.
  *
- * The volume is curve D_00482AF8 at mAudioSpeed (func_00290B58) and the bend is curve D_00482B20 at the same speed
+ * The volume is curve D_00482AF8 at mAudioSpeed (AudioTable_evaluate) and the bend is curve D_00482B20 at the same speed
  * times 4096 (0x1000 is no bend). Called by cSSXAudio_HandleChatter.
  *
  * @param rider  the rider
@@ -1620,8 +1620,8 @@ void cSSXAudio::ChatterProgram(cRider* rider, int* out1, int* out2)
     float spd = rider->mAudioSpeed;
     AudioTable volumeCurve = D_00482AF8;
     AudioTable bendCurve = D_00482B20;
-    *out1 = (int)func_00290B58(&volumeCurve, spd);
-    *out2 = (int)(func_00290B58(&bendCurve, spd) * 4096.0f);
+    *out1 = (int)AudioTable_evaluate(&volumeCurve, spd);
+    *out2 = (int)(AudioTable_evaluate(&bendCurve, spd) * 4096.0f);
 }
 #endif
 //100%
@@ -1803,8 +1803,8 @@ void cSSXAudio::HardGlideProgram(cRider* rider, int* volume, int* pitch)
     AudioTable volumeCurve = D_00482B78;
     mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482BA0;
-    *volume = (int)func_00290B58(&volumeCurve, level);
-    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
+    *volume = (int)AudioTable_evaluate(&volumeCurve, level);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1848,8 +1848,8 @@ void cSSXAudio::SoftGlideProgram(cRider* rider, int* volume, int* pitch)
     AudioTable volumeCurve = D_00482BC8;
     mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482BF0;
-    *volume = (int)func_00290B58(&volumeCurve, level);
-    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
+    *volume = (int)AudioTable_evaluate(&volumeCurve, level);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1893,8 +1893,8 @@ void cSSXAudio::RailGlideProgram(cRider* rider, int* volume, int* pitch)
     AudioTable volumeCurve = D_00482C18;
     mLastGlide[idx] = level;
     AudioTable bendCurve = D_00482C40;
-    *volume = (int)func_00290B58(&volumeCurve, level);
-    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
+    *volume = (int)AudioTable_evaluate(&volumeCurve, level);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100%
@@ -1979,8 +1979,8 @@ void cSSXAudio::HardCarveProgram(cRider* rider, int* volume, int* pitch)
     AudioTable volumeCurve = D_00482C68;
     sndLevels5990(this)[idx] = level;
     AudioTable bendCurve = D_00482C90;
-    *volume = (int)func_00290B58(&volumeCurve, level);
-    *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
+    *volume = (int)AudioTable_evaluate(&volumeCurve, level);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
         *volume = (int)((float)*volume * speed * 10.0f);
@@ -2025,8 +2025,8 @@ void cSSXAudio::SoftCarveProgram(cRider* rider, int* volume, int* pitch)
     AudioTable volCurve = D_00482CB8;
     mLastCarveEdging[idx] = level;
     AudioTable bendCurve = D_00482CE0;
-    *volume = (int)func_00290B58(&volCurve, level);
-    *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
+    *volume = (int)AudioTable_evaluate(&volCurve, level);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, pressure) * 4096.0f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2062,7 +2062,7 @@ void cSSXAudio::RailCarveProgram(cRider* rider, int* volume, int* pitch)
     mLastCarveEdging[idx] = level;
     *volume = 0x7F;
     AudioTable bendCurve = D_00482D08;
-    *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
+    *pitch = (int)(AudioTable_evaluate(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
         *volume = (int)((float)*volume * speed * 10.0f);
@@ -2249,8 +2249,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_LiftWithAirTime);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXAudio_SetNeedLift(cSSXAudio* self, int i, int v);
-extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider);
-extern "C" void func_002A7408(cCrowdSys* self, int i);
+extern "C" void cSSXAudio_SpeakBigAir(cSSXAudio* self, cRider* rider);
+extern "C" void cCrowdSys_RequestAnticipation(cCrowdSys* self, int i);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -2260,8 +2260,8 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
  * Handles the air-time side of a lift-off, from the rider's air predictor.
  *
  * Unless the predictor is in state kSS_SimDone or kSS_SimCheckObjectsDone, it only calls cSSXAudio_SetNeedLift(.., 1).
- * Otherwise it calls cSSXAudio_SetNeedLift(.., 0) and func_0029FCC8(); for the listener's rider with more than 2 s of
- * predicted air time it also calls func_002A7408(), probably a crowd reaction.
+ * Otherwise it calls cSSXAudio_SetNeedLift(.., 0) and cSSXAudio_SpeakBigAir(); for the listener's rider with more than 2 s of
+ * predicted air time it also calls cCrowdSys_RequestAnticipation(), probably a crowd reaction.
  *
  * @param rider  the rider
  */
@@ -2278,7 +2278,7 @@ void cSSXAudio::LiftWithAirTime(cRider* rider)
         SetNeedLift(rider->getAIIndex(), 0);
     }
     float x = rider->mAirPredictor->TotalAirTime;
-    func_0029FCC8(this, (cRider*)(((char*)rider)));
+    cSSXAudio_SpeakBigAir(this, (cRider*)(((char*)rider)));
     if (cSSXAudio_ReplayMode(this) != 0) {
         idx = 0;
     } else {
@@ -2288,7 +2288,7 @@ void cSSXAudio::LiftWithAirTime(cRider* rider)
         }
     }
     if (cSSXAudio_GetFocusRider_p(this, idx) == rider && x > 2.0f) {
-        func_002A7408((cCrowdSys*)this, idx);
+        cCrowdSys_RequestAnticipation((cCrowdSys*)this, idx);
     }
 }
 #endif
@@ -2299,8 +2299,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_UpdateLift);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXAudio_SetNeedLift(cSSXAudio* self, int i, int v);
-extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider);
-extern "C" void func_002A7408(cCrowdSys* self, int i);
+extern "C" void cSSXAudio_SpeakBigAir(cSSXAudio* self, cRider* rider);
+extern "C" void cCrowdSys_RequestAnticipation(cCrowdSys* self, int i);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -2390,8 +2390,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_Land);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" void func_002A7438(cCrowdSys* self, int i);
-extern "C" void func_002A73A8(cCrowdSys* self, int level, int i);
+extern "C" void cCrowdSys_CancelAnticipation(cCrowdSys* self, int i);
+extern "C" void cCrowdSys_PlayTrickCheer(cCrowdSys* self, int level, int i);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDover(int id);
@@ -2404,9 +2404,9 @@ extern const AudioTable D_00482D30;
  * Plays a rider's landing sound and the crowd's reaction to it.
  *
  * When the rider is the focus rider of its view (cSSXAudio_GetFocusRider with view 0 when replaying, mViewIndex for a
- * local human, else -1) the crowd reacts through func_002A7438 (nothing gained) or func_002A73A8 at level 0, 1 or 2
+ * local human, else -1) the crowd reacts through cCrowdSys_CancelAnticipation (nothing gained) or cCrowdSys_PlayTrickCheer at level 0, 1 or 2
  * (gain below 0.25, below 0.65, above). Computer and non-local riders farther than 100 units from the camera
- * (cSSXAudio_CameraInRange) play nothing more. The volume comes from the landing curve D_00482D30 (func_00290B58)
+ * (cSSXAudio_CameraInRange) play nothing more. The volume comes from the landing curve D_00482D30 (AudioTable_evaluate)
  * applied to the rider's +0x770, clamped to 0..127.
  *
  * A previous landing still playing (handle at +0x5FB8) is stopped. Then a play-option level is pushed with defaults
@@ -2433,13 +2433,13 @@ void cSSXAudio::Land(cRider* rider, float powerupGained)
     }
     if (cSSXAudio_GetFocusRider_p(self, idx) == rider) {
         if (powerupGained <= 0.0f) {
-            func_002A7438((cCrowdSys*)self, idx);
+            cCrowdSys_CancelAnticipation((cCrowdSys*)self, idx);
         } else if (powerupGained < 0.25f) {
-            func_002A73A8((cCrowdSys*)self, 0, idx);
+            cCrowdSys_PlayTrickCheer((cCrowdSys*)self, 0, idx);
         } else if (powerupGained < 0.65f) {
-            func_002A73A8((cCrowdSys*)self, 1, idx);
+            cCrowdSys_PlayTrickCheer((cCrowdSys*)self, 1, idx);
         } else {
-            func_002A73A8((cCrowdSys*)self, 2, idx);
+            cCrowdSys_PlayTrickCheer((cCrowdSys*)self, 2, idx);
         }
     }
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) {
@@ -2448,7 +2448,7 @@ void cSSXAudio::Land(cRider* rider, float powerupGained)
         }
     }
     AudioTable landCurve = D_00482D30;
-    int vol = (int)func_00290B58(&landCurve, rider->LastLandSpeed);
+    int vol = (int)AudioTable_evaluate(&landCurve, rider->LastLandSpeed);
     if (vol > 127) {
         vol = 127;
     }
@@ -2933,7 +2933,7 @@ void cSSXAudio::CollisionSound(cRider* rider, tInstanceRecord* evt, int idx)
     if (cSSXAudio_CameraInRange(this, rider->getPosition(), 100.0f) < 0) return;
     if (cSSXAudio_PlayHistoryExists_p(this, evt, idx) != 0) return;
     t4Vector* hitVel = (t4Vector*)rider->getVelocity();
-    int volume = (int)func_00290C10(0, sndVu0Length(*hitVel));
+    int volume = (int)AudioTable_evaluateByIndex(0, sndVu0Length(*hitVel));
     if (volume > 127) volume = 127;
     if (volume < 0) volume = 0;
     int* tbl = *(int**)((char*)evt->m_pInstanceAudio + 0x10);
@@ -2952,8 +2952,8 @@ void cSSXAudio::CollisionSound(cRider* rider, tInstanceRecord* evt, int idx)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_Wipeout);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void func_002A73D8(cCrowdSys* self, int a1, int i);
-extern "C" void func_002A7438(cCrowdSys* self, int i);
+extern "C" void cCrowdSys_PlayFallCheer(cCrowdSys* self, int a1, int i);
+extern "C" void cCrowdSys_CancelAnticipation(cCrowdSys* self, int i);
 extern "C" void func_0028F108(void* self, void* rider);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -2971,7 +2971,7 @@ static inline float absf_961F0(float x)
  *
  * The view is 0 when replaying, the rider's viewport (+0x870) for a local human, else -1; nothing happens unless the
  * rider is that view's focus rider (cSSXAudio_GetFocusRider). With |@p intensity| at 0 or below the crowd gets
- * func_002A7438, else func_002A73D8 with level 0 (below 0.25), 1 (below 0.65) or 2. Then func_0028F108(rider).
+ * cCrowdSys_CancelAnticipation, else cCrowdSys_PlayFallCheer with level 0 (below 0.25), 1 (below 0.65) or 2. Then func_0028F108(rider).
  * cRider_flagEventWipeout calls it with the boost from cRiderMetrix_evWipeout.
  *
  * @param rider  the rider
@@ -2993,13 +2993,13 @@ void cSSXAudio::Wipeout(cRider* rider, float intensity)
     }
     float magnitude = absf_961F0(intensity);
     if (magnitude <= 0.0f) {
-        func_002A7438((cCrowdSys*)this, idx);
+        cCrowdSys_CancelAnticipation((cCrowdSys*)this, idx);
     } else if (magnitude < 0.25f) {
-        func_002A73D8((cCrowdSys*)this, 0, idx);
+        cCrowdSys_PlayFallCheer((cCrowdSys*)this, 0, idx);
     } else if (magnitude < 0.65f) {
-        func_002A73D8((cCrowdSys*)this, 1, idx);
+        cCrowdSys_PlayFallCheer((cCrowdSys*)this, 1, idx);
     } else {
-        func_002A73D8((cCrowdSys*)this, 2, idx);
+        cCrowdSys_PlayFallCheer((cCrowdSys*)this, 2, idx);
     }
     func_0028F108(this, ((char*)rider));
 }
@@ -3022,11 +3022,11 @@ extern "C" void cSSXAudio_WipeoutStart(void) {
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutHit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 struct sSndList5 {
     char pad0[0x18];
-    sSndList5() { func_002A4BA8((tCrowdEventData*)(this)); }
+    sSndList5() { tCrowdEventData_tCrowdEventData((tCrowdEventData*)(this)); }
 };
 struct sSndRandSlot {
     sSndList5 a;
@@ -3159,7 +3159,7 @@ void cSSXAudio::WipeoutHit(cRider* obj)
         }
     }
     struct AudioTable curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, obj->LastLandSpeed);
+    int vol = (int)AudioTable_evaluate(&curve, obj->LastLandSpeed);
     int bankNum = 0;
     int patchNum;
     if (vol > 0x7F) {
@@ -3227,8 +3227,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -3266,7 +3266,7 @@ void cSSXAudio::WipeoutSlideStart(cWipeoutControl* wipeoutControl)
         }
     }
     AudioTable curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, wipeoutControl->mRider->LastLandSpeed);
+    int vol = (int)AudioTable_evaluate(&curve, wipeoutControl->mRider->LastLandSpeed);
     int patchNum = 51;
     if (vol > 0x7F) {
         vol = 0x7F;
@@ -3364,7 +3364,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * When the rider's mWipeoutSlideHandle is 0 or more it calls cBankMonitor_BANKMONITOR_StopHandle (type 1, fade 0.75) on
  * the bank monitor of cAudioInterface_bxAudio(), not of @p self, and sets the handle to -1. Called by the wipeout
- * control with its rider, and by the audio code for rider 0 (func_0028E8C0 among others).
+ * control with its rider, and by the audio code for rider 0 (cSSXAudio_HandleMusicEvent among others).
  *
  * @param obj  the rider
  */
@@ -3398,8 +3398,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -3414,7 +3414,7 @@ extern AudioTable D_00482DA0;
  *
  * Does nothing while the rider's mWipeoutTumbleHandle is set (>= 0). Computer and non-local riders more than 100 units
  * from every camera (cSSXAudio_CameraInRange on the position from cRider vtable slot 5) are skipped. The volume is the
- * curve D_00482DA0 (func_00290B58) of the rider's LastLandSpeed, clamped to 0..127. A play-option level is pushed with
+ * curve D_00482DA0 (AudioTable_evaluate) of the rider's LastLandSpeed, clamped to 0..127. A play-option level is pushed with
  * defaults (the inlined SFX_Begin) for bank 0, patch 52 and gets that volume, the volume control
  * cSSXAudio_GetCurrAppliedVolumePtr(vself, 5, 0), the rider's mPosition to follow, the view from
  * cSSXAudio_GetClosestCamera1, @p wipeoutControl as its pointer, the empty callback cSSXAudio_HandleWipeoutTumble
@@ -3436,7 +3436,7 @@ void cSSXAudio::WipeoutTumbleStart(cWipeoutControl* wipeoutControl)
         }
     }
     AudioTable curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, wipeoutControl->mRider->LastLandSpeed);
+    int vol = (int)AudioTable_evaluate(&curve, wipeoutControl->mRider->LastLandSpeed);
     int patchNum = 52;
     if (vol > 0x7F) {
         vol = 0x7F;
@@ -3692,8 +3692,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -4020,7 +4020,7 @@ int cSSXAudio_InCameraView_8488(void* self, t4Vector* pos, float radius) __asm__
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
-extern "C" float func_00290C10(int i, float v);
+extern "C" float AudioTable_evaluateByIndex(int i, float v);
 
 
 // PORT: PS2-only VU0 inline asm (4-component add).
@@ -4110,7 +4110,7 @@ static inline int snd8488Add(void* vself, cRider* obj, int a, int b, int c)
  *
  * Plays nothing when @p rider is more than 100 units from every camera (cSSXAudio_CameraInRange) or outside every camera
  * view (cSSXAudio_InCameraView), when neither rider is a local human (mIsHuman and mIsLocal), or while play-history event 7 is
- * still live (cSSXAudio_PlayHistoryExists). The volume is func_00290C10(1, length of the sum of both riders'
+ * still live (cSSXAudio_PlayHistoryExists). The volume is AudioTable_evaluateByIndex(1, length of the sum of both riders'
  * velocities, from cRider vtable slot 2). A play-option level is pushed with defaults for bank 0, patch 54 with that
  * volume, the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0), a 3D radius of 100 (cSndPlayOpts_OPTS_Radius), the view of @p rider
  * (cSSXAudio_GetClosestCamera1) and @p rider's mPosition to follow; cBankSys_SFX_End starts it and the handle goes into the play history
@@ -4130,7 +4130,7 @@ void cSSXAudio::RiderCollision(cRider* rider, cRider* opponent)
     }
     if (PlayHistoryExists(7, 0) != 0) return;
     t4Vector sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
-    int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
+    int volume = (int)AudioTable_evaluateByIndex(1, (float)(int)vu0Length_8488(sum));
     int handle = snd8488Add(this, rider, 0, 54, volume);
     PlayHistoryAdd((void*)7, handle,
                              MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mCounter + 50, 0, 0);
@@ -4474,7 +4474,7 @@ extern "C" void cMonitor_MONITOR_DestroyAll1_key(void* bank, long id) __asm__("c
 extern sSndKey8 D_004A3678_key[] __asm__("D_004A3678");
 extern "C" int cMonitor_MONITOR_Create_key(void*, int, long, void*, int, int, int,
         int) __asm__("cMonitor_MONITOR_Create");
-extern "C" void func_002A3C00(cSSXAudio* self, cRider* obj, int flags);
+extern "C" void cSSXAudio_SpeakArcadeResult(cSSXAudio* self, cRider* obj, int flags);
 
 /**
  * Reacts to a local human rider reaching maximum boost power: a delayed chime, a DJ line and a turbo-use monitor.
@@ -4482,7 +4482,7 @@ extern "C" void func_002A3C00(cSSXAudio* self, cRider* obj, int flags);
  * Does nothing while replaying, for a rider that is not a local human, or once the rider is past the finish line
  * (mFinishTime >= 0). Creates a 400 ms monitor (cMonitor_MONITOR_Create) that plays bank 0, patch 107 at volume 127
  * through cBankSys_Play2DCallback (D_004A3678) with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0).
- * Then raises the DJ event func_002A3C00 with 0x10 when mUberLevel is eUS_SuperUberMax, 8 when it is 5 or more, else 4.
+ * Then raises the DJ event cSSXAudio_SpeakArcadeResult with 0x10 when mUberLevel is eUS_SuperUberMax, 8 when it is 5 or more, else 4.
  * Finally destroys the monitors of cSSXAudio_TurboUseCheck (D_004A36A8) and, when mTurboRef is 0, creates a 3000 ms one
  * with the rider as its pointer. The peak3 comment above it ("landing thud ... airborne-and-dropping") is wrong: +0x470
  * is mFinishTime.
@@ -4509,11 +4509,11 @@ void cSSXAudio::MaxPowerEvent(cRider* obj)
     cMonitor_MONITOR_Create_key(bankMonitor, 400, key->v, volControl, 0, 107, 0x7F, 0);
     int uberLevel = obj->mUberLevel;
     if (uberLevel == eUS_SuperUberMax) {
-        func_002A3C00((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x10);
+        cSSXAudio_SpeakArcadeResult((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x10);
     } else if (uberLevel >= 5) {
-        func_002A3C00((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x8);
+        cSSXAudio_SpeakArcadeResult((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x8);
     } else {
-        func_002A3C00((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x4);
+        cSSXAudio_SpeakArcadeResult((cSSXAudio*)this, (cRider*)(((char*)obj)), 0x4);
     }
     long id = D_004A36A8_key[0].v;
     cMonitor_MONITOR_DestroyAll1_key(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, id);
@@ -4712,7 +4712,7 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" bool func_002A4290(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsRivalTimeEvent(cSSXAudio* self);
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
@@ -4720,14 +4720,14 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
-extern "C" void func_002A0560(void* self, void* a, void* b);
+extern "C" void cSSXAudio_SpeakOvertake(void* self, void* a, void* b);
 
 /**
  * Reacts to a rider's race position changing: a sting for taking the lead, then a passing reaction.
  *
  * Only while the game-flow state kGFSM_Riding runs, with at least two players and computers, for a local human or the
- * listener's rider (outside game mode kGAMEMODE_RACE only when func_002A4290() allows). Reaching first place plays bank
- * 9 patch 0x6D once (event 1). Then func_002A0560() gets (rider, passed rider) when moving up, or (passing rider,
+ * listener's rider (outside game mode kGAMEMODE_RACE only when cSSXAudio_IsRivalTimeEvent() allows). Reaching first place plays bank
+ * 9 patch 0x6D once (event 1). Then cSSXAudio_SpeakOvertake() gets (rider, passed rider) when moving up, or (passing rider,
  * rider).
  *
  * @param obj  the rider
@@ -4739,7 +4739,7 @@ extern "C" void func_002A0560(void* self, void* a, void* b);
 void cSSXAudio::ChangePosition(cRider* obj, cRider* pPrevPosRider, cRider* pNextPosRider, int lim, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace.cGameMode != 0 && func_002A4290(this) == 0) {
+    if (cBENewRaceInterface_newRace.cGameMode != 0 && cSSXAudio_IsRivalTimeEvent(this) == 0) {
         return;
     }
     if (cAudioInterface_getGame()->mCurrentStateID != kGFSM_Riding) {
@@ -4760,11 +4760,11 @@ void cSSXAudio::ChangePosition(cRider* obj, cRider* pPrevPosRider, cRider* pNext
     }
     if (n < lim) {
         if (((void*)pPrevPosRider) != 0) {
-            func_002A0560(this, obj, pPrevPosRider);
+            cSSXAudio_SpeakOvertake(this, obj, pPrevPosRider);
         }
     } else {
         if (((void*)pNextPosRider) != 0) {
-            func_002A0560(this, pNextPosRider, obj);
+            cSSXAudio_SpeakOvertake(this, pNextPosRider, obj);
         }
     }
 }
@@ -5286,12 +5286,12 @@ static inline int sndB430AddVoice(void* vself, int a, int b, int type)
 }
 
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev);
+extern "C" void cSSXAudio_SpeakArcadeUberMilestone(cSSXAudio* self, cRider* obj, int ev);
 
 /**
  * Plays the landed-uber-trick sound for a local human rider, except during a replay.
  *
- * When the count goes from below 4 to 4-8, also calls func_002A3DE0(rider, 1).
+ * When the count goes from below 4 to 4-8, also calls cSSXAudio_SpeakArcadeUberMilestone(rider, 1).
  *
  * @param obj  the rider
  * @param iNum  number of uber tricks just landed (On Tour iNum)
@@ -5309,7 +5309,7 @@ void cSSXAudio::LandedUberTrick(cRider* obj, int iNum, int iPrevious)
         if (iPrevious < 4) {
             if (total >= 4) {
                 if (total < 9) {
-                    func_002A3DE0(this, obj, 1);
+                    cSSXAudio_SpeakArcadeUberMilestone(this, obj, 1);
                 }
             }
         }
@@ -5324,15 +5324,15 @@ extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" cGame* cAudioInterface_getGame();
-extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev);
+extern "C" void cSSXAudio_SpeakArcadeUberMilestone(cSSXAudio* self, cRider* obj, int ev);
 
 /**
- * Raises the DJ event func_002A3DE0 when the focus rider's uber level reaches eUS_SuperUberMax.
+ * Raises the DJ event cSSXAudio_SpeakArcadeUberMilestone when the focus rider's uber level reaches eUS_SuperUberMax.
  *
  * Does nothing while replaying. Takes the focus rider (cSSXAudio_GetFocusRider(self, -1)); when its mViewIndex differs
  * from the one remembered in mUberViewIndex it only records the new view. Otherwise, when the rider's mUberLevel is
  * eUS_SuperUberMax, differs from the level remembered in mLastUberLevel and the game state is kGFSM_Riding, it calls
- * func_002A3DE0(self, rider, 2). The level is remembered in mLastUberLevel every time.
+ * cSSXAudio_SpeakArcadeUberMilestone(self, rider, 2). The level is remembered in mLastUberLevel every time.
  */
 void cSSXAudio::UpdateLandedUber()
 {
@@ -5342,7 +5342,7 @@ void cSSXAudio::UpdateLandedUber()
     if (localRider->mViewIndex == mUberViewIndex) {
         if (localRider->mUberLevel == eUS_SuperUberMax && mLastUberLevel != localRider->mUberLevel &&
             cAudioInterface_getGame()->mCurrentStateID == kGFSM_Riding) {
-            func_002A3DE0((cSSXAudio*)this, (cRider*)localRider, 2);
+            cSSXAudio_SpeakArcadeUberMilestone((cSSXAudio*)this, (cRider*)localRider, 2);
         }
     } else {
         mUberViewIndex = localRider->mViewIndex;
@@ -5354,10 +5354,10 @@ void cSSXAudio::UpdateLandedUber()
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_LandedMonsterCombo);
 #ifdef SKIP_ASM
-extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev);
+extern "C" void cSSXAudio_SpeakArcadeUberMilestone(cSSXAudio* self, cRider* obj, int ev);
 
 /**
- * Reports a landed monster combo by a local human rider: func_002A3DE0(rider, 8).
+ * Reports a landed monster combo by a local human rider: cSSXAudio_SpeakArcadeUberMilestone(rider, 8).
  *
  * @param obj  the rider
  */
@@ -5368,7 +5368,7 @@ void cSSXAudio::LandedMonsterCombo(cRider* obj)
         ok = obj->mIsLocal != 0;
     }
     if (ok) {
-        func_002A3DE0(this, obj, 8);
+        cSSXAudio_SpeakArcadeUberMilestone(this, obj, 8);
     }
 }
 #endif
@@ -5651,20 +5651,20 @@ static inline int sndC420AddVoice(void* vself, char* mon, int a, int b, int type
 }
 
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B49E0(void*);
-extern "C" void func_002B3D48(void*, float);
-extern "C" void func_0028D488(void* self);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_002B3A70(void*);
+extern "C" int cMusicSys_GetSongTag(void*);
+extern "C" void cMusicSys_FadeOut(void*, float);
+extern "C" void cSSXAudio_PickRandomSong(void* self);
+extern "C" void cSSXAudio_StartLocationMusic(void* self, int a1, int a2, int a3, int a4);
+extern "C" void cMusicSys_PauseSong(void*);
 
 /**
  * Plays a start-gate countdown beep and, on the first and last beeps, prepares the race music.
  *
  * Does nothing while replaying. Plays bank 0, patch 78 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self,
- * 5, 0). On beep 3, when the current song's tag (func_002B49E0) is kSONGTAG_CharTune or kSONGTAG_Peak1 .. 3 and
- * mRaceMusicOn is set, fades it over 2 seconds (func_002B3D48). On beep 1, when no song is playing
- * (MusicSys.mSongPlaying) or the state is one of those, and mRaceMusicOn is set, it calls func_0028D488,
- * func_0028CF98(self, 0, 0, kPEAKBIT_FromLocation, 0) and func_002B3A70 on the music system.
+ * 5, 0). On beep 3, when the current song's tag (cMusicSys_GetSongTag) is kSONGTAG_CharTune or kSONGTAG_Peak1 .. 3 and
+ * mRaceMusicOn is set, fades it over 2 seconds (cMusicSys_FadeOut). On beep 1, when no song is playing
+ * (MusicSys.mSongPlaying) or the state is one of those, and mRaceMusicOn is set, it calls cSSXAudio_PickRandomSong,
+ * cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0) and cMusicSys_PauseSong on the music system.
  *
  * @param mode  the countdown second (3, 2, 1; cGFGateState passes 3 first, then each whole second left)
  */
@@ -5676,21 +5676,21 @@ void cSSXAudio::CountdownBeep(int mode)
     char* mon = (char*)&MusicSys;
     sndC420AddVoice(this, mon, 0, 78, 5);
     if (mode == 3) {
-        int st = func_002B49E0((char*)&MusicSys);
+        int st = cMusicSys_GetSongTag((char*)&MusicSys);
         if (st == kSONGTAG_CharTune || st == kSONGTAG_Peak1 || st == kSONGTAG_Peak2 || st == kSONGTAG_Peak3) {
             if (mRaceMusicOn != 0) {
-                func_002B3D48((char*)&MusicSys, 2.0f);
+                cMusicSys_FadeOut((char*)&MusicSys, 2.0f);
             }
         }
     }
     if (mode == 1) {
-        int st = func_002B49E0((char*)&MusicSys);
+        int st = cMusicSys_GetSongTag((char*)&MusicSys);
         if (MusicSys.mSongPlaying == 0 || st == kSONGTAG_CharTune || st == kSONGTAG_Peak1 || st == kSONGTAG_Peak2
             || st == kSONGTAG_Peak3) {
             if (mRaceMusicOn != 0) {
-                func_0028D488(this);
-                func_0028CF98(this, 0, 0, kPEAKBIT_FromLocation, 0);
-                func_002B3A70((char*)&MusicSys);
+                cSSXAudio_PickRandomSong(this);
+                cSSXAudio_StartLocationMusic(this, 0, 0, kPEAKBIT_FromLocation, 0);
+                cMusicSys_PauseSong((char*)&MusicSys);
             }
         }
     }
@@ -5709,14 +5709,14 @@ extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
-void func_002B3A98_C7B0(void* p) __asm__("func_002B3A98");
-void func_0028DF08_C7B0(void* p) __asm__("func_0028DF08__FPv");
-void func_002B1758(void* self, int a1);
-int func_002B4908(void* self);
-extern "C" void func_002A3170(cSSXAudio* self);
-extern "C" void func_002A3400(cSSXAudio* self);
-extern "C" bool func_002A4078(void* self);
-extern "C" int func_002A40E8(cSSXAudio* self);
+void cMusicSys_ResumeSong_C7B0(void* p) __asm__("cMusicSys_ResumeSong");
+void cSSXAudio_ResetLastMusicState_C7B0(void* p) __asm__("cSSXAudio_ResetLastMusicState__FPv");
+void cSpeechSys_StartNextSpeech(void* self, int a1);
+int cMusicSys_GetCurrentSongSedValue(void* self);
+extern "C" void cSSXAudio_StartDJIntro(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPALine8387(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsRaceEvent(void* self);
+extern "C" int cSSXAudio_IsSlopestyleEvent(cSSXAudio* self);
 extern "C" void cSSXAudio_PlayHistoryUpdateTime(cSSXAudio* self, int a, int b, int c);
 
 struct sSs7B0PreC { char pad[0xC]; };
@@ -5730,7 +5730,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void SetMusicState(int state); // slot 4: cSSXAudio's override func_0028F3C8 sets the music state
+    virtual void SetMusicState(int state); // slot 4: cSSXAudio's override cSSXAudio_SetMusicState sets the music state
 };
 
 static inline int snd7B0Add(void* vself, int a, int b)
@@ -5774,13 +5774,13 @@ static inline int snd7B0Add(void* vself, int a, int b)
 /**
  * Plays the start-gate drop and starts the race's music and opening DJ line.
  *
- * Calls func_002B3A98 on the music system and func_0028DF08 (mLastMusicState = -1), stores the cAI's AITick in
+ * Calls cMusicSys_ResumeSong on the music system and cSSXAudio_ResetLastMusicState (mLastMusicState = -1), stores the cAI's AITick in
  * mGruntCycle and plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94
  * at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With mRaceMusicOn set the music
  * system's vtable slot 4 gets 0. Unless play-history event 0 is live: in the game paths kGAMEPATH_SINGLEEVENT and
- * kGAMEPATH_MULTIPLAYER (newRace.cGamePath) func_002A3170; otherwise on the last heat (cGameModeMan bIsLastHeat)
- * func_002A3400, func_002B1758(SpeechSys, 0) and, when func_002A4078 or func_002A40E8 is nonzero, mSongAnnouncePending
- * = 1 and mSongAnnounceNum = the current song's value from func_002B4908; in heat kHeat1 the latter unconditionally, in
+ * kGAMEPATH_MULTIPLAYER (newRace.cGamePath) cSSXAudio_StartDJIntro; otherwise on the last heat (cGameModeMan bIsLastHeat)
+ * cSSXAudio_SpeakPALine8387, cSpeechSys_StartNextSpeech(SpeechSys, 0) and, when cSSXAudio_IsRaceEvent or cSSXAudio_IsSlopestyleEvent is nonzero, mSongAnnouncePending
+ * = 1 and mSongAnnounceNum = the current song's value from cMusicSys_GetCurrentSongSedValue; in heat kHeat1 the latter unconditionally, in
  * kHeat2 under the same test. When mRaceMusicOn is 0 it is set to 1 and music slot 4 gets 37 (not replaying), or slot 4
  * gets 37 when replaying with mReplaySongPlaying set. Finally play-history event 0 is moved to 50 ms past the monitor
  * clock and mGateDropHeat records iHeatNum.
@@ -5790,8 +5790,8 @@ void cSSXAudio::CountdownGateDrop()
 {
     cSSXAudio* self = this;
     cSSXAudio* base = (cSSXAudio*)this;
-    func_002B3A98_C7B0(&base->MusicSys);
-    func_0028DF08_C7B0(this);
+    cMusicSys_ResumeSong_C7B0(&base->MusicSys);
+    cSSXAudio_ResetLastMusicState_C7B0(this);
     base->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     ((sSs7B0Self*)this)->SFX_Play2D(0, 98);
     if (cSSXAudio_ReplayMode(this) == 0) {
@@ -5804,27 +5804,27 @@ void cSSXAudio::CountdownGateDrop()
     if (PlayHistoryExists(0, 0) == 0) {
         int gamePath = cBENewRaceInterface_newRace.cGamePath;
         if (gamePath == kGAMEPATH_SINGLEEVENT) {
-            func_002A3170((cSSXAudio*)this);
+            cSSXAudio_StartDJIntro((cSSXAudio*)this);
         } else if (gamePath == kGAMEPATH_MULTIPLAYER) {
-            func_002A3170((cSSXAudio*)this);
+            cSSXAudio_StartDJIntro((cSSXAudio*)this);
         } else {
             int* gameModeMan = (int*)SSXApp->GameModeMan;
             if (gameModeMan[152 / 4] != 0) {
-                func_002A3400((cSSXAudio*)this);
-                func_002B1758(&base->SpeechSys, 0);
-                if (func_002A4078(this) != 0 || func_002A40E8(this) != 0) {
+                cSSXAudio_SpeakPALine8387((cSSXAudio*)this);
+                cSpeechSys_StartNextSpeech(&base->SpeechSys, 0);
+                if (cSSXAudio_IsRaceEvent(this) != 0 || cSSXAudio_IsSlopestyleEvent(this) != 0) {
                     base->mSongAnnouncePending = 1;
-                    base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
+                    base->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&base->MusicSys);
                 }
             } else {
                 int heatNum = gameModeMan[0];
                 if (heatNum == cGameModeMan::kHeat1) {
                     base->mSongAnnouncePending = 1;
-                    base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
+                    base->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&base->MusicSys);
                 } else if (heatNum == cGameModeMan::kHeat2) {
-                    if (func_002A4078(this) != 0 || func_002A40E8(this) != 0) {
+                    if (cSSXAudio_IsRaceEvent(this) != 0 || cSSXAudio_IsSlopestyleEvent(this) != 0) {
                         base->mSongAnnouncePending = 1;
-                        base->mSongAnnounceNum = func_002B4908(&base->MusicSys);
+                        base->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&base->MusicSys);
                     }
                 }
             }
@@ -5975,13 +5975,13 @@ static inline int sndCED8AddVoice(void* vself, int a, int b, int type)
     return ((cBankSys*)self)->SFX_End();
 }
 
-extern "C" void func_002A3EB8(cSSXAudio* self, cRider* obj, int n);
+extern "C" void cSSXAudio_SpeakArcadeMultiplier(cSSXAudio* self, cRider* obj, int n);
 
 /**
  * Plays the sound for a collected icon, and reports multiplier pickups.
  *
  * Icon types keIcon_SpeedBoost, keIcon_TrickBoost, keIcon_TrickMultiplier and keIcon_Points play patches 0x70, 0x71,
- * 0x75 and 0x76 (others 0x74). For keIcon_TrickMultiplier a multiplier of 2, 3, 5 or 10 also calls func_002A3EB8() with
+ * 0x75 and 0x76 (others 0x74). For keIcon_TrickMultiplier a multiplier of 2, 3, 5 or 10 also calls cSSXAudio_SpeakArcadeMultiplier() with
  * 1, 2, 4 or 8.
  *
  * @param kind  icon type (On Tour eIconType)
@@ -6009,13 +6009,13 @@ void cSSXAudio::PlayIconSound(int kind, cRider* obj, float x)
     sndCED8AddVoice(this, 0, id, 9);
     if (kind == keIcon_TrickMultiplier) {
         if (x == 2.0f) {
-            func_002A3EB8(this, obj, 1);
+            cSSXAudio_SpeakArcadeMultiplier(this, obj, 1);
         } else if (x == 3.0f) {
-            func_002A3EB8(this, obj, 2);
+            cSSXAudio_SpeakArcadeMultiplier(this, obj, 2);
         } else if (x == 5.0f) {
-            func_002A3EB8(this, obj, 4);
+            cSSXAudio_SpeakArcadeMultiplier(this, obj, 4);
         } else if (x == 10.0f) {
-            func_002A3EB8(this, obj, 8);
+            cSSXAudio_SpeakArcadeMultiplier(this, obj, 8);
         }
     }
 }
@@ -6215,13 +6215,13 @@ struct sSndVtVI_D6E0 { short delta; short index; void (*fn)(void*, int); };
 
 extern "C" void* cAudioInterface_getAI();
 
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void cSSXAudio_StartLocationMusic(void* self, int a1, int a2, int a3, int a4);
 
-extern "C" void func_0028D488(void* self);
+extern "C" void cSSXAudio_PickRandomSong(void* self);
 
 extern "C" void cSSXAudio_EndUberSpin_D6E0(void* self, void* obj) __asm__("cSSXAudio_EndUberSpin");
 
-extern "C" int func_002B49E0(void*);
+extern "C" int cMusicSys_GetSongTag(void*);
 
 // cBE interface lookup: cBE_getInterface__Fv takes (be, kind) despite its mangled name.
 extern "C" void* cBE_getBE();
@@ -6230,25 +6230,25 @@ extern "C" cBEInterface* cBE_getInterface__Fv(void* be, int kind);
 
 extern "C" void cMonitor_MONITOR_DestroyAll1_D6E0(void* bank, sSndCallback key) __asm__("cMonitor_MONITOR_DestroyAll1");
 
-extern "C" int func_002B46E8(void* monitor);
-extern "C" void func_002B4708(void* monitor);
-extern "C" int func_002B4620(void* monitor);
+extern "C" int cMusicSys_IsOverlayArmed(void* monitor);
+extern "C" void cMusicSys_ClearOverlayArmed(void* monitor);
+extern "C" int cMusicSys_StartOverlay(void* monitor);
 extern "C" int cBEMissionInterface_getAudioType(void* iface, int mission);
-extern "C" int func_0028D960(void* self);
-extern "C" int func_0028DEF0_D6E0(void* self, int a1) __asm__("func_0028DEF0");
+extern "C" int cSSXAudio_IsMusicRadioMode(void* self);
+extern "C" int cSSXAudio_SetLastMusicState_D6E0(void* self, int a1) __asm__("cSSXAudio_SetLastMusicState");
 
 /**
  * Starts the audio of a big challenge (mission): stops rider 0's wipeout and uber-spin sounds and picks the music.
  *
  * Clears mBigChallengeStarting and stops rider 0's wipeout slide and tumble sounds (cSSXAudio_WipeoutSlideEnd, cSSXAudio_WipeoutTumbleEnd) and
- * its uber spin (cSSXAudio_EndUberSpin). When func_002B46E8 on the music system is nonzero, calls the music system's
- * vtable slot 3 with 8 if func_0028D960 is nonzero, then func_002B4708. With unk_608C == 2 (a radio mode) it stops
- * there. When the current song's state (func_002B49E0) is 1..3 it destroys the monitors of the three front-end
- * callbacks D_004A3648, D_004A3650 and D_004A3658 (cMonitor_MONITOR_DestroyAll1), calls func_0028DEF0(self, 18), func_0028D488 and
- * func_0028CF98(self, 0, 0, -1, 0), and returns. Otherwise it stores the mission's audio type
+ * its uber spin (cSSXAudio_EndUberSpin). When cMusicSys_IsOverlayArmed on the music system is nonzero, calls the music system's
+ * vtable slot 3 with 8 if cSSXAudio_IsMusicRadioMode is nonzero, then cMusicSys_ClearOverlayArmed. With unk_608C == 2 (a radio mode) it stops
+ * there. When the current song's state (cMusicSys_GetSongTag) is 1..3 it destroys the monitors of the three front-end
+ * callbacks D_004A3648, D_004A3650 and D_004A3658 (cMonitor_MONITOR_DestroyAll1), calls cSSXAudio_SetLastMusicState(self, 18), cSSXAudio_PickRandomSong and
+ * cSSXAudio_StartLocationMusic(self, 0, 0, -1, 0), and returns. Otherwise it stores the mission's audio type
  * (cBEMissionInterface_getAudioType) in mCurBigChallengeType and maps it to a track (1: 33, 2: 34, 3: 38, 0 and 4: -1);
- * when func_002B4620 is nonzero the music system's vtable slot 4 gets the track and mInBigChallenge is set;
- * func_002B4708 follows.
+ * when cMusicSys_StartOverlay is nonzero the music system's vtable slot 4 gets the track and mInBigChallenge is set;
+ * cMusicSys_ClearOverlayArmed follows.
  *
  * @param mission  the mission id (the script's LocalMissionId)
  */
@@ -6259,23 +6259,23 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
     cSSXAudio_WipeoutSlideEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
     cSSXAudio_WipeoutTumbleEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
     cSSXAudio_EndUberSpin_D6E0(((char*)self), 0);
-    if (func_002B46E8(bank) != 0) {
-        if (func_0028D960(((char*)self)) != 0) {
+    if (cMusicSys_IsOverlayArmed(bank) != 0) {
+        if (cSSXAudio_IsMusicRadioMode(((char*)self)) != 0) {
             sSndVtVI_D6E0* vt = (sSndVtVI_D6E0*)self->MusicSys.mVtbl;
             vt[3].fn(vthis(bank, vt[3]), 8);
         }
-        func_002B4708(bank);
+        cMusicSys_ClearOverlayArmed(bank);
     }
     if (self->mRadioModeID == 2) {
         return;
     }
-    if ((unsigned int)(func_002B49E0(&self->MusicSys) - 1) < 3) {
+    if ((unsigned int)(cMusicSys_GetSongTag(&self->MusicSys) - 1) < 3) {
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3648[0]);
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3650_D6E0[0]);
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3658[0]);
-        func_0028DEF0_D6E0(((char*)self), 18);
-        func_0028D488(((char*)self));
-        func_0028CF98(((char*)self), 0, 0, -1, 0);
+        cSSXAudio_SetLastMusicState_D6E0(((char*)self), 18);
+        cSSXAudio_PickRandomSong(((char*)self));
+        cSSXAudio_StartLocationMusic(((char*)self), 0, 0, -1, 0);
         return;
     }
     int track = -1;
@@ -6289,13 +6289,13 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
     case 4: track = -1; break;
     }
     do {
-        if (func_002B4620(&self->MusicSys) != 0) {
+        if (cMusicSys_StartOverlay(&self->MusicSys) != 0) {
             sSndVtVI_D6E0* vt = (sSndVtVI_D6E0*)self->MusicSys.mVtbl;
             char* mon = (char*)&self->MusicSys;
             ((int (*)(void*, int))vt[4].fn)(vthis(mon, vt[4]), track);
             self->mInBigChallenge = 1;
         }
-        func_002B4708(&self->MusicSys);
+        cMusicSys_ClearOverlayArmed(&self->MusicSys);
     } while (0);
 }
 #endif
@@ -6342,7 +6342,7 @@ static inline int sndD8E0AddVoice(void* vself, int a, int b, int type)
 }
 
 extern "C" void* cAudioInterface_getAI();
-extern "C" void func_002A3C00(cSSXAudio* self, cRider* obj, int a2);
+extern "C" void cSSXAudio_SpeakArcadeResult(cSSXAudio* self, cRider* obj, int a2);
 
 struct sSndVtEntD8E0 { short delta; short index; void (*fn)(void*, int); };
 
@@ -6351,7 +6351,7 @@ struct sSndVtEntD8E0 { short delta; short index; void (*fn)(void*, int); };
  *
  * When mInBigChallenge is set, the music system's vtable slot 4 gets track 39 and mCurBigChallengeType and
  * mInBigChallenge are cleared. Then bank 0, patch 109 plays with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0) and the
- * DJ event func_002A3C00 is raised for rider 0 with 1. cWScriptMission_processComplete calls it.
+ * DJ event cSSXAudio_SpeakArcadeResult is raised for rider 0 with 1. cWScriptMission_processComplete calls it.
  */
 void cSSXAudio::BigChallengeComplete()
 {
@@ -6363,7 +6363,7 @@ void cSSXAudio::BigChallengeComplete()
         mInBigChallenge = 0;
     }
     sndD8E0AddVoice(this, 0, 109, 9);
-    func_002A3C00((cSSXAudio*)this, ((cAI*)cAudioInterface_getAI())->Riders[0], 1);
+    cSSXAudio_SpeakArcadeResult((cSSXAudio*)this, ((cAI*)cAudioInterface_getAI())->Riders[0], 1);
 }
 #endif
 
@@ -6479,8 +6479,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -6873,7 +6873,7 @@ void cSSXAudio::PlayWipeoutRecoverFull(cRider* obj)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_0029ED18);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_StopRiderLoops);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
 extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, cRider* obj);
@@ -6886,7 +6886,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  * stops mTurboHandle (cBankMonitor_BANKMONITOR_StopHandle, mode 1, fade 0) and clears mTurboRef. cGame_update and
  * cGame_updateUI call it when they bring up overlay 34.
  */
-extern "C" void func_0029ED18(cSSXAudio* self)
+extern "C" void cSSXAudio_StopRiderLoops(cSSXAudio* self)
 {
     self->WipeoutSlideEnd(((cAI*)cAudioInterface_getAI())->Riders[0]);
     self->WipeoutTumbleEnd(((cAI*)cAudioInterface_getAI())->Riders[0]);
@@ -6900,14 +6900,14 @@ extern "C" void func_0029ED18(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029ED90);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_OpenSpeechLanguage);
 #ifdef SKIP_ASM
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int BXFILE_exists(const char* name);
 extern "C" void SPCH_Init(void* self);
-extern "C" void func_002B0DA0(void* self);
-extern "C" void func_002B0E60(void* self, int a, int b, char* name, float* volumeControl, int d, int e);
+extern "C" void cSpeechSys_Shutdown(void* self);
+extern "C" void cSpeechSys_CreateInstance(void* self, int a, int b, char* name, float* volumeControl, int d, int e);
 extern "C" void FILESYS_addbigsync(const char* name, int a, int b, void** h);
 extern "C" void FILESYS_delbigsync(void* h, int a);
 extern char str_data_audio_french_big[];
@@ -6926,24 +6926,24 @@ static inline void sndStreamLoad(const char* name, void** h)
 /**
  * Opens the speech .big file of the language chosen in the options, and optionally restarts the speech system on it.
  *
- * Takes the language from func_0029F198 and returns when it equals mSpeechLanguage (the language already open). With
- * @p restart set it first calls func_002B0DA0 on the speech system (SpeechSys, frees its bank buffer). The open stream
+ * Takes the language from cSSXAudio_GetSpeechLanguage and returns when it equals mSpeechLanguage (the language already open). With
+ * @p restart set it first calls cSpeechSys_Shutdown on the speech system (SpeechSys, frees its bank buffer). The open stream
  * in mLanguageBigFile is closed (FILESYS_delbigsync(h, 100)), then "data/audio/french.big" (kSPEECHLANG_French),
  * "german.big" (kSPEECHLANG_German), "spanish.big" (kSPEECHLANG_Spanish) or "english.big" (otherwise) is opened into
  * mLanguageBigFile through FILESYS_addbigsync when BXFILE_exists finds it, and the language is recorded in
  * mSpeechLanguage. With @p restart set it then re-initialises the speech system (SPCH_Init) and starts speech instance
- * 0 on "CHAR" with the Character volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0) (func_002B0E60).
+ * 0 on "CHAR" with the Character volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0) (cSpeechSys_CreateInstance).
  *
  * @param restart  nonzero when the speech system is already running (the options screen); 0 from the constructor
  */
-extern "C" void func_0029ED90(cSSXAudio* self, int restart)
+extern "C" void cSSXAudio_OpenSpeechLanguage(cSSXAudio* self, int restart)
 {
-    int mode = func_0029F198((cSSXAudio*)(((char*)self)));
+    int mode = cSSXAudio_GetSpeechLanguage((cSSXAudio*)(((char*)self)));
     if (mode == self->mSpeechLanguage) {
         return;
     }
     if (restart) {
-        func_002B0DA0(&self->SpeechSys);
+        cSpeechSys_Shutdown(&self->SpeechSys);
     }
     void** streamHandle = (void**)(&self->mLanguageBigFile);
     if (*streamHandle) {
@@ -6961,7 +6961,7 @@ extern "C" void func_0029ED90(cSSXAudio* self, int restart)
     self->mSpeechLanguage = mode;
     if (restart) {
         SPCH_Init(&self->SpeechSys);
-        func_002B0E60(&self->SpeechSys, 0, 0, str_CHAR, (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0), 1, -1);
+        cSpeechSys_CreateInstance(&self->SpeechSys, 0, 0, str_CHAR, (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0), 1, -1);
     }
 }
 #endif
@@ -7040,7 +7040,7 @@ void* cSSXAudio::UpdateSpeechVolume(int instanceIndex, int type, int charIndex)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F088);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetLastSpeechVolumeID);
 #ifdef SKIP_ASM
 /**
  * Returns the speech volume class last recorded for speech instance 0 (mSpeechVolumeID, set by
@@ -7051,7 +7051,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F088);
  * @param instanceIndex  the speech instance
  * @return the class (2 DJ, 3 PA, 4 Character, 10 ArcadeSpeech, 11 front-end DJ), or -1 for other instances
  */
-extern "C" int func_0029F088(cSSXAudio* self, int instanceIndex)
+extern "C" int cSSXAudio_GetLastSpeechVolumeID(cSSXAudio* self, int instanceIndex)
 {
     if (instanceIndex == 0) {
         return self->mSpeechVolumeID;
@@ -7061,18 +7061,18 @@ extern "C" int func_0029F088(cSSXAudio* self, int instanceIndex)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F0A0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsCharacterSpeechOn);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
 
 /**
  * Tells whether character speech is audible: the set volume of control 4 (Character) is not 0.
  *
- * Every character speech event (cSSXAudio_PlayGrunt, func_0029FCC8 .. func_002A1778) checks it first.
+ * Every character speech event (cSSXAudio_PlayGrunt, cSSXAudio_SpeakBigAir .. cSSXAudio_SpeakCustomize) checks it first.
  *
  * @return true when the Character volume (cSSXAudio_GetCurrSetVolume(self, 4)) is nonzero, else false
  */
-extern "C" bool func_0029F0A0(void* self)
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self)
 {
     if (cSSXAudio_GetCurrSetVolume(self, 4) == 0.0f) {
         return false;
@@ -7082,7 +7082,7 @@ extern "C" bool func_0029F0A0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F0D8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsDJSpeechOn);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
@@ -7090,11 +7090,11 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
 /**
  * Tells whether DJ speech may play: not replaying and the set volume of control 2 (DJ) is not 0.
  *
- * The DJ speech events func_002A2018 .. func_002A2DA0 check it first.
+ * The DJ speech events cSSXAudio_SpeakDJLine8392 .. cSSXAudio_SpeakDJUberTricksResult check it first.
  *
  * @return true when allowed, else false
  */
-extern "C" bool func_0029F0D8(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return false;
@@ -7107,18 +7107,18 @@ extern "C" bool func_0029F0D8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F128);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsPASpeechOn);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
 
 /**
  * Tells whether PA speech is audible: the set volume of control 3 (PA) is not 0.
  *
- * The PA speech events func_002A31C0 .. func_002A39E0 check it first.
+ * The PA speech events cSSXAudio_SpeakPAEventStart .. cSSXAudio_SpeakPALine8379 check it first.
  *
  * @return true when the PA volume (cSSXAudio_GetCurrSetVolume(self, 3)) is nonzero, else false
  */
-extern "C" bool func_0029F128(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self)
 {
     if (cSSXAudio_GetCurrSetVolume(self, 3) == 0.0f) {
         return false;
@@ -7128,18 +7128,18 @@ extern "C" bool func_0029F128(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F160);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsArcadeSpeechOn);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int ch);
 
 /**
  * Tells whether arcade speech is audible: the set volume of control 10 (ArcadeSpeech) is not 0.
  *
- * The arcade announcer events func_002A3B18 .. func_002A3EB8 check it first.
+ * The arcade announcer events cSSXAudio_SpeakArcadeBoost .. cSSXAudio_SpeakArcadeMultiplier check it first.
  *
  * @return true when the ArcadeSpeech volume (cSSXAudio_GetCurrSetVolume(self, 10)) is nonzero, else false
  */
-extern "C" bool func_0029F160(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self)
 {
     if (cSSXAudio_GetCurrSetVolume(self, 10) == 0.0f) {
         return false;
@@ -7149,7 +7149,7 @@ extern "C" bool func_0029F160(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F198);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetSpeechLanguage);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -7173,7 +7173,7 @@ extern sSsOpts9F198 cBEOptionInterface_mOption_ss9F198 __asm__("cBEOptionInterfa
  *
  * @return the language bit
  */
-extern "C" int func_0029F198(cSSXAudio* self)
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sSsOpts9F198 optionCopy = cBEOptionInterface_mOption_ss9F198;
@@ -7194,24 +7194,24 @@ extern "C" int func_0029F198(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F2B0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetCharacterSpeechBit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares this as void(int, int); defined under an asm label with its real type
-extern "C" int func_0029F2B0_impl(unsigned int idx, int flag) __asm__("func_0029F2B0");
+extern "C" int cSSXAudio_GetCharacterSpeechBit_impl(unsigned int idx, int flag) __asm__("cSSXAudio_GetCharacterSpeechBit");
 /**
  * Returns the speech-filter bit of a character identity, or 0 for a cheat identity.
  *
  * With @p flag 0 the identities (eBECharacters) map to kCHAR_ELISE 0x1, kCHAR_MAC 0x2, kCHAR_MOBY 0x4, kCHAR_PSYMON
  * 0x8, kCHAR_KAORI 0x10, kCHAR_ZOE 0x20, kCHAR_NATE 0x40, kCHAR_VIGGO 0x80, kCHAR_GRIFF 0x100 and kCHAR_ALLEGRA 0x200
- * (func_0029F3F8's grunt banks agree); other identities and a nonzero @p flag give 0. The unit declares it void(int,
+ * (cSSXAudio_LoadGruntBanks's grunt banks agree); other identities and a nonzero @p flag give 0. The unit declares it void(int,
  * int).
  *
  * @param idx  the character identity (cRider_getIdentity)
  * @param flag  the cheat identity (cRider_getCheatIdentity); nonzero gives 0
  * @return the character's bit, or 0
  */
-extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
+extern "C" int cSSXAudio_GetCharacterSpeechBit_impl(unsigned int idx, int flag)
 {
     if (flag == 0) {
         switch (idx) {
@@ -7232,27 +7232,27 @@ extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_0029F330);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetRiderSpeechBit);
 #ifdef SKIP_ASM
 extern "C" int cRider_getIdentity(void*);
 extern "C" int cRider_getCheatIdentity(void*);
-extern "C" void func_0029F2B0(int, int);
+extern "C" void cSSXAudio_GetCharacterSpeechBit(int, int);
 
 /**
- * Returns a rider's speech-filter bit: func_0029F2B0 of its identity and cheat identity (declared void).
+ * Returns a rider's speech-filter bit: cSSXAudio_GetCharacterSpeechBit of its identity and cheat identity (declared void).
  *
  * Its argument is the rider (cRider), not the audio system: the character speech events pass the rider and use the
  * value left in v0.
  */
-extern "C" void func_0029F330(void* self)
+extern "C" void cSSXAudio_GetRiderSpeechBit(void* self)
 {
     int identity = cRider_getIdentity(self);
-    func_0029F2B0(identity, cRider_getCheatIdentity(self));
+    cSSXAudio_GetCharacterSpeechBit(identity, cRider_getCheatIdentity(self));
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F378);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetGruntCharacter);
 #ifdef SKIP_ASM
 /**
  * Returns the character whose grunt bank a rider uses.
@@ -7263,7 +7263,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F378);
  * @param obj  the rider (cRider)
  * @return the character identity for the grunt bank
  */
-extern "C" int func_0029F378(cSSXAudio* self, cRider* obj)
+extern "C" int cSSXAudio_GetGruntCharacter(cSSXAudio* self, cRider* obj)
 {
     switch (cRider_getCheatIdentity(obj)) {
     case 0:
@@ -7279,7 +7279,7 @@ extern "C" int func_0029F378(cSSXAudio* self, cRider* obj)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F3F8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_LoadGruntBanks);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -7302,14 +7302,14 @@ extern char str_GRNT_AI_bnk[];
 /**
  * Loads the grunt banks: rider 0's character into bank slot 14 and the shared AI grunts into slot 15.
  *
- * Picks "data/audio/GRNT_<char>.bnk" from func_0029F378 for the cAI's rider 0 (eli, mac, mob, psy, kao, zoe, vig, nat,
+ * Picks "data/audio/GRNT_<char>.bnk" from cSSXAudio_GetGruntCharacter for the cAI's rider 0 (eli, mac, mob, psy, kao, zoe, vig, nat,
  * grf or ari, "GRNT_none.bnk" for anything else) and "data/audio/GRNT_AI.bnk", and loads them with cBankManager_BANK_SyncLoad on the
  * cBankManager (synchronous, slot 14 and 15). cSSXAudio_InGameLoad calls it.
  */
-extern "C" void func_0029F3F8(cSSXAudio* self)
+extern "C" void cSSXAudio_LoadGruntBanks(cSSXAudio* self)
 {
     char buf[64];
-    switch (func_0029F378((cSSXAudio*)(((char*)self)), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
+    switch (cSSXAudio_GetGruntCharacter((cSSXAudio*)(((char*)self)), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
     case kCHAR_ELISE: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
     case kCHAR_MAC: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
     case kCHAR_MOBY: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
@@ -7329,14 +7329,14 @@ extern "C" void func_0029F3F8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F5E0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_UnloadGruntBanks);
 #ifdef SKIP_ASM
 extern "C" void cBankManager_BANK_UnLoad(void* self, int i);
 
 /**
  * Unloads the grunt banks in bank slots 14 and 15 (cBankManager_BANK_UnLoad); cSSXAudio_InGamePurge calls it.
  */
-extern "C" void func_0029F5E0(cSSXAudio* self)
+extern "C" void cSSXAudio_UnloadGruntBanks(cSSXAudio* self)
 {
     cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, 0xE);
     cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, 0xF);
@@ -7344,7 +7344,7 @@ extern "C" void func_0029F5E0(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029F620);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetGruntBank);
 #ifdef SKIP_ASM
 /**
  * Returns the bank slot of a rider's grunts: 14 (its own character bank) for rider 0, 15 (the AI grunts) otherwise.
@@ -7354,7 +7354,7 @@ INCLUDE_ASM("sound/soundsys", func_0029F620);
  * @param obj  the rider (cRider)
  * @return 14 or 15
  */
-extern "C" int func_0029F620(cSSXAudio* self, cRider* obj)
+extern "C" int cSSXAudio_GetGruntBank(cSSXAudio* self, cRider* obj)
 {
     if (obj->getAIIndex() == 0) {
         return 0xE;
@@ -7366,8 +7366,8 @@ extern "C" int func_0029F620(cSSXAudio* self, cRider* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayGrunt);
 #ifdef SKIP_ASM
-extern "C" bool func_002A10C0(cSSXAudio* self, int id);
-extern "C" bool func_002A1028(cSSXAudio* self, int id);
+extern "C" bool cSSXAudio_IsCharacterSpeaking(cSSXAudio* self, int id);
+extern "C" bool cSSXAudio_StopCharacterSpeech(cSSXAudio* self, int id);
 extern "C" unsigned int cSoundSys_SndRand(void* mon);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
@@ -7378,7 +7378,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
  * Plays a rider's grunt as a positional voice and records it in the play history (event 3).
  *
  * Skipped when speech is off, during a replay, after the rider has finished, or while another grunt plays; a
- * computer rider needs @p allowAI, or func_002A10C0() to allow it. The sample depends on the character and the
+ * computer rider needs @p allowAI, or cSSXAudio_IsCharacterSpeaking() to allow it. The sample depends on the character and the
  * length (character kind 14 picks randomly for keCharGruntLength_Long and keCharGruntLength_Short, or cycles for other
  * lengths); local humans get a shorter range.
  *
@@ -7390,17 +7390,17 @@ void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
 {
     cSSXAudio* self = this;
     cRider* rider = (cRider*)vrider;
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (!ok && allowAI == 0) {
-        if (func_002A10C0((cSSXAudio*)self, cRider_getIdentity(rider)) != 0) return;
+        if (cSSXAudio_IsCharacterSpeaking((cSSXAudio*)self, cRider_getIdentity(rider)) != 0) return;
     }
     int past = rider->mFinishTime >= 0.0f;
     if (past) return;
     if (self->PlayHistoryExists(3, 0) != 0) return;
-    func_002A1028((cSSXAudio*)self, cRider_getIdentity(rider));
-    int kind = func_0029F620(self, rider);
+    cSSXAudio_StopCharacterSpeech((cSSXAudio*)self, cRider_getIdentity(rider));
+    int kind = cSSXAudio_GetGruntBank(self, rider);
     int prio;
     if (kind == 0xE) {
         if (length == keCharGruntLength_Long) {
@@ -7417,9 +7417,9 @@ void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
             }
         }
     } else if (length == keCharGruntLength_Long) {
-        prio = func_0029F378(self, rider) * 2 + 1;
+        prio = cSSXAudio_GetGruntCharacter(self, rider) * 2 + 1;
     } else {
-        prio = func_0029F378(self, rider) * 2;
+        prio = cSSXAudio_GetGruntCharacter(self, rider) * 2;
     }
     int flag = 0;
     int ok2 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
@@ -7474,19 +7474,19 @@ void cSSXAudio::PlayGrunt(cRider* vrider, int length, int allowAI)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029FCC8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakBigAir);
 #ifdef SKIP_ASM
-extern "C" int func_002A3FE8(cSSXAudio* self);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_IsInBackCountry(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B0E28(void* self, int i);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 // PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
@@ -7497,20 +7497,20 @@ extern float D_004A36D8;
 /**
  * Requests a rider's big-air speech line when its predicted air time is at least about 4 seconds.
  *
- * Needs the Character volume on (func_0029F0A0), a location outside the back-country 14..16 (func_002A3FE8), no replay,
+ * Needs the Character volume on (cSSXAudio_IsCharacterSpeechOn), a location outside the back-country 14..16 (cSSXAudio_IsInBackCountry), no replay,
  * a rider not past the finish line, the air predictor's +0x98 (mAirPredictor) of at least 4.000256, and for a computer
- * or non-local rider that it is the focus rider. Then speech instance 0 must be ready (func_002B0E28) and the rider
+ * or non-local rider that it is the focus rider. Then speech instance 0 must be ready (cSpeechSys_CanTakeSpeech) and the rider
  * within 30 units of a camera (D_004A36D8). Speech 8324, 8323 or 8337 (peak 1, 2 or 3 of the location, from
- * func_002A1E20) is requested for the rider on speech instance 0 (func_002B1458); when queued, the speech hook
- * D_004A482C gets its packed id (func_003D8008(1, 0, id)), 2 arguments, the rider's speech bit (func_0029F330) and 3.
+ * cSSXAudio_GetLocationPeakBit) is requested for the rider on speech instance 0 (cSpeechSys_AddRequest); when queued, the speech hook
+ * D_004A482C gets its packed id (func_003D8008(1, 0, id)), 2 arguments, the rider's speech bit (cSSXAudio_GetRiderSpeechBit) and 3.
  * cSSXAudio_LiftWithAirTime calls it.
  *
  * @param rider  the rider
  */
-extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider)
+extern "C" void cSSXAudio_SpeakBigAir(cSSXAudio* self, cRider* rider)
 {
-    if (func_0029F0A0(self) == 0) return;
-    if (func_002A3FE8(self) != 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
+    if (cSSXAudio_IsInBackCountry(self) != 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int pos = rider->mFinishTime >= 0.0f;
     if (pos) return;
@@ -7523,20 +7523,20 @@ extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider)
     int pos2 = finishTime >= zero;
     if (pos2) return;
     char* snd = (char*)&self->SpeechSys;
-    if (func_002B0E28(snd, 0) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
+    if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
-        if (func_002B1458(snd, 0, 8324, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+        if (cSpeechSys_AddRequest(snd, 0, 8324, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8324), 2, speakerBit, 3);
         }
     } else if (sel == 2) {
-        if (func_002B1458(snd, 0, 8323, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+        if (cSpeechSys_AddRequest(snd, 0, 8323, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8323), 2, speakerBit, 3);
         }
     } else {
-        if (func_002B1458(snd, 0, 8337, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+        if (cSpeechSys_AddRequest(snd, 0, 8337, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8337), 2, speakerBit, 3);
         }
     }
@@ -7544,19 +7544,19 @@ extern "C" void func_0029FCC8(cSSXAudio* self, cRider* rider)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029FF80);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakCheer);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0A0(void* self);
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern void (*D_004A482C)(void*, int, int);
@@ -7566,53 +7566,53 @@ extern float D_004A36D8;
 /**
  * Requests a rider's positive-reaction speech line (a cheer), the stronger set when @p alt is set.
  *
- * Needs the Character volume on (func_0029F0A0), no replay, a rider not past the finish line, and for a computer or
+ * Needs the Character volume on (cSSXAudio_IsCharacterSpeechOn), no replay, a rider not past the finish line, and for a computer or
  * non-local rider that it is the focus rider; the rider must be within 30 units of a camera. By the location's peak
- * (func_002A1E20: 1, 2, other) it requests speech 8336/8347/8349 with @p alt set, else 8322/8346/8348, for the rider on
- * speech instance 0 (func_002B1458) and, when queued, passes the packed id and the rider's speech bit (func_0029F330)
+ * (cSSXAudio_GetLocationPeakBit: 1, 2, other) it requests speech 8336/8347/8349 with @p alt set, else 8322/8346/8348, for the rider on
+ * speech instance 0 (cSpeechSys_AddRequest) and, when queued, passes the packed id and the rider's speech bit (cSSXAudio_GetRiderSpeechBit)
  * to the speech hook D_004A482C. cRider_checkForReaction calls it for reaction types 1 (alt 0) and 2 (alt 1).
  *
  * @param rider  the rider (cRider)
  * @param alt  nonzero for the uber reaction (type 2)
  */
-extern "C" void func_0029FF80(cSSXAudio* self, cRider* rider, int alt)
+extern "C" void cSSXAudio_SpeakCheer(cSSXAudio* self, cRider* rider, int alt)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int pos = rider->mFinishTime >= 0.0f;
     if (pos) return;
     int chk = 0;
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
-    int speakerBit = func_0029F330_i(rider);
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     if (alt != 0) {
-        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+        int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8336, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8336, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8336), 1, speakerBit);
             }
         } else if (sel == 2) {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8347, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8347, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8347), 1, speakerBit);
             }
         } else {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8349, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8349, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8349), 1, speakerBit);
             }
         }
     } else {
-        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+        int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8322, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8322, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8322), 1, speakerBit);
             }
         } else if (sel == 2) {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8346, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8346, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8346), 1, speakerBit);
             }
         } else {
-            if (func_002B1458((char*)&self->SpeechSys, 0, 8348, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8348, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8348), 1, speakerBit);
             }
         }
@@ -7621,20 +7621,20 @@ extern "C" void func_0029FF80(cSSXAudio* self, cRider* rider, int alt)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A02D8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakWipeout);
 #ifdef SKIP_ASM
-extern "C" int func_002A3F90(cSSXAudio* self);
-extern "C" bool func_002A4040(cSSXAudio* self);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_IsAtHub(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsFreeride(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B0E28(void* self, int i);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 // PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
@@ -7645,43 +7645,43 @@ extern float D_004A36D8;
 /**
  * Requests a rider's wipeout speech line.
  *
- * Needs the Character volume on (func_0029F0A0), no replay, a rider not past the finish line, for a computer or
- * non-local rider that it is the focus rider, speech instance 0 ready (func_002B0E28) and the rider within 30 units of
- * a camera. By the location's peak (func_002A1E20: 1, 2, other) it requests speech 8328, 8352 or 8353 for the rider
+ * Needs the Character volume on (cSSXAudio_IsCharacterSpeechOn), no replay, a rider not past the finish line, for a computer or
+ * non-local rider that it is the focus rider, speech instance 0 ready (cSpeechSys_CanTakeSpeech) and the rider within 30 units of
+ * a camera. By the location's peak (cSSXAudio_GetLocationPeakBit: 1, 2, other) it requests speech 8328, 8352 or 8353 for the rider
  * and, when queued, passes the packed id, the rider's speech bit and a mode to the speech hook D_004A482C: 1 at the
- * locations 17..21 (func_002A3F90) or in game mode 4 (func_002A4040), else 3. cWipeoutControl_loseFocus calls it.
+ * locations 17..21 (cSSXAudio_IsAtHub) or in game mode 4 (cSSXAudio_IsFreeride), else 3. cWipeoutControl_loseFocus calls it.
  *
  * @param rider  the rider (cRider)
  */
-extern "C" void func_002A02D8(cSSXAudio* self, cRider* rider)
+extern "C" void cSSXAudio_SpeakWipeout(cSSXAudio* self, cRider* rider)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int pos = rider->mFinishTime >= 0.0f;
     if (pos) return;
     int chk = 0;
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
-    if (func_002B0E28((char*)&self->SpeechSys, 0) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
+    if (cSpeechSys_CanTakeSpeech((char*)&self->SpeechSys, 0) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int mode;
-    if (func_002A3F90(self) != 0 || func_002A4040(self) != 0) {
+    if (cSSXAudio_IsAtHub(self) != 0 || cSSXAudio_IsFreeride(self) != 0) {
         mode = 1;
     } else {
         mode = 3;
     }
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8328, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8328, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8328), 2, speakerBit, mode);
         }
     } else if (sel == 2) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8352, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8352, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8352), 2, speakerBit, mode);
         }
     } else {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8353, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8353, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8353), 2, speakerBit, mode);
         }
     }
@@ -7689,23 +7689,23 @@ extern "C" void func_002A02D8(cSSXAudio* self, cRider* rider)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A0560);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakOvertake);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0A0(void* self);
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cRider_getCheatIdentity(void*);
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B0E28(void* self, int i);
-int func_002B1458_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
-        int refresh) __asm__("func_002B1458");
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+int cSpeechSys_AddRequest_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
+        int refresh) __asm__("cSpeechSys_AddRequest");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" cGame* cAudioInterface_getGame();
-// PORT: the unit defines func_0029F330/func_002A1D48 as void; they return their tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
-int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
+int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-unsigned func_002A1820_0560(void* self, void* a, void* b) __asm__("func_002A1820");
+unsigned cSSXAudio_GetRiderRelation_0560(void* self, void* a, void* b) __asm__("cSSXAudio_GetRiderRelation");
 void fSinCos_0560(float a, float* x, float* y) __asm__("fSinCos");
 // PORT: D_004A482C is called with 4 and 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -7738,7 +7738,7 @@ static inline float vu0Dot_0560(const t4Vector& a, const t4Vector& b)
 }
 
 
-void func_002A0560_0560(cSSXAudio* self, cRider* a, cRider* b) __asm__("func_002A0560");
+void cSSXAudio_SpeakOvertake_0560(cSSXAudio* self, cRider* a, cRider* b) __asm__("cSSXAudio_SpeakOvertake");
 /**
  * Requests the speech of two riders when one overtakes the other fast enough: a taunt and a reply.
  *
@@ -7747,16 +7747,16 @@ void func_002A0560_0560(cSSXAudio* self, cRider* a, cRider* b) __asm__("func_002
  * rider or a local human. Speech instance 0 must be ready, @p passer within 30 units of a camera and @p passed in the same camera
  * range. The closing speed is @p passer's velocity minus @p passed's velocity along @p passed's heading (the angle at +0x4CC,
  * fSinCos); it must lie between 670.56 and 1788.16 (15 and 40 mph in cm/s), and from 1341.12 (30 mph) the mode is 2,
- * else 1. With the relation func_002A1820 == 2, speech 8321 is requested for @p passer and 8319 for @p passed; with 0 or 1, 8320
- * for @p passer (its event also gets @p passed's character bit func_002A1D48 ORed with 0x1000) and 8317 for @p passed. Each queued
+ * else 1. With the relation cSSXAudio_GetRiderRelation == 2, speech 8321 is requested for @p passer and 8319 for @p passed; with 0 or 1, 8320
+ * for @p passer (its event also gets @p passed's character bit cSSXAudio_GetRiderSubjectBit ORed with 0x1000) and 8317 for @p passed. Each queued
  * request goes to the speech hook D_004A482C with the speaker's bit and the mode.
  *
  * @param passer  the rider that passes
  * @param passed  the rider being passed
  */
-void func_002A0560_0560(cSSXAudio* self, cRider* passer, cRider* passed)
+void cSSXAudio_SpeakOvertake_0560(cSSXAudio* self, cRider* passer, cRider* passed)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (!sndA30Mode0560(2)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(passer) != 0) return;
@@ -7773,7 +7773,7 @@ void func_002A0560_0560(cSSXAudio* self, cRider* passer, cRider* passed)
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
     if (chkA && chkB && passer != pl && passed != pl) return;
     cSpeechSys* snd = &self->SpeechSys;
-    if (func_002B0E28(snd, 0) == 0) return;
+    if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
     int okA = cSSXAudio_CameraInRange(self, passer->getPosition(), D_004A36D8);
     if (okA < 0) return;
     int okB = cSSXAudio_CameraInRange(self, passed->getPosition(), D_004A36D8);
@@ -7790,26 +7790,26 @@ void func_002A0560_0560(cSSXAudio* self, cRider* passer, cRider* passed)
     if (!(closingSpeed > 670.55999755859375f)) return;
     if (!(closingSpeed < 1788.159912109375f)) return;
     int mode = 1;
-    int rA = func_0029F330_i(passer);
-    int passedBit = func_002A1D48_i(self, passed);
-    int rB = func_0029F330_i(passed);
+    int rA = cSSXAudio_GetRiderSpeechBit_i(passer);
+    int passedBit = cSSXAudio_GetRiderSubjectBit_i(self, passed);
+    int rB = cSSXAudio_GetRiderSpeechBit_i(passed);
     if (closingSpeed >= 1341.1199951171875f) mode = 2;
-    unsigned sel = func_002A1820_0560(self, passer, passed);
+    unsigned sel = cSSXAudio_GetRiderRelation_0560(self, passer, passed);
     if (sel == 2) {
         closingSpeed = 0.0f;
-        if (func_002B1458_f(snd, 0, 8321, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8321, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8321), 2, rA, mode);
         }
-        if (func_002B1458_f(snd, 0, 8319, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8319, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8319), 2, rB, mode);
         }
     } else if (sel < 2) {
         closingSpeed = 0.0f;
-        if (func_002B1458_f(snd, 0, 8320, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8320, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
             passedBit |= 0x1000;
             D_004A482C_5(func_003D8008(1, 0, 8320), 3, rA, mode, passedBit);
         }
-        if (func_002B1458_f(snd, 0, 8317, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8317, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8317), 2, rB, mode);
         }
     }
@@ -7817,21 +7817,21 @@ void func_002A0560_0560(cSSXAudio* self, cRider* passer, cRider* passed)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A0A30);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakRiderHit);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0A0(void* self);
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cRider_getCheatIdentity(void*);
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B0E28(void* self, int i);
-// func_002B1458 with the float argument in its real position (same registers).
-int func_002B1458_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
-        int refresh) __asm__("func_002B1458");
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+// cSpeechSys_AddRequest with the float argument in its real position (same registers).
+int cSpeechSys_AddRequest_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
+        int refresh) __asm__("cSpeechSys_AddRequest");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
-// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 // PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -7841,7 +7841,7 @@ static inline int sndA30Mode(int m)
     return ScriptEngine->mPlayingNISList == m;
 }
 
-extern "C" int func_002A1820(cSSXAudio* self, cRider* a, cRider* b);
+extern "C" int cSSXAudio_GetRiderRelation(cSSXAudio* self, cRider* a, cRider* b);
 
 /**
  * Plays the victim's grunt for a rider-on-rider hit and, for a plain punch, the attacker's and victim's speech.
@@ -7849,7 +7849,7 @@ extern "C" int func_002A1820(cSSXAudio* self, cRider* a, cRider* b);
  * Needs the Character volume on, no NIS playing, no replay, no cheat identity on either rider, neither past the finish
  * line and one of them the focus rider or a local human. Then @p victim grunts (cSSXAudio_PlayGrunt(self, b, 0, 1)). The
  * speech needs speech instance 0 ready, either rider within 30 units of a camera, and @p isBump and @p isHardHit both 0. By the
- * riders' relation (func_002A1820) it requests 8335 for @p victim and 8330 for @p attacker (2), 8318 and 8330 (1), or 8312 and 8334
+ * riders' relation (cSSXAudio_GetRiderRelation) it requests 8335 for @p victim and 8330 for @p attacker (2), 8318 and 8330 (1), or 8312 and 8334
  * (0); each queued request goes to the speech hook D_004A482C with the speaker's bit and 3. cComputer's bump, knockdown
  * and punch reactions call it.
  *
@@ -7858,9 +7858,9 @@ extern "C" int func_002A1820(cSSXAudio* self, cRider* a, cRider* b);
  * @param isBump  1 for a bump, 0 for a punch
  * @param isHardHit  1 when the hit knocks the rider down (or is the harder kind), else 0
  */
-extern "C" void func_002A0A30(cSSXAudio* self, cRider* attacker, cRider* victim, int isBump, int isHardHit)
+extern "C" void cSSXAudio_SpeakRiderHit(cSSXAudio* self, cRider* attacker, cRider* victim, int isBump, int isHardHit)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (!sndA30Mode(2)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(attacker) != 0) return;
@@ -7877,34 +7877,34 @@ extern "C" void func_002A0A30(cSSXAudio* self, cRider* attacker, cRider* victim,
     if (chkA && chkB && attacker != pl && victim != pl) return;
     self->PlayGrunt((cRider*)victim, 0, 1);
     char* snd = (char*)&self->SpeechSys;
-    if (func_002B0E28(snd, 0) == 0) return;
+    if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
     int okB = cSSXAudio_CameraInRange(self, victim->getPosition(), D_004A36D8) >= 0;
     int okA = cSSXAudio_CameraInRange(self, attacker->getPosition(), D_004A36D8) >= 0;
     if (!okB && !okA) return;
-    int rA = func_0029F330_i(attacker);
-    int rB = func_0029F330_i(victim);
+    int rA = cSSXAudio_GetRiderSpeechBit_i(attacker);
+    int rB = cSSXAudio_GetRiderSpeechBit_i(victim);
     if (isHardHit != 0) return;
     if (isBump != 0) return;
-    int sel = func_002A1820(self, attacker, victim);
+    int sel = cSSXAudio_GetRiderRelation(self, attacker, victim);
     if (sel == 2) {
-        if (func_002B1458_f(snd, 0, 8335, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8335, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8335), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 1) {
-        if (func_002B1458_f(snd, 0, 8318, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8318, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8318), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 0) {
-        if (func_002B1458_f(snd, 0, 8312, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8312, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8312), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8334, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
+        if (cSpeechSys_AddRequest_f(snd, 0, 8334, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8334), 2, rA, 3);
         }
     }
@@ -7912,16 +7912,16 @@ extern "C" void func_002A0A30(cSSXAudio* self, cRider* attacker, cRider* victim,
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A0E70);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakBump);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B0E28(void* self, int i);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
-// PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern void (*D_004A482C)(void*, int, int);
 extern float D_004A36D8;
@@ -7938,9 +7938,9 @@ extern float D_004A36D8;
  * @param rider  the rider (cRider)
  * @param play  nonzero to also request the speech line
  */
-extern "C" void func_002A0E70(cSSXAudio* self, cRider* rider, int play)
+extern "C" void cSSXAudio_SpeakBump(cSSXAudio* self, cRider* rider, int play)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int chk = 0;
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) chk = 1;
@@ -7950,40 +7950,40 @@ extern "C" void func_002A0E70(cSSXAudio* self, cRider* rider, int play)
     int pos = finishTime >= zero;
     if (pos) return;
     char* snd = (char*)&self->SpeechSys;
-    if (func_002B0E28(snd, 0) == 0) return;
+    if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     self->PlayGrunt((cRider*)rider, 2, 0);
     if (play == 0) return;
     int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (!ok) return;
-    int speakerBit = func_0029F330_i(rider);
-    if (func_002B1458(snd, 0, 8311, rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
+    if (cSpeechSys_AddRequest(snd, 0, 8311, rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
     D_004A482C(func_003D8008(1, 0, 8311), 1, speakerBit);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1028);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_StopCharacterSpeech);
 #ifdef SKIP_ASM
-extern "C" int func_002B1220(void* self, int i);
+extern "C" int cSpeechSys_GetStreamId(void* self, int i);
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i);
 extern "C" cBankMonitorInstance* cBankMonitor_BANKMONITOR_GetHandle(void* self, int idx, int a2);
-extern "C" void func_002B11B0(void*, int);
+extern "C" void cSpeechSys_PurgeInstance(void*, int);
 
 /**
  * Stops speech instance 0 when it is saying a line for the given character identity; returns whether nothing blocks.
  *
- * Maps speech instance 0's stream (func_002B1220) to a stream index (cStreamSys_STREAM_GetCurrActiveSampleHandle); none
+ * Maps speech instance 0's stream (cSpeechSys_GetStreamId) to a stream index (cStreamSys_STREAM_GetCurrActiveSampleHandle); none
  * (< 0) returns true. The bank monitor's voice for that index (cBankMonitor_BANKMONITOR_GetHandle(.., 3)) missing
- * returns false. When its mPtr equals @p id the speech is stopped (func_002B11B0) and true is returned, otherwise
+ * returns false. When its mPtr equals @p id the speech is stopped (cSpeechSys_PurgeInstance) and true is returned, otherwise
  * false. cSSXAudio_PlayGrunt calls it.
  *
  * @param id  the character identity
  * @return true when no speech is playing or the character's speech was stopped, else false
  */
-extern "C" bool func_002A1028(cSSXAudio* self, int id)
+extern "C" bool cSSXAudio_StopCharacterSpeech(cSSXAudio* self, int id)
 {
-    int idx = cStreamSys_STREAM_GetCurrActiveSampleHandle(self->MusicSys.mpVStreamSys, func_002B1220((char*)&self->SpeechSys, 0));
+    int idx = cStreamSys_STREAM_GetCurrActiveSampleHandle(self->MusicSys.mpVStreamSys, cSpeechSys_GetStreamId((char*)&self->SpeechSys, 0));
     if (idx < 0) {
         return true;
     }
@@ -7993,7 +7993,7 @@ extern "C" bool func_002A1028(cSSXAudio* self, int id)
         return false;
     }
     if ((int)voice->mPtr == id) {
-        func_002B11B0((char*)&self->SpeechSys, 0);
+        cSpeechSys_PurgeInstance((char*)&self->SpeechSys, 0);
         return true;
     }
     return false;
@@ -8001,25 +8001,25 @@ extern "C" bool func_002A1028(cSSXAudio* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A10C0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsCharacterSpeaking);
 #ifdef SKIP_ASM
-extern "C" int func_002B1220(void* self, int i);
+extern "C" int cSpeechSys_GetStreamId(void* self, int i);
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i);
 extern "C" cBankMonitorInstance* cBankMonitor_BANKMONITOR_GetHandle(void* self, int idx, int a2);
 
 /**
  * Tells whether speech instance 0 is saying a line for the given character identity.
  *
- * Maps speech instance 0's stream (func_002B1220) to a stream index (cStreamSys_STREAM_GetCurrActiveSampleHandle) and
+ * Maps speech instance 0's stream (cSpeechSys_GetStreamId) to a stream index (cStreamSys_STREAM_GetCurrActiveSampleHandle) and
  * compares the mPtr of the bank monitor's voice for it (cBankMonitor_BANKMONITOR_GetHandle(.., 3)) with @p id; no
- * stream or no voice gives false. cSSXAudio_PlayGrunt, func_0028DF18 and func_002A4A38 (with 10) use it.
+ * stream or no voice gives false. cSSXAudio_PlayGrunt, cSSXAudio_SwitchToNextSong and cSSXAudio_IsScriptedDJLinePlaying (with 10) use it.
  *
  * @param id  the character identity
  * @return true when that character's speech is playing, else false
  */
-extern "C" bool func_002A10C0(cSSXAudio* self, int id)
+extern "C" bool cSSXAudio_IsCharacterSpeaking(cSSXAudio* self, int id)
 {
-    int idx = cStreamSys_STREAM_GetCurrActiveSampleHandle(self->MusicSys.mpVStreamSys, func_002B1220((char*)&self->SpeechSys, 0));
+    int idx = cStreamSys_STREAM_GetCurrActiveSampleHandle(self->MusicSys.mpVStreamSys, cSpeechSys_GetStreamId((char*)&self->SpeechSys, 0));
     if (idx < 0) {
         return false;
     }
@@ -8033,101 +8033,101 @@ extern "C" bool func_002A10C0(cSSXAudio* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1138);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakScriptEventType0);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
-// PORT: the unit defines func_0029F330/func_002A1D48 as void; they return their tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
-int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
+int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern float D_004A36D8;
 
-// PORT: callers declare func_002A1138 as (void*, int, int); the body takes (self, rider, obj).
-void func_002A1138_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("func_002A1138");
+// PORT: callers declare cSSXAudio_SpeakScriptEventType0 as (void*, int, int); the body takes (self, rider, obj).
+void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("cSSXAudio_SpeakScriptEventType0");
 
 /**
  * Requests speech line 8403 for a rider, about another rider (script speech event type 0).
  *
  * Needs the Character volume on and no replay; @p rider defaults to the cAI's rider 1 and @p obj to rider 0. The rider
  * must be within 30 units of a camera (position from getPosition). When the request is queued on speech
- * instance 0 (func_002B1458), the speech hook D_004A482C gets its packed id, 3 arguments, the rider's speech bit
- * (func_0029F330), @p obj's character bit (func_002A1D48) and 4. func_002A1B88 and func_002A43B8 call it.
+ * instance 0 (cSpeechSys_AddRequest), the speech hook D_004A482C gets its packed id, 3 arguments, the rider's speech bit
+ * (cSSXAudio_GetRiderSpeechBit), @p obj's character bit (cSSXAudio_GetRiderSubjectBit) and 4. cSSXAudio_HandleSubjectSpeechEvent and cSSXAudio_PlayPendingDJLine call it.
  *
  * @param rider  the speaking rider, or 0 for rider 1
  * @param obj  the rider spoken about, or 0 for rider 0
  */
-void func_002A1138_impl(cSSXAudio* self, cRider* rider, void* obj)
+void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* obj)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (rider == 0) rider = ((cAI*)cAudioInterface_getAI())->Riders[1];
     if (obj == 0) obj = ((cAI*)cAudioInterface_getAI())->Riders[0];
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    if (func_002B1458(&self->SpeechSys, 0, 8403, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
-    int subjectBit = func_002A1D48_i(self, obj);
+    if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8403, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
+    int subjectBit = cSSXAudio_GetRiderSubjectBit_i(self, obj);
     D_004A482C_5(func_003D8008(1, 0, 8403), 3, speakerBit, subjectBit, 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1280);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakScriptEventType1);
 #ifdef SKIP_ASM
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
-// PORT: the unit defines func_0029F330/func_002A1D48 as void; they return their tail call's result.
-int func_0029F330_i(void* self) __asm__("func_0029F330");
-int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
+// PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
+int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
+int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 // PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern float D_004A36D8;
 
-// PORT: callers declare func_002A1280 as (void*, int, int); the body takes (self, rider, obj).
-void func_002A1280_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("func_002A1280");
+// PORT: callers declare cSSXAudio_SpeakScriptEventType1 as (void*, int, int); the body takes (self, rider, obj).
+void cSSXAudio_SpeakScriptEventType1_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("cSSXAudio_SpeakScriptEventType1");
 
 /**
  * Requests speech line 8404 for a rider, about another rider (script speech event type 1).
  *
  * Needs the Character volume on, no replay and @p rider within 30 units of a camera. When the request is queued on
- * speech instance 0 (func_002B1458), the speech hook D_004A482C gets its packed id, the rider's speech bit
- * (func_0029F330) and @p obj's character bit (func_002A1D48). func_002A1B88 calls it.
+ * speech instance 0 (cSpeechSys_AddRequest), the speech hook D_004A482C gets its packed id, the rider's speech bit
+ * (cSSXAudio_GetRiderSpeechBit) and @p obj's character bit (cSSXAudio_GetRiderSubjectBit). cSSXAudio_HandleSubjectSpeechEvent calls it.
  *
  * @param rider  the speaking rider
  * @param obj  the rider spoken about
  */
-void func_002A1280_impl(cSSXAudio* self, cRider* rider, void* obj)
+void cSSXAudio_SpeakScriptEventType1_impl(cSSXAudio* self, cRider* rider, void* obj)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    if (func_002B1458(&self->SpeechSys, 0, 8404, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
-    int subjectBit = func_002A1D48_i(self, obj);
+    if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8404, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
+    int subjectBit = cSSXAudio_GetRiderSubjectBit_i(self, obj);
     D_004A482C_4(func_003D8008(1, 0, 8404), 2, speakerBit, subjectBit);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1388);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPlaceCallback);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
-extern "C" void func_002A1400(void* self, cRider* rider);
+extern "C" void cSSXAudio_SpeakPlace(void* self, cRider* rider);
 
 /**
- * Monitor callback: requests the place speech line (func_002A1400) for the rider whose index the monitor carries.
+ * Monitor callback: requests the place speech line (cSSXAudio_SpeakPlace) for the rider whose index the monitor carries.
  *
  * The index is the monitor instance's +0x1C; one outside 0..NumberOfRidersAllocated - 1 uses rider 0. Its pointer to
- * member is D_004A36E8, which func_002A34D0 and func_002A3708 pass to cMonitor_MONITOR_Create (cMonitor's create).
+ * member is D_004A36E8, which cSSXAudio_SpeakPAPlace and cSSXAudio_SpeakPARiderPlace pass to cMonitor_MONITOR_Create (cMonitor's create).
  *
  * @param obj  the monitor instance (cMonitorInstance)
  * @return 1
  */
-extern "C" int func_002A1388(cSSXAudio* self, cMonitorInstance* obj)
+extern "C" int cSSXAudio_SpeakPlaceCallback(cSSXAudio* self, cMonitorInstance* obj)
 {
     int i = obj->mData1;
     cRider* rider;
@@ -8136,44 +8136,44 @@ extern "C" int func_002A1388(cSSXAudio* self, cMonitorInstance* obj)
     } else {
         rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
     }
-    func_002A1400(self, rider);
+    cSSXAudio_SpeakPlace(self, rider);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1400);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPlace);
 #ifdef SKIP_ASM
-extern "C" int func_002A1E68(void* self, cRider* rider);
-// PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
-bool func_002A4248_s(void* self) __asm__("func_002A4248");
+extern "C" int cSSXAudio_GetRiderPlaceBit(void* self, cRider* rider);
+// PORT: callers pass self to cSSXAudio_IsRivalEvent (the unit's later definition takes no args).
+bool cSSXAudio_IsRivalEvent_s(void* self) __asm__("cSSXAudio_IsRivalEvent");
 
-// PORT: callers declare func_002A1400 as (void*, int); the body takes (self, rider).
-void func_002A1400_impl(cSSXAudio* self, cRider* rider) __asm__("func_002A1400");
+// PORT: callers declare cSSXAudio_SpeakPlace as (void*, int); the body takes (self, rider).
+void cSSXAudio_SpeakPlace_impl(cSSXAudio* self, cRider* rider) __asm__("cSSXAudio_SpeakPlace");
 
 /**
- * Requests a rider's place speech line (8377) with the place class from func_002A1E68.
+ * Requests a rider's place speech line (8377) with the place class from cSSXAudio_GetRiderPlaceBit.
  *
  * Needs the Character volume on, no replay and the rider within 30 units of a camera. When the request is queued on
  * speech instance 0, the speech hook D_004A482C gets its packed id, the rider's speech bit and a mode: 1 when the place
- * bit is 1 (first), 2 when func_002A4248 is nonzero or in the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath), 4
- * for the bits 2 and 4, else 2. func_002A1388, func_002A1B58 and func_002A43B8 call it.
+ * bit is 1 (first), 2 when cSSXAudio_IsRivalEvent is nonzero or in the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath), 4
+ * for the bits 2 and 4, else 2. cSSXAudio_SpeakPlaceCallback, cSSXAudio_HandleRiderSpeechMessage and cSSXAudio_PlayPendingDJLine call it.
  *
  * @param rider  the rider (cRider)
  */
-void func_002A1400_impl(cSSXAudio* self, cRider* rider)
+void cSSXAudio_SpeakPlace_impl(cSSXAudio* self, cRider* rider)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    if (func_002B1458(&self->SpeechSys, 0, 8377, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
-    int k = func_002A1E68(self, rider);
+    if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8377, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
+    int k = cSSXAudio_GetRiderPlaceBit(self, rider);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int placeMode;
     if (k == 1) {
         placeMode = 1;
-    } else if (func_002A4248_s(self) != 0) {
+    } else if (cSSXAudio_IsRivalEvent_s(self) != 0) {
         placeMode = 2;
     } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         placeMode = 2;
@@ -8187,9 +8187,9 @@ void func_002A1400_impl(cSSXAudio* self, cRider* rider)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1560);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakOffBalance);
 #ifdef SKIP_ASM
-extern "C" int func_002B0E28(void* self, int i);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -8202,33 +8202,33 @@ extern void (*D_004A482C)(void*, int, int);
  *
  * @param rider  the rider (cRider)
  */
-extern "C" void func_002A1560(cSSXAudio* self, cRider* rider)
+extern "C" void cSSXAudio_SpeakOffBalance(cSSXAudio* self, cRider* rider)
 {
-    if (func_0029F0A0(self) == 0) return;
+    if (cSSXAudio_IsCharacterSpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int check = 0;
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) check = 1;
     if (check && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     char* bm = (char*)&self->SpeechSys;
-    if (func_002B0E28(bm, 0) == 0) return;
+    if (cSpeechSys_CanTakeSpeech(bm, 0) == 0) return;
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
-    if (func_002B1458(bm, 0, 8376, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int speakerBit = func_0029F330_i(rider);
+    if (cSpeechSys_AddRequest(bm, 0, 8376, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     D_004A482C(func_003D8008(1, 0, 8376), 1, speakerBit);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A16B0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakCharacterSelect);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" bool func_0029F0A0(void* self);
-extern "C" int func_002B0E28(void* self, int i);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-// func_0029F2B0 returns a value (the unit's earlier declaration says void).
-int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+// cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
+int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
@@ -8237,19 +8237,19 @@ extern void (*D_004A482C)(void*, int, int);
  *
  * Needs the Character volume on, speech instance 0 ready and a game path (newRace.cGamePath) other than 0. The request has no
  * rider, the identity and refresh 1; when queued, the speech hook D_004A482C gets its packed id and the identity's
- * speech bit (func_0029F2B0(identity, 0)). The front-end rider manager calls it.
+ * speech bit (cSSXAudio_GetCharacterSpeechBit(identity, 0)). The front-end rider manager calls it.
  *
  * @param identity  the character identity
  */
-extern "C" void func_002A16B0(cSSXAudio* self, int identity)
+extern "C" void cSSXAudio_SpeakCharacterSelect(cSSXAudio* self, int identity)
 {
-    if (func_0029F0A0(self) != 0) {
+    if (cSSXAudio_IsCharacterSpeechOn(self) != 0) {
         char* bm = (char*)&self->SpeechSys;
-        if (func_002B0E28(bm, 0) != 0) {
+        if (cSpeechSys_CanTakeSpeech(bm, 0) != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             if (cBENewRaceInterface_newRace.cGamePath != 0) {
-                if (func_002B1458(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
-                    int speakerBit = func_0029F2B0_r(identity, 0);
+                if (cSpeechSys_AddRequest(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
+                    int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
                     D_004A482C(func_003D8008(1, 0, 8380), 1, speakerBit);
                 }
             }
@@ -8259,14 +8259,14 @@ extern "C" void func_002A16B0(cSSXAudio* self, int identity)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A1778);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakCustomize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0A0(void* self);
-extern "C" int func_002B0E28(void* self, int i);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-// func_0029F2B0 returns a value (the unit's earlier declaration says void).
-int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
+extern "C" bool cSSXAudio_IsCharacterSpeechOn(void* self);
+extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+// cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
+int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
@@ -8274,18 +8274,18 @@ extern void (*D_004A482C)(void*, int, int);
  * Requests the customize speech line (8381) for a character identity.
  *
  * Needs the Character volume on and speech instance 0 ready. The request has no rider, the identity and refresh 1; when
- * queued, the speech hook D_004A482C gets its packed id and the identity's speech bit (func_0029F2B0(identity, 0)). The
+ * queued, the speech hook D_004A482C gets its packed id and the identity's speech bit (cSSXAudio_GetCharacterSpeechBit(identity, 0)). The
  * front-end rider manager calls it for the equip screen's customize request.
  *
  * @param identity  the character identity
  */
-extern "C" void func_002A1778(cSSXAudio* self, int identity)
+extern "C" void cSSXAudio_SpeakCustomize(cSSXAudio* self, int identity)
 {
-    if (func_0029F0A0(self) != 0) {
+    if (cSSXAudio_IsCharacterSpeechOn(self) != 0) {
         char* bm = (char*)&self->SpeechSys;
-        if (func_002B0E28(bm, 0) != 0) {
-            if (func_002B1458(bm, 0, 8381, 0, identity, 0, 1, 0.0f) != 0) {
-                int speakerBit = func_0029F2B0_r(identity, 0);
+        if (cSpeechSys_CanTakeSpeech(bm, 0) != 0) {
+            if (cSpeechSys_AddRequest(bm, 0, 8381, 0, identity, 0, 1, 0.0f) != 0) {
+                int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
                 D_004A482C(func_003D8008(1, 0, 8381), 1, speakerBit);
             }
         }
@@ -8294,7 +8294,7 @@ extern "C" void func_002A1778(cSSXAudio* self, int identity)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1820);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetRiderRelation);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
 void* cBEAggressionInterface_getThis();
@@ -8313,7 +8313,7 @@ extern "C" int cBEAggressionInterface_getState(void* ag, int a, int b);
  * @param secondRider  the second rider
  * @return 0, 1 or 2
  */
-extern "C" int func_002A1820(cSSXAudio* self, cRider* firstRider, cRider* secondRider)
+extern "C" int cSSXAudio_GetRiderRelation(cSSXAudio* self, cRider* firstRider, cRider* secondRider)
 {
     if (((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated == 2) return 2;
     int oka = firstRider->mIsHuman != 0 && firstRider->mIsLocal != 0;
@@ -8334,62 +8334,62 @@ extern "C" int func_002A1820(cSSXAudio* self, cRider* firstRider, cRider* second
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A19D8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayScriptSpeechEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_002A31C0(cSSXAudio* self);
-extern "C" void func_002A32B0(cSSXAudio* self);
-extern "C" void func_002A3358(cSSXAudio* self);
-extern "C" void func_002A3860(cSSXAudio* self);
-extern "C" void func_002A2018(cSSXAudio* self);
-extern "C" void func_002A2188(cSSXAudio* self);
-extern "C" void func_002A2568(cSSXAudio* self, int a1);
-extern "C" void func_002A2638(cSSXAudio* self);
-extern "C" void func_002A39E0(cSSXAudio* self);
-extern "C" void func_002A3708(cSSXAudio* self, cRider* rider);
+extern "C" void cSSXAudio_SpeakPAEventStart(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPALine8385(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPALine8386(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPAResult(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8392(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8394(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJCurrentLocation(cSSXAudio* self, int a1);
+extern "C" void cSSXAudio_SpeakDJLine8378(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPALine8379(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakPARiderPlace(cSSXAudio* self, cRider* rider);
 extern const sSndKey8 D_004A3648_19D8[] __asm__("D_004A3648");
 
 /**
  * Plays a script-triggered speech event by id; returns whether the id is handled.
  *
- * 0: func_002A31C0, and when no song is playing (MusicSys.mSongPlaying) func_0028D488 and a 10 ms monitor
- * (cMonitor_MONITOR_Create) with the callback D_004A3648 and data (0, 3, 1, 0, 0); 1: func_002A32B0; 2: func_002A3358; 3:
- * func_002A3400; 5: func_002A3708 for rider 0; 7: func_002A3860; 8: func_002A2018; 10: func_002A2188; 12:
- * func_002A2568(self, -1); 14: func_002A2638; 15: func_002A39E0. The script engine's speech events call it.
+ * 0: cSSXAudio_SpeakPAEventStart, and when no song is playing (MusicSys.mSongPlaying) cSSXAudio_PickRandomSong and a 10 ms monitor
+ * (cMonitor_MONITOR_Create) with the callback D_004A3648 and data (0, 3, 1, 0, 0); 1: cSSXAudio_SpeakPALine8385; 2: cSSXAudio_SpeakPALine8386; 3:
+ * cSSXAudio_SpeakPALine8387; 5: cSSXAudio_SpeakPARiderPlace for rider 0; 7: cSSXAudio_SpeakPAResult; 8: cSSXAudio_SpeakDJLine8392; 10: cSSXAudio_SpeakDJLine8394; 12:
+ * cSSXAudio_SpeakDJCurrentLocation(self, -1); 14: cSSXAudio_SpeakDJLine8378; 15: cSSXAudio_SpeakPALine8379. The script engine's speech events call it.
  *
  * @param ev  the event id
  * @return true when handled, else false
  */
 // PORT: 64-bit long sound key
-extern "C" bool func_002A19D8(cSSXAudio* self, int ev)
+extern "C" bool cSSXAudio_PlayScriptSpeechEvent(cSSXAudio* self, int ev)
 {
     if (ev == 0) {
-        func_002A31C0(self);
+        cSSXAudio_SpeakPAEventStart(self);
         if (self->MusicSys.mSongPlaying == 0) {
-            func_0028D488(self);
+            cSSXAudio_PickRandomSong(self);
             cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                     10, D_004A3648_19D8[0].v, 0, 3, 1, 0, 0);
         }
     } else if (ev == 1) {
-        func_002A32B0(self);
+        cSSXAudio_SpeakPALine8385(self);
     } else if (ev == 2) {
-        func_002A3358(self);
+        cSSXAudio_SpeakPALine8386(self);
     } else if (ev == 3) {
-        func_002A3400(self);
+        cSSXAudio_SpeakPALine8387(self);
     } else if (ev == 7) {
-        func_002A3860(self);
+        cSSXAudio_SpeakPAResult(self);
     } else if (ev == 8) {
-        func_002A2018(self);
+        cSSXAudio_SpeakDJLine8392(self);
     } else if (ev == 10) {
-        func_002A2188(self);
+        cSSXAudio_SpeakDJLine8394(self);
     } else if (ev == 12) {
-        func_002A2568(self, -1);
+        cSSXAudio_SpeakDJCurrentLocation(self, -1);
     } else if (ev == 14) {
-        func_002A2638(self);
+        cSSXAudio_SpeakDJLine8378(self);
     } else if (ev == 15) {
-        func_002A39E0(self);
+        cSSXAudio_SpeakPALine8379(self);
     } else if (ev == 5) {
-        func_002A3708(self, (cRider*)((char*)((cAI*)cAudioInterface_getAI())->Riders[0]));
+        cSSXAudio_SpeakPARiderPlace(self, (cRider*)((char*)((cAI*)cAudioInterface_getAI())->Riders[0]));
     } else {
         return false;
     }
@@ -8398,12 +8398,12 @@ extern "C" bool func_002A19D8(cSSXAudio* self, int ev)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1B58);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleRiderSpeechMessage);
 #ifdef SKIP_ASM
-extern "C" void func_002A1400(void* self, cRider* rider);
+extern "C" void cSSXAudio_SpeakPlace(void* self, cRider* rider);
 
 /**
- * Handles a rider's anim speech message: 2 requests the place line (func_002A1400) and returns true, others return
+ * Handles a rider's anim speech message: 2 requests the place line (cSSXAudio_SpeakPlace) and returns true, others return
  * false.
  *
  * cRider sends it the event ids below 0x64.
@@ -8412,10 +8412,10 @@ extern "C" void func_002A1400(void* self, cRider* rider);
  * @param rider  the rider
  * @return true when handled, else false
  */
-extern "C" bool func_002A1B58(cSSXAudio* self, int msg, cRider* rider)
+extern "C" bool cSSXAudio_HandleRiderSpeechMessage(cSSXAudio* self, int msg, cRider* rider)
 {
     if (msg == 2) {
-        func_002A1400(self, rider);
+        cSSXAudio_SpeakPlace(self, rider);
         return true;
     }
     return false;
@@ -8423,13 +8423,13 @@ extern "C" bool func_002A1B58(cSSXAudio* self, int msg, cRider* rider)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A1B88);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleSubjectSpeechEvent);
 #ifdef SKIP_ASM
-extern "C" void func_002A1138(void* self, int a, int b);
-extern "C" void func_002A1280(void* self, int a, int b);
+extern "C" void cSSXAudio_SpeakScriptEventType0(void* self, int a, int b);
+extern "C" void cSSXAudio_SpeakScriptEventType1(void* self, int a, int b);
 
 /**
- * Handles a script speech event about a subject rider: type 0 plays func_002A1138, type 1 func_002A1280.
+ * Handles a script speech event about a subject rider: type 0 plays cSSXAudio_SpeakScriptEventType0, type 1 cSSXAudio_SpeakScriptEventType1.
  *
  * cRider passes the rider and the event's subject rider (cSSXScriptEngine_GetSubjectRider).
  *
@@ -8438,14 +8438,14 @@ extern "C" void func_002A1280(void* self, int a, int b);
  * @param otherRider  the subject rider (as int)
  * @return true when handled, else false
  */
-extern "C" bool func_002A1B88(cSSXAudio* self, int type, int rider, int otherRider)
+extern "C" bool cSSXAudio_HandleSubjectSpeechEvent(cSSXAudio* self, int type, int rider, int otherRider)
 {
     if (type == 0) {
-        func_002A1138(self, rider, otherRider);
+        cSSXAudio_SpeakScriptEventType0(self, rider, otherRider);
         return true;
     }
     if (type == 1) {
-        func_002A1280(self, rider, otherRider);
+        cSSXAudio_SpeakScriptEventType1(self, rider, otherRider);
         return true;
     }
     return false;
@@ -8467,7 +8467,7 @@ int func_002A1BD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1BD8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetLocationSpeechBit);
 #ifdef SKIP_ASM
 /**
  * Returns the bit of a location for the location-dependent speech; the combined locations 17..21 also need a part.
@@ -8482,7 +8482,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1BD8);
  * @return the bit, or 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002A1BD8(cSSXAudio* self, int location, int subLocation)
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int location, int subLocation)
 {
     switch (location) {
     case 0: return 0x1;
@@ -8530,42 +8530,42 @@ extern "C" int func_002A1BD8(cSSXAudio* self, int location, int subLocation)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1D48);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetRiderSubjectBit);
 #ifdef SKIP_ASM
 extern "C" int cRider_getIdentity(void*);
 extern "C" int cRider_getCheatIdentity(void*);
-extern "C" void func_002A1DA0(void* self, int a, int b);
+extern "C" void cSSXAudio_GetSubjectCharacterBit(void* self, int a, int b);
 
 /**
- * Returns the speech character bit of a rider: func_002A1DA0 of its identity and cheat identity (declared void).
+ * Returns the speech character bit of a rider: cSSXAudio_GetSubjectCharacterBit of its identity and cheat identity (declared void).
  *
  * @param obj  the rider (cRider)
  */
-extern "C" void func_002A1D48(void* self, void* obj)
+extern "C" void cSSXAudio_GetRiderSubjectBit(void* self, void* obj)
 {
     int identity = cRider_getIdentity(obj);
-    func_002A1DA0(self, identity, cRider_getCheatIdentity(obj));
+    cSSXAudio_GetSubjectCharacterBit(self, identity, cRider_getCheatIdentity(obj));
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1DA0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetSubjectCharacterBit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares this as void(void*, int, int); defined under an asm label with its real type
-extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag) __asm__("func_002A1DA0");
+extern "C" int cSSXAudio_GetSubjectCharacterBit_impl(void* self, unsigned int idx, int flag) __asm__("cSSXAudio_GetSubjectCharacterBit");
 /**
  * Returns the character bit of an identity used for the rider spoken about, or 0x1000 for a cheat identity.
  *
  * With @p flag 0: kCHAR_ELISE gives 0x1, kCHAR_MAC 0x2, kCHAR_MOBY 0x4, kCHAR_PSYMON 0x8, kCHAR_KAORI 0x10, kCHAR_ZOE
- * 0x20, kCHAR_VIGGO 0x40, kCHAR_NATE 0x80, kCHAR_GRIFF 0x100, kCHAR_ALLEGRA 0x200 (unlike func_0029F2B0, kCHAR_VIGGO
+ * 0x20, kCHAR_VIGGO 0x40, kCHAR_NATE 0x80, kCHAR_GRIFF 0x100, kCHAR_ALLEGRA 0x200 (unlike cSSXAudio_GetCharacterSpeechBit, kCHAR_VIGGO
  * and kCHAR_NATE swap bits); anything else gives 0x1000. The unit declares it void(void*, int, int).
  *
  * @param idx  the character identity
  * @param flag  the cheat identity; nonzero gives 0x1000
  * @return the character's bit
  */
-extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
+extern "C" int cSSXAudio_GetSubjectCharacterBit_impl(void* self, unsigned int idx, int flag)
 {
     if (flag == 0) {
         switch (idx) {
@@ -8586,7 +8586,7 @@ extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1E20);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetLocationPeakBit);
 #ifdef SKIP_ASM
 /**
  * Returns the peak bit (ePeakBit) of a location: kPEAKBIT_Peak1, kPEAKBIT_Peak2 or kPEAKBIT_Peak3, kPEAKBIT_None for
@@ -8599,7 +8599,7 @@ INCLUDE_ASM("sound/soundsys", func_002A1E20);
  * @return the peak bit, or kPEAKBIT_None
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int x)
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int x)
 {
     switch (x) {
     case kLOCATION_ARA1: case kLOCATION_BRA2: case kLOCATION_ASS1: case kLOCATION_ABA1: case kLOCATION_BHP1:
@@ -8617,14 +8617,14 @@ extern "C" int func_002A1E20(cSSXAudio* self, unsigned int x)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1E68);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetRiderPlaceBit);
 #ifdef SKIP_ASM
 extern int cGameModeMan_iRanking[];
 
 /**
  * Returns a rider's place in the race as a bit (1 first, 2 second, ...), for the place speech.
  *
- * In the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath): when func_002A4078 is nonzero, the rider's RaceRanking
+ * In the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath): when cSSXAudio_IsRaceEvent is nonzero, the rider's RaceRanking
  * (its place) 0..4 gives 1, 2, 4, 8, 0x10 and anything else 0x200; otherwise 1 for place 0 and 2 for the rest. In the
  * other paths rider 0's rank cGameModeMan_iRanking[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7:
  * 0x80, 8: 0x100, 9: 0x200, else 0 (the @p obj rider is not used there).
@@ -8632,14 +8632,14 @@ extern int cGameModeMan_iRanking[];
  * @param obj  the rider (cRider)
  * @return the place bit
  */
-extern "C" int func_002A1E68(void *self, cRider* obj)
+extern "C" int cSSXAudio_GetRiderPlaceBit(void *self, cRider* obj)
 {
     int placeBit;
     int racePlace;
 
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        if (func_002A4078(self) != 0) {
+        if (cSSXAudio_IsRaceEvent(self) != 0) {
             racePlace = obj->RaceRanking;
             if (racePlace == 0) {
                 placeBit = 1;
@@ -8702,18 +8702,18 @@ extern "C" int func_002A1E68(void *self, cRider* obj)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A1FA0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_GetRiderCharacterGroup);
 #ifdef SKIP_ASM
 /**
  * Returns a character group of a rider for speech: 2 for kCHAR_KAORI, kCHAR_ALLEGRA, kCHAR_ZOE and kCHAR_ELISE, 1 for
  * the other six characters, else 0.
  *
- * A rider with a cheat identity gives 0. (By func_0029F3F8's grunt banks 1, 2, 4, 6 are kao, ari, zoe, eli: the women.)
+ * A rider with a cheat identity gives 0. (By cSSXAudio_LoadGruntBanks's grunt banks 1, 2, 4, 6 are kao, ari, zoe, eli: the women.)
  *
  * @param obj  the rider (cRider)
  * @return 1, 2 or 0
  */
-extern "C" int func_002A1FA0(void *self, void *obj)
+extern "C" int cSSXAudio_GetRiderCharacterGroup(void *self, void *obj)
 {
     if (cRider_getCheatIdentity(obj) == 0) {
         switch (cRider_getIdentity(obj)) {
@@ -8738,16 +8738,16 @@ extern "C" int func_002A1FA0(void *self, void *obj)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2018);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8392);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -8755,17 +8755,17 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8392 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8). The request goes to speech instance 0 with identity 10 (the DJ,
- * func_002B1458); when queued, the speech hook D_004A482C gets its packed id (func_003D8008(1, 0, 8392)), the language
- * bit (func_0029F198) and the peak bit of the location (func_002A1E20). func_002A19D8 (event 8) and func_002A2E50 (pick
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn). The request goes to speech instance 0 with identity 10 (the DJ,
+ * cSpeechSys_AddRequest); when queued, the speech hook D_004A482C gets its packed id (func_003D8008(1, 0, 8392)), the language
+ * bit (cSSXAudio_GetSpeechLanguage) and the peak bit of the location (cSSXAudio_GetLocationPeakBit). cSSXAudio_PlayScriptSpeechEvent (event 8) and cSSXAudio_SpeakDJBetweenEvents (pick
  * 2) call it.
  */
-extern "C" void func_002A2018(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8392(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8392), 2, languageBit, peakBit);
         }
     }
@@ -8773,16 +8773,16 @@ extern "C" void func_002A2018(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A20D0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8393);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -8790,16 +8790,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8393 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit (func_0029F198) and the peak bit (func_002A1E20).
- * func_002A2E50 calls it (pick 7).
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit (cSSXAudio_GetSpeechLanguage) and the peak bit (cSSXAudio_GetLocationPeakBit).
+ * cSSXAudio_SpeakDJBetweenEvents calls it (pick 7).
  */
-extern "C" void func_002A20D0(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8393(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8393), 2, languageBit, peakBit);
         }
     }
@@ -8807,19 +8807,19 @@ extern "C" void func_002A20D0(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2188);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8394);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
-// func_002A1D48 returns its tail call's value (the unit defines it as void).
-int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+// cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
+int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -8827,17 +8827,17 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8394 about rider 0's character, with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (func_002A1D48) and the peak
- * bit. func_002A19D8 (event 10) and func_002A2E50 (pick 0) call it.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
+ * bit. cSSXAudio_PlayScriptSpeechEvent (event 10) and cSSXAudio_SpeakDJBetweenEvents (pick 0) call it.
  */
-extern "C" void func_002A2188(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8394(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8394), 3, languageBit, riderBit, peakBit);
         }
     }
@@ -8845,16 +8845,16 @@ extern "C" void func_002A2188(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2260);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8423);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -8862,15 +8862,15 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8423 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A2E50 calls it (pick 5).
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 5).
  */
-extern "C" void func_002A2260(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8423(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8423), 2, languageBit, peakBit);
         }
     }
@@ -8878,16 +8878,16 @@ extern "C" void func_002A2260(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2318);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8424);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -8895,15 +8895,15 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8424 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A2E50 calls it (pick 6).
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 6).
  */
-extern "C" void func_002A2318(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8424(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8424), 2, languageBit, peakBit);
         }
     }
@@ -8911,43 +8911,43 @@ extern "C" void func_002A2318(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A23D0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8425);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
-// func_002A23D0's location argument for the current location (name ours). [U] it then reads the location from the
+// cSSXAudio_SpeakDJLine8425's location argument for the current location (name ours). [U] it then reads the location from the
 // new-race interface (cBENewRaceInterface_getLocation).
 enum { kCurrentLocation = -1 };
 
 /**
  * Requests DJ speech line 8425 with the language and the peak of a location (the current one for kCurrentLocation).
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit (func_002A1E20) of @p mode, or of the
- * current location when @p mode is -1. func_002A2E50 (pick 1) and func_002A4770 (a back-country location) call it.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit (cSSXAudio_GetLocationPeakBit) of @p mode, or of the
+ * current location when @p mode is -1. cSSXAudio_SpeakDJBetweenEvents (pick 1) and cSSXAudio_SpeakDJEventResult (a back-country location) call it.
  *
  * @param mode  a location id, or -1 for the current location
  */
-extern "C" void func_002A23D0(cSSXAudio* self, int mode)
+extern "C" void cSSXAudio_SpeakDJLine8425(cSSXAudio* self, int mode)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8425, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8425, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit;
             if (mode == kCurrentLocation) {
-                peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
-                peakBit = func_002A1E20(self, mode);
+                peakBit = cSSXAudio_GetLocationPeakBit(self, mode);
             }
             D_004A482C_4(func_003D8008(1, 0, 8425), 2, languageBit, peakBit);
         }
@@ -8956,13 +8956,13 @@ extern "C" void func_002A23D0(cSSXAudio* self, int mode)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A24B0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLocation);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -8970,18 +8970,18 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8396 about a location, with mode 3.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the location bit func_002A1BD8(@p location, -1) and 3.
- * func_002A4770 calls it.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1) and 3.
+ * cSSXAudio_SpeakDJEventResult calls it.
  *
  * @param location  the location id
  */
-extern "C" void func_002A24B0(cSSXAudio* self, int location)
+extern "C" void cSSXAudio_SpeakDJLocation(cSSXAudio* self, int location)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, location, -1);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
             D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
@@ -8989,16 +8989,16 @@ extern "C" void func_002A24B0(cSSXAudio* self, int location)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A2568);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJCurrentLocation);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -9006,18 +9006,18 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8396 about the current location (or a part of a combined location), with mode 3.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the bit func_002A1BD8(current location, @p subLocation) and 3.
- * func_002A19D8 (event 12, with -1) and func_002A43B8 (with mPendingLocationPart) call it.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, the bit cSSXAudio_GetLocationSpeechBit(current location, @p subLocation) and 3.
+ * cSSXAudio_PlayScriptSpeechEvent (event 12, with -1) and cSSXAudio_PlayPendingDJLine (with mPendingLocationPart) call it.
  *
- * @param subLocation  the part of a combined location (func_002A1BD8), or -1
+ * @param subLocation  the part of a combined location (cSSXAudio_GetLocationSpeechBit), or -1
  */
-extern "C" void func_002A2568(cSSXAudio* self, int subLocation)
+extern "C" void cSSXAudio_SpeakDJCurrentLocation(cSSXAudio* self, int subLocation)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), subLocation);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), subLocation);
             D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
@@ -9025,16 +9025,16 @@ extern "C" void func_002A2568(cSSXAudio* self, int subLocation)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2638);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8378);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9042,16 +9042,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8378 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A19D8 (event 14) and
- * func_002A43B8 (pending flag mPendingPeakLine8378) call it.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_PlayScriptSpeechEvent (event 14) and
+ * cSSXAudio_PlayPendingDJLine (pending flag mPendingPeakLine8378) call it.
  */
-extern "C" void func_002A2638(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8378(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8378), 2, languageBit, peakBit);
         }
     }
@@ -9059,13 +9059,13 @@ extern "C" void func_002A2638(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A26F0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJChoiceLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" void func_002B11B0(void*, int);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" void cSpeechSys_PurgeInstance(void*, int);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -9073,22 +9073,22 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 /**
  * Interrupts speech instance 0 and requests DJ speech line 8421 with two yes/no choices.
  *
- * Needs DJ speech allowed (func_0029F0D8). Stops speech instance 0 (func_002B11B0), then requests 8421 with identity
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn). Stops speech instance 0 (cSpeechSys_PurgeInstance), then requests 8421 with identity
  * 10; when queued, clears mChoiceLineFirstTime and the speech hook D_004A482C gets its packed id, the language bit, 1
  * when @p firstChoice is set (else 2) and 2 when @p secondChoice is set (else 1). The music code
- * (cSSXAudio_StartEventWithNoStartGate, func_0028E100, func_0028E8C0), func_002A3170 and func_002A43B8 call it, mostly
+ * (cSSXAudio_StartEventWithNoStartGate, cSSXAudio_HandleMusicRequest, cSSXAudio_HandleMusicEvent), cSSXAudio_StartDJIntro and cSSXAudio_PlayPendingDJLine call it, mostly
  * with (0, 0).
  *
  * @param firstChoice  the first choice
  * @param secondChoice  the second choice
  */
-extern "C" void func_002A26F0(cSSXAudio* self, int firstChoice, int secondChoice)
+extern "C" void cSSXAudio_SpeakDJChoiceLine(cSSXAudio* self, int firstChoice, int secondChoice)
 {
-    if (func_0029F0D8(self) != 0) {
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
         char* bm = (char*)&self->SpeechSys;
-        func_002B11B0(bm, 0);
-        if (func_002B1458(bm, 0, 8421, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
+        cSpeechSys_PurgeInstance(bm, 0);
+        if (cSpeechSys_AddRequest(bm, 0, 8421, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int x = 2;
             if (firstChoice) x = 1;
             if (self->mChoiceLineFirstTime != 0) {
@@ -9103,26 +9103,26 @@ extern "C" void func_002A26F0(cSSXAudio* self, int firstChoice, int secondChoice
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A27D8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8422);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
  * Requests DJ speech line 8422 with the language.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id and the language bit. func_002A43B8 calls it for the pending flag
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id and the language bit. cSSXAudio_PlayPendingDJLine calls it for the pending flag
  * mPendingLine8422.
  */
-extern "C" void func_002A27D8(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8422(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
             D_004A482C(func_003D8008(1, 0, 8422), 1, languageBit);
         }
     }
@@ -9130,12 +9130,12 @@ extern "C" void func_002A27D8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2860);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJSongAnnouncement);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
@@ -9143,19 +9143,19 @@ extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C"
 /**
  * Requests the DJ's song announcement (speech 8399) for a song number.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, 4 arguments: the language bit, 3, and the song as one bit in two words: 1
  * << n in the first for n below 100, 1 << (n - 100) in the second from 100 on, none for a negative n or 999.
- * func_002A43B8 calls it with mSongAnnounceNum (the song value cSSXAudio_CountdownGateDrop and func_002A3170 store from
- * func_002B4908).
+ * cSSXAudio_PlayPendingDJLine calls it with mSongAnnounceNum (the song value cSSXAudio_CountdownGateDrop and cSSXAudio_StartDJIntro store from
+ * cMusicSys_GetCurrentSongSedValue).
  *
  * @param n  the song number, or -1 / 999 for none
  */
-extern "C" void func_002A2860(cSSXAudio* self, int n)
+extern "C" void cSSXAudio_SpeakDJSongAnnouncement(cSSXAudio* self, int n)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8399, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8399, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int lo = 0;
             int hi = 0;
             if (n >= 0 && n != 999) {
@@ -9173,19 +9173,19 @@ extern "C" void func_002A2860(cSSXAudio* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2938);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJWinner);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
-// func_002A1D48 returns its tail call's value (the unit defines it as void).
-int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+// cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
+int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -9193,17 +9193,17 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8450 about rider 0's character, with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (func_002A1D48) and the peak
- * bit. func_002A4770 calls it when rider 0 finished first.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
+ * bit. cSSXAudio_SpeakDJEventResult calls it when rider 0 finished first.
  */
-extern "C" void func_002A2938(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJWinner(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8450), 3, languageBit, riderBit, peakBit);
         }
     }
@@ -9211,17 +9211,17 @@ extern "C" void func_002A2938(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2A10);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJRival);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getRival(void*);
-// func_002A1DA0 returns a value (the unit declares it void).
-int func_002A1DA0_r(void* self, int a, int b) __asm__("func_002A1DA0");
+// cSSXAudio_GetSubjectCharacterBit returns a value (the unit declares it void).
+int cSSXAudio_GetSubjectCharacterBit_r(void* self, int a, int b) __asm__("cSSXAudio_GetSubjectCharacterBit");
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9229,16 +9229,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8459 about the race's rival character.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the character bit (func_002A1DA0) of
- * cBENewRaceInterface_getRival. func_002A2E50 calls it (pick 3).
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the character bit (cSSXAudio_GetSubjectCharacterBit) of
+ * cBENewRaceInterface_getRival. cSSXAudio_SpeakDJBetweenEvents calls it (pick 3).
  */
-extern "C" void func_002A2A10(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJRival(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int rivalBit = func_002A1DA0_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int rivalBit = cSSXAudio_GetSubjectCharacterBit_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
             D_004A482C_4(func_003D8008(1, 0, 8459), 2, languageBit, rivalBit);
         }
     }
@@ -9246,16 +9246,16 @@ extern "C" void func_002A2A10(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2AD0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8491);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9263,16 +9263,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8491 with the language and the location's peak.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A43B8 calls it for the pending
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_PlayPendingDJLine calls it for the pending
  * flag mPendingPeakLine8491.
  */
-extern "C" void func_002A2AD0(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8491(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8491), 2, languageBit, peakBit);
         }
     }
@@ -9280,12 +9280,12 @@ extern "C" void func_002A2AD0(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2B88);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8492);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9293,16 +9293,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8492, telling it whether it was played before (mLine8492Played), and marks it played.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, the language bit and mLine8492Played. mLine8492Played is then set to 1
- * even when the request was not queued. func_002A2E50 (pick 4) and func_002A43B8 (pending flag mPendingLine8492) call
+ * even when the request was not queued. cSSXAudio_SpeakDJBetweenEvents (pick 4) and cSSXAudio_PlayPendingDJLine (pending flag mPendingLine8492) call
  * it.
  */
-extern "C" void func_002A2B88(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8492(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458(&self->SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int playedBefore = self->mLine8492Played;
             D_004A482C_4(func_003D8008(1, 0, 8492), 2, languageBit, playedBefore);
         }
@@ -9312,16 +9312,16 @@ extern "C" void func_002A2B88(cSSXAudio* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A2C30);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8493);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9329,16 +9329,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8493 about the current location.
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(location, -1).
- * func_002A43B8 calls it for the pending flag mPendingLocationLine.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
+ * cSSXAudio_PlayPendingDJLine calls it for the pending flag mPendingLocationLine.
  */
-extern "C" void func_002A2C30(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakDJLine8493(cSSXAudio* self)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 8493), 2, languageBit, locationBit);
         }
     }
@@ -9346,13 +9346,13 @@ extern "C" void func_002A2C30(cSSXAudio* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A2CF0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJFragsResult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9360,18 +9360,18 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8494 about a location (rider 0's frags after an event).
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p location, -1).
- * func_002A4770 calls it for the frag result (5 or more frags).
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
+ * cSSXAudio_SpeakDJEventResult calls it for the frag result (5 or more frags).
  *
  * @param location  the location id
  */
-extern "C" void func_002A2CF0(cSSXAudio* self, int location)
+extern "C" void cSSXAudio_SpeakDJFragsResult(cSSXAudio* self, int location)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, location, -1);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
             D_004A482C_4(func_003D8008(1, 0, 8494), 2, languageBit, locationBit);
         }
     }
@@ -9379,13 +9379,13 @@ extern "C" void func_002A2CF0(cSSXAudio* self, int location)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A2DA0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJUberTricksResult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F0D8(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9393,18 +9393,18 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests DJ speech line 8495 about a location (rider 0's uber tricks after an event).
  *
- * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p location, -1).
- * func_002A4770 calls it for the uber-trick result.
+ * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
+ * cSSXAudio_SpeakDJEventResult calls it for the uber-trick result.
  *
  * @param location  the location id
  */
-extern "C" void func_002A2DA0(cSSXAudio* self, int location)
+extern "C" void cSSXAudio_SpeakDJUberTricksResult(cSSXAudio* self, int location)
 {
-    if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, location, -1);
+    if (cSSXAudio_IsDJSpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
             D_004A482C_4(func_003D8008(1, 0, 8495), 2, languageBit, locationBit);
         }
     }
@@ -9412,19 +9412,19 @@ extern "C" void func_002A2DA0(cSSXAudio* self, int location)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A2E50);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJBetweenEvents);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" bool func_002A4770(cSSXAudio* self);
-extern "C" void func_002A2188(cSSXAudio* self);
-extern "C" void func_002A23D0(cSSXAudio* self, int a1);
-extern "C" void func_002A2018(cSSXAudio* self);
-extern "C" void func_002A2A10(cSSXAudio* self);
-extern "C" void func_002A2B88(cSSXAudio* self);
-extern "C" void func_002A2260(cSSXAudio* self);
-extern "C" void func_002A2318(cSSXAudio* self);
-extern "C" void func_002A20D0(cSSXAudio* self);
-extern "C" int func_002A1E20(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_SpeakDJEventResult(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8394(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8425(cSSXAudio* self, int a1);
+extern "C" void cSSXAudio_SpeakDJLine8392(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJRival(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8492(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8423(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8424(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8393(cSSXAudio* self);
+extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
@@ -9432,25 +9432,25 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 // PORT: declared signed char elsewhere; the caller here sign-extends an int result itself.
 int cBENewPlayerInterface_getRiderCharID_i(void* self, int riderIndex) __asm__("cBENewPlayerInterface_getRiderCharID__FPvi");
 int cBERewardInterface_getTrackMedal(void* self, int a1, int ch, int a3, int track);
-void func_002B1758(void* snd, int a1);
+void cSpeechSys_StartNextSpeech(void* snd, int a1);
 
 /**
  * Picks and plays the DJ's next between-events line, avoiding lines already used.
  *
  * The first time (mPeakIntroDone and mBonusLineQueued both 0) it sets mPeakIntroDone, queues pick 3 for next time
  * (mQueuedBetweenEventsPick), marks pick 7 used in the mask mUsedBetweenEventsPicks, clears mFirstTimeOnPeak and plays
- * pick 0. Otherwise it returns at once when func_002A4770 played an event-result line; a queued pick is used next (when
+ * pick 0. Otherwise it returns at once when cSSXAudio_SpeakDJEventResult played an event-result line; a queued pick is used next (when
  * mBonusLineQueued is 0); else one of the first 8 picks (5 with
  * @p bonus) not yet set in mUsedBetweenEventsPicks is chosen at random (cSoundSys_SndRand). When all are used the mask
  * is cleared, and bit 3 is pre-set when the human rider's character holds both the medal 4 and 5 of the peak's track
  * 14, 15 or 16 (cBERewardInterface_getTrackMedal). The pick is marked in mUsedBetweenEventsPicks and played: 0
- * func_002A2188, 1 func_002A23D0(-1), 2 func_002A2018, 3 func_002A2A10, 4 func_002A2B88, 5 func_002A2260, 6
- * func_002A2318, 7 func_002A20D0. Finally func_002B1758(SpeechSys, 0). func_002A43B8 and func_002A4770 call it.
+ * cSSXAudio_SpeakDJLine8394, 1 cSSXAudio_SpeakDJLine8425(-1), 2 cSSXAudio_SpeakDJLine8392, 3 cSSXAudio_SpeakDJRival, 4 cSSXAudio_SpeakDJLine8492, 5 cSSXAudio_SpeakDJLine8423, 6
+ * cSSXAudio_SpeakDJLine8424, 7 cSSXAudio_SpeakDJLine8393. Finally cSpeechSys_StartNextSpeech(SpeechSys, 0). cSSXAudio_PlayPendingDJLine and cSSXAudio_SpeakDJEventResult call it.
  *
  * @param vself  the audio system
  * @param bonus  nonzero to choose among the first 5 lines only
  */
-extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
+extern "C" void cSSXAudio_SpeakDJBetweenEvents(cSSXAudio* vself, int bonus)
 {
     int pick = 0;
     if (vself->mPeakIntroDone == 0 && vself->mBonusLineQueued == 0) {
@@ -9459,7 +9459,7 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
         vself->mUsedBetweenEventsPicks |= 0x80;
         vself->mFirstTimeOnPeak = 0;
     } else {
-        if (func_002A4770(vself) != 0) {
+        if (cSSXAudio_SpeakDJEventResult(vself) != 0) {
             return;
         }
         int queued = vself->mQueuedBetweenEventsPick;
@@ -9478,7 +9478,7 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
                 int track = 0xE;
                 void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
                 signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, cBENewPlayerInterface_getHumanRider(players, 0));
-                int sel = func_002A1E20((cSSXAudio*)(((char*)vself)), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                int sel = cSSXAudio_GetLocationPeakBit((cSSXAudio*)(((char*)vself)), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (sel != 1) {
                     track = sel == 2 ? 0xF : 0x10;
                 }
@@ -9503,68 +9503,68 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
     char* snd = (char*)&vself->SpeechSys;
     switch (pick) {
     case 0:
-        func_002A2188((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJLine8394((cSSXAudio*)vself);
         break;
     case 1:
-        func_002A23D0((cSSXAudio*)vself, -1);
+        cSSXAudio_SpeakDJLine8425((cSSXAudio*)vself, -1);
         break;
     case 2:
-        func_002A2018((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJLine8392((cSSXAudio*)vself);
         break;
     case 3:
-        func_002A2A10((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJRival((cSSXAudio*)vself);
         break;
     case 4:
-        func_002A2B88(vself);
+        cSSXAudio_SpeakDJLine8492(vself);
         break;
     case 5:
-        func_002A2260((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJLine8423((cSSXAudio*)vself);
         break;
     case 6:
-        func_002A2318((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJLine8424((cSSXAudio*)vself);
         break;
     case 7:
-        func_002A20D0((cSSXAudio*)vself);
+        cSSXAudio_SpeakDJLine8393((cSSXAudio*)vself);
         break;
     }
-    func_002B1758(snd, 0);
+    cSpeechSys_StartNextSpeech(snd, 0);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A3170);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_StartDJIntro);
 #ifdef SKIP_ASM
-extern "C" void func_002A26F0(cSSXAudio* self, int a, int b);
-void func_002B1758(void* self, int a1);
-int func_002B4908(void* self);
+extern "C" void cSSXAudio_SpeakDJChoiceLine(cSSXAudio* self, int a, int b);
+void cSpeechSys_StartNextSpeech(void* self, int a1);
+int cMusicSys_GetCurrentSongSedValue(void* self);
 
 /**
  * Starts the DJ intro of a race: DJ line 8421 with (0, 0), then queues the song announcement.
  *
- * Calls func_002A26F0(self, 0, 0) and func_002B1758(SpeechSys, 0), then sets mSongAnnouncePending (pending
- * announcement) and stores the current song's value func_002B4908 in mSongAnnounceNum for func_002A43B8 /
- * func_002A2860. cSSXAudio_CountdownGateDrop calls it in game paths 1 and 2.
+ * Calls cSSXAudio_SpeakDJChoiceLine(self, 0, 0) and cSpeechSys_StartNextSpeech(SpeechSys, 0), then sets mSongAnnouncePending (pending
+ * announcement) and stores the current song's value cMusicSys_GetCurrentSongSedValue in mSongAnnounceNum for cSSXAudio_PlayPendingDJLine /
+ * cSSXAudio_SpeakDJSongAnnouncement. cSSXAudio_CountdownGateDrop calls it in game paths 1 and 2.
  */
-extern "C" void func_002A3170(cSSXAudio* self)
+extern "C" void cSSXAudio_StartDJIntro(cSSXAudio* self)
 {
-    func_002A26F0(self, 0, 0);
-    func_002B1758(&self->SpeechSys, 0);
+    cSSXAudio_SpeakDJChoiceLine(self, 0, 0);
+    cSpeechSys_StartNextSpeech(&self->SpeechSys, 0);
     self->mSongAnnouncePending = 1;
-    self->mSongAnnounceNum = func_002B4908(&self->MusicSys);
+    self->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&self->MusicSys);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A31C0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPAEventStart);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F128(cSSXAudio* self);
-extern "C" bool func_002A4040(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsFreeride(cSSXAudio* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9572,36 +9572,36 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8384 at the start of a single-player event's first heat.
  *
- * Needs PA speech audible (func_0029F128), a game mode other than 4 (func_002A4040), game path 0 (newRace.cGamePath) and a
+ * Needs PA speech audible (cSSXAudio_IsPASpeechOn), a game mode other than 4 (cSSXAudio_IsFreeride), game path 0 (newRace.cGamePath) and a
  * cGameModeMan iHeatNum below 2, with play-history event 0 not live. The request goes to speech instance 0 with
  * identity 11 (the PA); when queued, the speech hook D_004A482C gets its packed id, the language bit and 1.
- * func_002A19D8 (event 0) and two front-end functions call it.
+ * cSSXAudio_PlayScriptSpeechEvent (event 0) and two front-end functions call it.
  */
-extern "C" void func_002A31C0(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPAEventStart(cSSXAudio* self)
 {
-    if (func_0029F128(self) == 0) return;
-    if (func_002A4040(self) != 0) return;
+    if (cSSXAudio_IsPASpeechOn(self) == 0) return;
+    if (cSSXAudio_IsFreeride(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != 0) return;
     if (*(int*)SSXApp->GameModeMan < 2) {
         if (self->PlayHistoryExists(0, 0) != 0) return;
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
-        int languageBit = func_0029F198(self);
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
+        int languageBit = cSSXAudio_GetSpeechLanguage(self);
         D_004A482C_4(func_003D8008(1, 0, 8384), 2, languageBit, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A32B0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPALine8385);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F128(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
-// func_002A1D48 returns its tail call's value (the unit defines it as void).
-int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+// cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
+int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9609,16 +9609,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8385 about rider 0's character.
  *
- * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (func_002A1D48).
- * func_002A19D8 calls it (event 1).
+ * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
+ * cSSXAudio_PlayScriptSpeechEvent calls it (event 1).
  */
-extern "C" void func_002A32B0(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPALine8385(cSSXAudio* self)
 {
-    if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+    if (cSSXAudio_IsPASpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             D_004A482C_4(func_003D8008(1, 0, 8385), 2, languageBit, riderBit);
         }
     }
@@ -9626,15 +9626,15 @@ extern "C" void func_002A32B0(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3358);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPALine8386);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F128(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
-// func_002A1D48 returns its tail call's value (the unit defines it as void).
-int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
+// cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
+int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9642,16 +9642,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8386 about rider 0's character.
  *
- * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (func_002A1D48).
- * func_002A19D8 calls it (event 2).
+ * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
+ * cSSXAudio_PlayScriptSpeechEvent calls it (event 2).
  */
-extern "C" void func_002A3358(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPALine8386(cSSXAudio* self)
 {
-    if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+    if (cSSXAudio_IsPASpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             D_004A482C_4(func_003D8008(1, 0, 8386), 2, languageBit, riderBit);
         }
     }
@@ -9659,17 +9659,17 @@ extern "C" void func_002A3358(cSSXAudio* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A3400);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPALine8387);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F128(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9677,43 +9677,43 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8387 about the current location.
  *
- * Needs PA speech audible (func_0029F128) and no replay; the request goes to speech instance 0 with identity 11 and,
+ * Needs PA speech audible (cSSXAudio_IsPASpeechOn) and no replay; the request goes to speech instance 0 with identity 11 and,
  * when queued, the speech hook D_004A482C gets its packed id, the language bit and the location bit
- * func_002A1BD8(location, -1). func_002A19D8 (event 3) and cSSXAudio_CountdownGateDrop (the last heat) call it.
+ * cSSXAudio_GetLocationSpeechBit(location, -1). cSSXAudio_PlayScriptSpeechEvent (event 3) and cSSXAudio_CountdownGateDrop (the last heat) call it.
  */
-extern "C" void func_002A3400(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPALine8387(cSSXAudio* self)
 {
-    if (func_0029F128(self) == 0) return;
+    if (cSSXAudio_IsPASpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
-    int languageBit = func_0029F198(self);
-    int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
+    int languageBit = cSSXAudio_GetSpeechLanguage(self);
+    int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
     D_004A482C_4(func_003D8008(1, 0, 8387), 2, languageBit, locationBit);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A34D0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPAPlace);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cMonitor_MONITOR_Create_i(void*, int, long, void*, int, int, int,
         int) __asm__("cMonitor_MONITOR_Create");
 extern sSndKey8 D_004A36E8_p[] __asm__("D_004A36E8");
-extern "C" int func_002A4248_p(void *) __asm__("func_002A4248");
-extern "C" int func_002A42C8_p(void *) __asm__("func_002A42C8");
+extern "C" int cSSXAudio_IsRivalEvent_p(void *) __asm__("cSSXAudio_IsRivalEvent");
+extern "C" int cSSXAudio_IsPeakChallengeEvent_p(void *) __asm__("cSSXAudio_IsPeakChallengeEvent");
 
 /**
  * Requests the PA's place announcement (speech 8388) for a rider, or schedules it for the rival challenges.
  *
  * Returns true without speech when PA speech is muted or replaying. In the game events kGAMEEVENT_RIVALTIME and
- * kGAMEEVENT_RIVALPOINTS (func_002A4248) with a rider it creates a 1000 ms monitor (cMonitor_MONITOR_Create) with the
- * callback D_004A36E8 (func_002A1388) and the rider's AI index, and returns true. Events 6..11 (func_002A42C8) return
- * true. With @p flag set, speech instance 0 must be ready (func_002B0E28), else false is returned. Without a rider, the
- * location must pass func_002A4078 and the game mode must not be kGAMEMODE_FREERIDE, and the focus rider of view @p
+ * kGAMEEVENT_RIVALPOINTS (cSSXAudio_IsRivalEvent) with a rider it creates a 1000 ms monitor (cMonitor_MONITOR_Create) with the
+ * callback D_004A36E8 (cSSXAudio_SpeakPlaceCallback) and the rider's AI index, and returns true. Events 6..11 (cSSXAudio_IsPeakChallengeEvent) return
+ * true. With @p flag set, speech instance 0 must be ready (cSpeechSys_CanTakeSpeech), else false is returned. Without a rider, the
+ * location must pass cSSXAudio_IsRaceEvent and the game mode must not be kGAMEMODE_FREERIDE, and the focus rider of view @p
  * which is used, its place bit coming from RaceRanking (0..4: 1..0x10, 5: 0x200). Riders with a cheat identity give
  * true. When request 8388 (identity 11) is queued, the speech hook D_004A482C gets its packed id, the language bit, the
- * rider's character bit (func_002A1D48) and the place bit (func_002A1E68 for a given rider).
+ * rider's character bit (cSSXAudio_GetRiderSubjectBit) and the place bit (cSSXAudio_GetRiderPlaceBit for a given rider).
  *
  * @param vself  the audio system
  * @param rider  the rider, or 0 for the focus rider of @p which
@@ -9721,20 +9721,20 @@ extern "C" int func_002A42C8_p(void *) __asm__("func_002A42C8");
  * @param which  the view whose focus rider is used without a rider
  * @return false when speech instance 0 was busy, else true
  */
-extern "C" bool func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int which)
+extern "C" bool cSSXAudio_SpeakPAPlace(cSSXAudio* vself, cRider *rider, int flag, int which)
 {
     int sel;
     int languageBit;
     int riderBit;
     int placeBit;
 
-    if (func_0029F128((cSSXAudio*)(((char*)vself))) == 0) {
+    if (cSSXAudio_IsPASpeechOn((cSSXAudio*)(((char*)vself))) == 0) {
         return true;
     }
     if (cSSXAudio_ReplayMode(((char*)vself)) != 0) {
         return true;
     }
-    if (func_002A4248_p(((char*)vself)) != 0 && rider != 0) {
+    if (cSSXAudio_IsRivalEvent_p(((char*)vself)) != 0 && rider != 0) {
         sSndKey8 *key = &D_004A36E8_p[0];
         cBeing& being = *rider;
         cBankMonitor* dst = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
@@ -9742,20 +9742,20 @@ extern "C" bool func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whi
         cMonitor_MONITOR_Create_i(dst, 1000, key->v, 0, idx, 0, 0, 0);
         return true;
     }
-    if (func_002A42C8_p(((char*)vself)) != 0) {
+    if (cSSXAudio_IsPeakChallengeEvent_p(((char*)vself)) != 0) {
         return true;
     }
     if (flag != 0) {
-        if (func_002B0E28(&vself->SpeechSys, 0) == 0) {
+        if (cSpeechSys_CanTakeSpeech(&vself->SpeechSys, 0) == 0) {
             return false;
         }
     }
     sel = 1;
     if (rider == 0) {
-        if (func_002A4078(((char*)vself)) == 0) {
+        if (cSSXAudio_IsRaceEvent(((char*)vself)) == 0) {
             return true;
         }
-        if (func_002A4040((cSSXAudio*)(((char*)vself))) != 0) {
+        if (cSSXAudio_IsFreeride((cSSXAudio*)(((char*)vself))) != 0) {
             return true;
         }
         sel = 0;
@@ -9764,13 +9764,13 @@ extern "C" bool func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whi
     if (cRider_getCheatIdentity(rider) != 0) {
         return true;
     }
-    if (func_002B1458_f(&vself->SpeechSys, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
+    if (cSpeechSys_AddRequest_f(&vself->SpeechSys, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
         return true;
     }
-    languageBit = func_0029F198((cSSXAudio*)(((char*)vself)));
-    riderBit = func_002A1D48_i(((char*)vself), rider);
+    languageBit = cSSXAudio_GetSpeechLanguage((cSSXAudio*)(((char*)vself)));
+    riderBit = cSSXAudio_GetRiderSubjectBit_i(((char*)vself), rider);
     if (sel != 0) {
-        placeBit = func_002A1E68(((char*)vself), rider);
+        placeBit = cSSXAudio_GetRiderPlaceBit(((char*)vself), rider);
     } else {
         switch ((unsigned int)rider->RaceRanking) {
         case 0:
@@ -9802,14 +9802,14 @@ extern "C" bool func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whi
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3708);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPARiderPlace);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F128(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
 extern "C" int cRider_getCheatIdentity(void*);
-extern "C" int func_0029F198(cSSXAudio* self);
-extern "C" int func_002A1E68(void* self, cRider* rider);
-// PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
-bool func_002A4248_s(void* self) __asm__("func_002A4248");
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
+extern "C" int cSSXAudio_GetRiderPlaceBit(void* self, cRider* rider);
+// PORT: callers pass self to cSSXAudio_IsRivalEvent (the unit's later definition takes no args).
+bool cSSXAudio_IsRivalEvent_s(void* self) __asm__("cSSXAudio_IsRivalEvent");
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern sSndKey8 D_004A36E8[];
@@ -9817,20 +9817,20 @@ extern sSndKey8 D_004A36E8[];
 /**
  * Requests the PA's speech line 8389 about a rider and its place, or schedules the place line for event types 4 and 5.
  *
- * Needs PA speech audible, no replay and no cheat identity. In game events 4 and 5 (func_002A4248) it only creates a
- * 1000 ms monitor (cMonitor_MONITOR_Create) with the callback D_004A36E8 (func_002A1388) and the rider's AI index
+ * Needs PA speech audible, no replay and no cheat identity. In game events 4 and 5 (cSSXAudio_IsRivalEvent) it only creates a
+ * 1000 ms monitor (cMonitor_MONITOR_Create) with the callback D_004A36E8 (cSSXAudio_SpeakPlaceCallback) and the rider's AI index
  * (getAIIndex). Otherwise, when request 8389 (identity 11) is queued, the speech hook D_004A482C gets its packed id,
- * the language bit, the rider's character bit (func_002A1D48) and its place bit (func_002A1E68).
+ * the language bit, the rider's character bit (cSSXAudio_GetRiderSubjectBit) and its place bit (cSSXAudio_GetRiderPlaceBit).
  *
  * @param rider  the rider (cRider)
  */
 // PORT: 64-bit long sound key
-extern "C" void func_002A3708(cSSXAudio* self, cRider* rider)
+extern "C" void cSSXAudio_SpeakPARiderPlace(cSSXAudio* self, cRider* rider)
 {
-    if (func_0029F128(self) == 0) return;
+    if (cSSXAudio_IsPASpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(rider) != 0) return;
-    if (func_002A4248_s(self) != 0) {
+    if (cSSXAudio_IsRivalEvent_s(self) != 0) {
         cBeing& being = *rider;
         cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         sSndKey8* key = D_004A36E8;
@@ -9838,21 +9838,21 @@ extern "C" void func_002A3708(cSSXAudio* self, cRider* rider)
         cMonitor_MONITOR_Create(bankMonitor, 1000, key->v, 0, aiIndex, 0, 0, 0);
         return;
     }
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8389, 0, 11, 0, 0, 0.0f) == 0) return;
-    int languageBit = func_0029F198(self);
-    int riderBit = func_002A1D48_i(self, rider);
-    int placeBit = func_002A1E68(self, rider);
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8389, 0, 11, 0, 0, 0.0f) == 0) return;
+    int languageBit = cSSXAudio_GetSpeechLanguage(self);
+    int riderBit = cSSXAudio_GetRiderSubjectBit_i(self, rider);
+    int placeBit = cSSXAudio_GetRiderPlaceBit(self, rider);
     D_004A482C_5(func_003D8008(1, 0, 8389), 3, languageBit, riderBit, placeBit);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3860);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPAResult);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 #include "object/being.h"
-extern "C" bool func_0029F128(cSSXAudio* self);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern int cGameModeMan_iRanking[];
@@ -9866,16 +9866,16 @@ struct sSndRiderList3860 {
  *
  * Needs PA speech audible and no replay. In the multiplayer game path the second human is used when it ranks ahead
  * (cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook D_004A482C
- * gets its packed id, the language bit, that rider's character bit (func_002A1D48, from the cAI's rider list at +0x28)
+ * gets its packed id, the language bit, that rider's character bit (cSSXAudio_GetRiderSubjectBit, from the cAI's rider list at +0x28)
  * and a place value: 8 outside the multiplayer path when the reward interface's +0x14 is 0, else 1, 2 or 4 for rank 0,
- * 1 or 2 and 0 for any other rank. func_002A19D8 calls it (event 7).
+ * 1 or 2 and 0 for any other rank. cSSXAudio_PlayScriptSpeechEvent calls it (event 7).
  */
 // FAKEMATCH: FM_OPAQUE(lst) after `lst = cAudioInterface_getAI() + 0x28` (keeps combine from folding +0x28 into the
 // lw offset; retail computes addiu 0x28 / addu / lw 0); plain form 96.86%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void func_002A3860(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPAResult(cSSXAudio* self)
 {
-    if (func_0029F128(self) == 0) return;
+    if (cSSXAudio_IsPASpeechOn(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int n = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -9883,11 +9883,11 @@ extern "C" void func_002A3860(cSSXAudio* self)
     if (newRaceBytes[0x49] == 2) {
         n = cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0];
     }
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8391, 0, 11, 0, 0, 0.0f) == 0) return;
-    int languageBit = func_0029F198(self);
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8391, 0, 11, 0, 0, 0.0f) == 0) return;
+    int languageBit = cSSXAudio_GetSpeechLanguage(self);
     sSndRiderList3860* lst = (sSndRiderList3860*)((char*)cAudioInterface_getAI() + 0x28);
     FM_OPAQUE(lst);
-    int riderBit = func_002A1D48_i(self, lst->r[n]);
+    int riderBit = cSSXAudio_GetRiderSubjectBit_i(self, lst->r[n]);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     if (newRaceBytes[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
         n = 8;
@@ -9908,16 +9908,16 @@ extern "C" void func_002A3860(cSSXAudio* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A39E0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPALine8379);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F128(cSSXAudio* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" int func_0029F198(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" int func_002A1BD8(cSSXAudio* self, int a, int b);
+extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
@@ -9925,16 +9925,16 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8379 about the current location.
  *
- * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(location, -1).
- * func_002A19D8 (event 15) and cSSXAudio_StartEvent call it.
+ * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
+ * cSSXAudio_PlayScriptSpeechEvent (event 15) and cSSXAudio_StartEvent call it.
  */
-extern "C" void func_002A39E0(cSSXAudio* self)
+extern "C" void cSSXAudio_SpeakPALine8379(cSSXAudio* self)
 {
-    if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)&self->SpeechSys, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
-            int languageBit = func_0029F198(self);
-            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+    if (cSSXAudio_IsPASpeechOn(self) != 0) {
+        if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
+            int languageBit = cSSXAudio_GetSpeechLanguage(self);
+            int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 8379), 2, languageBit, locationBit);
         }
     }
@@ -9942,29 +9942,29 @@ extern "C" void func_002A39E0(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3AA0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_CheerOnStreamDoneCallback);
 #ifdef SKIP_ASM
 extern "C" int SNDSTRM_requeststatus(int, void *);
-extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i);
+extern "C" void cCrowdSys_PlayTrickCheer(cCrowdSys* self, int a1, int i);
 
 /**
  * Raises the crowd level 0 reaction when a monitored stream has finished; returns whether it did.
  *
  * Asks the sound driver for the status of the stream whose handle is at @p monitorInst + 0x1C (SNDSTRM_requeststatus
- * inside SNDSYS_entercritical / SNDSYS_leavecritical); a status word of kSNDREQUEST_Done calls func_002A73A8(self, 0,
+ * inside SNDSYS_entercritical / SNDSYS_leavecritical); a status word of kSNDREQUEST_Done calls cCrowdSys_PlayTrickCheer(self, 0,
  * 0) and returns true. The retail image has no direct reference to it.
  *
  * @param monitorInst  the monitor instance whose +0x1C holds the stream handle
  * @return true when the stream reported kSNDREQUEST_Done, else false
  */
-extern "C" bool func_002A3AA0(void* self, cMonitorInstance* monitorInst) {
+extern "C" bool cSSXAudio_CheerOnStreamDoneCallback(void* self, cMonitorInstance* monitorInst) {
     int st[4];
     SNDSYS_entercritical();
     int status = SNDSTRM_requeststatus(monitorInst->mData1, st);
     SNDSYS_leavecritical();
     if (status >= 0) {
         if (st[0] == kSNDREQUEST_Done) {
-            func_002A73A8((cCrowdSys*)self, 0, 0);
+            cCrowdSys_PlayTrickCheer((cCrowdSys*)self, 0, 0);
             return true;
         }
         return false;
@@ -9974,57 +9974,57 @@ extern "C" bool func_002A3AA0(void* self, cMonitorInstance* monitorInst) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3B18);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeBoost);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F160(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 // cSSXAudio_GetFocusRider returns an object pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8359 with a value, for the focus rider before the finish line.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and not past the finish line, and no
+ * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider that is the focus rider and not past the finish line, and no
  * replay. When request 8359 (speech instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id
  * and @p eventValue. cRider_flagEventSpeedBoost and cRider_flagEventTrickBoost call it.
  *
  * @param obj  the rider (cRider)
  * @param eventValue  the value passed to the event
  */
-extern "C" void func_002A3B18(cSSXAudio* self, cRider* obj, int eventValue)
+extern "C" void cSSXAudio_SpeakArcadeBoost(cSSXAudio* self, cRider* obj, int eventValue)
 {
-    if (func_0029F160(self) == 0) return;
+    if (cSSXAudio_IsArcadeSpeechOn(self) == 0) return;
     if (((void*)obj) == 0) return;
     int done = obj->mFinishTime >= 0.0f;
     if (done) return;
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
         D_004A482C(func_003D8008(1, 0, 8359), 1, eventValue);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3C00);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeResult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_0029F160(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 // cSSXAudio_GetFocusRider returns an object pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8360 (an event result) for the focus rider.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and no replay; unless @p resultBit is 2 the
+ * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider that is the focus rider and no replay; unless @p resultBit is 2 the
  * rider must not be past the finish line. When request 8360 (speech instance 0, identity 12) is queued, the speech hook
  * D_004A482C gets its packed id and @p resultBit. Values seen: 1 big challenge complete (cSSXAudio_BigChallengeComplete, rider 0), 2 time ran
  * out (cRider_updateFinishTest, after the did-not-finish finish), 4 / 8 / 0x10 max power at an uber level below 5, 5..9
@@ -10033,9 +10033,9 @@ extern void (*D_004A482C)(void*, int, int);
  * @param obj  the rider (cRider)
  * @param resultBit  the result bit passed to the event
  */
-extern "C" void func_002A3C00(cSSXAudio* self, cRider* obj, int resultBit)
+extern "C" void cSSXAudio_SpeakArcadeResult(cSSXAudio* self, cRider* obj, int resultBit)
 {
-    if (func_0029F160(self) == 0) return;
+    if (cSSXAudio_IsArcadeSpeechOn(self) == 0) return;
     if (((void*)obj) == 0) return;
     if (resultBit != 2) {
         int done = obj->mFinishTime >= 0.0f;
@@ -10043,14 +10043,14 @@ extern "C" void func_002A3C00(cSSXAudio* self, cRider* obj, int resultBit)
     }
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
         D_004A482C(func_003D8008(1, 0, 8360), 1, resultBit);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3CE8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeCheckpoint);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_004A482C)(void*, int, int);
@@ -10060,7 +10060,7 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
 /**
  * Raises arcade announcer event 8361 (a checkpoint reached) for a rider before the finish line.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line, no replay and @p n nonzero; with
+ * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line, no replay and @p n nonzero; with
  * @p n other than 1 the rider must also be the focus rider. When request 8361 (speech instance 0, identity 12) is
  * queued, the speech hook D_004A482C gets its packed id and @p n. cRiderMetrix_evCheckpoint calls it with 1 when a
  * checkpoint adds time (cGameModeMan_riderCheckpointHit).
@@ -10068,10 +10068,10 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
  * @param rider  the rider (cRider)
  * @param n  the value passed to the event (1 from the checkpoint); 0 does nothing
  */
-extern "C" void func_002A3CE8(cSSXAudio* self, cRider* rider, int n)
+extern "C" void cSSXAudio_SpeakArcadeCheckpoint(cSSXAudio* self, cRider* rider, int n)
 {
     float zero;
-    if (func_0029F160(self) == 0) return;
+    if (cSSXAudio_IsArcadeSpeechOn(self) == 0) return;
     if (((char*)rider) == 0) return;
     float finishTime = rider->mFinishTime;
     zero = 0.0f;
@@ -10080,25 +10080,25 @@ extern "C" void func_002A3CE8(cSSXAudio* self, cRider* rider, int n)
     if (n != 1 && rider != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (n == 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8361, 0, 0xC, 0, 0, zero) != 0) {
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8361, 0, 0xC, 0, 0, zero) != 0) {
         D_004A482C(func_003D8008(1, 0, 8361), 1, n);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3DE0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeUberMilestone);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F160(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8499 (an uber trick milestone) for a rider before the finish line.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line and no replay. When request 8499 (speech
+ * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line and no replay. When request 8499 (speech
  * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev: 1 when the landed uber
  * tricks pass 4 (cSSXAudio_LandedUberTrick), 2 when the focus rider's uber level reaches 10 (cSSXAudio_UpdateLandedUber), 8 for a
  * monster combo (cSSXAudio_LandedMonsterCombo).
@@ -10106,127 +10106,127 @@ extern void (*D_004A482C)(void*, int, int);
  * @param obj  the rider (cRider)
  * @param ev  the milestone bit passed to the event
  */
-extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev)
+extern "C" void cSSXAudio_SpeakArcadeUberMilestone(cSSXAudio* self, cRider* obj, int ev)
 {
-    if (func_0029F160(self) == 0) return;
+    if (cSSXAudio_IsArcadeSpeechOn(self) == 0) return;
     if (((void*)obj) == 0) return;
     int done = obj->mFinishTime >= 0.0f;
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8499, 0, 0xC, 0, 0, 0.0f) != 0) {
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8499, 0, 0xC, 0, 0, 0.0f) != 0) {
         D_004A482C(func_003D8008(1, 0, 8499), 1, ev);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3EB8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeMultiplier);
 #ifdef SKIP_ASM
-extern "C" bool func_0029F160(cSSXAudio* self);
+extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_002B1458(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
+extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8517 (a multiplier icon collected) for a rider before the finish line.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line and no replay. When request 8517 (speech
+ * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line and no replay. When request 8517 (speech
  * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev. cSSXAudio_PlayIconSound
  * passes 1, 2, 4 or 8 for a multiplier icon of 2, 3, 5 or 10.
  *
  * @param obj  the rider (cRider)
  * @param ev  the multiplier bit passed to the event
  */
-extern "C" void func_002A3EB8(cSSXAudio* self, cRider* obj, int ev)
+extern "C" void cSSXAudio_SpeakArcadeMultiplier(cSSXAudio* self, cRider* obj, int ev)
 {
-    if (func_0029F160(self) == 0) return;
+    if (cSSXAudio_IsArcadeSpeechOn(self) == 0) return;
     if (((void*)obj) == 0) return;
     int done = obj->mFinishTime >= 0.0f;
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)&self->SpeechSys, 0, 8517, 0, 0xC, 0, 0, 0.0f) != 0) {
+    if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8517, 0, 0xC, 0, 0, 0.0f) != 0) {
         D_004A482C(func_003D8008(1, 0, 8517), 1, ev);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3F90);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsAtHub);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A3FD8(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsHubLocation(cSSXAudio* self, unsigned int a1);
 
 /**
  * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 17..21, the hubs kLOCATION_HUB_A ..
- * kLOCATION_HUB_E (func_002A3FD8).
+ * kLOCATION_HUB_E (cSSXAudio_IsHubLocation).
  *
  * @return 1 or 0
  */
-extern "C" int func_002A3F90(cSSXAudio* self)
+extern "C" int cSSXAudio_IsAtHub(cSSXAudio* self)
 {
-    return func_002A3FD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    return cSSXAudio_IsHubLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3FD8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsHubLocation);
 #ifdef SKIP_ASM
 /**
  * Tells whether a location id is one of 17..21 (kLOCATION_HUB_A .. kLOCATION_HUB_E), the locations that span several
- * peaks (func_002A1BD8 splits them).
+ * peaks (cSSXAudio_GetLocationSpeechBit splits them).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A3FD8(cSSXAudio* self, unsigned int location)
+extern "C" bool cSSXAudio_IsHubLocation(cSSXAudio* self, unsigned int location)
 {
     return location - 17 < 5;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A3FE8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsInBackCountry);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A4030(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsBackCountryLocation(cSSXAudio* self, unsigned int a1);
 
 /**
  * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 14..16, the back-country locations
- * kLOCATION_ABC1 .. kLOCATION_EBC3 (func_002A4030).
+ * kLOCATION_ABC1 .. kLOCATION_EBC3 (cSSXAudio_IsBackCountryLocation).
  *
  * @return 1 or 0
  */
-extern "C" int func_002A3FE8(cSSXAudio* self)
+extern "C" int cSSXAudio_IsInBackCountry(cSSXAudio* self)
 {
-    return func_002A4030(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    return cSSXAudio_IsBackCountryLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4030);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsBackCountryLocation);
 #ifdef SKIP_ASM
 /**
- * Tells whether a location id is one of 14..16 (kLOCATION_ABC1 .. kLOCATION_EBC3), one per peak (func_002A1E20 gives
+ * Tells whether a location id is one of 14..16 (kLOCATION_ABC1 .. kLOCATION_EBC3), one per peak (cSSXAudio_GetLocationPeakBit gives
  * them peaks 1, 2 and 3).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A4030(cSSXAudio* self, unsigned int location)
+extern "C" bool cSSXAudio_IsBackCountryLocation(cSSXAudio* self, unsigned int location)
 {
     return location - 0xe < 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4040);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsFreeride);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10237,7 +10237,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  *
  * @return true or false
  */
-extern "C" bool func_002A4040(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsFreeride(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     return cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_FREERIDE;
@@ -10245,23 +10245,23 @@ extern "C" bool func_002A4040(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4078);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsRaceEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A40E0(void* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsRaceLocation(void* self, unsigned int a1);
 
 /**
- * Tells whether the race is of the first kind: a location in 0..4 (the race courses, func_002A40E0) or game mode
+ * Tells whether the race is of the first kind: a location in 0..4 (the race courses, cSSXAudio_IsRaceLocation) or game mode
  * kGAMEMODE_RACE or kGAMEMODE_TIMECHALLENGE.
  *
  * @return true or false
  */
-extern "C" bool func_002A4078(void* self)
+extern "C" bool cSSXAudio_IsRaceEvent(void* self)
 {
-    if (func_002A40E0(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (cSSXAudio_IsRaceLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return true;
     }
     if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_RACE) {
@@ -10272,39 +10272,39 @@ extern "C" bool func_002A4078(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A40E0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsRaceLocation);
 #ifdef SKIP_ASM
 /**
- * Tells whether a location id is one of 0..4 (the race courses, which func_002A4078 pairs with game modes
+ * Tells whether a location id is one of 0..4 (the race courses, which cSSXAudio_IsRaceEvent pairs with game modes
  * kGAMEMODE_RACE and kGAMEMODE_TIMECHALLENGE).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A40E0(void* self, unsigned int location)
+extern "C" bool cSSXAudio_IsRaceLocation(void* self, unsigned int location)
 {
     return location < 5;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A40E8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsSlopestyleEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A4158(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsSlopestyleLocation(cSSXAudio* self, unsigned int a1);
 
 /**
- * Tells whether the race is of the second kind: a location in 5..7 (the slopestyle courses, func_002A4158) or game mode
+ * Tells whether the race is of the second kind: a location in 5..7 (the slopestyle courses, cSSXAudio_IsSlopestyleLocation) or game mode
  * kGAMEMODE_SLOPESTYLE or kGAMEMODE_PNTSCHALLENGE.
  *
  * @return 1 or 0
  */
-extern "C" int func_002A40E8(cSSXAudio* self)
+extern "C" int cSSXAudio_IsSlopestyleEvent(cSSXAudio* self)
 {
-    if (func_002A4158(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (cSSXAudio_IsSlopestyleLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
     if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_SLOPESTYLE) {
@@ -10319,39 +10319,39 @@ extern "C" int func_002A40E8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4158);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsSlopestyleLocation);
 #ifdef SKIP_ASM
 /**
- * Tells whether a location id is one of 5..7 (the slopestyle courses, which func_002A40E8 pairs with game modes
+ * Tells whether a location id is one of 5..7 (the slopestyle courses, which cSSXAudio_IsSlopestyleEvent pairs with game modes
  * kGAMEMODE_SLOPESTYLE and kGAMEMODE_PNTSCHALLENGE).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A4158(cSSXAudio* self, unsigned int location)
+extern "C" bool cSSXAudio_IsSlopestyleLocation(cSSXAudio* self, unsigned int location)
 {
     return location - 5 < 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4168);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsBigAirEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A41C8(void* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsBigAirLocation(void* self, unsigned int a1);
 
 /**
- * Tells whether the race is of the third kind: a location in 8..10 (the big-air courses, func_002A41C8) or game mode
+ * Tells whether the race is of the third kind: a location in 8..10 (the big-air courses, cSSXAudio_IsBigAirLocation) or game mode
  * kGAMEMODE_BIGAIR.
  *
  * @return true or false
  */
-extern "C" bool func_002A4168(void* self)
+extern "C" bool cSSXAudio_IsBigAirEvent(void* self)
 {
-    if (func_002A41C8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (cSSXAudio_IsBigAirLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return true;
     }
     return cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_BIGAIR;
@@ -10359,39 +10359,39 @@ extern "C" bool func_002A4168(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A41C8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsBigAirLocation);
 #ifdef SKIP_ASM
 /**
- * Tells whether a location id is one of 8..10 (the big-air courses, which func_002A4168 pairs with game mode
+ * Tells whether a location id is one of 8..10 (the big-air courses, which cSSXAudio_IsBigAirEvent pairs with game mode
  * kGAMEMODE_BIGAIR).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A41C8(void* self, unsigned int location)
+extern "C" bool cSSXAudio_IsBigAirLocation(void* self, unsigned int location)
 {
     return location - 8 < 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A41D8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsHalfpipeEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" bool func_002A4238(void* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsHalfpipeLocation(void* self, unsigned int a1);
 
 /**
- * Tells whether the race is of the fourth kind: a location in 11..13 (the half pipes, func_002A4238) or game mode
+ * Tells whether the race is of the fourth kind: a location in 11..13 (the half pipes, cSSXAudio_IsHalfpipeLocation) or game mode
  * kGAMEMODE_HALFPIPE.
  *
  * @return true or false
  */
-extern "C" bool func_002A41D8(void* self)
+extern "C" bool cSSXAudio_IsHalfpipeEvent(void* self)
 {
-    if (func_002A4238(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (cSSXAudio_IsHalfpipeLocation(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return true;
     }
     return cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_HALFPIPE;
@@ -10399,23 +10399,23 @@ extern "C" bool func_002A41D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4238);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsHalfpipeLocation);
 #ifdef SKIP_ASM
 /**
- * Tells whether a location id is one of 11..13 (the half pipes, which func_002A41D8 pairs with game mode
+ * Tells whether a location id is one of 11..13 (the half pipes, which cSSXAudio_IsHalfpipeEvent pairs with game mode
  * kGAMEMODE_HALFPIPE).
  *
  * @param location  the location id
  * @return true or false
  */
-extern "C" bool func_002A4238(void* self, unsigned int location)
+extern "C" bool cSSXAudio_IsHalfpipeLocation(void* self, unsigned int location)
 {
     return location - 11 < 3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4248);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsRivalEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10425,12 +10425,12 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  * Tells whether the race's game event (cBENewRaceInterface_newRace.cGameEvent) is kGAMEEVENT_RIVALTIME or
  * kGAMEEVENT_RIVALPOINTS.
  *
- * In those events the place lines are deferred through a monitor (func_002A34D0, func_002A3708) and func_002A1400 uses
+ * In those events the place lines are deferred through a monitor (cSSXAudio_SpeakPAPlace, cSSXAudio_SpeakPARiderPlace) and cSSXAudio_SpeakPlace uses
  * place mode 2.
  *
  * @return true or false
  */
-extern "C" bool func_002A4248(void)
+extern "C" bool cSSXAudio_IsRivalEvent(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (cBENewRaceInterface_newRace.cGameEvent) {
@@ -10445,7 +10445,7 @@ extern "C" bool func_002A4248(void)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4290);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsRivalTimeEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10457,7 +10457,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
  *
  * @return true or false
  */
-extern "C" bool func_002A4290(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsRivalTimeEvent(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     return cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME;
@@ -10465,7 +10465,7 @@ extern "C" bool func_002A4290(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A42C8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsPeakChallengeEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10473,13 +10473,13 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 6..11, kGAMEEVENT_TIME_PEAK1 ..
- * kGAMEEVENT_POINTS_PEAK3 (func_002A4318 and func_002A4368 split them).
+ * kGAMEEVENT_POINTS_PEAK3 (cSSXAudio_IsPeakTimeEvent and cSSXAudio_IsPeakPointsEvent split them).
  *
- * In these events func_002A34D0 makes no place announcement; the music code checks it too.
+ * In these events cSSXAudio_SpeakPAPlace makes no place announcement; the music code checks it too.
  *
  * @return true or false
  */
-extern "C" bool func_002A42C8(void)
+extern "C" bool cSSXAudio_IsPeakChallengeEvent(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameEvent >= 6) {
@@ -10492,7 +10492,7 @@ extern "C" bool func_002A42C8(void)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4318);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsPeakTimeEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10500,11 +10500,11 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 6..8, kGAMEEVENT_TIME_PEAK1 ..
- * kGAMEEVENT_TIME_PEAK3; func_0028D8A0 uses it.
+ * kGAMEEVENT_TIME_PEAK3; cSSXAudio_GetSongCategory uses it.
  *
  * @return true or false
  */
-extern "C" bool func_002A4318(void)
+extern "C" bool cSSXAudio_IsPeakTimeEvent(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameEvent >= 6) {
@@ -10517,7 +10517,7 @@ extern "C" bool func_002A4318(void)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4368);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsPeakPointsEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10525,11 +10525,11 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 
 /**
  * Tells whether the race's game event (newRace.cGameEvent) is one of 9..11, kGAMEEVENT_POINTS_PEAK1 ..
- * kGAMEEVENT_POINTS_PEAK3; func_0028D8A0 uses it.
+ * kGAMEEVENT_POINTS_PEAK3; cSSXAudio_GetSongCategory uses it.
  *
  * @return true or false
  */
-extern "C" bool func_002A4368(void)
+extern "C" bool cSSXAudio_IsPeakPointsEvent(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameEvent >= 9) {
@@ -10542,76 +10542,76 @@ extern "C" bool func_002A4368(void)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A43B8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayPendingDJLine);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
-extern "C" void func_002A1138(void* self, int a, int b);
-extern "C" void func_002A1400(void* self, cRider* rider);
-extern "C" void func_002A26F0(cSSXAudio* self, int a, int b);
-extern "C" void func_002A2568(cSSXAudio* self, int a);
-extern "C" void func_002A2638(cSSXAudio* self);
-extern "C" void func_002A27D8(cSSXAudio* self);
-extern "C" void func_002A2860(cSSXAudio* self, int a);
-extern "C" void func_002A2AD0(cSSXAudio* self);
-extern "C" void func_002A2B88(cSSXAudio* self);
-extern "C" void func_002A2C30(cSSXAudio* self);
-extern "C" void func_002A2E50(cSSXAudio* self, int a);
+extern "C" void cSSXAudio_SpeakScriptEventType0(void* self, int a, int b);
+extern "C" void cSSXAudio_SpeakPlace(void* self, cRider* rider);
+extern "C" void cSSXAudio_SpeakDJChoiceLine(cSSXAudio* self, int a, int b);
+extern "C" void cSSXAudio_SpeakDJCurrentLocation(cSSXAudio* self, int a);
+extern "C" void cSSXAudio_SpeakDJLine8378(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8422(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJSongAnnouncement(cSSXAudio* self, int a);
+extern "C" void cSSXAudio_SpeakDJLine8491(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8492(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJLine8493(cSSXAudio* self);
+extern "C" void cSSXAudio_SpeakDJBetweenEvents(cSSXAudio* self, int a);
 
 /**
  * Plays the most urgent pending DJ line when speech instance 0 is free, then any pending place line.
  *
- * Fills slot 4 of cSSXAudio's cSpeechSys vtable (D_004836D8); func_002AFC88 calls it while the speech instance is idle.
- * The first set pending flag, in this order, is cleared and its line played: mPendingChoiceLine func_002A26F0(0, 0),
- * mPendingPeakLine8491 func_002A2AD0, mPendingPeakLine8378 func_002A2638, mPendingLine8492 func_002A2B88,
- * mPendingLocationLine func_002A2C30, mRiderRemarkPending func_002A1138(0, 0), mSongAnnouncePending
- * func_002A2860(mSongAnnounceNum), mPendingBetweenEventsLine and mPendingBetweenEventsLine2 func_002A2E50(0),
- * mPendingBonusBetweenEventsLine func_002A2E50(1), mPendingLocationPartLine func_002A2568(mPendingLocationPart),
- * mPendingLine8422 func_002A27D8. Independently, mPendingPlaceLine requests the place line func_002A1400 for the cAI's
+ * Fills slot 4 of cSSXAudio's cSpeechSys vtable (D_004836D8); cSpeechInstance_Update calls it while the speech instance is idle.
+ * The first set pending flag, in this order, is cleared and its line played: mPendingChoiceLine cSSXAudio_SpeakDJChoiceLine(0, 0),
+ * mPendingPeakLine8491 cSSXAudio_SpeakDJLine8491, mPendingPeakLine8378 cSSXAudio_SpeakDJLine8378, mPendingLine8492 cSSXAudio_SpeakDJLine8492,
+ * mPendingLocationLine cSSXAudio_SpeakDJLine8493, mRiderRemarkPending cSSXAudio_SpeakScriptEventType0(0, 0), mSongAnnouncePending
+ * cSSXAudio_SpeakDJSongAnnouncement(mSongAnnounceNum), mPendingBetweenEventsLine and mPendingBetweenEventsLine2 cSSXAudio_SpeakDJBetweenEvents(0),
+ * mPendingBonusBetweenEventsLine cSSXAudio_SpeakDJBetweenEvents(1), mPendingLocationPartLine cSSXAudio_SpeakDJCurrentLocation(mPendingLocationPart),
+ * mPendingLine8422 cSSXAudio_SpeakDJLine8422. Independently, mPendingPlaceLine requests the place line cSSXAudio_SpeakPlace for the cAI's
  * rider mPlaceLineRider (when there is one) and is cleared.
  */
-extern "C" void func_002A43B8(cSSXAudio* self)
+extern "C" void cSSXAudio_PlayPendingDJLine(cSSXAudio* self)
 {
     if (self->mPendingChoiceLine != 0) {
-        func_002A26F0(self, 0, 0);
+        cSSXAudio_SpeakDJChoiceLine(self, 0, 0);
         self->mPendingChoiceLine = 0;
     } else if (self->mPendingPeakLine8491 != 0) {
-        func_002A2AD0((cSSXAudio*)self);
+        cSSXAudio_SpeakDJLine8491((cSSXAudio*)self);
         self->mPendingPeakLine8491 = 0;
     } else if (self->mPendingPeakLine8378 != 0) {
-        func_002A2638((cSSXAudio*)self);
+        cSSXAudio_SpeakDJLine8378((cSSXAudio*)self);
         self->mPendingPeakLine8378 = 0;
     } else if (self->mPendingLine8492 != 0) {
-        func_002A2B88(self);
+        cSSXAudio_SpeakDJLine8492(self);
         self->mPendingLine8492 = 0;
     } else if (self->mPendingLocationLine != 0) {
-        func_002A2C30((cSSXAudio*)self);
+        cSSXAudio_SpeakDJLine8493((cSSXAudio*)self);
         self->mPendingLocationLine = 0;
     } else if (self->mRiderRemarkPending != 0) {
-        func_002A1138(((char*)self), 0, 0);
+        cSSXAudio_SpeakScriptEventType0(((char*)self), 0, 0);
         self->mRiderRemarkPending = 0;
     } else if (self->mSongAnnouncePending != 0) {
-        func_002A2860((cSSXAudio*)self, self->mSongAnnounceNum);
+        cSSXAudio_SpeakDJSongAnnouncement((cSSXAudio*)self, self->mSongAnnounceNum);
         self->mSongAnnouncePending = 0;
     } else if (self->mPendingBetweenEventsLine != 0) {
-        func_002A2E50(self, 0);
+        cSSXAudio_SpeakDJBetweenEvents(self, 0);
         self->mPendingBetweenEventsLine = 0;
     } else if (self->mPendingBetweenEventsLine2 != 0) {
-        func_002A2E50(self, 0);
+        cSSXAudio_SpeakDJBetweenEvents(self, 0);
         self->mPendingBetweenEventsLine2 = 0;
     } else if (self->mPendingBonusBetweenEventsLine != 0) {
-        func_002A2E50(self, 1);
+        cSSXAudio_SpeakDJBetweenEvents(self, 1);
         self->mPendingBonusBetweenEventsLine = 0;
     } else if (self->mPendingLocationPartLine != 0) {
-        func_002A2568((cSSXAudio*)self, self->mPendingLocationPart);
+        cSSXAudio_SpeakDJCurrentLocation((cSSXAudio*)self, self->mPendingLocationPart);
         self->mPendingLocationPartLine = 0;
     } else if (self->mPendingLine8422 != 0) {
-        func_002A27D8((cSSXAudio*)self);
+        cSSXAudio_SpeakDJLine8422((cSSXAudio*)self);
         self->mPendingLine8422 = 0;
     }
     if (self->mPendingPlaceLine != 0) {
         cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[self->mPlaceLineRider];
         if (rider != 0) {
-            func_002A1400(self, rider);
+            cSSXAudio_SpeakPlace(self, rider);
         }
         self->mPendingPlaceLine = 0;
     }
@@ -10619,15 +10619,15 @@ extern "C" void func_002A43B8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4550);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_ClearPendingLines);
 #ifdef SKIP_ASM
 /**
- * Clears every pending DJ / place line flag that func_002A43B8 checks (mPendingLine8422 .. mRiderRemarkPending, plus
+ * Clears every pending DJ / place line flag that cSSXAudio_PlayPendingDJLine checks (mPendingLine8422 .. mRiderRemarkPending, plus
  * mPendingOtherLine).
  *
- * cSSXAudio_InGameDeInit, cSSXAudio_ResumeAudio and func_0028E8C0 call it.
+ * cSSXAudio_InGameDeInit, cSSXAudio_ResumeAudio and cSSXAudio_HandleMusicEvent call it.
  */
-extern "C" void func_002A4550(cSSXAudio* self)
+extern "C" void cSSXAudio_ClearPendingLines(cSSXAudio* self)
 {
     self->mPendingLine8422 = 0;
     self->mPendingPlaceLine = 0;
@@ -10647,7 +10647,7 @@ extern "C" void func_002A4550(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4590);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_ResetEventResult);
 #ifdef SKIP_ASM
 /**
  * Resets the event-result tracking the DJ comments on after an event.
@@ -10655,11 +10655,11 @@ INCLUDE_ASM("sound/soundsys", func_002A4590);
  * Clears the pending flag mEventResultPending, the allow flag mEventFinished and the frag and uber-trick sums
  * (mEventResultFrags, mEventResultUberTricks), sets the place mEventResultPlace and the location mEventResultLocation
  * to -1, the last location mLastTransportTrack to 23 (none) and, with @p flag set, the last result line
- * mLastEventResultLine to -1. The constructor calls it with 1 and func_002A45C0 with 0 in heat 1.
+ * mLastEventResultLine to -1. The constructor calls it with 1 and cSSXAudio_RecordHeatResult with 0 in heat 1.
  *
  * @param flag  nonzero to also forget the last result line played
  */
-extern "C" void func_002A4590(cSSXAudio* self, int flag)
+extern "C" void cSSXAudio_ResetEventResult(cSSXAudio* self, int flag)
 {
     self->mEventResultPending = 0;
     self->mEventFinished = 0;
@@ -10675,40 +10675,40 @@ extern "C" void func_002A4590(cSSXAudio* self, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A45C0);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_RecordHeatResult);
 #ifdef SKIP_ASM
-extern "C" void func_002A4590(cSSXAudio* self, int flag);
+extern "C" void cSSXAudio_ResetEventResult(cSSXAudio* self, int flag);
 extern "C" void* cAudioInterface_getAI();
-extern "C" bool func_002A4078(void* self);
-extern "C" void func_002A4660(cSSXAudio* self, int id, int a, int b, int c);
+extern "C" bool cSSXAudio_IsRaceEvent(void* self);
+extern "C" void cSSXAudio_AddHeatResult(cSSXAudio* self, int id, int a, int b, int c);
 extern int cGameModeMan_iRanking[];
 
 /**
- * Records rider 0's result of the heat for the DJ's event-result lines (func_002A4660).
+ * Records rider 0's result of the heat for the DJ's event-result lines (cSSXAudio_AddHeatResult).
  *
- * In the first heat (cGameModeMan iHeatNum kHeat1) it first resets the tracking (func_002A4590(self, 0)). Passes rider
- * 0's rank cGameModeMan_iRanking[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its
+ * In the first heat (cGameModeMan iHeatNum kHeat1) it first resets the tracking (cSSXAudio_ResetEventResult(self, 0)). Passes rider
+ * 0's rank cGameModeMan_iRanking[0], its frags (the metrix Totals.NumFrags, only when cSSXAudio_IsRaceEvent holds, else 0), its
  * uber tricks (Totals.NumUberTricks) and whether it finished (mDidNotFinish == 0). cSSXAudio_OnFinishEvent calls it.
  */
-extern "C" void func_002A45C0(cSSXAudio* self)
+extern "C" void cSSXAudio_RecordHeatResult(cSSXAudio* self)
 {
     if (SSXApp->GameModeMan->iHeatNum == cGameModeMan::kHeat1) {
-        func_002A4590(self, 0);
+        cSSXAudio_ResetEventResult(self, 0);
     }
     int id = cGameModeMan_iRanking[0];
     cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
     int fragCount;
-    if (func_002A4078(self) != 0) {
+    if (cSSXAudio_IsRaceEvent(self) != 0) {
         fragCount = rider->mMetrix->Totals.NumFrags;
     } else {
         fragCount = 0;
     }
-    func_002A4660(self, id, fragCount, rider->mMetrix->Totals.NumUberTricks, rider->mDidNotFinish ^ 1);
+    cSSXAudio_AddHeatResult(self, id, fragCount, rider->mMetrix->Totals.NumUberTricks, rider->mDidNotFinish ^ 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4660);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_AddHeatResult);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10721,14 +10721,14 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
  * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets mEventResultPending, sets mEventFinished when
  * @p finished is set and the heat is cGameModeMan::kFinalHeat, and stores the place (mEventResultPlace) and the current
  * location (mEventResultLocation). The frag and uber-trick counts are always added to mEventResultFrags and
- * mEventResultUberTricks. func_002A4770 picks the line from these.
+ * mEventResultUberTricks. cSSXAudio_SpeakDJEventResult picks the line from these.
  *
  * @param rank  the rider's rank (0 = first)
  * @param frags  the frags of the heat
  * @param uberTricks  the uber tricks of the heat
  * @param finished  nonzero when the rider finished
  */
-extern "C" void func_002A4660(cSSXAudio* self, int rank, int frags, int uberTricks, int finished)
+extern "C" void cSSXAudio_AddHeatResult(cSSXAudio* self, int rank, int frags, int uberTricks, int finished)
 {
     cGameModeMan* gameModeMan = SSXApp->GameModeMan;
     if (gameModeMan->bIsLastHeat != 0 || gameModeMan->iNextHeat <= gameModeMan->iHeatNum) {
@@ -10745,7 +10745,7 @@ extern "C" void func_002A4660(cSSXAudio* self, int rank, int frags, int uberTric
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4718);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_HasTransportTrackChanged);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10756,11 +10756,11 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
  * Tells whether the track recorded at the last transport start (mLastTransportTrack) is set (not kMAX_LOCATIONS) and
  * differs from the current one.
  *
- * func_0028E8C0 uses it.
+ * cSSXAudio_HandleMusicEvent uses it.
  *
  * @return true or false
  */
-extern "C" bool func_002A4718(cSSXAudio* self)
+extern "C" bool cSSXAudio_HasTransportTrackChanged(cSSXAudio* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int cur = self->mLastTransportTrack;
@@ -10772,14 +10772,14 @@ extern "C" bool func_002A4718(cSSXAudio* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A4770);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJEventResult);
 #ifdef SKIP_ASM
-extern "C" bool func_002A40E0(void* self, unsigned int a1);
-extern "C" bool func_002A4158(cSSXAudio* self, unsigned int a1);
-extern "C" bool func_002A4238(void* self, unsigned int a1);
-extern "C" bool func_002A4030(cSSXAudio* self, unsigned int a1);
-extern "C" bool func_002A3FD8(cSSXAudio* self, unsigned int a1);
-extern "C" void func_002A2E50(cSSXAudio* self, int a);
+extern "C" bool cSSXAudio_IsRaceLocation(void* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsSlopestyleLocation(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsHalfpipeLocation(void* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsBackCountryLocation(cSSXAudio* self, unsigned int a1);
+extern "C" bool cSSXAudio_IsHubLocation(cSSXAudio* self, unsigned int a1);
+extern "C" void cSSXAudio_SpeakDJBetweenEvents(cSSXAudio* self, int a);
 // bank-monitor method: returns BXrand()
 extern "C" unsigned int cSoundSys_SndRand(void* mon);
 
@@ -10789,15 +10789,15 @@ extern "C" unsigned int cSoundSys_SndRand(void* mon);
  * With mEventResultPending set it is cleared and up to three results qualify when mEventFinished (the rider finished
  * the final heat) allows: first place (mEventResultPlace == 0), 5 or more frags (mEventResultFrags), or at least 27
  * uber tricks (24 outside the locations 0..7 and 11..13; mEventResultUberTricks). None qualifying: when mInTransport is
- * set and a last location mLastTransportTrack is known, it plays func_002A2E50(0) for locations 17..21, func_002A23D0
- * for 14..16, else func_002A24B0, and returns true (false otherwise). With two or more, the result played last time
- * (mLastEventResultLine) is dropped. One is picked at random (cSoundSys_SndRand): func_002A2938 (first place),
- * func_002A2CF0 (frags) or func_002A2DA0 (uber tricks) with mEventResultLocation, and remembered in
- * mLastEventResultLine. func_002A2E50 calls it before choosing a between-events line.
+ * set and a last location mLastTransportTrack is known, it plays cSSXAudio_SpeakDJBetweenEvents(0) for locations 17..21, cSSXAudio_SpeakDJLine8425
+ * for 14..16, else cSSXAudio_SpeakDJLocation, and returns true (false otherwise). With two or more, the result played last time
+ * (mLastEventResultLine) is dropped. One is picked at random (cSoundSys_SndRand): cSSXAudio_SpeakDJWinner (first place),
+ * cSSXAudio_SpeakDJFragsResult (frags) or cSSXAudio_SpeakDJUberTricksResult (uber tricks) with mEventResultLocation, and remembered in
+ * mLastEventResultLine. cSSXAudio_SpeakDJBetweenEvents calls it before choosing a between-events line.
  *
  * @return true when a line was played, else false
  */
-extern "C" bool func_002A4770(cSSXAudio* self)
+extern "C" bool cSSXAudio_SpeakDJEventResult(cSSXAudio* self)
 {
     if (self->mEventResultPending != 0) {
         self->mEventResultPending = 0;
@@ -10817,12 +10817,12 @@ extern "C" bool func_002A4770(cSSXAudio* self)
                 n++;
             }
             int lim;
-            if (func_002A40E0(self, self->mEventResultLocation)) {
+            if (cSSXAudio_IsRaceLocation(self, self->mEventResultLocation)) {
                 lim = 27;
-            } else if (func_002A4158(self, self->mEventResultLocation)) {
+            } else if (cSSXAudio_IsSlopestyleLocation(self, self->mEventResultLocation)) {
                 lim = 27;
             } else {
-                lim = func_002A4238(self, self->mEventResultLocation) ? 27 : 0x18;
+                lim = cSSXAudio_IsHalfpipeLocation(self, self->mEventResultLocation) ? 27 : 0x18;
             }
             if (self->mEventResultUberTricks >= lim) {
                 flags[2] = 1;
@@ -10834,15 +10834,15 @@ extern "C" bool func_002A4770(cSSXAudio* self)
             if (self->mInTransport != 0) {
                 int cur = self->mLastTransportTrack;
                 if (cur != kMAX_LOCATIONS) {
-                    if (func_002A3FD8(self, cur)) {
-                        func_002A2E50(self, 0);
+                    if (cSSXAudio_IsHubLocation(self, cur)) {
+                        cSSXAudio_SpeakDJBetweenEvents(self, 0);
                         return true;
                     }
-                    if (func_002A4030(self, self->mLastTransportTrack)) {
-                        func_002A23D0((cSSXAudio*)self, self->mLastTransportTrack);
+                    if (cSSXAudio_IsBackCountryLocation(self, self->mLastTransportTrack)) {
+                        cSSXAudio_SpeakDJLine8425((cSSXAudio*)self, self->mLastTransportTrack);
                         return true;
                     }
-                    func_002A24B0((cSSXAudio*)self, self->mLastTransportTrack);
+                    cSSXAudio_SpeakDJLocation((cSSXAudio*)self, self->mLastTransportTrack);
                     return true;
                 }
             }
@@ -10866,13 +10866,13 @@ extern "C" bool func_002A4770(cSSXAudio* self)
         }
         switch (pick) {
         case 0:
-            func_002A2938((cSSXAudio*)self);
+            cSSXAudio_SpeakDJWinner((cSSXAudio*)self);
             break;
         case 1:
-            func_002A2CF0((cSSXAudio*)self, self->mEventResultLocation);
+            cSSXAudio_SpeakDJFragsResult((cSSXAudio*)self, self->mEventResultLocation);
             break;
         case 2:
-            func_002A2DA0((cSSXAudio*)self, self->mEventResultLocation);
+            cSSXAudio_SpeakDJUberTricksResult((cSSXAudio*)self, self->mEventResultLocation);
             break;
         }
         self->mLastEventResultLine = pick;
@@ -10883,7 +10883,7 @@ extern "C" bool func_002A4770(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A49E8);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginScriptedDJLine);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern const sSndKey8 D_004A36F0[];
@@ -10892,12 +10892,12 @@ extern "C" void cMonitor_MONITOR_Create(void* bank, int a1, long id, void* a3, i
 /**
  * Marks a scripted DJ moment for 30 seconds: sets mScriptedDJLine and starts a 30000 ms monitor that clears it.
  *
- * The monitor (cMonitor_MONITOR_Create) has the callback D_004A36F0 (func_002A4A68). While mScriptedDJLine is set,
- * func_002A4A38 reports a playing DJ line, so func_0028E8C0 leaves speech instance 0 alone. The script command
+ * The monitor (cMonitor_MONITOR_Create) has the callback D_004A36F0 (cSSXAudio_EndScriptedDJLineCallback). While mScriptedDJLine is set,
+ * cSSXAudio_IsScriptedDJLinePlaying reports a playing DJ line, so cSSXAudio_HandleMusicEvent leaves speech instance 0 alone. The script command
  * SectionFunc calls it with its action 3 (cGame_setState(game, 0xE, 2, 0)).
  */
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
-extern "C" void func_002A49E8(cSSXAudio* self)
+extern "C" void cSSXAudio_BeginScriptedDJLine(cSSXAudio* self)
 {
     self->mScriptedDJLine = 1;
     cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
@@ -10906,73 +10906,73 @@ extern "C" void func_002A49E8(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4A38);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_IsScriptedDJLinePlaying);
 #ifdef SKIP_ASM
-extern "C" bool func_002A10C0(cSSXAudio* self, int id);
+extern "C" bool cSSXAudio_IsCharacterSpeaking(cSSXAudio* self, int id);
 
 /**
- * Tells whether a scripted DJ line is playing: mScriptedDJLine is set (func_002A49E8) and speech instance 0 says
+ * Tells whether a scripted DJ line is playing: mScriptedDJLine is set (cSSXAudio_BeginScriptedDJLine) and speech instance 0 says
  * identity 10.
  *
- * Uses func_002A10C0(self, 10). func_0028E8C0 checks it before it interrupts the speech.
+ * Uses cSSXAudio_IsCharacterSpeaking(self, 10). cSSXAudio_HandleMusicEvent checks it before it interrupts the speech.
  *
  * @return true or false
  */
-extern "C" bool func_002A4A38(cSSXAudio* self)
+extern "C" bool cSSXAudio_IsScriptedDJLinePlaying(cSSXAudio* self)
 {
     if (self->mScriptedDJLine != 0) {
-        return func_002A10C0((cSSXAudio*)self, 10) != 0;
+        return cSSXAudio_IsCharacterSpeaking((cSSXAudio*)self, 10) != 0;
     }
     return false;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4A68);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_EndScriptedDJLineCallback);
 #ifdef SKIP_ASM
 /**
  * Monitor callback: ends the scripted DJ moment by clearing mScriptedDJLine; returns 1.
  *
- * Its pointer to member is D_004A36F0, which func_002A49E8 installs with a 30 s delay.
+ * Its pointer to member is D_004A36F0, which cSSXAudio_BeginScriptedDJLine installs with a 30 s delay.
  *
  * @param ssxAudio  the audio system (cSSXAudio)
  * @return 1
  */
-extern "C" int func_002A4A68(cSSXAudio* ssxAudio) {
+extern "C" int cSSXAudio_EndScriptedDJLineCallback(cSSXAudio* ssxAudio) {
     ssxAudio->mScriptedDJLine = 0;
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4A78);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_ScheduleDJOpening);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern const sSndKey8 D_004A3650[];
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, void*, int, int, int, int);
-extern "C" int func_0028DEF0(void* self, int a1);
+extern "C" int cSSXAudio_SetLastMusicState(void* self, int a1);
 
 /**
- * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through func_0028E548.
+ * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through cSSXAudio_HandleMusicChangeEvent.
  *
- * Only when mFirstTimeOnPeak is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90)
- * it sets mLastMusicState to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback
- * D_004A3650 (func_0028E548) and kind 2; elsewhere the kind is 4 with the current song value (func_002B4908) as its
+ * Only when mFirstTimeOnPeak is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (cSSXAudio_IsAtHub)
+ * it sets mLastMusicState to 13 (cSSXAudio_SetLastMusicState) and creates a monitor (cMonitor_MONITOR_Create) with the callback
+ * D_004A3650 (cSSXAudio_HandleMusicChangeEvent) and kind 2; elsewhere the kind is 4 with the current song value (cMusicSys_GetCurrentSongSedValue) as its
  * argument. cSSXAudio_InGameInit calls it.
  */
 // PORT: 64-bit long sound key
-extern "C" void func_002A4A78(cSSXAudio* self)
+extern "C" void cSSXAudio_ScheduleDJOpening(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (self->mFirstTimeOnPeak == 0 && cBENewRaceInterface_newRace.cGamePath == 0) {
-        if (func_002A3F90(self) != 0) {
-            func_0028DEF0(self, 13);
+        if (cSSXAudio_IsAtHub(self) != 0) {
+            cSSXAudio_SetLastMusicState(self, 13);
             cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                     2, D_004A3650->v, 0, 2, 0, 0, 0);
         } else {
             cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
             const sSndKey8* key = D_004A3650;
-            int songValue = func_002B4908(&self->MusicSys);
+            int songValue = cMusicSys_GetCurrentSongSedValue(&self->MusicSys);
             cMonitor_MONITOR_Create(bankMonitor, 2, key->v, 0, 4, songValue, 0, 0);
         }
     }
@@ -10980,26 +10980,26 @@ extern "C" void func_002A4A78(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4B68);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_StopSpeechForPkTrans);
 #ifdef SKIP_ASM
-extern "C" int func_002B49E0(void*);
-extern "C" void func_002B11B0(void*, int);
+extern "C" int cMusicSys_GetSongTag(void*);
+extern "C" void cSpeechSys_PurgeInstance(void*, int);
 
 /**
- * Stops speech instance 0 (func_002B11B0) when the current song's tag (func_002B49E0) is kSONGTAG_PkTrans.
+ * Stops speech instance 0 (cSpeechSys_PurgeInstance) when the current song's tag (cMusicSys_GetSongTag) is kSONGTAG_PkTrans.
  *
- * func_0028E8C0 sets that tag when it starts the "pktrans" stream. cGFTrackStartState_gainFocus calls it.
+ * cSSXAudio_HandleMusicEvent sets that tag when it starts the "pktrans" stream. cGFTrackStartState_gainFocus calls it.
  */
-extern "C" void func_002A4B68(cSSXAudio* self)
+extern "C" void cSSXAudio_StopSpeechForPkTrans(cSSXAudio* self)
 {
-    if (func_002B49E0((char*)&self->MusicSys) == kSONGTAG_PkTrans) {
-        func_002B11B0((char*)&self->SpeechSys, 0);
+    if (cMusicSys_GetSongTag((char*)&self->MusicSys) == kSONGTAG_PkTrans) {
+        cSpeechSys_PurgeInstance((char*)&self->SpeechSys, 0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4BA8);
+INCLUDE_ASM("sound/soundsys", tCrowdEventData_tCrowdEventData);
 #ifdef SKIP_ASM
 /**
  * Constructs a crowd sample list: no samples, all 5 pointers cleared.
@@ -11008,7 +11008,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4BA8);
  *
  * @return this
  */
-extern "C" void* func_002A4BA8(tCrowdEventData* self)
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self)
 {
     int i;
     self->mNumEventData = 0;
@@ -11020,21 +11020,21 @@ extern "C" void* func_002A4BA8(tCrowdEventData* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4BE0);
+INCLUDE_ASM("sound/soundsys", tCrowdEventData__tCrowdEventData);
 #ifdef SKIP_ASM
-extern "C" void func_002A4CF8(tCrowdEventData*);
+extern "C" void tCrowdEventData_FreeSamples(tCrowdEventData*);
 void operator_delete(int*);
 
 /**
- * Destroys a crowd sample list: frees its samples (func_002A4CF8) and, with bit 0 of @p flags, the list itself.
+ * Destroys a crowd sample list: frees its samples (tCrowdEventData_FreeSamples) and, with bit 0 of @p flags, the list itself.
  *
  * cCrowdSys__cCrowdSys runs it for each list.
  *
  * @param flags  bit 0 set to also delete the object
  */
-extern "C" void func_002A4BE0(tCrowdEventData* self, int flags)
+extern "C" void tCrowdEventData__tCrowdEventData(tCrowdEventData* self, int flags)
 {
-    func_002A4CF8(self);
+    tCrowdEventData_FreeSamples(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -11042,14 +11042,14 @@ extern "C" void func_002A4BE0(tCrowdEventData* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4C28);
+INCLUDE_ASM("sound/soundsys", tCrowdEventData_LoadSample);
 #ifdef SKIP_ASM
 extern "C" void* FILE_loadz(const char* name, int flags);
 
 /**
  * Loads one crowd sample file (FILE_loadz) into the next free slot of a sample list; returns whether it was added.
  *
- * A full list (5 samples) or a failed load returns false. func_002A7040 calls it for the TRICK, FALL and ANTICIPATE
+ * A full list (5 samples) or a failed load returns false. cCrowdSys_ReadSection calls it for the TRICK, FALL and ANTICIPATE
  * entries of crowd.inf.
  *
  * @param list  the sample list (tCrowdEventData)
@@ -11057,7 +11057,7 @@ extern "C" void* FILE_loadz(const char* name, int flags);
  * @param flags  the FILE_loadz flags (0)
  * @return true when the sample was added, else false
  */
-extern "C" bool func_002A4C28(tCrowdEventData* list, const char* name, int flags)
+extern "C" bool tCrowdEventData_LoadSample(tCrowdEventData* list, const char* name, int flags)
 {
     if (list->mNumEventData >= 5 ||
         (list->mpData[list->mNumEventData] = FILE_loadz(name, flags), list->mpData[list->mNumEventData] == 0)) {
@@ -11069,7 +11069,7 @@ extern "C" bool func_002A4C28(tCrowdEventData* list, const char* name, int flags
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4CA0);
+INCLUDE_ASM("sound/soundsys", tCrowdEventData_GetRandomSample);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 
@@ -11084,7 +11084,7 @@ struct sSndRandList {
  * @param list  the sample list (tCrowdEventData)
  * @return the sample data, or 0
  */
-extern "C" int func_002A4CA0(sSndRandList* list)
+extern "C" int tCrowdEventData_GetRandomSample(sSndRandList* list)
 {
     if (list->count == 0) {
         return 0;
@@ -11094,14 +11094,14 @@ extern "C" int func_002A4CA0(sSndRandList* list)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4CF8);
+INCLUDE_ASM("sound/soundsys", tCrowdEventData_FreeSamples);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
 /**
  * Frees every sample of a crowd sample list (cMemMan_free) and empties it.
  */
-extern "C" void func_002A4CF8(tCrowdEventData* self)
+extern "C" void tCrowdEventData_FreeSamples(tCrowdEventData* self)
 {
     tCrowdEventData* list = self;
     for (int i = 0; i < list->mNumEventData; i++) {
@@ -11164,7 +11164,7 @@ struct cCrowdInstance_cCrowdInstance_sObj {
  *
  * Sets mViewPort, mCrowdBank and the cheer handle mCheerHandle to -1, mAmbientCheerIntensity to 3 (none), the averaged
  * position, mNumCrowdObjects, mNumCrowdAmbience and the cheer fields to 0, clears the 15 crowd object slots and gives
- * the 3 ambient loops their index (index) and sampleID / handle -1. func_002A6D78 runs it on each element of its
+ * the 3 ambient loops their index (index) and sampleID / handle -1. cCrowdSys_Init runs it on each element of its
  * "CrowdInstances" array.
  */
 cCrowdInstance_cCrowdInstance_sObj::cCrowdInstance_cCrowdInstance_sObj()
@@ -11190,22 +11190,22 @@ cCrowdInstance_cCrowdInstance_sObj::cCrowdInstance_cCrowdInstance_sObj()
 //100%
 INCLUDE_ASM("sound/soundsys", cCrowdInstance__cCrowdInstance);
 #ifdef SKIP_ASM
-extern "C" void func_002A6848(cCrowdInstance* self);
-extern "C" void func_002A6430(cCrowdInstance* self, float v);
+extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self);
+extern "C" void cCrowdInstance_RemoveAllObjects(cCrowdInstance* self, float v);
 void operator_delete(int*);
 
 /**
- * Destroys a crowd instance: stops its cheer (func_002A6848), removes all its crowd objects (func_002A6430(self, 0))
+ * Destroys a crowd instance: stops its cheer (cCrowdInstance_StopCheer), removes all its crowd objects (cCrowdInstance_RemoveAllObjects(self, 0))
  * and, with bit 0 of @p flags, deletes it.
  *
- * func_002A6F38 runs it on each element of the "CrowdInstances" array, from the last one down.
+ * cCrowdSys_Shutdown runs it on each element of the "CrowdInstances" array, from the last one down.
  *
  * @param flags  bit 0 set to also delete the object
  */
 extern "C" void cCrowdInstance__cCrowdInstance(cCrowdInstance* self, int flags)
 {
-    func_002A6848(self);
-    func_002A6430(self, 0.0f);
+    cCrowdInstance_StopCheer(self);
+    cCrowdInstance_RemoveAllObjects(self, 0.0f);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -11213,7 +11213,7 @@ extern "C" void cCrowdInstance__cCrowdInstance(cCrowdInstance* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A4E88);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_Update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -11231,11 +11231,11 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 extern sSndCallback D_004A3700_cb[] __asm__("D_004A3700");
-extern "C" void func_002A8450_c(sSndSys8140* self, int a, int b) __asm__("func_002A8450");
-extern "C" int func_002A86B8_c(sSndSys8140* self) __asm__("func_002A86B8");
+extern "C" void cMidiSys_OpenMidiOpts_c(sSndSys8140* self, int a, int b) __asm__("cMidiSys_OpenMidiOpts");
+extern "C" int cMidiSys_PlayMidi_c(sSndSys8140* self) __asm__("cMidiSys_PlayMidi");
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // A crowd position vector (16-byte aligned, empty ctor, component access by index).
 struct sCrowdVec {
@@ -11314,10 +11314,10 @@ struct sCrowdVoice {
     int vol;                 // 0x64
 };
 struct sCrowdVt4E88 { short delta; short index; int (*fn)(void*, int, int*, int*); };
-extern "C" int func_002A4CA0(sSndRandList* list);
+extern "C" int tCrowdEventData_GetRandomSample(sSndRandList* list);
 
-// func_002A4E88 is declared with a void* parameter further down (the crowd update loop).
-void func_002A4E88_c(sCrowd4E88* self) __asm__("func_002A4E88");
+// cCrowdInstance_Update is declared with a void* parameter further down (the crowd update loop).
+void cCrowdInstance_Update_c(sCrowd4E88* self) __asm__("cCrowdInstance_Update");
 /**
  * Updates a crowd instance each frame: its averaged position and loudness, its ambient loops and its cheer voice.
  *
@@ -11326,13 +11326,13 @@ void func_002A4E88_c(sCrowd4E88* self) __asm__("func_002A4E88");
  * (mNumCrowdAmbience) the same is done per loop. With one loop, that loop follows the overall average at the overall
  * loudness; otherwise each used loop follows its own. A loop whose voice is gone is restarted (bank mCrowdBank, its
  * sampleID, the vol control mpVolControl, viewport mViewPort, callback D_004A3700); a live one just gets the volume.
- * When a cheer is wanted (mCheerState), the crowd system's vtable slot 2 (in cSSXAudio func_00290FD0) gives the
+ * When a cheer is wanted (mCheerState), the crowd system's vtable slot 2 (in cSSXAudio cSSXAudio_GetTrickPowerLevel) gives the
  * anticipation intensity 0..2 or 3 (none); 1 and 2 are kept in mCurrentCheer, and state 1 with an intensity starts a
- * random ANTICIPATE sample of it (func_002A8450 / func_002A86B8) at the averaged position, moving to state 2. A cheer
- * voice that has ended is stopped (func_002A6848) and mCurrentCheer cleared; a live one gets the loudness. The loudness
- * and position are stored in mLoudness and mCrowdPos. func_002A6D18 calls it for every instance.
+ * random ANTICIPATE sample of it (cMidiSys_OpenMidiOpts / cMidiSys_PlayMidi) at the averaged position, moving to state 2. A cheer
+ * voice that has ended is stopped (cCrowdInstance_StopCheer) and mCurrentCheer cleared; a live one gets the loudness. The loudness
+ * and position are stored in mLoudness and mCrowdPos. cCrowdSys_Update calls it for every instance.
  */
-void func_002A4E88_c(sCrowd4E88* self)
+void cCrowdInstance_Update_c(sCrowd4E88* self)
 {
     if (self->count == 0) {
         return;
@@ -11510,10 +11510,10 @@ void func_002A4E88_c(sCrowd4E88* self)
             self->mCurrentCheer = anticipateLevel;
         }
         if (self->state == 1 && anticipateLevel != 3) {
-            func_002A6848((cCrowdInstance*)self);
-            int cheerSample = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)gpCrowdSys)->ent[anticipateLevel].c);
+            cCrowdInstance_StopCheer((cCrowdInstance*)self);
+            int cheerSample = tCrowdEventData_GetRandomSample((sSndRandList*)&((sSndSys69A0*)gpCrowdSys)->ent[anticipateLevel].c);
             if (cheerSample != 0) {
-                func_002A8450_c((sSndSys69A0*)gpCrowdSys, self->mCrowdBank, cheerSample);
+                cMidiSys_OpenMidiOpts_c((sSndSys69A0*)gpCrowdSys, self->mCrowdBank, cheerSample);
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] = (const t4Vector*)&self->vec10;
@@ -11536,7 +11536,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->BankMonitor.mViewport[bankMgr->BankMonitor.mInst] = self->mViewPort;
                 }
-                self->handle = func_002A86B8_c((sSndSys69A0*)gpCrowdSys);
+                self->handle = cMidiSys_PlayMidi_c((sSndSys69A0*)gpCrowdSys);
                 if (self->handle >= 0) {
                     self->state = 2;
                 }
@@ -11548,7 +11548,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->BankMonitor,
                 self->handle, 2);
         if (voiceInst == 0) {
-            func_002A6848((cCrowdInstance*)self);
+            cCrowdInstance_StopCheer((cCrowdInstance*)self);
             self->mCurrentCheer = 0;
         } else {
             int cheerVolume = best;
@@ -11565,7 +11565,7 @@ void func_002A4E88_c(sCrowd4E88* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A5CD8);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_SetObjectLoudness);
 #ifdef SKIP_ASM
 struct s2A5CD8Entry {
     int active;
@@ -11581,12 +11581,12 @@ struct s2A5CD8 {
 /**
  * Sets the loudness of one crowd object of a crowd instance, when that slot is in use.
  *
- * func_002A7340 calls it for a world trigger's crowd.
+ * cCrowdSys_SetObjectLoudness calls it for a world trigger's crowd.
  *
  * @param i  the crowd object slot, or a negative value for none
  * @param newValue  the loudness, 0..127
  */
-extern "C" void func_002A5CD8(s2A5CD8* self, int i, int newValue)
+extern "C" void cCrowdInstance_SetObjectLoudness(s2A5CD8* self, int i, int newValue)
 {
     if (i >= 0) {
         if (self->entries[i].active) {
@@ -11597,7 +11597,7 @@ extern "C" void func_002A5CD8(s2A5CD8* self, int i, int newValue)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A5D08);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_AddObject);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
@@ -11614,7 +11614,7 @@ extern tSndCallback D_004A3700_5D08[] __asm__("D_004A3700");
 #define SND_5D08_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 // PORT: 64-bit long sound key
-int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* P, int key) __asm__("func_002A5D08");
+int cCrowdInstance_AddObject_5D08(cCrowdInstance* self, cBankMonitor* P, int key) __asm__("cCrowdInstance_AddObject");
 /**
  * Adds a crowd object to a crowd instance and starts or joins the ambient loop of its sample; returns its slot.
  *
@@ -11623,13 +11623,13 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* P, int key) __asm__("
  * sample (@p key); the first object also sets the instance's viewport, vol control and averaged position. Without a
  * matching loop it takes a free one (mNumCrowdAmbience grows), places it at the object and starts the sample from the
  * instance's bank mCrowdBank at the loop's position, with the object's loudness, the vol control, external volume, the
- * viewport and the callback D_004A3700, keeping the handle. func_002A7678 calls it.
+ * viewport and the callback D_004A3700, keeping the handle. cCrowdSys_AddObject calls it.
  *
  * @param objectOpts  the current play-option level (cBankManager + 0x1D8) that describes the object
  * @param key  the ambient sample (patch) of the object
  * @return the crowd object slot, or -1
  */
-int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
+int cCrowdInstance_AddObject_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
 {
     int idx = -1;
     int cnt = self->mNumCrowdObjects;
@@ -11743,7 +11743,7 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A62F0);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_RemoveObject);
 #ifdef SKIP_ASM
 
 struct sSsVoice62F0 { int sampleID; int id; int refs; };
@@ -11772,13 +11772,13 @@ struct sSsMgr62F0 {
  * lowered. When the last object goes, the cheer time mCheerTimeLeft is capped at 0.25, the cheer voice is stopped (only
  * when
  * @p fade is 0) and forgotten, a playing anticipation (state 2) drops back to 1, and mLoudness and mViewPort are reset.
- * func_002A6430 and func_002A72D8 call it.
+ * cCrowdInstance_RemoveAllObjects and cCrowdSys_RemoveObject call it.
  *
  * @param vself  the crowd instance
  * @param idx  the crowd object slot
  * @param fade  the fade time for the loop's voice
  */
-extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
+extern "C" void cCrowdInstance_RemoveObject(cCrowdInstance* vself, int idx, float fade)
 {
     sSsMgr62F0* self = (sSsMgr62F0*)vself;
     if (idx < 0) return;
@@ -11811,32 +11811,32 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A6430);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_RemoveAllObjects);
 #ifdef SKIP_ASM
-extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
+extern "C" void cCrowdInstance_RemoveObject(cCrowdInstance* voice, int b, float v);
 
 /**
- * Removes every crowd object of a crowd instance (func_002A62F0 on each used slot) with the given fade.
+ * Removes every crowd object of a crowd instance (cCrowdInstance_RemoveObject on each used slot) with the given fade.
  *
  * @param fade  the fade time for the ambient loops
  */
-extern "C" void func_002A6430(cCrowdInstance* self, float fade)
+extern "C" void cCrowdInstance_RemoveAllObjects(cCrowdInstance* self, float fade)
 {
     for (int i = 0; i < 15; i++) {
         if (self->mCrowdObjectsInfo[i].pCrowdObjectPos != 0) {
-            func_002A62F0(self, i, fade);
+            cCrowdInstance_RemoveObject(self, i, fade);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A64A0);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_PlayTrickCheer);
 #ifdef SKIP_ASM
-extern "C" void func_002A6848(cCrowdInstance* self);
-extern "C" int func_002A4CA0(sSndRandList* list);
-extern "C" void func_002A8450(char** sys, int a, int b);
-extern "C" int func_002A86B8(char** sys);
+extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self);
+extern "C" int tCrowdEventData_GetRandomSample(sSndRandList* list);
+extern "C" void cMidiSys_OpenMidiOpts(char** sys, int a, int b);
+extern "C" int cMidiSys_PlayMidi(char** sys);
 
 
 #define S64_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -11856,25 +11856,25 @@ static inline void crowdOptsUpdate64A0(cBankMonitor* o, int i)
 /**
  * Plays a TRICK cheer of a crowd instance at an intensity: a random sample of that intensity's TRICK list.
  *
- * Stops the current cheer (func_002A6848). With crowd objects present it records the intensity in
+ * Stops the current cheer (cCrowdInstance_StopCheer). With crowd objects present it records the intensity in
  * mAmbientCheerIntensity, sets the cheer time mCheerTimeLeft to mAttack + mDecay and, when the list has a sample, plays
- * it from bank mCrowdBank (func_002A8450 / func_002A86B8) at the instance's averaged position, loudness mLoudness, vol
+ * it from bank mCrowdBank (cMidiSys_OpenMidiOpts / cMidiSys_PlayMidi) at the instance's averaged position, loudness mLoudness, vol
  * control mpVolControl, external volume and viewport mViewPort; the handle goes to mCheerHandle and mCurrentCheer
- * becomes intensity + 1. func_002A73A8 calls it.
+ * becomes intensity + 1. cCrowdSys_PlayTrickCheer calls it.
  *
  * @param vself  the crowd instance
  * @param idx  the crowd intensity (0..2)
  */
-extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
+extern "C" void cCrowdInstance_PlayTrickCheer(cCrowdInstance* vself, int idx)
 {
-    func_002A6848(vself);
+    cCrowdInstance_StopCheer(vself);
     if (vself->mNumCrowdObjects == 0) return;
     tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->mCheerTimeLeft = crowdData->mAttack + crowdData->mDecay;
-    int cheerSample = func_002A4CA0((sSndRandList*)crowdData);
+    int cheerSample = tCrowdEventData_GetRandomSample((sSndRandList*)crowdData);
     if (cheerSample == 0) return;
-    func_002A8450((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
+    cMidiSys_OpenMidiOpts((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
     cBankManager* posMgr = gpCrowdSys->mpVBankManager;
     posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->mCrowdPos;
     cBankManager* volMgr = gpCrowdSys->mpVBankManager;
@@ -11886,18 +11886,18 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
     extMgr->BankMonitor.mExternalVol[extMgr->BankMonitor.mInst] = 1;
     cBankManager* viewMgr = gpCrowdSys->mpVBankManager;
     viewMgr->BankMonitor.mViewport[viewMgr->BankMonitor.mInst] = vself->mViewPort;
-    vself->mCheerHandle = func_002A86B8((char**)gpCrowdSys);
+    vself->mCheerHandle = cMidiSys_PlayMidi((char**)gpCrowdSys);
     vself->mCurrentCheer = idx + 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6648);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_PlayFallCheer);
 #ifdef SKIP_ASM
-extern "C" void func_002A6848(cCrowdInstance* self);
-extern "C" int func_002A4CA0(sSndRandList* list);
-extern "C" void func_002A8450(char** sys, int a, int b);
-extern "C" int func_002A86B8(char** sys);
+extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self);
+extern "C" int tCrowdEventData_GetRandomSample(sSndRandList* list);
+extern "C" void cMidiSys_OpenMidiOpts(char** sys, int a, int b);
+extern "C" int cMidiSys_PlayMidi(char** sys);
 
 
 #define S66_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -11917,22 +11917,22 @@ static inline void crowdOptsUpdate6648(cBankMonitor* o, int i)
 /**
  * Plays a FALL cheer of a crowd instance at an intensity: a random sample of that intensity's FALL list.
  *
- * As func_002A64A0 with the FALL list (tCrowdData + 0x18); mCurrentCheer becomes ~intensity (negative). func_002A73D8
+ * As cCrowdInstance_PlayTrickCheer with the FALL list (tCrowdData + 0x18); mCurrentCheer becomes ~intensity (negative). cCrowdSys_PlayFallCheer
  * calls it.
  *
  * @param vself  the crowd instance
  * @param idx  the crowd intensity (0..2)
  */
-extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
+extern "C" void cCrowdInstance_PlayFallCheer(cCrowdInstance* vself, int idx)
 {
-    func_002A6848(vself);
+    cCrowdInstance_StopCheer(vself);
     if (vself->mNumCrowdObjects == 0) return;
     tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->mCheerTimeLeft = crowdData->mAttack + crowdData->mDecay;
-    int cheerSample = func_002A4CA0((sSndRandList*)&crowdData->mFall);
+    int cheerSample = tCrowdEventData_GetRandomSample((sSndRandList*)&crowdData->mFall);
     if (cheerSample == 0) return;
-    func_002A8450((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
+    cMidiSys_OpenMidiOpts((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
     cBankManager* posMgr = gpCrowdSys->mpVBankManager;
     posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->mCrowdPos;
     cBankManager* volMgr = gpCrowdSys->mpVBankManager;
@@ -11944,19 +11944,19 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     extMgr->BankMonitor.mExternalVol[extMgr->BankMonitor.mInst] = 1;
     cBankManager* viewMgr = gpCrowdSys->mpVBankManager;
     viewMgr->BankMonitor.mViewport[viewMgr->BankMonitor.mInst] = vself->mViewPort;
-    vself->mCheerHandle = func_002A86B8((char**)gpCrowdSys);
+    vself->mCheerHandle = cMidiSys_PlayMidi((char**)gpCrowdSys);
     vself->mCurrentCheer = ~idx;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A67F0);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_RequestAnticipation);
 #ifdef SKIP_ASM
 /**
- * Asks a crowd instance for an anticipation cheer: the cheer state mCheerState goes from 0 to 1 (func_002A4E88 starts
+ * Asks a crowd instance for an anticipation cheer: the cheer state mCheerState goes from 0 to 1 (cCrowdInstance_Update starts
  * it).
  */
-extern "C" void func_002A67F0(cCrowdInstance* self)
+extern "C" void cCrowdInstance_RequestAnticipation(cCrowdInstance* self)
 {
     if (self->mCheerState == 0) {
         self->mCheerState = 1;
@@ -11965,24 +11965,24 @@ extern "C" void func_002A67F0(cCrowdInstance* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6808);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_CancelAnticipation);
 #ifdef SKIP_ASM
-extern "C" void func_002A6848(cCrowdInstance* self);
+extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self);
 
 /**
  * Cancels a crowd instance's anticipation: stops the cheer when one is playing (state 2) and sets the state to 0.
  */
-extern "C" void func_002A6808(cCrowdInstance* self)
+extern "C" void cCrowdInstance_CancelAnticipation(cCrowdInstance* self)
 {
     if (self->mCheerState == 2) {
-        func_002A6848(self);
+        cCrowdInstance_StopCheer(self);
     }
     self->mCheerState = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6848);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_StopCheer);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
@@ -11992,7 +11992,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * The voice is stopped with cBankMonitor_BANKMONITOR_StopHandle (mode 2, fade 0) and mCheerHandle reset to -1.
  */
-extern "C" void func_002A6848(cCrowdInstance* self)
+extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self)
 {
     float lim = 0.25f;
     if (lim < self->mCheerTimeLeft) {
@@ -12007,7 +12007,7 @@ extern "C" void func_002A6848(cCrowdInstance* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A68B0);
+INCLUDE_ASM("sound/soundsys", cCrowdInstance_UpdateLoopPitch);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void SNDpitchbend(int, int);
@@ -12019,12 +12019,12 @@ extern "C" void SNDpitchbend(int, int);
  * A voice handle (+4) below 0 resets the instance (cBankMonitorInstance_Reset). Otherwise, while the cheer time
  * mCheerTimeLeft is above 0 it is lowered by @p dt and the pitch bend (SNDpitchbend, in a sound-driver critical
  * section) is set from the intensity's tCrowdData: rising to 0x40 + mMaxBend during mAttack, then falling back to 0x40
- * over mDecay. func_002A77A8 (the loops' callback D_004A3700) calls it.
+ * over mDecay. cCrowdSys_LoopPitchCallback (the loops' callback D_004A3700) calls it.
  *
  * @param obj  the voice's monitor instance (cBankMonitorInstance)
  * @param dt  the elapsed time
  */
-extern "C" void func_002A68B0(cCrowdInstance* self, cBankMonitorInstance* obj, float dt) {
+extern "C" void cCrowdInstance_UpdateLoopPitch(cCrowdInstance* self, cBankMonitorInstance* obj, float dt) {
     if (obj->mHandle < 0) {
         cBankMonitorInstance_Reset(obj);
         return;
@@ -12058,7 +12058,7 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys_cCrowdSys);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int heap);
-extern "C" void* func_002A4BA8(tCrowdEventData* self);
+extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
 
 struct sSnd69VtEnt {
     short delta;
@@ -12074,7 +12074,7 @@ struct sSnd69Vt7 {
 
 struct sSnd69List {
     char pad0[0x18];
-    sSnd69List() { func_002A4BA8((tCrowdEventData*)(this)); }
+    sSnd69List() { tCrowdEventData_tCrowdEventData((tCrowdEventData*)(this)); }
 };
 struct sSnd69Ent {
     sSnd69List a;
@@ -12154,8 +12154,8 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys__cCrowdSys);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 void operator_delete(int*);
-extern "C" void func_002A4BE0(tCrowdEventData* self, int flags);
-extern "C" void func_002A6F38(cCrowdSys* self);
+extern "C" void tCrowdEventData__tCrowdEventData(tCrowdEventData* self, int flags);
+extern "C" void cCrowdSys_Shutdown(cCrowdSys* self);
 extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags);
 
 struct sSnd6BVtEnt {
@@ -12178,8 +12178,8 @@ extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 /**
  * Destroys the crowd sound system.
  *
- * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (func_002A6F38), clears gpCrowdSys,
- * destroys the three tCrowdData sample lists in reverse order (func_002A4BE0), runs the cMidiSys base destructor
+ * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (cCrowdSys_Shutdown), clears gpCrowdSys,
+ * destroys the three tCrowdData sample lists in reverse order (tCrowdEventData__tCrowdEventData), runs the cMidiSys base destructor
  * cMidiSys__cMidiSys, destroys the virtual bases (cBankManager, cSoundSys) when bit 1 of @p flags is set and frees the
  * object when bit 0 is set.
  *
@@ -12204,15 +12204,15 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
         int adj2 = ((char*)self) - bankMgrBase;
         bankMgrVtbl.e[1].delta = D_00483838_6B.e[1].delta + adj2;
     }
-    func_002A6F38(self);
+    cCrowdSys_Shutdown(self);
     gpCrowdSys = 0;
     if (self->mCrowdData != 0) {
         tCrowdData* crowdEntry = self->mCrowdData + 3;
         while (self->mCrowdData != crowdEntry) {
             crowdEntry--;
-            func_002A4BE0(&crowdEntry->mAnticipate, 2);
-            func_002A4BE0(&crowdEntry->mFall, 2);
-            func_002A4BE0(&crowdEntry->mTrick, 2);
+            tCrowdEventData__tCrowdEventData(&crowdEntry->mAnticipate, 2);
+            tCrowdEventData__tCrowdEventData(&crowdEntry->mFall, 2);
+            tCrowdEventData__tCrowdEventData(&crowdEntry->mTrick, 2);
         }
     }
     cMidiSys__cMidiSys((cMidiSys*)self, 0);
@@ -12225,31 +12225,31 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A6D18);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_Update);
 #ifdef SKIP_ASM
-extern "C" void func_002A4E88(void* voice);
+extern "C" void cCrowdInstance_Update(void* voice);
 
 /**
- * Updates every crowd instance (func_002A4E88); the audio update cController_Update calls it each frame.
+ * Updates every crowd instance (cCrowdInstance_Update); the audio update cController_Update calls it each frame.
  */
-extern "C" void func_002A6D18(cCrowdSys* self)
+extern "C" void cCrowdSys_Update(cCrowdSys* self)
 {
     for (int i = 0; i < self->mNumInstances; i++) {
-        func_002A4E88(&self->mpCrowdInstances[i]);
+        cCrowdInstance_Update(&self->mpCrowdInstances[i]);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6D78);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_Init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_002A4CF8(tCrowdEventData*);
+extern "C" void tCrowdEventData_FreeSamples(tCrowdEventData*);
 struct sSndFileBuf;
 extern "C" FileParser* FileParser_FileParser(FileParser* self, const char* name, int flags);
 extern "C" bool FileParser_FindSection(FileParser* self, const char* name);
-extern "C" void func_002A7040(cCrowdSys* self, void* parser);
+extern "C" void cCrowdSys_ReadSection(cCrowdSys* self, void* parser);
 extern "C" void FileParser__FileParser(FileParser* self, int flags);
 extern const char str_CrowdInstances[];
 extern const char str_GLOBAL[];
@@ -12275,7 +12275,7 @@ struct sSnd6D78Parser {
  *
  * Allocates the instances (operator new[], "CrowdInstances") into mpCrowdInstances, clears every intensity's mAttack,
  * mDecay, mMaxBend and sample lists, gives each instance the cheer bank @p cheerBank (unk_0D8), and reads the file
- * @p name with a FileParser: section "GLOBAL" and then section @p key go through func_002A7040. cSSXAudio_InGameLoad
+ * @p name with a FileParser: section "GLOBAL" and then section @p key go through cCrowdSys_ReadSection. cSSXAudio_InGameLoad
  * calls it with 2 instances in the multiplayer game path, else 1, and bank 5.
  *
  * @param name  the crowd.inf path
@@ -12283,7 +12283,7 @@ struct sSnd6D78Parser {
  * @param n  the number of crowd instances (viewports)
  * @param cheerBank  the bank the cheers play from
  */
-extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* key, int n, int cheerBank)
+extern "C" void cCrowdSys_Init(sSnd6D78Self* self, const char* name, const char* key, int n, int cheerBank)
 {
     self->count = n;
     sSnd6D78Voice*& slot = self->voices;
@@ -12292,9 +12292,9 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
         self->ent[i].mAttack = 0.0f;
         self->ent[i].mDecay = 0.0f;
         self->ent[i].mMaxBend = 0.0f;
-        func_002A4CF8(&self->ent[i].mAnticipate);
-        func_002A4CF8(&self->ent[i].mFall);
-        func_002A4CF8(&self->ent[i].mTrick);
+        tCrowdEventData_FreeSamples(&self->ent[i].mAnticipate);
+        tCrowdEventData_FreeSamples(&self->ent[i].mFall);
+        tCrowdEventData_FreeSamples(&self->ent[i].mTrick);
     }
     for (int i = 0; i < n; i++) {
         self->voices[i].mCrowdBank = cheerBank;
@@ -12302,30 +12302,30 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
     sSnd6D78Parser infParser;
     FileParser_FileParser((FileParser*)((FileParser*)&infParser), name, 0x100);
     infParser.cur = infParser.data;
-    if (FileParser_FindSection((FileParser*)(&infParser), str_GLOBAL)) func_002A7040((cCrowdSys*)self, &infParser);
+    if (FileParser_FindSection((FileParser*)(&infParser), str_GLOBAL)) cCrowdSys_ReadSection((cCrowdSys*)self, &infParser);
     infParser.cur = infParser.data;
-    if (FileParser_FindSection((FileParser*)(&infParser), key)) func_002A7040((cCrowdSys*)self, &infParser);
+    if (FileParser_FindSection((FileParser*)(&infParser), key)) cCrowdSys_ReadSection((cCrowdSys*)self, &infParser);
     FileParser__FileParser((FileParser*)(&infParser), 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A6F38);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_Shutdown);
 #ifdef SKIP_ASM
-extern "C" void func_002A7718(cCrowdSys* self);
+extern "C" void cCrowdSys_RemoveAllObjects(cCrowdSys* self);
 extern "C" void cCrowdInstance__cCrowdInstance(cCrowdInstance* p, int flags);
 
 /**
  * Shuts the crowd system down: removes all crowd objects, destroys the crowd instances and frees the sample lists.
  *
- * Calls func_002A7718, destroys each instance from the last one down (cCrowdInstance__cCrowdInstance(.., 0)), frees the array
+ * Calls cCrowdSys_RemoveAllObjects, destroys each instance from the last one down (cCrowdInstance__cCrowdInstance(.., 0)), frees the array
  * (cMemMan_free at its -0x10 header) and clears mpCrowdInstances and mNumInstances, then clears every intensity's
- * mAttack, mDecay, mMaxBend and its ANTICIPATE, FALL and TRICK lists (func_002A4CF8). cSSXAudio_InGamePurge and
+ * mAttack, mDecay, mMaxBend and its ANTICIPATE, FALL and TRICK lists (tCrowdEventData_FreeSamples). cSSXAudio_InGamePurge and
  * cCrowdSys__cCrowdSys call it.
  */
-extern "C" void func_002A6F38(cCrowdSys* self)
+extern "C" void cCrowdSys_Shutdown(cCrowdSys* self)
 {
-    func_002A7718(self);
+    cCrowdSys_RemoveAllObjects(self);
     cCrowdInstance* base = self->mpCrowdInstances;
     if (base != 0) {
         cCrowdInstance* curInstance = base + *(int*)((char*)base - 0x10);
@@ -12341,15 +12341,15 @@ extern "C" void func_002A6F38(cCrowdSys* self)
         self->mCrowdData[i].mAttack = 0.0f;
         self->mCrowdData[i].mDecay = 0.0f;
         self->mCrowdData[i].mMaxBend = 0.0f;
-        func_002A4CF8(&self->mCrowdData[i].mAnticipate);
-        func_002A4CF8(&self->mCrowdData[i].mFall);
-        func_002A4CF8(&self->mCrowdData[i].mTrick);
+        tCrowdEventData_FreeSamples(&self->mCrowdData[i].mAnticipate);
+        tCrowdEventData_FreeSamples(&self->mCrowdData[i].mFall);
+        tCrowdEventData_FreeSamples(&self->mCrowdData[i].mTrick);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7040);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_ReadSection);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -12370,12 +12370,12 @@ extern const char str_MAXBENDpct_d[];
  * Reads the crowd entries of one crowd.inf section until the end of the file.
  *
  * For each name, intensities 1..3 are tried: TRICK<n>, FALL<n> and ANTICIPATE<n> load a sample file into that list
- * (func_002A4C28); ATTACK<n>, DECAY<n> and MAXBEND<n> set mAttack, mDecay and mMaxBend (FileParser_AssignFloat). Names
+ * (tCrowdEventData_LoadSample); ATTACK<n>, DECAY<n> and MAXBEND<n> set mAttack, mDecay and mMaxBend (FileParser_AssignFloat). Names
  * compare case-insensitively; others are skipped.
  *
  * @param parser  the FileParser positioned in the section
  */
-extern "C" void func_002A7040(cCrowdSys* self, void* parser)
+extern "C" void cCrowdSys_ReadSection(cCrowdSys* self, void* parser)
 {
     cCrowdSys* crowdSys = self;
     char val[0x200];
@@ -12386,19 +12386,19 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
             sprintf(key, str_TRICKpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 ((FileParser*)parser)->AssignString(name, val);
-                func_002A4C28(&crowdSys->mCrowdData[i].mTrick, val, 0);
+                tCrowdEventData_LoadSample(&crowdSys->mCrowdData[i].mTrick, val, 0);
                 break;
             }
             sprintf(key, str_FALLpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 ((FileParser*)parser)->AssignString(name, val);
-                func_002A4C28(&crowdSys->mCrowdData[i].mFall, val, 0);
+                tCrowdEventData_LoadSample(&crowdSys->mCrowdData[i].mFall, val, 0);
                 break;
             }
             sprintf(key, str_ANTICIPATEpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 ((FileParser*)parser)->AssignString(name, val);
-                func_002A4C28(&crowdSys->mCrowdData[i].mAnticipate, val, 0);
+                tCrowdEventData_LoadSample(&crowdSys->mCrowdData[i].mAnticipate, val, 0);
                 break;
             }
             sprintf(key, str_ATTACKpct_d, i + 1);
@@ -12422,16 +12422,16 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A72C0);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_UnpackHandle);
 #ifdef SKIP_ASM
 /**
  * Splits a crowd object handle into its crowd instance (low 8 bits) and object slot (the rest).
  *
- * @param packedId  the handle from func_002A7678
+ * @param packedId  the handle from cCrowdSys_AddObject
  * @param outInstance  receives the crowd instance (viewport)
  * @param outSlot  receives the object slot
  */
-extern "C" void func_002A72C0(cCrowdSys* self, int packedId, int* outInstance, int* outSlot)
+extern "C" void cCrowdSys_UnpackHandle(cCrowdSys* self, int packedId, int* outInstance, int* outSlot)
 {
     *outInstance = packedId & 0xff;
     *outSlot = packedId >> 8;
@@ -12439,140 +12439,140 @@ extern "C" void func_002A72C0(cCrowdSys* self, int packedId, int* outInstance, i
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A72D8);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_RemoveObject);
 #ifdef SKIP_ASM
-extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
+extern "C" void cCrowdInstance_RemoveObject(cCrowdInstance* voice, int b, float v);
 
 /**
- * Removes a crowd object by its handle (func_002A62F0), fading its ambient loop over @p fade.
+ * Removes a crowd object by its handle (cCrowdInstance_RemoveObject), fading its ambient loop over @p fade.
  *
  * cWorldTriggerInstance_Stop calls it with 0.25 for a trigger with the crowd flag.
  *
- * @param id  the crowd object handle (func_002A7678), or negative for none
+ * @param id  the crowd object handle (cCrowdSys_AddObject), or negative for none
  * @param fade  the fade time
  */
-extern "C" void func_002A72D8(cCrowdSys* self, int id, float fade)
+extern "C" void cCrowdSys_RemoveObject(cCrowdSys* self, int id, float fade)
 {
     if (id >= 0 && self->mpCrowdInstances != 0) {
         int instance;
         int slot;
-        func_002A72C0(self, id, &instance, &slot);
-        func_002A62F0(&self->mpCrowdInstances[instance], slot, fade);
+        cCrowdSys_UnpackHandle(self, id, &instance, &slot);
+        cCrowdInstance_RemoveObject(&self->mpCrowdInstances[instance], slot, fade);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7340);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_SetObjectLoudness);
 #ifdef SKIP_ASM
 /**
- * Sets the loudness of a crowd object by its handle (func_002A5CD8).
+ * Sets the loudness of a crowd object by its handle (cCrowdInstance_SetObjectLoudness).
  *
  * The world trigger update cWorldTriggerInstance_Update passes the trigger's level * 127.
  *
- * @param id  the crowd object handle (func_002A7678), or negative for none
+ * @param id  the crowd object handle (cCrowdSys_AddObject), or negative for none
  * @param value  the loudness, 0..127
  */
-extern "C" void func_002A7340(cCrowdSys* self, int id, int value)
+extern "C" void cCrowdSys_SetObjectLoudness(cCrowdSys* self, int id, int value)
 {
     if (id >= 0 && self->mpCrowdInstances != 0) {
         int instance;
         int slot;
-        func_002A72C0(self, id, &instance, &slot);
-        func_002A5CD8((s2A5CD8*)&self->mpCrowdInstances[instance], slot, value);
+        cCrowdSys_UnpackHandle(self, id, &instance, &slot);
+        cCrowdInstance_SetObjectLoudness((s2A5CD8*)&self->mpCrowdInstances[instance], slot, value);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A73A8);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_PlayTrickCheer);
 #ifdef SKIP_ASM
-extern "C" void func_002A64A0(cCrowdInstance* voice, int a1);
+extern "C" void cCrowdInstance_PlayTrickCheer(cCrowdInstance* voice, int a1);
 
 
 /**
- * Plays a TRICK cheer at an intensity on the crowd instance of a viewport (func_002A64A0), when instances exist.
+ * Plays a TRICK cheer at an intensity on the crowd instance of a viewport (cCrowdInstance_PlayTrickCheer), when instances exist.
  *
- * cSSXAudio_Land uses intensities 0..2 by the landed trick, and func_002A3AA0 and cSSXAudio_OnFinishEvent use 0.
+ * cSSXAudio_Land uses intensities 0..2 by the landed trick, and cSSXAudio_CheerOnStreamDoneCallback and cSSXAudio_OnFinishEvent use 0.
  *
  * @param slot  the crowd intensity (0..2)
  * @param i  the crowd instance (viewport)
  */
-extern "C" void func_002A73A8(cCrowdSys* self, int slot, int i)
+extern "C" void cCrowdSys_PlayTrickCheer(cCrowdSys* self, int slot, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance != 0) {
-        func_002A64A0((cCrowdInstance*)(&crowdInstance[i]), slot);
+        cCrowdInstance_PlayTrickCheer((cCrowdInstance*)(&crowdInstance[i]), slot);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A73D8);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_PlayFallCheer);
 #ifdef SKIP_ASM
-extern "C" void func_002A6648(cCrowdInstance* voice, int a1);
+extern "C" void cCrowdInstance_PlayFallCheer(cCrowdInstance* voice, int a1);
 
 /**
- * Plays a FALL cheer at an intensity on the crowd instance of a viewport (func_002A6648), when instances exist.
+ * Plays a FALL cheer at an intensity on the crowd instance of a viewport (cCrowdInstance_PlayFallCheer), when instances exist.
  *
  * cSSXAudio_Wipeout (a wipeout) uses intensities 0..2.
  *
  * @param slot  the crowd intensity (0..2)
  * @param i  the crowd instance (viewport)
  */
-extern "C" void func_002A73D8(cCrowdSys* self, int slot, int i)
+extern "C" void cCrowdSys_PlayFallCheer(cCrowdSys* self, int slot, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance != 0) {
-        func_002A6648((cCrowdInstance*)(&crowdInstance[i]), slot);
+        cCrowdInstance_PlayFallCheer((cCrowdInstance*)(&crowdInstance[i]), slot);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7408);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_RequestAnticipation);
 #ifdef SKIP_ASM
-extern "C" void func_002A67F0(cCrowdInstance* voice);
+extern "C" void cCrowdInstance_RequestAnticipation(cCrowdInstance* voice);
 
 /**
- * Asks the crowd instance of a viewport for an anticipation cheer (func_002A67F0), when instances exist.
+ * Asks the crowd instance of a viewport for an anticipation cheer (cCrowdInstance_RequestAnticipation), when instances exist.
  *
  * cSSXAudio_LiftWithAirTime calls it as the rider leaves the ground.
  *
  * @param i  the crowd instance (viewport)
  */
-extern "C" void func_002A7408(cCrowdSys* self, int i)
+extern "C" void cCrowdSys_RequestAnticipation(cCrowdSys* self, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance != 0) {
-        func_002A67F0((cCrowdInstance*)(&crowdInstance[i]));
+        cCrowdInstance_RequestAnticipation((cCrowdInstance*)(&crowdInstance[i]));
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7438);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_CancelAnticipation);
 #ifdef SKIP_ASM
-extern "C" void func_002A6808(cCrowdInstance* voice);
+extern "C" void cCrowdInstance_CancelAnticipation(cCrowdInstance* voice);
 
 /**
- * Cancels the anticipation cheer of a viewport's crowd instance (func_002A6808), when instances exist.
+ * Cancels the anticipation cheer of a viewport's crowd instance (cCrowdInstance_CancelAnticipation), when instances exist.
  *
  * cSSXAudio_Land (nothing gained) and cSSXAudio_Wipeout call it.
  *
  * @param i  the crowd instance (viewport)
  */
-extern "C" void func_002A7438(cCrowdSys* self, int i)
+extern "C" void cCrowdSys_CancelAnticipation(cCrowdSys* self, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance != 0) {
-        func_002A6808((cCrowdInstance*)(&crowdInstance[i]));
+        cCrowdInstance_CancelAnticipation((cCrowdInstance*)(&crowdInstance[i]));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7468);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_OpenObjectOpts);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int c, int n);
 
@@ -12592,11 +12592,11 @@ struct sSnd7468Pair {
  *
  * Copies the default channel, clears the position, volume, callback and other options, sets the delay to {100, 0, 90,
  * 50}, mMapToMaxVol to 0x7F and mCloseOnEnd to 1 (the push of cBankSys's SFX_Begin, without a bank and patch). The
- * world trigger update cWorldTriggerInstance_Update fills it and adds the object with func_002A7678, which pops it.
+ * world trigger update cWorldTriggerInstance_Update fills it and adds the object with cCrowdSys_AddObject, which pops it.
  *
  * @param sys  the crowd system (its first word is the cBankManager)
  */
-extern "C" void func_002A7468(char** sys)
+extern "C" void cCrowdSys_OpenObjectOpts(char** sys)
 {
     cBankManager* bankMgr = *(cBankManager**)sys;
     cBankMonitor* playOpts = &bankMgr->BankMonitor;
@@ -12624,27 +12624,27 @@ extern "C" void func_002A7468(char** sys)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7678);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_AddObject);
 #ifdef SKIP_ASM
-extern "C" int func_002A5D08(void* voice, void* bank, int a1);
+extern "C" int cCrowdInstance_AddObject(void* voice, void* bank, int a1);
 
 /**
  * Adds a crowd object from the current play-option level to the crowd instance of that level's viewport.
  *
- * Calls func_002A5D08 on instance mViewport[cur] with the options and @p ambientPatch, then pops the level. Returns the handle
+ * Calls cCrowdInstance_AddObject on instance mViewport[cur] with the options and @p ambientPatch, then pops the level. Returns the handle
  * (slot << 8 | viewport) or -1 (no instances, or no free slot). The world trigger update cWorldTriggerInstance_Update keeps it.
  *
  * @param ambientPatch  the ambient sample (patch) of the object
  * @return the crowd object handle, or -1
  */
-extern "C" int func_002A7678(cCrowdSys* self, int ambientPatch)
+extern "C" int cCrowdSys_AddObject(cCrowdSys* self, int ambientPatch)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance == 0) {
         return -1;
     }
     cBankMonitor* bankMonitor = &self->mpVBankManager->BankMonitor;
-    int packedId = func_002A5D08(&crowdInstance[bankMonitor->mViewport[bankMonitor->mInst]], bankMonitor, ambientPatch);
+    int packedId = cCrowdInstance_AddObject(&crowdInstance[bankMonitor->mViewport[bankMonitor->mInst]], bankMonitor, ambientPatch);
     if (packedId >= 0) {
         cBankMonitor* monitor = &self->mpVBankManager->BankMonitor;
         packedId = (packedId << 8) | monitor->mViewport[monitor->mInst];
@@ -12655,24 +12655,24 @@ extern "C" int func_002A7678(cCrowdSys* self, int ambientPatch)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7718);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_RemoveAllObjects);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern const sSndKey8 D_004A3700[];
-extern "C" void func_002A6430(cCrowdInstance* voice, float a1);
+extern "C" void cCrowdInstance_RemoveAllObjects(cCrowdInstance* voice, float a1);
 
 
 /**
  * Removes every crowd object of every crowd instance and destroys the bank monitor instances of the crowd callback.
  *
- * Calls func_002A6430(instance, 0) for each instance, then the bank monitor's vtable slot 3 with the callback key
- * D_004A3700 (func_002A77A8). cSSXAudio_BANKMONITOR_DestroyAll and func_002A6F38 call it.
+ * Calls cCrowdInstance_RemoveAllObjects(instance, 0) for each instance, then the bank monitor's vtable slot 3 with the callback key
+ * D_004A3700 (cCrowdSys_LoopPitchCallback). cSSXAudio_BANKMONITOR_DestroyAll and cCrowdSys_Shutdown call it.
  */
 // PORT: 64-bit long sound key
-extern "C" void func_002A7718(cCrowdSys* self)
+extern "C" void cCrowdSys_RemoveAllObjects(cCrowdSys* self)
 {
     for (int i = 0; i < self->mNumInstances; i++) {
-        func_002A6430(&self->mpCrowdInstances[i], 0.0f);
+        cCrowdInstance_RemoveAllObjects(&self->mpCrowdInstances[i], 0.0f);
     }
     cBankManager* bankManager = self->mpVBankManager;
     sVEntry<void(void*, long)>* vt = (sVEntry<void(void*, long)>*)bankManager->BankMonitor.mVtbl;
@@ -12682,26 +12682,26 @@ extern "C" void func_002A7718(cCrowdSys* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A77A8);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_LoopPitchCallback);
 #ifdef SKIP_ASM
-extern "C" void func_002A68B0(cCrowdInstance* self, cBankMonitorInstance* obj, float dt);
+extern "C" void cCrowdInstance_UpdateLoopPitch(cCrowdInstance* self, cBankMonitorInstance* obj, float dt);
 
 /**
- * Monitor callback of the crowd voices: forwards to func_002A68B0 for the crowd instance stored in the voice's mPtr.
+ * Monitor callback of the crowd voices: forwards to cCrowdInstance_UpdateLoopPitch for the crowd instance stored in the voice's mPtr.
  *
- * Its pointer to member is D_004A3700, which func_002A4E88, func_002A5D08 install on the loop voices.
+ * Its pointer to member is D_004A3700, which cCrowdInstance_Update, cCrowdInstance_AddObject install on the loop voices.
  *
  * @param obj  the voice's monitor instance
  * @param dt  the elapsed time
  */
-extern "C" void func_002A77A8(cCrowdSys* self, cBankMonitorInstance* obj, float dt)
+extern "C" void cCrowdSys_LoopPitchCallback(cCrowdSys* self, cBankMonitorInstance* obj, float dt)
 {
-    func_002A68B0((cCrowdInstance*)((char*)obj->mPtr), obj, dt);
+    cCrowdInstance_UpdateLoopPitch((cCrowdInstance*)((char*)obj->mPtr), obj, dt);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A77C8);
+INCLUDE_ASM("sound/soundsys", cCrowdSys_GetCurrentCheer);
 #ifdef SKIP_ASM
 
 /**
@@ -12713,7 +12713,7 @@ INCLUDE_ASM("sound/soundsys", func_002A77C8);
  * @param i  the crowd instance (viewport)
  * @return the cheer value
  */
-extern "C" int func_002A77C8(cCrowdSys* self, int i)
+extern "C" int cCrowdSys_GetCurrentCheer(cCrowdSys* self, int i)
 {
     if (i < self->mNumInstances) {
         return (self->mpCrowdInstances)[i].mCurrentCheer;
@@ -13395,7 +13395,7 @@ extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A8450);
+INCLUDE_ASM("sound/soundsys", cMidiSys_OpenMidiOpts);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int c, int n);
 
@@ -13412,14 +13412,14 @@ struct sSnd8450Sys {
 /**
  * Opens a play-option level for a MIDI sequence: pushes a level with the defaults and records the bank and sequence.
  *
- * Same push as func_002A7468 (default channel, delay {100, 0, 90, 50}, mMapToMaxVol 0x7F, mCloseOnEnd 1); then
- * mMidiBanks[level] gets (@p bankIndex, @p midiData). func_002A86B8 plays it. The crowd cheers and loops and func_002A8B28 use it.
+ * Same push as cCrowdSys_OpenObjectOpts (default channel, delay {100, 0, 90, 50}, mMapToMaxVol 0x7F, mCloseOnEnd 1); then
+ * mMidiBanks[level] gets (@p bankIndex, @p midiData). cMidiSys_PlayMidi plays it. The crowd cheers and loops and cMidiSys_EchoCallback use it.
  *
  * @param sys  the MIDI system (cMidiSys; the crowd system or D_004A3744)
  * @param bankIndex  the bank (cBankManager bank index)
  * @param midiData  the MIDI sequence data in that bank
  */
-extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
+extern "C" void cMidiSys_OpenMidiOpts(char** sys, int bankIndex, int midiData)
 {
     sSnd8450Sys* self = (sSnd8450Sys*)sys;
     cBankManager* bankMgr = self->mpVBankManager;
@@ -13450,7 +13450,7 @@ extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A86B8);
+INCLUDE_ASM("sound/soundsys", cMidiSys_PlayMidi);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
@@ -13510,13 +13510,13 @@ static inline int snd86B8Handle(cBankManager* m, int id)
  * (clamped 0..127). When the level has no 3D radius (mRadius 0) and the bank is loaded, SNDMIDI_play starts the
  * sequence now (in a sound-driver critical section). The voice goes to cBankMonitor_BANKMONITOR_Create(.., type 2) and
  * cBankMonitorInstance_SetMIDI records the sequence and bank on it. Each delay echo (count, step, decay % and first-echo %) adds a
- * monitor (cMonitor_MONITOR_Create, callback D_004A3748 = func_002A8B28) at the accumulated delay and decayed volume, until the
+ * monitor (cMonitor_MONITOR_Create, callback D_004A3748 = cMidiSys_EchoCallback) at the accumulated delay and decayed volume, until the
  * volume reaches 0. Pops the level (cur--).
  *
  * @param vself  the MIDI system (cMidiSys)
  * @return the voice handle, or -1
  */
-extern "C" int func_002A86B8(char** vself)
+extern "C" int cMidiSys_PlayMidi(char** vself)
 {
     sSnd86B8Sys* self = (sSnd86B8Sys*)vself;
     cBankManager* bankMgr = self->mpVBankManager;
@@ -13570,25 +13570,25 @@ extern "C" int func_002A86B8(char** vself)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A8B28);
+INCLUDE_ASM("sound/soundsys", cMidiSys_EchoCallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_002A86B8(char** sys);
+extern "C" int cMidiSys_PlayMidi(char** sys);
 
 /**
  * Monitor callback for a MIDI echo: plays the monitor's sequence again at its volume through D_004A3744.
  *
- * Opens a level (func_002A8450) with the bank (+0x1C) and sequence (+0x20) of the monitor instance, sets the vol
- * control (+0x18) and the volume (+0x24, clamped to 0x7F and 0) and plays it (func_002A86B8). Its pointer to member is
- * D_004A3748, which func_002A86B8 installs for each echo.
+ * Opens a level (cMidiSys_OpenMidiOpts) with the bank (+0x1C) and sequence (+0x20) of the monitor instance, sets the vol
+ * control (+0x18) and the volume (+0x24, clamped to 0x7F and 0) and plays it (cMidiSys_PlayMidi). Its pointer to member is
+ * D_004A3748, which cMidiSys_PlayMidi installs for each echo.
  *
  * @param midiSys  the MIDI system
  * @param obj  the monitor instance
  * @return 1
  */
-extern "C" int func_002A8B28(cMidiSys* midiSys, cMonitorInstance* obj)
+extern "C" int cMidiSys_EchoCallback(cMidiSys* midiSys, cMonitorInstance* obj)
 {
-    func_002A8450((char**)D_004A3744, obj->mData1, obj->mData2);
+    cMidiSys_OpenMidiOpts((char**)D_004A3744, obj->mData1, obj->mData2);
     cBankManager* ctlMgr = (cBankManager*)D_004A3744->mpVBankManager;
     ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = (float*)obj->mPtr;
     cBankManager* volMgr = (cBankManager*)D_004A3744->mpVBankManager;
@@ -13597,7 +13597,7 @@ extern "C" int func_002A8B28(cMidiSys* midiSys, cMonitorInstance* obj)
 #define SND_X (playOpts->mBaseVol[playOpts->mInst])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
     playOpts->mCurrent[volMgr->BankMonitor.mInst].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
-    func_002A86B8((char**)D_004A3744);
+    cMidiSys_PlayMidi((char**)D_004A3744);
     return 1;
 }
 #endif
@@ -13842,17 +13842,17 @@ INCLUDE_ASM("sound/soundsys", cPS2SoundManager_AllocSoundMem);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_003B5B20(int a, int b);
 extern "C" int func_003B5B68(int* out);
-// The unit defines func_002A92B8 with its own entry/pool view types; bind this unit's struct view.
-tPS2SoundMemNode* func_002A92B8_v(cPS2SoundManager* self) __asm__("func_002A92B8");
+// The unit defines cPS2SoundManager_TakeUnusedNode with its own entry/pool view types; bind this unit's struct view.
+tPS2SoundMemNode* cPS2SoundManager_TakeUnusedNode_v(cPS2SoundManager* self) __asm__("cPS2SoundManager_TakeUnusedNode");
 
 /**
  * Allocates a block of sound memory and returns its handle.
  *
  * First walks the free-block list (mFreeNodeHead, sorted by address): a block of exactly @p size is marked used and
- * unlinked, a bigger one is split (a new node from func_002A92B8 takes its top @p size bytes). Otherwise carves the
+ * unlinked, a bigger one is split (a new node from cPS2SoundManager_TakeUnusedNode takes its top @p size bytes). Otherwise carves the
  * block off the top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with
  * -2 while load limits are on (mMemLoadLimited), else lowers mMainMemHighAddr by @p size and tells the driver
- * (func_003B5B20). No check that func_002A92B8 found a node. Likely bug: an exact fit at the head of the free list is
+ * (func_003B5B20). No check that cPS2SoundManager_TakeUnusedNode found a node. Likely bug: an exact fit at the head of the free list is
  * never unlinked (mFreeNodeHead keeps pointing at the now-used node, whose next is cleared), so the rest of the free
  * list is lost and the next request of that size gets the same block again.
  *
@@ -13875,7 +13875,7 @@ int cPS2SoundManager::AllocSoundMem(int size)
                 return ps2SoundMemNode->index;
             }
             if (size < ps2SoundMemNode->size) {
-                tPS2SoundMemNode* n = func_002A92B8_v((this));
+                tPS2SoundMemNode* n = cPS2SoundManager_TakeUnusedNode_v((this));
                 int top = ps2SoundMemNode->highAddr;
                 n->state = 2;
                 n->next = -1;
@@ -13898,7 +13898,7 @@ int cPS2SoundManager::AllocSoundMem(int size)
     if (mMemLoadLimited != 0) {
         return -2;
     }
-    tPS2SoundMemNode* n = func_002A92B8_v((this));
+    tPS2SoundMemNode* n = cPS2SoundManager_TakeUnusedNode_v((this));
     int top = mMainMemHighAddr;
     n->state = 2;
     n->lowAddr = top - size;
@@ -13915,11 +13915,11 @@ INCLUDE_ASM("sound/soundsys", cPS2SoundManager_DeallocSoundMem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_002A92F8_v(cPS2SoundManager* self, tPS2SoundMemNode* e) __asm__("func_002A92F8");
+extern "C" void cPS2SoundManager_FreeTopBlock_v(cPS2SoundManager* self, tPS2SoundMemNode* e) __asm__("cPS2SoundManager_FreeTopBlock");
 /**
  * Frees a block of sound memory allocated by cPS2SoundManager_AllocSoundMem (cPS2SoundManager_AllocSoundMem).
  *
- * Marks node @p memHandle free. A block at mMainMemHighAddr goes back to main memory (func_002A92F8), followed by every
+ * Marks node @p memHandle free. A block at mMainMemHighAddr goes back to main memory (cPS2SoundManager_FreeTopBlock), followed by every
  * free block that now sits at the new top; any other block is inserted into the free-block list (mFreeNodeHead) in
  * address order.
  *
@@ -13930,12 +13930,12 @@ void cPS2SoundManager::DeallocSoundMem(int memHandle)
     tPS2SoundMemNode* n = &((&mNodes[0]))[memHandle];
     n->state = 1;
     if (n->lowAddr == mMainMemHighAddr) {
-        func_002A92F8_v((this), n);
+        cPS2SoundManager_FreeTopBlock_v((this), n);
         while (mFreeNodeHead >= 0) {
             tPS2SoundMemNode* ps2SoundMemNode = &((&mNodes[0]))[mFreeNodeHead];
             if (ps2SoundMemNode->lowAddr != mMainMemHighAddr) return;
             mFreeNodeHead = ps2SoundMemNode->next;
-            func_002A92F8_v((this), ps2SoundMemNode);
+            cPS2SoundManager_FreeTopBlock_v((this), ps2SoundMemNode);
         }
     } else if (mFreeNodeHead < 0) {
         n->next = mFreeNodeHead;
@@ -14014,7 +14014,7 @@ void cPS2SoundManager::RestoreSoundMemLoadLimits()
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A92B8);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_TakeUnusedNode);
 #ifdef SKIP_ASM
 
 struct s2A92B8 {
@@ -14032,7 +14032,7 @@ struct s2A92B8 {
  *
  * @return the node (tPS2SoundMemNode), or 0
  */
-extern "C" tPS2SoundMemNode* func_002A92B8(cPS2SoundManager* self)
+extern "C" tPS2SoundMemNode* cPS2SoundManager_TakeUnusedNode(cPS2SoundManager* self)
 {
     int i = self->mUnusedNodeHead;
     if (i < 0) {
@@ -14046,7 +14046,7 @@ extern "C" tPS2SoundMemNode* func_002A92B8(cPS2SoundManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A92F8);
+INCLUDE_ASM("sound/soundsys", cPS2SoundManager_FreeTopBlock);
 #ifdef SKIP_ASM
 extern "C" void func_003B5B20(int a, int b);
 
@@ -14059,7 +14059,7 @@ extern "C" void func_003B5B20(int a, int b);
  *
  * @param memNode  the memory node
  */
-extern "C" void func_002A92F8(cPS2SoundManager* self, tPS2SoundMemNode* memNode)
+extern "C" void cPS2SoundManager_FreeTopBlock(cPS2SoundManager* self, tPS2SoundMemNode* memNode)
 {
     self->mMainMemHighAddr = memNode->highAddr;
     memNode->lowAddr = -1;

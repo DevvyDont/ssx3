@@ -4,7 +4,7 @@
 // cOVStateTrophy: the in-game trophy overlay ("34trophy"): widget events 5 / 6 ask the custom interface (the
 // engine's first word) for the next / previous state and push it.
 // EA's source file is not known (no assert of its own). Retail code: onCreateScreen / onWidgetEvent in fe/ovstatetrophy
-// (0x0020E938, 0x0020E9A0); the ctors func_002222F8 (engine 0) / cOVStateTrophy_cOVStateTrophy (pEngine, id) and the dtor in
+// (0x0020E938, 0x0020E9A0); the ctors cOVStateTrophy_cOVStateTrophy1 (engine 0) / cOVStateTrophy_cOVStateTrophy (pEngine, id) and the dtor in
 // fe/all_in_one_fe (0x002222F8 ... 0x002223C0).
 //
 // Size 0x9C: [O] On Tour's class is 0x90 = On Tour's cOVState (no members of its own); retail's cOVState is 0x9C

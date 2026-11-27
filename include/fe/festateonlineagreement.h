@@ -13,7 +13,7 @@
 // found) and the default cFEStateOnlineAgreement_cFEStateOnlineAgreement2 (cFEStateNet(0, 0), no mHashName); destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement (slot 1: frees
 // mpTOSLines). Retail vtable cFEStateOnlineAgreement_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineAgreement_onCreateScreen, 7 cFEStateOnlineAgreement_onGainTransition, 10 cFEStateOnlineAgreement_onLoseTransition
 // (onLoseTransition), 12 onUpdate cFEStateOnlineAgreement_onUpdate, 18 onWidgetCreate cFEStateOnlineAgreement_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineAgreement_onWidgetEvent, 20
-// cFEStateOnlineAgreement_onWidgetMenu, 25 func_001C0EA8 (help), 31 func_001C0E88). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
+// cFEStateOnlineAgreement_onWidgetMenu, 25 cFEStateOnlineAgreement_fillHelpPopup (help), 31 cFEStateOnlineAgreement_onNetEvent). Methods: fe/feasyncfile 0x1C03D0-0x1C0EA8.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
@@ -41,18 +41,18 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
     //       cFEStateOnlineAgreement_cFEStateOnlineAgreement1 store 0x43
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateOnlineAgreement
-    int* mpTOSLines;                // 0x6D0 [R] 0 (all three ctors); [U] func_001C0540 frees it and stores
+    int* mpTOSLines;                // 0x6D0 [R] 0 (all three ctors); [U] cFEStateOnlineAgreement_buildTOSLines frees it and stores
                                     //       operator_new_tag(miNumTOSLines * 4, "cFEStateOnlineAgreement") filled
                                     //       with the hashes of "kT_TOS000".."kT_TOS165" (with the a/b/.. variants);
                                     //       onUpdate cFEStateOnlineAgreement_onUpdate hands mpTOSLines[miNextTOSLine++] to
                                     //       "AgTextScroll" (cUITextScroll_addUnicodeStringByID); the destructor frees it
-    unsigned int miNumTOSLines;     // 0x6D4 [U] func_001C0540 stores 0xB2; onUpdate compares miNextTOSLine with it
+    unsigned int miNumTOSLines;     // 0x6D4 [U] cFEStateOnlineAgreement_buildTOSLines stores 0xB2; onUpdate compares miNextTOSLine with it
                                     //       (sltu)
     unsigned int miNextTOSLine;     // 0x6D8 [R] 0 (all three ctors); [U] onUpdate cFEStateOnlineAgreement_onUpdate post-increments it
                                     //       per line added

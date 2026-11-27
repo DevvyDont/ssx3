@@ -76,7 +76,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" const tTrophyInfo* cBERewardInterface_getTrophy(void* self, int a1, int a2);
-extern "C" int func_001CE6F0(int a, int b);
+extern "C" int countPeakEvents(int a, int b);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
 extern char str_bitmap[];
@@ -118,7 +118,7 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  * "bitmap" is kept at 0x48 (On Tour mpBigIcon) and shows the selection (cFEStateTrophyRoom_updateBigArt, probably
  * updateBigArt); "stats" is kept at 0x4C and hidden. "screentitle" names the trophy type (0x58): kTROPHY_RACE,
  * kTROPHY_FREESTYLE, kTROPHY_EXPLORE, kTROPHY_EARNINGS. Rows "trophy" and "event_0" to "event_4" (misc data 0-5) and
- * "0text blocks" to "5text blocks" are hidden and made static past the peak's event count (func_001CE6F0); "trophy"
+ * "0text blocks" to "5text blocks" are hidden and made static past the peak's event count (countPeakEvents); "trophy"
  * shows the name from the reward interface and each event row its challenge name.
  *
  * @param w  the widget just created (its hash name is at +0x38)
@@ -157,7 +157,7 @@ void cFEStateTrophyRoom::onWidgetCreate(cUIThing* w)
     }
     for (int i = 0; i < 6; i++) {
         if (hashName == GetHashValue32(D_00441600[i])) {
-            int n = func_001CE6F0(mPeakNum, mTrophyType);
+            int n = countPeakEvents(mPeakNum, mTrophyType);
             w->mMiscData = i;
             if (n < i) {
                 vcall_43F0(w, 9, 0);
@@ -169,7 +169,7 @@ void cFEStateTrophyRoom::onWidgetCreate(cUIThing* w)
                 setChallengeName(w, mPeakNum, mTrophyType, i - 1);
             }
         } else if (hashName == GetHashValue32(D_00441618[i])) {
-            if (func_001CE6F0(mPeakNum, mTrophyType) < i) {
+            if (countPeakEvents(mPeakNum, mTrophyType) < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             }
@@ -362,7 +362,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" const tTrophyInfo* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" const tMedalInfo* cBERewardInterface_getMedal(void* self, int a1, int a2);
-extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, const char* name, int a3, int a4, int a5);
 
 struct sTrophyRoom_4918 {
     char pad[0x50];
@@ -377,7 +377,7 @@ struct sTrophyRoom_4918 {
 /**
  * Requests the trophy room's five images from the FE file cache.
  *
- * On the cache at RealFE + 0x1A70, bank +0x50 (the character), func_0019DA10 (with 10, 1, 0) loads the trophy's image
+ * On the cache at RealFE + 0x1A70, bank +0x50 (the character), cFEBoltFileManager_requestFile (with 10, 1, 0) loads the trophy's image
  * (mpTextureFileName of cBERewardInterface_getTrophy for peak +0x54 and trophy +0x58) into slot index +0x74[0], and the
  * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
  * the requests. Called by the trophy room's constructor cFEStateTrophyRoom_cFEStateTrophyRoom.
@@ -386,13 +386,13 @@ void cFEStateTrophyRoom::loadTextures()
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = SSXApp->RealFE->mBoltFileManager;
-    mTextureFileIndex[0] = func_0019DA10(snd, mCharID,
+    mTextureFileIndex[0] = cFEBoltFileManager_requestFile(snd, mCharID,
         cBERewardInterface_getTrophy(pi, mPeakNum, mTrophyType)->mpTextureFileName, 10, 1, 0);
     mNumLoadingFiles = 1;
     for (int i = 0; i < 4; i++) {
         const char* name = cBERewardInterface_getMedal(pi, mTrophyType, i)->mpTextureFileName;
         if (name != 0) {
-            mTextureFileIndex[i + 1] = func_0019DA10(snd, mCharID, name, 10, 1, 0);
+            mTextureFileIndex[i + 1] = cFEBoltFileManager_requestFile(snd, mCharID, name, 10, 1, 0);
             mNumLoadingFiles++;
         }
     }
@@ -402,9 +402,9 @@ void cFEStateTrophyRoom::loadTextures()
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateTexturesLoad);
 #ifdef SKIP_ASM
-extern "C" bool func_0019E238(void* self, int bank, int i);
-extern "C" char* func_0019E2B0(void* self, int bank, int i);
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" bool cFEBoltFileManager_isFileLoaded(void* self, int bank, int i);
+extern "C" char* cFEBoltFileManager_getFileDataValue(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern char str_trph[];
 
@@ -412,10 +412,10 @@ extern char str_trph[];
 /**
  * Turns each finished trophy-room image load into a texture and redraws the big picture.
  *
- * For each of the five cache slots (+0x74) still pending whose file has loaded (func_0019E238 on RealFE + 0x1A70, bank
- * +0x50) it creates the texture "trph" from the first shape of the shape file func_0019E2B0 returns (tbl[0].offset)
+ * For each of the five cache slots (+0x74) still pending whose file has loaded (cFEBoltFileManager_isFileLoaded on RealFE + 0x1A70, bank
+ * +0x50) it creates the texture "trph" from the first shape of the shape file cFEBoltFileManager_getFileDataValue returns (tbl[0].offset)
  * through GrMan's vtable slot 46 (cPS2GraphicsMan_AddTexture in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
- * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
+ * (cFEBoltFileManager_releaseFile), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
  * (cFEStateTrophyRoom_updateBigArt with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
  *
  */
@@ -425,13 +425,13 @@ void cFEStateTrophyRoom::updateTexturesLoad()
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->mTextureFileIndex[i] >= 0 && func_0019E238(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
-            SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex[i]);
+        if (self->mTextureFileIndex[i] >= 0 && cFEBoltFileManager_isFileLoaded(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
+            SHAPEFILE* fileData = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(mgr, self->mCharID, self->mTextureFileIndex[i]);
             // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file
             // (a file blob)
             const SHAPE* shape = (const SHAPE*)((char*)fileData + fileData->tbl[0].offset);
             self->mTextureIDs[i] = GrMan->AddTexture(shape, str_trph, 0, 1, -1);
-            func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
+            cFEBoltFileManager_releaseFile(mgr, self->mCharID, self->mTextureFileIndex[i]);
             self->mTextureFileIndex[i] = -1;
             self->mNumLoadingFiles--;
             self->updateBigArt(self->mCurSelection);
@@ -443,7 +443,7 @@ void cFEStateTrophyRoom::updateTexturesLoad()
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_purgeTextures);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 struct sSelf001D4B20 {
     char pad[0x50];
     int bank;
@@ -456,7 +456,7 @@ struct sSelf001D4B20 {
  * Releases the trophy room's five images.
  *
  * Each texture (+0x60) is removed with GrMan's vtable slot 50 (cPS2GraphicsMan_RemoveTexture) and each cached file
- * (+0x74) released with func_0019DC20 (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
+ * (+0x74) released with cFEBoltFileManager_releaseFile (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
  * cFEStateTrophyRoom__cFEStateTrophyRoom.
  */
 void cFEStateTrophyRoom::purgeTextures()
@@ -469,7 +469,7 @@ void cFEStateTrophyRoom::purgeTextures()
         }
         mTextureIDs[i] = -1;
         if (mTextureFileIndex[i] >= 0) {
-            func_0019DC20(mgr, mCharID, mTextureFileIndex[i]);
+            cFEBoltFileManager_releaseFile(mgr, mCharID, mTextureFileIndex[i]);
         }
         mTextureFileIndex[i] = -1;
     }
@@ -520,7 +520,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 extern char str_128rewardsroom[];
 
 /**
@@ -534,7 +534,7 @@ void cFEStateRewardsRoom::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0028F140(cAudioInterface_bxAudio(), 6);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 6);
 }
 #endif
 
@@ -769,53 +769,53 @@ extern "C" void cFEStateRelogin_onWidgetCreate(cFEStateLogin* self, cUIText* ite
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5138);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onNetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" int func_001BF228(void* self, int msg);
+extern "C" void cFEStateNet_pushState(void* self, void* obj);
+extern "C" int cFEStateLogin_onNetEvent(void* self, int msg);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(void* mem, cUIEngine* a1);
-extern "C" void func_0025C610(void* mgr);
-extern "C" void* func_0025CD50(void*, char*);
-extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
+extern "C" void LobbyMan_authenticate(void* mgr);
+extern "C" void* LobbyMan_selectPersona(void*, char*);
+extern "C" void LobbyMan_reportRaceResult(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
 extern char str_cFEStateOnlineMainMenu[];
 
 /**
  * Handles lobby events on the reconnect screen: logs in again, re-selects the persona and returns to the online main
  * menu.
  *
- * kNetEvent_LobbyConnect sends the login request (func_0025C610 on LobbyMan_mLobbyMan); kNetEvent_Authentication
- * selects the current persona again (func_0025CD50 with mPersona); 257 pushes a new cFEStateOnlineMainMenu (1744 bytes)
- * through func_001A8A40; 273 calls func_0025FD50 with fields of cBENetworkInterface_networkOpt (+0x4, whether +0x8 is
+ * kNetEvent_LobbyConnect sends the login request (LobbyMan_authenticate on LobbyMan_mLobbyMan); kNetEvent_Authentication
+ * selects the current persona again (LobbyMan_selectPersona with mPersona); 257 pushes a new cFEStateOnlineMainMenu (1744 bytes)
+ * through cFEStateNet_pushState; 273 calls LobbyMan_reportRaceResult with fields of cBENetworkInterface_networkOpt (+0x4, whether +0x8 is
  * 0, whether it is not, and the strings at +0x330 and +0x3DC). Other events go to cFEStateLogin's handler
- * func_001BF228. Lobby event slot (+0xFC) of cFEStateRelogin_vtbl.
+ * cFEStateLogin_onNetEvent. Lobby event slot (+0xFC) of cFEStateRelogin_vtbl.
  *
  * @param msg  the lobby event id
- * @return 0 for the handled events, else func_001BF228's result
+ * @return 0 for the handled events, else cFEStateLogin_onNetEvent's result
  */
-extern "C" int func_001D5138(cFEStateLogin* self, int msg)
+extern "C" int cFEStateRelogin_onNetEvent(cFEStateLogin* self, int msg)
 {
     switch (msg) {
     case kNetEvent_LobbyConnect:
-        func_0025C610(LobbyMan_mLobbyMan);
+        LobbyMan_authenticate(LobbyMan_mLobbyMan);
         break;
     case kNetEvent_Authentication:
-        func_0025CD50(LobbyMan_mLobbyMan, (LobbyMan_mLobbyMan->mPersona));
+        LobbyMan_selectPersona(LobbyMan_mLobbyMan, (LobbyMan_mLobbyMan->mPersona));
         break;
     case 257:
-        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744,
+        cFEStateNet_pushState(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744,
                 str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
         break;
     case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         tBENetworkDB* netOpt = &cBENetworkInterface_networkOpt;
-        func_0025FD50(LobbyMan_mLobbyMan, netOpt->bIsRankedGame, netOpt->bIsHost == 0, netOpt->bIsHost != 0, (char*)&netOpt->MyStats, (char*)&netOpt->OpponentStats);
+        LobbyMan_reportRaceResult(LobbyMan_mLobbyMan, netOpt->bIsRankedGame, netOpt->bIsHost == 0, netOpt->bIsHost != 0, (char*)&netOpt->MyStats, (char*)&netOpt->OpponentStats);
         break;
     }
     default:
-        return func_001BF228(self, msg);
+        return cFEStateLogin_onNetEvent(self, msg);
     }
     return 0;
 }
@@ -824,11 +824,11 @@ extern "C" int func_001D5138(cFEStateLogin* self, int msg)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" int func_001A9668(void* self, void* a1, int a2);
+extern "C" int cFEStateNet_onDisconnectedPopupEvent(void* self, void* a1, int a2);
 extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 
 /**
- * Handles a popup event: popup id 258 (+0x18) goes to func_001A9668 (close the popups and push a new login), every
+ * Handles a popup event: popup id 258 (+0x18) goes to cFEStateNet_onDisconnectedPopupEvent (close the popups and push a new login), every
  * other popup to the login state's handler (cFEStateLogin_onPopupEvent).
  *
  * @param popup  the popup state
@@ -839,7 +839,7 @@ extern "C" int cFEStateRelogin_onPopupEvent(cFEStateLogin* self, cUIState* popup
 {
     int result;
     if (popup->miMiscData == 258) {
-        result = func_001A9668(self, popup, event);
+        result = cFEStateNet_onDisconnectedPopupEvent(self, popup, event);
     } else {
         result = cFEStateLogin_onPopupEvent(self, popup, event);
     }
@@ -848,16 +848,16 @@ extern "C" int cFEStateRelogin_onPopupEvent(cFEStateLogin* self, cUIState* popup
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5280);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onVerifyPopupEvent);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" int cUIStateStack_popToState(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 extern "C" void* func_002591B8();
-extern "C" void func_002636F0(void* p, int a1);
+extern "C" void cConnMan_disconnect(void* p, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* mem, void* owner);
-extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void cFEStateNet_pushState(void* self, void* obj);
 extern char str_cFEStateNetConfig[];
 
 /**
@@ -865,22 +865,22 @@ extern char str_cFEStateNetConfig[];
  *
  * Every event goes to cFEStateNet_onPopupEvent first. On 0xF (first option) or 20 (back) it then runs cUIStateStack_popToState on
  * the state stack (mpEngine + 0x18), sets bit 0x80 in the current state's mAttrState (+0x1C,
- * cUIStateStack_getCurrentState), logs out of the online services (func_002636F0 on func_002591B8(), no error) and
- * pushes a new cFEStateNetConfig (2332 bytes) through func_001A8A40. Popup handler slot (+0x10C) of
+ * cUIStateStack_getCurrentState), logs out of the online services (cConnMan_disconnect on func_002591B8(), no error) and
+ * pushes a new cFEStateNetConfig (2332 bytes) through cFEStateNet_pushState. Popup handler slot (+0x10C) of
  * cFEStateRelogin_vtbl.
  *
  * @param item  the popup that sent the event
  * @param msg  the popup event
  */
-extern "C" void func_001D5280(cFEStateLogin* self, void* item, int msg)
+extern "C" void cFEStateRelogin_onVerifyPopupEvent(cFEStateLogin* self, void* item, int msg)
 {
     if (msg == cUIState::kONSCREENPOPUPOPTION0 || msg == cUIState::kONSCREENPOPUPPREV) {
         cFEStateNet_onPopupEvent(self, item, msg);
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
         cUIState* state = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
         state->mAttrState |= 0x80;
-        func_002636F0(func_002591B8(), 0);
-        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));
+        cConnMan_disconnect(func_002591B8(), 0);
+        cFEStateNet_pushState(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));
     } else {
         cFEStateNet_onPopupEvent(self, item, msg);
     }
@@ -1525,9 +1525,9 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf);
 extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx);
 extern "C" void cFEMemCard_setSoundMode(unsigned int mode);
-extern "C" void func_00287410(void* opt, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
-extern "C" void func_00287520(void* opt, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 void cMemMan_free(void*);
@@ -1559,7 +1559,7 @@ static inline sSndCfg_1D5F40 Cfg_1D5F40()
  * cFEMemCard_mInstance). kTYPE_GAMEOPTIONS (settings) loads the buffer at +0x1D0 with cBESaveInterface_loadSaveGame (On
  * Tour cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded
  * sound options from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX,
- * speech and music volumes (4-bit fields) through func_00287410, cSSXAudio_SetSFXVolume and func_00287520, bit 17
+ * speech and music volumes (4-bit fields) through cSSXAudio_ApplyMusicVolume, cSSXAudio_SetSFXVolume and cSSXAudio_ApplySpeechVolume, bit 17
  * through cSSXAudio_SetDJSpeech and bit 16 through cSSXAudio_SetArcadeSFX. kTYPE_PROFILE loads it with
  * cBESaveInterface_loadSaveProfile (On Tour loadSaveProfile) into slot +0x1CC. kTYPE_REPLAY does nothing here. A failed
  * load returns false at once, keeping the buffer.
@@ -1579,9 +1579,9 @@ extern "C" bool cFEMemCard_readDone()
         if (cAudioInterface_bxAudio() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
             cFEMemCard_setSoundMode(Cfg_1D5F40().output);
-            func_00287410(cAudioInterface_bxAudio(), Cfg_1D5F40().sfxVol);
+            cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_1D5F40().sfxVol);
             cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_1D5F40().speechVol);
-            func_00287520(cAudioInterface_bxAudio(), Cfg_1D5F40().musicVol);
+            cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_1D5F40().musicVol);
             cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_1D5F40().iUseDJSpeech != 0);
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_1D5F40().iUseArcadeSFX != 0);
         }
@@ -1608,15 +1608,15 @@ extern "C" bool cFEMemCard_readDone()
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_setSoundMode);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_00287670(void* opt);
+extern "C" int cSSXAudio_GetMusicVolumeSetting(void* opt);
 extern "C" int cSSXAudio_GetSFXVolume(void* opt);
-extern "C" int func_002876D0(void* opt);
+extern "C" int cSSXAudio_GetSpeechVolumeSetting(void* opt);
 extern "C" void cSSXAudio_FrontEndPurge(void* opt);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int lang);
-extern "C" void func_00287410(void* opt, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
-extern "C" void func_00287520(void* opt, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void cSSXAudio_FrontEndLoad(void* opt);
@@ -1651,9 +1651,9 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  * -> keSOUNDDEF_MODE_MONO, kSpeakerDTS -> 3, anything else -> keSOUNDDEF_MODE_STEREO. The audio object
  * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's
  * first pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes
- * (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0), the DJ-speech flag (mDJSpeech), the arcade-SFX flag (+0x62B4)
+ * (cSSXAudio_GetMusicVolumeSetting, cSSXAudio_GetSFXVolume, cSSXAudio_GetSpeechVolumeSetting), the DJ-speech flag (mDJSpeech), the arcade-SFX flag (+0x62B4)
  * and the +0x534 word, then calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the
- * volumes and flags back (func_00287410, cSSXAudio_SetSFXVolume, func_00287520, cSSXAudio_SetDJSpeech,
+ * volumes and flags back (cSSXAudio_ApplyMusicVolume, cSSXAudio_SetSFXVolume, cSSXAudio_ApplySpeechVolume, cSSXAudio_SetDJSpeech,
  * cSSXAudio_SetArcadeSFX), reloads with cSSXAudio_FrontEndLoad and hands the saved +0x534 word back through virtual
  * slot 4 of the audio object's second base.
  *
@@ -1678,18 +1678,18 @@ extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
         break;
     }
     if ((*((sOpt_001D64C0*)cAudioInterface_bxAudio())->holder)->lang->v02(lang) == keSOUNDMANAGER_SETMODE_RESTART) {
-        float sfxVolume = func_00287670(cAudioInterface_bxAudio());
+        float sfxVolume = cSSXAudio_GetMusicVolumeSetting(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
-        float musicVolume = func_002876D0(cAudioInterface_bxAudio());
+        float musicVolume = cSSXAudio_GetSpeechVolumeSetting(cAudioInterface_bxAudio());
         int djSpeech = cAudioInterface_bxAudio()->mDJSpeech;
         int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
         int saved534 = cAudioInterface_bxAudio()->MusicSys.mMusicState;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);
-        func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
+        cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), (int)sfxVolume);
         cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), (int)speechVolume);
-        func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
+        cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), (int)musicVolume);
         cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), djSpeech);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeSfx);
         cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());

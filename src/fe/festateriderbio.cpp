@@ -29,7 +29,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 extern char str_154rider_details[];
 
@@ -38,7 +38,7 @@ extern char str_154rider_details[];
  * Creates the rider-details screen "154rider_details" and shows the player's character.
  *
  * Runs cFEStateCharSetup_updateWidget, reloads the player table (the interface's slot 2, discard), sets up the user's
- * front-end rider with the player's character, calls func_0028F140 with 1, and sets +0x50 when the character
+ * front-end rider with the player's character, calls cSSXAudio_SetFrontEndMusicMode with 1, and sets +0x50 when the character
  * has any cheat characters unlocked (cBERewardInterface_getNumOwnedCheatChars).
  */
 void cFEStateRiderDetail::onCreateScreen()
@@ -55,7 +55,7 @@ void cFEStateRiderDetail::onCreateScreen()
     pi->discard();
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, charID, 0);
-    func_0028F140(cAudioInterface_bxAudio(), 1);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 1);
     mbCheatCharEnable = 1;
     if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), mUserNum, charID) == 0) {
         mbCheatCharEnable = 0;
@@ -227,7 +227,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(void* iface, int rider);
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* mem, void* engine, void* owner, int rider, int cid);
 extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
-extern "C" void* func_001887A0(void* mem, void* engine, int a2);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* mem, void* engine, int a2);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
@@ -308,7 +308,7 @@ void cFEStateRiderDetail::onWidgetEvent(cUIThing* item, unsigned int msg)
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* w = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
+        cUIState* w = (cUIState*)cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         w->mAttrState = (w->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&mpEngine->mStateStack, w, 0, 0);
         break;
@@ -428,7 +428,7 @@ void cFEStateUberTrick::activateTrickMenu()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183D08);
+INCLUDE_ASM("fe/festateriderbio", fitThingToTexture);
 #ifdef SKIP_ASM
 
 /**
@@ -442,7 +442,7 @@ INCLUDE_ASM("fe/festateriderbio", func_00183D08);
  * @param rect  the texture element (cTextureElement), or 0
  * @param scale  size factor on top of 256 per texture-coordinate unit
  */
-extern "C" void func_00183D08(cUIThing* self, cTextureElement* rect, float scale)
+extern "C" void fitThingToTexture(cUIThing* self, cTextureElement* rect, float scale)
 {
     if (((void*)rect)) {
         t3Vector pos;

@@ -553,7 +553,7 @@ void cMemMan_free(void*);
 void operator_delete(int*);
 
 /**
- * Destroys a character profile: frees its item lookup table (+0x288, from func_00151A88) and clears the pointer; with
+ * Destroys a character profile: frees its item lookup table (+0x288, from cBECharProfileDB_buildBoltList) and clears the pointer; with
  * @p flags & 1 also frees the object.
  *
  * @param flags  bit 0: operator_delete the object
@@ -574,13 +574,13 @@ extern "C" void cBECharProfileDB__cBECharProfileDB(cBECharProfileDB* self, int f
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001513B8);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_applyStartingBolts);
 #ifdef SKIP_ASM
-int func_0014DC40(void* self, int kind);
-extern "C" void* func_0014DC50(void* self, int kind);
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(void* self, int i);
-extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
+int cBEBoltDB_getNumCharGroups(void* self, int kind);
+extern "C" void* cBEBoltDB_getCharGroups(void* self, int kind);
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
+extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* self, int id, int on);
 extern char D_004A6750[];
 
 
@@ -622,22 +622,22 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  * Applies a character profile's starting item ownership: grants each group prize, marks owned items, and marks free
  * or built-in items.
  *
- * For the character kind (+0xBC0) from the item database D_004A6750: owns each group's prize item (func_00151C90);
+ * For the character kind (+0xBC0) from the item database D_004A6750: owns each group's prize item (cBECharProfileDB_setBoltVisible);
  * owned items (flag 0x10) get flags 0x26; items priced 0 get flag 2, and items priced kBoltPriceBuiltIn (-1) also
- * become owned. If any did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and func_00151A88
+ * become owned. If any did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and cBECharProfileDB_buildBoltList
  * call it.
  *
  * @param vself  the character profile
  */
-extern "C" void func_001513B8(cBECharProfileDB* vself)
+extern "C" void cBECharProfileDB_applyStartingBolts(cBECharProfileDB* vself)
 {
     cBECharProfileDB* self = vself;
     void* db = D_004A6750;
-    int n = func_0014DC40(db, self->mCharacterID);
-    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->mCharacterID);
+    int n = cBEBoltDB_getNumCharGroups(db, self->mCharacterID);
+    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)cBEBoltDB_getCharGroups(db, self->mCharacterID);
     for (int i = 0; i < n; i++, prizeGroup++)
     {
-        func_00151C90((cBECharProfileDB*)self, prizeGroup->prize, 1);
+        cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, prizeGroup->prize, 1);
     }
     int j;
     for (j = 0; j < self->mNumBolts; j++)
@@ -646,8 +646,8 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
         if ((*(short*)&it->flags) & 0x10)
             *(short*)&it->flags |= 0x26;
     }
-    int numDefs = func_0014D988(db, self->mCharacterID);
-    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->mCharacterID);
+    int numDefs = cBEBoltDB_getNumCharBolts(db, self->mCharacterID);
+    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)cBEBoltDB_getCharBolts(db, self->mCharacterID);
     int changed = 0;
     for (int i = 0; i < numDefs; i++, itemDef++)
     {
@@ -658,7 +658,7 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
         else if (Price_1513B8(itemDef) == kBoltPriceBuiltIn)
         {
             (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
-            func_00151C90((cBECharProfileDB*)self, itemDef->id, 1);
+            cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, itemDef->id, 1);
             changed = 1;
         }
     }
@@ -678,7 +678,7 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001515B8);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_restoreVisibleFlags);
 #ifdef SKIP_ASM
 
 struct sEconItems_001515B8
@@ -693,7 +693,7 @@ struct sEconItems_001515B8
  *
  * The save-file loader calls it for every loaded profile.
  */
-extern "C" void func_001515B8(cBECharProfileDB* self)
+extern "C" void cBECharProfileDB_restoreVisibleFlags(cBECharProfileDB* self)
 {
     int n = self->mNumBolts;
     tBEProfileBolt* item = ((&self->mBolts[0]));
@@ -813,29 +813,29 @@ extern "C" void* memset(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, int c, int n);
 struct sEconItems_151A88;
 struct sEcon_001519E0;
-extern "C" void func_00151A88(cBECharProfileDB* self, int k);
-extern "C" void func_001519E0(sEcon_001519E0* self, int k);
-extern "C" void func_00150558(int kind, void* dst);
+extern "C" void cBECharProfileDB_buildBoltList(cBECharProfileDB* self, int k);
+extern "C" void cBECharProfileDB_resetRelations(sEcon_001519E0* self, int k);
+extern "C" void be_initStartingTricks(int kind, void* dst);
 extern sEconDef_1600 cBELibrary_missionInfo_v1600[] __asm__("cBELibrary_missionInfo");
 extern sEconColRec_1600 D_005308D9[];
 
 /**
  * Resets one character's career profile to its starting state.
  *
- * With @p reload, func_00151A88 first reloads the item data for character @p k. Then: the unlock bits at +0x278 get
+ * With @p reload, cBECharProfileDB_buildBoltList first reloads the item data for character @p k. Then: the unlock bits at +0x278 get
  * their defaults, money (+0xAC4, +0xAC8) and the visited-locations mask (+0xACC) are zeroed, the 26 slots are blanked,
  * the 23 entries cleared, the 0x58 mission flags (+0x118) take their initial lock state from cBELibrary_missionInfo, the outfit
- * colours come from D_005308D9[@p k], func_001519E0 and func_00150558 set the character kind's defaults, and the
+ * colours come from D_005308D9[@p k], cBECharProfileDB_resetRelations and be_initStartingTricks set the character kind's defaults, and the
  * remaining records are cleared; +0x27C ends as 0x11. Unlike On Tour's init(void) the retail version takes the
  * character and a reload flag.
  *
  * @param k  the character the profile belongs to
- * @param reload  nonzero to reload the character's item data first (func_00151A88)
+ * @param reload  nonzero to reload the character's item data first (cBECharProfileDB_buildBoltList)
  */
 extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 {
     if (reload) {
-        func_00151A88((cBECharProfileDB*)((sEconItems_151A88*)self), k);
+        cBECharProfileDB_buildBoltList((cBECharProfileDB*)((sEconItems_151A88*)self), k);
     }
     self->bits.bPeak1RivalPtsChallengePlayed = 0;
     self->bits.bPeak2RivalPtsChallengePlayed = 0;
@@ -891,8 +891,8 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
     self->col = D_005308D9[k].col;
     self->fAC4 = 0;
     self->fAC8 = 0;
-    func_001519E0((sEcon_001519E0*)self, self->kind);
-    func_00150558(self->kind, self->fBE6);
+    cBECharProfileDB_resetRelations((sEcon_001519E0*)self, self->kind);
+    be_initStartingTricks(self->kind, self->fBE6);
     memset(self->fBB8, 0, 8);
     memset(self->fDE4, 0, 84);
     self->fF04 = 0;
@@ -911,7 +911,7 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001519E0);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_resetRelations);
 #ifdef SKIP_ASM
 struct sEconColor_001519E0
 {
@@ -945,7 +945,7 @@ struct sEcon_001519E0
  *
  * @param k  the character the profile belongs to
  */
-extern "C" void func_001519E0(sEcon_001519E0* self, int k)
+extern "C" void cBECharProfileDB_resetRelations(sEcon_001519E0* self, int k)
 {
     sEconColor_001519E0 def = D_004A1218[0];
     for (int i = 0; i < 10; i++)
@@ -966,11 +966,11 @@ extern "C" void func_001519E0(sEcon_001519E0* self, int k)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintecon", func_00151A88);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_buildBoltList);
 #ifdef SKIP_ASM
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(void* self, int i);
-extern "C" void func_001513B8(cBECharProfileDB* self);
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
+extern "C" void cBECharProfileDB_applyStartingBolts(cBECharProfileDB* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern int kBolt_Num;
@@ -1001,15 +1001,15 @@ struct sEconItems_151A88
  *
  * Sets the kind (+0xBC0) and count (+0x28C) from D_004A6750; allocates the id-to-slot lookup (+0x288, kBolt_Num
  * shorts, "Profile_Bolts_Map") on first use and fills it with -1; gives each item a slot with flags 0 and clears the
- * rest of the 525 slots to id -1. Ends with func_001513B8.
+ * rest of the 525 slots to id -1. Ends with cBECharProfileDB_applyStartingBolts.
  *
  * @param k  the character
  */
-extern "C" void func_00151A88(cBECharProfileDB* self, int k)
+extern "C" void cBECharProfileDB_buildBoltList(cBECharProfileDB* self, int k)
 {
     void* db = D_004A6750;
-    sEconDef_151A88* itemDef = (sEconDef_151A88*)func_0014D998(db, k);
-    int n = func_0014D988(db, k);
+    sEconDef_151A88* itemDef = (sEconDef_151A88*)cBEBoltDB_getCharBolts(db, k);
+    int n = cBEBoltDB_getNumCharBolts(db, k);
     self->mCharacterID = k;
     self->mNumBolts = n;
     if (self->mpBoltsMap == 0)
@@ -1031,12 +1031,12 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
         emptySlot->id = -1;
         emptySlot->flags = 0;
     }
-    func_001513B8(self);
+    cBECharProfileDB_applyStartingBolts(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151BD0);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_normalizeBoltFlags);
 #ifdef SKIP_ASM
 
 struct sEconItems_151BD0
@@ -1055,7 +1055,7 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
 /**
  * Normalises a character profile's item flags: items with flag 0x20 get flags 0x16; the others lose flags 0x10 and 4.
  */
-extern "C" void func_00151BD0(cBECharProfileDB* self)
+extern "C" void cBECharProfileDB_normalizeBoltFlags(cBECharProfileDB* self)
 {
     for (int i = 0; i < self->mNumBolts; i++) {
         tBEProfileBolt* item = &((&self->mBolts[0]))[i];
@@ -1065,7 +1065,7 @@ extern "C" void func_00151BD0(cBECharProfileDB* self)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintecon", func_00151C20);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_getBoltIdAt);
 #ifdef SKIP_ASM
 /**
  * Returns the item id in slot @p i of a profile's item list (+0x290), or -1 when @p i is past the count (+0x28C).
@@ -1073,7 +1073,7 @@ INCLUDE_ASM("be/beintecon", func_00151C20);
  * @param i  the slot
  * @return the item id, or -1
  */
-extern "C" short func_00151C20(cBECharProfileDB* self, int i)
+extern "C" short cBECharProfileDB_getBoltIdAt(cBECharProfileDB* self, int i)
 {
     if (i >= self->mNumBolts)
         return -1;
@@ -1082,7 +1082,7 @@ extern "C" short func_00151C20(cBECharProfileDB* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151C48);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_setBoltBought);
 #ifdef SKIP_ASM
 
 struct sEconItems_00151C48
@@ -1101,7 +1101,7 @@ struct sEconItems_00151C48
  * @param id  the item id
  * @param on  nonzero to set the flag
  */
-extern "C" void func_00151C48(cBECharProfileDB* self, int id, int on)
+extern "C" void cBECharProfileDB_setBoltBought(cBECharProfileDB* self, int id, int on)
 {
     int idx = self->mpBoltsMap[id];
     tBEProfileBolt* item;
@@ -1117,15 +1117,15 @@ extern "C" void func_00151C48(cBECharProfileDB* self, int id, int on)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151C90);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_setBoltVisible);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_1C90() __asm__("func_0014BDB8__FPv");
-extern "C" int func_0014D448(void* db, int kind, int id);
-extern "C" void* func_0014D558(void* db, int kind, int id);
-extern "C" int func_0014D4C8(void* db, int kind, int id);
-extern "C" bool func_00151EF0(cBECharProfileDB* self, int id, int on);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_1C90() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" int cBEBoltDB_findBoltIndex(void* db, int kind, int id);
+extern "C" void* cBEBoltDB_getFirstChildBolt(void* db, int kind, int id);
+extern "C" int cBEBoltDB_countChildBolts(void* db, int kind, int id);
+extern "C" bool cBECharProfileDB_applyBoltRules(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1182,7 +1182,7 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
  *
  * Owning an item whose definition has flag 1 first un-owns the other members of its group (those owned or with flag
  * 8); un-owning one that was owned (or has flag 8) un-owns its dependants. A real change then applies the item's links
- * (func_00151EF0). Returns false as soon as a nested change fails.
+ * (cBECharProfileDB_applyBoltRules). Returns false as soon as a nested change fails.
  *
  * @param selfp  the character profile
  * @param id  the item id
@@ -1191,11 +1191,11 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
  */
 // Sets item id owned/unowned; turning on cascades turn-offs to conflicting items (def flag 1), turning off
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
-extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
+extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* selfp, int id, int on)
 {
     cBECharProfileDB* self = selfp;
-    sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
-    sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->mCharacterID, id));
+    sEconDefs_151C90* db = (sEconDefs_151C90*)cBEBoltInterface_getBoltDB_1C90();
+    sEconDef_151C90* def = getDef_151C90(db, cBEBoltDB_findBoltIndex(db, self->mCharacterID, id));
     tBEProfileBolt* item = getItem_151C90(self, id);
     int bit1 = hasFlag_151C90(def, 1) != 0;
     int bit8 = hasFlag_151C90(def, 8) != 0;
@@ -1209,8 +1209,8 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
     if (on && bit1)
     {
         int rid = def->rel;
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->mCharacterID, rid);
-        int n = func_0014D4C8(db, self->mCharacterID, rid);
+        sEconRel_151C90* rel = (sEconRel_151C90*)cBEBoltDB_getFirstChildBolt(db, self->mCharacterID, rid);
+        int n = cBEBoltDB_countChildBolts(db, self->mCharacterID, rid);
         for (int i = 0; i < n; i++, rel++)
         {
             int sid = rel->other;
@@ -1219,7 +1219,7 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
                 int j = self->mpBoltsMap[sid];
                 if (j >= 0 && (isOwned_151C90(&((&self->mBolts[0]))[j]) || (rel->flags & 8)))
                 {
-                    if (func_00151C90((cBECharProfileDB*)self, sid, 0) == 0)
+                    if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, sid, 0) == 0)
                         return false;
                 }
             }
@@ -1227,17 +1227,17 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
     }
     else if (!on && (wasOn || bit8))
     {
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->mCharacterID, id);
-        int n = func_0014D4C8(db, self->mCharacterID, id);
+        sEconRel_151C90* rel = (sEconRel_151C90*)cBEBoltDB_getFirstChildBolt(db, self->mCharacterID, id);
+        int n = cBEBoltDB_countChildBolts(db, self->mCharacterID, id);
         for (int i = 0; i < n; i++, rel++)
         {
-            if (func_00151C90((cBECharProfileDB*)self, rel->other, 0) == 0)
+            if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, rel->other, 0) == 0)
                 return false;
         }
     }
     if ((on && !wasOn) || (!on && wasOn))
     {
-        if (func_00151EF0((cBECharProfileDB*)self, id, on) == 0)
+        if (cBECharProfileDB_applyBoltRules((cBECharProfileDB*)self, id, on) == 0)
             return false;
     }
     return true;
@@ -1245,14 +1245,14 @@ extern "C" bool func_00151C90(cBECharProfileDB* selfp, int id, int on)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151EF0);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_applyBoltRules);
 #ifdef SKIP_ASM
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_1EF0() __asm__("func_0014BDB8__FPv");
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_1EF0() __asm__("cBEBoltInterface_getBoltDB__FPv");
 struct sEconLink_151EF0;
-extern "C" sEconLink_151EF0* func_0014DB40(void* db, int kind, int id, int on, int* n);
-extern "C" int func_0014D448(void* db, int kind, int id);
-extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
+extern "C" sEconLink_151EF0* cBEBoltDB_getBoltRules(void* db, int kind, int id, int on, int* n);
+extern "C" int cBEBoltDB_findBoltIndex(void* db, int kind, int id);
+extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1302,22 +1302,22 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
 /**
  * Applies the dependency links of item @p id for the given owned state: each link may own or un-own another item.
  *
- * Links come from func_0014DB40. A link is skipped when its target is kNoBoltID (-1), when its condition item's owned
+ * Links come from cBEBoltDB_getBoltRules. A link is skipped when its target is kNoBoltID (-1), when its condition item's owned
  * state differs from the link's, or when the target is already in the wanted state (unless it is owned and its
- * definition has flag 8). A link to @p id itself only sets its flag; others go through func_00151C90.
+ * definition has flag 8). A link to @p id itself only sets its flag; others go through cBECharProfileDB_setBoltVisible.
  *
  * @param selfp  the character profile
  * @param id  the item id
  * @param on  the item's new owned state
  * @return true on success, false if a nested change failed
  */
-// Sets item id owned/unowned and applies its dependency links (cascading through func_00151C90); 0 on failure.
-extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
+// Sets item id owned/unowned and applies its dependency links (cascading through cBECharProfileDB_setBoltVisible); 0 on failure.
+extern "C" bool cBECharProfileDB_applyBoltRules(cBECharProfileDB* selfp, int id, int on)
 {
     cBECharProfileDB* self = selfp;
-    sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
+    sEconDefs_151EF0* db = (sEconDefs_151EF0*)cBEBoltInterface_getBoltDB_1EF0();
     int n = 0;
-    sEconLink_151EF0* link = func_0014DB40(db, self->mCharacterID, id, on, &n);
+    sEconLink_151EF0* link = cBEBoltDB_getBoltRules(db, self->mCharacterID, id, on, &n);
     tBEProfileBolt* item = getItem_151EF0(self, id);
     for (int i = 0; i < n; i++, link++)
     {
@@ -1334,7 +1334,7 @@ extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
         {
             if (has)
                 continue;
-            if (!(getDef_151EF0(db, func_0014D448(db, self->mCharacterID, link->target))->flags & 8))
+            if (!(getDef_151EF0(db, cBEBoltDB_findBoltIndex(db, self->mCharacterID, link->target))->flags & 8))
                 continue;
         }
         if (targetItem->id == id)
@@ -1344,7 +1344,7 @@ extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
             else
                 item->flags &= ~0x10;
         }
-        else if (func_00151C90((cBECharProfileDB*)self, targetItem->id, link->on != 0) == 0)
+        else if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, targetItem->id, link->on != 0) == 0)
         {
             return false;
         }
@@ -1354,12 +1354,12 @@ extern "C" bool func_00151EF0(cBECharProfileDB* selfp, int id, int on)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001520E8);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_reapplyBoltRules);
 #ifdef SKIP_ASM
-void* func_0014BDB8(void* self);
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(void* self, int i);
-extern "C" bool func_00151EF0(cBECharProfileDB* self, int id, int on);
+void* cBEBoltInterface_getBoltDB(void* self);
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
+extern "C" bool cBECharProfileDB_applyBoltRules(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1385,11 +1385,11 @@ static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
  * @param changed  receives 1 when at least one such item was owned, else 0
  * @return true on success, false if applying links failed
  */
-extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
+extern "C" bool cBECharProfileDB_reapplyBoltRules(cBECharProfileDB* self, int* changed)
 {
-    void* db = func_0014BDB8((self));
-    int n = func_0014D988(db, self->mCharacterID);
-    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, self->mCharacterID);
+    void* db = cBEBoltInterface_getBoltDB((self));
+    int n = cBEBoltDB_getNumCharBolts(db, self->mCharacterID);
+    sEconDef_001520E8* def = (sEconDef_001520E8*)cBEBoltDB_getCharBolts(db, self->mCharacterID);
     *changed = 0;
     for (int i = 0; i < n; i++, def++)
     {
@@ -1398,7 +1398,7 @@ extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
             if (getItem_001520E8((self), def->id)->flags & 0x10)
             {
                 *changed = 1;
-                if (func_00151EF0(self, def->id, 1) == 0)
+                if (cBECharProfileDB_applyBoltRules(self, def->id, 1) == 0)
                     return false;
             }
         }
@@ -1408,14 +1408,14 @@ extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001521F0);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_showDefaultBolts);
 #ifdef SKIP_ASM
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-int func_0014DC40(void* self, int kind);
-extern "C" void* func_0014DC50(void* self, int kind);
-extern "C" int func_0014D608(void* self, int kind, int id, void** out, int a, int b);
-extern "C" bool func_00151C90(cBECharProfileDB* self, int id, int on);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+int cBEBoltDB_getNumCharGroups(void* self, int kind);
+extern "C" void* cBEBoltDB_getCharGroups(void* self, int kind);
+extern "C" int cBEBoltDB_collectChildBolts(void* self, int kind, int id, void** out, int a, int b);
+extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* self, int id, int on);
 
 
 
@@ -1445,22 +1445,22 @@ static inline tBEProfileBolt* Find_1521F0(cBECharProfileDB* self, int id)
 /**
  * Gives a character profile each group's prize item when none of the group's owned items has definition flag 0x10.
  *
- * For each group of the character kind: lists the group's items (func_0014D608) and, if no owned item has flag 0x10,
- * owns the group's prize (func_00151C90).
+ * For each group of the character kind: lists the group's items (cBEBoltDB_collectChildBolts) and, if no owned item has flag 0x10,
+ * owns the group's prize (cBECharProfileDB_setBoltVisible).
  *
  * @return 1, or 0 when a prize could not be owned
  */
-extern "C" int func_001521F0(cBECharProfileDB* self)
+extern "C" int cBECharProfileDB_showDefaultBolts(cBECharProfileDB* self)
 {
     int i = 0;
     int ok = 1;
-    void* db = func_0014BDB8_noarg();
-    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->mCharacterID);
-    int n = func_0014DC40(db, self->mCharacterID);
+    void* db = cBEBoltInterface_getBoltDB_noarg();
+    sEconGroup_1521F0* group = (sEconGroup_1521F0*)cBEBoltDB_getCharGroups(db, self->mCharacterID);
+    int n = cBEBoltDB_getNumCharGroups(db, self->mCharacterID);
     for (; i < n; i++, group++)
     {
         sEconDef_1521F0* list[528];
-        int cnt = func_0014D608(db, self->mCharacterID, group->id, (void**)list, -1, 1);
+        int cnt = cBEBoltDB_collectChildBolts(db, self->mCharacterID, group->id, (void**)list, -1, 1);
         int j;
         for (j = 0; j < cnt; j++)
         {
@@ -1471,7 +1471,7 @@ extern "C" int func_001521F0(cBECharProfileDB* self)
         }
         if (j == cnt)
         {
-            if (func_00151C90(self, group->prize, 1) == 0)
+            if (cBECharProfileDB_setBoltVisible(self, group->prize, 1) == 0)
             {
                 ok = 0;
                 break;
@@ -1484,7 +1484,7 @@ extern "C" int func_001521F0(cBECharProfileDB* self)
 
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00152340);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_isBoltVisible);
 #ifdef SKIP_ASM
 static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
 {
@@ -1497,7 +1497,7 @@ static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
  * @param id  the item id
  * @return true when owned
  */
-extern "C" bool func_00152340(cBECharProfileDB* self, int id)
+extern "C" bool cBECharProfileDB_isBoltVisible(cBECharProfileDB* self, int id)
 {
     int idx = (self->mpBoltsMap)[id];
     unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
@@ -1505,7 +1505,7 @@ extern "C" bool func_00152340(cBECharProfileDB* self, int id)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintecon", func_00152368);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB_hasBoltFlags);
 #ifdef SKIP_ASM
 /**
  * Tells whether item @p id has every flag in @p mask set in a character profile's item list (no check for a missing
@@ -1515,7 +1515,7 @@ INCLUDE_ASM("be/beintecon", func_00152368);
  * @param mask  the flags to test
  * @return true when all are set
  */
-extern "C" bool func_00152368(cBECharProfileDB* self, int id, unsigned int mask)
+extern "C" bool cBECharProfileDB_hasBoltFlags(cBECharProfileDB* self, int id, unsigned int mask)
 {
     int idx = (self->mpBoltsMap)[id];
     unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);

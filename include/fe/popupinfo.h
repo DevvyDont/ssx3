@@ -4,17 +4,17 @@
 // cPopupInfo: the description of one cScreenPopup (type, message, title, entry-box texts, up to 5 option names and
 // confirmations, layer offset, the id reported back to the owner, layout flags). Every cScreenPopup embeds one at
 // 0xBC (`info`, fe/screenpopup.h; getPopupInfo cScreenPopup_getPopupInfo returns it); the online states fill it after
-// cFEStateNet's createPopup (func_001A9C50) and show the popup with func_001A9BC0.
+// cFEStateNet's createPopup (cFEStateNet_createPopup) and show the popup with cFEStateNet_showPopup.
 //
 // Size 0xCC: the members end at 0xC8 and the vptr follows (retail _vt$10cPopupInfo cPopupInfo_vtbl, 1 slot: the destructor
 // cPopupInfo__cPopupInfo), as fe/screenpopup.h records; cScreenPopup's next member starts at 0x188 = 0xBC + 0xCC.
 // Methods (retail fe/feasyncfile 0x1C55F8-0x1C58D0; EA's source: all_in_one_fe.cpp in On Tour):
 //   cPopupInfo_cPopupInfo cPopupInfo() (stores the vptr, calls clear), cPopupInfo_clear clear(), cPopupInfo__cPopupInfo ~cPopupInfo(),
-//   func_001C5780/func_001C57A0/func_001C57C0 setPopupOptionNames(int, const char* / const unsigned short* /
-//   unsigned int) (eType 2/1/3), func_001C57E0 setPopupOptionNames(int, const tPopupElement*),
-//   cPopupInfo_getPopupOptionNames getPopupOptionNames(int), func_001C5810/func_001C5838/func_001C5878 setPopupConfirmation(int,
+//   cPopupInfo_setPopupOptionNames/cPopupInfo_setPopupOptionNames1/cPopupInfo_setPopupOptionNames2 setPopupOptionNames(int, const char* / const unsigned short* /
+//   unsigned int) (eType 2/1/3), cPopupInfo_setPopupOptionNames3 setPopupOptionNames(int, const tPopupElement*),
+//   cPopupInfo_getPopupOptionNames getPopupOptionNames(int), cPopupInfo_setPopupConfirmation/cPopupInfo_setPopupConfirmation1/cPopupInfo_setPopupConfirmation2 setPopupConfirmation(int,
 //   const char* / const unsigned short* / unsigned int, int iDefault) (eType 2/1/3), cPopupInfo_clearPopupConfirmation
-//   clearPopupConfirmation(int), func_001C58A0 setPopupConfirmation(int, const tConfirmElement*), cPopupInfo_getPopupConfirmation
+//   clearPopupConfirmation(int), cPopupInfo_setPopupConfirmation3 setPopupConfirmation(int, const tConfirmElement*), cPopupInfo_getPopupConfirmation
 //   getPopupConfirmation(int). The other accessors (setPopupType, setPopupMessage ...) are inlined at every call site.
 //
 // A FLAT layout, like main/game.h. Member names and order are EA's, from SSX On Tour's DWARF (class cPopupInfo, size
@@ -106,9 +106,9 @@ struct cPopupInfo {
     tPopupElement mtTitle;          // 0x00C [O]; [P] setPopupTitle 0xC/0x10
     tPopupElement mtEntryBoxTitle;  // 0x014 [O]; [P] setPopupEntryBoxTitle 0x14/0x18
     tPopupElement mtEntryBoxInitial; // 0x01C [O]; [P] setPopupEntryBoxInitial 0x1C/0x20
-    tPopupElement mtOptionNames[5]; // 0x024 [O]; [R] setPopupOptionNames func_001C5780.. (0x24 + 8 * i), clear
+    tPopupElement mtOptionNames[5]; // 0x024 [O]; [R] setPopupOptionNames cPopupInfo_setPopupOptionNames.. (0x24 + 8 * i), clear
     tPopupElement mtPostPending;    // 0x04C [O]; [P] setPopupPostPending 0x4C/0x50
-    tConfirmElement mtConfirmation[5]; // 0x054 [O]; [R] setPopupConfirmation func_001C5810.. (0x54 + 0xC * i), clear
+    tConfirmElement mtConfirmation[5]; // 0x054 [O]; [R] setPopupConfirmation cPopupInfo_setPopupConfirmation.. (0x54 + 0xC * i), clear
     int miLayerOffset;              // 0x090 [O]; [P] getLayerOffset/setLayerOffset lw/sw 0x90; [R] clear 0
     int miMiscData;                 // 0x094 [O]; [P] getMiscData/setMiscData lw/sw 0x94; [R] clear 0; [U] the online
                                     //       states store the popup's message id (0x806..0x83E), seen again in onPopupEvent
@@ -118,9 +118,9 @@ struct cPopupInfo {
                                     //       [R] clear 1
     int miDefaultOption;            // 0x0AC [O]; [P] getDefaultOption/setDefaultOption lw/sw 0xAC; [R] clear -1
     float mfMinSize;                // 0x0B0 [O]; [R] clear stores 0 (sw $0); [U] cScreenPopup::mfMinSize copies it
-    int mbDeferEventsFlag;          // 0x0B4 [O] (bool); [R] clear 0; [U] func_001A9930 and other online states set 1
+    int mbDeferEventsFlag;          // 0x0B4 [O] (bool); [R] clear 0; [U] cFEStateNet_showDisconnectPopup and other online states set 1
     int mbCenterOptions;            // 0x0B8 [O] (bool); [R] clear 0; [U] cScreenPopup::mbCenterOptions copies it
-    int mbCenterText;               // 0x0BC [O] (bool); [R] clear 1; [U] createPopup (func_001A9C50) stores 0;
+    int mbCenterText;               // 0x0BC [O] (bool); [R] clear 1; [U] createPopup (cFEStateNet_createPopup) stores 0;
                                     //       cScreenPopup::mbCenterText copies it
     int meBackgroundType;           // 0x0C0 [O] ePopupBackground (Online 0, Blue 1, Black 2); [R] clear 0;
                                     //       [U] cScreenPopup::meBackgroundType copies it

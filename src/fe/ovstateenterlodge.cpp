@@ -544,11 +544,11 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" int cBENewRaceInterface_getLocationName1(void* iface);
-extern "C" char* func_00155130(void* iface, int i);
-extern "C" char* func_00155190(void* iface, int i);
-extern "C" char* func_00155208(void* iface, int i);
-extern "C" int func_001FD190();
-extern "C" char* func_0020A1A8(char* s);
+extern "C" char* cBEScoreInterface_getCurrentHighScore(void* iface, int i);
+extern "C" char* cBEScoreInterface_getCurrentHighScoreCharacter(void* iface, int i);
+extern "C" char* cBEScoreInterface_getCurrentHighScoreName(void* iface, int i);
+extern "C" int getPeakChallengeEventName();
+extern "C" char* formatMinutesSeconds(char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
@@ -601,8 +601,8 @@ static inline int Loc1F7958(char* name)
  * "track_xxx" names the event as the rewards overlay does. Race modes (cGameMode 0 / 5) show time, top5record
  * and helptext01, other modes points, top5scores and helptext02; ngca, xba and ps2x are shown, and both help
  * texts hidden while cOVStateManager_mMiscData is set. Rows 1-5 get name0N / with0N / time0N from the score interface (8),
- * the time formatted by func_0020A1A8 or the points as "%d". Plays UI event 0xE.
- * func_001FD190() is declared without parameters here; retail relies on $a0 still holding the event kind.
+ * the time formatted by formatMinutesSeconds or the points as "%d". Plays UI event 0xE.
+ * getPeakChallengeEventName() is declared without parameters here; retail relies on $a0 still holding the event kind.
  */
 void cOVState_TOPTIMES::onCreateScreen()
 {
@@ -631,7 +631,7 @@ void cOVState_TOPTIMES::onCreateScreen()
     int mode = cBENewRaceInterface_newRace.cGameMode;
     switch (ev) {
     case kGAMEEVENT_TIME_PEAK1 ... kGAMEEVENT_POINTS_PEAK3:
-        strcpy1(wtext, func_001FD190());
+        strcpy1(wtext, getPeakChallengeEventName());
         break;
     case kGAMEEVENT_RIVALPOINTS:
         func_002C2540(wfmt, str_pct_S_Jam);
@@ -687,16 +687,16 @@ void cOVState_TOPTIMES::onCreateScreen()
     for (int i = 1; i < 6; i++) {
         sprintf(buf, str_name0pct_d, i);
         cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
-        cUIText_setAsciiString_i(nameText, func_00155208(stats, i - 1));
+        cUIText_setAsciiString_i(nameText, cBEScoreInterface_getCurrentHighScoreName(stats, i - 1));
         sprintf(buf, str_with0pct_d, i);
         cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
-        cUIText_setAsciiString_i(withText, func_00155190(stats, i - 1));
+        cUIText_setAsciiString_i(withText, cBEScoreInterface_getCurrentHighScoreCharacter(stats, i - 1));
         sprintf(buf, str_time0pct_d, i);
         cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (full == true) {
-            sprintf(line, func_0020A1A8(func_00155130(stats, i - 1)));
+            sprintf(line, formatMinutesSeconds(cBEScoreInterface_getCurrentHighScore(stats, i - 1)));
         } else {
-            sprintf(line, D_004A2138, func_00155130(stats, i - 1));
+            sprintf(line, D_004A2138, cBEScoreInterface_getCurrentHighScore(stats, i - 1));
         }
         cUIText_setAsciiString_i(timeText, line);
     }

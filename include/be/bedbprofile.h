@@ -6,7 +6,7 @@
 // medals, attributes, rider stats, messages, rewards and radio mode. The back end keeps them in the static array
 // cBELibrary_profileLib (0x004A6CA8): [3 profiles][10 characters]; cBEProfileLib_BackupCharProfile is one more (destroyed separately);
 // belibrary.cpp copies records to / from D_004B07F8. EA's source: d:/ssx/code/source/be/bedbprofile.cpp / .h (preview assert paths). Retail code: the decomp's
-// units be/beintecon.cpp (destructor, init, the bolt-on helpers func_001513B8 .. func_00152368) and be/bedbprofile.cpp
+// units be/beintecon.cpp (destructor, init, the bolt-on helpers cBECharProfileDB_applyStartingBolts .. cBECharProfileDB_hasBoltFlags) and be/bedbprofile.cpp
 // (getScoreStats .. updateMedalStats); most readers index cBELibrary_profileLib directly (be/beint*.cpp, belibrary.cpp).
 // Size 0xF88: [R] the static initialiser __sti__all_in_one_be_cpp (be/bedbreward) constructs and destroys the array
 // with a 0xF88 stride (cBELibrary_profileLib[3][10], 0x9B50 per profile; the inlined ctor sets the 525 bolt slots at
@@ -36,8 +36,8 @@ CHECK_SIZE(tBEProfileCollectBits, 0xC);
 
 // One bolt-on (equipment item) slot. No On Tour counterpart; the type name follows the "Profile Bolts Map" tag.
 struct tBEProfileBolt {
-    short id;                       // 0x000 [R] the ctor: -1 (empty); [U] func_00151A88 copies the item definition's id
-    unsigned short flags;           // 0x002 [R] the ctor: 0; [U] 2, 4, 0x10 owned, 0x20 (func_00151C48 / C90 / BD0)
+    short id;                       // 0x000 [R] the ctor: -1 (empty); [U] cBECharProfileDB_buildBoltList copies the item definition's id
+    unsigned short flags;           // 0x002 [R] the ctor: 0; [U] 2, 4, 0x10 owned, 0x20 (cBECharProfileDB_setBoltBought / C90 / BD0)
     tBEProfileBolt() : id(-1), flags(0) {}
 };
 CHECK_OFFSET(tBEProfileBolt, id, 0x0);
@@ -45,23 +45,23 @@ CHECK_OFFSET(tBEProfileBolt, flags, 0x2);
 CHECK_SIZE(tBEProfileBolt, 0x4);
 
 // A bolt id that names no bolt (name ours): [R] tBEProfileBolt's constructor stores it in an empty slot; [U] a bolt
-// definition's parent id is kNoBoltID at the top level (func_0014C068, func_0014D558, func_0014D608, func_0014D908);
-// func_00151EF0's links use it for no target and no condition; func_00156C70 / func_00156EE0 return it when no
+// definition's parent id is kNoBoltID at the top level (cBEBoltDB_buildChildTables, cBEBoltDB_getFirstChildBolt, cBEBoltDB_collectChildBolts, cBEBoltDB_isBoltAncestor);
+// cBECharProfileDB_applyBoltRules's links use it for no target and no condition; cBERewardInterface_getRandomUnownedPeakBolt / cBERewardInterface_getRandomUnownedAwardBolt return it when no
 // candidate is left, and cBERewardInterface_awardUser then logs no bolt.
 enum { kNoBoltID = -1 };
 
-// A bolt definition's group byte for a bolt in no group (name ours): [U] func_0014B988 builds no file name for it and
+// A bolt definition's group byte for a bolt in no group (name ours): [U] cBEBoltInterface_buildBoltModelFileName builds no file name for it and
 // fills a name's '$' wildcards from the other bolts of the same group.
 enum { kNoBoltGroup = -1 };
 
 // One bolt-on (equipment item) definition in the back end's item database (name ours). The records are 0x38 bytes:
-// [R] func_0014D998 returns a character's first one as the table's base + index * 0x38 (func_0014D988 counts them),
+// [R] cBEBoltDB_getCharBolts returns a character's first one as the table's base + index * 0x38 (cBEBoltDB_getNumCharBolts counts them),
 // and every walker steps 0x38. Laid out through the members the matched code reads; belibrary, beintecon,
 // beintreward, feridermanager and lensfx still read the record through their own views.
 struct tBEBoltDef {
     char unk_00[0x2];               // 0x00
     signed char storeNum;           // 0x02 [U] the store that sells it: cFEStateCharEquip's store lists an item only
-                                    //      when this equals its mStoreNum (func_0019B098, func_0019B180)
+                                    //      when this equals its mStoreNum (cFEStateCharEquip_isStoreCategoryEmpty, cFEStateCharEquip_buildItemList)
     char unk_03[0x1];               // 0x03
     short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (func_0011BBE8,
                                     //      cRider_OnStartObjectUse / OnEndObjectUse, beintecon, beintreward)
@@ -74,7 +74,7 @@ struct tBEBoltDef {
     char* name;                     // 0x14 [U] the item's name: the equip screen's rows (an ASCII string, or for a
                                     //      category the hashed string id), the buy popup's boltName ([O] On Tour
                                     //      cBuyPopupInfo::initBuyBolt(const char* boltName, ...)); the bolts file
-                                    //      loader relocates it (func_0014BE70)
+                                    //      loader relocates it (cBEBoltDB_loadFile)
     const char* lodPartNames[4];    // 0x18 [U] cRider_parsePartsFromBuf: the MDF archive part per LOD (0: none)
     char unk_28[0x8];               // 0x28
     char* pictureName;              // 0x30 [U] the item's picture: cFEStateCharEquip_getIconID looks its icon up by it
@@ -93,7 +93,7 @@ CHECK_OFFSET(tBEBoltDef, flags, 0x34);
 CHECK_SIZE(tBEBoltDef, 0x38);
 
 // A bolt definition's price (the short at +0xE, in tens of dollars) for an item every character starts with (name
-// ours): [U] func_001513B8 marks the items priced 0 free (flag 2) and makes the ones priced kBoltPriceBuiltIn owned
+// ours): [U] cBECharProfileDB_applyStartingBolts marks the items priced 0 free (flag 2) and makes the ones priced kBoltPriceBuiltIn owned
 // too.
 enum { kBoltPriceBuiltIn = -1 };
 
@@ -130,7 +130,7 @@ CHECK_OFFSET(tBEPeakMedals, uiNumRaceMedals, 0x0);
 CHECK_OFFSET(tBEPeakMedals, uiNumFreeStyleMedals, 0x4);
 CHECK_SIZE(tBEPeakMedals, 0x8);
 
-// A relation's state (tBERelationDB::aggState). [O] On Tour's enum eBEAggState, names and values; [U] func_001519E0
+// A relation's state (tBERelationDB::aggState). [O] On Tour's enum eBEAggState, names and values; [U] cBECharProfileDB_resetRelations
 // sets 0 for a friend .. 3 for an enemy; cBEAggressionInterface_applyAggression caps a friend at aggression level 2
 // and turns a neutral rider pushed to level 4 into an enemy, regressAggression turns an enemy back to neutral at 0.
 enum eBEAggState {
@@ -145,8 +145,8 @@ enum eBEAggBehaviors {
 
 // [O] struct tBERelationDB (3): how this character feels about another one (cBEAggressionInterface).
 struct tBERelationDB {
-    signed char aggState;           // 0x000 [O]; [U] func_001519E0: 0 friend ... 3 enemy
-    signed char aggLevel;           // 0x001 [O]; [U] func_001519E0: 0 / 2
+    signed char aggState;           // 0x000 [O]; [U] cBECharProfileDB_resetRelations: 0 friend ... 3 enemy
+    signed char aggLevel;           // 0x001 [O]; [U] cBECharProfileDB_resetRelations: 0 / 2
     signed char tick;               // 0x002 [O]
 };
 CHECK_OFFSET(tBERelationDB, aggState, 0x0);
@@ -178,7 +178,7 @@ CHECK_SIZE(tBEStatDB, 0x7);
 
 // [O] struct tBEStatDefault (0xF): a character's default attributes (On Tour global cBELibrary::statDefault, one per
 // character). [R] retail cBELibrary_statDefault is a table of 15-byte records indexed by character id; the stat
-// interface's struct-returning getters (be/beintplayer func_001482D0 / func_00148328) copy one record out whole, and
+// interface's struct-returning getters (be/beintplayer cBEStatInterface_getStatDefault / cBEStatInterface_getRiderStatDefault) copy one record out whole, and
 // the braking / edging attribute divides by byte 0xB (cMaxEdging, lb: signed like tBEStatDB). Views group D:
 // sCharStat_001482D0, sCharStat_00148328 (and the unit's other 15-byte views of the same table).
 struct tBEStatDefault {
@@ -273,7 +273,7 @@ CHECK_SIZE(tBEMissionFlags, 0x4);
 // A playable character (cBEPlayerDB::cCharacterID, the column of cBELibrary_profileLib[profile][10]). [O] On Tour's
 // enum eBECharacters names the SSX 3 riders it keeps kCHAR_ALLEGRA, kCHAR_ELISE, kCHAR_KAORI, kCHAR_MAC, kCHAR_NATE,
 // kCHAR_PSYMON and kCHAR_ZOE (with other values; MOBY, GRIFF and VIGGO are ours); [R] the values from retail's
-// per-character file lists in this order: func_0014B700's icon files "data/char/mobytxp/big_moby_icons.ssh",
+// per-character file lists in this order: cBEBoltInterface_getBigIconFileName's icon files "data/char/mobytxp/big_moby_icons.ssh",
 // "kaoritxp", "allegtxp", "mactxp", "zoetxp", "grifftxp", "elisetxp", "natetxp", "psymotxp", "viggotxp", and
 // cSSXApp::mTextureBigFile ("data/char/mobytxp.big" .. "viggotxp.big"); [P] the preview asserts charID < kCHAR_NUM
 // for cFEBoltFileManager::mFiles[10].
@@ -323,10 +323,10 @@ struct cBECharProfileDB {
                                     //       raceFinish) move it, the timed races (cGMRaceHandler) move mDifficulty
     short mFreestyleDifference;     // 0x286 (name ours) [R] init: 0; [U] the second difficulty difference
                                     //       (getDifficultyDifference(0)), the scored events' win/loss streak
-    short* mpBoltsMap;              // 0x288 [R] the ctor zeroes it; func_00151A88 allocates it ("Profile Bolts Map",
+    short* mpBoltsMap;              // 0x288 [R] the ctor zeroes it; cBECharProfileDB_buildBoltList allocates it ("Profile Bolts Map",
                                     //       one short per item id: the slot in mBolts or -1); the destructor frees it
-    int mNumBolts;                  // 0x28C [U] func_00151A88: the character's item count; func_00151C20 / func_001515B8
-    tBEProfileBolt mBolts[525];     // 0x290 [R] the ctor sets 525 slots to {-1, 0}; [U] func_00151A88 refills them (the
+    int mNumBolts;                  // 0x28C [U] cBECharProfileDB_buildBoltList: the character's item count; cBECharProfileDB_getBoltIdAt / cBECharProfileDB_restoreVisibleFlags
+    tBEProfileBolt mBolts[525];     // 0x290 [R] the ctor sets 525 slots to {-1, 0}; [U] cBECharProfileDB_buildBoltList refills them (the
                                     //       rest id -1); the bolt-on helpers
     int mMoney;                     // 0xAC4 [O]; [R] init: 0; [U] cBEEconInterface get/set/add/reduceMoney
     unsigned int mTotalMoneyEarned; // 0xAC8 [O]; [R] init: 0; [U] cBEEconInterface's total-earned getter
@@ -334,26 +334,26 @@ struct cBECharProfileDB {
     tBETrackScore mScoreStats[26];  // 0xAD0 [O]; [R] init: 26 x {0, -1, 0, 0}; [U] getScoreStats / updateScoreStats
     tBEPeakMedals mPeakMainEventMedals[3]; // 0xBA0 [O]; [R] init clears 0x18 bytes; [U] updateMedalStats, beintplayer
     signed char mCareerHighlights[8]; // 0xBB8 [O]; [R] init clears 8; [U] the highlight levels (beintplayer)
-    signed char mCharacterID;       // 0xBC0 (name ours) [U] the character this record belongs to: func_00151A88 stores
-                                    //       k; init passes it to func_001519E0 / func_00150558; the bolt-on helpers
+    signed char mCharacterID;       // 0xBC0 (name ours) [U] the character this record belongs to: cBECharProfileDB_buildBoltList stores
+                                    //       k; init passes it to cBECharProfileDB_resetRelations / be_initStartingTricks; the bolt-on helpers
                                     //       read it (19 loads)
-    tBERelationDB mRelations[10];   // 0xBC1 [O] tBERelationDB; [U] func_001519E0 resets 10 (one per character);
+    tBERelationDB mRelations[10];   // 0xBC1 [O] tBERelationDB; [U] cBECharProfileDB_resetRelations resets 10 (one per character);
                                     //       beintaggression's view sAggrCharProfile declares 16 (indexes stay < 10)
     tBEStatDB statDB;               // 0xBDF [O]; [R] init copies D_005308D9[k] (7 bytes); [U] "the seven attribute bytes"
-    char unk_BE6[0x1FE];            // 0xBE6 [U] the BAGT data: func_00150558(character, self + 0xBE6) (On Tour keeps
+    char unk_BE6[0x1FE];            // 0xBE6 [U] the BAGT data: be_initStartingTricks(character, self + 0xBE6) (On Tour keeps
                                     //       careerStatDB, uberV2Unlocked, unlockedBoards/Skis/Skins, ... in this area)
     tRiderBest mRiderBest;          // 0xDE4 [O] tRiderBest (0x54: tStat eventStat[10], int comboLongestOverall); [R] init
                                     //       clears 84 bytes; [U] beintplayer's best-stats getter returns +0xDE4
-    int mMessages[25][2];           // 0xE38 (name ours) [R] init zeroes the first word of each pair; [U] func_00147908
+    int mMessages[25][2];           // 0xE38 (name ours) [R] init zeroes the first word of each pair; [U] cBENewPlayerInterface_getRiderMessages
                                     //       (beintplayer) returns it as the character's message list ({message id,
                                     //       variant}: fepopupmisc's view sPopupList)
     unsigned int mMessageReadBits;  // 0xF00 (name ours) [R] init clears bits 0-24 (one per message); [U] fepopupmisc
-                                    //       (sPopupList::mask): func_001E2FE0 clears a new message's bit, the message
+                                    //       (sPopupList::mask): queueMessage clears a new message's bit, the message
                                     //       center shows the unread icon while it is clear
-    signed char mNumMessages;       // 0xF04 (name ours) [R] init: 0; [U] sPopupList::count (func_001E2FE0 appends)
+    signed char mNumMessages;       // 0xF04 (name ours) [R] init: 0; [U] sPopupList::count (queueMessage appends)
     char unk_F05[0x3];              // 0xF05 padding
     unsigned int mMessageGroupFlags[2]; // 0xF08 (name ours) [R] init clears bits 0-60; [U] the message flags, one per
-                                    //       message group (func_00147980 / func_00147A30; fepopupmisc's func_001E3A30)
+                                    //       message group (cBENewPlayerInterface_getMessageGroupFlag / cBENewPlayerInterface_setMessageGroupFlag; fepopupmisc's isMessageFlagSet)
     char unk_F10[0x18];             // 0xF10 no retail access seen
     unsigned char mAwardsReceived[4]; // 0xF28 [O]; [R] init MEM_fills 4; [U] cBERewardInterface_isAwardReceived's bits
     char unk_F2C[0x4];              // 0xF2C no retail access seen (On Tour aligns tRewardBits to 0x7A0 the same way)

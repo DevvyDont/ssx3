@@ -362,7 +362,7 @@ struct cRiderState {
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ int mGlueStrengthLevel; // [O] cRiderState::mGlueStrengthLevel (+0x8C there); [U] cComputer_setupWarp: 0 = no warp, 2/3 = catch-up, 1/3 = slow-down, as On Tour's setupWarp tests rider+0x8C
     /* 0x0E8 */ int PrevRanking; // [O] cRiderState::PrevRanking (+0x90); [R] cRider_setPreviousRanking / getPreviousRanking (On Tour setPreviousRanking: sw a1,0x90); cRider_flagEventPathCheckpoint copies RaceRanking (On Tour RaceRanking, +0x94) into it
-    /* 0x0EC */ int RaceRanking; // [O] cRiderState::RaceRanking (+0x94, after PrevRanking); [U] copied into PrevRanking; the place 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
+    /* 0x0EC */ int RaceRanking; // [O] cRiderState::RaceRanking (+0x94, after PrevRanking); [U] copied into PrevRanking; the place 0..5: cSSXAudio_SpeakPAPlace switches it to 1,2,4,8,0x10,0x200; cSSXAudio_GetRiderPlaceBit compares it 0..4
     /* 0x0F0 */ int PissedOff; // [O] cRiderState::PissedOff (bool at +0x98 there; a word here: cleared with sw on reset, cRider_initAlways); [U] cComputer_checkForAttack tests it before comparing PissedAIIndex
     /* 0x0F4 */ int LastPunchTick; // [O] cRiderState::LastPunchTick (+0x9C there); [U] cleared on reset; the shove check stores the AI tick here and waits 120 ticks
     /* 0x0F8 */ int PissedAIIndex; // [O] cRiderState::PissedAIIndex (+0xA0 there); [U] set to -1 on reset; indexes the AI's riders (the opponent this rider is after)

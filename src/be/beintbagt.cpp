@@ -62,7 +62,7 @@ extern sBagtRec D_00530EC0[3][10];
  * matching character profile (D_004A788E, +0xBE6 of each 0xF88-byte entry of cBELibrary_profileLib).
  *
  * A record is 85 six-byte entries, one per grab: two chosen-variant bytes and two 16-bit variant masks (see
- * cBEBAGTInterface_chooseUberVar, func_0014FFB8, func_00150048).
+ * cBEBAGTInterface_chooseUberVar, cBEBAGTInterface_isUberForSale, cBEBAGTInterface_isUberOffered).
  */
 extern "C" void cBEBAGTInterface_submit(void)
 {
@@ -95,7 +95,7 @@ extern "C" void cBEBAGTInterface_discard(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FC40);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_reloadProfileTricks);
 #ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
 extern sBagtRec D_00530EC0[3][10];
@@ -108,7 +108,7 @@ extern sBagtRec D_00530EC0[3][10];
  *
  * @param i  the profile slot, 0-2
  */
-extern "C" void func_0014FC40(int i)
+extern "C" void cBEBAGTInterface_reloadProfileTricks(int i)
 {
     for (int j = 0; j < 10; j++) {
         D_00530EC0[i][j] = D_004A788E[i][j].rec;
@@ -117,7 +117,7 @@ extern "C" void func_0014FC40(int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FD80);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_setSuperUberVar);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -136,7 +136,7 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
  * @param value  the variant index
  * @return 1
  */
-extern "C" int func_0014FD80(cBEBAGTInterface* self, int rider, int idx, int value)
+extern "C" int cBEBAGTInterface_setSuperUberVar(cBEBAGTInterface* self, int rider, int idx, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -148,7 +148,7 @@ extern "C" int func_0014FD80(cBEBAGTInterface* self, int rider, int idx, int val
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FE08);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_clearUberForSale);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -170,14 +170,14 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
 /**
  * Clears bit @p bit of the first variant mask (+2) of grab @p idx in @p rider's staged trick record (D_00530EC0).
  *
- * A set bit marks a variant still for sale (func_0014FFB8); the uber-trick store clears it when the trick is bought.
+ * A set bit marks a variant still for sale (cBEBAGTInterface_isUberForSale); the uber-trick store clears it when the trick is bought.
  *
  * @param rider  the rider (selects profile and character)
  * @param idx  the grab
  * @param bit  the variant
  * @return 1
  */
-extern "C" int func_0014FE08(cBEBAGTInterface* self, int rider, int idx, int bit)
+extern "C" int cBEBAGTInterface_clearUberForSale(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -229,7 +229,7 @@ int cBEBAGTInterface::chooseUberVar(int rider, int idx, int second)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FF90);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberVariants);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sBagInfo_FF90 {
@@ -254,7 +254,7 @@ extern sBagInfo_FF90 kGrabDB_FF90[] __asm__("kGrabDB");
  * @param count  receives the number of variants
  * @return the variant table
  */
-extern "C" int func_0014FF90(cBEBAGTInterface* self, int rider, int idx, int* count)
+extern "C" int cBEBAGTInterface_getUberVariants(cBEBAGTInterface* self, int rider, int idx, int* count)
 {
     int uberTable = kGrabDB_FF90[idx].value;
     unsigned short uberCount;
@@ -266,7 +266,7 @@ extern "C" int func_0014FF90(cBEBAGTInterface* self, int rider, int idx, int* co
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FFB8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_isUberForSale);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -278,14 +278,14 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * Tests bit @p bit of the first variant mask (+2) of grab @p idx in @p rider's staged trick record: whether uber
  * variant @p bit is still for sale.
  *
- * func_0014FE08 clears the bit when the trick is bought.
+ * cBEBAGTInterface_clearUberForSale clears the bit when the trick is bought.
  *
  * @param rider  the rider (selects profile and character)
  * @param idx  the grab
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int func_0014FFB8(cBEBAGTInterface* self, int rider, int idx, int bit)
+extern "C" int cBEBAGTInterface_isUberForSale(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -294,7 +294,7 @@ extern "C" int func_0014FFB8(cBEBAGTInterface* self, int rider, int idx, int bit
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150048);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_isUberOffered);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -306,14 +306,14 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * Tests bit @p bit of the second variant mask (+4) of grab @p idx in @p rider's staged trick record: whether uber
  * variant @p bit is offered to this character at all.
  *
- * func_00150558 sets every variant from 2 up in this mask; the uber-trick store lists only variants with the bit set.
+ * be_initStartingTricks sets every variant from 2 up in this mask; the uber-trick store lists only variants with the bit set.
  *
  * @param rider  the rider (selects profile and character)
  * @param idx  the grab
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int func_00150048(cBEBAGTInterface* self, int rider, int idx, int bit)
+extern "C" int cBEBAGTInterface_isUberOffered(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -636,7 +636,7 @@ int cBEBAGTInterface::getGrabPointsPerSec(int grabEnum)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150558);
+INCLUDE_ASM("be/beintbagt", be_initStartingTricks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -666,7 +666,7 @@ extern "C" void MEM_fill(void*, int, int);
  * @param mode  the character (eBECharacters; selects the starting choices)
  * @param entries  the record's first entries (6 bytes each)
  */
-extern "C" void func_00150558(int mode, sBagtSlot0558* entries)
+extern "C" void be_initStartingTricks(int mode, sBagtSlot0558* entries)
 {
     int i;
     MEM_fill(entries, 0, 90);

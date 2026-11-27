@@ -477,7 +477,7 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 
 class cFEStateAudioOptions_onCreateScreen_cObj {
 public:
@@ -512,7 +512,7 @@ public:
 /**
  * Opens the audio options screen: the PDA version ("142audio_pda") in game, otherwise "140audio".
  *
- * In game it tells the "hud" state v24(3, 0); in the front end it calls func_0028F140(cAudioInterface_bxAudio(), 4).
+ * In game it tells the "hud" state v24(3, 0); in the front end it calls cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 4).
  * The new screen is kept at +0x40 and starts at frame 0.
  */
 void cFEStateAudioOptions::onCreateScreen()
@@ -526,7 +526,7 @@ void cFEStateAudioOptions::onCreateScreen()
         }
     } else {
         name = str_140audio;
-        func_0028F140(cAudioInterface_bxAudio(), 4);
+        cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 4);
     }
     void* engine = mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(name), 0);

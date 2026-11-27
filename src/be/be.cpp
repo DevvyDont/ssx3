@@ -155,14 +155,14 @@ INCLUDE_ASM("be/be", cBE_newProfile);
 #ifdef SKIP_ASM
 extern void* cBE_library;
 extern "C" void cBELibrary_newProfile(void* p, char c);
-extern "C" void func_0014FC40(char c);
+extern "C" void cBEBAGTInterface_reloadProfileTricks(char c);
 
 /**
  * Starts a fresh profile in slot @p playerIndex: resets its library entry and its BAGT interface state.
  *
  * Calls cBELibrary_newProfile(cBE_library, @p playerIndex) when the library exists (clears the player entry, gives it the
  * default player name, re-inits its profile and resets the new-player, stat and BAGT interfaces), then
- * func_0014FC40(@p playerIndex). fe/fereal resets slots 0-2 this way when the back end has to be cleared.
+ * cBEBAGTInterface_reloadProfileTricks(@p playerIndex). fe/fereal resets slots 0-2 this way when the back end has to be cleared.
  *
  * @param playerIndex  the profile slot
  */
@@ -170,7 +170,7 @@ extern "C" void cBE_newProfile(void* self, char playerIndex)
 {
     if (cBE_library)
         cBELibrary_newProfile(cBE_library, playerIndex);
-    func_0014FC40(playerIndex);
+    cBEBAGTInterface_reloadProfileTricks(playerIndex);
 }
 #endif
 

@@ -195,7 +195,7 @@ CHECK_SIZE(tToyInfo, 0x10);
 // stride (getRewardName returns the first word, the name).
 struct tPeakPassInfo {
     char* mNameStringID;            // 0x0 [O]; [U] cBERewardDB_getRewardName (type 2) returns it
-    char* mpTextureFileName;        // 0x4 [O]; [U] cFEStateMountainRoom_loadPeakPass loads this file (func_0019DA10's
+    char* mpTextureFileName;        // 0x4 [O]; [U] cFEStateMountainRoom_loadPeakPass loads this file (cFEBoltFileManager_requestFile's
                                     //     file name) for cFEStateMountainRoom::mpPeakPassInfo
 };
 

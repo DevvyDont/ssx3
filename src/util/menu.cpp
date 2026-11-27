@@ -1608,7 +1608,7 @@ INCLUDE_ASM("util/menu", cMenuSys_input);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 float cInput_getValue_f(void* pad, int axis) __asm__("cInput_getValue");
-extern "C" int func_00266BA8(void* kb, int a1, int* key, int* chr);
+extern "C" int cUsbKeyboard_readKey(void* kb, int a1, int* key, int* chr);
 extern "C" void cMenuSys_popMenu(cMenuSys* p);
 extern void* Keyboard;
 
@@ -1623,7 +1623,7 @@ static inline int padHasButtons(cInput* input)
  *
  * Does nothing with no menu open (MenuDepth is 0) or no pad (Input->Pad is 0 or has no buttons). Stores the pad's menu
  * key (cInput_getValue 61) in Key and sets VKey and AsciiKey to -1 (kNoKey). When the pad
- * has no key (-1) and a USB keyboard exists (Keyboard), func_00266BA8 reads its key into VKey and AsciiKey: an ASCII
+ * has no key (-1) and a USB keyboard exists (Keyboard), cUsbKeyboard_readKey reads its key into VKey and AsciiKey: an ASCII
  * value below 0x20 becomes -1, and the virtual keys up, down, left, right, insert, delete, enter and escape become the
  * menu keys up, down, left, right, Opt1, Opt2, select and cancel. Then calls the top menu's vtable slot 2 (input):
  * MIR_PopMenu pops one menu (cMenuSys_popMenu), MIR_ExitMenu pops until none is left.
@@ -1642,7 +1642,7 @@ extern "C" void cMenuSys_input(cMenuSys* self)
     *key = cMenuSys::kNoKey;
     *chr = cMenuSys::kNoKey;
     self->Key = input;
-    if (input == cMenuSys::kNoKey && Keyboard != 0 && func_00266BA8(Keyboard, 0, key, chr) != 0) {
+    if (input == cMenuSys::kNoKey && Keyboard != 0 && cUsbKeyboard_readKey(Keyboard, 0, key, chr) != 0) {
         if (self->AsciiKey < 0x20) {
             self->AsciiKey = input;
         }

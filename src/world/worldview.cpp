@@ -1532,7 +1532,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 void cBEMissionInterface_addStreamData_AE68(void* self, int a, void* p, int v) __asm__("cBEMissionInterface_addStreamData__FPv");
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_AttachAudioBank(void* self, unsigned int arg, void* obj);
-extern "C" void func_002105D0(void* obj);
+extern "C" void setRadarCourseData(void* obj);
 extern "C" void cAvalanche_resolve(void* obj);
 
 // Puts obj into the space hash; the box is the 6 floats at obj+off.
@@ -1661,7 +1661,7 @@ void* cPS2ChunkResolve::resolve(int msg, unsigned int RID, char* obj)
         cBEMissionInterface_addStreamData_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
         break;
     case kBxStreamData_Radar:
-        func_002105D0(obj);
+        setRadarCourseData(obj);
         break;
     case kBxStreamData_VisCurtain:
         cOcclusionMan_addVisCurtain(getOcclusionMan(), obj);
@@ -1692,7 +1692,7 @@ extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
 // PORT: cBEMissionInterface_remStreamData__FPv is called with a second (byte) argument here.
 void cBEMissionInterface_remStreamData_2(void* iface, unsigned char id) __asm__("cBEMissionInterface_remStreamData__FPv");
 extern "C" void func_0016CF18(unsigned int param);
-extern "C" void func_00210608(void* data);
+extern "C" void clearRadarCourseData(void* data);
 extern "C" void cOcclusionMan_removeVisCurtain(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
@@ -1772,7 +1772,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * and free them; type 13 purges a world audio file (cWorldSound_PurgeWorldAudioFile), 15 unloads a world-painter section (cWorldPainterSection_unload),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
  * 10, 11 removes an occlusion curtain (cOcclusionMan_removeVisCurtain), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
- * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
+ * types 17 and 21 go to func_0016CF18 and clearRadarCourseData. Other types need nothing.
  *
  * @param msg  stream data type of the chunk (On Tour eBxStreamDataType type)
  * @param resourceId  resource id of the chunk (On Tour RID)
@@ -1867,7 +1867,7 @@ void* cPS2ChunkResolve::unresolve(unsigned int msg, unsigned int resourceId, cha
         cBEMissionInterface_remStreamData_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);
         break;
     case kBxStreamData_Radar:
-        func_00210608(data);
+        clearRadarCourseData(data);
         break;
     case kBxStreamData_VisCurtain:
         cOcclusionMan_removeVisCurtain(getOcclusionMan(), data);

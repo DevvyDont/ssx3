@@ -1546,7 +1546,7 @@ extern int func_003EF640(unsigned short*, char*);
  * Decodes a UTF-8 string into UCS-2.
  *
  * Decodes with func_003EF640 while fewer than @p size - 1 characters are written; sequences longer than three bytes are
- * skipped. func_001A7390 and func_001B4CD8 call it.
+ * skipped. cFEStateNet_showBuddyPresence and cFEStateNetConfig_loadConfigs call it.
  *
  * @param dst  the UCS-2 output
  * @param size  the output size in characters

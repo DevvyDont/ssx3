@@ -2196,7 +2196,7 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* 
 extern "C" void cSSXScriptEngine_ReadyNISList(cSSXScriptEngine* self, int i);
 extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int a, int b);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028E8C0(void* self, int id, int a2);
+extern "C" void cSSXAudio_HandleMusicEvent(void* self, int id, int a2);
 struct sSseGame_A860 {
     char pad_0x0[0xF44];
     int field_0xF44;        // 0xF44
@@ -2252,7 +2252,7 @@ void cSSXScriptEngine::PlayTransportSequence(int online, int intro)
     }
     ReadyNISList(keNISList_AuxTransition);
     PlayNISList(keNISList_AuxTransition, 0, 1);
-    func_0028E8C0(cAudioInterface_bxAudio(), 20, 1);
+    cSSXAudio_HandleMusicEvent(cAudioInterface_bxAudio(), 20, 1);
 }
 #endif
 
@@ -3346,13 +3346,13 @@ bool cSSXScriptEngine::IsBankLoading(int i)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ClearNISPlayListState);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028E888(void*);
+extern "C" void cSSXAudio_EndTransportMusic(void*);
 extern "C" void cRenderStateMan_setInNIS(int);
 
 /**
  * Marks no NIS list as playing, if one was.
  *
- * When mPlayingNISList is not 2 (none): sets it to 2, clears mNumFramesNoSkip, calls func_0028E888() on the game
+ * When mPlayingNISList is not 2 (none): sets it to 2, clears mNumFramesNoSkip, calls cSSXAudio_EndTransportMusic() on the game
  * audio object and cRenderStateMan_setInNIS(0), which clears a render-state pointer and its enabled flag. Does nothing
  * otherwise.
  */
@@ -3361,7 +3361,7 @@ void cSSXScriptEngine::ClearNISPlayListState()
     if (mPlayingNISList != keNISList_Num) {
         mPlayingNISList = keNISList_Num;
         mNumFramesNoSkip = 0;
-        func_0028E888(cAudioInterface_bxAudio());
+        cSSXAudio_EndTransportMusic(cAudioInterface_bxAudio());
         cRenderStateMan_setInNIS(0);
     }
 }
@@ -5683,7 +5683,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_Update);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
-extern "C" int func_002B0E28(void* p, int i);
+extern "C" int cSpeechSys_CanTakeSpeech(void* p, int i);
 
 /**
  * Per-frame update of the script event object: stops or forgets its event sounds and handles a pending stop on speech
@@ -5693,7 +5693,7 @@ extern "C" int func_002B0E28(void* p, int i);
  * count word is non-zero is stopped (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank monitor,
  * cAudioInterface_bxAudio() +0x118 then +0x1D8) and cleared; any other slot is cleared once
  * cBankMonitor_BANKMONITOR_GetHandle no longer finds the sound. If the flag at +0xF4 (On Tour mCheckForStopOnSpeechEnd)
- * is set it is cleared, and when func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are
+ * is set it is cleared, and when cSpeechSys_CanTakeSpeech(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are
  * skipped (cSSXScriptEngine_SkipNISListScripts).
  */
 void cScriptObjEvent::Update()
@@ -5718,7 +5718,7 @@ void cScriptObjEvent::Update()
     }
     if (mCheckForStopOnSpeechEnd != 0) {
         mCheckForStopOnSpeechEnd = 0;
-        if (func_002B0E28(&snd->SpeechSys, 0) != 0) {
+        if (cSpeechSys_CanTakeSpeech(&snd->SpeechSys, 0) != 0) {
             ScriptEngine->SkipNISListScripts(ScriptEngine->mPlayingNISList, 1, 1);
         }
     }
@@ -5850,8 +5850,8 @@ extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028E8C0(void* self, int id, int a2);
-extern "C" void func_002A19D8(void* self, int id);
+extern "C" void cSSXAudio_HandleMusicEvent(void* self, int id, int a2);
+extern "C" void cSSXAudio_PlayScriptSpeechEvent(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
@@ -5959,8 +5959,8 @@ struct sSeEngine_08E8 {
  * (cSectionMan_getWorldSectionIDFromBELocationID). Then: - each world script event runs with
  * cWScriptMan_runFunc(section, event ID); its abort-script hash, unless D_004A525C (no script), is recorded once per
  * (hash, section) in the abort list (+0x1C, count +0xEC); - event bit 8 clears and bit 4 sets the render-state flag
- * cRenderStateMan_m_indoor; - each music event (kMusicEventID_None skipped) goes to func_0028E8C0 on the audio
- * interface; each speech event goes to func_002A19D8 and sets +0xF0, except kSpeechEventID_None (skipped) and
+ * cRenderStateMan_m_indoor; - each music event (kMusicEventID_None skipped) goes to cSSXAudio_HandleMusicEvent on the audio
+ * interface; each speech event goes to cSSXAudio_PlayScriptSpeechEvent and sets +0xF0, except kSpeechEventID_None (skipped) and
  * kSpeechEventID_StopOnSpeechEnd, which sets +0xF4 (stop on speech end); - bit 2: every sound slot holding a handle
  * gets its end flag set, then the slots of the frame's sounds clear it; - bit 1: walks the frame's sound list until a
  * sound whose start frame is before @p when; a sound whose slot (track index) is free, or holds a different sound
@@ -6019,7 +6019,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
         sSeCmd_08E8* audioEvent = &((sSeCmd_08E8*)info.pMusicEventArray)[i];
         int id = audioEvent->id;
         if (id != tMusicEvent::kMusicEventID_None) {
-            func_0028E8C0(snd, id, 0);
+            cSSXAudio_HandleMusicEvent(snd, id, 0);
         }
     }
     for (i = 0; i < info.numSpeechEvent; i++) {
@@ -6029,7 +6029,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
             if (id == tSpeechEvent::kSpeechEventID_StopOnSpeechEnd) {
                 self->mCheckForStopOnSpeechEnd = 1;
             } else {
-                func_002A19D8(snd, id);
+                cSSXAudio_PlayScriptSpeechEvent(snd, id);
                 self->mHasTriggeredSpeechEvents = 1;
             }
         }
@@ -6524,13 +6524,13 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
                                                           float t);
 extern "C" void cScriptObjTransition_Update(void* self, float dt);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" float func_002B4920(void* p);
+extern "C" float cMusicSys_GetTimeToNextBeat(void* p);
 
 /**
  * Updates the camera manager for this frame: tracks the music beat and advances the running camera transition.
  *
  * With music sync on (the header's musicSync, GetSSXCameraManagerHeader): clears the beat flag (mBeatOccurred); when
- * the audio's song plays (MusicSys.mSongPlaying) the beat time left (func_002B4920) rising above the last value
+ * the audio's song plays (MusicSys.mSongPlaying) the beat time left (cMusicSys_GetTimeToNextBeat) rising above the last value
  * (mLastBeatTimeLeft) is a beat: the flag is set and a pending cut (mCutOnBeat) runs now
  * (cScriptObjCameraManager_DoCameraTransition). The value is stored in mLastBeatTimeLeft. Without a song the beat flag
  * is just set.
@@ -6557,7 +6557,7 @@ void cScriptObjCameraManager::OnInSeqUpdate(void* obj, float currFrame, float dt
         cSSXAudio* soundMan = cAudioInterface_bxAudio();
         void* timer = (char*)&soundMan->MusicSys;
         if (soundMan->MusicSys.mSongPlaying != 0) {
-            float now = func_002B4920(timer);
+            float now = cMusicSys_GetTimeToNextBeat(timer);
             if (mLastBeatTimeLeft < now) {
                 mBeatOccurred = 1;
                 if (mCutOnBeat != 0) {

@@ -8,14 +8,14 @@
 // cFEStateChallengeReceivedPopup's, fe/festatenetchallenge.h, in both builds; no assert names it).
 //
 // Size 0x6E4: cMemMan_alloc(0x6E4, "cFEStateOnlineCharacterSelect") + cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(mem, pEngine) at all 7 sites
-// (func_001A9268, func_001AF470, func_001B0708, func_001B3760, func_001B37D8, func_001C0358, func_001C19C8).
+// (cFEStateNet_onMessengerPopupEvent, cFEStateChallengePopup_onNetEvent, cFEStateChallengeReceivedPopup_onNetEvent, cFEStateChatRoom_onChallengeSetupPopupEvent, cFEStateChatRoom_onChallengeReceivedPopupEvent, cFEStateOnlineMainMenu_onNetEvent, cFEStateNetQuickPlayPopup_onNetEvent).
 // Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable cFEStateOnlineCharacterSelect_vtbl, mHashName 0x41) and the default
 // cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
 // _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen, 7
 // cFEStateOnlineCharacterSelect_onGainTransition, 8 cFEStateOnlineCharacterSelect_onInputBegin (input filter), 12 onUpdate cFEStateOnlineCharacterSelect_onUpdate, 17 onPopupEvent cFEStateOnlineCharacterSelect_onPopupEvent,
-// 18 onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent, 25 func_001B14D8 (help), 31 func_001B15D8 (net
-// events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object cSetupMan_mSetupMan (func_00264F88 /
-// func_00265018 / func_00265140) receives the picks.
+// 18 onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent, 25 cFEStateOnlineCharacterSelect_fillHelpPopup (help), 31 cFEStateOnlineCharacterSelect_onNetEvent (net
+// events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object cSetupMan_mSetupMan (cSetupMan_highlightCharacter /
+// cSetupMan_confirmCharacter / cSetupMan_unconfirmCharacter) receives the picks.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
@@ -45,7 +45,7 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     //       cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect stores 0x41
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -59,8 +59,8 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent stores
                                     //       mCurrentCtrl (lb 0x14) when the pick is confirmed; no read seen
     int mbConfirmed;                // 0x6DC [R] 1 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect), 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1); [U] cFEStateOnlineCharacterSelect_onGainTransition (slot 7)
-                                    //       clears it; onWidgetEvent sets 1 when the pick is sent (func_00265018) and
-                                    //       clears it on "back" (func_00265140), or asks "kT_POPUPCMNCancelChallenge"
+                                    //       clears it; onWidgetEvent sets 1 when the pick is sent (cSetupMan_confirmCharacter) and
+                                    //       clears it on "back" (cSetupMan_unconfirmCharacter), or asks "kT_POPUPCMNCancelChallenge"
                                     //       when clear; the input filter cFEStateOnlineCharacterSelect_onInputBegin blocks input while it is set
     int miCharID;                   // 0x6E0 [U] onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen clears it; onWidgetCreate stores the
                                     //       player's rider (cBENewPlayerInterface_getPlayerCharID); onWidgetEvent

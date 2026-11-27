@@ -765,7 +765,7 @@ extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
  * of @p flags also the virtual bases cBankManager and cSoundSys, with bit 0 the object.
  *
  * Without bit 1 (a base of a bigger object) the vtables are temporary copies with adjusted deltas.
- * cController__cController, cSSXAudio__cSSXAudio, cSpeechSys__cSpeechSys and func_002B3398 call it.
+ * cController__cController, cSSXAudio__cSSXAudio, cSpeechSys__cSpeechSys and cMusicSys__cMusicSys call it.
  *
  * @param streamSysObj  the stream system
  * @param flags  bit 1: destroy the virtual bases; bit 0: delete the object
@@ -1502,7 +1502,7 @@ extern "C" void cCrowdSys__cCrowdSys(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(cStreamSys* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
-extern "C" void func_002B3398(char* self, int flags);
+extern "C" void cMusicSys__cMusicSys(char* self, int flags);
 extern void* cMusicSys_vtbl[];
 extern void* cCrowdSys_vtbl[];
 extern void* cSpeechSys_vtbl[];
@@ -1530,7 +1530,7 @@ extern const sSsVtblCB478 D_004837A0;
  *
  * Hand-written g++ 2.95 virtual-base destruction: installs the cController vtables in MusicSys.mVtbl, SpeechSys.mVtbl
  * and mVtbl and in the shared virtual bases (reached through MusicSys.mpVStreamSys), then runs the sub-object
- * destructors (cSpeechSys__cSpeechSys, func_002B3398, cCrowdSys__cCrowdSys,
+ * destructors (cSpeechSys__cSpeechSys, cMusicSys__cMusicSys, cCrowdSys__cCrowdSys,
  * cStreamSys__cStreamSys, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
  * bit 0 of @p flags is set.
  *
@@ -1564,7 +1564,7 @@ extern "C" void cController__cController(cController* self, int flags)
         bankMgrVtbl.e[1].delta = D_004837A0.e[1].delta + bankMgrAdjust;
     }
     cSpeechSys__cSpeechSys(bank, 0);
-    func_002B3398(mon, 0);
+    cMusicSys__cMusicSys(mon, 0);
     cCrowdSys__cCrowdSys(((char*)self), 0);
     if (flags & 2) {
         cStreamSys__cStreamSys(self->MusicSys.mpVStreamSys, 0);
@@ -1717,16 +1717,16 @@ void cController::MONITOR_Update()
 INCLUDE_ASM("sound/streamsys", cController_Update);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_ASYNCSYS_Update(void* snd);
-extern "C" void func_002A6D18(void* self);
+extern "C" void cCrowdSys_Update(void* self);
 extern "C" void cStreamSys_STREAM_Update(cStreamSys* self);
-extern "C" void func_002B0C78(void* self);
-extern "C" void func_002B4388(void* self);
+extern "C" void cSpeechSys_Update(void* self);
+extern "C" void cMusicSys_UpdateSong(void* self);
 
 /**
  * Updates the sound controller each frame: async loads, crowd, bank monitor, music, speech and streams.
  *
- * Runs cAsyncSys_ASYNCSYS_Update, func_002A6D18 (crowd), the bank monitor's vtable slot 5 (BANKMONITOR_Update) with
- * @p frameTime, func_002B4388 (music), func_002B0C78 (speech) and cStreamSys_STREAM_Update (streams). cSSXAudio_Update calls it.
+ * Runs cAsyncSys_ASYNCSYS_Update, cCrowdSys_Update (crowd), the bank monitor's vtable slot 5 (BANKMONITOR_Update) with
+ * @p frameTime, cMusicSys_UpdateSong (music), cSpeechSys_Update (speech) and cStreamSys_STREAM_Update (streams). cSSXAudio_Update calls it.
  *
  * @param frameTime  the frame time
  */
@@ -1734,14 +1734,14 @@ void cController::Update(float frameTime)
 {
     cMusicSys* sys = &MusicSys;
     cAsyncSys_ASYNCSYS_Update(sys->mpVStreamSys->mpVBankManager);
-    func_002A6D18(this);
+    cCrowdSys_Update(this);
     cBankManager* bankMan = sys->mpVStreamSys->mpVBankManager;
     cBankMonitor* bankMon = &bankMan->BankMonitor;
     sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)bankMan->BankMonitor.mVtbl;
     sVEntry<void(void*, float)>* entry = &vt[5];
     entry->fn(vthis(bankMon, *entry), frameTime);
-    func_002B4388(sys);
-    func_002B0C78(&SpeechSys);
+    cMusicSys_UpdateSong(sys);
+    cSpeechSys_Update(&SpeechSys);
     sys->mpVStreamSys->STREAM_Update();
 }
 #endif

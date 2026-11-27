@@ -233,19 +233,19 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* self, int focus);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
-extern "C" void func_0028F5B8(void* mgr);
+extern "C" void cSSXAudio_EnterMapScreen(void* mgr);
 extern int cUITemplate_MAP_mMapState;
 
 /**
  * Restores the map screen's menu focus for the current map state when it gains focus.
  *
- * Calls cUITemplate_MAP_setupMenuFocus() for cUITemplate_MAP_mMapState, then func_0028F5B8() on the game audio
+ * Calls cUITemplate_MAP_setupMenuFocus() for cUITemplate_MAP_mMapState, then cSSXAudio_EnterMapScreen() on the game audio
  * object returned by cAudioInterface_bxAudio().
  */
 void cUITemplate_MAP::onGainFocus()
 {
     setupMenuFocus(cUITemplate_MAP_mMapState);
-    func_0028F5B8(cAudioInterface_bxAudio());
+    cSSXAudio_EnterMapScreen(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -255,7 +255,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onDestroyScreen);
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void cOVStateManager_removePDATemplate(void);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
-extern "C" void func_0028F678(void* mgr, int a);
+extern "C" void cSSXAudio_LeaveMapScreen(void* mgr, int a);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 
 /**
@@ -264,7 +264,7 @@ extern unsigned int cUITemplate_MAP_mMapStyle;
  *
  * Unloads the FE async file whose index is at +0x2D8 (On Tour mFEAsyncMapFileIndex) through SSXApp->mFEAsyncManager
  * (cFEAsyncManager_UnloadFEAsyncFile), calls cOVStateManager_removePDATemplate for cUITemplate_MAP_mMapStyle 1, 3 or 4,
- * and finally calls func_0028F678(cAudioInterface_bxAudio(), 0) on the game audio. cOVState_TRANSPORT_onDestroyScreen and
+ * and finally calls cSSXAudio_LeaveMapScreen(cAudioInterface_bxAudio(), 0) on the game audio. cOVState_TRANSPORT_onDestroyScreen and
  * cFEStateEventSelect_onDestroyScreen call it for their embedded template.
  */
 void cUITemplate_MAP::onDestroyScreen()
@@ -275,7 +275,7 @@ void cUITemplate_MAP::onDestroyScreen()
         || cUITemplate_MAP_mMapStyle == cUITemplate_MAP::kMAPSTYLE_EOE_TRANSPORT) {
         cOVStateManager_removePDATemplate();
     }
-    func_0028F678(cAudioInterface_bxAudio(), 0);
+    cSSXAudio_LeaveMapScreen(cAudioInterface_bxAudio(), 0);
 }
 #endif
 
@@ -420,7 +420,7 @@ extern "C" int strcmp(const char*, const char*);
 extern "C" const char* cBENewRaceInterface_getLocationName_enus(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
 extern "C" unsigned short* func_002C2540_enus(unsigned short* dst, const char* s) __asm__("func_002C2540");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" unsigned short* func_001FD190(int kind);
+extern "C" unsigned short* getPeakChallengeEventName(int kind);
 extern "C" void cUIText_setUnicodeString_enus(void* text, unsigned short* s) __asm__("cUIText_setUnicodeString");
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" char* strcpy(char* d, const char* s);
@@ -551,7 +551,7 @@ void cUITemplate_MAP::setupMenus()
                         sprintf1(text, wfmt, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
                         cUIText_setUnicodeString_enus(menuObj, text);
                     } else {
-                        cUIText_setUnicodeString_enus(menuObj, func_001FD190(goal.kind));
+                        cUIText_setUnicodeString_enus(menuObj, getPeakChallengeEventName(goal.kind));
                     }
                     menuObj->setMiscData(j);
                 } else if (menuObj != 0) {
@@ -1819,7 +1819,7 @@ extern "C" unsigned short* func_002C2540_oals(unsigned short* dst, const char* s
 extern "C" unsigned short* strcpy1_oals(unsigned short* dst, const unsigned short* src) __asm__("strcpy1");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void sprintf2(unsigned short* dst, const char* fmt, ...);
-extern "C" unsigned short* func_001FD190(int kind);
+extern "C" unsigned short* getPeakChallengeEventName(int kind);
 extern "C" void cUIText_setUnicodeString_oals(void* text, unsigned short* s) __asm__("cUIText_setUnicodeString");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int peak);
 extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* self, int peak);
@@ -1953,7 +1953,7 @@ void cUITemplate_MAP::setupPeakGoals()
                 func_002C2540_oals(fmt, str_pct_S_pct_s_b);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track), Loc_5098(str_kT_cmnRaceCaps_b_oals));
             } else {
-                strcpy1_oals(ev, func_001FD190(goal.kind));
+                strcpy1_oals(ev, getPeakChallengeEventName(goal.kind));
             }
             sprintf(name1, D_00471040, k);
             char name2[24];
@@ -2005,7 +2005,7 @@ void cUITemplate_MAP::setupPeakGoals()
                 func_002C2540_oals(fmt, str_pct_S_Jam_b_oals);
                 sprintf1(ev, fmt, cBENewRaceInterface_getLocationName_oals(race, goal.track));
             } else {
-                strcpy1_oals(ev, func_001FD190(goal.kind));
+                strcpy1_oals(ev, getPeakChallengeEventName(goal.kind));
             }
             char name1[24];
             sprintf(name1, D_00471040, k);
@@ -2465,8 +2465,8 @@ extern "C" int cBEMissionInterface_getTotalCollectForSection(void* iface, int ev
 extern "C" int cBEMissionInterface_getCurrentCollectForSection(void* iface, int a, int event);
 extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* iface, int event);
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(void* iface, int event);
-extern "C" int func_001550E8(void* iface, int a, int event, int type);
-extern "C" char* func_0020A1A8(int t);
+extern "C" int cBEScoreInterface_getHighScore(void* iface, int a, int event, int type);
+extern "C" char* formatMinutesSeconds(int t);
 extern "C" void strcpy1(void* dst, void* src);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
@@ -2565,7 +2565,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(cUITemplate_MAP* self) __asm
  * For freeride the two data rows show collectibles found / total (cBEMissionInterface_getCurrentCollectForSection, cBEMissionInterface_getTotalCollectForSection) and big challenges done
  * / total (cBEMissionInterface_getNumberCompletedMissionsOnTrack, cBEMissionInterface_getNumberMissionsOnTrack, "N/A" when there are none); otherwise the medal
  * (cBERewardInterface_getTrackMedal through cUITemplate_MAP_getMedalStr, or kT_CMNNoMedal) and the top time (races,
- * formatted by func_0020A1A8) or top score (func_001550E8), with str_dash for no result.
+ * formatted by formatMinutesSeconds) or top score (cBEScoreInterface_getHighScore), with str_dash for no result.
  */
 void cUITemplate_MAP::setupLocationInfo()
 {
@@ -2788,13 +2788,13 @@ void cUITemplate_MAP::setupLocationInfo()
         cUIText* value = (cUIText*)getObj_207430(this, str_SE_Data2);
         if (cUITemplate_MAP_mSelectedEvent == cUITemplate_MAP::kMAPEVENT_RACE) {
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_CMNTopTime));
-            int best = func_001550E8(score, 0, desc.w[0], desc.w[2]);
-            cUIText_setAsciiString(value, func_0020A1A8(best));
+            int best = cBEScoreInterface_getHighScore(score, 0, desc.w[0], desc.w[2]);
+            cUIText_setAsciiString(value, formatMinutesSeconds(best));
             if (best == 0)
                 cUIText_setAsciiString(value, str_dash);
         } else {
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_CMNTopScore));
-            int best = func_001550E8(score, 0, desc.w[0], desc.w[2]);
+            int best = cBEScoreInterface_getHighScore(score, 0, desc.w[0], desc.w[2]);
             char num[32];
             sprintf(num, D_004A2138, best);
             cUIText_setAsciiString(value, num);

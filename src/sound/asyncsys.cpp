@@ -794,7 +794,7 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInGame);
  * Says whether a game is running: SSXApp has a cGame.
  *
  * One of the audio code's static accessors (On Tour cAudioInterface): tests SSXApp->Game (+0x84). The sound code
- * (cSSXAudio_GetClosestCamera1, cSSXAudio_GetSpeechVolumeIdentifier, func_0028BF78, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
+ * (cSSXAudio_GetClosestCamera1, cSSXAudio_GetSpeechVolumeIdentifier, cSSXAudio_SetRadioMode, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
  *
  * @return true if SSXApp->Game is set
  */

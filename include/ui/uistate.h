@@ -52,7 +52,7 @@ struct tAttrState {
     unsigned short mExplicit : 1;      // bit 6 [O]
     unsigned short mPendingDelete : 1; // bit 7 [O]
     unsigned short mMode : 6;          // bits 8-13 [O]; [R] 2 in the ctors; [P] getMode (lbu 0x1D); [U] "FEOptions"
-                                       //       states set it (func_001887A0 callers mask 0x3F00)
+                                       //       states set it (cFEStateOptions_cFEStateOptions1 callers mask 0x3F00)
     unsigned short mPushCheck : 1;     // bit 14 [O]
     unsigned short mPopFloor : 1;      // bit 15 [O]
 };

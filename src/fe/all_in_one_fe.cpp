@@ -42,7 +42,7 @@
 INCLUDE_ASM("fe/all_in_one_fe", __sti__all_in_one_fe_cpp);
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C640);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_cOVState1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_xi(void*, int) __asm__("cUIState_cUIState");
@@ -56,7 +56,7 @@ extern char cOVState_vtbl[];
  *
  * @return the object
  */
-extern "C" void* func_0021C640(cOVState* self) {
+extern "C" void* cOVState_cOVState1(cOVState* self) {
     cUIState_cUIState_xi(self, 0);
     VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return ((void*)self);
@@ -269,7 +269,7 @@ extern "C" void cOVTemplate_Dialog_onUpdate(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C848);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_EMPTY__cOVState_EMPTY);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -284,7 +284,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C848(cOVState* ovState) {
+extern "C" void cOVState_EMPTY__cOVState_EMPTY(cOVState* ovState) {
     VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -603,7 +603,7 @@ extern "C" void cOVState_MESSAGECENTER__cOVState_MESSAGECENTER(cOVState_MESSAGEC
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CB08);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_ViewPopup_cOVState_ViewPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_xi(void*, int) __asm__("cUIState_cUIState");
@@ -617,7 +617,7 @@ extern char cOVState_ViewPopup_vtbl[];
  *
  * @return the object
  */
-extern "C" void* func_0021CB08(cOVState_ViewPopup* self) {
+extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup1(cOVState_ViewPopup* self) {
     cUIState_cUIState_xi(self, 0);
     VPTR_OF(cListNode, self) = (void**)cOVState_ViewPopup_vtbl;
     return ((void*)self);
@@ -660,7 +660,7 @@ extern "C" int cOVState_ViewPopup_onLoseTransition(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CB70);
+INCLUDE_ASM("fe/all_in_one_fe", tRadarRiderInfo_Reset);
 #ifdef SKIP_ASM
 /**
  * Initialises a six-word block: the first word to 1, the other five to 0.
@@ -669,7 +669,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB70);
  *
  * @param block  the block to fill
  */
-extern "C" void func_0021CB70(int *block) {
+extern "C" void tRadarRiderInfo_Reset(int *block) {
     block[0]=1;
     block[1]=0;
     block[2]=0;
@@ -687,7 +687,7 @@ extern int D_004A275C;
 /**
  * Sets the global flag D_004A275C.
  *
- * cOVStateHUD1P_onUpdate also writes it, and the HUD marker drawers func_0020EDA0 / func_0020FB40 draw nothing while it
+ * cOVStateHUD1P_onUpdate also writes it, and the HUD marker drawers cHUDRadar_renderTracker / cHUDRadar_renderSplitTracker draw nothing while it
  * is 0. No callers.
  *
  * @param newValue  the new value
@@ -713,7 +713,7 @@ extern "C" int cHUDRadar_IsRadarShown(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_cOVStateHUD1P1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CBA0(void*, int) __asm__("cUIState_cUIState");
@@ -737,7 +737,7 @@ struct sElem_CBA0 {
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_0021CBA0(cOVStateHUD1P* state) {
+extern "C" void *cOVStateHUD1P_cOVStateHUD1P1(cOVStateHUD1P* state) {
     cUIState_cUIState_CBA0(((char*)state), 0);
     VPTR_OF(cListNode, state) = (void**)cOVStateHUD1P_vtbl;
     new ((char*)&state->mRiderInfo[0]) sElem_CBA0[2];
@@ -783,7 +783,7 @@ extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CCC8);
+INCLUDE_ASM("fe/all_in_one_fe", tAttrIcon_tAttrIcon1);
 #ifdef SKIP_ASM
 /**
  * Clears the low four bits of a flag byte and returns its address.
@@ -794,7 +794,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CCC8);
  * @param flags  the flag byte
  * @return @p flags
  */
-extern "C" unsigned char *func_0021CCC8(unsigned char *flags) {
+extern "C" unsigned char *tAttrIcon_tAttrIcon1(unsigned char *flags) {
     *flags &= 0xF0;
     return flags;
 }
@@ -917,7 +917,7 @@ extern "C" void *cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS(cOVState_FINA
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CE00);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PEAKCHAL_RESULTS__cOVState_PEAKCHAL_RESULTS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -932,14 +932,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CE00(cOVState* ovState) {
+extern "C" void cOVState_PEAKCHAL_RESULTS__cOVState_PEAKCHAL_RESULTS(cOVState* ovState) {
     VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CE28);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CE28(void*) __asm__("cUIState_cUIState");
@@ -961,7 +961,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021CE28(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_CE28(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
@@ -1163,7 +1163,7 @@ extern "C" void *cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS(cOV
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D070);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHiScoreList_cOVStateHiScoreList1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateHiScoreList_vtbl[];
@@ -1181,7 +1181,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_0021D070(cOVStateHiScoreList* ovState) {
+extern "C" void *cOVStateHiScoreList_cOVStateHiScoreList1(cOVStateHiScoreList* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -2522,7 +2522,7 @@ void cOVStateHUD1P::renderFinishMessage(int elems, int* rider, int x, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021F9B0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderCollectibles);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V2_F9B0 { float x, y; };
@@ -2572,7 +2572,7 @@ extern "C" void cFont_text(void*, float, float, char*);
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  * @param animFrame  the counter's animation time; below 0.44 it pulses
  */
-extern "C" void func_0021F9B0(cOVStateHUD1P* self, char* obj, cRider* rider, int x, float animFrame) {
+extern "C" void cOVStateHUD1P_renderCollectibles(cOVStateHUD1P* self, char* obj, cRider* rider, int x, float animFrame) {
     V2_F9B0 scale;
     V2_F9B0 drawPos;
     V4_F9B0 elemPos;
@@ -2629,7 +2629,7 @@ extern "C" void func_0021F9B0(cOVStateHUD1P* self, char* obj, cRider* rider, int
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021FD38);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderMissionIndicator);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: the inline `scaleP()` returning &D_004A5B38 (a return-value pseudo keeps the address in $20 across 3
@@ -2686,7 +2686,7 @@ static inline float* scaleP() { return &D_004A5B38; }
  *
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  */
-extern "C" void func_0021FD38(cOVStateHUD1P* self, char* obj) {
+extern "C" void cOVStateHUD1P_renderMissionIndicator(cOVStateHUD1P* self, char* obj) {
     t2Vector circleCentre;
     t2Vector half;
     sColour col;
@@ -2969,7 +2969,7 @@ void cOVStateHUD1P::renderNISSkipMessage(char* obj, float progress)
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220D38);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodge_cFEStateLodge1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_xi(void*, int) __asm__("cUIState_cUIState");
@@ -2982,7 +2982,7 @@ extern char cFEStateLodge_vtbl[];
  *
  * @return the object
  */
-extern "C" void* func_00220D38(cFEStateLodge* self) {
+extern "C" void* cFEStateLodge_cFEStateLodge1(cFEStateLodge* self) {
     cUIState_cUIState_xi(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateLodge_vtbl;
     return ((void*)self);
@@ -3010,7 +3010,7 @@ extern "C" void cFEStateLodge__cFEStateLodge(cFEStateLodge* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220D98);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_xi(void*, int) __asm__("cUIState_cUIState");
@@ -3024,7 +3024,7 @@ extern char cFEStateLodgeRiderDetail_vtbl[];
  *
  * @return the object
  */
-extern "C" void* func_00220D98(cFEStateLodgeRiderDetail* self) {
+extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail1(cFEStateLodgeRiderDetail* self) {
     cUIState_cUIState_xi(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateLodgeRiderDetail_vtbl;
     return ((void*)self);
@@ -3052,7 +3052,7 @@ extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(cFEStateLodge
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220DF8);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateBuyAttrib_cFEStateBuyAttrib1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_cUIState_xi(void*, int) __asm__("cUIState_cUIState");
@@ -3065,7 +3065,7 @@ extern char cFEStateBuyAttrib_vtbl[];
  *
  * @return the object
  */
-extern "C" void* func_00220DF8(cFEStateBuyAttrib* self) {
+extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib1(cFEStateBuyAttrib* self) {
     cUIState_cUIState_xi(self, 0);
     VPTR_OF(cListNode, self) = (void**)cFEStateBuyAttrib_vtbl;
     return ((void*)self);
@@ -3093,7 +3093,7 @@ extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(cFEStateBuyAttrib* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220E58);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateCareerStats_cFEStateCareerStats1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void*, ...);
 extern char cFEStateCareerStats_vtbl[];
@@ -3107,7 +3107,7 @@ extern char cFEStateCareerStats_vtbl[];
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_00220E58(cFEStateCareerStats* state) {
+extern "C" void *cFEStateCareerStats_cFEStateCareerStats1(cFEStateCareerStats* state) {
     cUIState_cUIState(state, 0);
     VPTR_OF(cListNode, state) = (void**)cFEStateCareerStats_vtbl;
     return ((void*)state);
@@ -3194,7 +3194,7 @@ extern "C" void *cOVState_ENTERLODGE_cOVState_ENTERLODGE(cOVState_ENTERLODGE* ov
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220F48);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
@@ -3212,7 +3212,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00220F48(cOVState_BIGCHALLENGE_START* ovState) {
+extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START1(cOVState_BIGCHALLENGE_START* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -3543,7 +3543,7 @@ extern "C" void cOVState_TRANSPORT_onMenuGainFocus(void) {
 }
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002212C8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_MAP_cOVState_MAP1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_12C8(void*, int) __asm__("cUIState_cUIState");
@@ -3565,7 +3565,7 @@ struct Elem { Elem() {} };
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002212C8(cOVState_MAP* ovState) {
+extern "C" void *cOVState_MAP_cOVState_MAP1(cOVState_MAP* ovState) {
     cUIState_cUIState_12C8(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -3648,7 +3648,7 @@ extern "C" void cOVState_MAP_onMenuGainFocus(void) {
 }
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221408);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00473248[];
@@ -3666,7 +3666,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00221408(cOVState* ovState) {
+extern "C" void *cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -3681,7 +3681,7 @@ extern "C" void *func_00221408(cOVState* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221468);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1468(void*) __asm__("cUIState_cUIState");
@@ -3703,7 +3703,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221468(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1468(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
@@ -3718,7 +3718,7 @@ extern "C" void *func_00221468(cOVState* ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002214D0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE__cOVState_PRIVATEMESSAGE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -3732,14 +3732,14 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_002214D0(cOVState* self) {
+extern "C" void* cOVState_PRIVATEMESSAGE__cOVState_PRIVATEMESSAGE(cOVState* self) {
     VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002214F8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_PauseMenu_cOVTemplate_PauseMenu1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVTemplate_PauseMenu_vtbl[];
@@ -3757,7 +3757,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002214F8(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVTemplate_PauseMenu_cOVTemplate_PauseMenu1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -3831,7 +3831,7 @@ extern "C" void* cOVTemplate_PauseMenu__cOVTemplate_PauseMenu(cOVTemplate_PauseM
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002215F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_COMPETE_vtbl[];
@@ -3850,7 +3850,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002215F0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -3926,7 +3926,7 @@ extern "C" void* cOVState_PAUSE_COMPETE__cOVState_PAUSE_COMPETE(cOVTemplate_Paus
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002216F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_BIGCHAL_vtbl[];
@@ -3945,7 +3945,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002216F0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4021,7 +4021,7 @@ extern "C" void* cOVState_PAUSE_BIGCHAL__cOVState_PAUSE_BIGCHAL(cOVTemplate_Paus
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002217F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_FREERIDE_vtbl[];
@@ -4040,7 +4040,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002217F0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4116,7 +4116,7 @@ extern "C" void* cOVState_PAUSE_FREERIDE__cOVState_PAUSE_FREERIDE(cOVTemplate_Pa
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002218F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_SPOKE_vtbl[];
@@ -4135,7 +4135,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002218F0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4211,7 +4211,7 @@ extern "C" void* cOVState_PAUSE_SPOKE__cOVState_PAUSE_SPOKE(cOVTemplate_PauseMen
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002219F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLAY1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_QUICKPLAY_vtbl[];
@@ -4230,7 +4230,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002219F0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLAY1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4306,7 +4306,7 @@ extern "C" void* cOVState_PAUSE_QUICKPLAY__cOVState_PAUSE_QUICKPLAY(cOVTemplate_
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221AF0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_ONLINE_vtbl[];
@@ -4324,7 +4324,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00221AF0(cOVTemplate_PauseMenu* ovState) {
+extern "C" void *cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE1(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4458,7 +4458,7 @@ extern "C" void *cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OP
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221C80);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
@@ -4476,7 +4476,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00221C80(cOVState_PAUSE_ONLINE_ERROR* ovState) {
+extern "C" void *cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR1(cOVState_PAUSE_ONLINE_ERROR* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -4579,7 +4579,7 @@ extern "C" void* cOVState_PROFILE__cOVState_PROFILE(cOVState_PROFILE* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221DB0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PROFILE_cOVState_PROFILE1);
 #ifdef SKIP_ASM
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_PROFILE_vtbl[];
@@ -4593,7 +4593,7 @@ extern char cOVState_PROFILE_vtbl[];
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_00221DB0(cOVState_PROFILE* state) {
+extern "C" void *cOVState_PROFILE_cOVState_PROFILE1(cOVState_PROFILE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
     VPTR_OF(cListNode, state) = (void**)cOVState_PROFILE_vtbl;
     return ((void*)state);
@@ -4659,7 +4659,7 @@ extern "C" void *cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT(cOVState_HEAT_PRE
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221E80);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_FREESTYLE_PREEVENT__cOVState_FREESTYLE_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -4673,14 +4673,14 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221E80(cOVState* self) {
+extern "C" void* cOVState_FREESTYLE_PREEVENT__cOVState_FREESTYLE_PREEVENT(cOVState* self) {
     VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221EA8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1EA8(void*) __asm__("cUIState_cUIState");
@@ -4702,7 +4702,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221EA8(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1EA8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
@@ -4717,7 +4717,7 @@ extern "C" void *func_00221EA8(cOVState* ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221F10);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_MULTI_PREEVENT__cOVState_MULTI_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -4731,14 +4731,14 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221F10(cOVState* self) {
+extern "C" void* cOVState_MULTI_PREEVENT__cOVState_MULTI_PREEVENT(cOVState* self) {
     VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221F38);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_MULTI_PREEVENT_cOVState_MULTI_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1F38(void*) __asm__("cUIState_cUIState");
@@ -4760,7 +4760,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221F38(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_MULTI_PREEVENT_cOVState_MULTI_PREEVENT(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1F38(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
@@ -4775,7 +4775,7 @@ extern "C" void *func_00221F38(cOVState* ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221FA0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_CHALLENGE_PREEVENT__cOVState_CHALLENGE_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -4789,14 +4789,14 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221FA0(cOVState* self) {
+extern "C" void* cOVState_CHALLENGE_PREEVENT__cOVState_CHALLENGE_PREEVENT(cOVState* self) {
     VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221FC8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1FC8(void*) __asm__("cUIState_cUIState");
@@ -4818,7 +4818,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221FC8(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1FC8(ovState);
     ovState->mOVID = overlayId;
     ovState->mDoneTransition = 0;
@@ -4854,7 +4854,7 @@ extern "C" void* cOVState_SAVEREPLAY__cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* s
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222058);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEREPLAY_cOVState_SAVEREPLAY1);
 #ifdef SKIP_ASM
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_SAVEREPLAY_vtbl[];
@@ -4868,7 +4868,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00222058(cOVState_SAVEREPLAY* ovState) {
+extern "C" void *cOVState_SAVEREPLAY_cOVState_SAVEREPLAY1(cOVState_SAVEREPLAY* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
     VPTR_OF(cListNode, ovState) = (void**)cOVState_SAVEREPLAY_vtbl;
     return ((void*)ovState);
@@ -4897,7 +4897,7 @@ extern "C" void* cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002220C0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS1);
 #ifdef SKIP_ASM
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_SAVEOPTIONS_vtbl[];
@@ -4911,7 +4911,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002220C0(cOVState_SAVEOPTIONS* ovState) {
+extern "C" void *cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS1(cOVState_SAVEOPTIONS* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
     VPTR_OF(cListNode, ovState) = (void**)cOVState_SAVEOPTIONS_vtbl;
     return ((void*)ovState);
@@ -4919,7 +4919,7 @@ extern "C" void *func_002220C0(cOVState_SAVEOPTIONS* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222100);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateRewardsList_cOVStateRewardsList1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateRewardsList_vtbl[];
@@ -4937,7 +4937,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00222100(cOVStateRewardsList* ovState) {
+extern "C" void *cOVStateRewardsList_cOVStateRewardsList1(cOVStateRewardsList* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -5102,7 +5102,7 @@ extern "C" void cOVState_AUTOSAVE_hideActionButtons(void) {
 }
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002222B8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_AUTOSAVE_cOVState_AUTOSAVE1);
 #ifdef SKIP_ASM
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_AUTOSAVE_vtbl[];
@@ -5116,7 +5116,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_002222B8(cOVState_AUTOSAVE* state) {
+extern "C" void *cOVState_AUTOSAVE_cOVState_AUTOSAVE1(cOVState_AUTOSAVE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
     VPTR_OF(cListNode, state) = (void**)cOVState_AUTOSAVE_vtbl;
     return ((void*)state);
@@ -5124,7 +5124,7 @@ extern "C" void *func_002222B8(cOVState_AUTOSAVE* state) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002222F8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateTrophy_cOVStateTrophy1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateTrophy_vtbl[];
@@ -5142,7 +5142,7 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002222F8(cOVStateTrophy* ovState) {
+extern "C" void *cOVStateTrophy_cOVStateTrophy1(cOVStateTrophy* ovState) {
     cUIState_cUIState(ovState, 0);
     ovState->mOVID = 0;
     ovState->mDoneTransition = 0;
@@ -5257,7 +5257,7 @@ extern "C" void func_00222428(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222448);
+INCLUDE_ASM("fe/all_in_one_fe", calcCRC16);
 #ifdef SKIP_ASM
 extern unsigned short D_00441D38[];
 
@@ -5271,7 +5271,7 @@ extern unsigned short D_00441D38[];
  * @param n  how many bytes
  * @return the CRC
  */
-extern "C" unsigned int func_00222448(const unsigned char *bytes, int n) {
+extern "C" unsigned int calcCRC16(const unsigned char *bytes, int n) {
     const unsigned char *end = bytes + n;
     unsigned int crc = 64490;
     while (bytes < end) {

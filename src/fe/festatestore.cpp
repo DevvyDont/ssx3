@@ -157,7 +157,7 @@ extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, void* a, void* b);
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* p, int a);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on);
 extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on);
 extern char str_66ut_btnmap[];
@@ -175,7 +175,7 @@ extern char str_yell_dollar_sign[];
  * (cFERiderManager_setHumanCharacter) and hides that rider (cFERiderManager_setHumanVisible with 0). Points the FE camera (RealFE + 0x10, cSimpleCamera_setupCamWithPosAndTarget) from
  * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
  * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
- * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
+ * mpDollarSign), sets the sound bank manager's mode 5 (cSSXAudio_SetFrontEndMusicMode on cAudioInterface_bxAudio()) and hides the cost display
  * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable cFEStateUberTrick_vtbl.
  */
 void cFEStateUberTrick::onCreateScreen()
@@ -223,7 +223,7 @@ void cFEStateUberTrick::onCreateScreen()
         int iconHash = GetHashValue32(str_yell_dollar_sign);
         mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
-    func_0028F140(cAudioInterface_bxAudio(), 5);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 5);
     costVisible(0);
     previewVisible(0);
 }
@@ -419,7 +419,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
-extern "C" int func_0014FE08(void* self, int rider, int idx, int bit);
+extern "C" int cBEBAGTInterface_clearUberForSale(void* self, int rider, int idx, int bit);
 extern "C" void cFEStateUberTrick_updateTrickMenuEntry(void* self);
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern char str_helptext_custom[];
@@ -431,7 +431,7 @@ extern char str_kT_66HELPCustomUber[];
  *
  * On kONPOPUPDESTROY, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's
  * money (cBEEconInterface_reduceMoney on cBE interface 11), clears flag bit "trick" (the trick menu's selected
- * mMiscData) of the category's entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls
+ * mMiscData) of the category's entry (the category menu's selected mMiscData) with cBEBAGTInterface_clearUberForSale on interface 6, calls
  * that interface's vtable slot 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers
  * (cFEStateUberTrick_updateTrickMenuEntry). On kONPOPUPDESTROY the trick list is refilled either way
  * (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the vtable
@@ -453,7 +453,7 @@ void cFEStateUberTrick::onPopupEvent(cUIState* item, unsigned int msg)
             int entryIndex = *(signed char*)&mpMainMenu->mpSelected->mMiscData;
             int flagBit = *(signed char*)&mpTrickMenu->mpSelected->mMiscData;
             cBEBAGTInterface* pi = (cBEBAGTInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
-            func_0014FE08(pi, mUserNum, entryIndex, flagBit);
+            cBEBAGTInterface_clearUberForSale(pi, mUserNum, entryIndex, flagBit);
             pi->submit();
             void* helpText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {
@@ -569,10 +569,10 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cUIStateBuyPopup_initBuyTrick(void* popup, int trick, int cost, int points);
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern "C" int gGetGrabName(int id);
-extern "C" void func_0014FD80(void* iface, int rider, int a, int b);
-extern "C" tBEUber* func_0014FF90(void* iface, int rider, int a, int* out);
-extern "C" int func_0014FFB8(void* iface, int rider, int a, int b);
-extern "C" int func_00150048(void* iface, int rider, int a, int b);
+extern "C" void cBEBAGTInterface_setSuperUberVar(void* iface, int rider, int a, int b);
+extern "C" tBEUber* cBEBAGTInterface_getUberVariants(void* iface, int rider, int a, int* out);
+extern "C" int cBEBAGTInterface_isUberForSale(void* iface, int rider, int a, int b);
+extern "C" int cBEBAGTInterface_isUberOffered(void* iface, int rider, int a, int b);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
@@ -634,13 +634,13 @@ static inline void Back_185268(cFEStateUberTrick* self)
  * and the help texts.
  *
  * A widget's menu is its mpParent: the category menu mpMainMenu or the trick menu mpTrickMenu. The category and
- * trick are the menus' selected items' (mpSelected) mMiscData; the trick table (tBEUber) comes from func_0014FF90 on
+ * trick are the menus' selected items' (mpSelected) mMiscData; the trick table (tBEUber) comes from cBEBAGTInterface_getUberVariants on
  * cBE interface 6. "Back" pushes the state that the engine's mpCustom returns from getPrevState (slot 5,
  * cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable cFEStateUberTrick_vtbl.
  * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
  *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display
  *   (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. On the trick menu: an unlocked
- *   trick (func_00150048) that is not for sale (func_0014FFB8) becomes the category's trick (func_0014FD80),
+ *   trick (cBEBAGTInterface_isUberOffered) that is not for sale (cBEBAGTInterface_isUberForSale) becomes the category's trick (cBEBAGTInterface_setSuperUberVar),
  *   interface 6 is submitted (slot 1) and the list is refilled (cFEStateUberTrick_updateTrickMenu). Otherwise,
  *   outside game path 0 (newRace.cGamePath) UI sound 4 plays; a trick for sale opens a
  *   "UITRICKBUY" cUIStateBuyPopup (cUIStateBuyPopup_initBuyTrick with the trick's name, cost and the character's money)
@@ -684,8 +684,8 @@ void cFEStateUberTrick::onWidgetEvent(cUIThing* item, unsigned int msg)
                 int bi = *(signed char*)&trickItem->mMiscData;
                 cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                if (func_00150048(pi, mUserNum, ai, bi) && !func_0014FFB8(pi, mUserNum, ai, bi)) {
-                    func_0014FD80(pi, mUserNum, ai, bi);
+                if (cBEBAGTInterface_isUberOffered(pi, mUserNum, ai, bi) && !cBEBAGTInterface_isUberForSale(pi, mUserNum, ai, bi)) {
+                    cBEBAGTInterface_setSuperUberVar(pi, mUserNum, ai, bi);
                     // submit (slot 1) by hand, through an int-returning slot: the void virtual call allocates
                     // other registers
                     sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cBEInterface, pi);
@@ -693,13 +693,13 @@ void cFEStateUberTrick::onWidgetEvent(cUIThing* item, unsigned int msg)
                     cFEStateUberTrick_updateTrickMenu(((char*)this));
                 } else if (cBENewRaceInterface_newRace.cGamePath != 0) {
                     PlaySound_185268(this, 4);
-                } else if (func_0014FFB8(pi, mUserNum, ai, bi)) {
+                } else if (cBEBAGTInterface_isUberForSale(pi, mUserNum, ai, bi)) {
                     cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
                     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, mUserNum);
                     player->discard();
                     int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), mUserNum, charID);
                     int n;
-                    tBEUber* tbl = func_0014FF90(pi, mUserNum, ai, &n);
+                    tBEUber* tbl = cBEBAGTInterface_getUberVariants(pi, mUserNum, ai, &n);
                     int trick = gGetGrabName(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
                         void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0),
@@ -742,7 +742,7 @@ void cFEStateUberTrick::onWidgetEvent(cUIThing* item, unsigned int msg)
                 int bi = *(signed char*)&trickItem->mMiscData;
                 int ai = *(signed char*)&categoryItem->mMiscData;
                 int n = 0;
-                tBEUber* tbl = func_0014FF90(pi, mUserNum, ai, &n);
+                tBEUber* tbl = cBEBAGTInterface_getUberVariants(pi, mUserNum, ai, &n);
                 if (mbModelVisible != 0) {
                     cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
                     cRiderAnimBase_play(feRider->mpRiderAnim, tbl[bi].anim, 0, -1.0f);
@@ -776,16 +776,16 @@ void cFEStateUberTrick::onWidgetEvent(cUIThing* item, unsigned int msg)
                 int bi = *(signed char*)&trickItem->mMiscData;
                 cBEInterface* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                if (func_00150048(pi, mUserNum, ai, bi) && !func_0014FFB8(pi, mUserNum, ai, bi)) {
+                if (cBEBAGTInterface_isUberOffered(pi, mUserNum, ai, bi) && !cBEBAGTInterface_isUberForSale(pi, mUserNum, ai, bi)) {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPCustomUber));
                 } else if (cBENewRaceInterface_newRace.cGamePath == 0) {
-                    if (func_0014FFB8(pi, mUserNum, ai, bi)) {
+                    if (cBEBAGTInterface_isUberForSale(pi, mUserNum, ai, bi)) {
                         cBEInterface* player = cBE_getInterface_Fv(cBE_getBE(), 1);
                         signed char charID = cBENewPlayerInterface_getPlayerCharID(player, mUserNum);
                         player->discard();
                         int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), mUserNum, charID);
                         int n;
-                        tBEUber* tbl = func_0014FF90(pi, mUserNum, ai, &n);
+                        tBEUber* tbl = cBEBAGTInterface_getUberVariants(pi, mUserNum, ai, &n);
                         if (points >= tbl[bi].cost)
                             cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
                         else

@@ -5,7 +5,7 @@
 // cFEMemCard with mType 1 (replay). Retail code: cOVState_SAVEREPLAY_* in fe/ovstatepause (EA's
 // d:/ssx/code/source/fe/ovstatepause.cpp; the class is probably declared in its ovstatepause.h, which the preview's
 // asserts also name) and fe/all_in_one_fe (destructor cOVState_SAVEREPLAY__cOVState_SAVEREPLAY, the engine-less ctor
-// copy func_00222058).
+// copy cOVState_SAVEREPLAY_cOVState_SAVEREPLAY1).
 //
 // Size 0x274:
 //   [R] cOVStateManager_triggerOverlay / triggerPopup: operator new(628, "cOVStateOverlay") for overlay 18, then

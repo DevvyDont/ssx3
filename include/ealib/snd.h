@@ -664,8 +664,8 @@ CHECK_SIZE(SNDIPACKETCALLBACK, 0x8);
 // SNDREQUESTSTATUS (0x10 [O] sstrstat.c: int SNDSTRM_requeststatus(int sndrequesthandle, SNDREQUESTSTATUS* psrs)):
 // a stream request's status. [R] retail SNDSTRM_requeststatus (ealib/seg_2B4578) clears and fills the four words in this
 // order: the state (0 header not parsed, 1 queued, 2 playing, 3 finished), the position in ms, the time to the end in ms
-// and the submitted time in ms; [U] the song instance's position getters (sound/bankmonitor func_002B2600 /
-// func_002B2640) read state == 2, then currenttime / timetoend.
+// and the submitted time in ms; [U] the song instance's position getters (sound/bankmonitor cSongInstance_GetPlayPosition /
+// cSongInstance_GetTimeToEnd) read state == 2, then currenttime / timetoend.
 struct SNDREQUESTSTATUS {
     int state;                      // 0x0 [O]; [R]
     int currenttime;                // 0x4 [O]; [R] position * 1000 / sample rate

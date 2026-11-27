@@ -1444,7 +1444,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evCheckpoint);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" int cGameModeMan_riderCheckpointHit(void* mgr, int id, int a2);
-extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
+extern "C" void cSSXAudio_SpeakArcadeCheckpoint(void* snd, void* rider, int a2);
 
 
 static inline bool rmRiderFlags_1194C0(char* vvr)
@@ -1459,7 +1459,7 @@ static inline bool rmRiderFlags_1194C0(char* vvr)
  *
  * Only for a human rider (cBeing vtable slot 8): cGameModeMan_riderCheckpointHit (On Tour cGameModeMan::riderCheckpointHit) with the
  * rider's id (slot 7) and @p timeBonusSec; when accepted, HUD effect 0x29 shows @p timeBonusSec for 2.5 s and, when the rider's +0x874 and
- * +0x87C are both set, func_002A3CE8 plays the checkpoint sound.
+ * +0x87C are both set, cSSXAudio_SpeakArcadeCheckpoint plays the checkpoint sound.
  *
  * @param timeBonusSec  the checkpoint's time bonus in seconds (On Tour sec)
  * @return 0.0 (no boost change)
@@ -1474,7 +1474,7 @@ float cRiderMetrix::evCheckpoint(int timeBonusSec)
             cRiderMetrix_addHUDfx1(((char*)this), 41, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0((char*)Rider))
             {
-                func_002A3CE8(cAudioInterface_bxAudio(), Rider, 1);
+                cSSXAudio_SpeakArcadeCheckpoint(cAudioInterface_bxAudio(), Rider, 1);
             }
         }
     }
@@ -2121,7 +2121,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddCash);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001E3760(int id, int amount);
+extern "C" void queueEarningsMessages(int id, int amount);
 extern "C" void cBERewardInterface_awardUserCash(void* iface, int id, int amount);
 int cRiderMetrix_addHUDfx1_i(void* self, int type, int value, int arg, float duration) __asm__("cRiderMetrix_addHUDfx1");
 
@@ -2150,7 +2150,7 @@ static inline int GetId119EF8(char* self)
  * Awards career money to the rider and posts the matching HUD popups.
  *
  * Does nothing for 0, or while the replay is in a playback state (State 1 to 9). Otherwise it checks the
- * earnings unlocks (func_001E3760) and credits the money through the back end's reward interface
+ * earnings unlocks (queueEarningsMessages) and credits the money through the back end's reward interface
  * (cBERewardInterface_awardUserCash), both for the rider's AI index (being slot 7), then posts the total flash
  * (kHFX_CashOrPointsAdded, 0.7 s) and, by @p kind, popup kHFX_EarnTrickPointCash (kRMCS_TrickSuccess),
  * kHFX_EarnBonusCash (kRMCS_BonusCash), kHFX_EarnComboCash (kRMCS_ComboBonus, data = the combo count at +0x9C) for
@@ -2165,7 +2165,7 @@ float cRiderMetrix::evAddCash(unsigned int kind, int amount)
 {
     if (amount != 0 && !IsBusy119EF8()) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        func_001E3760(GetId119EF8(((char*)this)), amount);
+        queueEarningsMessages(GetId119EF8(((char*)this)), amount);
         cBERewardInterface_awardUserCash(iface, GetId119EF8(((char*)this)), amount);
         cRiderMetrix_addHUDfx1_i(this, 0x18, amount, 0, 0.7f);
         switch (kind) {

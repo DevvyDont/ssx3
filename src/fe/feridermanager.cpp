@@ -65,15 +65,15 @@ INCLUDE_ASM("fe/feridermanager", cFERider_queueLoadExtraTextures);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" void* func_0014D998(void* db, int g);
-int func_0014D988(void* db, int g);
-extern "C" int func_0014B988(void* iface, int a1, int a2, void* ent, char* buf);
-extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
-extern "C" int func_0019CCE8(void* self, int a1, int a2);
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" void* cBEBoltDB_getCharBolts(void* db, int g);
+int cBEBoltDB_getNumCharBolts(void* db, int g);
+extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int a1, int a2, void* ent, char* buf);
+extern "C" int cFEBoltFileManager_requestFile(void* mgr, int bank, char* buf, int a3, int a4, int a5);
+extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
 extern void* D_004A1968;
 
 struct sBoneEntE7F0 {
@@ -95,29 +95,29 @@ static inline tBEProfileBolt* getItemK19E7F0(cBECharProfileDB* list, int i)
 /**
  * Queues the loading of the front-end rider's extra textures.
  *
- * Clears +0xCB8, then for each of the character's part entries (func_0014D998 / func_0014D988 on the item database) of
- * type 6 whose item has no texture file queued yet (func_0019CCE8 on D_004A1968 below 0), builds the file name
- * (func_0014B988) and, when there is one, queues it in the front end's file manager (func_0019DA10 at RealFE + 0x1A70,
- * kind 11) and records the file slot (func_0019CD38).
+ * Clears +0xCB8, then for each of the character's part entries (cBEBoltDB_getCharBolts / cBEBoltDB_getNumCharBolts on the item database) of
+ * type 6 whose item has no texture file queued yet (cBoltFileIndexManager_getPartTextureFile on D_004A1968 below 0), builds the file name
+ * (cBEBoltInterface_buildBoltModelFileName) and, when there is one, queues it in the front end's file manager (cFEBoltFileManager_requestFile at RealFE + 0x1A70,
+ * kind 11) and records the file slot (cBoltFileIndexManager_setPartTextureFile).
  */
 void cFERider::queueLoadExtraTextures()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    void* db = func_0014BDB8_noarg();
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, mProfileIndex, mCharID);
-    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, mCharID);
-    int n = func_0014D988(db, mCharID);
+    void* db = cBEBoltInterface_getBoltDB_noarg();
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, mProfileIndex, mCharID);
+    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)cBEBoltDB_getCharBolts(db, mCharID);
+    int n = cBEBoltDB_getNumCharBolts(db, mCharID);
     mDoneLoadingTextures = 0;
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         if (partEntry->type == 6) {
             tBEProfileBolt* it = getItemK19E7F0(list, list->mpBoltsMap[partEntry->slot]);
-            if (func_0019CCE8(D_004A1968, mProfileIndex, it->id) < 0) {
+            if (cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id) < 0) {
                 char buf[0x100];
-                if (func_0014B988(iface, mProfileIndex, mCharID, partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, mCharID, buf, 11, 1, 1);
-                    func_0019CD38(D_004A1968, mProfileIndex, it->id, fileSlot);
+                if (cBEBoltInterface_buildBoltModelFileName(iface, mProfileIndex, mCharID, partEntry, buf)) {
+                    int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, buf, 11, 1, 1);
+                    cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
@@ -132,7 +132,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_init);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern "C" void cFERider_purge(cFERider* self);
 extern "C" void cFERider_queueLoadExtraTextures(cFERider* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -191,7 +191,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     *(void**)&self[2] = cAnimModel_cAnimModel(cMemMan_alloc(352, str_AnimModel, 0, 0));
     cAnimModel_init(*(void**)&self[2], 100, 15);
     func_002F19F0(*(void**)&self[3184 / 4], *(void**)&self[2]);
-    void* list = func_0014AD28(iface, profile, character);
+    void* list = cBEBoltInterface_getCharProfile(iface, profile, character);
     cFERider_loadModels_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
         ((cFERider*)self)->queueLoadExtraTextures();
@@ -270,21 +270,21 @@ INCLUDE_ASM("fe/feridermanager", cFERider_cancelAllFiles);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0019CBE0(void* self, int a1, int a2);
-extern "C" int func_0019CCE8(void* self, int a1, int a2);
-extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBoltFileIndexManager_getModelPartFile(void* self, int a1, int a2);
+extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setModelPartFile(void* self, int bit, int a2, int val);
+extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern void* D_004A1968;
 
 
 /**
  * Cancels every file the front-end rider has queued for its items.
  *
- * Needs a profile and character (+0x4, +0x0) set. For each item of the character's list (func_0014AD28), releases a
- * queued texture file (func_0019CCE8 / func_0019DC20, slot reset with func_0019CD38) and a queued model-part file
- * (func_0019CBE0 / func_0019DC20, reset with func_0019CC30).
+ * Needs a profile and character (+0x4, +0x0) set. For each item of the character's list (cBEBoltInterface_getCharProfile), releases a
+ * queued texture file (cBoltFileIndexManager_getPartTextureFile / cFEBoltFileManager_releaseFile, slot reset with cBoltFileIndexManager_setPartTextureFile) and a queued model-part file
+ * (cBoltFileIndexManager_getModelPartFile / cFEBoltFileManager_releaseFile, reset with cBoltFileIndexManager_setModelPartFile).
  *
  */
 void cFERider::cancelAllFiles()
@@ -296,19 +296,19 @@ void cFERider::cancelAllFiles()
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self[1], self[0]);
     int n = list->mNumBolts;
     int i;
     for (i = 0; i < n; i++) {
-        int fileSlot = func_0019CCE8(D_004A1968, self[1], list->mBolts[i].id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
-            func_0019DC20(mgr, self[0], fileSlot);
-            func_0019CD38(D_004A1968, self[1], list->mBolts[i].id, -1);
+            cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
+            cBoltFileIndexManager_setPartTextureFile(D_004A1968, self[1], list->mBolts[i].id, -1);
         }
-        fileSlot = func_0019CBE0(D_004A1968, self[1], list->mBolts[i].id);
+        fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
-            func_0019DC20(mgr, self[0], fileSlot);
-            func_0019CC30(D_004A1968, self[1], list->mBolts[i].id, -1);
+            cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
+            cBoltFileIndexManager_setModelPartFile(D_004A1968, self[1], list->mBolts[i].id, -1);
         }
     }
 }
@@ -986,10 +986,10 @@ INCLUDE_ASM("fe/feridermanager", cFERider_updateAnimModelParts);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0014D448(void* self, int g, int key);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
 extern "C" void func_0030EB60(void* model);
 extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
@@ -1016,21 +1016,21 @@ static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
  * Applies the variant of each equipped item part to the front-end rider's model and flags its bolt-on FX.
  *
  * Resets the model's parts (func_0030EB60), then for each item of the character's list with flag 0x10 looks up its part
- * entry (func_0014D448 on the item database) and, when its part index (+0x10) is not negative, sets that model part's
+ * entry (cBEBoltDB_findBoltIndex on the item database) and, when its part index (+0x10) is not negative, sets that model part's
  * variant (cAnimModel_setModelPartVariant). Finally sets the first word of the bolt-on FX interface (+0xC74) to 1.
  */
 void cFERider::updateAnimModelParts()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sBoneDbF780* db = (sBoneDbF780*)func_0014BDB8_noarg();
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, ((int*)this)[1], ((int*)this)[0]);
+    sBoneDbF780* db = (sBoneDbF780*)cBEBoltInterface_getBoltDB_noarg();
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, ((int*)this)[1], ((int*)this)[0]);
     int n = list->mNumBolts;
     tBEProfileBolt* it = ((&list->mBolts[0]));
     func_0030EB60(mpAnimModel);
     int i;
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {
-            sBoneEntF780* partEntry = getEntK19F780(db, func_0014D448(db, ((int*)this)[0], it[i].id));
+            sBoneEntF780* partEntry = getEntK19F780(db, cBEBoltDB_findBoltIndex(db, ((int*)this)[0], it[i].id));
             if (partEntry->partID >= 0)
                 cAnimModel_setModelPartVariant(mpAnimModel, partEntry->partID, partEntry->variant);
         }
@@ -1117,19 +1117,19 @@ void cFERider::addTextureFile(SHAPEFILE* pkg, int replace)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FA78);
+INCLUDE_ASM("fe/feridermanager", cFERider_releasePartTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" void* func_0014D998(void* db, int g);
-int func_0014D988(void* db, int g);
-extern "C" int func_0019CCE8(void* self, int a1, int a2);
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
-extern "C" void func_0019DC20(void* self, int bank, int i);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" void* cBEBoltDB_getCharBolts(void* db, int g);
+int cBEBoltDB_getNumCharBolts(void* db, int g);
+extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern void* D_004A1968;
 
 struct sBoneEntFA78 {
@@ -1152,33 +1152,33 @@ static inline tBEProfileBolt* getItemK19FA78(cBECharProfileDB* list, int i)
  * Cancels the front-end rider's queued textures except those of extra (type 6) parts.
  *
  * Needs a profile and character set. For each of the character's part entries whose item has a texture file queued,
- * releases it (func_0019DC20, slot reset to -1) unless the part is of type 6. Sets +0xCB8 (textures ready) only when
+ * releases it (cFEBoltFileManager_releaseFile, slot reset to -1) unless the part is of type 6. Sets +0xCB8 (textures ready) only when
  * nothing of type 6 is still queued.
  *
- * @param list  the character's item list, or null to fetch it (func_0014AD28)
+ * @param list  the character's item list, or null to fetch it (cBEBoltInterface_getCharProfile)
  */
-extern "C" void func_0019FA78(cFERider* self, cBECharProfileDB* list)
+extern "C" void cFERider_releasePartTextures(cFERider* self, cBECharProfileDB* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    void* db = func_0014BDB8_noarg();
+    void* db = cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (self->mProfileIndex < 0)
         return;
     if (self->mCharID < 0)
         return;
     if (list == 0)
-        list = (cBECharProfileDB*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+        list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mProfileIndex, self->mCharID);
     int flag = 1;
-    int n = func_0014D988(db, self->mCharID);
-    sBoneEntFA78* partEntry = (sBoneEntFA78*)func_0014D998(db, self->mCharID);
+    int n = cBEBoltDB_getNumCharBolts(db, self->mCharID);
+    sBoneEntFA78* partEntry = (sBoneEntFA78*)cBEBoltDB_getCharBolts(db, self->mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FA78(list, list->mpBoltsMap[partEntry->slot]);
-        int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, self->mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (partEntry->type != 6) {
-                func_0019DC20(mgr, self->mCharID, fileSlot);
-                func_0019CD38(D_004A1968, self->mProfileIndex, it->id, -1);
+                cFEBoltFileManager_releaseFile(mgr, self->mCharID, fileSlot);
+                cBoltFileIndexManager_setPartTextureFile(D_004A1968, self->mProfileIndex, it->id, -1);
             } else {
                 flag = 0;
             }
@@ -1194,16 +1194,16 @@ INCLUDE_ASM("fe/feridermanager", cFERider_loadTextures);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014D998(void* db, int g);
-int func_0014D988(void* db, int g);
-extern "C" int func_0014B988(void* iface, int a1, int a2, void* ent, char* buf);
-extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
-extern "C" int func_0019CCE8(void* self, int a1, int a2);
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
-extern "C" void func_0019E070(void* mgr, int bank);
-extern "C" void func_0019FA78(cFERider* self, cBECharProfileDB* list);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltDB_getCharBolts(void* db, int g);
+int cBEBoltDB_getNumCharBolts(void* db, int g);
+extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int a1, int a2, void* ent, char* buf);
+extern "C" int cFEBoltFileManager_requestFile(void* mgr, int bank, char* buf, int a3, int a4, int a5);
+extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
+extern "C" void cFEBoltFileManager_startDeferredPartTextureLoads(void* mgr, int bank);
+extern "C" void cFERider_releasePartTextures(cFERider* self, cBECharProfileDB* list);
 extern void* D_004A1968;
 
 struct sBoneEntFBE0 {
@@ -1225,38 +1225,38 @@ static inline tBEProfileBolt* getItemK19FBE0(cBECharProfileDB* list, int i)
 /**
  * Requeues the front-end rider's textures for its equipped items.
  *
- * Cancels the other textures (func_0019FA78), clears +0xCB8 and +0xCC0, queues the texture file of every part whose
- * item has flag 0x10 and no queued file (func_0014B988 name, func_0019DA10 kind 11) and starts the file manager on the
- * character's bank (func_0019E070).
+ * Cancels the other textures (cFERider_releasePartTextures), clears +0xCB8 and +0xCC0, queues the texture file of every part whose
+ * item has flag 0x10 and no queued file (cBEBoltInterface_buildBoltModelFileName name, cFEBoltFileManager_requestFile kind 11) and starts the file manager on the
+ * character's bank (cFEBoltFileManager_startDeferredPartTextureLoads).
  *
  * @param list  the character's item list
  * @param ignored    not used
- * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
+ * @param keepLoaded    passed to cFEBoltFileManager_requestFile as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
 void cFERider::loadTextures(cBECharProfileDB* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    void* db = func_0014BDB8_noarg();
+    void* db = cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    func_0019FA78(this, (cBECharProfileDB*)list);
+    cFERider_releasePartTextures(this, (cBECharProfileDB*)list);
     mDoneLoadingTextures = 0;
     mDoneUpdatingModelParts = 0;
-    int n = func_0014D988(db, mCharID);
-    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, mCharID);
+    int n = cBEBoltDB_getNumCharBolts(db, mCharID);
+    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)cBEBoltDB_getCharBolts(db, mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FBE0(list, list->mpBoltsMap[partEntry->slot]);
-        if (func_0019CCE8(D_004A1968, mProfileIndex, it->id) < 0) {
+        if (cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
-                if (func_0014B988(iface, mProfileIndex, mCharID, partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, mCharID, buf, 11, keepLoaded, 1);
-                    func_0019CD38(D_004A1968, mProfileIndex, it->id, fileSlot);
+                if (cBEBoltInterface_buildBoltModelFileName(iface, mProfileIndex, mCharID, partEntry, buf)) {
+                    int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, buf, 11, keepLoaded, 1);
+                    cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
     }
-    func_0019E070(mgr, mCharID);
+    cFEBoltFileManager_startDeferredPartTextureLoads(mgr, mCharID);
 }
 #endif
 
@@ -1266,12 +1266,12 @@ INCLUDE_ASM("fe/feridermanager", cFERider_isDoneLoadingTextures);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0019CCE8(void* self, int a1, int a2);
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
-extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" int func_0019E238(void* mgr, int bank, int i);
-extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
+extern "C" int cFEBoltFileManager_isFileLoaded(void* mgr, int bank, int i);
+extern "C" void* cFEBoltFileManager_getFileDataValue(void* mgr, int bank, int i);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_004A1968;
 
@@ -1279,7 +1279,7 @@ extern void* D_004A1968;
 /**
  * Finishes the front-end rider's texture loads: reports whether all are done and registers them.
  *
- * Returns 1 at once when +0xCB8 is set. Otherwise checks every queued texture file (func_0019E238); when all are ready,
+ * Returns 1 at once when +0xCB8 is set. Otherwise checks every queued texture file (cFEBoltFileManager_isFileLoaded); when all are ready,
  * registers each loaded package once (cFERider_addTextureFile, replacing for items with flag 0x10) and releases the files.
  *
  * @return 1 when every texture is loaded, else 0
@@ -1291,14 +1291,14 @@ int cFERider::isDoneLoadingTextures()
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, mProfileIndex, mCharID);
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, mProfileIndex, mCharID);
     int n = list->mNumBolts;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        int fileSlot = func_0019CCE8(D_004A1968, mProfileIndex, it->id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
         if (fileSlot >= 0) {
-            if (func_0019E238(mgr, mCharID, fileSlot) == 0) {
+            if (cFEBoltFileManager_isFileLoaded(mgr, mCharID, fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1308,16 +1308,16 @@ int cFERider::isDoneLoadingTextures()
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             tBEProfileBolt* it = &list->mBolts[i];
-            int fileSlot = func_0019CCE8(D_004A1968, mProfileIndex, it->id);
+            int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
             if (fileSlot >= 0) {
-                if (func_0019E2B0(mgr, mCharID, fileSlot) && used[fileSlot] == 0) {
-                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, mCharID, fileSlot);
+                if (cFEBoltFileManager_getFileDataValue(mgr, mCharID, fileSlot) && used[fileSlot] == 0) {
+                    SHAPEFILE* pkg = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(mgr, mCharID, fileSlot);
                     int fl = it->flags & 0x10;
                     addTextureFile(pkg, fl != 0);
                 }
                 used[fileSlot] = 1;
-                func_0019DC20(mgr, mCharID, fileSlot);
-                func_0019CD38(D_004A1968, mProfileIndex, it->id, -1);
+                cFEBoltFileManager_releaseFile(mgr, mCharID, fileSlot);
+                cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, -1);
             }
         }
     }
@@ -1328,14 +1328,14 @@ int cFERider::isDoneLoadingTextures()
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_loadModels);
 #ifdef SKIP_ASM
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" int func_0014D448(void* self, int g, int key);
-extern "C" int func_0019CBE0(void* self, int a1, int a2);
-extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
-extern "C" int func_0019DA10(void* mgr, int bank, char* buf, int a3, int a4, int a5);
-extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void func_0019DF20(void* mgr, int bank);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
+extern "C" int cBoltFileIndexManager_getModelPartFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setModelPartFile(void* self, int bit, int a2, int val);
+extern "C" int cFEBoltFileManager_requestFile(void* mgr, int bank, char* buf, int a3, int a4, int a5);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_startDeferredModelPartLoads(void* mgr, int bank);
 extern void* D_004A1968;
 
 struct sBoneEntFF00 {
@@ -1361,39 +1361,39 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * Unless @p force is set, first releases the queued parts of items without flag 0x10. Then for each item with no part
  * queued: when @p force is set, or the item has flag 0x10 and the matching entry of @p prev does not, queues the part's
  * file (kind 8) and clears +0xCBC and +0xCB4, or records -1 when the part has no file. Finally starts the file manager
- * on the character's bank (func_0019DF20).
+ * on the character's bank (cFEBoltFileManager_startDeferredModelPartLoads).
  *
  * @param list   the character's item list
  * @param prev   the previous item list to compare with, or null
  * @param force  nonzero to queue every item's part
- * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
+ * @param keepLoaded     passed to cFEBoltFileManager_requestFile as its keep-existing argument
  */
 void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
 {
     int n = list->mNumBolts;
-    sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
+    sBoneDbFF00* db = (sBoneDbFF00*)cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
-            if (func_0019CBE0(D_004A1968, mProfileIndex, it->id) >= 0) {
-                func_0019DC20(mgr, mCharID, func_0019CBE0(D_004A1968, mProfileIndex, it->id));
-                func_0019CC30(D_004A1968, mProfileIndex, it->id, -1);
+            if (cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id) >= 0) {
+                cFEBoltFileManager_releaseFile(mgr, mCharID, cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id));
+                cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, -1);
             }
         }
     }
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        if (func_0019CBE0(D_004A1968, mProfileIndex, it->id) < 0) {
+        if (cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
-                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, mCharID, it->id));
+                sBoneEntFF00* partEntry = getEntK19FF00(db, cBEBoltDB_findBoltIndex(db, mCharID, it->id));
                 if (partEntry->file) {
-                    int fileSlot = func_0019DA10(mgr, mCharID, partEntry->file, 8, keepLoaded, 1);
-                    func_0019CC30(D_004A1968, mProfileIndex, it->id, fileSlot);
+                    int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, partEntry->file, 8, keepLoaded, 1);
+                    cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, fileSlot);
                     mDoneLoadingModels = 0;
                     mCompiledModel = 0;
                 } else {
-                    func_0019CC30(D_004A1968, mProfileIndex, it->id, -1);
+                    cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, -1);
                 }
             }
             if (prev) {
@@ -1401,7 +1401,7 @@ void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int forc
             }
         }
     }
-    func_0019DF20(mgr, mCharID);
+    cFEBoltFileManager_startDeferredModelPartLoads(mgr, mCharID);
 }
 #endif
 
@@ -1411,15 +1411,15 @@ INCLUDE_ASM("fe/feridermanager", cFERider_isDoneLoadingModels);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0014D448(void* self, int g, int key);
-extern "C" int func_0019CBE0(void* self, int a1, int a2);
-extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
-extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" int func_0019E238(void* mgr, int bank, int i);
-extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
+extern "C" int cBoltFileIndexManager_getModelPartFile(void* self, int a1, int a2);
+extern "C" void cBoltFileIndexManager_setModelPartFile(void* self, int bit, int a2, int val);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
+extern "C" int cFEBoltFileManager_isFileLoaded(void* mgr, int bank, int i);
+extern "C" void* cFEBoltFileManager_getFileDataValue(void* mgr, int bank, int i);
 void* cMdfArchive_cMdfArchive(void* self);
 // PORT: cMdfArchive_attachConstArchive forwards its second argument (the archive data); bind the 2-arg form.
 void* cMdfArchive_attachConstArchive_data(void* self, void* data) __asm__("cMdfArchive_attachConstArchive__FPv");
@@ -1449,20 +1449,20 @@ static inline sBoneEnt_A0100* getEntK_A0100(sBoneDb_A0100* db, int i)
 
 static inline sBoneEnt_A0100* getEnt_A0100(sBoneDb_A0100* db, int id, int g)
 {
-    return getEntK_A0100(db, func_0014D448(db, g, id));
+    return getEntK_A0100(db, cBEBoltDB_findBoltIndex(db, g, id));
 }
 
 /**
  * Adds the front-end rider's loaded model parts to its model: reports whether all are done.
  *
- * Returns 1 at once when +0xCBC is set. Otherwise checks every queued part file (func_0019E238); when all are ready,
+ * Returns 1 at once when +0xCBC is set. Otherwise checks every queued part file (cFEBoltFileManager_isFileLoaded); when all are ready,
  * opens each loaded archive once (cMdfArchive_cMdfArchive, cMdfArchive_attachConstArchive), adds the model part named by each item sharing it as
  * LOD (cMdfArchive_getModelPart, cAnimModel_addModelPartLOD), releases the files and closes the archive.
  *
  * @return 1 when every part is loaded, else 0
  */
 // FAKEMATCH: identical arms on an always-non-null pointer in the inner loop (`void* g; if (self) g = D_004A1968; else
-// g = D_004A1968;`, g passed to the first func_0019CBE0 call); the extra inner-loop insns keep the `li 56` (sizeof entry)
+// g = D_004A1968;`, g passed to the first cBoltFileIndexManager_getModelPartFile call); the extra inner-loop insns keep the `li 56` (sizeof entry)
 // out of loop.c's hoisting, and cross-jumping merges the arms after reload; plain form 98.50%. Byte-identical and
 // behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
 // replace it when an honest spelling matches.
@@ -1473,14 +1473,14 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self[1], self[0]);
     int n = list->mNumBolts;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &((&list->mBolts[0]))[i];
-        int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
+        int fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], it->id);
         if (fileSlot >= 0) {
-            if (func_0019E238(mgr, self[0], fileSlot) == 0) {
+            if (cFEBoltFileManager_isFileLoaded(mgr, self[0], fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1489,11 +1489,11 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
         for (int i = 0; i < n;) {
             int next = i + 1;
             tBEProfileBolt* it = &((&list->mBolts[0]))[i];
-            int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
+            int fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], it->id);
             if (fileSlot >= 0) {
                 cMdfArchive arc;
                 cMdfArchive_cMdfArchive(&arc);
-                void* pkg = func_0019E2B0(mgr, self[0], fileSlot);
+                void* pkg = cFEBoltFileManager_getFileDataValue(mgr, self[0], fileSlot);
                 if (pkg) {
                     cMdfArchive_attachConstArchive_data(&arc, pkg);
                 }
@@ -1505,9 +1505,9 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
                     } else {
                         slotTable = D_004A1968;
                     }
-                    if (func_0019CBE0(slotTable, self[1], jt->id) == fileSlot) {
+                    if (cBoltFileIndexManager_getModelPartFile(slotTable, self[1], jt->id) == fileSlot) {
                         if (pkg) {
-                            sBoneEnt_A0100* partEntry = getEnt_A0100((sBoneDb_A0100*)func_0014BDB8_noarg(), jt->id, self[0]);
+                            sBoneEnt_A0100* partEntry = getEnt_A0100((sBoneDb_A0100*)cBEBoltInterface_getBoltDB_noarg(), jt->id, self[0]);
                             if (partEntry->file) {
                                 void* part = cMdfArchive_getModelPart(&arc, partEntry->file);
                                 if (part) {
@@ -1515,8 +1515,8 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
                                 }
                             }
                         }
-                        func_0019DC20(mgr, self[0], fileSlot);
-                        func_0019CC30(D_004A1968, self[1], jt->id, -1);
+                        cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
+                        cBoltFileIndexManager_setModelPartFile(D_004A1968, self[1], jt->id, -1);
                     }
                 }
                 cMdfArchive__cMdfArchive((int*)&arc, 2);
@@ -1532,22 +1532,22 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
 INCLUDE_ASM("fe/feridermanager", cFERider_speak);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A16B0(void* mgr, int id);
-extern "C" void func_002A1778(void* mgr, int id);
+extern "C" void cSSXAudio_SpeakCharacterSelect(void* mgr, int id);
+extern "C" void cSSXAudio_SpeakCustomize(void* mgr, int id);
 
 /**
  * Plays the front-end rider's pending speech line and clears the request.
  *
- * The customize request (+0xC1C, set by the equip screen) plays through func_002A1778 (sound 8381); otherwise the
- * character-select request (+0xC20) through func_002A16B0 (sound 8380); both on cAudioInterface_bxAudio() with the character id.
+ * The customize request (+0xC1C, set by the equip screen) plays through cSSXAudio_SpeakCustomize (sound 8381); otherwise the
+ * character-select request (+0xC20) through cSSXAudio_SpeakCharacterSelect (sound 8380); both on cAudioInterface_bxAudio() with the character id.
  */
 void cFERider::speak()
 {
     if (mCustomized != 0) {
-        func_002A1778(cAudioInterface_bxAudio(), *(int*)this);
+        cSSXAudio_SpeakCustomize(cAudioInterface_bxAudio(), *(int*)this);
         mCustomized = 0;
     } else if (mSelected != 0) {
-        func_002A16B0(cAudioInterface_bxAudio(), *(int*)this);
+        cSSXAudio_SpeakCharacterSelect(cAudioInterface_bxAudio(), *(int*)this);
         mSelected = 0;
     }
 }

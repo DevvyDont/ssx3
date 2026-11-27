@@ -342,7 +342,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern "C" void* func_001887A0(void* mem, void* owner, int a2);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* mem, void* owner, int a2);
 extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
 extern "C" void cFEStateRuleSelect_checkConflictForMenu(cFEStateRuleSelect* self, cUIListBox* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
@@ -394,7 +394,7 @@ void cFEStateRuleSelect::onWidgetEvent(cUIThing* msg, unsigned int type)
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
+        cUIState* st = (cUIState*)cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
         break;
@@ -760,7 +760,7 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setConfirmed);
  *
  * Each of the eight list boxes (+0x8) that exists gets setStatic(@p enabled) (vtable slot 8).
  * cFEStateBraggingRights_onWidgetEvent passes 1 when a row is accepted; cFEStateBraggingRights_onCreateScreen and
- * func_001941B0 pass 0.
+ * cFEStateBraggingRights_onNetEvent pass 0.
  *
  * @param enabled  the new flag: 1 confirms (locks), 0 unlocks
  */

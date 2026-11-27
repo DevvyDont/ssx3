@@ -24,36 +24,36 @@
 struct cStreamSys;
 struct cSpeechInstance;  // sound/speechinstance.h
 
-// One pending speech request (0x20; our name). [U] func_002B1458 adds one (timer 180 frames; refreshes a match),
-// func_002B1720 counts timers down, func_002B1520 applies a matching request to its speech instance
-// (mPosition / mUserInfo / mRadius / mIsHuman / mViewport), func_002B16A0 drops it.
+// One pending speech request (0x20; our name). [U] cSpeechSys_AddRequest adds one (timer 180 frames; refreshes a match),
+// cSpeechSys_AgeRequests counts timers down, cSpeechSys_ApplyRequest applies a matching request to its speech instance
+// (mPosition / mUserInfo / mRadius / mIsHuman / mViewport), cSpeechSys_RemoveRequest drops it.
 struct tSpeechRequest { // member names are ours, from use
-    int used;       // 0x00 [U] func_002B1458 1; func_002B1428 clears all; func_002B16A0 0
-    int timer;      // 0x04 [U] func_002B1458 180; func_002B1720 decrements, frees at 0
-    int instance;   // 0x08 [U] speech instance index (0..1) the request is for (func_002B1458/func_002B1520 match on it)
+    int used;       // 0x00 [U] cSpeechSys_AddRequest 1; cSpeechSys_ClearRequests clears all; cSpeechSys_RemoveRequest 0
+    int timer;      // 0x04 [U] cSpeechSys_AddRequest 180; cSpeechSys_AgeRequests decrements, frees at 0
+    int instance;   // 0x08 [U] speech instance index (0..1) the request is for (cSpeechSys_AddRequest/cSpeechSys_ApplyRequest match on it)
     int id;         // 0x0C [U] request key (matched with instance)
-    void* object;   // 0x10 [U] func_002B1520 calls its virtual slots (object + 0x6C0) and reads object + 0x870
-    int unk_14;     // 0x14 [U] func_002B1520 -> instance mUserInfo
-    float unk_18;   // 0x18 [U] func_002B1520 -> instance mRadius
-    void (*callback)(int); // 0x1C [U] func_002B1458 stores it; func_002B1520 copies it to mCallback (0 clears mCallback / mCallbackInstance)
+    void* object;   // 0x10 [U] cSpeechSys_ApplyRequest calls its virtual slots (object + 0x6C0) and reads object + 0x870
+    int unk_14;     // 0x14 [U] cSpeechSys_ApplyRequest -> instance mUserInfo
+    float unk_18;   // 0x18 [U] cSpeechSys_ApplyRequest -> instance mRadius
+    void (*callback)(int); // 0x1C [U] cSpeechSys_AddRequest stores it; cSpeechSys_ApplyRequest copies it to mCallback (0 clears mCallback / mCallbackInstance)
 };
 
 struct cSpeechSys {
     cStreamSys* mpVStreamSys;           // 0x000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0xC98 in a complete object; cSSXAudio + 0x7768); [U] methods reach cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
-    cSpeechInstance** mSpeechInstance;  // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] func_002B0E60
+    cSpeechInstance** mSpeechInstance;  // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] cSpeechSys_CreateInstance
                                         //       fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor
-                                        //       func_002AFA68; the dtor frees the array
+                                        //       cSpeechInstance_cSpeechInstance; the dtor frees the array
     void* mpBankMem;                    // 0x008 (our name, after the "bank mem" tag) [U] SPCH_Init: MEM_alloc("bank
-                                        //       mem", n, 0) (the speech bank buffer); func_002B0DA0 MEM_free()s and
+                                        //       mem", n, 0) (the speech bank buffer); cSpeechSys_Shutdown MEM_free()s and
                                         //       clears it
-    void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] func_002B0F48 calls it with the started
-                                        //       speech's handle (result unused); func_002B1058 stores it, func_002B1520
+    void (*mCallback)(int);             // 0x00C (our name) [R] ctor 0; [U] cSpeechSys_PlayEvent calls it with the started
+                                        //       speech's handle (result unused); cSpeechSys_TriggerSpeech stores it, cSpeechSys_ApplyRequest
                                         //       as an int
-    int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (func_002B0F48 compares, func_002B1058 sets/clears)
+    int mCallbackInstance;              // 0x010 (our name) [R] ctor -1; [U] the speech instance index mCallback is armed for (cSpeechSys_PlayEvent compares, cSpeechSys_TriggerSpeech sets/clears)
     char unk_014[0x4];                  // 0x014 no access found
-    tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (func_002B1428); [U] func_002B1458/func_002B1520/func_002B16A0/func_002B1720
+    tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (cSpeechSys_ClearRequests); [U] cSpeechSys_AddRequest/cSpeechSys_ApplyRequest/cSpeechSys_RemoveRequest/cSpeechSys_AgeRequests
     char mBigFileName[5][0x14];         // 0x158 [R] ctor copies "audio/speech.big", "audio/english.big", "audio/french.big", "audio/german.big", "audio/spanish.big"; [U] retail accessor func_002BAD00 returns this + 0x158 + 20 * i
-    void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: cSpeechSys_vtbl (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] func_002B1268 calls slot 3 through it
+    void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: cSpeechSys_vtbl (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] cSpeechSys_ApplyVolumeCallback calls slot 3 through it
 };
 
 CHECK_OFFSET(tSpeechRequest, used, 0x00);

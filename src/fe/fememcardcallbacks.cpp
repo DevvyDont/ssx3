@@ -2174,7 +2174,7 @@ extern "C" cFEPopupConfirm* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* sel
 INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_initPopup);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001C57C0(void* self, int a1, int a2);
+void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
 // PORT: cScreenPopup_redrawPopup takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 extern "C" void* strcpy1(void* dst, void* src);
@@ -2207,8 +2207,8 @@ void cFEPopupConfirm::initPopup(unsigned short* ustrDisplay, int bYesOnly, int b
 {
     void* str = ustrDisplay;
     cPopupInfo* sub = &info;
-    func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
-    func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
+    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
+    cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
     info.meType = 2;
     info.miLayerOffset = layerOffset;
     info.miDefaultOption = 0;
@@ -2247,7 +2247,7 @@ void cFEPopupConfirm::initPopup(unsigned short* ustrDisplay, int bYesOnly, int b
 INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_setButtonText);
 #ifdef SKIP_ASM
 extern "C" void* strcpy1(void* dst, void* src);
-void func_001C57A0(void* slots, int idx, int data);
+void cPopupInfo_setPopupOptionNames1(void* slots, int idx, int data);
 // PORT: cScreenPopup_redrawPopup takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 
@@ -2267,19 +2267,19 @@ void cFEPopupConfirm::setButtonText(unsigned short*src, unsigned int mode)
     if (mode == 0) {
         void* buttonText = (char*)&mYesText[0];
         strcpy1(buttonText, src);
-        func_001C57A0(slots, 0, (int)buttonText); // PORT: pointer passed as int
+        cPopupInfo_setPopupOptionNames1(slots, 0, (int)buttonText); // PORT: pointer passed as int
     } else if (mode == 1) {
         if (mNumButtons >= 2) {
             void* buttonText = (char*)&mNoText[0];
             strcpy1(buttonText, src);
-            func_001C57A0(slots, 1, (int)buttonText);
+            cPopupInfo_setPopupOptionNames1(slots, 1, (int)buttonText);
         }
     } else {
         void* buttonText = (char*)&mAltText[0];
         mNumButtons = 3;
         info.meType = 3;
         strcpy1(buttonText, src);
-        func_001C57A0(slots, 2, (int)buttonText);
+        cPopupInfo_setPopupOptionNames1(slots, 2, (int)buttonText);
     }
     if ((int)mpScreen != 0) {
         cScreenPopup_redrawPopup_self(this);

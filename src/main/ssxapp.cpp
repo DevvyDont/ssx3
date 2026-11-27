@@ -746,7 +746,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_preUpdate);
 #ifdef SKIP_ASM
 extern "C" bool cPadCache_nextInput(void* pad);
 extern "C" void cCommSystem_update(void* p);
-extern "C" void func_002668E8(void* p);
+extern "C" void cUsbKeyboard_update(void* p);
 extern "C" int cPadCache_numButtons(void* self, int i);
 extern "C" void* cPadCache_buttonValues(void* self, int i);
 extern "C" void cInputPad_update(void* target, int a, void* data);
@@ -770,7 +770,7 @@ bool cSSXApp::preUpdate()
             cCommSystem_update(cCommSystem_mCommSystem);
         }
         if (Keyboard != 0) {
-            func_002668E8(Keyboard);
+            cUsbKeyboard_update(Keyboard);
         }
         int i;
         for (i = 0; i < 2; i++) {
@@ -1017,9 +1017,9 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
 extern "C" void func_0031A6B8();
-extern "C" void func_00287410(void* opt, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
-extern "C" void func_00287520(void* opt, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* opt, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 void WORLDTRIGGERMANAGER_Init();
@@ -1162,9 +1162,9 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cBE_getInterface_Fv(cBE_getBE(), 4);
     SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), cBEOptionInterface_mOption_82D0.output));
     func_0031A6B8();
-    func_00287410(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
+    cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
     cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
-    func_00287520(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
+    cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
     cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_82D0().iUseDJSpeech != 0);
     cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().iUseArcadeSFX != 0);
     WORLDTRIGGERMANAGER_Init();
@@ -1325,7 +1325,7 @@ extern "C" void THREAD_yieldticks(int ticks);
 extern "C" void func_0040B130(int a);
 extern "C" void func_003F6A40();
 extern "C" void func_003F6AB0();
-extern "C" void func_00266788();
+extern "C" void cUsbKeyboard_createInstance();
 
 /**
  * Loads the IOP modules for USB, the keyboard, the network adapter, the modem and voice chat.
@@ -1375,7 +1375,7 @@ extern "C" void initOnline()
             func_003F6AB0();
         }
     }
-    func_00266788();
+    cUsbKeyboard_createInstance();
 }
 #endif
 
@@ -1621,7 +1621,7 @@ extern "C" void func_002294C8(cCrowdMan2d* self)
 INCLUDE_ASM("main/ssxapp", func_00229530);
 #ifdef SKIP_ASM
 unsigned int BXrand();
-extern "C" int func_002A77C8(void* self, int a1);
+extern "C" int cCrowdSys_GetCurrentCheer(void* self, int a1);
 struct sRingOwner;
 struct sQuad229;
 extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);
@@ -1691,7 +1691,7 @@ static inline float rands_229530(float lo, float hi)
 /**
  * Spawns markers over the crowd quads at a rate that follows the crowd's cheer level.
  *
- * Takes the absolute value of func_002A77C8(gSSXAudio, 0) (crowd instance 0's cheer value); when it changes, stores it
+ * Takes the absolute value of cCrowdSys_GetCurrentCheer(gSSXAudio, 0) (crowd instance 0's cheer value); when it changes, stores it
  * as the crowd level (+0x2210) and sets the animation's target state (+0x0) to it, at least 1. Each used slot's delay
  * (+0x30) falls by 10 * level + 4; when it reaches 0, a marker goes into the ring (func_00229738, lifetime 3) at the
  * slot's centre (+0x0) plus its two half-axes (+0x10, +0x20) each scaled by a random value in [-1, 1), and the delay
@@ -1702,7 +1702,7 @@ static inline float rands_229530(float lo, float hi)
 extern "C" void func_00229530(cCrowdMan2d* selfp)
 {
     sCrowd_229530* self = (sCrowd_229530*)selfp;
-    int n = func_002A77C8(gSSXAudio, 0);
+    int n = cCrowdSys_GetCurrentCheer(gSSXAudio, 0);
     n = n > -1 ? n : -n;
     if (n != self->count) {
         int animCount = n > 0 ? n : 1;

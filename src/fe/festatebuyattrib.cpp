@@ -33,7 +33,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateBank(cFEStateBuyAttrib* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 
 /**
  * Opens the buy-attributes screen ("33buyattribs") and fills in its cost, level, bar and bank displays.
@@ -41,7 +41,7 @@ extern "C" void func_0028F140(void* self, int a1);
  * Keeps the screen at 0x48 (On Tour mpScreen) and plays frame 0, sets the bank (0xA4, mBank) to the money of
  * user 0's character from the economy interface (11), clears the total cost (0xA0) and the prompt flag
  * (0xA8), runs the five update functions and switches the audio's front-end sound-bank mode to 3
- * (func_0028F140 on gSSXAudio).
+ * (cSSXAudio_SetFrontEndMusicMode on gSSXAudio).
  */
 void cFEStateBuyAttrib::onCreateScreen()
 {
@@ -60,7 +60,7 @@ void cFEStateBuyAttrib::onCreateScreen()
     updateCostPerLevel();
     updateExperienceDisplay();
     updateBank();
-    func_0028F140(cAudioInterface_bxAudio(), 3);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 3);
 }
 #endif
 
@@ -644,7 +644,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cFEStateCareerStats_initTotalEventMedal(cFEStateCareerStats* self);
 extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 
 /**
  * Opens the career-stats screen ("35car_stat") on its highlights page and counts the event medals.
@@ -675,7 +675,7 @@ void cFEStateCareerStats::onCreateScreen()
     mStatsState = 0;
     initTotalEventMedal();
     setupLayout();
-    func_0028F140(cAudioInterface_bxAudio(), 8);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 8);
 }
 #endif
 
@@ -1175,7 +1175,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
 extern "C" int cBENewRaceInterface_getPlatinumGoal(void* race, int track, int mode);
-extern "C" char* func_0020A1A8(int time);
+extern "C" char* formatMinutesSeconds(int time);
 extern char str_race_arrowup[];
 extern char str_race_arrowdown[];
 extern char str_race_medals[];
@@ -1196,7 +1196,7 @@ extern int D_004780F0[];
  * Shows "race_arrowup" while the scroll is above 0 and "race_arrowdown" while rows remain below; "race_medals" reads
  * "%d / %d" (owned +0x5C of the total +0x58). Each row gets its peak number (D_004780F0 + 1), the location name
  * (cBENewRaceInterface_getLocationName of D_004780D0; "%s Race" with the mode-4 time for every third event, else the
- * mode-0 time), the best time formatted by func_0020A1A8 (cBENewRaceInterface_getPlatinumGoal) and the "race_medal%d" icon when bit idx of
+ * mode-0 time), the best time formatted by formatMinutesSeconds (cBENewRaceInterface_getPlatinumGoal) and the "race_medal%d" icon when bit idx of
  * +0x60 is set; rows past the total are hidden.
  *
  */
@@ -1243,7 +1243,7 @@ void cFEStateCareerStats::setupRacePlatinumMedalsList()
             }
             sprintf(text, str_timepct_d_b, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(text));
-            cUIText_setAsciiString(textWidget, func_0020A1A8(raceTime));
+            cUIText_setAsciiString(textWidget, formatMinutesSeconds(raceTime));
             sprintf(medal, str_race_medalpct_d, i);
             if (self->mbitOwnedRaceMedal & (1 << idx)) {
                 cUIState_showObjSafe(self, medal);

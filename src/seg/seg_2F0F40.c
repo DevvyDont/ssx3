@@ -393,7 +393,7 @@ extern int func_003F5478(int);
  *
  * Allocates 0x50C bytes with func_002591E8 and zero-fills them, copies @p product to +0x314 and @p version to +0x354
  * (both sent in the 'AUTH' login), creates the packet session with func_003F5478(0x8000) at +0x4 and starts the request
- * counter (+0x14) at 100. BuddyMan's func_002614E8 calls it with version "2003-10-20".
+ * counter (+0x14) at 100. BuddyMan's BuddyMan_createBuddyApi calls it with version "2003-10-20".
  *
  * @param product  product name sent as PROD
  * @param version  version text sent as VERS

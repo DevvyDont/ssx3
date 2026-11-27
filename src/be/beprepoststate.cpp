@@ -336,21 +336,21 @@ void cBEProfileLib::init(int reload)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156810);
+INCLUDE_ASM("be/beprepoststate", cBEProfileLib_resetAllRelations);
 #ifdef SKIP_ASM
-extern "C" void func_001519E0(void* p, int i);
+extern "C" void cBECharProfileDB_resetRelations(void* p, int i);
 
 /**
- * Runs func_001519E0 on each of a profile's ten character records (0xF88 bytes apart), passing the character index.
+ * Runs cBECharProfileDB_resetRelations on each of a profile's ten character records (0xF88 bytes apart), passing the character index.
  *
- * func_001519E0 is the part of cBECharProfileDB_init that sets a character kind's defaults. The network interface calls
+ * cBECharProfileDB_resetRelations is the part of cBECharProfileDB_init that sets a character kind's defaults. The network interface calls
  * this when it resets a player's profile.
  */
-extern "C" void func_00156810(cBEProfileLib* self)
+extern "C" void cBEProfileLib_resetAllRelations(cBEProfileLib* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        func_001519E0(&self->charProfile[i], i);
+        cBECharProfileDB_resetRelations(&self->charProfile[i], i);
     }
 }
 #endif

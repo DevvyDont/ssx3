@@ -267,14 +267,14 @@ const tVideoInfo* cBERewardInterface::getVideos()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156C70);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getRandomUnownedPeakBolt);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 struct sBELibTables;
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(sBELibTables* self, int i);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
 unsigned int BXrand();
 
 
@@ -291,7 +291,7 @@ static inline tBEProfileBolt* Flag_6C70(cBECharProfileDB* charRecord, tBEBoltDef
  * Picks a random item of one type that the character does not have yet from the character's item-database entries, or
  * returns -1.
  *
- * Walks the character's entries in the item database (func_0014BDB8; count func_0014D988, array func_0014D998, 0x38
+ * Walks the character's entries in the item database (cBEBoltInterface_getBoltDB; count cBEBoltDB_getNumCharBolts, array cBEBoltDB_getCharBolts, 0x38
  * bytes each). Type 0 takes entries whose flags word (+0x34) has 0x100 set, type 1 0x200, type 2 0x400. An entry counts
  * when its per-character state, found through the index table at +0x288 of the character record (cBELibrary_profileLib
  * + profile * 0x9B50 + character * 0xF88) into the 4-byte states at +0x290, has bit 0x2 clear. Picks one of the n
@@ -307,13 +307,13 @@ static inline tBEProfileBolt* Flag_6C70(cBECharProfileDB* charRecord, tBEBoltDef
  * @param type  item type, the peak (eBEPeakID) 0 to 2 (flags 0x100, 0x200, 0x400)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int characterId, int type)
+extern "C" int cBERewardInterface_getRandomUnownedPeakBolt(cBERewardInterface* self, int profileIndex, int characterId, int type)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
-    void* lib = func_0014BDB8_noarg();
-    int count = func_0014D988(lib, characterId);
-    tBEBoltDef* def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
+    void* lib = cBEBoltInterface_getBoltDB_noarg();
+    int count = cBEBoltDB_getNumCharBolts(lib, characterId);
+    tBEBoltDef* def = (tBEBoltDef*)cBEBoltDB_getCharBolts((sBELibTables*)lib, characterId);
     int i;
     for (i = 0; i < count; i++, def++)
     {
@@ -336,7 +336,7 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
     if (n > 0)
     {
         n = BXrand() % n;
-        def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
+        def = (tBEBoltDef*)cBEBoltDB_getCharBolts((sBELibTables*)lib, characterId);
         int j;
         for (j = 0; j < count; j++, def++)
         {
@@ -392,14 +392,14 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00156EE0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_getRandomUnownedAwardBolt);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 struct sBELibTables;
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(sBELibTables* self, int i);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
 unsigned int BXrand();
 
 // The character's state for a bolt definition (its mpBoltsMap slot in mBolts), or 0 when the map has none.
@@ -415,7 +415,7 @@ static inline tBEProfileBolt* Flag_6EE0(cBECharProfileDB* charRecord, tBEBoltDef
  * Picks a random item with flag 0x800 that the character does not have yet from the character's item-database entries,
  * or returns -1.
  *
- * Same walk as func_00156C70 with the single test flags (+0x34) & 0x800: candidates are entries whose per-character
+ * Same walk as cBERewardInterface_getRandomUnownedPeakBolt with the single test flags (+0x34) & 0x800: candidates are entries whose per-character
  * state (index table at +0x288 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88),
  * states at +0x290) has bit 0x2 clear; one is chosen with BXrand() % n. cBERewardInterface_awardUser uses it for award
  * categories 20 to 31.
@@ -424,13 +424,13 @@ static inline tBEProfileBolt* Flag_6EE0(cBECharProfileDB* charRecord, tBEBoltDef
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int func_00156EE0(cBERewardInterface* self, int profileIndex, int characterId)
+extern "C" int cBERewardInterface_getRandomUnownedAwardBolt(cBERewardInterface* self, int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
-    void* lib = func_0014BDB8_noarg();
-    int count = func_0014D988(lib, characterId);
-    tBEBoltDef* def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
+    void* lib = cBEBoltInterface_getBoltDB_noarg();
+    int count = cBEBoltDB_getNumCharBolts(lib, characterId);
+    tBEBoltDef* def = (tBEBoltDef*)cBEBoltDB_getCharBolts((sBELibTables*)lib, characterId);
     int i;
     for (i = 0; i < count; i++, def++)
     {
@@ -443,7 +443,7 @@ extern "C" int func_00156EE0(cBERewardInterface* self, int profileIndex, int cha
     if (n > 0)
     {
         n = BXrand() % n;
-        def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
+        def = (tBEBoltDef*)cBEBoltDB_getCharBolts((sBELibTables*)lib, characterId);
         int j;
         for (j = 0; j < count; j++, def++)
         {
@@ -1353,7 +1353,7 @@ int cBERewardInterface::isVideoOwned(int profileIndex, int characterId, int bit)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", func_00157EA0);
+INCLUDE_ASM("be/beintreward", cBERewardInterface_isSongInPlayList);
 #ifdef SKIP_ASM
 /**
  * Returns bit @p bit of the 64-bit playlist word mRewards.iPlayList (+0xF78) of the character record
@@ -1369,7 +1369,7 @@ INCLUDE_ASM("be/beintreward", func_00157EA0);
  * @return 1 when the bit is set, else 0
  */
 // PORT: 64-bit ulong bit test (ld/dsrlv).
-extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int bit)
+extern "C" int cBERewardInterface_isSongInPlayList(void* self, int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     return (int)((charRecord->mRewards.iPlayList >> bit) & 1);
@@ -2516,9 +2516,9 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a,
 extern "C" void cBERewardInterface_awardUserCash1(cBERewardInterface* self, int a, int b, int c);
 extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int a, int b);
 extern "C" unsigned int cBEEconInterface_getCashReward(void* score, int medal, int event, int mode);
-extern "C" void func_001E1DD0(int group, int mode, int flag);
-extern "C" void func_001E1C10(int group);
-extern "C" void func_001E2370(int group);
+extern "C" void setChallengeMessagePending(int group, int mode, int flag);
+extern "C" void queueForeshadowMessage(int group);
+extern "C" void flagForeshadowGroups(int group);
 extern "C" int cBERewardInterface_getTrackTrophyID(cBERewardInterface* self, int a, int b);
 extern "C" int cBERewardInterface_getTrackPeakID(cBERewardInterface* self, int a1);
 
@@ -2556,7 +2556,7 @@ extern signed char D_005305F9[];
  * event, @p mode). The award category (eBEAwardCategory) is the peak plus kAWARD_PEAK1_EVENT_MEDAL (events 0-3),
  * kAWARD_PEAK1_RIVALTIME_MEDAL (4), kAWARD_PEAK1_RIVALPOINTS_MEDAL (5), kAWARD_PEAK1_TIMECHALLENGE_MEDAL (6-8) or
  * kAWARD_PEAK1_POINTSCHALLENGE_MEDAL (9-11). A medal of 0 or 1 calls cBERewardInterface_awardUser for it on the first
- * result (the score record's iNumGoldOrPlat is 0); events 6-11 with kMEDAL_BRONZE or kMEDAL_SILVER call func_001E1DD0
+ * result (the score record's iNumGoldOrPlat is 0); events 6-11 with kMEDAL_BRONZE or kMEDAL_SILVER call setChallengeMessagePending
  * instead, unless raceDB byte +0x49 (D_005305F9) is set.
  *
  * When the medal beats the stored one (cBERewardInterface_isBetterMedal), pays the full cash (cBERewardInterface_awardUserCash1), records
@@ -2567,7 +2567,7 @@ extern signed char D_005305F9[];
  * With any medal it then walks the trophy's five requirements in gMedalsInfo[peak][trophy] (event byte, location byte;
  * kMEDALSINFO_END ends) and checks each for a medal with cBERewardInterface_getTrackMedal. If they hold, it clears a
  * lock bit in the character's flags (+0x278: 0x40/0x80/0x100 for trophy 0, 0x200/0x400/0x800 otherwise, by peak) and
- * calls func_001E2370; the requirements on events 4 and 5 gate a second set of bits (0x4000-0x80000). Events 12 and 13
+ * calls flagForeshadowGroups; the requirements on events 4 and 5 gate a second set of bits (0x4000-0x80000). Events 12 and 13
  * leave the category at -1, which would still reach cBERewardInterface_awardUser (possible bug).
  * @param profile  profile index (On Tour iProfileIndex)
  * @param charID  character ID (On Tour iCharacterID)
@@ -2624,9 +2624,9 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
             awardUser(profile, charID, bit);
     } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
         if (medal == kMEDAL_BRONZE)
-            func_001E1DD0(group, mode, 0);
+            setChallengeMessagePending(group, mode, 0);
         else if (medal == kMEDAL_SILVER)
-            func_001E1DD0(group, mode, 1);
+            setChallengeMessagePending(group, mode, 1);
     }
     if (this->isBetterMedal(oldMedal, medal)) {
         int had = isTrophyOwned(profile, charID, group, tier);
@@ -2653,7 +2653,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
         int track = gMedalsInfo_1591E8[group][tier][i].track;
         if (track == kMEDALSINFO_END) {
             if (cBELibrary_raceDB_1591E8.cGamePath == 0)
-                func_001E1C10(group);
+                queueForeshadowMessage(group);
             break;
         }
         if ((unsigned int)(track - 4) < 2) {
@@ -2668,7 +2668,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
                     track, kind))) {
                 if (!any) {
                     if (cBELibrary_raceDB_1591E8.cGamePath == 0)
-                        func_001E1C10(group);
+                        queueForeshadowMessage(group);
                     okA = 0;
                     okB = 0;
                 }
@@ -2693,7 +2693,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
                 pc->flags &= ~0x800L;
         }
         if (D_005305F9[0] == 0)
-            func_001E2370(group);
+            flagForeshadowGroups(group);
     }
     if (okB) {
         if (tier == 0) {
@@ -2917,11 +2917,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUser);
 #ifdef SKIP_ASM
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_setBit(cBERewardInterface* self, int bit, unsigned char* bits);
-extern "C" void func_0014B560(void* stats, int profile, int c, int value, int flag);
-extern "C" void func_001E2428(int which);
-extern "C" void func_001E2518();
-extern "C" void func_001E2578();
-extern "C" void func_001E38B8(int profile);
+extern "C" void cBEBoltInterface_buyBolt(void* stats, int profile, int c, int value, int flag);
+extern "C" void queuePeakCompletedMessage(int which);
+extern "C" void queueMountainCompletedMessage();
+extern "C" void queueMountainConqueredMessage();
+extern "C" void queueTrophyMessages(int profile);
 
 struct sSlots4_00159CD0 {
     int v[4];
@@ -2936,7 +2936,7 @@ extern sSlots2_00159CD0 D_004A1268[];
  * Gives a character an award category's rewards, logs them, and awards anything that unlocks as a result.
  *
  * Except for categories 17-19 (the event medals) an award already given is skipped. Categories 0-4 (mountain, peaks)
- * call a front-end notice (func_001E2578, func_001E2518, func_001E2428) and give a fixed cheat character; peak 0's
+ * call a front-end notice (queueMountainConqueredMessage, queueMountainCompletedMessage, queuePeakCompletedMessage) and give a fixed cheat character; peak 0's
  * trophies give random trading cards and a poster and unlock peak 1, peak 1's give a toy and concept arts and unlock
  * peaks 1 and 2, peak 2's give a fixed cheat character; 17-31 give a bolt item. The category bit is set (+0xF28), the
  * rewards go into the log cBELibrary_userAwards, and the mountain, peak and trophy awards are re-checked.
@@ -2961,23 +2961,23 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
 
     switch (bit) {
     case kAWARD_MOUNTAIN_CONQUERED:
-        func_001E2578();
+        queueMountainConqueredMessage();
         value = 29;
         break;
     case kAWARD_MOUNTAIN_COMPLETED:
-        func_001E2518();
+        queueMountainCompletedMessage();
         value = 0x18;
         break;
     case kAWARD_PEAK1_COMPLETED:
-        func_001E2428(0);
+        queuePeakCompletedMessage(0);
         value = 18;
         break;
     case kAWARD_PEAK2_COMPLETED:
-        func_001E2428(1);
+        queuePeakCompletedMessage(1);
         value = 25;
         break;
     case kAWARD_PEAK3_COMPLETED:
-        func_001E2428(2);
+        queuePeakCompletedMessage(2);
         value = 26;
         break;
     case kAWARD_PEAK1_RACE_TROPHY:
@@ -2997,7 +2997,7 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
             rewardLog->setAward(bit, kRewardPoster, rewardBit);
         }
         if (bit == kAWARD_PEAK1_EXPLORE_TROPHY)
-            func_001E38B8(profile);
+            queueTrophyMessages(profile);
         this->awardUserPeakPass(profile, iCharacterID, bit, kPEAK_2);
         break;
     }
@@ -3018,7 +3018,7 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
             rewardLog->setAward(bit, kRewardArt, slots2.v[i]);
         }
         if (bit == kAWARD_PEAK2_EXPLORE_TROPHY)
-            func_001E38B8(profile);
+            queueTrophyMessages(profile);
         this->awardUserPeakPass(profile, iCharacterID, bit, kPEAK_3);
         break;
     }
@@ -3035,13 +3035,13 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
         value = 21;
         break;
     case kAWARD_PEAK1_EVENT_MEDAL:
-        item = func_00156C70(this, profile, iCharacterID, kPEAK_1);
+        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_1);
         break;
     case kAWARD_PEAK2_EVENT_MEDAL:
-        item = func_00156C70(this, profile, iCharacterID, kPEAK_2);
+        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_2);
         break;
     case kAWARD_PEAK3_EVENT_MEDAL:
-        item = func_00156C70(this, profile, iCharacterID, kPEAK_3);
+        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_3);
         break;
     case kAWARD_PEAK1_RIVALTIME_MEDAL:
     case kAWARD_PEAK2_RIVALTIME_MEDAL:
@@ -3055,7 +3055,7 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
     case kAWARD_PEAK1_POINTSCHALLENGE_MEDAL:
     case kAWARD_PEAK2_POINTSCHALLENGE_MEDAL:
     case kAWARD_PEAK3_POINTSCHALLENGE_MEDAL:
-        item = func_00156EE0(this, profile, iCharacterID);
+        item = cBERewardInterface_getRandomUnownedAwardBolt(this, profile, iCharacterID);
         break;
     }
 
@@ -3067,7 +3067,7 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
     if (item != kNoBoltID) {
         void* stats = cBE_getInterface_Fv(cBE_getBE(), 9);
         rewardLog->setAward(bit, kRewardBolt, item);
-        func_0014B560(stats, profile, iCharacterID, item, 0);
+        cBEBoltInterface_buyBolt(stats, profile, iCharacterID, item, 0);
     }
     if (this->isMountainConquered(profile, iCharacterID)) {
         if (!this->isAwardReceived(profile, iCharacterID, kAWARD_MOUNTAIN_CONQUERED))

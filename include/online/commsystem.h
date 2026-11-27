@@ -69,7 +69,7 @@ struct cCommSystem {
     int mBroadBand;              // 0x2C [O] (On Tour: bool); [R] 0; [U] update sets 1 when 'bbnd' answers 1; read by
                                  //      cGameComm_syncGame (tServerSettings), the ping (func_002583A8), tagsunk
     int mInterfaceType;          // 0x30 [O]; [R] 1; [U] netConnConnect sets 1, update stores the 'type' status; read by
-                                 //      tagsunk func_0025C610
+                                 //      tagsunk LobbyMan_authenticate
 
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cCommSystem_update");

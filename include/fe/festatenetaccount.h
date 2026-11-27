@@ -2,7 +2,7 @@
 #define FE_FESTATENETACCOUNT_H
 
 // The online account screens (EA's d:/ssx/code/source/fe/festatenetaccount.cpp: the preview's assert at line 852
-// sits in retail func_001AD9C8, a cFEStateSelectPersona popup handler; cFEUseExistingAccount's code comes right
+// sits in retail cFEStateSelectPersona_onDeletePersonaPopupEvent, a cFEStateSelectPersona popup handler; cFEUseExistingAccount's code comes right
 // before it in both builds, after cFEBlankPopup). Two cFEStateNet states (fe/festatenet.h, 0x6D0) live here:
 //
 // cFEUseExistingAccount: screen "204use_existing_account": account name and password boxes, "forgot password" /
@@ -13,8 +13,8 @@
 // mHashName 0x35) and the default cFEUseExistingAccount_cFEUseExistingAccount1 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
 // mszEmail, then cFEStateNet's cFEStateNet__cFEStateNet). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
 // cFEUseExistingAccount_onCreateScreen, 12 onUpdate cFEUseExistingAccount_onUpdate, 17 onPopupEvent cFEUseExistingAccount_onPopupEvent, 18 onWidgetCreate cFEUseExistingAccount_onWidgetCreate,
-// 19 onWidgetEvent cFEUseExistingAccount_onWidgetEvent, 20 cFEUseExistingAccount_onWidgetMenu, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
-// 31 func_001ACEF8 (net events 0xC9/0xCF/0xD2/0xD4)). Methods: fe/feasyncfile 0x1AC010-0x1ACEF8.
+// 19 onWidgetEvent cFEUseExistingAccount_onWidgetEvent, 20 cFEUseExistingAccount_onWidgetMenu, 25 cFEUseExistingAccount_fillHelpPopup (help texts), 29 cFEUseExistingAccount_isOnlineState,
+// 31 cFEUseExistingAccount_onNetEvent (net events 0xC9/0xCF/0xD2/0xD4)). Methods: fe/feasyncfile 0x1AC010-0x1ACEF8.
 //
 // cFEStateSelectPersona: screen "220select_persona": the account's persona list ("PersonaMenu"), create / delete
 // persona. EA's name: the preview's __21cFEStateSelectPersona / _$_21cFEStateSelectPersona. Size 0x6D8:
@@ -22,8 +22,8 @@
 // Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable cFEStateSelectPersona_vtbl, mHashName 0x38) and the default cFEStateSelectPersona_cFEStateSelectPersona1 (fe/fepopupmisc);
 // destructor cFEStateSelectPersona__cFEStateSelectPersona (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
 // cFEStateSelectPersona_vtbl (33 slots: 4 onCreateScreen cFEStateSelectPersona_onCreateScreen, 12 onUpdate cFEStateSelectPersona_onUpdate, 17 onPopupEvent cFEStateSelectPersona_onPopupEvent,
-// 18 onWidgetCreate cFEStateSelectPersona_onWidgetCreate, 19 onWidgetEvent cFEStateSelectPersona_onWidgetEvent, 25 func_001AD4F0 (help), 29 func_001E0940,
-// 31 func_001ADA30 (net events), 32 func_001E0948, 33 func_001AD9C8). Methods: fe/feasyncfile 0x1AD130-0x1ADC30.
+// 18 onWidgetCreate cFEStateSelectPersona_onWidgetCreate, 19 onWidgetEvent cFEStateSelectPersona_onWidgetEvent, 25 cFEStateSelectPersona_fillHelpPopup (help), 29 cFEStateSelectPersona_isOnlineState,
+// 31 cFEStateSelectPersona_onNetEvent (net events), 32 cFEStateSelectPersona_publishPresence, 33 cFEStateSelectPersona_onDeletePersonaPopupEvent). Methods: fe/feasyncfile 0x1AD130-0x1ADC30.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE), so the own fields are named from their retail use unless noted.
@@ -53,31 +53,31 @@ struct cFEUseExistingAccount : public cFEStateNet {
     //       0x35
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEUseExistingAccount
     int unk_6D0;                    // 0x6D0 [R] 0 (cFEUseExistingAccount_cFEUseExistingAccount, cFEUseExistingAccount_cFEUseExistingAccount1); no other access seen
-    int mbAskSave;                  // 0x6D4 [U] func_001ACB48 (popup 0x82C, the cFEStateNetAccountMem result): 1 on
+    int mbAskSave;                  // 0x6D4 [U] cFEUseExistingAccount_onAccountMemPopupEvent (popup 0x82C, the cFEStateNetAccountMem result): 1 on
                                     //       0x11 (option 2), 0 on 0xF/0x10 (then pushes cFEStateSelectPersona); on
                                     //       0x16 it opens the "kT_POPUP204SaveAccount" yes/no popup (0x81E) when set,
                                     //       then clears it
     int miRequest;                  // 0x6D8 [U] the pending LobbyMan request: onWidgetEvent cFEUseExistingAccount_onWidgetEvent stores 4
-                                    //       (verify, "kT_POPUP201Verify") and 2 (forgotten password), func_001AC9C0
-                                    //       stores 3 (forgotten account name); the net-event handler func_001ACEF8 on
-                                    //       0xC9 sends it: 2 -> func_0025C3F8(mUserName), 3 ->
-                                    //       func_0025C1E0(mszEmail), 4 -> func_0025C610
+                                    //       (verify, "kT_POPUP201Verify") and 2 (forgotten password), cFEUseExistingAccount_onEmailEntryPopupEvent
+                                    //       stores 3 (forgotten account name); the net-event handler cFEUseExistingAccount_onNetEvent on
+                                    //       0xC9 sends it: 2 -> LobbyMan_requestLostPassword(mUserName), 3 ->
+                                    //       LobbyMan_requestLostAccount(mszEmail), 4 -> LobbyMan_authenticate
     char* mszEmail;                 // 0x6DC [R] cBXString: the empty-string rep cBXString_EmptyString (both ctors), destroyed by
-                                    //       cFEUseExistingAccount__cFEUseExistingAccount (cBXString__cBXString(.., 2)); [U] func_001AC9C0 assigns
+                                    //       cFEUseExistingAccount__cFEUseExistingAccount (cBXString__cBXString(.., 2)); [U] cFEUseExistingAccount_onEmailEntryPopupEvent assigns
                                     //       the e-mail address the request popup returned (popup + 0x2B0;
-                                    //       cBXString_operatorE1); func_001AC448 opens "kT_POPUP204RequestAccount"
-                                    //       when its length (the word before the text) is 0; func_001ACEF8 passes it
-                                    //       to func_0025C1E0
+                                    //       cBXString_operatorE1); cFEUseExistingAccount_checkEmailEntered opens "kT_POPUP204RequestAccount"
+                                    //       when its length (the word before the text) is 0; cFEUseExistingAccount_onNetEvent passes it
+                                    //       to LobbyMan_requestLostAccount
     cUIText* mpTextForgotPassword;  // 0x6E0 [R] 0; [U] onWidgetCreate cFEUseExistingAccount_onWidgetCreate: widget
                                     //       "TextForgotPassword"
-                                    //       (miMiscData 2), then its slots 25 and 8 with 1; func_001ACDD0 calls its
+                                    //       (miMiscData 2), then its slots 25 and 8 with 1; cFEUseExistingAccount_handleKeyboardText calls its
                                     //       slot 8 with 0 once an account name is entered, 1 when the name is empty
 
     // Methods bound to their retail symbols by asm labels.
@@ -111,20 +111,20 @@ struct cFEStateSelectPersona : public cFEStateNet {
     //       0x38
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateSelectPersona
     int mbExistingPersona;          // 0x6D0 [R] 0 (cFEStateSelectPersona_cFEStateSelectPersona; not set by the default ctor); [U] onWidgetEvent
-                                    //       cFEStateSelectPersona_onWidgetEvent: 1 when an existing persona row is chosen (func_0025CD28
+                                    //       cFEStateSelectPersona_onWidgetEvent: 1 when an existing persona row is chosen (LobbyMan_selectPersonaAt
                                     //       selects it), 0 when the "create new persona" row opens the keyboard; the
-                                    //       net-event handler func_001ADC30 picks "kT_POPUPCMNProfanity" (set) or
+                                    //       net-event handler cFEStateSelectPersona_handlePersonaError picks "kT_POPUPCMNProfanity" (set) or
                                     //       "kT_POPUPCMNProfanityPersona" (clear) on the "filt" reply
     int miDeletePersona;            // 0x6D4 [U] onWidgetEvent cFEStateSelectPersona_onWidgetEvent (message 8, the delete key) stores the
-                                    //       persona row and opens "kT_POPUP220DeleteInitial"; func_001AD9C8 (popup
-                                    //       0x816, option 0xF) deletes it: func_0025D428(LobbyMan, it) (the C body
+                                    //       persona row and opens "kT_POPUP220DeleteInitial"; cFEStateSelectPersona_onDeletePersonaPopupEvent (popup
+                                    //       0x816, option 0xF) deletes it: LobbyMan_deletePersona(LobbyMan, it) (the C body
                                     //       reads it as a void*)
 
     // Methods bound to their retail symbols by asm labels.

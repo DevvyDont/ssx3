@@ -1333,14 +1333,14 @@ INCLUDE_ASM("ai/computer", cRider_flagEventBump);
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
-extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+extern "C" void cSSXAudio_SpeakRiderHit(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
 /**
  * Reacts to a light bump from another rider: collision sound and a mild aggression event.
  *
- * Plays the rider-collision sound (cSSXAudio_RiderCollision, On Tour cSSXAudio::RiderCollision) and func_002A0A30(audio, attacker,
+ * Plays the rider-collision sound (cSSXAudio_RiderCollision, On Tour cSSXAudio::RiderCollision) and cSSXAudio_SpeakRiderHit(audio, attacker,
  * self, 1, 0), then reports aggression behaviour 0 (kAGG_MILDCONTACT) from @p attacker against @p self to cBEAggressionInterface_applyAggression (On Tour
  * cBEAggressionInterface::applyAggression). Each rider's id comes from its cBeing vtable (+0x6C0) slot 7 (On Tour
  * cBeing::getAIIndex).
@@ -1350,7 +1350,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
 void cRider::flagEventBump(cRider* attacker)
 {
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), this, attacker);
-    func_002A0A30(cAudioInterface_bxAudio(), attacker, this, 1, 0);
+    cSSXAudio_SpeakRiderHit(cAudioInterface_bxAudio(), attacker, this, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
     int rb = attacker->getAIIndex();
     cBEAggressionInterface_applyAggression(agg, rb, getAIIndex(), 0);
@@ -1363,14 +1363,14 @@ INCLUDE_ASM("ai/computer", cRider_flagEventBumpKnockdown);
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
-extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+extern "C" void cSSXAudio_SpeakRiderHit(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
 /**
  * Reacts to a bump from another rider that knocked this one down: collision sound and a moderate aggression event.
  *
- * As cRider_flagEventBump, but func_002A0A30 gets (attacker, self, 1, 1) and the aggression behaviour passed to
+ * As cRider_flagEventBump, but cSSXAudio_SpeakRiderHit gets (attacker, self, 1, 1) and the aggression behaviour passed to
  * cBEAggressionInterface_applyAggression (On Tour cBEAggressionInterface::applyAggression) is 1 (kAGG_MODCONTACT).
  *
  * @param attacker  the rider that did the bumping (On Tour attacker)
@@ -1378,7 +1378,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
 void cRider::flagEventBumpKnockdown(cRider* attacker)
 {
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), this, attacker);
-    func_002A0A30(cAudioInterface_bxAudio(), attacker, this, 1, 1);
+    cSSXAudio_SpeakRiderHit(cAudioInterface_bxAudio(), attacker, this, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
     int rb = attacker->getAIIndex();
     cBEAggressionInterface_applyAggression(agg, rb, getAIIndex(), 1);
@@ -1391,14 +1391,14 @@ INCLUDE_ASM("ai/computer", cRider_flagEventPunch);
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
-extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+extern "C" void cSSXAudio_SpeakRiderHit(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
 /**
  * Reacts to a punch from another rider: punch sound and a hard-contact aggression event.
  *
- * Plays cSSXAudio_Punch(audio, attacker, self) and func_002A0A30(audio, attacker, self, 0, 0), then reports aggression
+ * Plays cSSXAudio_Punch(audio, attacker, self) and cSSXAudio_SpeakRiderHit(audio, attacker, self, 0, 0), then reports aggression
  * behaviour 2 (kAGG_HARDCONTACT) from @p attacker against @p self to cBEAggressionInterface_applyAggression (On Tour
  * cBEAggressionInterface::applyAggression), the ids from each rider's cBeing vtable slot 7.
  *
@@ -1407,7 +1407,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
 void cRider::flagEventPunch(cRider* attacker)
 {
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, this);
-    func_002A0A30(cAudioInterface_bxAudio(), attacker, this, 0, 0);
+    cSSXAudio_SpeakRiderHit(cAudioInterface_bxAudio(), attacker, this, 0, 0);
     void* agg = cBEAggressionInterface_getThis();
     int rb = attacker->getAIIndex();
     cBEAggressionInterface_applyAggression(agg, rb, getAIIndex(), 2);
@@ -1420,7 +1420,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventPunchKnockdown);
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
-extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
+extern "C" void cSSXAudio_SpeakRiderHit(void* snd, void* a, void* b, int c, int d);
 extern "C" void cSSXAudio_KnockdownSFX(void* snd, void* obj);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
@@ -1431,7 +1431,7 @@ extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
  * Reacts to a punch that knocked this rider down: sounds, the harshest aggression event and a frag reward for the
  * attacker.
  *
- * Plays cSSXAudio_Punch(attacker, self), func_002A0A30(audio, attacker, self, 0, 1) and cSSXAudio_KnockdownSFX for the
+ * Plays cSSXAudio_Punch(attacker, self), cSSXAudio_SpeakRiderHit(audio, attacker, self, 0, 1) and cSSXAudio_KnockdownSFX for the
  * attacker, reports aggression behaviour 3 (kAGG_BERTUZZI) to cBEAggressionInterface_applyAggression, then gives the attacker
  * cRider_flagEventBoostPowerUp(attacker, 2, ...) with the boost from its metrix's cRiderMetrix_evFrag (On Tour
  * cRiderMetrix::evFrag). The prototype here declares flagEventBoostPowerUp as (rider, int, float): the float goes in
@@ -1442,7 +1442,7 @@ extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 void cRider::flagEventPunchKnockdown(cRider* attacker)
 {
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, this);
-    func_002A0A30(cAudioInterface_bxAudio(), attacker, this, 0, 1);
+    cSSXAudio_SpeakRiderHit(cAudioInterface_bxAudio(), attacker, this, 0, 1);
     cSSXAudio_KnockdownSFX(cAudioInterface_bxAudio(), attacker);
     void* agg = cBEAggressionInterface_getThis();
     int rb = attacker->getAIIndex();
@@ -1548,13 +1548,13 @@ INCLUDE_ASM("ai/computer", cRider_flagEventSpeedBoost);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
-extern "C" void func_002A3B18(void*, void*, int);
+extern "C" void cSSXAudio_SpeakArcadeBoost(void*, void*, int);
 
 /**
  * Adds time to the rider's speed power-up boost and plays the boost icon sound.
  *
  * mPowerUpBoostTimer (+0x2E8) += @p amount, then cSSXAudio_PlayIconSound(audio, 0, self, 1.0f) (On Tour icon type 0;
- * flagEventTrickBoost uses 1) and func_002A3B18(audio, self, 1), which On Tour's version lacks. Virtual (cRider vtable
+ * flagEventTrickBoost uses 1) and cSSXAudio_SpeakArcadeBoost(audio, self, 1), which On Tour's version lacks. Virtual (cRider vtable
  * entry 13 in the kRiderVt_* numbering, after initForMission); no direct callers.
  *
  * @param amount  seconds of boost to add (On Tour sec)
@@ -1563,7 +1563,7 @@ void cRider::flagEventSpeedBoost(float amount)
 {
     mPowerUpBoostTimer += amount;
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 0, this, 1.0f);
-    func_002A3B18(cAudioInterface_bxAudio(), this, 1);
+    cSSXAudio_SpeakArcadeBoost(cAudioInterface_bxAudio(), this, 1);
 }
 #endif
 
@@ -1572,12 +1572,12 @@ INCLUDE_ASM("ai/computer", cRider_flagEventTrickBoost);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
-extern "C" void func_002A3B18(void*, void*, int);
+extern "C" void cSSXAudio_SpeakArcadeBoost(void*, void*, int);
 
 /**
  * Adds @p amount to the rider's mPowerUpTrickTimer and plays the icon sound for type 1.
  *
- * Also calls func_002A3B18 with 2 on the sound system. A cRider virtual (it is in six rider vtables).
+ * Also calls cSSXAudio_SpeakArcadeBoost with 2 on the sound system. A cRider virtual (it is in six rider vtables).
  *
  * @param amount  the time to add
  */
@@ -1585,7 +1585,7 @@ void cRider::flagEventTrickBoost(float amount)
 {
     mPowerUpTrickTimer += amount;
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 1, this, 1.0f);
-    func_002A3B18(cAudioInterface_bxAudio(), this, 2);
+    cSSXAudio_SpeakArcadeBoost(cAudioInterface_bxAudio(), this, 2);
 }
 #endif
 

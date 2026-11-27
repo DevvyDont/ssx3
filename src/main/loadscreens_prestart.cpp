@@ -605,7 +605,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cUIEngine_cUIEngine(void* p);
 extern "C" int cUIEngine_loadFile(void* ui, const char* name);
-extern "C" void* func_00186A08(void* p, void* ui);
+extern "C" void* cFEStateMemCard_cFEStateMemCard1(void* p, void* ui);
 extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_UIEngine_b[];
@@ -623,7 +623,7 @@ extern void* D_0047CA18[];
  * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine", cUIEngine_cUIEngine)
  * into mpUI, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (mpLocaleInterface) and Fonts
  * (mpFontInterface) and a new 0x1C-byte cFEInput (tag "GLUIInput", vtable cFEInput_vtbl, fields cleared) as its
- * mpInput. Type (meStartScreen_type) eStartScreen_Legal pushes a cFEStateMemCard (584 bytes, func_00186A08);
+ * mpInput. Type (meStartScreen_type) eStartScreen_Legal pushes a cFEStateMemCard (584 bytes, cFEStateMemCard_cFEStateMemCard1);
  * eStartScreen_Progressive pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable D_0047CA18);
  * any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
@@ -645,7 +645,7 @@ void cStartScreen::load()
     mpUI->mpFontInterface = SSXApp->Fonts;
     int mode = meStartScreen_type;
     if (mode == eStartScreen_Legal) {
-        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), mpUI);
+        void* item = cFEStateMemCard_cFEStateMemCard1(operator new(584, str_cFEStateMemCard, 0, 0), mpUI);
         cUIStateStack_push(&mpUI->mStateStack, item);
     } else if (mode == eStartScreen_Progressive) {
         cUIState* progressiveState = (cUIState*)operator new(72, str_cFEStateProgressive, 0, 0);
@@ -1009,14 +1009,14 @@ extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F768(void* snd);
+extern "C" void cSSXAudio_StartLoadingLoop(void* snd);
 
 
 /**
  * Starts the game load screen: uploads textures, starts the game load, turns off depth fog and clears to black.
  *
  * Calls cGraphicsMan_UploadTextures and cSSXApp_startGameLoad(SSXApp), clears cDepthFog_m_Enable, sets the clear colour
- * (0, 0, 0) (SetScreenClearColour, slot 15) and calls func_0028F768 on the audio (cAudioInterface_bxAudio). GainFocus slot
+ * (0, 0, 0) (SetScreenClearColour, slot 15) and calls cSSXAudio_StartLoadingLoop on the audio (cAudioInterface_bxAudio). GainFocus slot
  * (+0x2C) of cGameLoadScreen_vtbl.
  */
 extern "C" void cGameLoadScreen_gainFocus(void)
@@ -1027,7 +1027,7 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     int* fogEnable = &cDepthFog_m_Enable;
     *fogEnable = 0;
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
-    func_0028F768(cAudioInterface_bxAudio());
+    cSSXAudio_StartLoadingLoop(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -1055,7 +1055,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_purge);
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
-extern "C" void func_0028FA98(void* self, float v);
+extern "C" void cSSXAudio_StopLoadingLoop(void* self, float v);
 
 /**
  * Purges the game load screen: flushes the renderer, destroys the UI engine, removes its two textures and purges
@@ -1063,7 +1063,7 @@ extern "C" void func_0028FA98(void* self, float v);
  *
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with cUIEngine__cUIEngine(engine, 3) when set (the
  * pointer is not cleared), removes each non-zero texture id of the pair at +0x10 (RemoveTexture, slot 50), calls
- * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
+ * cGraphicsMan_PurgeTextures and cSSXAudio_StopLoadingLoop(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
  * cGameLoadScreen_vtbl.
  */
 void cGameLoadScreen::purge()
@@ -1081,7 +1081,7 @@ void cGameLoadScreen::purge()
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    func_0028FA98(cAudioInterface_bxAudio(), 1.0f);
+    cSSXAudio_StopLoadingLoop(cAudioInterface_bxAudio(), 1.0f);
 }
 #endif
 

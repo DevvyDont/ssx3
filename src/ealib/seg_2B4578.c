@@ -1907,7 +1907,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_add100hzclient);
  *
  * Only while started; appends to the sound driver state sndgs +0x184 and increments the count (+0x177) without a
  * bound check. SNDSYSI_100hzserver calls each client every tick. Used by cMonitor_MONITOR_BeginMonitoring__FPv, SNDmidiinit
- * and func_002AE048.
+ * and pathxSND_init.
  *
  * @param client  the client function
  */
@@ -1932,7 +1932,7 @@ extern struct S_5948 D_a8e8_5948 __asm__("sndgs");
  * Removes a client from the sound system's 100 Hz client list.
  *
  * Only while started, inside the critical section; shifts the later entries down. Used by cMonitor__cMonitor,
- * SNDmidirestore and func_002AE100.
+ * SNDmidirestore and pathxSND_shutdown.
  *
  * @param client  the client function
  */
@@ -2018,7 +2018,7 @@ extern int SNDPLATFORM_memlimits(int, int);
  *
  * Calls SNDPLATFORM_memlimits inside the critical section. Called by cPS2SoundManager_SetSoundMemLoadLimits,
  * cPS2SoundManager_RestoreSoundMemLoadLimits, cPS2SoundManager_AllocSoundMem, cPS2SoundManager_Shutdown and
- * func_002A92F8.
+ * cPS2SoundManager_FreeTopBlock.
  *
  * @param startAddr  first usable address
  * @param endAddr  end of the usable range
@@ -3452,7 +3452,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_create);
 /**
  * Creates a stream that reads its own file queue (SNDSTRMI_create with no tap stream).
  *
- * The handle passes through in $v0 although the declaration is void; its caller, func_002AE4C0 (sound/bankmonitor),
+ * The handle passes through in $v0 although the declaration is void; its caller, pathxSND_openPlayer (sound/bankmonitor),
  * declares it returning int and stores the handle.
  *
  * @param playOpts  the play options
@@ -23725,7 +23725,7 @@ static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a &
  * values below 0x80 are applied; each of the 4 players (D_00517610) that is in use (+0x34) and shares a class bit
  * (0xF0000000) and a group bit (0x0F000000) with @p mask is selected with func_003D5450 and all 24 of its voices
  * (+0x58) are updated, whatever the low mask bits say. Clears the selection (D_0044F430, D_0044F420) at the end.
- * func_002B2120 calls it for 0x11000001, passing its own second argument through.
+ * cSongInstance_SetVolume calls it for 0x11000001, passing its own second argument through.
  *
  * @param mask  the path id mask (class, group and voice bits)
  * @param val  the new value (0..0x7F)
@@ -23837,17 +23837,17 @@ extern int D_0044F430_1038 __asm__("D_0044F430");
 extern struct G_1038 *D_0044F420_1038 __asm__("D_0044F420");
 extern struct T_1038 D_00517610_1038[] __asm__("D_00517610");
 extern int func_003D5450_1038(int) __asm__("func_003D5450");
-extern void func_002AF7A0_1038(int, int) __asm__("func_002AF7A0");
+extern void pathxSND_setPaused_1038(int, int) __asm__("pathxSND_setPaused");
 
 static inline unsigned int has_1038(unsigned int a, unsigned int b) { return a & b; }
 
 /**
- * Pauses or resumes the voices of the path players a mask selects (func_002AF7A0 on each voice's sound, +0x3 = @p val).
+ * Pauses or resumes the voices of the path players a mask selects (pathxSND_setPaused on each voice's sound, +0x3 = @p val).
  *
  * Does nothing unless the path system is up and idle. A mask of -1 also stores @p val as the global state (D_0044F42D).
  * For each player in use whose class and group bits overlap @p mask (selected with func_003D5450), every voice whose
- * bit is set in the low 24 bits of @p mask gets func_002AF7A0(+0x54, val) and +0x3 = val. Clears the selection at the
- * end. func_002B2018 passes 1 after setting the stream pitch to 0, func_002B2070 passes 0 after restoring it.
+ * bit is set in the low 24 bits of @p mask gets pathxSND_setPaused(+0x54, val) and +0x3 = val. Clears the selection at the
+ * end. cSongInstance_Pause passes 1 after setting the stream pitch to 0, cSongInstance_Resume passes 0 after restoring it.
  *
  * @param mask  the path id mask
  * @param val  1 to pause, 0 to resume
@@ -23868,7 +23868,7 @@ void func_003D1038(unsigned int mask, unsigned char val) {
         for (j = 0; j < 24; j++) {
             struct E_1038 *pathVoice = D_0044F420_1038->list[j];
             if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                func_002AF7A0_1038(pathVoice->f54, val);
+                pathxSND_setPaused_1038(pathVoice->f54, val);
                 pathVoice->b3 = val;
             }
         }
@@ -23929,7 +23929,7 @@ extern char D_00495B10_11B8[] __asm__("D_00495B10");
 extern int f_5450_11B8(int) __asm__("func_003D5450");
 extern struct S_11B8 *f_5290_11B8(unsigned int) __asm__("func_003D5290");
 extern int f_4BB0_11B8(unsigned int) __asm__("func_003D4BB0");
-extern int f_F2F0_11B8(int, int *, int *, int) __asm__("func_002AF2F0");
+extern int f_F2F0_11B8(int, int *, int *, int) __asm__("pathxSND_getStatus");
 extern void f_1658_11B8(char *, char *, int) __asm__("func_003D1658");
 
 int PATH_status_impl(unsigned int id, struct Info_11B8 *info) __asm__("PATH_status");
@@ -23937,7 +23937,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) __asm__("PATH_stat
  * Fills a status block for the path voice an id names: the current node, part and the position within it.
  *
  * Returns -18 unless the path system is up and idle. The block (11 words) starts as -1 for node, part and the last two
- * fields and 0 elsewhere. When func_003D5290 finds the voice and func_003D4BB0 accepts its group, func_002AF2F0 on the
+ * fields and 0 elsewhere. When func_003D5290 finds the voice and func_003D4BB0 accepts its group, pathxSND_getStatus on the
  * voice's sound (+0x54) gives the current request, its offset and length: the block gets the length (+0x18), offset +
  * length (+0xC) and the voice's node (+0x36 to +0x24). The request is looked up in the voice's request table (+0xFC,
  * +0x20 bits 14-18 entries) for the node (+0x0) and part (+0x8); the node's format word gives a channel divisor (bits
@@ -23948,7 +23948,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) __asm__("PATH_stat
  * @param id  the path id
  * @param info  the status block to fill
  * @return the current request (also when it is missing from the table), -8 when there is no voice or request, a
- * negative func_002AF2F0 error, or -18 when the system is not ready
+ * negative pathxSND_getStatus error, or -18 when the system is not ready
  */
 int PATH_status_impl(unsigned int id, struct Info_11B8 *info) {
     int ret;
@@ -24040,12 +24040,12 @@ extern struct G_1470 *D_0044F420_1470 __asm__("D_0044F420");
 struct T_1470 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern struct T_1470 D_00517610_1470[] __asm__("D_00517610");
 extern int func_003D5450_1470(int) __asm__("func_003D5450");
-extern void func_002AF838_1470(int) __asm__("func_002AF838");
+extern void pathxSND_stop_1470(int) __asm__("pathxSND_stop");
 
 static inline unsigned int has_1470(unsigned int a, unsigned int b) { return a & b; }
 
 /**
- * Stops every voice of the path players a mask selects: func_002AF838 on each voice's sound (+0x54) and node +0x36 =
+ * Stops every voice of the path players a mask selects: pathxSND_stop on each voice's sound (+0x54) and node +0x36 =
  * -1.
  *
  * Does nothing unless the path system is up and idle. Players are matched by class and group bits only; all 24 voices
@@ -24068,7 +24068,7 @@ void func_003D1470(unsigned int mask) {
         for (j = 0; j < 24; j++) {
             struct E_1470 *pathVoice = D_0044F420_1470->list[j];
             if (pathVoice != 0) {
-                func_002AF838_1470(pathVoice->f54);
+                pathxSND_stop_1470(pathVoice->f54);
                 pathVoice->h36 = -1;
             }
         }
@@ -24209,7 +24209,7 @@ extern struct G_16F0 *D_0044F420_16F0 __asm__("D_0044F420");
 extern struct T_16F0 D_00517610_16F0[] __asm__("D_00517610");
 extern int func_003D5450_16F0(int) __asm__("func_003D5450");
 extern struct H_16F0 *func_003D2068_16F0(struct E_16F0 *) __asm__("PATHI_copyevent");
-extern int func_002AF370_16F0(void) __asm__("func_002AF370");
+extern int pathxSND_getTimeMs_16F0(void) __asm__("pathxSND_getTimeMs");
 
 static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a & b; }
 
@@ -24220,10 +24220,10 @@ static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a &
  * byte the event. For each player in use that has that group bit and shares class and group bits with @p mask, it is
  * selected (func_003D5450); an event number at or above the path data's event count (+0xF) fails with -13, and an event
  * whose definition (data +0x34, offsets +0x40) is disabled (0x20000000 in +0xC) is skipped. Otherwise PATHI_copyevent
- * copies it into the player's buffer and the copy, stamped with the current time (func_002AF370) at +0x0 and +0x8,
+ * copies it into the player's buffer and the copy, stamped with the current time (pathxSND_getTimeMs) at +0x0 and +0x8,
  * joins the pending list (+0xDC, count +0x91C) of every player in use with the same class and group byte (a full list
  * gives -13). Likely bug: PATHI_copyevent's 0 (buffer full) is not checked, so the stamp is written through a null
- * pointer. func_002B20C8 posts the music events with mask -1.
+ * pointer. cSongInstance_SendMusicEvent posts the music events with mask -1.
  *
  * @param mask  the path id mask (-1 for all)
  * @param prog  the event: group in bits 8-11, event number in the low byte
@@ -24267,7 +24267,7 @@ int func_003D16F0(unsigned int mask, short prog) {
             if (n >= 16) { result = -13; goto next; }
             err = 0;
             pending = (struct H_16F0 *)event;
-            pending->f0 = pending->f8 = func_002AF370_16F0();
+            pending->f0 = pending->f8 = pathxSND_getTimeMs_16F0();
             D_00517610_16F0[k].list[n] = pending;
             n++;
             D_00517610_16F0[k].n = n;
@@ -24626,13 +24626,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1F80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_1F80 { char pad[0x30]; unsigned int m_a; int m_b; char pad2[0xDC - 0x38]; char *ptrs[16]; char pad3[0x91C - 0x11C]; int count; char pad4[0x928 - 0x920]; };
-extern int f2AF370_1F80(void) __asm__("func_002AF370");
+extern int f2AF370_1F80(void) __asm__("pathxSND_getTimeMs");
 extern struct P_1F80 D_7610_1F80[4] __asm__("D_00517610");
 
 /**
  * Queues an already copied path event on every player in use whose class and group bits include @p mask's top byte.
  *
- * The event's start (+0x0) and last-run (+0x8) times are set to the current time (func_002AF370) and it is appended to
+ * The event's start (+0x0) and last-run (+0x8) times are set to the current time (pathxSND_getTimeMs) and it is appended to
  * each matching player's pending list (+0xDC, count +0x91C).
  *
  * @param mask  the path id mask (only the top byte counts)
@@ -24867,8 +24867,8 @@ extern unsigned int D_0044F430;
 extern int f5450_2A68(int) __asm__("func_003D5450");
 extern int func_003D5330(unsigned int mask);
 extern void func_003D4C40(void);
-extern void fAE100_2A68(void) __asm__("func_002AE100");
-extern void fAE690_2A68(int) __asm__("func_002AE690");
+extern void fAE100_2A68(void) __asm__("pathxSND_shutdown");
+extern void fAE690_2A68(int) __asm__("pathxSND_closePlayer");
 
 static inline int isOff_2A68(unsigned int m, int b) { return ((m >> b) & 1) == 0; }
 struct sPathVoice *func_003D2A68_impl(unsigned int mask) __asm__("func_003D2A68");
@@ -24876,10 +24876,10 @@ struct sPathVoice *func_003D2A68_impl(unsigned int mask) __asm__("func_003D2A68"
  * Closes the first path voice a mask names, and shuts the player (and the path system) down when nothing is left.
  *
  * Returns 0 unless the path system is up and idle. Finds the first player in use whose class and group bits overlap
- * @p mask and, in it, the first voice whose bit is set in @p mask; the slot (+0x58) is cleared and func_002AE690
+ * @p mask and, in it, the first voice whose bit is set in @p mask; the slot (+0x58) is cleared and pathxSND_closePlayer
  * releases the voice's sound (+0x54). When that player has no voices left (func_003D5330) its in-use flag (+0x34) and
  * +0xB8 are cleared and func_003D4C40 re-sorts the players; when no group has voices any more and a voice was closed,
- * func_002AE100 stops the bank monitor's service and D_0044F42C is cleared. Likely bug: when nothing matches, the
+ * pathxSND_shutdown stops the bank monitor's service and D_0044F42C is cleared. Likely bug: when nothing matches, the
  * "player empty" step still runs on the stale selection D_0044F420 (the loop index is 4, so func_003D5330 finds no
  * voices). The music monitor closes 0x11000001 and 0x11000002 on destruction.
  *
@@ -25013,8 +25013,8 @@ extern struct T_2DF8 *func_003D5290_2DF8(int) __asm__("func_003D5290");
 extern int func_003D5450_2DF8(int) __asm__("func_003D5450");
 extern struct R_2DF8 *func_003D4A50_2DF8(int) __asm__("func_003D4A50");
 extern int func_003D3140_2DF8(int, int) __asm__("func_003D3140");
-extern int func_002AE3A8_2DF8(int) __asm__("func_002AE3A8");
-extern int func_002AE298_2DF8(int, char *, int, int) __asm__("func_002AE298");
+extern int pathxSND_evictOldestBank_2DF8(int) __asm__("pathxSND_evictOldestBank");
+extern int pathxSND_addBank_2DF8(int, char *, int, int) __asm__("pathxSND_addBank");
 extern int D_0044F420_2DF8[] __asm__("D_0044F420");
 extern unsigned char D_0044F42C_2DF8[] __asm__("D_0044F42C");
 extern int D_0044F430_2DF8[] __asm__("D_0044F430");
@@ -25025,14 +25025,14 @@ extern int D_0044F430_2DF8[] __asm__("D_0044F430");
  * Returns -18 unless the path system is up and idle. With the voice (func_003D5290) and its request table
  * (func_003D4A50: count +0x0, policy +0x2, limits +0x4 and +0x8, then 12-byte entries), a policy other than 2 checks
  * the voice's totals (+0x104, +0x108) plus the part's sizes against the limits: policy 1 releases the entry with the
- * smallest first word (func_003D3140) unless that is @p idx itself (then it returns 0), policy 0 lets func_002AE3A8
- * free the oldest. Then func_002AE298 records the request on the voice's sound (+0x54) with +0x5C, @p idx and
+ * smallest first word (func_003D3140) unless that is @p idx itself (then it returns 0), policy 0 lets pathxSND_evictOldestBank
+ * free the oldest. Then pathxSND_addBank records the request on the voice's sound (+0x54) with +0x5C, @p idx and
  * @p userHandle. Likely bug: the early return for a self-eviction leaves the busy flag D_0044F430 set.
  *
  * @param pathId  the path id
  * @param idx  the part to request
  * @param userHandle  the caller's handle, stored with the request
- * @return func_002AE298's result, 0 when nothing was requested, -18 when the system is not ready
+ * @return pathxSND_addBank's result, 0 when nothing was requested, -18 when the system is not ready
  */
 int func_003D2DF8(int pathId, int idx, int userHandle) {
     int ret = 0;
@@ -25073,11 +25073,11 @@ ok:
                     }
                     func_003D3140_2DF8(pathId, sel);
                 } else if (reqTable->type == 0) {
-                    func_002AE3A8_2DF8(pathId);
+                    pathxSND_evictOldestBank_2DF8(pathId);
                 }
             }
         }
-        ret = func_002AE298_2DF8(pathVoice->f54, pathVoice->f5C, idx, userHandle);
+        ret = pathxSND_addBank_2DF8(pathVoice->f54, pathVoice->f5C, idx, userHandle);
     }
     D_0044F430_2DF8[0] = 0;
     D_0044F420_2DF8[0] = 0;
@@ -25163,7 +25163,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3030);
 /**
  * Returns the sound-monitor index (+0x54) of the path voice func_003D5290 finds, or -8.
  *
- * Declared without parameters: the caller's id reaches func_003D5290 through $a0 (func_002B2488 passes 0x11000001,
+ * Declared without parameters: the caller's id reaches func_003D5290 through $a0 (cSongInstance_GetStreamHandle passes 0x11000001,
  * func_003D53B8 its mask).
  *
  * @return the voice's monitor index, or -8 when no voice matches
@@ -25183,20 +25183,20 @@ int func_003D3030(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3058);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_002AE478_3058() __asm__("func_002AE478");
+extern int pathxSND_getPlayerSize_3058() __asm__("pathxSND_getPlayerSize");
 
 /**
- * Returns the memory a path player needs for @p n voices: func_002AE478's monitor size + 272 + 16 * n, rounded down to
+ * Returns the memory a path player needs for @p n voices: pathxSND_getPlayerSize's monitor size + 272 + 16 * n, rounded down to
  * 16 and plus 16.
  *
- * func_002AE478 is called without arguments here, so it gets @p n and the caller's second argument through the
+ * pathxSND_getPlayerSize is called without arguments here, so it gets @p n and the caller's second argument through the
  * registers (the music monitor calls func_003D3058(1, 0) for its "PathfinderOverlay" buffer).
  *
  * @param n  the number of voices
  * @return the size in bytes
  */
 int func_003D3058(int n) {
-    int size = func_002AE478_3058() + 272;
+    int size = pathxSND_getPlayerSize_3058() + 272;
     size += n * 0x10;
     return (size / 16) * 16 + 0x10;
 }
@@ -25206,7 +25206,7 @@ int func_003D3058(int n) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D30A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002AE768_30A8(int, int, int) __asm__("func_002AE768");
+extern void pathxSND_setPreload_30A8(int, int, int) __asm__("pathxSND_setPreload");
 extern void *func_003D5290_30A8(int) __asm__("func_003D5290");
 extern int func_003D5450_30A8(int) __asm__("func_003D5450");
 extern int D_0044F420_30A8[] __asm__("D_0044F420");
@@ -25214,10 +25214,10 @@ extern unsigned char D_0044F42C_30A8[] __asm__("D_0044F42C");
 extern int D_0044F430_30A8[] __asm__("D_0044F430");
 
 /**
- * Gives a path voice's sound monitor a memory-resident copy of its data: func_002AE768(monitor index, @p memBuffer,
+ * Gives a path voice's sound monitor a memory-resident copy of its data: pathxSND_setPreload(monitor index, @p memBuffer,
  * @p memLimit).
  *
- * The monitor index is the voice's +0x54 (-8 when func_003D5290 finds no voice, which func_002AE768 rejects). Stream
+ * The monitor index is the voice's +0x54 (-8 when func_003D5290 finds no voice, which pathxSND_setPreload rejects). Stream
  * requests below the limit are then read from the buffer instead of the file. Does nothing unless the path system is up
  * and idle; clears the selection at the end.
  *
@@ -25235,7 +25235,7 @@ void func_003D30A8(int pathId, int memBuffer, int memLimit) {
         if (temp_2 != 0) {
             var_4 = (*(int *)((char*)(temp_2) + 0x54));
         }
-        func_002AE768_30A8(var_4, memBuffer, memLimit);
+        pathxSND_setPreload_30A8(var_4, memBuffer, memLimit);
         D_0044F430_30A8[0] = 0;
         D_0044F420_30A8[0] = 0;
     }
@@ -25246,7 +25246,7 @@ void func_003D30A8(int pathId, int memBuffer, int memLimit) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3140);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_002AE328_3140(int, int) __asm__("func_002AE328");
+extern int pathxSND_removeBank_3140(int, int) __asm__("pathxSND_removeBank");
 extern char *func_003D5290_3140(int) __asm__("func_003D5290");
 extern int func_003D5450_3140(int) __asm__("func_003D5450");
 extern int D_0044F420_3140[] __asm__("D_0044F420");
@@ -25255,13 +25255,13 @@ extern int D_0044F430_3140[] __asm__("D_0044F430");
 int func_003D3140_3140(int arg0, int arg1) __asm__("func_003D3140");
 
 /**
- * Releases request @p requestIndex of a path voice's sound monitor (func_002AE328 on the voice's +0x54).
+ * Releases request @p requestIndex of a path voice's sound monitor (pathxSND_removeBank on the voice's +0x54).
  *
  * Returns -18 unless the path system is up and idle; clears the selection at the end.
  *
  * @param pathId  the path id
  * @param requestIndex  the request index
- * @return func_002AE328's result, 0 when no voice matches, -18 when the system is not ready
+ * @return pathxSND_removeBank's result, 0 when no voice matches, -18 when the system is not ready
  */
 int func_003D3140_3140(int pathId, int requestIndex) {
     int result;
@@ -25279,7 +25279,7 @@ int func_003D3140_3140(int pathId, int requestIndex) {
 ok:
     pathVoice = func_003D5290_3140(pathId);
     if (pathVoice != 0) {
-        result = func_002AE328_3140(*(int *)(pathVoice + 0x54), requestIndex);
+        result = pathxSND_removeBank_3140(*(int *)(pathVoice + 0x54), requestIndex);
     }
     D_0044F430_3140[0] = 0;
     D_0044F420_3140[0] = 0;
@@ -25387,7 +25387,7 @@ struct G_32B8 {
     struct T_32B8 *tab;
 };
 extern struct G_32B8 *D_0044F420_32B8 __asm__("D_0044F420");
-extern int fAEC58_32B8(int, unsigned int *, unsigned int *) __asm__("func_002AEC58");
+extern int fAEC58_32B8(int, unsigned int *, unsigned int *) __asm__("pathxSND_refreshPlayer");
 
 int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("func_003D32B8");
 
@@ -25397,7 +25397,7 @@ int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("func_003D32B
  * The node record is the selected player's path data (+0x34) at 4 * its offset (+0x38 table) for the voice's node
  * (+0x36); its length entry is player table +0x50 [record +0x0 - 1]. The segment length is that length divided by the
  * node's channel count times multiplier (bits 24-27 and 20-23 of record +0x4) when the multiplier is set; the
- * per-channel length divides by bits 20-23 only. func_002AEC58 gives the voice's stream positions (+0x54). For a voice
+ * per-channel length divides by bits 20-23 only. pathxSND_refreshPlayer gives the voice's stream positions (+0x54). For a voice
  * on a channel (+0x20 bits 4-8 > 0) of a node with flag 2 (+0xC) the start is offset by +0x40 per remaining channel and
  * the end is length - start. @p timing gets the multiplier (bits 0-3), record +0x8 bits 4-7, the segment index (bits 8-15),
  * the segment length (+0x4), per-channel length (+0x8), total (+0xC), the distance to the next segment boundary
@@ -25971,10 +25971,10 @@ int func_003D4900(int pathVoice, int *segLenOut) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4950);
 #ifdef SKIP_ASM
-extern int func_002AEAA8(int, unsigned int);
+extern int pathxSND_getRequestPosition(int, unsigned int);
 
 /**
- * Returns the total amount a path voice has queued on its sound monitor: the sum of func_002AEAA8 over the voice's
+ * Returns the total amount a path voice has queued on its sound monitor: the sum of pathxSND_getRequestPosition over the voice's
  * request entries (+0x20 bits 14-18), skipping negative results.
  *
  * @param pathVoice  the path voice
@@ -25986,7 +25986,7 @@ int func_003D4950(char *pathVoice) {
     unsigned int i;
 
     for (i = 0; i < ((*(unsigned int *)(pathVoice + 0x20) >> 0xE) & 0x1F); i++) {
-        temp_2 = func_002AEAA8(*(int *)(pathVoice + 0x54), i);
+        temp_2 = pathxSND_getRequestPosition(*(int *)(pathVoice + 0x54), i);
         if (temp_2 >= 0) {
             total += temp_2;
         }
@@ -26210,9 +26210,9 @@ struct Mgr_4F10 {
 extern struct Mgr_4F10 *D_0044F420_4F10 __asm__("D_0044F420");
 extern unsigned char D_0044F434_4F10 __asm__("D_0044F434");
 extern unsigned int D_0044F438_4F10 __asm__("D_0044F438");
-extern void func_002AE9F8_4F10(int h, int a) __asm__("func_002AE9F8");
-extern int func_002AEBD0_4F10(int h) __asm__("func_002AEBD0");
-extern int func_002AF428_4F10(int h) __asm__("func_002AF428");
+extern void pathxSND_releaseHold_4F10(int h, int a) __asm__("pathxSND_releaseHold");
+extern int pathxSND_isBusy_4F10(int h) __asm__("pathxSND_isBusy");
+extern int pathxSND_getVolume_4F10(int h) __asm__("pathxSND_getVolume");
 extern int func_003D1E80_4F10(void) __asm__("func_003D1E80");
 extern void func_003D3D20_4F10(unsigned int i) __asm__("func_003D3D20");
 extern int func_003D4950_4F10(struct Str_4F10 *s) __asm__("func_003D4950");
@@ -26228,10 +26228,10 @@ extern void func_003D5EE8_4F10(struct Str_4F10 *s) __asm__("func_003D5EE8");
  * otherwise, and a normal pass first services the pending events (func_003D1E80) and afterwards repeats that until it
  * does nothing. For each voice not paused (+0x3), one with a node and a record runs its three ramps (func_003D5A98,
  * func_003D5CC0, func_003D5EE8 when +0xD, +0x15, +0x1D are set). Voices of the other pass kind (+0x2F) or without a
- * node stop there. A voice with a release time (+0x4C) has its hold released (func_002AE9F8) once tick + look-ahead / 2
- * reaches it. Otherwise, when its monitor is streaming (func_002AEBD0), it advances (func_003D3D20) once tick +
+ * node stop there. A voice with a release time (+0x4C) has its hold released (pathxSND_releaseHold) once tick + look-ahead / 2
+ * reaches it. Otherwise, when its monitor is streaming (pathxSND_isBusy), it advances (func_003D3D20) once tick +
  * position + look-ahead passes its end time (+0x48), or, without one, once the queued amount (func_003D4950) no longer
- * exceeds its position (+0x24); +0xE becomes -1 first when it was 0 and func_002AF428 reports 0.
+ * exceeds its position (+0x24); +0xE becomes -1 first when it was 0 and pathxSND_getVolume reports 0.
  */
 void func_003D4F10(void) {
     int isB = D_0044F434_4F10 == 'B';
@@ -26277,10 +26277,10 @@ void func_003D4F10(void) {
         }
         if (pathVoice->f4C != 0) {
             if (D_0044F438_4F10 + (step >> 1) >= pathVoice->f4C) {
-                func_002AE9F8_4F10(pathVoice->f54, 0);
+                pathxSND_releaseHold_4F10(pathVoice->f54, 0);
                 pathVoice->f4C = 0;
             }
-        } else if (func_002AEBD0_4F10(pathVoice->f54) != 0) {
+        } else if (pathxSND_isBusy_4F10(pathVoice->f54) != 0) {
             queued = func_003D4950_4F10(pathVoice);
             if (pathVoice->f48 != 0) {
                 end += step;
@@ -26289,7 +26289,7 @@ void func_003D4F10(void) {
                 skip = pathVoice->f24 < queued;
             }
             if (!skip) {
-                if (pathVoice->fE == 0 && func_002AF428_4F10(pathVoice->f54) == 0) {
+                if (pathVoice->fE == 0 && pathxSND_getVolume_4F10(pathVoice->f54) == 0) {
                     pathVoice->fE = -1;
                 }
                 func_003D3D20_4F10(i);
@@ -26314,8 +26314,8 @@ extern unsigned int D_0044F430_5128 __asm__("D_0044F430");
 extern int D_0044F438_5128 __asm__("D_0044F438");
 extern struct T_5128 *D_0044F420_5128 __asm__("D_0044F420");
 extern struct T_5128 D_00517610_5128[] __asm__("D_00517610");
-extern int func_002AF370_5128(void) __asm__("func_002AF370");
-extern void func_002AEFA8_5128(int) __asm__("func_002AEFA8");
+extern int pathxSND_getTimeMs_5128(void) __asm__("pathxSND_getTimeMs");
+extern void pathxSND_refreshAll_5128(int) __asm__("pathxSND_refreshAll");
 extern void func_003D4B00_5128(void) __asm__("func_003D4B00");
 extern void func_003D4F10_5128(void) __asm__("func_003D4F10");
 
@@ -26336,7 +26336,7 @@ void func_003D5128_impl(unsigned char k) __asm__("func_003D5128");
  *
  * Does nothing when the global pause (D_0044F42D) is set, the system is not initialised (D_0044F42C) or a selection is
  * active (D_0044F430). Stores the pass kind @p k in D_0044F434, marks the system busy, reads the tick D_0044F438 from
- * func_002AF370 and brackets the work with func_002AEFA8(0) / (1). Each player in use is selected and gets
+ * pathxSND_getTimeMs and brackets the work with pathxSND_refreshAll(0) / (1). Each player in use is selected and gets
  * func_003D4B00 (leading voice) and func_003D4F10 (voice service). Clears the selection at the end.
  *
  * @param k  the pass kind: ' ' (func_003D54C8) or 'B' (func_003D54E8)
@@ -26348,8 +26348,8 @@ void func_003D5128_impl(unsigned char k) {
     if (D_0044F430_5128 != 0) return;
     D_0044F434_5128 = k;
     D_0044F430_5128 = 0xFFFFFFFF;
-    D_0044F438_5128 = func_002AF370_5128();
-    func_002AEFA8_5128(0);
+    D_0044F438_5128 = pathxSND_getTimeMs_5128();
+    pathxSND_refreshAll_5128(0);
     for (i = 0; i < 4; i++) {
         if (D_00517610_5128[i].pathData == 0) continue;
         if (D_0044F430_5128 == 0) D_0044F430_5128 = 0xFFFFFFFF;
@@ -26358,7 +26358,7 @@ void func_003D5128_impl(unsigned char k) {
             func_003D4F10_5128();
         }
     }
-    func_002AEFA8_5128(1);
+    pathxSND_refreshAll_5128(1);
     D_0044F430_5128 = 0;
     D_0044F420_5128 = 0;
 }
@@ -26691,17 +26691,17 @@ void func_003D5800(unsigned int mask, int sendTarget, int b) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5968);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_002AF428_5968(int) __asm__("func_002AF428");
-extern void func_002AF6C0_5968(int, int) __asm__("func_002AF6C0");
-extern void func_002AF838_5968(int) __asm__("func_002AF838");
+extern int pathxSND_getVolume_5968(int) __asm__("pathxSND_getVolume");
+extern void pathxSND_setVolume_5968(int, int) __asm__("pathxSND_setVolume");
+extern void pathxSND_stop_5968(int) __asm__("pathxSND_stop");
 extern int D_0044F420_5968[] __asm__("D_0044F420");
 
 /**
  * Settles the volume fades of the selected path player's voices in a mask, stopping voices that faded to silence.
  *
  * For each voice whose bit is set and that has a node (+0x36 >= 0): when it has a fade target (+0xE >= 0) scaled by its
- * level (+0x4, percent) equal to the monitor's current volume (func_002AF428), a target of 0 stops the voice
- * (func_002AF838, node -1) and any other target applies the node volume (+0x34 scaled by +0x4) with func_002AF6C0; a
+ * level (+0x4, percent) equal to the monitor's current volume (pathxSND_getVolume), a target of 0 stops the voice
+ * (pathxSND_stop, node -1) and any other target applies the node volume (+0x34 scaled by +0x4) with pathxSND_setVolume; a
  * voice without a target gets the node volume directly (when not negative). The target is then cleared (-1). A fade
  * still in progress is left alone.
  *
@@ -26716,9 +26716,9 @@ void func_003D5968(unsigned int mask) {
             signed char fadeTarget = *(signed char *)(pathVoice + 0xE);
             if (fadeTarget >= 0) {
                 int scaledTarget = fadeTarget * *(signed char *)(pathVoice + 4) / 100;
-                if (scaledTarget == func_002AF428_5968(*(int *)(pathVoice + 0x54))) {
+                if (scaledTarget == pathxSND_getVolume_5968(*(int *)(pathVoice + 0x54))) {
                     if (*(signed char *)(pathVoice + 0xE) == 0) {
-                        func_002AF838_5968(*(int *)(pathVoice + 0x54));
+                        pathxSND_stop_5968(*(int *)(pathVoice + 0x54));
                         *(short *)(pathVoice + 0x36) = -1;
                     } else {
                         goto b8;
@@ -26728,7 +26728,7 @@ void func_003D5968(unsigned int mask) {
             } else {
 b8:
                 if (nodeVol >= 0) {
-                    func_002AF6C0_5968(*(int *)(pathVoice + 0x54), nodeVol);
+                    pathxSND_setVolume_5968(*(int *)(pathVoice + 0x54), nodeVol);
                 }
 b10:
                 *(signed char *)(pathVoice + 0xE) = -1;
@@ -26749,7 +26749,7 @@ extern struct sPath *D_0044F420;
 
 extern unsigned int D_0044F438;         /* tick */
 
-extern int func_002AF6C0_5A98(int, int) __asm__("func_002AF6C0");
+extern int pathxSND_setVolume_5A98(int, int) __asm__("pathxSND_setVolume");
 
 void func_003D5A98_impl(struct sPathVoice *v) __asm__("func_003D5A98");
 /**
@@ -26757,7 +26757,7 @@ void func_003D5A98_impl(struct sPathVoice *v) __asm__("func_003D5A98");
  *
  * The ramp goes from +0xC to +0xE starting at tick +0x8; its length and curve come from the selected player's first
  * ramp setting (+0x14 duration, +0x18 mode). With t the elapsed fraction: when t >= 1 the volume becomes the node
- * volume +0x34 (func_002AF6C0 on the monitor +0x54) and the ramp and +0x34 are cleared to -1. Otherwise the curve value
+ * volume +0x34 (pathxSND_setVolume on the monitor +0x54) and the ramp and +0x34 are cleared to -1. Otherwise the curve value
  * (mode 1: 1 - t, 2: 1 - t^2, 3: 1 / t / 25; t is mirrored for a rising ramp) gives min(start, end) + |end - start| *
  * value, applied only when the value is within 0..1.
  *
@@ -26787,7 +26787,7 @@ void func_003D5A98_impl(struct sPathVoice *pathVoice) {
     rampSetting.neg = pos;
     elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f08) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
-        func_002AF6C0_5A98(pathVoice->f54, pathVoice->f34);
+        pathxSND_setVolume_5A98(pathVoice->f54, pathVoice->f34);
         none = -1;
         pathVoice->f0C = none;
         sel = none;
@@ -26820,7 +26820,7 @@ void func_003D5A98_impl(struct sPathVoice *pathVoice) {
     }
     if (curve >= 0.0f && curve <= 1.0f) {
         curve = lowLevel + diff * curve;
-        func_002AF6C0_5A98(pathVoice->f54, (int)curve);
+        pathxSND_setVolume_5A98(pathVoice->f54, (int)curve);
     }
 }
 #endif
@@ -26836,12 +26836,12 @@ extern struct sPath *D_0044F420;
 
 extern unsigned int D_0044F438;         /* tick */
 
-extern int func_002AF4E0(int, int, int);
+extern int pathxSND_setFxLevel(int, int, int);
 
 void func_003D5CC0_impl(struct sPathVoice *v) __asm__("func_003D5CC0");
 /**
  * Steps a path voice's effect-send ramp: the same curve as func_003D5A98 on +0x14 -> +0x16 from tick +0x10, with the
- * player's second ramp setting (+0x1C, +0x20), applied with func_002AF4E0 (bus 0).
+ * player's second ramp setting (+0x1C, +0x20), applied with pathxSND_setFxLevel (bus 0).
  *
  * When the ramp has run out the target +0x16 is applied and +0x14..+0x16 are cleared to -1, +0x10 to 0.
  *
@@ -26871,7 +26871,7 @@ void func_003D5CC0_impl(struct sPathVoice *pathVoice) {
     rampSetting.neg = pos;
     elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f10) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
-        func_002AF4E0(pathVoice->f54, 0, pathVoice->f16);
+        pathxSND_setFxLevel(pathVoice->f54, 0, pathVoice->f16);
         none = -1;
         pathVoice->f14 = none;
         pathVoice->f15 = pathVoice->f16 = none;
@@ -26902,7 +26902,7 @@ void func_003D5CC0_impl(struct sPathVoice *pathVoice) {
     }
     if (curve >= 0.0f && curve <= 1.0f) {
         curve = lowLevel + diff * curve;
-        func_002AF4E0(pathVoice->f54, 0, (int)curve);
+        pathxSND_setFxLevel(pathVoice->f54, 0, (int)curve);
     }
 }
 #endif
@@ -26918,12 +26918,12 @@ extern struct sPath *D_0044F420;
 
 extern unsigned int D_0044F438;         /* tick */
 
-extern int func_002AF580(int, int);
+extern int pathxSND_setDryLevel(int, int);
 
 void func_003D5EE8_impl(struct sPathVoice *v) __asm__("func_003D5EE8");
 /**
  * Steps a path voice's dry-level ramp: the same curve as func_003D5A98 on +0x1C -> +0x1E from tick +0x18, with the
- * player's third ramp setting (+0x24, +0x28), applied with func_002AF580.
+ * player's third ramp setting (+0x24, +0x28), applied with pathxSND_setDryLevel.
  *
  * When the ramp has run out the target +0x1E is applied and +0x1C..+0x1E are cleared to -1, +0x18 to 0.
  *
@@ -26953,7 +26953,7 @@ void func_003D5EE8_impl(struct sPathVoice *pathVoice) {
     rampSetting.neg = pos;
     elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f18) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
-        func_002AF580(pathVoice->f54, pathVoice->f1E);
+        pathxSND_setDryLevel(pathVoice->f54, pathVoice->f1E);
         none = -1;
         pathVoice->f1C = none;
         pathVoice->f1D = pathVoice->f1E = none;
@@ -26984,7 +26984,7 @@ void func_003D5EE8_impl(struct sPathVoice *pathVoice) {
     }
     if (curve >= 0.0f && curve <= 1.0f) {
         curve = lowLevel + diff * curve;
-        func_002AF580(pathVoice->f54, (int)curve);
+        pathxSND_setDryLevel(pathVoice->f54, (int)curve);
     }
 }
 #endif
@@ -27060,11 +27060,11 @@ void func_003D61E8(int mask, int value) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D62C8);
 #ifdef SKIP_ASM
-extern void func_002AF6C0(int, int);
+extern void pathxSND_setVolume(int, int);
 
 /**
  * Sets a path voice's level (+0x4, percent) and, when no fade target is pending (+0xE < 0), applies node volume +0x34
- * times the level / 100 with func_002AF6C0.
+ * times the level / 100 with pathxSND_setVolume.
  *
  * @param channel  the path voice
  * @param volume  the level, 0..100
@@ -27072,7 +27072,7 @@ extern void func_002AF6C0(int, int);
 void func_003D62C8(void *channel, signed char volume) {
     (*(signed char *)((char*)(channel) + 4)) = volume;
     if ((*(signed char *)((char*)(channel) + 0xE)) < 0) {
-        func_002AF6C0((*(int *)((char*)(channel) + 0x54)), (int) ((*(signed char *)((char*)(channel) + 0x34)) * volume) / 100);
+        pathxSND_setVolume((*(int *)((char*)(channel) + 0x54)), (int) ((*(signed char *)((char*)(channel) + 0x34)) * volume) / 100);
     }
 }
 #endif
@@ -27081,10 +27081,10 @@ void func_003D62C8(void *channel, signed char volume) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6318);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003D6318_cb(int, int, int, char) __asm__("func_002AF608");
+extern int func_003D6318_cb(int, int, int, char) __asm__("pathxSND_fadeVolume");
 
 /**
- * Starts a volume fade on a path voice: target +0xE = @p level, +0xD = 0, and func_002AF608 fades the monitor to
+ * Starts a volume fade on a path voice: target +0xE = @p level, +0xD = 0, and pathxSND_fadeVolume fades the monitor to
  * @p level times the voice level (+0x4) / 100 over @p w ms.
  *
  * @param level  the target volume
@@ -27124,12 +27124,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: the dead `q = a / 0x7F;` (q is never used), which keeps retail's divide-by-zero trap check (`li 0x7F; beqzl; break 7`) after the divide itself is deleted; plain form 38.71%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern int func_002AF428(int);
+extern int pathxSND_getVolume(int);
 
 /**
  * Starts a volume ramp on a path voice from its current volume to @p targetVol.
  *
- * Stamps the start tick (+0x8 = D_0044F438), stores @p rampFlag at +0xD, the current volume (func_002AF428) at +0xC and
+ * Stamps the start tick (+0x8 = D_0044F438), stores @p rampFlag at +0xD, the current volume (pathxSND_getVolume) at +0xC and
  * @p targetVol as the target (+0xE) and node volume (+0x34). func_003D5A98 then steps it.
  *
  * @param targetVol  the target volume
@@ -27140,7 +27140,7 @@ void func_003D6378(char *self, int targetVol, int rampFlag) {
     int q;
     *(int *)(self + 8) = D_0044F438;
     self[0xD] = rampFlag;
-    curVol = func_002AF428(*(int *)(self + 0x54));
+    curVol = pathxSND_getVolume(*(int *)(self + 0x54));
     self[0xC] = (int)(float)curVol;
     self[0xE] = targetVol;
     self[0x34] = (int)(float)targetVol;
@@ -27153,10 +27153,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D63F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F438_63F8[] __asm__("D_0044F438");
-extern signed char f_63F8_cb(int) __asm__("func_002AF4B0");
+extern signed char f_63F8_cb(int) __asm__("pathxSND_getFxLevel");
 
 /**
- * Starts an effect-send ramp on a path voice from its current send level (func_002AF4B0) to @p targetLevel.
+ * Starts an effect-send ramp on a path voice from its current send level (pathxSND_getFxLevel) to @p targetLevel.
  *
  * Stamps the start tick (+0x10), stores @p rampFlag at +0x15, the current level at +0x14 and the target at +0x16;
  * func_003D5CC0 steps it.
@@ -27179,10 +27179,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6448);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F438_6448[] __asm__("D_0044F438");
-extern signed char f_6448_cb(int) __asm__("func_002AF480");
+extern signed char f_6448_cb(int) __asm__("pathxSND_getDryLevel");
 
 /**
- * Starts a dry-level ramp on a path voice from its current dry level (func_002AF480) to @p targetLevel.
+ * Starts a dry-level ramp on a path voice from its current dry level (pathxSND_getDryLevel) to @p targetLevel.
  *
  * Stamps the start tick (+0x18), stores @p rampFlag at +0x1D, the current level at +0x1C and the target at +0x1E;
  * func_003D5EE8 steps it.

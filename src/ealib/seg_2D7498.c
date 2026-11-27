@@ -414,7 +414,7 @@ void func_003D71D8(void);
  * func_003DA3C0(0), the 8 words at D_004506A0, func_003D8278 (bank slots), the 8 entries of D_00450660 (0xFFFF, 0),
  * func_003D6D40 and func_003D71D8 are reset. Finally D_004A4820 = 0x01789A34.
  *
- * @param playCallback  the play callback (SPCH_Init passes func_002AF8A8)
+ * @param playCallback  the play callback (SPCH_Init passes SPCH_StartSpeechCallback)
  * @param seed  the seed (SPCH_Init's "rNum")
  * @param workBuf  the work buffer from func_003D6778
  * @return 1
@@ -2780,7 +2780,7 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
 /**
  * Sends a phrase's lines to the speech play callback and returns their total length as a percentage of the buffer.
  *
- * Does nothing without a play callback (D_0044FF90 +0x0, func_002AF8A8). Each of the template's slots takes a play list
+ * Does nothing without a play callback (D_0044FF90 +0x0, SPCH_StartSpeechCallback). Each of the template's slots takes a play list
  * entry from @p firstEntry (D_00450700): table and row. A random-subset table drops the row from its subset when D_004A4830 is
  * set. The message holds the table slot, the row's start (plus the repeat index times the table length when set), its
  * length, the key, the bank's sub id (func_003D8330) and registration key (func_003D81F0) and the table's +0x2

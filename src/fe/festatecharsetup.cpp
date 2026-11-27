@@ -30,7 +30,7 @@ extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* snd, int a);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* snd, int a);
 extern char str_09set_char[];
 extern char str_title[];
 extern char str_kT_TITLEPlayer1SetupCharacter[];
@@ -76,7 +76,7 @@ void cFEStateCharSetup::onCreateScreen()
     iface->discard();
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, charId, 0);
-    func_0028F140(cAudioInterface_bxAudio(), 1);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 1);
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -162,7 +162,7 @@ int cFEStateCharSetup::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned 
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001887A0(void* self, void* engine, int reset);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* self, void* engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
@@ -203,7 +203,7 @@ void cFEStateCharSetup::onWidgetEvent(cUIThing* item, unsigned int event)
         break;
     }
     case cUIState::kONOPTION: {
-        cUIState* st = (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
+        cUIState* st = (cUIState*)cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         st->mAttrState = (st->mAttrState & ~0x3F00) | 0x100; // tAttrState mMode (bits 8-13) = 1
         cUIStateStack_pushSpecial(&mpEngine->mStateStack, st, 0, 0);
         break;

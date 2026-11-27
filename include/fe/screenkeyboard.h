@@ -7,12 +7,12 @@
 // EA's source file is not known: the preview keeps its inline ctor / dtor and accessors as linkonce copies
 // (__15cScreenKeyboard, _$_15cScreenKeyboard, getInputText, getCurrentKey, setInclude*, cursorLeft / cursorRight),
 // so the class is declared in a header (the preview's assert strings name fe/festatedebug.h, a candidate); this one is
-// named after the class. Retail code: the ctor func_00180508 and the methods in fe/debugfe (0x00180508 ... 0x00180A90),
+// named after the class. Retail code: the ctor cScreenKeyboard_cScreenKeyboard1 and the methods in fe/debugfe (0x00180508 ... 0x00180A90),
 // initScreenKeyboard / onInput in fe/festatedebug (0x00180B60, 0x00180EF0), and the out-of-line inlines in
 // main/all_in_one_main (0x001DD598 ... 0x001DD690).
 //
 // Size 0x174:
-//   [R] the ctor func_00180508 writes every own field up to mCurrentKey at 0x170 (no allocation site: nothing
+//   [R] the ctor cScreenKeyboard_cScreenKeyboard1 writes every own field up to mCurrentKey at 0x170 (no allocation site: nothing
 //       constructs one);
 //   [O] On Tour's class ends with mCurrentKey too (0x180 + 4, padded to 0x190 by its 16-byte cUIScreen alignment);
 //       its cUIScreen is 0xF0 (retail 0xD4) and its five bools are bytes (retail: words), which moves its 0xF0 ...
@@ -27,7 +27,7 @@
 // (cList mThreads, cUIGroup mRootGroup) are raw regions here so that this header does not pull in ui/uigroup.h's
 // tARGB (fe/debugfe.cpp defines its own tARGB).
 // Evidence tags:
-//   [R] retail's constructors func_00180508 / cScreenKeyboard_cScreenKeyboard;
+//   [R] retail's constructors cScreenKeyboard_cScreenKeyboard1 / cScreenKeyboard_cScreenKeyboard;
 //   [P] the July 2003 preview's inline accessors (tools/layout_xlate.py: +0x8 from 0xCC to 0x168; cursorRight
 //       0xCC -> 0xD4, cursorLeft / cursorRight 0x164 -> 0x16C, getCurrentKey 0x168 -> 0x170; setIncludeNumbers /
 //       setIncludeShift / setIncludeSpace 0xD0 / 0xD4 / 0xD8 -> 0xD8 / 0xDC / 0xE0, bracketed);
@@ -60,7 +60,7 @@ struct cScreenKeyboard {
     cUIThing** mppObjectList;        // 0x03C [O]; [R] 0
     char mRootGroup[0x90];           // 0x040 [O] cUIGroup (ui/uiscreen.h: cUIGroup mRootGroup); [R] cUIThing_cUIThing(this +
                                      //       0x40), cUIGroup_vtbl at 0x48, cList_cList(this + 0xB4)
-    cUIState* mpState;               // 0x0D0 [O]; [R] the ctor's state argument (func_00180508), 0 (the default ctor);
+    cUIState* mpState;               // 0x0D0 [O]; [R] the ctor's state argument (cScreenKeyboard_cScreenKeyboard1), 0 (the default ctor);
                                      //       [U] pressKey calls its virtual slot 19 after each key press
     // --- cScreenKeyboard
     int mMaxChars;                   // 0x0D4 [O][P] (preview 0xCC, cursorRight); [R] 45; [U] cursorRight / pressKey cap

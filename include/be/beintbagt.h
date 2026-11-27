@@ -4,7 +4,7 @@
 // cBEBAGTInterface: the back end's grab/tweak/uber-trick interface (On Tour's name; its methods: getGrabAnim,
 // getGrabCycleAnim, getGrabName, getTweak*, getUber*, getGrabPoints, getGrabPointsPerSec, chooseUberVar) - which
 // animation, name and points each grab input gives a rider, and each rider's uber-trick assignments (the uber-trick
-// screen, cFEStateUberTrick_*, edits them through func_0014FD80 ... func_00150048). The object holds no trick data:
+// screen, cFEStateUberTrick_*, edits them through cBEBAGTInterface_setSuperUberVar ... cBEBAGTInterface_isUberOffered). The object holds no trick data:
 // like every BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this`
 // and work on the grab table kGrabDB (0x14-byte records) and the riders' staged trick records D_00530EC0. One
 // instance, created on demand by cBEBAGTInterface_getThis
@@ -60,7 +60,7 @@ CHECK_SIZE(cBEBAGTInterface, 0x10);
 // The one BAGT interface (On Tour: cBEBAGTInterface::instance), created by cBEBAGTInterface_getThis.
 
 // One uber-trick variant of a grab (On Tour struct tBEUber, 0x8: four unsigned shorts). [O] On Tour's
-// cBEBAGTInterface::getUber* family; [U] func_0014FF90 returns a grab's table of them from kGrabDB (pointer +0x10,
+// cBEBAGTInterface::getUber* family; [U] cBEBAGTInterface_getUberVariants returns a grab's table of them from kGrabDB (pointer +0x10,
 // count +0xC); cFEStateUberTrick_updateTrickMenuEntry (view sWSMEntry4520) shows the selected entry's cost (lhu +0x6)
 // with getDollarString in "cost_num".
 struct tBEUber {
@@ -78,7 +78,7 @@ CHECK_SIZE(tBEUber, 0x8);
 
 // One grab's record in kGrabDB (On Tour struct tBEGrabDB, 0x14; [O] `const tBEGrabDB kGrabDB[7]`, retail has 15
 // entries). [U] cBEBAGTInterface_getGrabAnim ... getTweakName return the six halfwords; chooseUberVar,
-// func_0014FF90 and func_00150558 read numUbers; func_0014FF90 and the getUber* getters read ubers.
+// cBEBAGTInterface_getUberVariants and be_initStartingTricks read numUbers; cBEBAGTInterface_getUberVariants and the getUber* getters read ubers.
 struct tBEGrabDB {
     unsigned short grabAnim;        // 0x00 [O]; [U] getGrabAnim: the start animation
     unsigned short grabCycleAnim;   // 0x02 [O]; [U] getGrabCycleAnim: the held animation (438 = none)
@@ -86,9 +86,9 @@ struct tBEGrabDB {
     unsigned short tweakAnim;       // 0x06 [O]; [U] getTweakAnim
     unsigned short tweakCycleAnim;  // 0x08 [O]; [U] getTweakCycleAnim (438 = none)
     unsigned short tweakID;         // 0x0A [O]; [U] getTweakName: the trick id scored for the tweak
-    unsigned short numUbers;        // 0x0C [O]; [U] chooseUberVar (0 = no uber variants), func_0014FF90
+    unsigned short numUbers;        // 0x0C [O]; [U] chooseUberVar (0 = no uber variants), cBEBAGTInterface_getUberVariants
     unsigned short pad_0x0E;
-    const tBEUber* ubers;           // 0x10 [O]; [U] func_0014FF90 returns it, getUber* index it by the chosen variant
+    const tBEUber* ubers;           // 0x10 [O]; [U] cBEBAGTInterface_getUberVariants returns it, getUber* index it by the chosen variant
 };
 
 CHECK_OFFSET(tBEGrabDB, grabAnim, 0x00);

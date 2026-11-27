@@ -3,14 +3,14 @@
 
 // LobbyApiRefT: the state of DirtySock's LobbyApi (C), the client for EA's online lobby server: the login / account /
 // persona commands, the room / user / rank lists, the request queue, server pings and the event routines LobbyMan
-// installs. LobbyMan (online/lobbyman.h) owns one as mpLobbyApi: func_0025A948 creates it with func_003E7FF0 (0x550
+// installs. LobbyMan (online/lobbyman.h) owns one as mpLobbyApi: LobbyMan_createLobbyApi creates it with func_003E7FF0 (0x550
 // bytes from func_002591E8, zero-filled) and registers its handlers with func_003E8248. Retail code: unit
 // ealib/seg_2DCAE8, func_003E7038 .. func_003EAEB8 (the LobbyApi part of the unit). EA source: DirtySock lobbyapi.c
 // (retail's "lobbyapi" label); no On Tour / preview layout.
 //
 // Name: DirtySock's LobbyApiRefT, from the July 2003 preview's mangled LobbyMan callbacks (on*__8LobbyManP12LobbyApiMsgT
 // P12LobbyApiRefTP12LobbyApiMsgTPv: the callbacks receive the LobbyApiRefT*) together with retail's data flow:
-// func_0025A948 stores func_003E7FF0's result at LobbyMan +0x54, the member include/online/lobbyman.h types as
+// LobbyMan_createLobbyApi stores func_003E7FF0's result at LobbyMan +0x54, the member include/online/lobbyman.h types as
 // LobbyApiRefT* mpLobbyApi, and the LobbyApi functions all take it first. Member names are ours, from retail use
 // (the DirtySock tag / FourCC each field carries is quoted); the 68-byte request record, the list slot and the event
 // routine pair are left as plain arrays.

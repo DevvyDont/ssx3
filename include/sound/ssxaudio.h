@@ -44,8 +44,8 @@ struct tWorldPainterQuery; // worldpainter/worldpainterquery.h
 
 // AudioTable: a 5-point piecewise-linear curve (keys x, values y) for volumes and pitches. [O] On Tour struct
 // AudioTable (0x28, all_in_one_sound.cpp) with TABLE_Scale(AudioTable* table, float input) and TABLE_Scale(int
-// tableIndex, float input) over AudioTable gAudioTables[4]; [R] retail's pair has the same shapes: func_00290B58 walks
-// x[0..4] and interpolates y (TABLE_Scale(AudioTable*, float)), func_00290C10(i, v) = func_00290B58(&gAudioTables[i], v)
+// tableIndex, float input) over AudioTable gAudioTables[4]; [R] retail's pair has the same shapes: AudioTable_evaluate walks
+// x[0..4] and interpolates y (TABLE_Scale(AudioTable*, float)), AudioTable_evaluateByIndex(i, v) = AudioTable_evaluate(&gAudioTables[i], v)
 // (gAudioTables = 0x00445898); [U] the cSSXAudio *Program methods pass their curves (D_00482AF8..D_00482DA0) to it.
 struct AudioTable {
     float x[5];                     // 0x00 [O]; [U] the keys, ascending
@@ -150,7 +150,7 @@ enum { kNoDuckStream = 3 };
 // RaceRanking, -2 the first local human; any other value is a viewport.
 enum { kFocusLeadingHuman = -1, kFocusFirstHuman = -2 };
 
-// The sound bank of the loading-screen loop (name ours). [U] func_0028F768 plays patch 0 of bank 13, and
+// The sound bank of the loading-screen loop (name ours). [U] cSSXAudio_StartLoadingLoop plays patch 0 of bank 13, and
 // cSSXAudio_InGamePurge unloads every bank below 17 except 13.
 enum { kLoadingLoopBank = 13 };
 
@@ -203,7 +203,7 @@ enum eIconType {
     keIcon_Collectable = 5
 };
 
-// The speech language as a bit (func_0029F198's result, cSSXAudio::mSpeechLanguage; names ours). [U] func_0029ED90
+// The speech language as a bit (cSSXAudio_GetSpeechLanguage's result, cSSXAudio::mSpeechLanguage; names ours). [U] cSSXAudio_OpenSpeechLanguage
 // opens data/audio/french.big for 2, german.big for 4, spanish.big for 8 and english.big otherwise; the speech hooks
 // get it as the request's language bit.
 enum eSpeechLanguageBit {
@@ -212,28 +212,28 @@ enum eSpeechLanguageBit {
 
 // The options' language index (eOptionSpeechLanguage, tBEOptionDB::iLanguage) lives in be/beintoption.h.
 
-// The radio mode (cSSXAudio::mRadioModeID). [O] On Tour's enum eRadioModeID, names and values. [U] func_0028BF78 plays
+// The radio mode (cSSXAudio::mRadioModeID). [O] On Tour's enum eRadioModeID, names and values. [U] cSSXAudio_SetRadioMode plays
 // the default song map in 0, the radio playlist (mRadioPlayList) in 1 and 3, and the peak ambience in 2
-// (cSSXAudio_NeedWPAmbience tests 2); func_0028D960 lets the music system pick songs in 0, 1 and 3.
+// (cSSXAudio_NeedWPAmbience tests 2); cSSXAudio_IsMusicRadioMode lets the music system pick songs in 0, 1 and 3.
 enum eRadioModeID {
     kRADIOMODE_RADIO = 0, kRADIOMODE_REQUESTLINE = 1, kRADIOMODE_MOUNTAIN = 2, kRADIOMODE_PLAYLIST = 3,
     kRADIOMODE_NUM = 4
 };
 
-// The peak of a race location as func_002A1E20 returns it, one bit per peak (names ours). [U] func_002A1E20 maps
+// The peak of a race location as cSSXAudio_GetLocationPeakBit returns it, one bit per peak (names ours). [U] cSSXAudio_GetLocationPeakBit maps
 // locations 0, 1, 5, 8, 11, 14, 17, 18 to 1, locations 2, 3, 6, 9, 12, 15, 19, 20 to 2, and 4, 7, 10, 13, 16, 21 to 4
-// (0 for any other id); its callers pick "Peak1" for 1, "Peak2" for 2 and "Peak3" otherwise. func_0028CF98 takes one
+// (0 for any other id); its callers pick "Peak1" for 1, "Peak2" for 2 and "Peak3" otherwise. cSSXAudio_StartLocationMusic takes one
 // as its peak argument, or -1 to look it up from the race location.
 enum ePeakBit {
     kPEAKBIT_FromLocation = -1, kPEAKBIT_None = 0, kPEAKBIT_Peak1 = 1, kPEAKBIT_Peak2 = 2, kPEAKBIT_Peak3 = 4
 };
 
-// cSSXAudio::mMusicRampState (names ours). [U] cSSXAudio_InGameInit stores 0; func_0028F000 starts a volume ramp
+// cSSXAudio::mMusicRampState (names ours). [U] cSSXAudio_InGameInit stores 0; cSSXAudio_UpdateMusicRamp starts a volume ramp
 // (mMusicRampCounter = 0) whenever it is not 2 and sets it to 2.
 enum eMusicRampState { kMUSICRAMP_Idle = 0, kMUSICRAMP_Ramping = 2 };
 
-// cSSXAudio::mMusicEventOwner with no owner (name ours). [U] func_0028CF98 and func_0028D7D8 store -1;
-// func_0028D630 lets only the focus rider claim the event then, func_0028D740 treats it as nobody.
+// cSSXAudio::mMusicEventOwner with no owner (name ours). [U] cSSXAudio_StartLocationMusic and cSSXAudio_ReleaseRiderMusicEvent store -1;
+// cSSXAudio_StartRiderMusicEvent lets only the focus rider claim the event then, cSSXAudio_EndRiderMusicEvent treats it as nobody.
 enum { kNoMusicEventOwner = -1 };
 
 struct cSSXAudio {
@@ -243,12 +243,12 @@ struct cSSXAudio {
     int* mPatch;                        // 0x008 [O] cBankSys::mPatch; [R] operator new(0x10, "mPath") (EA's tag spelling)
     void** mVtbl;                       // 0x00C [R] primary vptr: cSSXAudio_vtbl (cSSXAudio ctor/dtor), cCrowdSys_vtbl (cController/cCrowdSys), cBankSys_vtbl (cBankSys/cMidiSys)
     // --- cMidiSys (EA name from the preview: cMidiSys__cMidiSys = cMidiSys's virtual slot 1, the dtor; its ctor is cMidiSys_cMidiSys 0x2A8140)
-    void* mMidiBanks;                   // 0x010 [R] operator new(0x20, "MIDIBANKS") in the cMidiSys ctor (named after the tag); [U] func_002A8450/func_002A86B8
+    void* mMidiBanks;                   // 0x010 [R] operator new(0x20, "MIDIBANKS") in the cMidiSys ctor (named after the tag); [U] cMidiSys_OpenMidiOpts/cMidiSys_PlayMidi
     // --- cCrowdSys (preview: cCrowdSys__cCrowdSys = cCrowdSys's dtor; ctor cCrowdSys_cCrowdSys stores the instance in gpCrowdSys)
-    int mNumCrowdInstances;             // 0x014 [R] cCrowdSys ctor 0; [U] func_002A6D78 stores n and allocates n mCrowdInstances; func_002A6D18/func_002A7718/func_002A77C8 loop to it
-    void* mCrowdInstances;              // 0x018 [R] cCrowdSys ctor 0; func_002A6D78: operator new[](n, "CrowdInstances"); [U] func_002A72D8..func_002A77C8
-    tCrowdData mCrowdData[3];           // 0x01C [R] ctor constructs 3 (func_002A4BA8 x3 each); [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54
-    // --- cMusicSys (preview: func_002B3398 = cMusicSys's dtor; ctor cMusicSys_cMusicSys(this + 0x118); non-virtual part 0x5448, its methods in sound/bankmonitor.cpp take this + 0x118)
+    int mNumCrowdInstances;             // 0x014 [R] cCrowdSys ctor 0; [U] cCrowdSys_Init stores n and allocates n mCrowdInstances; cCrowdSys_Update/cCrowdSys_RemoveAllObjects/cCrowdSys_GetCurrentCheer loop to it
+    void* mCrowdInstances;              // 0x018 [R] cCrowdSys ctor 0; cCrowdSys_Init: operator new[](n, "CrowdInstances"); [U] cCrowdSys_RemoveObject..cCrowdSys_GetCurrentCheer
+    tCrowdData mCrowdData[3];           // 0x01C [R] ctor constructs 3 (tCrowdEventData_tCrowdEventData x3 each); [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54
+    // --- cMusicSys (preview: cMusicSys__cMusicSys = cMusicSys's dtor; ctor cMusicSys_cMusicSys(this + 0x118); non-virtual part 0x5448, its methods in sound/bankmonitor.cpp take this + 0x118)
     cMusicSys MusicSys;                 // 0x118 cMusicSys base (sound/musicsys.h; non-virtual part 0x5448)
     // --- cSpeechSys (preview: cSpeechSys__cSpeechSys = cSpeechSys's dtor; ctor cSpeechSys_cSpeechSys(this + 0x5560) stores the instance in D_004A37B4; non-virtual part 0x1C0)
     cSpeechSys SpeechSys;               // 0x5560 cSpeechSys base (sound/speechsys.h; non-virtual part 0x1C0)
@@ -257,10 +257,10 @@ struct cSSXAudio {
     char unk_5724[0x4];                 // 0x5724 padding (cController's non-virtual part ends 8-aligned)
     // --- cSSXAudio (own fields 0x5728..0x6C90; fields from mGruntCycle on follow On Tour's cSSXAudio member order, retail-only fields before it)
     void* mLanguageBigFile;             // 0x5728 (name ours) [R] ctor 0; dtor closes it with FILESYS_delbigsync(h,
-                                        //        100); [U] func_0029ED90 opens the chosen language's speech file
+                                        //        100); [U] cSSXAudio_OpenSpeechLanguage opens the chosen language's speech file
                                         //        ("data/audio/<language>.big") into it
-    int mSpeechLanguage;                // 0x572C (name ours) [R] ctor -1; [U] func_0029ED90: the language
-                                        //        (func_0029F198) whose file is open in mLanguageBigFile
+    int mSpeechLanguage;                // 0x572C (name ours) [R] ctor -1; [U] cSSXAudio_OpenSpeechLanguage: the language
+                                        //        (cSSXAudio_GetSpeechLanguage) whose file is open in mLanguageBigFile
     float mFrontEndDJVolume;            // 0x5730 (name ours) [R] ctor 1.0f; [U] cSSXAudio_UpdateSpeechVolume returns
                                         //        &it as the volume control of a front-end DJ line (class 11), so those
                                         //        play at 1.0
@@ -273,111 +273,111 @@ struct cSSXAudio {
     int mSpeechVolumeID;                // 0x5738 (name ours) [U] cSSXAudio_GetSpeechVolumeIdentifier stores speech
                                         //        instance 0's volume class from the file name prefix (DJ_ 2/11, PA_ 3,
                                         //        Arcade 10, else 4: eVolumeControl, 11 past it for the front-end DJ);
-                                        //        func_0029F088 returns it
-    int mUsedBetweenEventsPicks;        // 0x573C (name ours) [U] func_002A2E50: bit mask of the between-events lines
+                                        //        cSSXAudio_GetLastSpeechVolumeID returns it
+    int mUsedBetweenEventsPicks;        // 0x573C (name ours) [U] cSSXAudio_SpeakDJBetweenEvents: bit mask of the between-events lines
                                         //        (picks 0..7) already used; cleared once all are
-    int mPendingLine8422;               // 0x5740 (name ours, after the speech line) [R] ctor; [U] func_002A43B8 plays
-                                        //        DJ speech line 8422 (func_002A27D8) while set and clears it; reset by
-                                        //        func_002A4550
-    int mPendingPlaceLine;              // 0x5744 (name ours) [R] ctor; [U] func_002A43B8 requests the place line
-                                        //        (func_002A1400) for rider mPlaceLineRider while set and clears it;
-                                        //        reset by func_002A4550
-    int mPlaceLineRider;                // 0x5748 (name ours) [U] func_002A43B8: the cAI Riders[] index the place line
+    int mPendingLine8422;               // 0x5740 (name ours, after the speech line) [R] ctor; [U] cSSXAudio_PlayPendingDJLine plays
+                                        //        DJ speech line 8422 (cSSXAudio_SpeakDJLine8422) while set and clears it; reset by
+                                        //        cSSXAudio_ClearPendingLines
+    int mPendingPlaceLine;              // 0x5744 (name ours) [R] ctor; [U] cSSXAudio_PlayPendingDJLine requests the place line
+                                        //        (cSSXAudio_SpeakPlace) for rider mPlaceLineRider while set and clears it;
+                                        //        reset by cSSXAudio_ClearPendingLines
+    int mPlaceLineRider;                // 0x5748 (name ours) [U] cSSXAudio_PlayPendingDJLine: the cAI Riders[] index the place line
                                         //        is about
-    int mPendingBetweenEventsLine;      // 0x574C (name ours) [R] ctor; [U] func_0028E548 (kinds 1, 2) and func_0028E8C0
-                                        //        set it; func_002A43B8 then plays a between-events line
-                                        //        (func_002A2E50(0)) and clears it; reset by func_002A4550
+    int mPendingBetweenEventsLine;      // 0x574C (name ours) [R] ctor; [U] cSSXAudio_HandleMusicChangeEvent (kinds 1, 2) and cSSXAudio_HandleMusicEvent
+                                        //        set it; cSSXAudio_PlayPendingDJLine then plays a between-events line
+                                        //        (cSSXAudio_SpeakDJBetweenEvents(0)) and clears it; reset by cSSXAudio_ClearPendingLines
     int mPendingBetweenEventsLine2;     // 0x5750 (name ours) [R] ctor; [U] a second flag for the same line:
-                                        //        func_002A43B8 plays func_002A2E50(0) while set and clears it; reset by
-                                        //        func_002A4550; no setter found
-    int mPendingBonusBetweenEventsLine; // 0x5754 (name ours) [R] ctor; [U] func_0028E8C0 sets it with mBonusLineQueued;
-                                        //        func_002A43B8 then plays func_002A2E50(1) and clears it; reset by
-                                        //        func_002A4550
-    int mPendingLocationPartLine;       // 0x5758 (name ours) [R] ctor; [U] func_002A43B8 plays DJ speech line 8396
-                                        //        about mPendingLocationPart (func_002A2568) while set and clears it;
-                                        //        reset by func_002A4550
-    int mPendingLocationPart;           // 0x575C (name ours) [U] func_002A43B8 passes it to func_002A2568: the part of
+                                        //        cSSXAudio_PlayPendingDJLine plays cSSXAudio_SpeakDJBetweenEvents(0) while set and clears it; reset by
+                                        //        cSSXAudio_ClearPendingLines; no setter found
+    int mPendingBonusBetweenEventsLine; // 0x5754 (name ours) [R] ctor; [U] cSSXAudio_HandleMusicEvent sets it with mBonusLineQueued;
+                                        //        cSSXAudio_PlayPendingDJLine then plays cSSXAudio_SpeakDJBetweenEvents(1) and clears it; reset by
+                                        //        cSSXAudio_ClearPendingLines
+    int mPendingLocationPartLine;       // 0x5758 (name ours) [R] ctor; [U] cSSXAudio_PlayPendingDJLine plays DJ speech line 8396
+                                        //        about mPendingLocationPart (cSSXAudio_SpeakDJCurrentLocation) while set and clears it;
+                                        //        reset by cSSXAudio_ClearPendingLines
+    int mPendingLocationPart;           // 0x575C (name ours) [U] cSSXAudio_PlayPendingDJLine passes it to cSSXAudio_SpeakDJCurrentLocation: the part of
                                         //        a combined location (-1 = all of it)
-    int mPendingOtherLine;              // 0x5760 (name ours) [U] func_002A4550 clears it with the pending-line flags;
+    int mPendingOtherLine;              // 0x5760 (name ours) [U] cSSXAudio_ClearPendingLines clears it with the pending-line flags;
                                         //        no other access found
     int unk_5764;                       // 0x5764 [R] ctor -1
-    int mPendingChoiceLine;             // 0x5768 (name ours) [R] ctor; [U] func_002A43B8 plays DJ speech line 8421 with
-                                        //        two yes/no choices (func_002A26F0(0, 0)) while set and clears it;
-                                        //        reset by func_002A4550
-    int mPendingPeakLine8378;           // 0x576C (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
-                                        //        0) sets it; func_002A43B8 plays DJ speech line 8378 with the peak
-                                        //        (func_002A2638) and clears it; reset by func_002A4550
-    int mPendingLocationLine;           // 0x5770 (name ours) [R] ctor; [U] func_0028E548 sets it on a first visit;
-                                        //        func_002A43B8 plays DJ speech line 8493 about the location
-                                        //        (func_002A2C30) and clears it; reset by func_002A4550
+    int mPendingChoiceLine;             // 0x5768 (name ours) [R] ctor; [U] cSSXAudio_PlayPendingDJLine plays DJ speech line 8421 with
+                                        //        two yes/no choices (cSSXAudio_SpeakDJChoiceLine(0, 0)) while set and clears it;
+                                        //        reset by cSSXAudio_ClearPendingLines
+    int mPendingPeakLine8378;           // 0x576C (name ours, after the speech line) [R] ctor; [U] cSSXAudio_HandleMusicChangeEvent (kind
+                                        //        0) sets it; cSSXAudio_PlayPendingDJLine plays DJ speech line 8378 with the peak
+                                        //        (cSSXAudio_SpeakDJLine8378) and clears it; reset by cSSXAudio_ClearPendingLines
+    int mPendingLocationLine;           // 0x5770 (name ours) [R] ctor; [U] cSSXAudio_HandleMusicChangeEvent sets it on a first visit;
+                                        //        cSSXAudio_PlayPendingDJLine plays DJ speech line 8493 about the location
+                                        //        (cSSXAudio_SpeakDJLine8493) and clears it; reset by cSSXAudio_ClearPendingLines
     int mSongAnnouncePending;           // 0x5774 (name ours) [R] ctor; [U] the DJ's pending song announcement: set with
-                                        //        mSongAnnounceNum by cSSXAudio_CountdownGateDrop, func_002A3170 and
-                                        //        cSSXAudio_StartEventWithNoStartGate; func_002A43B8 plays
-                                        //        func_002A2860(mSongAnnounceNum) and clears it; reset by func_002A4550
-    int mSongAnnounceNum;               // 0x5778 (name ours) [U] the song number func_002A43B8 passes to func_002A2860
-                                        //        (the DJ's song announcement); stored from func_002B4908 (the current
+                                        //        mSongAnnounceNum by cSSXAudio_CountdownGateDrop, cSSXAudio_StartDJIntro and
+                                        //        cSSXAudio_StartEventWithNoStartGate; cSSXAudio_PlayPendingDJLine plays
+                                        //        cSSXAudio_SpeakDJSongAnnouncement(mSongAnnounceNum) and clears it; reset by cSSXAudio_ClearPendingLines
+    int mSongAnnounceNum;               // 0x5778 (name ours) [U] the song number cSSXAudio_PlayPendingDJLine passes to cSSXAudio_SpeakDJSongAnnouncement
+                                        //        (the DJ's song announcement); stored from cMusicSys_GetCurrentSongSedValue (the current
                                         //        song) with mSongAnnouncePending
-    int mPendingLine8492;               // 0x577C (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
-                                        //        0, peak 1) sets it; func_002A43B8 plays DJ speech line 8492
-                                        //        (func_002A2B88) and clears it; reset by func_002A4550 and
-                                        //        func_0028EF90
-    int mLine8492Played;                // 0x5780 (name ours) [R] ctor; [U] func_002A2B88 passes it with speech line
-                                        //        8492, then sets it to 1 (played before); func_0028E548 stores 2
-    int mPendingPeakLine8491;           // 0x5784 (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
-                                        //        7) sets it; func_002A43B8 plays DJ speech line 8491 with the peak
-                                        //        (func_002A2AD0) and clears it; reset by func_002A4550
+    int mPendingLine8492;               // 0x577C (name ours, after the speech line) [R] ctor; [U] cSSXAudio_HandleMusicChangeEvent (kind
+                                        //        0, peak 1) sets it; cSSXAudio_PlayPendingDJLine plays DJ speech line 8492
+                                        //        (cSSXAudio_SpeakDJLine8492) and clears it; reset by cSSXAudio_ClearPendingLines and
+                                        //        cSSXAudio_RestartLocationMusic
+    int mLine8492Played;                // 0x5780 (name ours) [R] ctor; [U] cSSXAudio_SpeakDJLine8492 passes it with speech line
+                                        //        8492, then sets it to 1 (played before); cSSXAudio_HandleMusicChangeEvent stores 2
+    int mPendingPeakLine8491;           // 0x5784 (name ours, after the speech line) [R] ctor; [U] cSSXAudio_HandleMusicChangeEvent (kind
+                                        //        7) sets it; cSSXAudio_PlayPendingDJLine plays DJ speech line 8491 with the peak
+                                        //        (cSSXAudio_SpeakDJLine8491) and clears it; reset by cSSXAudio_ClearPendingLines
     int mRiderRemarkPending;            // 0x5788 (name ours) [R] ctor; [U] cSSXAudio_StartEventWithNoStartGate sets it
-                                        //        in game events 4 and 5; func_002A43B8 then plays func_002A1138(0, 0)
+                                        //        in game events 4 and 5; cSSXAudio_PlayPendingDJLine then plays cSSXAudio_SpeakScriptEventType0(0, 0)
                                         //        (speech line 8403, a rider about another) and clears it; reset by
-                                        //        func_002A4550
+                                        //        cSSXAudio_ClearPendingLines
     int mFirstTimeOnPeak;               // 0x578C (name ours, after the preview's GetFirstTimeOnPeak /
                                         //        SetFirstTimeOnPeak accessors) [R] ctor 0; func_002BAD30 sets 1; retail
-                                        //        getter 0x2BAD48 (lw); [U] func_0028E8C0 plays the peak's first-visit
-                                        //        music while set; func_002A2E50, func_0028E8C0 (event 20) and
-                                        //        func_0028EF90 clear it; func_002A4A78 opens the event only while 0
+                                        //        getter 0x2BAD48 (lw); [U] cSSXAudio_HandleMusicEvent plays the peak's first-visit
+                                        //        music while set; cSSXAudio_SpeakDJBetweenEvents, cSSXAudio_HandleMusicEvent (event 20) and
+                                        //        cSSXAudio_RestartLocationMusic clear it; cSSXAudio_ScheduleDJOpening opens the event only while 0
     int mPeakIntroDone;                 // 0x5790 (name ours) [R] ctor 1; func_002BAD30 clears it; retail getter
-                                        //        0x2BAD50 (lw); [U] func_002A2E50: while 0 the next between-events call
+                                        //        0x2BAD50 (lw); [U] cSSXAudio_SpeakDJBetweenEvents: while 0 the next between-events call
                                         //        plays the opening line (pick 0) and sets it
-    int mChoiceLineFirstTime;           // 0x5794 (name ours) [R] ctor 1; [U] func_002A26F0 clears it once speech line
+    int mChoiceLineFirstTime;           // 0x5794 (name ours) [R] ctor 1; [U] cSSXAudio_SpeakDJChoiceLine clears it once speech line
                                         //        8421 is queued
-    int mQueuedBetweenEventsPick;       // 0x5798 (name ours) [R] ctor -1 (none); [U] func_002A2E50: a pick (0..7) to
+    int mQueuedBetweenEventsPick;       // 0x5798 (name ours) [R] ctor -1 (none); [U] cSSXAudio_SpeakDJBetweenEvents: a pick (0..7) to
                                         //        play next instead of a random one; it queues 3 after the opening line
     int mFirstTimeOnTrack[23];          // 0x579C (name ours) [R] ctor zeroes 23; [U] cSSXAudio_InGameInit fills entry i
                                         //        with cBENewPlayerInterface_isFirstTimeOnTrack(rider, i) for the 23
-                                        //        tracks; func_0028E548 tests entries for 1 and clears them,
-                                        //        func_0028E8C0 tests [mTransportTrack] != 1
-    int mEventResultPending;            // 0x57F8 (name ours) [U] func_002A4660 sets it on the event's last heat;
-                                        //        func_002A4770 clears it and plays a result line; func_002A4590 resets
+                                        //        tracks; cSSXAudio_HandleMusicChangeEvent tests entries for 1 and clears them,
+                                        //        cSSXAudio_HandleMusicEvent tests [mTransportTrack] != 1
+    int mEventResultPending;            // 0x57F8 (name ours) [U] cSSXAudio_AddHeatResult sets it on the event's last heat;
+                                        //        cSSXAudio_SpeakDJEventResult clears it and plays a result line; cSSXAudio_ResetEventResult resets
                                         //        it
-    int mEventFinished;                 // 0x57FC (name ours) [U] func_002A4660 sets it when the rider finished the
-                                        //        final heat; func_002A4770 picks a result line only then; func_002A4590
+    int mEventFinished;                 // 0x57FC (name ours) [U] cSSXAudio_AddHeatResult sets it when the rider finished the
+                                        //        final heat; cSSXAudio_SpeakDJEventResult picks a result line only then; cSSXAudio_ResetEventResult
                                         //        resets it
-    int mEventResultPlace;              // 0x5800 (name ours) [U] func_002A4660: the rider's rank on the last heat (0 =
-                                        //        first; func_002A4590 -1 = none); func_002A4770 tests for first place
-    int mEventResultFrags;              // 0x5804 (name ours) [U] func_002A4660 adds each heat's frags; func_002A4770
+    int mEventResultPlace;              // 0x5800 (name ours) [U] cSSXAudio_AddHeatResult: the rider's rank on the last heat (0 =
+                                        //        first; cSSXAudio_ResetEventResult -1 = none); cSSXAudio_SpeakDJEventResult tests for first place
+    int mEventResultFrags;              // 0x5804 (name ours) [U] cSSXAudio_AddHeatResult adds each heat's frags; cSSXAudio_SpeakDJEventResult
                                         //        comments on 5 or more
-    int mEventResultUberTricks;         // 0x5808 (name ours) [U] func_002A4660 adds each heat's uber tricks;
-                                        //        func_002A4770 compares them with 27 (24 at some locations)
-    int mLastEventResultLine;           // 0x580C (name ours) [U] func_002A4770: the result line played last time (-1 =
+    int mEventResultUberTricks;         // 0x5808 (name ours) [U] cSSXAudio_AddHeatResult adds each heat's uber tricks;
+                                        //        cSSXAudio_SpeakDJEventResult compares them with 27 (24 at some locations)
+    int mLastEventResultLine;           // 0x580C (name ours) [U] cSSXAudio_SpeakDJEventResult: the result line played last time (-1 =
                                         //        none), dropped when another one qualifies
-    int mEventResultLocation;           // 0x5810 (name ours) [U] func_002A4660 stores the current location on the last
-                                        //        heat; func_002A4770 passes it to the result line; func_002A4590 -1
-    int mLastTransportTrack;            // 0x5814 (name ours) [U] func_0028E8C0 (event 20, the transport start) copies
-                                        //        mTransportTrack into it; func_002A4590 resets it to 23
-                                        //        (kMAX_LOCATIONS, none); func_002A4718 compares it with the current
-                                        //        location, func_002A4770 picks a line about it
-    int mScriptedDJLine;                // 0x5818 (name ours) [R] ctor 0; [U] func_002A49E8 sets it for 30 s (a scripted
-                                        //        DJ moment), func_002A4A68 clears it, func_002A4A38 tests it
+    int mEventResultLocation;           // 0x5810 (name ours) [U] cSSXAudio_AddHeatResult stores the current location on the last
+                                        //        heat; cSSXAudio_SpeakDJEventResult passes it to the result line; cSSXAudio_ResetEventResult -1
+    int mLastTransportTrack;            // 0x5814 (name ours) [U] cSSXAudio_HandleMusicEvent (event 20, the transport start) copies
+                                        //        mTransportTrack into it; cSSXAudio_ResetEventResult resets it to 23
+                                        //        (kMAX_LOCATIONS, none); cSSXAudio_HasTransportTrackChanged compares it with the current
+                                        //        location, cSSXAudio_SpeakDJEventResult picks a line about it
+    int mScriptedDJLine;                // 0x5818 (name ours) [R] ctor 0; [U] cSSXAudio_BeginScriptedDJLine sets it for 30 s (a scripted
+                                        //        DJ moment), cSSXAudio_EndScriptedDJLineCallback clears it, cSSXAudio_IsScriptedDJLinePlaying tests it
     int mLastUberLevel;                 // 0x581C (name ours) [R] ctor -1; [U] cSSXAudio_UpdateLandedUber: the focus
                                         //        rider's mUberLevel last frame (the DJ event fires when it becomes 10)
     int mUberViewIndex;                 // 0x5820 (name ours) [R] ctor 0; [U] cSSXAudio_UpdateLandedUber: the focus
                                         //        rider's mViewIndex; a change only records the new view
     int mGateDropHeat;                  // 0x5824 (name ours) [U] cSSXAudio_CountdownGateDrop stores cGameModeMan
                                         //        iHeatNum; cSSXAudio_PartialRestart compares it with iNextHeat
-    int mStopSpeechOnResume;            // 0x5828 (name ours) [R] ctor 0; [U] func_0028FAE0 (map-screen music restart)
+    int mStopSpeechOnResume;            // 0x5828 (name ours) [R] ctor 0; [U] cSSXAudio_RestartMusicAfterMap (map-screen music restart)
                                         //        sets it; cSSXAudio_ResumeAudio then stops speech instance 0, clears
-                                        //        the pending speech flags (func_002A4550) and clears it
-    int mGruntCycle;                    // 0x582C [O] first own member; [U] cSSXAudio_StartEvent/cSSXAudio_StartEventWithNoStartGate set it, func_002A0560 reads it
+                                        //        the pending speech flags (cSSXAudio_ClearPendingLines) and clears it
+    int mGruntCycle;                    // 0x582C [O] first own member; [U] cSSXAudio_StartEvent/cSSXAudio_StartEventWithNoStartGate set it, cSSXAudio_SpeakOvertake reads it
     float mWindVolume;                  // 0x5830 [O]; [U] cSSXAudio_BeginWind passes &it as the stream's volume control, cSSXAudio_EndWind and cSSXAudio_BeginAllRiderSound clear it
     int mWindPlaying;                   // 0x5834 [O] (On Tour bool); [U] BeginWind/EndWind
     char mUsedBank[64];                 // 0x5838 [O]; [U] cSSXAudio_InGameLoad clears [0], func_0029B818 writes it
@@ -392,7 +392,7 @@ struct cSSXAudio {
     int mRailType;                      // 0x598C [O]; [P] SetRailSurface(int) (preview 0x5A68; retail accessor 0x2BAD58 sw 0x598C); [U] cSSXAudio_Surface reads it for a rider on a rail
     float mLastCarveEdging[10];         // 0x5990 [O]; [U] cSSXAudio_HardCarveProgram/cSSXAudio_SoftCarveProgram (carve programs) index it
     float mLastGlide[10];               // 0x59B8 [O]; [U] cSSXAudio_HardGlideProgram/cSSXAudio_SoftGlideProgram/cSSXAudio_RailGlideProgram (glide programs)
-    int mTurboHandle;                   // 0x59E0 [O]; [U] cSSXAudio_TurboOn sets it, cSSXAudio_TurboOff/func_0029ED18/cSSXAudio_StopAllRiderSounds stop it
+    int mTurboHandle;                   // 0x59E0 [O]; [U] cSSXAudio_TurboOn sets it, cSSXAudio_TurboOff/cSSXAudio_StopRiderLoops/cSSXAudio_StopAllRiderSounds stop it
     int mTurboRef;                      // 0x59E4 [O]; [U] TurboOn increments, cSSXAudio_TurboOff decrements
     int mNeedLift[6];                   // 0x59E8 [O] (On Tour bool[6]); [U] cSSXAudio_UpdateLift, cSSXAudio_ResetLift clears 6 words
     tAttachSoundStruct AttachedSounds[30]; // 0x5A00 [O] (On Tour's name); [R] ctor's 30-element empty-ctor loop; [U] cSSXAudio_AttachSound/cSSXAudio_DetachSound/cSSXAudio_InitAttachedSounds/cSSXAudio_ResetAttachedSounds walk 30 x 0x30 from 0x5A00
@@ -434,13 +434,13 @@ struct cSSXAudio {
     int mLastTime;                      // 0x607C [O]; [U] cSSXAudio_UpdateTimedEvent
     float mLastWipeoutRecoverPercent[2]; // 0x6080 [O]; [U] cSSXAudio_ResetWipeoutRecoverHit/cSSXAudio_PlayWipeoutRecoverHit/cSSXAudio_PlayWipeoutRecoverFull (wipeout recover hits)
     int mPausedSFXForMapScreen;         // 0x6088 [O] bool (a word in retail; On Tour's member right after
-                                        //        mLastWipeoutRecoverPercent, before mAudioMode); [U] func_0028F5B8
+                                        //        mLastWipeoutRecoverPercent, before mAudioMode); [U] cSSXAudio_EnterMapScreen
                                         //        (cUITemplate_MAP's map-screen entry) clears it, then sets it to 1 when
-                                        //        it pauses the SFX (cSSXAudio_PauseSFX); func_0028F678 (map-screen exit)
+                                        //        it pauses the SFX (cSSXAudio_PauseSFX); cSSXAudio_LeaveMapScreen (map-screen exit)
                                         //        resumes them (cSSXAudio_ResumeSFX) only when set, and clears it
-    int mRadioModeID;                       // 0x608C [R] ctor 0; [U] func_0028BF78 sets it (switching the radio mode
+    int mRadioModeID;                       // 0x608C [R] ctor 0; [U] cSSXAudio_SetRadioMode sets it (switching the radio mode
                                         //        restarts the music) and 11 methods read it (cSSXAudio_FrontEndLoad,
-                                        //        cSSXAudio_FrontEndPurge, cSSXAudio_NeedWPAmbience, func_0028CF98,
+                                        //        cSSXAudio_FrontEndPurge, cSSXAudio_NeedWPAmbience, cSSXAudio_StartLocationMusic,
                                         //        ...); retail accessor 0x2BAD68; the radio mode: values 0..3 as
                                         //        On Tour's eRadioModeID (cSSXAudio_NeedWPAmbience tests 2,
                                         //        kRADIOMODE_MOUNTAIN); the preview's GetRadioModeID (0x6134; the paired NeedWPAmbience reads it)
@@ -449,33 +449,33 @@ struct cSSXAudio {
                                         //        when it or mRadioModeID is 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
-    float mOverlayLevel;                // 0x60A0 (name ours) [U] func_0028C8C8 sets it every frame to the music volume,
+    float mOverlayLevel;                // 0x60A0 (name ours) [U] cSSXAudio_UpdateAirTimeVolume sets it every frame to the music volume,
                                         //        lowered during a long jump, and hands it to the song overlay
-                                        //        (func_002B3D10); func_0028C430 uses it as the volume control of the
+                                        //        (cMusicSys_SetOverlayLevel); cSSXAudio_PlayLoopBeat uses it as the volume control of the
                                         //        loop-bank phrases
     char mPlayListName[20][20];         // 0x60A4 [P] GetPlayListName(int) returns this + 0x60A4 + i * 20 (retail 0x2BAD80; preview 0x6144)
-    int mNumPlayLists;                  // 0x6234 [P] GetNumPlayLists (preview 0x62D4, same -0xA0 shift; retail accessor 0x2BAD78); [U] func_00289470 counts them
-    int mPlayListIndex;                 // 0x6238 [P] GetPlayListIndex (preview 0x62D8; retail accessor 0x2BAD98); [U] func_00289520 stores it
-    int mRiderMusicEvent;               // 0x623C (name ours) [U] the running rider music event: func_0028D630 starts
-                                        //        it, func_0028D898 returns it, func_0028D740 / func_0028D7D8 end it,
-                                        //        func_0028CF98 clears it
-    int mNextRiderMusicEvent;           // 0x6240 (name ours) [U] the event to follow it: func_0028D740 records it
-    float mJumpAirTime;                 // 0x6244 (name ours) [U] func_0028C8C8: the air time, cached on the jump's
+    int mNumPlayLists;                  // 0x6234 [P] GetNumPlayLists (preview 0x62D4, same -0xA0 shift; retail accessor 0x2BAD78); [U] cSSXAudio_ReadPlayListNames counts them
+    int mPlayListIndex;                 // 0x6238 [P] GetPlayListIndex (preview 0x62D8; retail accessor 0x2BAD98); [U] cSSXAudio_SelectPlayList stores it
+    int mRiderMusicEvent;               // 0x623C (name ours) [U] the running rider music event: cSSXAudio_StartRiderMusicEvent starts
+                                        //        it, cSSXAudio_GetRiderMusicEvent returns it, cSSXAudio_EndRiderMusicEvent / cSSXAudio_ReleaseRiderMusicEvent end it,
+                                        //        cSSXAudio_StartLocationMusic clears it
+    int mNextRiderMusicEvent;           // 0x6240 (name ours) [U] the event to follow it: cSSXAudio_EndRiderMusicEvent records it
+    float mJumpAirTime;                 // 0x6244 (name ours) [U] cSSXAudio_UpdateAirTimeVolume: the air time, cached on the jump's
                                         //        first frame
-    float mJumpMaxAirTime;              // 0x6248 (name ours) [U] func_0028C8C8: the largest current air time of the
+    float mJumpMaxAirTime;              // 0x6248 (name ours) [U] cSSXAudio_UpdateAirTimeVolume: the largest current air time of the
                                         //        jump
-    float mJumpVolumeAirTime;           // 0x624C (name ours) [U] func_0028C8C8: the volume scale's air time, set on the
+    float mJumpVolumeAirTime;           // 0x624C (name ours) [U] cSSXAudio_UpdateAirTimeVolume: the volume scale's air time, set on the
                                         //        jump's first frame
-    int mJumpCountdown;                 // 0x6250 (name ours) [R] ctor 0; [U] func_0028C8C8 counts it down,
-                                        //        func_0028C8C0 sets it; nothing reads it otherwise
-    int mInTransport;                   // 0x6254 (name ours) [R] ctor 0; [U] set by func_0028E8C0 event 20 (the
-                                        //        transport start) and by func_002BAD30 (retail 0x2BAD30); func_0028E888
-                                        //        (the NIS list ended) runs event 19 and clears it; func_002A4770
+    int mJumpCountdown;                 // 0x6250 (name ours) [R] ctor 0; [U] cSSXAudio_UpdateAirTimeVolume counts it down,
+                                        //        cSSXAudio_SetJumpCountdown sets it; nothing reads it otherwise
+    int mInTransport;                   // 0x6254 (name ours) [R] ctor 0; [U] set by cSSXAudio_HandleMusicEvent event 20 (the
+                                        //        transport start) and by func_002BAD30 (retail 0x2BAD30); cSSXAudio_EndTransportMusic
+                                        //        (the NIS list ended) runs event 19 and clears it; cSSXAudio_SpeakDJEventResult
                                         //        comments on mLastTransportTrack only while set
-    int mBonusLineQueued;               // 0x6258 (name ours) [U] func_0028E8C0 sets it with
+    int mBonusLineQueued;               // 0x6258 (name ours) [U] cSSXAudio_HandleMusicEvent sets it with
                                         //        mPendingBonusBetweenEventsLine and clears it after events 19 / 20, as
-                                        //        does func_0028EF90; while set func_002A2E50 skips the opening line and
-                                        //        the queued pick, and func_0028E8C0 holds its other DJ cues
+                                        //        does cSSXAudio_RestartLocationMusic; while set cSSXAudio_SpeakDJBetweenEvents skips the opening line and
+                                        //        the queued pick, and cSSXAudio_HandleMusicEvent holds its other DJ cues
     tWorldPainterQuery* mpMusicTriggerQuery[2]; // 0x625C (name ours) [U] cSSXAudio_InGameInit creates two
                                         //        kWPR_MusicTrigger queries, cSSXAudio_InGameDeInit frees them,
                                         //        cSSXAudio_UpdateAudioWorldPainter queries them
@@ -490,53 +490,53 @@ struct cSSXAudio {
     int mMusicTriggerReady;             // 0x6270 (name ours) [U] cSSXAudio_InGameInit = 1; func_0028D988 sets it on
                                         //        leaving a type 1 / 2 trigger region (type -1), acts on a state-11
                                         //        trigger only while it is set, and clears it after acting
-    int mMusicRequestPending;           // 0x6274 (name ours) [U] cSSXAudio_InGameInit stores; func_0028E088 sets 1 with
-                                        //        mMusicRequest, func_0028E100 acts while set and clears it (the shift
+    int mMusicRequestPending;           // 0x6274 (name ours) [U] cSSXAudio_InGameInit stores; cSSXAudio_PostMusicRequest sets 1 with
+                                        //        mMusicRequest, cSSXAudio_HandleMusicRequest acts while set and clears it (the shift
                                         //        here is -0x94: the preview's PathfinderCanChangeVolume is
                                         //        mPathfinderCanChangeVolume at 0x6280)
-    int mMusicRequest;                  // 0x6278 (name ours) [U] func_0028E088 posts the request code (its event's
-                                        //        mData1), func_0028E100 carries it out (0 peak theme, 2 location
+    int mMusicRequest;                  // 0x6278 (name ours) [U] cSSXAudio_PostMusicRequest posts the request code (its event's
+                                        //        mData1), cSSXAudio_HandleMusicRequest carries it out (0 peak theme, 2 location
                                         //        song, 4 stop, else event 36 / 0). Not the preview's
                                         //        SetTransportTrack field: that is mTransportTrack, shift -0x94
     int mRaceMusicOn;                   // 0x627C (name ours) [R] ctor 1; [U] cSSXAudio_InGameLoad = 1;
                                         //        cSSXAudio_OnFinishEvent clears it when it plays the between-heats
                                         //        track 36; cSSXAudio_CountdownBeep starts the race music only when set;
                                         //        cSSXAudio_CountdownGateDrop sets it (music state 37) when clear;
-                                        //        func_0028E8C0 sets it on transport start, tests it on transport end
-    int mPathfinderCanChangeVolume;                       // 0x6280 [P] PathfinderCanChangeVolume__9cSSXAudio (preview 0x6314; func_002AF6C0 = preview 0x281170); retail accessor 0x2BADA0 (lw); [U] the Pathfinder volume callback applies a volume only when set
-    int mTransportTrack;                       // 0x6284 [P] SetTransportTrack__9cSSXAudio13eBELocationID (preview 0x6318: both ctors store 23 there, kMAX_LOCATIONS); [R] ctor 23; [U] func_0028F558 stores the map screen's location
-    int mMusicRampState;                // 0x6288 (name ours) [U] cSSXAudio_InGameInit = 0; func_0028F000 starts a
+                                        //        cSSXAudio_HandleMusicEvent sets it on transport start, tests it on transport end
+    int mPathfinderCanChangeVolume;                       // 0x6280 [P] PathfinderCanChangeVolume__9cSSXAudio (preview 0x6314; pathxSND_setVolume = preview 0x281170); retail accessor 0x2BADA0 (lw); [U] the Pathfinder volume callback applies a volume only when set
+    int mTransportTrack;                       // 0x6284 [P] SetTransportTrack__9cSSXAudio13eBELocationID (preview 0x6318: both ctors store 23 there, kMAX_LOCATIONS); [R] ctor 23; [U] cSSXAudio_SetTransportTrack stores the map screen's location
+    int mMusicRampState;                // 0x6288 (name ours) [U] cSSXAudio_InGameInit = 0; cSSXAudio_UpdateMusicRamp starts a
                                         //        volume ramp (mMusicRampCounter = 0) when it is not 2 and sets it to 2
-    int mMusicRampCounter;              // 0x628C (name ours) [U] func_0028F000: zeroed when a volume ramp starts
+    int mMusicRampCounter;              // 0x628C (name ours) [U] cSSXAudio_UpdateMusicRamp: zeroed when a volume ramp starts
                                         //        (mMusicRampState = 2), then counted up to the tier's 800 / 1000 / 1200
-    int mFrontEndMusicMode;             // 0x6290 (name ours) [U] func_0028F140 switches the front-end music to a mode
+    int mFrontEndMusicMode;             // 0x6290 (name ours) [U] cSSXAudio_SetFrontEndMusicMode switches the front-end music to a mode
                                         //        (0-9) only when it differs from this, then stores it;
                                         //        cSSXAudio_FrontEndLoad stores 10 (no mode, so the next switch
-                                        //        applies); func_0028FC58 restores it
-    int mReplayMusicStarted;            // 0x6294 (name ours) [R] ctor 0; [U] func_0028F200 sets it when the replay
-                                        //        starts its own song (none was playing); func_0028F2C0 then stops the
-                                        //        song; func_0028CF98 loads music in a replay only while set
-    int mReplaySongPlaying;             // 0x6298 (name ours) [R] ctor 0; [U] func_0028F200 (replay music) sets it when
-                                        //        a song is playing, func_0028F2C0 then sets music state 36 and clears
+                                        //        applies); cSSXAudio_PlayCharSelSong restores it
+    int mReplayMusicStarted;            // 0x6294 (name ours) [R] ctor 0; [U] cSSXAudio_BeginReplayMusic sets it when the replay
+                                        //        starts its own song (none was playing); cSSXAudio_EndReplayMusic then stops the
+                                        //        song; cSSXAudio_StartLocationMusic loads music in a replay only while set
+    int mReplaySongPlaying;             // 0x6298 (name ours) [R] ctor 0; [U] cSSXAudio_BeginReplayMusic (replay music) sets it when
+                                        //        a song is playing, cSSXAudio_EndReplayMusic then sets music state 36 and clears
                                         //        it; cSSXAudio_CountdownGateDrop sets state 37 in a replay when set
-    int mLastMusicState;                // 0x629C (name ours) [U] func_0028DEF0 stores its argument (11, 13, 18) and
-                                        //        reports whether it changed; func_0028DF08 resets it to -1
+    int mLastMusicState;                // 0x629C (name ours) [U] cSSXAudio_SetLastMusicState stores its argument (11, 13, 18) and
+                                        //        reports whether it changed; cSSXAudio_ResetLastMusicState resets it to -1
     int mMusicEventOwner;               // 0x62A0 (name ours) [U] the AI index (cRider virtual slot 7) of the rider
-                                        //        whose music event runs, -1 for none: func_0028CF98 resets it,
-                                        //        func_0028D630 claims it, func_0028D740 / func_0028D7D8 test and release
-    int mLastPlaylistSong;              // 0x62A4 (name ours) [R] ctor -1; [U] func_0028CF98 stores the playlist song it
-                                        //        started (MusicSys.mCurrentSongNum); func_0028D488 avoids picking it
+                                        //        whose music event runs, -1 for none: cSSXAudio_StartLocationMusic resets it,
+                                        //        cSSXAudio_StartRiderMusicEvent claims it, cSSXAudio_EndRiderMusicEvent / cSSXAudio_ReleaseRiderMusicEvent test and release
+    int mLastPlaylistSong;              // 0x62A4 (name ours) [R] ctor -1; [U] cSSXAudio_StartLocationMusic stores the playlist song it
+                                        //        started (MusicSys.mCurrentSongNum); cSSXAudio_PickRandomSong avoids picking it
                                         //        again
     int mLoadingLoopHandle;             // 0x62A8 (name ours) [R] ctor -1; [U] the loading-screen loop's voice handle
-                                        //        (bank 13, patch 0): func_0028F768 starts it, func_0028FA98 stops it
+                                        //        (bank 13, patch 0): cSSXAudio_StartLoadingLoop starts it, cSSXAudio_StopLoadingLoop stops it
                                         //        (-1 = none); cSSXAudio_WorldSound and cSSXAudio_AttachSound play
                                         //        nothing while it is >= 0
-    int mSavedSongNum;                  // 0x62AC (name ours) [U] func_0028CDF8 saves MusicSys.mCurrentSongNum before
-                                        //        the podium tune; func_0028F200 (replay music) restores it
+    int mSavedSongNum;                  // 0x62AC (name ours) [U] cSSXAudio_PlayCharTune saves MusicSys.mCurrentSongNum before
+                                        //        the podium tune; cSSXAudio_BeginReplayMusic (replay music) restores it
     int mAudioMode;                     // 0x62B0 [O] eSOUNDDEF_MODE; [R] ctor stores its audioMode argument; [U] cSSXAudio_SetMode stores, cSSXAudio_Calc3DPos and cSSXAudio_GetCurrentSoundMode (GetMode) read
     int mArcadeSFX;                     // 0x62B4 [O] (On Tour bool, after mAudioMode); [R] ctor 0; [U] cSSXAudio_SetArcadeSFX stores it (and sets volume controls 9/10); cSSXAudio_SetSFXVolume re-applies controls 9/10 only when set
     int mDJSpeech;                      // 0x62B8 (name ours) [R] ctor 0; [U] cSSXAudio_SetDJSpeech stores 1 (DJ volume
-                                        //        control 2 on) or 0; func_00287410 re-applies control 2 only when set
+                                        //        control 2 on) or 0; cSSXAudio_ApplyMusicVolume re-applies control 2 only when set
                                         //        (and the radio mode is not 2); retail accessor func_002BADB0 returns
                                         //        it
     tSoundVolume mSoundVolume[11];      // 0x62BC [O]; [U] cSSXAudio_DuckVolume: entry j curVolume * duck -> duckedVolume, * mMixLevel[j] -> appliedVolume

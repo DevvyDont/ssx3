@@ -836,7 +836,7 @@ int cBENewPlayerInterface::getHumanRider(int second)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146F40);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderName);
 #ifdef SKIP_ASM
 /**
  * Sets a rider's name: copies up to 12 characters of @p name into its player entry.
@@ -847,14 +847,14 @@ INCLUDE_ASM("be/beintplayer", func_00146F40);
  * @param index  the rider
  * @param name  the new name
  */
-extern "C" void func_00146F40(cBENewPlayerInterface* self, int index, const char* name)
+extern "C" void cBENewPlayerInterface_setRiderName(cBENewPlayerInterface* self, int index, const char* name)
 {
     strncpy((char*)&cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146F88);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderName);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -881,7 +881,7 @@ extern char str_JUGADOR_pct_d[];
  * @return the name string
  */
 // Returns the display name for player idx (network names in a net game, else a default "Player N").
-extern "C" char* func_00146F88(cBENewPlayerInterface* self, int idx)
+extern "C" char* cBENewPlayerInterface_getRiderName(cBENewPlayerInterface* self, int idx)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     tBENetworkDB* net = &cBENetworkInterface_networkOpt;
@@ -1263,7 +1263,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHelpDone);
 /**
  * Returns iIsHelpDone (flag bit 3) at +0x10 of a rider's player entry (tempPlayers[getPlayerID(@p index)]).
  *
- * The bit is set once the world script has opened the message center (func_001E3510), after which func_001E3570 stops
+ * The bit is set once the world script has opened the message center (requestMessageCenter), after which canOpenMessageCenter stops
  * offering it.
  *
  * @param index  the rider (On Tour iRider)
@@ -1483,7 +1483,7 @@ void cBENewPlayerInterface::resetFromMissionMan(int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147908);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderMessages);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1497,7 +1497,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider
  * @return a pointer into the character record
  */
-extern "C" void* func_00147908(cBENewPlayerInterface* self, int index)
+extern "C" void* cBENewPlayerInterface_getRiderMessages(cBENewPlayerInterface* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1508,7 +1508,7 @@ extern "C" void* func_00147908(cBENewPlayerInterface* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147980);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getMessageGroupFlag);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1525,7 +1525,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the flag number
  * @return true when set
  */
-extern "C" bool func_00147980(cBENewPlayerInterface* self, int index, int bit)
+extern "C" bool cBENewPlayerInterface_getMessageGroupFlag(cBENewPlayerInterface* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1537,7 +1537,7 @@ extern "C" bool func_00147980(cBENewPlayerInterface* self, int index, int bit)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147A30);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setMessageGroupFlag);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1553,7 +1553,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the flag number
  * @param on  nonzero sets the flag, 0 clears it
  */
-extern "C" void func_00147A30(cBENewPlayerInterface* self, int index, int bit, int on)
+extern "C" void cBENewPlayerInterface_setMessageGroupFlag(cBENewPlayerInterface* self, int index, int bit, int on)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1571,7 +1571,7 @@ extern "C" void func_00147A30(cBENewPlayerInterface* self, int index, int bit, i
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147B20);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getNumPeakRaceMedals);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1586,7 +1586,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param slot  the pair index (no range check)
  * @return mPeakMainEventMedals[@p slot].uiNumRaceMedals
  */
-extern "C" int func_00147B20(cBENewPlayerInterface* self, int index, int slot)
+extern "C" int cBENewPlayerInterface_getNumPeakRaceMedals(cBENewPlayerInterface* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1596,7 +1596,7 @@ extern "C" int func_00147B20(cBENewPlayerInterface* self, int index, int slot)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147BB0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getNumPeakFreestyleMedals);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -1611,7 +1611,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param slot  the pair index (no range check)
  * @return mPeakMainEventMedals[@p slot].uiNumFreeStyleMedals
  */
-extern "C" int func_00147BB0(cBENewPlayerInterface* self, int index, int slot)
+extern "C" int cBENewPlayerInterface_getNumPeakFreestyleMedals(cBENewPlayerInterface* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1632,7 +1632,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * The character is cBELibrary_getCharacterID(0) in profile 0 of cBELibrary_profileLib. With @p flag set, stores
  * @p value in mDifficulty and clears mDifference; otherwise the pair mFreestyleDifficulty / mFreestyleDifference.
  *
- * @param value  the level, 0-2 (func_00147D20 caps it at 2)
+ * @param value  the level, 0-2 (cBENewPlayerInterface_recordDifficultyWin caps it at 2)
  * @param flag  picks the pair: nonzero mDifficulty, 0 mFreestyleDifficulty
  */
 void cBENewPlayerInterface::setDifficultyLevel(int value, int flag)
@@ -1676,7 +1676,7 @@ short cBENewPlayerInterface::getDifficultyLevel(int which)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147D20);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_recordDifficultyWin);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
@@ -1691,7 +1691,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
  */
-extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
+extern "C" void cBENewPlayerInterface_recordDifficultyWin(cBENewPlayerInterface* self, int which)
 {
     int profile = 0;
     int charId = cBELibrary_getCharacterID(0);
@@ -1726,7 +1726,7 @@ extern "C" void func_00147D20(cBENewPlayerInterface* self, int which)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147E18);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_recordDifficultyLoss);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
@@ -1741,7 +1741,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
  */
-extern "C" void func_00147E18(cBENewPlayerInterface* self, int which)
+extern "C" void cBENewPlayerInterface_recordDifficultyLoss(cBENewPlayerInterface* self, int which)
 {
     int profile = 0;
     int charId = cBELibrary_getCharacterID(0);
@@ -1785,7 +1785,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * Returns the win/loss streak beside a difficulty level of the first profile's current character.
  *
  * mDifference (when @p flag is set) or mFreestyleDifference of the record of cBELibrary_getCharacterID(0) in profile 0;
- * the win and loss counters func_00147D20 and func_00147E18 move it.
+ * the win and loss counters cBENewPlayerInterface_recordDifficultyWin and cBENewPlayerInterface_recordDifficultyLoss move it.
  *
  * @param flag  picks the pair: nonzero mDifference, 0 mFreestyleDifference
  * @return the streak, -1 to 1
@@ -1942,7 +1942,7 @@ int cBEStatInterface::getStatFromProfile(int profile, unsigned int stat)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001482D0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStatDefault);
 #ifdef SKIP_ASM
 extern tBEStatDefault cBELibrary_statDefault_001482D0[] __asm__("cBELibrary_statDefault");
 
@@ -1957,14 +1957,14 @@ extern tBEStatDefault cBELibrary_statDefault_001482D0[] __asm__("cBELibrary_stat
  * @param character  the character
  * @return @p dst
  */
-extern "C" tBEStatDefault* func_001482D0(tBEStatDefault* dst, int iface, int character)
+extern "C" tBEStatDefault* cBEStatInterface_getStatDefault(tBEStatDefault* dst, int iface, int character)
 {
     *dst = cBELibrary_statDefault_001482D0[character];
     return dst;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148328);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getRiderStatDefault);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int);
@@ -1982,7 +1982,7 @@ extern tBEStatDefault cBELibrary_statDefault_00148328[] __asm__("cBELibrary_stat
  * @param rider  the rider
  * @return @p dst
  */
-extern "C" tBEStatDefault* func_00148328(tBEStatDefault* dst, int iface, int rider)
+extern "C" tBEStatDefault* cBEStatInterface_getRiderStatDefault(tBEStatDefault* dst, int iface, int rider)
 {
     int charId = cBELibrary_getCharacterID(rider);
     *dst = cBELibrary_statDefault_00148328[charId];

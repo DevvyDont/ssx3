@@ -13,8 +13,8 @@
 // Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable cFEStateLogin_vtbl, mHashName 0x33, mNeedsLobby = 0) and the
 // default cFEStateLogin_cFEStateLogin1 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
 // cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate cFEStateLogin_onUpdate, 17
-// onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent cFEStateLogin_onWidgetEvent, 25 func_001BFAE0
-// (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
+// onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent cFEStateLogin_onWidgetEvent, 25 cFEStateLogin_fillHelpPopup
+// (help), 29 cFEStateLogin_isOnlineState, 31 cFEStateLogin_onNetEvent (net events), 32 cFEStateLogin_publishPresence, 33 cFEStateLogin_onVerifyPopupEvent). Methods:
 // fe/feasyncfile 0x1BEE30-0x1BFAE0.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
@@ -40,7 +40,7 @@ struct cFEStateLogin : public cFEStateNet {
     //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLogin_cFEStateLogin stores 0x33
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)

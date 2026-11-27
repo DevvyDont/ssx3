@@ -36,12 +36,12 @@ extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern "C" int cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void cFERiderManager_setHumanCharacter(void* mgr, int idx, int ch, int a3);
 extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
-extern "C" void func_0014AEA8(void* self, int a1, int a2);
-extern "C" int func_0014B478(void* self, int a1, int a2);
-extern "C" char* func_0014B700(void* iface, int rider);
+extern "C" void cBEBoltInterface_storeVisibleFlags(void* self, int a1, int a2);
+extern "C" int cBEBoltInterface_getUsedEquipPoints(void* self, int a1, int a2);
+extern "C" char* cBEBoltInterface_getBigIconFileName(void* iface, int rider);
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
-extern "C" void func_0019B180(void* self, int id);
-extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
+extern "C" void cFEStateCharEquip_buildItemList(void* self, int id);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, void* name, int a3, int a4, int a5);
 extern const int kBolt_None_c __asm__("kBolt_None");
 extern void* cFEStateCharEquip_vtbl[];
 extern char str_dollargreen[];
@@ -131,12 +131,12 @@ static inline int Find_8DB8(cUIEngine* mgr, int hash)
  * Constructs the equip-gear state for a user in store (buy) or inventory (equip) mode.
  *
  * Sets state id 0xE, the two preview positions (0xAC0, 0xAD0), the user's controller bits, the character
- * (0xBC), the mode (0xC8: 1 in the store), money (0xC0) and equip points (0xC4, func_0014B478); clears the
+ * (0xBC), the mode (0xC8: 1 in the store), money (0xC0) and equip points (0xC4, cBEBoltInterface_getUsedEquipPoints); clears the
  * widget pointers and the category stack (root -1), finds the dollar and checkbox texture elements and sets
  * the user's FE rider to the character (cFERiderManager_setHumanCharacter).
  *
  * With a store or a mode switch, 0xCC (On Tour mStoreNum) is the last hub's peak (2 for kLOCATION_HUB_C / _D, 3
- * for kLOCATION_HUB_E, else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon
+ * for kLOCATION_HUB_E, else 1), otherwise -1. Builds the root item list (cFEStateCharEquip_buildItemList) and loads the character's icon
  * file into the FE file cache (slot kept at 0xA64).
  *
  * @param mem  the state being constructed (this)
@@ -223,8 +223,8 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->team, self->slot, 1);
     self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 11), self->team, self->slot);
     void* shop = cBE_getInterface(cBE_getBE(), 9);
-    func_0014AEA8(shop, self->team, self->slot);
-    self->fC4 = func_0014B478(shop, self->team, self->slot);
+    cBEBoltInterface_storeVisibleFlags(shop, self->team, self->slot);
+    self->fC4 = cBEBoltInterface_getUsedEquipPoints(shop, self->team, self->slot);
     self->fAE4 = canSwitchMode;
     if (inStore != 0 || canSwitchMode != 0) {
         switch (cBENewPlayerInterface_getLastHub(player, cBELibrary_getRiderIndex(self->team))) {
@@ -250,9 +250,9 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     } else {
         self->fCC = -1;
     }
-    func_0019B180(self, kBolt_None_c);
-    char* name = func_0014B700(shop, self->slot);
-    self->fA64 = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->slot, name, 9, 1, 0);
+    cFEStateCharEquip_buildItemList(self, kBolt_None_c);
+    char* name = cBEBoltInterface_getBigIconFileName(shop, self->slot);
+    self->fA64 = cFEBoltFileManager_requestFile(SSXApp->RealFE->mBoltFileManager, self->slot, name, 9, 1, 0);
     return self;
 }
 #endif
@@ -260,7 +260,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self);
 extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* cFEStateCharEquip_vtbl[];
@@ -294,7 +294,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, in
 {
     VPTR_OF(cListNode, self) = cFEStateCharEquip_vtbl;
     if (self->mIconsFileIndex >= 0) {
-        func_0019DC20((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, self->mCharID,
+        cFEBoltFileManager_releaseFile((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, self->mCharID,
                       self->mIconsFileIndex);
         self->mIconsFileIndex = -1;
     }
@@ -321,7 +321,7 @@ extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 extern char str_12equ_char[];
 
 /**
@@ -354,7 +354,7 @@ void cFEStateCharEquip::onCreateScreen()
     mPlayerRotation = 0.0f;
     mPan = -1.0f;
     update3DPositions();
-    func_0028F140(cAudioInterface_bxAudio(), 2);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 2);
 }
 #endif
 
@@ -387,7 +387,7 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
-extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
+extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
@@ -395,7 +395,7 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * Runs cFEStateCharEquip_initStorePreview() in store mode (0xC8 set; probably On Tour initStorePreview) or cFEStateCharEquip_initInventoryPreview()
  * otherwise (initInventoryPreview), then the points bar (cFEStateCharEquip_updatePolyBar) and the equip preview bar with no
- * extra cost (cFEStateCharEquip_updatePolyEquipPreviewBar), redraws the rows with a scroll reset (func_0019B618) and runs
+ * extra cost (cFEStateCharEquip_updatePolyEquipPreviewBar), redraws the rows with a scroll reset (cFEStateCharEquip_redrawRows) and runs
  * cFEState_onGainFocus().
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
@@ -410,7 +410,7 @@ extern "C" void cFEStateCharEquip_onGainFocus(cFEStateCharEquip* self, int pPrev
     }
     self->updatePolyBar();
     self->updatePolyEquipPreviewBar(0);
-    func_0019B618(self, 1, 1);
+    cFEStateCharEquip_redrawRows(self, 1, 1);
     cFEState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -446,9 +446,9 @@ extern const int kBolt_None_eate __asm__("kBolt_None");
 
 extern "C" void cFEStateCharEquip_updateHeading_eate(void* self, int id) __asm__("cFEStateCharEquip_updateHeading");
 
-extern "C" void func_0019B7E0_eate(void* self, int idx) __asm__("func_0019B7E0");
+extern "C" void cFEStateCharEquip_drawInventoryRow_eate(void* self, int idx) __asm__("cFEStateCharEquip_drawInventoryRow");
 
-extern "C" void func_0019BA60_eate(void* self, int idx) __asm__("func_0019BA60");
+extern "C" void cFEStateCharEquip_drawStoreRow_eate(void* self, int idx) __asm__("cFEStateCharEquip_drawStoreRow");
 
 extern "C" void cFEStateCharEquip_updateBankWidget_eate(void* self) __asm__("cFEStateCharEquip_updateBankWidget");
 
@@ -609,9 +609,9 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
                 w->mMiscData = i;
                 if (i < self->mNumItems) {
                     if (isC8_FE(self)) {
-                        func_0019BA60_eate(self, i);
+                        cFEStateCharEquip_drawStoreRow_eate(self, i);
                     } else {
-                        func_0019B7E0_eate(self, i);
+                        cFEStateCharEquip_drawInventoryRow_eate(self, i);
                     }
                 } else {
                     hide_FE(self->f8C[i]);
@@ -622,9 +622,9 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
                 self->fA4[i] = ((void*)w);
                 if (i < self->mNumItems) {
                     if (isC8_FE(self)) {
-                        func_0019BA60_eate(self, i);
+                        cFEStateCharEquip_drawStoreRow_eate(self, i);
                     } else {
-                        func_0019B7E0_eate(self, i);
+                        cFEStateCharEquip_drawInventoryRow_eate(self, i);
                     }
                 } else {
                     hide_FE(self->fA4[i]);
@@ -639,11 +639,11 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void func_0019BE80(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_buySelectedItem(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateBankWidget(cFEStateCharEquip* self);
 struct sEquipDetail;
-extern "C" bool func_0019B458(sEquipDetail* self, int idx);
-extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
+extern "C" bool cFEStateCharEquip_removeItem(sEquipDetail* self, int idx);
+extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int a1, int a2);
 
 /**
  * Hides the equip-gear state behind popups and buys the selected item when the buy popup closes with a yes.
@@ -651,8 +651,8 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
  * kONPOPUPCREATE (a popup opened) clears this state's visible bit (mAttrState bit 3) unless the popup is the buy
  * popup (state id cUIStateBuyPopup::kStateID). kONPOPUPDESTROY (popped) sets it again and, for the buy popup with
  * its result (+0x6C) set,
- * buys the item (func_0019BE80), shows the new bank and redraws the rows when the item leaves the list
- * (func_0019B458).
+ * buys the item (cFEStateCharEquip_buySelectedItem), shows the new bank and redraws the rows when the item leaves the list
+ * (cFEStateCharEquip_removeItem).
  *
  * @param widget  the popup state that sent the event
  * @param msg  the popup event (kONPOPUPCREATE opened, kONPOPUPDESTROY closed)
@@ -670,10 +670,10 @@ void cFEStateCharEquip::onPopupEvent(cUIState* widget, unsigned int msg)
             mAttrState |= 8;
         }
         if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
-            func_0019BE80(this);
+            cFEStateCharEquip_buySelectedItem(this);
             updateBankWidget();
-            if (func_0019B458((sEquipDetail*)this, mpMenu->mScrollItemCurrent)) {
-                func_0019B618(this, 0, 1);
+            if (cFEStateCharEquip_removeItem((sEquipDetail*)this, mpMenu->mScrollItemCurrent)) {
+                cFEStateCharEquip_redrawRows(this, 0, 1);
             }
         }
         break;
@@ -689,8 +689,8 @@ int GetHashValue32(char* str);
 void* cList_first(cList* list);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onUpdate(void* self);
-extern "C" bool func_0019E238(cFEBoltFileManager* self, int a1, int a2);
-extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" bool cFEBoltFileManager_isFileLoaded(cFEBoltFileManager* self, int a1, int a2);
+extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
@@ -701,7 +701,7 @@ extern char str_loading_text[];
  * Updates the equip-gear state each frame: the icon file's arrival, the "loading text" and the preview loads.
  *
  * Runs the base update cUIState_onUpdate(); once the icon file (0xA64) is ready in the FE file cache, marks it
- * (0xA60) and refreshes the selected item's preview (func_0019A9B8). "loading text" shows in store mode while
+ * (0xA60) and refreshes the selected item's preview (cFEStateCharEquip_updatePreview). "loading text" shows in store mode while
  * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
  * cFEStateCharEquip_updatePreviewLoad() advances the preview load and cFEStateCharEquip_update3DPositions() places the camera and models.
  */
@@ -709,10 +709,10 @@ void cFEStateCharEquip::onUpdate()
 {
     cUIState_onUpdate(this);
     if (mIconsLoaded == 0
-        && func_0019E238((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
+        && cFEBoltFileManager_isFileLoaded((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
                          mIconsFileIndex)) {
         mIconsLoaded = 1;
-        func_0019A9B8(this);
+        cFEStateCharEquip_updatePreview(this);
     }
     void* screen = cList_first((cList*)(&mScreens));
     cUIThing* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
@@ -793,16 +793,16 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
-extern "C" void func_0019B180(void* self, int id);
-extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
+extern "C" void cFEStateCharEquip_buildItemList(void* self, int id);
+extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self, int a1);
-extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateCharacterModel(cFEStateCharEquip* self);
-extern "C" bool func_0019BEE8(cFEStateCharEquip* self);
-extern "C" void func_0019C7E8(cFEStateCharEquip* self, tBEBoltDef* item);
+extern "C" bool cFEStateCharEquip_toggleSelectedItem(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_openBuyPopup(cFEStateCharEquip* self, tBEBoltDef* item);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
-extern "C" int func_0014B478(void* self, int a1, int a2);
+extern "C" int cBEBoltInterface_getUsedEquipPoints(void* self, int a1, int a2);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -821,7 +821,7 @@ static inline int isMode1_9C28(cFEStateCharEquip* self)
  * kONNEXT (accept) on row top + misc data: a category (flag 0x20) is pushed on the stack (0xD0, depth 0x120)
  * and listed, the boards category (3) easing the camera to the board (0xAE0 = kCameraToBoard); an item (flag 4) opens
  * the buy popup in store mode when the money covers its price x 10, or in the inventory is equipped or taken off
- * (func_0019BEE8) when the row's points fit the 3392 budget, then the bars and rider model are refreshed.
+ * (cFEStateCharEquip_toggleSelectedItem) when the row's points fit the 3392 budget, then the bars and rider model are refreshed.
  *
  * kONPREV (back) lists the parent category (leaving boards eases back, 0xAE0 = kCameraToRider) or, at the root, sets
  * the FE rider's Customize speech request (mCustomized) and pushes getPrevState's state. kONGAINFOCUS (row focused)
@@ -847,8 +847,8 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
             mCurrentStackPos++;
             updateHeading(id);
             mCategoryStack[mCurrentStackPos] = id;
-            func_0019B180(this, id);
-            func_0019B618(this, 1, 1);
+            cFEStateCharEquip_buildItemList(this, id);
+            cFEStateCharEquip_redrawRows(this, 1, 1);
             if (id == D_004A11E0)
                 mCameraState = kCameraToBoard;
             return;
@@ -861,16 +861,16 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
                 cost *= 10;
             if (mMoneyAvailable < cost)
                 return;
-            func_0019C7E8(this, item);
+            cFEStateCharEquip_openBuyPopup(this, item);
             return;
         }
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         if (D_004A18D8 < mRowPoints[w->mMiscData] + mCurrentPolyCount)
             return;
-        if (!func_0019BEE8(this))
+        if (!cFEStateCharEquip_toggleSelectedItem(this))
             return;
-        mCurrentPolyCount = func_0014B478(iface, mUserNum, mCharID);
-        func_0019B618(this, 0, 1);
+        mCurrentPolyCount = cBEBoltInterface_getUsedEquipPoints(iface, mUserNum, mCharID);
+        cFEStateCharEquip_redrawRows(this, 0, 1);
         updatePolyBar();
         updatePolyEquipPreviewBar(mRowPoints[w->mMiscData]);
         updateCharacterModel();
@@ -881,8 +881,8 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
             if (mCategoryStack[mCurrentStackPos] == D_004A11E0)
                 mCameraState = kCameraToRider;
             updateHeading(mCategoryStack[mCurrentStackPos - 1]);
-            func_0019B180(this, mCategoryStack[mCurrentStackPos - 1]);
-            func_0019B618(this, 1, 1);
+            cFEStateCharEquip_buildItemList(this, mCategoryStack[mCurrentStackPos - 1]);
+            cFEStateCharEquip_redrawRows(this, 1, 1);
         } else {
             cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
             feRider->mSelected = 0;
@@ -896,7 +896,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
     case cUIState::kONGAINFOCUS:
         if (isMode1_9C28(this))
             startLargePreviewLoad(1);
-        func_0019A9B8(this);
+        cFEStateCharEquip_updatePreview(this);
         break;
     }
 }
@@ -939,7 +939,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(cFEStateCharEquip* self, int pMenu
     switch (kind) {
     case cUIMenu::kSCROLLUP:
     case cUIMenu::kSCROLLDOWN:
-        func_0019B618(self, 0, 0);
+        cFEStateCharEquip_redrawRows(self, 0, 0);
         return 1;
     case cUIMenu::kISSELECTABLE:
         if (idx < self->mNumItems) {
@@ -990,7 +990,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(cFEStateCharEquip* self, int pMenu
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_getIconID);
 #ifdef SKIP_ASM
-extern "C" void* func_0019E2B0(cFEBoltFileManager* self, int bank, int slotIndex);
+extern "C" void* cFEBoltFileManager_getFileDataValue(cFEBoltFileManager* self, int bank, int slotIndex);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" int strcmp(const void* a, const void* b);
 extern char str_icon[];
@@ -998,7 +998,7 @@ extern char str_icon[];
 /**
  * Finds an icon in the character's loaded icon package and returns its texture.
  *
- * Needs the icon package loaded (+0xA60) and present in the file manager (func_0019E2B0 with the character's bank +0xBC
+ * Needs the icon package loaded (+0xA60) and present in the file manager (cFEBoltFileManager_getFileDataValue with the character's bank +0xBC
  * and file +0xA64). Compares each image's name, cut to 4 characters, with @p name; on a match creates the icon texture
  * (graphics manager vtable entry 46, kind "icon") into +0xA68 the first time, or reloads that texture with the image
  * (entry 48). All icons share that one texture.
@@ -1010,7 +1010,7 @@ int cFEStateCharEquip::getIconID(const char* name)
 {
     if (mIconsLoaded == 0)
         return -1;
-    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager,
+    SHAPEFILE* pkg = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager,
                                                   mCharID, mIconsFileIndex);
     if (pkg == 0)
         return -1;
@@ -1042,22 +1042,22 @@ int cFEStateCharEquip::getIconID(const char* name)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateIconTexturesLoad);
 #ifdef SKIP_ASM
-extern "C" bool func_0019E238(cFEBoltFileManager* self, int a1, int a2);
-extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" bool cFEBoltFileManager_isFileLoaded(cFEBoltFileManager* self, int a1, int a2);
+extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self);
 
 /**
  * Marks the icon package loaded once its file is ready and refreshes the item preview.
  *
- * When +0xA60 is clear and the file manager reports the icon file ready (func_0019E238 on +0xBC, +0xA64), sets +0xA60
- * and calls func_0019A9B8. No call site was found in the asm.
+ * When +0xA60 is clear and the file manager reports the icon file ready (cFEBoltFileManager_isFileLoaded on +0xBC, +0xA64), sets +0xA60
+ * and calls cFEStateCharEquip_updatePreview. No call site was found in the asm.
  */
 void cFEStateCharEquip::updateIconTexturesLoad()
 {
     if (mIconsLoaded == 0
-        && func_0019E238((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
+        && cFEBoltFileManager_isFileLoaded((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
                          mIconsFileIndex)) {
         mIconsLoaded = 1;
-        func_0019A9B8(this);
+        cFEStateCharEquip_updatePreview(this);
     }
 }
 #endif
@@ -1144,7 +1144,7 @@ int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
-extern "C" void func_0019B180(void* self, int id);
+extern "C" void cFEStateCharEquip_buildItemList(void* self, int id);
 extern int kBolt_None;
 extern char str_kT_CMNBuyGear[];
 extern char str_kT_CMNEquipGear[];
@@ -1161,7 +1161,7 @@ static inline int isDetailK19A3D0(cFEStateCharEquip* self)
  * Flips +0xC8, sets the screen up for the new mode (cFEStateCharEquip_initInventoryPreview or cFEStateCharEquip_initStorePreview) and labels the button help (+0x50)
  * with the other mode (kT_CMNBuyGear in the inventory, kT_CMNEquipGear in the store). Then empties the category stack
  * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with kBolt_None), updates the heading and rebuilds and redraws the
- * list (func_0019B180, func_0019B618 with 1, 1).
+ * list (cFEStateCharEquip_buildItemList, cFEStateCharEquip_redrawRows with 1, 1).
  */
 void cFEStateCharEquip::switchEquipMode()
 {
@@ -1181,27 +1181,27 @@ void cFEStateCharEquip::switchEquipMode()
     mCurrentStackPos = 0;
     MEM_fill(&mCategoryStack[0], kBolt_None, 80);
     updateHeading(kBolt_None);
-    func_0019B180(this, kBolt_None);
-    func_0019B618((cFEStateCharEquip*)this, 1, 1);
+    cFEStateCharEquip_buildItemList(this, kBolt_None);
+    cFEStateCharEquip_redrawRows((cFEStateCharEquip*)this, 1, 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cancelLargePreviewLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Cancels the pending large-preview load.
  *
- * Releases the queued preview file (+0xA6C, func_0019DC20) if any, clears the file name (+0x960) and sets +0xA6C and
+ * Releases the queued preview file (+0xA6C, cFEBoltFileManager_releaseFile) if any, clears the file name (+0x960) and sets +0xA6C and
  * the delay (+0x95C) to -1.
  */
 void cFEStateCharEquip::cancelLargePreviewLoad()
 {
     int idx = mPreviewTextureFileIndex;
     if (idx >= 0) {
-        func_0019DC20((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID, idx);
+        cFEBoltFileManager_releaseFile((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID, idx);
     }
     mLargePreviewFileName[0] = 0;
     mPreviewTextureFileIndex = -1;
@@ -1215,7 +1215,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_startLargePreviewLoad
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" char* func_0014B700(void* iface, int rider);
+extern "C" char* cBEBoltInterface_getBigIconFileName(void* iface, int rider);
 extern "C" char* strrchr(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -1232,7 +1232,7 @@ static inline int isDigitK19A4E8(unsigned char c)
  *
  * Cancels the previous load (cFEStateCharEquip_cancelLargePreviewLoad), releases the old preview texture (+0xA74) and moves the current one
  * (+0xA70) there. For a selected row with a name (+0x30) sets the delay (+0x95C: 20 frames when @p flag is set, else 1)
- * and builds the file name at +0x960 as "%s_%s%s": the character's file name (func_0014B700) without the character
+ * and builds the file name at +0x960 as "%s_%s%s": the character's file name (cBEBoltInterface_getBigIconFileName) without the character
  * before its '.', the item name from its first digit, and the extension. The name buffer is both the destination and
  * the first source of that sprintf.
  *
@@ -1259,7 +1259,7 @@ void cFEStateCharEquip::startLargePreviewLoad(int flag)
     else
         mLargePreviewDelay = 1;
     char* buf = mLargePreviewFileName;
-    char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), mCharID);
+    char* fileName = cBEBoltInterface_getBigIconFileName(cBE_getInterface_Fv(cBE_getBE(), 9), mCharID);
     char* dot = strrchr(fileName, '.');
     int len = dot - fileName - 1;
     strncpy(buf, fileName, len);
@@ -1276,20 +1276,20 @@ void cFEStateCharEquip::startLargePreviewLoad(int flag)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePreviewLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i);
-extern "C" bool func_0019E238(cFEBoltFileManager* self, int a1, int a2);
-extern "C" void* func_0019E2B0(cFEBoltFileManager* self, int bank, int slotIndex);
-extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
-extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i);
+extern "C" bool cFEBoltFileManager_isFileLoaded(cFEBoltFileManager* self, int a1, int a2);
+extern "C" void* cFEBoltFileManager_getFileDataValue(cFEBoltFileManager* self, int bank, int slotIndex);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, void* name, int a3, int a4, int a5);
+extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self);
 extern char str_preview[];
 
 
 /**
  * Advances the store's large-preview load (store mode only).
  *
- * Counts the delay (+0x95C) down and, when it reaches 0, queues the preview file (func_0019DA10 kind 9 into +0xA6C).
+ * Counts the delay (+0x95C) down and, when it reaches 0, queues the preview file (cFEBoltFileManager_requestFile kind 9 into +0xA6C).
  * Once the queued file is ready, makes its texture (graphics manager vtable entry 46, kind "preview") into +0xA70, or
- * -1 when the file is empty, releases the file and refreshes the item preview (func_0019A9B8).
+ * -1 when the file is empty, releases the file and refreshes the item preview (cFEStateCharEquip_updatePreview).
  */
 void cFEStateCharEquip::updatePreviewLoad()
 {
@@ -1298,14 +1298,14 @@ void cFEStateCharEquip::updatePreviewLoad()
         return;
     if (mLargePreviewDelay > 0) {
         if (--mLargePreviewDelay == 0) {
-            mPreviewTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager,
+            mPreviewTextureFileIndex = cFEBoltFileManager_requestFile(SSXApp->RealFE->mBoltFileManager,
                                                          mCharID, mLargePreviewFileName, 9, 1, 0);
             mLargePreviewDelay = -1;
         }
     } else if (mPreviewTextureFileIndex >= 0) {
         cFEBoltFileManager* tbl = (cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(tbl, mCharID, mPreviewTextureFileIndex)) {
-            SHAPEFILE* file = (SHAPEFILE*)func_0019E2B0(tbl, mCharID, mPreviewTextureFileIndex);
+        if (cFEBoltFileManager_isFileLoaded(tbl, mCharID, mPreviewTextureFileIndex)) {
+            SHAPEFILE* file = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(tbl, mCharID, mPreviewTextureFileIndex);
             if (file != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file
@@ -1315,9 +1315,9 @@ void cFEStateCharEquip::updatePreviewLoad()
             } else {
                 mPreviewTextureID = -1;
             }
-            func_0019DC20(tbl, mCharID, mPreviewTextureFileIndex);
+            cFEBoltFileManager_releaseFile(tbl, mCharID, mPreviewTextureFileIndex);
             mPreviewTextureFileIndex = -1;
-            func_0019A9B8(this);
+            cFEStateCharEquip_updatePreview(this);
         }
     }
 }
@@ -1326,10 +1326,10 @@ void cFEStateCharEquip::updatePreviewLoad()
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cancelPreviewLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0019FA78(void* a0, int a1);
+extern "C" void cFERider_releasePartTextures(void* a0, int a1);
 
 /**
- * Cancels the user's front-end rider's texture loads (func_0019FA78 with no item list) when the front end exists.
+ * Cancels the user's front-end rider's texture loads (cFERider_releasePartTextures with no item list) when the front end exists.
  *
  * No call site was found in the asm.
  */
@@ -1337,7 +1337,7 @@ void cFEStateCharEquip::cancelPreviewLoad()
 {
     cFE* mgr = SSXApp->RealFE;
     if (((char*)mgr) != 0) {
-        func_0019FA78(cFERiderManager_getHuman1(&mgr->mRiderManager, mUserNum), 0);
+        cFERider_releasePartTextures(cFERiderManager_getHuman1(&mgr->mRiderManager, mUserNum), 0);
     }
 }
 #endif
@@ -1351,7 +1351,7 @@ int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern int D_004A18D8;
 extern char str_kT_HELPNoItemsCTM[];
 extern char str_kT_HELPBuyItemInCTM[];
@@ -1421,7 +1421,7 @@ void cFEStateCharEquip::updateHelpText()
         else
             setText_A798(this, str_kT_129HELPSaveCashItem);
     } else {
-        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), mUserNum, mCharID);
+        cBECharProfileDB* db = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(cBE_getInterface(cBE_getBE(), 9), mUserNum, mCharID);
         tBEProfileBolt* equipEntry = getEntry_A798(db, item->id);
         int idx = sel - mpMenu->mScrollItemOffset;
         if (D_004A18D8 >= mCurrentPolyCount + mRowPoints[idx]) {
@@ -1438,30 +1438,30 @@ void cFEStateCharEquip::updateHelpText()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A9B8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePreview);
 #ifdef SKIP_ASM
-extern "C" void func_0019AB78(cFEStateCharEquip* self);
-extern "C" void func_0019AA08(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updateStorePreview(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updateInventoryPreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self);
 
 /**
- * Refreshes the equip screen's item preview for the current mode (func_0019AB78 in the store, func_0019AA08 in the
+ * Refreshes the equip screen's item preview for the current mode (cFEStateCharEquip_updateStorePreview in the store, cFEStateCharEquip_updateInventoryPreview in the
  * inventory) and then its help text (cFEStateCharEquip_updateHelpText).
  */
-extern "C" void func_0019A9B8(cFEStateCharEquip* self)
+extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self)
 {
     bool buyMode = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (buyMode) {
-        func_0019AB78(self);
+        cFEStateCharEquip_updateStorePreview(self);
     } else {
-        func_0019AA08(self);
+        cFEStateCharEquip_updateInventoryPreview(self);
     }
     self->updateHelpText();
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateInventoryPreview);
 #ifdef SKIP_ASM
 extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* name);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
@@ -1474,7 +1474,7 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
  * name, shows the icon with its texture (cFEStateCharEquip_getIconID). Finally updates the points preview bar (cFEStateCharEquip_updatePolyEquipPreviewBar) with
  * the row's points, or 0.
  */
-extern "C" void func_0019AA08(cFEStateCharEquip* self)
+extern "C" void cFEStateCharEquip_updateInventoryPreview(cFEStateCharEquip* self)
 {
     if (self->mpMenu == 0)
         return;
@@ -1513,7 +1513,7 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019AB78);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateStorePreview);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1527,7 +1527,7 @@ extern "C" const char* getDollarString(int dollars);
  * ready, and the cost (+0x68) as the item's price x 10 (getDollarString) for an item that is not a category; otherwise
  * hides them.
  */
-extern "C" void func_0019AB78(cFEStateCharEquip* self)
+extern "C" void cFEStateCharEquip_updateStorePreview(cFEStateCharEquip* self)
 {
     cUIMenu* menu = self->mpMenu;
     if (menu == 0)
@@ -1565,7 +1565,7 @@ extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern "C" void cFERider_loadTextures(void* rider, void* item, int a2, int a3);
 
 /**
@@ -1576,17 +1576,17 @@ extern "C" void cFERider_loadTextures(void* rider, void* item, int a2, int a3);
 void cFEStateCharEquip::updateCharacterModel()
 {
     void* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
-    cFERider_loadTextures(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), mUserNum, mCharID), 0, 1);
+    cFERider_loadTextures(rider, cBEBoltInterface_getCharProfile(cBE_getInterface_Fv(cBE_getBE(), 9), mUserNum, mCharID), 0, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019AD18);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_scrollRows);
 #ifdef SKIP_ASM
-extern "C" int func_0019B518(cFEStateCharEquip* self);
-extern "C" int func_0019B598(cFEStateCharEquip* self);
-extern "C" void func_0019B7E0(cFEStateCharEquip* self, int idx);
-extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
+extern "C" int cFEStateCharEquip_drawInventoryRows(cFEStateCharEquip* self);
+extern "C" int cFEStateCharEquip_drawStoreRows(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_drawInventoryRow(cFEStateCharEquip* self, int idx);
+extern "C" void cFEStateCharEquip_drawStoreRow(cFEStateCharEquip* self, int idx);
 extern "C" void* cUIText_getUnicodeString(void* item);
 extern "C" void cUIText_setUnicodeString(void* item, void* value);
 
@@ -1607,23 +1607,23 @@ static inline void copyRow_19AD18(cFEStateCharEquip* self, int dst, int src)
 /**
  * Scrolls the equip screen's six item rows by @p n.
  *
- * Beyond six rows either way redraws all rows (func_0019B598 in the store, func_0019B518 in the inventory). Otherwise
+ * Beyond six rows either way redraws all rows (cFEStateCharEquip_drawStoreRows in the store, cFEStateCharEquip_drawInventoryRows in the inventory). Otherwise
  * copies each kept row from the row @p n away (the source text's mColour passed to setColour, its string, and the
  * icon's visibility from bit 6 (mVisible) of the source icon's mAttr) and redraws the rows that came into view. No
  * call site was found in the asm.
  *
  * @param n  rows to scroll (negative moves the rows down)
  */
-extern "C" void func_0019AD18(cFEStateCharEquip* self, int n)
+extern "C" void cFEStateCharEquip_scrollRows(cFEStateCharEquip* self, int n)
 {
     if (self->mpMenu == 0) {
         return;
     }
     if (n < -6 || n > 6) {
         if (isMode1_19AD18(self)) {
-            func_0019B598((cFEStateCharEquip*)self);
+            cFEStateCharEquip_drawStoreRows((cFEStateCharEquip*)self);
         } else {
-            func_0019B518((cFEStateCharEquip*)self);
+            cFEStateCharEquip_drawInventoryRows((cFEStateCharEquip*)self);
         }
         return;
     }
@@ -1635,12 +1635,12 @@ extern "C" void func_0019AD18(cFEStateCharEquip* self, int n)
         if (isMode1_19AD18(self)) {
             int j;
             for (j = 0; j < -n; j++) {
-                func_0019BA60((cFEStateCharEquip*)self, j);
+                cFEStateCharEquip_drawStoreRow((cFEStateCharEquip*)self, j);
             }
         } else {
             int j;
             for (j = 0; j < -n; j++) {
-                func_0019B7E0((cFEStateCharEquip*)self, j);
+                cFEStateCharEquip_drawInventoryRow((cFEStateCharEquip*)self, j);
             }
         }
     } else if (n > 0) {
@@ -1651,12 +1651,12 @@ extern "C" void func_0019AD18(cFEStateCharEquip* self, int n)
         if (isMode1_19AD18(self)) {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                func_0019BA60((cFEStateCharEquip*)self, j);
+                cFEStateCharEquip_drawStoreRow((cFEStateCharEquip*)self, j);
             }
         } else {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                func_0019B7E0((cFEStateCharEquip*)self, j);
+                cFEStateCharEquip_drawInventoryRow((cFEStateCharEquip*)self, j);
             }
         }
     }
@@ -1664,7 +1664,7 @@ extern "C" void func_0019AD18(cFEStateCharEquip* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019AFD0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_hasInventoryItemInCategory);
 #ifdef SKIP_ASM
 struct sEquipEntry_AFD0 {
     unsigned short f0;
@@ -1676,7 +1676,7 @@ struct sEquipItem_AFD0 {
     char pad_0x6[0x34 - 0x6];
     int flags;      // 0x34
 };
-extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
+extern "C" int cBEBoltDB_collectCategoryBolts(int a0, int a1, int a2, void* out, int a4, int a5);
 
 static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
 {
@@ -1690,7 +1690,7 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
 /**
  * Reports whether a category holds an item of the character that is in the inventory.
  *
- * Lists the category's items (func_0014D7E8 with the character +0xBC) and looks for one with flag 4, not a category,
+ * Lists the category's items (cBEBoltDB_collectCategoryBolts with the character +0xBC) and looks for one with flag 4, not a category,
  * whose character entry has flag 2 (the flag the inventory lists by).
  *
  * @param library  the item library
@@ -1698,10 +1698,10 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
  * @param itemId   the category
  * @return true when there is one, else false
  */
-extern "C" bool func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+extern "C" bool cFEStateCharEquip_hasInventoryItemInCategory(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
-    int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
+    int n = cBEBoltDB_collectCategoryBolts(library, self->mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_AFD0* it = items[i];
@@ -1718,9 +1718,9 @@ extern "C" bool func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfi
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B098);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_isStoreCategoryEmpty);
 #ifdef SKIP_ASM
-extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
+extern "C" int cBEBoltDB_collectCategoryBolts(int a0, int a1, int a2, void* out, int a4, int a5);
 
 static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
 {
@@ -1735,17 +1735,17 @@ static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
  * Reports whether a category has nothing to buy in the current store.
  *
  * Lists the category's items and returns false at the first one with flag 4, not a category, whose character entry
- * lacks flag 2 and whose store number equals +0xCC. Unlike func_0019B180's item test it does not accept +0xCC == -1.
+ * lacks flag 2 and whose store number equals +0xCC. Unlike cFEStateCharEquip_buildItemList's item test it does not accept +0xCC == -1.
  *
  * @param library  the item library
  * @param db       the character's item entries
  * @param itemId   the category
  * @return false when the store sells something in it, else true
  */
-extern "C" bool func_0019B098(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+extern "C" bool cFEStateCharEquip_isStoreCategoryEmpty(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     tBEBoltDef* items[528];
-    int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
+    int n = cBEBoltDB_collectCategoryBolts(library, self->mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         tBEBoltDef* it = items[i];
@@ -1764,12 +1764,12 @@ extern "C" bool func_0019B098(cFEStateCharEquip* self, int library, cBECharProfi
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B180);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_buildItemList);
 #ifdef SKIP_ASM
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
 extern "C" void qsort_B180(void* base, int n, int size, int (*cmp)(const void*, const void*)) __asm__("qsort");
-extern "C" int func_00198DA0(const void* a, const void* b);
+extern "C" int compareEquipItems(const void* a, const void* b);
 
 struct sEquipItem_B180 {
     short f0;
@@ -1806,15 +1806,15 @@ struct sCharEquip_B180 {
     int count;                      // 0x958
 };
 
-// PORT: the unit declares func_0019B180 as void; the body returns the item count.
-extern "C" int func_0019B180_impl(void* selfv, int cat) __asm__("func_0019B180");
+// PORT: the unit declares cFEStateCharEquip_buildItemList as void; the body returns the item count.
+extern "C" int cFEStateCharEquip_buildItemList_impl(void* selfv, int cat) __asm__("cFEStateCharEquip_buildItemList");
 /**
  * Builds the equip screen's item list for a category.
  *
- * Lists the category's items (func_0014D7E8) into the list at +0x124 (count +0x958, cleared first), keeping only named
+ * Lists the category's items (cBEBoltDB_collectCategoryBolts) into the list at +0x124 (count +0x958, cleared first), keeping only named
  * items and categories. In the store (mode 1): items whose character entry lacks flag 2 and whose store number matches
- * +0xCC (or +0xCC is -1), and categories with something to buy (func_0019B098). In the inventory: items whose entry has
- * flag 2 and categories holding one (func_0019AFD0). Sorts the list (qsort with func_00198DA0).
+ * +0xCC (or +0xCC is -1), and categories with something to buy (cFEStateCharEquip_isStoreCategoryEmpty). In the inventory: items whose entry has
+ * flag 2 and categories holding one (cFEStateCharEquip_hasInventoryItemInCategory). Sorts the list (qsort with compareEquipItems).
  *
  * @param selfv  the equip state
  * @param cat  the category
@@ -1824,14 +1824,14 @@ extern "C" int func_0019B180_impl(void* selfv, int cat) __asm__("func_0019B180")
 // loop (cross-jumped away after reload; before that they lengthen the live range of the self->items
 // copy, so global-alloc gives the loop-1 counter s5 and the copy s6 as in retail); plain form 99.01%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int func_0019B180_impl(void* selfv, int cat)
+extern "C" int cFEStateCharEquip_buildItemList_impl(void* selfv, int cat)
 {
     sCharEquip_B180* self = (sCharEquip_B180*)selfv;
     void* iface = cBE_getInterface(cBE_getBE(), 9);
-    int lib = (int)func_0014BDB8_noarg();
-    cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD28(iface, self->team, self->slot);
+    int lib = (int)cBEBoltInterface_getBoltDB_noarg();
+    cBECharProfileDB* db = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->team, self->slot);
     sEquipItem_B180* list[528];
-    int n = func_0014D7E8(lib, self->slot, cat, list, -1, 0);
+    int n = cBEBoltDB_collectCategoryBolts(lib, self->slot, cat, list, -1, 0);
     self->count = 0;
     MEM_fill(self->items, 0, 2100);
     if (isMode1_B180((cFEStateCharEquip*)self)) {
@@ -1844,7 +1844,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                     continue;
             }
             tBEProfileBolt* entry = getEntry_B180(db, it->id);
-            if ((it->flags & 0x20) && func_0019B098((cFEStateCharEquip*)self, lib, (cBECharProfileDB*)db, it->id) == 0) {
+            if ((it->flags & 0x20) && cFEStateCharEquip_isStoreCategoryEmpty((cFEStateCharEquip*)self, lib, (cBECharProfileDB*)db, it->id) == 0) {
                 self->items[self->count] = it;
                 self->count++;
             } else if (!(it->flags & 0x20) && !(entry->flags & 2)
@@ -1869,19 +1869,19 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
             }
             tBEProfileBolt* entry = getEntry_B180(db, it->id);
             if ((!(it->flags & 0x20) && (entry->flags & 2))
-                || ((it->flags & 0x20) && func_0019AFD0((cFEStateCharEquip*)self, lib, db, it->id) != 0)) {
+                || ((it->flags & 0x20) && cFEStateCharEquip_hasInventoryItemInCategory((cFEStateCharEquip*)self, lib, db, it->id) != 0)) {
                 self->items[self->count] = it;
                 self->count++;
             }
         }
     }
-    qsort_B180(self->items, self->count, 4, func_00198DA0);
+    qsort_B180(self->items, self->count, 4, compareEquipItems);
     return self->count;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B458);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_removeItem);
 #ifdef SKIP_ASM
 struct sEquipListWidget {
     char pad_0x0[0x95];
@@ -1906,7 +1906,7 @@ struct sEquipDetail {
  * @param idx  the list position
  * @return true, or false when @p idx is past the end
  */
-extern "C" bool func_0019B458(sEquipDetail* self, int idx)
+extern "C" bool cFEStateCharEquip_removeItem(sEquipDetail* self, int idx)
 {
     int top, sel, n;
     if (idx >= self->count) {
@@ -1939,21 +1939,21 @@ extern "C" bool func_0019B458(sEquipDetail* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B518);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_drawInventoryRows);
 #ifdef SKIP_ASM
-extern "C" void func_0019B7E0(cFEStateCharEquip* self, int idx);
+extern "C" void cFEStateCharEquip_drawInventoryRow(cFEStateCharEquip* self, int idx);
 
 /**
- * Draws the inventory rows from the menu's top row (func_0019B7E0), up to six or the end of the list.
+ * Draws the inventory rows from the menu's top row (cFEStateCharEquip_drawInventoryRow), up to six or the end of the list.
  *
  * @return the number of rows drawn
  */
-extern "C" int func_0019B518(cFEStateCharEquip* self)
+extern "C" int cFEStateCharEquip_drawInventoryRows(cFEStateCharEquip* self)
 {
     int j = self->mpMenu->mScrollItemOffset;
     int i = 0;
     while (i < 6 && j < self->mNumItems) {
-        func_0019B7E0(self, i);
+        cFEStateCharEquip_drawInventoryRow(self, i);
         i++;
         j++;
     }
@@ -1962,21 +1962,21 @@ extern "C" int func_0019B518(cFEStateCharEquip* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B598);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_drawStoreRows);
 #ifdef SKIP_ASM
-extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
+extern "C" void cFEStateCharEquip_drawStoreRow(cFEStateCharEquip* self, int idx);
 
 /**
- * Draws the store rows from the menu's top row (func_0019BA60), up to six or the end of the list.
+ * Draws the store rows from the menu's top row (cFEStateCharEquip_drawStoreRow), up to six or the end of the list.
  *
  * @return the number of rows drawn
  */
-extern "C" int func_0019B598(cFEStateCharEquip* self)
+extern "C" int cFEStateCharEquip_drawStoreRows(cFEStateCharEquip* self)
 {
     int j = self->mpMenu->mScrollItemOffset;
     int i = 0;
     while (i < 6 && j < self->mNumItems) {
-        func_0019BA60(self, i);
+        cFEStateCharEquip_drawStoreRow(self, i);
         i++;
         j++;
     }
@@ -1985,14 +1985,14 @@ extern "C" int func_0019B598(cFEStateCharEquip* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B618);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_redrawRows);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" int func_0019B518(cFEStateCharEquip* self);
-extern "C" int func_0019B598(cFEStateCharEquip* self);
+extern "C" int cFEStateCharEquip_drawInventoryRows(cFEStateCharEquip* self);
+extern "C" int cFEStateCharEquip_drawStoreRows(cFEStateCharEquip* self);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int n);
 extern char kColourEnabled[];
 extern char str_kT_FEEmpty[];
@@ -2013,7 +2013,7 @@ static inline int isMode1_B618(cFEStateCharEquip* self)
  * @param reset   nonzero to reset the menu to the top of a new list
  * @param select  nonzero to select the visible row
  */
-extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
+extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int reset, int select)
 {
     if (self->mpMenu == 0)
         return;
@@ -2031,9 +2031,9 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
     }
     int n;
     if (isMode1_B618(self))
-        n = func_0019B598(self);
+        n = cFEStateCharEquip_drawStoreRows(self);
     else
-        n = func_0019B518(self);
+        n = cFEStateCharEquip_drawInventoryRows(self);
     int visibleRow;
     if (n == 0) {
         self->mpBoltNameWidgets[0]->setVisible(1);
@@ -2061,12 +2061,12 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019B7E0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_drawInventoryRow);
 #ifdef SKIP_ASM
-extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
+extern "C" int cBEBoltInterface_trySetBoltVisible(void* self, int a1, int a2, int id, int locked);
 extern "C" void* MEM_copy(void* dst, void* src, int n);
-extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src);
-extern "C" int func_0014B478(void* self, int a1, int a2);
+extern "C" void cBEBoltInterface_restoreBolts(void* self, int a1, int a2, void* src);
+extern "C" int cBEBoltInterface_getUsedEquipPoints(void* self, int a1, int a2);
 
 static inline tBEProfileBolt* getEntry_19B7E0(cBECharProfileDB* p, int idx)
 {
@@ -2084,15 +2084,15 @@ static inline int IsSet_19B7E0(tBEProfileBolt* e)
 /**
  * Draws inventory row @p i.
  *
- * Writes the item's name (a string id for categories). For an item, tries toggling its equipped flag (func_0014AFB0) on
- * a saved copy of the character's entries, stores the change in equip points (func_0014B478) in the row's points
+ * Writes the item's name (a string id for categories). For an item, tries toggling its equipped flag (cBEBoltInterface_trySetBoltVisible) on
+ * a saved copy of the character's entries, stores the change in equip points (cBEBoltInterface_getUsedEquipPoints) in the row's points
  * (+0xA78, else -99999) and shows the checkbox (+0xA98) when the item is equipped or the empty box (+0xA9C) when it is
- * not; a failed toggle shows no box. The entries are restored afterwards (func_0014ACB0). A category gets the texture
+ * not; a failed toggle shows no box. The entries are restored afterwards (cBEBoltInterface_restoreBolts). A category gets the texture
  * at +0xAA0 (0, so no box).
  *
  * @param i  the row (0-5)
  */
-extern "C" void func_0019B7E0(cFEStateCharEquip* self, int i)
+extern "C" void cFEStateCharEquip_drawInventoryRow(cFEStateCharEquip* self, int i)
 {
     cUIMenu* scrollList = self->mpMenu;
     int top = scrollList ? scrollList->mScrollItemOffset : 0;
@@ -2105,19 +2105,19 @@ extern "C" void func_0019B7E0(cFEStateCharEquip* self, int i)
         col = self->mpPlusElem;
     } else {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        cBECharProfileDB* prof = (cBECharProfileDB*)func_0014AD28(iface, self->mUserNum, self->mCharID);
+        cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mUserNum, self->mCharID);
         tBEProfileBolt* flagEntry = getEntry_19B7E0(prof, item->id);
         tBEProfileBolt save[525];
         MEM_copy(save, &prof->mBolts[0], 2100);
-        int before = func_0014B478(iface, self->mUserNum, self->mCharID);
-        if (func_0014AFB0(iface, self->mUserNum, self->mCharID, item->id, !IsSet_19B7E0(flagEntry))) {
-            self->mRowPoints[i] = func_0014B478(iface, self->mUserNum, self->mCharID) - before;
+        int before = cBEBoltInterface_getUsedEquipPoints(iface, self->mUserNum, self->mCharID);
+        if (cBEBoltInterface_trySetBoltVisible(iface, self->mUserNum, self->mCharID, item->id, !IsSet_19B7E0(flagEntry))) {
+            self->mRowPoints[i] = cBEBoltInterface_getUsedEquipPoints(iface, self->mUserNum, self->mCharID) - before;
             if (IsSet_19B7E0(flagEntry))
                 col = self->mpCheckMarkElem;
             else
                 col = self->mpEmptyBoxElem;
         }
-        func_0014ACB0(iface, self->mUserNum, self->mCharID, save);
+        cBEBoltInterface_restoreBolts(iface, self->mUserNum, self->mCharID, save);
     }
     if (text) {
         if (item->flags & 0x20)
@@ -2139,7 +2139,7 @@ extern "C" void func_0019B7E0(cFEStateCharEquip* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BA60);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_drawStoreRow);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -2155,7 +2155,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
  * @param equipState  the equip state
  * @param i  the row (0-5)
  */
-extern "C" void func_0019BA60(cFEStateCharEquip* equipState, int i)
+extern "C" void cFEStateCharEquip_drawStoreRow(cFEStateCharEquip* equipState, int i)
 {
     cUIMenu* menu = equipState->mpMenu;
     int top = 0;
@@ -2217,9 +2217,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateHeading);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" int func_0014D448(void* self, int g, int key);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
 extern int kBolt_None;
 extern char str_kT_FECategories[];
 
@@ -2235,7 +2235,7 @@ struct sBETableK19BBE0 {
 
 static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int key)
 {
-    int idx = func_0014D448(t, g, key);
+    int idx = cBEBoltDB_findBoltIndex(t, g, key);
     if (idx < 0) {
         return 0;
     }
@@ -2246,7 +2246,7 @@ static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int
  * Shows the current category in the heading text: kT_FECategories at the root, else the category's name.
  *
  * For an @p id other than -1 (kBolt_None), looks the category up for the character (0xBC) with
- * func_0014D448() in the equip table from func_0014BDB8() and shows the string whose ID is the hash of its
+ * cBEBoltDB_findBoltIndex() in the equip table from cBEBoltInterface_getBoltDB() and shows the string whose ID is the hash of its
  * name (+0x14); a missing entry is not checked. Nothing happens without a heading widget (0x58).
  *
  * @param id  the category id, or -1 for the root
@@ -2257,7 +2257,7 @@ void cFEStateCharEquip::updateHeading(int id)
         if (id == kBolt_None) {
             cUIText_setUnicodeStringByID(mpHeading, GetHashValue32(str_kT_FECategories));
         } else {
-            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), mCharID, id);
+            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)cBEBoltInterface_getBoltDB_noarg(), mCharID, id);
             cUIText_setUnicodeStringByID(mpHeading, GetHashValue32(entry->name));
         }
     }
@@ -2342,37 +2342,37 @@ void cFEStateCharEquip::updatePolyEquipPreviewBar(int delta)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BE80);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_buySelectedItem);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_0014B560(void* iface, int a1, int a2, int a3, int a4);
+extern "C" int cBEBoltInterface_buyBolt(void* iface, int a1, int a2, int a3, int a4);
 
 /**
- * Buys the selected item: stores the result of func_0014B560 (BE interface 9, the user, the character, the item's id,
+ * Buys the selected item: stores the result of cBEBoltInterface_buyBolt (BE interface 9, the user, the character, the item's id,
  * 1) as the money (+0xC0).
  *
  * cFEStateCharEquip_onPopupEvent calls it when the buy popup closes with a yes.
  */
-extern "C" void func_0019BE80(cFEStateCharEquip* self)
+extern "C" void cFEStateCharEquip_buySelectedItem(cFEStateCharEquip* self)
 {
     int idx = self->mpMenu->mScrollItemCurrent;
     tBEBoltDef* item = self->mpItems[idx];
-    self->mMoneyAvailable = func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
+    self->mMoneyAvailable = cBEBoltInterface_buyBolt(cBE_getInterface_Fv(cBE_getBE(), 9),
         self->mUserNum, self->mCharID, item->id, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BEE8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_toggleSelectedItem);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
-extern "C" void func_0014AEA8(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBEBoltInterface_trySetBoltVisible(void* self, int a1, int a2, int id, int locked);
+extern "C" void cBEBoltInterface_storeVisibleFlags(void* self, int a1, int a2);
 
 
 static inline tBEProfileBolt* getItemK19BEE8(cBECharProfileDB* l, int id)
@@ -2386,12 +2386,12 @@ static inline tBEProfileBolt* getItemK19BEE8(cBECharProfileDB* l, int id)
 /**
  * Equips or takes off the selected inventory item.
  *
- * For a selected item (flag 4) toggles its equipped flag (entry flag 4) with func_0014AFB0 and, on success, calls
- * func_0014AEA8 for the character.
+ * For a selected item (flag 4) toggles its equipped flag (entry flag 4) with cBEBoltInterface_trySetBoltVisible and, on success, calls
+ * cBEBoltInterface_storeVisibleFlags for the character.
  *
  * @return true when the item changed, else false
  */
-extern "C" bool func_0019BEE8(cFEStateCharEquip* self)
+extern "C" bool cFEStateCharEquip_toggleSelectedItem(cFEStateCharEquip* self)
 {
     if (self->mNumItems <= 0)
         return false;
@@ -2399,13 +2399,13 @@ extern "C" bool func_0019BEE8(cFEStateCharEquip* self)
     if (!(item->flags & 4))
         return false;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mUserNum,
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mUserNum,
                                                               self->mCharID);
     tBEProfileBolt* entry = getItemK19BEE8(list, item->id);
     int mask = 4;
-    if (func_0014AFB0(iface, self->mUserNum, self->mCharID, item->id,
+    if (cBEBoltInterface_trySetBoltVisible(iface, self->mUserNum, self->mCharID, item->id,
                       (entry->flags & mask) == 0)) {
-        func_0014AEA8(iface, self->mUserNum, self->mCharID);
+        cBEBoltInterface_storeVisibleFlags(iface, self->mUserNum, self->mCharID);
         return true;
     }
     return false;
@@ -2677,7 +2677,7 @@ extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_openBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
@@ -2693,7 +2693,7 @@ extern char str_cUIStateBuyPopup[];
  *
  * @param item  the item
  */
-extern "C" void func_0019C7E8(cFEStateCharEquip* self, tBEBoltDef* item)
+extern "C" void cFEStateCharEquip_openBuyPopup(cFEStateCharEquip* self, tBEBoltDef* item)
 {
     cUIStateBuyPopup* popup = (cUIStateBuyPopup*)cUIStateBuyPopup_cUIStateBuyPopup(
         cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->mpEngine, self, self->mUserNum);
@@ -2708,22 +2708,22 @@ extern "C" void func_0019C7E8(cFEStateCharEquip* self, tBEBoltDef* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C880);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_allocNode);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C8F8(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
 
 /**
  * Takes the first node off the node pool's free list (+0x1F40) and returns it.
  *
- * The next node (func_0019C8F8) becomes the head with its previous index (+0xC) cleared; the taken node's next index
+ * The next node (cBoltFileIndexManager_getNextNode) becomes the head with its previous index (+0xC) cleared; the taken node's next index
  * (+0xE) is set to -1. Likely bug: an empty free list is not checked, so the null head is written through.
  *
  * @return the node
  */
-extern "C" tBoltFileIndexNode* func_0019C880(cBoltFileIndexManager* self)
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_allocNode(cBoltFileIndexManager* self)
 {
     tBoltFileIndexNode* item = self->mpFreeList;
-    self->mpFreeList = func_0019C8F8(self, item);
+    self->mpFreeList = cBoltFileIndexManager_getNextNode(self, item);
     item->next = -1;
     tBoltFileIndexNode* head = self->mpFreeList;
     if (head != 0) {
@@ -2734,7 +2734,7 @@ extern "C" tBoltFileIndexNode* func_0019C880(cBoltFileIndexManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8D0);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getPrevNode);
 #ifdef SKIP_ASM
 /**
  * Returns the node before @p item: the pool's 16-byte node at index +0xC of @p item.
@@ -2742,7 +2742,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8D0);
  * @param item  the node, or null
  * @return the previous node, or null when there is none
  */
-extern "C" tBoltFileIndexNode* func_0019C8D0(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getPrevNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
 {
     if (item != 0) {
         short idx = item->prev;
@@ -2755,7 +2755,7 @@ extern "C" tBoltFileIndexNode* func_0019C8D0(cBoltFileIndexManager* self, tBoltF
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8F8);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getNextNode);
 #ifdef SKIP_ASM
 /**
  * Returns the node after @p item: the pool's 16-byte node at index +0xE of @p item.
@@ -2763,7 +2763,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8F8);
  * @param item  the node, or null
  * @return the next node, or null when there is none
  */
-extern "C" tBoltFileIndexNode* func_0019C8F8(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
 {
     if (item != 0) {
         short idx = item->next;
@@ -2776,7 +2776,7 @@ extern "C" tBoltFileIndexNode* func_0019C8F8(cBoltFileIndexManager* self, tBoltF
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C920);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getNodeIndex);
 #ifdef SKIP_ASM
 /**
  * Returns the pool index of the node at @p node ((address - pool) / 16).
@@ -2784,7 +2784,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C920);
  * @param node  the node, or 0
  * @return the index, or -1 for 0
  */
-extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
+extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
 {
     if (node != 0) return node - self->mNodes;
     return -1;
@@ -2792,20 +2792,20 @@ extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* no
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019C938);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_findNode);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C880(cBoltFileIndexManager* self);
-extern "C" tBoltFileIndexNode* func_0019C8F8(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
-extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_allocNode(cBoltFileIndexManager* self);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
+extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
 
 /**
  * Finds the node for a two-part key in the file-index hash table, optionally creating it.
  *
  * The table (allocated as "BoltFileIndexManager", 8004 bytes; D_004A1968) holds 400 16-byte nodes at +0x0, 400 bucket
  * head pointers at +0x1900 and the free-list head at +0x1F40. The key is (@p hi << 16) | @p lo and its bucket is key %
- * 400. Walks the bucket's chain (next index at node +0xE, via func_0019C8F8) for a node with that key. When the chain
- * ends and @p create is set, takes a node from the free list (func_0019C880) and appends it: its prev index (+0xC) is
- * the old tail's index (func_0019C920) or -1 when it becomes the bucket head, and its next index is -1. Whatever node
+ * 400. Walks the bucket's chain (next index at node +0xE, via cBoltFileIndexManager_getNextNode) for a node with that key. When the chain
+ * ends and @p create is set, takes a node from the free list (cBoltFileIndexManager_allocNode) and appends it: its prev index (+0xC) is
+ * the old tail's index (cBoltFileIndexManager_getNodeIndex) or -1 when it becomes the bucket head, and its next index is -1. Whatever node
  * results gets the key stored at +0x0.
  *
  * The search also stops when the free list is empty and the chain is exhausted, so a missing key with no free node
@@ -2817,7 +2817,7 @@ extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* no
  * @param create  nonzero to add a node when the key is missing
  * @return the node, or 0 when the key is missing and no node was created
  */
-extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi, int lo, int create)
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create)
 {
     int key = (hi << 16) | lo;
     int bucket = key % 400;
@@ -2826,11 +2826,11 @@ extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi
     while (self->mpFreeList != 0 || n != 0) {
         if (n == 0) {
             if (create) {
-                n = func_0019C880(self);
-                n->prev = func_0019C920(self, prev);
+                n = cBoltFileIndexManager_allocNode(self);
+                n->prev = cBoltFileIndexManager_getNodeIndex(self, prev);
                 if (prev != 0) {
-                    n->prev = func_0019C920(self, prev);
-                    prev->next = func_0019C920(self, n);
+                    n->prev = cBoltFileIndexManager_getNodeIndex(self, prev);
+                    prev->next = cBoltFileIndexManager_getNodeIndex(self, n);
                 } else {
                     n->prev = -1;
                     self->mBuckets[bucket] = n;
@@ -2842,7 +2842,7 @@ extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi
         if (n->key == key)
             break;
         prev = n;
-        n = func_0019C8F8(self, prev);
+        n = cBoltFileIndexManager_getNextNode(self, prev);
     }
     if (n != 0)
         n->key = key;
@@ -2851,11 +2851,11 @@ extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CA70);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_freeNode);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C8D0(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
-extern "C" tBoltFileIndexNode* func_0019C8F8(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
-extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getPrevNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item);
+extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
 
 /**
  * Unlinks a node from its hash bucket in the file-index table and returns it to the free list.
@@ -2863,51 +2863,51 @@ extern "C" int func_0019C920(cBoltFileIndexManager* self, tBoltFileIndexNode* no
  * Does nothing for a null @p node. Otherwise the bucket (key % 400) head at +0x1900 or the previous node's next index
  * takes the node's next, the next node's prev index takes the node's prev, the node's key and both values (+0x8, +0xA)
  * and prev index become -1, and the node is pushed onto the free list at +0x1F40 (its next index is the old head's
- * index, func_0019C920).
+ * index, cBoltFileIndexManager_getNodeIndex).
  *
- * @param node  the node to release (from func_0019C938), or 0
+ * @param node  the node to release (from cBoltFileIndexManager_findNode), or 0
  */
-extern "C" void func_0019CA70(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
+extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
 {
     if (node != 0) {
         int bucketIndex = node->key % 400;
         if (node->prev < 0) {
-            self->mBuckets[bucketIndex] = func_0019C8F8(self, node);
+            self->mBuckets[bucketIndex] = cBoltFileIndexManager_getNextNode(self, node);
         } else {
-            func_0019C8D0(self, node)->next = node->next;
+            cBoltFileIndexManager_getPrevNode(self, node)->next = node->next;
         }
         if (node->next >= 0) {
-            func_0019C8F8(self, node)->prev = node->prev;
+            cBoltFileIndexManager_getNextNode(self, node)->prev = node->prev;
         }
         node->key = -1;
         node->modelPartFile = -1;
         node->partTextureFile = -1;
         node->prev = -1;
-        node->next = func_0019C920(self, self->mpFreeList);
+        node->next = cBoltFileIndexManager_getNodeIndex(self, self->mpFreeList);
         self->mpFreeList = node;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB38);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_cBoltFileIndexManager);
 #ifdef SKIP_ASM
-extern "C" void func_0019CB60(cBoltFileIndexManager* self);
+extern "C" void cBoltFileIndexManager_reset(cBoltFileIndexManager* self);
 
 /**
- * Constructs the file-index hash table by resetting it with func_0019CB60.
+ * Constructs the file-index hash table by resetting it with cBoltFileIndexManager_reset.
  *
  * @return @p self
  */
-extern "C" cBoltFileIndexManager* func_0019CB38(cBoltFileIndexManager* self)
+extern "C" cBoltFileIndexManager* cBoltFileIndexManager_cBoltFileIndexManager(cBoltFileIndexManager* self)
 {
-    func_0019CB60(self);
+    cBoltFileIndexManager_reset(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB60);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_reset);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 
@@ -2918,7 +2918,7 @@ extern "C" void MEM_fill(void* dst, unsigned int value, int size);
  * (+0x1F40) at node 0 and chains every node to its neighbours (prev i - 1, next i + 1, the last next -1) with both mask
  * words (+0x4, +0x6) cleared.
  */
-extern "C" void func_0019CB60(cBoltFileIndexManager* self)
+extern "C" void cBoltFileIndexManager_reset(cBoltFileIndexManager* self)
 {
     MEM_fill(self->mNodes, 0xFFFFFFFF, sizeof(self->mNodes));
     MEM_fill(self->mBuckets, 0, sizeof(self->mBuckets));
@@ -2935,24 +2935,24 @@ extern "C" void func_0019CB60(cBoltFileIndexManager* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CBE0);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getModelPartFile);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi, int lo, int create);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create);
 
 /**
  * Returns the second value stored for a key in the file-index hash table, or -1 when it is not set.
  *
- * Looks the node up without creating it (func_0019C938) and returns its value at +0xA when bit @p bit of its mask at
+ * Looks the node up without creating it (cBoltFileIndexManager_findNode) and returns its value at +0xA when bit @p bit of its mask at
  * +0x6 is set. The rider manager stores, per profile index and item id, the FE file cache slot of the item's type-8
- * file here (a func_0019DA10 result).
+ * file here (a cFEBoltFileManager_requestFile result).
  *
  * @param bit  high half of the key and the mask bit to test (the rider manager passes the rider's profile index, +0x4)
  * @param lowKey  low half of the key (an item id)
  * @return the stored value, or -1
  */
-extern "C" int func_0019CBE0(cBoltFileIndexManager* self, int bit, int lowKey)
+extern "C" int cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager* self, int bit, int lowKey)
 {
-    tBoltFileIndexNode* node = func_0019C938(self, bit, lowKey, 0);
+    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, 0);
     if (node != 0) {
         if ((node->modelPartMask >> bit) & 1) {
             return node->modelPartFile;
@@ -2963,17 +2963,17 @@ extern "C" int func_0019CBE0(cBoltFileIndexManager* self, int bit, int lowKey)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CC30);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_setModelPartFile);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi, int lo, int create);
-extern "C" void func_0019CA70(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create);
+extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
 
 /**
  * Stores or clears the second value for a key in the file-index hash table.
  *
  * A @p val of kNoBoltFile (-1) looks the node up without creating it; any other value creates it if needed
- * (func_0019C938). A negative @p val clears bit @p bit of the mask at +0x6 and, once that mask is 0 and the first value
- * (+0x8) is negative, frees the node (func_0019CA70). Otherwise the value goes to +0xA and the mask bit is set.
+ * (cBoltFileIndexManager_findNode). A negative @p val clears bit @p bit of the mask at +0x6 and, once that mask is 0 and the first value
+ * (+0x8) is negative, frees the node (cBoltFileIndexManager_freeNode). Otherwise the value goes to +0xA and the mask bit is set.
  *
  * Quirk: the free test checks the first value rather than the first mask, and +0x8 is only reset to -1 when a node is
  * freed, so a node whose first value was ever set stays allocated after both masks clear.
@@ -2982,15 +2982,15 @@ extern "C" void func_0019CA70(cBoltFileIndexManager* self, tBoltFileIndexNode* n
  * @param lowKey  low half of the key (an item id)
  * @param val  value to store, or a negative value to clear it
  */
-extern "C" void func_0019CC30(cBoltFileIndexManager* self, int bit, int lowKey, int val)
+extern "C" void cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager* self, int bit, int lowKey, int val)
 {
-    tBoltFileIndexNode* node = func_0019C938(self, bit, lowKey, val != kNoBoltFile);
+    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->modelPartMask >> bit) & 1) {
                 node->modelPartMask &= ~(1 << bit);
                 if (node->modelPartMask == 0 && node->partTextureFile < 0) {
-                    func_0019CA70(self, node);
+                    cBoltFileIndexManager_freeNode(self, node);
                 }
             }
         } else {
@@ -3002,24 +3002,24 @@ extern "C" void func_0019CC30(cBoltFileIndexManager* self, int bit, int lowKey, 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CCE8);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getPartTextureFile);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi, int lo, int create);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create);
 
 /**
  * Returns the first value stored for a key in the file-index hash table, or -1 when it is not set.
  *
- * Looks the node up without creating it (func_0019C938) and returns its value at +0x8 when bit @p bit of its mask at
+ * Looks the node up without creating it (cBoltFileIndexManager_findNode) and returns its value at +0x8 when bit @p bit of its mask at
  * +0x4 is set. The rider manager stores, per profile index and item id, the FE file cache slot of the item's type-11
- * file here (a func_0019DA10 result).
+ * file here (a cFEBoltFileManager_requestFile result).
  *
  * @param bit  high half of the key and the mask bit to test (the rider manager passes the rider's profile index, +0x4)
  * @param lowKey  low half of the key (an item id)
  * @return the stored value, or -1
  */
-extern "C" int func_0019CCE8(cBoltFileIndexManager* self, int bit, int lowKey)
+extern "C" int cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager* self, int bit, int lowKey)
 {
-    tBoltFileIndexNode* node = func_0019C938(self, bit, lowKey, 0);
+    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, 0);
     if (node != 0) {
         if ((node->partTextureMask >> bit) & 1) {
             return node->partTextureFile;
@@ -3030,32 +3030,32 @@ extern "C" int func_0019CCE8(cBoltFileIndexManager* self, int bit, int lowKey)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CD38);
+INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_setPartTextureFile);
 #ifdef SKIP_ASM
-extern "C" tBoltFileIndexNode* func_0019C938(cBoltFileIndexManager* self, int hi, int lo, int create);
-extern "C" void func_0019CA70(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
+extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create);
+extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBoltFileIndexNode* node);
 
 /**
  * Stores or clears the first value for a key in the file-index hash table.
  *
  * A @p val of kNoBoltFile (-1) looks the node up without creating it; any other value creates it if needed
- * (func_0019C938). A negative @p val clears bit @p bit of the mask at +0x4 and, once that mask is 0 and the second
- * value (+0xA) is negative, frees the node (func_0019CA70). Otherwise the value goes to +0x8 and the mask bit is set.
- * Same quirk as func_0019CC30: the free test checks the other value, not the other mask.
+ * (cBoltFileIndexManager_findNode). A negative @p val clears bit @p bit of the mask at +0x4 and, once that mask is 0 and the second
+ * value (+0xA) is negative, frees the node (cBoltFileIndexManager_freeNode). Otherwise the value goes to +0x8 and the mask bit is set.
+ * Same quirk as cBoltFileIndexManager_setModelPartFile: the free test checks the other value, not the other mask.
  *
  * @param bit  high half of the key and the mask bit (the rider manager passes the rider's profile index, +0x4)
  * @param lowKey  low half of the key (an item id)
  * @param val  value to store, or a negative value to clear it
  */
-extern "C" void func_0019CD38(cBoltFileIndexManager* self, int bit, int lowKey, int val)
+extern "C" void cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager* self, int bit, int lowKey, int val)
 {
-    tBoltFileIndexNode* node = func_0019C938(self, bit, lowKey, val != kNoBoltFile);
+    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->partTextureMask >> bit) & 1) {
                 node->partTextureMask &= ~(1 << bit);
                 if (node->partTextureMask == 0 && node->modelPartFile < 0) {
-                    func_0019CA70(self, node);
+                    cBoltFileIndexManager_freeNode(self, node);
                 }
             }
         } else {
@@ -3067,44 +3067,44 @@ extern "C" void func_0019CD38(cBoltFileIndexManager* self, int bit, int lowKey, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CDF0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_cFEBoltFileManager);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
-extern "C" void func_0019CE68(cFEBoltFileManager* self);
+extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self);
 
 /**
- * Constructs the FE file cache: records it in D_004A196C and initialises it with func_0019CE68.
+ * Constructs the FE file cache: records it in D_004A196C and initialises it with cFEBoltFileManager_init.
  *
- * cFE_cFE builds it at the front end's +0x1A70. D_004A196C is what the sort comparators func_0019DD10 and func_0019DE18
+ * cFE_cFE builds it at the front end's +0x1A70. D_004A196C is what the sort comparators compareDeferredModelPartFiles and compareDeferredPartTextureFiles
  * read.
  *
  * @return @p self
  */
-extern "C" cFEBoltFileManager* func_0019CDF0(cFEBoltFileManager* self)
+extern "C" cFEBoltFileManager* cFEBoltFileManager_cFEBoltFileManager(cFEBoltFileManager* self)
 {
     D_004A196C = self;
-    func_0019CE68(self);
+    cFEBoltFileManager_init(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE20);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager__cFEBoltFileManager);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
-extern "C" void func_0019CF40(cFEBoltFileManager* self);
+extern "C" void cFEBoltFileManager_purge(cFEBoltFileManager* self);
 void operator_delete(int* p);
 
 /**
- * Destroys the FE file cache: clears D_004A196C, purges every slot (func_0019CF40) and frees the object when bit 0 of
+ * Destroys the FE file cache: clears D_004A196C, purges every slot (cFEBoltFileManager_purge) and frees the object when bit 0 of
  * @p flags is set.
  *
  * @param flags  deleting-destructor flags; bit 0 frees the object
  */
-extern "C" void func_0019CE20(cFEBoltFileManager* self, int flags)
+extern "C" void cFEBoltFileManager__cFEBoltFileManager(cFEBoltFileManager* self, int flags)
 {
     D_004A196C = 0;
-    func_0019CF40(self);
+    cFEBoltFileManager_purge(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3112,7 +3112,7 @@ extern "C" void func_0019CE20(cFEBoltFileManager* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE68);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_init);
 #ifdef SKIP_ASM
 extern cBoltFileIndexManager* D_004A1968;
 extern char str_BoltFileIndexManager[];
@@ -3122,10 +3122,10 @@ extern char str_BoltFileIndexManager[];
  *
  * For each of the 10 banks it clears all 256 slots (state, name, data, handle, size and use count `timer` to 0, type
  * -1) and sets the bank's stamp counter (counts) to 1; then clears used and nPending. The file-index table D_004A1968
- * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by func_0019CB38), otherwise
- * reset with func_0019CB60. cRealFE_load calls it on the front end's +0x1A70.
+ * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by cBoltFileIndexManager_cBoltFileIndexManager), otherwise
+ * reset with cBoltFileIndexManager_reset. cRealFE_load calls it on the front end's +0x1A70.
  */
-extern "C" void func_0019CE68(cFEBoltFileManager* self)
+extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self)
 {
     int i;
     int j;
@@ -3145,17 +3145,17 @@ extern "C" void func_0019CE68(cFEBoltFileManager* self)
     self->mNumLoadThreads = 0;
     self->mMemUsed = 0;
     if (D_004A1968 == 0) {
-        D_004A1968 = func_0019CB38((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
+        D_004A1968 = cBoltFileIndexManager_cBoltFileIndexManager((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
-        func_0019CB60(D_004A1968);
+        cBoltFileIndexManager_reset(D_004A1968);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019CF40);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_purge);
 #ifdef SKIP_ASM
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
 void operator_delete(int* p);
 extern cBoltFileIndexManager* D_004A1968;
 
@@ -3163,17 +3163,17 @@ extern cBoltFileIndexManager* D_004A1968;
 /**
  * Empties the FE file cache and frees its file-index hash table.
  *
- * Releases every slot of the 10 banks with func_0019D4B8 and resets each bank's stamp counter to 1, then deletes
+ * Releases every slot of the 10 banks with cFEBoltFileManager_freeFile and resets each bank's stamp counter to 1, then deletes
  * D_004A1968 (operator_delete, no destructor call) and clears it. nPending is not reset here. Called by the cache's
  * destructor and by cRealFE_purge.
  */
-extern "C" void func_0019CF40(cFEBoltFileManager* self)
+extern "C" void cFEBoltFileManager_purge(cFEBoltFileManager* self)
 {
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
-            func_0019D4B8(self, i, j);
+            cFEBoltFileManager_freeFile(self, i, j);
         }
         self->unk_B4008[i] = 1;
     }
@@ -3185,15 +3185,15 @@ extern "C" void func_0019CF40(cFEBoltFileManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D000);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_unpackFile);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* ptr);
 extern "C" int unpacksizez(void* data);
 extern "C" void unpack(void* src, void* dst);
-extern "C" void func_0019D578(cFEBoltFileManager* self, int bank, int size);
-extern "C" void func_0019D738(cFEBoltFileManager* self, int bank, int size);
+extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, int size);
+extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern char str_UncompressedData[];
@@ -3204,15 +3204,15 @@ extern char cMemMan_m_mutex[];
  * Unpacks a slot's compressed file data in place in the FE file cache.
  *
  * Does nothing when @p rawSlot or its data is null or unpacksizez() reports no unpacked size. Otherwise it makes room
- * for the unpacked size (func_0019D578), allocates it (operator new, tag "UncompressedData", flags 0x60000000), and
- * while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes (func_0019D738) and retries. It then
+ * for the unpacked size (cFEBoltFileManager_makeRoom), allocates it (operator new, tag "UncompressedData", flags 0x60000000), and
+ * while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes (cFEBoltFileManager_evictBytes) and retries. It then
  * unpacks into the new block, frees the packed data, stores the new block as the slot's data and adjusts used by the
- * size difference. Called when an asynchronous load completes (func_0019D250, func_0019DC20).
+ * size difference. Called when an asynchronous load completes (cFEBoltFileManager_update, cFEBoltFileManager_releaseFile).
  *
  * @param bank  the slot's bank (0-9), passed to the eviction helpers
  * @param rawSlot  the slot
  */
-extern "C" void func_0019D000(cFEBoltFileManager* self, int bank, tBoltFile* rawSlot)
+extern "C" void cFEBoltFileManager_unpackFile(cFEBoltFileManager* self, int bank, tBoltFile* rawSlot)
 {
     tBoltFile* slot = (tBoltFile*)rawSlot;
     if (slot == 0)
@@ -3222,12 +3222,12 @@ extern "C" void func_0019D000(cFEBoltFileManager* self, int bank, tBoltFile* raw
     int size = unpacksizez(slot->dataPtr);
     if (size <= 0)
         return;
-    func_0019D578(self, bank, size);
+    cFEBoltFileManager_makeRoom(self, bank, size);
     void* buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     while (buf == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
-        func_0019D738(self, bank, size);
+        cFEBoltFileManager_evictBytes(self, bank, size);
         buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     }
     unpack(slot->dataPtr, buf);
@@ -3240,24 +3240,24 @@ extern "C" void func_0019D000(cFEBoltFileManager* self, int bank, tBoltFile* raw
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_startNextQueuedLoad);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_0019D8B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Starts the oldest queued load, preferring the given bank of the FE file cache.
  *
  * Picks the queued (kBoltFileFlag_Queued) slot with the lowest stamp in @p bank; when the bank has none, it searches
  * the other banks in order and takes the lowest-stamp queued slot of the first bank that has one. The chosen slot is
- * loaded with func_0019D8B8.
+ * loaded with cFEBoltFileManager_loadFile.
  *
  * Quirk: a best stamp of 0 counts as "nothing chosen yet", so a queued slot with stamp 0 loses to any later queued
  * slot.
  *
  * @param bank  the bank to try first
  */
-extern "C" void func_0019D140(cFEBoltFileManager* self, int bank)
+extern "C" void cFEBoltFileManager_startNextQueuedLoad(cFEBoltFileManager* self, int bank)
 {
     unsigned int best = 0;
     int bestIdx = kNoBoltFile;
@@ -3291,32 +3291,32 @@ extern "C" void func_0019D140(cFEBoltFileManager* self, int bank)
         }
     }
     if (bestIdx >= 0) {
-        func_0019D8B8(self, found, bestIdx);
+        cFEBoltFileManager_loadFile(self, found, bestIdx);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D250);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_update);
 #ifdef SKIP_ASM
 extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
-extern "C" void func_0019D000(cFEBoltFileManager* self, int bank, tBoltFile* slot);
-extern "C" void func_0019D140(cFEBoltFileManager* self, int bank);
-extern "C" void func_0019D8B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_unpackFile(cFEBoltFileManager* self, int bank, tBoltFile* slot);
+extern "C" void cFEBoltFileManager_startNextQueuedLoad(cFEBoltFileManager* self, int bank);
+extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Polls the FE file cache's asynchronous loads once per frame (cRealFE_update).
  *
  * For every slot of the 10 banks: an asynchronous load in flight (pending set, kBoltFileFlag_Loading) whose
- * ASYNCFILE_getstatus() reports kASYNCFILE_Done is released (ASYNCFILE_release), unpacked (func_0019D000) and becomes
+ * ASYNCFILE_getstatus() reports kASYNCFILE_Done is released (ASYNCFILE_release), unpacked (cFEBoltFileManager_unpackFile) and becomes
  * loaded (kBoltFileFlag_Done) or idle (kBoltFileFlag_Idle)
  * when its use count is 0; pending is cleared and nPending decremented, and when no loads remain in flight the next
- * queued load starts (func_0019D140 for that bank). A queued slot (kBoltFileFlag_Queued) starts loading (func_0019D8B8)
+ * queued load starts (cFEBoltFileManager_startNextQueuedLoad for that bank). A queued slot (kBoltFileFlag_Queued) starts loading (cFEBoltFileManager_loadFile)
  * whenever no loads are in flight.
  *
  */
-extern "C" void func_0019D250(cFEBoltFileManager* self)
+extern "C" void cFEBoltFileManager_update(cFEBoltFileManager* self)
 {
     int i;
     int j;
@@ -3328,17 +3328,17 @@ extern "C" void func_0019D250(cFEBoltFileManager* self)
                 if (asyncStatus == kASYNCFILE_Done) {
                     int status[4];
                     ASYNCFILE_release(slot->asyncFileHandle, 0, status);
-                    func_0019D000(self, i, slot);
+                    cFEBoltFileManager_unpackFile(self, i, slot);
                     if (slot->refCount == 0)
                         slot->flags = 0;
                     else
                         slot->flags = asyncStatus;
                     slot->async = 0;
                     if (--self->mNumLoadThreads <= 0)
-                        func_0019D140(self, i);
+                        cFEBoltFileManager_startNextQueuedLoad(self, i);
                 }
             } else if (self->mNumLoadThreads <= 0 && slot->flags == kBoltFileFlag_Queued) {
-                func_0019D8B8(self, i, j);
+                cFEBoltFileManager_loadFile(self, i, j);
             }
         }
     }
@@ -3346,7 +3346,7 @@ extern "C" void func_0019D250(cFEBoltFileManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D3B0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_findFreeSlot);
 #ifdef SKIP_ASM
 /**
  * Picks the slot to reuse for a new file in a bank of the FE file cache.
@@ -3357,7 +3357,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019D3B0);
  * @param bank  the bank (0-9)
  * @return the slot index, or -1 when no slot of the bank is idle
  */
-extern "C" int func_0019D3B0(cFEBoltFileManager* self, int bank)
+extern "C" int cFEBoltFileManager_findFreeSlot(cFEBoltFileManager* self, int bank)
 {
     unsigned int best = 0;
     int bestIdx = -1;
@@ -3378,7 +3378,7 @@ extern "C" int func_0019D3B0(cFEBoltFileManager* self, int bank)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D428);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_findFile);
 #ifdef SKIP_ASM
 extern "C" int strcmp(const void* a, const void* b);
 
@@ -3391,7 +3391,7 @@ extern "C" int strcmp(const void* a, const void* b);
  * @param name  the file name
  * @return the slot index, or -1 when the name is not cached
  */
-extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* name)
+extern "C" int cFEBoltFileManager_findFile(cFEBoltFileManager* self, int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
         tBoltFile* slot = &self->mFiles[bank][i];
@@ -3404,7 +3404,7 @@ extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* nam
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D4B8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_freeFile);
 #ifdef SKIP_ASM
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 void cMemMan_free(void* ptr);
@@ -3418,7 +3418,7 @@ void cMemMan_free(void* ptr);
  * @param bank  the bank (0-9)
  * @param i  the slot index
  */
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i)
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i)
 {
     int status;
     tBoltFile* slot = &self->mFiles[bank][i];
@@ -3443,21 +3443,21 @@ extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D578);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_makeRoom);
 #ifdef SKIP_ASM
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Evicts idle cached files until a new file fits in the FE file cache's 9,999,999-byte budget.
  *
  * Returns at once when used plus @p size fits. Otherwise frees idle slots (data present, use count 0, state 0) of the
  * other banks in bank order, stopping as soon as it fits, then frees this bank's idle slots oldest stamp first until it
- * fits or none remain (func_0019D4B8).
+ * fits or none remain (cFEBoltFileManager_freeFile).
  *
  * @param bank  the bank being loaded into; its own files go last
  * @param size  bytes about to be added
  */
-extern "C" void func_0019D578(cFEBoltFileManager* self, int bank, int size)
+extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, int size)
 {
     if (self->mMemUsed + size <= 9999999)
         return;
@@ -3469,7 +3469,7 @@ extern "C" void func_0019D578(cFEBoltFileManager* self, int bank, int size)
         for (j = 0; j < 256; j++) {
             tBoltFile* slot = &self->mFiles[otherBank][j];
             if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
-                func_0019D4B8(self, otherBank, j);
+                cFEBoltFileManager_freeFile(self, otherBank, j);
                 if (self->mMemUsed + size <= 9999999)
                     return;
             }
@@ -3489,27 +3489,27 @@ extern "C" void func_0019D578(cFEBoltFileManager* self, int bank, int size)
         }
         if (best < 0)
             return;
-        func_0019D4B8(self, bank, best);
+        cFEBoltFileManager_freeFile(self, bank, best);
     } while (self->mMemUsed + size > 9999999);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D738);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_evictBytes);
 #ifdef SKIP_ASM
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Evicts at least a given number of bytes of idle cached files from the FE file cache.
  *
  * Used after an allocation fails, regardless of the budget. Frees idle slots (data present, use count 0, state 0) of
  * the other banks in bank order until the freed sizes reach @p size, then this bank's idle slots oldest stamp first
- * until they do or none remain (func_0019D4B8).
+ * until they do or none remain (cFEBoltFileManager_freeFile).
  *
  * @param bank  the bank being loaded into; its own files go last
  * @param size  bytes to free
  */
-extern "C" void func_0019D738(cFEBoltFileManager* self, int bank, int size)
+extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank, int size)
 {
     int otherBank;
     int j;
@@ -3520,7 +3520,7 @@ extern "C" void func_0019D738(cFEBoltFileManager* self, int bank, int size)
             tBoltFile* slot = &self->mFiles[otherBank][j];
             if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
                 size -= slot->fileSize;
-                func_0019D4B8(self, otherBank, j);
+                cFEBoltFileManager_freeFile(self, otherBank, j);
                 if (size <= 0)
                     return;
             }
@@ -3541,21 +3541,21 @@ extern "C" void func_0019D738(cFEBoltFileManager* self, int bank, int size)
         if (best < 0)
             return;
         size -= self->mFiles[bank][best].fileSize;
-        func_0019D4B8(self, bank, best);
+        cFEBoltFileManager_freeFile(self, bank, best);
     } while (size > 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019D8B8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_loadFile);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int BXFILE_sizez(const char* name);
 extern "C" int ASYNCFILE_loadat(const char* name, void* data, int size);
 extern "C" int FILE_loadatz(const char* name, void* data, int size);
-extern "C" void func_0019D578(cFEBoltFileManager* self, int bank, int size);
-extern "C" void func_0019D738(cFEBoltFileManager* self, int bank, int size);
+extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, int size);
+extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank, int size);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern char str_Bolt_FileData[];
@@ -3565,27 +3565,27 @@ extern char cMemMan_m_mutex[];
 /**
  * Starts loading a slot's file into the FE file cache.
  *
- * Reads the file size (BXFILE_sizez), makes room (func_0019D578) and allocates the data (operator new, tag "Bolt
+ * Reads the file size (BXFILE_sizez), makes room (cFEBoltFileManager_makeRoom) and allocates the data (operator new, tag "Bolt
  * FileData", flags 0x60000000), and while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes
- * (func_0019D738) and retries; used grows by the size. With pending set the load is asynchronous: state 2, handle from
+ * (cFEBoltFileManager_evictBytes) and retries; used grows by the size. With pending set the load is asynchronous: state 2, handle from
  * ASYNCFILE_loadat (an async load request) and nPending incremented. Otherwise FILE_loadatz() loads it at once and the
  * state becomes 1 (loaded).
  *
- * Quirk: a synchronous load is not unpacked; only completed asynchronous loads go through func_0019D000.
+ * Quirk: a synchronous load is not unpacked; only completed asynchronous loads go through cFEBoltFileManager_unpackFile.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
  */
-extern "C" void func_0019D8B8(cFEBoltFileManager* self, int bank, int i)
+extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, int i)
 {
     tBoltFile* slot = &self->mFiles[bank][i];
     int size = BXFILE_sizez(slot->fileName);
-    func_0019D578(self, bank, size);
+    cFEBoltFileManager_makeRoom(self, bank, size);
     slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     while (slot->dataPtr == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
-        func_0019D738(self, bank, size);
+        cFEBoltFileManager_evictBytes(self, bank, size);
         slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     }
     self->mMemUsed += size;
@@ -3603,42 +3603,42 @@ extern "C" void func_0019D8B8(cFEBoltFileManager* self, int bank, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019DA10);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_requestFile);
 #ifdef SKIP_ASM
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i);
-extern "C" void func_0019D8B8(cFEBoltFileManager* self, int bank, int i);
-extern "C" int func_0019D3B0(cFEBoltFileManager* self, int bank);
-extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* name);
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, int i);
+extern "C" int cFEBoltFileManager_findFreeSlot(cFEBoltFileManager* self, int bank);
+extern "C" int cFEBoltFileManager_findFile(cFEBoltFileManager* self, int bank, const char* name);
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 extern "C" char* strcpy(char* dst, const char* src);
 
 /**
  * Requests a file from the FE file cache and returns its slot, adding one use.
  *
- * When the name is already cached (func_0019D428): the stamp becomes 0 with @p deferred or the bank's next stamp otherwise;
+ * When the name is already cached (cFEBoltFileManager_findFile): the stamp becomes 0 with @p deferred or the bank's next stamp otherwise;
  * with @p async an idle slot becomes loaded (kBoltFileFlag_Done); without it, pending is cleared, an in-flight load is
- * waited on (ASYNCFILE_release), a queued one is loaded at once (func_0019D8B8), and the slot is marked loaded with
- * handle -1. Otherwise it reuses a slot (func_0019D3B0, emptied with func_0019D4B8), stamps it the same way, copies the
- * name and stores @p fileType as the type and @p async as pending; it loads at once (func_0019D8B8) unless @p deferred
+ * waited on (ASYNCFILE_release), a queued one is loaded at once (cFEBoltFileManager_loadFile), and the slot is marked loaded with
+ * handle -1. Otherwise it reuses a slot (cFEBoltFileManager_findFreeSlot, emptied with cFEBoltFileManager_freeFile), stamps it the same way, copies the
+ * name and stores @p fileType as the type and @p async as pending; it loads at once (cFEBoltFileManager_loadFile) unless @p deferred
  * is set or an asynchronous request meets loads already in flight, in which case it is queued (kBoltFileFlag_Queued).
- * Either way the use count (timer) goes up by 1; func_0019DC20 gives the use back.
+ * Either way the use count (timer) goes up by 1; cFEBoltFileManager_releaseFile gives the use back.
  *
- * Likely bug: the cached path that waits on an in-flight load neither unpacks it (func_0019D000) nor decrements
- * nPending, unlike func_0019DC20. Likely bug: a -1 from func_0019D3B0 (no idle slot) is used as a slot index.
+ * Likely bug: the cached path that waits on an in-flight load neither unpacks it (cFEBoltFileManager_unpackFile) nor decrements
+ * nPending, unlike cFEBoltFileManager_releaseFile. Likely bug: a -1 from cFEBoltFileManager_findFreeSlot (no idle slot) is used as a slot index.
  *
  * @param cache  the FE file cache
  * @param bank  the bank (0-9)
  * @param namep  the file name
  * @param fileType  the file type stored in the slot (the rider manager uses 8 and 11)
  * @param async  nonzero to load asynchronously
- * @param deferred  nonzero to defer the load: stamp 0 and queued, to be ordered later by func_0019DF20 or func_0019E070
+ * @param deferred  nonzero to defer the load: stamp 0 and queued, to be ordered later by cFEBoltFileManager_startDeferredModelPartLoads or cFEBoltFileManager_startDeferredPartTextureLoads
  * @return the slot index
  */
-extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, int async, int deferred)
+extern "C" int cFEBoltFileManager_requestFile(void* cache, int bank, void* namep, int fileType, int async, int deferred)
 {
     cFEBoltFileManager* self = (cFEBoltFileManager*)cache;
     const char* name = (const char*)namep;
-    int i = func_0019D428(self, bank, name);
+    int i = cFEBoltFileManager_findFile(self, bank, name);
     if (i >= 0) {
         tBoltFile* slot = &self->mFiles[bank][i];
         if (deferred)
@@ -3654,16 +3654,16 @@ extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, i
                 int status;
                 ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
             } else if (slot->flags == kBoltFileFlag_Queued) {
-                func_0019D8B8(self, bank, i);
+                cFEBoltFileManager_loadFile(self, bank, i);
             }
             slot->flags = 1;
             slot->asyncFileHandle = -1;
         }
         slot->refCount++;
     } else {
-    i = func_0019D3B0(self, bank);
+    i = cFEBoltFileManager_findFreeSlot(self, bank);
     tBoltFile* slot = &self->mFiles[bank][i];
-    func_0019D4B8(self, bank, i);
+    cFEBoltFileManager_freeFile(self, bank, i);
     if (deferred)
         slot->stamp = 0;
     else
@@ -3673,7 +3673,7 @@ extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, i
     slot->fileType = fileType;
     slot->async = async;
     if (deferred == 0 && (async == 0 || self->mNumLoadThreads <= 0))
-        func_0019D8B8(self, bank, i);
+        cFEBoltFileManager_loadFile(self, bank, i);
     else
         slot->flags = 3;
     }
@@ -3682,25 +3682,25 @@ extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, i
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019DC20);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_releaseFile);
 #ifdef SKIP_ASM
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 extern "C" int ASYNCFILE_getstatus(int handle);
-extern "C" void func_0019D000(cFEBoltFileManager* self, int bank, tBoltFile* slot);
-extern "C" void func_0019D4B8(cFEBoltFileManager* self, int bank, int i);
+extern "C" void cFEBoltFileManager_unpackFile(cFEBoltFileManager* self, int bank, tBoltFile* slot);
+extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
 
 /**
  * Drops one use of a slot in the FE file cache, keeping its data cached for reuse.
  *
  * Decrements the use count (timer) and returns while it is still positive. An asynchronous load still in flight
- * (ASYNCFILE_getstatus() not kASYNCFILE_Done) is left to finish; a finished one is released, unpacked (func_0019D000)
- * and counted out of nPending. A slot without data is then freed (func_0019D4B8); one with data becomes idle (state 0),
+ * (ASYNCFILE_getstatus() not kASYNCFILE_Done) is left to finish; a finished one is released, unpacked (cFEBoltFileManager_unpackFile)
+ * and counted out of nPending. A slot without data is then freed (cFEBoltFileManager_freeFile); one with data becomes idle (state 0),
  * so a later request can reuse it until it is evicted.
  *
  * @param bank  the bank (0-9)
- * @param i  the slot index (from func_0019DA10)
+ * @param i  the slot index (from cFEBoltFileManager_requestFile)
  */
-extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i)
+extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i)
 {
     int status;
     tBoltFile* slot = &self->mFiles[bank][i];
@@ -3712,13 +3712,13 @@ extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i)
             return;
         }
         ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
-        func_0019D000(self, bank, slot);
+        cFEBoltFileManager_unpackFile(self, bank, slot);
         slot->async = 0;
         slot->flags = 0;
         self->mNumLoadThreads -= 1;
     }
     if (slot->dataPtr == 0) {
-        func_0019D4B8(self, bank, i);
+        cFEBoltFileManager_freeFile(self, bank, i);
     } else {
         slot->flags = 0;
     }
@@ -3726,7 +3726,7 @@ extern "C" void func_0019DC20(cFEBoltFileManager* self, int bank, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019DD10);
+INCLUDE_ASM("fe/festatecharequipdetail", compareDeferredModelPartFiles);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
 extern "C" int strcasecmp(const char* a, const char* b);
@@ -3742,7 +3742,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param secondKey  second packed key
  * @return negative, 0 or positive in qsort fashion
  */
-extern "C" int func_0019DD10(const int* firstKey, const int* secondKey)
+extern "C" int compareDeferredModelPartFiles(const int* firstKey, const int* secondKey)
 {
     int ka = *firstKey;
     tBoltFile* bank = D_004A196C->mFiles[ka >> 16];
@@ -3763,7 +3763,7 @@ extern "C" int func_0019DD10(const int* firstKey, const int* secondKey)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019DE18);
+INCLUDE_ASM("fe/festatecharequipdetail", compareDeferredPartTextureFiles);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
 extern "C" int strcasecmp(const char* a, const char* b);
@@ -3772,14 +3772,14 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * Compares two FE file cache slots to sort the deferred kBoltFileType_PartTexture (11) loads by name (qsort
  * comparator).
  *
- * Same as func_0019DD10 for kBoltFileType_PartTexture: queued, type 11, stamp 0 slots sort first, by name with
+ * Same as compareDeferredModelPartFiles for kBoltFileType_PartTexture: queued, type 11, stamp 0 slots sort first, by name with
  * strcasecmp; two others compare equal.
  *
  * @param firstKey  first packed key
  * @param secondKey  second packed key
  * @return negative, 0 or positive in qsort fashion
  */
-extern "C" int func_0019DE18(const int* firstKey, const int* secondKey)
+extern "C" int compareDeferredPartTextureFiles(const int* firstKey, const int* secondKey)
 {
     int ka = *firstKey;
     tBoltFile* bank = D_004A196C->mFiles[ka >> 16];
@@ -3800,7 +3800,7 @@ extern "C" int func_0019DE18(const int* firstKey, const int* secondKey)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_startDeferredModelPartLoads);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3831,28 +3831,28 @@ struct sFileCache {
     int counts[10];         // 0xB4008
 };
 
-extern "C" void func_0019D8B8_DF20(sFileCache* self, int bank, int i) __asm__("func_0019D8B8");
+extern "C" void cFEBoltFileManager_loadFile_DF20(sFileCache* self, int bank, int i) __asm__("cFEBoltFileManager_loadFile");
 
 // (prototype from their definition at line 2766)
-extern "C" int func_0019DD10_DF20(const int* a, const int* b) __asm__("func_0019DD10");
+extern "C" int compareDeferredModelPartFiles_DF20(const int* a, const int* b) __asm__("compareDeferredModelPartFiles");
 
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
  * Stamps a bank's deferred kBoltFileType_ModelPart (8) loads in name order and starts the first one.
  *
- * Sorts the bank's 256 packed keys with qsort (qsort) and func_0019DD10, then walks them while the slot has
+ * Sorts the bank's 256 packed keys with qsort (qsort) and compareDeferredModelPartFiles, then walks them while the slot has
  * type 8 and stamp 0: each gets the bank's next stamp (counts) and, when no loads are in flight and it is queued,
- * starts loading (func_0019D8B8). The rider manager (cFERider_loadModels) calls it after requesting deferred files.
+ * starts loading (cFEBoltFileManager_loadFile). The rider manager (cFERider_loadModels) calls it after requesting deferred files.
  *
  * @param bank  the bank (0-9)
  */
-extern "C" void func_0019DF20(sFileCache* self, int bank)
+extern "C" void cFEBoltFileManager_startDeferredModelPartLoads(sFileCache* self, int bank)
 {
     int keys[256];
     for (int i = 0; i < 256; i++)
         keys[i] = (bank << 16) | i;
-    qsort(keys, 256, 4, func_0019DD10_DF20);
+    qsort(keys, 256, 4, compareDeferredModelPartFiles_DF20);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
@@ -3860,13 +3860,13 @@ extern "C" void func_0019DF20(sFileCache* self, int bank)
             break;
         slot->stamp = self->counts[bank]++;
         if (self->nPending <= 0 && slot->state == kBoltFileFlag_Queued)
-            func_0019D8B8_DF20(self, bank, idx);
+            cFEBoltFileManager_loadFile_DF20(self, bank, idx);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_startDeferredPartTextureLoads);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3874,27 +3874,27 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
 // it). state: 0 idle, 1 loaded, 2 async load in flight, 3 queued.
 // 256 slots per bank (0x12000 bytes).
 // The FE file cache: ten banks, the loaded byte count, the number of loads in flight and per-bank stamp counters.
-extern "C" void func_0019D8B8_E070(sFileCache* self, int bank, int i) __asm__("func_0019D8B8");
+extern "C" void cFEBoltFileManager_loadFile_E070(sFileCache* self, int bank, int i) __asm__("cFEBoltFileManager_loadFile");
 
 // (prototype from their definition at line 2789)
-extern "C" int func_0019DE18_E070(const int* a, const int* b) __asm__("func_0019DE18");
+extern "C" int compareDeferredPartTextureFiles_E070(const int* a, const int* b) __asm__("compareDeferredPartTextureFiles");
 
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
  * Stamps a bank's deferred kBoltFileType_PartTexture (11) loads in name order and starts the first one.
  *
- * Same as func_0019DF20 with func_0019DE18 and kBoltFileType_PartTexture. The rider manager (cFERider_loadTextures)
+ * Same as cFEBoltFileManager_startDeferredModelPartLoads with compareDeferredPartTextureFiles and kBoltFileType_PartTexture. The rider manager (cFERider_loadTextures)
  * calls it after requesting deferred files.
  *
  * @param bank  the bank (0-9)
  */
-extern "C" void func_0019E070(sFileCache* self, int bank)
+extern "C" void cFEBoltFileManager_startDeferredPartTextureLoads(sFileCache* self, int bank)
 {
     int keys[256];
     for (int i = 0; i < 256; i++)
         keys[i] = (bank << 16) | i;
-    qsort(keys, 256, 4, func_0019DE18_E070);
+    qsort(keys, 256, 4, compareDeferredPartTextureFiles_E070);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
@@ -3902,13 +3902,13 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
             break;
         slot->stamp = self->counts[bank]++;
         if (self->nPending <= 0 && slot->state == kBoltFileFlag_Queued)
-            func_0019D8B8_E070(self, bank, idx);
+            cFEBoltFileManager_loadFile_E070(self, bank, idx);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isBankIdle);
 #ifdef SKIP_ASM
 /**
  * Returns whether a bank of the FE file cache has no load in flight or queued.
@@ -3917,7 +3917,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
  * @return false when any slot is loading or queued (state kBoltFileFlag_Loading / kBoltFileFlag_Queued, or a
  *         negative state), else true
  */
-extern "C" bool func_0019E1C0(cFEBoltFileManager* self, int bank) {
+extern "C" bool cFEBoltFileManager_isBankIdle(cFEBoltFileManager* self, int bank) {
     for (int i = 0; i < 0x100; i++) {
         if ((unsigned int)self->mFiles[bank][i].flags >= 2) return false;
     }
@@ -3925,7 +3925,7 @@ extern "C" bool func_0019E1C0(cFEBoltFileManager* self, int bank) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isFileLoading);
 #ifdef SKIP_ASM
 /**
  * Returns whether a slot of the FE file cache is loading (state kBoltFileFlag_Loading).
@@ -3934,13 +3934,13 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
  * @param i  the slot index
  * @return true while the load is in flight, else false
  */
-extern "C" bool func_0019E208(cFEBoltFileManager* self, int bank, int i) {
+extern "C" bool cFEBoltFileManager_isFileLoading(cFEBoltFileManager* self, int bank, int i) {
     return self->mFiles[bank][i].flags == kBoltFileFlag_Loading;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E238);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isFileLoaded);
 #ifdef SKIP_ASM
 /**
  * Returns whether a slot of the FE file cache is loaded (state kBoltFileFlag_Done).
@@ -3949,14 +3949,14 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E238);
  * @param slotIndex  the slot index
  * @return true when loaded, else false
  */
-extern "C" bool func_0019E238(cFEBoltFileManager* self, int bank, int slotIndex)
+extern "C" bool cFEBoltFileManager_isFileLoaded(cFEBoltFileManager* self, int bank, int slotIndex)
 {
     return self->mFiles[bank][slotIndex].flags == kBoltFileFlag_Done;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileName);
 #ifdef SKIP_ASM
 /**
  * Returns a slot's file name in the FE file cache.
@@ -3967,25 +3967,25 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
  * @param i  the slot index
  * @return the name buffer, or 0
  */
-extern "C" char* func_0019E268(cFEBoltFileManager* self, int bank, int i) {
+extern "C" char* cFEBoltFileManager_getFileName(cFEBoltFileManager* self, int bank, int i) {
     if (self->mFiles[bank][i].flags == kBoltFileFlag_Invalid) return 0;
     return self->mFiles[bank][i].fileName;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileDataValue);
 #ifdef SKIP_ASM
 /**
  * Returns a slot's file data in the FE file cache once it is loaded.
  *
- * The view calls the data pointer at +0x104 `value`; func_0019E2F0 is the same lookup typed as a pointer.
+ * The view calls the data pointer at +0x104 `value`; cFEBoltFileManager_getFileData is the same lookup typed as a pointer.
  *
  * @param bank  the bank (0-9)
  * @param slotIndex  the slot index
  * @return the data pointer as an int when the state is kBoltFileFlag_Done, else 0
  */
-extern "C" void* func_0019E2B0(cFEBoltFileManager* self, int bank, int slotIndex)
+extern "C" void* cFEBoltFileManager_getFileDataValue(cFEBoltFileManager* self, int bank, int slotIndex)
 {
     if (self->mFiles[bank][slotIndex].flags != kBoltFileFlag_Done) {
         return 0;
@@ -3995,30 +3995,30 @@ extern "C" void* func_0019E2B0(cFEBoltFileManager* self, int bank, int slotIndex
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileData);
 #ifdef SKIP_ASM
 /**
  * Returns a slot's file data in the FE file cache once it is loaded (state kBoltFileFlag_Done), else 0.
  *
- * Same as func_0019E2B0, typed as a pointer.
+ * Same as cFEBoltFileManager_getFileDataValue, typed as a pointer.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
  * @return the data, or 0
  */
-extern "C" void* func_0019E2F0(cFEBoltFileManager* self, int bank, int i) {
+extern "C" void* cFEBoltFileManager_getFileData(cFEBoltFileManager* self, int bank, int i) {
     if (self->mFiles[bank][i].flags != kBoltFileFlag_Done) return 0;
     return self->mFiles[bank][i].dataPtr;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_detachFileData);
 #ifdef SKIP_ASM
 /**
  * Detaches a slot's file data from the FE file cache and returns it.
  *
  * Clears the slot's data and size and subtracts the size from mMemUsed; state, name and use count stay. The
- * reward database (cBERewardDB_update) takes the block this way and then drops its use with func_0019DC20, which frees the
+ * reward database (cBERewardDB_update) takes the block this way and then drops its use with cFEBoltFileManager_releaseFile, which frees the
  * now empty slot.
  *
  * @param base  the FE file cache
@@ -4026,7 +4026,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
  * @param slotIndex  the slot index
  * @return the data pointer as an int (the caller now owns it)
  */
-extern "C" void* func_0019E330(cFEBoltFileManager* base, int bank, int slotIndex) {
+extern "C" void* cFEBoltFileManager_detachFileData(cFEBoltFileManager* base, int bank, int slotIndex) {
     void* data = base->mFiles[bank][slotIndex].dataPtr;
     base->mFiles[bank][slotIndex].dataPtr = 0;
     base->mMemUsed -= base->mFiles[bank][slotIndex].fileSize;
@@ -4035,21 +4035,21 @@ extern "C" void* func_0019E330(cFEBoltFileManager* base, int bank, int slotIndex
 }
 #endif
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E380);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileType);
 #ifdef SKIP_ASM
 /**
- * Returns a slot's file type (+0x110, as passed to func_0019DA10) in the FE file cache.
+ * Returns a slot's file type (+0x110, as passed to cFEBoltFileManager_requestFile) in the FE file cache.
  *
  * @param bank  the bank (0-9)
  * @param i  the slot index
  * @return the type
  */
-extern "C" int func_0019E380(cFEBoltFileManager* self, int bank, int i) {
+extern "C" int cFEBoltFileManager_getFileType(cFEBoltFileManager* self, int bank, int i) {
     return self->mFiles[bank][i].fileType;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getUseCount);
 #ifdef SKIP_ASM
 /**
  * Returns a slot's use count (+0x114, `timer` in the views) in the FE file cache.
@@ -4058,7 +4058,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
  * @param i  the slot index
  * @return the use count
  */
-extern "C" int func_0019E3A8(cFEBoltFileManager* self, int bank, int i) {
+extern "C" int cFEBoltFileManager_getUseCount(cFEBoltFileManager* self, int bank, int i) {
     return self->mFiles[bank][i].refCount;
 }
 #endif

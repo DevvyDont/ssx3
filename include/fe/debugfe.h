@@ -277,15 +277,15 @@ CHECK_SIZE(cDebugMenuScreen, 0x8C48);
 // preview names the class): a menu system with eight debug menus (login, persona, room, occupants, chat, challenge) and
 // a state machine over the lobby manager's events, ending in a two-player game over a DirtySock channel. No On Tour
 // class (On Tour has no online front end), so its own fields are named from their retail use. Retail code: fe/debugfe:
-// the ctor (0x0017D298), the dtor, update, the lobby-event handler func_0017D6F0, the error / state / channel steps
-// func_0017DA30 / func_0017DB18 / func_0017DE70, the menu callbacks func_0017E030 ... func_0017E558 and draw
+// the ctor (0x0017D298), the dtor, update, the lobby-event handler cDebugLobbyScreen_handleLobbyEvent, the error / state / channel steps
+// cDebugLobbyScreen_showLobbyError / cDebugLobbyScreen_runStateMachine / cDebugLobbyScreen_startOnlineRace, the menu callbacks cDebugLobbyScreen_createAccount ... cDebugLobbyScreen_abortChallenge and draw
 // (0x0017E5C8).
 //
 // Size 0x1C18: [R] cDebugFE_load: cMemMan_alloc(7192, "LobbyMenu") + cDebugLobbyScreen_cDebugLobbyScreen; the ctor's
 // regions follow from the sub-object ctors' addresses and the dtor's item loops; the last words (0x1C10, 0x1C14) are
-// used by func_0017DE70 / func_0017DA30.
+// used by cDebugLobbyScreen_startOnlineRace / cDebugLobbyScreen_showLobbyError.
 // Base: cDebugScreen (the vptr only). Vtable cDebugLobbyScreen_vtbl (0x0046D350, 3 slots: 1 dtor, 2 update, 3 draw);
-// the dtor clears the screen pointer D_004A4E90 (the ctor sets it; func_0017D260 sends lobby events through it),
+// the dtor clears the screen pointer D_004A4E90 (the ctor sets it; dispatchLobbyEvent sends lobby events through it),
 // destroys the strings, menus and menu system and stores cDebugScreen_vtbl. The menus are raw regions: their classes
 // (cMenu / cMenuItem subclasses built by AccountMenu_AccountMenu ... AbortMenu_AbortMenu) are not laid out here.
 // A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
@@ -298,13 +298,13 @@ struct cDebugLobbyScreen {
     int mState;                     // 0x0004 [R] ctor 0; [U] the lobby state (0 / 1 connecting, 2 lobby, 3 login menu,
                                     //       4 creating account, 5 authenticating, 6 / 7 persona, 8 / 9 create / delete
                                     //       persona, 10 / 11 room, 12 occupants, 13 waiting, 14 chat, 15 challenged, 16
-                                    //       play game, 17 declined, 18 ... 24 errors): func_0017D6F0 / func_0017DB18 /
+                                    //       play game, 17 declined, 18 ... 24 errors): cDebugLobbyScreen_handleLobbyEvent / cDebugLobbyScreen_runStateMachine /
                                     //       the callbacks set it, draw prints its line
     cMenuSys mMenuSys;              // 0x0008 cMenuSys (util/menusys.h, 0x68); [R] cMenuSys_cMenuSys(&mMenuSys) /
                                     //       cMenuSys__cMenuSys(.., 2); the ctor sets mMenuSys.Font / Input / BoxTexture
                                     //       (0x60 / 0x64 / 0x68) from the debug FE's Font, SSXApp's Inputs[0] and BoxTID;
                                     //       [U] the open-menu stack (MenuDepth, MenuStack): cMenuSys_pushMenu / popMenu
-                                    //       (func_0017E368 / func_0017E3B8 pop while MenuDepth != 0) / isActive / input /
+                                    //       (cDebugLobbyScreen_selectOccupant / cDebugLobbyScreen_openChatMenu pop while MenuDepth != 0) / isActive / input /
                                     //       render
     AccountMenu mLoginMenu;         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
                                     //       0x70, ...), AccountMenu__AccountMenu(.., 2) (dtor); [U] pushed on the login step
@@ -321,23 +321,23 @@ struct cDebugLobbyScreen {
     ChatMenu mChatMenu;             // 0x1534 [R] the chat menu (14 lines): ChatMenu_ChatMenu; dtor loop over 14 * 0x24 from
                                     //       +0x194
     ChallengeResponseMenu mChallengedMenu;// 0x18C0 [R] "You've been Challenged!" (Accept, Decline):
-                                    //       ChallengeResponseMenu_ChallengeResponseMenu(this + 0x18C0, ...); [U] func_0017D6F0 stores
+                                    //       ChallengeResponseMenu_ChallengeResponseMenu(this + 0x18C0, ...); [U] cDebugLobbyScreen_handleLobbyEvent stores
                                     //       the challenger's name into its third line (lw/sw 0x1A44 = +0x184)
-    AbortMenu mAbortMenu;           // 0x1AAC [R] "Abort": AbortMenu_AbortMenu; [U] func_0017DB18 pushes it while a challenge
+    AbortMenu mAbortMenu;           // 0x1AAC [R] "Abort": AbortMenu_AbortMenu; [U] cDebugLobbyScreen_runStateMachine pushes it while a challenge
                                     //       is pending
     char* mUserName;                // 0x1C04 cBXString (a char*, bx/bxstring.h); [R] ctor cBXString_EmptyString, dtor
-                                    //       cBXString__cBXString; [U] func_0017E030 / func_0017E118 keep the typed
+                                    //       cBXString__cBXString; [U] cDebugLobbyScreen_createAccount / cDebugLobbyScreen_login keep the typed
                                     //       name; it is copied to LobbyMan's mUserName
-    char* mPassword;                // 0x1C08 cBXString; [R] as mUserName; [U] func_0017E030 / func_0017E118 keep the
+    char* mPassword;                // 0x1C08 cBXString; [R] as mUserName; [U] cDebugLobbyScreen_createAccount / cDebugLobbyScreen_login keep the
                                     //       typed password; copied to LobbyMan's mPassword
-    char* mChallenger;              // 0x1C0C cBXString; [R] as mUserName; [U] func_0017D6F0 copies the challenge
-                                    //       event's name (+0x8) into it; func_0017E490 / func_0017E4F0 / func_0017E558
+    char* mChallenger;              // 0x1C0C cBXString; [R] as mUserName; [U] cDebugLobbyScreen_handleLobbyEvent copies the challenge
+                                    //       event's name (+0x8) into it; cDebugLobbyScreen_acceptChallenge / cDebugLobbyScreen_declineChallenge / cDebugLobbyScreen_abortChallenge
                                     //       answer that rider
-    int mGameChannel;               // 0x1C10 [U] func_0017DE70 stores cCommSystem_openDSockChannel's channel;
-                                    //       func_0017DB18 (state 16) waits for it to connect and builds the game comm
+    int mGameChannel;               // 0x1C10 [U] cDebugLobbyScreen_startOnlineRace stores cCommSystem_openDSockChannel's channel;
+                                    //       cDebugLobbyScreen_runStateMachine (state 16) waits for it to connect and builds the game comm
                                     //       on it
-    int mErrorCode;                 // 0x1C14 [U] func_0017DA30 stores the lobby error code; draw prints its text
-                                    //       (func_00260E50) in the error states
+    int mErrorCode;                 // 0x1C14 [U] cDebugLobbyScreen_showLobbyError stores the lobby error code; draw prints its text
+                                    //       (LobbyMan_getErrorText) in the error states
 
     // The menu callbacks (C++ only; no data in the screen). [P] the preview's template instances name them:
     // AccountMenu<cDebugLobbyScreen::OnCreate, cDebugLobbyScreen::OnLogin>, PersonaMenu<::OnSelectPersona,

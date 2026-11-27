@@ -1662,7 +1662,7 @@ extern char str_overlayOptpct_d[];
  * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
  * "overlayOpt4" of mpScreen: option 0 gets the localised string named D_00441D10[D_004A2860[0]] and that index as its
  * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and made static (setStatic(1), slot 8). It fills the
- * onCreateScreen slot (+0x24) of cOVTemplate_Simple_vtbl, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
+ * onCreateScreen slot (+0x24) of cOVTemplate_Simple_vtbl, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; cOVState_FREESTYLE_PREEVENT_onCreateScreen
  * and cOVState_HEAT_PREEVENT_onCreateScreen call it as their base.
  */
 extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)

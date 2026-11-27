@@ -2443,7 +2443,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_createConfirmationPopup);
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* mem, cUIEngine* engine, cUIState* owner);
-void func_001C57C0(void* self, int a1, int a2);
+void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_Confirmation_Popup[];
 extern char str_kT_CMNYes[];
@@ -2466,8 +2466,8 @@ void cScreenPopup::createConfirmationPopup(int idx)
     mpConfirmPopup = (cScreenPopup*)popup;
     cPopupInfo* info = &popup->info;
     popup->info.meType = 2;
-    func_001C57C0(info, 0, GetHashValue32(str_kT_CMNYes));
-    func_001C57C0(info, 1, GetHashValue32(str_kT_CMNNo));
+    cPopupInfo_setPopupOptionNames2(info, 0, GetHashValue32(str_kT_CMNYes));
+    cPopupInfo_setPopupOptionNames2(info, 1, GetHashValue32(str_kT_CMNNo));
     t3VectorInit popupOffset(30.0f, 40.0f, 0.0f);
     popup->info.mvOffset = popupOffset;
     popup->info.miLayerOffset = miLayerOffset + 3;
@@ -6019,7 +6019,7 @@ void cKeyboardPopup::handleQuickKeyPress(int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CE6F0);
+INCLUDE_ASM("fe/fepopup", countPeakEvents);
 #ifdef SKIP_ASM
 struct sPopupSlot_E6F0 {
     signed char id;
@@ -6039,7 +6039,7 @@ extern sPopupSlot_E6F0 gMedalsInfo[][4][5];
  * @param peak  the peak (0..3)
  * @return the number of events before the first terminator (0..5)
  */
-extern "C" int func_001CE6F0(int mountain, int peak)
+extern "C" int countPeakEvents(int mountain, int peak)
 {
     int n = 0;
     for (int i = 0; i < 5; i++) {

@@ -25,12 +25,12 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 extern char str_06title[];
 
 /**
  * Builds the title screen ("06title"), plays its first frame, clears its idle timer and sets the front-end
- * music state to the title (func_0028F140(audio, 0)).
+ * music state to the title (cSSXAudio_SetFrontEndMusicMode(audio, 0)).
  */
 void cFEStateTitle::onCreateScreen()
 {
@@ -43,7 +43,7 @@ void cFEStateTitle::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0028F140(cAudioInterface_bxAudio(), 0);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 0);
 }
 #endif
 
@@ -239,9 +239,9 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void MEM_fill(void* p, int v, int n);
-extern "C" void func_00266CD8();
-extern "C" void func_00261008();
-extern "C" void func_0025B688();
+extern "C" void cVoipMan_destroyInstance();
+extern "C" void BuddyMan_destroyInstance();
+extern "C" void LobbyMan_destroyInstance();
 extern "C" void cGameComm_destroy();
 extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
@@ -251,8 +251,8 @@ extern char str_07main_men[];
  * Builds the main menu ("07main_men"), shuts the online layer down and counts the connected controllers.
  *
  * Clears the option block cBERules_mRules, the choice flag (mGoToNextState) and the Circle counter (mHackCheatTotal);
- * destroys the voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008,
- * func_0025B688, cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot
+ * destroys the voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (cVoipMan_destroyInstance, BuddyMan_destroyInstance,
+ * LobbyMan_destroyInstance, cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot
  * 1; sets the FE music state 1; stores the number of active pads (the UI input's setPadNum / isActive, slots 44 / 45)
  * in mNumOfCtrl.
  */
@@ -267,15 +267,15 @@ void cFEStateMainMenu::onCreateScreen()
     MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
     mGoToNextState = 0;
     mHackCheatTotal = 0;
-    func_00266CD8();
-    func_00261008();
-    func_0025B688();
+    cVoipMan_destroyInstance();
+    BuddyMan_destroyInstance();
+    LobbyMan_destroyInstance();
     cGameComm_destroy();
     cCommSystem_destroy();
     cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     iface->submit();
-    func_0028F140(cAudioInterface_bxAudio(), 1);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 1);
     cUIInput* input = mpEngine->mpInput;
     mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
@@ -447,19 +447,19 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
-extern "C" void func_001A86E8(int a);
+extern "C" void cFEStateNet_setFEPath(int a);
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int mode);
 extern "C" void cCommSystem_construct();
-extern "C" void func_0025B650();
-extern "C" void func_00260F80();
-extern "C" void func_00266CA0();
+extern "C" void LobbyMan_createInstance();
+extern "C" void BuddyMan_createInstance();
+extern "C" void cVoipMan_createInstance();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
-extern "C" void* func_001887A0(void* mem, void* engine, int a2);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* mem, void* engine, int a2);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern void* cFEPopupSelectMultiplayerMode_vtbl[];
 extern char str_cFEPopupSelectMultiplayerMode[];
@@ -493,12 +493,12 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
 /**
  * Handles a main-menu choice: sets the game path for the chosen mode and pushes the next front-end state.
  *
- * Cross (kONNEXT): func_001A86E8(0), then by the item's miscData: 11 Conquer kGAMEPATH_WORLDCIRCUIT, 9 Quick Play
+ * Cross (kONNEXT): cFEStateNet_setFEPath(0), then by the item's miscData: 11 Conquer kGAMEPATH_WORLDCIRCUIT, 9 Quick Play
  * kGAMEPATH_SINGLEEVENT, 22 Multi Play kGAMEPATH_MULTIPLAYER, 49 Online kGAMEPATH_MULTIPLAYER plus the online
  * singletons (cCommSystem_construct ...), 5 Bonus Material; each sets the choice flag (+0x48). After the race
  * interface's slot 1 it pushes the custom interface's getNextState(miscData). The Select Multiplayer Mode popup branch
  * needs +0x48 clear for item 22, which case 22 has just set, so it never runs. Triangle (kONPREV) pushes
- * getPrevState(); Square (kONOPTION) pushes a new "FEOptions" state (func_001887A0); each Circle (kONMISC) counts in
+ * getPrevState(); Square (kONOPTION) pushes a new "FEOptions" state (cFEStateOptions_cFEStateOptions1); each Circle (kONMISC) counts in
  * +0x54 and from the 7th on clears the static flag of "2quick play", "3multi play" and "4online".
  *
  * @param item_  the item (On Tour pWidget); ignored when null
@@ -510,7 +510,7 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
         return;
     switch (type) {
     case cUIState::kONNEXT: {
-        func_001A86E8(0);
+        cFEStateNet_setFEPath(0);
         cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (item_->mMiscData) {
         case 11:
@@ -531,9 +531,9 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
         case 49:
             cBENewRaceInterface_setGamePath(iface, kGAMEPATH_MULTIPLAYER);
             cCommSystem_construct();
-            func_0025B650();
-            func_00260F80();
-            func_00266CA0();
+            LobbyMan_createInstance();
+            BuddyMan_createInstance();
+            cVoipMan_createInstance();
         case 5:
             mGoToNextState = 1;
             break;
@@ -571,7 +571,7 @@ void cFEStateMainMenu::onWidgetEvent(cUIThing* item_, unsigned int type)
     }
     case cUIState::kONOPTION: {
         cUIState* optionsState =
-            (cUIState*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
+            (cUIState*)cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_FEOptions, 0x100, 0), mpEngine, 1);
         optionsState->mAttrState = (optionsState->mAttrState & ~0x3F00) | 0x100; // tAttrState::mMode = 1
         cUIStateStack_pushSpecial(&mpEngine->mStateStack, optionsState, 0, 0);
         break;

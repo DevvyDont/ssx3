@@ -74,7 +74,7 @@ struct cCrowdMan2d {
     char unk_0208[0x8];             // 0x0208 no access (alignment of mQuad)
     tCrowdQuad2d mQuad[128];        // 0x0210 [R] ctor builds 128, reset MEM_fill's 0x2000 bytes; [U] func_00229910
                                     //        places one, func_00229530 walks the used ones
-    int mCheerLevel;                // 0x2210 [R] reset 0; [U] func_00229530: |func_002A77C8(gSSXAudio, 0)|
+    int mCheerLevel;                // 0x2210 [R] reset 0; [U] func_00229530: |cCrowdSys_GetCurrentCheer(gSSXAudio, 0)|
     int mMarkerIndex;               // 0x2214 [R] reset 0; [U] func_00229738: the next ring entry, modulo 40
     char unk_2218[0x8];             // 0x2218 no access (alignment of mMarker)
     tCrowdMarker2d mMarker[40];     // 0x2220 [R] ctor builds 40, reset MEM_fill's 1280 bytes; [U] func_00229738 adds,

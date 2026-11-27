@@ -309,7 +309,7 @@ CHECK_SIZE(VerticalLineProximityTest, 0x4);
 // helpX__Q34nash5privyt11QueryHelper3Z..Z..Z9tBoundBox (const callback&, const callback&, const tBoundBox&,
 // const nash::Cell*, const nash::CellKey&): a template class with no data whose member helpX walks a cell for a box
 // query; [R] retail keeps the instances' code under nash_privy_QueryHelper_helpX* (camera/trigger
-// cameratriggerfactory) and calls them with the address of an empty helper as `this` (func_002B83F8 in
+// cameratriggerfactory) and calls them with the address of an empty helper as `this` (nash_privy_QueryHelper_help1 in
 // sound/icepick/worldtriggermanager). Flat stand-in for every instance: an empty struct (size 1 in g++).
 struct nash_privy_QueryHelper {
 

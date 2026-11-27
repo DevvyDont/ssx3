@@ -182,7 +182,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setSyncData);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
-extern "C" void func_00156810(void* self);
+extern "C" void cBEProfileLib_resetAllRelations(void* self);
 
 
 extern cBECharProfileDB cBELibrary_profileLib_E5C8[][10] __asm__("cBELibrary_profileLib");
@@ -199,7 +199,7 @@ public:
  *
  * Restores the race settings and reloads NewRace (BE interface 0); on the client it also takes records 2-5
  * and the shared option pair. It stores the player's record and option record, re-initialises that
- * character's profile (cBECharProfileDB_init, func_00156810), copies the profile pieces back and reloads NewPlayer
+ * character's profile (cBECharProfileDB_init, cBEProfileLib_resetAllRelations), copies the profile pieces back and reloads NewPlayer
  * (1) and BAGT (6), each reload being the interface's virtual discard (slot 2).
  *
  * @param player  the player slot the data belongs to (0 host, 1 client)
@@ -223,7 +223,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
     ((sNetTrip_E2C8*)&cBERules_mRules)[player] = (&in->t0)[player];
     cBECharProfileDB_init(&cBELibrary_profileLib_E5C8[player][characterId], characterId, 1);
-    func_00156810(cBELibrary_profileLib_E5C8[player]);
+    cBEProfileLib_resetAllRelations(cBELibrary_profileLib_E5C8[player]);
     for (int k = 0; k < 525; k++)
         ((sNetHW_E2C8*)((char*)cBELibrary_profileLib_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
     for (int k = 0; k < 26; k++)
@@ -265,8 +265,8 @@ void cBENetworkInterface::copyProfile(int srcProfile, int destProfile)
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_preInitBE);
 #ifdef SKIP_ASM
 extern "C" void cBEProfileLib_init(void* self, int arg);
-// PORT: func_0014EB08 is defined (void) in this unit but called with self here.
-void func_0014EB08_self(void* self) __asm__("func_0014EB08");
+// PORT: cBENetworkInterface_swapBraggingRecords is defined (void) in this unit but called with self here.
+void cBENetworkInterface_swapBraggingRecords_self(void* self) __asm__("cBENetworkInterface_swapBraggingRecords");
 
 struct sRiderEntry_0014E9F8 {
     int w[7];
@@ -280,7 +280,7 @@ extern sRiderEntry_0014E9F8 D_00535B3C;
  *
  * Re-initialises profile 2's ten character records (cBEProfileLib_init(D_004BA348, 0)); on the client it copies
  * player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps
- * the two players' option records (func_0014EB08), which postInitBE swaps back.
+ * the two players' option records (cBENetworkInterface_swapBraggingRecords), which postInitBE swaps back.
  */
 void cBENetworkInterface::preInitBE()
 {
@@ -291,7 +291,7 @@ void cBENetworkInterface::preInitBE()
         riderEntry[0] = riderEntry[-1];
         copyProfile(0, 1);
     }
-    func_0014EB08_self(this);
+    cBENetworkInterface_swapBraggingRecords_self(this);
 }
 #endif
 
@@ -302,14 +302,14 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_postInitBE);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_0014EB08 is defined (void) in this unit but called with self here.
-void func_0014EB08_self(void* self) __asm__("func_0014EB08");
+// PORT: cBENetworkInterface_swapBraggingRecords is defined (void) in this unit but called with self here.
+void cBENetworkInterface_swapBraggingRecords_self(void* self) __asm__("cBENetworkInterface_swapBraggingRecords");
 
 /**
  * Finishes the back-end setup after the online handshake.
  *
  * Reloads the Stat (BE interface 3) and Aggression (12) interfaces through their virtual discard (slot 2),
- * then swaps the two players' option records again (func_0014EB08), undoing preInitBE's swap.
+ * then swaps the two players' option records again (cBENetworkInterface_swapBraggingRecords), undoing preInitBE's swap.
  */
 void cBENetworkInterface::postInitBE()
 {
@@ -317,12 +317,12 @@ void cBENetworkInterface::postInitBE()
     statInterface->discard();
     cBEInterface* aggressionInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
     aggressionInterface->discard();
-    func_0014EB08_self(this);
+    cBENetworkInterface_swapBraggingRecords_self(this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EB08);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_swapBraggingRecords);
 #ifdef SKIP_ASM
 struct sNetSlot_0014EB08
 {
@@ -344,7 +344,7 @@ struct sNetSlot_0014EB08
  * cBENetworkInterface_preInitBE swaps them before the online handshake and cBENetworkInterface_postInitBE swaps them
  * back (both pass self, which is ignored).
  */
-extern "C" void func_0014EB08(void)
+extern "C" void cBENetworkInterface_swapBraggingRecords(void)
 {
     sNetSlot_0014EB08 firstRecord = (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[0]);
     cBERules_mRules.Bragging[0].HeadStartSecs = cBERules_mRules.Bragging[1].HeadStartSecs;
@@ -361,17 +361,17 @@ extern "C" void func_0014EB08(void)
 extern "C" char* strcpy(char*, const char*);
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setOpponentName);
 #ifdef SKIP_ASM
 /**
  * Copies @p src into the opponent-name buffer (cBENetworkInterface_networkOpt.strOpponentName, 16 bytes; strcpy, no
- * length check), which func_0015C5A8 returns.
+ * length check), which cBENetworkInterface_getOpponentName returns.
  *
  * The lobby code passes the opponent's persona name.
  *
  * @param src  the name
  */
-extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
+extern "C" void cBENetworkInterface_setOpponentName(cBENetworkInterface* self, const char* src)
 {
     strcpy(cBENetworkInterface_networkOpt.strOpponentName, src);
 }
@@ -379,17 +379,17 @@ extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
 
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setMyName);
 #ifdef SKIP_ASM
 /**
  * Copies @p src into this player's name buffer (cBENetworkInterface_networkOpt.strMyName, 16 bytes; strcpy, no length
- * check), which func_0015C5B8 returns.
+ * check), which cBENetworkInterface_getMyName returns.
  *
  * The lobby code passes the local persona name.
  *
  * @param src  the name
  */
-extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
+extern "C" void cBENetworkInterface_setMyName(cBENetworkInterface* self, const char* src)
 {
     strcpy(cBENetworkInterface_networkOpt.strMyName, src);
 }

@@ -55,7 +55,7 @@ struct cPS2SoundManager {
     tPS2SoundMemNode mNodes[32];      // 0x00C [P] kPS2SOUNDMANAGER_MAX_SOUNDMEM_ALLOCS (preview sltiu 32, stride 24, base 12); [R] Init chains them
     int mMainMemHighAddr;             // 0x30C [P] "(mainMemLowAddr + mainMemSize) == mMainMemHighAddr", "pNode->lowAddr == mMainMemHighAddr" (preview lw 780); [R] ctor -1, Init = sound RAM top; [U] AllocSoundMem moves it down
     int mUnusedNodeHead;              // 0x310 (name ours) [R] ctor -1, Init 31; [U] head of the unused-node chain
-                                      //        (func_002A92B8 pops, func_002A92F8 pushes)
+                                      //        (cPS2SoundManager_TakeUnusedNode pops, cPS2SoundManager_FreeTopBlock pushes)
     char unk_314[0x4];                // 0x314 no access
     int mFreeNodeHead;                // 0x318 (name ours) [R] ctor -1; Init -1; [U] head of the free-block list (sorted
                                       //        by address: AllocSoundMem / DeallocSoundMem)

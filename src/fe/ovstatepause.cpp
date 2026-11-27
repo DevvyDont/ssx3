@@ -50,14 +50,14 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(void* box, unsigned char sel);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
-extern "C" void func_00266F90(void* self, int* a, int* b);
-extern "C" void func_00266E88(void* self);
-extern "C" void func_00266E30(void* self);
+extern "C" void cVoipMan_getVoiceLevel(void* self, int* a, int* b);
+extern "C" void cVoipMan_turnVoiceOff(void* self);
+extern "C" void cVoipMan_turnVoiceOn(void* self);
 extern void* VoipMan;
 extern char str_37beoptions[];
 extern char str_kT_CMNHUDFull[];
@@ -202,8 +202,8 @@ static inline cGameViewMan* views_PO()
  * On, bits 17 / 16). The 12-step sliders 4sl / 5sl / 6sl take the music, effects and speech volumes (bits
  * 0-3, 8-11, 4-7), and all five audio settings are reapplied to the audio object.
  * In a network game the EA Talk widgets (EATalkPair, EATalk, EATalksl) are shown and made selectable, and the
- * voice slider (0..10) is loaded from func_00266F90's level / 10, calling func_00266E88 below level 10, else
- * func_00266E30 (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
+ * voice slider (0..10) is loaded from cVoipMan_getVoiceLevel's level / 10, calling cVoipMan_turnVoiceOff below level 10, else
+ * cVoipMan_turnVoiceOn (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
  * setStatic / setUseStaticColour are vtable slots 8 / 25 (cUIThing_setStatic / cUIText_setUseStaticColour).
  */
 extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* self)
@@ -265,7 +265,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         if (w != 0) {
             w->mNumValues = 12;
             w->mValue = iface->getOptions().f0;
-            func_00287410(cAudioInterface_bxAudio(), Cfg_PO().f0);
+            cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_PO().f0);
         }
     }
     {
@@ -281,7 +281,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         if (w != 0) {
             w->mNumValues = 12;
             w->mValue = iface->getOptions().f4;
-            func_00287520(cAudioInterface_bxAudio(), Cfg_PO().f4);
+            cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_PO().f4);
         }
     }
     {
@@ -326,12 +326,12 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
             ((cUISlider*)talkSlider)->mNumValues = 10;
             int level;
             int max;
-            func_00266F90(VoipMan, &level, &max);
+            cVoipMan_getVoiceLevel(VoipMan, &level, &max);
             ((cUISlider*)talkSlider)->mValue = level / 10;
             if (level < 10) {
-                func_00266E88(VoipMan);
+                cVoipMan_turnVoiceOff(VoipMan);
             } else {
-                func_00266E30(VoipMan);
+                cVoipMan_turnVoiceOn(VoipMan);
             }
         }
     } else {
@@ -413,15 +413,15 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
-extern "C" void func_00266F90(void* self, int* a, int* b);
-extern "C" void func_00266F58(void* self, int a, int b);
-extern "C" void func_00266E88(void* self);
-extern "C" void func_00266E30(void* self);
+extern "C" void cVoipMan_getVoiceLevel(void* self, int* a, int* b);
+extern "C" void cVoipMan_setVoiceLevel(void* self, int a, int b);
+extern "C" void cVoipMan_turnVoiceOff(void* self);
+extern "C" void cVoipMan_turnVoiceOn(void* self);
 extern void* VoipMan;
 extern char str_EATalksl[];
 extern char str_Save_Profile[];
@@ -525,13 +525,13 @@ void cOVState_PAUSE_OPTIONS::onWidgetEvent(cUIThing* obj, unsigned int msg)
             cChaseCameraController_switchCamera_UserChange(camera->ChaseController, on, camera);
         } else if (IsId_A238(obj, str_4sl_b)) {
             SetF0_A238(((cUISlider*)obj)->mValue);
-            func_00287410(cAudioInterface_bxAudio(), iface->getOptions().f0);
+            cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), iface->getOptions().f0);
         } else if (IsId_A238(obj, str_5sl)) {
             SetF8_A238(((cUISlider*)obj)->mValue);
             cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), iface->getOptions().f8);
         } else if (IsId_A238(obj, str_6sl)) {
             SetF4_A238(((cUISlider*)obj)->mValue);
-            func_00287520(cAudioInterface_bxAudio(), iface->getOptions().f4);
+            cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), iface->getOptions().f4);
         } else if (IsId_A238(obj, str_7lb_b)) {
             cBEOptionInterface_mOption_A238.iUseDJSpeech = cUIListBox_getCurrentEntryData(obj) != 0;
             cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), iface->getOptions().iUseDJSpeech != 0);
@@ -543,13 +543,13 @@ void cOVState_PAUSE_OPTIONS::onWidgetEvent(cUIThing* obj, unsigned int msg)
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, str_EATalksl)) {
             int level;
             int max;
-            func_00266F90(VoipMan, &level, &max);
+            cVoipMan_getVoiceLevel(VoipMan, &level, &max);
             level = ((cUISlider*)obj)->mValue * 10;
-            func_00266F58(VoipMan, level, max);
+            cVoipMan_setVoiceLevel(VoipMan, level, max);
             if (level < 10) {
-                func_00266E88(VoipMan);
+                cVoipMan_turnVoiceOff(VoipMan);
             } else {
-                func_00266E30(VoipMan);
+                cVoipMan_turnVoiceOn(VoipMan);
             }
         }
         iface->vtbl[1].fn(vthis(iface, iface->vtbl[1]));
@@ -1252,7 +1252,7 @@ void cOVState_HEAT_PREEVENT::onUpdate()
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FBD20);
+INCLUDE_ASM("fe/ovstatepause", cOVState_FREESTYLE_PREEVENT_onCreateScreen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -1302,7 +1302,7 @@ extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int 
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(void* self, int index);
-extern "C" void* func_00155130(void* iface, int idx);
+extern "C" void* cBEScoreInterface_getCurrentHighScore(void* iface, int idx);
 extern int cGameModeMan_iCharRank[];
 // The "%d" format D_004A2138, reached gp-relative here: a sized declaration of the same string.
 extern char D_004A2138_n[3] __asm__("D_004A2138");
@@ -1382,9 +1382,9 @@ static inline void* getObj_1FBD20(cUIState* self, char* name)
  * iCharacters / iCheatCharacters), heat score (cGameModeMan_getHeatScore heat 0, or 2 in the final), and in career heat
  * 2 the second-run and total scores; "- - -" otherwise. "p0rider" gets the player's name and "p0run1" the player's
  * heat-1 score in career heat 2 ("- - -" otherwise); "p1rider" gets the second player online, else it and "p1dashes"
- * are hidden. "topScore" shows the event's record (func_00155130 on BE interface 8) with "%d".
+ * are hidden. "topScore" shows the event's record (cBEScoreInterface_getCurrentHighScore on BE interface 8) with "%d".
  */
-extern "C" void func_001FBD20(void* self)
+extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
 {
     unsigned short title[0x38];
     unsigned short line[104];
@@ -1554,7 +1554,7 @@ extern "C" void func_001FBD20(void* self)
     textObj = getObj_1FBD20(overlay, str_topScore);
     {
         char buf[0x10];
-        void* recordScore = func_00155130(iface8, 0);
+        void* recordScore = cBEScoreInterface_getCurrentHighScore(iface8, 0);
         sprintf(buf, D_004A2138, recordScore);
         cUIText_setAsciiString((cUIText*)textObj, buf);
     }
@@ -1562,7 +1562,7 @@ extern "C" void func_001FBD20(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FC768);
+INCLUDE_ASM("fe/ovstatepause", cOVState_FREESTYLE_PREEVENT_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void* cBE_getBE();
@@ -1571,7 +1571,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
-extern "C" void func_002A31C0(void* self);
+extern "C" void cSSXAudio_SpeakPAEventStart(void* self);
 extern char str_at_TextPulseWhiteOrange[];
 extern char str_p0rider[];
 extern char str_p0run1[];
@@ -1585,10 +1585,10 @@ extern char str_p1dashes[];
  * Runs cUIState_onGainFocus and plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "p0rider" and on "p0dashes"
  * in heat 2 (SSXApp->GameModeMan's iHeatNum, kHeat2) or "p0run1" otherwise; in an online race
  * (cBENewRaceInterface_newRace's cGamePath == kGAMEPATH_MULTIPLAYER) also on "p1rider" and "p1dashes". Then plays menu
- * sound 0xE (cSSXAudio_MenuSound) and calls func_002A31C0 on the sound system (cAudioInterface_bxAudio()). BE interface
+ * sound 0xE (cSSXAudio_MenuSound) and calls cSSXAudio_SpeakPAEventStart on the sound system (cAudioInterface_bxAudio()). BE interface
  * 0 is fetched and unused.
  */
-extern "C" void func_001FC768(void* self)
+extern "C" void cOVState_FREESTYLE_PREEVENT_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1604,12 +1604,12 @@ extern "C" void func_001FC768(void* self)
         cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
-    func_002A31C0(cAudioInterface_bxAudio());
+    cSSXAudio_SpeakPAEventStart(cAudioInterface_bxAudio());
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FC878);
+INCLUDE_ASM("fe/ovstatepause", cOVState_MULTI_PREEVENT_onCreateScreen);
 #ifdef SKIP_ASM
 // self is a pause-menu UI state (no header yet): +0x10 its UI engine, +0x40 its screen.
 int GetHashValue32(char* str);
@@ -1627,10 +1627,10 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
-extern "C" char* func_00146F88(void* iface, int idx);
+extern "C" char* cBENewPlayerInterface_getRiderName(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
-extern "C" void* func_00155130(void* iface, int idx);
-extern "C" char* func_0020A1A8(void* p);
+extern "C" void* cBEScoreInterface_getCurrentHighScore(void* iface, int idx);
+extern "C" char* formatMinutesSeconds(void* p);
 extern "C" void func_002C2540(unsigned short* dst, char* src);
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
@@ -1702,16 +1702,16 @@ static inline void* getObj_1FC878(cUIState* self, char* name)
  * cGameMode 5 / 1 / 2 / 3, kGAMEMODE_TIMECHALLENGE / _SLOPESTYLE / _BIGAIR / _HALFPIPE), or "<location> - Jam" for
  * cGameMode 6 (kGAMEMODE_PNTSCHALLENGE). Quirk: the "%s - %s" call passes only the location;
  * the event string reaches it because the compiler keeps it in $a3 (fine on the PS2, undefined elsewhere). "name" gets
- * player 1 (the online player name func_00146F88 on game path 2, else cBECharacterInterface_getShortName of the first
+ * player 1 (the online player name cBENewPlayerInterface_getRiderName on game path 2, else cBECharacterInterface_getShortName of the first
  * human rider); "vs" gets kT_OVRCMNVs formatted with player 2's name, found the same way.
  *
  * For cGameMode 1-3 "obj2" and "bullet2" are shown with kT_OVRCMNCollPointAndMulti (slopestyle) or
  * kT_OVRCMNCollPointIcons, otherwise hidden; modes 2-3 hide "screendata1", modes 5-6 hide "screendata" and
  * "screendata1". "obj1" reads kT_HELPFirstToBottom for cGameEvent 4, else kT_OVRCMNBeatOppMaxTrick. For cGameEvent 4 or
- * 0 "topScoreLabel" reads kT_OVRCMNRecordTime and "topScore" the record as a time (func_0020A1A8); otherwise
- * kT_OVRCMNRecordScore and the record with "%d". The record is func_00155130 on BE interface 8.
+ * 0 "topScoreLabel" reads kT_OVRCMNRecordTime and "topScore" the record as a time (formatMinutesSeconds); otherwise
+ * kT_OVRCMNRecordScore and the record with "%d". The record is cBEScoreInterface_getCurrentHighScore on BE interface 8.
  */
-extern "C" void func_001FC878(void* self)
+extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
 {
     unsigned short title[0x38];
     unsigned short line[104];
@@ -1764,7 +1764,7 @@ extern "C" void func_001FC878(void* self)
     cUIText_setUnicodeString(widget, line);
     widget = getObj_1FC878(overlay, str_name);
     if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_MULTIPLAYER)
-        cUIText_setAsciiString((cUIText*)widget, func_00146F88(iface1, 0));
+        cUIText_setAsciiString((cUIText*)widget, cBENewPlayerInterface_getRiderName(iface1, 0));
     else
         cUIText_setAsciiString((cUIText*)widget, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
     cUIText* status = (cUIText*)getObj_1FC878(overlay, str_obj1);
@@ -1786,7 +1786,7 @@ extern "C" void func_001FC878(void* self)
     widget = getObj_1FC878(overlay, str_title1);
     cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_CMNStateMultiPlay));
     if (getField_1FC878((signed char*)&cBENewRaceInterface_newRace, 73) == kGAMEPATH_MULTIPLAYER)
-        strcpy(rider, func_00146F88(iface1, 1));
+        strcpy(rider, cBENewPlayerInterface_getRiderName(iface1, 1));
     else
         strcpy(rider, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 1)));
     unsigned short* fmt = lookupString_1FC878(str_kT_OVRCMNVs);
@@ -1809,14 +1809,14 @@ extern "C" void func_001FC878(void* self)
     if (mode4A == kGAMEEVENT_RIVALTIME || mode4A == kGAMEEVENT_RACE)
     {
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNRecordTime));
-        void* record = func_00155130(iface8, 0);
+        void* record = cBEScoreInterface_getCurrentHighScore(iface8, 0);
         widget = getObj_1FC878(overlay, str_topScore);
-        cUIText_setAsciiString((cUIText*)widget, func_0020A1A8(record));
+        cUIText_setAsciiString((cUIText*)widget, formatMinutesSeconds(record));
     }
     else
     {
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNRecordScore));
-        void* record = func_00155130(iface8, 0);
+        void* record = cBEScoreInterface_getCurrentHighScore(iface8, 0);
         widget = getObj_1FC878(overlay, str_topScore);
         sprintf(num, D_004A2138, record);
         cUIText_setAsciiString((cUIText*)widget, num);
@@ -1825,7 +1825,7 @@ extern "C" void func_001FC878(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FCEC0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_MULTI_PREEVENT_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1856,7 +1856,7 @@ struct sVec3_1FCEC0
  * @param msg  nonzero on the transition the layout is applied for (the first-time flag)
  * @return always 0
  */
-extern "C" int func_001FCEC0(cOVState* self, void* msg)
+extern "C" int cOVState_MULTI_PREEVENT_onGainTransition(cOVState* self, void* msg)
 {
     if (msg != 0)
     {
@@ -1886,7 +1886,7 @@ extern "C" int func_001FCEC0(cOVState* self, void* msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_MULTI_PREEVENT_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
@@ -1896,9 +1896,9 @@ extern "C" void cUIState_onGainFocus(void* self);
  * Gains focus on the two-player pre-event overlay: starts the online overlay timeout and plays its menu sound.
  *
  * Runs cUIState_onGainFocus, sets cGameComm_mGameComm's mOverlayTimeout to 1200 frames when there is a link
- * (func_001FD150 closes the overlay when it runs out) and plays menu sound 0xE (cSSXAudio_MenuSound).
+ * (cOVState_MULTI_PREEVENT_onUpdate closes the overlay when it runs out) and plays menu sound 0xE (cSSXAudio_MenuSound).
  */
-extern "C" void func_001FD0D8(void* self)
+extern "C" void cOVState_MULTI_PREEVENT_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1910,7 +1910,7 @@ extern "C" void func_001FD0D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD118);
+INCLUDE_ASM("fe/ovstatepause", cOVState_MULTI_PREEVENT_onLoseFocus);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_StartEventWithNoStartGate(void* self);
@@ -1921,7 +1921,7 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(void* self);
  * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link, then calls cSSXAudio_StartEventWithNoStartGate on the sound system
  * (cAudioInterface_bxAudio()).
  */
-extern "C" void func_001FD118(void)
+extern "C" void cOVState_MULTI_PREEVENT_onLoseFocus(void)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
@@ -1932,7 +1932,7 @@ extern "C" void func_001FD118(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD150);
+INCLUDE_ASM("fe/ovstatepause", cOVState_MULTI_PREEVENT_onUpdate);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
@@ -1943,7 +1943,7 @@ extern "C" void* cOVState_onUpdate(void* self);
  * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
  * and cOVStateManager_mStatus to 1 (go to the next overlay).
  */
-extern "C" void func_001FD150(void* self)
+extern "C" void cOVState_MULTI_PREEVENT_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1955,7 +1955,7 @@ extern "C" void func_001FD150(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD190);
+INCLUDE_ASM("fe/ovstatepause", getPeakChallengeEventName);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_kT_EventPk1Race_b[];
@@ -1979,12 +1979,12 @@ static inline int sendHash_1FD190(char* name)
  * Looks up the string through SSXApp->FELocale's virtual slot 4 by the hash of its key: 6 kT_EventPk1Race_b, 7
  * kT_EventPk2Race_b, 8 kT_EventAllPeakRace_b, 9 kT_EventPk1Jam_b, 10 kT_EventPk2Jam_b, 11 kT_EventAllPeakJam_b. The map
  * template (cUITemplate_MAP_setupMenus, cUITemplate_MAP_setupPeakGoals), cOVState_REWARDS_onGainTransition,
- * cOVState_TOPTIMES_onCreateScreen and func_001FD320 use it.
+ * cOVState_TOPTIMES_onCreateScreen and cOVState_CHALLENGE_PREEVENT_onGainTransition use it.
  *
  * @param id  the event id, kGAMEEVENT_TIME_PEAK1 to kGAMEEVENT_POINTS_PEAK3 (cBENewRaceInterface_newRace's cGameEvent)
  * @return the 16-bit string (as an int), or 0 for any other id
  */
-extern "C" int func_001FD190(int id)
+extern "C" int getPeakChallengeEventName(int id)
 {
     switch (id) {
     case kGAMEEVENT_TIME_PEAK1: return sendHash_1FD190(str_kT_EventPk1Race_b);
@@ -1999,7 +1999,7 @@ extern "C" int func_001FD190(int id)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD268);
+INCLUDE_ASM("fe/ovstatepause", cOVState_CHALLENGE_PREEVENT_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -2014,9 +2014,9 @@ extern char str_OV_darkblue[];
  * Builds the rival-challenge pre-event overlay's screens.
  *
  * Adds the "68rival_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each, runs
- * cOVState_onCreateScreen and plays menu sound 0xE (cSSXAudio_MenuSound). The texts are filled in by func_001FD320.
+ * cOVState_onCreateScreen and plays menu sound 0xE (cSSXAudio_MenuSound). The texts are filled in by cOVState_CHALLENGE_PREEVENT_onGainTransition.
  */
-extern "C" void func_001FD268(cOVState* self)
+extern "C" void cOVState_CHALLENGE_PREEVENT_onCreateScreen(cOVState* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_68rival_pre), 0);
@@ -2035,7 +2035,7 @@ extern "C" void func_001FD268(cOVState* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FD320);
+INCLUDE_ASM("fe/ovstatepause", cOVState_CHALLENGE_PREEVENT_onGainTransition);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int idx);
@@ -2096,14 +2096,14 @@ static inline void* getObj_1FD320(cUIState* self, char* name)
  * short character name, then (wrapped) the challenge line: kT_OVRCMNChallengeBy (events 4-5), kT_HELPChalPeakRace (6-8)
  * or kT_HELPChalPeakJam (9-11) formatted with the rival's name (cBECharacterInterface_getShortNameByCharacter of cBENewRaceInterface_getRival), which replaces it.
  * "title1" reads kT_TITLERivalChallenge; "title2" gets "<location> - <kT_cmnRaceCaps_b>" (event 4), "<location> - Jam"
- * (5) or the event name func_001FD190 (6-11).
+ * (5) or the event name getPeakChallengeEventName (6-11).
  *
  * Objectives ("obj1", "obj2"): event 4 kT_HELPFirstToBottom and kT_HELPBeatChallengePeakRace, event 5
  * kT_HELPGetToBottomPoints and kT_HELPBeatChallPeakJam; both hide "obj2" and "bullet2" on kGAMEPATH_SINGLEEVENT or when
  * the peak event (6-8 for race, 9-11 for jam) of the current location (kLOCATION_ABC1, kLOCATION_DBC2, kLOCATION_EBC3)
  * is already unlocked
  * (cBENewPlayerInterface_isEventLocked), and hide "timescoretobeat". Events 6-8 show "<Time to beat:> <time>"
- * (kT_OVRCMNTimeToBeatColon and SSXApp->GameModeMan's uiTimeLimit / 60 as a time string, func_0020A1A8), with
+ * (kT_OVRCMNTimeToBeatColon and SSXApp->GameModeMan's uiTimeLimit / 60 as a time string, formatMinutesSeconds), with
  * kT_HELPRaceToBottom and kT_HELPBeatPostedTime, or kT_HELPBeatPostedTimePass while that peak (1 for event 6, 2 for
  * event 7) is still locked for the player (cBERewardInterface_isPeakLocked on BE interface 13; event 8 always uses the plain text).
  * Events 9-11 do the same with kT_OVRCMNScoreToBeatColon and uiPointTarget, kT_HELPMakeWayDnSlope and
@@ -2112,7 +2112,7 @@ static inline void* getObj_1FD320(cUIState* self, char* name)
  * @param msg  nonzero on the transition the texts are filled for (the first-time flag)
  * @return always 0
  */
-extern "C" int func_001FD320(cUIState* self, void* msg)
+extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void* msg)
 {
     unsigned short out[304];
     unsigned short fmt[0x18];
@@ -2150,7 +2150,7 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
         case kGAMEEVENT_POINTS_PEAK1:
         case kGAMEEVENT_POINTS_PEAK2:
         case kGAMEEVENT_POINTS_PEAK3:
-            cUIText_setUnicodeString(widget, (unsigned short*)func_001FD190(mode));
+            cUIText_setUnicodeString(widget, (unsigned short*)getPeakChallengeEventName(mode));
             break;
         }
         cUIText* statusA = (cUIText*)getObj_1FD320(self, str_obj1);
@@ -2204,7 +2204,7 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
             widget = getObj_1FD320(self, str_timescoretobeat);
             float mins = (float)stats->uiTimeLimit * 0.01666666753590107f;
             void* wholeSeconds = fptoui(mins);
-            func_002C2540_r(num, func_0020A1A8(wholeSeconds));
+            func_002C2540_r(num, formatMinutesSeconds(wholeSeconds));
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNTimeToBeatColon);
             func_002C2540_r(title, D_004A2550);
             sprintf1(text, title, labelText, num);
@@ -2242,7 +2242,7 @@ extern "C" int func_001FD320(cUIState* self, void* msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDB78);
+INCLUDE_ASM("fe/ovstatepause", cOVState_CHALLENGE_PREEVENT_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the rival-challenge pre-event overlay's menu events: feedback 0x101 (animation and sound) for kONNEXT,
@@ -2252,14 +2252,14 @@ INCLUDE_ASM("fe/ovstatepause", func_001FDB78);
  * @param event  the menu event (tUIMenuEvent)
  * @return 0x101 for kONNEXT, 0 otherwise
  */
-extern "C" int func_001FDB78(void* self, int menu, int event)
+extern "C" int cOVState_CHALLENGE_PREEVENT_onWidgetMenu(void* self, int menu, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDB88);
+INCLUDE_ASM("fe/ovstatepause", cOVState_CHALLENGE_PREEVENT_onWidgetEvent);
 #ifdef SKIP_ASM
 
 extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
@@ -2275,7 +2275,7 @@ extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
  * @param widget  the widget the event is for; nothing happens when it is null
  * @param event  the widget event
  */
-extern "C" void func_001FDB88(cUIState* self, int widget, int event)
+extern "C" void cOVState_CHALLENGE_PREEVENT_onWidgetEvent(cUIState* self, int widget, int event)
 {
     if (widget != 0 && event == cUIState::kONNEXT) {
         cOVStateManager_mStatus = 3;
@@ -3520,7 +3520,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
-extern "C" int func_001FD190(int id);
+extern "C" int getPeakChallengeEventName(int id);
 extern "C" void strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_002C2540(unsigned short* dst, char* src);
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
@@ -3553,7 +3553,7 @@ static inline unsigned short* lookupString_1FFF78(char* name)
  * Fills in the rewards overlay's event title and congratulation text the first time it is shown.
  *
  * Runs while mDoneTransition (+0x48) is 0, then sets it. "title_rewardlisting" names the event: the peak
- * event title (func_001FD190) for the peak events (cGameEvent kGAMEEVENT_TIME_PEAK1 .. kGAMEEVENT_POINTS_PEAK3), "%S -
+ * event title (getPeakChallengeEventName) for the peak events (cGameEvent kGAMEEVENT_TIME_PEAK1 .. kGAMEEVENT_POINTS_PEAK3), "%S -
  * Jam" for kGAMEEVENT_RIVALPOINTS, else "%S - %s" with the location name and the mode label (cGameMode
  * kGAMEMODE_RACE / kGAMEMODE_TIMECHALLENGE race, then slopestyle, big air, pipe). "1text" gets
  * kT_OVRCMNCongratUser with the human rider's short name.
@@ -3575,7 +3575,7 @@ bool cOVState_REWARDS::onGainTransition(int)
         int kind = cBENewRaceInterface_newRace.cGameEvent;
         switch (kind) {
         case kGAMEEVENT_TIME_PEAK1 ... kGAMEEVENT_POINTS_PEAK3:
-            strcpy1(result, (unsigned short*)func_001FD190(kind));
+            strcpy1(result, (unsigned short*)getPeakChallengeEventName(kind));
             break;
         case kGAMEEVENT_RIVALPOINTS:
             func_002C2540(fmt, str_pct_S_Jam);

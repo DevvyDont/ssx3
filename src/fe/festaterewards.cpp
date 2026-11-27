@@ -640,7 +640,7 @@ int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_loadIcons);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, const char* name, int a3, int a4, int a5);
 struct sVE_FE60 {
     short delta;
     short index;
@@ -651,7 +651,7 @@ struct sVE_FE60 {
  * Starts loading the gallery's icon file, or marks the icons loaded when the gallery has none.
  *
  * The file name comes from vtable slot 25 (the per-gallery icon file, e.g. cFEStateRewardGalleryPosters_getIconsFileName's
- * "data/char/rwrdps2.big|poster_icon.ssh"; the cheat-character gallery has none). With a name, func_0019DA10() requests
+ * "data/char/rwrdps2.big|poster_icon.ssh"; the cheat-character gallery has none). With a name, cFEBoltFileManager_requestFile() requests
  * it from the FE file table (SSXApp->RealFE + 0x1A70) in the bank of the player's character (+0x50) with arguments 9, 1
  * and 0, the slot goes into +0x8EC, and flags +0x48 get bit 2 (icons loading) set and bit 3 (icons loaded) cleared;
  * otherwise bit 3 is set and bit 2 cleared. Slot 25 is called twice, once to test and once for the name. Called by
@@ -661,7 +661,7 @@ void cFEStateRewardGalleryBase::loadIcons()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (getIconsFileName() != 0) {
-        mIconsFileIndex = func_0019DA10(mgr, mCharID, getIconsFileName(), 9, 1, 0);
+        mIconsFileIndex = cFEBoltFileManager_requestFile(mgr, mCharID, getIconsFileName(), 9, 1, 0);
         mLoadingState = (mLoadingState & ~8) | 4;
     } else {
         mLoadingState = (mLoadingState | 8) & ~4;
@@ -672,11 +672,11 @@ void cFEStateRewardGalleryBase::loadIcons()
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateIconsLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" bool func_0019E238(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
+extern "C" bool cFEBoltFileManager_isFileLoaded(void* self, int bank, int i);
 struct sSelf001CFFF8;
 struct sData001CFFF8;
-extern "C" SHAPEFILE* func_0019E2B0(void* self, int bank, int i);
+extern "C" SHAPEFILE* cFEBoltFileManager_getFileDataValue(void* self, int bank, int i);
 extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, SHAPEFILE* data);
 struct sVE_FF10 {
     short delta;
@@ -692,9 +692,9 @@ struct sVE_FF10i {
 /**
  * Finishes the icon-file load: once the file is in, builds the icon table from it and releases the file.
  *
- * Only while bit 3 (icons loaded) of flags +0x48 is clear, and once func_0019E238() reports the slot in +0x8EC (bank
- * +0x50 of the FE file table, SSXApp->RealFE + 0x1A70) ready: passes the file from func_0019E2B0() to cFEStateRewardGalleryBase_allocIcons(),
- * releases the slot (func_0019DC20), sets +0x8EC to -1, clears bit 2 and sets bit 3. If the rewards are loaded too (bit
+ * Only while bit 3 (icons loaded) of flags +0x48 is clear, and once cFEBoltFileManager_isFileLoaded() reports the slot in +0x8EC (bank
+ * +0x50 of the FE file table, SSXApp->RealFE + 0x1A70) ready: passes the file from cFEBoltFileManager_getFileDataValue() to cFEStateRewardGalleryBase_allocIcons(),
+ * releases the slot (cFEBoltFileManager_releaseFile), sets +0x8EC to -1, clears bit 2 and sets bit 3. If the rewards are loaded too (bit
  * 1), the first cell (+0x924) becomes the current cell (+0x8FC) and vtable slots 40 (cFEStateRewardGalleryBase_updateList, grid refresh) and
  * 33 (cFEStateRewardGalleryBase_updateHelpText, reward 0) run.
  */
@@ -702,9 +702,9 @@ void cFEStateRewardGalleryBase::updateIconsLoad()
 {
     if (((mLoadingState >> 3) & 1) == 0) {
         char* mgr = SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(mgr, mCharID, mIconsFileIndex) != 0) {
-            allocIcons(func_0019E2B0(mgr, mCharID, mIconsFileIndex));
-            func_0019DC20(mgr, mCharID, mIconsFileIndex);
+        if (cFEBoltFileManager_isFileLoaded(mgr, mCharID, mIconsFileIndex) != 0) {
+            allocIcons(cFEBoltFileManager_getFileDataValue(mgr, mCharID, mIconsFileIndex));
+            cFEBoltFileManager_releaseFile(mgr, mCharID, mIconsFileIndex);
             mIconsFileIndex = -1;
             mLoadingState = (mLoadingState & ~4) | 8;
             if ((mLoadingState >> 1) & 1) {
@@ -763,12 +763,12 @@ void cFEStateRewardGalleryBase::allocIcons(SHAPEFILE* data)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_purgeIcons);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 /**
  * Empties the gallery's icon table, releasing every registered icon and any icon-file slot still held.
  *
  * Each entry with a handle >= 0 is released through GrMan's virtual v50 (as the view declares it); every entry's handle
- * becomes -1 and its name empty. A file slot in +0x8EC that is >= 0 is released in the FE file table (func_0019DC20,
+ * becomes -1 and its name empty. A file slot in +0x8EC that is >= 0 is released in the FE file table (cFEBoltFileManager_releaseFile,
  * bank +0x50) and set to -1. Clears bit 3 (icons loaded) of flags +0x48. The callers are in fe/fepopupmisc.cpp, among
  * them the gallery vtables' slot-1 destructors (cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts, cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos, cFEStateRewardGalleryToys__cFEStateRewardGalleryToys, cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars).
  */
@@ -784,7 +784,7 @@ void cFEStateRewardGalleryBase::purgeIcons()
     }
     int iconSlot = mIconsFileIndex;
     if (iconSlot >= 0) {
-        func_0019DC20(SSXApp->RealFE->mBoltFileManager, mCharID, iconSlot);
+        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, mCharID, iconSlot);
         mIconsFileIndex = -1;
     }
     mLoadingState &= ~8;
@@ -2197,11 +2197,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward__cFEStatePreviewReward);
 
 extern void* cFEStatePreviewReward_vtbl[];
 extern void* cFEState_vtbl[];
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
- * Destroys a reward preview: frees its texture and releases its file slot (func_0019DC20), then the base
+ * Destroys a reward preview: frees its texture and releases its file slot (cFEBoltFileManager_releaseFile), then the base
  * state.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -2216,7 +2216,7 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewRewa
     }
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
+        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
     }
     self->mTextureFileIndex = -1;
     self->mTextureID = -1;
@@ -2545,27 +2545,27 @@ void cFEStatePreviewReward::setReward(int kind, void* data)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_loadTexture);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, const char* name, int a3, int a4, int a5);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, const char* name, int a3, int a4, int a5);
 
 /**
  * Requests the preview's picture file from the FE file table and keeps the slot in +0x6C.
  *
- * Calls func_0019DA10() on SSXApp->RealFE + 0x1A70 in the bank of the player's character (+0x64) with the name and
+ * Calls cFEBoltFileManager_requestFile() on SSXApp->RealFE + 0x1A70 in the bank of the player's character (+0x64) with the name and
  * arguments 9, 1 and 0.
  *
  * @param fileName  the picture file name (the reward record's mpTextureFileName)
  */
 void cFEStatePreviewReward::loadTexture(const char* fileName)
 {
-    mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, fileName, 9, 1, 0);
+    mTextureFileIndex = cFEBoltFileManager_requestFile(SSXApp->RealFE->mBoltFileManager, mCharID, fileName, 9, 1, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_updateTextureLoad);
 #ifdef SKIP_ASM
-extern "C" bool func_0019E238(void* self, int bank, int i);
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" bool cFEBoltFileManager_isFileLoaded(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 
 struct sSelfK1D2198 {
     char pad_0x0[0x48];
@@ -2588,10 +2588,10 @@ struct sVEK1D2198 {
  * Finishes the preview picture load: registers the picture with GrMan, picks the square, horizontal or vertical frame
  * by its shape and shows the picture there.
  *
- * Returns at once until func_0019E238() reports the slot in +0x6C (bank +0x64 of the FE file table) ready. Then takes
- * the first shape of the loaded file (func_0019E2B0): its width (+4) and height (+6) set the shape index +0x74 (1 when
+ * Returns at once until cFEBoltFileManager_isFileLoaded() reports the slot in +0x6C (bank +0x64 of the FE file table) ready. Then takes
+ * the first shape of the loaded file (cFEBoltFileManager_getFileDataValue): its width (+4) and height (+6) set the shape index +0x74 (1 when
  * wider, 2 when taller, 0 when square); SHAPE_name() copies its name and GrMan's virtual v46 (as the view declares it)
- * registers it, the handle going into +0x70. The file slot is released (func_0019DC20) and set to -1. When the bitmap
+ * registers it, the handle going into +0x70. The file slot is released (cFEBoltFileManager_releaseFile) and set to -1. When the bitmap
  * (+0x48) and the frame (+0x54) for that shape both exist, the bitmap's mTextureID becomes the handle with
  * mpTextureElem 0 and the frame is shown (setVisible 1). Called by cFEStatePreviewReward_onUpdate while the slot is >=
  * 0.
@@ -2599,9 +2599,9 @@ struct sVEK1D2198 {
 void cFEStatePreviewReward::updateTextureLoad()
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (func_0019E238(mgr, mCharID, mTextureFileIndex) == 0)
+    if (cFEBoltFileManager_isFileLoaded(mgr, mCharID, mTextureFileIndex) == 0)
         return;
-    SHAPEFILE* data = func_0019E2B0(mgr, mCharID, mTextureFileIndex);
+    SHAPEFILE* data = cFEBoltFileManager_getFileDataValue(mgr, mCharID, mTextureFileIndex);
     char* shapeHeader = (char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[0].off;
     short shapeWidth = *(short*)(shapeHeader + 4);
     short shapeHeight = *(short*)(shapeHeader + 6);
@@ -2615,7 +2615,7 @@ void cFEStatePreviewReward::updateTextureLoad()
     SHAPE_name(data, 0, &ent);
     ent.mName[4] = 0;
     mTextureID = GrMan->AddTexture((const SHAPE*)shapeHeader, (const char*)&ent, 0, 1, -1);
-    func_0019DC20(mgr, mCharID, mTextureFileIndex);
+    cFEBoltFileManager_releaseFile(mgr, mCharID, mTextureFileIndex);
     mTextureFileIndex = -1;
     sSelfK1D2198* previewState = (sSelfK1D2198*)this;
     char* bitmapWidget = previewState->a48[previewState->kind];
@@ -2862,20 +2862,20 @@ void cFEStateVideoPlayer::setVideoSourceFiles(const char* videoFile, const char*
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Start);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002B3A70(void* p);
+extern "C" void cMusicSys_PauseSong(void* p);
 extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" void cMoviePlayer_asyncPlay(void* p);
 
 /**
  * Starts the movie: turns the current song down, then opens and starts the movie player with the source files.
  *
- * Calls func_002B3A70() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level to 0), sets the word at +0x254 of
+ * Calls cMusicSys_PauseSong() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level to 0), sets the word at +0x254 of
  * the settings block to 1, opens the movie with cMoviePlayer_init() and the settings block (+0x24C), starts it with
  * cMoviePlayer_asyncPlay(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
  */
 void cFEStateVideoPlayer::Start()
 {
-    func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
+    cMusicSys_PauseSong(&cAudioInterface_bxAudio()->MusicSys);
     mOptions.bSoundOn = 1;
     cMoviePlayer_init(mpMoviePlayer, (char*)&mOptions);
     cMoviePlayer_asyncPlay(mpMoviePlayer);
@@ -2888,19 +2888,19 @@ void cFEStateVideoPlayer::Start()
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Stop);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002B3A98(void* self);
+extern "C" void cMusicSys_ResumeSong(void* self);
 extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Stops the video player: restores the current song and closes the front state.
  *
- * Calls func_002B3A98() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level back to 0x1000), clears the stop
+ * Calls cMusicSys_ResumeSong() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level back to 0x1000), clears the stop
  * request (+0x27C), and marks the front state on the engine's state stack (mpEngine + 0x18) pending delete in mode 6
  * with cUIStateStack_pop(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
  */
 void cFEStateVideoPlayer::Stop()
 {
-    func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
+    cMusicSys_ResumeSong(&cAudioInterface_bxAudio()->MusicSys);
     mStopPending = 0;
     cUIStateStack_pop(&mpEngine->mStateStack, 1);
 }

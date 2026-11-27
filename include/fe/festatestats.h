@@ -12,7 +12,7 @@
 // cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateStats_onCreateScreen, 7 onGainTransition cFEStateStats_onGainTransition, 9 onInputAlways cFEStateStats_onInputAlways, 12 onUpdate
 // cFEStateStats_onUpdate, 13 cFEStateStats_onMenuGainFocus, 18 onWidgetCreate cFEStateStats_onWidgetCreate, 19 onWidgetEvent cFEStateStats_onWidgetEvent, 20
-// onWidgetMenu cFEStateStats_onWidgetMenu, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
+// onWidgetMenu cFEStateStats_onWidgetMenu, 25 cFEStateStats_fillHelpPopup (help), 31 cFEStateStats_onNetEvent (net event 0xE1), 32 cFEStateStats_publishPresence).
 // Methods: fe/feasyncfile 0x1C2D18-0x1C4F58. tools/layout_xlate.py: preview 0xC4 = retail 0x6E4 (+0x620).
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. No On Tour DWARF and no
@@ -36,23 +36,23 @@ struct cFEStateStats : public cFEStateNet {
     //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateStats_cFEStateStats stores 0x42
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateStats
     cUIMenu* mpMenus[4];            // 0x6D0 [R] 0 (both ctors loop over the four); [U] onWidgetCreate cFEStateStats_onWidgetCreate: [0] "HeadingsMenu",
-                                    //       [1] "EventsMenu", [2] "CoursesMenu", [3] "ResultsMenu" (scrollable, input map 1); func_001C4D28 /
-                                    //       func_001C4E40 move the focus with mpMenus[miFocusMenu]; func_001C4CD8 selects row 0 of [3]
-    int miMode;                     // 0x6E0 [R] 0; [U] func_001C3EE8(self, mode) stores it (0 overall, 1 race, 2 freestyle: the "Txt_Overal" /
-                                    //       "Txt_Race" / "Txt_FreeStyle" highlights); cFEStateStats_onWidgetEvent / func_001C47A8 / func_001C49C8 switch on it
-    unsigned int miFocusMenu;       // 0x6E4 [R] 0; [U] the focused mpMenus[] index: func_001C4D28 / func_001C4E40 step it (0..3,
+                                    //       [1] "EventsMenu", [2] "CoursesMenu", [3] "ResultsMenu" (scrollable, input map 1); cFEStateStats_focusNextMenu /
+                                    //       cFEStateStats_focusPrevMenu move the focus with mpMenus[miFocusMenu]; cFEStateStats_onNetEvent selects row 0 of [3]
+    int miMode;                     // 0x6E0 [R] 0; [U] cFEStateStats_setMode(self, mode) stores it (0 overall, 1 race, 2 freestyle: the "Txt_Overal" /
+                                    //       "Txt_Race" / "Txt_FreeStyle" highlights); cFEStateStats_onWidgetEvent / cFEStateStats_fillEventList / cFEStateStats_fillCourseList switch on it
+    unsigned int miFocusMenu;       // 0x6E4 [R] 0; [U] the focused mpMenus[] index: cFEStateStats_focusNextMenu / cFEStateStats_focusPrevMenu step it (0..3,
                                     //       wrapping); onInputAlways cFEStateStats_onInputAlways moves only while it is < 3
     int miFirstResult;              // 0x6E8 [R] 0; [U] the results list's scroll offset: onWidgetMenu cFEStateStats_onWidgetMenu stores it (event 4),
-                                    //       func_001C3310 shows rows miFirstResult..+9, func_001C4B78 resets it
-    int mbShowTime;                 // 0x6EC [R] 1 (cFEStateStats_cFEStateStats); [U] func_001C3EE8 sets it for mode 1, clears it for 0 and 2;
-                                    //       func_001C3310 prints the score as a time (func_001C4F58) when set, else as points
+                                    //       cFEStateStats_fillResultRows shows rows miFirstResult..+9, cFEStateStats_requestResults resets it
+    int mbShowTime;                 // 0x6EC [R] 1 (cFEStateStats_cFEStateStats); [U] cFEStateStats_setMode sets it for mode 1, clears it for 0 and 2;
+                                    //       cFEStateStats_fillResultRows prints the score as a time (cFEStateStats_formatTime) when set, else as points
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateStats1() __asm__("cFEStateStats_cFEStateStats1");

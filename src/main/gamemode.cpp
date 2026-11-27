@@ -863,8 +863,8 @@ extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_00147D20(void* iface, int a1);
-extern "C" void func_00147E18(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_recordDifficultyWin(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_recordDifficultyLoss(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
@@ -888,7 +888,7 @@ static inline cRider* Rider_239230(int i)
  *
  * Stores the rider's score (its metrics block + 0xFC + 0x9C) or 0 when it did not finish (D_005366A8 marks that) in the
  * heat's column. Once cAI_isRaceFinished: heat 1 ranks on heats 1 + 2 and sends a top-3 rider to heat 3; heat 2 also
- * reports the result to the player interface (func_00147D20 for a win, func_00147E18 for a loss, career only); heat 3
+ * reports the result to the player interface (cBENewPlayerInterface_recordDifficultyWin for a win, cBENewPlayerInterface_recordDifficultyLoss for a loss, career only); heat 3
  * estimates unfinished riders' scores (cRider_estimateFinishScore), locks the results and ranks. Finally sets the human
  * rider's +0x2F8 to 0.7, 0.35 or 0 for first, second or other place. Slot +0x44 (raceFinish) of cGMBigAirHandler_vtbl.
  *
@@ -944,12 +944,12 @@ void cGMBigAirHandler::raceFinish(int idx)
             gm->iNextHeat = 3;
             Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
             if (quick == 0 && cGameModeMan_iRanking[idx] == 0)
-                func_00147D20(player, 0);
+                cBENewPlayerInterface_recordDifficultyWin(player, 0);
         } else {
             gm->iNextHeat = 1;
             Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
             if (quick == 0)
-                func_00147E18(player, 0);
+                cBENewPlayerInterface_recordDifficultyLoss(player, 0);
         }
         break;
     case cGameModeMan::kFinalHeat: {
@@ -976,11 +976,11 @@ void cGMBigAirHandler::raceFinish(int idx)
         if (lost) {
             Rider_239230(idx)->ShouldCelebrateAtFinish = 0;
             if (quick == 0)
-                func_00147E18(player, 0);
+                cBENewPlayerInterface_recordDifficultyLoss(player, 0);
         } else {
             Rider_239230(idx)->ShouldCelebrateAtFinish = 1;
             if (quick == 0)
-                func_00147D20(player, 0);
+                cBENewPlayerInterface_recordDifficultyWin(player, 0);
         }
         break;
     }
@@ -1733,9 +1733,9 @@ extern "C" int cAI_isRaceFinished(void* race);
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
-extern "C" void func_00147D20(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_recordDifficultyWin(void* iface, int a1);
 
-extern "C" void func_00147E18(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_recordDifficultyLoss(void* iface, int a1);
 
 extern "C" int cRider_estimateFinishTick(void* self);
 
@@ -1753,7 +1753,7 @@ static inline int vcall_23A760(char* obj, int slot)
  * Stores the finish tick (360000 for did-not-finish) in the heat's row of the table at +0x58. When the race is over and
  * the rider's state says so, estimates unfinished riders (cRider_estimateFinishTick), ranks with sortTimes
  * (cGameModeMan_sortTimes) and: a top-3 human goes to the next heat (heat 3 ends the event), otherwise repeats the heat. On the
- * career path it reports big wins and losses to the player interface (func_00147D20 / func_00147E18), and heat 3 locks
+ * career path it reports big wins and losses to the player interface (cBENewPlayerInterface_recordDifficultyWin / cBENewPlayerInterface_recordDifficultyLoss), and heat 3 locks
  * the results. Sets the human's +0x2F8 to 0.7, 0.35 or 0 by place. Slot +0x44 (raceFinish) of cGMRaceHandler_vtbl.
  *
  * @param idx  the rider index
@@ -1806,7 +1806,7 @@ void cGMRaceHandler::raceFinish(int idx)
                      && D_00536640[1] - D_00536640[0] > 300) ||
                     (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat
                      && D_00536640[1] - D_00536640[0] > 180)) {
-                    func_00147D20(player, 1);
+                    cBENewPlayerInterface_recordDifficultyWin(player, 1);
                 }
             }
             if (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat) {
@@ -1824,7 +1824,7 @@ void cGMRaceHandler::raceFinish(int idx)
                 (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kHeat2 && cGameModeMan_iRanking[n] >= 4) ||
                 (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat
                  && cGameModeMan_iRanking[n] == cGameModeMan::kLastPlace)) {
-                func_00147E18(player, 1);
+                cBENewPlayerInterface_recordDifficultyLoss(player, 1);
             }
         }
     }

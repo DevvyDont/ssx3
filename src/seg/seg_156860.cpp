@@ -488,7 +488,7 @@ extern int cCommSystem_mNumNetConn;
  * Reads the list of network configurations into cCommSystem_mNetConns.
  *
  * Asks for up to 10 entries (NetConnQuery with @p listParam and the 0x100-byte records of cCommSystem_mNetConns) and stores
- * the count in cCommSystem_mNumNetConn. The debug menu screen and func_001B4CD8 call it.
+ * the count in cCommSystem_mNumNetConn. The debug menu screen and cFEStateNetConfig_loadConfigs call it.
  *
  * @param commSystem  the connection manager (not used)
  * @param listParam  passed to NetConnQuery first
@@ -610,7 +610,7 @@ extern int D_004A2EC0;
 /**
  * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (func_0031B008 with 1 and D_004A2EC0).
  *
- * func_001B5BD8 and the debug menu screen call it.
+ * cFEStateNetConfig_onCreateConfigPopupEvent and the debug menu screen call it.
  */
 extern "C" void func_00256088(void) {
     func_0031B008_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
@@ -2034,7 +2034,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_displayError);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_updateDisplayError_78F8(void *) __asm__("cGameComm_updateDisplayError");
 extern "C" void cGameComm_updateMessageDisplay_78F8(void *) __asm__("cGameComm_updateMessageDisplay");
-extern "C" void func_00266DF8_78F8(int) __asm__("func_00266DF8");
+extern "C" void cVoipMan_disconnect_78F8(int) __asm__("cVoipMan_disconnect");
 extern int VoipMan;
 
 /**
@@ -2042,7 +2042,7 @@ extern int VoipMan;
  *
  * Always clears the waiting message, the peer's pause and the unpause flag and timer. On the first error
  * only, it sets mCheating[0] to 4 if this machine's controller is unplugged mid-race with no other error,
- * closes the voice link (func_00266DF8 on VoipMan, probably cVoipMan), lets the connection popup close,
+ * closes the voice link (cVoipMan_disconnect on VoipMan, probably cVoipMan), lets the connection popup close,
  * clears mSyncInput and mConnected, sets mError and mDisplayError and runs updateDisplayError.
  */
 void cGameComm::displayError()
@@ -2060,7 +2060,7 @@ void cGameComm::displayError()
             }
         }
         if (VoipMan != 0) {
-            func_00266DF8_78F8(VoipMan);
+            cVoipMan_disconnect_78F8(VoipMan);
         }
         cGameComm_updateMessageDisplay_78F8(((char*)this));
         mSyncInput = 0;
@@ -2936,35 +2936,35 @@ void cGameComm::gameStartGate()
 INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartRace);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00260F80_8988(void) __asm__("func_00260F80");
-extern "C" int func_00261460_8988(BuddyMan *) __asm__("func_00261460");
-extern "C" void func_002613C8_8988(BuddyMan *) __asm__("func_002613C8");
-extern "C" void func_0025B800_8988(LobbyMan *) __asm__("func_0025B800");
-extern "C" void func_00262768_8988(BuddyMan *, int, int, const char *, const char *, const char *)
-    __asm__("func_00262768");
+extern "C" void BuddyMan_createInstance_8988(void) __asm__("BuddyMan_createInstance");
+extern "C" int BuddyMan_isLoggedIn_8988(BuddyMan *) __asm__("BuddyMan_isLoggedIn");
+extern "C" void BuddyMan_reconnect_8988(BuddyMan *) __asm__("BuddyMan_reconnect");
+extern "C" void LobbyMan_disconnect_8988(LobbyMan *) __asm__("LobbyMan_disconnect");
+extern "C" void BuddyMan_setPresence_8988(BuddyMan *, int, int, const char *, const char *, const char *)
+    __asm__("BuddyMan_setPresence");
 
 /**
  * Marks the online race as started and tells the buddy server that this player is racing.
  *
- * Does nothing once the game is over. Creates (func_00260F80) and connects (func_002613C8) BuddyMan when
- * needed, then sets its presence to LOCID 9 with the opponent (LobbyMan mOpponent) through func_00262768.
+ * Does nothing once the game is over. Creates (BuddyMan_createInstance) and connects (BuddyMan_reconnect) BuddyMan when
+ * needed, then sets its presence to LOCID 9 with the opponent (LobbyMan mOpponent) through BuddyMan_setPresence.
  * Stores the start time (SSXApp +0x18 / +0x10) in mRaceStartTime, sets mRaceInProgress and disarms the link timeout.
  */
 void cGameComm::gameStartRace()
 {
     if (mState < kGameComm_GameOver) {
         if (BuddyMan_mBuddyMan == 0) {
-            func_00260F80_8988();
+            BuddyMan_createInstance_8988();
         }
-        if (func_00261460_8988(BuddyMan_mBuddyMan) == 0) {
-            func_002613C8_8988(BuddyMan_mBuddyMan);
+        if (BuddyMan_isLoggedIn_8988(BuddyMan_mBuddyMan) == 0) {
+            BuddyMan_reconnect_8988(BuddyMan_mBuddyMan);
         }
         if (BuddyMan_mBuddyMan == 0) {
-            func_0025B800_8988(LobbyMan_mLobbyMan);
+            LobbyMan_disconnect_8988(LobbyMan_mLobbyMan);
         }
         BuddyMan* buddyMan = BuddyMan_mBuddyMan;
         if (buddyMan != 0) {
-            func_00262768_8988(buddyMan, 1, 9, LobbyMan_mLobbyMan->mOpponent, 0, 0);
+            BuddyMan_setPresence_8988(buddyMan, 1, 9, LobbyMan_mLobbyMan->mOpponent, 0, 0);
         }
         mRaceStartTime = SSXApp->TimerTick / SSXApp->TimerHz;
         mRaceInProgress = 1;
@@ -3008,11 +3008,11 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameExit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cBE_getInterface_8AE0(void*, int) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00260F80();
-extern "C" int func_00261460(BuddyMan*);
-extern "C" void func_002613C8(BuddyMan*);
-extern "C" void func_0025B800(LobbyMan*);
-extern "C" void func_00262768(BuddyMan*, int, int, const char*, const char*, const char*);
+extern "C" void BuddyMan_createInstance();
+extern "C" int BuddyMan_isLoggedIn(BuddyMan*);
+extern "C" void BuddyMan_reconnect(BuddyMan*);
+extern "C" void LobbyMan_disconnect(LobbyMan*);
+extern "C" void BuddyMan_setPresence(BuddyMan*, int, int, const char*, const char*, const char*);
 extern "C" void cGameComm_sendExitGame(cGameComm*);
 extern "C" void cGameComm_gameEnded(cGameComm*);
 extern "C" void cBENetworkInterface_copyProfile(void *, int, int);
@@ -3027,17 +3027,17 @@ extern "C" void* cBE_getBE();
 void cGameComm::gameExit()
 {
     if (BuddyMan_mBuddyMan == 0) {
-        func_00260F80();
+        BuddyMan_createInstance();
     }
-    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
-        func_002613C8(BuddyMan_mBuddyMan);
+    if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0) {
+        BuddyMan_reconnect(BuddyMan_mBuddyMan);
     }
     if (BuddyMan_mBuddyMan == 0) {
-        func_0025B800(LobbyMan_mLobbyMan);
+        LobbyMan_disconnect(LobbyMan_mLobbyMan);
     }
     BuddyMan* buddyMan = BuddyMan_mBuddyMan;
     if (buddyMan != 0) {
-        func_00262768(buddyMan, 1, 0, 0, 0, 0);
+        BuddyMan_setPresence(buddyMan, 1, 0, 0, 0, 0);
     }
     sendExitGame();
     gameEnded();
@@ -3296,21 +3296,21 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_9098(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void*, int);
-extern "C" void func_0014EBB8(void* iface, const char* name);
-extern "C" void func_0014EBD8(void* iface, const char* name);
-extern "C" void func_002639E0(int a, int b, int c, int d, int e);
+extern "C" void cBENetworkInterface_setOpponentName(void* iface, const char* name);
+extern "C" void cBENetworkInterface_setMyName(void* iface, const char* name);
+extern "C" void cGameConnMan_connect(int a, int b, int c, int d, int e);
 
 /**
  * Starts the peer-to-peer race connection for the lobby's game.
  *
  * Takes the peer's address from LobbyMan (the opponent's when hosting, else the host's), stores player 0's character
  * (BE interface 1) in cBENetworkInterface_networkOpt.MyCharacterID[0], gives BE interface 7 the opponent and the
- * persona (func_0014EBB8, func_0014EBD8) and calls its submit (virtual slot 1). Then it calls func_002639E0 with the
+ * persona (cBENetworkInterface_setOpponentName, cBENetworkInterface_setMyName) and calls its submit (virtual slot 1). Then it calls cGameConnMan_connect with the
  * peer address and the host flag. LobbyMan_onplaymsg calls it with func_002591D0's object.
  *
  * @param peerSession  the game-connection object
- * @param ctrlId  passed to func_002639E0 as the controller id
- * @param cancelFlag  passed to func_002639E0 as its cancel flag
+ * @param ctrlId  passed to cGameConnMan_connect as the controller id
+ * @param cancelFlag  passed to cGameConnMan_connect as its cancel flag
  */
 extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
 {
@@ -3321,10 +3321,10 @@ extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
     cBEInterface* ri = cBE_getInterface_9098(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.MyCharacterID = cBENewPlayerInterface_getPlayerCharID(pi, 0);
-    func_0014EBB8(ri, LobbyMan_mLobbyMan->mOpponent);
-    func_0014EBD8(ri, LobbyMan_mLobbyMan->mPersona);
+    cBENetworkInterface_setOpponentName(ri, LobbyMan_mLobbyMan->mOpponent);
+    cBENetworkInterface_setMyName(ri, LobbyMan_mLobbyMan->mPersona);
     ri->submit();
-    func_002639E0(peerSession, peerAddr, lobbyMan->mIsHost, ctrlId, cancelFlag);
+    cGameConnMan_connect(peerSession, peerAddr, lobbyMan->mIsHost, ctrlId, cancelFlag);
 }
 #endif
 
@@ -3433,7 +3433,7 @@ INCLUDE_ASM("seg/seg_156860", func_00259230);
  * Passes an event to the front end's top screen.
  *
  * When the front end exists, takes the top state of its UI engine's state stack (cUIStateStack_getTopState) and calls
- * its handleEvent (virtual slot 24) with the event's first word and the event. func_0017D260 calls it.
+ * its handleEvent (virtual slot 24) with the event's first word and the event. dispatchLobbyEvent calls it.
  *
  * @param event  the event (first word: its id)
  */

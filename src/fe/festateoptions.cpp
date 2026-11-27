@@ -116,7 +116,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* o
 extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void cKeyboardPopup_setStatic2(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
-extern "C" bool func_00187D38(void* self);
+extern "C" bool applyCheatCode(void* self);
 extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -153,7 +153,7 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  * probably getNextState returns for the widget's misc data.
  *
  * kONPREV (back) does the same save check or transition-out. kONKEYBOARDEND (the keyboard popup is done) checks the
- * typed text with func_00187D38 (unknown) and calls slot 2 of the engine's listener at +0x14 (default
+ * typed text with applyCheatCode (unknown) and calls slot 2 of the engine's listener at +0x14 (default
  * gUISoundNull) with 6 on a result of 1, else 4, then forgets the popup.
  *
  * @param widget  the widget the event is for
@@ -209,7 +209,7 @@ void cFEStateOptions::onWidgetEvent(cUIThing* widget, unsigned int event)
         break;
     }
     case cUIState::kONKEYBOARDEND: {
-        int r = func_00187D38((char*)mpKeyboard + 0x74);
+        int r = applyCheatCode((char*)mpKeyboard + 0x74);
         char* obj = &gUISoundNull;
         char* sound = (char*)mpEngine->mpSound;
         if (sound != 0)
@@ -396,7 +396,7 @@ void cFEStateOptions::saveOptionPrompt()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188EE8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_cFEStateOptionsGame1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsGame_vtbl[];
@@ -412,7 +412,7 @@ extern void* cFEStateOptionsGame_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00188EE8(cFEStateOptionsGame* self)
+extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame1(cFEStateOptionsGame* self)
 {
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateOptionsGame_vtbl;
@@ -600,7 +600,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cBEOptionInterface_defaultGame(void* iface);
 extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0029ED90(void* p, int a);
+extern "C" void cSSXAudio_OpenSpeechLanguage(void* p, int a);
 extern char str_111resetopts[];
 extern char str_24screen_position[];
 extern int D_004A14D0;
@@ -643,7 +643,7 @@ static inline sGameCfg_189610 Cfg_189610()
  * kONPOPUPCREATE does nothing. On kONPOPUPDESTROY the popup's answer is its virtual slot 23 (getData) with 2, nonzero
  * meaning accepted, and the popup is told apart by its mHashName (+0xC):
  * - "111resetopts" accepted: resets the game options to their defaults (cBEOptionInterface_defaultGame), sets the changed flag
- *   D_004A14D0, refreshes the widgets (cFEStateOptionsGame_updateWidget) and reloads the language audio (func_0029ED90 on cAudioInterface_bxAudio's
+ *   D_004A14D0, refreshes the widgets (cFEStateOptionsGame_updateWidget) and reloads the language audio (cSSXAudio_OpenSpeechLanguage on cAudioInterface_bxAudio's
  *   gSSXAudio, restart 1).
  * - "24screen_position" accepted: stores the popup's getData(0) and getData(1) into bytes 6 and 5 (f6, f5) of
  *   cBEOptionInterface_mOption, the horizontal and vertical screen offsets, and sets D_004A14D0. Declined: sends the
@@ -667,7 +667,7 @@ void cFEStateOptionsGame::onPopupEvent(cUIState* popup, unsigned int event)
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
                 updateWidget();
-                func_0029ED90(cAudioInterface_bxAudio(), 1);
+                cSSXAudio_OpenSpeechLanguage(cAudioInterface_bxAudio(), 1);
             }
         } else if (Is_189610(popup->mHashName, str_24screen_position)) {
             if (GetOpt_189610(((char*)popup), 2)) {
@@ -744,7 +744,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0029ED90(void* p, int a);
+extern "C" void cSSXAudio_OpenSpeechLanguage(void* p, int a);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -878,7 +878,7 @@ void cFEStateOptionsGame::onWidgetEvent(cUIThing* widget, unsigned int event)
             void* thisp = vthis(locale, vt[3]);
             vt[3].fn(thisp, cUIListBox_getCurrentEntryData(((char*)widget)));
             Refresh_189980((this));
-            func_0029ED90(cAudioInterface_bxAudio(), 1);
+            cSSXAudio_OpenSpeechLanguage(cAudioInterface_bxAudio(), 1);
         }
         if (((signed char*)&mLanguageSlot)[1] >= 0 && Is_189980(widget->mHashName,
                 D_00440FD8[((signed char*)&mLanguageSlot)[1]])) {
@@ -995,7 +995,7 @@ void cFEStateOptionsGame::updateWidget()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A258);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_cFEStateOptionsSound1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsSound_vtbl[];
@@ -1012,7 +1012,7 @@ extern int D_004A14D4;
  *
  * @return @p self
  */
-extern "C" void* func_0018A258(cFEStateOptionsSound* self)
+extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound1(cFEStateOptionsSound* self)
 {
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateOptionsSound_vtbl;
@@ -1077,9 +1077,9 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cBEOptionInterface_defaultSound(void* iface);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* self);
@@ -1129,8 +1129,8 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * Only kONPOPUPDESTROY from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData)
  * with 2 is nonzero it resets the sound options (cBEOptionInterface_defaultSound, the sound step of
  * cBEOptionInterface_revert), switches the speaker mode to bits 12-13 (`output`) with
- * cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes (func_00287410,
- * cSSXAudio_SetSFXVolume, func_00287520 on gSSXAudio), bit 17 (`iUseDJSpeech`) through cSSXAudio_SetDJSpeech and bit 16
+ * cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes (cSSXAudio_ApplyMusicVolume,
+ * cSSXAudio_SetSFXVolume, cSSXAudio_ApplySpeechVolume on gSSXAudio), bit 17 (`iUseDJSpeech`) through cSSXAudio_SetDJSpeech and bit 16
  * (`iUseArcadeSFX`) through cSSXAudio_SetArcadeSFX, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
  *
  * It sets the sound changed flag D_004A14D4 even when the reset is declined, unlike the game and HUD popup handlers.
@@ -1149,9 +1149,9 @@ void cFEStateOptionsSound::onPopupEvent(cUIState* popup, unsigned int event)
             if (GetOpt_18A3D8(((char*)popup), 2)) {
                 cBEOptionInterface_defaultSound(iface);
                 setSoundMode(cBEOptionInterface_mOption_18A3D8.output);
-                func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
+                cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
                 cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
-                func_00287520(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
+                cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
                 cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A3D8().iUseDJSpeech != 0);
                 cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A3D8().iUseArcadeSFX != 0);
                 updateWidget();
@@ -1232,9 +1232,9 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern char str_cFEPopupOptionReset[];
@@ -1287,8 +1287,8 @@ static inline sSndCfg_18A8D0 Cfg_18A8D0()
  * the engine's custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
  * kONCHANGE (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the
- * speaker mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl"
- * `speechVol` (cSSXAudio_SetSFXVolume) and "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit
+ * speaker mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (cSSXAudio_ApplyMusicVolume), "3sl"
+ * `speechVol` (cSSXAudio_SetSFXVolume) and "4sl" `musicVol` (cSSXAudio_ApplySpeechVolume) from the slider value at +0x74, "5lb" bit
  * 17 (cSSXAudio_SetDJSpeech) and "6lb" bit 16 (cSSXAudio_SetArcadeSFX); "7lb" sets bit 18 (`f18`) only while D_004A1A70
  * is kFEPathOnline. Every kONCHANGE sets the sound changed flag D_004A14D4.
  *
@@ -1315,9 +1315,9 @@ void cFEStateOptionsSound::onWidgetEvent(cUIThing* widget, unsigned int event)
         {
             iface->submit();
         }
-        func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
+        cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
-        func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
+        cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseDJSpeech != 0);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         char* eng = *(char**)(char*)mpEngine;
@@ -1335,7 +1335,7 @@ void cFEStateOptionsSound::onWidgetEvent(cUIThing* widget, unsigned int event)
         else if (Is_18A8D0(widget->mHashName, str_2sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
             cBEOptionInterface_mOption_18A8D0.sfxVol = vol;
-            func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
+            cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         }
         else if (Is_18A8D0(widget->mHashName, str_3sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
@@ -1345,7 +1345,7 @@ void cFEStateOptionsSound::onWidgetEvent(cUIThing* widget, unsigned int event)
         else if (Is_18A8D0(widget->mHashName, str_4sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
             cBEOptionInterface_mOption_18A8D0.musicVol = vol;
-            func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
+            cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         }
         else if (Is_18A8D0(widget->mHashName, str_5lb)) {
             cBEOptionInterface_mOption_18A8D0.iUseDJSpeech = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
@@ -1377,9 +1377,9 @@ extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 int cSSXAudio_GetCurrentSoundMode(void* snd);
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern char str_kT_CMNOff[];
@@ -1475,7 +1475,7 @@ void cFEStateOptionsSound::updateWidget()
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().sfxVol;
-        func_00287410(cAudioInterface_bxAudio(), Cfg_18B380().sfxVol);
+        cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), Cfg_18B380().sfxVol);
     }
     }
     {
@@ -1491,7 +1491,7 @@ void cFEStateOptionsSound::updateWidget()
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().musicVol;
-        func_00287520(cAudioInterface_bxAudio(), Cfg_18B380().musicVol);
+        cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), Cfg_18B380().musicVol);
     }
     }
     {
@@ -1537,15 +1537,15 @@ void cFEStateOptionsSound::updateWidget()
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_setSoundMode);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_00287670(void* snd);
+extern "C" int cSSXAudio_GetMusicVolumeSetting(void* snd);
 extern "C" int cSSXAudio_GetSFXVolume(void* snd);
-extern "C" int func_002876D0(void* snd);
+extern "C" int cSSXAudio_GetSpeechVolumeSetting(void* snd);
 extern "C" void cSSXAudio_FrontEndPurge(void* snd);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int mode);
-extern "C" void func_00287410(void* snd, int v);
+extern "C" void cSSXAudio_ApplyMusicVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
-extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_ApplySpeechVolume(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
@@ -1561,10 +1561,10 @@ extern "C" void cSSXAudio_FrontEndLoad(void* snd);
  * loads and then +0x1D8; its virtual slot 2 (probably the sound manager's SetMode) is asked to take the audio mode, and
  * only keSOUNDMANAGER_SETMODE_RESTART goes on.
  *
- * The restart saves the effects, speech and music levels (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0, 0-11 scale), the
+ * The restart saves the effects, speech and music levels (cSSXAudio_GetMusicVolumeSetting, cSSXAudio_GetSFXVolume, cSSXAudio_GetSpeechVolumeSetting, 0-11 scale), the
  * switches at gSSXAudio + 0x62B8 (cSSXAudio_SetDJSpeech's flag) and + 0x62B4 (cSSXAudio_SetArcadeSFX's flag) and the word at + 0x534;
- * calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(audio mode); re-applies the volumes (func_00287410,
- * cSSXAudio_SetSFXVolume, func_00287520), the two switches (cSSXAudio_SetDJSpeech, cSSXAudio_SetArcadeSFX) and cSSXAudio_FrontEndLoad; and
+ * calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(audio mode); re-applies the volumes (cSSXAudio_ApplyMusicVolume,
+ * cSSXAudio_SetSFXVolume, cSSXAudio_ApplySpeechVolume), the two switches (cSSXAudio_SetDJSpeech, cSSXAudio_SetArcadeSFX) and cSSXAudio_FrontEndLoad; and
  * finally passes the saved + 0x534 word to virtual slot 4 of the sub-object at gSSXAudio + 0x118 (its vtable pointer is
  * at + 0x5558).
  *
@@ -1591,18 +1591,18 @@ void cFEStateOptionsSound::setSoundMode(unsigned int mode)
     char* obj = *(char**)(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8);
     sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
     if (vt[2].fn(vthis(obj, vt[2]), audioMode) == keSOUNDMANAGER_SETMODE_RESTART) {
-        float sfxVolume = func_00287670(cAudioInterface_bxAudio());
+        float sfxVolume = cSSXAudio_GetMusicVolumeSetting(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
-        float musicVolume = func_002876D0(cAudioInterface_bxAudio());
+        float musicVolume = cSSXAudio_GetSpeechVolumeSetting(cAudioInterface_bxAudio());
         int djSpeech = cAudioInterface_bxAudio()->mDJSpeech;
         int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
         int saved534 = cAudioInterface_bxAudio()->MusicSys.mMusicState;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);
-        func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
+        cSSXAudio_ApplyMusicVolume(cAudioInterface_bxAudio(), (int)sfxVolume);
         cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), (int)speechVolume);
-        func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
+        cSSXAudio_ApplySpeechVolume(cAudioInterface_bxAudio(), (int)musicVolume);
         cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), djSpeech);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeSfx);
         cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
@@ -1615,7 +1615,7 @@ void cFEStateOptionsSound::setSoundMode(unsigned int mode)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_cFEStateOptionsHUD1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsHUD_vtbl[];
@@ -1632,7 +1632,7 @@ extern int D_004A14D8;
  *
  * @return @p self
  */
-extern "C" void* func_0018C0E8(cFEStateOptionsHUD* self)
+extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD1(cFEStateOptionsHUD* self)
 {
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateOptionsHUD_vtbl;
@@ -1899,7 +1899,7 @@ void cFEStateOptionsHUD::updateWidget()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C658);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_cFEStateOptionsController1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsController_vtbl[];
@@ -1916,7 +1916,7 @@ extern int D_004A14DC;
  *
  * @return @p self
  */
-extern "C" void* func_0018C658(cFEStateOptionsController* self)
+extern "C" void* cFEStateOptionsController_cFEStateOptionsController1(cFEStateOptionsController* self)
 {
     cUIState_cUIState(self);
     VPTR_OF(cListNode, self) = cFEStateOptionsController_vtbl;
@@ -2419,7 +2419,7 @@ public:
  * largest of 0, (y - 0.5) * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and
  * (x' - 100) / 5000 (setActuator). Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen,
  * cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent,
- * cFEStateOptionsController_onUpdate; fepopupmisc's func_001E3AC8 is the same body without the state argument.
+ * cFEStateOptionsController_onUpdate; fepopupmisc's vibratePad is the same body without the state argument.
  * Likely bug: with no PadCache the device stays 0 and numActuators() is still called through it.
  *
  * @param idx  the pad index
@@ -2751,7 +2751,7 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  * Runs cFEMemCard_cFEMemCard2 with @p engine and @p cardMode, installs cFEStateOptionsDeviceSelect_vtbl, stores @p
  * isSave at +0x22C and @p isOnline at +0x230, and clears +0x234 (the hidden-buttons flag) and +0x238. A load screen (@p
  * isSave 0) also clears the card manager's mPollForFullCard. cFECustom_getNextState creates it with (2, 1, 0), (1, 0,
- * 0) or (2, 0, 0), and the quick-messages popup (func_001C2C50) with (2, 1, 1).
+ * 0) or (2, 0, 0), and the quick-messages popup (cFEStateNetQuickMessages_onSaveChangesPopupEvent) with (2, 1, 1).
  *
  * @param engine  the UI engine
  * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard2 (kept at +0x1BC)

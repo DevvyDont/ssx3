@@ -30,7 +30,7 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FCE10);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void func_003FB858(int, int*, int*);
 extern int func_003FB898(int, int);
-extern char* func_00266728(int, int, int);
+extern char* TibExtMemAlloc(int, int, int);
 extern void memset(char*, int, int);
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 /**
@@ -52,7 +52,7 @@ int func_003FCE10(char** out, int allocator, int size, int memType) {
     if (out == 0) {
         return 4;
     }
-    *out = func_00266728(allocator, n, allocInfo[0]);
+    *out = TibExtMemAlloc(allocator, n, allocInfo[0]);
     if (*out != 0) {
         memset(*out, 0, n);
         __builtin_memcpy(*out, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 12);
@@ -69,7 +69,7 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FCF00);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void func_003FB858(int, int*, int*);
 extern int func_003FB898(int, int);
-extern void func_00266760(int, int, int, int);
+extern void TibExtMemFree(int, int, int, int);
 /**
  * Frees a save-record buffer from func_003FCE10 (header included).
  *
@@ -87,7 +87,7 @@ int func_003FCF00(int userPtr, int allocator, int size, int memType) {
     func_003FB858(memType, allocInfo, &allocInfo[1]);
     result = func_003FB898(size, memType);
     if (userPtr) {
-        func_00266760(allocator, userPtr - 0xC, result, allocInfo[0]);
+        TibExtMemFree(allocator, userPtr - 0xC, result, allocInfo[0]);
         result = 0;
     } else {
         result = 4;

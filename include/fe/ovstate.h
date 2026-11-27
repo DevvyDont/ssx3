@@ -29,12 +29,12 @@ struct cUIScreen;
 // tOVStateEnum where the class matches; values [R] from retail's cOVStateManager_triggerOverlay, which builds for each
 // id the class named here (its vtable cOVState_<NAME>_vtbl; retail has more overlays than On Tour, so the values
 // differ).
-// Names ours for the ids whose class has no name, after what [U] its methods show: 9 (onCreateScreen func_001FBD20
+// Names ours for the ids whose class has no name, after what [U] its methods show: 9 (onCreateScreen cOVState_FREESTYLE_PREEVENT_onCreateScreen
 // adds "41freestyle_pre"), 14 (a bare cOVState: its vtable D_00474B80 overrides nothing), 20 (the rival / peak
-// challenge pre-event: func_001FD320; cOVStateManager_gotoOverlay picks it for events kGAMEEVENT_RIVALTIME ..
-// kGAMEEVENT_POINTS_PEAK3), 21 (func_001FC878 adds "50multifs_pre"; picked on the multiplayer path), 22 (its
-// onCreateScreen func_001E8920 adds "70peakchal_results"; cOVStateManager_getResultsOverlay picks it for the peak
-// challenges) and 40 (func_00210940 adds "282ReadPrivateMessage").
+// challenge pre-event: cOVState_CHALLENGE_PREEVENT_onGainTransition; cOVStateManager_gotoOverlay picks it for events kGAMEEVENT_RIVALTIME ..
+// kGAMEEVENT_POINTS_PEAK3), 21 (cOVState_MULTI_PREEVENT_onCreateScreen adds "50multifs_pre"; picked on the multiplayer path), 22 (its
+// onCreateScreen cOVState_PEAKCHAL_RESULTS_onCreateScreen adds "70peakchal_results"; cOVStateManager_getResultsOverlay picks it for the peak
+// challenges) and 40 (cOVState_PRIVATEMESSAGE_onCreateScreen adds "282ReadPrivateMessage").
 enum tOVStateEnum {
     kOVSTATE_NULL = 0, kOVSTATE_PAUSE_COMPETE = 1, kOVSTATE_PAUSE_BIGCHAL = 2, kOVSTATE_PAUSE_FREERIDE = 3,
     kOVSTATE_PAUSE_SPOKE = 4, kOVSTATE_PAUSE_QUICKPLAY = 5, kOVSTATE_PAUSE_ONLINE = 6, kOVSTATE_PAUSE_OPTIONS = 7,

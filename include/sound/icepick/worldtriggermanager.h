@@ -41,7 +41,7 @@ enum eTriggerToPatchCheck {
 enum { kSwapTriggerBank = 3, kCrowdTriggerBank = 5 };
 
 // The one advanced trigger retail knows. [O] On Tour's eAudioTrigger member kAUDIO_TRIGGER_PA_Trigger = 77;
-// [U] AdvancedTriggerToPatch sends trigger 77 to the PA's place announcement (func_002A34D0).
+// [U] AdvancedTriggerToPatch sends trigger 77 to the PA's place announcement (cSSXAudio_SpeakPAPlace).
 enum { kAUDIO_TRIGGER_PA_Trigger = 77 };
 
 // The fixed head of every trigger record in the trigger file (views group D: sTrigObj_6A38). [O] On Tour struct

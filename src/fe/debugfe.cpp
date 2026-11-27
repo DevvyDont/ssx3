@@ -266,7 +266,7 @@ void cDebugMenuScreen::setGamePath(int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D0A8);
+INCLUDE_ASM("fe/debugfe", connectDebugDirectLink);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -277,8 +277,8 @@ extern "C" void cCommSystem_update(void* comm);
 extern "C" void SYNCTASK_run(int a);
 extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
-extern "C" void func_00266D58(void* p, int ip);
-extern "C" void func_00266E30(void* p);
+extern "C" void cVoipMan_connect(void* p, int ip);
+extern "C" void cVoipMan_turnVoiceOn(void* p);
 extern void* VoipMan;
 extern char str_10_10_53_35[] __attribute__((aligned(8)));
 extern char str_10_10_53_25[] __attribute__((aligned(8)));
@@ -300,13 +300,13 @@ extern sNetCfg_D0A8 cBENetworkInterface_networkOpt_D0A8 __asm__("cBENetworkInter
  * DirtySock channel with cCommSystem_openDSockChannel on networkOpt.iPort, as host or client by bIsHost, and spins
  * until the channel reports connected (cCommSystem_isChannelConnected), running the comm update cCommSystem_update, SYNCTASK_run(0) and
  * THREAD_yieldticks(1) on each pass. Then creates the game comm (cGameComm_construct with the channel and bIsHost) and
- * connects and enables voice chat on VoipMan (func_00266D58, func_00266E30). cDebugMenuScreen_update calls it when
+ * connects and enables voice chat on VoipMan (cVoipMan_connect, cVoipMan_turnVoiceOn). cDebugMenuScreen_update calls it when
  * the debug start menu starts a game.
  *
- * Likely bug: voice chat is given this console's own address (from cCommSystem_netConnLocalAddr), not the partner's; func_002639E0
+ * Likely bug: voice chat is given this console's own address (from cCommSystem_netConnLocalAddr), not the partner's; cGameConnMan_connect
  * passes the opponent's. The wait loop has no timeout.
  */
-extern "C" void func_0017D0A8(void)
+extern "C" void connectDebugDirectLink(void)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt_D0A8.active == 0) {
@@ -332,8 +332,8 @@ extern "C" void func_0017D0A8(void)
         THREAD_yieldticks(1);
     }
     cGameComm_construct(ch, cBENetworkInterface_networkOpt_D0A8.host);
-    func_00266D58(VoipMan, info[0]);
-    func_00266E30(VoipMan);
+    cVoipMan_connect(VoipMan, info[0]);
+    cVoipMan_turnVoiceOn(VoipMan);
 }
 #endif
 
@@ -396,25 +396,25 @@ extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D260);
+INCLUDE_ASM("fe/debugfe", dispatchLobbyEvent);
 #ifdef SKIP_ASM
 extern void* D_004A4E90;
-extern "C" void func_0017D6F0(cDebugLobbyScreen* self, online_Event* ev);
+extern "C" void cDebugLobbyScreen_handleLobbyEvent(cDebugLobbyScreen* self, online_Event* ev);
 extern "C" void func_00259230(void* ev);
 
 /**
  * Passes one lobby event to the debug lobby screen, when one exists, and then to the real front end.
  *
- * The lobby manager's update (func_0025AC50) calls it for every event it pops from mEventList, with itself as @p self
+ * The lobby manager's update (LobbyMan_update) calls it for every event it pops from mEventList, with itself as @p self
  * (unused here). When the debug lobby screen pointer D_004A4E90 is set (cDebugLobbyScreen_cDebugLobbyScreen sets it, cDebugLobbyScreen__cDebugLobbyScreen clears it)
- * the event goes to func_0017D6F0; func_00259230 then hands it to the real front end's top UI state.
+ * the event goes to cDebugLobbyScreen_handleLobbyEvent; func_00259230 then hands it to the real front end's top UI state.
  *
  * @param ev  the event (its type at +0x0)
  */
-extern "C" void func_0017D260(LobbyMan* self, void* ev)
+extern "C" void dispatchLobbyEvent(LobbyMan* self, void* ev)
 {
     if (D_004A4E90 != 0)
-        func_0017D6F0((cDebugLobbyScreen*)D_004A4E90, (online_Event*)ev);
+        cDebugLobbyScreen_handleLobbyEvent((cDebugLobbyScreen*)D_004A4E90, (online_Event*)ev);
     func_00259230(ev);
 }
 #endif
@@ -448,7 +448,7 @@ extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
  * cBXStrings at +0x1C04 (typed user name), +0x1C08 (typed password) and +0x1C0C (challenger's name) start empty. The
  * menu system's font, input and box texture (its +0x58, +0x5C, +0x60, here +0x60, +0x64, +0x68) are taken from the
  * debug front end's font (+0x18), SSXApp->Inputs[0] and its box texture (+0x20). Finally the screen registers itself in
- * D_004A4E90, which func_0017D260 uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
+ * D_004A4E90, which dispatchLobbyEvent uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
  * its second screen.
  *
  * @return @p self
@@ -621,9 +621,9 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
 INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_update);
 #ifdef SKIP_ASM
 extern "C" void cCommSystem_update(void*);
-extern "C" void func_0025AC50(void*);
+extern "C" void LobbyMan_update(void*);
 extern "C" void cMenuSys_input(void* stack);
-extern "C" void func_0017DB18(cDebugLobbyScreen* self);
+extern "C" void cDebugLobbyScreen_runStateMachine(cDebugLobbyScreen* self);
 
 // The menu on top of the menu system's stack, or 0 when no menu is open.
 static inline cMenu* menuSysTop(cMenuSys* menuSys)
@@ -636,40 +636,40 @@ static inline cMenu* menuSysTop(cMenuSys* menuSys)
 /**
  * Runs one frame of the debug lobby screen: the network and lobby updates, menu input and the screen's state machine.
  *
- * Calls the comm system update cCommSystem_update (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
- * (LobbyMan_mLobbyMan), which delivers queued lobby events to func_0017D6F0 through func_0017D260. When the menu system
- * mMenuSys has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
+ * Calls the comm system update cCommSystem_update (cCommSystem_mCommSystem) and the lobby manager update LobbyMan_update
+ * (LobbyMan_mLobbyMan), which delivers queued lobby events to cDebugLobbyScreen_handleLobbyEvent through dispatchLobbyEvent. When the menu system
+ * mMenuSys has a menu open it runs its input (cMenuSys_input), then cDebugLobbyScreen_runStateMachine advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
 void cDebugLobbyScreen::update()
 {
     cCommSystem_update(cCommSystem_mCommSystem);
-    func_0025AC50(LobbyMan_mLobbyMan);
+    LobbyMan_update(LobbyMan_mLobbyMan);
     if (menuSysTop(&mMenuSys) != 0)
         cMenuSys_input(&mMenuSys);
-    func_0017DB18((cDebugLobbyScreen*)this);
+    cDebugLobbyScreen_runStateMachine((cDebugLobbyScreen*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D6F0);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_handleLobbyEvent);
 #ifdef SKIP_ASM
 extern char str_A_West[];
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025C610(void* net);
-extern "C" void func_0017DA30(cDebugLobbyScreen* self, int a1);
-extern "C" void func_0017DE70(cDebugLobbyScreen* self);
+extern "C" void LobbyMan_authenticate(void* net);
+extern "C" void cDebugLobbyScreen_showLobbyError(cDebugLobbyScreen* self, int a1);
+extern "C" void cDebugLobbyScreen_startOnlineRace(cDebugLobbyScreen* self);
 extern "C" void PersonaMenu_setpersonas(void* items, void* net);
 extern "C" int LobbyMan_getnumrooms(void* net);
-extern "C" char* func_0025F150(void* net, int i);
-extern "C" int func_0025F430(void* net);
+extern "C" char* LobbyMan_getRoomNameAt(void* net, int i);
+extern "C" int LobbyMan_isInRoom(void* net);
 extern "C" int strcmp(char* a, char* b);
-extern "C" void func_0025D800(void* a, int b, int c);
-void func_0025CD28(void* a, int b);
-void func_0025FC28(void* a, int b);
+extern "C" void LobbyMan_joinRoomAt(void* a, int b, int c);
+void LobbyMan_selectPersonaAt(void* a, int b);
+void LobbyMan_sendDecline(void* a, int b);
 
 
 
@@ -693,22 +693,22 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  * menus. By type:
  * - 277 (disconnected): closes all menus (cMenuSys_popMenu until the stack is empty); automatic mode restarts at state 0,
  *   otherwise state 19 with the Continue menu (+0x604).
- * - 258 (error): func_0017DA30 with the error code.
+ * - 258 (error): cDebugLobbyScreen_showLobbyError with the error code.
  * - 201 (connected to the lobby server): automatic mode copies SSXApp->UserName and Password into LobbyMan's mUserName
- *   and mPassword, logs in (func_0025C610) and sets state 5; otherwise state 3 and the Login Method menu (+0x70).
+ *   and mPassword, logs in (LobbyMan_authenticate) and sets state 5; otherwise state 3 and the Login Method menu (+0x70).
  * - 203 (account created): state 5 and a login with the typed user name and password (+0x1C04, +0x1C08).
- * - 212 (logged in): automatic mode selects persona 0 (func_0025CD28, state 7); otherwise fills Select Persona (+0x74C)
+ * - 212 (logged in): automatic mode selects persona 0 (LobbyMan_selectPersonaAt, state 7); otherwise fills Select Persona (+0x74C)
  *   from the lobby (PersonaMenu_setpersonas), opens it and sets state 6.
- * - 218 (persona selected): automatic mode joins every room named "A.West" (LobbyMan_getnumrooms, func_0025F150,
- *   strcmp, then func_0025D800, state 11); otherwise state 10 with Select Room (+0xD2C).
+ * - 218 (persona selected): automatic mode joins every room named "A.West" (LobbyMan_getnumrooms, LobbyMan_getRoomNameAt,
+ *   strcmp, then LobbyMan_joinRoomAt, state 11); otherwise state 10 with Select Room (+0xD2C).
  * - 214, 216 (persona created or deleted): refills and opens Select Persona, state 6.
- * - 220 (room joined): Room Occupants (+0x1044) and state 12 when func_0025F430 reports a current room, else Select
+ * - 220 (room joined): Room Occupants (+0x1044) and state 12 when LobbyMan_isInRoom reports a current room, else Select
  *   Room and state 10.
  * - 237, 240, 241 (challenge declined, ignored, ...): state 17, closes all menus and opens Continue.
- * - 239 (game ready): func_0017DE70 sets up the race and opens the game channel; state 16.
+ * - 239 (game ready): cDebugLobbyScreen_startOnlineRace sets up the race and opens the game channel; state 16.
  * - 236 (challenge received): in state 12 it closes all menus, sets state 15, copies the challenger's name (the event's
  *   cBXString at +0x8) into +0x1C0C, shows it as the third line of the challenge menu (+0x1A44) and opens that menu
- *   (+0x18C0); in any other state it declines at once (func_0025FC28 with the name).
+ *   (+0x18C0); in any other state it declines at once (LobbyMan_sendDecline with the name).
  *
  * Likely bug: in automatic mode a lobby without an "A.West" room leaves the screen in state 7 ("Selecting Persona") for
  * good, and the room search does not stop at the first match.
@@ -716,7 +716,7 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  * @param vself  the debug lobby screen
  * @param ev  the lobby event
  */
-extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
+extern "C" void cDebugLobbyScreen_handleLobbyEvent(cDebugLobbyScreen* vself, online_Event* ev)
 {
     cDebugLobbyScreen* self = vself;
     switch (*(int*)ev) {
@@ -734,13 +734,13 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         break;
     }
     case 258:
-        func_0017DA30((cDebugLobbyScreen*)self, *(int*)((char*)ev + 8));
+        cDebugLobbyScreen_showLobbyError((cDebugLobbyScreen*)self, *(int*)((char*)ev + 8));
         break;
     case 201:
         if (SSXApp->AutoLobby != 0) {
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
-            func_0025C610(LobbyMan_mLobbyMan);
+            LobbyMan_authenticate(LobbyMan_mLobbyMan);
             self->mState = 5;
         } else {
             self->mState = 3;
@@ -751,12 +751,12 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         self->mState = 5;
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->mUserName);
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mPassword);
-        func_0025C610(LobbyMan_mLobbyMan);
+        LobbyMan_authenticate(LobbyMan_mLobbyMan);
         break;
     case 212:
         if (SSXApp->AutoLobby != 0) {
             self->mState = 7;
-            func_0025CD28(LobbyMan_mLobbyMan, 0);
+            LobbyMan_selectPersonaAt(LobbyMan_mLobbyMan, 0);
         } else {
             PersonaMenu_setpersonas(((char*)&self->mPersonaMenu), LobbyMan_mLobbyMan);
             cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mPersonaMenu));
@@ -767,8 +767,8 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         if (SSXApp->AutoLobby != 0) {
             int i;
             for (i = 0; i < LobbyMan_getnumrooms(LobbyMan_mLobbyMan); i++) {
-                if (strcmp(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
-                    func_0025D800(LobbyMan_mLobbyMan, i, 0);
+                if (strcmp(LobbyMan_getRoomNameAt(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
+                    LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, i, 0);
                     self->mState = 11;
                 }
             }
@@ -784,7 +784,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         self->mState = 6;
         break;
     case 220:
-        if (func_0025F430(LobbyMan_mLobbyMan) != 0) {
+        if (LobbyMan_isInRoom(LobbyMan_mLobbyMan) != 0) {
             cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mOccupantsMenu));
             self->mState = 0xC;
         } else {
@@ -804,7 +804,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         break;
     }
     case 239:
-        func_0017DE70((cDebugLobbyScreen*)self);
+        cDebugLobbyScreen_startOnlineRace((cDebugLobbyScreen*)self);
         self->mState = 0x10;
         break;
     case 236:
@@ -818,7 +818,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
             (*(int*)&self->mChallengedMenu.mChallengerItem.Caption) = ((int)self->mChallenger);
             cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mChallengedMenu));
         } else {
-            func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));
+            LobbyMan_sendDecline(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));
         }
         break;
     }
@@ -826,12 +826,12 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017DA30);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_showLobbyError);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
-extern "C" void func_0025C610(void* net);
+extern "C" void LobbyMan_authenticate(void* net);
 static inline void SetMode0017DA30(void* vself, int mode)
 {
     cDebugLobbyScreen* self = (cDebugLobbyScreen*)vself;
@@ -841,19 +841,19 @@ static inline void SetMode0017DA30(void* vself, int mode)
 /**
  * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
  *
- * Stores @p errorCode at +0x1C14 (cDebugLobbyScreen_draw prints its text through func_00260E50) and, by the state at +0x4, moves to the
+ * Stores @p errorCode at +0x1C14 (cDebugLobbyScreen_draw prints its text through LobbyMan_getErrorText) and, by the state at +0x4, moves to the
  * matching error state and opens the Continue menu (+0x604): 2 (connecting) goes to 18, 4 (creating account) to 20, 7,
  * 8 and 9 (persona steps) to 22, 11 (joining a room) to 23 and 13 (waiting on a challenge) to 24. In state 5
  * (authenticating) it goes to 21 unless SSXApp->unk_74 (automatic login) is set; then it copies SSXApp->UserName and
- * Password into LobbyMan again and resends the login (func_0025C610), staying in state 5. Other states only keep the
- * code. func_0017D6F0 calls it for event 258.
+ * Password into LobbyMan again and resends the login (LobbyMan_authenticate), staying in state 5. Other states only keep the
+ * code. cDebugLobbyScreen_handleLobbyEvent calls it for event 258.
  *
  * Likely bug: with automatic login a rejected login is retried at once with the same credentials, with no limit and no
  * error shown.
  *
  * @param errorCode  the lobby error code (a four-character tag)
  */
-extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
+extern "C" void cDebugLobbyScreen_showLobbyError(cDebugLobbyScreen* self, int errorCode)
 {
     self->mErrorCode = errorCode;
     switch (self->mState) {
@@ -867,7 +867,7 @@ extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
         if (SSXApp->AutoLobby != 0) {
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
-            func_0025C610(LobbyMan_mLobbyMan);
+            LobbyMan_authenticate(LobbyMan_mLobbyMan);
         } else {
             SetMode0017DA30(self, 21);
         }
@@ -892,7 +892,7 @@ extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017DB18);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_runStateMachine);
 #ifdef SKIP_ASM
 extern void* VoipMan;
 extern char str_cPreGameLoadScreen[];
@@ -900,19 +900,19 @@ struct cAppMan;
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void cCommSystem_netConnConnect(void* comm, int a1);
-extern "C" void func_0025B6D8(void* net, int a1);
+extern "C" void LobbyMan_connect(void* net, int a1);
 extern "C" void PersonaMenu_setpersonas(void* items, void* net);
 extern "C" void LobbyMenu_updaterooms(void* items, void* net);
 extern "C" void RoomMenu_updateusers(void* items, void* net);
-extern "C" void func_0025D800(void* a, int b, int c);
+extern "C" void LobbyMan_joinRoomAt(void* a, int b, int c);
 extern "C" int cCommSystem_isChannelConnected(void* comm, int ch);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* mem);
 void cAppMan_setNextModule(cAppMan* app, unsigned int module);
 extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
-extern "C" void func_00266D58(void* p, int ip);
-extern "C" void func_00266E30(void* p);
+extern "C" void cVoipMan_connect(void* p, int ip);
+extern "C" void cVoipMan_turnVoiceOn(void* p);
 
 
 /**
@@ -920,10 +920,10 @@ extern "C" void func_00266E30(void* p);
  *
  * - 0: starts the network connection with config 0 (cCommSystem_netConnConnect) when the comm system is idle (mNetConnState 1), then
  *   state 1.
- * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (func_0025B6D8) and sets state 2.
+ * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (LobbyMan_connect) and sets state 2.
  * - 3, 6, 10, 15: reopens Login Method (+0x70), Select Persona (+0x74C), Select Room (+0xD2C) or the challenge menu
  *   (+0x18C0) when no menu is open (cMenuSys_pushMenu); state 10 also refreshes the room list (LobbyMenu_updaterooms) every pass.
- * - 12: with no menu open it joins the empty-named room (func_0025D800 with index -1) and sets state 11; otherwise it
+ * - 12: with no menu open it joins the empty-named room (LobbyMan_joinRoomAt with index -1) and sets state 11; otherwise it
  *   refreshes the occupant list (RoomMenu_updateusers).
  * - 13: opens the Abort menu (+0x1AAC) when the menu system is inactive (cMenuSys_isActive).
  * - 14: with no menu open, state 12 and Room Occupants (+0x1044).
@@ -931,7 +931,7 @@ extern "C" void func_00266E30(void* p);
  *   22 to a refilled Select Persona (state 6), 23 to Select Room (state 10), 18 and 19 to state 0.
  * - 16: once the game channel (+0x1C10) reports connected (cCommSystem_isChannelConnected) it creates the game comm (cGameComm_construct
  *   with LobbyMan's mIsHost), queues a new cPreGameLoadScreen as the next module and connects voice chat
- *   (func_00266D58, func_00266E30 on VoipMan).
+ *   (cVoipMan_connect, cVoipMan_turnVoiceOn on VoipMan).
  *
  * Likely bugs: in state 1 the loop runs again at once after state 0, when mNetConnState is still 2 (connect requested),
  * so the lobby connect starts before the network is up (a failed connection, 6, does not stop it either); voice chat in
@@ -939,7 +939,7 @@ extern "C" void func_00266E30(void* p);
  *
  * @param vself  the debug lobby screen
  */
-extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
+extern "C" void cDebugLobbyScreen_runStateMachine(cDebugLobbyScreen* vself)
 {
     cDebugLobbyScreen* self = vself;
     unsigned int state;
@@ -957,7 +957,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
         }
         case 1:
             if (cCommSystem_mCommSystem->mNetConnState != 3 && cCommSystem_mCommSystem->mNetConnState != 4) {
-                func_0025B6D8(LobbyMan_mLobbyMan, 0);
+                LobbyMan_connect(LobbyMan_mLobbyMan, 0);
                 self->mState = 2;
             }
             break;
@@ -1034,7 +1034,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
         }
         case 12:
             if (self->mMenuSys.MenuDepth == 0) {
-                func_0025D800(LobbyMan_mLobbyMan, -1, 0);
+                LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, -1, 0);
                 self->mState = 11;
             } else {
                 RoomMenu_updateusers(((char*)&self->mOccupantsMenu), LobbyMan_mLobbyMan);
@@ -1061,8 +1061,8 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
                 cGameComm_construct(self->mGameChannel, LobbyMan_mLobbyMan->mIsHost);
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
-                func_00266D58(VoipMan, info[0]);
-                func_00266E30(VoipMan);
+                cVoipMan_connect(VoipMan, info[0]);
+                cVoipMan_turnVoiceOn(VoipMan);
             }
             break;
         }
@@ -1071,7 +1071,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017DE70);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_startOnlineRace);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1113,9 +1113,9 @@ static inline void vcall1_17DE70(void* obj)
  * bIsNetworkGame 1 and bIsHost from LobbyMan's mIsHost (network interface, kind 7, applied). The address to dial is
  * mOppoAddr when hosting and mHostAddr otherwise; it is formatted as dotted decimal and passed to
  * cCommSystem_openDSockChannel with networkOpt.iPort and bIsHost. Stores the channel at +0x1C10 and sets state 16,
- * where func_0017DB18 waits for the connection. func_0017D6F0 calls it for event 239 (game ready).
+ * where cDebugLobbyScreen_runStateMachine waits for the connection. cDebugLobbyScreen_handleLobbyEvent calls it for event 239 (game ready).
  */
-extern "C" void func_0017DE70(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_startOnlineRace(cDebugLobbyScreen* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_setGamePath(race, 1);
@@ -1151,11 +1151,11 @@ extern "C" void func_0017DE70(cDebugLobbyScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E030);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_createAccount);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
-extern "C" void func_0025B9C8(void* mgr, void* req);
+extern "C" void LobbyMan_createAccount(void* mgr, void* req);
 extern char str_pleaseat_get_lost[];
 
 
@@ -1181,14 +1181,14 @@ struct sDsReq17E030 {
  * Closes all menus (cMenuSys_popMenu until the stack is empty), copies @p userName and @p password into the screen's
  * strings at +0x1C04 and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p
  * userName, mPassword and mConfirmPassword @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear,
- * mBornMonth, mBornDay), mGender 1 (sent as 'F'), both mSpam flags 0, and sends it with func_0025B9C8. On event 203
- * func_0017D6F0 then logs in with the same name and password. Called by the Create Account menu's command handler
+ * mBornMonth, mBornDay), mGender 1 (sent as 'F'), both mSpam flags 0, and sends it with LobbyMan_createAccount. On event 203
+ * cDebugLobbyScreen_handleLobbyEvent then logs in with the same name and password. Called by the Create Account menu's command handler
  * AccountDetailsMenu_onCommand.
  *
  * @param userName  account name
  * @param password  password
  */
-extern "C" void func_0017E030(cDebugLobbyScreen* self, const char* userName, const char* password)
+extern "C" void cDebugLobbyScreen_createAccount(cDebugLobbyScreen* self, const char* userName, const char* password)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
@@ -1208,29 +1208,29 @@ extern "C" void func_0017E030(cDebugLobbyScreen* self, const char* userName, con
     lobbyMan->mNewAccount.mSpam[1] = 0;
     lobbyMan->mNewAccount.mSpam[0] = 0;
     lobbyMan->mNewAccount.mBornDay = 1;
-    func_0025B9C8(LobbyMan_mLobbyMan, &lobbyMan->mNewAccount.mName);
+    LobbyMan_createAccount(LobbyMan_mLobbyMan, &lobbyMan->mNewAccount.mName);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E118);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_login);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
-extern "C" void func_0025C610(void* mgr);
+extern "C" void LobbyMan_authenticate(void* mgr);
 
 
 /**
  * Logs in from the debug "Login" menu: keeps the typed name and password and sends the lobby login.
  *
  * Closes all menus, copies @p userName and @p password into the screen's strings at +0x1C04 and +0x1C08, sets state 5
- * ("Authenticating account"), copies both into LobbyMan's mUserName and mPassword and sends the login (func_0025C610).
+ * ("Authenticating account"), copies both into LobbyMan's mUserName and mPassword and sends the login (LobbyMan_authenticate).
  * Called by the Login menu's command handler AccountDetailsMenu_onCommand1.
  *
  * @param userName  account name
  * @param password  password
  */
-extern "C" void func_0017E118(cDebugLobbyScreen* self, const char* userName, const char* password)
+extern "C" void cDebugLobbyScreen_login(cDebugLobbyScreen* self, const char* userName, const char* password)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
@@ -1241,112 +1241,112 @@ extern "C" void func_0017E118(cDebugLobbyScreen* self, const char* userName, con
     self->mState = 0x5;
     cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->mUserName);
     cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mPassword);
-    func_0025C610(LobbyMan_mLobbyMan);
+    LobbyMan_authenticate(LobbyMan_mLobbyMan);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E1C0);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_createPersona);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025D1B8(void* a, int b);
+extern "C" void LobbyMan_createPersona(void* a, int b);
 
 /**
  * Creates a persona from the debug "Create Persona" menu.
  *
- * Closes all menus, sets state 8 ("Creating Persona") and sends the create-persona request (func_0025D1B8). The menu's
+ * Closes all menus, sets state 8 ("Creating Persona") and sends the create-persona request (LobbyMan_createPersona). The menu's
  * command handler CreatePersonaMenu_onCommand passes the typed name buffer, although the parameter is declared int.
  *
  * @param persona  the new persona's name (a char pointer)
  */
-extern "C" void func_0017E1C0(cDebugLobbyScreen* self, int persona)
+extern "C" void cDebugLobbyScreen_createPersona(cDebugLobbyScreen* self, int persona)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 0x8;
-    func_0025D1B8(LobbyMan_mLobbyMan, persona);
+    LobbyMan_createPersona(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E228);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_deletePersona);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025D428(void* a, int b);
+extern "C" void LobbyMan_deletePersona(void* a, int b);
 
 /**
  * Deletes a persona chosen in the debug "Delete Persona" menu.
  *
  * Closes all menus, sets state 9 ("Deleting Persona") and sends the delete-persona request for that index
- * (func_0025D428). Called by the menu's command handler DeletePersonaMenu_onCommand.
+ * (LobbyMan_deletePersona). Called by the menu's command handler DeletePersonaMenu_onCommand.
  *
  * @param persona  index of the persona in LobbyMan's list
  */
-extern "C" void func_0017E228(cDebugLobbyScreen* self, int persona)
+extern "C" void cDebugLobbyScreen_deletePersona(cDebugLobbyScreen* self, int persona)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 0x9;
-    func_0025D428(LobbyMan_mLobbyMan, persona);
+    LobbyMan_deletePersona(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E290);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_selectPersona);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-void func_0025CD28(void* a, int b);
+void LobbyMan_selectPersonaAt(void* a, int b);
 
 /**
  * Selects the persona chosen in the debug "Select Persona" menu.
  *
- * Closes all menus, sets state 7 ("Selecting Persona") and selects the persona with func_0025CD28. Called by the menu's
+ * Closes all menus, sets state 7 ("Selecting Persona") and selects the persona with LobbyMan_selectPersonaAt. Called by the menu's
  * command handler PersonaMenu_onCommand.
  *
  * @param persona  index of the persona in LobbyMan's list
  */
-extern "C" void func_0017E290(cDebugLobbyScreen* self, int persona)
+extern "C" void cDebugLobbyScreen_selectPersona(cDebugLobbyScreen* self, int persona)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 0x7;
-    func_0025CD28(LobbyMan_mLobbyMan, persona);
+    LobbyMan_selectPersonaAt(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E2F8);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_joinRoom);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025D800(void* a, int b, int c);
+extern "C" void LobbyMan_joinRoomAt(void* a, int b, int c);
 
 /**
  * Joins the room chosen in the debug "Select Room" menu.
  *
- * Closes all menus, sets state 11 ("Selecting Room") and joins the room without a password (func_0025D800). Called by
+ * Closes all menus, sets state 11 ("Selecting Room") and joins the room without a password (LobbyMan_joinRoomAt). Called by
  * the menu's command handler LobbyMenu_onCommand.
  *
  * @param room  index in the lobby's room list
  */
-extern "C" void func_0017E2F8(cDebugLobbyScreen* self, int room)
+extern "C" void cDebugLobbyScreen_joinRoom(cDebugLobbyScreen* self, int room)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 11;
-    func_0025D800(LobbyMan_mLobbyMan, room, 0);
+    LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, room, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E368);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_selectOccupant);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 
@@ -1356,9 +1356,9 @@ extern "C" void cMenuSys_popMenu(void* list);
  *
  * Likely bug: the menu's command handler RoomMenu_onCommand passes the chosen occupant's index as a second argument, but
  * this function ignores it and sends no challenge, so the screen waits for a reply that is never requested (the Abort
- * menu, func_0017E558, gets it out).
+ * menu, cDebugLobbyScreen_abortChallenge, gets it out).
  */
-extern "C" void func_0017E368(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_selectOccupant(cDebugLobbyScreen* self)
 {
     int* list = (int*)(&self->mMenuSys);
     while (*list != 0) {
@@ -1369,7 +1369,7 @@ extern "C" void func_0017E368(cDebugLobbyScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E3B8);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_openChatMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
@@ -1377,7 +1377,7 @@ extern "C" void cMenuSys_pushMenu(void* list, void* item);
 /**
  * Opens the debug chat menu from "Room Occupants": closes all menus, sets state 14 and pushes the chat menu (+0x1534).
  */
-extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_openChatMenu(cDebugLobbyScreen* self)
 {
     int* list = (int*)(&self->mMenuSys);
     while (*list != 0) {
@@ -1389,21 +1389,21 @@ extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E418);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_sendChatLine);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
-extern "C" void func_0025AAE0(void* a, int b);
+extern "C" void LobbyMan_sendChatMessage(void* a, int b);
 
 /**
  * Sends a chat line chosen in the debug chat menu and returns to "Room Occupants".
  *
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends @p messageText as a lobby message with
- * func_0025AAE0 ('mesg'). The chat menu's command handler ChatMenu_onCommand passes the item's caption.
+ * LobbyMan_sendChatMessage ('mesg'). The chat menu's command handler ChatMenu_onCommand passes the item's caption.
  *
  * @param messageText  the line to send (a char pointer, declared int)
  */
-extern "C" void func_0017E418(cDebugLobbyScreen* self, int messageText)
+extern "C" void cDebugLobbyScreen_sendChatLine(cDebugLobbyScreen* self, int messageText)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
@@ -1411,48 +1411,48 @@ extern "C" void func_0017E418(cDebugLobbyScreen* self, int messageText)
     }
     cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
     self->mState = 0xC;
-    func_0025AAE0(LobbyMan_mLobbyMan, messageText);
+    LobbyMan_sendChatMessage(LobbyMan_mLobbyMan, messageText);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E490);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_acceptChallenge);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
-extern "C" void func_0025FB58(void* a, char* b, int c);
+extern "C" void LobbyMan_lockChallenge(void* a, char* b, int c);
 
 /**
  * Accepts a challenge from the debug "You've been Challenged!" menu.
  *
  * Closes all menus, sets state 13 ("Waiting for reponse") and locks the challenge with the challenger named in +0x1C0C
- * (func_0025FB58, match type 0). func_0017DB18 then shows the Abort menu. Called by the challenge menu's command
+ * (LobbyMan_lockChallenge, match type 0). cDebugLobbyScreen_runStateMachine then shows the Abort menu. Called by the challenge menu's command
  * handler ChallengeResponseMenu_onCommand.
  */
-extern "C" void func_0017E490(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_acceptChallenge(cDebugLobbyScreen* self)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 13;
-    func_0025FB58(LobbyMan_mLobbyMan, self->mChallenger, 0);
+    LobbyMan_lockChallenge(LobbyMan_mLobbyMan, self->mChallenger, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E4F0);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_declineChallenge);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
-void func_0025FC28(void* a, int b);
+void LobbyMan_sendDecline(void* a, int b);
 
 /**
  * Declines a challenge from the debug "You've been Challenged!" menu and returns to "Room Occupants".
  *
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends "decline" to the challenger named in
- * +0x1C0C (func_0025FC28). Called by the challenge menu's command handler ChallengeResponseMenu_onCommand.
+ * +0x1C0C (LobbyMan_sendDecline). Called by the challenge menu's command handler ChallengeResponseMenu_onCommand.
  */
-extern "C" void func_0017E4F0(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_declineChallenge(cDebugLobbyScreen* self)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
@@ -1460,25 +1460,25 @@ extern "C" void func_0017E4F0(cDebugLobbyScreen* self)
     }
     cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
     self->mState = 0xC;
-    func_0025FC28(LobbyMan_mLobbyMan, (int)self->mChallenger);
+    LobbyMan_sendDecline(LobbyMan_mLobbyMan, (int)self->mChallenger);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E558);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_abortChallenge);
 #ifdef SKIP_ASM
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
-extern "C" void func_0025F628(void* a, int b, int c);
+extern "C" void LobbyMan_cancelChallenge(void* a, int b, int c);
 
 /**
  * Aborts the pending challenge from the debug "Abort" menu and returns to "Room Occupants".
  *
- * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and cancels the challenge with func_0025F628(..., 1,
+ * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and cancels the challenge with LobbyMan_cancelChallenge(..., 1,
  * 0): a type-238 event is posted and no "abortChal" is sent to the opponent. Called by the Abort menu's command handler
  * AbortMenu_onCommand.
  */
-extern "C" void func_0017E558(cDebugLobbyScreen* self)
+extern "C" void cDebugLobbyScreen_abortChallenge(cDebugLobbyScreen* self)
 {
     int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
@@ -1486,7 +1486,7 @@ extern "C" void func_0017E558(cDebugLobbyScreen* self)
     }
     cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
     self->mState = 0xC;
-    func_0025F628(LobbyMan_mLobbyMan, 1, 0);
+    LobbyMan_cancelChallenge(LobbyMan_mLobbyMan, 1, 0);
 }
 #endif
 
@@ -1540,7 +1540,7 @@ struct sBXStr17E5C8 {
     sBXStr17E5C8(const sBXStr17E5C8&);
     ~sBXStr17E5C8() { cBXString__cBXString(this, 2); }
 };
-sBXStr17E5C8 getStr17E5C8(void* self, unsigned int tag) __asm__("func_00260E50");
+sBXStr17E5C8 getStr17E5C8(void* self, unsigned int tag) __asm__("LobbyMan_getErrorText");
 
 static inline void scale17E5C8(cFont* f, float s)
 {
@@ -1577,7 +1577,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * "Waiting for reponse" (13) and "Challenge Declined!" (17) at (320, 100). The error states 18 "Error Connecting!", 19
  * "Disconnected from server!", 20 "Error Creating Account!", 21 "Error Authenticating Account!", 22 "Persona Error!",
  * 23 "Error Entering room!" and 24 "Error Issueing Challenge!" add a light grey line at scale 0.8 and y 150: the text
- * func_00260E50 builds for mErrorCode. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
+ * LobbyMan_getErrorText builds for mErrorCode. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
  * rows 20 apart from y 200 with labels at x 110 and values right-aligned at x 530: Game (LobbyMan mGameName), Opponent
  * (mOpponent), Host/Client ("Host" or "Client" by mIsHost), Host Address (mHostAddr) and Client Address (mOppoAddr) in
  * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (cMenuSys_render) when one is
@@ -2847,7 +2847,7 @@ bool cFEInput::isActive()
 INCLUDE_ASM("fe/debugfe", cFEInput_update);
 #ifdef SKIP_ASM
 extern void* Keyboard;
-extern "C" int func_00266BA8(void* mgr, int a1, int* out0, int* out1);
+extern "C" int cUsbKeyboard_readKey(void* mgr, int a1, int* out0, int* out1);
 
 struct sDebugFE1804B8 {
     char pad_0x00[0xC];
@@ -2860,7 +2860,7 @@ struct sDebugFE1804B8 {
  * Polls the USB keyboard for the front-end input, once per update.
  *
  * Clears the key-ready word (+0xC, On Tour mbKeyReady). When a keyboard is connected (Keyboard), zeroes the virtual
- * key (+0x10, miVKey) and the ASCII key (+0x14, miAsciiKey) and asks func_00266BA8(keyboard, 0, &vkey, &ascii) for a
+ * key (+0x10, miVKey) and the ASCII key (+0x14, miAsciiKey) and asks cUsbKeyboard_readKey(keyboard, 0, &vkey, &ascii) for a
  * key press; when it returns one, key-ready becomes 1. cFEInput_getKeyReady, cFEInput_getVKey and cFEInput_getAsciiKey
  * return the results. The last virtual of cFEInput; On Tour's PSP version is empty.
  */
@@ -2870,14 +2870,14 @@ void cFEInput::update()
     if (Keyboard != 0) {
         miAsciiKey = 0;
         miVKey = 0;
-        if (func_00266BA8(Keyboard, 0, &miVKey, &miAsciiKey) != 0)
+        if (cUsbKeyboard_readKey(Keyboard, 0, &miVKey, &miAsciiKey) != 0)
             mbKeyReady = 1;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180508);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_cScreenKeyboard1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" unsigned short* tAttrScreen_tAttrScreen(unsigned short* p);
@@ -2900,7 +2900,7 @@ extern int cUIGroup_vtbl[];
  * @param parentState  the owning UI state; cScreenKeyboard_pressKey calls its virtual slot 19 after each key press
  * @return @p self
  */
-extern "C" void* func_00180508(cScreenKeyboard* self, cUIState* parentState)
+extern "C" void* cScreenKeyboard_cScreenKeyboard1(cScreenKeyboard* self, cUIState* parentState)
 {
     self->mpNext = (cListNode*)self;
     self->mpPrev = (cListNode*)self;

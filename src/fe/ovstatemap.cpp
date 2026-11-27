@@ -323,7 +323,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028FAE0(void* self);
+extern "C" void cSSXAudio_RestartMusicAfterMap(void* self);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on);
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on);
@@ -381,7 +381,7 @@ void cOVState_MAP::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
             }
             cBEMissionInterface* iface = (cBEMissionInterface*)cBE_getInterface_Fv(cBE_getBE(), 10);
             iface->nextSessionID = mSelectedSessionPoint;
-            func_0028FAE0(cAudioInterface_bxAudio());
+            cSSXAudio_RestartMusicAfterMap(cAudioInterface_bxAudio());
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
@@ -772,7 +772,7 @@ void cList_addToEnd(cList* list, cListNode* node);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEMissionInterface_getPictureDBRecord(tBEPictureDB* out, void* iface, int id);
 extern "C" void* cUIThing_cUIThing(void* self, void* parent, int a2);
-extern "C" void func_0021CCC8(void* p);
+extern "C" void tAttrIcon_tAttrIcon1(void* p);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern char str_Player_Indicator_Icon[];
 extern char str_location[];
@@ -811,7 +811,7 @@ void cOVState_MAP::setupPlayerIndicator()
     cUIIcon* ind = (cUIIcon*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
     cUIThing_cUIThing(ind, ((char*)self->mpMapScreen), 0);
     VPTR_OF(cListNode, ind) = cUIIcon_vtbl;
-    func_0021CCC8(&ind->mAttrIcon);
+    tAttrIcon_tAttrIcon1(&ind->mAttrIcon);
     ind->mTextureID = -1;
     self->mpPlayerIcon = ind;
     ind->mpTextureElem = 0;
@@ -856,7 +856,7 @@ struct cUIIcon_9970 {
         cUIIcon* icon = (cUIIcon*)this;  // same layout: the block being constructed is the cUIIcon
         cUIThing_cUIThing(icon, screen, 0);
         VPTR_OF(cListNode, icon) = cUIIcon_vtbl;
-        func_0021CCC8(&icon->mAttrIcon);
+        tAttrIcon_tAttrIcon1(&icon->mAttrIcon);
         icon->mTextureID = -1;
         icon->mpTextureElem = 0;
     }
@@ -1041,7 +1041,7 @@ void cOVState_MAP::cleanupIndicators()
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
+INCLUDE_ASM("fe/ovstatemap", formatMinutesSeconds);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1071,7 +1071,7 @@ extern sGameSettings_A1A8 cBEOptionInterface_mOption_A1A8 __asm__("cBEOptionInte
  * @return D_004C6848, the formatted text (overwritten by the next call)
  */
 // Format a time in seconds as minutes/seconds for the current language.
-extern "C" char* func_0020A1A8(int secs)
+extern "C" char* formatMinutesSeconds(int secs)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int minuteCount = secs / 60;
@@ -1175,7 +1175,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
-extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" void trimAndRestoreTextScroll(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" int cGameComm_getQueuedChat(cGameComm* a, char* name, int len);
 extern char str_helptext_b[];
 extern char str_helptexts[];
@@ -1193,7 +1193,7 @@ struct sBXString_A4E0 {
  *
  * Only online (cBENetworkInterface_networkOpt.bIsNetworkGame) with a screen and a connected cGameComm. When a
  * chat packet is queued (cGameComm_getQueuedChat into mszChatBuff), hides "helptext" and "helptexts" and shows "textScrollChat"
- * with "<opponent's name>: <message>" (the network options' strOpponentName), scrolled by func_001A83D8 from the
+ * with "<opponent's name>: <message>" (the network options' strOpponentName), scrolled by trimAndRestoreTextScroll from the
  * scroll's counters at +0xC4/+0xC6/+0xC8. The 0x41 size passed for the 0x40-byte buffer is not checked by
  * cGameComm_readPacket, which copies the whole payload (up to 236 bytes).
  *
@@ -1228,7 +1228,7 @@ int cOVState::onUpdate_HandleIncomingChat()
                 cBXString_Concat(&chatLine, str_colon_sp_b);
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
-                func_001A83D8(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);
+                trimAndRestoreTextScroll(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);
                 obj->setVisible(1);
                 cBXString__cBXString(&chatLine, 2);
             }

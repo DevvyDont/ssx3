@@ -1081,7 +1081,7 @@ void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_rewind(void* self, void* a1);
 extern "C" void cReplay_stepFrame(void* self, int a1);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F200(void* self);
+extern "C" void cSSXAudio_BeginReplayMusic(void* self);
 
 
 /**
@@ -1090,7 +1090,7 @@ extern "C" void func_0028F200(void* self);
  * Saves the live game first unless a loaded replay is playing (cReplay_pushReplaySaveFrame), sets state 7
  * (kPlaybackStart), clears Cmd and AutoReplay, stores @p instantReplay, rewinds to @p frame and steps one frame. An
  * instant replay sets up its cameras with cReplay_setupInstantReplayCameras, any other with cReplay_setupReplayCameras. A replay that is
- * neither instant nor automatic also calls the sound bank manager's func_0028F200. AutoReplay is cleared even when @p
+ * neither instant nor automatic also calls the sound bank manager's cSSXAudio_BeginReplayMusic. AutoReplay is cleared even when @p
  * autoReplay is set.
  *
  * @param frame  the frame to start from (On Tour cReplayFrame*)
@@ -1116,7 +1116,7 @@ void cReplay::startReplay(void* frame, int instantReplay, int autoReplay)
             setupReplayCameras();
         }
         if (instantReplay == 0 && autoReplay == 0) {
-            func_0028F200(cAudioInterface_bxAudio());
+            cSSXAudio_BeginReplayMusic(cAudioInterface_bxAudio());
         }
     }
 }
@@ -1131,13 +1131,13 @@ void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F2C0(void* self);
+extern "C" void cSSXAudio_EndReplayMusic(void* self);
 
 
 /**
  * Stops playback, unless the replay is paused (14) or not set up (15).
  *
- * Cancels a marked instant replay, calls the sound bank manager's func_0028F2C0 unless the replay was automatic or
+ * Cancels a marked instant replay, calls the sound bank manager's cSSXAudio_EndReplayMusic unless the replay was automatic or
  * instant, and clears AutoReplay, InstantReplay and StartInstantReplay. Unless a loaded replay is playing, restores
  * the live game (cReplay_popReplaySaveFrame), gives the cameras back and sets state 13 (kReplayEnd) when EndReplay is
  * set, else 0 (kGameRecording). InstantReplay is cleared before it is tested, so cReplay_setupGameCamerasOnExitInstantReplay (the instant-replay
@@ -1149,7 +1149,7 @@ void cReplay::stopReplay()
     if (ok) {
         cReplay_cancelMarkInstantReplay((this));
         if (AutoReplay == 0 && InstantReplay == 0) {
-            func_0028F2C0(cAudioInterface_bxAudio());
+            cSSXAudio_EndReplayMusic(cAudioInterface_bxAudio());
         }
         AutoReplay = 0;
         InstantReplay = 0;

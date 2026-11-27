@@ -5,7 +5,7 @@
 // slots, the name keyboard, save / delete), a cFEMemCard with mType 0. Retail code: the ctor
 // cOVState_PROFILE_cOVState_PROFILE in fe/ovstatetrophy (0x00211088), cOVState_PROFILE_* in fe/ovstateprofile
 // (0x002111A0 ... 0x00212080), the destructor cOVState_PROFILE__cOVState_PROFILE and the engine-less ctor copy
-// func_00221DB0 in fe/all_in_one_fe. On Tour defines it in fe/all_in_one_fe.cpp.
+// cOVState_PROFILE_cOVState_PROFILE1 in fe/all_in_one_fe. On Tour defines it in fe/all_in_one_fe.cpp.
 //
 // Size 0x27C:
 //   [R] operator new(636, "cOVStateOverlay") for overlay 36 (cOVStateManager_triggerOverlay / triggerPopup) and

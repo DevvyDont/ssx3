@@ -147,9 +147,9 @@ extern "C" int cBankSys_SFX_End(void* self);
 extern "C" cRider* cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" int strcmp(const void* a, const void* b);
 extern "C" int func_0029B818(void* sys, void* name, int* rec);
-extern "C" void func_002A7468(void* sys);
-extern "C" int func_002A7678(void* sys, int a);
-extern "C" void func_002A7340(void* sys, int idx, int v);
+extern "C" void cCrowdSys_OpenObjectOpts(void* sys);
+extern "C" int cCrowdSys_AddObject(void* sys, int a);
+extern "C" void cCrowdSys_SetObjectLoudness(void* sys, int idx, int v);
 extern "C" cBankMonitorInstance* cBankMonitor_BANKMONITOR_GetHandle(void* sub, int idx, int a2);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern "C" int cWorldTriggerInstance_CrowdTrigger(cWorldTriggerInstance* self, int idx);
@@ -239,12 +239,12 @@ static inline void voiceTail_4C38(cWorldTriggerInstance* t)
  *
  * The sound plays only when the trigger is not an after-collision trigger (cWorldTriggerManager_AfterCollisionTrigger) or its object was hit
  * (cWorldTriggerManager_ObjectHit); a sync-to-animation trigger (cWorldTriggerManager_SyncToAnimationTrigger) also waits for its object's first frame (cWorldTriggerManager_ObjectRefFirstFrame).
- * Crowd triggers go to the crowd system (func_002A7468, func_002A7678); others play through cBankSys_SFX_Begin-style
+ * Crowd triggers go to the crowd system (cCrowdSys_OpenObjectOpts, cCrowdSys_AddObject); others play through cBankSys_SFX_Begin-style
  * options with volume +0x10 x 127, volume control 5, the position (+0x20) when positional and the viewport, ending in
  * cBankSys_SFX_End.
  *
  * With a sound: a sync-to-animation trigger restarts on each new first frame (stopping the old handle with a 0.1 s
- * fade); otherwise the volume is re-applied (func_002A7340 for crowd triggers, else the bank monitor instance's volume
+ * fade); otherwise the volume is re-applied (cCrowdSys_SetObjectLoudness for crowd triggers, else the bank monitor instance's volume
  * through cBankMonitor_BANKMONITOR_GetHandle). Called by cWorldTriggerManager_Update for touched instances.
  *
  */
@@ -308,9 +308,9 @@ void cWorldTriggerInstance::Update()
                 }
             }
             if (m_bCrowdTrigger != 0) {
-                func_002A7468(cAudioInterface_bxAudio());
+                cCrowdSys_OpenObjectOpts(cAudioInterface_bxAudio());
                 voiceTail_4C38(this);
-                m_iAudioHandle = func_002A7678(cAudioInterface_bxAudio(), rec[1]);
+                m_iAudioHandle = cCrowdSys_AddObject(cAudioInterface_bxAudio(), rec[1]);
                 return;
             }
             sfxBegin_4C38(cAudioInterface_bxAudio(), rec[0], rec[1]);
@@ -335,7 +335,7 @@ void cWorldTriggerInstance::Update()
     if (m_bCrowdTrigger != 0) {
         if (m_iAudioHandle == cWorldTriggerInstance::kAudioNone)
             return;
-        func_002A7340(cAudioInterface_bxAudio(), m_iAudioHandle, (int)(m_fVolume * 127.0f));
+        cCrowdSys_SetObjectLoudness(cAudioInterface_bxAudio(), m_iAudioHandle, (int)(m_fVolume * 127.0f));
         return;
     }
     if (m_iAudioHandle == cWorldTriggerInstance::kAudioNone)
@@ -354,7 +354,7 @@ void cWorldTriggerInstance::Update()
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Stop);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A72D8(void* snd, int id, float t);
+extern "C" void cCrowdSys_RemoveObject(void* snd, int id, float t);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern unsigned char str_empty_j[];
 struct sWorldTrigger70;
@@ -363,7 +363,7 @@ struct sWorldTrigger70;
  * Stops a world audio trigger instance's sound and resets the instance.
  *
  * If the handle at +0x30 (On Tour m_iAudioHandle) is live (not kAudioNone) it is stopped with a 0.25 s fade: through
- * the crowd system (func_002A72D8 on gSSXAudio, cAudioInterface_bxAudio) when the crowd flag at +0x38 is set, else
+ * the crowd system (cCrowdSys_RemoveObject on gSSXAudio, cAudioInterface_bxAudio) when the crowd flag at +0x38 is set, else
  * through cBankMonitor_BANKMONITOR_StopHandle on the bank monitor. Then the handle becomes kAudioNotStarted, the swap
  * name at +0x40 is emptied (On Tour strcpy(name, "")), +0x68 (On Tour m_iLastAnimFrame) is set to -1.0f and +0x60,
  * +0x64 and +0x6C are zeroed.
@@ -373,7 +373,7 @@ void cWorldTriggerInstance::Stop()
 {
     if (m_bCrowdTrigger != 0) {
         if (m_iAudioHandle != kAudioNone) {
-            func_002A72D8(cAudioInterface_bxAudio(), m_iAudioHandle, 0.25f);
+            cCrowdSys_RemoveObject(cAudioInterface_bxAudio(), m_iAudioHandle, 0.25f);
         }
     } else if (m_iAudioHandle != kAudioNone) {
         cBankMonitor_BANKMONITOR_StopHandle(
@@ -1007,21 +1007,21 @@ int cWorldTriggerManager::TriggerToPatch(int trigger, int* bank, int* patch, int
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTriggerToPatch);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
+extern "C" int cSSXAudio_SpeakPAPlace(void* mgr, int a1, int a2, int a3);
 
 /**
  * Resolves an advanced world audio trigger: only kAUDIO_TRIGGER_PA_Trigger (77) is known, and it plays through the
  * audio system itself.
  *
  * Clears *bank, *patch and *noAudio. For kAUDIO_TRIGGER_PA_Trigger it sets *noAudio to 1 and returns
- * func_002A34D0(gSSXAudio, no rider, 1, @p viewPort); any other trigger returns 0.
+ * cSSXAudio_SpeakPAPlace(gSSXAudio, no rider, 1, @p viewPort); any other trigger returns 0.
  *
  * @param trigger   the trigger number
  * @param bank      out: the sound bank (always 0)
  * @param patch     out: the patch in the bank (always 0)
  * @param noAudio   out: 1 when the trigger plays no bank sound of its own (On Tour noaudio)
  * @param viewPort  the viewport the trigger fired in
- * @return 0, or func_002A34D0's result for kAUDIO_TRIGGER_PA_Trigger
+ * @return 0, or cSSXAudio_SpeakPAPlace's result for kAUDIO_TRIGGER_PA_Trigger
  */
 int cWorldTriggerManager::AdvancedTriggerToPatch(int trigger, int* bank, int* patch, int* noAudio, int viewPort)
 {
@@ -1031,7 +1031,7 @@ int cWorldTriggerManager::AdvancedTriggerToPatch(int trigger, int* bank, int* pa
     *noAudio = 0;
     if (trigger == kAUDIO_TRIGGER_PA_Trigger) {
         *noAudio = 1;
-        found = func_002A34D0(cAudioInterface_bxAudio(), 0, 1, viewPort);
+        found = cSSXAudio_SpeakPAPlace(cAudioInterface_bxAudio(), 0, 1, viewPort);
     }
     return found;
 }
@@ -1888,7 +1888,7 @@ struct tWtVector4 : t4Vector {
 
 
 extern "C" cGame* cAudioInterface_getGame(void);
-extern "C" void wtq_75D0(nash_privy_QueryHelper* h, void* partial, void* inside, void* pos, void* node, void* key) __asm__("func_002B83F8");
+extern "C" void wtq_75D0(nash_privy_QueryHelper* h, void* partial, void* inside, void* pos, void* node, void* key) __asm__("nash_privy_QueryHelper_help1");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline tWtVector4 Sub_75D0(const t4Vector& a, const t4Vector& b)
@@ -1931,7 +1931,7 @@ static inline float Length_75D0(const t4Vector& v)
 /**
  * Refreshes a viewport's overlap list when the position moved more than 10 units (or on first use).
  *
- * Clears the count and queries the eight octree roots (game +0x20) around pos with func_002B83F8, then stores pos as
+ * Clears the count and queries the eight octree roots (game +0x20) around pos with nash_privy_QueryHelper_help1, then stores pos as
  * the last position. Called by cWorldSound_TriggerWorldAudio.
  *
  * @param pos  the listener position
@@ -2356,7 +2356,7 @@ extern "C" void* func_002B83B8(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83F8);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", nash_privy_QueryHelper_help1);
 #ifdef SKIP_ASM
 extern "C" void func_002BADD0(void* node, void* list);
 
@@ -2365,7 +2365,7 @@ union sFloatBits83F8 {
     float f;
 };
 
-// How a position relates to an octree cell, Classify83F8's result (names ours): func_002B83F8 sends a cell's items to
+// How a position relates to an octree cell, Classify83F8's result (names ours): nash_privy_QueryHelper_help1 sends a cell's items to
 // the inside list for kOctInside and to the crossing list for kOctCrossing; Classify83F8 never reports kOctInside.
 enum eOctOverlap83F8 { kOctInside = 0, kOctOutside = 1, kOctCrossing = 2 };
 
@@ -2403,7 +2403,7 @@ static inline int Classify83F8(const t4Vector* v, const nash_CellKey* key)
  * @param node  the octree cell
  * @param key  its cell key (level, x, y, z)
  */
-extern "C" void func_002B83F8(nash_privy_QueryHelper* self, AudioOverlapCallback* partial, AudioOverlapCallback* inside,
+extern "C" void nash_privy_QueryHelper_help1(nash_privy_QueryHelper* self, AudioOverlapCallback* partial, AudioOverlapCallback* inside,
                               PointProximityTest* pos, nash_Cell* node, nash_CellKey* key)
 {
     int overlap = Classify83F8(pos->position, key);
@@ -2443,21 +2443,21 @@ extern "C" void func_002B83F8(nash_privy_QueryHelper* self, AudioOverlapCallback
         k.x = key->x * 2;
         k.y = key->y * 2;
         k.z = key->z * 2;
-        if (node->children[0][0][0]) func_002B83F8(self, partial, inside, pos, node->children[0][0][0], &k);
+        if (node->children[0][0][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][0][0], &k);
         k.x++;
-        if (node->children[1][0][0]) func_002B83F8(self, partial, inside, pos, node->children[1][0][0], &k);
+        if (node->children[1][0][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][0][0], &k);
         k.y++;
-        if (node->children[1][1][0]) func_002B83F8(self, partial, inside, pos, node->children[1][1][0], &k);
+        if (node->children[1][1][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][1][0], &k);
         k.x--;
-        if (node->children[0][1][0]) func_002B83F8(self, partial, inside, pos, node->children[0][1][0], &k);
+        if (node->children[0][1][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][1][0], &k);
         k.z++;
-        if (node->children[0][1][1]) func_002B83F8(self, partial, inside, pos, node->children[0][1][1], &k);
+        if (node->children[0][1][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][1][1], &k);
         k.x++;
-        if (node->children[1][1][1]) func_002B83F8(self, partial, inside, pos, node->children[1][1][1], &k);
+        if (node->children[1][1][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][1][1], &k);
         k.y--;
-        if (node->children[1][0][1]) func_002B83F8(self, partial, inside, pos, node->children[1][0][1], &k);
+        if (node->children[1][0][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][0][1], &k);
         k.x--;
-        if (node->children[0][0][1]) func_002B83F8(self, partial, inside, pos, node->children[0][0][1], &k);
+        if (node->children[0][0][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][0][1], &k);
     }
 }
 #endif

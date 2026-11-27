@@ -28,7 +28,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" int BXFILE_sizez(int file);
 extern "C" void FILE_loadatz(int file, void* data, int size);
 extern void cBERewardDB_initRewards_s(void* self, void* data) __asm__("cBERewardDB_initRewards");
-extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, int id, int a3, int a4, int a5);
 extern int gRewardsFileName;
 extern char str_Rewards_File[];
 
@@ -36,7 +36,7 @@ extern char str_Rewards_File[];
  * Loads the reward database "data/be/rwrdps2.dat", at once or through the front end's asynchronous loader.
  *
  * Synchronously it reads the whole file into a "Rewards File" block, parses it (cBERewardDB_initRewards) and stores -1
- * at +0x0; otherwise it stores the request id that func_0019DA10 returns for the front end's +0x1A70 object.
+ * at +0x0; otherwise it stores the request id that cFEBoltFileManager_requestFile returns for the front end's +0x1A70 object.
  *
  * @param async  0 to load now, else passed on to the asynchronous request
  */
@@ -52,7 +52,7 @@ void cBERewardDB::init(int async)
     }
     else
     {
-        *((int*)this) = func_0019DA10(SSXApp->RealFE->mBoltFileManager, 0, gRewardsFileName, 10, async, 0);
+        *((int*)this) = cFEBoltFileManager_requestFile(SSXApp->RealFE->mBoltFileManager, 0, gRewardsFileName, 10, async, 0);
     }
 }
 #endif
@@ -60,8 +60,8 @@ void cBERewardDB::init(int async)
 //100%
 INCLUDE_ASM("be/bedbreward", cBERewardDB_purge);
 #ifdef SKIP_ASM
-extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void func_0019D4B8(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_freeFile(void* self, int bank, int i);
 void cMemMan_free(void* p);
 
 struct sBEDB_0015AE00
@@ -92,7 +92,7 @@ struct sBEDB_0015AE00
  * Releases the reward database: cancels its pending file request, frees the loaded rewards file and clears the fields.
  *
  * A request id at +0x0 that is not negative is dropped on the front end's loader (SSXApp->RealFE + 0x1A70) with
- * func_0019DC20 and func_0019D4B8. The file buffer (+0x4) is freed with cMemMan_free. Then +0x0 becomes -1 and the
+ * cFEBoltFileManager_releaseFile and cFEBoltFileManager_freeFile. The file buffer (+0x4) is freed with cMemMan_free. Then +0x0 becomes -1 and the
  * other words up to +0x4C become 0, except +0x28, which is left as it was (likely an oversight).
  */
 void cBERewardDB::purge()
@@ -100,8 +100,8 @@ void cBERewardDB::purge()
     if (mRewardFileIndex >= 0)
     {
         char* snd = SSXApp->RealFE->mBoltFileManager;
-        func_0019DC20(snd, 0, mRewardFileIndex);
-        func_0019D4B8(snd, 0, mRewardFileIndex);
+        cFEBoltFileManager_releaseFile(snd, 0, mRewardFileIndex);
+        cFEBoltFileManager_freeFile(snd, 0, mRewardFileIndex);
     }
     if (mpRewardsFile != 0)
     {
@@ -132,24 +132,24 @@ void cBERewardDB::purge()
 //100%
 INCLUDE_ASM("be/bedbreward", cBERewardDB_update);
 #ifdef SKIP_ASM
-extern "C" int func_0019E238(void* self, int bank, int i);
-extern "C" int func_0019E330(void* self, int bank, int i);
+extern "C" int cFEBoltFileManager_isFileLoaded(void* self, int bank, int i);
+extern "C" int cFEBoltFileManager_detachFileData(void* self, int bank, int i);
 extern "C" void cBERewardDB_initRewards(int* self, int v);
 
 /**
  * Finishes an asynchronous rewards-file load once the file has arrived.
  *
  * When the request id at +0x0 is not negative and the front end's loader (SSXApp->RealFE + 0x1A70) reports it done
- * (func_0019E238), parses the loaded data (cBERewardDB_initRewards with the buffer from func_0019E330), releases the request
- * (func_0019DC20) and sets +0x0 to -1. cBERewardDB_init starts such a load when called with async set.
+ * (cFEBoltFileManager_isFileLoaded), parses the loaded data (cBERewardDB_initRewards with the buffer from cFEBoltFileManager_detachFileData), releases the request
+ * (cFEBoltFileManager_releaseFile) and sets +0x0 to -1. cBERewardDB_init starts such a load when called with async set.
  */
 void cBERewardDB::update()
 {
     if (*((int*)this) >= 0) {
         char* snd = SSXApp->RealFE->mBoltFileManager;
-        if (func_0019E238(snd, 0, *((int*)this)) != 0) {
-            cBERewardDB_initRewards(((int*)this), func_0019E330(snd, 0, *((int*)this)));
-            func_0019DC20(snd, 0, *((int*)this));
+        if (cFEBoltFileManager_isFileLoaded(snd, 0, *((int*)this)) != 0) {
+            cBERewardDB_initRewards(((int*)this), cFEBoltFileManager_detachFileData(snd, 0, *((int*)this)));
+            cFEBoltFileManager_releaseFile(snd, 0, *((int*)this));
             *((int*)this) = -1;
         }
     }
@@ -1558,30 +1558,30 @@ extern "C" tRiderStats* cBENetworkInterface_getOpponentStats(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C5A8);
+INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentName);
 #ifdef SKIP_ASM
 
 /**
  * Returns the address of the 16-byte name buffer cBENetworkInterface_networkOpt.strOpponentName, the opponent's name
- * (filled by func_0014EBB8; prefixes received chat lines).
+ * (filled by cBENetworkInterface_setOpponentName; prefixes received chat lines).
  *
  * @return the name buffer
  */
-extern "C" void* func_0015C5A8(void) {
+extern "C" void* cBENetworkInterface_getOpponentName(void) {
     return cBENetworkInterface_networkOpt.strOpponentName;
 }
 #endif
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C5B8);
+INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getMyName);
 #ifdef SKIP_ASM
 
 /**
  * Returns the address of the 16-byte name buffer cBENetworkInterface_networkOpt.strMyName, this player's online name
- * (filled by func_0014EBD8; prefixes our own chat lines).
+ * (filled by cBENetworkInterface_setMyName; prefixes our own chat lines).
  *
  * @return the name buffer
  */
-extern "C" void* func_0015C5B8(void) {
+extern "C" void* cBENetworkInterface_getMyName(void) {
     return cBENetworkInterface_networkOpt.strMyName;
 }
 #endif
@@ -2061,7 +2061,7 @@ extern "C" void* cBEPostRaceState_cBEPostRaceState(cBEPostRaceState* self)
 #endif
 
 //99.38%
-INCLUDE_ASM("be/bedbreward", func_0015C8F0__FPv);
+INCLUDE_ASM("be/bedbreward", be_runStaticConstructors__FPv);
 #ifdef SKIP_ASM
 /**
  * Runs the unit's static initializer: __sti__all_in_one_be_cpp(1, 0xFFFF) (an entry of the global constructor list
@@ -2069,7 +2069,7 @@ INCLUDE_ASM("be/bedbreward", func_0015C8F0__FPv);
  *
  * @return what __sti__all_in_one_be_cpp leaves in the return register (unused)
  */
-void* func_0015C8F0(void* self)
+void* be_runStaticConstructors(void* self)
 {
     return __sti__all_in_one_be_cpp(1, 0xffff);
 }
@@ -2078,7 +2078,7 @@ void* func_0015C8F0(void* self)
 extern "C" void* __sti__all_in_one_be_cpp(int, int);
 
 //99.38%
-INCLUDE_ASM("be/bedbreward", func_0015C910__FPv);
+INCLUDE_ASM("be/bedbreward", be_runStaticDestructors__FPv);
 #ifdef SKIP_ASM
 /**
  * Runs the unit's static destructors: __sti__all_in_one_be_cpp(0, 0xFFFF) (an entry of the global destructor list
@@ -2086,7 +2086,7 @@ INCLUDE_ASM("be/bedbreward", func_0015C910__FPv);
  *
  * @return what __sti__all_in_one_be_cpp leaves in the return register (unused)
  */
-void* func_0015C910(void* self)
+void* be_runStaticDestructors(void* self)
 {
     return __sti__all_in_one_be_cpp(0, 0xffff);
 }

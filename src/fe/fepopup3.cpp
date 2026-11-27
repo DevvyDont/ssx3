@@ -174,13 +174,13 @@ INCLUDE_ASM("fe/fepopup3", cFEStateSelectMultiplayerMode__cFEStateSelectMultipla
 
 INCLUDE_ASM("fe/fepopup3", cFEStateMPCircuit__cFEStateMPCircuit);
 
-INCLUDE_ASM("fe/fepopup3", func_001E08D0);
+INCLUDE_ASM("fe/fepopup3", cFEUseExistingAccount_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona__cFEStateSelectPersona);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0940);
+INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona_isOnlineState);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0948);
+INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona_publishPresence);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup__cFEStateChallengePopup);
 
@@ -192,23 +192,23 @@ INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0BA0);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetConfig_publishPresence);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0BA8);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetConfig_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C20);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_publishPresence);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C28);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNAS_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNASError_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C80);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNASError_publishPresence);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0C88);
+INCLUDE_ASM("fe/fepopup3", cFEStateAuthDNASError_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onGainTransition);
 
@@ -216,19 +216,19 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1__cFEStateCreateStep1);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0D60);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep2__cFEStateCreateStep2);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0DD0);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep2_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateCreateDuplicate__cFEStateCreateDuplicate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0E40);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateDuplicate_isOnlineState);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0E88);
+INCLUDE_ASM("fe/fepopup3", cFEStateLogin_publishPresence);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0E90);
+INCLUDE_ASM("fe/fepopup3", cFEStateLogin_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateStats__cFEStateStats);
 
@@ -362,93 +362,93 @@ INCLUDE_ASM("fe/fepopup3", func_001E12B0);
 
 INCLUDE_ASM("fe/fepopup3", func_001E12D0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E12F0);
+INCLUDE_ASM("fe/fepopup3", initMessageGroups);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1458);
+INCLUDE_ASM("fe/fepopup3", updateTimedMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E14C0);
+INCLUDE_ASM("fe/fepopup3", runTimedMessageHooks);
 
 INCLUDE_ASM("fe/fepopup3", func_001E1548);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1550);
+INCLUDE_ASM("fe/fepopup3", queueRivalChallengeMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1A30);
+INCLUDE_ASM("fe/fepopup3", isSameCharacterId);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1AD0);
+INCLUDE_ASM("fe/fepopup3", pickForeshadowMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1C10);
+INCLUDE_ASM("fe/fepopup3", queueForeshadowMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1DD0);
+INCLUDE_ASM("fe/fepopup3", setChallengeMessagePending);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1EB8);
+INCLUDE_ASM("fe/fepopup3", sendPendingChallengeMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E20D0);
+INCLUDE_ASM("fe/fepopup3", queuePointsChallengeMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2220);
+INCLUDE_ASM("fe/fepopup3", queueTimeChallengeMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2370);
+INCLUDE_ASM("fe/fepopup3", flagForeshadowGroups);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2428);
+INCLUDE_ASM("fe/fepopup3", queuePeakCompletedMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2518);
+INCLUDE_ASM("fe/fepopup3", queueMountainCompletedMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2578);
+INCLUDE_ASM("fe/fepopup3", queueMountainConqueredMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E25D8);
+INCLUDE_ASM("fe/fepopup3", queueRivalResultMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2648);
+INCLUDE_ASM("fe/fepopup3", queueRivalTimeResultMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2828);
+INCLUDE_ASM("fe/fepopup3", queueRivalPointsResultMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2A08);
+INCLUDE_ASM("fe/fepopup3", queueAggressionMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2B38);
+INCLUDE_ASM("fe/fepopup3", getAggressionGroup);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2BB8);
+INCLUDE_ASM("fe/fepopup3", countMessageRows);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2C80);
+INCLUDE_ASM("fe/fepopup3", getMessageForRow);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2D58);
+INCLUDE_ASM("fe/fepopup3", isMessageInCategory);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2DC0);
+INCLUDE_ASM("fe/fepopup3", getMessagePositionInCategory);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2EA0);
+INCLUDE_ASM("fe/fepopup3", getMessageSenderName);
 
-INCLUDE_ASM("fe/fepopup3", func_001E2FE0);
+INCLUDE_ASM("fe/fepopup3", queueMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3100);
+INCLUDE_ASM("fe/fepopup3", pickMessageVariant);
 
-INCLUDE_ASM("fe/fepopup3", func_001E31B8);
+INCLUDE_ASM("fe/fepopup3", removeMessageAt);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3268);
+INCLUDE_ASM("fe/fepopup3", removeMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E32C8);
+INCLUDE_ASM("fe/fepopup3", removeGroupMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3388);
+INCLUDE_ASM("fe/fepopup3", findMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E33E8);
+INCLUDE_ASM("fe/fepopup3", getMessageCount);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3408);
+INCLUDE_ASM("fe/fepopup3", countUnreadMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3510);
+INCLUDE_ASM("fe/fepopup3", requestMessageCenter);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3570);
+INCLUDE_ASM("fe/fepopup3", canOpenMessageCenter);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3620);
+INCLUDE_ASM("fe/fepopup3", getListMessageId);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3650);
+INCLUDE_ASM("fe/fepopup3", getListMessageVariant);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3680);
+INCLUDE_ASM("fe/fepopup3", getMessageRow);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3760);
+INCLUDE_ASM("fe/fepopup3", queueEarningsMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E38B8);
+INCLUDE_ASM("fe/fepopup3", queueTrophyMessages);
 
-INCLUDE_ASM("fe/fepopup3", func_001E39F8);
+INCLUDE_ASM("fe/fepopup3", getMessageList);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3A30);
+INCLUDE_ASM("fe/fepopup3", isMessageFlagSet);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3A78);
+INCLUDE_ASM("fe/fepopup3", setMessageFlag);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 
@@ -462,31 +462,31 @@ INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onGainFocus);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4458);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_updateButtons);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onWidgetMenu);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onPopupEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4658);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_updateScrollArrows);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4758);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_showMessageCounts);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4840);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_hideWidget);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4878);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_showWidget);
 
-INCLUDE_ASM("fe/fepopup3", func_001E48B0);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_fillRows);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4B80);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_getFAQSubjectVariant);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4C78);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_fillRow);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4F70);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_setRowSubject);
 
-INCLUDE_ASM("fe/fepopup3", func_001E50C8);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_openViewPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5148);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_deleteMessage);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_cOVState_ViewPopup);
 
@@ -498,19 +498,19 @@ INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetCreate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5428);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_fillMessage);
 
-INCLUDE_ASM("fe/fepopup3", func_001E55D0);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_setSubject);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5638);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_setVariantSubject);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5780);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_setBody);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetEvent);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5AA0);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_getSubjectVariant);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onCreateScreen);
 
@@ -562,17 +562,17 @@ INCLUDE_ASM("fe/fepopup3", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_BASSSP_QUAL_FINISHOV_handleEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8920);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8E70);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8E90);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onInputBegin);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8E98);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8EA8);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8ED0);
+INCLUDE_ASM("fe/fepopup3", cOVState_PEAKCHAL_RESULTS_onGainFocus);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_TOURNAMENT_STANDINGS_onCreateScreen);
 

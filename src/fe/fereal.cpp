@@ -121,7 +121,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* own
 extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(void* self, void* owner, int a, int b);
 extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(void* self, void* owner, int a, int b);
 extern "C" void cFEFlowState_setValue(void* flow, int a, int b);
-extern "C" void func_001A86E8(int a);
+extern "C" void cFEStateNet_setFEPath(int a);
 extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(void* self, void* owner);
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* self, void* owner);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
@@ -133,10 +133,10 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* self, void* owner, in
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* self, void* owner, int a, int b);
 extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* self, void* owner);
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(void* self, void* owner);
-extern "C" void* func_00188EE8(void* self, void* owner);
-extern "C" void* func_0018A258(void* self, void* owner);
-extern "C" void* func_0018C0E8(void* self, void* owner);
-extern "C" void* func_0018C658(void* self, void* owner);
+extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame1(void* self, void* owner);
+extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound1(void* self, void* owner);
+extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD1(void* self, void* owner);
+extern "C" void* cFEStateOptionsController_cFEStateOptionsController1(void* self, void* owner);
 extern "C" void* cFEStateCredits_cFEStateCredits1(void* self, void* owner);
 extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* self, void* owner, int a, int b, int c);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* owner, int a, int b);
@@ -257,23 +257,23 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         cFEFlowState_setValue(&gFlowState, 2, 0);
         return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
     case 59:
-        func_001A86E8(1);
+        cFEStateNet_setFEPath(1);
         return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, st->x44);
     case 2:
         switch (pData) {
         case 11:
-            func_001A86E8(0);
+            cFEStateNet_setFEPath(0);
             return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 9:
-            func_001A86E8(0);
+            cFEStateNet_setFEPath(0);
             return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 22:
-            func_001A86E8(0);
+            cFEStateNet_setFEPath(0);
             return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 5:
             return cFEStateBonusMaterial_cFEStateBonusMaterial1(cMemMan_alloc(72, str_cFEStateBonusMaterial, 0, 0), *self);
         case 49:
-            func_001A86E8(1);
+            cFEStateNet_setFEPath(1);
             return cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *self);
         }
     case 22:
@@ -378,13 +378,13 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
     case 24:
         switch (pData) {
         case 28:
-            return func_00188EE8(cMemMan_alloc(76, str_cFEStateOptionsGame, 0, 0), *self);
+            return cFEStateOptionsGame_cFEStateOptionsGame1(cMemMan_alloc(76, str_cFEStateOptionsGame, 0, 0), *self);
         case 29:
-            return func_0018A258(cMemMan_alloc(72, str_cFEStateOptionsSound, 0, 0), *self);
+            return cFEStateOptionsSound_cFEStateOptionsSound1(cMemMan_alloc(72, str_cFEStateOptionsSound, 0, 0), *self);
         case 30:
-            return func_0018C0E8(cMemMan_alloc(72, str_cFEStateOptionsHUD, 0, 0), *self);
+            return cFEStateOptionsHUD_cFEStateOptionsHUD1(cMemMan_alloc(72, str_cFEStateOptionsHUD, 0, 0), *self);
         case 31:
-            return func_0018C658(cMemMan_alloc(84, str_cFEStateOptionsController, 0, 0), *self);
+            return cFEStateOptionsController_cFEStateOptionsController1(cMemMan_alloc(84, str_cFEStateOptionsController, 0, 0), *self);
         case 32:
             ((int*)self)[3] = 0x18;
             return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
@@ -509,7 +509,7 @@ extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* mem, void* owner, i
 extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* mem, void* owner, int a2);
 extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(void* mem, void* owner, int a2);
 extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(void* mem, void* owner, int a2);
-extern "C" void* func_001887A0(void* mem, void* owner, int a2);
+extern "C" void* cFEStateOptions_cFEStateOptions1(void* mem, void* owner, int a2);
 extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(void* mem, void* owner);
 extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* owner);
 extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* mem, void* owner);
@@ -671,12 +671,12 @@ extern "C" void* cFECustom_getPrevState(cFECustom* self, cUIState* desc, int sta
     case 36:
     case 37:
     case 38:
-        return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
+        return cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
     case 33:
         switch (stateData) {
         case 0:
             if (self->mProfileLaunchScreen == 34) {
-                return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
+                return cFEStateOptions_cFEStateOptions1(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), self->mpEngine, 0);
             }
             return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(
                 cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), self->mpEngine);
@@ -891,13 +891,13 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cLoadTimer_startload(void* self, float t);
 void cLoadTimer_setnextpercent(void* self, float t);
-void func_0014BD78(void* iface);
-extern "C" void func_0014AF10(void* iface);
+void cBEBoltInterface_loadBoltDB(void* iface);
+extern "C" void cBEBoltInterface_restoreVisibleFlags(void* iface);
 extern "C" void cFELocale_loadFE(void* self);
 extern "C" void cUIEngine_loadFile(void* engine, const char* path);
 // PORT: the unit declares cRealFE_loadCharAnimations without parameters; this caller passes self.
 extern "C" void cRealFE_loadCharAnimations_1(void* self) __asm__("cRealFE_loadCharAnimations");
-extern "C" void func_0019CE68(void* self);
+extern "C" void cFEBoltFileManager_init(void* self);
 extern "C" void cFERiderManager_init(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner);
@@ -943,9 +943,9 @@ static inline void progress_1E80(float t)
 /**
  * Loads the front end: UI files, character animations, riders, camera, input and sound.
  *
- * Advances the loading bar (20, 50, 75, 99) as it goes. It calls func_0014BD78 and func_0014AF10 on BE
+ * Advances the loading bar (20, 50, 75, 99) as it goes. It calls cBEBoltInterface_loadBoltDB and cBEBoltInterface_restoreVisibleFlags on BE
  * interface 9 and cFELocale_loadFE on the front-end locale, calls the graphics manager's slot 44 with 0, loads
- * "data/ui/fe" into the UI engine and the character animations, and calls func_0019CE68 on +0x1A70 and
+ * "data/ui/fe" into the UI engine and the character animations, and calls cFEBoltFileManager_init on +0x1A70 and
  * cFERiderManager_init on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
  * engine gets a cFEInput ("FEUIInput"), a cFECustom ("FEUICustom"), a sound object ("FEUISound"), the app's
  * fonts and locale; finally it loads the irradiance database and calls cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio()).
@@ -956,8 +956,8 @@ void cRealFE::load()
     cLoadTimer_startload(&cAppMan_TheAppMan->LoadTimer, 3.5f);
     progress_1E80(20.0f);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    func_0014BD78(iface);
-    func_0014AF10(iface);
+    cBEBoltInterface_loadBoltDB(iface);
+    cBEBoltInterface_restoreVisibleFlags(iface);
     cFELocale_loadFE(SSXApp->FELocale);
     progress_1E80(50.0f);
     {
@@ -972,7 +972,7 @@ void cRealFE::load()
     } while (0);
     progress_1E80(75.0f);
     cRealFE_loadCharAnimations_1(this);
-    func_0019CE68(mBoltFileManager);
+    cFEBoltFileManager_init(mBoltFileManager);
     cFERiderManager_init(&mRiderManager);
     cFE* cam = SSXApp->RealFE;
     t4Vector pos;
@@ -1056,7 +1056,7 @@ INCLUDE_ASM("fe/fereal", cRealFE_purge);
 extern char cIrradianceDataBase_TheDataBase[];
 extern "C" void cRealFE_purgeCharAnimations(cRealFE* self);
 extern "C" void cFERiderManager_purge(void* p);
-extern "C" void func_0019CF40(void* p);
+extern "C" void cFEBoltFileManager_purge(void* p);
 extern "C" void cIrradianceDataBase_Purge(void* p);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
@@ -1066,7 +1066,7 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
  *
  * Calls the graphics manager's slot 19 (cGraphicsMan_FlushRenderer) first, then cRealFE_purgeCharAnimations (releases the animation
  * data sources that cRealFE_loadCharAnimations() registered), cFERiderManager_purge on the rider manager (+0xB0),
- * func_0019CF40 on +0x1A70 and cIrradianceDataBase_Purge on cIrradianceDataBase_TheDataBase, clears the app's words at +0x7C and +0x80 and finally
+ * cFEBoltFileManager_purge on +0x1A70 and cIrradianceDataBase_Purge on cIrradianceDataBase_TheDataBase, clears the app's words at +0x7C and +0x80 and finally
  * calls cSSXAudio_FrontEndPurge() on the audio object.
  */
 void cRealFE::purge()
@@ -1075,7 +1075,7 @@ void cRealFE::purge()
     ps2GraphicsMan->FlushRenderer();
     purgeCharAnimations();
     cFERiderManager_purge(&mRiderManager);
-    func_0019CF40(mBoltFileManager);
+    cFEBoltFileManager_purge(mBoltFileManager);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     cSSXApp* st = SSXApp;
     st->RealFE = 0;
@@ -1296,8 +1296,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cFadeScreen_update(void* self);
 extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002B3A70(void* p);
-extern "C" void func_002B3A98(void* p);
+extern "C" void cMusicSys_PauseSong(void* p);
+extern "C" void cMusicSys_ResumeSong(void* p);
 extern "C" void tMoviePlayOptions_SetDefaults(void* self);
 extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" bool cMoviePlayer_asyncPlay(void* self);
@@ -1306,12 +1306,12 @@ extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 int cSSXAudio_PlayIntroMovieWithDJ(void* self);
 void* cInput_getState(void* self, int a1);
 extern "C" void cUIEngine_update(void* self);
-extern "C" void func_0019D250(void* p);
+extern "C" void cFEBoltFileManager_update(void* p);
 extern "C" void cFERiderManager_update(void* p);
 extern "C" void cFEAsyncManager_Update(void* p);
-extern "C" void func_00263828(void* p);
-extern "C" void func_00263CF0(void* p);
-extern "C" void func_0025AC50(void* p);
+extern "C" void cConnMan_update(void* p);
+extern "C" void cGameConnMan_update(void* p);
+extern "C" void LobbyMan_update(void* p);
 extern const char str_MoviePlayer[];
 extern int cRealFE_mMovieList;
 extern int D_004A19D0;
@@ -1334,8 +1334,8 @@ extern int EnableOnline;
  * option bits and cSSXAudio_PlayIntroMovieWithDJ), clearing that bit and recording it in D_004A19D0; bit 4 also makes the movie
  * skippable (+0xB5AD8). While a movie plays it runs cMoviePlayer_asyncUpdate() and, when skippable, ends it on a
  * press of input 0x70 or 122 on either pad; when it ends the player is destroyed, +0xB5ADC is set to 1 and, if no
- * movie is left, func_002B3A98 is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
- * cUIEngine_update; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), func_0019D250 on
+ * movie is left, cMusicSys_ResumeSong is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
+ * cUIEngine_update; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), cFEBoltFileManager_update on
  * +0x1A70, the rider manager (+0xB0, cFERiderManager_update) and the async file manager, and, when EnableOnline is set, the
  * online members at +0xB5AB0 and +0xB5ABC and the lobby manager.
  */
@@ -1346,7 +1346,7 @@ void cRealFE::update()
     if (mpMoviePlayer == 0) {
         if (cRealFE_mMovieList != 0) {
             mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
-            func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
+            cMusicSys_PauseSong(&cAudioInterface_bxAudio()->MusicSys);
             tMoviePlayOptions info;
             tMoviePlayOptions_SetDefaults(&info);
             int movieBits = cRealFE_mMovieList;
@@ -1405,7 +1405,7 @@ void cRealFE::update()
     mpMoviePlayer = 0;
     mMovieSkippable = 0;
     if (movieBits == 0) {
-        func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
+        cMusicSys_ResumeSong(&cAudioInterface_bxAudio()->MusicSys);
     }
     return;
     }
@@ -1418,16 +1418,16 @@ noh:
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)mCamera.mVtbl;
         char* obj = (char*)&mCamera;
         vt[3].fn(vthis(obj, vt[3]));
-        func_0019D250(mBoltFileManager);
+        cFEBoltFileManager_update(mBoltFileManager);
         cFERiderManager_update(&mRiderManager);
         if ((void*)SSXApp->mFEAsyncManager != 0) {
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
         if (EnableOnline != 0) {
-            func_00263828(&mConnMan);
-            func_00263CF0(&mGameConnMan);
+            cConnMan_update(&mConnMan);
+            cGameConnMan_update(&mGameConnMan);
             if (LobbyMan_mLobbyMan != 0) {
-                func_0025AC50(LobbyMan_mLobbyMan);
+                LobbyMan_update(LobbyMan_mLobbyMan);
             }
         }
 }
@@ -1516,9 +1516,9 @@ extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* owner);
 extern "C" void* cFEStateLodge_cFEStateLodge(void* self, void* owner);
 extern "C" void* cFEStateRelogin_cFEStateRelogin(void* self, void* owner);
 extern "C" void cCommSystem_closeChannel(void* a, int b);
-extern "C" void func_00266E88(void* a);
-extern "C" void func_00266DF8(void* a);
-extern "C" void func_0025B6D8(void* a, int b);
+extern "C" void cVoipMan_turnVoiceOff(void* a);
+extern "C" void cVoipMan_disconnect(void* a);
+extern "C" void LobbyMan_connect(void* a, int b);
 extern "C" void cBENetworkInterface_restoreCharProfile(void* a, int b);
 extern "C" void cBE_newProfile(void* be, int b);
 extern "C" void* cBE_getBE();
@@ -1575,9 +1575,9 @@ void cRealFE::loadStartState()
         void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), (char*)mpUI);
         cUIStateStack_push(&mpUI->mStateStack, st);
         cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->mChannel);
-        func_00266E88(VoipMan);
-        func_00266DF8(VoipMan);
-        func_0025B6D8(LobbyMan_mLobbyMan, 1);
+        cVoipMan_turnVoiceOff(VoipMan);
+        cVoipMan_disconnect(VoipMan);
+        LobbyMan_connect(LobbyMan_mLobbyMan, 1);
         cBENetworkInterface_restoreCharProfile(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
         cBE_newProfile(cBE_getBE(), 1);
         cBE_newProfile(cBE_getBE(), 2);

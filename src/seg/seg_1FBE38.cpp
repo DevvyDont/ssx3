@@ -55,7 +55,7 @@ enum eRailCmd { kRailCmd_Off = 0, kRailCmd_On = 1 };
 // tNISData::Cmd (NISFunc): queue the NIS of a script hash or of a script category on list 0, or play list 0.
 enum eNISCmd { kNISCmd_QueueScript = 0, kNISCmd_QueueCategory = 1, kNISCmd_Play = 2 };
 // tSectionData::Cmd (SectionFunc): cSectionMan_load; nothing (1 is handled and ignored); cSectionMan_activate; game
-// state kGFSM_UserSelect with startup flag 2 and a scripted DJ line (func_002A49E8), or with flag 0; a sky swap.
+// state kGFSM_UserSelect with startup flag 2 and a scripted DJ line (cSSXAudio_BeginScriptedDJLine), or with flag 0; a sky swap.
 enum eSectionCmd {
     kSectionCmd_Load = 0,
     kSectionCmd_Ignored = 1,
@@ -5826,7 +5826,7 @@ extern "C" void cSectionMan_load_2210(void* self, int hash, char* name) __asm__(
 extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
 extern "C" void cGame_setState_2210(void* self, int a, int b, int refresh) __asm__("cGame_setState");
 extern "C" void* cAudioInterface_bxAudio_2210() __asm__("cAudioInterface_bxAudio");
-extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
+extern "C" void cSSXAudio_BeginScriptedDJLine_2210(void* self) __asm__("cSSXAudio_BeginScriptedDJLine");
 
 
 /**
@@ -5836,7 +5836,7 @@ extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
  * script's rider is set and not a computer rider (cBeing virtual isComputer): the location comes from the script ID
  * through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and the mode from D_00445E40 (index < 8). The
  * action (eSectionCmd): kSectionCmd_Load cSectionMan_load, kSectionCmd_Activate cSectionMan_activate,
- * kSectionCmd_UserSelectDJ cGame_setState(game, 0xE, 2, 0) and func_002A49E8(cAudioInterface_bxAudio()),
+ * kSectionCmd_UserSelectDJ cGame_setState(game, 0xE, 2, 0) and cSSXAudio_BeginScriptedDJLine(cAudioInterface_bxAudio()),
  * kSectionCmd_UserSelect cGame_setState(game, 0xE, 0, 0), kSectionCmd_SkySwap sets SectionMan->m_bTriggerSkySwap;
  * kSectionCmd_Ignored does nothing (load and activate act on SSXApp->Game->SectionMan).
  *
@@ -5899,7 +5899,7 @@ extern "C" t3Vector SectionFunc(int n, luno_cLunoCArg* params)
             break;
         case kSectionCmd_UserSelectDJ:
             cGame_setState_2210(SSXApp->Game, kGFSM_UserSelect, 2, 0);
-            func_002A49E8_2210(cAudioInterface_bxAudio_2210());
+            cSSXAudio_BeginScriptedDJLine_2210(cAudioInterface_bxAudio_2210());
             break;
         case kSectionCmd_UserSelect:
             cGame_setState_2210(SSXApp->Game, kGFSM_UserSelect, 0, 0);
@@ -8939,7 +8939,7 @@ int* luno_cLunoVar_castInt(void*);
 extern luno_cLunoVar luno_gLunoNil_6300 __asm__("luno_gLunoNil");
 
 extern int D_004A3DB0_6300[2] __asm__("D_004A3DB0");
-extern "C" void func_001E3510(int, int);
+extern "C" void requestMessageCenter(int, int);
 extern "C" void* cBE_getInterface_6300(cBE*, int) __asm__("cBE_getInterface__Fv");
 extern int D_004A588C_6300 __asm__("D_004A588C");
 extern tMessageCenterData sMessageCenterDefaults __asm__("D_004FBF38");
@@ -8950,7 +8950,7 @@ extern tMessageCenterData sMessageCenterDefaults __asm__("D_004FBF38");
  * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
  * field type table D_004A3DB0 says eLunoVar_Float. Defaults: TitleId 0, MsgId 0.
  *
- * Unless cBENetworkInterface_networkOpt.bIsNetworkGame is set, calls func_001E3510(TitleId, MsgId) (fe/fepopup3). The
+ * Unless cBENetworkInterface_networkOpt.bIsNetworkGame is set, calls requestMessageCenter(TitleId, MsgId) (fe/fepopup3). The
  * cBE_getInterface call before it has no effect.
  *
  * @param n  the number of script arguments
@@ -8978,7 +8978,7 @@ extern "C" luno_cLunoVar MessageCenterFunc(int n, luno_cLunoCArg* params) {
     int y = vp[1];
     cBE_getInterface_6300(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0)
-        func_001E3510(x, y);
+        requestMessageCenter(x, y);
     return luno_gLunoNil_6300;
 }
 #endif
@@ -9698,7 +9698,7 @@ int* luno_cLunoVar_castInt(void*);
 extern luno_cLunoVar luno_gLunoNil_7020 __asm__("luno_gLunoNil");
 
 extern int D_004A3DD0_7020[2] __asm__("D_004A3DD0");
-extern "C" int func_001E3570(int, int);
+extern "C" int canOpenMessageCenter(int, int);
 extern int D_004A58C0_7020 __asm__("D_004A58C0");
 extern tShowMessageIconData sMessageIconDefaults __asm__("D_004FC070");
 /**
@@ -9708,7 +9708,7 @@ extern tShowMessageIconData sMessageIconDefaults __asm__("D_004FC070");
  * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
  * field type table D_004A3DD0 says eLunoVar_Float. Defaults: TitleId 0, MsgId 0.
  *
- * Returns 1 when func_001E3570(TitleId, MsgId) (fe/fepopup3) returns non-zero, else 0, as an int in the hidden result
+ * Returns 1 when canOpenMessageCenter(TitleId, MsgId) (fe/fepopup3) returns non-zero, else 0, as an int in the hidden result
  * slot self.
  *
  * @param n  the number of script arguments
@@ -9732,7 +9732,7 @@ extern "C" void* ShowMessageIconFunc(luno_cLunoVar* self, int n, luno_cLunoCArg*
         int k = curArg->Index;
         setArgField(&vp[k], curArg, D_004A3DD0_7020[k]);
     }
-    bool iconShown = func_001E3570(vp[0], vp[1]) != 0;
+    bool iconShown = canOpenMessageCenter(vp[0], vp[1]) != 0;
     self->Type = 1;
     *luno_cLunoVar_castInt(self) = iconShown;
     return self;

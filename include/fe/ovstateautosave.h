@@ -6,7 +6,7 @@
 // cMCOverlayManager_writeSetFileType in card state 1), then onDestroyScreen moves on to where the save was started from
 // (mParentScreen).
 // Retail code: cOVState_AUTOSAVE_* in fe/ovstateprofile (0x00212138 ... 0x00212508) and fe/all_in_one_fe (destructor
-// 0x00222280, the empty onWidgetEvent / hideActionButtons overrides, the engine-less ctor copy func_002222B8). On Tour
+// 0x00222280, the empty onWidgetEvent / hideActionButtons overrides, the engine-less ctor copy cOVState_AUTOSAVE_cOVState_AUTOSAVE1). On Tour
 // defines it in fe/all_in_one_fe.cpp (no EA path for it in the preview's asserts).
 //
 // Size 0x234:

@@ -319,7 +319,7 @@ CHECK_SIZE(cFELoadStateInLodge, 0x48);
 // 0x0047C948; its onWidgetCreate__14cGameLoadStateP8cUIThing is an exact body match of cGameLoadState_onWidgetCreate).
 // Retail code: the dtor, onCreateScreen, onGainTransition and onWidgetCreate in main/ssxappdtor (0x002453F0 ...
 // 0x00245598); the preview's widgetCreateMultiP / widgetCreateQP (cGameLoadState_widgetCreateMultiP / cGameLoadState_widgetCreateQP) and the player-panel
-// helper func_00246CF8 in fe/festateloadhint; there is no out-of-line ctor. No On Tour class.
+// helper cGameLoadState_showPlayerStats in fe/festateloadhint; there is no out-of-line ctor. No On Tour class.
 //
 // Size 0x4C: [R] cGameLoadScreen_load: operator new(0x4C, "cGameLoadState") + cUIState_cUIState(mem, mpUI), vtable,
 // word 0x48 = 0, then 0x48 = the load screen.
@@ -337,7 +337,7 @@ struct cGameLoadState : public cUIState {
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
     // --- cGameLoadState
     cGameLoadScreen* mpParentModule; // 0x048 [R] 0, then cGameLoadScreen_load stores the load screen (and loads its
-                                    //       texture 0); [U] func_00246CF8 and cGameLoadState_widgetCreateQP show
+                                    //       texture 0); [U] cGameLoadState_showPlayerStats and cGameLoadState_widgetCreateQP show
                                     //       mpParentModule->mTexID[player] (views sLoadInfo_6CF8 / image[2] at 0x10).
                                     //       Name taken from cFELoadState's [O] member in the same role (no DWARF here)
 

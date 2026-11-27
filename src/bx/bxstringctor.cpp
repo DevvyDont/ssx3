@@ -198,7 +198,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00268A90);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A2FB0 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A778 registers it as the callback of list 0 (rooms).
+ * argument, and the first is not used. LobbyMan_openLists registers it as the callback of list 0 (rooms).
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -220,7 +220,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A2FB8 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A778 registers it as the callback of list 1 (users).
+ * argument, and the first is not used. LobbyMan_openLists registers it as the callback of list 1 (users).
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -242,7 +242,7 @@ extern "C" void LobbyMan_onranklistupdate(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A2FC0 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A778 (list 2, ranks) and func_0025E348 register it.
+ * argument, and the first is not used. LobbyMan_openLists (list 2, ranks) and LobbyMan_selectRankList register it.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -264,7 +264,7 @@ void* LobbyMan_onincomingmsg(void* self);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A2FF0 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 0.
+ * argument, and the first is not used. LobbyMan_createLobbyApi registers it as LobbyApi message callback 0.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -286,7 +286,7 @@ extern "C" void LobbyMan_onchatmsg(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A2FF8 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 1.
+ * argument, and the first is not used. LobbyMan_createLobbyApi registers it as LobbyApi message callback 1.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -308,7 +308,7 @@ extern "C" void LobbyMan_onconnectionmsg(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3000 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 3.
+ * argument, and the first is not used. LobbyMan_createLobbyApi registers it as LobbyApi message callback 3.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -330,7 +330,7 @@ extern "C" void LobbyMan_onplaymsg(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3008 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 4.
+ * argument, and the first is not used. LobbyMan_createLobbyApi registers it as LobbyApi message callback 4.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -375,7 +375,7 @@ extern "C" void LobbyMan_onaccountcreated(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3088 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The account-create request passes it to func_0025B608 as its reply callback.
+ * argument, and the first is not used. The account-create request passes it to LobbyMan_sendRequest as its reply callback.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -397,7 +397,7 @@ extern "C" void LobbyMan_onaccountedited(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A30A8 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The account-edit request passes it to func_0025B608 as its reply callback.
+ * argument, and the first is not used. The account-edit request passes it to LobbyMan_sendRequest as its reply callback.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -419,7 +419,7 @@ extern "C" void LobbyMan_onlostaccountrequestsent(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A30B0 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The lost-account request passes it to func_0025B608 as its reply callback.
+ * argument, and the first is not used. The lost-account request passes it to LobbyMan_sendRequest as its reply callback.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -463,7 +463,7 @@ extern "C" void LobbyMan_onauthentication(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A30E8 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The login request passes it to func_0025B608 as its reply callback.
+ * argument, and the first is not used. The login request passes it to LobbyMan_sendRequest as its reply callback.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -500,21 +500,21 @@ extern "C" void func_00268C98(void* self, void* message, int lobbyMan)
 INCLUDE_ASM("bx/bxstringctor", func_00268CC0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3120;
-extern "C" void func_0025D048(int);
+extern "C" void LobbyMan_handleStatsReply(int);
 
 /**
- * Calls func_0025D048 on the lobby manager passed as the third argument (callback thunk).
+ * Calls LobbyMan_handleStatsReply on the lobby manager passed as the third argument (callback thunk).
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3120 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025D048 handles the reply to the persona's 'onln' stats request.
+ * argument, and the first is not used. LobbyMan_handleStatsReply handles the reply to the persona's 'onln' stats request.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
 extern "C" void func_00268CC0(void* self, void* message, int lobbyMan)
 {
-    func_0025D048(lobbyMan + D_004A3120.v);
+    LobbyMan_handleStatsReply(lobbyMan + D_004A3120.v);
 }
 #endif
 
@@ -661,7 +661,7 @@ extern "C" void LobbyMan_onNewsRetrieved(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3178 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The news request passes it to func_0025B608 as its reply callback.
+ * argument, and the first is not used. The news request passes it to LobbyMan_sendRequest as its reply callback.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
@@ -720,21 +720,21 @@ extern "C" void func_00268E28(void* self, void* message, int lobbyMan)
 INCLUDE_ASM("bx/bxstringctor", func_00268E50);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A31D0;
-extern "C" void func_0025EB00(int);
+extern "C" void LobbyMan_handlePlayerInfoReply(int);
 
 /**
- * Calls func_0025EB00 on the lobby manager passed as the third argument (callback thunk).
+ * Calls LobbyMan_handlePlayerInfoReply on the lobby manager passed as the third argument (callback thunk).
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A31D0 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_0025EB00 handles the reply to another player's 'onln' info request.
+ * argument, and the first is not used. LobbyMan_handlePlayerInfoReply handles the reply to another player's 'onln' info request.
  *
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
 extern "C" void func_00268E50(void* self, void* message, int lobbyMan)
 {
-    func_0025EB00(lobbyMan + D_004A31D0.v);
+    LobbyMan_handlePlayerInfoReply(lobbyMan + D_004A31D0.v);
 }
 #endif
 
@@ -838,7 +838,7 @@ extern "C" void BuddyMan_onconnect(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3340 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_00261248 (the buddy connect) registers it.
+ * argument, and the first is not used. BuddyMan_connect (the buddy connect) registers it.
  *
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
@@ -904,7 +904,7 @@ extern "C" void BuddyMan_onBuddyDelete(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3380 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_00261EF8 and two other BuddyMan functions register it with the delete call.
+ * argument, and the first is not used. BuddyMan_moveToRosterList and two other BuddyMan functions register it with the delete call.
  *
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
@@ -926,7 +926,7 @@ extern "C" void BuddyMan_onBuddyAdd(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3388 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. func_002620D8 registers it with the add call func_003F0E38.
+ * argument, and the first is not used. BuddyMan_addRosterEntry registers it with the add call func_003F0E38.
  *
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
@@ -966,7 +966,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00264CF0(void* self, int a1);
+extern "C" void cSetupMan_applyMyCharacter(void* self, int a1);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -996,8 +996,8 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  * Handles the host echoing the client's character pick: takes the host's state, applies the character and posts an
  * event.
  *
- * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
- * online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (cSetupMan_applyMyCharacter) and pushes an 8-byte
+ * online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. cSetupMan_update calls
  * it on the client's setup manager (cSetupMan_mSetupMan) for a type-1 message while the state is below 7.
  *
  * @param riderId  the character id from the message
@@ -1007,7 +1007,7 @@ extern "C" void func_00269008(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 243;
     self->mState = hostState;
-    func_00264CF0(self, riderId);
+    cSetupMan_applyMyCharacter(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1024,7 +1024,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00264CF0(void* self, int a1);
+extern "C" void cSetupMan_applyMyCharacter(void* self, int a1);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -1054,8 +1054,8 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  * Handles the host echoing the client's character confirmation: takes the host's state, applies the character and posts
  * an event.
  *
- * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
- * online event of kind 244 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (cSetupMan_applyMyCharacter) and pushes an 8-byte
+ * online event of kind 244 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. cSetupMan_update calls
  * it on the client's setup manager (cSetupMan_mSetupMan) for a type-3 message while the state is below 7.
  *
  * @param riderId  the character id from the message
@@ -1065,7 +1065,7 @@ extern "C" void func_002690C8(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 244;
     self->mState = hostState;
-    func_00264CF0(self, riderId);
+    cSetupMan_applyMyCharacter(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1113,7 +1113,7 @@ static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_002691
  * Handles the host echoing the client's withdrawn confirmation: takes the host's state and posts an event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
- * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a
+ * "NetEvent") onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a
  * type-5 message while the state is below 7.
  *
  * @param hostState  the host's setup state (the message's second word)
@@ -1138,7 +1138,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00264D80(void* self, int a1, void* a2);
+extern "C" void cSetupMan_applyOpponentCharacter(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -1169,8 +1169,8 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  * an event.
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId and the attribute bytes @p riderStats as the opponent's character
- * (func_00264D80) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto
- * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-0 message while
+ * (cSetupMan_applyOpponentCharacter) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto
+ * LobbyMan's mEventList. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-0 message while
  * the state is below 7.
  *
  * @param riderId  the host's character id
@@ -1181,7 +1181,7 @@ extern "C" void func_00269240(cSetupMan* self, int riderId, int hostState, void*
 {
     int kind = 243;
     self->mState = hostState;
-    func_00264D80(self, riderId, riderStats);
+    cSetupMan_applyOpponentCharacter(self, riderId, riderStats);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1198,7 +1198,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00264D80(void* self, int a1, void* a2);
+extern "C" void cSetupMan_applyOpponentCharacter(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -1229,8 +1229,8 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  * posts an event.
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId as the opponent's character without attribute bytes
- * (func_00264D80) and pushes an 8-byte online event of kind 245 (vtable online_Event_vtbl, tag "NetEvent") onto
- * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-2 message while
+ * (cSetupMan_applyOpponentCharacter) and pushes an 8-byte online event of kind 245 (vtable online_Event_vtbl, tag "NetEvent") onto
+ * LobbyMan's mEventList. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-2 message while
  * the state is below 7.
  *
  * @param riderId  the host's character id
@@ -1240,7 +1240,7 @@ extern "C" void func_00269300(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 245;
     self->mState = hostState;
-    func_00264D80(self, riderId, 0);
+    cSetupMan_applyOpponentCharacter(self, riderId, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1288,7 +1288,7 @@ static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693
  * Handles the host withdrawing its confirmation on the client: takes the host's state and posts an event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
- * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a
+ * "NetEvent") onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a
  * type-4 message while the state is below 7.
  *
  * @param hostState  the host's setup state (the message's second word)
@@ -1342,8 +1342,8 @@ static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_002694
  * Handles the client's highlighted bragging-rights row on the host: posts it as a lobby event.
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
- * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
- * func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase
+ * 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post the same event with flag 0.
+ * cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase
  * (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
@@ -1396,8 +1396,8 @@ static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_002695
  * Handles a bragging-rights rule change from the client on the host: posts it as a lobby event.
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
- * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
- * the same event with flag 0. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-9 message in
+ * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post
+ * the same event with flag 0. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-9 message in
  * the bragging-rights phase (state 7 or more).
  *
  * @param ruleSlot  the rule slot
@@ -1424,7 +1424,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
-extern "C" void func_00264E50(void* self, int event, int a2, int state);
+extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
 extern void* D_004813E0[];
 
@@ -1453,8 +1453,8 @@ static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_002696
  * Handles the client locking its bragging-rights panel on the host: advances the state, answers and posts an event.
  *
  * Moves the state word from 6 or 7 to 8, or from 9 to 10, sends a type-11 message carrying the new state
- * (func_00264E50) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag "cSetupMan::Update") with flag +0x8 =
- * 1 onto LobbyMan's mEventList. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
+ * (cSetupMan_sendCharacterMessage) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag "cSetupMan::Update") with flag +0x8 =
+ * 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
 extern "C" void func_00269608(cSetupMan* self)
@@ -1469,7 +1469,7 @@ extern "C" void func_00269608(cSetupMan* self)
         self->mState = 10;
         break;
     }
-    func_00264E50(self, 11, self->mState, 0);
+    cSetupMan_sendCharacterMessage(self, 11, self->mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
     netEvent->mVtbl = D_004813E0;
@@ -1487,7 +1487,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
-extern "C" void func_00264E50(void* self, int event, int a2, int state);
+extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
 extern void* D_004813C0[];
 
@@ -1515,16 +1515,16 @@ static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696
 /**
  * Handles the client unlocking its bragging-rights panel on the host: steps the state back, answers and posts an event.
  *
- * Moves the state word from 8 back to 7, sends a type-12 message carrying the state (func_00264E50) and pushes a
+ * Moves the state word from 8 back to 7, sends a type-12 message carrying the state (cSetupMan_sendCharacterMessage) and pushes a
  * 0xC-byte event of kind 254 (vtable D_004813C0, tag "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's
- * mEventList. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
+ * mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
 extern "C" void func_002696F8(cSetupMan* self)
 {
     if (self->mState == 8)
         self->mState = 7;
-    func_00264E50(self, 0xC, self->mState, 0);
+    cSetupMan_sendCharacterMessage(self, 0xC, self->mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
     netEvent->mVtbl = D_004813C0;
@@ -1570,8 +1570,8 @@ static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697
  * Handles the host's highlighted bragging-rights row on the client: posts it as a lobby event.
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
- * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
- * func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-6 message in the bragging-rights phase
+ * 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post the same event with flag 0.
+ * cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-6 message in the bragging-rights phase
  * (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
@@ -1624,7 +1624,7 @@ static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_002698
  * Handles a type-7 highlighted-row message on the client: posts it as a lobby event with flag 0.
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
- * 0 onto LobbyMan's mEventList, like the local sender func_00265458. func_002642B8 calls it on the client's setup
+ * 0 onto LobbyMan's mEventList, like the local sender cSetupMan_sendBraggingSelection. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
@@ -1677,8 +1677,8 @@ static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_002699
  * Handles a bragging-rights rule change from the host on the client: posts it as a lobby event.
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
- * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
- * the same event with flag 0. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-8 message in
+ * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post
+ * the same event with flag 0. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-8 message in
  * the bragging-rights phase (state 7 or more).
  *
  * @param ruleSlot  the rule slot
@@ -1733,7 +1733,7 @@ static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A
  * Handles a type-9 rule-change message on the client: posts it as a lobby event with flag 0.
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
- * value at +0x10, with flag +0x8 = 0 onto LobbyMan's mEventList, like the local sender func_00265568. func_002642B8
+ * value at +0x10, with flag +0x8 = 0 onto LobbyMan's mEventList, like the local sender cSetupMan_sendBraggingRule. cSetupMan_update
  * calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-9 message in the bragging-rights phase (state 7 or
  * more).
  *
@@ -1789,7 +1789,7 @@ static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269A
  * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
- * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-10 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
@@ -1843,7 +1843,7 @@ static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B
  * event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
- * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-11 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
@@ -1895,9 +1895,9 @@ static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C
 /**
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
  *
- * Type 12 comes from the host unlocking its own panel (func_00265700) or answering the client's unlock (func_002696F8).
+ * Type 12 comes from the host unlocking its own panel (cSetupMan_unlockBragging) or answering the client's unlock (func_002696F8).
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
- * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-12 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
@@ -1950,7 +1950,7 @@ static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269C
  * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
- * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-13 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the setup state from the message

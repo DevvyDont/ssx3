@@ -421,7 +421,7 @@ extern "C" void cStreamPause__cStreamPause(void* self, int flags)
 extern "C" void* cUIState__cUIState(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F30__FPv);
+INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup__cUIStateDisplayModePopup__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys the display-mode popup state (vtable D_0047DA58) by running the cUIState destructor cUIState__cUIState().
@@ -430,14 +430,14 @@ INCLUDE_ASM("fe/festateloadhint", func_00245F30__FPv);
  *
  * @return cUIState__cUIState()'s return value
  */
-void* func_00245F30(void* self)
+void* cUIStateDisplayModePopup__cUIStateDisplayModePopup(void* self)
 {
     return cUIState__cUIState(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F50);
+INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -455,10 +455,10 @@ extern char str_The_display_mode_has_been_set_to_interla[];
 extern char str_kT_CMNContinue_c[];
 
 // The display-mode popup's UI state (vtable D_0047DA58; the class name is not known, ours): a cUIState and two fields.
-// [R] func_002452D8 allocates 0x50 bytes for it and sets mInterlaced; [U] func_00245F50 / func_00246098.
+// [R] func_002452D8 allocates 0x50 bytes for it and sets mInterlaced; [U] cUIStateDisplayModePopup_onCreateScreen / cUIStateDisplayModePopup_onUpdate.
 struct cUIStateDisplayModePopup : public cUIState {
     signed char mInterlaced;        // 0x48 (name ours) [U] 0: the popup says the mode was switched to progressive
-    int mConfirmTimer;              // 0x4C (name ours) [U] func_00245F50 starts it at 300; func_00246098 counts it down
+    int mConfirmTimer;              // 0x4C (name ours) [U] cUIStateDisplayModePopup_onCreateScreen starts it at 300; cUIStateDisplayModePopup_onUpdate counts it down
 };
 
 /**
@@ -471,7 +471,7 @@ struct cUIStateDisplayModePopup : public cUIState {
  * slot 9, with 0) and made static (setStatic, slot 8, with 1). Starts the 300-frame countdown at +0x4C. The state is
  * pushed by func_002452D8() after the progressive-scan choice.
  */
-extern "C" void func_00245F50(cUIStateDisplayModePopup* self)
+extern "C" void cUIStateDisplayModePopup_onCreateScreen(cUIStateDisplayModePopup* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_supopup), 0);
@@ -502,7 +502,7 @@ extern "C" void func_00245F50(cUIStateDisplayModePopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246098);
+INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -522,10 +522,10 @@ extern char str_kT_CMNContinue_c[];
  * output (onUpdate slot of D_0047DA58).
  *
  * When the counter at +0x4C reaches 0 while the flag at +0x48 is 0 (the "switched to progressive" message), sets the
- * flag to 1, rewrites "Title", "yes" and "no" as func_00245F50() does (so the text now says the mode was set to
+ * flag to 1, rewrites "Title", "yes" and "no" as cUIStateDisplayModePopup_onCreateScreen() does (so the text now says the mode was set to
  * interlaced) and calls cGraphicsMan_TheGraphicsMan's SetDTV (slot 8) with 0. Always ends with cUIState_onUpdate().
  */
-extern "C" void func_00246098(cUIStateDisplayModePopup* self)
+extern "C" void cUIStateDisplayModePopup_onUpdate(cUIStateDisplayModePopup* self)
 {
     if (self->mConfirmTimer != 0) {
         if (--self->mConfirmTimer == 0) {
@@ -560,11 +560,11 @@ extern "C" void func_00246098(cUIStateDisplayModePopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_002461E0);
+INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00186A08(void* self, void* engine);
+extern "C" void* cFEStateMemCard_cFEStateMemCard1(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_yes_c[];
 extern char str_cFEStateMemCard[];
@@ -572,19 +572,19 @@ extern char str_cFEStateMemCard[];
 /**
  * Handles a button press on the display-mode popup: "yes" (accept, kONNEXT) pushes a new memory-card load state.
  *
- * The state is a 584-byte "cFEStateMemCard" built by func_00186A08() on this state's engine and pushed on its state
+ * The state is a 584-byte "cFEStateMemCard" built by cFEStateMemCard_cFEStateMemCard1() on this state's engine and pushed on its state
  * stack (mpEngine +0x18). Other buttons and events do nothing. onWidgetEvent slot of D_0047DA58.
  *
  * @param item  the widget (ignored when 0); its hash name is at +0x38
  * @param msg  the widget event
  */
-extern "C" void func_002461E0(cUIState* self, void* item, int msg)
+extern "C" void cUIStateDisplayModePopup_onWidgetEvent(cUIState* self, void* item, int msg)
 {
     if (item != 0) {
         if (msg == cUIState::kONNEXT) {
             int hash = *(int*)((char*)item + 0x38);
             if (hash == GetHashValue32(str_yes_c)) {
-                void* state = func_00186A08(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), self->mpEngine);
+                void* state = cFEStateMemCard_cFEStateMemCard1(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), self->mpEngine);
                 cUIStateStack_push((char*)self->mpEngine + 0x18, state);
             }
         }
@@ -593,7 +593,7 @@ extern "C" void func_002461E0(cUIState* self, void* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246268);
+INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers 257 to menu event kONNEXT and 0 to everything else (onWidgetMenu slot of D_0047DA58).
@@ -602,7 +602,7 @@ INCLUDE_ASM("fe/festateloadhint", func_00246268);
  * @param event  the menu event
  * @return 257 (0x101) for kONNEXT, else 0
  */
-extern "C" int func_00246268(void* self, int menu, int event)
+extern "C" int cUIStateDisplayModePopup_onWidgetMenu(void* self, int menu, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -938,7 +938,7 @@ void cGameLoadState::widgetCreateQP(char* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246CF8);
+INCLUDE_ASM("fe/festateloadhint", cGameLoadState_showPlayerStats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
@@ -1022,7 +1022,7 @@ struct sName5_6CF8 { char c[5]; };
  *
  * @param player  the player slot (0 or 1)
  */
-extern "C" void func_00246CF8(cGameLoadState* self, char player)
+extern "C" void cGameLoadState_showPlayerStats(cGameLoadState* self, char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
@@ -1185,7 +1185,7 @@ extern int cGameModeMan_iRanking[];
 extern "C" void* cGameModeMan_getGM();
 extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
 extern "C" unsigned int fptoui(float f);
-extern "C" char* func_0020A1A8(int v);
+extern "C" char* formatMinutesSeconds(int v);
 extern "C" char* strcpy(char* dst, const char* src);
 
 
@@ -1271,7 +1271,7 @@ void cFELoadState::InitwidgetMultiP(char player)
             if (o != 0) {
                 o->setVisible(1);
             }
-            strcpy(buf, func_0020A1A8(seconds));
+            strcpy(buf, formatMinutesSeconds(seconds));
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];

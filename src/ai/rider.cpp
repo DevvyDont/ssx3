@@ -328,18 +328,18 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
 extern "C" int cBELibrary_getCheatCharacterID(int);
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-int func_0014D988(void* self, int i);
-extern "C" void* func_0014D998(void* self, int i);
-extern "C" void* func_0014AD50(void* iface, int rider);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+int cBEBoltDB_getNumCharBolts(void* self, int i);
+extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
+extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int rider);
 
 /**
  * Fills @p list with the BE part entries the rider wears and returns how many.
  *
- * Uses the rider's character (cBELibrary_getCharacterID with mAIIndex) and the parts DB (func_0014BDB8, entry list
- * func_0014D998, count func_0014D988; entries are 0x38 bytes). A cheat character (cBELibrary_getCheatCharacterID
- * non-zero) takes all of its own entries. Otherwise each entry's slot in the rider's BE data (func_0014AD50 on
+ * Uses the rider's character (cBELibrary_getCharacterID with mAIIndex) and the parts DB (cBEBoltInterface_getBoltDB, entry list
+ * cBEBoltDB_getCharBolts, count cBEBoltDB_getNumCharBolts; entries are 0x38 bytes). A cheat character (cBELibrary_getCheatCharacterID
+ * non-zero) takes all of its own entries. Otherwise each entry's slot in the rider's BE data (cBEBoltInterface_getRiderCharProfile on
  * interface 9: map at +0x288 indexed by the entry's +4 short, slots of 4 bytes from +0x290) is taken when the slot's
  * flags have bit 0x10. Likely bug (retail too): an entry whose map value is negative gets a null slot whose flags are
  * still read (address 2). Called by cRider_parsePartsFromBuf with a 52-entry list.
@@ -355,12 +355,12 @@ extern "C" int func_0011BBE8(cRider* vself, tBEBoltDef** list)
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int ch = cBELibrary_getCharacterID(self->mAIIndex);
     int other = cBELibrary_getCheatCharacterID(self->mAIIndex);
-    void* db = func_0014BDB8_noarg();
+    void* db = cBEBoltInterface_getBoltDB_noarg();
     if (other != 0)
     {
         ch = other;
-        tBEBoltDef* part = (tBEBoltDef*)func_0014D998(db, ch);
-        int cnt = func_0014D988(db, ch);
+        tBEBoltDef* part = (tBEBoltDef*)cBEBoltDB_getCharBolts(db, ch);
+        int cnt = cBEBoltDB_getNumCharBolts(db, ch);
         for (int i = 0; i < cnt; i++)
         {
             list[n] = part;
@@ -370,9 +370,9 @@ extern "C" int func_0011BBE8(cRider* vself, tBEBoltDef** list)
     }
     else
     {
-        cBECharProfileDB* riderData = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
-        int cnt = func_0014D988(db, ch);
-        tBEBoltDef* part = (tBEBoltDef*)func_0014D998(db, ch);
+        cBECharProfileDB* riderData = (cBECharProfileDB*)cBEBoltInterface_getRiderCharProfile(iface, self->mAIIndex);
+        int cnt = cBEBoltDB_getNumCharBolts(db, ch);
+        tBEBoltDef* part = (tBEBoltDef*)cBEBoltDB_getCharBolts(db, ch);
         for (int i = 0; i < cnt; i++, part++)
         {
             short idx = riderData->mpBoltsMap[part->id];
@@ -449,10 +449,10 @@ extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
-extern "C" int func_0014AC30(int c);
+extern "C" int cBEBoltInterface_getCharacterID(int c);
 extern "C" int cBELibrary_getCheatCharacterID(int c);
-extern "C" int func_0014AC50(int c);
-extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
+extern "C" int cBEBoltInterface_getProfileIndex(int c);
+extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int b, int a, void* item, char* out);
 
 
 
@@ -460,8 +460,8 @@ extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
  * Adds the texture names of @p n parts to the rider's second load list (mLoadList seen with a start index at +0x2940
  * and a count at +0x2944), skipping duplicates, and sorts that range.
  *
- * For a cheat character the name is the part's +0x2C string; otherwise func_0014B988 on interface 9 builds it from the
- * character values func_0014AC50 / func_0014AC30 and the part into a 256-byte buffer, skipping parts it rejects. New
+ * For a cheat character the name is the part's +0x2C string; otherwise cBEBoltInterface_buildBoltModelFileName on interface 9 builds it from the
+ * character values cBEBoltInterface_getProfileIndex / cBEBoltInterface_getCharacterID and the part into a 256-byte buffer, skipping parts it rejects. New
  * entries go at start + count, without a bound check, and the range is sorted with qsort and func_0011B678.
  *
  * @param list  the part entries
@@ -470,7 +470,7 @@ extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
 extern "C" void func_0011BE88(cRider* self, void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
-    int characterId = func_0014AC30(self->mAIIndex);
+    int characterId = cBEBoltInterface_getCharacterID(self->mAIIndex);
     if (cBELibrary_getCheatCharacterID(self->mAIIndex)) {
         for (int i = 0; i < n; i++) {
             char* name = *(char**)((char*)list[i] + 0x2C);
@@ -492,10 +492,10 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
         next:;
         }
     } else {
-        int profileIndex = func_0014AC50(self->mAIIndex);
+        int profileIndex = cBEBoltInterface_getProfileIndex(self->mAIIndex);
         for (int i = 0; i < n; i++) {
             char buf[0x100];
-            if (func_0014B988(iface, profileIndex, characterId, list[i], buf) == 0) continue;
+            if (cBEBoltInterface_buildBoltModelFileName(iface, profileIndex, characterId, list[i], buf) == 0) continue;
             char* name = buf;
             tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
             if (*name == 0) continue;
@@ -797,7 +797,7 @@ extern "C" void* cAnimModel_buildSkelMatrices(void* obj);
 extern "C" void cRider_updateBoundBox(cRider* self, int a1);
 extern "C" void cOverlapList_geteverything(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
-extern "C" void func_002105B0(int);
+extern "C" void setRadarRiderResetFlag(int);
 
 // The unit declares these later with their own vector types; bind them by asm label.
 extern const t4Vector t4vect_Zero_D660 __asm__("t4vect_Zero");
@@ -1083,7 +1083,7 @@ static inline void InitChannel_D660(cRider* self, int i, float v, float z)
  * rates, boost, rail/press state, attack and HUD message, sets the stance from IsGoofyStance (anim heading turned half
  * a turn when switched), plays @p anim, sets up and runs the animation and skeleton (cRiderAnimBase_setupAnimation,
  * cRider_updateAnimation, cRider_updateSkeleton, cAnimModel_buildSkelMatrices), updates the bounds, overlap list and lights,
- * func_002105B0(mAIIndex), resets vibration, and resets the camera of a rider with a view (mViewIndex < 2).
+ * setRadarRiderResetFlag(mAIIndex), resets vibration, and resets the camera of a rider with a view (mViewIndex < 2).
  *
  * The C definition is cRider_putAt with an asm label.
  *
@@ -1189,7 +1189,7 @@ void cRider::putAt(const t4Vector* pos, const float* dir, float drop, int anim)
     cRider_updateBoundBox(this, 0);
     cOverlapList_geteverything(mOverlapList, &mBoundsMin);
     updateActiveLights();
-    func_002105B0(mAIIndex);
+    setRadarRiderResetFlag(mAIIndex);
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)&VPTR_AT(this, sizeof(cRiderState));
     vt[kRiderVt_vibrationReset].fn(vthis(this, vt[kRiderVt_vibrationReset]));
     if ((unsigned int)mViewIndex < 2)
@@ -4978,10 +4978,10 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
-void* func_0014BDB8_3640() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD50(void* iface, int id);
-int func_0014D988(void* tbl, int g);
-extern "C" void* func_0014D998(void* tbl, int g);
+void* cBEBoltInterface_getBoltDB_3640() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int id);
+int cBEBoltDB_getNumCharBolts(void* tbl, int g);
+extern "C" void* cBEBoltDB_getCharBolts(void* tbl, int g);
 extern "C" int cRider_getIdentity(cRider* self);
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 
@@ -5143,11 +5143,11 @@ void cRider::OnStartObjectUse()
     func_0030EA80(mAnimModel, 7, 0);
     if (rec->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        void* tbl = func_0014BDB8_3640();
-        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, mAIIndex);
+        void* tbl = cBEBoltInterface_getBoltDB_3640();
+        cBECharProfileDB* db = (cBECharProfileDB*)cBEBoltInterface_getRiderCharProfile(iface, mAIIndex);
         int identity = getIdentity();
-        int n = func_0014D988(tbl, identity);
-        tBEBoltDef* entry = (tBEBoltDef*)func_0014D998(tbl, identity);
+        int n = cBEBoltDB_getNumCharBolts(tbl, identity);
+        tBEBoltDef* entry = (tBEBoltDef*)cBEBoltDB_getCharBolts(tbl, identity);
         int i;
         for (i = 0; i < n; i++, entry++) {
             int id = entry->modelPart;
@@ -5175,11 +5175,11 @@ void func_002A1BD0(void* p);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
 tSSXHeaderActor* GetSSXActorHeader(void* self);
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void* func_0014AD50(void* iface, int id);
-int func_0014D988(void* tbl, int g);
-extern "C" void* func_0014D998(void* tbl, int g);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int id);
+int cBEBoltDB_getNumCharBolts(void* tbl, int g);
+extern "C" void* cBEBoltDB_getCharBolts(void* tbl, int g);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 
 
@@ -5253,11 +5253,11 @@ void cRider::OnEndObjectUse()
     func_0030E9E0(mAnimModel, 7, 0);
     if (GetSSXActorHeader(mpEntity)->hideIllegalBoltOn != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        void* tbl = func_0014BDB8_noarg();
-        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, mAIIndex);
+        void* tbl = cBEBoltInterface_getBoltDB_noarg();
+        cBECharProfileDB* db = (cBECharProfileDB*)cBEBoltInterface_getRiderCharProfile(iface, mAIIndex);
         int identity = getIdentity();
-        int n = func_0014D988(tbl, identity);
-        tBEBoltDef* entry = (tBEBoltDef*)func_0014D998(tbl, identity);
+        int n = cBEBoltDB_getNumCharBolts(tbl, identity);
+        tBEBoltDef* entry = (tBEBoltDef*)cBEBoltDB_getCharBolts(tbl, identity);
         int i;
         for (i = 0; i < n; i++, entry++) {
             int id = entId_123B48(entry);
@@ -5321,8 +5321,8 @@ INCLUDE_ASM("ai/rider", cRider_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
 extern "C" void GetSSXActorFrame(void* pPlayer, void* frame);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_002A1B58(void* self, int msg, cRider* rider);
-extern "C" int func_002A1B88(void* self, int type, cRider* rider, void* otherRider);
+extern "C" int cSSXAudio_HandleRiderSpeechMessage(void* self, int msg, cRider* rider);
+extern "C" int cSSXAudio_HandleSubjectSpeechEvent(void* self, int type, cRider* rider, void* otherRider);
 extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, cScriptPlayerMain* pPlayer);
 
 
@@ -5331,8 +5331,8 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, cScriptPlay
  * Handles an in-sequence script's key events: sends its sound events for the rider.
  *
  * Only when @p flags has bit 0x10: reads the entity's channels (GetSSXActorFrame) and, for each event of channel
- * 2 except 0x66, sends ids below 0x64 to the audio system (func_002A1B58) and ids from 0x64 on, less 0x64,
- * with the event's subject rider (cSSXScriptEngine_GetSubjectRider) to func_002A1B88. Each event sent sets
+ * 2 except 0x66, sends ids below 0x64 to the audio system (cSSXAudio_HandleRiderSpeechMessage) and ids from 0x64 on, less 0x64,
+ * with the event's subject rider (cSSXScriptEngine_GetSubjectRider) to cSSXAudio_HandleSubjectSpeechEvent. Each event sent sets
  * unk_AC8.
  *
  * @param entity  the script player entity (On Tour: pEntity); its mpOwner is passed to the subject lookup
@@ -5354,7 +5354,7 @@ void cRider::OnInSeqKeyEvent(cScriptPlayerEntity* entity, float currFrame, float
             if (ev == 102) continue;
             if (ev < 100)
             {
-                func_002A1B58(cAudioInterface_bxAudio(), ev, this);
+                cSSXAudio_HandleRiderSpeechMessage(cAudioInterface_bxAudio(), ev, this);
                 mHasTriggeredSpeechEvents = 1;
             }
             else
@@ -5363,7 +5363,7 @@ void cRider::OnInSeqKeyEvent(cScriptPlayerEntity* entity, float currFrame, float
                 void* snd = cAudioInterface_bxAudio();
                 void* subjectRider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom),
                                                                       entity->mpOwner);
-                func_002A1B88(snd, ev, this, subjectRider);
+                cSSXAudio_HandleSubjectSpeechEvent(snd, ev, this, subjectRider);
                 mHasTriggeredSpeechEvents = 1;
             }
         }
@@ -6291,7 +6291,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A3C00(void* a, void* self, int n);
+extern "C" void cSSXAudio_SpeakArcadeResult(void* a, void* self, int n);
 extern "C" unsigned int fptoui(float f);
 extern int D_005308D0[];
 
@@ -6300,7 +6300,7 @@ extern int D_005308D0[];
  *
  * For a human who has not finished, outside game mode kGAMEMODE_FREERIDE: in a timed event (GameModeMan
  * bIsTimedEvent) with race-rule bit 9 clear, once the race clock passes uiTimeLimit (rounded down to whole seconds)
- * the rider gets mDidNotFinish, its finish event and an audio cue (func_002A3C00). A rider already marked DNF gets its
+ * the rider gets mDidNotFinish, its finish event and an audio cue (cSSXAudio_SpeakArcadeResult). A rider already marked DNF gets its
  * finish event when the game state is kGFSM_Riding.
  *
  * @return true when the rider has finished (mFinishTime >= 0)
@@ -6323,7 +6323,7 @@ bool cRider::updateFinishTest()
                 if (secs * 60 < eventTicks) {
                     mDidNotFinish = 1;
                     doFinishEvent();
-                    func_002A3C00(cAudioInterface_bxAudio(), this, 2);
+                    cSSXAudio_SpeakArcadeResult(cAudioInterface_bxAudio(), this, 2);
                     goto end;
                 }
             }

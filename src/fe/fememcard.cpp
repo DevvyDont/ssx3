@@ -75,7 +75,7 @@ void cFEStateMemCard::onUpdate()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186C98);
+INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackConfirmFormat);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char str_kT_MEMOVNotFormattedPS2[];
@@ -141,14 +141,14 @@ struct sLocalK186C98 {
 /**
  * Shows the memory-card state's "card not formatted" popup, with no buttons.
  *
- * Callback that the cFEStateMemCard constructor func_00186A08 plugs into the memory-card manager's
+ * Callback that the cFEStateMemCard constructor cFEStateMemCard_cFEStateMemCard1 plugs into the memory-card manager's
  * callbackConfirmFormat slot (0x48). It writes the selected device's number (cMCOverlayManager_getDeviceNumberString
  * with mSelectedDevice) into the localized kT_MEMOVNotFormattedPS2 text (FELocale slot 4, then sprintf1 into an
  * 800-char buffer), sets the popup id (+0x19C) of the memory-card state cFEStateMemCard_mInstance to 4 and opens it through the
  * state's getPopup (vtable slot 36, cFEMemCard_getPopup) with yes-only and no-buttons set. Popup 4 makes cFEStateMemCard_onPopupEvent leave
  * the screen (cFEStateMemCard_exitScreen).
  */
-extern "C" void func_00186C98(void)
+extern "C" void cFEStateMemCard_callbackConfirmFormat(void)
 {
     unsigned short buf[800];
     sLocalK186C98 loc;
@@ -165,7 +165,7 @@ extern "C" void func_00186C98(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00186D60);
+INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackConfirmNoCards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -186,7 +186,7 @@ struct sLocal_86D60 { int v[8]; };
 /**
  * Shows the memory-card state's "no card detected" popup with Yes and Retry buttons.
  *
- * Callback that the cFEStateMemCard constructor func_00186A08 plugs into the manager's callbackConfirmNoCards slot
+ * Callback that the cFEStateMemCard constructor cFEStateMemCard_cFEStateMemCard1 plugs into the manager's callbackConfirmNoCards slot
  * (0x3C). The localized kT_MEMFENotDetectedStartUpPS2 text gets the selected device's number and the card space a
  * profile needs (the card's SpaceRequired, slot 22, of cBESaveInterface_getSaveProfileSize()); the
  * cBE_getInterface(cBE_getBE(), 5) result is discarded. Sets popup id 9 (+0x19C of cFEStateMemCard_mInstance) and opens a two-button
@@ -194,7 +194,7 @@ struct sLocal_86D60 { int v[8]; };
  * "kT_MEMOVRetry", and setDefaultButton (slot 25) picks button 1. In cFEMemCard_onPopupEvent, button 0 cancels and button 1 sets
  * the retry flag (+0x1EC).
  */
-extern "C" void func_00186D60(void)
+extern "C" void cFEStateMemCard_callbackConfirmNoCards(void)
 {
     sLocal_86D60 loc;
     unsigned short buf[800];
@@ -249,7 +249,7 @@ extern "C" bool cMCOverlayManager_hasCardStatusCriticalError(void* game);
 /**
  * Tells the memory-card manager whether a card status change needs acknowledging during the start-up reads.
  *
- * Callback for the manager's callbackAcknowledgeCardStatusChange slot (0xB0), installed by func_00186A08. True only
+ * Callback for the manager's callbackAcknowledgeCardStatusChange slot (0xB0), installed by cFEStateMemCard_cFEStateMemCard1. True only
  * when the stage cFEStateMemCard_mStage is 4 or more (reading the settings file or the profile) and
  * cMCOverlayManager_hasCardStatusCriticalError reports a critical error.
  *
@@ -286,7 +286,7 @@ extern int cFEStateMemCard_mStage;
 /**
  * Checks that the selected card has room for the missing profile, or ends the free-space check and starts the reads.
  *
- * Callback for the manager's callbackLoadReady slot (0xA4), installed by func_00186A08; works on the memory-card state
+ * Callback for the manager's callbackLoadReady slot (0xA4), installed by cFEStateMemCard_cFEStateMemCard1; works on the memory-card state
  * cFEStateMemCard_mInstance. When the free-space check is already done (mFreespaceCheckDone set) it only acts from
  * stage 4 on (cFEStateMemCard_mStage >= 4): the card's GetTitleString (slot 14) writes the title of the file at
  * mFileCursor into mLastLoadFileName. Otherwise, unless cMCOverlayManager_hasCardStatusCriticalError reports an error,
@@ -395,7 +395,7 @@ extern cFEMemCardStateK187148* cFEStateMemCard_mInstance_K187148 __asm__("cFESta
 /**
  * Handles a missing file on the memory-card state: cancels the card operation and marks the screen done.
  *
- * Callback for the manager's callbackFileNotFound slot (0x38), installed by func_00186A08. Calls the state's cancel
+ * Callback for the manager's callbackFileNotFound slot (0x38), installed by cFEStateMemCard_cFEStateMemCard1. Calls the state's cancel
  * (vtable slot 41, cFEMemCard_cancel, which leaves screen state 2) and then sets the screen state (+0x1C0 of cFEStateMemCard_mInstance) to
  * 6.
  */
@@ -416,7 +416,7 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* self)
 /**
  * Handles a finished file check on the memory-card state: runs the base handler, then advances the free-space check.
  *
- * Callback for the manager's callbackFileChecked slot (0x94), installed by func_00186A08. Calls cFEMemCard's
+ * Callback for the manager's callbackFileChecked slot (0x94), installed by cFEStateMemCard_cFEStateMemCard1. Calls cFEMemCard's
  * file-checked handler cFEMemCard_callbackFileChecked, then cFEStateMemCard_updateFreeSpaceCheckState on the memory-card state cFEStateMemCard_mInstance.
  */
 extern "C" void cFEStateMemCard_callbackFileChecked(void)
@@ -455,7 +455,7 @@ public:
 /**
  * Starts the memory-card state's file checks on the first device once the cards are checked.
  *
- * Callback for the manager's callbackCardsChecked slot (0x90), installed by func_00186A08. Selects device 0
+ * Callback for the manager's callbackCardsChecked slot (0x90), installed by cFEStateMemCard_cFEStateMemCard1. Selects device 0
  * (cMCOverlayManager_selectDevice, then cMCOverlayManager_setSelectedDevice) and moves the manager to InitFileCheckDevice (54, SetState
  * through vtable slot 1). Then restarts the check: stage cFEStateMemCard_mStage = 0, every file marked missing (+0x22C of
  * cFEStateMemCard_mInstance = -1), +0x234 cleared, the manager's file type set to 2 (cMCOverlayManager_readSetFileType) and the screen's file type
@@ -495,7 +495,7 @@ extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
  * Restarts the memory-card state's free-space check when the manager rechecks the files.
  *
  * Callback for the manager's callbackSysRecheckFile slot (0xAC; cMCOverlayManager_InitiateFileCheck calls it),
- * installed by func_00186A08. Resets the stage cFEStateMemCard_mStage to 0, marks every file missing (+0x22C of cFEStateMemCard_mInstance = -1),
+ * installed by cFEStateMemCard_cFEStateMemCard1. Resets the stage cFEStateMemCard_mStage to 0, marks every file missing (+0x22C of cFEStateMemCard_mInstance = -1),
  * clears +0x234 and sets the manager's file type to 2 (cMCOverlayManager_readSetFileType).
  */
 extern "C" void cFEStateMemCard_callbackSysRecheckFile(void)
@@ -602,7 +602,7 @@ struct sLocal_00187360 {
 /**
  * Shows the memory-card state's "not enough space" popup, with a Retry button.
  *
- * Callback for the manager's callbackConfirmNoFreeBlocks slot (0x5C), installed by func_00186A08. Sets popup id 20
+ * Callback for the manager's callbackConfirmNoFreeBlocks slot (0x5C), installed by cFEStateMemCard_cFEStateMemCard1. Sets popup id 20
  * (+0x19C of cFEStateMemCard_mInstance) and writes the selected device's number and the profile's needed space (the card's
  * SpaceRequired, slot 22, of cBESaveInterface_getSaveProfileSize()) into the localized kT_MEMNoSpaceStartPS2 text; the
  * cBE_getInterface(cBE_getBE(), 5) result is discarded. Opens a two-button popup through getPopup (slot 36), labels
@@ -1032,7 +1032,7 @@ int cFEStateMemCard_onInputBegin(void* vself)
 
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187C18);
+INCLUDE_ASM("fe/fememcard", cFEStateLegal_cFEStateLegal1);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState1(void* self);
 extern char cFEStateLegal_vtbl[];
@@ -1045,7 +1045,7 @@ extern char cFEStateLegal_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00187C18(cFEStateLegal* self)
+extern "C" void* cFEStateLegal_cFEStateLegal1(cFEStateLegal* self)
 {
     cUIState_cUIState1(self);
     self->mDisplayTicks = 0;

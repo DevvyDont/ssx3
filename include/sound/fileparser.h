@@ -8,7 +8,7 @@
 // Retail methods: sound/soundsys unit 0x2A77F8..0x2A8138 (19, On Tour's methods except Reset, which retail inlines as
 // `mPtr = mBasePtr`). EA's source file is unknown (no asserts): the header path is ours.
 // Size 0x80C [O]; [R] every user builds it on the stack (data/config/crowd.inf, speech.inf, music.inf, the SFX and mix
-// tables of cSSXAudio) and reserves 0x810 (the next local starts 0x810 after it, e.g. func_002B0088). No vtable.
+// tables of cSSXAudio) and reserves 0x810 (the next local starts 0x810 after it, e.g. cSpeechInstance_ReadConfig). No vtable.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] the constructor FileParser_FileParser (FileParser(const char* Filename, int MemType)) and destructor FileParser__FileParser;

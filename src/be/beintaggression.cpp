@@ -127,7 +127,7 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_applyAggression);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern "C" void func_001E2A08(int charID, int level);
+extern "C" void queueAggressionMessage(int charID, int level);
 extern signed char D_005305F9[];
 
 /**
@@ -135,7 +135,7 @@ extern signed char D_005305F9[];
  *
  * The record is cBELibrary_profileLib[profile of @p iRider1][character of @p iRider1].mRelations[character of @p iRider2]: {state, level,
  * ticks}. @p event adds 1, 2, 4 or 6 ticks and the level becomes ticks / 5. When the level rises, rider 0 notifies
- * func_001E2A08(other character, ticks) unless D_005305F9 is set, and the state clamps it: state 0 caps at level 2,
+ * queueAggressionMessage(other character, ticks) unless D_005305F9 is set, and the state clamps it: state 0 caps at level 2,
  * state 1 drops back to level 2 and moves to state 3 on reaching 4, state 2 stays within 1-3 and state 3 within 1-4
  * (ticks reset to 5 x level). The lower-bound checks can only fire for a negative old level.
  *
@@ -171,7 +171,7 @@ void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event
     int lvl = lv;
     if (oldLvl < lvl) {
         if (iRider1 == 0 && D_005305F9[0] == 0) {
-            func_001E2A08(cb, pts);
+            queueAggressionMessage(cb, pts);
         }
         switch (st) {
         case kAGG_FRIEND:
@@ -219,7 +219,7 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_regressAggression);
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern "C" void func_001E2A08(int charID, int level);
+extern "C" void queueAggressionMessage(int charID, int level);
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 extern cBERaceDB cBELibrary_raceDB;
@@ -230,7 +230,7 @@ extern cBERaceDB cBELibrary_raceDB;
  * For each of the race's riders (cBELibrary_raceDB +0x30) and each of the 10 characters, the relation record's ticks
  * become ticks - 3 and the level ticks / 5, then the state clamps them as in cBEAggressionInterface_applyAggression
  * (state 0 caps at level 2, state 1 moves to state 3 at level 4, state 2 stays within 1-3, state 3 drops to state 1 at
- * level 0 and caps at 4). Every relation is reported to func_001E2A08(character, ticks) unless the game-path byte
+ * level 0 and caps at 4). Every relation is reported to queueAggressionMessage(character, ticks) unless the game-path byte
  * (cBELibrary_raceDB +0x49) is set.
  */
 // Re-clamps every player's aggression level towards the other riders to the limits of its current state.
@@ -246,7 +246,7 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
             int st = cBELibrary_profileLib[profile][ca].mRelations[j].aggState;
             int lvl = pts / 5;
             if (cBELibrary_raceDB.cGamePath == 0) {
-                func_001E2A08(j, pts);
+                queueAggressionMessage(j, pts);
             }
             switch (st) {
             case kAGG_FRIEND:

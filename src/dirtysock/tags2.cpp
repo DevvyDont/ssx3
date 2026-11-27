@@ -2,9 +2,9 @@
 
 INCLUDE_ASM("dirtysock/tags2", func_00259390);
 
-INCLUDE_ASM("dirtysock/tags2", func_00259398);
+INCLUDE_ASM("dirtysock/tags2", lobbyman_compareRoomNames);
 
-INCLUDE_ASM("dirtysock/tags2", func_002593B8);
+INCLUDE_ASM("dirtysock/tags2", lobbyman_compareUserNames);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_LobbyMan);
 
@@ -22,201 +22,201 @@ INCLUDE_ASM("dirtysock/tags2", LobbyMan_onchatmsg);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onplaymsg);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A650);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createConfig);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A6F8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_destroyConfig);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A730);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getConfigValue);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A778);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_openLists);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A850);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_releaseRankSnapshots);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A8B0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_closeLists);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A948);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createLobbyApi);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025AA98);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_destroyLobbyApi);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025AAE0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendChatMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025AB40);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_postChatEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025AC50);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B608);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendRequest);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B650);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B688);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_destroyInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B6D8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_connect);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B800);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_disconnect);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlobbyconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B9C8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025BC48);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_readNameOptions);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onaccountcreated);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025BF18);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_editAccount);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onaccountedited);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C1E0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_requestLostAccount);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlostaccountrequestsent);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C3F8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_requestLostPassword);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlostpasswordrequestsent);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C610);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_authenticate);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onauthentication);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025CD28);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_selectPersonaAt);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025CD50);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_selectPersona);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonaselected);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025CFE0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_requestStats);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D048);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_handleStatsReply);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D1B8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createPersona);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonacreated);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D428);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_deletePersona);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonadeleted);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onroomlistupdate);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D770);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_peekRoom);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D800);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_joinRoomAt);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D860);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_joinRoom);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onroomselected);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DA90);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getRoomName);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DAC0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_createRoom);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onRoomCreated);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DD08);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_pingPlayer);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onPingReceived);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DF00);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_reportAbuse);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onAbuseReportReceived);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E0C8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_requestNews);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onNewsRetrieved);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E348);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_selectRankList);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E420);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_requestRankRows);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onRanklistRetrieved);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E6D0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_findPlayer);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onPlayerFound);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025EE20);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_startQuickMatch);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025EED8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_cancelQuickMatch);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onQuickMatchResponse);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_getnumrooms);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F150);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getRoomNameAt);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F180);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_isRoomLocked);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F1B0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getNumUsers);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F1E0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getUserName);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F248);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getUserFlag);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F288);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getUserInfo);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F338);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getNumRankRows);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F388);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getRankRow);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F430);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_isInRoom);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F4C0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_challengePlayer);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F628);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_cancelChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F740);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_leaveGame);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F858);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_clearChallenge);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onchallengeresponse);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FA48);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendHostChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FAD0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendGuestChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FB58);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_lockChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FB80);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendPrivateMessage);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025FC20);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FC28);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendDecline);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FC48);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendAbortChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FC70);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_sendLockChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025FD50);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_reportRaceResult);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onresultsreportresponse);
 
-INCLUDE_ASM("dirtysock/tags2", func_00260E50);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getErrorText);
 
-INCLUDE_ASM("dirtysock/tags2", func_00260F10);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_resetNewAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_00260F80);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261008);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_destroyInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261058);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_clearConnectSettings);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261070);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_deleteMessages);
 
-INCLUDE_ASM("dirtysock/tags2", func_002610D0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_addMessageSendersToRoster);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261248);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_connect);
 
-INCLUDE_ASM("dirtysock/tags2", func_002613C8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_reconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261408);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_disconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261460);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isLoggedIn);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261490);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_002614E8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_createBuddyApi);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261530);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_destroyBuddyApi);
 
 INCLUDE_ASM("dirtysock/tags2", BuddyMan_onconnect);
 
@@ -230,279 +230,279 @@ INCLUDE_ASM("dirtysock/tags2", BuddyMan_onBuddySend);
 
 INCLUDE_ASM("dirtysock/tags2", BuddyMan_onReceiveMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261CD0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_storeMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261EF8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_moveToRosterList);
 
-INCLUDE_ASM("dirtysock/tags2", func_002620D8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_addRosterEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262280);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_countNonTempEntries);
 
-INCLUDE_ASM("dirtysock/tags2", func_002622F0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_countTempEntries);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262360);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isBuddyByName);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262390);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isBuddy);
 
-INCLUDE_ASM("dirtysock/tags2", func_002623B0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isBlockedByName);
 
-INCLUDE_ASM("dirtysock/tags2", func_002623E0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isBlocked);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262400);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isTempEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262438);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isTempEntryByName);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262468);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_findRosterEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_002624F8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_findRosterEntryNoCase);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262598);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getNumRosterEntries);
 
-INCLUDE_ASM("dirtysock/tags2", func_002625C8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getRosterEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262620);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getBuddyEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262658);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getBlockedEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262690);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_sendMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262768);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_setPresence);
 
-INCLUDE_ASM("dirtysock/tags2", func_002628C0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_checkPresenceState);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262938);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getNumMessages);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262950);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_countMessagesFrom);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262A08);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_countMessagesFromName);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262A38);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_hasMessageFrom);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262AF0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_addChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262E20);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_findChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_00262EC0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_removeTempEntry);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263018);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_declineChallenge);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263128);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_hasChallengeFrom);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263270);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getChallengeFrom);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263308);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getChallenge);
 
 INCLUDE_ASM("dirtysock/tags2", func_00263338);
 
 INCLUDE_ASM("dirtysock/tags2", func_002633C8);
 
-INCLUDE_ASM("dirtysock/tags2", func_002633F8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isInSameGame);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263490);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_isInSameGameByName);
 
-INCLUDE_ASM("dirtysock/tags2", func_002634C0);
+INCLUDE_ASM("dirtysock/tags2", lobbyman_compareRosterNames);
 
-INCLUDE_ASM("dirtysock/tags2", func_002635A8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_removeMessageAt);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263630);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_getMessage);
 
 INCLUDE_ASM("dirtysock/tags2", cConnMan_cConnMan);
 
 INCLUDE_ASM("dirtysock/tags2", cConnMan__cConnMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_002636A8);
+INCLUDE_ASM("dirtysock/tags2", cConnMan_connect);
 
-INCLUDE_ASM("dirtysock/tags2", func_002636F0);
+INCLUDE_ASM("dirtysock/tags2", cConnMan_disconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263828);
+INCLUDE_ASM("dirtysock/tags2", cConnMan_update);
 
 INCLUDE_ASM("dirtysock/tags2", cGameConnMan_cGameConnMan);
 
 INCLUDE_ASM("dirtysock/tags2", cGameConnMan__cGameConnMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_002639E0);
+INCLUDE_ASM("dirtysock/tags2", cGameConnMan_connect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263BA8);
+INCLUDE_ASM("dirtysock/tags2", cGameConnMan_shutdown);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263CF0);
+INCLUDE_ASM("dirtysock/tags2", cGameConnMan_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264030);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264098);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_destroyInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cSetupMan_cSetupMan);
 
 INCLUDE_ASM("dirtysock/tags2", cSetupMan__cSetupMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_002642B8);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264960);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_allocPacket);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264990);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_freePacket);
 
-INCLUDE_ASM("dirtysock/tags2", func_002649B0);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_readMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264A58);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_receivePackets);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264B20);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_flushSendQueue);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264BE8);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_sendMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264CB8);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_sendRank);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264CF0);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_applyMyCharacter);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264D80);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_applyOpponentCharacter);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264E50);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_sendCharacterMessage);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264F88);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_highlightCharacter);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265018);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_confirmCharacter);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265140);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_unconfirmCharacter);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265190);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_handleOpponentHighlight);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265290);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_handleOpponentConfirm);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265398);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_handleOpponentUnconfirm);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265458);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_sendBraggingSelection);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265568);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_sendBraggingRule);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265688);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_lockBragging);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265700);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_unlockBragging);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265768);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_cancelSetup);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265880);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_002658B8);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_destroyInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_cSharedLoginMan);
 
 INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan__cSharedLoginMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265950);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_init);
 
-INCLUDE_ASM("dirtysock/tags2", func_002659C0);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_shutdown);
 
-INCLUDE_ASM("dirtysock/tags2", func_002659E8);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_recheckCard);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265A38);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_getCardFreeSpace);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265A68);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265CB0);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_isCardUnformatted);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265D08);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_clearCardChanged);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265D38);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_hasCardChanged);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265D68);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_isCardMissing);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265D98);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_startReadAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265DF0);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_requestReadAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265E00);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_requestSaveAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265E10);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_requestCreateAccount);
 
 INCLUDE_ASM("dirtysock/tags2", func_00265E20);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265E30);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_requestFormat);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265E40);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_startSaveAccount);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265E80);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_startCreateAccount);
 
 INCLUDE_ASM("dirtysock/tags2", func_00265EC8);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265F00);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_startFormat);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265F18);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_setAccountName);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265F68);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_setAccountPassword);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265FB8);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardGetDir);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266010);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardGetFreeSpace);
 
 INCLUDE_ASM("dirtysock/tags2", func_00266038);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266060);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardCheckPort);
 
 INCLUDE_ASM("dirtysock/tags2", func_002660A0);
 
-INCLUDE_ASM("dirtysock/tags2", func_002660C8);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardOpenFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266148);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardCloseFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266170);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardMakeDir);
 
-INCLUDE_ASM("dirtysock/tags2", func_002661D8);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardDeleteFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266240);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardDeleteDir);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266298);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardReadFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_002662C0);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardWriteFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_002662E8);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardSeekFile);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266320);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardFlushFile);
 
 INCLUDE_ASM("dirtysock/tags2", func_00266348);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266358);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardPollStatus);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266550);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardGetFoundName);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266578);
+INCLUDE_ASM("dirtysock/tags2", sharedlogin_cardMapError);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266728);
+INCLUDE_ASM("dirtysock/tags2", TibExtMemAlloc);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266760);
+INCLUDE_ASM("dirtysock/tags2", TibExtMemFree);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266788);
+INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_createInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_cUsbKeyboard);
 
-INCLUDE_ASM("dirtysock/tags2", func_002668A8);
+INCLUDE_ASM("dirtysock/tags2", usbkeyboard_setupKeyboard);
 
-INCLUDE_ASM("dirtysock/tags2", func_002668E8);
+INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266BA8);
+INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_readKey);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266CA0);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266CD8);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_destroyInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cVoipMan_cVoipMan);
 
 INCLUDE_ASM("dirtysock/tags2", cVoipMan__cVoipMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266D58);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_connect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266DF8);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_disconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266E30);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_turnVoiceOn);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266E88);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_turnVoiceOff);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266F38);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_getVoiceStatus);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266F58);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_setVoiceLevel);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266F90);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_getVoiceLevel);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267128);
+INCLUDE_ASM("dirtysock/tags2", vector_cPrivateMessage_M_insert_aux);
 
-INCLUDE_ASM("dirtysock/tags2", func_002672C8);
+INCLUDE_ASM("dirtysock/tags2", vector_cChallenger_M_insert_aux);
 
 INCLUDE_ASM("dirtysock/tags2", func_00267468);
 

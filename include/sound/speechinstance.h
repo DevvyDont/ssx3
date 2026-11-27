@@ -8,37 +8,37 @@
 // "SpeechInstance", "%sheaders.big", "%seventdat\events.evt", "mNumTotalBanks >= 0"); retail methods in the
 // sound/bankmonitor unit 0x2AF8A8..0x2B07F8, just before cSpeechSys's. Neither class has a vtable.
 // Class names from the allocation tags "SpeechInstance" / "SpeechBank". On Tour has no speech system.
-// Sizes [R]: cSpeechSys func_002B0E60 = func_002AFA68(cMemMan_alloc(0x904, "SpeechInstance")); func_002AF960 =
+// Sizes [R]: cSpeechSys cSpeechSys_CreateInstance = cSpeechInstance_cSpeechInstance(cMemMan_alloc(0x904, "SpeechInstance")); cSpeechBank_Create =
 // cSpeechBank_cSpeechBank(cMemMan_alloc(0x4C, "SpeechBank")).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors func_002AFA68 / cSpeechBank_cSpeechBank, destructors func_002AFB38 / cSpeechBank__cSpeechBank, the speech.inf keys
-//       func_002B0088 reads;
+//   [R] constructors cSpeechInstance_cSpeechInstance / cSpeechBank_cSpeechBank, destructors cSpeechInstance__cSpeechInstance / cSpeechBank__cSpeechBank, the speech.inf keys
+//       cSpeechInstance_ReadConfig reads;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.
 
 #include "layout.h"
 
 // cSpeechBank (0x4C): one loaded speech bank header (a "<name>.hdr" file).
 struct cSpeechBank {
-    int mBankId;       // 0x00 (our name) [R] ctor -1; func_002AF960 = func_003D69F0(data) (the driver's bank id);
-                       //      [U] func_002AFA58 compares it with a requested bank id; dtor func_003D6CA0()s it
-    char mName[0x3C];  // 0x04 (our name) [R] ctor clears byte 0; func_002AF960 strcpy()s the bank path; [U] func_002B04D8 builds the stream file name from it and its language suffix (func_002B03B8)
-    char* mShortName;  // 0x40 (our name) [R] func_002AF960: the part of mName after the last '\\'; [U] func_002B04D8 passes it to cSpeechSys's vtable slot 2
-    void* mpData;      // 0x44 (our name) [R] ctor 0; func_002AF960: the .hdr data (passed in, or FILE_load()ed); dtor MEM_free()s it when mOwnsData
-    int mOwnsData;     // 0x48 (our name) [R] ctor 0; func_002AF960 1 when it loaded mpData itself
+    int mBankId;       // 0x00 (our name) [R] ctor -1; cSpeechBank_Create = func_003D69F0(data) (the driver's bank id);
+                       //      [U] cSpeechBank_HasBankId compares it with a requested bank id; dtor func_003D6CA0()s it
+    char mName[0x3C];  // 0x04 (our name) [R] ctor clears byte 0; cSpeechBank_Create strcpy()s the bank path; [U] cSpeechInstance_PlayEvent builds the stream file name from it and its language suffix (SPCH_GetBankLanguage)
+    char* mShortName;  // 0x40 (our name) [R] cSpeechBank_Create: the part of mName after the last '\\'; [U] cSpeechInstance_PlayEvent passes it to cSpeechSys's vtable slot 2
+    void* mpData;      // 0x44 (our name) [R] ctor 0; cSpeechBank_Create: the .hdr data (passed in, or FILE_load()ed); dtor MEM_free()s it when mOwnsData
+    int mOwnsData;     // 0x48 (our name) [R] ctor 0; cSpeechBank_Create 1 when it loaded mpData itself
 };
 
 // One speech event file of a cSpeechInstance (8 bytes; our names).
 struct tSpeechEventFile {
-    void* mpData; // 0x0 [U] func_002AFD40: the event data (located inside the loaded headers .big, or FILE_loadz("%seventdat\events.evt")); registered with func_003D66C0
-    int mOwned;   // 0x4 [U] func_002AFD40 1 when loaded on its own; dtor MEM_free()s mpData then
+    void* mpData; // 0x0 [U] cSpeechInstance_LoadEventFile: the event data (located inside the loaded headers .big, or FILE_loadz("%seventdat\events.evt")); registered with func_003D66C0
+    int mOwned;   // 0x4 [U] cSpeechInstance_LoadEventFile 1 when loaded on its own; dtor MEM_free()s mpData then
 };
 
 // cSpeechInstance (0x904): one speech stream.
 struct cSpeechInstance {
     int mIndex;                        // 0x000 (our name) [R] ctor arg 1 = the instance's index in
-                                       //       cSpeechSys::mSpeechInstance; [U] func_002B04D8 passes it to
-                                       //       cSpeechSys (request match func_002B1520, vtable slots 2/3)
+                                       //       cSpeechSys::mSpeechInstance; [U] cSpeechInstance_PlayEvent passes it to
+                                       //       cSpeechSys (request match cSpeechSys_ApplyRequest, vtable slots 2/3)
     int mStreamId;                     // 0x004 (our name) [R] ctor arg 2; [U] the cStreamSys stream id: STREAM_
                                        //       calls (cStreamSys_STREAM_Create in the ctor, cStreamSys_STREAM_Destroy
                                        //       in the dtor, cStreamSys_STREAM_Requests / cStreamSys_STREAM_Purge /
@@ -47,37 +47,37 @@ struct cSpeechInstance {
                                        //       (cStreamSys_STREAM_SetBigFile, speech.inf BIGFILE)
     int unk_008;                       // 0x008 [R] ctor arg 6; no read found
     char unk_00C[0x60];                // 0x00C [R] ctor clears byte 0 (an empty string); no other access found
-    char mBasePath[0x60];              // 0x06C [R] speech.inf BASEPATH (func_002B0088 AssignString); [U] func_002AFD40 / func_002B0088 sprintf the .big / events / bank paths from it
-    tSpeechEventFile mEventFile[4];    // 0x0CC [R] ctor zeroes 4; [U] func_002AFD40 fills [mNumEventFiles]; dtor frees
-    int mNumEventFiles;                // 0x0EC (our name) [R] ctor 0; [U] number of event files loaded (func_002B0088
+    char mBasePath[0x60];              // 0x06C [R] speech.inf BASEPATH (cSpeechInstance_ReadConfig AssignString); [U] cSpeechInstance_LoadEventFile / cSpeechInstance_ReadConfig sprintf the .big / events / bank paths from it
+    tSpeechEventFile mEventFile[4];    // 0x0CC [R] ctor zeroes 4; [U] cSpeechInstance_LoadEventFile fills [mNumEventFiles]; dtor frees
+    int mNumEventFiles;                // 0x0EC (our name) [R] ctor 0; [U] number of event files loaded (cSpeechInstance_ReadConfig
                                        //       ++ per speech.inf BASEPATH entry); dtor loop bound
     int mNumBanks;                     // 0x0F0 (our name) [R] ctor 0; [U] number of speech banks in mBanks
-                                       //       (func_002B0348 ++, cSpeechInstance_mNumTotalBanks counts them all);
-                                       //       dtor / func_002B04D8 loop bound
-    cSpeechBank* mBanks[500];          // 0x0F4 (our name) [U] func_002B0348 appends func_002AF960(...); func_002B04D8
+                                       //       (cSpeechInstance_AddBank ++, cSpeechInstance_mNumTotalBanks counts them all);
+                                       //       dtor / cSpeechInstance_PlayEvent loop bound
+    cSpeechBank* mBanks[500];          // 0x0F4 (our name) [U] cSpeechInstance_AddBank appends cSpeechBank_Create(...); cSpeechInstance_PlayEvent
                                        //       searches by bank id; dtor destroys them (cSpeechBank__cSpeechBank)
     int unk_8C4;                       // 0x8C4 [R] ctor 0; [U] set by func_002B07E8 (cSpeechSys func_002B0FE8)
-    int mHoldTime;                     // 0x8C8 (our name) [R] ctor 0; [U] set by func_002B07F0 (cSpeechSys
-                                       //       func_002B1020); func_002B04D8 passes it to cSpeechSys's play slot
+    int mHoldTime;                     // 0x8C8 (our name) [R] ctor 0; [U] set by cSpeechInstance_SetHoldTime (cSpeechSys
+                                       //       cSpeechSys_SetHoldTime); cSpeechInstance_PlayEvent passes it to cSpeechSys's play slot
                                        //       (vtable slot 1, cSSXAudio_PlayPositional) as holdTime on an idle stream
-    int mPosition;                     // 0x8CC (our name; a t4Vector*) [R] ctor 0; [U] cSpeechSys func_002B1058 /
-                                       //       func_002B1520 (the request rider's getPosition()) set it; func_002B04D8
+    int mPosition;                     // 0x8CC (our name; a t4Vector*) [R] ctor 0; [U] cSpeechSys cSpeechSys_TriggerSpeech /
+                                       //       cSpeechSys_ApplyRequest (the request rider's getPosition()) set it; cSpeechInstance_PlayEvent
                                        //       passes it to the play slot as position
     int mUserInfo;                     // 0x8D0 (our name) [R] ctor 0; [U] set as mPosition (tSpeechRequest::unk_14);
-                                       //       the play slot's userInfo; func_002B04D8 / func_002B1268 also pass it to
+                                       //       the play slot's userInfo; cSpeechInstance_PlayEvent / cSpeechSys_ApplyVolumeCallback also pass it to
                                        //       slot 3
-    void* mHeaderBigData[4][2];        // 0x8D4 (our name) [U] func_002AFD40: per event file, the loaded "%sheaders.big"
+    void* mHeaderBigData[4][2];        // 0x8D4 (our name) [U] cSpeechInstance_LoadEventFile: per event file, the loaded "%sheaders.big"
                                        //       ([.][0]) / "%slanghead.big" ([.][1]) data; dtor MEM_free()s them
-    float mRadius;                     // 0x8F4 (our name) [R] ctor 0 (sw zero); [U] cSpeechSys func_002B1058 /
-                                       //       func_002B1520 store a float; func_002B04D8 passes it to the play slot as
+    float mRadius;                     // 0x8F4 (our name) [R] ctor 0 (sw zero); [U] cSpeechSys cSpeechSys_TriggerSpeech /
+                                       //       cSpeechSys_ApplyRequest store a float; cSpeechInstance_PlayEvent passes it to the play slot as
                                        //       radius (lwc1)
-    int mIsHuman;                      // 0x8F8 (our name) [U] cSpeechSys func_002B1520 (the request rider's isHuman());
-                                       //       func_002B04D8 passes it to the play slot as isHuman
-    int mViewport;                     // 0x8FC (our name) [U] cSpeechSys func_002B1520 (the request rider's mViewIndex,
-                                       //       -1 without one); func_002B04D8 passes it to the play slot as viewport
+    int mIsHuman;                      // 0x8F8 (our name) [U] cSpeechSys cSpeechSys_ApplyRequest (the request rider's isHuman());
+                                       //       cSpeechInstance_PlayEvent passes it to the play slot as isHuman
+    int mViewport;                     // 0x8FC (our name) [U] cSpeechSys cSpeechSys_ApplyRequest (the request rider's mViewIndex,
+                                       //       -1 without one); cSpeechInstance_PlayEvent passes it to the play slot as viewport
     int mReadyForSpeech;               // 0x900 (our name) [R] ctor 1; [U] set while the stream can take the next
-                                       //       speech: func_002AFC88 / func_002AFD10 clear it once func_003D7EC8
-                                       //       starts one, func_002AFC88 sets it again (func_003D8040) or while busy
+                                       //       speech: cSpeechInstance_Update / cSpeechInstance_StartNextSpeech clear it once func_003D7EC8
+                                       //       starts one, cSpeechInstance_Update sets it again (func_003D8040) or while busy
 };
 
 CHECK_OFFSET(cSpeechBank, mBankId, 0x00);

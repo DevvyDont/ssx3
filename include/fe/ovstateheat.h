@@ -9,7 +9,7 @@
 // 0x474D30), which adds no members either (On Tour 0x90; its constructor func_0021C730 stores nothing past 0x98).
 // Constructor cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT, destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT. On Tour's other heat
 // overlay, cOVState_HEAT_STANDINGS, has no retail counterpart identified (the overlays next to this one in the
-// unit, ids 9 / 21 / 20: func_001FBD20 "41freestyle_pre", func_001FC878 "50multifs_pre", func_001FD268
+// unit, ids 9 / 21 / 20: cOVState_FREESTYLE_PREEVENT_onCreateScreen "41freestyle_pre", cOVState_MULTI_PREEVENT_onCreateScreen "50multifs_pre", cOVState_CHALLENGE_PREEVENT_onCreateScreen
 // "68rival_pre", are other pre-event screens without names). Derives from cOVState (fe/ovstate.h, 0x9C).
 //
 // Its own members are at their retail offsets. Evidence tags:

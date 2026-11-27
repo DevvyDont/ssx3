@@ -2,18 +2,18 @@
 #define FE_FESTATENETCONFIG_H
 
 // The online network-configuration screens (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the preview's asserts
-// at lines 554 and 641 sit between retail func_001B0F28 and cFEStateAuthDNAS_onCreateScreen (cFEStateNetConfig / cFEStateAuthDNAS),
+// at lines 554 and 641 sit between retail findOnlineCharacterRow and cFEStateAuthDNAS_onCreateScreen (cFEStateNetConfig / cFEStateAuthDNAS),
 // those at 1381-1394 between cFEStateNetAccountMem_onUpdate and cFEStateNetAccountMem_handleEvent, both cFEStateNetAccountMem methods). Two classes
 // live here, both cFEStateNet states (fe/festatenet.h, 0x6D0):
 //
 // cFEStateNetConfig: screen "200net_config": picks a network adapter and a saved network configuration, connects
 // (a state machine over the memory card object D_004A1B78 = cMemCard_CreateInstance(), cMemCard::CreateInstance) and runs DNAS authentication. Size 0x91C:
-// cMemMan_alloc(0x91C, "cFEStateNetConfig") + cFEStateNetConfig_cFEStateNetConfig(mem, pEngine) (func_001A9710, func_001BF5A8); its
+// cMemMan_alloc(0x91C, "cFEStateNetConfig") + cFEStateNetConfig_cFEStateNetConfig(mem, pEngine) (cFEStateNet_onNetInterruptedPopupEvent, cFEStateLogin_onNetConfigPopupEvent); its
 // unicode popup buffer at 0x71C runs to the end. Constructors cFEStateNetConfig_cFEStateNetConfig and cFEStateNetConfig_cFEStateNetConfig1 (fe/fepopupmisc, the
 // default one: zeroes the same fields), destructor cFEStateNetConfig__cFEStateNetConfig (frees the heap texts). Retail vtable cFEStateNetConfig_vtbl
 // (32 slots: 1 dtor, 4 onCreateScreen cFEStateNetConfig_onCreateScreen, 5 onDestroyScreen cFEStateNetConfig_onDestroyScreen, 12 onUpdate cFEStateNetConfig_onUpdate,
 // 17 onPopupEvent cFEStateNetConfig_onPopupEvent, 18 onWidgetCreate cFEStateNetConfig_onWidgetCreate, 19 onWidgetEvent cFEStateNetConfig_onWidgetEvent, 21 cFEStateNetConfig_onWidgetPair,
-// 22 cFEStateNetConfig_onWidgetListBox, 25 func_001B54B8 (help), 29 func_001E0BA8, 31 func_001B5E28, 32 func_001E0BA0). Methods:
+// 22 cFEStateNetConfig_onWidgetListBox, 25 cFEStateNetConfig_fillHelpPopup (help), 29 cFEStateNetConfig_isOnlineState, 31 cFEStateNetConfig_onNetEvent, 32 cFEStateNetConfig_publishPresence). Methods:
 // fe/feasyncfile 0x1B3F78-0x1B60A8. The DNAS popup cFEStateAuthDNAS (cFEStateAuthDNAS_onUpdate) writes mpustrAuthError
 // through its mpParentState.
 //
@@ -52,47 +52,47 @@ struct cFEStateNetConfig : public cFEStateNet {
     //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetConfig_cFEStateNetConfig stores 0x31
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateNetConfig
     int miSelectedSetting;          // 0x6D0 [R] 0; [U] onWidgetEvent cFEStateNetConfig_onWidgetEvent stores the "LBSettings" row (list + 0x319) and
-                                    //       selects it in mpLBAdapters; func_001B45E8 passes it to the connect call (func_002636A8)
-    int miNumSettings;              // 0x6D4 [R] 0; [U] func_001B4CD8: cCommSystem_mNumNetConn clamped to 4, one list row each;
+                                    //       selects it in mpLBAdapters; cFEStateNetConfig_connectWithSelectedConfig passes it to the connect call (cConnMan_connect)
+    int miNumSettings;              // 0x6D4 [R] 0; [U] cFEStateNetConfig_loadConfigs: cCommSystem_mNumNetConn clamped to 4, one list row each;
                                     //       cFEStateNetConfig_onWidgetListBox tests > 1
-    int mbCancelled;                // 0x6D8 (name ours) [R] 0; [U] func_001B55B0 / func_001B5830: 1 when the popup is
+    int mbCancelled;                // 0x6D8 (name ours) [R] 0; [U] cFEStateNetConfig_onConnectingPopupEvent / cFEStateNetConfig_onDNASAuthPopupEvent: 1 when the popup is
                                     //       cancelled (events 0xF/0x14); on 0x16 they push "NetConfigAuthPopup" /
                                     //       cFEStateNetAccountMem only while it is 0, then clear it
-    int mbPushLogin;                // 0x6DC (name ours) [U] func_001B5A58: 1 on event 0xF, 0 on 0x15; on 0x16 it pushes
+    int mbPushLogin;                // 0x6DC (name ours) [U] cFEStateNetConfig_onAccountMemPopupEvent: 1 on event 0xF, 0 on 0x15; on 0x16 it pushes
                                     //       cFEStateLogin when set
-    int miWaitFrames;               // 0x6E0 [R] -1; [U] func_001B4CD8 sets 15; onUpdate cFEStateNetConfig_onUpdate counts it down in state 5
-    cUIListBox* mpLBAdapters;       // 0x6E4 [R] 0; [U] onWidgetCreate cFEStateNetConfig_onWidgetCreate: widget "LBAdapters"; func_001B4CD8 adds a row
+    int miWaitFrames;               // 0x6E0 [R] -1; [U] cFEStateNetConfig_loadConfigs sets 15; onUpdate cFEStateNetConfig_onUpdate counts it down in state 5
+    cUIListBox* mpLBAdapters;       // 0x6E4 [R] 0; [U] onWidgetCreate cFEStateNetConfig_onWidgetCreate: widget "LBAdapters"; cFEStateNetConfig_loadConfigs adds a row
                                     //       per configuration (cUIListBox_addEntryByAsciiString)
-    cUIListBox* mpLBSettings;       // 0x6E8 [R] 0; [U] widget "LBSettings"; func_001B4CD8 reads its font/scale (+ 0x50) and adds
+    cUIListBox* mpLBSettings;       // 0x6E8 [R] 0; [U] widget "LBSettings"; cFEStateNetConfig_loadConfigs reads its font/scale (+ 0x50) and adds
                                     //       the numbered configuration names
-    cUIThing* mpPairSettings;       // 0x6EC [U] widget "PairSettings"; enabled / disabled (its slot 8) by func_001B5068 and the popup
+    cUIThing* mpPairSettings;       // 0x6EC [U] widget "PairSettings"; enabled / disabled (its slot 8) by cFEStateNetConfig_showConfigLists and the popup
                                     //       handlers
     int unk_6F0;                    // 0x6F0 [R] 0 in the default constructor cFEStateNetConfig_cFEStateNetConfig1 only; no other access seen
-    cUIMenu* mpMenuConfig;          // 0x6F4 [R] 0; [U] widget "MenuConfig"; func_001B5068 cUIMenu_setSelectedByIndex(.., 0 / 1)
-    cUIThing* mpConfigRectangle;    // 0x6F8 [R] 0; [U] widget "configrectangle1"; func_001B5068 shows / hides it (slot 9)
-    cUIThing* mpNoConfiguration;    // 0x6FC [R] 0; [U] widget "NoConfiguration"; func_001B5068 shows it when there is no
+    cUIMenu* mpMenuConfig;          // 0x6F4 [R] 0; [U] widget "MenuConfig"; cFEStateNetConfig_showConfigLists cUIMenu_setSelectedByIndex(.., 0 / 1)
+    cUIThing* mpConfigRectangle;    // 0x6F8 [R] 0; [U] widget "configrectangle1"; cFEStateNetConfig_showConfigLists shows / hides it (slot 9)
+    cUIThing* mpNoConfiguration;    // 0x6FC [R] 0; [U] widget "NoConfiguration"; cFEStateNetConfig_showConfigLists shows it when there is no
                                     //       configuration
-    int mbAuthFailed;               // 0x700 (name ours) [R] 0; [U] func_001B5830: 1 on event 0x10, 0 on 0xF; on 0x16 it
+    int mbAuthFailed;               // 0x700 (name ours) [R] 0; [U] cFEStateNetConfig_onDNASAuthPopupEvent: 1 on event 0x10, 0 on 0xF; on 0x16 it
                                     //       pushes cFEStateAuthDNASError (with mpustrAuthError) when set
-    unsigned short* mpustrPopupText; // 0x704 [R] 0; [U] func_001B5E28 (slot 31) frees it and stores a heap copy of a
+    unsigned short* mpustrPopupText; // 0x704 [R] 0; [U] cFEStateNetConfig_onNetEvent (slot 31) frees it and stores a heap copy of a
                                     //       unicode / ascii message (operator_new_tag + USTR_copy / strcpy1), then points the popup's message (+ 0xC4)
                                     //       at it; the destructor frees it
-    int miState;                    // 0x708 [R] 0; [U] the connect state machine of onUpdate cFEStateNetConfig_onUpdate (0..8); func_001B4198 sets 6,
-                                    //       func_001B43A8 / func_001B4470 / func_001B45E8 / func_001B4C40 / func_001B4CD8 / func_001B5268 advance it
-    int miResult;                   // 0x70C [U] func_001B4470 / func_001B4C40 / func_001B4CD8 / func_001B5268: the last connect result
+    int miState;                    // 0x708 [R] 0; [U] the connect state machine of onUpdate cFEStateNetConfig_onUpdate (0..8); cFEStateNetConfig_startConnect sets 6,
+                                    //       cFEStateNetConfig_checkCardAndLoadConfigs / cFEStateNetConfig_checkCardSlot / cFEStateNetConfig_connectWithSelectedConfig / cFEStateNetConfig_onCardErrorPopupEvent / cFEStateNetConfig_loadConfigs / cFEStateNetConfig_rescanConfigs advance it
+    int miResult;                   // 0x70C [U] cFEStateNetConfig_checkCardSlot / cFEStateNetConfig_onCardErrorPopupEvent / cFEStateNetConfig_loadConfigs / cFEStateNetConfig_rescanConfigs: the last connect result
                                     //       (1, -200, the number of configurations)
     unsigned short* mpustrAuthError[3]; // 0x710 [R] 0; [U] cFEStateAuthDNAS cFEStateAuthDNAS_onUpdate stores three heap unicode
-                                    //       copies of the DNAS error texts here (through its mpParentState); func_001B5830 passes [1], [2], [0] to
+                                    //       copies of the DNAS error texts here (through its mpParentState); cFEStateNetConfig_onDNASAuthPopupEvent passes [1], [2], [0] to
                                     //       cFEStateAuthDNASError's constructor cFEStateAuthDNASError_cFEStateAuthDNASError; the destructor frees them
-    unsigned short mustrPopupText[0x100]; // 0x71C [U] sprintf1 (unicode) target of func_001B45E8 / func_001B47C0 /
-                                    //       func_001B4888 that becomes the popup's message (+ 0xC4); extent: to the end of the object
+    unsigned short mustrPopupText[0x100]; // 0x71C [U] sprintf1 (unicode) target of cFEStateNetConfig_connectWithSelectedConfig / cFEStateNetConfig_showCheckingCardPopup /
+                                    //       cFEStateNetConfig_showCardErrorPopup that becomes the popup's message (+ 0xC4); extent: to the end of the object
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetConfig1() __asm__("cFEStateNetConfig_cFEStateNetConfig1");
@@ -139,7 +139,7 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     //       cFEStateNetAccountMem_cFEStateNetAccountMem)
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -147,29 +147,29 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     // --- cFEStateNetAccountMem
     int miResult;                   // 0x6D0 [U] onPopupEvent cFEStateNetAccountMem_onPopupEvent: the event (0xF/0x10/0x11) reported to mpParentState's
                                     //       onPopupEvent (slot 17) when the popup closes (0x16)
-    int miError;                    // 0x6D4 [R] 0; [U] func_001B70D0 / func_001B7A98 / cFEStateNetAccountMem_onPopupEvent store the card result (2, 3, 6, 0x18 ..)
-    int mbCardError;                // 0x6D8 (name ours) [R] 0; [U] func_001B7A98 sets it on a card read error or an
+    int miError;                    // 0x6D4 [R] 0; [U] cFEStateNetAccountMem_setStep / cFEStateNetAccountMem_updateDeleteReadStep / cFEStateNetAccountMem_onPopupEvent store the card result (2, 3, 6, 0x18 ..)
+    int mbCardError;                // 0x6D8 (name ours) [R] 0; [U] cFEStateNetAccountMem_updateDeleteReadStep sets it on a card read error or an
                                     //        account mismatch, the card-change check in onUpdate
-                                    //        cFEStateNetAccountMem_onUpdate sets it; func_001B70D0 clears it in states
+                                    //        cFEStateNetAccountMem_onUpdate sets it; cFEStateNetAccountMem_setStep clears it in states
                                     //        0/5/7/11/13/19/21 and skips to the error step when it is set (8 -> 9, 22
                                     //        -> 23, 26 -> 28); onPopupEvent cFEStateNetAccountMem_onPopupEvent reports
                                     //        error 6 when it is set
-    int miState;                    // 0x6DC [U] func_001B70D0(self, state) stores it and sets up the state's popup text; onUpdate
+    int miState;                    // 0x6DC [U] cFEStateNetAccountMem_setStep(self, state) stores it and sets up the state's popup text; onUpdate
                                     //       cFEStateNetAccountMem_onUpdate and onPopupEvent cFEStateNetAccountMem_onPopupEvent switch on it
     char mszUserName[0x11];         // 0x6E0 [R] strcpy of the constructor's 5th argument (LobbyMan mUserName / tLobbyAccount mName at
-                                    //       the call sites), AccountData in mode 3; [U] func_001B7778 hands it to the card code (func_00265F18),
-                                    //       func_001B7A98 compares it with AccountData
-    char mszPassword[0x11];         // 0x6F1 [R] strcpy of the 6th argument (mPassword), AccountData + 0x11 in mode 3; [U] func_00265F68,
-                                    //       func_001B7A98 compares it with AccountData + 0x11
-    unsigned short mustrText[0x201]; // 0x702 [U] func_001B70D0: sprintf1 / strcpy1 (unicode) target of the state's message,
-                                    //       passed to the popup (func_001B7650); func_001B7E40 / func_001B8238 / func_001B83C0; extent: up to 0xB04
-    int mbCardBusy;                 // 0xB04 [R] 0; [U] func_001B70D0: 1 while a card operation runs (states 8/14/16/22), 0 otherwise;
-                                    //       func_001B7E40 tests it
-    int mbAccountMismatch;          // 0xB08 (name ours) [R] 0; [U] func_001B7A98 sets it with miError 0x18 when the
+                                    //       the call sites), AccountData in mode 3; [U] cFEStateNetAccountMem_copyToAccountData hands it to the card code (sharedlogin_setAccountName),
+                                    //       cFEStateNetAccountMem_updateDeleteReadStep compares it with AccountData
+    char mszPassword[0x11];         // 0x6F1 [R] strcpy of the 6th argument (mPassword), AccountData + 0x11 in mode 3; [U] sharedlogin_setAccountPassword,
+                                    //       cFEStateNetAccountMem_updateDeleteReadStep compares it with AccountData + 0x11
+    unsigned short mustrText[0x201]; // 0x702 [U] cFEStateNetAccountMem_setStep: sprintf1 / strcpy1 (unicode) target of the state's message,
+                                    //       passed to the popup (cFEStateNetAccountMem_showPopup); cFEStateNetAccountMem_showErrorPopup / cFEStateNetAccountMem_formatNotDetectedText / cFEStateNetAccountMem_formatFailedText; extent: up to 0xB04
+    int mbCardBusy;                 // 0xB04 [R] 0; [U] cFEStateNetAccountMem_setStep: 1 while a card operation runs (states 8/14/16/22), 0 otherwise;
+                                    //       cFEStateNetAccountMem_showErrorPopup tests it
+    int mbAccountMismatch;          // 0xB08 (name ours) [R] 0; [U] cFEStateNetAccountMem_updateDeleteReadStep sets it with miError 0x18 when the
                                     //        card's account (AccountData) is not mszUserName / mszPassword;
                                     //        cFEStateNetAccountMem_onPopupEvent: in step 23, OK restarts from step 0
                                     //        when it is set
-    int miStartState;               // 0xB0C [R] by the constructor's mode: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (func_001B70D0 starts there);
+    int miStartState;               // 0xB0C [R] by the constructor's mode: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (cFEStateNetAccountMem_setStep starts there);
                                     //       [U] cFEStateNetAccountMem_onPopupEvent restarts from it
 
     // Methods bound to their retail symbols by asm labels.

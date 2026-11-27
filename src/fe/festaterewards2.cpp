@@ -40,11 +40,11 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onCreateScreen);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onWidgetCreate);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5138);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onNetEvent);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onPopupEvent);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5280);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onVerifyPopupEvent);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard);
 

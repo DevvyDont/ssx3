@@ -2865,7 +2865,7 @@ extern void f65F8(char *, struct sKbRead *, int, int) __asm__("func_003F65F8");
  *
  * Modifier keys are tested in the modifier word (func_003F6700) and lock keys in the LED word (func_003F67E0); any
  * other key compares the virtual-key byte of the buffer's @p idx-th key code (func_003F65F8) with @p virtKey. The
- * keyboard reader update (func_002668E8) asks it for VK_SHIFT (0x10).
+ * keyboard reader update (cUsbKeyboard_update) asks it for VK_SHIFT (0x10).
  *
  * @param kbdState  the read buffer: LED word, modifier word, count, key codes
  * @param mapMode  key-map mode for func_003F65F8
@@ -3016,7 +3016,7 @@ extern int func_003F6960(int, int, int, int *, int);
 /**
  * Connects voice chat to a peer: RPC function 2 with the address and the two 16-bit ports packed in one word.
  *
- * The voice manager (func_00266D58) passes ports 6000 / 6000.
+ * The voice manager (cVoipMan_connect) passes ports 6000 / 6000.
  *
  * @param peerAddr  peer address
  * @param firstPort  first port (low half)
@@ -3231,13 +3231,13 @@ struct sNetAcct {
 
 extern struct sNetAcct *D_004A4BC4;
 
-extern struct sNetAcct *f6728(int, int, int) __asm__("func_00266728");
+extern struct sNetAcct *f6728(int, int, int) __asm__("TibExtMemAlloc");
 extern unsigned f6210x(struct sNetAcct *, int, int) __asm__("memset");
 int func_003F6C70_impl(struct sNetInit *initParams) __asm__("func_003F6C70");
 /**
  * Creates the network-account session D_004A4BC4 (0x14C bytes).
  *
- * Allocates it from the heap @p initParams->heap with func_00266728 and zeroes it, keeps the heap (+0x140), copies the
+ * Allocates it from the heap @p initParams->heap with TibExtMemAlloc and zeroes it, keeps the heap (+0x140), copies the
  * 17 memory-card callbacks from the table @p initParams->callbacks into its head, and sets it idle: operation 4 (+0xD0,
  * +0x104), mode 10 (+0xD8), phase 5 (+0xEC), +0x148 and +0x138 0, +0x13C -1 (so +0x138 is the port list {0, -1} for
  * func_003F6DC8).
@@ -3273,14 +3273,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6D98);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
-extern int func_00266760(int, char *, int, int);
+extern int TibExtMemFree(int, char *, int, int);
 /**
- * Frees the network-account session D_004A4BC4 back to its heap (func_00266760) and clears the pointer.
+ * Frees the network-account session D_004A4BC4 back to its heap (TibExtMemFree) and clears the pointer.
  *
  * @return 0
  */
 int func_003F6D98(void) {
-    func_00266760(D_004A4BC4->heap, (char *)D_004A4BC4, 332, 4);
+    TibExtMemFree(D_004A4BC4->heap, (char *)D_004A4BC4, 332, 4);
     D_004A4BC4 = 0;
     return 0;
 }
@@ -4486,7 +4486,7 @@ extern int func_003F6DC8(void);
  * Starts the network-account library: sets its started flag (func_003F6C50), creates the session (func_003F6C70) and
  * opens the save-record manager (func_003F6DC8).
  *
- * The shared-login manager (func_00265950) passes {its 17 memory-card callbacks, 0}.
+ * The shared-login manager (cSharedLoginMan_init) passes {its 17 memory-card callbacks, 0}.
  *
  * @param initParams  {callback table, heap}
  */
@@ -4506,7 +4506,7 @@ extern int func_003F6D98(void);
 extern int func_003F6C60(void);
 /**
  * Stops the network-account library: closes the save-record manager (func_003F6E70), frees the session (func_003F6D98)
- * and clears the started flag (func_003F6C60). The shared-login manager (func_002659C0) calls it.
+ * and clears the started flag (func_003F6C60). The shared-login manager (cSharedLoginMan_shutdown) calls it.
  *
  * @return 0
  */
@@ -4649,7 +4649,7 @@ extern int func_003F7A30(void);
  * Polls the running network-account operation.
  *
  * Unless idle, runs the operation poll (+0xD4, func_003F6EE0); when it finishes (status 2) or fails, the session goes
- * back to idle (func_003F7A30). The shared-login manager (func_00265A68) calls it every frame.
+ * back to idle (func_003F7A30). The shared-login manager (cSharedLoginMan_update) calls it every frame.
  *
  * @param out  receives 0 when idle, 1 while running, 2 when finished
  * @return 0 or an error code (7 when @p out is 0)
@@ -5741,7 +5741,7 @@ struct sMcCallbacks {
 };
 
 extern int func_003F9208(void);
-extern void *func_00266728(int, int, int);
+extern void *TibExtMemAlloc(int, int, int);
 extern int (*D_00451468[])(int, int *, int *);  /* per-op handler table */
 extern int (*D_004514A0[])(int, int, int);      /* per-state handler table */
 
@@ -5776,9 +5776,9 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
         cb->sync == 0 || cb->getFoundName == 0)
         return 0xC;
     if (D_004A4BDC != 0 || D_004A4BD8 != 0) return 1;
-    D_004A4BDC = func_00266728(heap, 1068, 4);
+    D_004A4BDC = TibExtMemAlloc(heap, 1068, 4);
     if (D_004A4BDC == 0) return 7;
-    D_004A4BD8 = func_00266728(heap, 116, 4);
+    D_004A4BD8 = TibExtMemAlloc(heap, 116, 4);
     if (D_004A4BD8 == 0) return 7;
     D_004A4BDC->h = heap;
     D_004A4BDC->ports = 0;
@@ -5827,7 +5827,7 @@ extern struct sMcReq *D_004A4BD8;
 extern struct sMcDrv *D_004A4BDC;
 
 extern int func_003F9208(void);
-extern int func_00266760(int, char *, int, int);
+extern int TibExtMemFree(int, char *, int, int);
 /**
  * Closes the memory-card request layer: clears the 17 callbacks and the request, frees the request and the driver block
  * to the driver's heap and clears both pointers.
@@ -5860,9 +5860,9 @@ int func_003F9530(void) {
     driver->getFoundName = 0;
     request->op = 0;
     request->st = 0;
-    func_00266760(driver->h, (char *)request, 116, 4);
+    TibExtMemFree(driver->h, (char *)request, 116, 4);
     D_004A4BD8 = 0;
-    func_00266760(D_004A4BDC->h, (char *)D_004A4BDC, 1068, 4);
+    TibExtMemFree(D_004A4BDC->h, (char *)D_004A4BDC, 1068, 4);
     D_004A4BDC = 0;
     return 0;
 }
@@ -7196,7 +7196,7 @@ struct sCrc { unsigned *table; int outSize; int *outDigest; unsigned crc; int he
 
 extern struct sCrc D_00451518;
 
-extern void *func_00266728(int, int, int);
+extern void *TibExtMemAlloc(int, int, int);
 /**
  * Starts the CRC interface D_00451518: allocates its 1 KB table from @p heapId, fills it, and resets the digest (all ones)
  * and the output block.
@@ -7207,7 +7207,7 @@ extern void *func_00266728(int, int, int);
 int func_003FB3A0(unsigned heapId) {
     unsigned *table;
     if (D_00451518.table != 0) return 5;
-    table = func_00266728(heapId, 0x400, 4);
+    table = TibExtMemAlloc(heapId, 0x400, 4);
     D_00451518.table = table;
     if (table == 0) return 1;
     D_00451518.heap = heapId;
@@ -7226,7 +7226,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB430);
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
 extern struct sCrc D_00451518;
 
-extern int func_00266760(int, char *, int, int);
+extern int TibExtMemFree(int, char *, int, int);
 /**
  * Stops the CRC interface: frees its table to the heap it came from.
  *
@@ -7235,7 +7235,7 @@ extern int func_00266760(int, char *, int, int);
 int func_003FB430(void) {
     struct sCrc *crcState = &D_00451518;
     if (D_00451518.table == 0) return 6;
-    func_00266760(crcState->heap, (char *)crcState->table, 0x400, 4);
+    TibExtMemFree(crcState->heap, (char *)crcState->table, 0x400, 4);
     D_00451518.table = 0;
     return 0;
 }
@@ -8305,7 +8305,7 @@ extern int func_003F9218(int, int, int);
 extern int func_003FB810(int);
 extern int func_003FB840c(int) __asm__("func_003FB840");
 extern int fB828(int) __asm__("func_003FB828");
-extern void *c0e8_6728(int, int, int) __asm__("func_00266728");
+extern void *c0e8_6728(int, int, int) __asm__("TibExtMemAlloc");
 extern void c0e8_A6C8(struct sMcIfB **) __asm__("func_003FA6C8");
 extern int func_003FCE10(char *, int, int, int);
 extern void func_0041605C(char *, char *, int);
@@ -8371,7 +8371,7 @@ extern int func_003FCF00(int, int, int, int);
 // 99.47: only $2/$3 swap between D ptr and q (f6C) in blocks 3,7 (target D in $2). tried decl order sweep, q vs int v, permuter 4min nothing. Names prefixed c260_ in file to avoid clashes
 extern int func_003FC0D8(void);
 extern void c260_B9A0(int) __asm__("func_003FB9A0");
-extern void c260_6760(int, void *, int, int) __asm__("func_00266760");
+extern void c260_6760(int, void *, int, int) __asm__("TibExtMemFree");
 extern int c260_B828(int) __asm__("func_003FB828");
 extern int c260_B840(int) __asm__("func_003FB840");
 extern int c260_B810(int, struct sMcState *) __asm__("func_003FB810");

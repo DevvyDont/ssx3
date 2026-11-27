@@ -250,15 +250,15 @@ extern "C" void cBENewRaceInterface_setNumberHumans(void* self, int n) __asm__("
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int mode);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
-extern "C" void func_00266CD8();
-extern "C" void func_00261008();
-extern "C" void func_0025B688();
+extern "C" void cVoipMan_destroyInstance();
+extern "C" void BuddyMan_destroyInstance();
+extern "C" void LobbyMan_destroyInstance();
 extern "C" void cCommSystem_destroy();
 extern "C" void cCommSystem_construct();
 extern "C" void func_00255F20_ls(int a, const char* b) __asm__("func_00255F20");
-extern "C" void func_0025B650();
-extern "C" void func_00260F80();
-extern "C" void func_00266CA0();
+extern "C" void LobbyMan_createInstance();
+extern "C" void BuddyMan_createInstance();
+extern "C" void cVoipMan_createInstance();
 extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx);
 extern "C" int cTrackFileMan_getNextWCBAMStartLocation_ls(void* self, int i) __asm__("cTrackFileMan_getNextWCBAMStartLocation");
 extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name);
@@ -266,7 +266,7 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* self, int a1);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_00289520(void* snd, void* entry);
+extern "C" void cSSXAudio_SelectPlayList(void* snd, void* entry);
 
 
 struct sNet_B1B0 {
@@ -347,15 +347,15 @@ extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen*
     self->currentLocation = 0;
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     if (EnableOnline != 0) {
-        func_00266CD8();
-        func_00261008();
-        func_0025B688();
+        cVoipMan_destroyInstance();
+        BuddyMan_destroyInstance();
+        LobbyMan_destroyInstance();
         cCommSystem_destroy();
         cCommSystem_construct();
         func_00255F20_ls((int)cCommSystem_mCommSystem, str_mc0);
-        func_0025B650();
-        func_00260F80();
-        func_00266CA0();
+        LobbyMan_createInstance();
+        BuddyMan_createInstance();
+        cVoipMan_createInstance();
     }
     if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan)) != 0) {
         if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].active == 0) {
@@ -389,7 +389,7 @@ extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen*
     cBENewPlayerInterface_setPlayerCharID(iface1, 0, 2);
     self->CurrentMap = cBENewPlayerInterface_getControllerMapping(iface1, 0);
     void* snd = cAudioInterface_bxAudio();
-    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
+    cSSXAudio_SelectPlayList(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
     iface1->submit();
     iface0->submit();
     return self;
@@ -415,7 +415,7 @@ extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2
 
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
-extern "C" void func_00289520(void* snd, void* entry);
+extern "C" void cSSXAudio_SelectPlayList(void* snd, void* entry);
 
 
 struct cAppMan;
@@ -425,7 +425,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void func_0017D0A8(cDebugMenuScreen* self);
+extern "C" void connectDebugDirectLink(cDebugMenuScreen* self);
 extern "C" int cDebugMenuScreen_getMaxAIRiders(cDebugMenuScreen* self, int quick, int mode, int event);
 extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(sLSSub_B1B0* s, int i);
 extern "C" int cTrackFileMan_legalTrackMode(sLSSub_B1B0* s, int i, int mode);
@@ -518,7 +518,7 @@ static inline int numSongs_B4E0()
 static inline void playSong_B4E0(cDebugMenuScreen* self)
 {
     void* snd = cAudioInterface_bxAudio();
-    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
+    cSSXAudio_SelectPlayList(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
 }
 
 static inline int bgCount_B4E0(cBackgroundMan* bg)
@@ -529,7 +529,7 @@ static inline int bgCount_B4E0(cBackgroundMan* bg)
 /**
  * Runs one frame of the debug start menu: moves between its 15 items, changes the selected one and starts the game.
  *
- * Input state 0x65 saves the choices (func_0017D0A8) and starts: kRealFEItem sets the app's word +0x60 and moves to a
+ * Input state 0x65 saves the choices (connectDebugDirectLink) and starts: kRealFEItem sets the app's word +0x60 and moves to a
  * cPreFELoadScreen module (cPreFELoadScreen_cPreFELoadScreen), any other item to a cPreGameLoadScreen. Up / down
  * (cInput_getValue(.., 0x3D) kMenuKeyUp / kMenuKeyDown, only while no background is previewed, CurrentBack ==
  * cBackgroundMan::kNoImage) step the item (tItems), skipping kNetworkItem without a comm system and kLobbyItem without
@@ -545,7 +545,7 @@ static inline int bgCount_B4E0(cBackgroundMan* bg)
 void cDebugMenuScreen::update()
 {
     if (cInput_getState(SSXApp_b4->input, 101)) {
-        func_0017D0A8(this);
+        connectDebugDirectLink(this);
         if (SelectedItem == kRealFEItem) {
             SSXApp_b4->f60 = 1;
             cAppMan_setNextModule((cAppMan*)SSXApp_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));

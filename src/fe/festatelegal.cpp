@@ -57,7 +57,7 @@ void cFEStateLegal::onUpdate()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelegal", func_00187D38);
+INCLUDE_ASM("fe/festatelegal", applyCheatCode);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -80,13 +80,13 @@ extern "C" int cBERewardInterface_buyTradingCard(void* iface, int a, int i, int 
 extern "C" int cBERewardInterface_buyConceptArt(void* iface, int a, int i, int j, int b);
 extern "C" int cBERewardInterface_buyVideo(void* iface, int a, int i, int j, int b);
 extern "C" int cBERewardInterface_buyToy(void* iface, int a, int i, int j, int b);
-// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
-void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" char* func_0014D998(void* db, int type);
-int func_0014D988(void* db, int type);
-extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" int func_0014D908(void* db, char* item, int id);
-extern "C" void func_00151C48(void* prof, int id, int on);
+// PORT: cBEBoltInterface_getBoltDB is declared (void*) but never reads its argument; called here with none
+void* cBEBoltInterface_getBoltDB_noarg() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" char* cBEBoltDB_getCharBolts(void* db, int type);
+int cBEBoltDB_getNumCharBolts(void* db, int type);
+extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" int cBEBoltDB_isBoltAncestor(void* db, char* item, int id);
+extern "C" void cBECharProfileDB_setBoltBought(void* prof, int id, int on);
 extern int D_004A11E0;
 
 static inline int ItemType_7D38(char* item)
@@ -106,14 +106,14 @@ static inline int ItemType_7D38(char* item)
  * cBERewardInterface_setPlayList(); 0x5B65653, 0xA0CF7C4, 0xB5D8914, 0x717257D and 0x74F6CF4 do every index below the matching count
  * (cBERewardInterface_getTotalNumPosters, cBERewardInterface_getTotalNumTradingCards, cBERewardInterface_getTotalNumConceptArts, cBERewardInterface_getTotalNumVideos, cBERewardInterface_getTotalNumToys) with cBERewardInterface_buyPoster, cBERewardInterface_buyTradingCard,
  * cBERewardInterface_buyConceptArt, cBERewardInterface_buyVideo and cBERewardInterface_buyToy. 0xBCF3974 marks every library item of types 1-3 that passes
- * func_0014D908() against D_004A11E0 as owned (func_00151C48()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
+ * cBEBoltDB_isBoltAncestor() against D_004A11E0 as owned (cBECharProfileDB_setBoltBought()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
  * same for every type-1 item without the check. cFEStateOptions_onWidgetEvent() calls it with the text typed into its
  * popup.
  *
  * @param code  the typed code (copied, not modified)
  * @return true when the code was recognised and applied
  */
-extern "C" bool func_00187D38(char* code)
+extern "C" bool applyCheatCode(char* code)
 {
     void* gear = cBE_getInterface_Fv(cBE_getBE(), 11);
     void* unlocks = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -239,14 +239,14 @@ extern "C" bool func_00187D38(char* code)
     } else if (GetHashValue32(buf) == 0xBCF3974) {
         for (int team = 0; team < 3; team++) {
             for (int type = 0; type < 10; type++) {
-                void* db = func_0014BDB8_noarg();
-                char* item = func_0014D998(db, type);
-                int count = func_0014D988(db, type);
-                void* prof = func_0014AD28(profiles, team, type);
+                void* db = cBEBoltInterface_getBoltDB_noarg();
+                char* item = cBEBoltDB_getCharBolts(db, type);
+                int count = cBEBoltDB_getNumCharBolts(db, type);
+                void* prof = cBEBoltInterface_getCharProfile(profiles, team, type);
                 for (int k = 0; k < count; k++, item += 0x38) {
                     if (ItemType_7D38(item) == 1 || ItemType_7D38(item) == 2 || ItemType_7D38(item) == 3) {
-                        if (func_0014D908(db, item, D_004A11E0))
-                            func_00151C48(prof, *(short*)(item + 4), 1);
+                        if (cBEBoltDB_isBoltAncestor(db, item, D_004A11E0))
+                            cBECharProfileDB_setBoltBought(prof, *(short*)(item + 4), 1);
                     }
                 }
             }
@@ -255,12 +255,12 @@ extern "C" bool func_00187D38(char* code)
     } else if (GetHashValue32(buf) == 0x70694D5) {
         for (int team = 0; team < 3; team++) {
             for (int type = 0; type < 10; type++) {
-                char* item = func_0014D998(func_0014BDB8_noarg(), type);
-                int count = func_0014D988(func_0014BDB8_noarg(), type);
-                void* prof = func_0014AD28(profiles, team, type);
+                char* item = cBEBoltDB_getCharBolts(cBEBoltInterface_getBoltDB_noarg(), type);
+                int count = cBEBoltDB_getNumCharBolts(cBEBoltInterface_getBoltDB_noarg(), type);
+                void* prof = cBEBoltInterface_getCharProfile(profiles, team, type);
                 for (int k = 0; k < count; k++, item += 0x38) {
                     if (ItemType_7D38(item) == 1)
-                        func_00151C48(prof, *(short*)(item + 4), 1);
+                        cBECharProfileDB_setBoltBought(prof, *(short*)(item + 4), 1);
                 }
             }
         }
@@ -271,7 +271,7 @@ extern "C" bool func_00187D38(char* code)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelegal", func_001887A0);
+INCLUDE_ASM("fe/festatelegal", cFEStateOptions_cFEStateOptions1);
 #ifdef SKIP_ASM
 struct sFlowState_887A0 {
     signed char count;
@@ -295,7 +295,7 @@ extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
  * @param reset  non-zero to clear the options entry in gFlowState
  * @return @p self
  */
-extern "C" void* func_001887A0(cFEStateOptions* self, int engine, int reset)
+extern "C" void* cFEStateOptions_cFEStateOptions1(cFEStateOptions* self, int engine, int reset)
 {
     cUIState_cUIState(self);
     self->mHashName = 0x18;

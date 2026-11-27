@@ -1419,10 +1419,10 @@ cSongInstance* cMusicSys::MUSIC_Current()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetStreamHandle);
 #ifdef SKIP_ASM
-extern "C" int func_002B2488(cSongInstance* song);
+extern "C" int cSongInstance_GetStreamHandle(cSongInstance* song);
 
 /**
- * Returns the current song's stream handle: func_002B2488(mCurrent), or -1 when there is no current song.
+ * Returns the current song's stream handle: cSongInstance_GetStreamHandle(mCurrent), or -1 when there is no current song.
  *
  * @return the stream handle, or -1
  */
@@ -1434,7 +1434,7 @@ int cMusicSys::MUSIC_GetStreamHandle()
     song = mSongInstance;
     handle = -1;
     if (song != 0) {
-        handle = func_002B2488(song);
+        handle = cSongInstance_GetStreamHandle(song);
     }
     return handle;
 }
@@ -1513,15 +1513,15 @@ int cMusicSys::MUSIC_GetCurrentSongNum()
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SetDelay);
 #ifdef SKIP_ASM
-extern "C" void func_002B2850(cSongInstance* song, void* musicSys);
+extern "C" void cSongInstance_ApplyDelay(cSongInstance* song, void* musicSys);
 
 /**
- * Applies the delay settings to the current song: func_002B2850(mCurrent, @p musicSys).
+ * Applies the delay settings to the current song: cSongInstance_ApplyDelay(mCurrent, @p musicSys).
  *
  */
 void cMusicSys::MUSIC_SetDelay()
 {
-    func_002B2850(mSongInstance, this);
+    cSongInstance_ApplyDelay(mSongInstance, this);
 }
 #endif
 
@@ -1603,7 +1603,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
 /**
  * Returns the music system's mMusicState word.
  *
- * func_002B3838 sets it to -1; func_002B3BC0 compares and stores it.
+ * cMusicSys_StartSong sets it to -1; cMusicSys_SetMusicState compares and stores it.
  *
  * @param musicSys  the cMusicSys
  * @return mMusicState
@@ -1691,7 +1691,7 @@ extern "C" void func_002BAD30(cSSXAudio* audio) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD48);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's mFirstTimeOnPeak (set by func_002BAD30; func_002A2E50 and func_002A4A78 use it).
+ * Returns cSSXAudio's mFirstTimeOnPeak (set by func_002BAD30; cSSXAudio_SpeakDJBetweenEvents and cSSXAudio_ScheduleDJOpening use it).
  *
  * @param audio  the cSSXAudio
  * @return mFirstTimeOnPeak
@@ -1911,7 +1911,7 @@ struct Node_ADD0 { Node_ADD0* child[8]; int pad[2]; Item_ADD0* items; };
  * Collects every type-5 item in an octree node and all its descendants into a list.
  *
  * Walks the node's item chain (+0x28; next at +0x0, type at +0x8), appending each item of type 5 to (*@p out)'s array
- * and incrementing its count, then recurses into each of the eight children that is set. func_002B83F8 calls it for
+ * and incrementing its count, then recurses into each of the eight children that is set. nash_privy_QueryHelper_help1 calls it for
  * nodes that lie wholly inside the query box. No bound on the list's capacity.
  *
  * @param node  the octree node

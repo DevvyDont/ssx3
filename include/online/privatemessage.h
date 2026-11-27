@@ -7,7 +7,7 @@
 // it); the header sits with BuddyMan, its owner.
 //
 // Size 0x10: [R] every allocation is cMemMan_alloc(0x10, "cPrivateMessage", 0x20000000, 0) / operator new(0x10,
-// "cPrivateMessage") (func_00261CD0 in dirtysock/tagsunk, func_001A7ED8 / func_001A7F78 in fe/feasyncfile), each
+// "cPrivateMessage") (BuddyMan_storeMessage in dirtysock/tagsunk, cFEStateReadMessagePopup_addOwnReply / cFEStateReadMessagePopup_collectSenderMessages in fe/feasyncfile), each
 // followed by the inline ctor (vptr, then three cBXString ctors). [P] the preview's linkonce _vt$15cPrivateMessage,
 // _$_15cPrivateMessage (its out-of-line dtor) and vector<const cPrivateMessage*, BXAllocator<..>>. Not in On Tour's
 // DWARF. No base class: the class's only virtual is its destructor, so g++ 2.95 puts the vptr after the data (0xC).
@@ -23,12 +23,12 @@
 
 struct cPrivateMessage {
     cBXString mSender;              // 0x0 [R] ctor cBXString(name) first; dtor destroys it last; [U] BuddyMan_onReceiveMessage
-                                    //     passes the TagField "USER" (func_00261CD0 name); func_001A7ED8 the own persona;
-                                    //     func_001A7F78 compares it with cFEStateReadMessagePopup::mszSender (strcasecmp)
-    cBXString mText;                // 0x4 [R] ctor second; [U] BuddyMan_onReceiveMessage: "SUBJ" + "BODY"; func_001A7ED8:
+                                    //     passes the TagField "USER" (BuddyMan_storeMessage name); cFEStateReadMessagePopup_addOwnReply the own persona;
+                                    //     cFEStateReadMessagePopup_collectSenderMessages compares it with cFEStateReadMessagePopup::mszSender (strcasecmp)
+    cBXString mText;                // 0x4 [R] ctor second; [U] BuddyMan_onReceiveMessage: "SUBJ" + "BODY"; cFEStateReadMessagePopup_addOwnReply:
                                     //     the reply text
     cBXString mDate;                // 0x8 [R] ctor third; [U] BuddyMan_onReceiveMessage: the "TIME" field printed as
-                                    //     "%02d/%02d/%02d %02d:%02d"; func_001A7ED8: str_empty_d (""); the popup shows
+                                    //     "%02d/%02d/%02d %02d:%02d"; cFEStateReadMessagePopup_addOwnReply: str_empty_d (""); the popup shows
                                     //     it in its "TextFromX" line
     void** mVtbl;                   // 0xC [R] the ctors and both dtors store cPrivateMessage_vtbl here; [P] _vt$15cPrivateMessage
 };

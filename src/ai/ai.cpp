@@ -4479,13 +4479,13 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_loseFocus);
 extern "C" int AITick();
 extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A02D8(void*, void*);
+extern "C" void cSSXAudio_SpeakWipeout(void*, void*);
 
 /**
  * Leaves the wipeout control: on even logic ticks, asks for a negative rider reaction and the wipeout speech.
  *
  * Only when the logic tick (AITick) is even: a human rider (rider vtable slot 8, isHuman) gets
- * reaction kREACT_Neg (cRider_flagEventReaction, kind 4, no delay), then func_002A02D8 requests the Wipeout_* speech. On
+ * reaction kREACT_Neg (cRider_flagEventReaction, kind 4, no delay), then cSSXAudio_SpeakWipeout requests the Wipeout_* speech. On
  * Tour's loseFocus also takes the next control state; this body has no such parameter.
  */
 void cWipeoutControl::loseFocus()
@@ -4496,7 +4496,7 @@ void cWipeoutControl::loseFocus()
         {
             cRider_flagEventReaction(mRider, 4, 0.0f);
         }
-        func_002A02D8(cAudioInterface_bxAudio(), mRider);
+        cSSXAudio_SpeakWipeout(cAudioInterface_bxAudio(), mRider);
     }
 }
 #endif
@@ -6241,7 +6241,7 @@ bool cBoardPressControl::checkForPivot(tBoardPressCmd* in)
 INCLUDE_ASM("ai/ai", cBoardPressControl_checkForWipeout);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A1560(void* mgr, void* rider);
+extern "C" void cSSXAudio_SpeakOffBalance(void* mgr, void* rider);
 extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, tCollideInfo* info);
 
 struct sCurvePt_130DD0
@@ -6330,7 +6330,7 @@ static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
  * BalanceSec counts the time in the press and OffBalanceSec the time at full depth (rider + 0x274 == 1). The target is
  * the press (word 1 bits 0-5, negated for a tail press, at least 0), capped at 0.5 + BalanceSec / 2 in the first second
  * and then snapped to 0 or 1 (1 when it or |BoardPivot| exceeds 0.5). The rate is 1 when crossing 0.5, else a blend
- * over 5 s of the curves kBPEasyBalanceRate and kBPHardBalanceRate, with the Whooh speech (func_002A1560) above depth
+ * over 5 s of the curves kBPEasyBalanceRate and kBPHardBalanceRate, with the Whooh speech (cSSXAudio_SpeakOffBalance) above depth
  * 0.8. After 1 s at full depth it calls the hard crash cRider_flagEventWipeout with kAID_WH_TailBwd2FwdFaceUp (tail) or
  * kAID_WH_NoseFwd2FwdFaceDown (nose).
  *
@@ -6375,7 +6375,7 @@ bool cBoardPressControl::checkForWipeout(tBoardPressCmd* in)
         float mix = BalanceSec * 0.20000895857810974f <? 1.0f;
         desRate = easyRate * (1.0f - mix) + hardRate * mix;
         if (mRider->mSlewed[11].cur > 0.800000011920929f)
-            func_002A1560(cAudioInterface_bxAudio(), mRider);
+            cSSXAudio_SpeakOffBalance(cAudioInterface_bxAudio(), mRider);
     }
     cRider* rider3 = mRider;
     rider3->mSlewed[11].target = desPress;

@@ -15,7 +15,7 @@
 //   [R] retail's constructor cGameComm_cGameComm (initial values below) and the allocation size;
 //   [U] how retail code uses the field: the class's own methods (cGameComm_cGameComm..cGameComm_updateSyncPacket in seg_156860) and the
 //       ~50 users of cGameComm_mGameComm (ovstatepause, ovtemplatepausemenu, gamestate's cInputSync, ai, gameload, ...). The
-//       results reporter func_0025FD50 (tagsunk) sends many fields under DirtySock tags, quoted as "TAG";
+//       results reporter LobbyMan_reportRaceResult (tagsunk) sends many fields under DirtySock tags, quoted as "TAG";
 //   [O] SSX On Tour's DWARF (class cGameComm, size 0x101C): same member order where both games have the member. On
 //       Tour is a 4-player rewrite (per-player [4] arrays, 1-byte bools, mPlayerID/mNumPlayers, disable/rejoin), so a
 //       name is used only where the retail use matches; On Tour's [4] arrays are [2] here (index 0 = this machine,
@@ -139,7 +139,7 @@ struct cGameComm {
                                  //       the link; cleared when an input packet arrives (readPacket channel 0)
     int mWaitingTimer;                 // 0x060 [R] 30; [U] frames without a packet (cGameComm_checkActive); at 60 mWaitingMessage is set
                                  //       (On Tour has mWaitingTimer[4] in this area)
-    int mOverlayTimeout;         // 0x064 [O]; [R] -1; [U] the pause overlays start it (0x4B0, func_001FD0D8; 0x8CA0 in
+    int mOverlayTimeout;         // 0x064 [O]; [R] -1; [U] the pause overlays start it (0x4B0, cOVState_MULTI_PREEVENT_onGainFocus; 0x8CA0 in
                                  //       ovtemplatedialog), stop it (-1) and test == 0; counted down by cGameComm_updateTimeout
     int mPauseTimeout;           // 0x068 [O]; [R] -1; [U] counted down by cGameComm_updateTimeout, tested and reset to -1 by the pause
                                  //       menu; never armed in retail

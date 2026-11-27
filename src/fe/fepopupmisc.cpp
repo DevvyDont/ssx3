@@ -807,7 +807,7 @@ void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_isChanged);
 #ifdef SKIP_ASM
 /**
  * Returns the int at +0x6D0 of an online state.
@@ -818,7 +818,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
  * @param netState  the state
  * @return the int at +0x6D0
  */
-extern "C" int func_001DF778(cFEStateNetQuickMessages* netState) {
+extern "C" int cFEStateNetQuickMessages_isChanged(cFEStateNetQuickMessages* netState) {
     return (netState->mbChanged);
 }
 #endif
@@ -3275,17 +3275,17 @@ void* cFEUseExistingAccount::cFEUseExistingAccount1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E08D0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEUseExistingAccount_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the use-existing-account state publishes the player's buddy presence as offline.
  *
- * Entry 29 (+0xEC) of cFEUseExistingAccount_vtbl; cFEStateNet's func_001A8830 asks this entry (func_001DE870, 1, by
+ * Entry 29 (+0xEC) of cFEUseExistingAccount_vtbl; cFEStateNet's cFEStateNet_publishPresence asks this entry (func_001DE870, 1, by
  * default) whether to show the player online.
  *
  * @return 0
  */
-int func_001E08D0(void* self)
+int cFEUseExistingAccount_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3333,32 +3333,32 @@ void* cFEStateSelectPersona__cFEStateSelectPersona(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0940__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the select-persona state publishes the player's buddy presence as offline.
  *
- * Entry 29 (+0xEC) of cFEStateSelectPersona_vtbl; cFEStateNet's func_001A8830 asks this entry (func_001DE870, 1, by
+ * Entry 29 (+0xEC) of cFEStateSelectPersona_vtbl; cFEStateNet's cFEStateNet_publishPresence asks this entry (func_001DE870, 1, by
  * default) whether to show the player online.
  *
  * @return 0
  */
-int func_001E0940(void* self)
+int cFEStateSelectPersona_isOnlineState(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0948__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_publishPresence__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the select-persona state does not publish the player's buddy presence when it gains focus.
  *
- * Entry 32 (+0x104) of cFEStateSelectPersona_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * Entry 32 (+0x104) of cFEStateSelectPersona_vtbl, replacing cFEStateNet's cFEStateNet_publishPresence, which cFEStateNet_onGainFocus
  * calls.
  */
-void func_001E0948(void* self)
+void cFEStateSelectPersona_publishPresence(void* self)
 {
 }
 #endif
@@ -3569,21 +3569,21 @@ void* cFEStateNetConfig::cFEStateNetConfig1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0BA0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_publishPresence__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the network-configuration state does not publish the player's buddy presence when it gains focus.
  *
- * Entry 32 (+0x104) of cFEStateNetConfig_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * Entry 32 (+0x104) of cFEStateNetConfig_vtbl, replacing cFEStateNet's cFEStateNet_publishPresence, which cFEStateNet_onGainFocus
  * calls.
  */
-void func_001E0BA0(void* self)
+void cFEStateNetConfig_publishPresence(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0BA8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the network-configuration state counts the player as offline for buddy presence.
@@ -3592,7 +3592,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0BA8__FPv);
  *
  * @return 0
  */
-int func_001E0BA8(void* self)
+int cFEStateNetConfig_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3655,21 +3655,21 @@ bool cFEStateAuthDNAS::onLoseTransition()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C20__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_publishPresence__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the DNAS authentication state does not publish the player's buddy presence when it gains focus.
  *
- * Entry 32 (+0x104) of cFEStateAuthDNAS_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * Entry 32 (+0x104) of cFEStateAuthDNAS_vtbl, replacing cFEStateNet's cFEStateNet_publishPresence, which cFEStateNet_onGainFocus
  * calls.
  */
-void func_001E0C20(void* self)
+void cFEStateAuthDNAS_publishPresence(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C28__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the DNAS authentication state counts the player as offline for buddy presence.
@@ -3678,7 +3678,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0C28__FPv);
  *
  * @return 0
  */
-int func_001E0C28(void* self)
+int cFEStateAuthDNAS_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3722,21 +3722,21 @@ bool cFEStateAuthDNASError::onLoseTransition()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C80__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_publishPresence__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the DNAS error state does not publish the player's buddy presence when it gains focus.
  *
- * Entry 32 (+0x104) of cFEStateAuthDNASError_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * Entry 32 (+0x104) of cFEStateAuthDNASError_vtbl, replacing cFEStateNet's cFEStateNet_publishPresence, which cFEStateNet_onGainFocus
  * calls.
  */
-void func_001E0C80(void* self)
+void cFEStateAuthDNASError_publishPresence(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0C88__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the DNAS error state counts the player as offline for buddy presence.
@@ -3745,7 +3745,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0C88__FPv);
  *
  * @return 0
  */
-int func_001E0C88(void* self)
+int cFEStateAuthDNASError_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3837,7 +3837,7 @@ extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0D60__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the account-creation step-1 state counts the player as offline for buddy presence.
@@ -3846,7 +3846,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0D60__FPv);
  *
  * @return 0
  */
-int func_001E0D60(void* self)
+int cFEStateCreateStep1_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3895,7 +3895,7 @@ void* cFEStateCreateStep2__cFEStateCreateStep2(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0DD0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the account-creation step-2 state counts the player as offline for buddy presence.
@@ -3904,7 +3904,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0DD0__FPv);
  *
  * @return 0
  */
-int func_001E0DD0(void* self)
+int cFEStateCreateStep2_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3952,7 +3952,7 @@ void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0E40__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the duplicate-account state counts the player as offline for buddy presence.
@@ -3961,7 +3961,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0E40__FPv);
  *
  * @return 0
  */
-int func_001E0E40(void* self)
+int cFEStateCreateDuplicate_isOnlineState(void* self)
 {
     return 0;
 }
@@ -3989,21 +3989,21 @@ void* cFEStateLogin::cFEStateLogin1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0E88__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_publishPresence__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the login and re-login states do not publish the player's buddy presence when they gain focus.
  *
- * Entry 32 (+0x104) of cFEStateLogin_vtbl and cFEStateRelogin_vtbl, replacing cFEStateNet's func_001A8830, which
+ * Entry 32 (+0x104) of cFEStateLogin_vtbl and cFEStateRelogin_vtbl, replacing cFEStateNet's cFEStateNet_publishPresence, which
  * cFEStateNet_onGainFocus calls.
  */
-void func_001E0E88(void* self)
+void cFEStateLogin_publishPresence(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0E90__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_isOnlineState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0, so the login and re-login states count the player as offline for buddy presence.
@@ -4012,7 +4012,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0E90__FPv);
  *
  * @return 0
  */
-int func_001E0E90(void* self)
+int cFEStateLogin_isOnlineState(void* self)
 {
     return 0;
 }
@@ -4206,14 +4206,14 @@ bool cFEStateNetMessenger::onLoseTransition()
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onGainTransition);
 #ifdef SKIP_ASM
 /**
- * Publishes the messenger presence through its own vtable slot 32 (func_001A3E30, which reports the player as "in the
+ * Publishes the messenger presence through its own vtable slot 32 (cFEStateNetMessenger_publishPresence, which reports the player as "in the
  * messenger") and lets the transition proceed.
  *
  * @return 1
  */
 extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 {
-    // cFEStateNetMessenger_vtbl entry 32: func_001A3E30 (publish the presence)
+    // cFEStateNetMessenger_vtbl entry 32: cFEStateNetMessenger_publishPresence (publish the presence)
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
     vt[32].fn(vthis(self, vt[32]));
     return 1;
@@ -5096,7 +5096,7 @@ void* func_001E12D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E12F0);
+INCLUDE_ASM("fe/fepopupmisc", initMessageGroups);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 #include "ui/uitext.h"
@@ -5127,14 +5127,14 @@ struct sRun_12F0 {
  * Each 0x14-byte group gets its message count (+0x8): 0 for group 0, 6 for groups 1-6, 11, 17, 7, 6 and 8 for groups
  * 7-11, 3 for groups 12-21, 4 for groups 22-27, 16 for groups 28-33, 2 for groups 34-39, 0 for groups 40-51 and 1 for
  * groups 52-60 (256 messages in all). Group 0 starts at message 0 and every later group's first message (+0x4) is the
- * previous group's start plus its count. func_001E1458 runs it once.
+ * previous group's start plus its count. updateTimedMessages runs it once.
  */
 // FAKEMATCH: statement order (each run of equal counts is written with its first entry last, and the
 // zero and one entries of the tail interleaved, so sched1 reproduces retail's store order) plus five
 // FM_OPAQUE(n) after n = 1 (delays the ones by five cycles so d[52] issues after d[46]); plain form 99.82%
 // (natural index order: 99.02%).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void func_001E12F0(void)
+extern "C" void initMessageGroups(void)
 {
     sCount_12F0* groupTable = (sCount_12F0*)D_00441630;
     int i;
@@ -5237,31 +5237,31 @@ extern "C" void func_001E1450(void) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E1458);
+INCLUDE_ASM("fe/fepopupmisc", updateTimedMessages);
 #ifdef SKIP_ASM
 extern int D_004A20C0;
 extern int D_004A20C8;
 extern int D_004A20BC;
-extern "C" void func_001E12F0(void);
-extern "C" void func_001E14C0(int type);
+extern "C" void initMessageGroups(void);
+extern "C" void runTimedMessageHooks(int type);
 
 /**
  * Runs the message system's periodic check (called every frame by cGame_update).
  *
  * Skipped while the message center is open (D_004A20C0 set). The first call fills in the message-group table
- * (func_001E12F0, guarded by D_004A20C8). Whenever the app manager's counter at +0x1C has moved more than 600 past
- * D_004A20BC, calls func_001E14C0(1) and stores the counter in D_004A20BC.
+ * (initMessageGroups, guarded by D_004A20C8). Whenever the app manager's counter at +0x1C has moved more than 600 past
+ * D_004A20BC, calls runTimedMessageHooks(1) and stores the counter in D_004A20BC.
  */
-extern "C" void func_001E1458(void)
+extern "C" void updateTimedMessages(void)
 {
     if (D_004A20C0 == 0) {
         if (D_004A20C8 == 0) {
             D_004A20C8 = 1;
-            func_001E12F0();
+            initMessageGroups();
         }
         int appTicks = cAppMan_TheAppMan->Tick;
         if (appTicks - D_004A20BC > 600) {
-            func_001E14C0(1);
+            runTimedMessageHooks(1);
             D_004A20BC = appTicks;
         }
     }
@@ -5269,10 +5269,10 @@ extern "C" void func_001E1458(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E14C0);
+INCLUDE_ASM("fe/fepopupmisc", runTimedMessageHooks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(int group);
+extern "C" bool isMessageFlagSet(int group);
 void func_001E1548(int group) __asm__("func_001E1548__FPv");
 
 struct sEntry14_14C0 {
@@ -5284,17 +5284,17 @@ extern sEntry14_14C0 D_00441630_14C0[] __asm__("D_00441630");
 /**
  * Runs the timed-delivery hook for every message group of a given type that has not been flagged yet.
  *
- * Calls func_001E1548 with the group index for each of the 61 groups whose message flag is clear (func_001E3A30) and
+ * Calls func_001E1548 with the group index for each of the 61 groups whose message flag is clear (isMessageFlagSet) and
  * whose type (+0x0 of D_00441630) is @p type or 5. func_001E1548 is empty, so this has no effect (and no group has type
  * 5).
  *
- * @param type  the group type to deliver (func_001E1458 passes 1)
+ * @param type  the group type to deliver (updateTimedMessages passes 1)
  */
-extern "C" void func_001E14C0(int type)
+extern "C" void runTimedMessageHooks(int type)
 {
     int i;
     for (i = 0; i < 61; i++) {
-        if (func_001E3A30(i) == 0) {
+        if (isMessageFlagSet(i) == 0) {
             int groupType = D_00441630_14C0[i].type;
             if (groupType == type || groupType == 5) {
                 func_001E1548(i);
@@ -5308,7 +5308,7 @@ extern "C" void func_001E14C0(int type)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1548__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the per-group hook func_001E14C0 calls.
+ * Does nothing: the per-group hook runTimedMessageHooks calls.
  *
  * @param group  the message group index (the symbol's mangling says void*)
  */
@@ -5318,16 +5318,16 @@ void func_001E1548(int group)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1550);
+INCLUDE_ASM("fe/fepopupmisc", queueRivalChallengeMessages);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E2FE0(int a, unsigned char b);
-extern "C" void func_001E3A78(int a, int b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void queueMessage(int a, unsigned char b);
+extern "C" void setMessageFlag(int a, int b);
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int a, int ch, int b, int c);
 extern "C" int cBENewPlayerInterface_hasPlayedEvent(void* iface, int a, int b, int c);
 unsigned int BXrand();
@@ -5339,70 +5339,70 @@ unsigned int BXrand();
  * Skipped during replay playback (the replay's first word 1-9). For the first of groups 1, 2, 3 whose message flag is
  * clear (peak k = 0, 1, 2; later groups are not tried in the same call): when cBENewPlayerInterface_isRivalEventLocked(player interface, 0,
  * character, k, 1) and cBENewPlayerInterface_hasPlayedEvent(player interface, 0, 14 + k, 4) both return 0, sets the group's flag
- * (func_001E3A78) and queues a random one of the group's first three messages (func_001E2FE0), or of its last three
+ * (setMessageFlag) and queues a random one of the group's first three messages (queueMessage), or of its last three
  * when the human rider's character is 3, 7 or 8 respectively. Groups 4, 5, 6 are handled the same way, independently,
  * with cBENewPlayerInterface_isRivalEventLocked(..., k, 0) and event 5. cBEScoreInterface_processRiderRanking (race result) calls it except in modes 4 and 5.
  */
-extern "C" void func_001E1550(void)
+extern "C" void queueRivalChallengeMessages(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
-        if (func_001E3A30(1) == 0) {
+        if (isMessageFlagSet(1) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 4) == 0) {
-                func_001E3A78(1, 1);
+                setMessageFlag(1, 1);
                 if (ch != 3) {
-                    func_001E2FE0(BXrand() % 3, 0);
+                    queueMessage(BXrand() % 3, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 3, 0);
+                    queueMessage(BXrand() % 3 + 3, 0);
                 }
             }
-        } else if (func_001E3A30(2) == 0) {
+        } else if (isMessageFlagSet(2) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 4) == 0) {
-                func_001E3A78(2, 1);
+                setMessageFlag(2, 1);
                 if (ch != 7) {
-                    func_001E2FE0(BXrand() % 3 + 6, 0);
+                    queueMessage(BXrand() % 3 + 6, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 9, 0);
+                    queueMessage(BXrand() % 3 + 9, 0);
                 }
             }
-        } else if (func_001E3A30(3) == 0) {
+        } else if (isMessageFlagSet(3) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 4) == 0) {
-                func_001E3A78(3, 1);
+                setMessageFlag(3, 1);
                 if (ch != 8) {
-                    func_001E2FE0(BXrand() % 3 + 0xC, 0);
+                    queueMessage(BXrand() % 3 + 0xC, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 0xF, 0);
+                    queueMessage(BXrand() % 3 + 0xF, 0);
                 }
             }
         }
-        if (func_001E3A30(4) == 0) {
+        if (isMessageFlagSet(4) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 5) == 0) {
-                func_001E3A78(4, 1);
+                setMessageFlag(4, 1);
                 if (ch != 3) {
-                    func_001E2FE0(BXrand() % 3 + 18, 0);
+                    queueMessage(BXrand() % 3 + 18, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 21, 0);
+                    queueMessage(BXrand() % 3 + 21, 0);
                 }
             }
-        } else if (func_001E3A30(5) == 0) {
+        } else if (isMessageFlagSet(5) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 5) == 0) {
-                func_001E3A78(5, 1);
+                setMessageFlag(5, 1);
                 if (ch != 7) {
-                    func_001E2FE0(BXrand() % 3 + 0x18, 0);
+                    queueMessage(BXrand() % 3 + 0x18, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 27, 0);
+                    queueMessage(BXrand() % 3 + 27, 0);
                 }
             }
-        } else if (func_001E3A30(6) == 0) {
+        } else if (isMessageFlagSet(6) == 0) {
             if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 5) == 0) {
-                func_001E3A78(6, 1);
+                setMessageFlag(6, 1);
                 if (ch != 8) {
-                    func_001E2FE0(BXrand() % 3 + 0x1E, 0);
+                    queueMessage(BXrand() % 3 + 0x1E, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 33, 0);
+                    queueMessage(BXrand() % 3 + 33, 0);
                 }
             }
         }
@@ -5411,7 +5411,7 @@ extern "C" void func_001E1550(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
+INCLUDE_ASM("fe/fepopupmisc", isSameCharacterId);
 #ifdef SKIP_ASM
 /**
  * Reports whether @p x is a character id (0-9) equal to @p y.
@@ -5421,7 +5421,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
  * @return true on a match, else false
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" bool func_001E1A30(int x, int y)
+extern "C" bool isSameCharacterId(int x, int y)
 {
     switch (x) {
     case 0: return y == 0;
@@ -5440,14 +5440,14 @@ extern "C" bool func_001E1A30(int x, int y)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E1AD0);
+INCLUDE_ASM("fe/fepopupmisc", pickForeshadowMessage);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
 unsigned int BXrand();
-extern "C" bool func_001E1A30(int kind, int arg);
-extern "C" int func_001E3388(int id);
+extern "C" bool isSameCharacterId(int kind, int arg);
+extern "C" int findMessage(int id);
 extern char str_AddForeshadowMessage[];
 
 struct sPopupEntry18_1AD0 {
@@ -5470,21 +5470,21 @@ struct sRangeK1E1AD0 {
  * Picks a random message from a message group that is not about a given character and not already queued.
  *
  * Allocates a list (operator new, tag "AddForeshadowMessage"), collects the group's message indices i (from its first
- * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p skipCharId (func_001E1A30) and that are not
- * in the message list (func_001E3388 returns -1), returns one of them at random (BXrand) and frees the list. Likely
+ * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p skipCharId (isSameCharacterId) and that are not
+ * in the message list (findMessage returns -1), returns one of them at random (BXrand) and frees the list. Likely
  * bug: when nothing qualifies it returns 0x100 without freeing the list.
  *
  * @param messageGroup    the message group (a D_00441630 entry: +0x4 first message, +0x8 count)
  * @param skipCharId  the character whose messages are skipped
  * @return a message index, or 0x100 when none qualifies
  */
-extern "C" int func_001E1AD0(sRangeK1E1AD0* messageGroup, int skipCharId)
+extern "C" int pickForeshadowMessage(sRangeK1E1AD0* messageGroup, int skipCharId)
 {
     int* list = (int*)operator_new_tag(messageGroup->count * 4, str_AddForeshadowMessage, 0x100, 0);
     int n = 0;
     int i;
     for (i = messageGroup->start; i < messageGroup->count + messageGroup->start; i++) {
-        if (func_001E1A30(D_004C6C08_1AD0[i].fC, skipCharId) == 0 && func_001E3388(i) == -1) {
+        if (isSameCharacterId(D_004C6C08_1AD0[i].fC, skipCharId) == 0 && findMessage(i) == -1) {
             list[n++] = i;
         }
     }
@@ -5498,15 +5498,15 @@ extern "C" int func_001E1AD0(sRangeK1E1AD0* messageGroup, int skipCharId)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1C10);
+INCLUDE_ASM("fe/fepopupmisc", queueForeshadowMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void queueMessage(int a, unsigned char b);
 
 struct sEntry14_1C10 {
     int type;
@@ -5522,13 +5522,13 @@ extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
  *
  * Skipped during replay playback and when either of the peak's two foreshadow groups (28/29, 30/31, 32/33) has its
  * message flag set. Uses the pair's second group when the human rider's character is 3, 7 or 8 (for peaks 0, 1, 2),
- * else the first, picks a message from it that is not about the human rider's character (func_001E1AD0) and queues it
- * (func_001E2FE0) unless none was found. Sets no flag itself (func_001E2370 does). Called by the reward interface after
+ * else the first, picks a message from it that is not about the human rider's character (pickForeshadowMessage) and queues it
+ * (queueMessage) unless none was found. Sets no flag itself (flagForeshadowGroups does). Called by the reward interface after
  * a peak event.
  *
  * @param which  the peak (0-2)
  */
-extern "C" void func_001E1C10(int which)
+extern "C" void queueForeshadowMessage(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
@@ -5538,10 +5538,10 @@ extern "C" void func_001E1C10(int which)
         int id;
         switch (which) {
         case 0: {
-            if (func_001E3A30(28) != 0) {
+            if (isMessageFlagSet(28) != 0) {
                 break;
             }
-            if (func_001E3A30(29) != 0) {
+            if (isMessageFlagSet(29) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5552,17 +5552,17 @@ extern "C" void func_001E1C10(int which)
                 sEntry14_1C10* tbl = D_00441630_1C10;
                 foreshadowGroup = &tbl[29];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
+            id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
-                func_001E2FE0(id, 0);
+                queueMessage(id, 0);
             }
             break;
         }
         case 1: {
-            if (func_001E3A30(30) != 0) {
+            if (isMessageFlagSet(30) != 0) {
                 break;
             }
-            if (func_001E3A30(31) != 0) {
+            if (isMessageFlagSet(31) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5573,17 +5573,17 @@ extern "C" void func_001E1C10(int which)
                 sEntry14_1C10* tbl = D_00441630_1C10;
                 foreshadowGroup = &tbl[0x1F];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
+            id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
-                func_001E2FE0(id, 0);
+                queueMessage(id, 0);
             }
             break;
         }
         case 2: {
-            if (func_001E3A30(32) != 0) {
+            if (isMessageFlagSet(32) != 0) {
                 break;
             }
-            if (func_001E3A30(33) != 0) {
+            if (isMessageFlagSet(33) != 0) {
                 break;
             }
             sEntry14_1C10* foreshadowGroup;
@@ -5594,9 +5594,9 @@ extern "C" void func_001E1C10(int which)
                 sEntry14_1C10* tbl = D_00441630_1C10;
                 foreshadowGroup = &tbl[33];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
+            id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
-                func_001E2FE0(id, 0);
+                queueMessage(id, 0);
             }
             break;
         }
@@ -5606,11 +5606,11 @@ extern "C" void func_001E1C10(int which)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1DD0);
+INCLUDE_ASM("fe/fepopupmisc", setChallengeMessagePending);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int id, int a1);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int id, int a1);
 static inline int IsBusy001E1DD0()
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -5620,106 +5620,106 @@ static inline int IsBusy001E1DD0()
  * Flags the follow-up message for an event mode 6-11 unless the player already has it.
  *
  * Skipped during replay playback. Mode 6, 7, 8, 9, 10, 11 maps to group 34, 36, 38, 35, 37, 39; when that group's
- * message flag is clear, sets pending flag 40, 44, 48, 42, 46 or 50 (one higher when @p alt is set) with func_001E3A78.
- * func_001E1EB8 later turns the pending flags into messages. The first argument is not used (the reward interface
+ * message flag is clear, sets pending flag 40, 44, 48, 42, 46 or 50 (one higher when @p alt is set) with setMessageFlag.
+ * sendPendingChallengeMessages later turns the pending flags into messages. The first argument is not used (the reward interface
  * passes the peak).
  *
  * @param kind  the event mode (6-11; others do nothing)
  * @param alt   nonzero to set the pending flag one above (the reward interface passes 1 for medal 2, 0 for medal 3)
  */
-extern "C" void func_001E1DD0(void* self, int kind, int alt)
+extern "C" void setChallengeMessagePending(void* self, int kind, int alt)
 {
     if (IsBusy001E1DD0()) return;
     int id = 0;
     switch (kind) {
-    case 6: id = func_001E3A30(34) == 0 ? 40 : 0; break;
-    case 7: id = func_001E3A30(36) == 0 ? 44 : 0; break;
-    case 8: id = func_001E3A30(38) == 0 ? 0x30 : 0; break;
-    case 9: id = func_001E3A30(35) == 0 ? 42 : 0; break;
-    case 10: id = func_001E3A30(37) == 0 ? 46 : 0; break;
-    case 11: id = func_001E3A30(39) == 0 ? 50 : 0; break;
+    case 6: id = isMessageFlagSet(34) == 0 ? 40 : 0; break;
+    case 7: id = isMessageFlagSet(36) == 0 ? 44 : 0; break;
+    case 8: id = isMessageFlagSet(38) == 0 ? 0x30 : 0; break;
+    case 9: id = isMessageFlagSet(35) == 0 ? 42 : 0; break;
+    case 10: id = isMessageFlagSet(37) == 0 ? 46 : 0; break;
+    case 11: id = isMessageFlagSet(39) == 0 ? 50 : 0; break;
     }
     if (id != 0) {
         if (alt != 0) id++;
-        func_001E3A78(id, 1);
+        setMessageFlag(id, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1EB8);
+INCLUDE_ASM("fe/fepopupmisc", sendPendingChallengeMessages);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E20D0(int which, int flag);
-extern "C" void func_001E2220(int which, int flag);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queuePointsChallengeMessage(int which, int flag);
+extern "C" void queueTimeChallengeMessage(int which, int flag);
 
 /**
- * Queues the follow-up messages flagged by func_001E1DD0 and clears their pending flags.
+ * Queues the follow-up messages flagged by setChallengeMessagePending and clears their pending flags.
  *
- * Skipped during replay playback. For peaks 0-2, pending flag 40/44/48 calls func_001E2220(peak, 0) and 41/45/49 calls
- * func_001E2220(peak, 1); pending flag 42/46/50 calls func_001E20D0(peak, 0) and 43/47/51 func_001E20D0(peak, 1). Each
- * handled flag is cleared (func_001E3A78(flag, 0)); the second of a pair is only checked when the first is clear.
+ * Skipped during replay playback. For peaks 0-2, pending flag 40/44/48 calls queueTimeChallengeMessage(peak, 0) and 41/45/49 calls
+ * queueTimeChallengeMessage(peak, 1); pending flag 42/46/50 calls queuePointsChallengeMessage(peak, 0) and 43/47/51 queuePointsChallengeMessage(peak, 1). Each
+ * handled flag is cleared (setMessageFlag(flag, 0)); the second of a pair is only checked when the first is clear.
  * cBEScoreInterface_processRiderRanking (race result) calls it.
  */
-extern "C" void func_001E1EB8(void)
+extern "C" void sendPendingChallengeMessages(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
-        if (func_001E3A30(40) != 0) {
-            func_001E2220(0, 0);
-            func_001E3A78(40, 0);
-        } else if (func_001E3A30(41) != 0) {
-            func_001E2220(0, 1);
-            func_001E3A78(41, 0);
+        if (isMessageFlagSet(40) != 0) {
+            queueTimeChallengeMessage(0, 0);
+            setMessageFlag(40, 0);
+        } else if (isMessageFlagSet(41) != 0) {
+            queueTimeChallengeMessage(0, 1);
+            setMessageFlag(41, 0);
         }
-        if (func_001E3A30(44) != 0) {
-            func_001E2220(1, 0);
-            func_001E3A78(44, 0);
-        } else if (func_001E3A30(45) != 0) {
-            func_001E2220(1, 1);
-            func_001E3A78(45, 0);
+        if (isMessageFlagSet(44) != 0) {
+            queueTimeChallengeMessage(1, 0);
+            setMessageFlag(44, 0);
+        } else if (isMessageFlagSet(45) != 0) {
+            queueTimeChallengeMessage(1, 1);
+            setMessageFlag(45, 0);
         }
-        if (func_001E3A30(48) != 0) {
-            func_001E2220(2, 0);
-            func_001E3A78(0x30, 0);
-        } else if (func_001E3A30(49) != 0) {
-            func_001E2220(2, 1);
-            func_001E3A78(49, 0);
+        if (isMessageFlagSet(48) != 0) {
+            queueTimeChallengeMessage(2, 0);
+            setMessageFlag(0x30, 0);
+        } else if (isMessageFlagSet(49) != 0) {
+            queueTimeChallengeMessage(2, 1);
+            setMessageFlag(49, 0);
         }
-        if (func_001E3A30(42) != 0) {
-            func_001E20D0(0, 0);
-            func_001E3A78(42, 0);
-        } else if (func_001E3A30(43) != 0) {
-            func_001E20D0(0, 1);
-            func_001E3A78(43, 0);
+        if (isMessageFlagSet(42) != 0) {
+            queuePointsChallengeMessage(0, 0);
+            setMessageFlag(42, 0);
+        } else if (isMessageFlagSet(43) != 0) {
+            queuePointsChallengeMessage(0, 1);
+            setMessageFlag(43, 0);
         }
-        if (func_001E3A30(46) != 0) {
-            func_001E20D0(1, 0);
-            func_001E3A78(46, 0);
-        } else if (func_001E3A30(47) != 0) {
-            func_001E20D0(1, 1);
-            func_001E3A78(47, 0);
+        if (isMessageFlagSet(46) != 0) {
+            queuePointsChallengeMessage(1, 0);
+            setMessageFlag(46, 0);
+        } else if (isMessageFlagSet(47) != 0) {
+            queuePointsChallengeMessage(1, 1);
+            setMessageFlag(47, 0);
         }
-        if (func_001E3A30(50) != 0) {
-            func_001E20D0(2, 0);
-            func_001E3A78(50, 0);
-        } else if (func_001E3A30(51) != 0) {
-            func_001E20D0(2, 1);
-            func_001E3A78(51, 0);
+        if (isMessageFlagSet(50) != 0) {
+            queuePointsChallengeMessage(2, 0);
+            setMessageFlag(50, 0);
+        } else if (isMessageFlagSet(51) != 0) {
+            queuePointsChallengeMessage(2, 1);
+            setMessageFlag(51, 0);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E20D0);
+INCLUDE_ASM("fe/fepopupmisc", queuePointsChallengeMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 struct sEntry14_20D0 {   // a D_00441630 message group (names ours)
     int type;
@@ -5737,42 +5737,42 @@ extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
  * @param which  the peak (0-2; others do nothing)
  * @param flag   nonzero to send the second message and flag the group
  */
-extern "C" void func_001E20D0(int which, int flag)
+extern "C" void queuePointsChallengeMessage(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30(35) == 0) {
+            if (isMessageFlagSet(35) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(35, 1);
-                    func_001E2FE0(tbl[35].start + 1, 0);
+                    setMessageFlag(35, 1);
+                    queueMessage(tbl[35].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[35].start, 0);
+                    queueMessage(tbl[35].start, 0);
                 }
             }
             break;
         case 1:
-            if (func_001E3A30(37) == 0) {
+            if (isMessageFlagSet(37) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(37, 1);
-                    func_001E2FE0(tbl[37].start + 1, 0);
+                    setMessageFlag(37, 1);
+                    queueMessage(tbl[37].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[37].start, 0);
+                    queueMessage(tbl[37].start, 0);
                 }
             }
             break;
         case 2:
-            if (func_001E3A30(39) == 0) {
+            if (isMessageFlagSet(39) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(39, 1);
-                    func_001E2FE0(tbl[39].start + 1, 0);
+                    setMessageFlag(39, 1);
+                    queueMessage(tbl[39].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[39].start, 0);
+                    queueMessage(tbl[39].start, 0);
                 }
             }
             break;
@@ -5782,12 +5782,12 @@ extern "C" void func_001E20D0(int which, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2220);
+INCLUDE_ASM("fe/fepopupmisc", queueTimeChallengeMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 struct sEntry14_2220 {   // a D_00441630 message group (names ours)
     int type;
@@ -5805,42 +5805,42 @@ extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
  * @param which  the peak (0-2; others do nothing)
  * @param flag   nonzero to send the second message and flag the group
  */
-extern "C" void func_001E2220(int which, int flag)
+extern "C" void queueTimeChallengeMessage(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30(34) == 0) {
+            if (isMessageFlagSet(34) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(34, 1);
-                    func_001E2FE0(tbl[34].start + 1, 0);
+                    setMessageFlag(34, 1);
+                    queueMessage(tbl[34].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[34].start, 0);
+                    queueMessage(tbl[34].start, 0);
                 }
             }
             break;
         case 1:
-            if (func_001E3A30(36) == 0) {
+            if (isMessageFlagSet(36) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(36, 1);
-                    func_001E2FE0(tbl[36].start + 1, 0);
+                    setMessageFlag(36, 1);
+                    queueMessage(tbl[36].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[36].start, 0);
+                    queueMessage(tbl[36].start, 0);
                 }
             }
             break;
         case 2:
-            if (func_001E3A30(38) == 0) {
+            if (isMessageFlagSet(38) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(38, 1);
-                    func_001E2FE0(tbl[38].start + 1, 0);
+                    setMessageFlag(38, 1);
+                    queueMessage(tbl[38].start + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[38].start, 0);
+                    queueMessage(tbl[38].start, 0);
                 }
             }
             break;
@@ -5850,34 +5850,34 @@ extern "C" void func_001E2220(int which, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2370);
+INCLUDE_ASM("fe/fepopupmisc", flagForeshadowGroups);
 #ifdef SKIP_ASM
-extern "C" void func_001E3A78(int a, int b);
+extern "C" void setMessageFlag(int a, int b);
 
 /**
- * Sets the message flags of both foreshadow groups of a peak (28/29, 30/31 or 32/33), so func_001E1C10 sends no more.
+ * Sets the message flags of both foreshadow groups of a peak (28/29, 30/31 or 32/33), so queueForeshadowMessage sends no more.
  *
  * Skipped during replay playback. The reward interface calls it once a peak's events are all won.
  *
  * @param which  the peak (0-2; others do nothing)
  */
-extern "C" void func_001E2370(int which)
+extern "C" void flagForeshadowGroups(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
         case 0:
-            func_001E3A78(0x1C, 1);
-            func_001E3A78(29, 1);
+            setMessageFlag(0x1C, 1);
+            setMessageFlag(29, 1);
             break;
         case 1:
-            func_001E3A78(0x1E, 1);
-            func_001E3A78(0x1F, 1);
+            setMessageFlag(0x1E, 1);
+            setMessageFlag(0x1F, 1);
             break;
         case 2:
-            func_001E3A78(0x20, 1);
-            func_001E3A78(33, 1);
+            setMessageFlag(0x20, 1);
+            setMessageFlag(33, 1);
             break;
         }
     }
@@ -5885,11 +5885,11 @@ extern "C" void func_001E2370(int which)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2428);
+INCLUDE_ASM("fe/fepopupmisc", queuePeakCompletedMessage);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 /**
  * Queues the peak-award message for peak @p which once: message 252, 253 or 254, guarded by flag 57, 58 or 59.
@@ -5899,28 +5899,28 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
  *
  * @param which  the peak (0-2; others do nothing)
  */
-extern "C" void func_001E2428(int which)
+extern "C" void queuePeakCompletedMessage(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30(57) == 0) {
-                func_001E3A78(57, 1);
-                func_001E2FE0(0xFC, 0);
+            if (isMessageFlagSet(57) == 0) {
+                setMessageFlag(57, 1);
+                queueMessage(0xFC, 0);
             }
             break;
         case 1:
-            if (func_001E3A30(58) == 0) {
-                func_001E3A78(57, 1);
-                func_001E2FE0(253, 0);
+            if (isMessageFlagSet(58) == 0) {
+                setMessageFlag(57, 1);
+                queueMessage(253, 0);
             }
             break;
         case 2:
-            if (func_001E3A30(59) == 0) {
-                func_001E3A78(59, 1);
-                func_001E2FE0(0xFE, 0);
+            if (isMessageFlagSet(59) == 0) {
+                setMessageFlag(59, 1);
+                queueMessage(0xFE, 0);
             }
             break;
         }
@@ -5929,59 +5929,59 @@ extern "C" void func_001E2428(int which)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2518);
+INCLUDE_ASM("fe/fepopupmisc", queueMountainCompletedMessage);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 /**
  * Queues message 255 once (guarded by message flag 60).
  *
  * Skipped during replay playback. cBERewardInterface_awardUser calls it for award category 1.
  */
-extern "C" void func_001E2518(void)
+extern "C" void queueMountainCompletedMessage(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
-    if (busy == 0 && func_001E3A30(60) == 0) {
-        func_001E3A78(0x3C, 1);
-        func_001E2FE0(0xFF, 0);
+    if (busy == 0 && isMessageFlagSet(60) == 0) {
+        setMessageFlag(0x3C, 1);
+        queueMessage(0xFF, 0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2578);
+INCLUDE_ASM("fe/fepopupmisc", queueMountainConqueredMessage);
 #ifdef SKIP_ASM
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 /**
  * Queues message 251 once (guarded by message flag 56).
  *
  * Skipped during replay playback. cBERewardInterface_awardUser calls it for award category 0.
  */
-extern "C" void func_001E2578(void)
+extern "C" void queueMountainConqueredMessage(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
-    if (busy == 0 && func_001E3A30(56) == 0) {
-        func_001E3A78(0x38, 1);
-        func_001E2FE0(251, 0);
+    if (busy == 0 && isMessageFlagSet(56) == 0) {
+        setMessageFlag(0x38, 1);
+        queueMessage(251, 0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E25D8);
+INCLUDE_ASM("fe/fepopupmisc", queueRivalResultMessage);
 #ifdef SKIP_ASM
-extern "C" void func_001E2648(void* a, int b);
-extern "C" void func_001E2828(void* a, int b);
+extern "C" void queueRivalTimeResultMessage(void* a, int b);
+extern "C" void queueRivalPointsResultMessage(void* a, int b);
 
 /**
- * Passes a back-country race result to the message system: mode 4 to func_001E2648, mode 5 to func_001E2828.
+ * Passes a back-country race result to the message system: mode 4 to queueRivalTimeResultMessage, mode 5 to queueRivalPointsResultMessage.
  *
  * Skipped during replay playback; other modes do nothing. cBEScoreInterface_processRiderRanking (race result) calls it with the game mode, the
  * event's location id and the result.
@@ -5990,17 +5990,17 @@ extern "C" void func_001E2828(void* a, int b);
  * @param locationId   the event's location id (declared void*)
  * @param raceResult   the race result (0 = won)
  */
-extern "C" void func_001E25D8(int key, void* locationId, int raceResult)
+extern "C" void queueRivalResultMessage(int key, void* locationId, int raceResult)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (key) {
         case 4:
-            func_001E2648(locationId, raceResult);
+            queueRivalTimeResultMessage(locationId, raceResult);
             break;
         case 5:
-            func_001E2828(locationId, raceResult);
+            queueRivalPointsResultMessage(locationId, raceResult);
             break;
         }
     }
@@ -6008,31 +6008,31 @@ extern "C" void func_001E25D8(int key, void* locationId, int raceResult)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2648);
+INCLUDE_ASM("fe/fepopupmisc", queueRivalTimeResultMessage);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
-extern "C" void func_001E32C8(int type);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
+extern "C" void removeGroupMessages(int type);
 
-// PORT: the unit declares func_001E2648(void*, int); the first arg is really an int id.
-extern "C" void func_001E2648_impl(int which, int flag) __asm__("func_001E2648");
+// PORT: the unit declares queueRivalTimeResultMessage(void*, int); the first arg is really an int id.
+extern "C" void queueRivalTimeResultMessage_impl(int which, int flag) __asm__("queueRivalTimeResultMessage");
 /**
  * Queues the result message of a mode-4 back-country event at location 14, 15 or 16 (peak 0, 1, 2).
  *
  * Skipped during replay playback and when the location's group (22, 23, 24) is already flagged. First removes the
- * queued messages of groups 1/2/3 and 22/23/24 (func_001E32C8). On a win (@p flag 0) sets the group's flag and queues
+ * queued messages of groups 1/2/3 and 22/23/24 (removeGroupMessages). On a win (@p flag 0) sets the group's flag and queues
  * message 116, 120 or 124 (118, 122, 126 when the human rider's character is 3, 7 or 8 respectively); otherwise queues
  * 115, 119 or 123 (117, 121, 125) and leaves the flag clear.
  *
  * @param which  the location id (14-16; others do nothing)
  * @param flag   the race result (0 = won)
  */
-extern "C" void func_001E2648_impl(int which, int flag)
+extern "C" void queueRivalTimeResultMessage_impl(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
@@ -6041,65 +6041,65 @@ extern "C" void func_001E2648_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30(22) != 0) {
+            if (isMessageFlagSet(22) != 0) {
                 break;
             }
-            func_001E32C8(1);
-            func_001E32C8(22);
+            removeGroupMessages(1);
+            removeGroupMessages(22);
             if (flag == 0) {
-                func_001E3A78(22, 1);
+                setMessageFlag(22, 1);
                 if (ch != 3) {
-                    func_001E2FE0(116, 0);
+                    queueMessage(116, 0);
                 } else {
-                    func_001E2FE0(118, 0);
+                    queueMessage(118, 0);
                 }
             } else {
                 if (ch != 3) {
-                    func_001E2FE0(115, 0);
+                    queueMessage(115, 0);
                 } else {
-                    func_001E2FE0(117, 0);
+                    queueMessage(117, 0);
                 }
             }
             break;
         case 0xF:
-            if (func_001E3A30(23) != 0) {
+            if (isMessageFlagSet(23) != 0) {
                 break;
             }
-            func_001E32C8(2);
-            func_001E32C8(23);
+            removeGroupMessages(2);
+            removeGroupMessages(23);
             if (flag == 0) {
-                func_001E3A78(23, 1);
+                setMessageFlag(23, 1);
                 if (ch != 7) {
-                    func_001E2FE0(0x78, 0);
+                    queueMessage(0x78, 0);
                 } else {
-                    func_001E2FE0(122, 0);
+                    queueMessage(122, 0);
                 }
             } else {
                 if (ch != 7) {
-                    func_001E2FE0(119, 0);
+                    queueMessage(119, 0);
                 } else {
-                    func_001E2FE0(121, 0);
+                    queueMessage(121, 0);
                 }
             }
             break;
         case 0x10:
-            if (func_001E3A30(24) != 0) {
+            if (isMessageFlagSet(24) != 0) {
                 break;
             }
-            func_001E32C8(3);
-            func_001E32C8(0x18);
+            removeGroupMessages(3);
+            removeGroupMessages(0x18);
             if (flag == 0) {
-                func_001E3A78(0x18, 1);
+                setMessageFlag(0x18, 1);
                 if (ch != 8) {
-                    func_001E2FE0(0x7C, 0);
+                    queueMessage(0x7C, 0);
                 } else {
-                    func_001E2FE0(0x7E, 0);
+                    queueMessage(0x7E, 0);
                 }
             } else {
                 if (ch != 8) {
-                    func_001E2FE0(123, 0);
+                    queueMessage(123, 0);
                 } else {
-                    func_001E2FE0(125, 0);
+                    queueMessage(125, 0);
                 }
             }
             break;
@@ -6109,31 +6109,31 @@ extern "C" void func_001E2648_impl(int which, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2828);
+INCLUDE_ASM("fe/fepopupmisc", queueRivalPointsResultMessage);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
-extern "C" void func_001E32C8(int type);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
+extern "C" void removeGroupMessages(int type);
 
-// PORT: the unit declares func_001E2828(void*, int); the first arg is really an int id.
-extern "C" void func_001E2828_impl(int which, int flag) __asm__("func_001E2828");
+// PORT: the unit declares queueRivalPointsResultMessage(void*, int); the first arg is really an int id.
+extern "C" void queueRivalPointsResultMessage_impl(int which, int flag) __asm__("queueRivalPointsResultMessage");
 /**
  * Queues the result message of a mode-5 back-country event at location 14, 15 or 16 (peak 0, 1, 2).
  *
  * Skipped during replay playback and when the location's group (25, 26, 27) is already flagged. First removes the
- * queued messages of groups 4/5/6 and 25/26/27 (func_001E32C8). On a win (@p flag 0) sets the group's flag and queues
+ * queued messages of groups 4/5/6 and 25/26/27 (removeGroupMessages). On a win (@p flag 0) sets the group's flag and queues
  * message 128, 132 or 136 (130, 134, 138 when the human rider's character is 3, 7 or 8 respectively); otherwise queues
  * 127, 131 or 135 (129, 133, 137) and leaves the flag clear.
  *
  * @param which  the location id (14-16; others do nothing)
  * @param flag   the race result (0 = won)
  */
-extern "C" void func_001E2828_impl(int which, int flag)
+extern "C" void queueRivalPointsResultMessage_impl(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
@@ -6142,65 +6142,65 @@ extern "C" void func_001E2828_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30(25) != 0) {
+            if (isMessageFlagSet(25) != 0) {
                 break;
             }
-            func_001E32C8(4);
-            func_001E32C8(25);
+            removeGroupMessages(4);
+            removeGroupMessages(25);
             if (flag == 0) {
-                func_001E3A78(25, 1);
+                setMessageFlag(25, 1);
                 if (ch != 3) {
-                    func_001E2FE0(0x80, 0);
+                    queueMessage(0x80, 0);
                 } else {
-                    func_001E2FE0(130, 0);
+                    queueMessage(130, 0);
                 }
             } else {
                 if (ch != 3) {
-                    func_001E2FE0(0x7F, 0);
+                    queueMessage(0x7F, 0);
                 } else {
-                    func_001E2FE0(129, 0);
+                    queueMessage(129, 0);
                 }
             }
             break;
         case 0xF:
-            if (func_001E3A30(26) != 0) {
+            if (isMessageFlagSet(26) != 0) {
                 break;
             }
-            func_001E32C8(5);
-            func_001E32C8(26);
+            removeGroupMessages(5);
+            removeGroupMessages(26);
             if (flag == 0) {
-                func_001E3A78(26, 1);
+                setMessageFlag(26, 1);
                 if (ch != 7) {
-                    func_001E2FE0(132, 0);
+                    queueMessage(132, 0);
                 } else {
-                    func_001E2FE0(134, 0);
+                    queueMessage(134, 0);
                 }
             } else {
                 if (ch != 7) {
-                    func_001E2FE0(131, 0);
+                    queueMessage(131, 0);
                 } else {
-                    func_001E2FE0(133, 0);
+                    queueMessage(133, 0);
                 }
             }
             break;
         case 0x10:
-            if (func_001E3A30(27) != 0) {
+            if (isMessageFlagSet(27) != 0) {
                 break;
             }
-            func_001E32C8(6);
-            func_001E32C8(27);
+            removeGroupMessages(6);
+            removeGroupMessages(27);
             if (flag == 0) {
-                func_001E3A78(27, 1);
+                setMessageFlag(27, 1);
                 if (ch != 8) {
-                    func_001E2FE0(136, 0);
+                    queueMessage(136, 0);
                 } else {
-                    func_001E2FE0(138, 0);
+                    queueMessage(138, 0);
                 }
             } else {
                 if (ch != 8) {
-                    func_001E2FE0(135, 0);
+                    queueMessage(135, 0);
                 } else {
-                    func_001E2FE0(137, 0);
+                    queueMessage(137, 0);
                 }
             }
             break;
@@ -6210,17 +6210,17 @@ extern "C" void func_001E2828_impl(int which, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
+INCLUDE_ASM("fe/fepopupmisc", queueAggressionMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
-extern "C" int func_001E2B38(int charID);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" int getAggressionGroup(int charID);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 unsigned int BXrand();
 
 struct sEntry14_2A08 {
@@ -6235,14 +6235,14 @@ extern sEntry14_2A08 D_00441630_2A08[] __asm__("D_00441630");
  * Queues an aggression message about another character when the human rider's grudge against it runs high.
  *
  * Skipped during replay playback and when @p charID is the human rider's own character. The character's group is
- * func_001E2B38(charID) (12-21). When the group is flagged, clears the flag once @p level falls below 5; otherwise,
+ * getAggressionGroup(charID) (12-21). When the group is flagged, clears the flag once @p level falls below 5; otherwise,
  * when @p level exceeds 15 plus a random 0-7, queues a random message of the group and sets the flag.
  * cBEAggressionInterface_applyAggression calls it for rider 0.
  *
  * @param charID  the other rider's character id
  * @param level   the aggression ticks toward that rider
  */
-extern "C" void func_001E2A08(int charID, int level)
+extern "C" void queueAggressionMessage(int charID, int level)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
@@ -6251,20 +6251,20 @@ extern "C" void func_001E2A08(int charID, int level)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0)) == charID)
         return;
-    int id = func_001E2B38(charID);
+    int id = getAggressionGroup(charID);
     sEntry14_2A08* aggressionGroup = &D_00441630_2A08[id];
-    if (func_001E3A30(id)) {
+    if (isMessageFlagSet(id)) {
         if (level < 5)
-            func_001E3A78(id, 0);
+            setMessageFlag(id, 0);
     } else if ((int)((BXrand() & 7) + 0xF) < level) {
-        func_001E2FE0(aggressionGroup->start + BXrand() % aggressionGroup->count, 0);
-        func_001E3A78(id, 1);
+        queueMessage(aggressionGroup->start + BXrand() % aggressionGroup->count, 0);
+        setMessageFlag(id, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2B38);
+INCLUDE_ASM("fe/fepopupmisc", getAggressionGroup);
 #ifdef SKIP_ASM
 /**
  * Returns the aggression message group of a character: 12 + @p x for characters 0-9, else 61.
@@ -6273,7 +6273,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2B38);
  * @return the message group index
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_001E2B38(int x)
+extern "C" int getAggressionGroup(int x)
 {
     switch (x) {
     case 0: return 0xC;
@@ -6294,10 +6294,10 @@ extern "C" int func_001E2B38(int x)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2BB8);
+INCLUDE_ASM("fe/fepopupmisc", countMessageRows);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(int group);
+extern "C" bool isMessageFlagSet(int group);
 
 struct sEntry14_2BB8 {   // a D_00441630 message group (names ours)
     int type;
@@ -6318,14 +6318,14 @@ extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
  * @param all   nonzero to count every message
  * @return the number of rows
  */
-extern "C" int func_001E2BB8(int type, int all)
+extern "C" int countMessageRows(int type, int all)
 {
     int total = 0;
     int i;
     for (i = 0; i < 61; i++) {
         sEntry14_2BB8* groupEntry = &D_00441630_2BB8[i];
         if (groupEntry->type == type) {
-            if (all != 0 || (groupEntry->isFolder != 0 && func_001E3A30(i) != 0)) {
+            if (all != 0 || (groupEntry->isFolder != 0 && isMessageFlagSet(i) != 0)) {
                 total += groupEntry->count;
             } else {
                 total += 1;
@@ -6337,7 +6337,7 @@ extern "C" int func_001E2BB8(int type, int all)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2C60);
+INCLUDE_ASM("fe/fepopupmisc", getMessageGroupCount);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sEntry14_2C60 {
@@ -6355,17 +6355,17 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  * @param i  the group index
  * @return its message count
  */
-extern "C" int func_001E2C60(int i)
+extern "C" int getMessageGroupCount(int i)
 {
     return D_00441630_2C60[i].count;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
+INCLUDE_ASM("fe/fepopupmisc", getMessageForRow);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001E3A30(int group);
+extern "C" bool isMessageFlagSet(int group);
 
 struct sEntry14_2C80 {   // a D_00441630 message group (names ours)
     int type;
@@ -6380,7 +6380,7 @@ extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
  * Returns the message shown in row @p idx of the rows built from the message groups of one type.
  *
  * Walks the groups of that type; each takes all its messages when @p mode is 0, when it is not a folder (+0x10 clear)
- * or when its flag is set, else one row (its first message). Note that func_001E2BB8 counts a non-folder group as one
+ * or when its flag is set, else one row (its first message). Note that countMessageRows counts a non-folder group as one
  * row in its non-full mode; the two agree for type 4, whose groups (7-11) are all folders.
  *
  * @param type  the group type (+0x0 of D_00441630)
@@ -6388,7 +6388,7 @@ extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
  * @param mode  0 to list every message
  * @return the message index, or -1 past the last row
  */
-extern "C" int func_001E2C80(int type, int idx, int mode)
+extern "C" int getMessageForRow(int type, int idx, int mode)
 {
     int base = 0;
     int result = -1;
@@ -6397,7 +6397,7 @@ extern "C" int func_001E2C80(int type, int idx, int mode)
         sEntry14_2C80* groupEntry = &D_00441630_2C80[i];
         if (groupEntry->type == type) {
             int n;
-            if (mode == 0 || groupEntry->isFolder == 0 || func_001E3A30(i) != 0) {
+            if (mode == 0 || groupEntry->isFolder == 0 || isMessageFlagSet(i) != 0) {
                 n = groupEntry->count;
             } else {
                 n = 1;
@@ -6416,7 +6416,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2D58);
+INCLUDE_ASM("fe/fepopupmisc", isMessageInCategory);
 #ifdef SKIP_ASM
 struct sPopupEntry18 {
     int field_0x0;
@@ -6429,7 +6429,7 @@ struct sPopupEntry14 {
     int type;
     int start;   // 0x4: the group's first message
     int count;   // 0x8: its message count
-    int category;   // 0xC: the category func_001E2D58 tests
+    int category;   // 0xC: the category isMessageInCategory tests
     int isFolder;   // 0x10
 };
 extern sPopupEntry14 D_00441630[];
@@ -6442,7 +6442,7 @@ extern sPopupEntry14 D_00441630[];
  * @param i  the message index
  * @return true when it does, else false
  */
-extern "C" bool func_001E2D58(int category, int i)
+extern "C" bool isMessageInCategory(int category, int i)
 {
     sPopupEntry18* messageEntry = &D_004C6C08[i];
     sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
@@ -6451,7 +6451,7 @@ extern "C" bool func_001E2D58(int category, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2D98);
+INCLUDE_ASM("fe/fepopupmisc", isMessageGroupInCategory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
@@ -6463,7 +6463,7 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  * @param i  the group index
  * @return true when it does, else false
  */
-extern "C" bool func_001E2D98(int category, int i)
+extern "C" bool isMessageGroupInCategory(int category, int i)
 {
     int* groupWords = (int*)&D_00441630_2C60[0] + i * 5;
     return groupWords[3] == category;
@@ -6471,7 +6471,7 @@ extern "C" bool func_001E2D98(int category, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
+INCLUDE_ASM("fe/fepopupmisc", getMessagePositionInCategory);
 #ifdef SKIP_ASM
 /**
  * Returns message @p idx's 0-based position among all messages of the same category.
@@ -6480,9 +6480,9 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
  * group holding @p idx, its offset within the group.
  *
  * @param idx  the message index
- * @return the position (the variant number func_001E5AA0 and func_001E4B80 derive the subject from)
+ * @return the position (the variant number cOVState_ViewPopup_getSubjectVariant and cOVState_MESSAGECENTER_getFAQSubjectVariant derive the subject from)
  */
-extern "C" int func_001E2DC0(int idx)
+extern "C" int getMessagePositionInCategory(int idx)
 {
     sPopupEntry18* ta = &D_004C6C08[idx];
     sPopupEntry14* target = &D_00441630[ta->groupIndex];
@@ -6506,7 +6506,7 @@ extern "C" int func_001E2DC0(int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2E80);
+INCLUDE_ASM("fe/fepopupmisc", getGroupMessageIndex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
@@ -6518,14 +6518,14 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  * @param n  the offset within the group
  * @return the message index
  */
-extern "C" int func_001E2E80(int i, int n)
+extern "C" int getGroupMessageIndex(int i, int n)
 {
     return D_00441630_2C60[i].start + n;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2EA0);
+INCLUDE_ASM("fe/fepopupmisc", getMessageSenderName);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
@@ -6552,7 +6552,7 @@ extern char str_kT_FAQFolder[];
  * @param kind  the sender (+0xC of the D_004C6C08 message)
  * @return GetHashValue32 of the name's string id, or 0 for other kinds
  */
-extern "C" int func_001E2EA0(int kind)
+extern "C" int getMessageSenderName(int kind)
 {
     switch ((unsigned int)kind) {
     case 0:
@@ -6587,12 +6587,12 @@ extern "C" int func_001E2EA0(int kind)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E2FE0);
+INCLUDE_ASM("fe/fepopupmisc", queueMessage);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_hud_b[];
-extern "C" void func_001E31B8(int idx);
-extern "C" unsigned char func_001E3100(int i);
+extern "C" void removeMessageAt(int idx);
+extern "C" unsigned char pickMessageVariant(int i);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 
 struct sPopupListEntry_2FE0 {
@@ -6605,8 +6605,8 @@ struct sPopupList_2FE0 {
     int mask;
     unsigned char count;
 };
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList_2FE0* func_001E39F8_list2FE0() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList_2FE0* getMessageList_list2FE0() __asm__("getMessageList");
 
 struct sPopupEntry18_2FE0 {   // a D_004C6C08 message (names ours)
     int field_0x0;
@@ -6620,21 +6620,21 @@ extern sPopupEntry18_2FE0 D_004C6C08_2FE0[] __asm__("D_004C6C08");
 /**
  * Adds a message to the human rider's message list as unread and notifies the HUD.
  *
- * The list (func_001E39F8) holds up to 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at
- * +0xCC. When it is full the oldest entry is dropped first (func_001E31B8(0)). A message whose D_004C6C08 kind (+0x8)
- * is 1 gets a random variant from func_001E3100 instead of @p flag. The new entry's read bit is cleared; then, when the
+ * The list (getMessageList) holds up to 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at
+ * +0xCC. When it is full the oldest entry is dropped first (removeMessageAt(0)). A message whose D_004C6C08 kind (+0x8)
+ * is 1 gets a random variant from pickMessageVariant instead of @p flag. The new entry's read bit is cleared; then, when the
  * game has a UI, the "hud_b" state found on its state stack gets handleEvent (vtable entry 24) with event 8.
  *
  * @param id    the message index (D_004C6C08)
  * @param flag  the variant byte stored with it
  */
-extern "C" void func_001E2FE0(int id, unsigned char flag)
+extern "C" void queueMessage(int id, unsigned char flag)
 {
-    sPopupList_2FE0* messageList = func_001E39F8_list2FE0();
+    sPopupList_2FE0* messageList = getMessageList_list2FE0();
     if (messageList->count == 25)
-        func_001E31B8(0);
+        removeMessageAt(0);
     if (D_004C6C08_2FE0[id].kind == 1)
-        flag = func_001E3100(id);
+        flag = pickMessageVariant(id);
     messageList->entries[messageList->count].id = id;
     messageList->entries[messageList->count].flag = flag;
     messageList->mask &= ~(1 << messageList->count);
@@ -6650,9 +6650,9 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E3100);
+INCLUDE_ASM("fe/fepopupmisc", pickMessageVariant);
 #ifdef SKIP_ASM
-extern "C" bool func_001E2D58(int v, int i);
+extern "C" bool isMessageInCategory(int v, int i);
 unsigned int BXrand();
 
 /**
@@ -6663,16 +6663,16 @@ unsigned int BXrand();
  * @param i  the message index
  * @return the variant, or 0xFF
  */
-extern "C" unsigned char func_001E3100(int i)
+extern "C" unsigned char pickMessageVariant(int i)
 {
     unsigned char pick = 0xFF;
-    if (func_001E2D58(3, i)) {
+    if (isMessageInCategory(3, i)) {
         pick = BXrand() % 10;
-    } else if (func_001E2D58(5, i)) {
+    } else if (isMessageInCategory(5, i)) {
         pick = BXrand() % 11;
-    } else if (func_001E2D58(8, i)) {
+    } else if (isMessageInCategory(8, i)) {
         pick = BXrand() % 4;
-    } else if (func_001E2D58(4, i)) {
+    } else if (isMessageInCategory(4, i)) {
         pick = BXrand() % 10;
     }
     return pick;
@@ -6680,7 +6680,7 @@ extern "C" unsigned char func_001E3100(int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E31B8);
+INCLUDE_ASM("fe/fepopupmisc", removeMessageAt);
 #ifdef SKIP_ASM
 struct sPopupListEntry_31B8 {
     int id;
@@ -6692,8 +6692,8 @@ struct sPopupList_31B8 {
     int mask;
     unsigned char count;
 };
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList_31B8* func_001E39F8_list31B8() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList_31B8* getMessageList_list31B8() __asm__("getMessageList");
 
 /**
  * Removes entry @p idx from the message list, moving later entries and their read bits down one place.
@@ -6702,9 +6702,9 @@ extern "C" sPopupList_31B8* func_001E39F8_list31B8() __asm__("func_001E39F8");
  *
  * @param idx  the list position to remove
  */
-extern "C" void func_001E31B8(int idx)
+extern "C" void removeMessageAt(int idx)
 {
-    sPopupList_31B8* msgList = func_001E39F8_list31B8();
+    sPopupList_31B8* msgList = getMessageList_list31B8();
     int i;
     for (i = idx; i < msgList->count - 1; i++) {
         msgList->entries[i] = msgList->entries[i + 1];
@@ -6720,7 +6720,7 @@ extern "C" void func_001E31B8(int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3268);
+INCLUDE_ASM("fe/fepopupmisc", removeMessage);
 #ifdef SKIP_ASM
 struct sPopupListEntry {
     int id;
@@ -6732,22 +6732,22 @@ struct sPopupList {
     int mask;
     unsigned char count;
 };
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
-extern "C" void func_001E31B8(int idx);
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList* getMessageList_list() __asm__("getMessageList");
+extern "C" void removeMessageAt(int idx);
 
 /**
  * Removes the first message-list entry holding message @p id, if any.
  *
  * @param id  the message index
  */
-extern "C" void func_001E3268(int id)
+extern "C" void removeMessage(int id)
 {
-    sPopupList* msgList = func_001E39F8_list();
+    sPopupList* msgList = getMessageList_list();
     int i;
     for (i = 0; i < msgList->count; i++) {
         if (id == msgList->entries[i].id) {
-            func_001E31B8(i);
+            removeMessageAt(i);
             break;
         }
     }
@@ -6755,7 +6755,7 @@ extern "C" void func_001E3268(int id)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E32C8);
+INCLUDE_ASM("fe/fepopupmisc", removeGroupMessages);
 #ifdef SKIP_ASM
 struct sPopupEntry18_32C8 {
     int field_0x0;
@@ -6773,9 +6773,9 @@ struct sPopupList_32C8 {
     int mask;
     unsigned char count;
 };
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList_32C8* func_001E39F8_list32C8() __asm__("func_001E39F8");
-extern "C" void func_001E31B8(int idx);
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList_32C8* getMessageList_list32C8() __asm__("getMessageList");
+extern "C" void removeMessageAt(int idx);
 
 /**
  * Removes every queued message that belongs to message group @p type.
@@ -6785,15 +6785,15 @@ extern "C" void func_001E31B8(int idx);
  *
  * @param type  the message group (D_00441630 index) whose messages are removed
  */
-extern "C" void func_001E32C8(int type)
+extern "C" void removeGroupMessages(int type)
 {
     int n = 0;
     int j = 0;
-    sPopupList_32C8* messageList = func_001E39F8_list32C8();
+    sPopupList_32C8* messageList = getMessageList_list32C8();
     for (; n < messageList->count; n++) {
         sPopupEntry18_32C8* messageEntry = &D_004C6C08_32C8[messageList->entries[j].id];
         if (type == messageEntry->groupIndex) {
-            func_001E31B8(j);
+            removeMessageAt(j);
         } else {
             j++;
         }
@@ -6802,10 +6802,10 @@ extern "C" void func_001E32C8(int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3388);
+INCLUDE_ASM("fe/fepopupmisc", findMessage);
 #ifdef SKIP_ASM
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList* getMessageList_list() __asm__("getMessageList");
 
 /**
  * Returns the message-list position of message @p id.
@@ -6813,9 +6813,9 @@ extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
  * @param id  the message index
  * @return its position, or -1 when it is not queued
  */
-extern "C" int func_001E3388(int id)
+extern "C" int findMessage(int id)
 {
-    sPopupList* msgList = func_001E39F8_list();
+    sPopupList* msgList = getMessageList_list();
     int i;
     for (i = 0; i < msgList->count; i++) {
         if (id == msgList->entries[i].id) {
@@ -6826,27 +6826,27 @@ extern "C" int func_001E3388(int id)
 }
 #endif
 
-extern "C" void* func_001E39F8(void* self);
+extern "C" void* getMessageList(void* self);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E33E8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", getMessageCount__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns how many messages the human rider's message list holds (its count byte at +0xCC).
  *
  * @return the message count
  */
-unsigned char func_001E33E8(void* self)
+unsigned char getMessageCount(void* self)
 {
-    return func_001E39F8_list()->count;
+    return getMessageList_list()->count;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3408);
+INCLUDE_ASM("fe/fepopupmisc", countUnreadMessages);
 #ifdef SKIP_ASM
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList* getMessageList_list() __asm__("getMessageList");
 
 /**
  * Counts the unread messages in the human rider's message list (entries whose read bit at +0xC8 is clear).
@@ -6855,9 +6855,9 @@ extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
  *
  * @return the number of unread messages
  */
-extern "C" int func_001E3408()
+extern "C" int countUnreadMessages()
 {
-    sPopupList* msgList = func_001E39F8_list();
+    sPopupList* msgList = getMessageList_list();
     int n = 0;
     int i;
     for (i = 0; i < msgList->count; i++) {
@@ -6871,34 +6871,34 @@ extern "C" int func_001E3408()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3460);
+INCLUDE_ASM("fe/fepopupmisc", findUnreadMessage);
 #ifdef SKIP_ASM
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
-extern "C" int func_001E3620(int idx);
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupList* getMessageList_list() __asm__("getMessageList");
+extern "C" int getListMessageId(int idx);
 
 /**
  * Finds the first unread message in the human rider's message list.
  *
  * @param out  receives the list position when one is found
- * @return its message index (func_001E3620), or -1 when every message is read
+ * @return its message index (getListMessageId), or -1 when every message is read
  */
-extern "C" int func_001E3460(int* out)
+extern "C" int findUnreadMessage(int* out)
 {
-    sPopupList* msgList = func_001E39F8_list();
+    sPopupList* msgList = getMessageList_list();
     int i;
     for (i = 0; i < msgList->count; i++) {
         int bit = 1 << i;
         if (!(msgList->mask & bit)) {
             *out = i;
-            return func_001E3620(i);
+            return getListMessageId(i);
         }
     }
     return -1;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
+INCLUDE_ASM("fe/fepopupmisc", getNextMessageInGroup);
 #ifdef SKIP_ASM
 /**
  * Returns the next message of the same group as message @p i: @p i + 1 when that message is in the same group.
@@ -6907,7 +6907,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
  * @return i + 1, or -1 when message i is the last of its group
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" int func_001E34D8(int i)
+extern "C" int getNextMessageInGroup(int i)
 {
     sPopupEntry18* currentEntry = &D_004C6C08[i];
     int n = i + 1;
@@ -6919,7 +6919,7 @@ extern "C" int func_001E34D8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3510);
+INCLUDE_ASM("fe/fepopupmisc", requestMessageCenter);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -6934,7 +6934,7 @@ extern int D_004A20CC;
  * message center) on its next pass, and sets player 0's flag through cBENewPlayerInterface_setHelpDone(player interface, 0, 1); otherwise
  * does nothing.
  */
-extern "C" void func_001E3510(void)
+extern "C" void requestMessageCenter(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
@@ -6945,7 +6945,7 @@ extern "C" void func_001E3510(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3570);
+INCLUDE_ASM("fe/fepopupmisc", canOpenMessageCenter);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -6957,11 +6957,11 @@ extern "C" int cBENewPlayerInterface_getHelpDone(void* iface, int a1);
  *
  * Returns false when the new race's cGamePath is not kGAMEPATH_WORLDCIRCUIT or its cGameEvent is
  * kGAMEEVENT_TIME_PEAK1 or kGAMEEVENT_POINTS_PEAK1; otherwise true while player 0's flag read
- * by cBENewPlayerInterface_getHelpDone is still clear (func_001E3510 sets it).
+ * by cBENewPlayerInterface_getHelpDone is still clear (requestMessageCenter sets it).
  *
  * @return true when the message center may be opened, else false
  */
-extern "C" bool func_001E3570(void)
+extern "C" bool canOpenMessageCenter(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_WORLDCIRCUIT) {
@@ -6976,9 +6976,9 @@ extern "C" bool func_001E3570(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E35F0);
+INCLUDE_ASM("fe/fepopupmisc", getMessageListEntry);
 #ifdef SKIP_ASM
-extern "C" void* func_001E39F8(void* self);
+extern "C" void* getMessageList(void* self);
 
 /**
  * Returns the address of message-list entry @p index (the list plus 8 bytes per entry).
@@ -6986,14 +6986,14 @@ extern "C" void* func_001E39F8(void* self);
  * @param index  the entry's index
  * @return the entry's address
  */
-extern "C" sPopupListEntry* func_001E35F0(int index)
+extern "C" sPopupListEntry* getMessageListEntry(int index)
 {
-    return &func_001E39F8_list()->entries[index];
+    return &getMessageList_list()->entries[index];
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3620);
+INCLUDE_ASM("fe/fepopupmisc", getListMessageId);
 #ifdef SKIP_ASM
 struct sPopupEntry8 {
     int messageId;
@@ -7003,8 +7003,8 @@ struct sPopupEntry8 {
 struct sPopupTable8 {
     sPopupEntry8 entries[1];
 };
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupTable8* getMessageList_get() __asm__("getMessageList");
 
 /**
  * Returns the message index stored in message-list entry @p idx.
@@ -7012,17 +7012,17 @@ extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
  * @param idx  the list position
  * @return the message index (D_004C6C08)
  */
-extern "C" int func_001E3620(int idx)
+extern "C" int getListMessageId(int idx)
 {
-    return func_001E39F8_get()->entries[idx].messageId;
+    return getMessageList_get()->entries[idx].messageId;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3650);
+INCLUDE_ASM("fe/fepopupmisc", getListMessageVariant);
 #ifdef SKIP_ASM
-// PORT: unit declares func_001E39F8(void*), but its body takes no arguments
-extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
+// PORT: unit declares getMessageList(void*), but its body takes no arguments
+extern "C" sPopupTable8* getMessageList_get() __asm__("getMessageList");
 
 /**
  * Returns the variant byte stored in message-list entry @p idx.
@@ -7030,45 +7030,45 @@ extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
  * @param idx  the list position
  * @return the subject variant (0xFF for none)
  */
-extern "C" unsigned char func_001E3650(int idx)
+extern "C" unsigned char getListMessageVariant(int idx)
 {
-    return func_001E39F8_get()->entries[idx].variant;
+    return getMessageList_get()->entries[idx].variant;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3680);
+INCLUDE_ASM("fe/fepopupmisc", getMessageRow);
 #ifdef SKIP_ASM
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 extern int D_004A20C4;
 
 /**
  * Returns the message-center row that shows message @p id.
  *
- * The rows list the queued messages newest first, then the FAQ rows (type 4, built by func_001E2C80 with collapsed
+ * The rows list the queued messages newest first, then the FAQ rows (type 4, built by getMessageForRow with collapsed
  * folders as one row). Returns @p id unchanged when D_004A20C4 is set.
  *
  * @param id  the message index
  * @return the row, or 0xFF when the message is not shown
  */
-extern "C" unsigned char func_001E3680(int id)
+extern "C" unsigned char getMessageRow(int id)
 {
     if (D_004A20C4 != 0) {
         return id;
     }
-    int faqRowCount = func_001E2BB8(4, 0);
-    int queuedCount = func_001E33E8_noarg();
+    int faqRowCount = countMessageRows(4, 0);
+    int queuedCount = getMessageCount_noarg();
     int i;
     for (i = 0; i < faqRowCount + queuedCount; i++) {
         int k = i + 1;
         int idx = queuedCount - k;
         if (idx >= 0) {
-            if (func_001E3620(idx) == id) {
+            if (getListMessageId(idx) == id) {
                 return i;
             }
         } else if (idx + faqRowCount >= 0) {
-            if (func_001E2C80(4, ~idx, 1) == id) {
+            if (getMessageForRow(4, ~idx, 1) == id) {
                 return i;
             }
         }
@@ -7078,7 +7078,7 @@ extern "C" unsigned char func_001E3680(int id)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3760);
+INCLUDE_ASM("fe/fepopupmisc", queueEarningsMessages);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -7086,9 +7086,9 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 int cBERewardInterface_getEarningsTarget(void* self, int a1);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 /**
  * Queues the earnings messages when an amount of career money would reach a peak's earnings target.
@@ -7100,7 +7100,7 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
  * @param rider  the rider's AI index (only 0 does anything)
  * @param amt    the money about to be credited
  */
-extern "C" void func_001E3760(int rider, int amt)
+extern "C" void queueEarningsMessages(int rider, int amt)
 {
     if (rider == 0) {
         void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -7108,16 +7108,16 @@ extern "C" void func_001E3760(int rider, int amt)
         void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (cBENewPlayerInterface_isPeakLocked1(pl, 0, 1)) {
             if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ,
-                    0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30(52) == 0) {
-                func_001E3A78(52, 1);
-                func_001E2FE0(247, 0);
+                    0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && isMessageFlagSet(52) == 0) {
+                setMessageFlag(52, 1);
+                queueMessage(247, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(pl, rider, 2)) {
             if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ,
-                    rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30(53) == 0) {
-                func_001E3A78(53, 1);
-                func_001E2FE0(0xF8, 0);
+                    rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && isMessageFlagSet(53) == 0) {
+                setMessageFlag(53, 1);
+                queueMessage(0xF8, 0);
             }
         }
     }
@@ -7125,7 +7125,7 @@ extern "C" void func_001E3760(int rider, int amt)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E38B8);
+INCLUDE_ASM("fe/fepopupmisc", queueTrophyMessages);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -7134,9 +7134,9 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E2FE0(int a, unsigned char b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void queueMessage(int a, unsigned char b);
 
 /**
  * Queues the trophy messages for the locked peaks once the human rider owns the needed trophy.
@@ -7147,22 +7147,22 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
  *
  * @param player  the profile (only 0 does anything)
  */
-extern "C" void func_001E38B8(int player)
+extern "C" void queueTrophyMessages(int player)
 {
     if (player == 0) {
         void* stats = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
         int charID = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 1)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30(54) == 0) {
-                func_001E3A78(54, 1);
-                func_001E2FE0(249, 0);
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && isMessageFlagSet(54) == 0) {
+                setMessageFlag(54, 1);
+                queueMessage(249, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 2)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30(55) == 0) {
-                func_001E3A78(55, 1);
-                func_001E2FE0(250, 0);
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && isMessageFlagSet(55) == 0) {
+                setMessageFlag(55, 1);
+                queueMessage(250, 0);
             }
         }
     }
@@ -7170,70 +7170,70 @@ extern "C" void func_001E38B8(int player)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E39F8);
+INCLUDE_ASM("fe/fepopupmisc", getMessageList);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_00147908(void* iface, int a1);
+extern "C" void* cBENewPlayerInterface_getRiderMessages(void* iface, int a1);
 
 /**
- * Returns the human rider's message list: func_00147908(player interface, 0), the character record at +0xE38.
+ * Returns the human rider's message list: cBENewPlayerInterface_getRiderMessages(player interface, 0), the character record at +0xE38.
  *
  * The list holds 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at +0xCC. The declared
  * parameter is not used.
  *
  * @return the message list
  */
-extern "C" void* func_001E39F8(void* self)
+extern "C" void* getMessageList(void* self)
 {
-    return func_00147908(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    return cBENewPlayerInterface_getRiderMessages(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3A30);
+INCLUDE_ASM("fe/fepopupmisc", isMessageFlagSet);
 #ifdef SKIP_ASM
-extern "C" int func_00147980(void* iface, int a1, int flag);
+extern "C" int cBENewPlayerInterface_getMessageGroupFlag(void* iface, int a1, int flag);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
- * Reports whether the human rider's message flag number @p group is set (func_00147980 on the player interface).
+ * Reports whether the human rider's message flag number @p group is set (cBENewPlayerInterface_getMessageGroupFlag on the player interface).
  *
  * The flags are the bits of the character record's words at +0xF08.
  *
  * @param group  the message group (flag) index
  * @return true when the flag is set, else false
  */
-extern "C" bool func_001E3A30(int group)
+extern "C" bool isMessageFlagSet(int group)
 {
-    return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, group) != 0;
+    return cBENewPlayerInterface_getMessageGroupFlag(cBE_getInterface_Fv(cBE_getBE(), 1), 0, group) != 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3A78);
+INCLUDE_ASM("fe/fepopupmisc", setMessageFlag);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00147A30(void* iface, int a1, int a2, int a3);
+extern "C" void cBENewPlayerInterface_setMessageGroupFlag(void* iface, int a1, int a2, int a3);
 
 /**
- * Sets or clears the human rider's message flag number @p flagIndex (func_00147A30 on the player interface).
+ * Sets or clears the human rider's message flag number @p flagIndex (cBENewPlayerInterface_setMessageGroupFlag on the player interface).
  *
  * @param flagIndex  the flag index
  * @param enabled  nonzero to set the flag, 0 to clear it
  */
-extern "C" void func_001E3A78(int flagIndex, int enabled)
+extern "C" void setMessageFlag(int flagIndex, int enabled)
 {
-    func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, flagIndex, enabled);
+    cBENewPlayerInterface_setMessageGroupFlag(cBE_getInterface_Fv(cBE_getBE(), 1), 0, flagIndex, enabled);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
+INCLUDE_ASM("fe/fepopupmisc", vibratePad);
 #ifdef SKIP_ASM
 extern char* PadCache;
 
@@ -7260,7 +7260,7 @@ public:
  * @param y    the second level input
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" void func_001E3AC8(int idx, float x, float y)
+extern "C" void vibratePad(int idx, float x, float y)
 {
     signed char i = idx;
     float adjusted = x * 0.9133333563804626f - 18.518518447875977f;
@@ -7285,8 +7285,8 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int hash);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E3A78(int a, int b);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void setMessageFlag(int a, int b);
 int GetHashValue32(char* str);
 extern void* cOVState_vtbl[];
 extern void* cOVState_MESSAGECENTER_vtbl[];
@@ -7317,7 +7317,7 @@ struct sObj_3C00 {
  * widget tables (unread mail, FAQ icon, from, subject, number) and the labels, menu, buttons and arrows (not
  * mpNoMessage), and looks up the "folder", "minus folder" and "questmark" textures in the engine's texture bank
  * (+0x58, cUITextureBank_getElementByHashname). miMiscData becomes the opening mode: 2 when D_004A20CC is -1, else 0 or 1 by whether
- * new-player hint 7 is set (func_001E3A30), which it then sets (func_001E3A78(7, 1)).
+ * new-player hint 7 is set (isMessageFlagSet), which it then sets (setMessageFlag(7, 1)).
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param id  the overlay's id (On Tour cOVState ctor tOVStateEnum id; the overlay factory passes 0x22)
@@ -7367,11 +7367,11 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
         stateView->miQuestionMarkTex = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     if (~D_004A20CC != 0) {
-        if (func_001E3A30(7) != 0)
+        if (isMessageFlagSet(7) != 0)
             self->miMiscData = 0;
         else
             self->miMiscData = 1;
-        func_001E3A78(7, 1);
+        setMessageFlag(7, 1);
     } else {
         self->miMiscData = 2;
     }
@@ -7382,14 +7382,14 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onCreateScreen);
 #ifdef SKIP_ASM
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVStateManager_addPDATemplate();
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4458(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_showMessageCounts(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_updateButtons(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER*);
 extern char str_112messagecenter[];
 
 /**
@@ -7398,7 +7398,7 @@ extern char str_112messagecenter[];
  * Adds the "112messagecenter" screen (cUIEngine_addScreenByHashName), keeps it in mpMessageScreen and plays its first
  * frame, runs cOVState_onCreateScreen, adds the PDA template in opening modes 0 and 1 (miMiscData), zeroes
  * mScrollOffset, sizes the menu to the queued messages plus every FAQ row (cUIMenu_setScrollableMenu), refreshes the
- * rows, labels, buttons and arrows (func_001E48B0, func_001E4758, func_001E4458, func_001E4658) and sets D_004A20C0
+ * rows, labels, buttons and arrows (cOVState_MESSAGECENTER_fillRows, cOVState_MESSAGECENTER_showMessageCounts, cOVState_MESSAGECENTER_updateButtons, cOVState_MESSAGECENTER_updateScrollArrows) and sets D_004A20C0
  * (message center open).
  */
 void cOVState_MESSAGECENTER::onCreateScreen()
@@ -7419,13 +7419,13 @@ void cOVState_MESSAGECENTER::onCreateScreen()
         cOVStateManager_addPDATemplate();
     }
     mScrollOffset = 0;
-    int n = func_001E33E8_noarg();
-    n += func_001E2BB8(4, 1);
+    int n = getMessageCount_noarg();
+    n += countMessageRows(4, 1);
     cUIMenu_setScrollableMenu(mpMenu, (unsigned char)n);
-    func_001E48B0(this);
-    func_001E4758(this);
-    func_001E4458(this);
-    func_001E4658(this);
+    cOVState_MESSAGECENTER_fillRows(this);
+    cOVState_MESSAGECENTER_showMessageCounts(this);
+    cOVState_MESSAGECENTER_updateButtons(this);
+    cOVState_MESSAGECENTER_updateScrollArrows(this);
     D_004A20C0 = 1;
 }
 #endif
@@ -7433,7 +7433,7 @@ void cOVState_MESSAGECENTER::onCreateScreen()
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void func_001E3A78(int a, int b);
+extern "C" void setMessageFlag(int a, int b);
 extern "C" void cOVStateManager_removePDATemplate(void);
 extern "C" void cOVState_onDestroyScreen(void* self);
 extern int cPauseState_StackIdx;
@@ -7452,11 +7452,11 @@ void cOVState_MESSAGECENTER::onDestroyScreen()
 {
     int openMode = miMiscData;
     if (openMode == 1) {
-        func_001E3A78(7, 0);
+        setMessageFlag(7, 0);
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     } else if (openMode == 0) {
-        func_001E3A78(7, 1);
+        setMessageFlag(7, 1);
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     }
@@ -7576,15 +7576,15 @@ void cOVState_MESSAGECENTER::onWidgetCreate(cUIThing* w)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" unsigned char func_001E3680(int id);
-extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
+extern "C" unsigned char getMessageRow(int id);
+extern "C" void cOVState_MESSAGECENTER_openViewPopup(cOVState_MESSAGECENTER* self, int a1, int a2);
 
 
 /**
  * Focuses the message center's menu and, when it opened by itself, shows message 37 (vtable entry 6, onGainFocus).
  *
- * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (func_001E3680), focuses the menu (setFocus(1),
- * vtable entry 7) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the
+ * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (getMessageRow), focuses the menu (setFocus(1),
+ * vtable entry 7) and opens the view popup for message 37 with number -1 (cOVState_MESSAGECENTER_openViewPopup); otherwise only focuses the
  * menu.
  */
 void cOVState_MESSAGECENTER::onGainFocus(cUIState*)
@@ -7595,10 +7595,10 @@ void cOVState_MESSAGECENTER::onGainFocus(cUIState*)
     }
     if (state == 1) {
     reset:
-        cUIMenu_setSelectedByIndex(mpMenu, func_001E3680(37));
+        cUIMenu_setSelectedByIndex(mpMenu, getMessageRow(37));
         cUIMenu* menu = mpMenu;
         menu->setFocus(1);
-        func_001E50C8(this, 37, -1);
+        cOVState_MESSAGECENTER_openViewPopup(this, 37, -1);
     } else {
         cUIMenu* menu = mpMenu;
         menu->setFocus(1);
@@ -7636,25 +7636,25 @@ int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern char str_TransitionOut_b[];
 extern int D_004A20C0;
 
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-// PORT: func_001E3A30 is declared int; its result is used as a bool here
-extern "C" bool func_001E3A30_b(int id) __asm__("func_001E3A30");
-extern "C" int func_001E3620(int idx);
-extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4458(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
-extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
-extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
+// PORT: isMessageFlagSet is declared int; its result is used as a bool here
+extern "C" bool isMessageFlagSet_b(int id) __asm__("isMessageFlagSet");
+extern "C" int getListMessageId(int idx);
+extern "C" void setMessageFlag(int a, int b);
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_updateButtons(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_openViewPopup(cOVState_MESSAGECENTER* self, int a1, int a2);
+extern "C" void cOVState_MESSAGECENTER_deleteMessage(cOVState_MESSAGECENTER* self, int idx);
 
 /**
  * Handles the message center's widget events (vtable entry 19, onWidgetEvent).
  *
- * kONNEXT (select): on a queued-message row marks it read and opens the view popup with its row number (func_001E50C8);
+ * kONNEXT (select): on a queued-message row marks it read and opens the view popup with its row number (cOVState_MESSAGECENTER_openViewPopup);
  * on a FAQ row either toggles the folder (when the row is a folder's first message: flips the group's message flag and
  * refreshes rows, arrows and buttons) or opens the view popup. kONOPTION: clears mbMessageDeleted and, on a queued row,
- * deletes that message (func_001E5148) and sets mbMessageDeleted, then refreshes the buttons. kONPREV: plays the
+ * deletes that message (cOVState_MESSAGECENTER_deleteMessage) and sets mbMessageDeleted, then refreshes the buttons. kONPREV: plays the
  * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. kONGAINFOCUS:
  * calls vtable entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
  *
@@ -7666,29 +7666,29 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
     if (widget == 0) {
         return;
     }
-    sPopupList* list = func_001E39F8_list();
-    int faqRowCount = func_001E2BB8(4, 1);
-    int queuedCount = func_001E33E8_noarg();
+    sPopupList* list = getMessageList_list();
+    int faqRowCount = countMessageRows(4, 1);
+    int queuedCount = getMessageCount_noarg();
     switch (event) {
     case cUIState::kONNEXT:
         if (faqRowCount + queuedCount > 0) {
             int k = mpMenu->mScrollItemCurrent;
             int idx = queuedCount - k - 1;
             if (idx >= 0) {
-                int id = func_001E3620(idx);
+                int id = getListMessageId(idx);
                 list->mask |= 1 << idx;
-                func_001E50C8(this, id, k + 1);
+                cOVState_MESSAGECENTER_openViewPopup(this, id, k + 1);
             } else if (idx + faqRowCount >= 0) {
                 int w = widget->mMiscData;
                 sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
                 sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
                 if (groupEntry->enabled != 0 && w == groupEntry->start) {
-                    func_001E3A78(messageEntry->id, !func_001E3A30_b(messageEntry->id));
-                    func_001E48B0(this);
-                    func_001E4658(this);
-                    func_001E4458(this);
+                    setMessageFlag(messageEntry->id, !isMessageFlagSet_b(messageEntry->id));
+                    cOVState_MESSAGECENTER_fillRows(this);
+                    cOVState_MESSAGECENTER_updateScrollArrows(this);
+                    cOVState_MESSAGECENTER_updateButtons(this);
                 } else {
-                    func_001E50C8(this, w, k + 1);
+                    cOVState_MESSAGECENTER_openViewPopup(this, w, k + 1);
                 }
             }
         }
@@ -7698,10 +7698,10 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
         if (queuedCount > 0) {
             int idx = queuedCount - mpMenu->mScrollItemCurrent - 1;
             if (idx >= 0) {
-                func_001E5148(this, idx);
+                cOVState_MESSAGECENTER_deleteMessage(this, idx);
                 mbMessageDeleted = 1;
             }
-            func_001E4458(this);
+            cOVState_MESSAGECENTER_updateButtons(this);
         }
         break;
     case cUIState::kONPREV: {
@@ -7727,17 +7727,17 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4458);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_updateButtons);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" int func_001E2C80(int type, int idx, int mode);
-extern "C" bool func_001E3A30(int group);
-extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj);
-extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj);
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
+extern "C" int getMessageForRow(int type, int idx, int mode);
+extern "C" bool isMessageFlagSet(int group);
+extern "C" void cOVState_MESSAGECENTER_hideWidget(cOVState_MESSAGECENTER* self, cUIThing* obj);
+extern "C" void cOVState_MESSAGECENTER_showWidget(cOVState_MESSAGECENTER* self, cUIThing* obj);
 extern char str_kT_BTNView[];
 extern char str_kT_BTNCollapse[];
 extern char str_kT_BTNExpand[];
@@ -7762,25 +7762,25 @@ extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
  * and labels "btext1" kT_BTNCollapse or kT_BTNExpand on a folder's first message (by the folder's message flag), else
  * kT_BTNView.
  */
-extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_updateButtons(cOVState_MESSAGECENTER* self)
 {
     int base = self->mpMenu->mScrollItemCurrent;
-    int diff = func_001E33E8_noarg() - base;
+    int diff = getMessageCount_noarg() - base;
     if (diff - 1 >= 0) {
-        func_001E4878(self, self->mpButtonSquare);
-        func_001E4878(self, self->mpButtonText3);
+        cOVState_MESSAGECENTER_showWidget(self, self->mpButtonSquare);
+        cOVState_MESSAGECENTER_showWidget(self, self->mpButtonText3);
         if (self->mpButtonText1 != 0)
             cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNView));
     } else {
-        func_001E4840(self, self->mpButtonSquare);
-        func_001E4840(self, self->mpButtonText3);
+        cOVState_MESSAGECENTER_hideWidget(self, self->mpButtonSquare);
+        cOVState_MESSAGECENTER_hideWidget(self, self->mpButtonText3);
         if (self->mpButtonText1 != 0) {
-            int id = func_001E2C80(4, -diff, 1);
+            int id = getMessageForRow(4, -diff, 1);
             sEntry18_4458* messageEntry = &D_004C6C08_4458[id];
             int groupIndex = messageEntry->groupIndex;
             sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
             if (id == groupEntry->start) {
-                if (func_001E3A30(groupIndex))
+                if (isMessageFlagSet(groupIndex))
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
                 else
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNExpand));
@@ -7796,9 +7796,9 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetMenu);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_001E4658(cOVState_MESSAGECENTER* self);
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER* self);
-extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
+extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER* self);
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER* self);
+extern "C" void cOVState_MESSAGECENTER_updateButtons(cOVState_MESSAGECENTER* self);
 
 /**
  * Answers the message center menu's events (vtable entry 20, onWidgetMenu).
@@ -7816,11 +7816,11 @@ int cOVState_MESSAGECENTER::onWidgetMenu(cUIMenu* widget, unsigned int event, un
     switch (event) {
     case cUIMenu::kSCROLLUPDATE:
         mScrollOffset = value;
-        func_001E4658(this);
-        func_001E48B0(this);
+        cOVState_MESSAGECENTER_updateScrollArrows(this);
+        cOVState_MESSAGECENTER_fillRows(this);
         break;
     case cUIMenu::kSCROLLCHANGE:
-        func_001E4458(this);
+        cOVState_MESSAGECENTER_updateButtons(this);
         return 257;
     case cUIMenu::kONMISC:
         return 0;
@@ -7837,14 +7837,14 @@ int cOVState_MESSAGECENTER::onWidgetMenu(cUIMenu* widget, unsigned int event, un
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_showMessageCounts(cOVState_MESSAGECENTER*);
 extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Refreshes the message center when its view popup closes (vtable entry 17, onPopupEvent).
  *
- * On kONSCREENPOPUPPREV (sent by the view popup) refreshes the rows and the count labels (func_001E48B0, func_001E4758)
+ * On kONSCREENPOPUPPREV (sent by the view popup) refreshes the rows and the count labels (cOVState_MESSAGECENTER_fillRows, cOVState_MESSAGECENTER_showMessageCounts)
  * and calls cUIStateStack_pop(mpEngine + 0x18, 1).
  *
  * @param popup  the popup
@@ -7853,19 +7853,19 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
 void cOVState_MESSAGECENTER::onPopupEvent(cUIState* popup, unsigned int event)
 {
     if (event == cUIState::kONSCREENPOPUPPREV) {
-        func_001E48B0(this);
-        func_001E4758(this);
+        cOVState_MESSAGECENTER_fillRows(this);
+        cOVState_MESSAGECENTER_showMessageCounts(this);
         cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4658);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_updateScrollArrows);
 #ifdef SKIP_ASM
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" int func_001E2BB8(int type, int all);
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
+extern "C" int countMessageRows(int type, int all);
 extern int D_004A20C4;
 
 
@@ -7875,7 +7875,7 @@ extern int D_004A20C4;
  * mpArrowUp is shown while mScrollOffset is not 0; mpArrowDown while mScrollOffset + 8 is below the row count (the
  * queued messages plus the FAQ rows, every FAQ row when D_004A20C4 is set).
  */
-extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER* self)
 {
     if (self->mScrollOffset == 0) {
         cUIThing* arrowWidget = self->mpArrowUp;
@@ -7886,11 +7886,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
     }
     int n;
     if (D_004A20C4 != 0) {
-        n = func_001E33E8_noarg();
-        n += func_001E2BB8(4, 1);
+        n = getMessageCount_noarg();
+        n += countMessageRows(4, 1);
     } else {
-        n = func_001E33E8_noarg();
-        n += func_001E2BB8(4, 0);
+        n = getMessageCount_noarg();
+        n += countMessageRows(4, 0);
     }
     if (self->mScrollOffset + 8 >= n) {
         cUIThing* arrowWidget = self->mpArrowDown;
@@ -7903,10 +7903,10 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4758);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_showMessageCounts);
 #ifdef SKIP_ASM
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char str_kT_OVRCMNTotalMsg[];
@@ -7916,32 +7916,32 @@ extern char str_kT_OVRCMNUnread[];
 /**
  * Prints the message center's total and unread counts.
  *
- * Formats kT_OVRCMNTotalMsg with the queued message count and kT_OVRCMNUnread with the unread count (func_001E3408),
+ * Formats kT_OVRCMNTotalMsg with the queued message count and kT_OVRCMNUnread with the unread count (countUnreadMessages),
  * each looked up through the front-end locale (vtable entry 4) and written with sprintf1 into mpTotalMessagesLabel and
  * mpUnreadMessagesLabel when present.
  */
-extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_showMessageCounts(cOVState_MESSAGECENTER* self)
 {
     unsigned short buf[0x38];
     if (self->mpTotalMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
-        sprintf1(buf, fmt, func_001E33E8_noarg());
+        sprintf1(buf, fmt, getMessageCount_noarg());
         cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
     if (self->mpUnreadMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
-        sprintf1(buf, fmt, func_001E3408());
+        sprintf1(buf, fmt, countUnreadMessages());
         cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4840);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_hideWidget);
 #ifdef SKIP_ASM
 
 /**
@@ -7949,7 +7949,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4840);
  *
  * @param obj  the widget
  */
-extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj)
+extern "C" void cOVState_MESSAGECENTER_hideWidget(cOVState_MESSAGECENTER* self, cUIThing* obj)
 {
     if (obj != 0) {
         obj->setVisible(0);
@@ -7958,7 +7958,7 @@ extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, cUIThing* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4878);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_showWidget);
 #ifdef SKIP_ASM
 
 /**
@@ -7966,7 +7966,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4878);
  *
  * @param obj  the widget
  */
-extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj)
+extern "C" void cOVState_MESSAGECENTER_showWidget(cOVState_MESSAGECENTER* self, cUIThing* obj)
 {
     if (obj != 0) {
         obj->setVisible(1);
@@ -7975,20 +7975,20 @@ extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, cUIThing* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E48B0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_fillRows);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState_showObjSafe_48B0(void* self, char* name) __asm__("cUIState_showObjSafe");
 extern "C" void cUIState_hideObjSafe_48B0(void* self, char* name) __asm__("cUIState_hideObjSafe");
-extern "C" int func_001E2BB8_48B0(int kind, int online) __asm__("func_001E2BB8");
-extern "C" int func_001E33E8_48B0() __asm__("func_001E33E8__FPv");
-extern "C" void func_001E4840_48B0(void* self, int obj) __asm__("func_001E4840");
-extern "C" void func_001E4878_48B0(void* self, int obj) __asm__("func_001E4878");
-extern "C" int func_001E3620_48B0(int idx) __asm__("func_001E3620");
-extern "C" int func_001E3650_48B0(int idx) __asm__("func_001E3650");
-extern "C" void func_001E4C78_48B0(void* self, int idx, int row, int a3, int a4) __asm__("func_001E4C78");
-extern "C" int func_001E2C80_48B0(int kind, int idx, int local) __asm__("func_001E2C80");
-extern "C" int func_001E4B80_48B0(void* self, int entry) __asm__("func_001E4B80");
+extern "C" int countMessageRows_48B0(int kind, int online) __asm__("countMessageRows");
+extern "C" int getMessageCount_48B0() __asm__("getMessageCount__FPv");
+extern "C" void cOVState_MESSAGECENTER_hideWidget_48B0(void* self, int obj) __asm__("cOVState_MESSAGECENTER_hideWidget");
+extern "C" void cOVState_MESSAGECENTER_showWidget_48B0(void* self, int obj) __asm__("cOVState_MESSAGECENTER_showWidget");
+extern "C" int getListMessageId_48B0(int idx) __asm__("getListMessageId");
+extern "C" int getListMessageVariant_48B0(int idx) __asm__("getListMessageVariant");
+extern "C" void cOVState_MESSAGECENTER_fillRow_48B0(void* self, int idx, int row, int a3, int a4) __asm__("cOVState_MESSAGECENTER_fillRow");
+extern "C" int getMessageForRow_48B0(int kind, int idx, int local) __asm__("getMessageForRow");
+extern "C" int cOVState_MESSAGECENTER_getFAQSubjectVariant_48B0(void* self, int entry) __asm__("cOVState_MESSAGECENTER_getFAQSubjectVariant");
 extern "C" void cUIMenu_setScrollableMenu_48B0(void* menu, unsigned char n) __asm__("cUIMenu_setScrollableMenu");
 extern int D_004A20C4;
 extern char str_MessageNumbers[];
@@ -8021,23 +8021,23 @@ struct sList_48B0 {
  *
  * With no rows hides the "MessageNumbers", "MessageFroms", "MessageSubjects", "UnreadMailBitmaps" and
  * "MessageHighlights" groups, shows "NoMessages" and hides the buttons. Otherwise shows them and fills the rows from
- * mScrollOffset: queued messages newest first (func_001E4C78 with the list position and the entry's variant), then FAQ
- * rows (func_001E4C78 with -1 and func_001E4B80's variant), hiding a row's widgets past the end. Finally resets the
+ * mScrollOffset: queued messages newest first (cOVState_MESSAGECENTER_fillRow with the list position and the entry's variant), then FAQ
+ * rows (cOVState_MESSAGECENTER_fillRow with -1 and cOVState_MESSAGECENTER_getFAQSubjectVariant's variant), hiding a row's widgets past the end. Finally resets the
  * menu's item count (cUIMenu_setScrollableMenu) while keeping its selected row (+0x95) and stores the scroll offset's
  * low byte in the menu's +0x98.
  *
  * @param selfp  the message center
  */
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER* selfp)
 {
     sList_48B0* self = (sList_48B0*)selfp;
     int online;
     if (D_004A20C4) {
-        online = func_001E2BB8_48B0(4, 1);
+        online = countMessageRows_48B0(4, 1);
     } else {
-        online = func_001E2BB8_48B0(4, 0);
+        online = countMessageRows_48B0(4, 0);
     }
-    int local = func_001E33E8_48B0();
+    int local = getMessageCount_48B0();
     int total = local + online;
     int sel;
     if (total == 0) {
@@ -8048,10 +8048,10 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
         cUIState_hideObjSafe_48B0(self, str_UnreadMailBitmaps);
         cUIState_hideObjSafe_48B0(self, str_MessageHighlights);
         cUIState_showObjSafe_48B0(self, str_NoMessages);
-        func_001E4840_48B0(self, self->mpButtonCross);
-        func_001E4840_48B0(self, self->mpButtonText1);
-        func_001E4840_48B0(self, self->mpButtonSquare);
-        func_001E4840_48B0(self, self->mpButtonText3);
+        cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpButtonCross);
+        cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpButtonText1);
+        cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpButtonSquare);
+        cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpButtonText3);
     } else {
         cUIState_showObjSafe_48B0(self, str_MessageNumbers);
         sel = total;
@@ -8059,29 +8059,29 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
         cUIState_showObjSafe_48B0(self, str_MessageSubjects);
         cUIState_showObjSafe_48B0(self, str_UnreadMailBitmaps);
         cUIState_hideObjSafe_48B0(self, str_NoMessages);
-        func_001E4878_48B0(self, self->mpButtonCross);
-        func_001E4878_48B0(self, self->mpButtonText1);
+        cOVState_MESSAGECENTER_showWidget_48B0(self, self->mpButtonCross);
+        cOVState_MESSAGECENTER_showWidget_48B0(self, self->mpButtonText1);
         for (int i = 0; i < 8; i++) {
             int n = i + 1;
             int k = local - self->mScrollOffset - n;
             if (k >= 0) {
-                int messageIndex = func_001E3620_48B0(k);
-                func_001E4C78_48B0(self, k, i, messageIndex, func_001E3650_48B0(k));
+                int messageIndex = getListMessageId_48B0(k);
+                cOVState_MESSAGECENTER_fillRow_48B0(self, k, i, messageIndex, getListMessageVariant_48B0(k));
             } else if (k + online >= 0) {
                 int nk = ~k;
                 int faqMessage;
                 if (D_004A20C4) {
-                    faqMessage = func_001E2C80_48B0(4, nk, 0);
+                    faqMessage = getMessageForRow_48B0(4, nk, 0);
                 } else {
-                    faqMessage = func_001E2C80_48B0(4, nk, 1);
+                    faqMessage = getMessageForRow_48B0(4, nk, 1);
                 }
-                func_001E4C78_48B0(self, -1, i, faqMessage, (unsigned char)func_001E4B80_48B0(self, faqMessage));
+                cOVState_MESSAGECENTER_fillRow_48B0(self, -1, i, faqMessage, (unsigned char)cOVState_MESSAGECENTER_getFAQSubjectVariant_48B0(self, faqMessage));
             } else {
-                func_001E4840_48B0(self, self->mpUnreadMail[i]);
-                func_001E4840_48B0(self, self->mpFAQIcon[i]);
-                func_001E4840_48B0(self, self->mpFrom[i]);
-                func_001E4840_48B0(self, self->mpNumber[i]);
-                func_001E4840_48B0(self, self->mpSubject[i]);
+                cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpUnreadMail[i]);
+                cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpFAQIcon[i]);
+                cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpFrom[i]);
+                cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpNumber[i]);
+                cOVState_MESSAGECENTER_hideWidget_48B0(self, self->mpSubject[i]);
             }
         }
     }
@@ -8094,11 +8094,11 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4B80);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_getFAQSubjectVariant);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A20C4;
-extern "C" int func_001E2DC0(int idx);
+extern "C" int getMessagePositionInCategory(int idx);
 
 struct sPopupEntry18_4B80 {   // a D_004C6C08 message (names ours)
     int field_0x0;
@@ -8111,13 +8111,13 @@ extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
 /**
  * Returns the subject variant of a FAQ-row message when D_004A20C4 is set.
  *
- * For a message of kind 1 (+0x8) takes its position in its category (func_001E2DC0) and reduces it by the group's
- * category: 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0. Same rule as func_001E5AA0.
+ * For a message of kind 1 (+0x8) takes its position in its category (getMessagePositionInCategory) and reduces it by the group's
+ * category: 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0. Same rule as cOVState_ViewPopup_getSubjectVariant.
  *
  * @param idx  the message index
  * @return the variant, or 0xFF when D_004A20C4 is clear or the message is not of kind 1
  */
-extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
+extern "C" unsigned char cOVState_MESSAGECENTER_getFAQSubjectVariant(cOVState_MESSAGECENTER* self, int idx)
 {
     unsigned char variant = 0xFF;
     if (D_004A20C4 == 0) {
@@ -8125,7 +8125,7 @@ extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
     }
     sPopupEntry18_4B80* messageEntry = &D_004C6C08_4B80[idx];
     if (messageEntry->kind == 1) {
-        int position = func_001E2DC0(idx);
+        int position = getMessagePositionInCategory(idx);
         int div = 1;
         sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
         switch (groupEntry->category) {
@@ -8150,14 +8150,14 @@ extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E4C78);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_fillRow);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" int func_001E2EA0(int id);
-extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char sub);
+extern "C" int getMessageSenderName(int id);
+extern "C" void cOVState_MESSAGECENTER_setRowSubject(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char sub);
 extern char str_plus[];
 extern char str_dash[];
 extern char str_sp_gt[];
@@ -8234,7 +8234,7 @@ static inline void show_4C78(sObj_4C78* o)
  * (miFolderTex), an open folder (miMinusFolderTex, folder flag set) or a question mark (miQuestionMarkTex, not a
  * folder's first message); for a queued message shows the unread icon while its read bit (+0xC8) is clear and hides the
  * FAQ icon. The number reads "+", "-" or " >" on folder rows, else "%d." with mScrollOffset + @p slot + 1. From gets
- * the sender's name (func_001E2EA0) and keeps @p id at +0x18. The subject is func_001E4F70's variant text for messages
+ * the sender's name (getMessageSenderName) and keeps @p id at +0x18. The subject is cOVState_MESSAGECENTER_setRowSubject's variant text for messages
  * of kind 1, else the message's subject id (+0x10).
  *
  * @param self_  the message center
@@ -8243,17 +8243,17 @@ static inline void show_4C78(sObj_4C78* o)
  * @param id     the message index (D_004C6C08)
  * @param sub    the subject variant
  */
-extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, int id, unsigned char sub)
+extern "C" void cOVState_MESSAGECENTER_fillRow(cOVState_MESSAGECENTER* self_, int idx, int slot, int id, unsigned char sub)
 {
     sPopup_4C78* self = (sPopup_4C78*)self_;
     char buf[16];
     sEnt18_4C78* messageEntry = &D_004C6C08_4C78[id];
     sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->groupIndex];
-    char* messageList = (char*)func_001E39F8(self);
+    char* messageList = (char*)getMessageList(self);
     if (idx == -1) {
         if (groupEntry->isFolder != 0) {
             if (id == groupEntry->start) {
-                if (func_001E3A30(messageEntry->groupIndex) == 0)
+                if (isMessageFlagSet(messageEntry->groupIndex) == 0)
                     setTexture_4C78(self->mpFAQIcon[slot], self->miFolderTex, idx);
                 else
                     setTexture_4C78(self->mpFAQIcon[slot], self->miMinusFolderTex, idx);
@@ -8261,22 +8261,22 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
                 setTexture_4C78(self->mpFAQIcon[slot], self->miQuestionMarkTex, idx);
             }
         }
-        func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-        func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+        cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+        cOVState_MESSAGECENTER_showWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
     } else {
         int mask = 1 << idx;
         if (*(int*)(messageList + 0xC8) & mask) {
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
         } else {
-            func_001E4878((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-            func_001E4840((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+            cOVState_MESSAGECENTER_showWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
+            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
         }
     }
     if (self->mpNumber[slot] != 0) {
         if (groupEntry->isFolder != 0) {
             if (id == groupEntry->start) {
-                if (func_001E3A30(messageEntry->groupIndex) == 0)
+                if (isMessageFlagSet(messageEntry->groupIndex) == 0)
                     sprintf(buf, str_plus);
                 else
                     sprintf(buf, str_dash);
@@ -8290,12 +8290,12 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
         show_4C78(self->mpNumber[slot]);
     }
     if (self->mpFrom[slot] != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)self->mpFrom[slot], func_001E2EA0(messageEntry->sender));
+        cUIText_setUnicodeStringByID((cUIText*)self->mpFrom[slot], getMessageSenderName(messageEntry->sender));
         show_4C78(self->mpFrom[slot]);
         self->mpFrom[slot]->mMiscData = id;
     }
     if (messageEntry->kind == 1) {
-        func_001E4F70((cOVState_MESSAGECENTER*)self, slot, id, sub);
+        cOVState_MESSAGECENTER_setRowSubject((cOVState_MESSAGECENTER*)self, slot, id, sub);
     } else if (self->mpSubject[slot] != 0) {
         cUIText_setUnicodeStringByID((cUIText*)self->mpSubject[slot], messageEntry->subject);
         show_4C78(self->mpSubject[slot]);
@@ -8304,16 +8304,16 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4F70);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_setRowSubject);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
-extern "C" int func_001E3388(int id);
-extern "C" unsigned char func_001E3650(int idx);
-extern "C" bool func_001E2D58(int v, int i);
+extern "C" unsigned char cOVState_ViewPopup_getSubjectVariant(cOVState_ViewPopup* self, int idx);
+extern "C" int findMessage(int id);
+extern "C" unsigned char getListMessageVariant(int idx);
+extern "C" bool isMessageInCategory(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A20C4;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
@@ -8336,10 +8336,10 @@ extern char str_kT_MSGSubjectBeatThePeakpct_d[];
  * @param id    the message index
  * @param lvl   the variant number
  */
-extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char lvl)
+extern "C" void cOVState_MESSAGECENTER_setRowSubject(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char lvl)
 {
     char buf[48];
-    if (func_001E2D58(3, id)) {
+    if (isMessageInCategory(3, id)) {
         switch (id) {
         case 115: case 117: case 119: case 121: case 123: case 125: case 0x7F: case 129: case 131: case 133: case 135: case 137:
             sprintf(buf, str_kT_MSGSubjectBCFinishLosspct_d, lvl);
@@ -8348,11 +8348,11 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
             sprintf(buf, str_kT_MSGSubjectBCFinishWinpct_d, lvl);
             break;
         }
-    } else if (func_001E2D58(5, id)) {
+    } else if (isMessageInCategory(5, id)) {
         sprintf(buf, str_kT_MSGSubjectAggressionpct_d, lvl);
-    } else if (func_001E2D58(4, id)) {
+    } else if (isMessageInCategory(4, id)) {
         sprintf(buf, str_kT_MSGSubjectForeshadowpct_d, lvl);
-    } else if (func_001E2D58(8, id)) {
+    } else if (isMessageInCategory(8, id)) {
         sprintf(buf, str_kT_MSGSubjectBeatThePeakpct_d, lvl);
     }
     cOVState_MESSAGECENTER* view = self;
@@ -8365,7 +8365,7 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E50C8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_openViewPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, cUIEngine* a1, cOVState_MESSAGECENTER* owner, int a3, int a4);
@@ -8382,7 +8382,7 @@ extern char str_cOVState_ViewPopup[];
  * @param messageIndex  the message index (the popup's miMessage)
  * @param messageNumber  the number to show (miNumber; -1 from onGainFocus)
  */
-extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int messageIndex, int messageNumber)
+extern "C" void cOVState_MESSAGECENTER_openViewPopup(cOVState_MESSAGECENTER* self, int messageIndex, int messageNumber)
 {
     void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), self->mpEngine, self, messageIndex, messageNumber);
     void* screen = self->mpMessageScreen;
@@ -8393,37 +8393,37 @@ extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int messageIndex, in
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E5148);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_deleteMessage);
 #ifdef SKIP_ASM
-extern "C" void func_001E31B8(int idx);
-extern "C" int func_001E2BB8(int a0, int a1);
-// PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
-extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
+extern "C" void removeMessageAt(int idx);
+extern "C" int countMessageRows(int a0, int a1);
+// PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
+extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_showMessageCounts(cOVState_MESSAGECENTER*);
+extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER*);
 
 /**
  * Deletes a queued message from the message center and refreshes it.
  *
- * Removes list entry @p idx (func_001E31B8), moves the menu's selected row (mScrollItemCurrent) back by one when it is
+ * Removes list entry @p idx (removeMessageAt), moves the menu's selected row (mScrollItemCurrent) back by one when it is
  * now past the end, then refreshes the rows, labels and arrows.
  *
  * @param idx  the message-list position
  */
-extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
+extern "C" void cOVState_MESSAGECENTER_deleteMessage(cOVState_MESSAGECENTER* self, int idx)
 {
-    func_001E31B8(idx);
+    removeMessageAt(idx);
     int cur = self->mpMenu->mScrollItemCurrent;
-    int n = func_001E2BB8(4, 1);
-    n += func_001E33E8_noarg();
+    int n = countMessageRows(4, 1);
+    n += getMessageCount_noarg();
     if (cur >= n) {
         cur--;
     }
     self->mpMenu->mScrollItemCurrent = cur;
-    func_001E48B0(self);
-    func_001E4758(self);
-    func_001E4658(self);
+    cOVState_MESSAGECENTER_fillRows(self);
+    cOVState_MESSAGECENTER_showMessageCounts(self);
+    cOVState_MESSAGECENTER_updateScrollArrows(self);
 }
 #endif
 
@@ -8504,10 +8504,10 @@ void* cOVState::ViewPopup_onUpdate()
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onGainTransition);
 #ifdef SKIP_ASM
-extern "C" void func_001E5428(cOVState_ViewPopup* self);
+extern "C" void cOVState_ViewPopup_fillMessage(cOVState_ViewPopup* self);
 
 /**
- * Fills the message view the first time it gains focus (func_001E5428: number, sender, subject, body and buttons).
+ * Fills the message view the first time it gains focus (cOVState_ViewPopup_fillMessage: number, sender, subject, body and buttons).
  *
  * @param on  nonzero on the first transition (On Tour bFirstTime)
  * @return always 0
@@ -8515,7 +8515,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self);
 bool cOVState_ViewPopup::onGainTransition(int on)
 {
     if (on != 0) {
-        func_001E5428(this);
+        cOVState_ViewPopup_fillMessage(this);
     }
     return false;
 }
@@ -8572,7 +8572,7 @@ void cOVState_ViewPopup::onWidgetCreate(cUIThing* widget)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E5428);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_fillMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPopupEntry18_5428 {   // a D_004C6C08 message (names ours)
@@ -8602,20 +8602,20 @@ extern char str_kT_MSGFAQNumber[];
 extern char D_004A2138[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" int func_001E2EA0(int id);
+extern "C" int getMessageSenderName(int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx);
-extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx);
+extern "C" void cOVState_ViewPopup_setSubject(cOVState_ViewPopup* self, int idx);
+extern "C" void cOVState_ViewPopup_setBody(cOVState_ViewPopup* self, int idx);
 
 /**
  * Fills the view popup with its message (miMessage).
  *
  * For a FAQ message (group type 4) hides the square button and mpDeleteMessage and sets mpKeepMessage to kT_BTNKeepMsg.
- * mpNumber shows kT_MSGFAQNumber with the message's position in its category (func_001E2DC0) for FAQ messages, else
- * miNumber ("%d"). mpFrom gets the sender's name (func_001E2EA0); then the subject (func_001E55D0) and the body
- * (func_001E5780) are set.
+ * mpNumber shows kT_MSGFAQNumber with the message's position in its category (getMessagePositionInCategory) for FAQ messages, else
+ * miNumber ("%d"). mpFrom gets the sender's name (getMessageSenderName); then the subject (cOVState_ViewPopup_setSubject) and the body
+ * (cOVState_ViewPopup_setBody) are set.
  */
-extern "C" void func_001E5428(cOVState_ViewPopup* self)
+extern "C" void cOVState_ViewPopup_fillMessage(cOVState_ViewPopup* self)
 {
     sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
     sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
@@ -8638,7 +8638,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
             cFELocale* mgr = SSXApp->FELocale;
             sVEntryS1E5428* vt = (sVEntryS1E5428*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* fmt = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_MSGFAQNumber));
-            sprintf1(buf, fmt, func_001E2DC0(self->miMessage));
+            sprintf1(buf, fmt, getMessagePositionInCategory(self->miMessage));
             cUIText_setUnicodeString(self->mpNumber, buf);
         } else {
             char buf[0x30];
@@ -8647,30 +8647,30 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
         }
     }
     if (self->mpFrom != 0) {
-        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(messageEntry->sender));
+        cUIText_setUnicodeStringByID(self->mpFrom, getMessageSenderName(messageEntry->sender));
     }
-    func_001E55D0(self, self->miMessage);
-    func_001E5780(self, self->miMessage);
+    cOVState_ViewPopup_setSubject(self, self->miMessage);
+    cOVState_ViewPopup_setBody(self, self->miMessage);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E55D0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_setSubject);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void func_001E5638(cOVState_ViewPopup* self, int idx);
+extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, int idx);
 
 /**
- * Sets the view popup's subject: the variant text (func_001E5638) for messages of kind 1, else the subject id (+0x10).
+ * Sets the view popup's subject: the variant text (cOVState_ViewPopup_setVariantSubject) for messages of kind 1, else the subject id (+0x10).
  *
  * @param idx  the message index
  */
-extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx)
+extern "C" void cOVState_ViewPopup_setSubject(cOVState_ViewPopup* self, int idx)
 {
     char* messageEntry = (char*)&D_004C6C08[idx];
     if (*(int*)(messageEntry + 0x8) == 1) {
-        func_001E5638(self, idx);
+        cOVState_ViewPopup_setVariantSubject(self, idx);
     } else {
         cUIText* uiText = self->mpSubject;
         if (uiText != 0) {
@@ -8681,16 +8681,16 @@ extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5638);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_setVariantSubject);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx);
-extern "C" int func_001E3388(int id);
-extern "C" unsigned char func_001E3650(int idx);
-extern "C" bool func_001E2D58(int v, int i);
+extern "C" unsigned char cOVState_ViewPopup_getSubjectVariant(cOVState_ViewPopup* self, int idx);
+extern "C" int findMessage(int id);
+extern "C" unsigned char getListMessageVariant(int idx);
+extern "C" bool isMessageInCategory(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A20C4;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
@@ -8702,22 +8702,22 @@ extern char str_kT_MSGSubjectBeatThePeakpct_d[];
 /**
  * Sets the view popup's subject to the text for a message's variant.
  *
- * The variant is func_001E5AA0's when D_004A20C4 is set, else the one stored with the queued message (func_001E3650 of
- * its list position). The string id is built as in func_001E4F70 (BCFinishLoss / Win, Aggression, Foreshadow,
+ * The variant is cOVState_ViewPopup_getSubjectVariant's when D_004A20C4 is set, else the one stored with the queued message (getListMessageVariant of
+ * its list position). The string id is built as in cOVState_MESSAGECENTER_setRowSubject (BCFinishLoss / Win, Aggression, Foreshadow,
  * BeatThePeak) and set on mpSubject.
  *
  * @param id  the message index
  */
-extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
+extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, int id)
 {
     char buf[32];
     unsigned char lvl;
     if (D_004A20C4 != 0) {
-        lvl = func_001E5AA0(self, id);
+        lvl = cOVState_ViewPopup_getSubjectVariant(self, id);
     } else {
-        lvl = func_001E3650(func_001E3388(id));
+        lvl = getListMessageVariant(findMessage(id));
     }
-    if (func_001E2D58(3, id)) {
+    if (isMessageInCategory(3, id)) {
         switch (id) {
         case 115: case 117: case 119: case 121: case 123: case 125: case 0x7F: case 129: case 131: case 133: case 135: case 137:
             sprintf(buf, str_kT_MSGSubjectBCFinishLosspct_d, lvl);
@@ -8726,11 +8726,11 @@ extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
             sprintf(buf, str_kT_MSGSubjectBCFinishWinpct_d, lvl);
             break;
         }
-    } else if (func_001E2D58(5, id)) {
+    } else if (isMessageInCategory(5, id)) {
         sprintf(buf, str_kT_MSGSubjectAggressionpct_d, lvl);
-    } else if (func_001E2D58(4, id)) {
+    } else if (isMessageInCategory(4, id)) {
         sprintf(buf, str_kT_MSGSubjectForeshadowpct_d, lvl);
-    } else if (func_001E2D58(8, id)) {
+    } else if (isMessageInCategory(8, id)) {
         sprintf(buf, str_kT_MSGSubjectBeatThePeakpct_d, lvl);
     }
     if (self->mpSubject != 0) {
@@ -8740,7 +8740,7 @@ extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5780);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_setBody);
 #ifdef SKIP_ASM
 
 /**
@@ -8751,7 +8751,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5780);
  *
  * @param idx  the message index
  */
-extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
+extern "C" void cOVState_ViewPopup_setBody(cOVState_ViewPopup* self, int idx)
 {
     char* messageEntry = (char*)&D_004C6C08[idx];
     int kind = *(int*)(messageEntry + 0x8);
@@ -8782,12 +8782,12 @@ struct sEntry14_5800 {
     char pad_0x4[0x14 - 0x4];
 };
 extern sEntry14_5800 D_00441630_5800[] __asm__("D_00441630");
-extern "C" void func_001E3268(int id);
+extern "C" void removeMessage(int id);
 
 /**
  * Handles the message view's widget events: delete the message, or close the popup.
  *
- * kONOPTION deletes the shown message from the saved list (func_001E3268) unless its type (D_00441630[entry +0x4])
+ * kONOPTION deletes the shown message from the saved list (removeMessage) unless its type (D_00441630[entry +0x4])
  * is kMessageGroupFAQ, in which case nothing happens; it then falls through to close. kONNEXT and kONPREV (and a
  * delete) tell the parent state's onPopupEvent (slot 17) kONSCREENPOPUPPREV (back) from this popup.
  *
@@ -8804,7 +8804,7 @@ void cOVState_ViewPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         if (typeEntry->type == kMessageGroupFAQ) {
             return;
         }
-        func_001E3268(id);
+        removeMessage(id);
     }
     case cUIState::kONNEXT: {
         cUIState* parentState = mpParentState;
@@ -8821,31 +8821,31 @@ void cOVState_ViewPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E58E0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_showNextMessage);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" int func_001E34D8(int i);
-extern "C" int func_001E3408();
-extern "C" int func_001E3460(int* out);
-extern "C" void func_001E5428(cOVState_ViewPopup* self);
-// PORT: func_001E33E8 is declared (void*) but called with no argument here
-unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+extern "C" int getNextMessageInGroup(int i);
+extern "C" int countUnreadMessages();
+extern "C" int findUnreadMessage(int* out);
+extern "C" void cOVState_ViewPopup_fillMessage(cOVState_ViewPopup* self);
+// PORT: getMessageCount is declared (void*) but called with no argument here
+unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 
 /**
  * Steps the view popup to the next message, or tells its parent to close it.
  *
- * For a FAQ message moves to the next message of the same folder (func_001E34D8), adds 1 to miNumber and refills the
- * popup. Otherwise, while unread messages remain, shows the first unread one (func_001E3460), marks it read and sets
+ * For a FAQ message moves to the next message of the same folder (getNextMessageInGroup), adds 1 to miNumber and refills the
+ * popup. Otherwise, while unread messages remain, shows the first unread one (findUnreadMessage), marks it read and sets
  * miNumber to its row number (count minus position). When there is nothing more it sends mpParentState onPopupEvent
  * (vtable entry 17) with this popup and kONSCREENPOPUPPREV.
  */
-extern "C" void func_001E58E0(cOVState_ViewPopup* self)
+extern "C" void cOVState_ViewPopup_showNextMessage(cOVState_ViewPopup* self)
 {
     int id = self->miMessage;
     sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
     sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->groupIndex];
     if (groupEntry->type == kMessageGroupFAQ) {
-        int n = func_001E34D8(id);
+        int n = getNextMessageInGroup(id);
         if (n == -1) {
             cUIState* parentState = self->mpParentState;
             parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
@@ -8853,14 +8853,14 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         }
         self->miMessage = n;
         self->miNumber = self->miNumber + 1;
-        func_001E5428(self);
-    } else if (func_001E3408() > 0) {
-        sPopupList* messageList = func_001E39F8_list();
+        cOVState_ViewPopup_fillMessage(self);
+    } else if (countUnreadMessages() > 0) {
+        sPopupList* messageList = getMessageList_list();
         int idx;
-        self->miMessage = func_001E3460(&idx);
+        self->miMessage = findUnreadMessage(&idx);
         messageList->mask |= 1 << idx;
-        self->miNumber = func_001E33E8_noarg() - idx;
-        func_001E5428(self);
+        self->miNumber = getMessageCount_noarg() - idx;
+        cOVState_ViewPopup_fillMessage(self);
     } else {
         cUIState* parentState = self->mpParentState;
         parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
@@ -8898,24 +8898,24 @@ int cOVState_ViewPopup::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigne
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5AA0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_getSubjectVariant);
 #ifdef SKIP_ASM
 extern int D_004A20C4;
 
 /**
  * Returns a message's subject variant from its position in its category, when D_004A20C4 is set.
  *
- * Category 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0 (position from func_001E2DC0).
+ * Category 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0 (position from getMessagePositionInCategory).
  *
  * @param idx  the message index
  * @return the variant, or 0xFF when D_004A20C4 is clear
  */
-extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
+extern "C" unsigned char cOVState_ViewPopup_getSubjectVariant(cOVState_ViewPopup* self, int idx)
 {
     if (D_004A20C4 == 0) {
         return 0xFF;
     }
-    int position = func_001E2DC0(idx);
+    int position = getMessagePositionInCategory(idx);
     int div = 1;
     sPopupEntry18* messageEntry = &D_004C6C08[idx];
     sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
@@ -9377,7 +9377,7 @@ extern char str_helptext_b[];
 
 extern "C" int fptoui(float f);
 
-extern "C" char* func_0020A1A8(int v);
+extern "C" char* formatMinutesSeconds(int v);
 
 extern unsigned int D_00536640[];
 
@@ -9388,7 +9388,7 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" unsigned short* func_002C2540(void* dst, const char* s);
 extern "C" void sprintf2(void* dst, const char* fmt, ...);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* iface);
-extern "C" char* func_00146F88(void* iface, int idx);
+extern "C" char* cBENewPlayerInterface_getRiderName(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
@@ -9570,10 +9570,10 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                     }
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER && i == cGameModeMan_iRanking[pl0]) {
-                    cUIText_setAsciiString(uiText, func_00146F88(player, pl0));
+                    cUIText_setAsciiString(uiText, cBENewPlayerInterface_getRiderName(player, pl0));
                 } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
                     && i == cGameModeMan_iRanking[pl1]) {
-                    cUIText_setAsciiString(uiText, func_00146F88(player, pl1));
+                    cUIText_setAsciiString(uiText, cBENewPlayerInterface_getRiderName(player, pl1));
                 } else {
                     int rider = raceSetup->iCharacters[idx];
                     int outfit = raceSetup->iCheatCharacters[idx];
@@ -9585,7 +9585,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                     cUIText_setAsciiString(uiText, str_DNF);
                     done = 1;
                 } else if (track == 0 || track == 5) {
-                    cUIText_setAsciiString(uiText, func_0020A1A8(fptoui(D_00536640[idx] * 0.01666666753590107f)));
+                    cUIText_setAsciiString(uiText, formatMinutesSeconds(fptoui(D_00536640[idx] * 0.01666666753590107f)));
                 } else {
                     unsigned int time = D_00536640[idx];
                     sprintf(text, D_004A2138, time);
@@ -9646,9 +9646,9 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 ((cUIThing*)uiText)->setVisible(0);
             } else {
                 if (cGameModeMan_iRanking[pl0] < cGameModeMan_iRanking[pl1]) {
-                    func_002C2540(text, func_00146F88(player, pl0));
+                    func_002C2540(text, cBENewPlayerInterface_getRiderName(player, pl0));
                 } else {
-                    func_002C2540(text, func_00146F88(player, pl1));
+                    func_002C2540(text, cBENewPlayerInterface_getRiderName(player, pl1));
                 }
                 unsigned short msg[200];
                 unsigned short* msgFmt = Loc1E6718(str_kT_OVRCMNCongratP1);
@@ -10014,7 +10014,7 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int fptoui(float f);
-extern "C" char* func_0020A1A8(int v);
+extern "C" char* formatMinutesSeconds(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
@@ -10090,7 +10090,7 @@ void cOVState_RACE_FINISHOV::onCreateScreen()
     cUIState_hideObjSafe(this, str_thirdrun);
     cUIState_hideObjSafe(this, str_finalrun);
     cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pointstotal));
-    cUIText_setAsciiString((cUIText*)screenWidget, func_0020A1A8(fptoui(D_00536640[pl] * 0.01666666753590107f)));
+    cUIText_setAsciiString((cUIText*)screenWidget, formatMinutesSeconds(fptoui(D_00536640[pl] * 0.01666666753590107f)));
     int off = pl * 4;
     int i;
     for (i = 1; i < 7; i++) {
@@ -10504,7 +10504,7 @@ extern "C" int cOVState_BASSSP_QUAL_FINISHOV_handleEvent(cOVState_BASSSP_QUAL_FI
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8920);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
@@ -10519,8 +10519,8 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int fptoui(float f);
-extern "C" char* func_0020A1A8(int v);
-extern "C" void* func_001FD190(int v);
+extern "C" char* formatMinutesSeconds(int v);
+extern "C" void* getPeakChallengeEventName(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_005366A8[];
@@ -10557,13 +10557,13 @@ extern char str_overlayOptpct_d[];
  * Builds the peak challenge results overlay (overlay 22, vtable D_00473ED8, entry 4 onCreateScreen).
  *
  * Adds "70peakchal_results" (kept at +0x40) over "OV_darkblue" and runs cOVState_onCreateScreen. "title1" reads
- * kT_TITLERivalChallenge and "title2" func_001FD190's name for game events 6-11. For events 6-8 the labels read
+ * kT_TITLERivalChallenge and "title2" getPeakChallengeEventName's name for game events 6-11. For events 6-8 the labels read
  * kT_OVRCMNTimeToBeatColon / kT_OVRCMNYourTimeColon with the target time (mode data +0x78) and the rider's time or DNF;
  * otherwise kT_OVRCMNScoreToBeatColon / kT_CMNYourScore with the target score (+0x7C). The help text is
  * kT_HELPCongratWonChal for places 0-3, else kT_HELPSorryBeatTime or kT_HELPSorryBeatScore, hidden when the player gave
  * up; the first three overlayOpt buttons take option ids from D_0046E9B0 and the rest are hidden.
  */
-extern "C" void func_001E8920(cOVState* self)
+extern "C" void cOVState_PEAKCHAL_RESULTS_onCreateScreen(cOVState* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_70peakchal_results), 0);
@@ -10587,7 +10587,7 @@ extern "C" void func_001E8920(cOVState* self)
     uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title2));
     if (trk < 12) {
         if (trk >= 6) {
-            cUIText_setUnicodeString(uiText, func_001FD190(trk));
+            cUIText_setUnicodeString(uiText, getPeakChallengeEventName(trk));
         }
     }
     cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_label_target_timescore));
@@ -10597,11 +10597,11 @@ extern "C" void func_001E8920(cOVState* self)
     if (trk >= 6 && trk <= 8) {
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
-        cUIText_setAsciiString(targetValue, func_0020A1A8(fptoui(modeData->uiTimeLimit * 0.01666666753590107f)));
+        cUIText_setAsciiString(targetValue, formatMinutesSeconds(fptoui(modeData->uiTimeLimit * 0.01666666753590107f)));
         if (D_005366A8[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            cUIText_setAsciiString(resultValue, func_0020A1A8(fptoui(D_00536640[0] * 0.01666666753590107f)));
+            cUIText_setAsciiString(resultValue, formatMinutesSeconds(fptoui(D_00536640[0] * 0.01666666753590107f)));
         }
     } else {
         char buf[32];
@@ -10657,35 +10657,35 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8E70__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates the peak challenge results overlay: runs cOVState_onUpdate (vtable entry 12).
  *
  * @return cOVState_onUpdate's result
  */
-void* func_001E8E70(void* self)
+void* cOVState_PEAKCHAL_RESULTS_onUpdate(void* self)
 {
     return cOVState_onUpdate(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8E90__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onInputBegin__FPv);
 #ifdef SKIP_ASM
 /**
  * Ignores input on the peak challenge results overlay (vtable entry 8, onInputBegin).
  *
  * @return 0
  */
-int func_001E8E90(void* self)
+int cOVState_PEAKCHAL_RESULTS_onInputBegin(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the peak challenge results menu's events (vtable entry 20, onWidgetMenu): 257 for kONNEXT, else 0.
@@ -10694,14 +10694,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E8E98(void* self, int widget, int event)
+extern "C" int cOVState_PEAKCHAL_RESULTS_onWidgetMenu(void* self, int widget, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8EA8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
@@ -10714,7 +10714,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8EA8(void* self, cUIThing* popup, int event)
+extern "C" void cOVState_PEAKCHAL_RESULTS_onWidgetEvent(void* self, cUIThing* popup, int event)
 {
     if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
@@ -10725,7 +10725,7 @@ extern "C" void func_001E8EA8(void* self, cUIThing* popup, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8ED0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -10735,7 +10735,7 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * Plays menu sound 0xE when the peak challenge results overlay gains focus, after cUIState_onGainFocus (vtable entry
  * 6).
  */
-extern "C" void func_001E8ED0(void* self)
+extern "C" void cOVState_PEAKCHAL_RESULTS_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);

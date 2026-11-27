@@ -36,7 +36,7 @@ struct cBEOptionInterface : public cBEInterface {
     //   bIsActive: [R] getThis sets 0; [U] cBEOptionInterface_setOptionActive (static: instance->bIsActive = arg);
     //       cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit, cBERaceState_onEnter/onExit set 0/1
     //   the vptr (0x0C): [R] getThis and cBEOptionInterface_cBEOptionInterface store cBEOptionInterface_vtbl; [P]
-    //       __18cBEOptionInterface; [U] defaultSound/defaultGame/defaultHUD/defaultCtrl and func_001C2BA8 call slot 1
+    //       __18cBEOptionInterface; [U] defaultSound/defaultGame/defaultHUD/defaultCtrl and cFEStateNetQuickMessages_onResetMessagesPopupEvent call slot 1
     //       (submit) through it, cBESaveInterface_loadSaveGame slot 2 (discard)
 
     // Methods bound to their retail symbols by asm labels.
@@ -94,7 +94,7 @@ struct tBEOptionDB {
     unsigned int iUseVOIP : 1;          // 0x0 bit 18 [O]; [R] defaultSound 1
     unsigned int iUseMetricUnits : 1;   // 0x0 bit 19 [O]; [R] defaultGame 0
     unsigned int iUseWidescreen : 2;    // 0x0 bits 20-21 [O]; [R] defaultGame from the console config
-    unsigned int iLanguage : 3;         // 0x0 bits 22-24 [O]; [R] defaultGame 0; [U] func_0029F198 maps it to the
+    unsigned int iLanguage : 3;         // 0x0 bits 22-24 [O]; [R] defaultGame 0; [U] cSSXAudio_GetSpeechLanguage maps it to the
                                         //     speech language bit
     unsigned int iBrightness : 4;       // 0x0 bits 25-28 [O]; [R] defaultGame 9
     unsigned int iReplayOption : 1;     // 0x0 bit 29 [O]; [R] defaultGame 0
@@ -117,8 +117,8 @@ enum eWidescreenSetting {
 };
 
 // The options' language index (tBEOptionDB::iLanguage, bits 22..24 of cBEOptionInterface_mOption's first word; names
-// ours). [U] func_0029F198 maps 0..3 to kSPEECHLANG_English, French, German and Spanish (anything else to English);
-// func_00146F88 names an unnamed player PLAYER, JOUEUR, SPIELER or JUGADOR by it.
+// ours). [U] cSSXAudio_GetSpeechLanguage maps 0..3 to kSPEECHLANG_English, French, German and Spanish (anything else to English);
+// cBENewPlayerInterface_getRiderName names an unnamed player PLAYER, JOUEUR, SPIELER or JUGADOR by it.
 enum eOptionSpeechLanguage {
     kOPTLANG_English = 0, kOPTLANG_French = 1, kOPTLANG_German = 2, kOPTLANG_Spanish = 3
 };

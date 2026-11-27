@@ -5903,7 +5903,7 @@ int AIrand();
 extern "C" void cBoardPressControl_forceExit(void*);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002A0E70(void*, void*, int);
+extern "C" void cSSXAudio_SpeakBump(void*, void*, int);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Len_8388(const t4Vector& v)
@@ -5964,7 +5964,7 @@ static inline t4Vector Get_8388(char* p) { return *(t4Vector*)p; }
  * kAID_BumpFromBehind or kAID_BumpFromFront. Sideways (side axis +0x1A0, mirrored when riding fakie, +0x320) a slow
  * contact (normal speed < 1111.1) at over 1388.9 speed off MS_Railslide adds a random number of half turns to mSpinRate
  * and plays kAID_BumpHardFromTS / kAID_BumpHardFromHS; otherwise kAID_BumpFromTS / kAID_BumpFromHS. With @p flag it
- * plays the bump sound (func_002A0E70). Ends in CS_Bump.
+ * plays the bump sound (cSSXAudio_SpeakBump). Ends in CS_Bump.
  *
  * @param info  the collide info (contact normal at +0x20, normal speed at +0x30)
  * @param flag  nonzero to play the bump sound (On Tour isObject)
@@ -6008,7 +6008,7 @@ void cRider::doBump(tCollideInfo* info, int flag)
         }
     }
     if (flag)
-        func_002A0E70(cAudioInterface_bxAudio(), ((char*)this), played);
+        cSSXAudio_SpeakBump(cAudioInterface_bxAudio(), ((char*)this), played);
     cRider_setControlState_8388(((char*)this), CS_Bump);
 }
 #endif

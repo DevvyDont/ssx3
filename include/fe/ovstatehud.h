@@ -5,7 +5,7 @@
 // wipeout meter, "Now Playing" big-radio popup, slope-style places, countdown, message and skip lines.
 // EA's source is fe/ovstatehud.cpp (the July 2003 preview's strings; On Tour's asserts name ovstatehud.cpp too).
 // Retail code: fe/ovstatehud (ctor 0x001E9A30 ... cOVStateHUD1P_renderMultiText1 0x001F2DB0) and the out-of-line
-// helpers in fe/all_in_one_fe (func_0021CBA0, the destructor, cOVStateHUD1P_renderWipeoutMeter 0x0021D9A0 ...
+// helpers in fe/all_in_one_fe (cOVStateHUD1P_cOVStateHUD1P1, the destructor, cOVStateHUD1P_renderWipeoutMeter 0x0021D9A0 ...
 // cOVStateHUD1P_renderNISSkipMessage 0x00220AD0).
 //
 // Size 0xC98:
@@ -26,7 +26,7 @@
 // string (mpTimeDivider), the "switch" texture (0x470), 26 gen textures, 5x3 boost textures, the "Sphere" texture
 // and two extra bar configs.
 // Evidence tags:
-//   [R] retail's constructors (cOVStateHUD1P_cOVStateHUD1P, func_0021CBA0), destructor and allocation size;
+//   [R] retail's constructors (cOVStateHUD1P_cOVStateHUD1P, cOVStateHUD1P_cOVStateHUD1P1), destructor and allocation size;
 //   [U] how retail code uses the field (C bodies in src/fe/ovstatehud.cpp and src/fe/all_in_one_fe.cpp; the asm of
 //       onUpdate / onRender2D / func_002204A0);
 //   [O] SSX On Tour's DWARF (class cOVStateHUD1P, tHUDRiderInfo, tBigRadioText, tSSPlaceInfo, tBarConfig,
@@ -69,7 +69,7 @@ struct tHUDRiderInfo {
     int playerID;                   // 0x04 [O]; [U] onCreateScreen: the rider's index in the race (On Tour: player index)
     cHUDRadar radar;                // 0x08 (name ours) [R] course-progress tracker (cHUDRadar_cHUDRadar constructs
                                     //       it, vptr cHUDRadar_vtbl at its 0x38; cHUDRadar__cHUDRadar destroys it;
-                                    //       func_0020EB50 lays it out); retail only
+                                    //       cHUDRadar_init lays it out); retail only
     int currRank;                   // 0x44 [O]; [U] -1
     float rankAnimFrame;            // 0x48 [O]; [U] 1.0
     float rankGlowFrame;            // 0x4C [O]; [U] -1.0
@@ -173,7 +173,7 @@ struct cOVStateHUD1P : public cUIState {
     int mTimeSec;                   // 0x184 [O]; [U] onUpdate
     int mTimeSecFrac;               // 0x188 [O]; [U] onUpdate (an int made with cvt.w.s and stored with swc1)
     unsigned int mLastMissionID;    // 0x18C [O]; [U] onCreateScreen / handleEvent 7 (On Tour's RESET) store -1;
-                                    //       func_0021FD38 (the mission indicator) reads it
+                                    //       cOVStateHUD1P_renderMissionIndicator (the mission indicator) reads it
     float mBigRadioAnimFrame;       // 0x190 [O]; [U] -1.0 in onCreateScreen and handleEvent 5 (On Tour's
                                     //       SHOWSONGSTATS)
     float mBigRadioBkgdAnimFrame;   // 0x194 [O]; [U] handleEvent 5 zeroes it; onUpdate, func_002204A0
@@ -225,7 +225,7 @@ struct cOVStateHUD1P : public cUIState {
                                     //       and width / 18, as On Tour's code)
     tBarConfig mWipeoutMeterConfig2P; // 0x554 [O]; [U] ditto from D_00477B88
     int mTextUberIndexLast;         // 0x55C [O]; [U] BXrand() & 1: which Uber hint mTextUberHelp shows; onUpdate
-    tTextPictLine mTextUberHelp;      // 0x560 [O] tTextPictLine (0x14C, as On Tour); [U] func_001E94E0 builds it
+    tTextPictLine mTextUberHelp;      // 0x560 [O] tTextPictLine (0x14C, as On Tour); [U] makeTextPictLineAscii builds it
     tTextPictLine mTextRecoverHelp;   // 0x6AC [O] tTextPictLine; [U] built from D_004A21D8 (RECOVER);
                                     //       renderWipeoutMeter draws it
     tTextPictLine mTextRecoverHelpAlt; // 0x7F8 [O] tTextPictLine; [U] ditto
@@ -401,7 +401,7 @@ CHECK_SIZE(cOVStateHUD1P, 0xC98);
 // whether there are scores): picking the entry with misc data 1 (event 5) asks the custom interface (the engine's first
 // word, slot 4) for the next state and pushes it.
 // EA's source: d:/ssx/code/source/fe/ovstatehud.cpp (preview assert strings; the unit is fe/ovstatehud). Retail code:
-// onCreateScreen / onWidgetEvent in fe/ovstatehud (0x001E8FF0, 0x001E9130); the ctors func_0021D070 (engine 0) /
+// onCreateScreen / onWidgetEvent in fe/ovstatehud (0x001E8FF0, 0x001E9130); the ctors cOVStateHiScoreList_cOVStateHiScoreList1 (engine 0) /
 // cOVStateHiScoreList_cOVStateHiScoreList (pEngine, id) and the dtor in fe/all_in_one_fe (0x0021D070 ... 0x0021D138).
 //
 // Size 0x9C: [O] On Tour's class is 0x90 = On Tour's cOVState (no members of its own); retail's cOVState is 0x9C

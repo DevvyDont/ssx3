@@ -404,7 +404,7 @@ extern "C" void* func_003A3F08(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A3F48);
+INCLUDE_ASM("ui/uivector", __sti__all_in_one_ui_cpp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new(unsigned int, void* p) { return p; }
@@ -477,8 +477,8 @@ extern sColor_3A3F48 D_00508720;
 extern sColor_3A3F48 D_00508730;
 extern sColor_3A3F48 D_00508740;
 
-// The unit declares func_003A3F48 later as returning void*; bind this body by asm label.
-extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_003A3F48");
+// The unit declares __sti__all_in_one_ui_cpp later as returning void*; bind this body by asm label.
+extern "C" void __sti__all_in_one_ui_cpp_impl(int initialize, int priority) __asm__("__sti__all_in_one_ui_cpp");
 
 /**
  * Constructs or tears down the UI module's static objects (g++'s static initialisation and destruction routine).
@@ -492,7 +492,7 @@ extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_0
  * @param initialize  non-zero to construct, zero to destroy
  * @param priority  the init priority; only DEFAULT_INIT_PRIORITY does anything
  */
-extern "C" void func_003A3F48_impl(int initialize, int priority)
+extern "C" void __sti__all_in_one_ui_cpp_impl(int initialize, int priority)
 {
     if (priority == DEFAULT_INIT_PRIORITY) {
         if (initialize != 0) {
@@ -1568,12 +1568,12 @@ extern "C" void cUISoundInterface_soundShutdown1(void) {
 INCLUDE_ASM("ui/uivector", cUIIcon_cUIIcon1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
-extern "C" void* func_0021CCC8(void* p);
+extern "C" void* tAttrIcon_tAttrIcon1(void* p);
 extern void* cUIIcon_vtbl[];
 
 /**
  * Constructs a cUIIcon with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIIcon_vtbl and constructs
- * the tAttrIcon word mAttrIcon (+0x74) with func_0021CCC8.
+ * the tAttrIcon word mAttrIcon (+0x74) with tAttrIcon_tAttrIcon1.
  *
  * Unlike cUIIcon_cUIIcon it leaves mTextureID and mpTextureElem unset. Nothing in retail calls it.
  *
@@ -1583,7 +1583,7 @@ void* cUIIcon::cUIIcon1()
 {
     cUIThing_cUIThing(((char*)this), 0, 0);
     VPTR_OF(cListNode, this) = cUIIcon_vtbl;
-    func_0021CCC8(&mAttrIcon);
+    tAttrIcon_tAttrIcon1(&mAttrIcon);
     return ((char*)this);
 }
 #endif
@@ -1592,12 +1592,12 @@ INCLUDE_ASM("ui/uivector", cUIIcon_cUIIcon);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
-extern "C" void* func_0021CCC8(void* p);
+extern "C" void* tAttrIcon_tAttrIcon1(void* p);
 extern void* cUIIcon_vtbl[];
 
 /**
  * Constructs a UI icon: the cUIThing constructor (cUIThing_cUIThing, declared with only self, so the screen and parent
- * pass through in $a1 / $a2), cUIIcon_vtbl, the icon attributes at +0x74 (func_0021CCC8), mTextureID -1 and
+ * pass through in $a1 / $a2), cUIIcon_vtbl, the icon attributes at +0x74 (tAttrIcon_tAttrIcon1), mTextureID -1 and
  * mpTextureElem 0.
  *
  * @return @p self
@@ -1606,7 +1606,7 @@ extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     VPTR_OF(cListNode, self) = cUIIcon_vtbl;
-    func_0021CCC8(&self->mAttrIcon);
+    tAttrIcon_tAttrIcon1(&self->mAttrIcon);
     self->mTextureID = -1;
     self->mpTextureElem = 0;
     return ((char*)self);
@@ -1654,7 +1654,7 @@ INCLUDE_ASM("ui/uivector", tAttrIcon_tAttrIcon);
  * Clears the low four bits (mIconTiled, mIconFlip, mIconRotate) of a cUIIcon's tAttrIcon byte and returns it: the
  * tAttrIcon constructor.
  *
- * cUIIcon's constructors use func_0021CCC8 for the same job; nothing in retail calls this copy.
+ * cUIIcon's constructors use tAttrIcon_tAttrIcon1 for the same job; nothing in retail calls this copy.
  *
  * @param attr  the tAttrIcon (cUIIcon + 0x74)
  * @return @p attr
@@ -4766,7 +4766,7 @@ int cUIVector_getType(void* vself)
 }
 #endif
 
-extern "C" void* func_003A3F48(int, int);
+extern "C" void* __sti__all_in_one_ui_cpp(int, int);
 
 //100%
 INCLUDE_ASM("ui/uivector", tAttrThing_tAttrThing);
@@ -4910,29 +4910,29 @@ extern "C" void* tAttrVector_tAttrVector(tAttrVector* attrVector)
 INCLUDE_ASM("ui/uivector", func_003A6648__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the UI module's static constructors: func_003A3F48(1, 0xFFFF) (g++'s static initialiser for this unit).
+ * Runs the UI module's static constructors: __sti__all_in_one_ui_cpp(1, 0xFFFF) (g++'s static initialiser for this unit).
  *
- * @return whatever func_003A3F48 leaves in the return register (it returns nothing)
+ * @return whatever __sti__all_in_one_ui_cpp leaves in the return register (it returns nothing)
  */
 void* func_003A6648(void* self)
 {
-    return func_003A3F48(1, 0xffff);
+    return __sti__all_in_one_ui_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_003A3F48(int, int);
+extern "C" void* __sti__all_in_one_ui_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("ui/uivector", func_003A6668__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the UI module's static destructors: func_003A3F48(0, 0xFFFF) (g++'s static destructor for this unit).
+ * Runs the UI module's static destructors: __sti__all_in_one_ui_cpp(0, 0xFFFF) (g++'s static destructor for this unit).
  *
- * @return whatever func_003A3F48 leaves in the return register (it returns nothing)
+ * @return whatever __sti__all_in_one_ui_cpp leaves in the return register (it returns nothing)
  */
 void* func_003A6668(void* self)
 {
-    return func_003A3F48(0, 0xffff);
+    return __sti__all_in_one_ui_cpp(0, 0xffff);
 }
 #endif
 

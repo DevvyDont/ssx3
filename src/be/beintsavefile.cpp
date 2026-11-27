@@ -341,7 +341,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_loadSaveProfile);
 cBEIface_2BB0* cBEStatInterface_getThis_2DE0() __asm__("cBEStatInterface_getThis");
 cBEIface_2BB0* cBEBAGTInterface_getThis_2DE0() __asm__("cBEBAGTInterface_getThis__Fv");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001515B8(void* p);
+extern "C" void cBECharProfileDB_restoreVisibleFlags(void* p);
 struct sProfSub_2DE0 { char pad[0x288]; int keep; char pad28C[0xF88 - 0x28C]; };
 struct sProfile_2DE0 { sProfSub_2DE0 sub[10]; };
 extern sProfile_2DE0 cBELibrary_profileLib_2DE0[] __asm__("cBELibrary_profileLib");
@@ -355,7 +355,7 @@ extern sCharFlag_2DE0 D_00535B31[];
  * one and returns false on a mismatch. Otherwise copies the 12-byte name into cBELibrary_playerDB[@p idx], the ten
  * character records into cBELibrary_profileLib[@p idx] and one byte into playerDB +0x11, then calls the onLoad of the
  * player, stat and BAGT interfaces. The word at +0x288 of each character record (the item index table pointer that
- * func_00156C70 reads) is kept across the load, and func_001515B8 is called on each record afterwards.
+ * cBERewardInterface_getRandomUnownedPeakBolt reads) is kept across the load, and cBECharProfileDB_restoreVisibleFlags is called on each record afterwards.
  *
  * @param buf  the save data read from the memory card
  * @param idx  the profile slot to load into (On Tour iProfile)
@@ -385,7 +385,7 @@ bool cBESaveInterface::loadSaveProfile(char* buf, int idx)
     cBEBAGTInterface_getThis_2DE0()->onLoad();
     for (int i = 0; i < 10; i++) {
         cBELibrary_profileLib_2DE0[idx].sub[i].keep = keep[i];
-        func_001515B8(&cBELibrary_profileLib_2DE0[idx].sub[i]);
+        cBECharProfileDB_restoreVisibleFlags(&cBELibrary_profileLib_2DE0[idx].sub[i]);
     }
     return true;
 }

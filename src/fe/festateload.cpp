@@ -104,7 +104,7 @@ extern "C" void cUITemplate_MAP_onDestroyScreen(void* tmpl);
  * Destroys the event select state's screens, then tears down its map template (+0x48).
  *
  * After cUIState_onDestroyScreen(), cUITemplate_MAP_onDestroyScreen() unloads the template's async file, removes the PDA template
- * in map states 1, 3 and 4, and calls func_0028F678() on the audio object with 0.
+ * in map states 1, 3 and 4, and calls cSSXAudio_LeaveMapScreen() on the audio object with 0.
  */
 void cFEStateEventSelect::onDestroyScreen()
 {
@@ -307,7 +307,7 @@ void cFEStateEventSelect::onUpdate()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186A08);
+INCLUDE_ASM("fe/festateload", cFEStateMemCard_cFEStateMemCard1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
@@ -322,8 +322,8 @@ extern "C" void cFEStateMemCard_callbackFileNotFound();
 extern "C" void cFEStateMemCard_callbackFileChecked();
 extern "C" void cFEStateMemCard_callbackSysRecheckFile();
 extern "C" void cFEStateMemCard_callbackCardsChecked();
-extern "C" void func_00186C98();
-extern "C" void func_00186D60();
+extern "C" void cFEStateMemCard_callbackConfirmFormat();
+extern "C" void cFEStateMemCard_callbackConfirmNoCards();
 extern "C" void cFEStateMemCard_callbackAcknowledgeCardStatusChange();
 extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
 
@@ -336,13 +336,13 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
  * (cFEStateMemCard_mInstance) and clears cFEStateMemCard_mProfileFile and cFEStateMemCard_mStage. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
  * +0x240 and +0x244 to 0, +0x19C to 26 and +0x22C and +0x238 to -1. On cSSXApp_getMCManager()'s manager it sets +0x120,
  * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (cFEStateMemCard_callbackLoadReady,
- * cFEStateMemCard_callbackFileNotFound, cFEStateMemCard_callbackFileChecked, cFEStateMemCard_callbackSysRecheckFile, cFEStateMemCard_callbackCardsChecked, func_00186C98, func_00186D60, cFEStateMemCard_callbackAcknowledgeCardStatusChange,
+ * cFEStateMemCard_callbackFileNotFound, cFEStateMemCard_callbackFileChecked, cFEStateMemCard_callbackSysRecheckFile, cFEStateMemCard_callbackCardsChecked, cFEStateMemCard_callbackConfirmFormat, cFEStateMemCard_callbackConfirmNoCards, cFEStateMemCard_callbackAcknowledgeCardStatusChange,
  * cFEStateMemCard_callbackConfirmNoFreeBlocks). Callers allocate 584 bytes ("cFEStateMemCard").
  *
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, cUIEngine* engine)
+extern "C" cFEStateMemCard* cFEStateMemCard_cFEStateMemCard1(cFEStateMemCard* self, cUIEngine* engine)
 {
     cFEMemCard_cFEMemCard2((self), engine, 2);
     int one = 1;
@@ -369,8 +369,8 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, cUIEngine* engi
     mc->callbackFileChecked = (void (*)())((void*)cFEStateMemCard_callbackFileChecked);
     mc->callbackSysRecheckFile = (void (*)())((void*)cFEStateMemCard_callbackSysRecheckFile);
     mc->callbackCardsChecked = (void (*)())((void*)cFEStateMemCard_callbackCardsChecked);
-    mc->callbackConfirmFormat = (void (*)())((void*)func_00186C98);
-    mc->callbackConfirmNoCards = (void (*)())((void*)func_00186D60);
+    mc->callbackConfirmFormat = (void (*)())((void*)cFEStateMemCard_callbackConfirmFormat);
+    mc->callbackConfirmNoCards = (void (*)())((void*)cFEStateMemCard_callbackConfirmNoCards);
     mc->callbackAcknowledgeCardStatusChange =
         (int (*)(int))((void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange);
     mc->callbackConfirmNoFreeBlocks = (void (*)())((void*)cFEStateMemCard_callbackConfirmNoFreeBlocks);

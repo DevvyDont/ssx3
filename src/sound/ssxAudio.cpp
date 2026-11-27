@@ -84,19 +84,19 @@ extern "C" void* operator_new__FUi(unsigned int size, const char* tag, int flags
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float).
 void cSSXAudio_SetCurrVolume_4C68(void*, int, float) __asm__("cSSXAudio_SetCurrVolume");
 extern "C" void cSSXAudio_SetPreset(cSSXAudio* self, int mode);
-extern "C" void func_00289470(cSSXAudio* self);
-extern "C" void func_00289520(cSSXAudio* self, const char* name);
+extern "C" void cSSXAudio_ReadPlayListNames(cSSXAudio* self);
+extern "C" void cSSXAudio_SelectPlayList(cSSXAudio* self, const char* name);
 void cSSXAudio_LoadMixes_4C68(void* self) __asm__("cSSXAudio_LoadMixes");
 extern "C" void cSSXAudio_InitAttachedSounds(void* self);
 extern "C" void SNDSYS_adduserdataclient(void (*cb)(void*));
 extern "C" void cSSXAudio_HandleUserChunk(void* msg);
 extern "C" void cSSXAudio_ResetLift(void* self);
-extern "C" void func_002A4590(void* self, int flag);
-extern "C" void func_0029ED90(char* self, int restart);
+extern "C" void cSSXAudio_ResetEventResult(void* self, int flag);
+extern "C" void cSSXAudio_OpenSpeechLanguage(char* self, int restart);
 extern "C" void SPCH_Init(void* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int a1, int a2);
-extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
-extern "C" void func_0028F700(void* self);
+extern "C" void cSpeechSys_CreateInstance(void* self, int a, int b, char* name, int c, int d, int e);
+extern "C" void cSSXAudio_LoadLoadingScreenBank(void* self);
 extern char str_CircFIFOBuff[];
 extern char str_CHAR[];
 extern void* D_00483688[];
@@ -281,8 +281,8 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     cSSXAudio_SetCurrVolume_4C68(self, 0, 0.9090909361839294f);
     self->mPreset = 0;
     self->SetPreset(0);
-    func_00289470(self);
-    func_00289520((cSSXAudio*)self, A_4C68->m60A4);
+    cSSXAudio_ReadPlayListNames(self);
+    cSSXAudio_SelectPlayList((cSSXAudio*)self, A_4C68->m60A4);
     cSSXAudio_LoadMixes_4C68(self);
     cSSXAudio_InitAttachedSounds(self);
     SNDSYS_adduserdataclient(cSSXAudio_HandleUserChunk);
@@ -301,11 +301,11 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     cSSXAudio_ResetLift(self);
     for (int i = 0; i < 23; i++)
         A_4C68->m579C[i] = 0;
-    func_002A4590(self, 1);
-    func_0029ED90(S_4C68, 0);
+    cSSXAudio_ResetEventResult(self, 1);
+    cSSXAudio_OpenSpeechLanguage(S_4C68, 0);
     SPCH_Init(A_4C68->m5560);
-    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)self->GetCurrAppliedVolumePtr(4, 0), 1, -1);
-    func_0028F700(self);
+    cSpeechSys_CreateInstance(A_4C68->m5560, 0, 0, str_CHAR, (int)self->GetCurrAppliedVolumePtr(4, 0), 1, -1);
+    cSSXAudio_LoadLoadingScreenBank(self);
     return S_4C68;
 }
 #undef S_4C68
@@ -319,9 +319,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio__cSSXAudio);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void cSSXAudio_HandleUserChunk(void* msg);
-extern "C" void func_0028F730(void* self);
+extern "C" void cSSXAudio_UnloadLoadingScreenBank(void* self);
 extern "C" void SNDSYS_removeuserdataclient(void (*cb)(void*));
-extern "C" void func_002B0DA0(void* p);
+extern "C" void cSpeechSys_Shutdown(void* p);
 extern "C" void FILESYS_delbigsync(void* h, int a);
 extern "C" void cController__cController(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
@@ -355,8 +355,8 @@ extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
 /**
  * Destroys the audio system: shuts down its parts, frees the "CircFIFOBuff" and runs the base destructors.
  *
- * It restores the base vtables first, then calls func_0028F730, unregisters the cSSXAudio_HandleUserChunk callback and
- * calls func_002B0DA0 on the speech system. It also releases +0x5728 (FILESYS_delbigsync) and runs the base part's
+ * It restores the base vtables first, then calls cSSXAudio_UnloadLoadingScreenBank, unregisters the cSSXAudio_HandleUserChunk callback and
+ * calls cSpeechSys_Shutdown on the speech system. It also releases +0x5728 (FILESYS_delbigsync) and runs the base part's
  * destructor (cController__cController). With bit 1 of @p flags it also destroys the virtual bases (stream system, bank
  * manager, cSoundSys).
  *
@@ -392,9 +392,9 @@ extern "C" void cSSXAudio__cSSXAudio(cSSXAudio* self, int flags)
         *(sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &vtbl3;
         vtbl3.e[1].delta = D_00483728_285210.e[1].delta + delta2;
     }
-    func_0028F730(self);
+    cSSXAudio_UnloadLoadingScreenBank(self);
     SNDSYS_removeuserdataclient(cSSXAudio_HandleUserChunk);
-    func_002B0DA0(speechSys);
+    cSpeechSys_Shutdown(speechSys);
     if (self->mLanguageBigFile)
         FILESYS_delbigsync(self->mLanguageBigFile, 100);
     if (self->mPlayHistory.Array)
@@ -485,7 +485,7 @@ static inline void pushPlayOptsLevel(cBankManager* bankMgr)
  * position @p position, follows it on the closest view (cSSXAudio_GetClosestCamera). In the multiplayer game path a human speaker's voice
  * is panned to its side @p viewport (two-player pan). The handle goes to cBankMonitor_BANKMONITOR_Create(.., 0x7F, type 3)
  * and cBankMonitorInstance_SetStream records the stream's slot, file and offset on the instance; the level is popped. It fills slot 1 of
- * cSSXAudio's cSpeechSys vtable (D_004836D8; pure virtual in cSpeechSys), which func_002B04D8 calls to start a speech
+ * cSSXAudio's cSpeechSys vtable (D_004836D8; pure virtual in cSpeechSys), which cSpeechInstance_PlayEvent calls to start a speech
  * line.
  *
  * @param streamIndex  the stream index
@@ -688,12 +688,12 @@ extern "C" void cController_Update(void* self, float dt);
 extern "C" int cStreamSys_STREAM_Playing(void* p, int idx);
 extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self);
 extern "C" void cSSXAudio_UpdateMix(cSSXAudio* self);
-extern "C" void func_0028C8C8(void* self);
-extern "C" void func_0028F000(void* self);
+extern "C" void cSSXAudio_UpdateAirTimeVolume(void* self);
+extern "C" void cSSXAudio_UpdateMusicRamp(void* self);
 extern "C" void cSSXAudio_PlayHistoryUpdate(void* self);
 extern "C" void cSSXAudio_UpdateLift(void* self);
 extern "C" void cSSXAudio_UpdateAttachedSounds(void* self);
-extern "C" void func_0028E100(void* self);
+extern "C" void cSSXAudio_HandleMusicRequest(void* self);
 extern "C" void cSSXAudio_UpdateTrackBanks(void* self);
 extern "C" void cSSXAudio_UpdateBoostBar(void* self);
 extern "C" void cSSXAudio_UpdateLandedUber(void* self);
@@ -712,9 +712,9 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
  * Plays thunder when the screen tint asks (PlayThunder, cSSXAudio_PlayThunder), runs cController_Update, and while a
  * stream is ducked (mDuckStream not kNoDuckStream) un-ducks it (cSSXAudio_DuckToStream(this, kNoDuckStream, 0.5, 1.0))
  * once that stream has started and stopped again. Then cSSXAudio_UpdateDuck and cSSXAudio_UpdateMix. In game:
- * func_0028C8C8 and, while mAudioUpdateState is INGAME_UPDATE, func_0028F000 (not paused), cSSXAudio_PlayHistoryUpdate,
+ * cSSXAudio_UpdateAirTimeVolume and, while mAudioUpdateState is INGAME_UPDATE, cSSXAudio_UpdateMusicRamp (not paused), cSSXAudio_PlayHistoryUpdate,
  * the lift update (cSSXAudio_UpdateLift in game state kGFSM_Riding, else cSSXAudio_ResetLift),
- * cSSXAudio_UpdateAttachedSounds, func_0028E100, cSSXAudio_UpdateTrackBanks, cSSXAudio_UpdateBoostBar,
+ * cSSXAudio_UpdateAttachedSounds, cSSXAudio_HandleMusicRequest, cSSXAudio_UpdateTrackBanks, cSSXAudio_UpdateBoostBar,
  * cSSXAudio_UpdateLandedUber, cSSXAudio_UpdateTimedEvent, cSSXAudio_UpdateTone, and cSSXAudio_ResumeAudio when
  * mAudioPaused is set and cPauseState_Flags bit 1 is clear. Finally cSSXAudio_ApplyRMSData. cGame_render,
  * cRealFE_render and func_0022C830 call it.
@@ -738,17 +738,17 @@ void cSSXAudio::Update(float dt)
     UpdateDuck();
     UpdateMix();
     if (cAudioInterface_getApp()->Game != 0) {
-        func_0028C8C8(((char*)this));
+        cSSXAudio_UpdateAirTimeVolume(((char*)this));
         if (mAudioUpdateState == INGAME_UPDATE) {
             if (mAudioPaused == 0)
-                func_0028F000(((char*)this));
+                cSSXAudio_UpdateMusicRamp(((char*)this));
             cSSXAudio_PlayHistoryUpdate(((char*)this));
             if (cAudioInterface_getGame()->mCurrentStateID == kGFSM_Riding)
                 cSSXAudio_UpdateLift(((char*)this));
             else
                 cSSXAudio_ResetLift(((char*)this));
             cSSXAudio_UpdateAttachedSounds(((char*)this));
-            func_0028E100(((char*)this));
+            cSSXAudio_HandleMusicRequest(((char*)this));
             cSSXAudio_UpdateTrackBanks(((char*)this));
             cSSXAudio_UpdateBoostBar(((char*)this));
             cSSXAudio_UpdateLandedUber(((char*)this));
@@ -824,18 +824,18 @@ cRider* cSSXAudio::GetFocusRider(int which)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_BANKMONITOR_DestroyAll);
 #ifdef SKIP_ASM
-extern "C" void func_002A7718(void*);
+extern "C" void cCrowdSys_RemoveAllObjects(void*);
 extern "C" void cBankMonitor_BANKMONITOR_DestroyAll(void*);
 
 /**
- * Destroys every bank monitor instance: first the crowd voices (func_002A7718), then the base cBankMonitor's
+ * Destroys every bank monitor instance: first the crowd voices (cCrowdSys_RemoveAllObjects), then the base cBankMonitor's
  * (cBankMonitor_BANKMONITOR_DestroyAll).
  *
  * It fills slot 2 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has cBankMonitor_BANKMONITOR_DestroyAll.
  */
 void cSSXAudio::BANKMONITOR_DestroyAll()
 {
-    func_002A7718(this);
+    cCrowdSys_RemoveAllObjects(this);
     cBankManager* inner = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor_BANKMONITOR_DestroyAll(&inner->BankMonitor);
 }
@@ -884,7 +884,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cBankManager_BANK_SyncLoad(void* p, int a1, char* msg, int a3);
 extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float f1);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int a1, int a2);
-extern "C" void func_002B49C0(void* mon, int id);
+extern "C" void cMusicSys_SetSongTag(void* mon, int id);
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
 extern "C" void FileParser__FileParser(void* self, int flags);
 extern char* str_H_H;
@@ -950,7 +950,7 @@ void cSSXAudio::FrontEndLoad()
     sSaVt5FB0* vt = (sSaVt5FB0*)MusicSys.mVtbl;
     char* thisp = mon + vt[2].delta;
     vt[2].fn(thisp, str_charsel, 0xC, GetCurrAppliedVolumePtr(1, 0), 1);
-    func_002B49C0(mon, 301);
+    cMusicSys_SetSongTag(mon, 301);
     mFrontEndMusicMode = 10;
     mFrontEndRadioModeID = mRadioModeID;
     ResumeAudio();
@@ -976,24 +976,24 @@ void cSSXAudio::FrontEndFadeSong()
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndPurge);
 #ifdef SKIP_ASM
 struct cSSXAudio_FrontEndPurge_vte { short delta; short index; void (*fn)(void*); };
-extern "C" void func_002B3AC0(void*);
-extern "C" void func_002B3D48(void*, float);
+extern "C" void cMusicSys_StopSong(void*);
+extern "C" void cMusicSys_FadeOut(void*, float);
 extern "C" void cMonitor_MONITOR_DestroyAll(void*);
 extern "C" void cBankManager_BANK_UnLoad(void*, int);
 
 /**
  * Releases the front end's audio before leaving it: stops or fades the streams and purges bank slot 0.
  *
- * When mRadioModeID or mFrontEndRadioModeID is kRADIOMODE_MOUNTAIN it calls func_002B3AC0 on the stream system.
- * Otherwise it calls func_002B3D48 with 1.0 (probably a one-second fade). It then sets the update state to
+ * When mRadioModeID or mFrontEndRadioModeID is kRADIOMODE_MOUNTAIN it calls cMusicSys_StopSong on the stream system.
+ * Otherwise it calls cMusicSys_FadeOut with 1.0 (probably a one-second fade). It then sets the update state to
  * DEFAULT_UPDATE and resets the bank monitor (cMonitor_MONITOR_DestroyAll) and the bank manager (its virtual slot 2).
  */
 void cSSXAudio::FrontEndPurge()
 {
     if (mRadioModeID == kRADIOMODE_MOUNTAIN || mFrontEndRadioModeID == kRADIOMODE_MOUNTAIN) {
-        func_002B3AC0((char*)&MusicSys);
+        cMusicSys_StopSong((char*)&MusicSys);
     } else {
-        func_002B3D48((char*)&MusicSys, 1.0f);
+        cMusicSys_FadeOut((char*)&MusicSys, 1.0f);
     }
     SetAudioUpdateState(DEFAULT_UPDATE);
     cMonitor_MONITOR_DestroyAll(&(*(cBankManager**)MusicSys.mpVStreamSys)->BankMonitor);
@@ -1014,8 +1014,8 @@ void cAsyncSys_Init3(cAsyncSys* self, unsigned int a1, int a2) __asm__("cAsyncSy
 extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" void cBankManager_BANK_AllocMem(void* p, int pool, int size, int a3, int a4);
-extern "C" void func_002A6D78(void* self, char* name, char* ext, int mode, int a4);
-extern "C" void func_0029F3F8(void* self, int a1);
+extern "C" void cCrowdSys_Init(void* self, char* name, char* ext, int mode, int a4);
+extern "C" void cSSXAudio_LoadGruntBanks(void* self, int a1);
 extern char* str_H;
 // Default stream-group extension string (gcc inlines strcpy of the literal as an aligned block copy).
 extern char D_004A35A0[] __attribute__((aligned(8)));
@@ -1115,11 +1115,11 @@ void cSSXAudio::InGameLoad()
     cBankManager_BANK_AllocMem(MusicSys.mpVStreamSys->mpVBankManager, 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        func_002A6D78(((char*)this), str_H, ext, 2, 5);
+        cCrowdSys_Init(((char*)this), str_H, ext, 2, 5);
     } else {
-        func_002A6D78(((char*)this), str_H, ext, 1, 5);
+        cCrowdSys_Init(((char*)this), str_H, ext, 1, 5);
     }
-    func_0029F3F8(((char*)this), 0);
+    cSSXAudio_LoadGruntBanks(((char*)this), 0);
     mRaceMusicOn = 1;
     FileParser__FileParser(&parser, 2);
 }
@@ -1136,17 +1136,17 @@ extern "C" char* cAudioInterface_getAI();
 extern "C" void* cRider_getIdentity(void*);
 extern "C" int cBERewardInterface_getPlayList(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_getRadioMode(void* self, int a1, int a2);
-extern "C" void func_0028BF78(void* self, int a1);
-extern "C" void func_0028C2D0(void* self, int a1);
-extern "C" int func_002B49E0(void*);
-extern "C" void func_0028D488(void* self);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void cSSXAudio_SetRadioMode(void* self, int a1);
+extern "C" void cSSXAudio_SetRadioPlayList(void* self, int a1);
+extern "C" int cMusicSys_GetSongTag(void*);
+extern "C" void cSSXAudio_PickRandomSong(void* self);
+extern "C" void cSSXAudio_StartLocationMusic(void* self, int a1, int a2, int a3, int a4);
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float f1);
 extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, int bit);
-void func_0028DF08_C7B0(void* p) __asm__("func_0028DF08__FPv");
+void cSSXAudio_ResetLastMusicState_C7B0(void* p) __asm__("cSSXAudio_ResetLastMusicState__FPv");
 extern "C" void cSSXAudio_StartEvent(cSSXAudio* self);
-extern "C" void func_002A4A78(void* self);
+extern "C" void cSSXAudio_ScheduleDJOpening(void* self);
 struct cWorldPainterManArg;
 tWorldPainterQuery* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
 extern char kWPR_MusicTrigger_2;
@@ -1173,13 +1173,13 @@ public:
  * Sets up the in-game audio when a race gains focus: music playlist, radio mode, world-painter queries and levels.
  *
  * Reads the player rider's playlist and radio mode from the reward interface (cBERewardInterface_getPlayList,
- * cBERewardInterface_getRadioMode) and applies them (func_0028BF78, func_0028C2D0). Unless the music system's song tag
- * is already kSONGTAG_PkTrans, it restarts the music (func_0028D488, func_0028CF98 with 0 in game path
+ * cBERewardInterface_getRadioMode) and applies them (cSSXAudio_SetRadioMode, cSSXAudio_SetRadioPlayList). Unless the music system's song tag
+ * is already kSONGTAG_PkTrans, it restarts the music (cSSXAudio_PickRandomSong, cSSXAudio_StartLocationMusic with 0 in game path
  * kGAMEPATH_WORLDCIRCUIT, else 0x24). Then it resets the lift state, creates six world-painter queries
  * (mpMusicTriggerQuery, mpAmbienceQuery, mpMixQuery) from the world's painter manager, resets the ambience bookkeeping,
  * un-ducks (cSSXAudio_DuckToStream(self, kNoDuckStream, ..)), records per-track first-time flags for the kMAX_LOCATIONS
  * locations in game path kGAMEPATH_WORLDCIRCUIT (cBENewPlayerInterface_isFirstTimeOnTrack), and finishes with
- * func_0028DF08, cSSXAudio_StartEvent and func_002A4A78.
+ * cSSXAudio_ResetLastMusicState, cSSXAudio_StartEvent and cSSXAudio_ScheduleDJOpening.
  */
 void cSSXAudio::InGameInit()
 {
@@ -1187,16 +1187,16 @@ void cSSXAudio::InGameInit()
     cAI* ai = (cAI*)cAudioInterface_getAI();
     void* rider = cRider_getIdentity(ai->Riders[0]);
     int radioPlaylist = cBERewardInterface_getPlayList(be, 0, (int)rider);
-    func_0028BF78(((char*)this), cBERewardInterface_getRadioMode(be, 0, (int)rider));
-    func_0028C2D0(((char*)this), radioPlaylist);
+    cSSXAudio_SetRadioMode(((char*)this), cBERewardInterface_getRadioMode(be, 0, (int)rider));
+    cSSXAudio_SetRadioPlayList(((char*)this), radioPlaylist);
     char* musicSys = (char*)&MusicSys;
-    if (MusicSys.mSongPlaying == 0 || func_002B49E0(musicSys) != kSONGTAG_PkTrans) {
-        func_0028D488(((char*)this));
+    if (MusicSys.mSongPlaying == 0 || cMusicSys_GetSongTag(musicSys) != kSONGTAG_PkTrans) {
+        cSSXAudio_PickRandomSong(((char*)this));
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (sa_state_867E8() == kGAMEPATH_WORLDCIRCUIT) {
-            func_0028CF98(((char*)this), 0, 0, kPEAKBIT_FromLocation, 0);
+            cSSXAudio_StartLocationMusic(((char*)this), 0, 0, kPEAKBIT_FromLocation, 0);
         } else {
-            func_0028CF98(((char*)this), 36, 0, kPEAKBIT_FromLocation, 0);
+            cSSXAudio_StartLocationMusic(((char*)this), 36, 0, kPEAKBIT_FromLocation, 0);
         }
     }
     cSSXAudio_ResetLift(((char*)this));
@@ -1232,9 +1232,9 @@ void cSSXAudio::InGameInit()
             firstTimeFlag++;
         } while (i < kMAX_LOCATIONS);
     }
-    func_0028DF08_C7B0(((char*)this));
+    cSSXAudio_ResetLastMusicState_C7B0(((char*)this));
     StartEvent();
-    func_002A4A78(((char*)this));
+    cSSXAudio_ScheduleDJOpening(((char*)this));
 }
 #endif
 
@@ -1243,14 +1243,14 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGameDeInit);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int a1);
-extern "C" void func_002B3AC0(void*);
+extern "C" void cMusicSys_StopSong(void*);
 extern "C" void cSSXAudio_StopTone(void* self, float v);
-extern "C" void func_002A4550(void*);
+extern "C" void cSSXAudio_ClearPendingLines(void*);
 extern "C" void cSSXAudio_StopAllRiderSounds(void* self);
 extern "C" void cSSXAudio_ResetAttachedSounds(void* self);
 extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id);
 extern "C" void cMonitor_MONITOR_DestroyAll(void*);
-extern "C" void func_002B11B0(void*, int);
+extern "C" void cSpeechSys_PurgeInstance(void*, int);
 
 struct sSaDelVt6A80 { short delta; short index; void (*fn)(void*, int); };
 
@@ -1268,17 +1268,17 @@ static inline void saDeleteObj(void** slot)
  * Shuts down the in-game audio: resumes and stops everything, and deletes the per-race objects.
  *
  * It resumes the audio (cSSXAudio_ResumeAudio) and sets the update state to DEFAULT_UPDATE. It then stops the streams
- * (func_002B3AC0) and the tone, and deletes the world-painter queries (mpMusicTriggerQuery, mpAmbienceQuery and
+ * (cMusicSys_StopSong) and the tone, and deletes the world-painter queries (mpMusicTriggerQuery, mpAmbienceQuery and
  * mpMixQuery). It resets the attached sounds, switches to mix 0, resets the bank monitor and bank manager as
- * FrontEndPurge does, and calls func_002B11B0 on the speech system.
+ * FrontEndPurge does, and calls cSpeechSys_PurgeInstance on the speech system.
  */
 void cSSXAudio::InGameDeInit()
 {
     ResumeAudio();
     SetAudioUpdateState(DEFAULT_UPDATE);
-    func_002B3AC0((char*)&MusicSys);
+    cMusicSys_StopSong((char*)&MusicSys);
     cSSXAudio_StopTone(this, 0.0f);
-    func_002A4550(this);
+    cSSXAudio_ClearPendingLines(this);
     cSSXAudio_StopAllRiderSounds(this);
     saDeleteObj((void**)(&mpMusicTriggerQuery[0]));
     saDeleteObj((void**)(&mpMusicTriggerQuery[1]));
@@ -1293,30 +1293,30 @@ void cSSXAudio::InGameDeInit()
     cBankMonitor* monitor = &bankManager->BankMonitor;
     cSSXAudio_FrontEndPurge_vte* vt = (cSSXAudio_FrontEndPurge_vte*)bankManager->BankMonitor.mVtbl;
     vt[2].fn(vthis(monitor, vt[2]));
-    func_002B11B0((char*)&SpeechSys, 0);
+    cSpeechSys_PurgeInstance((char*)&SpeechSys, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGamePurge);
 #ifdef SKIP_ASM
-extern "C" void func_002A6F38(void*);
+extern "C" void cCrowdSys_Shutdown(void*);
 extern "C" void cAsyncSys_DoCancel(cAsyncSys*, int);
 extern "C" void cBankManager_BANK_UnLoad(void*, int);
 extern "C" void cBankManager_BANK_DeallocMem(void*, int);
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
-extern "C" void func_0029F5E0(void*);
+extern "C" void cSSXAudio_UnloadGruntBanks(void*);
 
 /**
  * Purges the in-game sound banks: every bank slot 0-16 except kLoadingLoopBank (13), then the reserved slots 3 and 12.
  *
- * Also calls func_002A6F38, cAsyncSys_DoCancel (on the bank manager), cAsyncSys_ASYNCSYS_DeInit and func_0029F5E0 (all
+ * Also calls cCrowdSys_Shutdown, cAsyncSys_DoCancel (on the bank manager), cAsyncSys_ASYNCSYS_DeInit and cSSXAudio_UnloadGruntBanks (all
  * unknown).
  */
 void cSSXAudio::InGamePurge()
 {
     int i;
-    func_002A6F38(this);
+    cCrowdSys_Shutdown(this);
     ((cAsyncSys*)(*(void**)MusicSys.mpVStreamSys))->DoCancel(1);
     for (i = 0; i < 17; i++) {
         if (i != kLoadingLoopBank) {
@@ -1326,7 +1326,7 @@ void cSSXAudio::InGamePurge()
     cBankManager_BANK_DeallocMem(*(void**)MusicSys.mpVStreamSys, 3);
     cBankManager_BANK_DeallocMem(*(void**)MusicSys.mpVStreamSys, 12);
     cAsyncSys_ASYNCSYS_DeInit(*(void**)MusicSys.mpVStreamSys);
-    func_0029F5E0(this);
+    cSSXAudio_UnloadGruntBanks(this);
 }
 #endif
 
@@ -1411,7 +1411,7 @@ extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_002A39E0(void* self);
+extern "C" void cSSXAudio_SpeakPALine8379(void* self);
 
 /**
  * Starts the in-game audio of an event: update state INGAME_UPDATE, world triggers reset, all rider sounds, and the
@@ -1420,7 +1420,7 @@ extern "C" void func_002A39E0(void* self);
  * Sets the update state INGAME_UPDATE (cSSXAudio_SetAudioUpdateState), resets the world triggers, begins every rider's
  * sounds (cSSXAudio_BeginAllRiderSound) and stores the cAI's AITick in mGruntCycle. In the game paths
  * kGAMEPATH_SINGLEEVENT and kGAMEPATH_MULTIPLAYER (newRace.cGamePath) it also requests the PA's location line
- * func_002A39E0. cSSXAudio_InGameInit calls it.
+ * cSSXAudio_SpeakPALine8379. cSSXAudio_InGameInit calls it.
  */
 void cSSXAudio::StartEvent()
 {
@@ -1435,7 +1435,7 @@ void cSSXAudio::StartEvent()
     }
     if (mode == kGAMEPATH_MULTIPLAYER) {
     load:
-        func_002A39E0(this);
+        cSSXAudio_SpeakPALine8379(this);
     }
 }
 #endif
@@ -1447,17 +1447,17 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_OnFinishEvent);
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" cRider* cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
-extern "C" void func_002A73A8(void* p, int a1, int id);
+extern "C" void cCrowdSys_PlayTrickCheer(void* p, int a1, int id);
 extern "C" void cSSXAudio_WipeoutSlideEnd(void* self, cRider* rider);
 extern "C" void cSSXAudio_WipeoutTumbleEnd(void* self, cRider* rider);
 extern "C" void cSSXAudio_EndUberSpin(void* self, cRider* rider);
-extern "C" int func_0028D960(void* self);
-extern "C" int func_002A4078(void* self);
+extern "C" int cSSXAudio_IsMusicRadioMode(void* self);
+extern "C" int cSSXAudio_IsRaceEvent(void* self);
 extern "C" int cAI_isRaceFinished(void* p);
 extern "C" char* cAudioInterface_getAI();
-extern "C" void func_002A3708(void* self, void* rider);
-extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
-extern "C" void func_002A45C0(void* self);
+extern "C" void cSSXAudio_SpeakPARiderPlace(void* self, void* rider);
+extern "C" void cSSXAudio_SpeakPAPlace(void* self, void* rider, int a2, int a3);
+extern "C" void cSSXAudio_RecordHeatResult(void* self);
 
 static inline int sa_state6EA0()
 {
@@ -1469,13 +1469,13 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
 /**
  * Plays the finish of a rider's event for its view: crowd cheer, music, the PA's place line and the result record.
  *
- * Only for the focus rider of its view. Raises a level-2 TRICK cheer (func_002A73A8; view 0 when replaying), stops the
+ * Only for the focus rider of its view. Raises a level-2 TRICK cheer (cCrowdSys_PlayTrickCheer; view 0 when replaying), stops the
  * rider's wipeout slide and tumble (cSSXAudio_WipeoutSlideEnd, cSSXAudio_WipeoutTumbleEnd) and uber spin. In game modes
  * kGAMEMODE_BIGAIR and kGAMEMODE_HALFPIPE before the last heat the music gets track 36 (and mRaceMusicOn is cleared),
- * otherwise track 10, each when func_0028D960 allows. A rider that finished (mDidNotFinish 0) gets the PA's place line:
- * func_002A3708 at the locations of func_002A4078; in the kGAMEPATH_MULTIPLAYER game path func_002A3708 when the race
- * is over (cAI_isRaceFinished), else func_002A34D0; otherwise func_002A34D0 before heat 3 and func_002A3708 from heat
- * 3. In game path kGAMEPATH_WORLDCIRCUIT the result is recorded (func_002A45C0). cRider_doFinishEvent calls it.
+ * otherwise track 10, each when cSSXAudio_IsMusicRadioMode allows. A rider that finished (mDidNotFinish 0) gets the PA's place line:
+ * cSSXAudio_SpeakPARiderPlace at the locations of cSSXAudio_IsRaceEvent; in the kGAMEPATH_MULTIPLAYER game path cSSXAudio_SpeakPARiderPlace when the race
+ * is over (cAI_isRaceFinished), else cSSXAudio_SpeakPAPlace; otherwise cSSXAudio_SpeakPAPlace before heat 3 and cSSXAudio_SpeakPARiderPlace from heat
+ * 3. In game path kGAMEPATH_WORLDCIRCUIT the result is recorded (cSSXAudio_RecordHeatResult). cRider_doFinishEvent calls it.
  *
  * @param rider  the rider (cRider)
  */
@@ -1483,7 +1483,7 @@ void cSSXAudio::OnFinishEvent(cRider* rider)
 {
     if (rider != GetFocusRider(rider->mViewIndex))
         return;
-    func_002A73A8((char*)gSSXAudio, 2, ReplayMode() ? 0 : rider->mViewIndex);
+    cCrowdSys_PlayTrickCheer((char*)gSSXAudio, 2, ReplayMode() ? 0 : rider->mViewIndex);
     int flag = 1;
     cSSXAudio_WipeoutSlideEnd(((char*)this), rider);
     cSSXAudio_WipeoutTumbleEnd(((char*)this), rider);
@@ -1494,7 +1494,7 @@ void cSSXAudio::OnFinishEvent(cRider* rider)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGameMode;
     if ((mode == kGAMEMODE_BIGAIR || mode == kGAMEMODE_HALFPIPE) && heatNum < nextHeat) {
-        if (func_0028D960(((char*)this))) {
+        if (cSSXAudio_IsMusicRadioMode(((char*)this))) {
             char* mon = (char*)&MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), 36);
@@ -1503,7 +1503,7 @@ void cSSXAudio::OnFinishEvent(cRider* rider)
         }
     }
     if (flag) {
-        if (func_0028D960(((char*)this))) {
+        if (cSSXAudio_IsMusicRadioMode(((char*)this))) {
             char* mon = (char*)&MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), 10);
@@ -1511,20 +1511,20 @@ void cSSXAudio::OnFinishEvent(cRider* rider)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (rider->mDidNotFinish == 0) {
-        if (func_002A4078(((char*)this)))
-            func_002A3708(((char*)this), ((char*)rider));
+        if (cSSXAudio_IsRaceEvent(((char*)this)))
+            cSSXAudio_SpeakPARiderPlace(((char*)this), ((char*)rider));
         else if (sa_state6EA0() == kGAMEPATH_MULTIPLAYER) {
             if (cAI_isRaceFinished(cAudioInterface_getAI()))
-                func_002A3708(((char*)this), ((char*)rider));
+                cSSXAudio_SpeakPARiderPlace(((char*)this), ((char*)rider));
             else
-                func_002A34D0(((char*)this), ((char*)rider), 0, -1);
+                cSSXAudio_SpeakPAPlace(((char*)this), ((char*)rider), 0, -1);
         } else if (heatNum < 3)
-            func_002A34D0(((char*)this), ((char*)rider), 0, -1);
+            cSSXAudio_SpeakPAPlace(((char*)this), ((char*)rider), 0, -1);
         else
-            func_002A3708(((char*)this), ((char*)rider));
+            cSSXAudio_SpeakPARiderPlace(((char*)this), ((char*)rider));
     }
     if (sa_state6EA0() == kGAMEPATH_WORLDCIRCUIT)
-        func_002A45C0(((char*)this));
+        cSSXAudio_RecordHeatResult(((char*)this));
 }
 #endif
 
@@ -1532,19 +1532,19 @@ void cSSXAudio::OnFinishEvent(cRider* rider)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_RestartEvent);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ResetAudioVariables(cSSXAudio* self);
-extern "C" int func_002A4040(void* self);
+extern "C" int cSSXAudio_IsFreeride(void* self);
 extern "C" int cSSXAudio_PlayHistoryExists(void* self, int a, int b);
 extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d, int e);
 
 /**
  * Resets the audio for a restarted event and records a (0, 0) play-history entry if none exists.
  *
- * Calls cSSXAudio_ResetAudioVariables (On Tour ResetAudioVariables). The entry is only added when func_002A4040 returns 0.
+ * Calls cSSXAudio_ResetAudioVariables (On Tour ResetAudioVariables). The entry is only added when cSSXAudio_IsFreeride returns 0.
  */
 void cSSXAudio::RestartEvent()
 {
     ResetAudioVariables();
-    if (func_002A4040(this) == 0 && cSSXAudio_PlayHistoryExists(this, 0, 0) == 0) {
+    if (cSSXAudio_IsFreeride(this) == 0 && cSSXAudio_PlayHistoryExists(this, 0, 0) == 0) {
         cSSXAudio_PlayHistoryAdd(this, 0, 0, kPlayHistoryNoTimeout, 0, 0);
     }
 }
@@ -1554,14 +1554,14 @@ void cSSXAudio::RestartEvent()
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PartialRestart);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ResetAudioVariables(cSSXAudio* self);
-extern "C" int func_002A4040(void* self);
+extern "C" int cSSXAudio_IsFreeride(void* self);
 extern "C" int cSSXAudio_PlayHistoryExists(void* self, int a, int b);
 extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d, int e);
-extern "C" int func_002A4168(void* self);
-extern "C" int func_002A41D8(void* self);
+extern "C" int cSSXAudio_IsBigAirEvent(void* self);
+extern "C" int cSSXAudio_IsHalfpipeEvent(void* self);
 
 /**
- * Resets the audio for a partial restart (cSSXAudio_ResetAudioVariables), and in game modes of func_002A4168 / func_002A41D8 marks
+ * Resets the audio for a partial restart (cSSXAudio_ResetAudioVariables), and in game modes of cSSXAudio_IsBigAirEvent / cSSXAudio_IsHalfpipeEvent marks
  * play-history event 0.
  *
  * That event is added (cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0)) when the game mode is not 4, mGateDropHeat has
@@ -1570,8 +1570,8 @@ extern "C" int func_002A41D8(void* self);
 void cSSXAudio::PartialRestart()
 {
     ResetAudioVariables();
-    if (func_002A4168(this) != 0 || func_002A41D8(this) != 0) {
-        if (func_002A4040(this) == 0
+    if (cSSXAudio_IsBigAirEvent(this) != 0 || cSSXAudio_IsHalfpipeEvent(this) != 0) {
+        if (cSSXAudio_IsFreeride(this) == 0
             && mGateDropHeat >= SSXApp->GameModeMan->iNextHeat
             && cSSXAudio_PlayHistoryExists(this, 0, 0) == 0) {
             cSSXAudio_PlayHistoryAdd(this, 0, 0, kPlayHistoryNoTimeout, 0, 0);
@@ -1627,21 +1627,21 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_StartEventWithNoStartGate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0028D488(void* self);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_002A26F0(void* self, int a1, int a2);
-void func_002B1758(void* self, int a1);
-int func_002B4908(void* mon);
+extern "C" void cSSXAudio_PickRandomSong(void* self);
+extern "C" void cSSXAudio_StartLocationMusic(void* self, int a1, int a2, int a3, int a4);
+extern "C" void cSSXAudio_SpeakDJChoiceLine(void* self, int a1, int a2);
+void cSpeechSys_StartNextSpeech(void* self, int a1);
+int cMusicSys_GetCurrentSongSedValue(void* mon);
 
 
 /**
  * Starts the music and DJ intro of an event without a start gate (the time and points challenges).
  *
  * Stores the cAI's AITick in mGruntCycle, then only in kGAMEMODE_TIMECHALLENGE and kGAMEMODE_PNTSCHALLENGE: with
- * unk_530 set the music system's vtable slot 4 gets track 0, else func_0028D488 and func_0028CF98(self, 0, 0,
+ * unk_530 set the music system's vtable slot 4 gets track 0, else cSSXAudio_PickRandomSong and cSSXAudio_StartLocationMusic(self, 0, 0,
  * kPEAKBIT_FromLocation, 0). Unless play-history event 0 is live: in kGAMEEVENT_RIVALTIME and kGAMEEVENT_RIVALPOINTS it
- * queues the DJ line func_002A1138 (mRiderRemarkPending), or in kGAMEPATH_MULTIPLAYER plays func_002A26F0(0, 0) at
- * once, then queues the song announcement (mSongAnnouncePending, mSongAnnounceNum = func_002B4908). The pre-event
+ * queues the DJ line cSSXAudio_SpeakScriptEventType0 (mRiderRemarkPending), or in kGAMEPATH_MULTIPLAYER plays cSSXAudio_SpeakDJChoiceLine(0, 0) at
+ * once, then queues the song announcement (mSongAnnouncePending, mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue). The pre-event
  * overlays in fe/ovstatepause.cpp call it when they close.
  */
 void cSSXAudio::StartEventWithNoStartGate()
@@ -1655,8 +1655,8 @@ void cSSXAudio::StartEventWithNoStartGate()
         sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)MusicSys.mVtbl; // slot 4 sets the music state
         vt[4].fn(vthis(mon, vt[4]), 0);
     } else {
-        func_0028D488(this);
-        func_0028CF98(this, 0, 0, kPEAKBIT_FromLocation, 0);
+        cSSXAudio_PickRandomSong(this);
+        cSSXAudio_StartLocationMusic(this, 0, 0, kPEAKBIT_FromLocation, 0);
     }
     if (cSSXAudio_PlayHistoryExists(this, 0, 0) != 0) return;
     int gameEvent = cBENewRaceInterface_newRace.cGameEvent;
@@ -1664,12 +1664,12 @@ void cSSXAudio::StartEventWithNoStartGate()
         if (cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER) {
             mRiderRemarkPending = 1;
         } else {
-            func_002A26F0(this, 0, 0);
-            func_002B1758(&SpeechSys, 0);
+            cSSXAudio_SpeakDJChoiceLine(this, 0, 0);
+            cSpeechSys_StartNextSpeech(&SpeechSys, 0);
         }
     }
     mSongAnnouncePending = 1;
-    mSongAnnounceNum = func_002B4908(mon);
+    mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(mon);
 }
 #endif
 
@@ -1699,7 +1699,7 @@ float cSSXAudio::Volume2Float(int n)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/ssxAudio", func_00287410);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ApplyMusicVolume);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_Volume2Float(void*);
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float); the unit declares (self, float, int).
@@ -1712,7 +1712,7 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * options screens, the pause options, the memory-card load and cSSXApp_initload call it. The setting is not a declared
  * parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void func_00287410(cSSXAudio* self)
+extern "C" void cSSXAudio_ApplyMusicVolume(cSSXAudio* self)
 {
     float level = cSSXAudio_Volume2Float(self);
     cSSXAudio_SetCurrVolume_if(self, 1, level);
@@ -1751,7 +1751,7 @@ void cSSXAudio::SetSFXVolume()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/ssxAudio", func_00287520);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ApplySpeechVolume);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_Volume2Float(void*);
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
@@ -1761,7 +1761,7 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
  *
  * The setting is not a declared parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void func_00287520(cSSXAudio* self)
+extern "C" void cSSXAudio_ApplySpeechVolume(cSSXAudio* self)
 {
     self->SetCurrVolume(cSSXAudio_Volume2Float(self), 4);
 }
@@ -1821,7 +1821,7 @@ void cSSXAudio::SetArcadeSFX(int on)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00287670);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetMusicVolumeSetting);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
@@ -1830,7 +1830,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int func_00287670(cSSXAudio* self)
+extern "C" int cSSXAudio_GetMusicVolumeSetting(cSSXAudio* self)
 {
     return (int)(self->GetCurrSetVolume(1) * 11.0f);
 }
@@ -1853,7 +1853,7 @@ int cSSXAudio::GetSFXVolume()
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_002876D0);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetSpeechVolumeSetting);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
@@ -1862,7 +1862,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int func_002876D0(cSSXAudio* self)
+extern "C" int cSSXAudio_GetSpeechVolumeSetting(cSSXAudio* self)
 {
     return (int)(self->GetCurrSetVolume(4) * 11.0f);
 }
@@ -1892,7 +1892,7 @@ extern float gEliseScaling;
 extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
-extern "C" void func_002B4388(void* mon);
+extern "C" void cMusicSys_UpdateSong(void* mon);
 extern "C" void SNDmastervol(signed char vol);
 
 
@@ -1903,8 +1903,8 @@ extern "C" void SNDmastervol(signed char vol);
  * @p volume is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
  * the level times a per-control constant (gSFXScaling .. gArcadeSpeechScaling) for the others. The gain is base * the control's
  * volume (+0x6394) and the output gain * the current factor (+0x63E4). Control 0 then sets the library master volume
- * (SNDmastervol, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
- * levels at +0x636C. Quirk: control 1 calls func_002B4388 twice, the first time before the new gain is computed.
+ * (SNDmastervol, out * 127), control 1 updates the music monitor (cMusicSys_UpdateSong) and control 4 rescales the ten mix
+ * levels at +0x636C. Quirk: control 1 calls cMusicSys_UpdateSong twice, the first time before the new gain is computed.
  *
  * @param self_  the audio system (this)
  * @param volume      the new level, 0..1 (On Tour v)
@@ -1924,7 +1924,7 @@ void cSSXAudio::SetCurrVolume(float volume, int ch)
     case keVolumeControl_Music:
         currVolume->setVolume = volume;
         currVolume->curVolume = volume * gMusicScaling;
-        func_002B4388(&self->MusicSys);
+        cMusicSys_UpdateSong(&self->MusicSys);
         break;
     case keVolumeControl_DJ:
         currVolume->setVolume = volume;
@@ -1970,7 +1970,7 @@ void cSSXAudio::SetCurrVolume(float volume, int ch)
         SNDmastervol((int)(currVolume->appliedVolume * 127.0f));
         break;
     case keVolumeControl_Music:
-        func_002B4388(&self->MusicSys);
+        cMusicSys_UpdateSong(&self->MusicSys);
         break;
     case keVolumeControl_Character:
         self->mCharacterVolume[0] = currVolume->appliedVolume * gMobyScaling;
@@ -3133,7 +3133,7 @@ extern "C" int cSSXAudio_HandleDelayMonitorTriggers(void) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00289470);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReadPlayListNames);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void FileParser_FileParser(void* self, char* name, int size);
@@ -3148,7 +3148,7 @@ extern char* str_x_H;
  *
  * The cSSXAudio constructor calls it.
  */
-extern "C" void func_00289470(cSSXAudio* self)
+extern "C" void cSSXAudio_ReadPlayListNames(cSSXAudio* self)
 {
     if (BXFILE_exists(str_x_H) != 0) {
         char parser[2064];
@@ -3170,7 +3170,7 @@ extern "C" void func_00289470(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00289520);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SelectPlayList);
 #ifdef SKIP_ASM
 extern "C" void FileParser_FileParser(void* self, char* name, int size);
 extern "C" void FileParser__FileParser(void* self, int flags);
@@ -3181,8 +3181,8 @@ extern "C" char* FileParser_GetName(void* self);
 extern "C" void FileParser_AssignString(void* self, const char* key, char* out);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int strcmp(const void* a, const void* b);
-extern "C" void func_002B3EB0(void* self);
-extern "C" void func_002B3EE8(void* self, const char* name);
+extern "C" void cMusicSys_ClearActiveSongs(void* self);
+extern "C" void cMusicSys_AddActiveSongByName(void* self, const char* name);
 void func_002B4060(void* self);
 extern char* str_x_H;
 extern char str_SONG[];
@@ -3190,19 +3190,19 @@ extern char str_SONG[];
 /**
  * Selects a play list by name: loads its SONG entries into the music system and records its index.
  *
- * Clears the music system's song list (func_002B3EB0), reads the section of data/config/playlist.inf that matches
- * @p name and adds each SONG (func_002B3EE8), sets mPlayListIndex to the index of @p name in the play-list table (20
+ * Clears the music system's song list (cMusicSys_ClearActiveSongs), reads the section of data/config/playlist.inf that matches
+ * @p name and adds each SONG (cMusicSys_AddActiveSongByName), sets mPlayListIndex to the index of @p name in the play-list table (20
  * when absent), finishes the list (func_002B4060) and copies MusicSys.mActiveMap into +0x518. The constructor and the
  * debug menu call it.
  *
  * @param name  the play list (section) name
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern "C" void func_00289520(cSSXAudio* self, const char* name)
+extern "C" void cSSXAudio_SelectPlayList(cSSXAudio* self, const char* name)
 {
     char parser[2064];
     char buf[0x40];
-    func_002B3EB0((char*)&self->MusicSys);
+    cMusicSys_ClearActiveSongs((char*)&self->MusicSys);
     FileParser_FileParser(parser, str_x_H, 0x100);
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
@@ -3210,7 +3210,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
             char* key = FileParser_GetName(parser);
             if (strcasecmp(str_SONG, key) == 0) {
                 FileParser_AssignString(parser, str_SONG, buf);
-                func_002B3EE8((char*)&self->MusicSys, buf);
+                cMusicSys_AddActiveSongByName((char*)&self->MusicSys, buf);
             }
         }
     }
@@ -3261,7 +3261,7 @@ void cSSXAudio::HandleStreamChunk()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ApplyRMSData);
 #ifdef SKIP_ASM
-extern "C" int func_0029F088(void* self, int a1);
+extern "C" int cSSXAudio_GetLastSpeechVolumeID(void* self, int a1);
 extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float v);
 
 
@@ -3269,7 +3269,7 @@ extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float v);
  * Ducks the music to the loudness (RMS) data of the current stream, if it has valid RMS data.
  *
  * Every second frame it reads the RMS byte for the current time and picks a target level. When the speech volume class
- * (func_0029F088) is keVolumeControl_DJ a value of 30 or more gives level 0; otherwise the level is 1. The level goes
+ * (cSSXAudio_GetLastSpeechVolumeID) is keVolumeControl_DJ a value of 30 or more gives level 0; otherwise the level is 1. The level goes
  * to DuckByRMS (cSSXAudio_DuckByRMS) right away. The ramp branch only runs if something else sets the step counter
  * negative.
  *
@@ -3288,7 +3288,7 @@ void cSSXAudio::ApplyRMSData()
                 if (val > 0) {
                     int lowThreshold, midThreshold, highThreshold;
                     float vb, va;
-                    switch (func_0029F088(((char*)this), 0)) {
+                    switch (cSSXAudio_GetLastSpeechVolumeID(((char*)this), 0)) {
                     case keVolumeControl_DJ:
                         lowThreshold = 0;
                         midThreshold = 0;
@@ -3386,7 +3386,7 @@ void cSSXAudio::CancelRMSData()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_UpdateAudioWorldPainter);
 #ifdef SKIP_ASM
-extern "C" int func_0028D960(void* self);
+extern "C" int cSSXAudio_IsMusicRadioMode(void* self);
 extern "C" void func_0028D988(void* self, void* rider, const void* obj);
 extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self);
 extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj);
@@ -3397,7 +3397,7 @@ extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, cRider* rider, tWPI
  * Applies the world painter's audio data under a player rider: mix changes and ambience.
  *
  * Only the two players (mViewIndex below 2) count. The painter queries for that player are evaluated
- * at the rider's x/y. When func_0028D960 allows it, two results go to func_0028D988 and to ReactToWPMixEvent.
+ * at the rider's x/y. When cSSXAudio_IsMusicRadioMode allows it, two results go to func_0028D988 and to ReactToWPMixEvent.
  * When ambience is needed, a third result goes to ReactToWPAmbienceEvent (cSSXAudio_ReactToWPAmbienceEvent).
  *
  * @param rider  the rider (On Tour cRider*)
@@ -3410,7 +3410,7 @@ void cSSXAudio::UpdateAudioWorldPainter(cRider* rider)
     {
         pos = *rider->getPosition();
     }
-    if (func_0028D960(this) != 0) {
+    if (cSSXAudio_IsMusicRadioMode(this) != 0) {
         float k = -99999.0f;
         tWorldPainterQuery* musicQuery = mpMusicTriggerQuery[idx];
         func_0028D988(this, rider, musicQuery->queryPosition(pos.x, pos.y, k));
@@ -3443,8 +3443,8 @@ bool cSSXAudio::NeedWPAmbience()
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReactToWPAmbienceEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
-extern "C" int func_002B49E0(void* monitor);
+extern "C" void cSSXAudio_StartLocationMusic(void* self, int a1, int a2, int a3, int a4);
+extern "C" int cMusicSys_GetSongTag(void* monitor);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
@@ -3453,7 +3453,7 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
  * Reacts to a world-painter music event for the focus rider: switches the song or the music track.
  *
  * Only for the focus rider (cSSXAudio_GetFocusRider(self, -1)) and with data. The id from the data's vtable slot 4: -1
- * nothing; 0x1F the peak-1 ambience (func_0028CF98(.., kPEAKBIT_Peak1, ..)) unless the song tag is already
+ * nothing; 0x1F the peak-1 ambience (cSSXAudio_StartLocationMusic(.., kPEAKBIT_Peak1, ..)) unless the song tag is already
  * kSONGTAG_Peak1Amb; 0x20 the peak-2 ambience likewise; 33 nothing; any other id goes to the music system's vtable slot
  * 4 (set track). cSSXAudio_UpdateAudioWorldPainter calls it.
  *
@@ -3467,12 +3467,12 @@ void cSSXAudio::ReactToWPAmbienceEvent(cRider* rider, tWPInGameData* obj)
     int id = obj->BankID();
     if (id == -1) return;
     if (id == 0x1F) {
-        if (func_002B49E0((char*)&MusicSys) != kSONGTAG_Peak1Amb) {
-            func_0028CF98(this, 0, 0, kPEAKBIT_Peak1, 0);
+        if (cMusicSys_GetSongTag((char*)&MusicSys) != kSONGTAG_Peak1Amb) {
+            cSSXAudio_StartLocationMusic(this, 0, 0, kPEAKBIT_Peak1, 0);
         }
     } else if (id == 0x20) {
-        if (func_002B49E0((char*)&MusicSys) != kSONGTAG_Peak2Amb) {
-            func_0028CF98(this, 0, 0, kPEAKBIT_Peak2, 0);
+        if (cMusicSys_GetSongTag((char*)&MusicSys) != kSONGTAG_Peak2Amb) {
+            cSSXAudio_StartLocationMusic(this, 0, 0, kPEAKBIT_Peak2, 0);
         }
     } else if (id != 33) {
         char* mon = (char*)&MusicSys;
@@ -3543,7 +3543,7 @@ void cSSXAudio::PlayAniTag(cRider* rider, int type)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PauseAudio);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_PauseSFX(void* self);
-extern "C" void func_002B3A70(void*);
+extern "C" void cMusicSys_PauseSong(void*);
 
 /**
  * Pauses the sound effects (PauseSFX) and the stream part at +0x118, unless the audio is already paused.
@@ -3552,7 +3552,7 @@ void cSSXAudio::PauseAudio()
 {
     if (mAudioPaused == 0) {
         cSSXAudio_PauseSFX(this);
-        func_002B3A70((char*)&MusicSys);
+        cMusicSys_PauseSong((char*)&MusicSys);
         mAudioPaused = 1;
     }
 }
@@ -3561,27 +3561,27 @@ void cSSXAudio::PauseAudio()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ResumeAudio);
 #ifdef SKIP_ASM
-extern "C" void func_002B3A98(void*);
+extern "C" void cMusicSys_ResumeSong(void*);
 extern "C" void cSSXAudio_ResumeSFX(void*);
-extern "C" void func_002B11B0(void*, int);
-extern "C" void func_002A4550(void*);
+extern "C" void cSpeechSys_PurgeInstance(void*, int);
+extern "C" void cSSXAudio_ClearPendingLines(void*);
 
 /**
- * Resumes paused audio: the music (func_002B3A98) and the effects (cSSXAudio_ResumeSFX), clearing mAudioPaused.
+ * Resumes paused audio: the music (cMusicSys_ResumeSong) and the effects (cSSXAudio_ResumeSFX), clearing mAudioPaused.
  *
- * When mStopSpeechOnResume is set it also stops speech instance 0 (func_002B11B0), clears the pending speech flags
- * (func_002A4550) and mStopSpeechOnResume. cSSXAudio_Update, cSSXAudio_FrontEndLoad, cSSXAudio_InGameDeInit and a game
+ * When mStopSpeechOnResume is set it also stops speech instance 0 (cSpeechSys_PurgeInstance), clears the pending speech flags
+ * (cSSXAudio_ClearPendingLines) and mStopSpeechOnResume. cSSXAudio_Update, cSSXAudio_FrontEndLoad, cSSXAudio_InGameDeInit and a game
  * state call it.
  */
 void cSSXAudio::ResumeAudio()
 {
     if (mAudioPaused != 0) {
-        func_002B3A98((char*)&MusicSys);
+        cMusicSys_ResumeSong((char*)&MusicSys);
         cSSXAudio_ResumeSFX(this);
         mAudioPaused = 0;
         if (mStopSpeechOnResume != 0) {
-            func_002B11B0((char*)&SpeechSys, 0);
-            func_002A4550(this);
+            cSpeechSys_PurgeInstance((char*)&SpeechSys, 0);
+            cSSXAudio_ClearPendingLines(this);
             mStopSpeechOnResume = 0;
         }
     }
@@ -3599,7 +3599,7 @@ extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 /**
  * Returns a rider's character level from its stat level: below 4 gives 0, below 8 gives 1, else 2.
  *
- * The stat level comes from cBEStatInterface_getStatLevel (BE interface 3) for the rider's AI index. func_0028F000 and
+ * The stat level comes from cBEStatInterface_getStatLevel (BE interface 3) for the rider's AI index. cSSXAudio_UpdateMusicRamp and
  * func_0028F108 use it.
  *
  * @param src  the rider (cRider)

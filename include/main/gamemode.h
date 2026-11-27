@@ -39,7 +39,7 @@
 struct cBxReplayFrame;
 
 struct cGameModeMan {
-    // iHeatNum's heats (names ours): [U] the freestyle pre-event overlay (fe/ovstatepause func_001FBD20) shows the
+    // iHeatNum's heats (names ours): [U] the freestyle pre-event overlay (fe/ovstatepause cOVState_FREESTYLE_PREEVENT_onCreateScreen) shows the
     // "heat1_tab" for 0 / 1, "heat2_tab" for 2 and "finalheat_tab" for 3.
     enum { kHeat1 = 1, kHeat2 = 2, kFinalHeat = 3 };
     // aHandler's slots (names ours): [R] getGM builds cGMBigAirHandler in 0, cGMRaceHandler 1, cGMFreerideHandler 2,

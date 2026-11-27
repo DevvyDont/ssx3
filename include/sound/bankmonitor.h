@@ -16,7 +16,7 @@
 // object (cMonitor + 0x8DC, cBankMonitor + 0x8F0; On Tour sizes 0x8E4 / 0x8F4) and gives the class a pointer to it at
 // 0x0. The structs below are the NON-VIRTUAL parts, so they can be embedded where the object lives: the only
 // cBankMonitor is the one inside cBankManager (+0x1D8), i.e. cSSXAudio + 0x6E70 (sound/ssxaudio.h). gMonitor is the
-// current cMonitor (cMonitor_cMonitor stores this, cMonitor__cMonitor clears it; the static tick func_002AD998 calls
+// current cMonitor (cMonitor_cMonitor stores this, cMonitor__cMonitor clears it; the static tick cMonitor_Tick100Hz calls
 // its
 // virtual slot 1, MONITOR_Update).
 //
@@ -61,7 +61,7 @@ typedef void (cController::*tSndCallback)(cController*, cBankMonitorInstance*, f
 
 
 // One cSndPlayOpts::mDelay level (On Tour struct cDelayOpts, 0x10); [U] reset to 100 / 0 / 90 / 50 on every push
-// (func_002B35A0).
+// (cMusicSys_PlaySong).
 struct cDelayOpts {
     int mTime;     // 0x0 [O]
     int mCount;    // 0x4 [O]
@@ -263,7 +263,7 @@ struct cSndPlayOpts {
     cSoundSys* mpVSoundSys;          // 0x000 [R] g++ 2.95 virtual-base pointer to cSoundSys (placed after the 0x88-byte
                                      //       non-virtual part in a complete object); every ctor/dtor in the chain loads
                                      //       it to patch the cSoundSys vptr
-    SNDPLAYOPTS mDefault;            // 0x004 [O]; [U] OPTS push copies it into mCurrent[++mInst] (func_002B35A0)
+    SNDPLAYOPTS mDefault;            // 0x004 [O]; [U] OPTS push copies it into mCurrent[++mInst] (cMusicSys_PlaySong)
     volatile int mInst;              // 0x01C [O] (volatile); [R] ctor; [U] every OPTS_ access indexes the arrays below
                                      //       with it
     SNDPLAYOPTS* mCurrent;           // 0x020 [R] operator new[](0x60, "mCurrent") (4 levels)
@@ -348,7 +348,7 @@ struct cMonitor {
                                      //       complete cMonitor); every ctor/dtor in the chain loads it to patch the
                                      //       cSoundSys vptr
     // --- cSndPlayOpts (non-virtual part 0x88; ctor cSndPlayOpts_cSndPlayOpts 0x2A9350; up to 4 nested option levels)
-    SNDPLAYOPTS mDefault;            // 0x004 [O]; [U] OPTS push copies it into mCurrent[++mInst] (func_002B35A0)
+    SNDPLAYOPTS mDefault;            // 0x004 [O]; [U] OPTS push copies it into mCurrent[++mInst] (cMusicSys_PlaySong)
     volatile int mInst;              // 0x01C [O] (volatile); [R] ctor; [U] every OPTS_ access indexes the arrays below
                                      //       with it
     SNDPLAYOPTS* mCurrent;           // 0x020 [R] operator new[](0x60, "mCurrent") (4 levels)

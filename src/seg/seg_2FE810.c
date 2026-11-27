@@ -11942,7 +11942,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetArrangement);
 /**
  * Selects a keyboard's key layout table (0..2).
  *
- * Stores @p layout in the keyboard's arrangement (f08), which sceUsbKbCnvRawCode reads. func_002668A8 sets 0.
+ * Stores @p layout in the keyboard's arrangement (f08), which sceUsbKbCnvRawCode reads. usbkeyboard_setupKeyboard sets 0.
  *
  * @param kbIndex  the keyboard number
  * @param layout  the layout (0..2)
@@ -12522,7 +12522,7 @@ static inline void kbPortSetReadMode(sKbPort *kbPort, unsigned readMode) {
  * Switches a keyboard between converted key codes and raw reports.
  *
  * When the mode changes it clears the keyboard's repeat count, ring positions and repeated key and the previous
- * report's key count. func_0040C980 returns raw reports while the mode (f0C) is 1. func_002668A8 sets 0.
+ * report's key count. func_0040C980 returns raw reports while the mode (f0C) is 1. usbkeyboard_setupKeyboard sets 0.
  *
  * @param kbIndex  the keyboard number
  * @param readMode  0 converted keys, 1 raw reports
@@ -12769,7 +12769,7 @@ extern int matherr_D8D0(struct exception_D8D0 *) __asm__("matherr");
 	 *
 	 * Computes it with __ieee754_fmodf. Unless the library mode is -1 or either argument is NaN (isnanf), y = 0 fills
 	 * a domain record (type 1, result x in SVID mode, else NaN) and sets errno 33 in POSIX mode or when matherr
-	 * returns 0. func_002B2718 (bank monitor) uses it for the position within a beat.
+	 * returns 0. cSongInstance_GetTimeToNextBeat (bank monitor) uses it for the position within a beat.
 	 *
 	 * @param x  the dividend
 	 * @param y  the divisor

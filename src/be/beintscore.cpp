@@ -254,9 +254,9 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 extern "C" int cBEScoreInterface_convertRankToMedal(cBEScoreInterface* self, int a);
-extern "C" void func_001E25D8(int mode, int event, int result);
-extern "C" void func_001E1EB8(void);
-extern "C" void func_001E1550(void);
+extern "C" void queueRivalResultMessage(int mode, int event, int result);
+extern "C" void sendPendingChallengeMessages(void);
+extern "C" void queueRivalChallengeMessages(void);
 extern "C" int cBENewRaceInterface_getPlatinumGoal(void* self, int idx, int mode);
 extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(void* iface, int profile, int charID, int mode, int event, int medal);
 
@@ -274,8 +274,8 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  *
  * Only profiles 0 and 1. Stores @p result at +0xCC + profile * 0xB0 (the last-event slot's rank). The medal is
  * cBEScoreInterface_convertRankToMedal(@p result); the rival events 4 and 5 (newRace.cGameEvent) give kMEDAL_GOLD for
- * first place, else none. Unless raceDB +0x49 is set it updates the event popups (func_001E25D8, then func_001E1EB8
- * and, outside events 4 and 5, func_001E1550).
+ * first place, else none. Unless raceDB +0x49 is set it updates the event popups (queueRivalResultMessage, then sendPendingChallengeMessages
+ * and, outside events 4 and 5, queueRivalChallengeMessages).
  *
  * With a medal, unless raceDB +0x49 is set or raceDB +0x48 is kGAMEMODE_FREERIDE: when @p score meets or beats the
  * event's target from cBENewRaceInterface_getPlatinumGoal (time target * 60 for events 0 and 4, lower is better; a
@@ -302,13 +302,13 @@ void cBEScoreInterface::processRiderRanking(int rider, int result, int score)
     if (mode == kGAMEEVENT_RIVALTIME || mode == kGAMEEVENT_RIVALPOINTS)
         medal = result == 0 ? kMEDAL_GOLD : kMEDAL_NONE;
     if (cBELibrary_raceDB.cGamePath == 0)
-        func_001E25D8(mode, event, result);
+        queueRivalResultMessage(mode, event, result);
     if (medal == kMEDAL_NONE)
         return;
     if (cBELibrary_raceDB.cGamePath == 0) {
-        func_001E1EB8();
+        sendPendingChallengeMessages();
         if (cBELibrary_raceDB.cGamePath == 0 && mode != kGAMEEVENT_RIVALTIME && mode != kGAMEEVENT_RIVALPOINTS)
-            func_001E1550();
+            queueRivalChallengeMessages();
     }
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (cBELibrary_raceDB.cGamePath != 0)
@@ -330,7 +330,7 @@ void cBEScoreInterface::processRiderRanking(int rider, int result, int score)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001550E8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getHighScore);
 #ifdef SKIP_ASM
 extern "C" tBEHighScore* cBELibrary_getHighScoreTable(int a, int b);
 
@@ -344,7 +344,7 @@ extern "C" tBEHighScore* cBELibrary_getHighScoreTable(int a, int b);
  * @param mode  the game event
  * @return the score, or 0 when the event has no table
  */
-extern "C" int func_001550E8(cBEScoreInterface* self, int i, int event, int mode)
+extern "C" int cBEScoreInterface_getHighScore(cBEScoreInterface* self, int i, int event, int mode)
 {
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(event, mode);
     if (highScores != 0) {
@@ -355,7 +355,7 @@ extern "C" int func_001550E8(cBEScoreInterface* self, int i, int event, int mode
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155130);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScore);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -371,7 +371,7 @@ extern int D_005305F0[];
  * @param i  entry index, 0 (best) to 4
  * @return the score, or 0 when the event has no table
  */
-extern "C" int func_00155130(cBEScoreInterface* self, int i)
+extern "C" int cBEScoreInterface_getCurrentHighScore(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -384,7 +384,7 @@ extern "C" int func_00155130(cBEScoreInterface* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155190);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScoreCharacter);
 #ifdef SKIP_ASM
 struct sScoreSlot_00155190
 {
@@ -403,7 +403,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the character record, or D_004A1244 when the event has no table
  */
-extern "C" void* func_00155190(cBEScoreInterface* self, int i)
+extern "C" void* cBEScoreInterface_getCurrentHighScoreCharacter(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -414,7 +414,7 @@ extern "C" void* func_00155190(cBEScoreInterface* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155208);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScoreName);
 #ifdef SKIP_ASM
 extern void* D_004A1244;
 
@@ -426,7 +426,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the name, or D_004A1244 when the event has no table
  */
-extern "C" void* func_00155208(cBEScoreInterface* self, int i)
+extern "C" void* cBEScoreInterface_getCurrentHighScoreName(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);

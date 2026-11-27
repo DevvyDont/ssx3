@@ -96,7 +96,7 @@ void cOVStateRewardsList::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
+INCLUDE_ASM("fe/ovstaterewardslist", getPeakMapLocation);
 #ifdef SKIP_ASM
 extern tMapLocation kPeakRaceLocations[][4];
 extern tMapLocation kPeakFreestyleLocations[][5];
@@ -114,7 +114,7 @@ extern tMapLocation kPeakFreerideLocations[][8];
  * @param kind  0 race, 1 freestyle, 2 freeride
  * @return a copy of the goal entry
  */
-extern "C" tMapLocation func_00200388(int peak, int goalIndex, int kind)
+extern "C" tMapLocation getPeakMapLocation(int peak, int goalIndex, int kind)
 {
     if (kind == 0) {
         return kPeakRaceLocations[peak][goalIndex];

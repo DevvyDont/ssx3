@@ -189,7 +189,7 @@ struct cScriptObjEvent {
                                                  //      (func_002A1BD0) and clears it
     int mCheckForStopOnSpeechEnd;                // 0xF4 [O] bool (word here; On Tour byte 0xF1); [R] ctor 0; [U]
                                                  //      OnInSeqKeyEvent sets 1 on speech event 16; Update tests and clears
-                                                 //      it (then func_002B0E28 decides cSSXScriptEngine_SkipNISListScripts)
+                                                 //      it (then cSpeechSys_CanTakeSpeech decides cSSXScriptEngine_SkipNISListScripts)
     tScriptSoundBankInfo* mpSoundBankInfo;       // 0xF8 [O] (On Tour 0xF4); [R] ctor 0; [U] OnStartObjectUse binds the
                                                  //      script's bank (cSSXScriptEngine_GetSoundBankInfo__FPv), OnEndObjectUse
                                                  //      clears it, ScriptSoundIDToGameSoundInfo reads its bankNum (+0x4)

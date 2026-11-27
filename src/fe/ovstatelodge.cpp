@@ -127,7 +127,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom__cFEStateMountainRoom);
 
 extern void* cFEStateMountainRoom_vtbl[];
 extern void* cFEState_vtbl[];
-extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
@@ -141,7 +141,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
     VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
+        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
         self->mTextureFileIndex = -1;
     }
     int id = self->mFrontTextureID;
@@ -164,7 +164,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_0028F140(void* self, int a1);
+extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
 extern char str_125mountainroom[];
 extern char str_Numb_1[];
 extern char str_Numb_2[];
@@ -175,7 +175,7 @@ extern char D_004A1508[];
 
 /**
  * Creates the mountain room screen ("125mountainroom"), labels the peak numbers 1-3, and calls
- * func_0028F140(.., 7) on the audio system.
+ * cSSXAudio_SetFrontEndMusicMode(.., 7) on the audio system.
  */
 void cFEStateMountainRoom::onCreateScreen()
 {
@@ -197,7 +197,7 @@ void cFEStateMountainRoom::onCreateScreen()
     if (textObj3 != 0) {
         cUIText_setAsciiString(textObj3, D_004A1508);
     }
-    func_0028F140(cAudioInterface_bxAudio(), 7);
+    cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 7);
 }
 #endif
 
@@ -635,13 +635,13 @@ void cFEStateMountainRoom::onUpdate()
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_loadPeakPass);
 #ifdef SKIP_ASM
-extern "C" int func_0019DA10(void* self, int bank, char* id, int a3, int a4, int a5);
+extern "C" int cFEBoltFileManager_requestFile(void* self, int bank, char* id, int a3, int a4, int a5);
 
 /**
  * Starts loading the mountain room's peak-pass picture, unless a load is already pending or there is no pass to show.
  *
  * Only when the load slot (+0xBC) is negative and the pass item (+0xC0) is set: asks the front end's file loader
- * (SSXApp->RealFE + 0x1A70, func_0019DA10) for the item's file (its word at +4) under the character id (+0xB0), with
+ * (SSXApp->RealFE + 0x1A70, cFEBoltFileManager_requestFile) for the item's file (its word at +4) under the character id (+0xB0), with
  * arguments 10, 1, 0, and keeps the returned slot at +0xBC. cFEStateMountainRoom_onUpdate finishes the load through
  * cFEStateMountainRoom_updateTextureLoad.
  */
@@ -650,7 +650,7 @@ void cFEStateMountainRoom::loadPeakPass()
     if (mTextureFileIndex < 0) {
         tPeakPassInfo* item = mpPeakPassInfo;
         if (item != 0) {
-            mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, mCharID, item->mpTextureFileName,
+            mTextureFileIndex = cFEBoltFileManager_requestFile(SSXApp->RealFE->mBoltFileManager, mCharID, item->mpTextureFileName,
                     10, 1, 0);
         }
     }
@@ -660,8 +660,8 @@ void cFEStateMountainRoom::loadPeakPass()
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateTextureLoad);
 #ifdef SKIP_ASM
-extern "C" bool func_0019E238(void* mgr, int bank, int i);
-extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+extern "C" bool cFEBoltFileManager_isFileLoaded(void* mgr, int bank, int i);
+extern "C" void* cFEBoltFileManager_getFileDataValue(void* mgr, int bank, int i);
 extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self);
 extern char str_pass[];
 
@@ -677,11 +677,11 @@ static inline int isActive_31C0(cUIGroup* w)
  * pass front when appropriate and releases the file.
  *
  * Does nothing without the pass icon (mpPassIcon) or while the loader (SSXApp->RealFE + 0x1A70) reports slot
- * mTextureFileIndex of character mCharID as not loaded (func_0019E238). Otherwise takes the shape file (func_0019E2B0),
+ * mTextureFileIndex of character mCharID as not loaded (cFEBoltFileManager_isFileLoaded). Otherwise takes the shape file (cFEBoltFileManager_getFileDataValue),
  * creates the texture "pass" from its first shape (tbl[0].offset) through GrMan's virtual slot 46, and stores the
  * texture id in mFrontTextureID and in the icon (mTextureID, with mpTextureElem cleared). When the pass group (+0x48)
  * is visible (widget flag bit 6) and the pass-front group (+0x4C) is not, shows them
- * (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (func_0019DC20) and sets +0xBC to -1.
+ * (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (cFEBoltFileManager_releaseFile) and sets +0xBC to -1.
  *
  */
 void cFEStateMountainRoom::updateTextureLoad()
@@ -690,10 +690,10 @@ void cFEStateMountainRoom::updateTextureLoad()
     if (mpPassIcon == 0) {
         return;
     }
-    if (func_0019E238(mgr, mCharID, mTextureFileIndex) == 0) {
+    if (cFEBoltFileManager_isFileLoaded(mgr, mCharID, mTextureFileIndex) == 0) {
         return;
     }
-    SHAPEFILE* fileData = (SHAPEFILE*)func_0019E2B0(mgr, mCharID, mTextureFileIndex);
+    SHAPEFILE* fileData = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(mgr, mCharID, mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file blob)
     int id = ps2GraphicsMan->AddTexture((const SHAPE*)((char*)fileData + fileData->tbl[0].offset), str_pass, 0, 1, -1);
@@ -714,7 +714,7 @@ void cFEStateMountainRoom::updateTextureLoad()
             showPassFront();
         }
     }
-    func_0019DC20(mgr, mCharID, mTextureFileIndex);
+    cFEBoltFileManager_releaseFile(mgr, mCharID, mTextureFileIndex);
     mTextureFileIndex = -1;
 }
 #endif
@@ -1229,7 +1229,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_001CE6F0(int mountain);
+extern "C" int countPeakEvents(int mountain);
 extern "C" int getChallengeMedal(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
 extern "C" tMedalInfo* cBERewardInterface_getMedal(void* iface, int peak, int ch);
@@ -1240,7 +1240,7 @@ extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
  * when earned, the medal and a check mark, else a cross.
  *
  * First hides all six widget lists (mpMedals, mpMedalsBackground, mpMedalsText, mpMedalsTextBackground,
- * mpMedalsCheckMark, mpMedalsCrossMark). func_001CE6F0 counts the group's entries in the challenge table for the peak
+ * mpMedalsCheckMark, mpMedalsCrossMark). countPeakEvents counts the group's entries in the challenge table for the peak
  * (mPeakNum); it is declared here with one argument and gets the group from $a1, which still holds @p peak. For each
  * entry: getChallengeMedal gives the medal for the player (mUserNum) and character (mCharID), setChallengeName labels
  * the line, and the name, its background and the medal background are shown. With a medal (not -1) the icon takes the
@@ -1261,7 +1261,7 @@ void cFEStatePeakRoom::updateMedalsList(int peak)
     cUIThing** bar = self->mpMedalsTextBackground;
     cUIIcon** medal = self->mpMedalsCheckMark;
     cUIIcon** lock = self->mpMedalsCrossMark;
-    n = func_001CE6F0(self->mPeakNum);
+    n = countPeakEvents(self->mPeakNum);
     for (int j = 0; j < 5; j++) {
         self->mpMedals[j]->setVisible(0);
         self->mpMedalsBackground[j]->setVisible(0);

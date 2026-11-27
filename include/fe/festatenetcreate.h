@@ -13,16 +13,16 @@
 // and the default cFEStateCreateStep1_cFEStateCreateStep11 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
 // (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable cFEStateCreateStep1_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateCreateStep1_onCreateScreen, 7 onGainTransition cFEStateCreateStep1_onGainTransition, 12 onUpdate cFEStateCreateStep1_onUpdate, 17 onPopupEvent
-// cFEStateCreateStep1_onPopupEvent, 18 onWidgetCreate cFEStateCreateStep1_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep1_onWidgetEvent, 25 func_001B9088 (help text),
-// 29 func_001E0D60, 31 func_001B9488 (net event 0xCE)). Methods: fe/feasyncfile 0x1B88F0-0x1BA358.
+// cFEStateCreateStep1_onPopupEvent, 18 onWidgetCreate cFEStateCreateStep1_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep1_onWidgetEvent, 25 cFEStateCreateStep1_fillHelpPopup (help text),
+// 29 cFEStateCreateStep1_isOnlineState, 31 cFEStateCreateStep1_onNetEvent (net event 0xCE)). Methods: fe/feasyncfile 0x1B88F0-0x1BA358.
 //
 // cFEStateCreateStep2: screen "211create_step2": birth date, gender and the spam option of the same form. Size
 // 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (cFEStateCreateStep1_onWidgetEvent, cFEStateOnlineAgreement_onWidgetEvent);
 // own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default cFEStateCreateStep2_cFEStateCreateStep21 (fe/fepopupmisc),
 // destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable cFEStateCreateStep2_vtbl
 // (slots 4 onCreateScreen cFEStateCreateStep2_onCreateScreen, 12 onUpdate cFEStateCreateStep2_onUpdate, 17 onPopupEvent cFEStateCreateStep2_onPopupEvent, 18
-// onWidgetCreate cFEStateCreateStep2_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep2_onWidgetEvent, 25 func_001BA8B8, 29 func_001E0DD0, 31
-// func_001BAB28). Methods: fe/feasyncfile 0x1BA3E0-0x1BBC40.
+// onWidgetCreate cFEStateCreateStep2_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep2_onWidgetEvent, 25 cFEStateCreateStep2_fillHelpPopup, 29 cFEStateCreateStep2_isOnlineState, 31
+// cFEStateCreateStep2_onNetEvent). Methods: fe/feasyncfile 0x1BA3E0-0x1BBC40.
 //
 // Derives from cFEStateNet (fe/festatenet.h); its own members at their retail offsets. There is no On Tour DWARF for
 // these classes (On Tour has no online FE) and the preview keeps no accessors (tools/layout_xlate.py: preview
@@ -52,7 +52,7 @@ struct cFEStateCreateStep1 : public cFEStateNet {
     //       (edit) or 0x50 (create)
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -60,22 +60,22 @@ struct cFEStateCreateStep1 : public cFEStateNet {
     // --- cFEStateCreateStep1
     tLobbyAccount* mpAccount;       // 0x6D0 [U] the account form being edited: onCreateScreen cFEStateCreateStep1_onCreateScreen stores
                                     //       (char*)LobbyMan_mLobbyMan + 0x2B0 when mbEditAccount, else + 0x260 (online/lobbyman.h); every text box
-                                    //       reads / writes its mName/mPassword/unk_08/mMail/mSpam fields (func_001B95C0..func_001B97B0, func_001B9820)
+                                    //       reads / writes its mName/mPassword/unk_08/mMail/mSpam fields (cFEStateCreateStep1_showAccountName..cFEStateCreateStep1_selectShareInfoOption, cFEStateCreateStep1_handleKeyboardText)
     char* mszSavedPassword;         // 0x6D4 [R] cBXString (cFEStateCreateStep1_cFEStateCreateStep1 stores the empty-string rep cBXString_EmptyString, cFEStateCreateStep1__cFEStateCreateStep1
-                                    //       destroys it); [U] func_001BA178 saves mpAccount->mPassword here when editing, func_001BA218 restores it,
-                                    //       func_001BA358 sets mpAccount->mChangePassword when it differs
-    char* mszSavedConfirm;          // 0x6D8 [R] cBXString (as above); [U] the saved mpAccount->unk_08 (func_001BA178 / func_001BA218)
-    char* mszSavedMail;             // 0x6DC [R] cBXString (as above); [U] the saved mpAccount->mMail; func_001BA358 sets mChangeMail when
+                                    //       destroys it); [U] cFEStateCreateStep1_saveAccountFields saves mpAccount->mPassword here when editing, cFEStateCreateStep1_restoreAccountFields restores it,
+                                    //       cFEStateCreateStep1_markChangedFields sets mpAccount->mChangePassword when it differs
+    char* mszSavedConfirm;          // 0x6D8 [R] cBXString (as above); [U] the saved mpAccount->unk_08 (cFEStateCreateStep1_saveAccountFields / cFEStateCreateStep1_restoreAccountFields)
+    char* mszSavedMail;             // 0x6DC [R] cBXString (as above); [U] the saved mpAccount->mMail; cFEStateCreateStep1_markChangedFields sets mChangeMail when
                                     //       it differs
-    int miSavedSpam[2];             // 0x6E0 [U] func_001BA178 saves mpAccount->mSpam[0..1], func_001BA218 restores them, func_001BA358
+    int miSavedSpam[2];             // 0x6E0 [U] cFEStateCreateStep1_saveAccountFields saves mpAccount->mSpam[0..1], cFEStateCreateStep1_restoreAccountFields restores them, cFEStateCreateStep1_markChangedFields
                                     //       sets mpAccount->mChangeSpam when either differs
-    int mbSaveAccount;              // 0x6E8 (name ours) [U] func_001B92C8 (popup 0x82C events): 1 on 0x11 (option 2),
+    int mbSaveAccount;              // 0x6E8 (name ours) [U] cFEStateCreateStep1_onAccountMemPopupEvent (popup 0x82C events): 1 on 0x11 (option 2),
                                     //       0 on 0xF/0x10/0x14; on 0x16 it opens the "kT_POPUP204SaveAccount" yes/no
                                     //       popup when set, else pushes cFEStateSelectPersona
     int mbEditAccount;              // 0x6EC [R] cFEStateCreateStep1_cFEStateCreateStep1's 3rd argument (mHashName 0x4D when set, 0x50 when not), 1 in the default
-                                    //       ctor; [U] onCreateScreen picks the form from it, onWidgetCreate/onWidgetEvent/func_001BA178 test it
+                                    //       ctor; [U] onCreateScreen picks the form from it, onWidgetCreate/onWidgetEvent/cFEStateCreateStep1_saveAccountFields test it
     cUIText* mpStaticContinue;      // 0x6F0 [R] 0; [U] onWidgetCreate cFEStateCreateStep1_onWidgetCreate: widget "StaticContinue"; onGainTransition
-                                    //       cFEStateCreateStep1_onGainTransition enables it (its slot 8) only when all four strings are set (func_001B9558)
+                                    //       cFEStateCreateStep1_onGainTransition enables it (its slot 8) only when all four strings are set (cFEStateCreateStep1_isFormFilled)
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateCreateStep11() __asm__("cFEStateCreateStep1_cFEStateCreateStep11");
@@ -108,7 +108,7 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     //   mHashName: [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep2_cFEStateCreateStep2 stores 0x4E
     //   mpEngine: [R] the ctor's engine argument; [U] passed to every child state's ctor (cMemMan_alloc(..) +
     //       ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
-    //   mpParentState: [U] func_001A92D8 calls its slot 17 (onPopupEvent)
+    //   mpParentState: [U] cFEStateNet_onNestedChallengePopupEvent calls its slot 17 (onPopupEvent)
     //   mpScreen: [U] cUIEngine_addScreenByHashName result (onCreateScreen overrides),
     //       cUIScreen_getObjectByHashName(mpScreen, ...) everywhere
     //   mUserNum: [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
@@ -116,12 +116,12 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     // --- cFEStateCreateStep2
     tLobbyAccount* mpAccount;       // 0x6D0 [U] onCreateScreen cFEStateCreateStep2_onCreateScreen stores (char*)LobbyMan_mLobbyMan + 0x260 (online/lobbyman.h:
                                     //       the new-account form); the boxes read/write its mBornMonth/Day/Year (0x28/0x2C/0x30), mGender 0x34, 0x40
-                                    //       (func_001BB2D0..func_001BB4B0, cFEStateCreateStep2_onWidgetEvent, func_001BB840); func_001BAED8 sends mName/mPassword
+                                    //       (cFEStateCreateStep2_selectBornMonth..cFEStateCreateStep2_selectLegalAccepted, cFEStateCreateStep2_onWidgetEvent, cFEStateCreateStep2_fillDayListBox); cFEStateCreateStep2_onAccountMemPopupEvent sends mName/mPassword
     int mbScreenReady;              // 0x6D4 [U] onCreateScreen cFEStateCreateStep2_onCreateScreen clears it first and sets it once every box is filled;
                                     //       onWidgetEvent cFEStateCreateStep2_onWidgetEvent stores box changes into mpAccount only while it is set
-    int mbSaveAccount;              // 0x6D8 (name ours) [U] func_001BAED8 (popup events): 1 on 0x11 (option 2), 0 on
+    int mbSaveAccount;              // 0x6D8 (name ours) [U] cFEStateCreateStep2_onAccountMemPopupEvent (popup events): 1 on 0x11 (option 2), 0 on
                                     //       0xF/0x10/0x14; on 0x16 it opens "kT_POPUP204SaveAccount" when set, else
-                                    //       "kT_POPUP201Verify" and submits the account (func_0025C610)
+                                    //       "kT_POPUP201Verify" and submits the account (LobbyMan_authenticate)
     int unk_6DC;                    // 0x6DC [U] onCreateScreen cFEStateCreateStep2_onCreateScreen stores 0; no read seen
 
     // Methods bound to their retail symbols by asm labels.

@@ -30,21 +30,21 @@ INCLUDE_ASM("fe/festateload4", cGameModeMan_cmpRanks);
 
 INCLUDE_ASM("fe/festateload4", cStreamPause__cStreamPause);
 
-INCLUDE_ASM("fe/festateload4", func_00245F30);
+INCLUDE_ASM("fe/festateload4", cUIStateDisplayModePopup__cUIStateDisplayModePopup);
 
-INCLUDE_ASM("fe/festateload4", func_00245F50);
+INCLUDE_ASM("fe/festateload4", cUIStateDisplayModePopup_onCreateScreen);
 
-INCLUDE_ASM("fe/festateload4", func_00246098);
+INCLUDE_ASM("fe/festateload4", cUIStateDisplayModePopup_onUpdate);
 
-INCLUDE_ASM("fe/festateload4", func_002461E0);
+INCLUDE_ASM("fe/festateload4", cUIStateDisplayModePopup_onWidgetEvent);
 
-INCLUDE_ASM("fe/festateload4", func_00246268);
+INCLUDE_ASM("fe/festateload4", cUIStateDisplayModePopup_onWidgetMenu);
 
 INCLUDE_ASM("fe/festateload4", cGameLoadState_widgetCreateMultiP);
 
 INCLUDE_ASM("fe/festateload4", cGameLoadState_widgetCreateQP);
 
-INCLUDE_ASM("fe/festateload4", func_00246CF8);
+INCLUDE_ASM("fe/festateload4", cGameLoadState_showPlayerStats);
 
 INCLUDE_ASM("fe/festateload4", cFELoadState_InitwidgetMultiP);
 

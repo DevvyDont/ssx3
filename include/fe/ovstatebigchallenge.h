@@ -9,7 +9,7 @@
 // cOVState_BIGCHALLENGE_START: the challenge intro (overlay id 29). Allocated 0xA0 by cOVStateManager_triggerOverlay /
 // triggerPopup, which then call cOVState_BIGCHALLENGE_START_getChallengeData. Vtable
 // cOVState_BIGCHALLENGE_START_vtbl (0x473688); constructors cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START
-// (engine, id; calls getChallengeData) and func_00220F48 (no engine); destructor
+// (engine, id; calls getChallengeData) and cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START1 (no engine); destructor
 // cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START. On Tour: size 0x94, one member.
 //
 // cOVState_BIGCHALLENGE_FAIL: the challenge-failed screen (overlay id 30). Allocated 0xA4 (+ getChallengeData).

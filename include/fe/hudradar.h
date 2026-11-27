@@ -13,13 +13,13 @@
 // built by the constructor cHUDRadar_cHUDRadar, which stores the vptr at +0x38 - the last word - and counts live instances
 // in D_004A276C; the destructor cHUDRadar__cHUDRadar undoes both). No allocation of its own. No base class; the class
 // declares a virtual destructor, so g++ 2.95 puts the vptr after its data (0x38).
-// Methods: ctor cHUDRadar_cHUDRadar, dtor cHUDRadar__cHUDRadar (vtable slot 1, the only slot), init/layout func_0020EB50 (loads
-// the shared icons and font, then func_0020EC18 lays it out), 1-player render func_0020EDA0, split-screen render
-// func_0020FB40. func_0020ED20 and func_002105B0 ... func_002108F8 are statics (course progress of all riders).
+// Methods: ctor cHUDRadar_cHUDRadar, dtor cHUDRadar__cHUDRadar (vtable slot 1, the only slot), init/layout cHUDRadar_init (loads
+// the shared icons and font, then cHUDRadar_calcLayout lays it out), 1-player render cHUDRadar_renderTracker, split-screen render
+// cHUDRadar_renderSplitTracker. updateRadarRiders and setRadarRiderResetFlag ... resetRadarRiders are statics (course progress of all riders).
 //
 // A FLAT layout, like main/game.h. No member has a name source (the assert names radarLoc / messageHeight /
 // offScreenArrowHeight may be locals), so all are unk_XXX. Evidence tags: [R] retail ctor / dtor; [U] retail usage
-// (asm of func_0020EC18 / func_0020EDA0 / func_0020FB40; their C views sTrophyBox_EDA0 / sTrophyBox_FB40 /
+// (asm of cHUDRadar_calcLayout / cHUDRadar_renderTracker / cHUDRadar_renderSplitTracker; their C views sTrophyBox_EDA0 / sTrophyBox_FB40 /
 // sTrophyBox_20EC18 in src/fe/ovstatetrophy.cpp); [P] the preview build.
 
 #include "layout.h"
@@ -28,19 +28,19 @@
 
 struct cHUDRadar {
     float unk_000[2];                // 0x000 [U] text position x, y (On Tour t2Vector shape; no shared definition in
-                                     //       include/ yet): func_0020EC18 stores it as one unaligned doubleword
-                                     //       (sdl/sdr); func_0020EDA0 prints the trophy line there
-    float unk_008;                   // 0x008 [U] strip top (func_0020EC18 swc1; func_0020EDA0 lwc1)
+                                     //       include/ yet): cHUDRadar_calcLayout stores it as one unaligned doubleword
+                                     //       (sdl/sdr); cHUDRadar_renderTracker prints the trophy line there
+    float unk_008;                   // 0x008 [U] strip top (cHUDRadar_calcLayout swc1; cHUDRadar_renderTracker lwc1)
     float unk_00C;                   // 0x00C [U] strip bottom (ditto)
     float unk_010;                   // 0x010 [U] strip centre x (ditto)
     float unk_014;                   // 0x014 [U] top of the bar below the top arrow (ditto)
     float unk_018;                   // 0x018 [U] bottom arrow row (ditto)
     float unk_01C;                   // 0x01C [U] pixels per course unit (strip height / 10000; ditto)
-    tRect unk_020;                   // 0x020 [U] the tracker rectangle: func_0020EC18 copies its area argument (struct
-                                     //       copy, sdl/sdr), func_0020FB40 reads X / Y / W / H. Possibly the assert's
+    tRect unk_020;                   // 0x020 [U] the tracker rectangle: cHUDRadar_calcLayout copies its area argument (struct
+                                     //       copy, sdl/sdr), cHUDRadar_renderSplitTracker reads X / Y / W / H. Possibly the assert's
                                      //       radarLoc (".H")
-    float unk_030;                   // 0x030 [U] rectangle h / 10000: split-screen pixels per unit (func_0020EC18 swc1;
-                                     //       func_0020FB40 lwc1)
+    float unk_030;                   // 0x030 [U] rectangle h / 10000: split-screen pixels per unit (cHUDRadar_calcLayout swc1;
+                                     //       cHUDRadar_renderSplitTracker lwc1)
     int unk_034;                     // 0x034 [U] the viewer's AI index from the last frame: both renders compare and
                                      //       store it (lw/sw)
     void** mVtbl;                    // 0x038 [R] cHUDRadar_cHUDRadar stores cHUDRadar_vtbl (1 slot), cHUDRadar__cHUDRadar restores it;
