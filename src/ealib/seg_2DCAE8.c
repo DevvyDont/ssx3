@@ -913,14 +913,14 @@ extern int D_00450C60_CC88 __asm__("D_00450C60");
 extern void MUTEX_create_CC88(void *) __asm__("MUTEX_create");
 extern int FILESYS_overhead_CC88(int, int, int) __asm__("FILESYS_overhead");
 extern void MEM_fill_CC88(int, int, int) __asm__("MEM_fill");
-extern int func_003E4040_CC88(int, int) __asm__("func_003E4040");
+extern int CDVD_initFileSystem_CC88(int, int) __asm__("CDVD_initFileSystem");
 extern void FILEDEV_init_CC88(int, int) __asm__("FILEDEV_init");
 /**
  * Initialises the file system in caller-supplied memory; returns 0 when it was already initialised.
  *
  * Zero arguments take the defaults (16 open files, 1000 directory entries, 32 file operations). Creates the mutex,
  * clears FILESYS_overhead's worth of @p mem, places the 0x30-byte operation table and the 0x110-byte handle table in
- * it, then calls FILEDEV_init(@p maxopenfiles, v), v being func_003E4040's result for the directory entries when
+ * it, then calls FILEDEV_init(@p maxopenfiles, v), v being CDVD_initFileSystem's result for the directory entries when
  * D_00450C60 is set and 0 otherwise.
  *
  * @param maxopenfiles  maximum open files (0: 16)
@@ -943,7 +943,7 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
         MEM_fill_CC88(((int)gFileDevice.oplist), 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
         *(int*)&gFileDevice.handlelist = (int)gFileDevice.oplist + gFileDevice.maxfileops * 0x30;
         if (D_00450C60_CC88 != 0) {
-            alignedDir = func_003E4040_CC88(maxdirfiles, gFileDevice.maxopen * 272 + (int)gFileDevice.handlelist);
+            alignedDir = CDVD_initFileSystem_CC88(maxdirfiles, gFileDevice.maxopen * 272 + (int)gFileDevice.handlelist);
         } else {
             alignedDir = 0;
         }
@@ -984,20 +984,20 @@ int FILESYS_overhead(int maxopenfiles, int maxdirfiles, int maxfileops) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
+extern void CDVD_shutdownFileSystem_CDE0(void) __asm__("CDVD_shutdownFileSystem");
 extern void FILESYS_closesync_CDE0(int, int) __asm__("FILESYS_closesync");
 extern void MUTEX_destroy_CDE0(char *) __asm__("MUTEX_destroy");
 extern void MEM_clear_CDE0(char *, int) __asm__("MEM_clear");
 extern int pFileDeviceMem_CDE0[] __asm__("pFileDeviceMem");
 
 /**
- * Shuts the file system down: calls func_003E44B0, frees and closes every added archive (FILESYS_closesync on its
+ * Shuts the file system down: calls CDVD_shutdownFileSystem, frees and closes every added archive (FILESYS_closesync on its
  * file), releases the mutex (MUTEX_destroy), clears the command manager's state and frees its memory block (pFileDeviceMem)
  * through the free callback.
  */
 void FILESYS_restore(void) {
     int *n;
-    func_003E44B0_CDE0();
+    CDVD_shutdownFileSystem_CDE0();
     for (n = (int*)gFileDevice.bigfilelist; n != 0; n = (int *)n[5]) {
         ((void (*)(int))gFileSysOpts.free)(n[0]);
         FILESYS_closesync_CDE0(*(int *)n[3], 0);
@@ -2386,7 +2386,7 @@ void FILESYS_setmemcallbacks(int mallocFn, int freeFn) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_getopts);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* gFileSysOpts (FILESYSOPTS's names at these offsets) and the live CD settings D_00450C58 (func_003E4040's
+/* gFileSysOpts (FILESYSOPTS's names at these offsets) and the live CD settings D_00450C58 (CDVD_initFileSystem's
    CdCfg_4040 names, names ours). */
 struct A_E928 { int size, malloc, free, cdMediaMode, cdNameLen, useDisc, cdRoot, REAL_filedevice; };
 struct B_E928 { int root, namelen, mmode, useDisc; };
@@ -2420,7 +2420,7 @@ int FILESYS_getopts(int *opts) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setopts);
 #ifdef SKIP_ASM
-/* The live CD settings (func_003E4040's CdCfg_4040 names, names ours). */
+/* The live CD settings (CDVD_initFileSystem's CdCfg_4040 names, names ours). */
 struct B_E9B8 { int root, namelen, mmode, useDisc; };
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
 extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
@@ -6579,14 +6579,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_open);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void FILEDEV_resolvename(int, char *, int *);
-extern int func_003E4508_3208(char *, int, int *) __asm__("func_003E4508");
+extern int CDVD_findFileNumber_3208(char *, int, int *) __asm__("CDVD_findFileNumber");
 extern int sceOpen(char *, int);
 
 /**
  * Opens a file on its device; returns 1 with the device handle (device in the top byte, 1 disc or 2 host) in
  * @p out, or 0.
  *
- * The name is resolved by FILEDEV_resolvename. Disc files are looked up in the CD file table (func_003E4508). Host files are
+ * The name is resolved by FILEDEV_resolvename. Disc files are looked up in the CD file table (CDVD_findFileNumber). Host files are
  * opened by open mode (flags & 7): 1 read-only (1), 0 read-write appending (0x103), 2 read-write creating (0x203), 6
  * read-write creating and truncating (0x603); any other mode gives -1.
  *
@@ -6602,7 +6602,7 @@ int FILEDEV_open(int path, unsigned int flags, int *out) {
 
     FILEDEV_resolvename(path, buf, &kind);
     if (kind == 1) {
-        if (func_003E4508_3208(buf, flags, out) == 0) {
+        if (CDVD_findFileNumber_3208(buf, flags, out) == 0) {
             return 0;
         }
         *out = 0x01000000 | *out;
@@ -6766,11 +6766,11 @@ int FILEDEV_write(int handle, int buffer, int offset, int size) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_getsize);
 #ifdef SKIP_ASM
-extern void func_003E48D8(int, int, int, int);
+extern void CDVD_readFileEntry(int, int, int, int);
 extern void sceLseek(int, int, int);
 
 /**
- * Returns the size of an open file: a disc file's from the CD file table (func_003E48D8), a host file's by seeking to
+ * Returns the size of an open file: a disc file's from the CD file table (CDVD_readFileEntry), a host file's by seeking to
  * its end. Declared void; the size is left in the return register.
  *
  * @param handle  the device handle
@@ -6780,7 +6780,7 @@ void FILEDEV_getsize(int handle) {
 
     temp_4 = handle & 0xFFFFFF;
     if ((handle >> 0x18) == 1) {
-        func_003E48D8(temp_4, 0, 0, 0);
+        CDVD_readFileEntry(temp_4, 0, 0, 0);
         return;
     }
     sceLseek(temp_4, 0, 2);
@@ -6791,7 +6791,7 @@ void FILEDEV_getsize(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_getstartsector);
 #ifdef SKIP_ASM
 /**
- * Returns the start sector of an open disc file (from the CD file table, func_003E48D8), or 0 for a host file.
+ * Returns the start sector of an open disc file (from the CD file table, CDVD_readFileEntry), or 0 for a host file.
  *
  * @param handle  the device handle
  * @return the sector, or 0
@@ -6801,7 +6801,7 @@ int FILEDEV_getstartsector(int handle) {
     int idx = handle & 0xFFFFFF;
 
     if ((handle >> 24) == 1) {
-        func_003E48D8(idx, 0, 0, &startSector);
+        CDVD_readFileEntry(idx, 0, 0, &startSector);
     } else {
         startSector = 0;
     }
@@ -6810,17 +6810,17 @@ int FILEDEV_getstartsector(int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3588);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_signalAlarmSema);
 #ifdef SKIP_ASM
 void iSignalSema_3588(int) __asm__("iSignalSema");
 /**
- * Alarm handler of func_003E35B0: signals the waiting semaphore and re-enables interrupts.
+ * Alarm handler of CDVD_sleepHsyncs: signals the waiting semaphore and re-enables interrupts.
  *
  * @param alarmId  the alarm id
  * @param alarmTime  the alarm time
  * @param semaId  the semaphore
  */
-void func_003E3588(int alarmId, int alarmTime, int semaId) {
+void CDVD_signalAlarmSema(int alarmId, int alarmTime, int semaId) {
     iSignalSema_3588(semaId);
     // PORT: MIPS sync + EE ei (no C equivalent)
     __asm__ volatile("sync\n\tei");
@@ -6828,22 +6828,22 @@ void func_003E3588(int alarmId, int alarmTime, int semaId) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E35B0);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_sleepHsyncs);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* The kernel's semaphore parameters (Sony's SemaParam; the field names are func_003E4040's SemaParam_4040's). */
+/* The kernel's semaphore parameters (Sony's SemaParam; the field names are CDVD_initFileSystem's SemaParam_4040's). */
 typedef struct Cfg_35B0 { int count, max_count, init_count, wait_threads, attr, option; } Cfg_35B0;
-extern void cb_35B0(void) __asm__("func_003E3588");
+extern void cb_35B0(void) __asm__("CDVD_signalAlarmSema");
 extern void SetAlarm_35B0(int, void (*)(void), int) __asm__("SetAlarm");
 extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
 
 /**
- * Sleeps the calling thread for @p hsyncTicks alarm ticks (H-sync periods): sets an alarm (handler func_003E3588) that
+ * Sleeps the calling thread for @p hsyncTicks alarm ticks (H-sync periods): sets an alarm (handler CDVD_signalAlarmSema) that
  * signals a new semaphore, waits on it and deletes it.
  *
  * @param hsyncTicks  the delay in H-sync periods
  */
-void func_003E35B0(unsigned short hsyncTicks) {
+void CDVD_sleepHsyncs(unsigned short hsyncTicks) {
     Cfg_35B0 semaParam;
     int sema;
 
@@ -6858,7 +6858,7 @@ void func_003E35B0(unsigned short hsyncTicks) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3618);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readCurrentSector);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -6878,7 +6878,7 @@ extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
  *
  * @return the sector buffer
  */
-char *func_003E3618(void) {
+char *CDVD_readCurrentSector(void) {
     int n = 10;
     int syncBusy;
     int done;
@@ -6890,11 +6890,11 @@ char *func_003E3618(void) {
         }
         sceCdDiskReady_3618(0);
         while (sceCdRead_3618(D_00519C40_3618[11], 1, D_00519C80_3618, &D_00519C40_3618[7]) == 0) {
-            func_003E35B0(0x1E0);
+            CDVD_sleepHsyncs(0x1E0);
         }
         do {
             syncBusy = sceCdSync_3618(1);
-            func_003E35B0(0x1E0);
+            CDVD_sleepHsyncs(0x1E0);
         } while (syncBusy != 0);
         done = sceCdGetError_3618() == 0;
         if (!done) n--;
@@ -6956,7 +6956,7 @@ int fi_cmp(unsigned int *lhs, unsigned int *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E39A8);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_buildFileTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int CDVD_hashname_39A8(char *, int) __asm__("CDVD_hashname");
@@ -6980,7 +6980,7 @@ extern int hashcollision_39A8[] __asm__("hashcollision");
  * @param seed  the first hash seed
  * @return the seed used
  */
-int func_003E39A8(char *src, char *dst, int n, int seed) {
+int CDVD_buildFileTable(char *src, char *dst, int n, int seed) {
     int done = 0;
     char *dstEntry;
     do {
@@ -7016,21 +7016,21 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3AD8);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_wakeReader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519C40_3AD8[] __asm__("D_00519C40");
 void iSignalSema_3AD8(int) __asm__("iSignalSema");
 /**
- * CD callback: wakes the CD reader thread (func_003E3BE0) by signalling its semaphore (D_00519C40 +0xC).
+ * CD callback: wakes the CD reader thread (CDVD_readerThread) by signalling its semaphore (D_00519C40 +0xC).
  */
-void func_003E3AD8(void) {
+void CDVD_wakeReader(void) {
     iSignalSema_3AD8(D_00519C40_3AD8[3]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3B00);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_issueStepRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -7040,9 +7040,9 @@ extern void sceCdSync_3B00(int) __asm__("sceCdSync");
 /**
  * Issues the CD read of the current step: sectors +0x30 from sector +0x2C into the sector buffer (+0x3C) when flag bit
  * 0 is set, else straight into the destination (+0x34). Up to three tries, waiting and syncing between them; it sets
- * flag 2 (reading) on success or flags 2 and 4 (failed, for the recovery in func_003E4000) otherwise.
+ * flag 2 (reading) on success or flags 2 and 4 (failed, for the recovery in CDVD_checkFailedRead) otherwise.
  */
-void func_003E3B00(void) {
+void CDVD_issueStepRead(void) {
     int *readState = &D_00519C40_3B00[8];
     int *cdState = D_00519C40_3B00;
     int readBuf;
@@ -7060,7 +7060,7 @@ void func_003E3B00(void) {
             ok = 1;
             break;
         }
-        func_003E35B0(i + 1);
+        CDVD_sleepHsyncs(i + 1);
         sceCdSync_3B00(0);
     }
     if (!ok) {
@@ -7070,11 +7070,11 @@ void func_003E3B00(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readerThread);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* Field names: func_003E4040's CdState_4040 view of the same record where they agree (names ours). */
+/* Field names: CDVD_initFileSystem's CdState_4040 view of the same record where they agree (names ours). */
 struct sC40Mode {                   /* the CD read mode handed to sceCdRead */
     unsigned char f00;
     unsigned char f01;
@@ -7096,19 +7096,19 @@ struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
     int count;                      /* number of files */
     int tid;                        /* reader thread */
     int sema;                       /* semaphore (also D_00519C4C) */
-    int retries;                    /* read retries left (func_003E3B00 restarts the read) */
+    int retries;                    /* read retries left (CDVD_issueStepRead restarts the read) */
     int cached;                     /* the sector in the sector buffer */
     int sorted;
     struct sC40Mode mode;
     struct sC40Read read;
 };
 extern struct sC40 D_00519C40;
-extern void func_003E3B00_3BE0(void) __asm__("func_003E3B00");
+extern void CDVD_issueStepRead_3BE0(void) __asm__("CDVD_issueStepRead");
 extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 extern void MEM_copy_2190(int, int, int) __asm__("MEM_copy");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
-void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
+void CDVD_readerThread_impl(void) __asm__("CDVD_readerThread");
 /**
  * CD reader thread: waits on the semaphore for each finished CD command and moves the current disc read on.
  *
@@ -7116,10 +7116,10 @@ void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
  * (4). After a step read into the sector buffer (flag bit 0), the wanted bytes are copied to the destination and that
  * sector is remembered (+0x14). While bytes are left (+0x24) it plans the next step (a part sector or an unaligned
  * destination goes through the sector buffer one sector at a time, otherwise whole sectors go straight in) and issues
- * it (func_003E3B00); when none are left it clears the reading flag and completes the command
+ * it (CDVD_issueStepRead); when none are left it clears the reading flag and completes the command
  * (iFILESYS_CommandCompleteCallback(1)). Never returns.
  */
-void func_003E3BE0_impl(void) {
+void CDVD_readerThread_impl(void) {
     struct sC40Read *curRead = &D_00519C40.read;
 
     while (1) {
@@ -7130,7 +7130,7 @@ void func_003E3BE0_impl(void) {
             D_00519C40.flags = fl;
             if (fl & 2) {
                 if (--D_00519C40.retries > 0) {
-                    func_003E3B00_3BE0();
+                    CDVD_issueStepRead_3BE0();
                 } else {
                     D_00519C40.flags = fl | 4;
                 }
@@ -7161,7 +7161,7 @@ void func_003E3BE0_impl(void) {
                 curRead->stepBytes = k;
             }
             curRead->restBytes -= curRead->stepBytes;
-            func_003E3B00_3BE0();
+            CDVD_issueStepRead_3BE0();
         } else {
             D_00519C40.flags &= ~2;
             iFILESYS_CommandCompleteCallback_33B0(1);
@@ -7171,7 +7171,7 @@ void func_003E3BE0_impl(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3D78);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_recoverRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MEM_copy_3D78(void *, void *, int) __asm__("MEM_copy");
@@ -7206,11 +7206,11 @@ extern char D_0051A480[];
  * Recovers a failed disc read synchronously. Removes the CD callback, then, until no error is left: initialises the CD
  * again (shutting it down when that fails), sets the media mode, waits (480 ticks per attempt so far), test-reads
  * sector 0x10 and reads the current step's sectors one at a time. Then it restarts the CD callback thread, installs
- * func_003E3AD8 again and signals the reader so the read carries on. Returns 0.
+ * CDVD_wakeReader again and signals the reader so the read carries on. Returns 0.
  *
  * @return 0
  */
-int func_003E3D78(void) {
+int CDVD_recoverRead(void) {
     struct CdReq_3D78 req;
     int tries;
     int busy;
@@ -7221,32 +7221,32 @@ int func_003E3D78(void) {
     do {
         tries++;
         while (sceCdInit_3D78(0) == 0) {
-            func_003E35B0(7200);
+            CDVD_sleepHsyncs(7200);
             while (sceCdInit_3D78(5) == 0) {
-                func_003E35B0(7200);
+                CDVD_sleepHsyncs(7200);
             }
         }
         sceCdMmode_3D78(D_00450C58[2]);
-        func_003E35B0(tries * 0x1E0);
+        CDVD_sleepHsyncs(tries * 0x1E0);
         while (sceCdRead_3D78(0x10, 1, D_00519C40_3D78.buf, D_00519C40_3D78.mode) == 0) {
-            func_003E35B0(tries * 0x1E0);
+            CDVD_sleepHsyncs(tries * 0x1E0);
         }
         do {
             busy = sceCdSync_3D78(1);
-            func_003E35B0(tries * 0x1E0);
+            CDVD_sleepHsyncs(tries * 0x1E0);
         } while (busy != 0);
         if (sceCdGetError_3D78() == 0 && req.count > 0) {
             do {
                 sceCdDiskReady_3D78(0);
                 while (sceCdRead_3D78(req.lba, 1, (D_00519C40_3D78.flags & 1) ? D_00519C40_3D78.buf : req.buf, D_00519C40_3D78.mode) == 0) {
-                    func_003E35B0(tries * 0x1E0);
+                    CDVD_sleepHsyncs(tries * 0x1E0);
                 }
                 do {
                     busy = sceCdSync_3D78(1);
-                    func_003E35B0(tries * 0x1E0);
+                    CDVD_sleepHsyncs(tries * 0x1E0);
                 } while (busy != 0);
                 if (sceCdGetError_3D78() != 0) {
-                    func_003E35B0(7200);
+                    CDVD_sleepHsyncs(7200);
                     break;
                 }
                 req.lba++;
@@ -7257,37 +7257,37 @@ int func_003E3D78(void) {
         }
     } while (sceCdGetError_3D78() != 0);
     sceCdInitEeCB_3D78(11, D_0051A480, 0x800);
-    sceCdCallback_3D78(func_003E3AD8);
+    sceCdCallback_3D78(CDVD_wakeReader);
     SignalSema_3D78(D_00519C40_3D78.fC);
     return 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4000);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_checkFailedRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519C40_4000[] __asm__("D_00519C40");
-void func_003E3D78_4000(void) __asm__("func_003E3D78");
+void CDVD_recoverRead_4000(void) __asm__("CDVD_recoverRead");
 
 /**
  * Sync task of the CD file system: when a read has failed (flags 2 and 4 both set) it clears them and recovers the read
- * (func_003E3D78). Returns 0.
+ * (CDVD_recoverRead). Returns 0.
  *
  * @return 0
  */
-int func_003E4000(void) {
+int CDVD_checkFailedRead(void) {
     int cdFlags = D_00519C40_4000[0];
     if ((cdFlags & 6) == 6) {
         D_00519C40_4000[0] = cdFlags & ~6;
-        func_003E3D78_4000();
+        CDVD_recoverRead_4000();
     }
     return 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4040);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_initFileSystem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MEM_fill_4040(void *, int, int) __asm__("MEM_fill");
@@ -7300,15 +7300,15 @@ extern void FlushCache_4040(int) __asm__("FlushCache");
 extern void MEM_clear_4040(void *, int) __asm__("MEM_clear");
 extern char *strcat_4040(char *, char *) __asm__("strcat");
 extern int strncmp_4040(char *, char *, int) __asm__("strncmp");
-extern int func_003E39A8_4040(void *, void *, unsigned int, int) __asm__("func_003E39A8");
+extern int CDVD_buildFileTable_4040(void *, void *, unsigned int, int) __asm__("CDVD_buildFileTable");
 extern int CreateSema_4040(void *) __asm__("CreateSema");
 extern int CreateThread_4040(void *) __asm__("CreateThread");
 extern int StartThread_4040(int, int) __asm__("StartThread");
 extern void sceCdInitEeCB_4040(int, void *, int) __asm__("sceCdInitEeCB");
 extern int sceCdCallback_4040(void *) __asm__("sceCdCallback");
-extern void func_003E3BE0_4040(void) __asm__("func_003E3BE0");
-extern void func_003E3AD8_4040(void) __asm__("func_003E3AD8");
-extern void func_003E4000_4040(void) __asm__("func_003E4000");
+extern void CDVD_readerThread_4040(void) __asm__("CDVD_readerThread");
+extern void CDVD_wakeReader_4040(void) __asm__("CDVD_wakeReader");
+extern void CDVD_checkFailedRead_4040(void) __asm__("CDVD_checkFailedRead");
 extern int strlen(char *);
 
 /* ISO 9660 directory record (byte-packed) */
@@ -7377,7 +7377,7 @@ extern char D_0051A480[];
 extern char D_0051AC80[];
 extern char D_0051EC80[];
 extern int D_004A30F0;
-extern struct IsoDirRec_4040 *func_003E3618_4040(void) __asm__("func_003E3618");
+extern struct IsoDirRec_4040 *CDVD_readCurrentSector_4040(void) __asm__("CDVD_readCurrentSector");
 extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E3758");
 
 /**
@@ -7388,15 +7388,15 @@ extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E375
  * gFileSysOpts allocator): from the built-in file list (gFileSysOpts +0x20; the 7-character device prefix and the
  * 2-character version suffix are dropped and backslashes become slashes), or by walking the ISO 9660 directories
  * (func_003E3758) from the root or from the root directory D_00450C58 names. More than @p n files fails. Otherwise it
- * builds the sorted hash table into @p files (func_003E39A8, seed D_00450C70), creates the semaphore and the reader
- * thread func_003E3BE0 (priority 12), starts the CD callback thread, installs func_003E3AD8 and adds the sync task
- * func_003E4000.
+ * builds the sorted hash table into @p files (CDVD_buildFileTable, seed D_00450C70), creates the semaphore and the reader
+ * thread CDVD_readerThread (priority 12), starts the CD callback thread, installs CDVD_wakeReader and adds the sync task
+ * CDVD_checkFailedRead.
  *
  * @param n  the table capacity
  * @param files  the file table
  * @return the number of files, or 0
  */
-unsigned int func_003E4040(unsigned int n, void *files) {
+unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
     struct ThreadParam_4040 tp;
     struct SemaParam_4040 sp;
     char toc[0x1000];
@@ -7453,12 +7453,12 @@ unsigned int func_003E4040(unsigned int n, void *files) {
             builtinFile++;
         }
     } else {
-        pvd = (struct IsoPvd_4040 *)func_003E3618_4040();
+        pvd = (struct IsoPvd_4040 *)CDVD_readCurrentSector_4040();
         D_0051EC80[1] = 0;
         D_0051EC80[0] = '/';
         if (*D_00450C58_4040.root != 0) {
             D_00519C40_4040.lba = pvd->root.lba;
-            for (rec = func_003E3618_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
+            for (rec = CDVD_readCurrentSector_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
                 if (strncmp_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
                     strcat_4040(D_0051EC80, D_00450C58_4040.root);
                     strcat_4040(D_0051EC80, str_slash_c);
@@ -7478,14 +7478,14 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     }
     D_00519C40_4040.files = files;
     D_00519C40_4040.count = D_00450C6C;
-    D_00519C40_4040.sorted = func_003E39A8_4040(D_00450C68, files, D_00450C6C, D_00450C70);
+    D_00519C40_4040.sorted = CDVD_buildFileTable_4040(D_00450C68, files, D_00450C6C, D_00450C70);
     ((void (*)(void*))gFileSysOpts.free)(D_00450C68);
     D_00450C6C = 0;
     sp.init_count = 0;
     sp.max_count = 0x20;
     D_00450C68 = 0;
     D_00519C40_4040.sema = CreateSema_4040(&sp);
-    tp.func = func_003E3BE0_4040;
+    tp.func = CDVD_readerThread_4040;
     tp.stack = D_0051AC80;
     tp.gpReg = &D_004A30F0;
     tp.stackSize = 0x4000;
@@ -7494,15 +7494,15 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.tid = CreateThread_4040(&tp);
     StartThread_4040(D_00519C40_4040.tid, 0);
     sceCdInitEeCB_4040(11, D_0051A480, 0x800);
-    sceCdCallback_4040(func_003E3AD8_4040);
+    sceCdCallback_4040(CDVD_wakeReader_4040);
     D_00519C40_4040.sector = D_00519C80;
-    SYNCTASK_add(func_003E4000_4040, 0, 0);
+    SYNCTASK_add(CDVD_checkFailedRead_4040, 0, 0);
     return D_00519C40_4040.count;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E44B0);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_shutdownFileSystem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SYNCTASK_del_44B0(void (*)(void)) __asm__("SYNCTASK_del");
@@ -7512,14 +7512,14 @@ extern void DeleteThread(int);
 extern void TerminateThread(int);
 extern void DeleteSema(int);
 extern int D_00519C40_9C40[] __asm__("D_00519C40");
-extern void func_003E4000_4000(void) __asm__("func_003E4000");
+extern void CDVD_checkFailedRead_4000(void) __asm__("CDVD_checkFailedRead");
 
 /**
- * Shuts the CD file system down: removes its sync task (func_003E4000) and the CD callback, terminates and deletes the
+ * Shuts the CD file system down: removes its sync task (CDVD_checkFailedRead) and the CD callback, terminates and deletes the
  * reader thread, deletes its semaphore and shuts the CD down (sceCdInit(5)).
  */
-void func_003E44B0(void) {
-    SYNCTASK_del_44B0(func_003E4000_4000);
+void CDVD_shutdownFileSystem(void) {
+    SYNCTASK_del_44B0(CDVD_checkFailedRead_4000);
     sceCdCallback(0);
     TerminateThread(D_00519C40_9C40[2]);
     DeleteThread(D_00519C40_9C40[2]);
@@ -7529,7 +7529,7 @@ void func_003E44B0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4508);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_findFileNumber);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "fakematch.h"
@@ -7540,7 +7540,7 @@ extern int D_00450C58_4508[] __asm__("D_00450C58");
 extern char D_00499C81_4508[] __asm__("D_00499C81");
 extern int D_00519C40_4508[] __asm__("D_00519C40");
 
-int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508");
+int CDVD_findFileNumber_4508(char *path, int unused, int *out) __asm__("CDVD_findFileNumber");
 /**
  * Looks a path up in the disc's hashed file table and gives its 1-based entry number.
  *
@@ -7548,7 +7548,7 @@ int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508"
  * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with CDVD_hashname (seed word 6 of
  * the file-system state D_00519C40) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
  * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with fi_cmp. Used by
- * FILEDEV_open, which tags the number with device 1 in the top byte, and by func_003E4968.
+ * FILEDEV_open, which tags the number with device 1 in the top byte, and by CDVD_findFileEntry.
  *
  * @param path  the file path ('/' or '\\' separated)
  * @param modeFlags  the open-mode flags FILEDEV_open passes (not used)
@@ -7558,7 +7558,7 @@ int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508"
 // FAKEMATCH: register pin `register int slash FM_REG("$2") = '/'; buf[0] = slash;` (fakematch.h) breaks the
 // local-alloc tie between the '/' constant for buf[0] and the first path char c0 (retail: v0 / v1, ours swapped); plain form 99.62%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-int func_003E4508_4508(char *path, int modeFlags, int *out) {
+int CDVD_findFileNumber_4508(char *path, int modeFlags, int *out) {
     char buf[256];
     int key;
     char *bufCursor;
@@ -7603,14 +7603,14 @@ int func_003E4508_4508(char *path, int modeFlags, int *out) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4648);
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E48D8);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readFileEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C5C_48D8[] __asm__("D_00450C5C");
 extern char *D_00519C78_48D8[] __asm__("D_00519C78");
 extern char *strncpy(char *, const char *, int);
 
-int func_003E48D8_48D8(int, char *, int *, int *) __asm__("func_003E48D8");
+int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEntry");
 
 /**
  * Reads one entry of the disc file table by its 1-based number.
@@ -7625,7 +7625,7 @@ int func_003E48D8_48D8(int, char *, int *, int *) __asm__("func_003E48D8");
  * @param sectorOut  receives the start sector (+4), or 0
  * @return the entry's size (+8)
  */
-int func_003E48D8_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOut) {
+int CDVD_readFileEntry_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOut) {
     char *entry;
     entry = D_00519C78_48D8[0] + (fileIndex - 1) * (D_00450C5C_48D8[0] + 0xC);
     if (nameOut != 0) {
@@ -7642,27 +7642,27 @@ int func_003E48D8_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOu
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4968);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_findFileEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003E4508(int, int, int *);
+extern int CDVD_findFileNumber(int, int, int *);
 extern int D_00450C5C_0C5C[] __asm__("D_00450C5C");
 extern int D_00519C78_9C78[] __asm__("D_00519C78");
 
 /**
  * Returns the disc file-table entry for a path, or 0 when the table has none.
  *
- * Finds the entry number with func_003E4508 and turns it into a pointer into D_00519C78 (entries of D_00450C5C + 12
+ * Finds the entry number with CDVD_findFileNumber and turns it into a pointer into D_00519C78 (entries of D_00450C5C + 12
  * bytes).
  *
  * @param filePath  the file path
  * @return the entry (start sector at +4, size at +8, name at +0xC), or 0
  */
-int func_003E4968(int filePath) {
+int CDVD_findFileEntry(int filePath) {
     int entryNumber;
     int entry;
 
-    if (func_003E4508(filePath, 0, &entryNumber) == 0) {
+    if (CDVD_findFileNumber(filePath, 0, &entryNumber) == 0) {
         entry = 0;
     } else {
         entry = D_00519C78_9C78[0] + (entryNumber - 1) * (D_00450C5C_0C5C[0] + 0xC);
@@ -7768,7 +7768,7 @@ void REAL_removeexit(void (*exitFunc)(void)) {
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003E6690_4AF0(int) __asm__("func_003E6690");
+extern void TIMER_setHblankRate_4AF0(int) __asm__("TIMER_setHblankRate");
 extern int AddIntcHandler_4AF0(int, void (*)(void), int) __asm__("AddIntcHandler");
 extern int EnableIntc_4AF0(int) __asm__("EnableIntc");
 extern void REAL_addexit_4AF0(void (*)(void)) __asm__("REAL_addexit");
@@ -7797,7 +7797,7 @@ extern unsigned short D_00450DE0;
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
  * as the INTC 10 (timer 1) handler (AddIntcHandler) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
- * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to func_003E6690. Finally it registers the teardown
+ * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to TIMER_setHblankRate. Finally it registers the teardown
  * TIMER_restore with REAL_addexit. systemInit calls it with 60.
  *
  * Likely bug: after the calibration both saved timer-0 values (the count and the mode) are written back to T0_COUNT
@@ -7855,11 +7855,11 @@ int TIMER_init(int hz) {
             hblankCount += 0x10000;
         }
         if ((unsigned int)(hblankCount - 15701) < 99) {
-            func_003E6690_4AF0(1);
+            TIMER_setHblankRate_4AF0(1);
         } else if ((unsigned int)(hblankCount - 15576) < 99) {
-            func_003E6690_4AF0(2);
+            TIMER_setHblankRate_4AF0(2);
         } else if ((unsigned int)(hblankCount - 28801) < 3199) {
-            func_003E6690_4AF0(3);
+            TIMER_setHblankRate_4AF0(3);
         }
     }
     REAL_addexit_4AF0(TIMER_restore_4AF0);
@@ -8326,7 +8326,7 @@ void func_003E5288(void) {
 }
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5290);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_wakeOnAlarm);
 #ifdef SKIP_ASM
 extern void iWakeupThread(int);
 
@@ -8340,7 +8340,7 @@ extern void iWakeupThread(int);
  * @param alarmTime  the alarm time (unused)
  * @param threadId  the argument given to SetAlarm: the sleeping thread's id
  */
-void func_003E5290(int alarmId, int alarmTime, int threadId) {
+void THREAD_wakeOnAlarm(int alarmId, int alarmTime, int threadId) {
     iWakeupThread(threadId);
 }
 #endif
@@ -8361,7 +8361,7 @@ extern void f4CE8_YT(int) __asm__("iRotateThreadReadyQueue");
 extern int D_0DA0_YT[] __asm__("D_00450DA0");
 extern int D_0DE4_YT[] __asm__("bInTimerSubroutine");
 extern char D_5E20_YT[] __asm__("D_00495E20");
-extern char fE5290_YT[] __asm__("func_003E5290");
+extern char fE5290_YT[] __asm__("THREAD_wakeOnAlarm");
 
 /**
  * Puts the calling thread to sleep for a number of library timer ticks, or just yields when given none.
@@ -9449,16 +9449,16 @@ int MEMSYS_validaddress(unsigned int addr) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E62B0);
+INCLUDE_ASM("ealib/seg_2DCAE8", DEBUG_breakIfEnabled);
 #ifdef SKIP_ASM
 extern int D_00450DA4[];
 
 /**
  * Breaks into the debugger (break 6) when the debug-break switch D_00450DA4 is set; does nothing otherwise.
  *
- * Called on error paths in seg_2AEDC0 (func_003ADEC8, func_003AED40).
+ * Called on error paths in seg_2AEDC0 (RCMP_AV_PLAYER_Init, RCMP_AV_AUDIO_AV_AUDIO).
  */
-void func_003E62B0(void) {
+void DEBUG_breakIfEnabled(void) {
     if (D_00450DA4[0] != 0) {
         __asm__ volatile("break 6");  // PORT: trap
     }
@@ -9764,7 +9764,7 @@ __asm__(
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6690);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_setHblankRate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
@@ -9778,7 +9778,7 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
  *
  * @param videoMode  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
  */
-void func_003E6690(int videoMode) {
+void TIMER_setHblankRate(int videoMode) {
     switch (videoMode) {
     case 1:
         D_00450DA0_0DA0[0] = 15750;
@@ -9875,7 +9875,7 @@ void NetGameLinkDestroy(int *linkRef) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6878);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLink_completeStatus);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
@@ -9898,7 +9898,7 @@ struct S_6878 { int iopref; int statstate; char pad[0x158 - 8]; int statbuf; };
  * @param replyWordC  reply word +0xC (unused)
  * @return 0
  */
-int func_003E6878(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
+int NetGameLink_completeStatus(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
         int replyWord8, int replyWordC, struct S_6878 *self) {
     char *src = (char *)((self->statbuf & 0x0FFFFFFF) | 0x20000000);
     __builtin_memcpy((char *)self + 8, src, 336);
@@ -9916,15 +9916,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkStatus);
 typedef struct { int iopref; int statstate; char pad8[0x150]; int statbuf; } G_6958;
 extern int func_003F4C68_6958(int *, int, int, int, int, int, int, int, void *, void *) __asm__("func_003F4C68");
 extern int func_003F4C98_6958(int *, int, int) __asm__("func_003F4C98");
-extern int func_003E6878_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("func_003E6878");
+extern int NetGameLink_completeStatus_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("NetGameLink_completeStatus");
 extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
 
 /**
  * Returns the game link's latest status, starting a refresh when none is in flight.
  *
  * The status is the 336-byte copy at the block's +8. The busy flag +4 is -1 on a new link: then the first 'gmlk'/'stat'
- * request is sent and waited for (mode 1, completion 1) and copied in with func_003E6878 at once. When it is 0 (idle),
- * it is set to 1 and an asynchronous request goes out (into D_0051EEA8) with func_003E6878 as completion, which copies
+ * request is sent and waited for (mode 1, completion 1) and copied in with NetGameLink_completeStatus at once. When it is 0 (idle),
+ * it is set to 1 and an asynchronous request goes out (into D_0051EEA8) with NetGameLink_completeStatus as completion, which copies
  * the status and clears the flag; the caller gets the previous copy meanwhile.
  *
  * @return the link's status copy (block +8)
@@ -9939,10 +9939,10 @@ char *NetGameLinkStatus(G_6958 *self) {
         self->statstate = 1;
         func_003F4C98_6958(D_0051EEA8_6958, 'gmlk', 'stat');
         if (was == 0) {
-            func_003F4C68_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, func_003E6878_6958, self);
+            func_003F4C68_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, NetGameLink_completeStatus_6958, self);
         } else {
             func_003F4C68_6958(D_0051EEA8_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
-            func_003E6878_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
+            NetGameLink_completeStatus_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
         }
     }
     return (char *)self + 8;
@@ -10244,13 +10244,13 @@ int NetGameUtilComplete(int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7038);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_queryStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_7038(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_7038(int *, int, int) __asm__("func_003F4C98");
 
-int func_003E7038_impl(int a, int b) __asm__("func_003E7038");
+int NetGameUtil_queryStatus_impl(int a, int b) __asm__("NetGameUtil_queryStatus");
 /**
  * Queries a game-util object's status on the IOP.
  *
@@ -10260,7 +10260,7 @@ int func_003E7038_impl(int a, int b) __asm__("func_003E7038");
  * @param selector  the status selector
  * @return the IOP's answer
  */
-int func_003E7038_impl(int handle, int selector) {
+int NetGameUtil_queryStatus_impl(int handle, int selector) {
     int msg[4];
     int result;
 
@@ -10271,7 +10271,7 @@ int func_003E7038_impl(int handle, int selector) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E70B8);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_postStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003F4C68_70B8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
@@ -10280,12 +10280,12 @@ extern int func_003F4C98_70B8(int *, int, int) __asm__("func_003F4C98");
 /**
  * Sends a game-util status request to the IOP and ignores the answer.
  *
- * Sends 'gmut'/'stat' with @p handle and no selector, with no result pointer. Same command as func_003E7038; nothing in
+ * Sends 'gmut'/'stat' with @p handle and no selector, with no result pointer. Same command as NetGameUtil_queryStatus; nothing in
  * the build calls it.
  *
  * @param handle  the IOP game-util reference
  */
-void func_003E70B8(int handle) {
+void NetGameUtil_postStatus(int handle) {
     int msg[4];
 
     func_003F4C98_70B8(msg, 'gmut', 'stat');
@@ -10294,7 +10294,7 @@ void func_003E70B8(int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7120);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_advertise);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003F4C68_7120(int *, int, int, int, char *, int, int, int, int, int) __asm__("func_003F4C68");
@@ -10312,7 +10312,7 @@ extern int D_004A4860_7120[] __asm__("D_004A4860");
  * @param kind  the advert kind (game id string)
  * @param name  the advertised name
  */
-void func_003E7120(int util, int kind, int name) {
+void NetGameUtil_advertise(int util, int kind, int name) {
     char advertText[256];
     int request[4];
 
@@ -10343,14 +10343,14 @@ void NetGameUtilWithdraw(int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7218);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_locate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_7218(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_7218(int *, int, int) __asm__("func_003F4C98");
 extern char D_004A4868_7218[] __asm__("D_004A4868");
 
-int func_003E7218_impl(int a, int b, char *c) __asm__("func_003E7218");
+int NetGameUtil_locate_impl(int a, int b, char *c) __asm__("NetGameUtil_locate");
 /**
  * Looks up the address of an advertised name through the IOP game util.
  *
@@ -10362,7 +10362,7 @@ int func_003E7218_impl(int a, int b, char *c) __asm__("func_003E7218");
  * @param name  the name to locate, or null for ""
  * @return the address found (0 when none)
  */
-int func_003E7218_impl(int util, int kind, char *name) {
+int NetGameUtil_locate_impl(int util, int kind, char *name) {
     int request[4];
     int foundAddress;
 
@@ -10410,7 +10410,7 @@ int NetGameUtilQuery_impl(int util, char *kind, int buffer, int bufferSize) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7340);
+INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -10424,11 +10424,11 @@ extern void *memset_7340(void *, int, int) __asm__("memset");
  *
  * Allocates and zeroes 2132 bytes with RpcAlloc, stores the 64-byte-aligned address of its 2 KB response buffer at
  * +0x10 (block + 0x53 & ~0x3F) and sends 'ping'/'crea', waiting for the IOP reference into +0xC. The lobby
- * (func_003E7FF0) keeps one at +4 and cGameComm one at +0x140; func_003E73E0 destroys it.
+ * (LobbyApi_create) keeps one at +4 and cGameComm one at +0x140; PingRpc_destroy destroys it.
  *
  * @return the ping block
  */
-char *func_003E7340(void) {
+char *PingRpc_create(void) {
     int buf[4];
     char *block = RpcAlloc_7340(2132);
     memset_7340(block, 0, 2132);
@@ -10440,7 +10440,7 @@ char *func_003E7340(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E73E0);
+INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void RpcFree_73E0(void *) __asm__("RpcFree");
@@ -10449,13 +10449,13 @@ extern void func_003F4C98_73E0(void *, int, int) __asm__("func_003F4C98");
 struct S_73E0 { int a[4]; };
 
 /**
- * Destroys a ping object made by func_003E7340.
+ * Destroys a ping object made by PingRpc_create.
  *
  * Sends 'ping'/'dest' with its IOP reference (+0xC) without waiting, then frees the block with RpcFree.
  *
  * @param block  the ping block
  */
-void func_003E73E0(void *block) {
+void PingRpc_destroy(void *block) {
     struct S_73E0 msg;
 
     func_003F4C98_73E0(&msg, 'ping', 'dest');
@@ -10465,19 +10465,19 @@ void func_003E73E0(void *block) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7450);
+INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_request);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_7450(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_7450(int *, int, int) __asm__("func_003F4C98");
 
-int func_003E7450_impl(char *o, int a, int b, int c) __asm__("func_003E7450");
+int PingRpc_request_impl(char *o, int a, int b, int c) __asm__("PingRpc_request");
 /**
  * Sends a ping request through a ping object.
  *
  * Sends 'ping'/'requ' with the block's IOP reference (+0xC), @p address, @p payload and @p payloadLen, and waits for the result. The lobby
- * pings servers and players with a tag payload (func_003E8DC0), cGameComm_update and the pause-overlay check
- * (func_002583A8) use it too; replies are collected with func_003E7500.
+ * pings servers and players with a tag payload (LobbyApi_ping), cGameComm_update and the pause-overlay check
+ * (func_002583A8) use it too; replies are collected with PingRpc_pollResponse.
  *
  * @param block  the ping block
  * @param address  the address to ping
@@ -10485,7 +10485,7 @@ int func_003E7450_impl(char *o, int a, int b, int c) __asm__("func_003E7450");
  * @param payloadLen  the payload length in bytes
  * @return the IOP's result
  */
-int func_003E7450_impl(char *block, int address, int payload, int payloadLen) {
+int PingRpc_request_impl(char *block, int address, int payload, int payloadLen) {
     int msg[4];
     int result;
 
@@ -10496,7 +10496,7 @@ int func_003E7450_impl(char *block, int address, int payload, int payloadLen) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E74E8);
+INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_completeResponse);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* The ping block (names ours, from use): recvLen the reply length and busy the request-in-flight flag (set by this
@@ -10505,7 +10505,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E74E8);
 struct S_7500 { volatile int recvLen; volatile int busy; int sendTick; int iopref; char *respBuf; };
 
 /**
- * Completion routine of the ping-response request sent by func_003E7500.
+ * Completion routine of the ping-response request sent by PingRpc_pollResponse.
  *
  * Stores @p recvBytes (the byte count the IOP wrote into the response buffer) in the block's +0 and clears its busy flag +4.
  * The SIF reply dispatcher passes it the request key, its argument, the reply words and the reply data; the rest is
@@ -10522,7 +10522,7 @@ struct S_7500 { volatile int recvLen; volatile int busy; int sendTick; int iopre
  * @param out  the ping block
  * @return 0
  */
-int func_003E74E8(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
+int PingRpc_completeResponse(int requestKey, int requestFlags, int replyWord10, int result, int replyData, int replyLen,
         int replyWord8, int recvBytes, struct S_7500 *out)
 {
     out->recvLen = recvBytes;
@@ -10532,7 +10532,7 @@ int func_003E74E8(int requestKey, int requestFlags, int replyWord10, int result,
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7500);
+INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_pollResponse);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -10542,16 +10542,16 @@ extern void InvalidDCache_7500(char *, char *) __asm__("InvalidDCache");
 extern void func_0041605C_7500(char *, char *, int) __asm__("func_0041605C");
 extern int func_003F4C98_7500(int *, int, int) __asm__("func_003F4C98");
 extern void func_003F4C68_7500(int *, int, int, int, int, int, char *, int, void *, void *) __asm__("func_003F4C68");
-extern char func_003E74E8_7500[] __asm__("func_003E74E8");
+extern char PingRpc_completeResponse_7500[] __asm__("PingRpc_completeResponse");
 
-int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__("func_003E7500");
+int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__("PingRpc_pollResponse");
 /**
  * Collects a ping reply, if one has arrived, and keeps a response request outstanding.
  *
  * When the block holds a reply (+0 > 0 bytes in the 2 KB buffer +0x10): the result is its first word; the 16-byte
  * header is copied to @p response and the payload (up to *@p bufLen bytes, *@p bufLen updated) to @p buf; then the count and the time
  * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
- * request (into D_0051EEE8) with the 2 KB buffer and func_003E74E8 as completion, at most once per 6 units of
+ * request (into D_0051EEE8) with the 2 KB buffer and PingRpc_completeResponse as completion, at most once per 6 units of
  * NetTick (+8 holds the last send) and, for a fresh buffer, after passing it to InvalidDCache and marking the
  * count -1.
  *
@@ -10560,7 +10560,7 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__
  * @param response  receives the 16-byte reply header (round-trip time, address, ...), or 0
  * @return the reply's first word (the round-trip time), 0 when no reply was waiting
  */
-int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *response) {
+int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *bufLen, int *response) {
     int res = 0;
 
     if (self->recvLen > 0) {
@@ -10591,14 +10591,14 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *respons
             self->recvLen = -1;
         }
         func_003F4C98_7500(D_0051EEE8_7500, 'ping', 'resp');
-        func_003F4C68_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, func_003E74E8_7500, self);
+        func_003F4C68_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, PingRpc_completeResponse_7500, self);
     }
     return res;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E76A8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_debugPrintf);
 #ifdef SKIP_ASM
 extern void vsprintf_76A8(char *, const char *, char *) __asm__("vsprintf");
 
@@ -10606,13 +10606,13 @@ extern void vsprintf_76A8(char *, const char *, char *) __asm__("vsprintf");
  * Formats a debug message for the lobby and hands it to the lobby's debug routine.
  *
  * Formats @p fmt and the variable arguments into a 4 KB buffer (vsprintf, vsprintf-style) and, when a routine is
- * set at +0x548, calls it with the data word +0x544 and the text (both given to func_003E7FF0). Used for the
- * "connecting to %08x:%d" note, the incoming-message dump func_003E8FD0 and the server ping timeout.
+ * set at +0x548, calls it with the data word +0x544 and the text (both given to LobbyApi_create). Used for the
+ * "connecting to %08x:%d" note, the incoming-message dump LobbyApi_printMessage and the server ping timeout.
  *
  * @param fmt  printf-style format; the arguments follow
  */
 // PORT: SN-specific va_start
-void func_003E76A8(char *self, const char *fmt, ...) {
+void LobbyApi_debugPrintf(char *self, const char *fmt, ...) {
     char buf[0x1000];
     char *ap;
     void (*cb)(int, char *);
@@ -10626,7 +10626,7 @@ void func_003E76A8(char *self, const char *fmt, ...) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7718);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_queueRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_002591E8_7718(int) __asm__("func_002591E8");
@@ -10637,7 +10637,7 @@ extern void *func_002591E8_7718(int) __asm__("func_002591E8");
  * Allocates a 68-byte record (func_002591E8): +0 a request id taken from the counter +0x54C (which then advances, kept
  * below 2^31), +4 the command @p tag, +0x38 / +0x3C the completion routine and its context. It is linked into the
  * request list +0x53C in front of the first 'ping' record, so command requests stay ahead of pings. The lobby's command
- * (func_003E8B10), connect (func_003E8260) and ping (func_003E8DC0) routines use it.
+ * (LobbyApi_sendCommand), connect (LobbyApi_connect) and ping (LobbyApi_ping) routines use it.
  *
  * @param lobby  the lobby
  * @param tag  the command FourCC ('auth', 'skey', 'ping', ...)
@@ -10645,7 +10645,7 @@ extern void *func_002591E8_7718(int) __asm__("func_002591E8");
  * @param context  the context passed to it
  * @return the record, or 0 when the allocation failed
  */
-void *func_003E7718(char *lobby, int tag, int callback, int context) {
+void *LobbyApi_queueRequest(char *lobby, int tag, int callback, int context) {
     char **pp;
     char *n;
     char *cur;
@@ -10678,7 +10678,7 @@ void *func_003E7718(char *lobby, int tag, int callback, int context) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E77F0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_takeRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct N_77F0 { int pad0; int key; int w[14]; struct N_77F0 *next; } N_77F0;
@@ -10688,14 +10688,14 @@ extern void func_00259210_77F0(void *) __asm__("func_00259210");
  * Takes the first pending-request record off the lobby's list when it matches a command.
  *
  * Clears @p dst (68 bytes) and, when the head of the request list +0x53C has the command @p key (or @p key is 'DQUE',
- * which takes any), unlinks it, copies it into @p dst and frees it (func_00259210). func_003E95C8 uses it to find the
- * completion routine of each reply; func_003E7AC0 drains the list with 'DQUE'.
+ * which takes any), unlinks it, copies it into @p dst and frees it (func_00259210). LobbyApi_update uses it to find the
+ * completion routine of each reply; LobbyApi_dropRequests drains the list with 'DQUE'.
  *
  * @param dst  receives the record (all zero when none was taken)
  * @param key  the reply's command FourCC, or 'DQUE' for any
  * @return nonzero while records remain on the list
  */
-int func_003E77F0(char *self, N_77F0 *dst, int key) {
+int LobbyApi_takeRequest(char *self, N_77F0 *dst, int key) {
     N_77F0 *n;
     memset_77F0(dst, 0, 68);
     n = *(N_77F0 **)(self + 0x53C);
@@ -10709,7 +10709,7 @@ int func_003E77F0(char *self, N_77F0 *dst, int key) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7918);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_takePing);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct N_7918 { int f0; int tag; int id; int fC; int f10; int f14; char name[0x28]; struct N_7918 *next; };
@@ -10722,7 +10722,7 @@ extern void func_00259210_7918(void *) __asm__("func_00259210");
  *
  * Walks the list +0x53C for a 'ping' record that either has address @p id and the name @p name (strcmp), or,
  * when @p id is -1, a deadline (+0xC) before @p cutoff. The first match is unlinked, copied into @p out, freed and the
- * outstanding-ping count +0x540 decremented. Used by func_003E7C40 for replies and for timeouts.
+ * outstanding-ping count +0x540 decremented. Used by LobbyApi_handlePings for replies and for timeouts.
  *
  * @param list  the lobby
  * @param out  receives the record
@@ -10731,7 +10731,7 @@ extern void func_00259210_7918(void *) __asm__("func_00259210");
  * @param cutoff  the current time, for expired pings
  * @return 1 when a record was taken, 0 otherwise
  */
-int func_003E7918(struct L_7918 *list, struct N_7918 *out, char *name, int id, int cutoff) {
+int LobbyApi_takePing(struct L_7918 *list, struct N_7918 *out, char *name, int id, int cutoff) {
     struct N_7918 **pp = &list->head;
     struct N_7918 *n;
 
@@ -10752,25 +10752,25 @@ int func_003E7918(struct L_7918 *list, struct N_7918 *out, char *name, int id, i
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7AC0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_dropRequests);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003E77F0_7AC0(int, void *, int) __asm__("func_003E77F0");
+int LobbyApi_takeRequest_7AC0(int, void *, int) __asm__("LobbyApi_takeRequest");
 
 /**
- * Drops every pending request record of the lobby (func_003E77F0 with 'DQUE' until the list is empty).
+ * Drops every pending request record of the lobby (LobbyApi_takeRequest with 'DQUE' until the list is empty).
  *
  * @param lobby  the lobby
  */
-void func_003E7AC0(int lobby) {
+void LobbyApi_dropRequests(int lobby) {
     char buf[80];
-    while (func_003E77F0_7AC0(lobby, buf, 0x44515545) != 0) {
+    while (LobbyApi_takeRequest_7AC0(lobby, buf, 0x44515545) != 0) {
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7B00);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setRoomPopulation);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003EE3E0(int, int, void *);
@@ -10784,13 +10784,13 @@ extern int D_004A4870_7B00[] __asm__("D_004A4870");
  *
  * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p roomId (func_003EEEE8, func_003EE468) and,
  * if its count (+0x10) differs from @p population, stores the count, writes it as text at +0x14 ("%d") and puts the record
- * back (func_003EE3E0). func_003E95C8 calls it for "+who", "+pop", "+usr" and move / room replies.
+ * back (func_003EE3E0). LobbyApi_update calls it for "+who", "+pop", "+usr" and move / room replies.
  *
  * @param lobby  the lobby
  * @param roomId  the room id
  * @param population  the room's user count
  */
-void func_003E7B00(void *lobby, int roomId, int population) {
+void LobbyApi_setRoomPopulation(void *lobby, int roomId, int population) {
     int temp_2;
     int temp_4;
     void *temp_2_2;
@@ -10811,7 +10811,7 @@ void func_003E7B00(void *lobby, int roomId, int population) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7BA0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_notifyListChanges);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003EE620_7BA0(int) __asm__("func_003EE620");
@@ -10821,15 +10821,15 @@ struct M_7BA0 { int type; int idx; int zero; int h; };
 struct S_7BA0 { int h; int list; void (*fn)(void *, struct M_7BA0 *, int); int context; int pad; };
 struct O_7BA0 { char pad[0x310]; struct S_7BA0 s[8]; };
 
-void func_003E7BA0_impl(struct O_7BA0 *self) __asm__("func_003E7BA0");
+void LobbyApi_notifyListChanges_impl(struct O_7BA0 *self) __asm__("LobbyApi_notifyListChanges");
 /**
  * Notifies the owners of the lobby's lists that changed.
  *
  * For each of the 8 list slots (+0x310, 0x14 bytes each: index, list, routine, context) that is open and has a routine,
  * when func_003EE620 reports changes on its list (> 0) it calls the routine with the lobby, an event (type 2, the slot
- * number, 0, the list) and the slot's context. Called from func_003E95C8.
+ * number, 0, the list) and the slot's context. Called from LobbyApi_update.
  */
-void func_003E7BA0_impl(struct O_7BA0 *self) {
+void LobbyApi_notifyListChanges_impl(struct O_7BA0 *self) {
     int i;
     for (i = 0; i < 8; i++) {
         struct S_7BA0 *listSlot = &self->s[i];
@@ -10848,7 +10848,7 @@ void func_003E7BA0_impl(struct O_7BA0 *self) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7C40);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_handlePings);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cDirtysock_tag_TagFieldFind_7C40(char *, char *) __asm__("cDirtysock_tag_TagFieldFind");
@@ -10856,7 +10856,7 @@ extern unsigned int cDirtysock_tag_TagFieldGetAddr_7C40(int, unsigned int) __asm
 extern int cDirtysock_tag_TagFieldGetString_7C40(int, char *, int, char *) __asm__("cDirtysock_tag_TagFieldGetString");
 extern int cDirtysock_tag_TagFieldSetNumber_7C40(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
 extern void cDirtysock_tag_TagFieldSetString_7C40(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
-extern int func_003E7500_7C40(int, char *, int *, int *) __asm__("func_003E7500");
+extern int PingRpc_pollResponse_7C40(int, char *, int *, int *) __asm__("PingRpc_pollResponse");
 extern int func_003EE558_7C40(int) __asm__("func_003EE558");
 extern char *func_003EE560_7C40(int, int) __asm__("func_003EE560");
 extern void func_003EE600_7C40(int, int) __asm__("func_003EE600");
@@ -10884,19 +10884,19 @@ struct Rec_7C40 {
     struct Rec_7C40 *next;
 };
 
-extern int func_003E7918_7C40(char *, struct Rec_7C40 *, char *, int, int) __asm__("func_003E7918");
+extern int LobbyApi_takePing_7C40(char *, struct Rec_7C40 *, char *, int, int) __asm__("LobbyApi_takePing");
 
 /**
  * Handles ping replies and expired pings for the lobby.
  *
- * For every reply func_003E7500 delivers on the lobby's ping object (+4) it reads the reply's "ORIG" address and
- * "NAME"; the matching pending ping (func_003E7918) gets its routine called with a 'ping' event whose tags carry NAME,
+ * For every reply PingRpc_pollResponse delivers on the lobby's ping object (+4) it reads the reply's "ORIG" address and
+ * "NAME"; the matching pending ping (LobbyApi_takePing) gets its routine called with a 'ping' event whose tags carry NAME,
  * ADDR and PING (the round-trip time). The time is also written as "%dms" into the room-list entry with that address
  * (slot 0, +0x64 / +0x5C) and the user-list entry with that name (slot 1, +8 / +0x28), each followed by
  * func_003EE600(list, 1). Then every ping whose deadline has passed (protocol time from func_003F5D88) is completed
  * with code -1 and PING 0.
  */
-void func_003E7C40(char *self) {
+void LobbyApi_handlePings(char *self) {
     int info[2];
     char buf[0x100];
     char name[0x20];
@@ -10909,13 +10909,13 @@ void func_003E7C40(char *self) {
 
     for (;;) {
         len = 0x100;
-        if (func_003E7500_7C40(*(int *)(self + 4), buf, &len, info) == 0) {
+        if (PingRpc_pollResponse_7C40(*(int *)(self + 4), buf, &len, info) == 0) {
             break;
         }
         addr = cDirtysock_tag_TagFieldGetAddr_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_ORIG), info[1]);
         cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20,
                                               str_empty_k);
-        if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
+        if (LobbyApi_takePing_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
             ev.mType = 0;
             ev.mKind = 'ping';
             ev.mStatus = 0;
@@ -10950,7 +10950,7 @@ void func_003E7C40(char *self) {
         }
     }
     currentTick = func_003F5D88_7C40(*(int *)self);
-    while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
+    while (LobbyApi_takePing_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
             ev.mType = 0;
             ev.mKind = 'ping';
@@ -10967,17 +10967,17 @@ void func_003E7C40(char *self) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F58);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_resetServerPing);
 #ifdef SKIP_ASM
 /**
  * Resets the lobby's server-ping state.
  *
  * Clears the failure count +0x20 and the next-ping time +0x18, and sets the last ping result +0x1C to -1 (none). See
- * func_003E94F0.
+ * LobbyApi_onServerPing.
  *
  * @param lobby  the lobby
  */
-void func_003E7F58(LobbyApiRefT* lobby) {
+void LobbyApi_resetServerPing(LobbyApiRefT* lobby) {
     lobby->mPingFailures = 0;
     lobby->mNextPingTime = 0;
     *(unsigned *)&lobby->mLastPing = 0xFFFFFFFF;
@@ -10985,26 +10985,26 @@ void func_003E7F58(LobbyApiRefT* lobby) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F70);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_dropConnection);
 #ifdef SKIP_ASM
 /**
  * Drops the lobby connection with a reason and reports it.
  *
- * Sets the state +0xC to 'term', ORs @p flags into the event flags +8, resets the server-ping state (func_003E7F58) and
+ * Sets the state +0xC to 'term', ORs @p flags into the event flags +8, resets the server-ping state (LobbyApi_resetServerPing) and
  * calls the connection routine (+0x52C, context +0x530) with an event of type 3, kind 'disc' and code @p reason.
- * func_003E95C8 calls it on timeouts ('time', 0x800), lost connections and failed logins ('auth', 2).
+ * LobbyApi_update calls it on timeouts ('time', 0x800), lost connections and failed logins ('auth', 2).
  *
  * @param lobby  the lobby
  * @param reason  the code passed in the 'disc' event
  * @param flags  the event flags to raise
  */
-void func_003E7F70(LobbyApiRefT* lobby, int reason, int flags) {
+void LobbyApi_dropConnection(LobbyApiRefT* lobby, int reason, int flags) {
     int sp[4];
     int (*fn)(char *, int *, int);
 
     lobby->mState = 'term';
     lobby->mEventFlags |= flags;
-    func_003E7F58((struct LobbyApiRefT *)lobby);
+    LobbyApi_resetServerPing((struct LobbyApiRefT *)lobby);
     fn = (int (*)(char*, int*, int))lobby->mEventProcs[3][0];
     if (fn != 0) {
         sp[0] = 3; sp[1] = 'disc'; sp[2] = reason; sp[3] = 0;
@@ -11014,7 +11014,7 @@ void func_003E7F70(LobbyApiRefT* lobby, int reason, int flags) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7FF0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char str_VERS_c_7FF0[] __asm__("str_VERS_c");
@@ -11024,23 +11024,23 @@ extern char *strchr_7FF0(char *, int) __asm__("strchr");
 extern void cDirtysock_tag_TagFieldDupl_7FF0(void *, int, char *) __asm__("cDirtysock_tag_TagFieldDupl");
 extern void cDirtysock_tag_TagFieldSetString_7FF0(void *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern int func_003F5478_7FF0(int) __asm__("func_003F5478");
-extern int func_003E7340_7FF0(void) __asm__("func_003E7340");
-extern void func_003E80C0_7FF0(void *) __asm__("func_003E80C0");
+extern int PingRpc_create_7FF0(void) __asm__("PingRpc_create");
+extern void LobbyApi_disconnect_7FF0(void *) __asm__("LobbyApi_disconnect");
 
 /**
  * Creates a lobby client object (1360 bytes) and returns it.
  *
  * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p tagString is duplicated as tags when it contains '=',
  * otherwise stored as the "VERS" tag. Creates the lobby protocol (func_003F5478(0x8000), +0) and a ping object
- * (func_003E7340, +4), stores the debug routine and its data (+0x548, +0x544; see func_003E76A8) and resets everything
- * with func_003E80C0. LobbyMan (LobbyMan_createLobbyApi) creates its mpLobbyApi with it.
+ * (PingRpc_create, +4), stores the debug routine and its data (+0x548, +0x544; see LobbyApi_debugPrintf) and resets everything
+ * with LobbyApi_disconnect. LobbyMan (LobbyMan_createLobbyApi) creates its mpLobbyApi with it.
  *
  * @param tagString  the default tags, or a version string, or 0
  * @param debugData  data passed to the debug routine
  * @param debugProc  the debug output routine, or 0
  * @return the lobby, or 0 when the allocation failed
  */
-void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
+void *LobbyApi_create(char *tagString, int debugData, int debugProc) {
     LobbyApiRefT* lobbyRef;
     int pingRef;
 
@@ -11055,22 +11055,22 @@ void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
             }
         }
         *(int*)lobbyRef = func_003F5478_7FF0(0x8000);
-        pingRef = func_003E7340_7FF0();
+        pingRef = PingRpc_create_7FF0();
         lobbyRef->mpDebugData = (void*)debugData;
         lobbyRef->mpDebugProc = (void (*)(void*, const char*))debugProc;
         lobbyRef->mpPing = (void*)pingRef;
-        func_003E80C0_7FF0(lobbyRef);
+        LobbyApi_disconnect_7FF0(lobbyRef);
     }
     return ((char*)lobbyRef);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E80C0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_disconnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_00259210_80C0(void *) __asm__("func_00259210");
-extern void func_003E7F58_80C0(void *) __asm__("func_003E7F58");
+extern void LobbyApi_resetServerPing_80C0(void *) __asm__("LobbyApi_resetServerPing");
 extern void *func_003EE480_80C0(int, int) __asm__("func_003EE480");
 extern int func_003EE9A0_80C0(int) __asm__("func_003EE9A0");
 extern void func_003F5738_80C0(int) __asm__("func_003F5738");
@@ -11092,13 +11092,13 @@ struct S_80C0 {
  * Disconnects the lobby and clears its state.
  *
  * Sets the state +0xC to 'offl', disconnects the protocol (func_003F5738), empties and frees the entries of every open
- * list slot (+0x310), frees all pending request records (+0x53C), resets the server-ping state (func_003E7F58) and
- * clears the outstanding-ping count +0x540 and the request id counter +0x54C. Used by func_003E7FF0, func_003E81C8 and
+ * list slot (+0x310), frees all pending request records (+0x53C), resets the server-ping state (LobbyApi_resetServerPing) and
+ * clears the outstanding-ping count +0x540 and the request id counter +0x54C. Used by LobbyApi_create, LobbyApi_destroy and
  * LobbyMan's disconnect.
  *
  * @param lobby  the lobby
  */
-void func_003E80C0(struct S_80C0 *lobby) {
+void LobbyApi_disconnect(struct S_80C0 *lobby) {
     int i, entryRef;
     char *request;
     lobby->mState = 'offl';
@@ -11115,20 +11115,20 @@ void func_003E80C0(struct S_80C0 *lobby) {
         lobby->mpRequests = *(char **)(request + 0x40);
         func_00259210_80C0(request);
     }
-    func_003E7F58_80C0(lobby);
+    LobbyApi_resetServerPing_80C0(lobby);
     lobby->mPingsOutstanding = 0;
     lobby->mRequestId = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E81C8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003E80C0_81C8(void *) __asm__("func_003E80C0");
+extern void LobbyApi_disconnect_81C8(void *) __asm__("LobbyApi_disconnect");
 extern void func_003EE820_81C8(int) __asm__("func_003EE820");
 extern void func_003EE260_81C8(int) __asm__("func_003EE260");
-extern void func_003E73E0_81C8(int) __asm__("func_003E73E0");
+extern void PingRpc_destroy_81C8(int) __asm__("PingRpc_destroy");
 extern void func_003F55B8_81C8(int) __asm__("func_003F55B8");
 extern void func_00259210_81C8(void *) __asm__("func_00259210");
 
@@ -11136,30 +11136,30 @@ struct S_81C8 { int h; int list; int pad[3]; };
 /* LobbyApiRefT's member names at these offsets. */
 struct O_81C8 { int mpSession; int mpPing; char pad[0x310 - 8]; struct S_81C8 s[8]; };
 
-void func_003E81C8_impl(struct O_81C8 *self) __asm__("func_003E81C8");
+void LobbyApi_destroy_impl(struct O_81C8 *self) __asm__("LobbyApi_destroy");
 /**
- * Destroys a lobby made by func_003E7FF0.
+ * Destroys a lobby made by LobbyApi_create.
  *
- * Disconnects it (func_003E80C0), destroys every open list slot's index and list (func_003EE820, func_003EE260), the
- * ping object (func_003E73E0) and the protocol (func_003F55B8), then frees the lobby (func_00259210).
+ * Disconnects it (LobbyApi_disconnect), destroys every open list slot's index and list (func_003EE820, func_003EE260), the
+ * ping object (PingRpc_destroy) and the protocol (func_003F55B8), then frees the lobby (func_00259210).
  */
-void func_003E81C8_impl(struct O_81C8 *self) {
+void LobbyApi_destroy_impl(struct O_81C8 *self) {
     int i;
-    func_003E80C0_81C8(self);
+    LobbyApi_disconnect_81C8(self);
     for (i = 0; i < 8; i++) {
         if (self->s[i].h != 0) {
             func_003EE820_81C8(self->s[i].h);
             func_003EE260_81C8(self->s[i].list);
         }
     }
-    func_003E73E0_81C8(self->mpPing);
+    PingRpc_destroy_81C8(self->mpPing);
     func_003F55B8_81C8(self->mpSession);
     func_00259210_81C8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8248);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setEventRoutine);
 #ifdef SKIP_ASM
 typedef struct { int a; int b; } E8248_pair;
 typedef struct { char pad[0x514]; E8248_pair e[1]; } E8248_S;
@@ -11168,28 +11168,28 @@ typedef struct { char pad[0x514]; E8248_pair e[1]; } E8248_S;
  * Sets one of the lobby's five event routines (+0x514 + 8 * @p i: routine, context).
  *
  * Slot 0 receives every message, 1 chat messages, 3 connection events and 4 game-session ("play") events
- * (func_003E95C8); LobbyMan (LobbyMan_createLobbyApi) installs 0, 1, 3 and 4.
+ * (LobbyApi_update); LobbyMan (LobbyMan_createLobbyApi) installs 0, 1, 3 and 4.
  *
  * @param table  the lobby
  * @param i  the routine slot (0-4)
  * @param callback  the routine
  * @param context  its context
  */
-void func_003E8248(E8248_S *table, int i, int callback, int context) {
+void LobbyApi_setEventRoutine(E8248_S *table, int i, int callback, int context) {
     table->e[i].a = callback;
     table->e[i].b = context;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8260);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_connect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cDirtysock_tag_TagFieldDupl_8260(void *, int, void *) __asm__("cDirtysock_tag_TagFieldDupl");
-extern void func_003E76A8_8260(void *, int *, int, int) __asm__("func_003E76A8");
-extern int func_003E7718_8260(void *, int, int, int) __asm__("func_003E7718");
-extern void func_003E7AC0_8260() __asm__("func_003E7AC0");
-extern void func_003E7F58_8260(void *) __asm__("func_003E7F58");
+extern void LobbyApi_debugPrintf_8260(void *, int *, int, int) __asm__("LobbyApi_debugPrintf");
+extern int LobbyApi_queueRequest_8260(void *, int, int, int) __asm__("LobbyApi_queueRequest");
+extern void LobbyApi_dropRequests_8260() __asm__("LobbyApi_dropRequests");
+extern void LobbyApi_resetServerPing_8260(void *) __asm__("LobbyApi_resetServerPing");
 extern void func_003F5638_8260(int, int, int) __asm__("func_003F5638");
 extern void func_003F5738_8260(int) __asm__("func_003F5738");
 extern int func_003F5910_8260(int, int, int, void *, int) __asm__("func_003F5910");
@@ -11210,10 +11210,10 @@ struct S_8260 {
 /**
  * Starts connecting the lobby to a server.
  *
- * Stores the address (+0x3B4) and port (+0x3B0), drops pending requests (func_003E7AC0), clears the snapshot counter
+ * Stores the address (+0x3B4) and port (+0x3B0), drops pending requests (LobbyApi_dropRequests), clears the snapshot counter
  * +0x50C, resets the server-ping state and queues an 'skey' request record with the routine and context (returns -1
  * when that fails). Then reconnects the protocol (func_003F5738, func_003F5638), prints "connecting to %08x:%d" through
- * func_003E76A8, sends '@dir' with the default tags (+0x34), sets the state +0xC to 'rdir', the timeout +0x10 to now +
+ * LobbyApi_debugPrintf, sends '@dir' with the default tags (+0x34), sets the state +0xC to 'rdir', the timeout +0x10 to now +
  * 120000 and +0x14 to now, and clears the server-down text +0x3B8. LobbyMan calls it with port 11000.
  *
  * @param lobby  the lobby
@@ -11223,19 +11223,19 @@ struct S_8260 {
  * @param context  its context
  * @return 0, or -1 when the request record could not be made
  */
-int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int callback, int context) {
+int LobbyApi_connect(struct S_8260 *lobby, int serverAddr, int serverPort, int callback, int context) {
     char buf[0x100];
     lobby->mAddress = serverAddr;
     lobby->mPort = serverPort;
-    func_003E7AC0_8260();
+    LobbyApi_dropRequests_8260();
     lobby->mPendingSnapshots = 0;
-    func_003E7F58_8260(lobby);
-    if (func_003E7718_8260(lobby, 'skey', callback, context) == 0) {
+    LobbyApi_resetServerPing_8260(lobby);
+    if (LobbyApi_queueRequest_8260(lobby, 'skey', callback, context) == 0) {
         return -1;
     }
     func_003F5738_8260(lobby->mpSession);
     func_003F5638_8260(lobby->mpSession, lobby->mAddress, lobby->mPort);
-    func_003E76A8_8260(lobby, D_00495F30_8260, lobby->mAddress, lobby->mPort);
+    LobbyApi_debugPrintf_8260(lobby, D_00495F30_8260, lobby->mAddress, lobby->mPort);
     cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->mTags);
     func_003F5910_8260(lobby->mpSession, 0x40646972, 0, buf, -1);
     lobby->mState = 'rdir';
@@ -11247,7 +11247,7 @@ int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int call
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8368);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setListEnabled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_00259210_8368(void *) __asm__("func_00259210");
@@ -11282,7 +11282,7 @@ struct O_8368 { int lobby; char pad[0x8]; int state; char pad2[0x300]; struct S_
  * @param on  nonzero to open, 0 to close
  * @return the slot's list (0 when closed or @p i is out of range)
  */
-int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
+int LobbyApi_setListEnabled(struct O_8368 *self, unsigned int i, int on) {
     char buf[256];
     int entryRef;
 
@@ -11334,7 +11334,7 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E85B0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_openList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003EE778_85B0(int, int) __asm__("func_003EE778");
@@ -11344,7 +11344,7 @@ extern void func_003EE768_85B0(int, int) __asm__("func_003EE768");
 struct S_85B0 { int h; int list; int a; int b; int pad; };
 struct O_85B0 { char pad[0x310]; struct S_85B0 s[8]; };
 
-int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm__("func_003E85B0");
+int LobbyApi_openList_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm__("LobbyApi_openList");
 /**
  * Opens one of the lobby's list slots with a change routine and returns its list.
  *
@@ -11353,11 +11353,11 @@ int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm_
  * already open. LobbyMan opens the room, user and rank lists (slots 0-2) and rank snapshots (slot 4) with it.
  *
  * @param i  the list slot (0-7)
- * @param callback  the routine func_003E7BA0 calls when the list changes
+ * @param callback  the routine LobbyApi_notifyListChanges calls when the list changes
  * @param context  its context
  * @return the new list, or 0 when @p i is out of range
  */
-int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int callback, int context) {
+int LobbyApi_openList_impl(struct O_85B0 *self, unsigned int i, int callback, int context) {
     int listRef = 0;
     if (i < 8) {
     self->s[i].a = callback;
@@ -11372,7 +11372,7 @@ int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int callback, int co
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8650);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setListRoutine);
 #ifdef SKIP_ASM
 typedef struct { int a, b, c, d, e; } Q_8650;
 typedef struct { char pad[0x314]; Q_8650 q[8]; } S_8650;
@@ -11386,7 +11386,7 @@ typedef struct { char pad[0x314]; Q_8650 q[8]; } S_8650;
  * @param context  its context
  * @return the slot's list, or 0 when @p i is out of range
  */
-int func_003E8650(S_8650 *table, unsigned int i, int callback, int context) {
+int LobbyApi_setListRoutine(S_8650 *table, unsigned int i, int callback, int context) {
     int listRef = 0;
     if (i < 8U) {
         table->q[i].b = callback;
@@ -11398,7 +11398,7 @@ int func_003E8650(S_8650 *table, unsigned int i, int callback, int context) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8688);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_closeList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -11412,7 +11412,7 @@ extern void func_003EE820_8688(int) __asm__("func_003EE820");
 extern void func_003EE260_8688(int) __asm__("func_003EE260");
 
 /**
- * Destroys a list opened with func_003E85B0.
+ * Destroys a list opened with LobbyApi_openList.
  *
  * Frees every entry (through the index func_003EE770 returns for the list), destroys the index and the list; when the
  * slot still refers to this list its index and list words are cleared. The slot's routine and context are cleared in
@@ -11421,7 +11421,7 @@ extern void func_003EE260_8688(int) __asm__("func_003EE260");
  * @param i  the list slot (0-7)
  * @param listRef  the list
  */
-void func_003E8688(T_8688 *self, unsigned int i, int listRef) {
+void LobbyApi_closeList(T_8688 *self, unsigned int i, int listRef) {
     int iter;
     int item;
     if (i < 8 && listRef != 0) {
@@ -11442,7 +11442,7 @@ void func_003E8688(T_8688 *self, unsigned int i, int listRef) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8778);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_addListEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_002591E8_8778(int) __asm__("func_002591E8");
@@ -11455,7 +11455,7 @@ struct S_8778 { int h; int list; int a; int b; int pad; };
 struct O_8778 { char pad[0x310]; struct S_8778 s[8]; };
 struct B_8778 { char b[0xA8]; };
 
-int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) __asm__("func_003E8778");
+int LobbyApi_addListEntry_impl(struct O_8778 *self, unsigned int i, char *arg) __asm__("LobbyApi_addListEntry");
 /**
  * Adds an entry to one of the lobby's keyed lists (slots 3-7), unless its name is already there.
  *
@@ -11467,7 +11467,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) __asm__("
  * @param record  the name (slot 3) or the record to copy (slots 4-7)
  * @return 1 when added, 0 when the name was present, -1 when @p i is invalid or the slot is closed
  */
-int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
+int LobbyApi_addListEntry_impl(struct O_8778 *self, unsigned int i, char *record) {
     if (i < 8) {
         if (self->s[i].h == 0) {
             return -1;
@@ -11504,7 +11504,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8968);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_removeListEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003EEC88_8968(int, int) __asm__("func_003EEC88");
@@ -11515,7 +11515,7 @@ extern void func_00259210_8968(void *) __asm__("func_00259210");
 struct S_8968 { int h; int list; int a; int b; int pad; };
 struct O_8968 { char pad[0x310]; struct S_8968 s[8]; };
 
-int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("func_003E8968");
+int LobbyApi_removeListEntry_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("LobbyApi_removeListEntry");
 /**
  * Removes a named entry from one of the lobby's keyed lists (slots 3-7).
  *
@@ -11526,7 +11526,7 @@ int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("fu
  * @param entryName  the entry's name
  * @return 1 when removed, 0 when not found, -1 when @p i is invalid or the slot is closed
  */
-int func_003E8968_impl(struct O_8968 *self, unsigned int i, int entryName) {
+int LobbyApi_removeListEntry_impl(struct O_8968 *self, unsigned int i, int entryName) {
     int entryRef;
     if (i < 8) {
         if (self->s[i].h == 0) {
@@ -11548,7 +11548,7 @@ int func_003E8968_impl(struct O_8968 *self, unsigned int i, int entryName) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A28);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_hasListEntry);
 #ifdef SKIP_ASM
 extern int func_003EEC88(int, int);
 
@@ -11560,7 +11560,7 @@ extern int func_003EEC88(int, int);
  * @param entryName  the name or key to look up (func_003EEC88)
  * @return 1 when present, 0 when not, -1 when @p slot is invalid or closed
  */
-int func_003E8A28(struct LobbyApiRefT *lobby, unsigned int slot, int entryName) {
+int LobbyApi_hasListEntry(struct LobbyApiRefT *lobby, unsigned int slot, int entryName) {
     int temp_4;
 
     if (slot < 8U) {
@@ -11574,7 +11574,7 @@ int func_003E8A28(struct LobbyApiRefT *lobby, unsigned int slot, int entryName) 
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A70);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_getText);
 #ifdef SKIP_ASM
 /**
  * Returns one of the lobby's text fields by FourCC.
@@ -11587,7 +11587,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A70);
  * @param k  the field FourCC
  * @return the field, or 0 when unknown or empty
  */
-char *func_003E8A70(LobbyApiRefT* lobby, int k) {
+char *LobbyApi_getText(LobbyApiRefT* lobby, int k) {
     if (k == 'user' || k == 'acct') return lobby->mAccount;
     if (k == 'pers') return lobby->mPersona;
     if (k == 'room') return lobby->mRoomName;
@@ -11598,16 +11598,16 @@ char *func_003E8A70(LobbyApiRefT* lobby, int k) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8AF8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_clearField);
 #ifdef SKIP_ASM
 /**
- * Clears a lobby field by FourCC: for 'play' it zeroes the game session's WHEN time (+0x2CC), so func_003E8A70 stops
+ * Clears a lobby field by FourCC: for 'play' it zeroes the game session's WHEN time (+0x2CC), so LobbyApi_getText stops
  * returning the session. Other keys do nothing.
  *
  * @param lobby  the lobby
  * @param key  the field FourCC
  */
-void func_003E8AF8(LobbyApiRefT* lobby, int key) {
+void LobbyApi_clearField(LobbyApiRefT* lobby, int key) {
     if (key == 'play') {
         lobby->mGameWhen = 0;
     }
@@ -11615,7 +11615,7 @@ void func_003E8AF8(LobbyApiRefT* lobby, int key) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8B10);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_sendCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cDirtysock_tag_TagFieldDupl_8B10(char *, int, char *) __asm__("cDirtysock_tag_TagFieldDupl");
@@ -11626,7 +11626,7 @@ extern void cDirtysock_tag_TagFieldSetCrypt_8B10(char *, int, char *, char *, ch
 extern void cDirtysock_tag_TagFieldSetNumber_8B10(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
 extern void cDirtysock_tag_TagFieldSetString_8B10(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern void func_00259210_8B10(void *) __asm__("func_00259210");
-extern int *func_003E7718_8B10(void *, int, int, int) __asm__("func_003E7718");
+extern int *LobbyApi_queueRequest_8B10(void *, int, int, int) __asm__("LobbyApi_queueRequest");
 extern int cDirtysock_tag_TagFieldMerge_8B10(char *, int, char *) __asm__("cDirtysock_tag_TagFieldMerge");
 extern void *func_003EE480_8B10(int, int) __asm__("func_003EE480");
 extern int func_003EE9A0_8B10(int) __asm__("func_003EE9A0");
@@ -11657,7 +11657,7 @@ struct O_8B10 {
  * Sends a command to the lobby server and returns its request id.
  *
  * Allowed only in the states 'idle', 'auth', 'acct' and 'skey' (else -1). Queues a request record with the routine and
- * context (func_003E7718; -2 when that fails). For 'auth', 'acct' and 'pass' the tags are copied, the lobby's default
+ * context (LobbyApi_queueRequest; -2 when that fails). For 'auth', 'acct' and 'pass' the tags are copied, the lobby's default
  * tags (+0x34) merged in (cDirtysock_tag_TagFieldMerge) and PASS replaced: without a session key (+0x24 empty) by TagFieldSetCrypt
  * with the MASK text from the '@dir' reply (+0x4BC) plus a MASK tag holding its SESS number (+0x4B8); with one by '~'
  * and the password encrypted with it (func_003F35D0). A 'snap' command empties the list slot named by its CHAN tag
@@ -11670,7 +11670,7 @@ struct O_8B10 {
  * @param context  its context
  * @return the request id, -1 in the wrong state, -2 when the record could not be made
  */
-int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int context) {
+int LobbyApi_sendCommand(struct O_8B10 *self, int cmd, char *tags, int callback, int context) {
     char buf[0x200];
     char str[0x20];
     int *n;
@@ -11682,7 +11682,7 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
     if (st != 'idle' && st != 'auth' && st != 'acct' && st != 'skey') {
         return -1;
     }
-    n = func_003E7718_8B10(self, cmd, callback, context);
+    n = LobbyApi_queueRequest_8B10(self, cmd, callback, context);
     if (n == 0) {
         return -2;
     }
@@ -11717,7 +11717,7 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int co
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8D70);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_cancelCallbacks);
 #ifdef SKIP_ASM
 /**
  * Cancels the reply routine of pending lobby requests.
@@ -11729,7 +11729,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8D70);
  * @param entryId  the request id, or -1 for all
  * @return 1 when at least one record matched, 0 otherwise
  */
-int func_003E8D70(void *lobby, int entryId) {
+int LobbyApi_cancelCallbacks(void *lobby, int entryId) {
     int var_6;
     void **var_4;
     void *temp_2;
@@ -11753,7 +11753,7 @@ int func_003E8D70(void *lobby, int entryId) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8DC0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_ping);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -11762,12 +11762,12 @@ typedef struct {
     int mpSession; int mpPing; int mEventFlags; int mState; char pad[0x530]; int mPingsOutstanding;
 } S_8DC0;
 typedef struct { int id; int f4; int addr; int t; char pad[8]; char name[0x20]; } N_8DC0;
-extern N_8DC0 *func_003E7718_8DC0(S_8DC0 *, int, int, int) __asm__("func_003E7718");
+extern N_8DC0 *LobbyApi_queueRequest_8DC0(S_8DC0 *, int, int, int) __asm__("LobbyApi_queueRequest");
 extern int func_003F5D88_8DC0(int) __asm__("func_003F5D88");
 extern char *strncpy_8DC0(char *, char *, int) __asm__("strncpy");
 extern int TagFieldSetString_8DC0(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern int TagFieldSetAddress_8DC0(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetAddress");
-extern int func_003E7450_8DC0(int, int, char *, int) __asm__("func_003E7450");
+extern int PingRpc_request_8DC0(int, int, char *, int) __asm__("PingRpc_request");
 extern char str_NAME_b_8DC0[] __asm__("str_NAME_b");
 extern char str_ADDR_b_8DC0[] __asm__("str_ADDR_b");
 
@@ -11775,10 +11775,10 @@ extern char str_ADDR_b_8DC0[] __asm__("str_ADDR_b");
  * Pings a host through the lobby's ping object and returns the ping's request id.
  *
  * Only in the states 'conn', 'idle', 'auth' and 'acct' (-1 otherwise), with a ping object (+4; -2) and fewer than 64
- * pings outstanding (+0x540; -3). Queues a 'ping' record (func_003E7718; -4 when that fails) with the address, the
- * deadline (protocol time + @p x) and the name, then sends the ping with NAME and ADDR tags (func_003E7450) and counts
- * it. The routine gets the 'ping' event built by func_003E7C40. LobbyMan pings players with a 5000 timeout;
- * func_003E9590 pings the server.
+ * pings outstanding (+0x540; -3). Queues a 'ping' record (LobbyApi_queueRequest; -4 when that fails) with the address, the
+ * deadline (protocol time + @p x) and the name, then sends the ping with NAME and ADDR tags (PingRpc_request) and counts
+ * it. The routine gets the 'ping' event built by LobbyApi_handlePings. LobbyMan pings players with a 5000 timeout;
+ * LobbyApi_pingServer pings the server.
  *
  * @param name  the host's name
  * @param addr  the host's address
@@ -11787,14 +11787,14 @@ extern char str_ADDR_b_8DC0[] __asm__("str_ADDR_b");
  * @param context  its context
  * @return the ping's request id, or a negative error
  */
-int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int callback, int context) {
+int LobbyApi_ping(S_8DC0 *self, char *name, int addr, int x, int callback, int context) {
     char buf[0x100];
     N_8DC0 *n;
     int st = self->mState;
     if (st != 'conn' && st != 'idle' && st != 'auth' && st != 'acct') return -1;
     if (self->mpPing == 0) return -2;
     if (self->mPingsOutstanding >= 0x40) return -3;
-    n = func_003E7718_8DC0(self, 'ping', callback, context);
+    n = LobbyApi_queueRequest_8DC0(self, 'ping', callback, context);
     if (n == 0) return -4;
     n->addr = addr;
     n->t = func_003F5D88_8DC0(self->mpSession) + x;
@@ -11802,14 +11802,14 @@ int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int callback, int c
     buf[0] = 0;
     TagFieldSetString_8DC0(buf, 0x100, str_NAME_b_8DC0, name);
     TagFieldSetAddress_8DC0(buf, 0x100, str_ADDR_b_8DC0, addr);
-    func_003E7450_8DC0(self->mpPing, addr, buf, 0x100);
+    PingRpc_request_8DC0(self->mpPing, addr, buf, 0x100);
     self->mPingsOutstanding++;
     return n->id;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8F08);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_getStatus);
 #ifdef SKIP_ASM
 /**
  * Returns one of the lobby's status values by FourCC.
@@ -11822,7 +11822,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8F08);
  * @param key  the value FourCC
  * @return the value, or 0 for an unknown key
  */
-int func_003E8F08(LobbyApiRefT* lobby, unsigned key) {
+int LobbyApi_getStatus(LobbyApiRefT* lobby, unsigned key) {
     int extAddr, localAddr;
     if (key == 'stat') return lobby->mState;
     if (key == 'rflg') return lobby->mRoomFlags;
@@ -11844,18 +11844,18 @@ int func_003E8F08(LobbyApiRefT* lobby, unsigned key) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FB8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_takeEvent);
 #ifdef SKIP_ASM
 /**
  * Takes the lowest pending event flag off the lobby and returns it.
  *
- * Clears the lowest set bit of the event flags +8 (set by func_003E95C8 and func_003E7F70) and returns that bit, 0 when
+ * Clears the lowest set bit of the event flags +8 (set by LobbyApi_update and LobbyApi_dropConnection) and returns that bit, 0 when
  * none is set. LobbyMan's update polls it.
  *
  * @param lobby  the lobby
  * @return the event bit taken, or 0
  */
-int func_003E8FB8(LobbyApiRefT* lobby) {
+int LobbyApi_takeEvent(LobbyApiRefT* lobby) {
     int temp_2;
     int temp_3;
 
@@ -11867,11 +11867,11 @@ int func_003E8FB8(LobbyApiRefT* lobby) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FD0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_printMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void func_003E76A8_8FD0(void *, const char *, ...) __asm__("func_003E76A8");
+extern void LobbyApi_debugPrintf_8FD0(void *, const char *, ...) __asm__("LobbyApi_debugPrintf");
 extern char str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct_8FD0[] __asm__("str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct");
 extern char str_null_data_8FD0[] __asm__("str_null_data");
 extern char str_binary_data_8FD0[] __asm__("str_binary_data");
@@ -11881,7 +11881,7 @@ extern char str_pct_s_e_8FD0[] __asm__("str_pct_s_e");
 /**
  * Prints an incoming lobby message for debugging.
  *
- * Prints "recv: %c%c%c%c/%c%c%c%c" through func_003E76A8 with the event's kind and code FourCCs (kind -1 shows as
+ * Prints "recv: %c%c%c%c/%c%c%c%c" through LobbyApi_debugPrintf with the event's kind and code FourCCs (kind -1 shows as
  * '****' with code 'conn', 'disc' or '----'; a 0 code shows as '----'), then the text: " [null data]" when empty, "
  * [binary data]" when it has control characters other than tab, newline and return, " [long data]" when over 240
  * characters, otherwise the text itself. LobbyMan_onincomingmsg calls it.
@@ -11889,7 +11889,7 @@ extern char str_pct_s_e_8FD0[] __asm__("str_pct_s_e");
  * @param out  the lobby (for its debug routine)
  * @param event  the event (+4 kind, +8 code, +0xC text)
  */
-void func_003E8FD0(void *out, int *event) {
+void LobbyApi_printMessage(void *out, int *event) {
     int eventKind = event[1];
     int eventCode = event[2];
     char *eventText = (char *)event[3];
@@ -11907,7 +11907,7 @@ void func_003E8FD0(void *out, int *event) {
             eventCode = 0x2D2D2D2D;
         }
     }
-    func_003E76A8_8FD0(out, str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct_8FD0, eventKind >> 24, eventKind >> 16, eventKind >> 8, eventKind, eventCode >> 24, eventCode >> 16, eventCode >> 8, eventCode);
+    LobbyApi_debugPrintf_8FD0(out, str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct_8FD0, eventKind >> 24, eventKind >> 16, eventKind >> 8, eventKind, eventCode >> 24, eventCode >> 16, eventCode >> 8, eventCode);
     n = 0;
     bad = 0;
     for (; eventText[n] != 0 && eventText[n] < 0x7F; n++) {
@@ -11917,19 +11917,19 @@ void func_003E8FD0(void *out, int *event) {
         }
     }
     if (n == 0) {
-        func_003E76A8_8FD0(out, str_null_data_8FD0);
+        LobbyApi_debugPrintf_8FD0(out, str_null_data_8FD0);
     } else if (bad == 1) {
-        func_003E76A8_8FD0(out, str_binary_data_8FD0);
+        LobbyApi_debugPrintf_8FD0(out, str_binary_data_8FD0);
     } else if (n > 0xF0) {
-        func_003E76A8_8FD0(out, str_long_data_8FD0);
+        LobbyApi_debugPrintf_8FD0(out, str_long_data_8FD0);
     } else {
-        func_003E76A8_8FD0(out, str_pct_s_e_8FD0, eventText);
+        LobbyApi_debugPrintf_8FD0(out, str_pct_s_e_8FD0, eventText);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9160);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_rankList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -11953,7 +11953,7 @@ extern char str_bogus_9160[] __asm__("str_bogus") __attribute__((aligned(8)));
  * @param limit  how many top entries to keep
  * @return the number of ranked entries kept
  */
-int func_003E9160(LobbyApiRefT* self, int limit) {
+int LobbyApi_rankList(LobbyApiRefT* self, int limit) {
     int rankList = self->mLists[2][1];
     int rankIndex = self->mLists[2][0];
     int k, sum, res;
@@ -12020,11 +12020,11 @@ int func_003E9160(LobbyApiRefT* self, int limit) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9378);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_pickRoom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* A room record (func_003E95C8's Room_95C8; names ours, from the tags). */
+/* A room record (LobbyApi_update's Room_95C8; names ours, from the tags). */
 struct N_9378 { int id; int f4; unsigned int flags; int userLimit; int userCount; int userCountText; int flagText;
     char name[1]; };
 extern char D_004A4888_9378[] __asm__("str_empty_k");
@@ -12035,7 +12035,7 @@ extern struct N_9378 *func_003EE560_9378(int, int) __asm__("func_003EE560");
 extern int strlen(const char *);
 extern int strncmp(const char *, const char *, int);
 
-int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) __asm__("func_003E9378");
+int LobbyApi_pickRoom_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) __asm__("LobbyApi_pickRoom");
 /**
  * Picks a room in the lobby's room list for joining.
  *
@@ -12051,7 +12051,7 @@ int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int va
  * @param def  the index returned when no room matches
  * @return the chosen room's index in the list, or @p def
  */
-int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) {
+int LobbyApi_pickRoom_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) {
     int i;
     int best = -1;
     int minv = 999;
@@ -12090,18 +12090,18 @@ int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int va
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E94F0);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_onServerPing);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cDirtysock_tag_TagFieldFind_94F0(int, char *) __asm__("cDirtysock_tag_TagFieldFind");
 extern int cDirtysock_tag_TagFieldGetNumber_94F0(int, int) __asm__("cDirtysock_tag_TagFieldGetNumber");
-extern void func_003E76A8_94F0(void *, char *) __asm__("func_003E76A8");
+extern void LobbyApi_debugPrintf_94F0(void *, char *) __asm__("LobbyApi_debugPrintf");
 extern int func_003F4330_94F0(void) __asm__("func_003F4330");
 extern char str_server_ICMP_timeout_94F0[] __asm__("str_server_ICMP_timeout");
 extern char str_PING_b_94F0[] __asm__("str_PING_b");
 
 /**
- * Ping routine for the lobby's server pings (installed by func_003E9590).
+ * Ping routine for the lobby's server pings (installed by LobbyApi_pingServer).
  *
  * Handles 'ping' events only. A PING of 0 (timeout) prints "server ICMP timeout" and counts a failure (+0x20): after 3
  * the count restarts at 0, otherwise the next ping is due at once (+0x18 = func_003F4330()). A nonzero PING is stored
@@ -12111,12 +12111,12 @@ extern char str_PING_b_94F0[] __asm__("str_PING_b");
  * @param lobby  the lobby
  * @param event  the event (+4 kind, +0xC tag text)
  */
-void func_003E94F0(void *lobby, void *event) {
+void LobbyApi_onServerPing(void *lobby, void *event) {
     int n;
     if (*(int *)((char *)event + 4) == 'ping') {
         n = cDirtysock_tag_TagFieldGetNumber_94F0(cDirtysock_tag_TagFieldFind_94F0(*(int *)((char *)event + 0xC), str_PING_b_94F0), 0);
         if (n == 0) {
-            func_003E76A8_94F0(lobby, str_server_ICMP_timeout_94F0);
+            LobbyApi_debugPrintf_94F0(lobby, str_server_ICMP_timeout_94F0);
             *(int *)((char *)lobby + 0x20) += 1;
             if (*(int *)((char *)lobby + 0x20) == 3) {
                 *(int *)((char *)lobby + 0x20) = 0;
@@ -12133,26 +12133,26 @@ void func_003E94F0(void *lobby, void *event) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9590);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_pingServer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003E8DC0_9590(void *, void *, int, int, void *, int) __asm__("func_003E8DC0");
+extern void LobbyApi_ping_9590(void *, void *, int, int, void *, int) __asm__("LobbyApi_ping");
 extern char str_server_9590[] __asm__("str_server");
-extern char func_003E94F0_9590[] __asm__("func_003E94F0");
+extern char LobbyApi_onServerPing_9590[] __asm__("LobbyApi_onServerPing");
 
 /**
- * Pings the lobby server: func_003E8DC0 with the name "@server", the server address (+0x3B4), a 3000 timeout and
- * func_003E94F0 as the routine. Called by func_003E95C8 after the redirect.
+ * Pings the lobby server: LobbyApi_ping with the name "@server", the server address (+0x3B4), a 3000 timeout and
+ * LobbyApi_onServerPing as the routine. Called by LobbyApi_update after the redirect.
  *
  * @param lobby  the lobby
  */
-void func_003E9590(LobbyApiRefT* lobby) {
-    func_003E8DC0_9590(lobby, str_server_9590, lobby->mAddress, 3000, func_003E94F0_9590, 0);
+void LobbyApi_pingServer(LobbyApiRefT* lobby) {
+    LobbyApi_ping_9590(lobby, str_server_9590, lobby->mAddress, 3000, LobbyApi_onServerPing_9590, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E95C8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -12261,13 +12261,13 @@ extern void func_00259210_95C8(void *) __asm__("func_00259210");
 extern void *memset_95C8(void *, int, int) __asm__("memset");
 extern int sprintf_95C8(char *, char *, ...) __asm__("sprintf");
 extern char *strcpy(char *, const char *);
-extern void func_003E76A8_95C8(void *, char *, ...) __asm__("func_003E76A8");
-extern int func_003E77F0_95C8(void *, struct Rec_95C8 *, int) __asm__("func_003E77F0");
-extern void func_003E7B00_95C8(void *, int, int) __asm__("func_003E7B00");
-extern void func_003E7BA0_95C8(void *) __asm__("func_003E7BA0");
-extern void func_003E7C40_95C8(void *) __asm__("func_003E7C40");
-extern void func_003E7F70_95C8(void *, int, int) __asm__("func_003E7F70");
-extern void func_003E9590_95C8(void *) __asm__("func_003E9590");
+extern void LobbyApi_debugPrintf_95C8(void *, char *, ...) __asm__("LobbyApi_debugPrintf");
+extern int LobbyApi_takeRequest_95C8(void *, struct Rec_95C8 *, int) __asm__("LobbyApi_takeRequest");
+extern void LobbyApi_setRoomPopulation_95C8(void *, int, int) __asm__("LobbyApi_setRoomPopulation");
+extern void LobbyApi_notifyListChanges_95C8(void *) __asm__("LobbyApi_notifyListChanges");
+extern void LobbyApi_handlePings_95C8(void *) __asm__("LobbyApi_handlePings");
+extern void LobbyApi_dropConnection_95C8(void *, int, int) __asm__("LobbyApi_dropConnection");
+extern void LobbyApi_pingServer_95C8(void *) __asm__("LobbyApi_pingServer");
 extern int func_003EE320_95C8(int, void *) __asm__("func_003EE320");
 extern void func_003EE3E0_95C8(int, int, void *) __asm__("func_003EE3E0");
 extern void *func_003EE468_95C8(int, int) __asm__("func_003EE468");
@@ -12345,19 +12345,19 @@ extern char D_004A4A68_95C8[] __asm__("D_004A4A68");
  * Runs the lobby client: timeouts, pings and every message from the server.
  *
  * Does nothing without a protocol (+0). Unless offline it tracks the inactivity timeout (+0x10; 60 s after each
- * message, a gap over 5000 extends it) and disconnects with 'time' (func_003E7F70) when it passes; stops in the 'term'
- * and 'offl' states. Handles ping replies (func_003E7C40), then reads each message (func_003F5A70): '~png' keep-alives
+ * message, a gap over 5000 extends it) and disconnects with 'time' (LobbyApi_dropConnection) when it passes; stops in the 'term'
+ * and 'offl' states. Handles ping replies (LobbyApi_handlePings), then reads each message (func_003F5A70): '~png' keep-alives
  * are answered (with the last server ping as TIME), anything else goes to event routine 0 and to the matching request
- * record's routine (func_003E77F0). The protocol flow: in 'rdir' the '@dir' reply gives the real server (ADDR, PORT,
- * SESS, MASK; or the DOWN text and flag 0x400) and moves to 'conn' with a server ping (func_003E9590); the connection
+ * record's routine (LobbyApi_takeRequest). The protocol flow: in 'rdir' the '@dir' reply gives the real server (ADDR, PORT,
+ * SESS, MASK; or the DOWN text and flag 0x400) and moves to 'conn' with a server ping (LobbyApi_pingServer); the connection
  * sends 'skey' with "Public Key"; the 'skey' / 'sele' reply stores the session key and enters 'idle' (flag 1,
  * connection routine 3); 'auth' / 'acct' replies store the account name and external address (flag 2); 'sele' stores
  * MORE and SLOTS; 'pers' the persona. Server pushes: "+ses" fills the game session and calls routine 4; "+msg" calls
  * routine 1 with 'chat', 'cast' or 'priv'; "+who", "+rom", "+pop", "+usr", "+rnk" and "+snp" maintain the room, user,
  * rank and snapshot lists (flags 8, 0x20, 0x40, 0x80); 'move' / 'room' replies update the current room. Finally
- * notifies changed lists (func_003E7BA0). LobbyMan's update calls it.
+ * notifies changed lists (LobbyApi_notifyListChanges). LobbyMan's update calls it.
  */
-void func_003E95C8(struct Lob_95C8 *self)
+void LobbyApi_update(struct Lob_95C8 *self)
 {
     char buf[0x100];
     struct Ev_95C8 ev;
@@ -12381,14 +12381,14 @@ void func_003E95C8(struct Lob_95C8 *self)
             self->mTimeout += diff;
         }
         if ((int)(self->mTimeout - now) < 0) {
-            func_003E7F70_95C8(self, 'time', 0x800);
+            LobbyApi_dropConnection_95C8(self, 'time', 0x800);
         }
     }
     self->mStateTime = now;
     if (self->mState == 'term' || self->mState == 'offl') {
         return;
     }
-    func_003E7C40_95C8(self);
+    LobbyApi_handlePings_95C8(self);
     while ((len = func_003F5A70_95C8(self->mpSession, &kind, &code, &data)) >= 0) {
         self->mTimeout = now + 60000;
         if (kind == 0x7E706E67) {
@@ -12407,7 +12407,7 @@ void func_003E95C8(struct Lob_95C8 *self)
             if (self->cb[0].fn != 0) {
                 self->cb[0].fn(self, &ev, self->cb[0].ctx);
             }
-            func_003E77F0_95C8(self, &rec, kind);
+            LobbyApi_takeRequest_95C8(self, &rec, kind);
             if (rec.fn != 0) {
                 rec.fn(self, &ev, rec.ctx);
             }
@@ -12424,8 +12424,8 @@ void func_003E95C8(struct Lob_95C8 *self)
                     func_003F5738_95C8(self->mpSession);
                     if (self->mAddress != 0) {
                         self->mState = 'conn';
-                        func_003E9590_95C8(self);
-                        func_003E76A8_95C8(self, D_00495F30_95C8, self->mAddress, self->mPort);
+                        LobbyApi_pingServer_95C8(self);
+                        LobbyApi_debugPrintf_95C8(self, D_00495F30_95C8, self->mAddress, self->mPort);
                         func_003F5638_95C8(self->mpSession, self->mAddress, self->mPort);
                         buf[0] = 0;
                         TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->mLocalAddr);
@@ -12465,10 +12465,10 @@ void func_003E95C8(struct Lob_95C8 *self)
                 }
             }
             if (kind == -1 && code == (int)0xFEFEFEFE && self->mState != 'conn') {
-                func_003E7F70_95C8(self, 0xFEFEFEFE, 0x800);
+                LobbyApi_dropConnection_95C8(self, 0xFEFEFEFE, 0x800);
             }
             if (code == 'auth') {
-                func_003E7F70_95C8(self, 'auth', 2);
+                LobbyApi_dropConnection_95C8(self, 'auth', 2);
             }
             if (kind == 'auth' && code == 0) {
                 self->mState = 'auth';
@@ -12541,7 +12541,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 count = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C0_95C8), 0);
                 if (room != self->mRoomId) {
                     self->mRoomId = room;
-                    func_003E7B00_95C8(self, room, count);
+                    LobbyApi_setRoomPopulation_95C8(self, room, count);
                     TagGetString_95C8(TagFind_95C8(data, D_004A49C8_95C8), self->mRoomName, 0x40, D_004A4888_95C8);
                     self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49D0_95C8), 0);
                     self->mEventFlags |= 8;
@@ -12626,7 +12626,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                         popCursor++;
                     }
                     if (id != self->mRoomId) {
-                        func_003E7B00_95C8(self, id, count);
+                        LobbyApi_setRoomPopulation_95C8(self, id, count);
                     }
                 }
             }
@@ -12667,7 +12667,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                             func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
                         }
                     }
-                    func_003E7B00_95C8(self, self->mRoomId, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
+                    LobbyApi_setRoomPopulation_95C8(self, self->mRoomId, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
                     self->mEventFlags |= 0x40;
                 }
             }
@@ -12728,7 +12728,7 @@ void func_003E95C8(struct Lob_95C8 *self)
             if ((kind == 'move' || kind == 'room') && code == 0) {
                 int ident = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A48_95C8), -1);
                 if (ident >= 0) {
-                    func_003E7B00_95C8(self, ident, TagGetNumber_95C8(TagFind_95C8(data, D_004A4A50_95C8), 0));
+                    LobbyApi_setRoomPopulation_95C8(self, ident, TagGetNumber_95C8(TagFind_95C8(data, D_004A4A50_95C8), 0));
                 }
             }
             if (kind == 'move') {
@@ -12736,7 +12736,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 int count = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A60_95C8), 0);
                 if (room != self->mRoomId) {
                     self->mRoomId = room;
-                    func_003E7B00_95C8(self, room, count);
+                    LobbyApi_setRoomPopulation_95C8(self, room, count);
                     TagGetString_95C8(TagFind_95C8(data, str_NAME_b_95C8), self->mRoomName, 0x40, D_004A4888_95C8);
                     self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A4A68_95C8), 0);
                     self->mEventFlags |= 8;
@@ -12751,16 +12751,16 @@ void func_003E95C8(struct Lob_95C8 *self)
         }
         func_003F5C38_95C8(self->mpSession, 0, 0, 0, 0);
     }
-    func_003E7BA0_95C8(self);
+    LobbyApi_notifyListChanges_95C8(self);
     if (self->mNextPingTime != 0 && self->mNextPingTime <= now) {
-        func_003E9590_95C8(self);
+        LobbyApi_pingServer_95C8(self);
         self->mNextPingTime = now + 30000;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003EAE68);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_parseDecimal);
 #ifdef SKIP_ASM
 /**
  * Reads an unsigned decimal number from the start of a string.
@@ -12772,7 +12772,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003EAE68);
  * @param out  receives the number
  * @return the first character after the digits
  */
-unsigned char *func_003EAE68(unsigned char *str, int *out) {
+unsigned char *LobbyApi_parseDecimal(unsigned char *str, int *out) {
     unsigned int chr;
 
     *out = 0;
@@ -12789,7 +12789,7 @@ unsigned char *func_003EAE68(unsigned char *str, int *out) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003EAEB8);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_secondsToCalendar);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern int D_004969E0[];
@@ -12811,7 +12811,7 @@ struct sTm_3EAEB8 {
  *
  * Fills seconds, minutes, hours, day of the month (1-based), month (0-based), year since 1900 and day of the year; the
  * weekday is not set and isdst is 0. Leap years follow the Gregorian rules; the month lengths come from D_004969E0.
- * Used by the tag time routines (TagFieldSetEpoch and others) and by func_003EB090.
+ * Used by the tag time routines (TagFieldSetEpoch and others) and by LobbyApi_calendarToSeconds.
  *
  * @param tm  the 9-word time structure to fill
  * @param seconds  seconds since 1970-01-01 (unsigned)
@@ -12819,7 +12819,7 @@ struct sTm_3EAEB8 {
  */
 // Seconds since 1970 -> broken-down time (no wday). D_004969E0 holds two rows of month
 // lengths: row 0 is picked for a 366-day year, row 1 for a 365-day year.
-struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long seconds)
+struct sTm_3EAEB8* LobbyApi_secondsToCalendar(struct sTm_3EAEB8* tm, long seconds)
 {
     int days;
     int rem;
@@ -12864,22 +12864,22 @@ struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long seconds)
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003EB090);
+INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_calendarToSeconds);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void func_003EAEB8_B090(int *, unsigned long) __asm__("func_003EAEB8");
+extern void LobbyApi_secondsToCalendar_B090(int *, unsigned long) __asm__("LobbyApi_secondsToCalendar");
 /**
  * Converts calendar fields back into seconds since 1970 by binary search.
  *
- * Searches 0 to 0xFFFFFFFF with func_003EAEB8, comparing year, month, day, hour, minute and second in that order. Used
+ * Searches 0 to 0xFFFFFFFF with LobbyApi_secondsToCalendar, comparing year, month, day, hour, minute and second in that order. Used
  * by cDirtysock_tag_TagFieldGetTime and two other tag time helpers.
  *
- * @param key  the time fields (as func_003EAEB8 fills them)
+ * @param key  the time fields (as LobbyApi_secondsToCalendar fills them)
  * @return the matching seconds, or 0 when the fields name no exact time
  */
-unsigned long func_003EB090(int *key) {
+unsigned long LobbyApi_calendarToSeconds(int *key) {
     int buf[12];
     unsigned int lo = 0;
     unsigned int hi = 0xFFFFFFFF;
@@ -12887,7 +12887,7 @@ unsigned long func_003EB090(int *key) {
     int diff;
     while (lo <= hi) {
         mid = (lo + hi) >> 1;
-        func_003EAEB8_B090(buf, mid);
+        LobbyApi_secondsToCalendar_B090(buf, mid);
         if ((diff = buf[5] - key[5]) != 0 || (diff = buf[4] - key[4]) != 0 ||
             (diff = buf[3] - key[3]) != 0 || (diff = buf[2] - key[2]) != 0 ||
             (diff = buf[1] - key[1]) != 0 || (diff = buf[0] - key[0]) != 0) {

@@ -116,19 +116,19 @@ struct FILESYSOPTS {
     void* (*malloc)(char*, int, int);   // 0x04 [O]; [U] iFILE_addbigreadcallback: (name, size, memflags)
     int (*free)(void*);                 // 0x08 [O]; [U] iFILE_addbigreadcallback frees a header buffer
     int cdMediaMode;                    // 0x0C (name ours) [U] setopts: D_00450C58 + 0x8, the CD media mode that
-                                        //       func_003E3618 / func_003E3D78 / func_003E4040 pass to sceCdMmode
+                                        //       CDVD_readCurrentSector / CDVD_recoverRead / CDVD_initFileSystem pass to sceCdMmode
                                         //       (FILESYS_initadr builds the disc directory when it is set)
     int cdNameLen;                      // 0x10 (name ours) [U] get / setopts: D_00450C58 + 0x4, the disc directory
-                                        //       entry's name size (FILESYS_overhead, func_003E39A8 and func_003E4040
+                                        //       entry's name size (FILESYS_overhead, CDVD_buildFileTable and CDVD_initFileSystem
                                         //       size each entry as it + 0xC)
     int useDisc;                        // 0x14 (name ours; a bool like On Tour's UseDisc) [U] get / setopts:
                                         //       D_00450C58 + 0xC (getopts stores it as a 0 / 1 flag); no other reader
     char* cdRoot;                       // 0x18 (name ours) [U] get / setopts: D_00450C58 + 0x0, the root prefix file
-                                        //       names are matched against (func_003E4040 lists the disc from it)
+                                        //       names are matched against (CDVD_initFileSystem lists the disc from it)
     char* REAL_filedevice;              // 0x1C [O] (0x10 there); [U] getopts / setopts copy it to and from the global
                                         //       REAL_filedevice (the host-device prefix)
     void* builtinFiles;                 // 0x20 (name ours) [U] the built-in file table ({name, ?, ?, path} records, a 0
-                                        //       name ends it; func_003E4040 lists the disc from it); retail-only
+                                        //       name ends it; CDVD_initFileSystem lists the disc from it); retail-only
 };
 
 CHECK_OFFSET(FILESYSOPTS, malloc, 0x04);

@@ -164,8 +164,8 @@ struct LobbyMan {
     int mHaveCPAT;                  // 0x018 [R] ctor 0; [U] onauthentication: 1 when the reply has "CPAT";
                                     //       selectpersona (LobbyMan_selectPersona) then sends mCPAT as "CDEV"
     char mCPAT[0x24];               // 0x01C [U] onauthentication decodes "CPAT" into it (func_003EFD30, up to 0x21)
-    int mRequestId;                 // 0x040 [U] LobbyMan_sendRequest stores the LobbyApi request (func_003E8B10); the
-                                    //       cancel paths pass it to func_003E8D70; the rank list keeps it per slot
+    int mRequestId;                 // 0x040 [U] LobbyMan_sendRequest stores the LobbyApi request (LobbyApi_sendCommand); the
+                                    //       cancel paths pass it to LobbyApi_cancelCallbacks; the rank list keeps it per slot
     int mFindingPlayer;             // 0x044 [R] ctor 0; [U] findplayer ("user", LobbyMan_findPlayer) sets 1,
                                     //       onPlayerFound clears, update times it out
     char* mUserName;                // 0x048 [R] ctor empty cBXString; [U] "NAME" in login/editaccount; 16 readers
@@ -175,14 +175,14 @@ struct LobbyMan {
     int mDeletePersonaIdx;          // 0x050 [U] deletepersona (LobbyMan_deletePersona) stores the index, onpersonadeleted
                                     //       removes that entry
     LobbyApiRefT* mpLobbyApi;       // 0x054 [P] preview "lobbyapi" (offset 0x28 there); [R] ctor 0;
-                                    //       [U] LobbyMan_createLobbyApi stores func_003E7FF0's handle; every request uses it
+                                    //       [U] LobbyMan_createLobbyApi stores LobbyApi_create's handle; every request uses it
     void* mpHostLookup;             // 0x058 [R] ctor 0; [U] connect stores SocketLookup(mServerName, 0) (a
                                     //       DirtySock host lookup: result +0x4, poll fn +0x8, release fn +0xC);
                                     //       update polls/frees it through those
     void* mpRoomList;               // 0x05C [P] getnumrooms() reads it (preview 0x30); [U] LobbyMan_openLists:
-                                    //       func_003E85B0(api, 0, onroomlistupdate thunk); LobbyMan_getnumrooms/F150/F180
-    void* mpUserList;               // 0x060 [U] func_003E85B0(api, 1, onuserlistupdate thunk); LobbyMan_getNumUsers..
-    void* mpRankList;               // 0x064 [U] func_003E85B0(api, 2, onranklistupdate thunk)
+                                    //       LobbyApi_openList(api, 0, onroomlistupdate thunk); LobbyMan_getnumrooms/F150/F180
+    void* mpUserList;               // 0x060 [U] LobbyApi_openList(api, 1, onuserlistupdate thunk); LobbyMan_getNumUsers..
+    void* mpRankList;               // 0x064 [U] LobbyApi_openList(api, 2, onranklistupdate thunk)
     int unk_068;                    // 0x068 no access seen
     int mNumPersonas;               // 0x06C [P] "idx < numpersonas", "numpersonas < max_personas" (preview 0x40);
                                     //       [U] onauthentication counts "PERSONAS"; createpersona appends
@@ -222,13 +222,13 @@ struct LobbyMan {
                                     //       logged-in "pers" config; LobbyMan_getConfigValue looks keys up; LobbyMan_destroyConfig frees
     int mRankSlot;                  // 0x0F8 [R] ctor 0; [U] LobbyMan_selectRankList selects the rank-list slot (0..28)
     int unk_0FC;                    // 0x0FC [R] ctor 0 (no other access)
-    void* mpSlotTag;                // 0x100 [R] ctor 0; [U] LobbyMan_selectRankList stores func_003E8F08(api, 'slot')
+    void* mpSlotTag;                // 0x100 [R] ctor 0; [U] LobbyMan_selectRankList stores LobbyApi_getStatus(api, 'slot')
     int mRankCount[29];             // 0x104 [U] LobbyMan_openLists sets all -1; onRanklistRetrieved: "START" + "RANGE"
                                     //       per "SEQN" slot; LobbyMan_selectRankList compares the slot's row count with it
     int mRankRequest[29];           // 0x178 [U] LobbyMan_openLists sets all -1; LobbyMan_requestRankRows cancels the slot's old
                                     //       request and stores mRequestId ("snap" request)
     void* mRankSnapshot[29];        // 0x1EC [R] ctor zeroes 29 words; [U] LobbyMan_requestRankRows opens a snapshot per slot
-                                    //       (func_003E85B0(api, 4, ..)); LobbyMan_releaseRankSnapshots frees them
+                                    //       (LobbyApi_openList(api, 4, ..)); LobbyMan_releaseRankSnapshots frees them
     tLobbyAccount mNewAccount;      // 0x260 [R] ctor builds it, LobbyMan_resetNewAccount resets it; [U] createaccount's form
     tLobbyAccount mAccount;         // 0x2B0 [R] ctor builds it; [U] onauthentication fills it
 

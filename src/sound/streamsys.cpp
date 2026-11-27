@@ -165,10 +165,10 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Set3DPosition);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
-extern "C" void func_003B7F60(int h, int a, int b);
+extern "C" void SNDSTRM_set3dPos(int h, int a, int b);
 
 /**
- * Sets a stream's 3D position: azimuth and elevation (func_003B7F60, in a sound-driver critical section).
+ * Sets a stream's 3D position: azimuth and elevation (SNDSTRM_set3dPos, in a sound-driver critical section).
  *
  * @param azimuth  the azimuth
  * @param elevation  the elevation
@@ -176,7 +176,7 @@ extern "C" void func_003B7F60(int h, int a, int b);
 void cStreamInstance::Set3DPosition(int azimuth, int elevation)
 {
     SNDSYS_entercritical();
-    func_003B7F60(mHandle, azimuth, elevation);
+    SNDSTRM_set3dPos(mHandle, azimuth, elevation);
     SNDSYS_leavecritical();
 }
 #endif
@@ -224,11 +224,11 @@ int cAudioInterface_getTimerHz(void* self);
 void* cStreamInstance_Purge(void* self);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
-extern "C" void func_003B7E70(int h, int vol);
+extern "C" void SNDSTRM_setVolume(int h, int vol);
 
 /**
  * Updates a stream instance: purges it once its counter (+0x80) passes twice the timer rate, otherwise re-applies the
- * volume scaled by its volume control (clamped 0..127, func_003B7E70).
+ * volume scaled by its volume control (clamped 0..127, SNDSTRM_setVolume).
  */
 void cStreamInstance::Update()
 {
@@ -247,7 +247,7 @@ void cStreamInstance::Update()
             volume = 0;
         }
         SNDSYS_entercritical();
-        func_003B7E70(mHandle, volume);
+        SNDSTRM_setVolume(mHandle, volume);
         SNDSYS_leavecritical();
     }
 }

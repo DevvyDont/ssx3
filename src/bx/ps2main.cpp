@@ -24,13 +24,13 @@ extern "C" void* malloc(int size);
 extern "C" void free(void* p);
 extern "C" char* EndOfHeap(void);
 extern "C" void cMemMan_initialize(char* heap, int size);
-extern "C" void func_003E6690(int a);
+extern "C" void TIMER_setHblankRate(int a);
 extern "C" void TIMER_init(int hz);
 extern "C" int FILESYS_getopts(void* cfg);
 extern "C" int FILESYS_setopts(void* cfg);
 extern "C" void FILESYS_init(int a, int b, int c);
 extern "C" void ASYNCFILE_init(int a, int b);
-extern "C" void func_003E4000(void);
+extern "C" void CDVD_checkFailedRead(void);
 extern "C" void cd_recoverReadError(void);
 extern "C" void SYNCTASK_del(void (*fn)(void));
 extern "C" void SYNCTASK_add(void (*fn)(void), int a, int b);
@@ -52,7 +52,7 @@ struct sIoCfg_SysInit {
  * Loads SIO2MAN, PADMAN, LIBSD, SNDDRV, MCMAN and MCSERV.IRX, seeds BXsrand() from a clock reading, hands the
  * memory from just past a 64-byte-aligned scratch block (+0x800) up to EndOfHeap() to
  * cMemMan_initialize(), installs MEM_alloc/MEM_free as the file system's allocator, runs FILESYS_init(48,
- * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for cd_recoverReadError and finally passes
+ * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task CDVD_checkFailedRead for cd_recoverReadError and finally passes
  * "cd:" to FILESYS_setcurrentpath() (probably selecting the default file device).
  */
 // Boot-time setup: IOP modules, timers, random seed, heap, file system and the per-frame sync task.
@@ -75,7 +75,7 @@ extern "C" void systemInit(void)
     free(heapProbe);
     char* heap = (char*)(((int)heapProbe + 0x3F) & ~0x3F) + 0x800;
     cMemMan_initialize(heap, EndOfHeap() - heap);
-    func_003E6690(1);
+    TIMER_setHblankRate(1);
     TIMER_init(0x3C);
     sIoCfg_SysInit cfg;
     cfg.size = 36;
@@ -86,7 +86,7 @@ extern "C" void systemInit(void)
     FILESYS_setopts(&cfg);
     FILESYS_init(0x30, 500, 0x20);
     ASYNCFILE_init(0x10, 0);
-    SYNCTASK_del(func_003E4000);
+    SYNCTASK_del(CDVD_checkFailedRead);
     SYNCTASK_add(cd_recoverReadError, 0, 0);
     FILESYS_setcurrentpath(str_cd);
 }

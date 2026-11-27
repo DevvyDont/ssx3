@@ -44,10 +44,10 @@ struct tPathPlayer {
                                 //      handle; pathxSND_play stores the bank handle it played from; the SNDSTRM_* /
                                 //      status calls take it; pathxSND_getBankHandle / pathxSND_getStreamHandle return it
     int mPatch;                 // 0x04 [R] pathxSND_initPlayer: -1; [U] pathxSND_play stores the patch it passes to
-                                //      SNDBANK_play; pathxSND_refreshAll passes it to func_003B6670 when >= 0
+                                //      SNDBANK_play; pathxSND_refreshAll passes it to SNDBANK_readPatchHeader when >= 0
     int mFadeTarget;            // 0x08 [R] pathxSND_initPlayer: -1; [U] pathxSND_fadeVolume stores the fade's target volume;
                                 //      pathxSND_setVolume compares it with mVolume and resets it to -1
-    int mVolume;                // 0x0C [U] pathxSND_refreshAll stores the driver's volume (func_003B86C0 / func_003B7F18);
+    int mVolume;                // 0x0C [U] pathxSND_refreshAll stores the driver's volume (SND_getVolume / SNDSTRM_getVolume);
                                 //      pathxSND_setVolume compares and stores the volume it sets; pathxSND_getVolume returns it
     int mFxLevel;               // 0x10 [R] pathxSND_openPlayer: 0; [U] pathxSND_setFxLevel stores the effect send level;
                                 //      pathxSND_getFxLevel returns it
@@ -57,7 +57,7 @@ struct tPathPlayer {
                                 //      applies it again when it resumes
     char mName[12];             // 0x1C [R] pathxSND_openPlayer: sprintf("%.*s", 11, name)
     int mPreloadData;           // 0x28 [U] pathxSND_setPreload stores it; pathxSND_play queues file offsets below
-                                //      mPreloadSize from it (func_003B7E10) when set
+                                //      mPreloadSize from it (SNDSTRM_queueMemory) when set
     unsigned int mPreloadSize;  // 0x2C [U] pathxSND_setPreload stores it; pathxSND_play compares the file offset with it
                                 //      (unsigned)
     SNDPLAYOPTS mPlayOpts;      // 0x30 [R] pathxSND_openPlayer copies the caller's options (or SNDplaysetdef's defaults),
@@ -76,7 +76,7 @@ struct tPathPlayer {
                                 //      buffered than left to play; pathxSND_isBusy returns it
     int mCurrentRequest;        // 0x5C [R] pathxSND_initPlayer: -1; [U] pathxSND_refreshAll stores the handle of the request it
                                 //      last saw playing; pathxSND_getStatus returns it when mStatus is 0
-    int mStatus;                // 0x60 [U] pathxSND_refreshAll stores func_003B6670's / SNDSTRM_status's result (-8 when it
+    int mStatus;                // 0x60 [U] pathxSND_refreshAll stores SNDBANK_readPatchHeader's / SNDSTRM_status's result (-8 when it
                                 //      made no call; 0 on a reset); pathxSND_getStatus returns it when nonzero
     signed char mIsBankPlayer;  // 0x64 [R] pathxSND_openPlayer: 1 when maxChunks is 0; [U] every driver call picks the SND*
                                 //      (bank) or SNDSTRM_* (stream) variant on it

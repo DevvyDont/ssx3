@@ -94,8 +94,8 @@ struct SNDSTREAMCHANNEL {
     SNDSAMPLEATTR cursa;                    // 0x01C [O]; [U] f1C
     SNDSAMPLEATTR newsa;                    // 0x084 [O]; [U] f84
     SNDPLAYOPTS po;                         // 0x0EC [O]; [R] SNDSTRMI_create copies the play options here (sdr 0xEC);
-                                            //      [U] func_003B7E70 / func_003B7EB0 vol (0xEC), func_003B8010 drylevel
-                                            //      (0xF0), SNDSTRM_timemult timemult (0xFA), func_003B80A0 lowpasscutoff (0x100)
+                                            //      [U] SNDSTRM_setVolume / SNDSTRM_fadeVolume vol (0xEC), SNDSTRM_setDryLevel drylevel
+                                            //      (0xF0), SNDSTRM_timemult timemult (0xFA), SNDSTRM_setLowPass lowpasscutoff (0x100)
     SNDFILTERDEF filter[1];                 // 0x104 [O] (0x108 there); [U] sA0A0Strm f104 (0x18 bytes)
     SNDLINKLIST allocatedrequests;          // 0x11C [O]; [R] SNDSTRMI_create (addiu 0x11C); [U] f11C, the queued
                                             //      requests (view C_6B10 reads its head)

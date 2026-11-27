@@ -379,13 +379,13 @@ rom:0x168C64 reloc:MIPS_LO16 symbol:D_004D2FA8
 rom:0x277120 reloc:MIPS_HI16 symbol:D_005083C0
 rom:0x277170 reloc:MIPS_LO16 symbol:D_00508380
 rom:0x27718C reloc:MIPS_LO16 symbol:D_005083C0
-// ealib/seg_2DCAE8 func_003E4040: the directory-scan loop's bound is the end of the 0x800-byte sector buffer at
+// ealib/seg_2DCAE8 CDVD_initFileSystem: the directory-scan loop's bound is the end of the 0x800-byte sector buffer at
 // D_00519C80; the separate buffer D_0051A480 starts at the same address (its own lui/addiu at 0x2E5418 stay named).
 rom:0x2E52A4 reloc:MIPS_HI16 symbol:D_00519C80 addend:0x800
 rom:0x2E52AC reloc:MIPS_LO16 symbol:D_00519C80 addend:0x800
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
-// ealib/seg_2B4578 func_003CC070 (tools/gen/reloc_from_diff.py)
+// ealib/seg_2B4578 SNDMIXI_buildFxGraph (tools/gen/reloc_from_diff.py)
 rom:0x2CD1DC reloc:MIPS_LO16 symbol:D_00515D44
 rom:0x2CD230 reloc:MIPS_LO16 symbol:D_00515D44
 rom:0x2CD274 reloc:MIPS_LO16 symbol:D_00515D44
@@ -589,12 +589,12 @@ rom:0x2DF680 reloc:MIPS_LO16 symbol:gFileDevice addend:0x14
 rom:0x2DF750 reloc:MIPS_LO16 symbol:gFileDevice addend:0x14
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
-// ealib/seg_2DCAE8 func_003E95C8 (tools/gen/reloc_from_diff.py)
+// ealib/seg_2DCAE8 LobbyApi_update (tools/gen/reloc_from_diff.py)
 rom:0x2EB60C reloc:MIPS_HI16 symbol:D_004A49F0
 rom:0x2EB668 reloc:MIPS_HI16 symbol:D_004A49F0
 
 // ealib/seg_2B4578: D_0050B980 is D_0050AD00+0xC80, an inner address of the driver state (our C builds it as
-// &D_0050AD00 + 0xC80; func_003C0B10 has its own lui for it). Splat named it from these two functions' uses only.
+// &D_0050AD00 + 0xC80; SNDDRV_callIopRpc has its own lui for it). Splat named it from these two functions' uses only.
 rom:0x2C1B50 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xC80
 rom:0x2C1B68 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
 rom:0x2C1B8C reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
@@ -631,7 +631,7 @@ rom:0x5700C reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x57014 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x57038 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC2
 rom:0x57040 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC2
-// ealib/seg_2B4578 func_003C4450: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
+// ealib/seg_2B4578 SNDDRV_startNextTransfer: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
 rom:0x2C5454 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xCC8
 rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8
 // visualfx/lensfx cRenderStateMan_update: D_004FA3A8 is cRenderStateMan_m_state+0x38 (slot 0's second vec4).

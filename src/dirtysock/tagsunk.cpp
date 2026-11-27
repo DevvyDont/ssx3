@@ -89,7 +89,7 @@ extern "C" void cDirtysock_tag_TagFieldGetUnk(const char* tag, char* dst, int si
 INCLUDE_ASM("dirtysock/tagsunk", func_00259390__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the empty callback that LobbyMan_createLobbyApi() hands to func_003E7FF0() when it creates the LobbyApi.
+ * Does nothing: the empty callback that LobbyMan_createLobbyApi() hands to LobbyApi_create() when it creates the LobbyApi.
  */
 void func_00259390(void* self)
 {
@@ -380,24 +380,24 @@ extern "C" void LobbyMan__LobbyMan(LobbyMan* self_, int flags)
 }
 #endif
 
-extern "C" void* func_003E8FD0(int);
+extern "C" void* LobbyApi_printMessage(int);
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onincomingmsg__FPv);
 #ifdef SKIP_ASM
 /**
- * Logs an incoming lobby message: passes mpLobbyApi and the message to func_003E8FD0().
+ * Logs an incoming lobby message: passes mpLobbyApi and the message to LobbyApi_printMessage().
  *
  * The message arrives in the second argument register (the member declares no parameters) and reaches
- * func_003E8FD0() untouched; that function prints "recv: %c%c%c%c/%c%c%c%c" with the message's two codes plus its
+ * LobbyApi_printMessage() untouched; that function prints "recv: %c%c%c%c/%c%c%c%c" with the message's two codes plus its
  * text (or "[null data]", "[binary data]", "[long data]"). The functor thunk LobbyMan_LobbyFunctor_onincomingmsg_invoke, registered as LobbyApi
  * message callback 0 by LobbyMan_createLobbyApi(), calls it.
  *
- * @return no meaningful value (func_003E8FD0() returns nothing)
+ * @return no meaningful value (LobbyApi_printMessage() returns nothing)
  */
 void* LobbyMan::onincomingmsg()
 {
-    return func_003E8FD0((int)mpLobbyApi);
+    return LobbyApi_printMessage((int)mpLobbyApi);
 }
 #endif
 
@@ -986,17 +986,17 @@ void LobbyMan::onplaymsg(LobbyApiMsgT* msg)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_createConfig);
 #ifdef SKIP_ASM
-extern "C" char* func_003E8A70(void* p, int tag);
+extern "C" char* LobbyApi_getText(void* p, int tag);
 extern "C" void* NetGameUtilCreate();
-extern "C" void func_003E7120(void* h, char* fmt, char* arg);
+extern "C" void NetGameUtil_advertise(void* h, char* fmt, char* arg);
 extern char str_SSX_PS2_2004[];
 
 /**
  * Creates the lobby config handle mpConfig from the logged-in persona's 'pers' data, once.
  *
- * Does nothing unless mLoggedIn is set, mpConfig is still 0 and the LobbyApi's 'pers' value (func_003E8A70) is a
+ * Does nothing unless mLoggedIn is set, mpConfig is still 0 and the LobbyApi's 'pers' value (LobbyApi_getText) is a
  * non-empty string. Then it creates the handle with NetGameUtilCreate() and loads that text into it under the section
- * "SSX-PS2-2004" (func_003E7120). LobbyMan_getConfigValue() reads keys from it and LobbyMan_destroyConfig() frees it.
+ * "SSX-PS2-2004" (NetGameUtil_advertise). LobbyMan_getConfigValue() reads keys from it and LobbyMan_destroyConfig() frees it.
  */
 extern "C" void LobbyMan_createConfig(LobbyMan* self)
 {
@@ -1004,14 +1004,14 @@ extern "C" void LobbyMan_createConfig(LobbyMan* self)
         return;
     if (self->mpConfig != 0)
         return;
-    if (func_003E8A70(self->mpLobbyApi, 'pers') == 0)
+    if (LobbyApi_getText(self->mpLobbyApi, 'pers') == 0)
         return;
-    if (*func_003E8A70(self->mpLobbyApi, 'pers') == 0)
+    if (*LobbyApi_getText(self->mpLobbyApi, 'pers') == 0)
         return;
     self->mpConfig = NetGameUtilCreate();
     if (self->mpConfig == 0)
         return;
-    func_003E7120(self->mpConfig, str_SSX_PS2_2004, func_003E8A70(self->mpLobbyApi, 'pers'));
+    NetGameUtil_advertise(self->mpConfig, str_SSX_PS2_2004, LobbyApi_getText(self->mpLobbyApi, 'pers'));
 }
 #endif
 
@@ -1037,7 +1037,7 @@ extern "C" void LobbyMan_destroyConfig(LobbyMan* self)
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_getConfigValue);
 #ifdef SKIP_ASM
 extern char str_SSX_PS2_2004[];
-extern "C" int func_003E7218(void* tags, const char* key, const char* def);
+extern "C" int NetGameUtil_locate(void* tags, const char* key, const char* def);
 
 /**
  * Looks a key up in the lobby config (mpConfig, section "SSX-PS2-2004") and returns its value, or a default.
@@ -1045,14 +1045,14 @@ extern "C" int func_003E7218(void* tags, const char* key, const char* def);
  * The game-start handler LobbyMan_onplaymsg() uses it to override the host's and opponent's addresses by player name.
  *
  * @param key  the key to look up
- * @param def  value returned when there is no config or func_003E7218() returns 0
+ * @param def  value returned when there is no config or NetGameUtil_locate() returns 0
  * @return the configured value, or @p def
  */
 extern "C" int LobbyMan_getConfigValue(LobbyMan* self, const char* key, int def)
 {
     void* tags = self->mpConfig;
     if (tags != 0) {
-        int configValue = func_003E7218(tags, str_SSX_PS2_2004, key);
+        int configValue = NetGameUtil_locate(tags, str_SSX_PS2_2004, key);
         if (configValue != 0) {
             def = configValue;
         }
@@ -1064,7 +1064,7 @@ extern "C" int LobbyMan_getConfigValue(LobbyMan* self, const char* key, int def)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_openLists);
 #ifdef SKIP_ASM
-extern "C" void* func_003E85B0(void* mgr, int idx, void* cb, void* user);
+extern "C" void* LobbyApi_openList(void* mgr, int idx, void* cb, void* user);
 extern "C" void func_003EE5A0(void* h, int a, int b, void* cb);
 extern "C" void LobbyMan_LobbyFunctor_onroomlistupdate_invoke(void* self, void* a1, int a2);
 extern "C" void LobbyMan_LobbyFunctor_onuserlistupdate_invoke(void* self, void* a1, int a2);
@@ -1085,17 +1085,17 @@ struct sDsSessK2 {
  *
  * Opens list 0 (rooms, mpRoomList) with the functor thunk LobbyMan_LobbyFunctor_onroomlistupdate_invoke and the name compare lobbyman_compareRoomNames(), list 1
  * (users, mpUserList) with LobbyMan_LobbyFunctor_onuserlistupdate_invoke and lobbyman_compareUserNames(), and list 2 (ranks, mpRankList) with LobbyMan_LobbyFunctor_onranklistupdate_invoke, all
- * through func_003E85B0() on the LobbyApi; then sets all 29 mRankCount and mRankRequest entries to -1. LobbyMan_createLobbyApi()
+ * through LobbyApi_openList() on the LobbyApi; then sets all 29 mRankCount and mRankRequest entries to -1. LobbyMan_createLobbyApi()
  * calls it right after creating the LobbyApi.
  */
 extern "C" void LobbyMan_openLists(sDsSessK2* self)
 {
     int i;
-    self->chan[0] = func_003E85B0(self->mgr, 0, (void*)LobbyMan_LobbyFunctor_onroomlistupdate_invoke, self);
+    self->chan[0] = LobbyApi_openList(self->mgr, 0, (void*)LobbyMan_LobbyFunctor_onroomlistupdate_invoke, self);
     func_003EE5A0(self->chan[0], 0, 0, (void*)lobbyman_compareRoomNames);
-    self->chan[1] = func_003E85B0(self->mgr, 1, (void*)LobbyMan_LobbyFunctor_onuserlistupdate_invoke, self);
+    self->chan[1] = LobbyApi_openList(self->mgr, 1, (void*)LobbyMan_LobbyFunctor_onuserlistupdate_invoke, self);
     func_003EE5A0(self->chan[1], 0, 0, (void*)lobbyman_compareUserNames);
-    self->chan[2] = func_003E85B0(self->mgr, 2, (void*)LobbyMan_LobbyFunctor_onranklistupdate_invoke, self);
+    self->chan[2] = LobbyApi_openList(self->mgr, 2, (void*)LobbyMan_LobbyFunctor_onranklistupdate_invoke, self);
     for (i = 0; i < 29; i++) {
         self->slotA[i] = 0xFFFFFFFF;
         self->slotB[i] = 0xFFFFFFFF;
@@ -1106,10 +1106,10 @@ extern "C" void LobbyMan_openLists(sDsSessK2* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_releaseRankSnapshots);
 #ifdef SKIP_ASM
-extern "C" void func_003E8688(void* ctx, int kind, void* p);
+extern "C" void LobbyApi_closeList(void* ctx, int kind, void* p);
 
 /**
- * Releases every open rank-list snapshot: each non-null mRankSnapshot[i] (29 slots) goes to func_003E8688(..., 4, ...)
+ * Releases every open rank-list snapshot: each non-null mRankSnapshot[i] (29 slots) goes to LobbyApi_closeList(..., 4, ...)
  * and is cleared.
  */
 extern "C" void LobbyMan_releaseRankSnapshots(LobbyMan* self)
@@ -1118,7 +1118,7 @@ extern "C" void LobbyMan_releaseRankSnapshots(LobbyMan* self)
     void** arr = (void**)&self->mRankSnapshot;
     for (i = 0; i < 29; i++) {
         if (arr[i] != 0) {
-            func_003E8688(self->mpLobbyApi, 4, arr[i]);
+            LobbyApi_closeList(self->mpLobbyApi, 4, arr[i]);
             arr[i] = 0;
         }
     }
@@ -1136,21 +1136,21 @@ struct sTagsUnkCallbackObj {
 /**
  * Closes the lobby's lists, rank snapshots and pending host lookup.
  *
- * Releases mpRoomList, mpUserList and mpRankList through func_003E8688() (kinds 0, 1, 2) and clears them, frees the
+ * Releases mpRoomList, mpUserList and mpRankList through LobbyApi_closeList() (kinds 0, 1, 2) and clears them, frees the
  * snapshots with LobbyMan_releaseRankSnapshots(), and releases mpHostLookup through its own release function (+0xC) before clearing it.
  */
 extern "C" void LobbyMan_closeLists(LobbyMan* self)
 {
     if (self->mpRoomList != 0) {
-        func_003E8688(self->mpLobbyApi, 0, self->mpRoomList);
+        LobbyApi_closeList(self->mpLobbyApi, 0, self->mpRoomList);
         self->mpRoomList = 0;
     }
     if (self->mpUserList != 0) {
-        func_003E8688(self->mpLobbyApi, 1, self->mpUserList);
+        LobbyApi_closeList(self->mpLobbyApi, 1, self->mpUserList);
         self->mpUserList = 0;
     }
     if (self->mpRankList != 0) {
-        func_003E8688(self->mpLobbyApi, 2, self->mpRankList);
+        LobbyApi_closeList(self->mpLobbyApi, 2, self->mpRankList);
         self->mpRankList = 0;
     }
     LobbyMan_releaseRankSnapshots(self);
@@ -1166,8 +1166,8 @@ extern "C" void LobbyMan_closeLists(LobbyMan* self)
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_createLobbyApi);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_003E7FF0(const char* tag, int a, void* cb);
-extern "C" void func_003E8248(void* mgr, int idx, void* cb, void* user);
+extern "C" void* LobbyApi_create(const char* tag, int a, void* cb);
+extern "C" void LobbyApi_setEventRoutine(void* mgr, int idx, void* cb, void* user);
 extern "C" const char* func_00259198();
 extern "C" void LobbyMan_LobbyFunctor_onincomingmsg_invoke(void* self, void* a1, int a2);
 extern "C" void LobbyMan_LobbyFunctor_onchatmsg_invoke(void* self, void* a1, int a2);
@@ -1188,9 +1188,9 @@ extern char str_Sep_17_2003[];
  * Creates the DirtySock LobbyApi instance and registers the lobby manager's message callbacks.
  *
  * Builds the client identity record: PROD "SSX-PS2-2004", VERS "PS2/Beta 1.04-Sep 17 2003" ("%s/%s-%s"), LANG
- * func_00259198() ("en") and SLUS "SLUS_20772"; creates the instance with func_003E7FF0(record, 0, func_00259390) into
+ * func_00259198() ("en") and SLUS "SLUS_20772"; creates the instance with LobbyApi_create(record, 0, func_00259390) into
  * mpLobbyApi; registers the functor thunks LobbyMan_LobbyFunctor_onincomingmsg_invoke (callback 0, logging), LobbyMan_LobbyFunctor_onchatmsg_invoke (1, chat), LobbyMan_LobbyFunctor_onconnectionmsg_invoke
- * (3, connection) and LobbyMan_LobbyFunctor_onplaymsg_invoke (4, game start) with func_003E8248(); then opens the lists with LobbyMan_openLists().
+ * (3, connection) and LobbyMan_LobbyFunctor_onplaymsg_invoke (4, game start) with LobbyApi_setEventRoutine(); then opens the lists with LobbyMan_openLists().
  * The connect function LobbyMan_connect() calls it when there is no instance yet.
  *
  * @param self_  the lobby manager
@@ -1206,12 +1206,12 @@ extern "C" void LobbyMan_createLobbyApi(LobbyMan* self_)
     const char* key = str_LANG;
     cDirtysock_tag_TagFieldSetString(tag, 0x100, key, func_00259198());
     cDirtysock_tag_TagFieldSetString(tag, 0x100, str_SLUS, str_SLUS_20772);
-    void* mgr = func_003E7FF0(tag, 0, (void*)func_00259390);
+    void* mgr = LobbyApi_create(tag, 0, (void*)func_00259390);
     self_->mpLobbyApi = (LobbyApiRefT*)mgr;
-    func_003E8248(mgr, 0, (void*)LobbyMan_LobbyFunctor_onincomingmsg_invoke, ((char*)self_));
-    func_003E8248(self_->mpLobbyApi, 1, (void*)LobbyMan_LobbyFunctor_onchatmsg_invoke, ((char*)self_));
-    func_003E8248(self_->mpLobbyApi, 3, (void*)LobbyMan_LobbyFunctor_onconnectionmsg_invoke, ((char*)self_));
-    func_003E8248(self_->mpLobbyApi, 4, (void*)LobbyMan_LobbyFunctor_onplaymsg_invoke, ((char*)self_));
+    LobbyApi_setEventRoutine(mgr, 0, (void*)LobbyMan_LobbyFunctor_onincomingmsg_invoke, ((char*)self_));
+    LobbyApi_setEventRoutine(self_->mpLobbyApi, 1, (void*)LobbyMan_LobbyFunctor_onchatmsg_invoke, ((char*)self_));
+    LobbyApi_setEventRoutine(self_->mpLobbyApi, 3, (void*)LobbyMan_LobbyFunctor_onconnectionmsg_invoke, ((char*)self_));
+    LobbyApi_setEventRoutine(self_->mpLobbyApi, 4, (void*)LobbyMan_LobbyFunctor_onplaymsg_invoke, ((char*)self_));
     LobbyMan_openLists((sDsSessK2*)self_);
 }
 #endif
@@ -1220,19 +1220,19 @@ extern "C" void LobbyMan_createLobbyApi(LobbyMan* self_)
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_destroyLobbyApi);
 #ifdef SKIP_ASM
 extern "C" void LobbyMan_closeLists(LobbyMan* self);
-extern "C" void func_003E80C0(void* p);
-extern "C" void func_003E81C8(void* p);
+extern "C" void LobbyApi_disconnect(void* p);
+extern "C" void LobbyApi_destroy(void* p);
 
 /**
- * Shuts the LobbyApi down: closes the lists (LobbyMan_closeLists), then calls func_003E80C0() and func_003E81C8() on
+ * Shuts the LobbyApi down: closes the lists (LobbyMan_closeLists), then calls LobbyApi_disconnect() and LobbyApi_destroy() on
  * mpLobbyApi and clears it.
  */
 extern "C" void LobbyMan_destroyLobbyApi(LobbyMan* self)
 {
     LobbyMan_closeLists(self);
     if (self->mpLobbyApi != 0) {
-        func_003E80C0(self->mpLobbyApi);
-        func_003E81C8(self->mpLobbyApi);
+        LobbyApi_disconnect(self->mpLobbyApi);
+        LobbyApi_destroy(self->mpLobbyApi);
         self->mpLobbyApi = 0;
     }
 }
@@ -1243,13 +1243,13 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendChatMessage);
 #ifdef SKIP_ASM
 extern char str_TEXT[];
 extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, const char* value);
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 
 /**
  * Sends a 'mesg' lobby request carrying @p value as its TEXT field, when the lobby is not idle (mState != 0).
  *
  * The field is written with cDirtysock_tag_TagFieldSetUnk() (a leading apostrophe gets a backquote) into a 0x200-byte
- * record and sent with func_003E8B10() without a reply callback; mState and mTimeout are left alone.
+ * record and sent with LobbyApi_sendCommand() without a reply callback; mState and mTimeout are left alone.
  *
  * @param value  the message text
  */
@@ -1259,7 +1259,7 @@ extern "C" void LobbyMan_sendChatMessage(LobbyMan* self, const char* value)
     if (*(int*)self != 0) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetUnk(buf, 0x200, str_TEXT, value);
-        func_003E8B10(self->mpLobbyApi, 'mesg', buf, 0, 0);
+        LobbyApi_sendCommand(self->mpLobbyApi, 'mesg', buf, 0, 0);
     }
 }
 #endif
@@ -1347,13 +1347,13 @@ extern void* online_BuddyErrorEvent_vtbl[];
 extern void* D_004811B0[];
 extern int D_004A3018;
 extern float D_004A5154;
-extern "C" void func_003E95C8(void* p);
-extern "C" int func_003E8FB8(void* p);
+extern "C" void LobbyApi_update(void* p);
+extern "C" int LobbyApi_takeEvent(void* p);
 extern "C" void LobbyMan_createConfig(LobbyMan* self);
 extern "C" void LobbyMan_disconnect(LobbyMan* self);
-extern "C" void func_003E8260(void* p, int a, int timeout, void* cb, void* user);
+extern "C" void LobbyApi_connect(void* p, int a, int timeout, void* cb, void* user);
 extern "C" void LobbyMan_LobbyFunctor_onlobbyconnect_invoke(void* self, void* a1, int a2);
-extern "C" char* func_003E8A70(void* p, int tag);
+extern "C" char* LobbyApi_getText(void* p, int tag);
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void BuddyMan_createInstance(void);
 extern "C" int BuddyMan_isLoggedIn(void* p);
@@ -1467,11 +1467,11 @@ static inline void closeConn_AC50(char* self)
  * Runs the lobby manager once per frame: pumps the LobbyApi, advances the connection and request states, and delivers
  * queued events to the front end.
  *
- * With a LobbyApi: calls func_003E95C8() on it, reads its status with func_003E8FB8() and creates mpConfig when ready
+ * With a LobbyApi: calls LobbyApi_update() on it, reads its status with LobbyApi_takeEvent() and creates mpConfig when ready
  * (LobbyMan_createConfig). If mDisconnected is set it clears it, disconnects (LobbyMan_disconnect) and posts type 277. Otherwise, by
  * mState:
  * - 2 (host lookup): polls mpHostLookup; on success stores the address in mServerAddr and D_004A3018, enters mState 3
- *   with a 30-second mTimeout and connects to port 11000 (func_003E8260, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke); on failure
+ *   with a 30-second mTimeout and connects to port 11000 (LobbyApi_connect, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke); on failure
  *   disconnects and posts an error event (vtable online_ErrorEvent_vtbl, type 258) with 'dnsf'; either way releases the
  * lookup.
  * - 3 (connecting): status 0x400 posts an error event (vtable D_004811B0) with 'down' and the server's 'down' text and
@@ -1494,8 +1494,8 @@ static inline void closeConn_AC50(char* self)
 extern "C" void LobbyMan_update(LobbyMan* self)
 {
     if (self->mpLobbyApi != 0) {
-        func_003E95C8(self->mpLobbyApi);
-        int ev = func_003E8FB8(self->mpLobbyApi);
+        LobbyApi_update(self->mpLobbyApi);
+        int ev = LobbyApi_takeEvent(self->mpLobbyApi);
         LobbyMan_createConfig(self);
         if (self->mDisconnected != 0) {
             self->mDisconnected = 0;
@@ -1517,7 +1517,7 @@ extern "C" void LobbyMan_update(LobbyMan* self)
                     sess->mState = 3;
                     sess->mTimeout = 30.0f;
                     // PORT: function pointer passed as a callback argument.
-                    func_003E8260(((void*)sess->mpLobbyApi), serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
+                    LobbyApi_connect(((void*)sess->mpLobbyApi), serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
                 } else if (lookupStatus < 0) {
                     LobbyMan_disconnect(self);
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
@@ -1530,7 +1530,7 @@ extern "C" void LobbyMan_update(LobbyMan* self)
                     closeConn_AC50(((char*)self));
             } else if (state == 3) {
                 if (ev == 0x400) {
-                    char* downReason = func_003E8A70(self->mpLobbyApi, 'down');
+                    char* downReason = LobbyApi_getText(self->mpLobbyApi, 'down');
                     int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     event[2] = 'down';
@@ -1644,12 +1644,12 @@ extern "C" void LobbyMan_update(LobbyMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendRequest);
 #ifdef SKIP_ASM
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 
 /**
  * Starts a LobbyApi request: sets mState and mTimeout and stores the request handle in mRequestId.
  *
- * The request goes out through func_003E8B10(mpLobbyApi, tag, cb, callback, self). All the account, persona, room,
+ * The request goes out through LobbyApi_sendCommand(mpLobbyApi, tag, cb, callback, self). All the account, persona, room,
  * challenge and report requests use it with a 20-second timeout.
  *
  * @param newState  the state to enter (see LobbyMan::mState)
@@ -1662,7 +1662,7 @@ extern "C" void LobbyMan_sendRequest(LobbyMan* self, int newState, int tag, void
 {
     *(int*)self = newState;
     self->mTimeout = timeout;
-    self->mRequestId = func_003E8B10(self->mpLobbyApi, tag, cb, callback, self);
+    self->mRequestId = LobbyApi_sendCommand(self->mpLobbyApi, tag, cb, callback, self);
 }
 #endif
 
@@ -1721,7 +1721,7 @@ extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern int D_004A3018;
 extern "C" void LobbyMan_createLobbyApi(LobbyMan* self);
-extern "C" void func_003E8260(void* p, int a, int timeout, void* cb, void* user);
+extern "C" void LobbyApi_connect(void* p, int a, int timeout, void* cb, void* user);
 extern "C" int SocketLookup(void* p, int a);
 extern "C" void LobbyMan_LobbyFunctor_onlobbyconnect_invoke(void* self, void* a1, int a2);
 
@@ -1755,7 +1755,7 @@ static inline sMsgListIterB6D8 sMsgListB6D8_insert(sMsgListIterB6D8 pos, void* c
  *
  * Creates the LobbyApi first if needed (LobbyMan_createLobbyApi) and stores @p conn in mbUseCachedAddr. With @p conn set it
  * reuses the address cached in D_004A3018: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects
- * on port 11000 (func_003E8260, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke). Otherwise it enters mState 2 and starts a host lookup of
+ * on port 11000 (LobbyApi_connect, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke). Otherwise it enters mState 2 and starts a host lookup of
  * mServerName with SocketLookup() into mpHostLookup (LobbyMan_update() polls it). Either way posts a type-200 event.
  *
  * @param conn  nonzero to connect to the cached server address, 0 to look the server name up first
@@ -1771,7 +1771,7 @@ extern "C" void LobbyMan_connect(LobbyMan* self, int conn)
         self->mTimeout = 30.0f;
         self->mServerAddr = serverAddr;
         // PORT: function pointer passed as a callback argument.
-        func_003E8260(self->mpLobbyApi, serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
+        LobbyApi_connect(self->mpLobbyApi, serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
     } else {
         *(int*)self = 2;
         self->mpHostLookup = (void*)SocketLookup(self->mServerName, 0);
@@ -1813,7 +1813,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onlobbyconnect);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1[];
@@ -1857,7 +1857,7 @@ static inline void post_B848(char* self, void* msg)
  * Sets mState to 1. On success (reply mStatus 0) it sends a 'sele' request with "ROOMS=1 USERS=1 RANKS=0
  * MESGS=1 GAMES=1" (no reply callback) and posts a type-201 event; otherwise it posts an error event (vtable
  * online_ErrorEvent_vtbl, type 258) carrying the code and sets mDisconnected. Called through the functor thunk
- * LobbyMan_LobbyFunctor_onlobbyconnect_invoke, which LobbyMan_connect() and LobbyMan_update() pass to func_003E8260().
+ * LobbyMan_LobbyFunctor_onlobbyconnect_invoke, which LobbyMan_connect() and LobbyMan_update() pass to LobbyApi_connect().
  *
  * @param msg  the LobbyApi reply (error code mStatus, 0 on success)
  */
@@ -1865,7 +1865,7 @@ void LobbyMan::onlobbyconnect(LobbyApiMsgT* msg)
 {
     mState = 1;
     if (msg->mStatus == 0) {
-        func_003E8B10(mpLobbyApi, 'sele', str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
+        LobbyApi_sendCommand(mpLobbyApi, 'sele', str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 201;
         event->mVtbl = online_Event_vtbl;
@@ -2615,17 +2615,17 @@ extern "C" void LobbyMan_authenticate(LobbyMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_cancelAuthentication);
 #ifdef SKIP_ASM
-extern "C" void func_003E8D70(void* p, int a);
+extern "C" void LobbyApi_cancelCallbacks(void* p, int a);
 
 /**
- * Cancels a pending login: when mState is 8 (authenticating), passes mRequestId to func_003E8D70() on mpLobbyApi.
+ * Cancels a pending login: when mState is 8 (authenticating), passes mRequestId to LobbyApi_cancelCallbacks() on mpLobbyApi.
  *
  * mState itself is left unchanged.
  */
 extern "C" void LobbyMan_cancelAuthentication(LobbyMan* self)
 {
     if (self->mState == 8) {
-        func_003E8D70(self->mpLobbyApi, self->mRequestId);
+        LobbyApi_cancelCallbacks(self->mpLobbyApi, self->mRequestId);
     }
 }
 #endif
@@ -2793,7 +2793,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_selectPersona);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_PERS[];
@@ -2969,7 +2969,7 @@ extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const cha
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_STAT[];
@@ -3121,7 +3121,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onpersonacreated);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 
@@ -3258,7 +3258,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onpersonadeleted);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern "C" void* cBXString_operatorE(void* self, void* other);
@@ -3394,7 +3394,7 @@ extern "C" void* LobbyMan_getRoomNameAt(LobbyMan* self);
  * Sends a 'peek' request for a room in the room list, or with an empty name.
  *
  * Does nothing when mState is 0. NAME is the name of room @p idx (LobbyMan_getRoomNameAt(), which gets @p idx through the second
- * argument register its C declaration omits) or "" for kRoomIndex_None; the request goes straight to func_003E8B10()
+ * argument register its C declaration omits) or "" for kRoomIndex_None; the request goes straight to LobbyApi_sendCommand()
  * with no callback, no state change and no timeout.
  *
  * @param idx  index into the room list, or LobbyMan::kRoomIndex_None
@@ -3412,7 +3412,7 @@ extern "C" void LobbyMan_peekRoom(LobbyMan* self, int idx)
             name = str_empty_i;
         }
         cDirtysock_tag_TagFieldSetString(buf, 0x100, key, name);
-        func_003E8B10(self->mpLobbyApi, 'peek', buf, 0, 0);
+        LobbyApi_sendCommand(self->mpLobbyApi, 'peek', buf, 0, 0);
     }
 }
 #endif
@@ -3620,7 +3620,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onRoomCreated);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_NAME[];
@@ -3700,12 +3700,12 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_pingPlayer);
 #ifdef SKIP_ASM
 extern "C" int LobbyMan_getConfigValue(LobbyMan* self, const char* key, int def);
 extern "C" void LobbyMan_LobbyFunctor_onPingReceived_invoke(void* self, void* a1, int a2);
-extern "C" int func_003E8DC0(void* p, const char* key, int value, int timeout, void* cb, void* user);
+extern "C" int LobbyApi_ping(void* p, const char* key, int value, int timeout, void* cb, void* user);
 
 /**
  * Pings a player by name through the lobby.
  *
- * Does nothing when mState is 0. Calls func_003E8DC0() (a LobbyApi 'ping' with NAME and ADDR) on mpLobbyApi with @p
+ * Does nothing when mState is 0. Calls LobbyApi_ping() (a LobbyApi 'ping' with NAME and ADDR) on mpLobbyApi with @p
  * key, the address LobbyMan_getConfigValue() returns for it (a "SSX-PS2-2004" config override of @p def), a 5000 timeout and
  * callback thunk LobbyMan_LobbyFunctor_onPingReceived_invoke (reply to LobbyMan_onPingReceived()). showOpponentStats calls it for a found player.
  *
@@ -3715,7 +3715,7 @@ extern "C" int func_003E8DC0(void* p, const char* key, int value, int timeout, v
 extern "C" void LobbyMan_pingPlayer(LobbyMan* self, const char* key, int def)
 {
     if (*(int*)self != 0) {
-        func_003E8DC0(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, def), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, self);
+        LobbyApi_ping(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, def), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, self);
     }
 }
 #endif
@@ -3725,7 +3725,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_pingUser);
 #ifdef SKIP_ASM
 extern "C" int LobbyMan_getConfigValue(LobbyMan* self, const char* key, int def);
 extern "C" void LobbyMan_LobbyFunctor_onPingReceived_invoke(void* self, void* a1, int a2);
-extern "C" int func_003E8DC0(void* p, const char* key, int value, int timeout, void* cb, void* user);
+extern "C" int LobbyApi_ping(void* p, const char* key, int value, int timeout, void* cb, void* user);
 extern "C" void* func_003EE560(void*);
 
 /**
@@ -3734,7 +3734,7 @@ extern "C" void* func_003EE560(void*);
  * Does nothing when mState is 0. Takes the user-list entry from func_003EE560() on mpUserList; its index is whatever
  * the caller left in the second argument register (the C declaration omits that parameter). When the entry exists it
  * pings its name (entry + 0x8) at the address from its word +0x30 (or the config override, LobbyMan_getConfigValue()) with
- * func_003E8DC0(), timeout 5000 and callback thunk LobbyMan_LobbyFunctor_onPingReceived_invoke.
+ * LobbyApi_ping(), timeout 5000 and callback thunk LobbyMan_LobbyFunctor_onPingReceived_invoke.
  */
 extern "C" void LobbyMan_pingUser(LobbyMan* self)
 {
@@ -3742,7 +3742,7 @@ extern "C" void LobbyMan_pingUser(LobbyMan* self)
         char* userEntry = (char*)func_003EE560(self->mpUserList);
         if (userEntry != 0) {
             const char* key = userEntry + 8;
-            func_003E8DC0(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, *(int*)(userEntry + 0x30)), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, ((char*)self));
+            LobbyApi_ping(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, *(int*)(userEntry + 0x30)), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, ((char*)self));
         }
     }
 }
@@ -4049,7 +4049,7 @@ void LobbyMan::onNewsRetrieved(LobbyApiMsgT* msg)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_selectRankList);
 #ifdef SKIP_ASM
-extern "C" void* func_003E8F08(void* ctx, int tag);
+extern "C" void* LobbyApi_getStatus(void* ctx, int tag);
 extern "C" unsigned int LobbyMan_getNumRankRows(LobbyMan* self);
 extern "C" void LobbyMan_requestRankRows(LobbyMan* self, int a1, int a2, int a3);
 extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int unused);
@@ -4069,9 +4069,9 @@ struct sDsSlotSessK2 {
 /**
  * Selects which rank list (slot 0..28) the ranking screens show and refreshes it when needed.
  *
- * Does nothing when mState is 0 (the view's `active`). Stores @p slot in mRankSlot and func_003E8F08(mpLobbyApi,
+ * Does nothing when mState is 0 (the view's `active`). Stores @p slot in mRankSlot and LobbyApi_getStatus(mpLobbyApi,
  * 'slot') in mpSlotTag. When the slot's snapshot holds fewer rows (LobbyMan_getNumRankRows()) than mRankCount[@p slot], it
- * releases the slot's mRankSnapshot entry (func_003E8688(api, 4, ..)) and asks for rows 0..99 with LobbyMan_requestRankRows()
+ * releases the slot's mRankSnapshot entry (LobbyApi_closeList(api, 4, ..)) and asks for rows 0..99 with LobbyMan_requestRankRows()
  * (passing the previous slot); otherwise it just calls the snapshot callback LobbyMan_onranklistupdate() with no
  * message. The parameter's view type (sDsSlotSessK2) is LobbyMan read through its own layout.
  *
@@ -4082,10 +4082,10 @@ extern "C" void LobbyMan_selectRankList(sDsSlotSessK2* self, int slot)
     if (self->active != 0) {
         int old = self->slot;
         self->slot = slot;
-        self->slotTag = func_003E8F08(self->ctx, 'slot');
+        self->slotTag = LobbyApi_getStatus(self->ctx, 'slot');
         if (LobbyMan_getNumRankRows((LobbyMan*)self) < self->limit[slot]) {
             if (self->handles[self->slot] != 0) {
-                func_003E8688(self->ctx, 4, self->handles[self->slot]);
+                LobbyApi_closeList(self->ctx, 4, self->handles[self->slot]);
                 self->handles[self->slot] = 0;
             }
             LobbyMan_requestRankRows((LobbyMan*)self, 0, 100, old);
@@ -4101,8 +4101,8 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_requestRankRows);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
 extern "C" void LobbyMan_sendRequest(LobbyMan* self, int a1, int tag, void* cb, int a4, float f);
-extern "C" void* func_003E85B0(void* mgr, int idx, void* cb, void* user);
-extern "C" void func_003E8D70(void* p, int a);
+extern "C" void* LobbyApi_openList(void* mgr, int idx, void* cb, void* user);
+extern "C" void LobbyApi_cancelCallbacks(void* p, int a);
 extern "C" void LobbyMan_LobbyFunctor_onranklistupdate_invoke(void* self, void* a1, int a2);
 extern "C" void LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke(void* self, void* a1, int a2);
 extern int D_004A3180;
@@ -4130,9 +4130,9 @@ struct sDsSlotSessE420 {
 /**
  * Requests a range of rows of the selected rank list ('snap').
  *
- * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (func_003E85B0, callback thunk
+ * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (LobbyApi_openList, callback thunk
  * LobbyMan_LobbyFunctor_onranklistupdate_invoke), builds INDEX = mRankSlot, CHAN = D_004A3180 + 4 (D_004A3180 is zero and only read here), START = @p
- * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (func_003E8D70) and sends
+ * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (LobbyApi_cancelCallbacks) and sends
  * 'snap' with LobbyMan_sendRequest(), keeping the current mState (20 s timeout, reply through LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke to
  * LobbyMan_onRanklistRetrieved()). The new request id goes into mRankRequest[mRankSlot].
  *
@@ -4147,7 +4147,7 @@ extern "C" void LobbyMan_requestRankRows(LobbyMan* self_, int start, int range, 
     if (self->active == 0)
         return;
     if (self->handles[self->slot] == 0)
-        self->handles[self->slot] = func_003E85B0(self->ctx, 4, (void*)LobbyMan_LobbyFunctor_onranklistupdate_invoke, self);
+        self->handles[self->slot] = LobbyApi_openList(self->ctx, 4, (void*)LobbyMan_LobbyFunctor_onranklistupdate_invoke, self);
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_INDEX, self->slot);
@@ -4155,7 +4155,7 @@ extern "C" void LobbyMan_requestRankRows(LobbyMan* self_, int start, int range, 
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_START, start);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_RANGE, range);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_SEQN, self->slot);
-    func_003E8D70(self->ctx, self->limitB[prevSlot]);
+    LobbyApi_cancelCallbacks(self->ctx, self->limitB[prevSlot]);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
     LobbyMan_sendRequest((LobbyMan*)self, self->active, 'snap', buf, (int)LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke, 20.0f);
     self->limitB[self->slot] = self->mRequestId;
@@ -4421,7 +4421,7 @@ extern "C" void func_00268E50();
 /**
  * Requests another player's online info: sends 'onln' with PERS = @p name.
  *
- * Calls func_003E8B10() directly, so mState, mTimeout and mRequestId stay as they are; the reply goes through
+ * Calls LobbyApi_sendCommand() directly, so mState, mTimeout and mRequestId stay as they are; the reply goes through
  * func_00268E50 to LobbyMan_handlePlayerInfoReply().
  *
  * @param name  the persona to look up
@@ -4431,8 +4431,8 @@ extern "C" void LobbyMan_requestPlayerInfo(LobbyMan* self, const char* name)
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
-    // PORT: function pointer passed through func_003E8B10's int parameter.
-    func_003E8B10(self->mpLobbyApi, 'onln', buf, (int)func_00268E50, ((char*)self));
+    // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
+    LobbyApi_sendCommand(self->mpLobbyApi, 'onln', buf, (int)func_00268E50, ((char*)self));
 }
 #endif
 //100%
@@ -4599,7 +4599,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_cancelQuickMatch);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_KIND[];
@@ -4646,7 +4646,7 @@ static inline void post_EED8(char* self, void* msg)
  *
  * Does nothing when mState is 0. In state 25 (in game) it closes the game connection held at SSXApp->RealFE + 0xB5ABC
  * (func_002591D0) with cGameConnMan_shutdown(conn, 2) when that is active. In any other state but 1 it sends 'quik' with KIND =
- * "*" straight to func_003E8B10() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()).
+ * "*" straight to LobbyApi_sendCommand() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()).
  * Then sets mState to 1 and pushes an Event of type 231 onto mEventList.
  */
 extern "C" void LobbyMan_cancelQuickMatch(LobbyMan* self)
@@ -4662,8 +4662,8 @@ extern "C" void LobbyMan_cancelQuickMatch(LobbyMan* self)
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_star);
         self->mTimeout = 20.0f;
-        // PORT: function pointer passed through func_003E8B10's int parameter.
-        self->mRequestId = func_003E8B10(self->mpLobbyApi, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, ((char*)self));
+        // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
+        self->mRequestId = LobbyApi_sendCommand(self->mpLobbyApi, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, ((char*)self));
     }
     *(int*)self = 1;
     int type = 231;
@@ -4890,7 +4890,7 @@ extern "C" void* func_003EE560(void*);
 extern "C" int atoi(const char* s);
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
 
-// A room user record (LobbyApi's '+usr' record, func_003E95C8's User_95C8; names ours, from its tags).
+// A room user record (LobbyApi's '+usr' record, LobbyApi_update's User_95C8; names ours, from its tags).
 struct sDsPeerK2 {
     char pad_0x00[0x28];
     char ping[0xC];      // 0x28 the "P" text
@@ -5057,11 +5057,11 @@ extern "C" void* LobbyMan_getRankRow(LobbyMan* self, int rowIndex, int* outA, in
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_isInRoom);
 #ifdef SKIP_ASM
-extern "C" char* func_003E8A70(void* p, int tag);
+extern "C" char* LobbyApi_getText(void* p, int tag);
 /**
  * Tells whether the lobby connection reports a current room.
  *
- * @return true when mState is non-zero and func_003E8A70(mpLobbyApi, 'room') gives a non-empty string
+ * @return true when mState is non-zero and LobbyApi_getText(mpLobbyApi, 'room') gives a non-empty string
  */
 extern "C" bool LobbyMan_isInRoom(LobbyMan* self)
 {
@@ -5069,7 +5069,7 @@ extern "C" bool LobbyMan_isInRoom(LobbyMan* self)
     if (*(int*)self == 0) {
         return false;
     }
-    room = func_003E8A70(self->mpLobbyApi, 'room');
+    room = LobbyApi_getText(self->mpLobbyApi, 'room');
     return room != 0 && *room != 0;
 }
 #endif
@@ -5161,7 +5161,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_cancelChallenge);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-extern "C" void func_003E8D70(void* p, int a);
+extern "C" void LobbyApi_cancelCallbacks(void* p, int a);
 extern "C" void LobbyMan_clearChallenge(LobbyMan* self);
 extern "C" void LobbyMan_leaveGame(LobbyMan* self, int type);
 void* LobbyMan_sendAbortChallenge(void* self);
@@ -5195,7 +5195,7 @@ static inline sMsgListIterF628 sMsgListF628_insert(sMsgListIterF628 pos, void* c
  * Cancels the lobby challenge or game in progress and optionally tells the front end.
  *
  * Does nothing when mState is 0. In the challenge states 21, 22 and 24 it first sends "abortChal" to mOpponent
- * (LobbyMan_sendAbortChallenge) when @p flag is set, cancels the pending request (func_003E8D70(mpLobbyApi, mRequestId)) and sends an
+ * (LobbyMan_sendAbortChallenge) when @p flag is set, cancels the pending request (LobbyApi_cancelCallbacks(mpLobbyApi, mRequestId)) and sends an
  * empty "chal" request (LobbyMan_clearChallenge, which sets mState to 1). In state 25 (in game) it calls LobbyMan_leaveGame(self, 0)
  * instead. With @p notify set it then posts an online::Event of type 238 (vtable online_Event_vtbl) on mEventList. The
  * update LobbyMan_update calls it when the state-24 timeout runs out; the challenge popup calls it to cancel.
@@ -5211,7 +5211,7 @@ extern "C" void LobbyMan_cancelChallenge(LobbyMan* selfp, int notify, int flag)
         if (st == 21 || st == 22 || st == 0x18) {
             if (flag)
                 LobbyMan_sendAbortChallenge(((char*)selfp));
-            func_003E8D70(selfp->mpLobbyApi, selfp->mRequestId);
+            LobbyApi_cancelCallbacks(selfp->mpLobbyApi, selfp->mRequestId);
             LobbyMan_clearChallenge(selfp);
         } else if (st == 25) {
             LobbyMan_leaveGame(selfp, 0);
@@ -5265,7 +5265,7 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
 /**
  * Leaves the lobby game in progress and optionally posts an event of the given type.
  *
- * Does nothing when mState is 0. In state 25 (in game) it sets mTimeout to 20.0, sends a "chal" request (func_003E8B10,
+ * Does nothing when mState is 0. In state 25 (in game) it sets mTimeout to 20.0, sends a "chal" request (LobbyApi_sendCommand,
  * no callback) whose record holds PERS="*" (str_star), and sets mState to 1. When @p type is nonzero it then posts an
  * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back
  * out of an accepted game.
@@ -5281,7 +5281,7 @@ extern "C" void LobbyMan_leaveGame(LobbyMan* selfp, int type)
             selfp->mTimeout = 20.0f;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, str_star);
-            func_003E8B10(selfp->mpLobbyApi, 'chal', buf, 0, 0);
+            LobbyApi_sendCommand(selfp->mpLobbyApi, 'chal', buf, 0, 0);
             *(int*)selfp = 1;
         }
         if (type != 0) {
@@ -5299,7 +5299,7 @@ extern "C" void LobbyMan_leaveGame(LobbyMan* selfp, int type)
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_clearChallenge);
 #ifdef SKIP_ASM
 extern char str_empty_i[];
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 
 /**
  * Sends an empty "chal" request and sets the lobby state back to 1 (ready).
@@ -5308,7 +5308,7 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
  */
 extern "C" void LobbyMan_clearChallenge(LobbyMan* self)
 {
-    func_003E8B10(self->mpLobbyApi, 'chal', str_empty_i, 0, 0);
+    LobbyApi_sendCommand(self->mpLobbyApi, 'chal', str_empty_i, 0, 0);
     *(int*)self = 1;
 }
 #endif
@@ -5490,13 +5490,13 @@ extern "C" void func_00268EC8(void* self, void* a1, int a2);
  * Sends a private lobby message (a "mesg" request) to a player.
  *
  * Builds a 256-byte record with PRIV = @p recipient, TEXT = @p text and ATTR flags 0x40004000, and sends it with
- * func_003E8B10(mpLobbyApi, 'mesg', ..). The reply callback func_00268EC8 runs the empty func_0025FC20. It does not
+ * LobbyApi_sendCommand(mpLobbyApi, 'mesg', ..). The reply callback func_00268EC8 runs the empty func_0025FC20. It does not
  * touch mState or mRequestId. The challenge protocol uses it for its control words ("decline", "abortChal",
  * "lockChal").
  *
  * @param recipient  name of the receiving player (a string pointer passed as an int)
  * @param text       the message text
- * @return the request handle func_003E8B10() returns
+ * @return the request handle LobbyApi_sendCommand() returns
  */
 // PORT: a1 carries a string pointer in an int (the unit's declaration).
 extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan* self, int recipient, void* text)
@@ -5506,8 +5506,8 @@ extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan* self, int recipient, void
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRIV, (const char*)recipient);
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_TEXT, (const char*)text);
     cDirtysock_tag_TagFieldSetFlags(buf, 0x100, str_ATTR, 0x40004000);
-    // PORT: function pointer passed through func_003E8B10's int parameter.
-    return (void*)func_003E8B10(self->mpLobbyApi, 'mesg', buf, (int)func_00268EC8, self);
+    // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
+    return (void*)LobbyApi_sendCommand(self->mpLobbyApi, 'mesg', buf, (int)func_00268EC8, self);
 }
 #endif
 
@@ -6792,7 +6792,7 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onrosterupdate);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern "C" void BuddyMan_addMessageSendersToRoster();
@@ -8815,7 +8815,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cConnMan_update);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern "C" void cConnMan_disconnect(int* out, int val);
@@ -9027,7 +9027,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan_shutdown);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* cSetupMan_mSetupMan;

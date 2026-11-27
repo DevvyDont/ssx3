@@ -1459,7 +1459,7 @@ extern int D_004A379C;
  * Stops the Pathfinder sound back end: unregisters its 100 Hz client and sync task when a callback is installed.
  *
  * Calls SNDSYS_remove100hzclient(D_004A379C) and SYNCTASK_del(pathxSND_syncTask), then clears D_004A3798 and D_004A379C.
- * Called by the Pathfinder library (func_003D2A68) when its last player closes.
+ * Called by the Pathfinder library (PATH_closeVoice) when its last player closes.
  */
 extern "C" void pathxSND_shutdown()
 {
@@ -1608,7 +1608,7 @@ extern "C" int pathxSND_findBank(int a, int b);
  * Registers a loaded bank for a Pathfinder player slot: fills the slot's record for that bank, or a free record.
  *
  * Looks up the record with pathxSND_findBank(a, b), else a free one; marks it used (+0x1C = 1) and stores the slot (+0x8),
- * the bank index (+0x0) and the bank handle (+0x4). Called by the Pathfinder library (func_003D2DF8), which first
+ * the bank index (+0x0) and the bank handle (+0x4). Called by the Pathfinder library (PATH_requestPart), which first
  * evicts the oldest bank (pathxSND_evictOldestBank) when memory runs short.
  *
  * @param slotIndex  the player-slot index
@@ -1643,7 +1643,7 @@ extern "C" int SNDbankremove(int id);
  *
  * When the record's handle (+0x4) is set it calls SNDbankremove(-1) and resets the record (+0x14 = 0, +0x4, +0x8, +0x0,
  * +0x24 = -1, +0x1C = 0). Quirk: it passes -1 to SNDbankremove, not the record's handle. Called by pathxSND_evictOldestBank and
- * the Pathfinder library (func_003D3140).
+ * the Pathfinder library (PATH_releaseRequest).
  *
  * @param slotIndex  the player-slot index
  * @param bankIndex  the bank index within the slot
@@ -1684,7 +1684,7 @@ enum { kNoBankFound = -1 };
  *
  * Walks bank indices 0, 1, .. while the slot has a record for them (pathxSND_findBank) and picks the one with the smallest
  * non-negative play time (+0x24, set by pathxSND_play from pathxSND_getTimeMs), then unregisters it with pathxSND_removeBank.
- * Called by the Pathfinder library (func_003D2DF8) before it registers a new bank.
+ * Called by the Pathfinder library (PATH_requestPart) before it registers a new bank.
  *
  * @param slotIndex  the player-slot index
  * @return 0 when no bank has a play time, otherwise pathxSND_removeBank's result
@@ -1721,7 +1721,7 @@ extern "C" int SNDSTRM_overhead(int n, int m);
  *
  * The stream overhead (SNDSTRM_overhead(n, m)) is added only when m > 0. The total is then rounded up to a multiple of
  * 16, always adding 1..16 bytes (an already aligned size grows by 16). Called by the Pathfinder library
- * (func_003D3058).
+ * (PATH_getPlayerMemSize).
  *
  * @param n  the number of queued requests
  * @param maxChunks  the packet-player chunk count (0 for a bank-only slot)
@@ -1812,7 +1812,7 @@ extern "C" void SNDSTRM_destroy(int id);
  *
  * For a bank player (byte +0x64) it walks the slot's bank records (pathxSND_findBank(idx, -1)), passes each record's memory
  * (+0x14) to the free hook D_004A3794 and clears the record (pathxSND_clearBank); for a stream it calls SNDSTRM_destroy on
- * its handle. Then clears the slot pointer (pathxSND_forgetPlayer). Called by the Pathfinder library (func_003D2A68).
+ * its handle. Then clears the slot pointer (pathxSND_forgetPlayer). Called by the Pathfinder library (PATH_closeVoice).
  *
  * @param idx  the player-slot index
  */
@@ -1843,7 +1843,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_setPreload);
  * Sets a stream player slot's preloaded data: slot +0x28 = a1 and +0x2C = a2.
  *
  * Only for an open stream slot (index < 24, not a bank player). pathxSND_play then queues offsets below that size from
- * memory (func_003B7E10) instead of the file. Called by the Pathfinder library (func_003D30A8).
+ * memory (SNDSTRM_queueMemory) instead of the file. Called by the Pathfinder library (PATH_setPreload).
  *
  * @param idx  the player-slot index
  * @param preloadData  the preloaded data
@@ -1874,7 +1874,7 @@ extern "C" int SNDBANK_play(int h, int id, void* desc);
 extern "C" int SNDSTRM_queuefile(int h, int a, int b, unsigned int t);
 // PORT: the unit declares SNDSTRM_purge as void; the caller leaves $v0 live (int return).
 int SNDSTRM_purge_r(int) __asm__("SNDSTRM_purge");
-extern "C" int func_003B7E10(int h, int a, int b, unsigned int t);
+extern "C" int SNDSTRM_queueMemory(int h, int a, int b, unsigned int t);
 
 /**
  * Plays a sound on a Pathfinder player slot: a bank patch on a bank player, or a queued file section on a stream.
@@ -1885,7 +1885,7 @@ extern "C" int func_003B7E10(int h, int a, int b, unsigned int t);
  * and the slot's handle the bank's; request 0 gets the sound handle and a4.
  *
  * Stream: the file offset is key * 128. With a7 set it purges the stream (SNDSTRM_purge) and clears the older requests.
- * Offsets inside the preloaded data (+0x28/+0x2C, pathxSND_setPreload) are queued from memory (func_003B7E10), others with
+ * Offsets inside the preloaded data (+0x28/+0x2C, pathxSND_setPreload) are queued from memory (SNDSTRM_queueMemory), others with
  * SNDSTRM_queuefile(stream, a1, a2, offset); on success the request table shifts down one and request 0 gets the new
  * handle and a4. Both paths set the dirty byte (+0x65). Called by the Pathfinder library (func_003D41A8).
  *
@@ -1946,7 +1946,7 @@ extern "C" int pathxSND_play(int idx, int holdTime, int fileName, unsigned int k
             }
         }
         if (player->mPreloadData && fileOffset < player->mPreloadSize)
-            playHandle = func_003B7E10(player->mHandle, holdTime, player->mPreloadData, fileOffset);
+            playHandle = SNDSTRM_queueMemory(player->mHandle, holdTime, player->mPreloadData, fileOffset);
         else
             playHandle = SNDSTRM_queuefile(player->mHandle, holdTime, fileName, fileOffset);
         if (playHandle >= 0)
@@ -1971,7 +1971,7 @@ extern "C" void SNDSTRM_modifyhold(int requestHandle);
  * Releases the newest queued request of a stream player slot (SNDSTRM_modifyhold on request 0's handle).
  *
  * Nothing for a bank player. Declared with one parameter, but the hold time passes through in the second argument
- * register (the Pathfinder library, func_003D4F10, calls it with (slot, 0), which starts playback).
+ * register (the Pathfinder library, PATHI_serviceVoices, calls it with (slot, 0), which starts playback).
  *
  * @param i  the player-slot index
  */
@@ -2018,7 +2018,7 @@ extern "C" void pathxSND_refreshAll(int a0);
  * Returns a request's progress on a Pathfinder player slot, refreshing the slots' status first when it is dirty.
  *
  * With sub < 0 it returns slot +0x54 (the total the refresh adds up); otherwise request sub's position (table entry
- * +0x8) when that request has a handle. Called by the Pathfinder library (func_003D41A8, func_003D4950).
+ * +0x8) when that request has a handle. Called by the Pathfinder library (func_003D41A8, PATHI_getQueuedAmount).
  *
  * @param idx  the player-slot index
  * @param sub  the request index, or < 0 for the slot total
@@ -2082,7 +2082,7 @@ extern "C" void pathxSND_refreshAll(int a0);
 /**
  * Returns whether a Pathfinder player slot is still busy (+0x58), refreshing the slots' status first when dirty.
  *
- * Called by the Pathfinder library (func_003D4F10).
+ * Called by the Pathfinder library (PATHI_serviceVoices).
  *
  * @param idx  the player-slot index
  * @return slot +0x58, or -8 for an unused slot
@@ -2126,13 +2126,13 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_refreshPlayer);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
+extern "C" int SNDBANK_readPatchHeader(int h, int sub, void* hdr, void* buf, unsigned int* pos);
 extern "C" int SNDtimeremaining(int h);
-extern "C" int func_003B86C0(int h);
+extern "C" int SND_getVolume(int h);
 extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
 extern "C" void SNDSTRM_requeststatus(int h, void* status);
-extern "C" int func_003B7F18(int h);
+extern "C" int SNDSTRM_getVolume(int h);
 
 struct sStrmInfo_EC58 {
     int count;
@@ -2159,14 +2159,14 @@ struct sStrmHdr_EC58 {
 /**
  * Refreshes one Pathfinder player slot's status and returns its play position through the two out-pointers.
  *
- * Same work as one iteration of pathxSND_refreshAll: a bank player reads the patch's sample position (func_003B6670) and the
+ * Same work as one iteration of pathxSND_refreshAll: a bank player reads the patch's sample position (SNDBANK_readPatchHeader) and the
  * time left (SNDtimeremaining x 10 ms); a stream reads SNDSTRM_status and each request's SNDSTRM_requeststatus, summing
  * positions into +0x54 and +0x50, updating busy (+0x58), the current handle (+0x5C) and the current volume (+0xC). Sets
  * +0x58 to 1 first, returns -1 for an unused slot and -2 for one without a handle.
  *
  * Likely bugs: in the stream path it tests the out-pointers themselves (outA == 0 && outB == 0) where pathxSND_refreshAll
  * tests the values, and at the end it stores the pointers, not the values, into +0x48/+0x4C. Called by the Pathfinder
- * library (func_003D32B8).
+ * library (PATHI_getVoiceSegment).
  *
  * @param idx  the player-slot index
  * @param outA  receives the elapsed time (ms)
@@ -2196,7 +2196,7 @@ extern "C" int pathxSND_refreshPlayer(int idx, int* outA, int* outB)
     sStrmPos_EC58 pos;
     if (player->mIsBankPlayer != 0) {
         if (player->mPatch >= 0 && player->mRequests->mHandle >= 0) {
-            statusResult = func_003B6670(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
+            statusResult = SNDBANK_readPatchHeader(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
             if (statusResult >= 0) {
                 *outB = SNDtimeremaining(player->mRequests->mHandle);
                 if (*outB < 0) {
@@ -2209,7 +2209,7 @@ extern "C" int pathxSND_refreshPlayer(int idx, int* outA, int* outB)
             }
             player->mRequests->mPosition = *outB;
             player->mBuffered = player->mRequests->mLength;
-            player->mVolume = func_003B86C0(player->mRequests->mHandle);
+            player->mVolume = SND_getVolume(player->mRequests->mHandle);
             player->mCurrentRequest = player->mRequests->mHandle;
         }
     } else {
@@ -2253,7 +2253,7 @@ extern "C" int pathxSND_refreshPlayer(int idx, int* outA, int* outB)
                 break;
             }
         }
-        player->mVolume = func_003B7F18(player->mHandle);
+        player->mVolume = SNDSTRM_getVolume(player->mHandle);
     }
 done:
     player->mElapsedMs = (int)outA;
@@ -2270,13 +2270,13 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_refreshAll);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
+extern "C" int SNDBANK_readPatchHeader(int h, int sub, void* hdr, void* buf, unsigned int* pos);
 extern "C" int SNDtimeremaining(int h);
-extern "C" int func_003B86C0(int h);
+extern "C" int SND_getVolume(int h);
 extern "C" int SNDSTRM_status(int h, void* out);
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
 extern "C" void SNDSTRM_requeststatus(int h, void* status);
-extern "C" int func_003B7F18(int h);
+extern "C" int SNDSTRM_getVolume(int h);
 
 struct sStrmInfo_EFA8 {
     int count;
@@ -2304,14 +2304,14 @@ struct sStrmHdr_EFA8 {
  * Refreshes the status of all 24 Pathfinder player slots (or, with reset set, just marks them dirty).
  *
  * Inside the critical section. With reset != 0 each open slot gets +0x60 = 0 and the dirty byte. Otherwise for each
- * slot: a bank player reads its patch's sample position (func_003B6670) and remaining time (SNDtimeremaining x 10 ms),
- * giving the elapsed ms (+0x48) and remaining ms (+0x4C), and its volume (+0xC, func_003B86C0); a stream reads
+ * slot: a bank player reads its patch's sample position (SNDBANK_readPatchHeader) and remaining time (SNDtimeremaining x 10 ms),
+ * giving the elapsed ms (+0x48) and remaining ms (+0x4C), and its volume (+0xC, SND_getVolume); a stream reads
  * SNDSTRM_status and each request's SNDSTRM_requeststatus, adding finished and playing requests into +0x54 / +0x50,
- * dropping unknown ones, and records the current volume (+0xC, func_003B7F18). Clears busy (+0x58) when nothing is
+ * dropping unknown ones, and records the current volume (+0xC, SNDSTRM_getVolume). Clears busy (+0x58) when nothing is
  * pending, stores the status result in +0x60 and clears the dirty byte (+0x65).
  *
  * The slot queries (pathxSND_getPlayed, pathxSND_getRequestPosition, pathxSND_getHandlePosition, pathxSND_isBusy, pathxSND_getStatus, pathxSND_getVolume,
- * pathxSND_setVolume) call it with 0 when their slot is dirty; the Pathfinder library calls it too (func_003D5128).
+ * pathxSND_setVolume) call it with 0 when their slot is dirty; the Pathfinder library calls it too (PATHI_serviceTick).
  *
  * @param reset  nonzero to only mark the slots dirty
  */
@@ -2340,7 +2340,7 @@ extern "C" void pathxSND_refreshAll(int reset)
             sStrmPos_EFA8 pos;
             if (player->mIsBankPlayer != 0) {
                 if (player->mPatch >= 0 && player->mRequests->mHandle >= 0) {
-                    statusResult = func_003B6670(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
+                    statusResult = SNDBANK_readPatchHeader(player->mHandle, player->mPatch, &hdr, buf, &pos.samples);
                     if (statusResult >= 0) {
                         remainingMs = SNDtimeremaining(player->mRequests->mHandle);
                         if (remainingMs < 0) {
@@ -2353,7 +2353,7 @@ extern "C" void pathxSND_refreshAll(int reset)
                     }
                     player->mRequests->mPosition = remainingMs;
                     player->mBuffered = player->mRequests->mLength;
-                    player->mVolume = func_003B86C0(player->mRequests->mHandle);
+                    player->mVolume = SND_getVolume(player->mRequests->mHandle);
                     player->mCurrentRequest = player->mRequests->mHandle;
                 }
             } else {
@@ -2397,7 +2397,7 @@ extern "C" void pathxSND_refreshAll(int reset)
                         break;
                     }
                 }
-                player->mVolume = func_003B7F18(player->mHandle);
+                player->mVolume = SNDSTRM_getVolume(player->mHandle);
             }
         }
     done:
@@ -2505,7 +2505,7 @@ extern "C" void pathxSND_refreshAll(int a0);
 /**
  * Returns a Pathfinder player slot's current volume (+0xC), refreshing the slots' status first when it is dirty.
  *
- * Called by the Pathfinder library (func_003D41A8, func_003D4F10, func_003D5968, func_003D6378).
+ * Called by the Pathfinder library (func_003D41A8, PATHI_serviceVoices, PATHI_settleFades, PATHI_startVolumeRamp).
  *
  * @param idx  the player-slot index
  * @return the volume, or -8 for an unused slot
@@ -2565,14 +2565,14 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_setFxLevel);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B8050(int h, int a, int b);
-extern "C" int func_003B88C8(int h, int a, int b);
+extern "C" int SNDSTRM_setFxLevel(int h, int a, int b);
+extern "C" int SND_setFxLevel(int h, int a, int b);
 
 /**
- * Sets a Pathfinder player slot's effect send level: func_003B88C8 for a bank player, func_003B8050 for a stream.
+ * Sets a Pathfinder player slot's effect send level: SND_setFxLevel for a bank player, SNDSTRM_setFxLevel for a stream.
  *
  * Runs inside the critical section and records the level in slot +0x10. Called by the Pathfinder library
- * (func_003D5CC0) with bus 0.
+ * (PATHI_stepSendRamp) with bus 0.
  *
  * @param idx  the player-slot index
  * @param effectBus  the effect bus
@@ -2586,9 +2586,9 @@ extern "C" int pathxSND_setFxLevel(int idx, int effectBus, int sendLevel)
     if (player != 0) {
         SNDSYS_entercritical();
         if (player->mIsBankPlayer != 0) {
-            result = func_003B88C8(player->mHandle, effectBus, sendLevel);
+            result = SND_setFxLevel(player->mHandle, effectBus, sendLevel);
         } else {
-            result = func_003B8050(player->mHandle, effectBus, sendLevel);
+            result = SNDSTRM_setFxLevel(player->mHandle, effectBus, sendLevel);
         }
         SNDSYS_leavecritical();
         player->mFxLevel = sendLevel;
@@ -2602,14 +2602,14 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_setDryLevel);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" int func_003B8010(int h, int a);
-extern "C" int func_003B8700(int h, int a);
+extern "C" int SNDSTRM_setDryLevel(int h, int a);
+extern "C" int SND_setDryLevel(int h, int a);
 
 /**
- * Sets a Pathfinder player slot's dry level: func_003B8700 for a bank player, func_003B8010 for a stream.
+ * Sets a Pathfinder player slot's dry level: SND_setDryLevel for a bank player, SNDSTRM_setDryLevel for a stream.
  *
  * Runs inside the critical section and records the level in slot +0x14. Called by the Pathfinder library
- * (func_003D5EE8).
+ * (PATHI_stepDryRamp).
  *
  * @param idx  the player-slot index
  * @param dryLevel  the dry level
@@ -2622,9 +2622,9 @@ extern "C" int pathxSND_setDryLevel(int idx, int dryLevel)
     if (player != 0) {
         SNDSYS_entercritical();
         if (player->mIsBankPlayer != 0) {
-            result = func_003B8700(player->mHandle, dryLevel);
+            result = SND_setDryLevel(player->mHandle, dryLevel);
         } else {
-            result = func_003B8010(player->mHandle, dryLevel);
+            result = SNDSTRM_setDryLevel(player->mHandle, dryLevel);
         }
         SNDSYS_leavecritical();
         player->mDryLevel = dryLevel;
@@ -2639,15 +2639,15 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_fadeVolume);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" int SNDautovol(int h, int v, int c);
-// PORT: the unit declares func_003B7EB0 as void; this caller uses its result.
-int func_003B7EB0_r(int h, int v, int c) __asm__("func_003B7EB0");
+// PORT: the unit declares SNDSTRM_fadeVolume as void; this caller uses its result.
+int SNDSTRM_fadeVolume_r(int h, int v, int c) __asm__("SNDSTRM_fadeVolume");
 
 /**
  * Starts a volume fade on a Pathfinder player slot unless busy is set.
  *
  * Inside the critical section it records the target in slot +0x8 and fades a bank player's sound with
- * SNDautovol(handle, ms / 10 ticks, target) or a stream with func_003B7EB0(stream, ms, target). Called by the
- * Pathfinder library (func_003D6318).
+ * SNDautovol(handle, ms / 10 ticks, target) or a stream with SNDSTRM_fadeVolume(stream, ms, target). Called by the
+ * Pathfinder library (PATHI_startVolumeFade).
  *
  * @param idx  the player-slot index
  * @param targetVolume  the target volume
@@ -2665,7 +2665,7 @@ extern "C" int pathxSND_fadeVolume(int idx, int targetVolume, int fadeMs, char b
         if (player->mIsBankPlayer != 0) {
             driverResult = SNDautovol(player->mRequests[0].mHandle, fadeMs / 10, targetVolume);
         } else {
-            driverResult = func_003B7EB0_r(player->mHandle, fadeMs, targetVolume);
+            driverResult = SNDSTRM_fadeVolume_r(player->mHandle, fadeMs, targetVolume);
         }
         SNDSYS_leavecritical();
     }
@@ -2681,7 +2681,7 @@ extern "C" void pathxSND_refreshAll(int a0);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void SNDvol(int h, int v);
-extern "C" void func_003B7E70(int h, int v);
+extern "C" void SNDSTRM_setVolume(int h, int v);
 
 /**
  * Sets a Pathfinder player slot's volume when no fade is pending; only while the audio system's
@@ -2689,7 +2689,7 @@ extern "C" void func_003B7E70(int h, int v);
  *
  * Returns 0 at once when gSSXAudio's mPathfinderCanChangeVolume (cAudioInterface_bxAudio) is 0. Refreshes the status
  * when the slot is dirty; when the fade target (+0x8) is unset or reached it clears it and, if v differs from the
- * current volume (+0xC) and both are >= 0, applies v with SNDvol (bank player) or func_003B7E70 (stream) inside the
+ * current volume (+0xC) and both are >= 0, applies v with SNDvol (bank player) or SNDSTRM_setVolume (stream) inside the
  * critical section and stores it. A pending fade makes it return -8. Called by pathxSND_play and the Pathfinder
  * library.
  *
@@ -2713,7 +2713,7 @@ extern "C" int pathxSND_setVolume(int idx, int volume)
             if (player->mIsBankPlayer != 0) {
                 SNDvol(player->mRequests[0].mHandle, volume);
             } else {
-                func_003B7E70(player->mHandle, volume);
+                SNDSTRM_setVolume(player->mHandle, volume);
             }
             SNDSYS_leavecritical();
             player->mVolume = volume;
@@ -2738,7 +2738,7 @@ extern "C" void SNDpitchmult(int h, int v);
  *
  * With reset set it saves the play options' pitchmult (+0x3C) in +0x18 and applies 0 (stops playback); otherwise it
  * applies the saved +0x18. Uses SNDpitchmult on a bank player's request-0 sound, SNDSTRM_pitchmult on a stream, inside
- * the critical section, then marks the slot dirty. Called by the Pathfinder library (func_003D1038).
+ * the critical section, then marks the slot dirty. Called by the Pathfinder library (PATH_setPaused).
  *
  * @param idx  the player-slot index
  * @param reset  nonzero to pause (pitch 0), 0 to restore the saved pitch
@@ -2777,8 +2777,8 @@ extern "C" void SNDstop(int);
 /**
  * Stops a Pathfinder player slot: SNDstop on a bank player's request-0 sound, SNDSTRM_purge on a stream.
  *
- * Inside the critical section; then marks the slot dirty. Called by the Pathfinder library (func_003D1470,
- * func_003D5968).
+ * Inside the critical section; then marks the slot dirty. Called by the Pathfinder library (PATH_stopVoices,
+ * PATHI_settleFades).
  *
  * @param idx  the player-slot index
  * @return 0
@@ -2810,7 +2810,7 @@ extern "C" int SPCH_StartSpeechCallback_impl(int a) __asm__("SPCH_StartSpeechCal
  * The speech driver's start callback: plays a speech event through cSpeechSys (cSpeechSys_PlayEvent on D_004A37B4).
  *
  * Returns -1 without playing while D_004A37BC is set (cSpeechSys_FlushChannel sets it while it flushes a channel). SPCH_Init
- * registers it with the speech driver (func_003D6840).
+ * registers it with the speech driver (SPCH_initDriver).
  *
  * @param speechEvent  the speech event, passed on to cSpeechSys_PlayEvent
  * @return cSpeechSys_PlayEvent's result (the started speech's handle, or -1)
@@ -2849,10 +2849,10 @@ void* cSpeechBank_cSpeechBank(void* vself)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSpeechBank__cSpeechBank);
 #ifdef SKIP_ASM
-extern "C" void func_003D6CA0(int bankId);
+extern "C" void SPCH_removeTable(int bankId);
 
 /**
- * Destroys a cSpeechBank: releases its driver bank (func_003D6CA0(mBankId)) and frees mpData when mOwnsData.
+ * Destroys a cSpeechBank: releases its driver bank (SPCH_removeTable(mBankId)) and frees mpData when mOwnsData.
  *
  * Deletes the object when bit 0 of flags is set. The cSpeechInstance destructor cSpeechInstance__cSpeechInstance calls it with 3.
  *
@@ -2860,7 +2860,7 @@ extern "C" void func_003D6CA0(int bankId);
  */
 extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags)
 {
-    func_003D6CA0(self->mBankId);
+    SPCH_removeTable(self->mBankId);
     if (self->mOwnsData != 0) {
         MEM_free(self->mpData);
     }
@@ -2875,7 +2875,7 @@ INCLUDE_ASM("sound/bankmonitor", cSpeechBank_Create);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
 extern "C" void* FILE_load(const char* name, int a1);
-extern "C" int func_003D69F0(void* data);
+extern "C" int SPCH_addTable(void* data);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strrchr(const char* s, int c);
 void* cSpeechBank_cSpeechBank(void* self);
@@ -2891,7 +2891,7 @@ void* cSpeechBank_Create_impl(const char* name, const char* shortName, void* dat
  *
  * Without data it returns 0 when the file is missing (BXFILE_exists), else FILE_load()s it and sets mOwnsData.
  * Allocates the bank (cMemMan_alloc(0x4C, "SpeechBank") + cSpeechBank_cSpeechBank), stores mpData, the driver bank
- * id mBankId = func_003D69F0(data), copies name into mName and points mShortName after its last '\'. Called by
+ * id mBankId = SPCH_addTable(data), copies name into mName and points mShortName after its last '\'. Called by
  * cSpeechInstance_AddBank.
  *
  * @param name  the bank path without extension
@@ -2913,7 +2913,7 @@ void* cSpeechBank_Create_impl(const char* name, const char* shortName, void* dat
     cSpeechBank* obj = (cSpeechBank*)cSpeechBank_cSpeechBank(cMemMan_alloc(76, str_SpeechBank, 0, 0));
     obj->mOwnsData = owned;
     obj->mpData = data;
-    obj->mBankId = func_003D69F0(data);
+    obj->mBankId = SPCH_addTable(data);
     strcpy(obj->mName, name);
     char* lastSlash = strrchr(obj->mName, '\\');
     if (lastSlash == 0) {
@@ -3039,8 +3039,8 @@ extern "C" void cSpeechInstance__cSpeechInstance(cSpeechInstance* self, int flag
 INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_Update);
 #ifdef SKIP_ASM
 extern "C" int cSpeechInstance_CanTakeSpeech(cSpeechInstance* p);
-extern "C" int func_003D7EC8(int channel);
-extern "C" void* func_003D8040(int channel);
+extern "C" int SPCH_startNextRequest(int channel);
+extern "C" void* SPCH_updateChannel(int channel);
 
 class cSpeechInstance_Update_cObj {
 public:
@@ -3056,8 +3056,8 @@ public:
  * Per-frame update of one speech instance: lets the speech driver start or advance speech on channel i.
  *
  * When the stream can take speech (cSpeechInstance_CanTakeSpeech): with mReadyForSpeech set it calls cSpeechSys's virtual slot 4 (on
- * D_004A37B4) and then the driver's func_003D7EC8(i), clearing mReadyForSpeech when that returns nonzero; with
- * mReadyForSpeech clear it calls func_003D8040(i) and sets mReadyForSpeech. When the stream is busy it sets
+ * D_004A37B4) and then the driver's SPCH_startNextRequest(i), clearing mReadyForSpeech when that returns nonzero; with
+ * mReadyForSpeech clear it calls SPCH_updateChannel(i) and sets mReadyForSpeech. When the stream is busy it sets
  * mReadyForSpeech. Called by cSpeechSys_Update for both instances.
  *
  * @param i  the instance's index (the speech driver channel)
@@ -3067,11 +3067,11 @@ extern "C" void cSpeechInstance_Update(cSpeechInstance* self, int i)
     if (cSpeechInstance_CanTakeSpeech(self) != 0) {
         if (self->mReadyForSpeech != 0) {
             ((cSpeechInstance_Update_cObj*)D_004A37B4)->OnReadyForSpeech();
-            if (func_003D7EC8(i) != 0) {
+            if (SPCH_startNextRequest(i) != 0) {
                 self->mReadyForSpeech = 0;
             }
         } else {
-            func_003D8040(i);
+            SPCH_updateChannel(i);
             self->mReadyForSpeech = 1;
         }
     } else {
@@ -3083,23 +3083,23 @@ extern "C" void cSpeechInstance_Update(cSpeechInstance* self, int i)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_StartNextSpeech);
 #ifdef SKIP_ASM
-extern "C" int func_003D7EC8(int channel);
+extern "C" int SPCH_startNextRequest(int channel);
 
 // PORT: real arity is (self, channel); the unit later declares cSpeechInstance_StartNextSpeech(int)
 int cSpeechInstance_StartNextSpeech_impl(cSpeechInstance* self, int channel) __asm__("cSpeechInstance_StartNextSpeech");
 
 /**
- * Starts the next speech on a channel (func_003D7EC8) and clears the instance's mReadyForSpeech when that returns
+ * Starts the next speech on a channel (SPCH_startNextRequest) and clears the instance's mReadyForSpeech when that returns
  * nonzero.
  *
  * cSpeechSys_StartNextSpeech calls it on cSpeechSys's instance for the channel.
  *
  * @param channel  the speech driver channel
- * @return func_003D7EC8's result
+ * @return SPCH_startNextRequest's result
  */
 int cSpeechInstance_StartNextSpeech_impl(cSpeechInstance* self, int channel)
 {
-    int result = func_003D7EC8(channel);
+    int result = SPCH_startNextRequest(channel);
     if (result != 0) {
         self->mReadyForSpeech = 0;
     }
@@ -3117,7 +3117,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void* BIG_locate(void* big, char* name);
 extern "C" int BIG_count(void* big);
-extern "C" void func_003D66C0(void* h, int a);
+extern "C" void SPCH_registerBank(void* h, int a);
 char* BIG_locateentryz_2AFD40(void* big, char* name, int index, int* offset, int* size) __asm__("BIG_locateentryz");
 extern char str_pct_seventdat_events_evt[];
 extern "C" void cSpeechInstance_AddBank_l(cSpeechInstance* self, const char* bankPath, const char* shortName, void* headerData)
@@ -3128,7 +3128,7 @@ extern "C" void cSpeechInstance_AddBank_l(cSpeechInstance* self, const char* ban
  *
  * Loads name (FILE_loadz) into the next event-file pair (mHeaderBigData[mNumEventFiles][0] for headers, [1] for
  * language headers). For the headers .big it locates "<mBasePath>eventdat\events.evt" inside it (an optional "prefix|"
- * in the name sets the prefix), registers it with the speech driver (func_003D66C0(.., instIndex)) and returns false
+ * in the name sets the prefix), registers it with the speech driver (SPCH_registerBank(.., instIndex)) and returns false
  * when it is missing. Then every other entry of the .big becomes a speech bank (cSpeechInstance_AddBank with the entry's path
  * minus its 4-character extension, its short name and its data).
  *
@@ -3176,7 +3176,7 @@ extern "C" bool cSpeechInstance_LoadEventFile(cSpeechInstance* self, int isHeade
                 self->mHeaderBigData[self->mNumEventFiles][sel] = 0;
                 return false;
             }
-            func_003D66C0(self->mEventFile[self->mNumEventFiles].mpData, instIndex);
+            SPCH_registerBank(self->mEventFile[self->mNumEventFiles].mpData, instIndex);
         } else {
             buf[1] = 0;
             buf[0] = '|';
@@ -3201,7 +3201,7 @@ extern "C" bool cSpeechInstance_LoadEventFile(cSpeechInstance* self, int isHeade
         if (self->mEventFile[self->mNumEventFiles].mpData == 0)
             return false;
         self->mEventFile[self->mNumEventFiles].mOwned = 1;
-        func_003D66C0(self->mEventFile[self->mNumEventFiles].mpData, instIndex);
+        SPCH_registerBank(self->mEventFile[self->mNumEventFiles].mpData, instIndex);
     }
     return true;
 }
@@ -3756,15 +3756,15 @@ extern "C" void cSpeechSys_Update(cSpeechSys* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", SPCH_Init);
 #ifdef SKIP_ASM
-extern "C" int func_003D6778(int a, int b, int c);
+extern "C" int SPCH_getBufferSize(int a, int b, int c);
 // cSoundSys::SndRand() is a member function: this caller passes the shared cSoundSys as its this pointer.
 int cSoundSys_SndRand_a(cSoundSys* soundSys) __asm__("cSoundSys_SndRand");
 extern "C" void bxLogPrint(const char* fmt, ...);
-extern "C" void func_003D6840(void* fn, int seed, int buf);
-extern "C" int func_003D6C58(int n);
+extern "C" void SPCH_initDriver(void* fn, int seed, int buf);
+extern "C" int SPCH_getTableListSize(int n);
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
-extern "C" void func_003D6C60(int n, void* p);
-extern "C" void* func_003D6768();
+extern "C" void SPCH_initTableList(int n, void* p);
+extern "C" void* SPCH_getCallbackBlock();
 extern "C" void SPCH_StartSpeechCallback();
 extern "C" int TIMER_gettick();
 extern char D_00483390[];
@@ -3773,22 +3773,22 @@ extern char str_bank_mem[];
 /**
  * Sets up the speech system's memory and callbacks.
  *
- * Allocates a 0x5622-byte buffer (func_003D6778) and prints "SPCH_Init: rNum=%d". It passes SPCH_StartSpeechCallback, a
- * random number (cSoundSys_SndRand on the shared cSoundSys, BankMonitor.mpVSoundSys) and the buffer to func_003D6840.
- * It then sizes a "bank mem" block for 500 (func_003D6C58), allocates it into mpBankMem and hands it to func_003D6C60.
+ * Allocates a 0x5622-byte buffer (SPCH_getBufferSize) and prints "SPCH_Init: rNum=%d". It passes SPCH_StartSpeechCallback, a
+ * random number (cSoundSys_SndRand on the shared cSoundSys, BankMonitor.mpVSoundSys) and the buffer to SPCH_initDriver.
+ * It then sizes a "bank mem" block for 500 (SPCH_getTableListSize), allocates it into mpBankMem and hands it to SPCH_initTableList.
  * The callees are unknown.
  */
 extern "C" void SPCH_Init(cSpeechSys* self)
 {
-    int buf = func_003D6778(22050, 0x10, 1);
+    int buf = SPCH_getBufferSize(22050, 0x10, 1);
     int seed = cSoundSys_SndRand_a(self->mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys);
     bxLogPrint(D_00483390, seed);
-    func_003D6840((void*)SPCH_StartSpeechCallback, seed, buf);
-    int n = func_003D6C58(500);
+    SPCH_initDriver((void*)SPCH_StartSpeechCallback, seed, buf);
+    int n = SPCH_getTableListSize(500);
     void* workMem = MEM_alloc(str_bank_mem, n, 0);
     self->mpBankMem = workMem;
-    func_003D6C60(500, workMem);
-    *(void**)((char*)func_003D6768() + 0x8) = (void*)TIMER_gettick;
+    SPCH_initTableList(500, workMem);
+    *(void**)((char*)SPCH_getCallbackBlock() + 0x8) = (void*)TIMER_gettick;
 }
 #endif
 
@@ -3796,12 +3796,12 @@ extern "C" void SPCH_Init(cSpeechSys* self)
 INCLUDE_ASM("sound/bankmonitor", cSpeechSys_Shutdown);
 #ifdef SKIP_ASM
 extern "C" void cSpeechInstance__cSpeechInstance(cSpeechInstance* p, int mode);
-extern "C" void func_003D67F8(void);
+extern "C" void SPCH_shutdown(void);
 
 /**
  * Shuts the speech system down: destroys both speech instances and frees the speech bank buffer.
  *
- * Destroys each instance (cSpeechInstance__cSpeechInstance with 3) and clears its slot, calls the driver's func_003D67F8 and MEM_free()s
+ * Destroys each instance (cSpeechInstance__cSpeechInstance with 3) and clears its slot, calls the driver's SPCH_shutdown and MEM_free()s
  * mpBankMem, clearing it. Called by the audio system's shutdown.
  */
 extern "C" void cSpeechSys_Shutdown(cSpeechSys* self)
@@ -3813,7 +3813,7 @@ extern "C" void cSpeechSys_Shutdown(cSpeechSys* self)
         }
         (self->mSpeechInstance)[i] = 0;
     }
-    func_003D67F8();
+    SPCH_shutdown();
     MEM_free(self->mpBankMem);
     self->mpBankMem = 0;
 }
@@ -3966,7 +3966,7 @@ INCLUDE_ASM("sound/bankmonitor", cSpeechSys_TriggerSpeech);
  * Triggers the speech driver on channel idx with one-shot settings, then clears them.
  *
  * Sets the instance's mPosition = a2, mRadius = v (only when v > 0) and mUserInfo = a4, arms mCallback for idx when
- * callback is nonzero, and calls the driver's func_003D8040(idx), which can start speech (SPCH_StartSpeechCallback ->
+ * callback is nonzero, and calls the driver's SPCH_updateChannel(idx), which can start speech (SPCH_StartSpeechCallback ->
  * cSpeechSys_PlayEvent). Afterwards mCallback / mCallbackInstance and the three fields are cleared.
  *
  * @param idx  the instance index (driver channel)
@@ -3989,7 +3989,7 @@ extern "C" void cSpeechSys_TriggerSpeech(cSpeechSys* self, int idx, int playArg,
             self->mCallback = callback;
             self->mCallbackInstance = idx;
         }
-        func_003D8040(idx);
+        SPCH_updateChannel(idx);
         self->mCallbackInstance = -1;
         self->mCallback = 0;
         self->mSpeechInstance[idx]->mRadius = 0.0f;
@@ -4622,7 +4622,7 @@ INCLUDE_ASM("sound/bankmonitor", cSongInstance_cSongInstance);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* bmNew_1C50(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int func_003D3058(int a, int b);
+extern "C" int PATH_getPlayerMemSize(int a, int b);
 extern "C" void cMusicSys_LoadMPFFile(cMusicSys* self, void* name, int sync);
 extern "C" void cSongInstance_Update(cSongInstance*, int);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -4692,7 +4692,7 @@ extern "C" void* cSongInstance_cSongInstance_body(sBankMon_1C50* self, int a0, i
  *
  * Initialises the fields (mHandle/mPendingEvent/mSongTag -1, mVolumeEnabled 1, others 0), stores the bank index
  * (mBankIndex), volume control (mpVolumeControl), base volume (mBaseVolume) and the current play options' low-pass
- * cutoff (mLowPassCutoff), and allocates the 0x37000-byte "PathfinderStream" and the func_003D3058(1, 0)-byte
+ * cutoff (mLowPassCutoff), and allocates the 0x37000-byte "PathfinderStream" and the PATH_getPlayerMemSize(1, 0)-byte
  * "PathfinderOverlay" buffers. Scales mBaseVol[mInst] by the song's mPathlevel / 100 (clamped 0..127) into the play
  * level's vol and copies that level into mPlayOpts.
  *
@@ -4731,7 +4731,7 @@ extern "C" void* cSongInstance_cSongInstance_body(sBankMon_1C50* self, int baseP
     self->mHoldEvents = 0;
     self->mLowPassCutoff = bankCur_1C50(def)->lowpasscutoff;
     self->mpPathfinderStream = bmNew_1C50(0x37000, str_PathfinderStream, 0, 0);
-    self->mpPathfinderOverlay = bmNew_1C50(func_003D3058(1, 0), str_PathfinderOverlay, 0, 0);
+    self->mpPathfinderOverlay = bmNew_1C50(PATH_getPlayerMemSize(1, 0), str_PathfinderOverlay, 0, 0);
     float scale = (float)snd->mPathlevel * 0.01f;
     def->vols[def->cur] = (int)BM_MAX_1C50(BM_MIN_1C50((float)def->vols[def->cur] * scale, 127.0f), 0.0f);
     def->entries[def->cur].vol = BM_MAX_1C50(BM_MIN_1C50(def->vols[def->cur], 127), 0);
@@ -4756,14 +4756,14 @@ extern "C" void* cSongInstance_cSongInstance_body(sBankMon_1C50* self, int baseP
 INCLUDE_ASM("sound/bankmonitor", cSongInstance__cSongInstance);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
-extern "C" int func_003D2A68(int id);
+extern "C" int PATH_closeVoice(int id);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a cSongInstance: cancels its overlay bank load, closes its Pathfinder streams and frees its buffers.
  *
- * Cancels the async load of bank mBankIndex (cAsyncSys_ASYNCSYS_Cancel), closes the main path stream (func_003D2A68
+ * Cancels the async load of bank mBankIndex (cAsyncSys_ASYNCSYS_Cancel), closes the main path stream (PATH_closeVoice
  * with 0x11000001) and, when the song has loop banks (mNumBankData > 0), the overlay (0x11000002), and frees the stream
  * and overlay buffers (mpPathfinderStream, mpPathfinderOverlay). Called with 3 by cMusicSys_StopSong and the cMusicSys
  * destructor.
@@ -4773,9 +4773,9 @@ void operator_delete(int* ptr);
 extern "C" void cSongInstance__cSongInstance(cSongInstance* self, int flags)
 {
     cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), self->mBankIndex);
-    func_003D2A68(0x11000001);
+    PATH_closeVoice(0x11000001);
     if (self->mpConfig->mNumBankData > 0) {
-        func_003D2A68(0x11000002);
+        PATH_closeVoice(0x11000002);
     }
     if (self->mpPathfinderStream != 0) {
         cMemMan_free(self->mpPathfinderStream);
@@ -4796,10 +4796,10 @@ extern "C" int cSongInstance_GetStreamHandle(cSongInstance* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void SNDSTRM_pitchmult(int h, int v);
-extern "C" void func_003D1038(int cmd, int v);
+extern "C" void PATH_setPaused(int cmd, int v);
 
 /**
- * Pauses a song: sets its main stream's pitch multiplier to 0 and pauses the overlay (func_003D1038(.., 1)).
+ * Pauses a song: sets its main stream's pitch multiplier to 0 and pauses the overlay (PATH_setPaused(.., 1)).
  *
  * The pitch change runs inside the critical section and only when the stream has a handle (cSongInstance_GetStreamHandle).
  */
@@ -4811,7 +4811,7 @@ extern "C" void cSongInstance_Pause(cSongInstance* self)
         SNDSTRM_pitchmult(handle, 0);
     }
     SNDSYS_leavecritical();
-    func_003D1038(0x11000002, 1);
+    PATH_setPaused(0x11000002, 1);
 }
 #endif
 
@@ -4822,10 +4822,10 @@ extern "C" int cSongInstance_GetStreamHandle(cSongInstance* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void SNDSTRM_pitchmult(int h, int v);
-extern "C" void func_003D1038(int cmd, int v);
+extern "C" void PATH_setPaused(int cmd, int v);
 
 /**
- * Resumes a song paused by cSongInstance_Pause: pitch multiplier 0x1000 and func_003D1038(0x11000002, 0).
+ * Resumes a song paused by cSongInstance_Pause: pitch multiplier 0x1000 and PATH_setPaused(0x11000002, 0).
  */
 extern "C" void cSongInstance_Resume(cSongInstance* self)
 {
@@ -4835,17 +4835,17 @@ extern "C" void cSongInstance_Resume(cSongInstance* self)
         SNDSTRM_pitchmult(handle, 0x1000);
     }
     SNDSYS_leavecritical();
-    func_003D1038(0x11000002, 0);
+    PATH_setPaused(0x11000002, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSongInstance_SendMusicEvent);
 #ifdef SKIP_ASM
-extern "C" void func_003D16F0(int id, short v);
+extern "C" void PATH_postEvent(int id, short v);
 
 /**
- * Sends a music event to the song's Pathfinder players (func_003D16F0(-1, v)), or parks it until they open.
+ * Sends a music event to the song's Pathfinder players (PATH_postEvent(-1, v)), or parks it until they open.
  *
  * Does nothing while mHoldEvents is set unless force is. Without open streams (mStreamsOpen 0) the event is kept in
  * mPendingEvent (only when none is parked yet); cSongInstance_Update sends it with force after opening them. Reached from
@@ -4860,42 +4860,42 @@ extern "C" void cSongInstance_SendMusicEvent(cSongInstance* self, int musicEvent
         return;
     }
     if (self->mStreamsOpen != 0) {
-        func_003D16F0(-1, musicEvent);
+        PATH_postEvent(-1, musicEvent);
     } else if (self->mPendingEvent == cSongInstance::kNoPendingEvent) {
         self->mPendingEvent = musicEvent;
     }
 }
 #endif
 
-extern "C" void func_003D0D70(unsigned int);
+extern "C" void PATH_setVolume(unsigned int);
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSongInstance_SetVolume);
 #ifdef SKIP_ASM
 /**
- * Calls func_003D0D70 for the main path stream (0x11000001), passing the caller's second argument through.
+ * Calls PATH_setVolume for the main path stream (0x11000001), passing the caller's second argument through.
  *
  * The C declaration has no parameters; cMusicSys_SetVolume reaches it with its value (the callers pass a volume such as 127)
  * still in the second argument register.
  */
 extern "C" void cSongInstance_SetVolume()
 {
-    func_003D0D70(0x11000001U);
+    PATH_setVolume(0x11000001U);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2140);
 #ifdef SKIP_ASM
-extern "C" void func_003D15C8(int);
+extern "C" void PATH_setVoicePosition(int);
 
 /**
- * Calls func_003D15C8 for the main path stream (0x11000001), passing the caller's second argument through.
+ * Calls PATH_setVoicePosition for the main path stream (0x11000001), passing the caller's second argument through.
  *
  * The C declaration has no parameters; func_002B3C60 reaches it with its value still in the second argument register.
  */
 extern "C" void func_002B2140(void) {
-    func_003D15C8(0x11000001);
+    PATH_setVoicePosition(0x11000001);
 }
 #endif
 
@@ -4905,10 +4905,10 @@ INCLUDE_ASM("sound/bankmonitor", cSongInstance_SetLowPass);
 extern "C" int cSongInstance_GetStreamHandle(cSongInstance* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" void func_003B80A0(int h, int v);
+extern "C" void SNDSTRM_setLowPass(int h, int v);
 
 /**
- * Sets the low-pass cutoff of the song's main stream (func_003B80A0), clamped to 0..0xFFFF, when it changed.
+ * Sets the low-pass cutoff of the song's main stream (SNDSTRM_setLowPass), clamped to 0..0xFFFF, when it changed.
  *
  * The cutoff is cached in mLowPassCutoff (only when the stream has a handle) and applied inside the critical section.
  *
@@ -4927,7 +4927,7 @@ extern "C" void cSongInstance_SetLowPass(cSongInstance* self, int lowPass)
         int streamHandle = cSongInstance_GetStreamHandle(self);
         if (streamHandle >= 0) {
             self->mLowPassCutoff = lowPass;
-            func_003B80A0(streamHandle, lowPass);
+            SNDSTRM_setLowPass(streamHandle, lowPass);
         }
         SNDSYS_leavecritical();
     }
@@ -4945,7 +4945,7 @@ extern "C" bool cMusicSys_IsMPFLoaded(cMusicSys* self, int force);
 int cMusicSys_GetMPFFile(void* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" void func_003B7E70(int h, int v);
+extern "C" void SNDSTRM_setVolume(int h, int v);
 extern "C" void func_003D2350(int a);
 extern "C" int func_003D25F0(int id, char* name, int a2, void* a3, int a4, int a5, void* buf, int size);
 extern char str_pct_spct_s_c[];
@@ -4962,7 +4962,7 @@ extern float gMusicScaling;
  * buffer); a parked event (mPendingEvent) is then sent with force (cSongInstance_SendMusicEvent).
  *
  * Once open it applies the song's mLowPass (cSongInstance_SetLowPass) and, unless fading out (mFadingOut) or mVolumeEnabled is 0,
- * sets the stream volume (func_003B7E70) to base volume (mBaseVolume) x mPathlevel / 100 x the volume control
+ * sets the stream volume (SNDSTRM_setVolume) to base volume (mBaseVolume) x mPathlevel / 100 x the volume control
  * (mpVolumeControl, when set) x gMusicScaling, clamped to 0..127. Called by the constructor with force and by
  * cMusicSys_UpdateSong.
  *
@@ -5011,7 +5011,7 @@ extern "C" void cSongInstance_Update(cSongInstance* mon, int force)
     if (streamHandle >= 0)
     {
         signed char vol = (int)((volume <? 127.0f) >? 0.0f);
-        func_003B7E70(streamHandle, vol);
+        SNDSTRM_setVolume(streamHandle, vol);
     }
     SNDSYS_leavecritical();
 }
@@ -5020,17 +5020,17 @@ extern "C" void cSongInstance_Update(cSongInstance* mon, int force)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSongInstance_SetOverlayLevel);
 #ifdef SKIP_ASM
-extern "C" void func_003D5508(int cmd, int v);
+extern "C" void PATH_setLevel(int cmd, int v);
 
 /**
- * Sets the song overlay's level (func_003D5508(0x11000002, v), 0..100) when mVolumeEnabled is set.
+ * Sets the song overlay's level (PATH_setLevel(0x11000002, v), 0..100) when mVolumeEnabled is set.
  *
  * @param levelPercent  the level in percent
  */
 extern "C" void cSongInstance_SetOverlayLevel(cSongInstance* self, signed char levelPercent)
 {
     if (self->mVolumeEnabled != 0) {
-        func_003D5508(0x11000002, levelPercent);
+        PATH_setLevel(0x11000002, levelPercent);
     }
 }
 #endif
@@ -5041,10 +5041,10 @@ INCLUDE_ASM("sound/bankmonitor", cSongInstance_FadeOut);
 extern "C" int cSongInstance_GetStreamHandle(cSongInstance* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
-extern "C" void func_003B7EB0(int h, int v, int c);
+extern "C" void SNDSTRM_fadeVolume(int h, int v, int c);
 
 /**
- * Fades the song's main stream out to 0 over t seconds (func_003B7EB0) and marks it fading (mFadingOut = 1).
+ * Fades the song's main stream out to 0 over t seconds (SNDSTRM_fadeVolume) and marks it fading (mFadingOut = 1).
  *
  * The fade runs inside the critical section, only when the stream has a handle; cSongInstance_Update stops applying the volume
  * once mFadingOut is set.
@@ -5056,7 +5056,7 @@ extern "C" void cSongInstance_FadeOut(cSongInstance* self, float fadeSeconds)
     SNDSYS_entercritical();
     int streamHandle = cSongInstance_GetStreamHandle(self);
     if (streamHandle >= 0) {
-        func_003B7EB0(streamHandle, (int)(fadeSeconds * 1000.0f), 0);
+        SNDSTRM_fadeVolume(streamHandle, (int)(fadeSeconds * 1000.0f), 0);
     }
     SNDSYS_leavecritical();
     self->mFadingOut = 1;
@@ -5066,18 +5066,18 @@ extern "C" void cSongInstance_FadeOut(cSongInstance* self, float fadeSeconds)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", cSongInstance_GetStreamHandle);
 #ifdef SKIP_ASM
-extern "C" int func_003D3030(int id);
+extern "C" int PATH_getVoiceMonitor(int id);
 
 /**
  * Returns the song's main stream handle: the first word of the Pathfinder slot playing 0x11000001, or -1.
  *
- * The slot comes from func_003D3030 and pathxSND_getPlayer.
+ * The slot comes from PATH_getVoiceMonitor and pathxSND_getPlayer.
  *
  * @return the stream handle, or -1 when the main stream has no slot
  */
 extern "C" int cSongInstance_GetStreamHandle(cSongInstance* self)
 {
-    int idx = func_003D3030(0x11000001);
+    int idx = PATH_getVoiceMonitor(0x11000001);
     if (idx < 0) {
         return -1;
     }
@@ -6719,7 +6719,7 @@ extern "C" void cMusicSys_ArmBeatCallback(cMusicSys* self, cSongInstance* ent)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cMusicSys_StartOverlay);
 #ifdef SKIP_ASM
-extern "C" void func_003D2DF8(int cmd, int a, int b);
+extern "C" void PATH_requestPart(int cmd, int a, int b);
 
 static inline int cMusicSys_StartOverlay_ready(cBankInstance* e)
 {
@@ -6733,7 +6733,7 @@ int cMusicSys_StartOverlay_impl(void* self) __asm__("cMusicSys_StartOverlay");
  * Starts the current song's overlay once its loop bank is loaded; returns whether the overlay is running.
  *
  * Sets mOverlayArmed. With mLoopBankState == 1 and the bank record in state 1 it passes the bank handle to the overlay
- * stream (func_003D2DF8(0x11000002, 0, handle)) and sets mLoopBankState = 2. Called by cMusicSys_UpdateSong and the audio
+ * stream (PATH_requestPart(0x11000002, 0, handle)) and sets mLoopBankState = 2. Called by cMusicSys_UpdateSong and the audio
  * update.
  *
  * @return 1 when started or already running, 0 otherwise (also without a song)
@@ -6752,7 +6752,7 @@ int cMusicSys_StartOverlay_impl(void* vself)
         cBankInstance* bankInst =
             (cBankInstance*)(curSong->mBankIndex * 0x60 + (int)self->mpVStreamSys->mpVBankManager->mBank);
         if (cMusicSys_StartOverlay_ready(bankInst)) {
-            func_003D2DF8(0x11000002, 0, bankInst->mBankHandle);
+            PATH_requestPart(0x11000002, 0, bankInst->mBankHandle);
             self->mSongInstance->mLoopBankState = 2;
             ready = 1;
         }

@@ -1355,7 +1355,7 @@ extern "C" void cMemMan_free__FPv();
 /**
  * Frees a buffer from RpcAlloc (cMemMan_free) unless it is null.
  *
- * The DirtySock code (NetGameLinkDestroy, func_003E73E0, func_003F55B8 and others) frees its blocks with it. The C
+ * The DirtySock code (NetGameLinkDestroy, PingRpc_destroy, func_003F55B8 and others) frees its blocks with it. The C
  * declares cMemMan_free without arguments; the buffer passes through in its register.
  *
  * @param buffer  the buffer, or 0
@@ -1413,7 +1413,7 @@ cBEInterface* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterfac
 int cBENetworkInterface_getSyncDataSize(void* iface);
 extern "C" void cGameComm_setState_6C78(void* self, int mode) __asm__("cGameComm_setState");
 extern "C" void MEM_fill_6C78(void* p, int c, int n) __asm__("MEM_fill");
-extern "C" void* func_003E7340();
+extern "C" void* PingRpc_create();
 
 /**
  * Constructs the online game link: the handshake state, timers, counters and empty packet queues.
@@ -1424,7 +1424,7 @@ extern "C" void* func_003E7340();
  * mNumSamples 3, both mNetLatency entries and mLatency to the default frame time (SSXApp->TimerPeriod), mRaceStartTime
  * to the current time (TimerTick / TimerHz), and the other flags, counters and ping state to 0. The five 32-slot packet
  * queues (mReadQueue, mWriteQueue) and the two 0xF0-byte checksum buffers (mCheckSumBuffer) are cleared with MEM_fill,
- * and mPingSocket gets a DirtySock handle from func_003E7340 (the ping server's socket).
+ * and mPingSocket gets a DirtySock handle from PingRpc_create (the ping server's socket).
  *
  * Retail's arguments are (channel, server), not On Tour's (playerID, numPlayers): this build links two machines.
  *
@@ -1519,7 +1519,7 @@ extern "C" cGameComm* cGameComm_cGameComm(void* vself, int port, int isServer)
     self->mAITick[1] = -1;
     MEM_fill_6C78(self->mCheckSumBuffer[0], 0, sizeof(self->mCheckSumBuffer[0]));
     MEM_fill_6C78(self->mCheckSumBuffer[1], 0, sizeof(self->mCheckSumBuffer[1]));
-    self->mPingSocket = func_003E7340();
+    self->mPingSocket = PingRpc_create();
     return self;
 }
 #endif
@@ -1530,7 +1530,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm__cGameComm);
 extern "C" void cMemMan_free_6EE0(void *) __asm__("cMemMan_free__FPv");
 extern "C" void operator_delete__FPi(int *);
 extern "C" void cGameComm_freePacket(cGameComm* arg0, int *arg1);
-extern "C" void func_003E73E0(void* p);
+extern "C" void PingRpc_destroy(void* p);
 
 static inline tGameCommPacket* Peek_6EE0(tGameCommQueue* q)
 {
@@ -1546,7 +1546,7 @@ static inline tGameCommPacket* Pop_6EE0(tGameCommQueue* q)
  * Destroys an online game link.
  *
  * Frees mBEBuffer, the packet being received (mPacketCache) and every packet left in the four read queues
- * (cGameComm_freePacket), destroys the ping object (mPingSocket, func_003E73E0) and frees the object when bit 0 of
+ * (cGameComm_freePacket), destroys the ping object (mPingSocket, PingRpc_destroy) and frees the object when bit 0 of
  * @p flags is set.
  *
  * @param flags  bit 0: free the memory
@@ -1562,7 +1562,7 @@ extern "C" void cGameComm__cGameComm(cGameComm* self, int flags)
         }
     }
     if (self->mPingSocket) {
-        func_003E73E0(self->mPingSocket);
+        PingRpc_destroy(self->mPingSocket);
         self->mPingSocket = 0;
     }
     if (flags & 1) operator_delete__FPi((int*)self);
@@ -1646,16 +1646,16 @@ extern "C" int cGameComm_asyncWriteComplete_70D8(char* s) __asm__("cGameComm_asy
 extern "C" void cGameComm_asyncWrite_70D8(char* s, void* data, int size) __asm__("cGameComm_asyncWrite");
 extern "C" void cGameComm_asyncWriteUpdate_70D8(char* s) __asm__("cGameComm_asyncWriteUpdate");
 extern "C" void cGameComm_updateMessageDisplay_70D8(void* s) __asm__("cGameComm_updateMessageDisplay");
-extern "C" int func_003E7450_70D8(void* sock, int a1, char* tag, int n) __asm__("func_003E7450");
-extern "C" int func_003E7500_70D8(void* sock, char* buf, int* len, int* info) __asm__("func_003E7500");
+extern "C" int PingRpc_request_70D8(void* sock, int a1, char* tag, int n) __asm__("PingRpc_request");
+extern "C" int PingRpc_pollResponse_70D8(void* sock, char* buf, int* len, int* info) __asm__("PingRpc_pollResponse");
 extern "C" int strncmp_70D8(const char* a, const char* b, int n) __asm__("strncmp");
 extern char str_SSXPingServer[];
 
 /**
  * Runs one frame of the online game link: ping replies, timers, the packet queues and the pre-race handshake.
  *
- * While the ping server is active (mPingTimer > 0) it counts it down, reads replies from mPingSocket (func_003E7500)
- * and stops when one matches a sent ping id (mPingID), else sends up to 4 "SSXPingServer" pings (func_003E7450), one
+ * While the ping server is active (mPingTimer > 0) it counts it down, reads replies from mPingSocket (PingRpc_pollResponse)
+ * and stops when one matches a sent ping id (mPingID), else sends up to 4 "SSXPingServer" pings (PingRpc_request), one
  * every 5 frames. Then mStallTimer drops by 0.15 (not below 0), mUnPauseTimer counts down, and it runs
  * cGameComm_updateMessageDisplay, cGameComm_updateTimeout (timeouts) and cGameComm_checkErrors (checkErrors; an error
  * returns), cGameComm_updateReadQueue (updateReadQueue), cGameComm_updateWriteQueue, cGameComm_asyncReadUpdate /
@@ -1681,7 +1681,7 @@ void cGameComm::update()
         mPingTimer = mPingTimer - 1;
         for (;;) {
             len = 0x100;
-            if (func_003E7500_70D8(mPingSocket, msg, &len, info) == 0) {
+            if (PingRpc_pollResponse_70D8(mPingSocket, msg, &len, info) == 0) {
                 break;
             }
             if (strncmp_70D8(msg, str_SSXPingServer, 13) != 0) {
@@ -1702,7 +1702,7 @@ void cGameComm::update()
             if (mPingDelay > 0) {
                 mPingDelay = mPingDelay - 1;
             } else {
-                int sock = func_003E7450_70D8(mPingSocket, mPingAddr, str_SSXPingServer, 0xE);
+                int sock = PingRpc_request_70D8(mPingSocket, mPingAddr, str_SSXPingServer, 0xE);
                 int k = mPingCount;
                 mPingID[k] = sock;
                 mPingCount = k + 1;
@@ -2644,14 +2644,14 @@ float cGameComm::getLatency()
 INCLUDE_ASM("seg/seg_156860", func_002583A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003E7450_83A8(void *, int, char *, int) __asm__("func_003E7450");
+extern "C" int PingRpc_request_83A8(void *, int, char *, int) __asm__("PingRpc_request");
 extern char str_SSXPingServer[];
 
 /**
  * Starts pinging a server through the game link's ping object.
  *
  * Only when no ping is running (+0x138 not positive): clears the ping count (+0xB8), stores the address (+0xC0), sends
- * the first ping "SSXPingServer" (func_003E7450 on the ping object +0x140, size 0xE) and keeps its id, sets +0xBC to 4,
+ * the first ping "SSXPingServer" (PingRpc_request on the ping object +0x140, size 0xE) and keeps its id, sets +0xBC to 4,
  * the running time (+0x138) to @p durationSecs * 60 frames and clears +0x13C. +0x13C is set when the connection is not
  * broadband. The online-error pause screen calls it with the lobby server's address and 3.
  *
@@ -2663,7 +2663,7 @@ extern "C" void func_002583A8(cGameComm* self, int serverAddr, int durationSecs)
         self->mPingCount = 0;
         self->mPingAddr = serverAddr;
         self->mPingID[self->mPingCount++] =
-            func_003E7450_83A8(self->mPingSocket, serverAddr, str_SSXPingServer, 0xE);
+            PingRpc_request_83A8(self->mPingSocket, serverAddr, str_SSXPingServer, 0xE);
         self->mPingDelay = 4;
         self->mPingTimer = durationSecs * 0x3C;
         self->mPingReceived = 0;

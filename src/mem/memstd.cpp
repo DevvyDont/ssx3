@@ -1832,8 +1832,8 @@ struct sMemAllocFuncs_2534A8 {
 // Typed view of the allocator table (the unit defines sMemAllocFuncs later).
 extern sMemAllocFuncs_2534A8 RCMP_rcmp_sys_2534A8 __asm__("RCMP_rcmp_sys");
 extern char str_empty_g[];
-extern "C" void* func_003ADE08(void* mem, const char* videoFile, int a2, char* name, int a4, int a5, int a6);
-extern "C" void* func_003ADDC0(void* mem, const char* videoFile, int a2, int a3, int a4);
+extern "C" void* RCMP_AV_PLAYER_AV_PLAYER1(void* mem, const char* videoFile, int a2, char* name, int a4, int a5, int a6);
+extern "C" void* RCMP_AV_PLAYER_AV_PLAYER(void* mem, const char* videoFile, int a2, int a3, int a4);
 
 
 /**
@@ -1841,8 +1841,8 @@ extern "C" void* func_003ADDC0(void* mem, const char* videoFile, int a2, int a3,
  * REAL decoder (+0x38).
  *
  * Copies the options' play speed (+0x34) to the speed (+0x10). The decoder memory (0x78 bytes) comes from the movie
- * allocator table RCMP_rcmp_sys. With an audio file name (+0x18, non-empty) it builds the decoder with func_003ADE08
- * (video +0x14, 0x60000, audio file, 0x20000), else with func_003ADDC0 (video, 0x80000); both also get whether the
+ * allocator table RCMP_rcmp_sys. With an audio file name (+0x18, non-empty) it builds the decoder with RCMP_AV_PLAYER_AV_PLAYER1
+ * (video +0x14, 0x60000, audio file, 0x20000), else with RCMP_AV_PLAYER_AV_PLAYER (video, 0x80000); both also get whether the
  * options word +0x24 is set and whether the word +0x1C is clear. Callers then start it with cMoviePlayer_asyncPlay.
  *
  * @param cfg  the play options (filled from tMoviePlayOptions_SetDefaults's defaults)
@@ -1864,12 +1864,12 @@ int cMoviePlayer::init(tMoviePlayOptions* cfg)
     char* name = (char*)m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        m_pPlayer = (RCMP_AV_PLAYER*)func_003ADE08(mem, m_PlayOp.sVideoFileName, 0x60000,
+        m_pPlayer = (RCMP_AV_PLAYER*)RCMP_AV_PLAYER_AV_PLAYER1(mem, m_PlayOp.sVideoFileName, 0x60000,
                                                          (char*)m_PlayOp.sAudioFileName, 0x20000, optionSet,
                                                          soundOff);
     } else {
         void* mem = RCMP_rcmp_sys_2534A8.alloc(str_empty_g, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
-        m_pPlayer = (RCMP_AV_PLAYER*)func_003ADDC0(mem, m_PlayOp.sVideoFileName, 0x80000, optionSet, soundOff);
+        m_pPlayer = (RCMP_AV_PLAYER*)RCMP_AV_PLAYER_AV_PLAYER(mem, m_PlayOp.sVideoFileName, 0x80000, optionSet, soundOff);
     }
     return 1;
 }
@@ -1880,7 +1880,7 @@ INCLUDE_ASM("mem/memstd", cMoviePlayer_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
-extern "C" void func_003AE300(void* p, int flags);
+extern "C" void RCMP_AV_PLAYER__AV_PLAYER(void* p, int flags);
 extern int cMoviePlayer_m_isPlaying;
 
 
@@ -1891,7 +1891,7 @@ extern int cMoviePlayer_m_isPlaying;
  * With a decoder (+0x38) and a video driver (+0x3C) it first flushes the renderer (graphics manager slot 19,
  * cGraphicsMan_FlushRenderer); a pending frame (+0x40, +0xC) goes back to the decoder (RCMP_DECODER_ReleaseFrame). The
  * driver is deleted (vtable slot 1, flags 3) and the active-player count cMoviePlayer_m_isPlaying decremented, the decoder is deleted
- * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
+ * (RCMP_AV_PLAYER__AV_PLAYER, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
  */
 void cMoviePlayer::purge()
 {
@@ -1912,7 +1912,7 @@ void cMoviePlayer::purge()
     }
     char* decoderObj = ((char*)moviePlayer->m_pPlayer);
     if (decoderObj != 0) {
-        func_003AE300(decoderObj, 3);
+        RCMP_AV_PLAYER__AV_PLAYER(decoderObj, 3);
         moviePlayer->m_pPlayer = 0;
     }
     moviePlayer->mbMovieFinished = 0;
@@ -1928,16 +1928,16 @@ INCLUDE_ASM("mem/memstd", cMoviePlayer_startPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cMoviePlayer_m_isPlaying;
-extern "C" void* func_003AE450(void* p, int a, int b);
+extern "C" void* RCMP_AV_PLAYER_GetFirstFrame(void* p, int a, int b);
 extern "C" void* SSX_VD_create(void* framesDecoder, void* firstFrame, cPS2GraphicsMan* graphicsMan, int drawLayer);
-int func_003AE938(void*);
-int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
+int RCMP_AV_PLAYER_Pause(void*);
+int RCMP_AV_PLAYER_UnPause_i(void*) __asm__("RCMP_AV_PLAYER_UnPause__FPv");
 
 /**
- * Starts playback: fetches the first frame (func_003AE450(decoder, 1, 33)) into +0xC and sets the new-frame flag
- * (+0x40), pauses the decoder (func_003AE938), creates the video driver for that frame (SSX_VD_create with the
+ * Starts playback: fetches the first frame (RCMP_AV_PLAYER_GetFirstFrame(decoder, 1, 33)) into +0xC and sets the new-frame flag
+ * (+0x40), pauses the decoder (RCMP_AV_PLAYER_Pause), creates the video driver for that frame (SSX_VD_create with the
  * decoder's +0x64, the frame, cGraphicsMan_TheGraphicsMan and the draw layer +0x30) into +0x3C, resumes the decoder
- * (func_003AE958) and increments the active-player count cMoviePlayer_m_isPlaying.
+ * (RCMP_AV_PLAYER_UnPause) and increments the active-player count cMoviePlayer_m_isPlaying.
  *
  * Clears the finished (+0x0) and redraw (+0x4) words first.
  */
@@ -1946,12 +1946,12 @@ void cMoviePlayer::startPlay()
     mbMovieFinished = 0;
     mbReDraw = 0;
     mpCurrFrame = 0;
-    mpCurrFrame = func_003AE450(m_pPlayer, 1, 33);
+    mpCurrFrame = RCMP_AV_PLAYER_GetFirstFrame(m_pPlayer, 1, 33);
     mbNewFrame = 1;
-    func_003AE938(m_pPlayer);
+    RCMP_AV_PLAYER_Pause(m_pPlayer);
     m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(m_pPlayer->mpDecoder, mpCurrFrame, cGraphicsMan_TheGraphicsMan,
                                                     m_PlayOp.iDrawLayer);
-    func_003AE958_i(m_pPlayer);
+    RCMP_AV_PLAYER_UnPause_i(m_pPlayer);
     cMoviePlayer_m_isPlaying++;
 }
 #endif
@@ -1960,9 +1960,9 @@ void cMoviePlayer::startPlay()
 INCLUDE_ASM("mem/memstd", cMoviePlayer_syncPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_003AE6C8(void* p, float f);
-extern "C" bool func_003AE780(void* p);
-extern "C" int func_003AE860(void* p);
+extern "C" void* RCMP_AV_PLAYER_GetFrame(void* p, float f);
+extern "C" bool RCMP_AV_PLAYER_IsTimeForDecode(void* p);
+extern "C" int RCMP_AV_PLAYER_IsAudioFinished(void* p);
 extern "C" void SYNCTASK_run(int);
 extern "C" void THREAD_yield(int);
 
@@ -1978,8 +1978,8 @@ struct sWorld_253748 {
  *
  * Starts playback (cMoviePlayer_startPlay), then until finished (+0x0): draws the frame (driver slot 5 when redraw +0x4 is set,
  * else slot 4 with the frame +0xC), shows it (graphics manager slot 20, cPS2GraphicsMan_DrawFrame), runs
- * SYNCTASK_run(0) and THREAD_yield(0), and when the decoder is due (func_003AE780) completes the draw (driver slot 6)
- * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
+ * SYNCTASK_run(0) and THREAD_yield(0), and when the decoder is due (RCMP_AV_PLAYER_IsTimeForDecode) completes the draw (driver slot 6)
+ * and fetches the next frame for the decoder's time (+0x48, RCMP_AV_PLAYER_GetFrame). Without a frame it asks RCMP_AV_PLAYER_IsAudioFinished
  * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
  */
 void cMoviePlayer::syncPlay()
@@ -2002,12 +2002,12 @@ void cMoviePlayer::syncPlay()
             cGraphicsMan_TheGraphicsMan->DrawFrame();
             SYNCTASK_run(0);
             THREAD_yield(0);
-            if (func_003AE780(((char*)moviePlayer->m_pPlayer)) != 0) {
+            if (RCMP_AV_PLAYER_IsTimeForDecode(((char*)moviePlayer->m_pPlayer)) != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
                 sVEntry<void(void*)>* vtable = (sVEntry<void(void*)>*)videoDriver->mVtbl;
                 sVEntry<void(void*)>* slotEntry = &vtable[6];
                 slotEntry->fn(vthis(videoDriver, *slotEntry));
-                moviePlayer->mpCurrFrame = func_003AE6C8(((char*)moviePlayer->m_pPlayer),
+                moviePlayer->mpCurrFrame = RCMP_AV_PLAYER_GetFrame(((char*)moviePlayer->m_pPlayer),
                                                                 moviePlayer->m_pPlayer->mGoalFrame);
                 moviePlayer->mbReDraw = 0;
             } else {
@@ -2015,7 +2015,7 @@ void cMoviePlayer::syncPlay()
             }
             if (moviePlayer->mpCurrFrame == 0) {
                 moviePlayer->mbReDraw = 1;
-                moviePlayer->mbMovieFinished = func_003AE860(((char*)moviePlayer->m_pPlayer));
+                moviePlayer->mbMovieFinished = RCMP_AV_PLAYER_IsAudioFinished(((char*)moviePlayer->m_pPlayer));
             }
         } while (moviePlayer->mbMovieFinished == 0);
         moviePlayer->mbNewFrame = 0;
@@ -2080,25 +2080,25 @@ void cMoviePlayer::asyncRender(int force)
 //100%
 INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncUpdate);
 #ifdef SKIP_ASM
-extern "C" bool func_003AE780(void* p);
-extern "C" void* func_003AE6C8(void* p, float f);
-extern "C" int func_003AE860(void* p);
+extern "C" bool RCMP_AV_PLAYER_IsTimeForDecode(void* p);
+extern "C" void* RCMP_AV_PLAYER_GetFrame(void* p, float f);
+extern "C" int RCMP_AV_PLAYER_IsAudioFinished(void* p);
 
 /**
  * Movie player step: decodes the next frame when it is due and notices when the movie has finished.
  *
- * If no frame is waiting (+0x40) and func_003AE780 says the decoder (+0x38) is due, calls virtual slot 6 of +0x3C,
- * gets a frame for the decoder's time (+0x48) with func_003AE6C8 into +0xC and marks it waiting; otherwise sets
+ * If no frame is waiting (+0x40) and RCMP_AV_PLAYER_IsTimeForDecode says the decoder (+0x38) is due, calls virtual slot 6 of +0x3C,
+ * gets a frame for the decoder's time (+0x48) with RCMP_AV_PLAYER_GetFrame into +0xC and marks it waiting; otherwise sets
  * +0x4. When there is no frame and the movie is not finished (+0x0), clears the waiting flag and stores
- * func_003AE860's answer (audio finished) in +0x0.
+ * RCMP_AV_PLAYER_IsAudioFinished's answer (audio finished) in +0x0.
  */
 void cMoviePlayer::asyncUpdate()
 {
-    if (mbNewFrame == 0 && func_003AE780(m_pPlayer) != 0) {
+    if (mbNewFrame == 0 && RCMP_AV_PLAYER_IsTimeForDecode(m_pPlayer) != 0) {
         sVEntry<void(void*)>* vtable = (sVEntry<void(void*)>*)m_pVd->mVtbl;
         vtable[6].fn(vthis(m_pVd, vtable[6]));
         RCMP_AV_PLAYER* player = m_pPlayer;
-        mpCurrFrame = func_003AE6C8(player, player->mGoalFrame);
+        mpCurrFrame = RCMP_AV_PLAYER_GetFrame(player, player->mGoalFrame);
         mbNewFrame = 1;
         mbReDraw = 0;
     } else {
@@ -2107,7 +2107,7 @@ void cMoviePlayer::asyncUpdate()
     if (mpCurrFrame == 0 && mbMovieFinished == 0) {
         mbNewFrame = 0;
         mbReDraw = 1;
-        mbMovieFinished = func_003AE860(m_pPlayer);
+        mbMovieFinished = RCMP_AV_PLAYER_IsAudioFinished(m_pPlayer);
     }
 }
 #endif
@@ -2115,18 +2115,18 @@ void cMoviePlayer::asyncUpdate()
 //100%
 INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncPause);
 #ifdef SKIP_ASM
-int func_003AE938(void*);
+int RCMP_AV_PLAYER_Pause(void*);
 
 /**
  * Pauses the movie: when a decoder (+0x38) and a driver (+0x3C) exist and it is neither finished (+0x0) nor already
- * paused (+0x8), pauses the decoder (func_003AE938) and sets the paused word.
+ * paused (+0x8), pauses the decoder (RCMP_AV_PLAYER_Pause) and sets the paused word.
  */
 void cMoviePlayer::asyncPause()
 {
     void* handle = m_pPlayer;
     if (handle != 0 && m_pVd != 0 && mbMovieFinished == 0
         && mbPaused == 0) {
-        func_003AE938(handle);
+        RCMP_AV_PLAYER_Pause(handle);
         mbPaused = 1;
     }
 }
@@ -2135,18 +2135,18 @@ void cMoviePlayer::asyncPause()
 //100%
 INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncResume);
 #ifdef SKIP_ASM
-void func_003AE958(void*);
+void RCMP_AV_PLAYER_UnPause(void*);
 
 /**
  * Resumes a paused movie: when a decoder (+0x38) and a driver (+0x3C) exist, it has not finished (+0x0) and it is
- * paused (+0x8), resumes the decoder (func_003AE958) and clears the paused word.
+ * paused (+0x8), resumes the decoder (RCMP_AV_PLAYER_UnPause) and clears the paused word.
  */
 void cMoviePlayer::asyncResume()
 {
     void* handle = m_pPlayer;
     if (handle != 0 && m_pVd != 0 && mbMovieFinished == 0
         && mbPaused != 0) {
-        func_003AE958(handle);
+        RCMP_AV_PLAYER_UnPause(handle);
         mbPaused = 0;
     }
 }
@@ -2340,7 +2340,7 @@ void* func_00254330(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00254350);
+INCLUDE_ASM("mem/memstd", SSX_VD_floorLog2);
 #ifdef SKIP_ASM
 /**
  * Returns floor(log2(@p x)) for a positive @p x, read from the exponent of its float conversion.
@@ -2350,7 +2350,7 @@ INCLUDE_ASM("mem/memstd", func_00254350);
  * @param x  a positive integer
  * @return the index of its highest set bit
  */
-extern "C" int func_00254350(int x)
+extern "C" int SSX_VD_floorLog2(int x)
 {
     union {
         float f;
@@ -2435,7 +2435,7 @@ extern char str_VD_VD_TEXTURE_POINTER[];
 extern char str_empty_h[];
 extern char D_004A2EA8[];
 extern float D_004A2EB0[];
-extern "C" int func_00254350(int x);
+extern "C" int SSX_VD_floorLog2(int x);
 extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_SetPosition(SSX_VD_PS2_SINGLE_BUFFERD* self, float a, float b, float c);
 void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* self, float f0, float f1);
 // PORT: the project names this cPS2GraphicsMan_setTextureFilter__FPv (one arg); this caller passes six.
@@ -2495,7 +2495,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
  *
  * Stores the decoder (+0x0), the vtable D_00480270 and the graphics manager (+0x8), reads the frame image header
  * (@p res + 4; data at header + 0x10, or at its offset +0x10 when flag 0x1000 is set). The image is cut into 16-pixel
- * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, func_00254350); each tile (12 bytes from the movie
+ * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, SSX_VD_floorLog2); each tile (12 bytes from the movie
  * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and cPS2GraphicsMan_setTextureFilter. The tile table (+0x14,
  * name "VD: VD_TEXTURE_POINTER") holds +0x18 entries. Centres the image on the screen (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition with the screen
  * width and height from slots 10/11, depth D_004A2EB0), sets the scale to 1 (SSX_VD_PS2_SINGLE_BUFFERD_SetScale) and stores the draw layer
@@ -2526,7 +2526,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
     self->mNumColumns = w / 16;
     int rem = frameHeight;
     for (;;) {
-        int stripHeight = 1 << func_00254350(rem);
+        int stripHeight = 1 << SSX_VD_floorLog2(rem);
         if (rem == stripHeight) {
             self->mRowHeights[self->mNumRows] = rem;
             self->mNumRows++;
@@ -2612,7 +2612,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002548D0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_drawTiles);
 #ifdef SKIP_ASM
 struct sVec4_2548D0 {
     float v[4];
@@ -2734,8 +2734,8 @@ struct sMesh_2548D0 {
     float ch;               // 0x50
 };
 
-// PORT: the unit declares func_002548D0 as returning void*, but it returns nothing (v0 is left as is); bind the real signature.
-extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
+// PORT: the unit declares SSX_VD_PS2_SINGLE_BUFFERD_drawTiles as returning void*, but it returns nothing (v0 is left as is); bind the real signature.
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_drawTiles_impl(void* p) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_drawTiles");
 /**
  * Draws the driver's tiles as screen quads: waits until the renderer is ready (graphics manager slot 17), sets a
  * full-screen viewport (slot 26) and the identity view (slot 34), puts the draw layer (+0x3C) into the render state,
@@ -2747,7 +2747,7 @@ extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
  *
  * @param videoDriver  the video driver
  */
-extern "C" void func_002548D0_impl(void* videoDriver)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_drawTiles_impl(void* videoDriver)
 {
     sMesh_2548D0* self = (sMesh_2548D0*)videoDriver;
     while (self->world->IsRenderReady() == 0) {
@@ -2811,13 +2811,13 @@ extern "C" void func_002548D0_impl(void* videoDriver)
 INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_Draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_002548D0(void* self);
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(void* self);
 
 
 /**
  * Draws a new movie frame: uploads the frame's pixels (its SHAPE, data as in
  * SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) into each tile's texture (graphics manager slot 49,
- * cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (func_002548D0).
+ * cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles).
  *
  * Remembers @p frame in mpCurrentFrame when it is non-null, though it then reads it unconditionally. Vtable slot 4 of
  * D_00480270.
@@ -2850,23 +2850,23 @@ void SSX_VD_PS2_SINGLE_BUFFERD::Draw(RCMP_FRAME* frame)
             off += mRowHeights[j];
         }
     }
-    func_002548D0(this);
+    SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(this);
 }
 #endif
 
-extern "C" void* func_002548D0(void* self);
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(void* self);
 
 //99.29%
 INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv);
 #ifdef SKIP_ASM
 /**
- * Redraws the last frame's tiles (func_002548D0). Vtable slot 5 of D_00480270.
+ * Redraws the last frame's tiles (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles). Vtable slot 5 of D_00480270.
  *
- * @return whatever func_002548D0 left in the return register
+ * @return whatever SSX_VD_PS2_SINGLE_BUFFERD_drawTiles left in the return register
  */
 void* SSX_VD_PS2_SINGLE_BUFFERD::ReDraw()
 {
-    return func_002548D0(this);
+    return SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(this);
 }
 #endif
 
@@ -3029,7 +3029,7 @@ void VIDEO_DRIVER_CompleteDraw(void* self)
 extern "C" void* func_00254E60(int, int);
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255670);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new2);
 #ifdef SKIP_ASM
 /**
  * Allocates @p allocSize bytes through the movie allocator table (RCMP_rcmp_sys's allocate with name str_empty_h and
@@ -3039,24 +3039,24 @@ INCLUDE_ASM("mem/memstd", func_00255670);
  *
  * @param allocSize  bytes wanted
  */
-extern "C" void func_00255670(int allocSize) {
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_new2(int allocSize) {
     RCMP_rcmp_sys.AllocMemFunc(str_empty_h, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002556B0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array2);
 #ifdef SKIP_ASM
 /**
- * Allocates @p allocSize bytes through the movie allocator table, like func_00255670; the video driver's array operator new.
+ * Allocates @p allocSize bytes through the movie allocator table, like SSX_VD_PS2_SINGLE_BUFFERD_operator_new2; the video driver's array operator new.
  *
  * @param allocSize  bytes wanted
  */
-extern "C" void func_002556B0(int allocSize) {
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array2(int allocSize) {
     RCMP_rcmp_sys.AllocMemFunc(str_empty_h, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002556F0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new1);
 #ifdef SKIP_ASM
 /**
  * Allocates @p size bytes through the movie allocator table with the caller's name, alignment, header size and memory
@@ -3068,17 +3068,17 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
  * @param hdrSize  header bytes
  * @param flags  memory class and flags
  */
-extern "C" void func_002556F0(int size, void* tag, int align, int hdrSize, int flags)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_new1(int size, void* tag, int align, int hdrSize, int flags)
 {
     RCMP_rcmp_sys.AllocMemFunc((const char*)tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00255720);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array1);
 #ifdef SKIP_ASM
 /**
  * Allocates @p size bytes through the movie allocator table with the caller's name, alignment, header size and memory
- * type; the array form of func_002556F0.
+ * type; the array form of SSX_VD_PS2_SINGLE_BUFFERD_operator_new1.
  *
  * @param size  bytes wanted
  * @param tag  the block's name
@@ -3086,35 +3086,35 @@ INCLUDE_ASM("mem/memstd", func_00255720);
  * @param hdrSize  header bytes
  * @param flags  memory class and flags
  */
-extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int flags)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array1(int size, void* tag, int align, int hdrSize, int flags)
 {
     RCMP_rcmp_sys.AllocMemFunc((const char*)tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00255750);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1);
 #ifdef SKIP_ASM
 /**
  * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's operator delete.
  */
-extern "C" void func_00255750(void* self)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1(void* self)
 {
     RCMP_rcmp_sys.FreeMemFunc(self);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00255778);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1);
 #ifdef SKIP_ASM
 /**
  * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's array operator delete.
  */
-extern "C" void func_00255778(void* self)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1(void* self)
 {
     RCMP_rcmp_sys.FreeMemFunc(self);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002557A0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new);
 #ifdef SKIP_ASM
 /**
  * Returns @p value: the placement form of operator new (the size in @p self is ignored).
@@ -3122,22 +3122,22 @@ INCLUDE_ASM("mem/memstd", func_002557A0);
  * @param value  the place to construct at
  * @return @p value
  */
-extern "C" int func_002557A0(void* self, int value) {
+extern "C" int SSX_VD_PS2_SINGLE_BUFFERD_operator_new(void* self, int value) {
     return value;
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002557A8);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the placement form of operator delete.
  */
-extern "C" void func_002557A8(void) {
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002557B0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array);
 #ifdef SKIP_ASM
 /**
  * Returns @p value: the array placement form of operator new.
@@ -3145,17 +3145,17 @@ INCLUDE_ASM("mem/memstd", func_002557B0);
  * @param value  the place to construct at
  * @return @p value
  */
-extern "C" int func_002557B0(void* self, int value) {
+extern "C" int SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array(void* self, int value) {
     return value;
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002557B8);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the array placement form of operator delete.
  */
-extern "C" void func_002557B8(void) {
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array(void) {
 
 }
 #endif

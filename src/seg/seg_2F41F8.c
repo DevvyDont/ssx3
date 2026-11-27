@@ -203,7 +203,7 @@ extern unsigned char str_ru_paranoid[];
  * state D_0051EEF8. Writes @p n - 1 characters and a NUL: each input character (anything outside 0x20..0x7E becomes
  * 0x7F, which also marks the end of the input) is shifted by a keystream byte mod 96 into the range 0x20..0x7F; after
  * the input's NUL the rest is random padding drawn from the shared state, so the output length does not reveal the
- * text's. func_003E8B10 uses it to send the PASS field as "~" + this encoding under the 16-byte session key.
+ * text's. LobbyApi_sendCommand uses it to send the PASS field as "~" + this encoding under the 16-byte session key.
  *
  * @param out  output buffer
  * @param n  output buffer size
@@ -830,7 +830,7 @@ extern int NetTick(void);
 /**
  * Returns the millisecond tick (NetTick).
  *
- * LobbyApi code (func_003E94F0) uses it to time its pings.
+ * LobbyApi code (LobbyApi_onServerPing) uses it to time its pings.
  *
  * @return milliseconds since the IOP queue's timer started
  */

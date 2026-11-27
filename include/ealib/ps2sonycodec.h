@@ -2,9 +2,9 @@
 #define EALIB_PS2SONYCODEC_H
 
 // PS2_SONY_CODEC_INTERNAL: RCMP's PS2 MPEG codec (an RCMP::CODEC over Sony's libmpeg: sceMpegInit / sceMpegCreate /
-// sceMpegGetPicture, with an mpeg2decode header parser), and its decoded frames. Created by func_003B11A0 (0x80 bytes
-// from the RCMP allocator, empty tag) and offered to the DECODER by the movie player's get-data function (func_003AEAD0
-// -> RCMP_DECODER_ChooseCodec). Retail code: unit ealib/seg_2AEDC0, func_003B07F8 .. func_003B11A0 (0x3B07F8..0x3B11E8).
+// sceMpegGetPicture, with an mpeg2decode header parser), and its decoded frames. Created by RCMP_createSonyCodec (0x80 bytes
+// from the RCMP allocator, empty tag) and offered to the DECODER by the movie player's get-data function (RCMP_AV_PLAYER_getVideoChunk
+// -> RCMP_DECODER_ChooseCodec). Retail code: unit ealib/seg_2AEDC0, PS2_SONY_FRAME_PS2_SONY_FRAME .. RCMP_createSonyCodec (0x3B07F8..0x3B11E8).
 // EA source: not named for PS2 (On Tour's PSP twin is rcmp/dev/source/decoder/psp/rcmp_psp_sony_codec.cpp:
 // PspSonyCodec / PspSonyFrame).
 //
@@ -16,13 +16,13 @@
 // with 3, ~DLNode with 7, Remove with 0xB; an empty list's head points at itself).
 // The decoded frames (0x14 bytes each, allocated by PS2_SONY_CODEC_INTERNAL_Init) are the PS2 counterpart of On Tour's
 // PspSonyFrame (an RCMP::FRAME, an RCON::DLNode at +0x8, mReferenceCount at +0x10); retail gives the class no name, so
-// PS2_SONY_FRAME below is ours (func_003B07F8 / func_003B08E0 are its ctor / dtor).
+// PS2_SONY_FRAME below is ours (PS2_SONY_FRAME_PS2_SONY_FRAME / PS2_SONY_FRAME__PS2_SONY_FRAME are its ctor / dtor).
 //
 // Vtable PS2_SONY_CODEC_INTERNAL_vtbl (_vt$23PS2_SONY_CODEC_INTERNAL): slot 1 PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL, 2 _Init,
 // 3 _GetFrame, 4 _GetCurrentFrameNumber__FPv, 5 _GetFrameRate, 6 _ReleaseFrame (RCMP::CODEC's virtual order).
 //
-// FLAT layouts. Evidence tags: [R] constructors PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL / func_003B07F8 and the
-// allocation sizes (0x80 in func_003B11A0, 20 in PS2_SONY_CODEC_INTERNAL_Init); [O] On Tour's DWARF; [U] retail use.
+// FLAT layouts. Evidence tags: [R] constructors PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL / PS2_SONY_FRAME_PS2_SONY_FRAME and the
+// allocation sizes (0x80 in RCMP_createSonyCodec, 20 in PS2_SONY_CODEC_INTERNAL_Init); [O] On Tour's DWARF; [U] retail use.
 
 #include "layout.h"
 #include "ealib/rcmpbase.h"
@@ -72,14 +72,14 @@ struct RCON_DLList {
 
 // The Sony codec's decoded frame (0x14 [R] PS2_SONY_CODEC_INTERNAL_Init allocates 20 bytes; name ours). [O] On Tour's
 // PspSonyFrame : FRAME, TDLNode has the same bases and mReferenceCount after them (its FRAME has a vptr, so its
-// members sit 4 bytes higher). [R] ctor func_003B07F8 (type 2, links 3, count 0), dtor func_003B08E0 (links 7).
+// members sit 4 bytes higher). [R] ctor PS2_SONY_FRAME_PS2_SONY_FRAME (type 2, links 3, count 0), dtor PS2_SONY_FRAME__PS2_SONY_FRAME (links 7).
 #ifdef __cplusplus
 struct PS2_SONY_FRAME : RCMP_FRAME, RCON_DLNode {
-    int mReferenceCount;                // 0x10 [O]; [R] ctor 0; [U] func_003B10D0 sets 1, ReleaseFrame counts down
+    int mReferenceCount;                // 0x10 [O]; [R] ctor 0; [U] PS2_SONY_CODEC_INTERNAL_takeFreeFrame sets 1, ReleaseFrame counts down
 };
 #endif
 
-// PS2_SONY_CODEC_INTERNAL. 0x80 [R] func_003B11A0 allocates 0x80.
+// PS2_SONY_CODEC_INTERNAL. 0x80 [R] RCMP_createSonyCodec allocates 0x80.
 struct RCMP_CHUNK;
 struct RCMP_DECODER;
 
@@ -93,12 +93,12 @@ struct PS2_SONY_CODEC_INTERNAL {
     int mHeight;                        // 0x0C [O] (PspSonyCodec); [U] Init: coded height
     unsigned int mCurrentFrameNumber;   // 0x10 [O] (PspSonyCodec); [U] Init 0, DecodeFrame ++, GetFrame compares,
                                         //      GetCurrentFrameNumber__FPv returns it
-    int mChunksFed;                     // 0x14 [U] Init 0; func_003B0B40 counts the chunks fed to the decoder
-    RCON_DLList mUsedFrames;            // 0x18 [O]; [R] ctor: empty list; [U] func_003B10D0 adds, ReleaseFrame removes;
-                                        //      the dtor destroys what is left (func_003B08E0)
-    RCON_DLList mFreeFrames;            // 0x20 [O]; [R] ctor: empty list; [U] Init adds the new frames, func_003B10D0
+    int mChunksFed;                     // 0x14 [U] Init 0; PS2_SONY_CODEC_INTERNAL_feedChunk counts the chunks fed to the decoder
+    RCON_DLList mUsedFrames;            // 0x18 [O]; [R] ctor: empty list; [U] PS2_SONY_CODEC_INTERNAL_takeFreeFrame adds, ReleaseFrame removes;
+                                        //      the dtor destroys what is left (PS2_SONY_FRAME__PS2_SONY_FRAME)
+    RCON_DLList mFreeFrames;            // 0x20 [O]; [R] ctor: empty list; [U] Init adds the new frames, PS2_SONY_CODEC_INTERNAL_takeFreeFrame
                                         //      takes from it, ReleaseFrame returns frames to it
-    RCMP_DECODER* mpDecoder;            // 0x28 [U] Init stores its DECODER argument; func_003B0B40 gets / releases chunks
+    RCMP_DECODER* mpDecoder;            // 0x28 [U] Init stores its DECODER argument; PS2_SONY_CODEC_INTERNAL_feedChunk gets / releases chunks
                                         //      through it (RCMP_DECODER_GetChunk / ReleaseChunk)
     void* mpWorkBuffer;                 // 0x2C [R] ctor 0; [U] Init frees the old one and allocates "RCMP::mpegbuff"
                                         //      (w * h * 9 / 2 + 5996, mem dir | 0x400) for sceMpegCreate; dtor frees it
@@ -106,7 +106,7 @@ struct PS2_SONY_CODEC_INTERNAL {
                                         //      sceMpegGetPicture / sceMpegIsEnd; 0x48 = its PS2 size up to mpChunkBuffer)
     void* mpChunkBuffer;                // 0x78 [R] ctor 0; [U] Init allocates "RCMP::chunkbuff" (0x32000, | 0x400), dtor
                                         //      frees it
-    char* mpChunkBufferUncached;        // 0x7C [U] Init: mpChunkBuffer | 0x30000000 (uncached alias); func_003B0B40 copies
+    char* mpChunkBufferUncached;        // 0x7C [U] Init: mpChunkBuffer | 0x30000000 (uncached alias); PS2_SONY_CODEC_INTERNAL_feedChunk copies
                                         //      each chunk there and hands it to sceMpegAddBs
 
     // Methods bound to their retail symbols by asm labels.

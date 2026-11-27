@@ -352,7 +352,7 @@ extern "C" void LobbyMan_onlobbyconnect(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3020 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The lobby connect code passes it as the reply callback of func_003E8260 (port
+ * argument, and the first is not used. The lobby connect code passes it as the reply callback of LobbyApi_connect (port
  * 11000).
  *
  * @param message  the callback's message, passed through to the handler
@@ -793,7 +793,7 @@ void func_0025FC20(void* self);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3268 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. The private 'mesg' request passes it to func_003E8B10 as its reply callback;
+ * argument, and the first is not used. The private 'mesg' request passes it to LobbyApi_sendCommand as its reply callback;
  * func_0025FC20 is empty.
  *
  * @param message  the callback's message, passed through to the handler

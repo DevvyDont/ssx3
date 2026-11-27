@@ -980,7 +980,7 @@ extern "C" void cMenu_postRender()
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CB350);
+INCLUDE_ASM("util/menu", drawTexturedScreenQuad);
 #ifdef SKIP_ASM
 // A t4Vector with EA's constructors (ours has none): a corner position (x, y, 0, 1).
 struct t4VectorXYZW : t4Vector {
@@ -998,7 +998,7 @@ struct t4VectorXYZW : t4Vector {
  * @param screenRect  screen rect (x, y, w, h)
  * @param texRect  texture rect (u, v, du, dv)
  */
-extern "C" void func_002CB350(tBxVertex* quadVerts, float* screenRect, float* texRect)
+extern "C" void drawTexturedScreenQuad(tBxVertex* quadVerts, float* screenRect, float* texRect)
 {
     quadVerts[0].p = t4VectorXYZW(screenRect[0], screenRect[1], 0.0f, 1.0f);
     quadVerts[0].u = texRect[0];
@@ -1036,7 +1036,7 @@ static inline void cMenu_drawBox_setF8_5(sDrawState* state, int v)
  *
  * Sets all four vertices' colour to @p col (each component * 128) with q = 1, lowers the current draw state's 5-bit
  * field at word +0x8 bits 5-9 by 2 (clamped at 0), sets word +0x4 bits 2-6 to 5 and the texture id (+0x10) to
- * MenuSys->BoxTexture (+0x60). Then draws, with func_002CB350, the four 5x5 corners (texture quarters at the corners),
+ * MenuSys->BoxTexture (+0x60). Then draws, with drawTexturedScreenQuad, the four 5x5 corners (texture quarters at the corners),
  * the top and bottom 5-high edges, the left and right 5-wide edges and the centre, using the texture's outer 0.25 for
  * the borders and its middle 0.5 for the rest. Restores the bit field at the end. cMenu's vtable slot 8.
  *
@@ -1070,31 +1070,31 @@ extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sC
     float innerHeight = rect[3] - 10.0f;
     pieceRect[0] = rect[0]; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = rect[0]; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = rect[1]; pieceRect[2] = w; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.0f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = bot; pieceRect[2] = w; pieceRect[3] = 5.0f;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.75f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = rect[0]; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.0f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = right; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.75f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     pieceRect[0] = left; pieceRect[1] = top; pieceRect[2] = w; pieceRect[3] = innerHeight;
     pieceUv[0] = 0.25f; pieceUv[1] = 0.25f; pieceUv[2] = 0.5f; pieceUv[3] = 0.5f;
-    func_002CB350(quadVerts, pieceRect, pieceUv);
+    drawTexturedScreenQuad(quadVerts, pieceRect, pieceUv);
     cMenu_drawBox_setF8_5(GrMan->m_pCurrentDrawState, old);
 }
 #endif
@@ -5881,7 +5881,7 @@ extern cMenuItem_textRender1_sVec3 kTextSelectedColor;
 extern cMenuItem_textRender1_sVec3 kTextUnselectedColor;
 
 // (prototype from their definition at line 858)
-extern "C" void func_002CB350_0EF8(tBxVertex* v, float* r, float* t) __asm__("func_002CB350");
+extern "C" void drawTexturedScreenQuad_0EF8(tBxVertex* v, float* r, float* t) __asm__("drawTexturedScreenQuad");
 
 // A point of the graph (cGraphMenuItem's point list).
 struct sGraphPt_D0EF8 {
@@ -5948,7 +5948,7 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  * kTextUnselectedColor, alpha 1) and ShadowOffset (2, 2), and draws the caption at rect.x + 16. With IsEditMode and the
  * focus it prints prettyFloat(x) + "," + prettyFloat(y) of point OnPoint one line lower at rect.x + 32. The
  * plot box (100 wide, rect.h - 12 high, or - 24 when edited) is centred vertically, 16 from the right edge, and filled
- * in D_004D53C0 with texture -1 (func_002CB350); the y axis is flipped (MaxPoint.y at the top). Each further
+ * in D_004D53C0 with texture -1 (drawTexturedScreenQuad); the y axis is flipped (MaxPoint.y at the top). Each further
  * layer is drawn one step higher in the draw state's 5-bit field at word +0x8 bits 5-9: the y = 0 line in kBoxSelectedColor
  * when the y range spans 0, the polyline through the points in D_004D53D0 (GrMan's vtable slot 73, 2-vertex lines), and
  * in edit mode a 5x5 marker on the current point in D_004D53E0. Restores the field at the end.
@@ -6007,7 +6007,7 @@ void cGraphMenuItem::render(float* rect)
         fullUv[1] = 0.0f;
         fullUv[2] = 1.0f;
         fullUv[3] = 1.0f;
-        func_002CB350_0EF8((tBxVertex*)quadVerts, &gr.x, fullUv);
+        drawTexturedScreenQuad_0EF8((tBxVertex*)quadVerts, &gr.x, fullUv);
     }
     float sx = gr.w / (MaxPoint[0] - MinPoint[0]);
     float sy = gr.h / (MinPoint[1] - MaxPoint[1]);
@@ -6079,7 +6079,7 @@ void cGraphMenuItem::render(float* rect)
         tt[1] = 0.0f;
         tt[2] = 1.0f;
         tt[3] = 1.0f;
-        func_002CB350_0EF8((tBxVertex*)quadVerts, markerRect, tt);
+        drawTexturedScreenQuad_0EF8((tBxVertex*)quadVerts, markerRect, tt);
     }
     // Restore the depth the item started with.
     ((cRenderCtx*)GrMan)->top->f8 = (((cRenderCtx*)GrMan)->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);

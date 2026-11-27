@@ -41,20 +41,20 @@ struct RCMP_RCMP_SYSTEM {
                                         //     _$_Q24RCMP11RCMP_SYSTEM); __sti__rcmpbase_cpp restores it at exit (D_0050943C)
 };
 
-// RCMP::CHUNK (0xC [O]; [R] RCMP_CHUNK_CHUNK__FPv clears all three; func_003AEAD0 allocates 12 bytes and fills them).
+// RCMP::CHUNK (0xC [O]; [R] RCMP_CHUNK_CHUNK__FPv clears all three; RCMP_AV_PLAYER_getVideoChunk allocates 12 bytes and fills them).
 struct RCMP_CHUNK {
     void* m_UserChunkData;              // 0x0 [O]; [R] ctor 0; [U] the movie player stores the STREAM block here and
-                                        //     func_003AECE0 hands it back with STREAM_release
-    void* m_DataToDecode;               // 0x4 [O]; [R] ctor 0; [U] func_003AEAD0: block + 8 (after the chunk header);
-                                        //     the Sony codec copies from it (func_003B0B40, PS2_SONY_CODEC_INTERNAL_Init)
-    unsigned int m_DataToDecodeSize;    // 0x8 [O]; [R] ctor 0; [U] func_003AEAD0: the little-endian size word of the
-                                        //     chunk header; func_003B0B40 copies size - 8 bytes
+                                        //     RCMP_AV_PLAYER_releaseVideoChunk hands it back with STREAM_release
+    void* m_DataToDecode;               // 0x4 [O]; [R] ctor 0; [U] RCMP_AV_PLAYER_getVideoChunk: block + 8 (after the chunk header);
+                                        //     the Sony codec copies from it (PS2_SONY_CODEC_INTERNAL_feedChunk, PS2_SONY_CODEC_INTERNAL_Init)
+    unsigned int m_DataToDecodeSize;    // 0x8 [O]; [R] ctor 0; [U] RCMP_AV_PLAYER_getVideoChunk: the little-endian size word of the
+                                        //     chunk header; PS2_SONY_CODEC_INTERNAL_feedChunk copies size - 8 bytes
 };
 
 // RCMP::STREAMER (0x4 [O]): an opaque handle the codec passes back to the get / release functions. The movie player
 // (ealib/avplayer.h) embeds one at +0x60 pointing at itself.
 struct RCMP_STREAMER {
-    void* m_Streamer;                   // 0x0 [O]; [U] func_003AE450 stores the player; func_003AECB8 / func_003AED20
+    void* m_Streamer;                   // 0x0 [O]; [U] RCMP_AV_PLAYER_GetFirstFrame stores the player; RCMP_avGetDataCallback / RCMP_avReleaseDataCallback
                                         //     read it back
 };
 
@@ -64,9 +64,9 @@ struct RCMP_CODEC_IDATA {
     RCMP_STREAMER* m_Streamer;          // 0x0 [O]; [R] both ctors; [U] passed to both callbacks
     void (*m_GetDataFunc)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK** out);
                                         // 0x4 [O]; [R] both ctors; [U] RCMP_DECODER_GetFrame / GetChunk call it
-                                        //     (func_003AECB8 for the movie player)
+                                        //     (RCMP_avGetDataCallback for the movie player)
     void (*m_ReleaseDataFunc)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK* chunk);
-                                        // 0x8 [O]; [R] both ctors; [U] RCMP_DECODER_ReleaseChunk calls it (func_003AED20)
+                                        // 0x8 [O]; [R] both ctors; [U] RCMP_DECODER_ReleaseChunk calls it (RCMP_avReleaseDataCallback)
     unsigned int m_MaxFramesOutstanding; // 0xC [O]; [R] default ctor 2, ctor1 its argument; [U] PS2_SONY_CODEC_INTERNAL_Init
                                         //     allocates that many frames (reads DECODER + 0x10)
 };
@@ -82,13 +82,13 @@ struct RCMP_CODEC {
 // codec's frames (ealib/ps2sonycodec.h) add a list node at +0x8.
 struct RCMP_FRAME {
     int m_FrameType;                    // 0x0 [O] FRAME_TYPE_ENUM (FRAME_MPC 0, FRAME_MAD 1, FRAME_PS2_SONY 2,
-                                        //     FRAME_PSP_SONY 3); [R] func_003B07F8 stores 2
-    SHAPE* m_Shp;                       // 0x4 [O]; [R] func_003B07F8 = SHAPE_create(w, h, 32 bpp, ...); [U] freed by
-                                        //     func_003B08E0 (SHAPE_destroy); the codec decodes into its pixels;
+                                        //     FRAME_PSP_SONY 3); [R] PS2_SONY_FRAME_PS2_SONY_FRAME stores 2
+    SHAPE* m_Shp;                       // 0x4 [O]; [R] PS2_SONY_FRAME_PS2_SONY_FRAME = SHAPE_create(w, h, 32 bpp, ...); [U] freed by
+                                        //     PS2_SONY_FRAME__PS2_SONY_FRAME (SHAPE_destroy); the codec decodes into its pixels;
                                         //     SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD (video driver) reads its header
 };
 
-// RCMP::DECODER (0x1C [R] func_003AE450 allocates 0x1C for it; [O] 0x1C). Vtable _vt$Q24RCMP7DECODER = RCMP_DECODER_vtbl
+// RCMP::DECODER (0x1C [R] RCMP_AV_PLAYER_GetFirstFrame allocates 0x1C for it; [O] 0x1C). Vtable _vt$Q24RCMP7DECODER = RCMP_DECODER_vtbl
 // (slot 1 RCMP_DECODER__DECODER).
 struct RCMP_DECODER {
     RCMP_CHUNK* m_FirstChunk;           // 0x00 [O]; [R] ctor 0; [U] ChooseCodec stores it, GetFrame fills it through
@@ -98,8 +98,8 @@ struct RCMP_DECODER {
                                         //     PS2_SONY_CODEC_INTERNAL_Init reads + 0x10 (m_MaxFramesOutstanding)
     RCMP_CODEC* m_codec;                // 0x14 [O]; [R] ctor 0; [U] ChooseCodec stores it, FreeChosenCodec deletes it
                                         //     (slot 1, flags 3); GetFrame / GetCurrentFrameNumber / GetFrameRate /
-                                        //     ReleaseFrame call its slots 3 / 4 / 5 / 6; func_003AEAD0 tests it
-    void** mVtbl;                       // 0x18 [R] ctor and dtor RCMP_DECODER_vtbl; func_003AE300 deletes the decoder through
+                                        //     ReleaseFrame call its slots 3 / 4 / 5 / 6; RCMP_AV_PLAYER_getVideoChunk tests it
+    void** mVtbl;                       // 0x18 [R] ctor and dtor RCMP_DECODER_vtbl; RCMP_AV_PLAYER__AV_PLAYER deletes the decoder through
                                         //     slot 1
 
     // Methods bound to their retail symbols by asm labels.

@@ -7483,7 +7483,7 @@ extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
@@ -7502,7 +7502,7 @@ extern float D_004A36D8;
  * or non-local rider that it is the focus rider. Then speech instance 0 must be ready (cSpeechSys_CanTakeSpeech) and the rider
  * within 30 units of a camera (D_004A36D8). Speech 8324, 8323 or 8337 (peak 1, 2 or 3 of the location, from
  * cSSXAudio_GetLocationPeakBit) is requested for the rider on speech instance 0 (cSpeechSys_AddRequest); when queued, the speech hook
- * D_004A482C gets its packed id (func_003D8008(1, 0, id)), 2 arguments, the rider's speech bit (cSSXAudio_GetRiderSpeechBit) and 3.
+ * D_004A482C gets its packed id (SPCH_makeKey(1, 0, id)), 2 arguments, the rider's speech bit (cSSXAudio_GetRiderSpeechBit) and 3.
  * cSSXAudio_LiftWithAirTime calls it.
  *
  * @param rider  the rider
@@ -7529,15 +7529,15 @@ extern "C" void cSSXAudio_SpeakBigAir(cSSXAudio* self, cRider* rider)
     int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (cSpeechSys_AddRequest(snd, 0, 8324, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8324), 2, speakerBit, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8324), 2, speakerBit, 3);
         }
     } else if (sel == 2) {
         if (cSpeechSys_AddRequest(snd, 0, 8323, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8323), 2, speakerBit, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8323), 2, speakerBit, 3);
         }
     } else {
         if (cSpeechSys_AddRequest(snd, 0, 8337, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8337), 2, speakerBit, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8337), 2, speakerBit, 3);
         }
     }
 }
@@ -7553,7 +7553,7 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
@@ -7590,30 +7590,30 @@ extern "C" void cSSXAudio_SpeakCheer(cSSXAudio* self, cRider* rider, int alt)
         int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8336, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8336), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8336), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8347, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8347), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8347), 1, speakerBit);
             }
         } else {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8349, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8349), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8349), 1, speakerBit);
             }
         }
     } else {
         int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8322, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8322), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8322), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8346, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8346), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8346), 1, speakerBit);
             }
         } else {
             if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8348, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8348), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8348), 1, speakerBit);
             }
         }
     }
@@ -7631,7 +7631,7 @@ extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
@@ -7674,15 +7674,15 @@ extern "C" void cSSXAudio_SpeakWipeout(cSSXAudio* self, cRider* rider)
     int sel = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8328, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8328), 2, speakerBit, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8328), 2, speakerBit, mode);
         }
     } else if (sel == 2) {
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8352, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8352), 2, speakerBit, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8352), 2, speakerBit, mode);
         }
     } else {
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8353, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8353), 2, speakerBit, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8353), 2, speakerBit, mode);
         }
     }
 }
@@ -7698,7 +7698,7 @@ extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 int cSpeechSys_AddRequest_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
         int refresh) __asm__("cSpeechSys_AddRequest");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" cGame* cAudioInterface_getGame();
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
@@ -7798,19 +7798,19 @@ void cSSXAudio_SpeakOvertake_0560(cSSXAudio* self, cRider* passer, cRider* passe
     if (sel == 2) {
         closingSpeed = 0.0f;
         if (cSpeechSys_AddRequest_f(snd, 0, 8321, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8321), 2, rA, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8321), 2, rA, mode);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8319, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8319), 2, rB, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8319), 2, rB, mode);
         }
     } else if (sel < 2) {
         closingSpeed = 0.0f;
         if (cSpeechSys_AddRequest_f(snd, 0, 8320, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
             passedBit |= 0x1000;
-            D_004A482C_5(func_003D8008(1, 0, 8320), 3, rA, mode, passedBit);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8320), 3, rA, mode, passedBit);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8317, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8317), 2, rB, mode);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8317), 2, rB, mode);
         }
     }
 }
@@ -7827,7 +7827,7 @@ extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 // cSpeechSys_AddRequest with the float argument in its real position (same registers).
 int cSpeechSys_AddRequest_f(void* self, int a, int b, cRider* rider, int d, float f, int e,
         int refresh) __asm__("cSpeechSys_AddRequest");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
@@ -7888,24 +7888,24 @@ extern "C" void cSSXAudio_SpeakRiderHit(cSSXAudio* self, cRider* attacker, cRide
     int sel = cSSXAudio_GetRiderRelation(self, attacker, victim);
     if (sel == 2) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8335, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8335), 2, rB, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8335), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 1) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8318, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8318), 2, rB, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8318), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 0) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8312, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8312), 2, rB, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8312), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8334, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8334), 2, rA, 3);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8334), 2, rA, 3);
         }
     }
 }
@@ -7917,7 +7917,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakBump);
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
 extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
@@ -7958,7 +7958,7 @@ extern "C" void cSSXAudio_SpeakBump(cSSXAudio* self, cRider* rider, int play)
     if (!ok) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     if (cSpeechSys_AddRequest(snd, 0, 8311, rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
-    D_004A482C(func_003D8008(1, 0, 8311), 1, speakerBit);
+    D_004A482C(SPCH_makeKey(1, 0, 8311), 1, speakerBit);
 }
 #endif
 
@@ -8037,7 +8037,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakScriptEventType0);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
@@ -8070,7 +8070,7 @@ void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* 
     if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8403, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int subjectBit = cSSXAudio_GetRiderSubjectBit_i(self, obj);
-    D_004A482C_5(func_003D8008(1, 0, 8403), 3, speakerBit, subjectBit, 4);
+    D_004A482C_5(SPCH_makeKey(1, 0, 8403), 3, speakerBit, subjectBit, 4);
 }
 #endif
 
@@ -8078,7 +8078,7 @@ void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* 
 INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakScriptEventType1);
 #ifdef SKIP_ASM
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
@@ -8108,7 +8108,7 @@ void cSSXAudio_SpeakScriptEventType1_impl(cSSXAudio* self, cRider* rider, void* 
     if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8404, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int subjectBit = cSSXAudio_GetRiderSubjectBit_i(self, obj);
-    D_004A482C_4(func_003D8008(1, 0, 8404), 2, speakerBit, subjectBit);
+    D_004A482C_4(SPCH_makeKey(1, 0, 8404), 2, speakerBit, subjectBit);
 }
 #endif
 
@@ -8182,7 +8182,7 @@ void cSSXAudio_SpeakPlace_impl(cSSXAudio* self, cRider* rider)
     } else {
         placeMode = 2;
     }
-    D_004A482C_4(func_003D8008(1, 0, 8377), 2, speakerBit, placeMode);
+    D_004A482C_4(SPCH_makeKey(1, 0, 8377), 2, speakerBit, placeMode);
 }
 #endif
 
@@ -8214,7 +8214,7 @@ extern "C" void cSSXAudio_SpeakOffBalance(cSSXAudio* self, cRider* rider)
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     if (cSpeechSys_AddRequest(bm, 0, 8376, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
-    D_004A482C(func_003D8008(1, 0, 8376), 1, speakerBit);
+    D_004A482C(SPCH_makeKey(1, 0, 8376), 1, speakerBit);
 }
 #endif
 
@@ -8229,7 +8229,7 @@ extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 // cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
 int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -8250,7 +8250,7 @@ extern "C" void cSSXAudio_SpeakCharacterSelect(cSSXAudio* self, int identity)
             if (cBENewRaceInterface_newRace.cGamePath != 0) {
                 if (cSpeechSys_AddRequest(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
                     int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
-                    D_004A482C(func_003D8008(1, 0, 8380), 1, speakerBit);
+                    D_004A482C(SPCH_makeKey(1, 0, 8380), 1, speakerBit);
                 }
             }
         }
@@ -8267,7 +8267,7 @@ extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 // cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
 int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -8286,7 +8286,7 @@ extern "C" void cSSXAudio_SpeakCustomize(cSSXAudio* self, int identity)
         if (cSpeechSys_CanTakeSpeech(bm, 0) != 0) {
             if (cSpeechSys_AddRequest(bm, 0, 8381, 0, identity, 0, 1, 0.0f) != 0) {
                 int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
-                D_004A482C(func_003D8008(1, 0, 8381), 1, speakerBit);
+                D_004A482C(SPCH_makeKey(1, 0, 8381), 1, speakerBit);
             }
         }
     }
@@ -8748,7 +8748,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -8756,7 +8756,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  * Requests DJ speech line 8392 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn). The request goes to speech instance 0 with identity 10 (the DJ,
- * cSpeechSys_AddRequest); when queued, the speech hook D_004A482C gets its packed id (func_003D8008(1, 0, 8392)), the language
+ * cSpeechSys_AddRequest); when queued, the speech hook D_004A482C gets its packed id (SPCH_makeKey(1, 0, 8392)), the language
  * bit (cSSXAudio_GetSpeechLanguage) and the peak bit of the location (cSSXAudio_GetLocationPeakBit). cSSXAudio_PlayScriptSpeechEvent (event 8) and cSSXAudio_SpeakDJBetweenEvents (pick
  * 2) call it.
  */
@@ -8766,7 +8766,7 @@ extern "C" void cSSXAudio_SpeakDJLine8392(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8392), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8392), 2, languageBit, peakBit);
         }
     }
 }
@@ -8783,7 +8783,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -8800,7 +8800,7 @@ extern "C" void cSSXAudio_SpeakDJLine8393(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8393), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8393), 2, languageBit, peakBit);
         }
     }
 }
@@ -8820,7 +8820,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
@@ -8838,7 +8838,7 @@ extern "C" void cSSXAudio_SpeakDJLine8394(cSSXAudio* self)
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 8394), 3, languageBit, riderBit, peakBit);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8394), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -8855,7 +8855,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -8871,7 +8871,7 @@ extern "C" void cSSXAudio_SpeakDJLine8423(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8423), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8423), 2, languageBit, peakBit);
         }
     }
 }
@@ -8888,7 +8888,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -8904,7 +8904,7 @@ extern "C" void cSSXAudio_SpeakDJLine8424(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8424), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8424), 2, languageBit, peakBit);
         }
     }
 }
@@ -8921,7 +8921,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -8949,7 +8949,7 @@ extern "C" void cSSXAudio_SpeakDJLine8425(cSSXAudio* self, int mode)
             } else {
                 peakBit = cSSXAudio_GetLocationPeakBit(self, mode);
             }
-            D_004A482C_4(func_003D8008(1, 0, 8425), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8425), 2, languageBit, peakBit);
         }
     }
 }
@@ -8963,7 +8963,7 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
@@ -8982,7 +8982,7 @@ extern "C" void cSSXAudio_SpeakDJLocation(cSSXAudio* self, int location)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
-            D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -8999,7 +8999,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
@@ -9018,7 +9018,7 @@ extern "C" void cSSXAudio_SpeakDJCurrentLocation(cSSXAudio* self, int subLocatio
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), subLocation);
-            D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -9035,7 +9035,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9052,7 +9052,7 @@ extern "C" void cSSXAudio_SpeakDJLine8378(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8378), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8378), 2, languageBit, peakBit);
         }
     }
 }
@@ -9066,7 +9066,7 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" void cSpeechSys_PurgeInstance(void*, int);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
@@ -9096,7 +9096,7 @@ extern "C" void cSSXAudio_SpeakDJChoiceLine(cSSXAudio* self, int firstChoice, in
             }
             int y = 2;
             if (!secondChoice) y = 1;
-            D_004A482C_5(func_003D8008(1, 0, 8421), 3, languageBit, x, y);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8421), 3, languageBit, x, y);
         }
     }
 }
@@ -9108,7 +9108,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8422);
 extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -9123,7 +9123,7 @@ extern "C" void cSSXAudio_SpeakDJLine8422(cSSXAudio* self)
     if (cSSXAudio_IsDJSpeechOn(self) != 0) {
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
-            D_004A482C(func_003D8008(1, 0, 8422), 1, languageBit);
+            D_004A482C(SPCH_makeKey(1, 0, 8422), 1, languageBit);
         }
     }
 }
@@ -9136,7 +9136,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJSongAnnouncement);
 extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
 
@@ -9166,7 +9166,7 @@ extern "C" void cSSXAudio_SpeakDJSongAnnouncement(cSSXAudio* self, int n)
                     hi = 1 << n;
                 }
             }
-            D_004A482C_6(func_003D8008(1, 0, 8399), 4, languageBit, 3, lo, hi);
+            D_004A482C_6(SPCH_makeKey(1, 0, 8399), 4, languageBit, 3, lo, hi);
         }
     }
 }
@@ -9186,7 +9186,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
@@ -9204,7 +9204,7 @@ extern "C" void cSSXAudio_SpeakDJWinner(cSSXAudio* self)
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 8450), 3, languageBit, riderBit, peakBit);
+            D_004A482C_5(SPCH_makeKey(1, 0, 8450), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -9222,7 +9222,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int cBENewRaceInterface_getRival(void*);
 // cSSXAudio_GetSubjectCharacterBit returns a value (the unit declares it void).
 int cSSXAudio_GetSubjectCharacterBit_r(void* self, int a, int b) __asm__("cSSXAudio_GetSubjectCharacterBit");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9239,7 +9239,7 @@ extern "C" void cSSXAudio_SpeakDJRival(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int rivalBit = cSSXAudio_GetSubjectCharacterBit_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
-            D_004A482C_4(func_003D8008(1, 0, 8459), 2, languageBit, rivalBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8459), 2, languageBit, rivalBit);
         }
     }
 }
@@ -9256,7 +9256,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9273,7 +9273,7 @@ extern "C" void cSSXAudio_SpeakDJLine8491(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int peakBit = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8491), 2, languageBit, peakBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8491), 2, languageBit, peakBit);
         }
     }
 }
@@ -9286,7 +9286,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakDJLine8492);
 extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9304,7 +9304,7 @@ extern "C" void cSSXAudio_SpeakDJLine8492(cSSXAudio* self)
         if (cSpeechSys_AddRequest(&self->SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int playedBefore = self->mLine8492Played;
-            D_004A482C_4(func_003D8008(1, 0, 8492), 2, languageBit, playedBefore);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8492), 2, languageBit, playedBefore);
         }
         self->mLine8492Played = 1;
     }
@@ -9322,7 +9322,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9339,7 +9339,7 @@ extern "C" void cSSXAudio_SpeakDJLine8493(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 8493), 2, languageBit, locationBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8493), 2, languageBit, locationBit);
         }
     }
 }
@@ -9353,7 +9353,7 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9372,7 +9372,7 @@ extern "C" void cSSXAudio_SpeakDJFragsResult(cSSXAudio* self, int location)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
-            D_004A482C_4(func_003D8008(1, 0, 8494), 2, languageBit, locationBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8494), 2, languageBit, locationBit);
         }
     }
 }
@@ -9386,7 +9386,7 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9405,7 +9405,7 @@ extern "C" void cSSXAudio_SpeakDJUberTricksResult(cSSXAudio* self, int location)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, location, -1);
-            D_004A482C_4(func_003D8008(1, 0, 8495), 2, languageBit, locationBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8495), 2, languageBit, locationBit);
         }
     }
 }
@@ -9565,7 +9565,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9587,7 +9587,7 @@ extern "C" void cSSXAudio_SpeakPAEventStart(cSSXAudio* self)
         if (self->PlayHistoryExists(0, 0) != 0) return;
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
         int languageBit = cSSXAudio_GetSpeechLanguage(self);
-        D_004A482C_4(func_003D8008(1, 0, 8384), 2, languageBit, 1);
+        D_004A482C_4(SPCH_makeKey(1, 0, 8384), 2, languageBit, 1);
     }
 }
 #endif
@@ -9602,7 +9602,7 @@ extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
 int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9619,7 +9619,7 @@ extern "C" void cSSXAudio_SpeakPALine8385(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(func_003D8008(1, 0, 8385), 2, languageBit, riderBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8385), 2, languageBit, riderBit);
         }
     }
 }
@@ -9635,7 +9635,7 @@ extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
 int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9652,7 +9652,7 @@ extern "C" void cSSXAudio_SpeakPALine8386(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(func_003D8008(1, 0, 8386), 2, languageBit, riderBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8386), 2, languageBit, riderBit);
         }
     }
 }
@@ -9670,7 +9670,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9688,7 +9688,7 @@ extern "C" void cSSXAudio_SpeakPALine8387(cSSXAudio* self)
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
     int languageBit = cSSXAudio_GetSpeechLanguage(self);
     int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-    D_004A482C_4(func_003D8008(1, 0, 8387), 2, languageBit, locationBit);
+    D_004A482C_4(SPCH_makeKey(1, 0, 8387), 2, languageBit, locationBit);
 }
 #endif
 
@@ -9796,7 +9796,7 @@ extern "C" bool cSSXAudio_SpeakPAPlace(cSSXAudio* vself, cRider *rider, int flag
             break;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 8388), 3, languageBit, riderBit, placeBit);
+    D_004A482C_5(SPCH_makeKey(1, 0, 8388), 3, languageBit, riderBit, placeBit);
     return true;
 }
 #endif
@@ -9842,7 +9842,7 @@ extern "C" void cSSXAudio_SpeakPARiderPlace(cSSXAudio* self, cRider* rider)
     int languageBit = cSSXAudio_GetSpeechLanguage(self);
     int riderBit = cSSXAudio_GetRiderSubjectBit_i(self, rider);
     int placeBit = cSSXAudio_GetRiderPlaceBit(self, rider);
-    D_004A482C_5(func_003D8008(1, 0, 8389), 3, languageBit, riderBit, placeBit);
+    D_004A482C_5(SPCH_makeKey(1, 0, 8389), 3, languageBit, riderBit, placeBit);
 }
 #endif
 
@@ -9903,7 +9903,7 @@ extern "C" void cSSXAudio_SpeakPAResult(cSSXAudio* self)
             if (z) n = 0;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 8391), 3, languageBit, riderBit, n);
+    D_004A482C_5(SPCH_makeKey(1, 0, 8391), 3, languageBit, riderBit, n);
 }
 #endif
 
@@ -9918,7 +9918,7 @@ extern "C" void* cAudioInterface_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
@@ -9935,7 +9935,7 @@ extern "C" void cSSXAudio_SpeakPALine8379(cSSXAudio* self)
         if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
             int languageBit = cSSXAudio_GetSpeechLanguage(self);
             int locationBit = cSSXAudio_GetLocationSpeechBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 8379), 2, languageBit, locationBit);
+            D_004A482C_4(SPCH_makeKey(1, 0, 8379), 2, languageBit, locationBit);
         }
     }
 }
@@ -9982,7 +9982,7 @@ extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -10004,7 +10004,7 @@ extern "C" void cSSXAudio_SpeakArcadeBoost(cSSXAudio* self, cRider* obj, int eve
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8359), 1, eventValue);
+        D_004A482C(SPCH_makeKey(1, 0, 8359), 1, eventValue);
     }
 }
 #endif
@@ -10018,7 +10018,7 @@ extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -10044,7 +10044,7 @@ extern "C" void cSSXAudio_SpeakArcadeResult(cSSXAudio* self, cRider* obj, int re
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8360), 1, resultBit);
+        D_004A482C(SPCH_makeKey(1, 0, 8360), 1, resultBit);
     }
 }
 #endif
@@ -10081,7 +10081,7 @@ extern "C" void cSSXAudio_SpeakArcadeCheckpoint(cSSXAudio* self, cRider* rider, 
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (n == 0) return;
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8361, 0, 0xC, 0, 0, zero) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8361), 1, n);
+        D_004A482C(SPCH_makeKey(1, 0, 8361), 1, n);
     }
 }
 #endif
@@ -10092,7 +10092,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeUberMilestone);
 extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -10114,7 +10114,7 @@ extern "C" void cSSXAudio_SpeakArcadeUberMilestone(cSSXAudio* self, cRider* obj,
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8499, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8499), 1, ev);
+        D_004A482C(SPCH_makeKey(1, 0, 8499), 1, ev);
     }
 }
 #endif
@@ -10125,7 +10125,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeMultiplier);
 extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
-extern "C" void* func_003D8008(int a, int b, int c);
+extern "C" void* SPCH_makeKey(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
 /**
@@ -10146,7 +10146,7 @@ extern "C" void cSSXAudio_SpeakArcadeMultiplier(cSSXAudio* self, cRider* obj, in
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cSpeechSys_AddRequest((char*)&self->SpeechSys, 0, 8517, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8517), 1, ev);
+        D_004A482C(SPCH_makeKey(1, 0, 8517), 1, ev);
     }
 }
 #endif
@@ -13663,7 +13663,7 @@ INCLUDE_ASM("sound/soundsys", cPS2SoundManager_Init);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void System_VectorToReal5();
 extern "C" void SNDSYSI_init(void* buf, int size, int flags);
-extern "C" int func_003B5B68(int* out);
+extern "C" int SNDSYS_getLargestUnusedMem(int* out);
 extern const char str_mSoundHeap[];
 
 struct sSndVtE8CB0 {
@@ -13680,7 +13680,7 @@ struct sSndVtE8CB0 {
  * Allocates mSoundHeap (0x32000 bytes, tag "mSoundHeap"), calls System_VectorToReal5, applies @p mode through virtual slot 2
  * (SetMode), registers the heap with SNDSYSI_init (flags 0x80303), then links the 32 sound-memory nodes into a free
  * list (each with no address range and size 0; free head 31, +0x318 = -1) and records the main-memory high address from
- * func_003B5B68 in mMainMemHighAddr.
+ * SNDSYS_getLargestUnusedMem in mMainMemHighAddr.
  *
  * @param mode  the sound mode (On Tour eSOUNDDEF_MODE mode)
  */
@@ -13703,7 +13703,7 @@ void cPS2SoundManager::Init(int mode)
     }
     mMemLoadLimited = 0;
     int blockAddr = 0;
-    int blockSize = func_003B5B68(&blockAddr);
+    int blockSize = SNDSYS_getLargestUnusedMem(&blockAddr);
     mMainMemHighAddr = blockAddr + blockSize;
 }
 #endif
@@ -13713,14 +13713,14 @@ INCLUDE_ASM("sound/soundsys", cPS2SoundManager_SetMode);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_getopts(void* cfg);
 extern "C" void SNDSYS_setopts(void* cfg);
-extern "C" void func_003BC930();
+extern "C" void DTSENC_install();
 
 
 /**
  * Switches the sound driver configuration for an audio mode.
  *
  * Fills a driver configuration (SNDSYS_getopts defaults, then rates 36000/24000 and fixed levels) with per-mode voice
- * and buffer counts: mode 3 (calls func_003BC930, records mModeGroup = 2), mode 2 and modes 0/1 (record mModeGroup =
+ * and buffer counts: mode 3 (calls DTSENC_install, records mModeGroup = 2), mode 2 and modes 0/1 (record mModeGroup =
  * 1), and applies it with SNDSYS_setopts; any other mode applies the defaults. Likely bug: the early return tests the
  * other group's value (mode 3 returns 1 when mModeGroup is 1, modes 0-2 when it is 2), so re-applying the current
  * setting goes through and switching between the two groups never does.
@@ -13750,7 +13750,7 @@ int cPS2SoundManager::SetMode(int mode)
         cfg.set.rendermode[1] = 288;
         cfg.set.rendermode[2] = 36;
         cfg.set.outputspdifmode = 2;
-        func_003BC930();
+        DTSENC_install();
         mModeGroup = 2;
         break;
     case 2:
@@ -13792,20 +13792,20 @@ int cPS2SoundManager::SetMode(int mode)
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_Shutdown);
 #ifdef SKIP_ASM
-extern "C" void func_003B5B20(int a, int b);
+extern "C" void SNDSYS_setMemLimits(int a, int b);
 extern "C" void SNDSYS_restore();
 void cMemMan_free(void*);
 
 /**
  * Shuts the PS2 sound manager down and releases its sound heap.
  *
- * Clears the sound-memory load limits (func_003B5B20(-1, -1)), restores the sound library (SNDSYS_restore), frees
+ * Clears the sound-memory load limits (SNDSYS_setMemLimits(-1, -1)), restores the sound library (SNDSYS_restore), frees
  * mSoundHeap if set and zeroes it.
  */
 void cPS2SoundManager::Shutdown()
 {
     void* soundHeap;
-    func_003B5B20(-1, -1);
+    SNDSYS_setMemLimits(-1, -1);
     SNDSYS_restore();
     soundHeap = mSoundHeap;
     if (soundHeap != 0) {
@@ -13840,8 +13840,8 @@ extern "C" void* cSoundManager_Construct()
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_AllocSoundMem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003B5B20(int a, int b);
-extern "C" int func_003B5B68(int* out);
+extern "C" void SNDSYS_setMemLimits(int a, int b);
+extern "C" int SNDSYS_getLargestUnusedMem(int* out);
 // The unit defines cPS2SoundManager_TakeUnusedNode with its own entry/pool view types; bind this unit's struct view.
 tPS2SoundMemNode* cPS2SoundManager_TakeUnusedNode_v(cPS2SoundManager* self) __asm__("cPS2SoundManager_TakeUnusedNode");
 
@@ -13850,9 +13850,9 @@ tPS2SoundMemNode* cPS2SoundManager_TakeUnusedNode_v(cPS2SoundManager* self) __as
  *
  * First walks the free-block list (mFreeNodeHead, sorted by address): a block of exactly @p size is marked used and
  * unlinked, a bigger one is split (a new node from cPS2SoundManager_TakeUnusedNode takes its top @p size bytes). Otherwise carves the
- * block off the top of main sound memory: fails with -1 when func_003B5B68 reports less free memory than @p size, with
+ * block off the top of main sound memory: fails with -1 when SNDSYS_getLargestUnusedMem reports less free memory than @p size, with
  * -2 while load limits are on (mMemLoadLimited), else lowers mMainMemHighAddr by @p size and tells the driver
- * (func_003B5B20). No check that cPS2SoundManager_TakeUnusedNode found a node. Likely bug: an exact fit at the head of the free list is
+ * (SNDSYS_setMemLimits). No check that cPS2SoundManager_TakeUnusedNode found a node. Likely bug: an exact fit at the head of the free list is
  * never unlinked (mFreeNodeHead keeps pointing at the now-used node, whose next is cleared), so the rest of the free
  * list is lost and the next request of that size gets the same block again.
  *
@@ -13892,7 +13892,7 @@ int cPS2SoundManager::AllocSoundMem(int size)
         }
     }
     int avail = 0;
-    if (func_003B5B68(&avail) < size) {
+    if (SNDSYS_getLargestUnusedMem(&avail) < size) {
         return -1;
     }
     if (mMemLoadLimited != 0) {
@@ -13905,7 +13905,7 @@ int cPS2SoundManager::AllocSoundMem(int size)
     n->next = -1;
     n->highAddr = top;
     n->size = size;
-    func_003B5B20(-1, mMainMemHighAddr -= size);
+    SNDSYS_setMemLimits(-1, mMainMemHighAddr -= size);
     return n->index;
 }
 #endif
@@ -13969,7 +13969,7 @@ void cPS2SoundManager::DeallocSoundMem(int memHandle)
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_SetSoundMemLoadLimits);
 #ifdef SKIP_ASM
-extern "C" void func_003B5B20(int a, int b);
+extern "C" void SNDSYS_setMemLimits(int a, int b);
 
 
 struct sSndPool2A9250 {
@@ -13984,7 +13984,7 @@ struct sSndPool2A9250 {
 /**
  * Restricts sound-memory loading to one memory node's address range.
  *
- * Sets +0x31C to 1 and calls func_003B5B20 with the node's lowAddr and highAddr.
+ * Sets +0x31C to 1 and calls SNDSYS_setMemLimits with the node's lowAddr and highAddr.
  *
  * @param memHandle  index of the sound-memory node
  */
@@ -13992,23 +13992,23 @@ void cPS2SoundManager::SetSoundMemLoadLimits(int memHandle)
 {
     mMemLoadLimited = 1;
     tPS2SoundMemNode* ps2SoundMemNode = &((&mNodes[0]))[memHandle];
-    func_003B5B20(ps2SoundMemNode->lowAddr, ps2SoundMemNode->highAddr);
+    SNDSYS_setMemLimits(ps2SoundMemNode->lowAddr, ps2SoundMemNode->highAddr);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_RestoreSoundMemLoadLimits);
 #ifdef SKIP_ASM
-extern "C" void func_003B5B20(int a, int b);
+extern "C" void SNDSYS_setMemLimits(int a, int b);
 
 /**
  * Lifts the sound-memory load limit set by cPS2SoundManager_SetSoundMemLoadLimits.
  *
- * Calls func_003B5B20(-1, mMainMemHighAddr) and clears +0x31C.
+ * Calls SNDSYS_setMemLimits(-1, mMainMemHighAddr) and clears +0x31C.
  */
 void cPS2SoundManager::RestoreSoundMemLoadLimits()
 {
-    func_003B5B20(-1, mMainMemHighAddr);
+    SNDSYS_setMemLimits(-1, mMainMemHighAddr);
     mMemLoadLimited = 0;
 }
 #endif
@@ -14048,13 +14048,13 @@ extern "C" tPS2SoundMemNode* cPS2SoundManager_TakeUnusedNode(cPS2SoundManager* s
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_FreeTopBlock);
 #ifdef SKIP_ASM
-extern "C" void func_003B5B20(int a, int b);
+extern "C" void SNDSYS_setMemLimits(int a, int b);
 
 /**
  * Returns the block at the top of main sound memory to the pool and puts its node back on the unused chain.
  *
  * mMainMemHighAddr becomes the node's highAddr; the node's lowAddr / highAddr become -1, size and state 0 (unused), and
- * it is pushed on mUnusedNodeHead. Unless load limits are set (mMemLoadLimited), func_003B5B20(-1, mMainMemHighAddr)
+ * it is pushed on mUnusedNodeHead. Unless load limits are set (mMemLoadLimited), SNDSYS_setMemLimits(-1, mMainMemHighAddr)
  * applies the new limit. cPS2SoundManager_DeallocSoundMem calls it.
  *
  * @param memNode  the memory node
@@ -14069,7 +14069,7 @@ extern "C" void cPS2SoundManager_FreeTopBlock(cPS2SoundManager* self, tPS2SoundM
     memNode->next = self->mUnusedNodeHead;
     self->mUnusedNodeHead = memNode->index;
     if (self->mMemLoadLimited == 0) {
-        func_003B5B20(-1, self->mMainMemHighAddr);
+        SNDSYS_setMemLimits(-1, self->mMainMemHighAddr);
     }
 }
 #endif

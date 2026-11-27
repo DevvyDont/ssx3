@@ -7,7 +7,7 @@
 // 336-byte status area and a 4-byte word with the IOP's read position in the sent data. The EE reads all three through
 // the uncached alias of their addresses ((address & 0x0FFFFFFF) | 0x20000000). Requests go to the IOP as 'gmlk'
 // commands (func_003F4C98 / func_003F4C68): 'crea', 'dest', 'stat', 'recv', 'send', 'ctrl'. Retail code: unit
-// ealib/seg_2DCAE8 (NetGameLinkCreate .. NetGameLinkControl, func_003E6878). Owner: cDSockChannel::mGameLink
+// ealib/seg_2DCAE8 (NetGameLinkCreate .. NetGameLinkControl, NetGameLink_completeStatus). Owner: cDSockChannel::mGameLink
 // (online/dsockchannel.h).
 //
 // Name: DirtySock's NetGameLinkRefT ([O] On Tour's DWARF has the struct, opaque (size 0), and cDSockChannel's
@@ -27,8 +27,8 @@ struct NetGameLinkRefT {
     int iopref;                     // 0x000 [R] the 'crea' reply (the IOP's link reference) lands here; [U] Destroy,
                                     //       Status, Recv, Send and Control pass it with their commands
     int statstate;                  // 0x004 [R] -1 (no status read yet); [U] NetGameLinkStatus: -1 reads it once
-                                    //       synchronously, 0 sends 'stat' and sets 1; func_003E6878 (the reply) sets 0
-    char stat[0x150];               // 0x008 [U] func_003E6878 copies the 336-byte status area in; NetGameLinkStatus
+                                    //       synchronously, 0 sends 'stat' and sets 1; NetGameLink_completeStatus (the reply) sets 0
+    char stat[0x150];               // 0x008 [U] NetGameLink_completeStatus copies the 336-byte status area in; NetGameLinkStatus
                                     //       returns it (On Tour's NetGameLinkStatT is 0x150 too)
     char* statbuf;                  // 0x158 [R] the status area the IOP fills
     int fillid;                     // 0x15C [U] NetGameLinkRecv: the receive-buffer fill last seen

@@ -52,7 +52,7 @@ struct tMoviePlayOptions {
 
 struct cMoviePlayer {
     int mbMovieFinished;        // 0x00 [O] (On Tour bool); [U] startPlay / purge 0; syncPlay / asyncUpdate store
-                                //       func_003AE860's "finished"; asyncRender / asyncPause / asyncResume test it;
+                                //       RCMP_AV_PLAYER_IsAudioFinished's "finished"; asyncRender / asyncPause / asyncResume test it;
                                 //       cRealFE_update reads it (isMovieFinished)
     int mbReDraw;               // 0x04 [O] (On Tour bool); [U] startPlay / purge 0; asyncUpdate / syncPlay set it when
                                 //       no new frame was decoded; asyncRender / syncPlay redraw (driver slot 5) when
@@ -60,7 +60,7 @@ struct cMoviePlayer {
     int mbPaused;               // 0x08 [O] (On Tour bool); [R] ctor 0; [U] asyncPause 1, asyncResume 0, purge 0;
                                 //       asyncRender redraws while set
     void* mpCurrFrame;          // 0x0C [O] FRAME*; [R] ctor 0; [U] startPlay / asyncUpdate / syncPlay store the
-                                //       decoder's frame (func_003AE450 / func_003AE6C8), asyncRender draws it, purge
+                                //       decoder's frame (RCMP_AV_PLAYER_GetFirstFrame / RCMP_AV_PLAYER_GetFrame), asyncRender draws it, purge
                                 //       releases it (RCMP_DECODER_ReleaseFrame); preview assert "mpCurrFrame"
     float m_fSpeed;             // 0x10 [O]; [R] ctor = m_PlayOp.fPlaySpeed; [U] cMoviePlayer_init copies it again
     tMoviePlayOptions m_PlayOp; // 0x14 [O]; [R] ctor tMoviePlayOptions_SetDefaults(this + 0x14); [U] cMoviePlayer_init
@@ -68,7 +68,7 @@ struct cMoviePlayer {
                                 //       +0x24; startPlay +0x30 (iDrawLayer); ctor / init +0x34 (fPlaySpeed)
     RCMP_AV_PLAYER* m_pPlayer;  // 0x38 [O] (On Tour PspAvPlayer*; on PS2 the AV player); [R] ctor 0; [U]
                                 //       cMoviePlayer_init creates it (0x78 bytes from the movie allocator,
-                                //       func_003ADE08 / func_003ADDC0), purge deletes it (func_003AE300(p, 3)); every
+                                //       RCMP_AV_PLAYER_AV_PLAYER1 / RCMP_AV_PLAYER_AV_PLAYER), purge deletes it (RCMP_AV_PLAYER__AV_PLAYER(p, 3)); every
                                 //       method tests it first
     RCMP_VIDEO_DRIVER* m_pVd;   // 0x3C [O] VIDEO_DRIVER*; [R] ctor 0; [U] startPlay = SSX_VD_create(...); asyncRender /
                                 //       syncPlay / asyncUpdate call its vtable slots 4 / 5 / 6 (vptr at +0x4); purge

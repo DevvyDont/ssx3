@@ -70,7 +70,7 @@ struct SNDPLAYOPTS {
     unsigned short filteramount;   // 0x12 (name ours; On Tour: pad2, a pad there); [U] retail SNDplaysetdef clears it
                                    //      and SNDBANKI_playtimbre / SNDPKTPLAY_start pass it to SNDPLATFORM_playtimbre
                                    //      between timemult and lowpasscutoff (its filterAmount, the clip level for
-                                   //      func_003C30C8; On Tour's playtimbre has no such argument)
+                                   //      SNDDRV_setClipLevel; On Tour's playtimbre has no such argument)
     unsigned short lowpasscutoff;  // 0x14 [O]; [U] SNDplaysetdef 0xFFFF
     unsigned short highpasscutoff; // 0x16 [O]; [U] SNDplaysetdef 0
 };
@@ -308,7 +308,7 @@ CHECK_SIZE(ENVELOPE, 0x8);
 // earlier than On Tour's ([U] SNDPKTPLAY_start: pspo->bend -> 0x64, pssa->detune -> 0x84, pssa->bendrange * 100 -> 0x82,
 // pspo->pitchmult -> 0x88; SNDPLATFORM_setpitch writes finalpitch 0x8A; status 0x69 and timemult 0x6A are tested / set
 // by the voice code). The per-bus effect bytes at 0x60..0x63 are retail's own (On Tour keeps them behind pFxVolume).
-// Floats in On Tour's fade members are 16.16 ints in retail (SNDvol stores vol << 16; func_003B86C0 reads the high half).
+// Floats in On Tour's fade members are 16.16 ints in retail (SNDvol stores vol << 16; SND_getVolume reads the high half).
 struct CHANPUB {
     int handle;                    // 0x00 [O]; [U] SNDbankremove / SNDmastervol / SNDVOICEI_free
     short voices[6];               // 0x04 [O]; [U] the platform voices (the SNDPLATFORM_* loops, numchan entries)
@@ -330,12 +330,12 @@ struct CHANPUB {
     unsigned int timestamp;        // 0x2C [O]; [U] SNDVOICEI_free
     int fadePer100Hz;              // 0x30 [O] (float there); [U] SNDvol clears it
     int fadeTargetVol;             // 0x34 [O] (float there)
-    int programmedVol;             // 0x38 [O] (float there); [U] 16.16: SNDvol stores vol << 16, func_003B86C0 reads the
+    int programmedVol;             // 0x38 [O] (float there); [U] 16.16: SNDvol stores vol << 16, SND_getVolume reads the
                                    //      high half (lh 0x3A)
     int envpertick;                // 0x3C [O]
     int envvol;                    // 0x40 [O]
     int envduration;               // 0x44 [O]
-    float finalvol;                // 0x48 [O]; [U] SNDPLATFORM_setfxlevel / func_003C2A50
+    float finalvol;                // 0x48 [O]; [U] SNDPLATFORM_setfxlevel / SNDDRV_applyVolume
     unsigned short builtinazimuth; // 0x4C [O]; [U] SND3dpos
     unsigned char isLfe;           // 0x4E [O]
     char pad[1];                   // 0x4F [O]
@@ -343,13 +343,13 @@ struct CHANPUB {
     signed char numenvelopes;      // 0x5C [O]; [U] the envelope step count
     signed char curenvelope;       // 0x5D [O]
     signed char releaseenvelope;   // 0x5E [O]
-    signed char drylevel;          // 0x5F [O]; [U] SNDPKTPLAY_start (pspo->drylevel), func_003B8700, func_003C2A50
+    signed char drylevel;          // 0x5F [O]; [U] SNDPKTPLAY_start (pspo->drylevel), SND_setDryLevel, SNDDRV_applyVolume
     signed char progfxlevel[1];    // 0x60 [O] (a byte there); [U] SNDPKTPLAY_start stores pssa->fxlevel0 in [0]; indexed by
-                                   //      effect bus in func_003BA740
+                                   //      effect bus in SNDI_updateFxSend
     signed char fxsendlevel[1];    // 0x61 (name ours; On Tour: pad1) [U] the send level per effect bus:
-                                   //      SNDPKTPLAY_start stores pspo->fxlevel0 in [0], func_003B88C8 stores its level
+                                   //      SNDPKTPLAY_start stores pspo->fxlevel0 in [0], SND_setFxLevel stores its level
                                    //      argument (0..127)
-    short fxsend[1];               // 0x62 (name ours) [U] the computed send per bus: func_003BA740 stores
+    short fxsend[1];               // 0x62 (name ours) [U] the computed send per bus: SNDI_updateFxSend stores
                                    //      progfxlevel[bus] * fxsendlevel[bus] * the bus level >> 6; SNDvol /
                                    //      SNDPLATFORM_setfxlevel read it
     signed char pitchbend;         // 0x64 [O] (0x68 there); [U] SNDPKTPLAY_start (pspo->bend)
@@ -785,7 +785,7 @@ CHECK_SIZE(SNDTIMERCLIENT, 0x10);
 // header's block and size and the request handle; the game's client cSSXAudio_HandleUserChunk (sound/ssxAudio) acts
 // on type 3. The words at 0xC and 0x14..0x1F are never written.
 // SNDUSERDATAMSG::type, what the block came with (names ours). [U] SNDBANKI_userdatacallback's callers pass 0
-// (func_003B6788, which SNDbankadd calls once it resolved a patch's samples), 1 (SNDBANKI_playpatch, a timbre started)
+// (SNDBANKI_resolvePatchSamples, which SNDbankadd calls once it resolved a patch's samples), 1 (SNDBANKI_playpatch, a timbre started)
 // and 2 (SNDbankremove); SNDSTRMI_parseheader sends 3 for a stream header.
 enum eSndUserDataType {
     kSNDUSERDATA_BankAdd = 0, kSNDUSERDATA_Play = 1, kSNDUSERDATA_BankRemove = 2, kSNDUSERDATA_StreamHeader = 3
@@ -845,7 +845,7 @@ struct SNDGLOBALSTATE {
     struct SNDTIMERCLIENT* variabletimerclients; // 0x1B4 (name ours) [U] the nodes SNDSYSI_variabletimerservice
                                    //       calls when updatetick changes; retail-only
     int unk_1B8[2];                // 0x1B8
-    int updatetick;                // 0x1C0 (name ours) [U] counts sound updates: the VBlank handler func_003C1980, or
+    int updatetick;                // 0x1C0 (name ours) [U] counts sound updates: the VBlank handler SNDDRV_vblankHandler, or
                                    //       SNDDRV_thread when there is none; SNDSYSI_variabletimerservice compares it
     float unk_1C4;                 // 0x1C4 [U] SNDPLATFORM_init stores the update period in ms (16.68 / 20 / 10.67)
     void (*userdataclient[4])(void*); // 0x1C8 [O]; [U] SNDSYS_adduserdataclient appends
@@ -861,10 +861,10 @@ struct SNDGLOBALSTATE {
     struct CHANPUB* chan;          // 0x1F0 [O]; [U] voicestotal entries of 0x8C (D_0050AAD8)
     struct BANKLIST* banklist;     // 0x1F4 [O]; [U] maxbanks entries of 0x10, indexed by the bank handle (D_0050AADC)
     char unk_1F8[0x14];            // 0x1F8 [U] three 0x14-byte effect-bus records {short; char; int; int; float pan[2]}
-    char unk_20C[0x14];            // 0x20C     for the render kinds 4 / 0x100 / 8 (func_003B8218 returns one,
-    char unk_220[0x14];            // 0x220     func_003B82B8 fills it; the unit's view sA8E8Bus); retail-only, no EA name
+    char unk_20C[0x14];            // 0x20C     for the render kinds 4 / 0x100 / 8 (SNDFX_getBus returns one,
+    char unk_220[0x14];            // 0x220     SNDFX_configureBuses fills it; the unit's view sA8E8Bus); retail-only, no EA name
     struct SNDMEMSTATE* mm;        // 0x234 [O]; [U] SNDMEMI_init points it at the heap (D_0050AB1C)
-    char unk_238[0xA8];            // 0x238 [U] the speaker layout tables func_003C7480 restores and func_003C38E0 pans
+    char unk_238[0xA8];            // 0x238 [U] the speaker layout tables SNDI_setDefaultSpeakerLayouts restores and func_003C38E0 pans
                                    //       with (D_0050AB20); retail-only
     unsigned short srcchancfg3d[6][6]; // 0x2E0 [O]; [U] SNDSYSI_init fills row n - 1 with n channel angles (D_0050ABC8)
     void (*profileenter)(void);    // 0x328 [O]; [U] SNDDRV_thread calls it before a tick

@@ -2033,8 +2033,6 @@ func_002516B0__FPv = 0x002516B0; //type:func
 // --- src/mem/memstd.cpp ---
 func_00253B58 = 0x00253B58; //type:func
 func_00254330__FPv = 0x00254330; //type:func
-func_00254350 = 0x00254350; //type:func
-func_002548D0 = 0x002548D0; //type:func
 func_00254E60 = 0x00254E60; //type:func
 func_002557C0__FPv = 0x002557C0; //type:func
 
@@ -2509,7 +2507,6 @@ lbl_002C7544 = 0x002C7544; //type:label
 lbl_002C7550 = 0x002C7550; //type:label
 
 // --- src/util/menu.cpp ---
-func_002CB350 = 0x002CB350; //type:func
 lbl_002CC184 = 0x002CC184; //type:label
 lbl_002CC18C = 0x002CC18C; //type:label
 lbl_002CC194 = 0x002CC194; //type:label
@@ -3247,27 +3244,6 @@ lbl_003ABE10 = 0x003ABE10; //type:label
 // --- src/world/wscriptcache.cpp ---
 func_003AD290 = 0x003AD290; //type:func
 func_003ADDA0__FPv = 0x003ADDA0; //type:func
-func_003ADDC0 = 0x003ADDC0; //type:func
-func_003ADE08 = 0x003ADE08; //type:func
-func_003ADEC8 = 0x003ADEC8; //type:func
-func_003AE300 = 0x003AE300; //type:func
-func_003AE450 = 0x003AE450; //type:func
-func_003AE6C8 = 0x003AE6C8; //type:func
-func_003AE780 = 0x003AE780; //type:func
-func_003AE860 = 0x003AE860; //type:func
-func_003AE888 = 0x003AE888; //type:func
-func_003AE938__FPv = 0x003AE938; //type:func
-func_003AE958__FPv = 0x003AE958; //type:func
-func_003AE9A0 = 0x003AE9A0; //type:func
-func_003AEAD0 = 0x003AEAD0; //type:func
-func_003AECB8__FPvT0 = 0x003AECB8; //type:func
-func_003AECE0 = 0x003AECE0; //type:func
-func_003AED20__FPvT0i = 0x003AED20; //type:func
-func_003AED40 = 0x003AED40; //type:func
-func_003AEE30 = 0x003AEE30; //type:func
-func_003AEE98 = 0x003AEE98; //type:func
-func_003AEEF8 = 0x003AEEF8; //type:func
-func_003AEFA8 = 0x003AEFA8; //type:func
 lbl_003AFB14 = 0x003AFB14; //type:label
 lbl_003AFB1C = 0x003AFB1C; //type:label
 lbl_003AFB24 = 0x003AFB24; //type:label
@@ -3283,13 +3259,6 @@ lbl_003AFB6C = 0x003AFB6C; //type:label
 lbl_003AFB74 = 0x003AFB74; //type:label
 func_003B07B8__FPv = 0x003B07B8; //type:func
 func_003B07D8__FPv = 0x003B07D8; //type:func
-func_003B07F8 = 0x003B07F8; //type:func
-func_003B08E0 = 0x003B08E0; //type:func
-func_003B0B10 = 0x003B0B10; //type:func
-func_003B0B40 = 0x003B0B40; //type:func
-func_003B10D0 = 0x003B10D0; //type:func
-func_003B11A0 = 0x003B11A0; //type:func
-func_003B11F0 = 0x003B11F0; //type:func
 lbl_003B1990 = 0x003B1990; //type:label
 lbl_003B19E4 = 0x003B19E4; //type:label
 lbl_003B19F4 = 0x003B19F4; //type:label
@@ -3311,7 +3280,6 @@ lbl_003B2E30 = 0x003B2E30; //type:label
 
 // --- gap 0x003B3578-0x003EB198 (no owning cpp segment) ---
 func_003C52C8 = 0x003C52C8; //type:func
-func_003CCA38 = 0x003CCA38; //type:func
 
 // --- src/dirtysock/tags.cpp ---
 

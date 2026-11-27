@@ -11746,3 +11746,405 @@ names5b	0x003AC048	cPS2ChunkResolve_patchSubMeshChain	func_003AC048	[desc] patch
 names5b	0x003AC358	cPS2ChunkResolve_resolveInstanceDma	func_003AC358	[desc] turns a streamed instance's DMA data offset (+0x98) into a pointer and patches its per-instance chains (func_003AC508); cPS2ChunkResolve_resolveInstance calls it
 names5b	0x003AC438	patchDmaChainNoSplit	func_003AC438	[desc] patches a DMA chain in place like func_003AC048 without the split handling (MSCAL D_2320 / D_2358); unreferenced
 names5b	0x003AC508	cPS2ChunkResolve_patchInstanceChain	func_003AC508	[desc] patches one per-instance DMA chain in place: first ref of each pair into the model's data, second into the instance's, MSCAL D_2270 then D_22C8
+names5c	0x00254350	SSX_VD_floorLog2	func_00254350	[desc] returns floor(log2(x)) from the exponent bits of (float)x; first function of the video driver file (before SSX_VD_create)
+names5c	0x002548D0	SSX_VD_PS2_SINGLE_BUFFERD_drawTiles	func_002548D0	[desc] waits for the renderer, sets a full-screen orthographic viewport, then draws each of the driver's tiles as a textured 4-vertex strip; Draw and ReDraw call it with this
+names5c	0x00255670	SSX_VD_PS2_SINGLE_BUFFERD_operator_new2	func_00255670	[e] preview linkonce __nw__25SSX_VD_PS2_SINGLE_BUFFERDUi (operator new(unsigned)); [d] retail lays this unit's run out in the reverse of the preview's linkonce list, continuing from the named VIDEO_DRIVER__VIDEO_DRIVER / VIDEO_DRIVER_CompleteDraw, so this slot is __nw__...Ui; [a] one size argument; [b] allocates through RCMP_rcmp_sys; suffix as PS2_SONY_CODEC_INTERNAL_operator_new2 (same overload)
+names5c	0x002556B0	SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array2	func_002556B0	[e] preview linkonce __vn__25SSX_VD_PS2_SINGLE_BUFFERDUi (operator new[](unsigned)); [d] second slot of the reversed linkonce run; [a] one size argument; [b] allocates through RCMP_rcmp_sys; suffix as PS2_SONY_CODEC_INTERNAL_operator_new_array2
+names5c	0x002556F0	SSX_VD_PS2_SINGLE_BUFFERD_operator_new1	func_002556F0	[e] preview linkonce __nw__25SSX_VD_PS2_SINGLE_BUFFERDUiPCciii (operator new(unsigned, const char *, int, int, int)); [a] five arguments: size, name, three ints; [b] passes them to RCMP_rcmp_sys's allocate; [d] third slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_new1
+names5c	0x00255720	SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array1	func_00255720	[e] preview linkonce __vn__25SSX_VD_PS2_SINGLE_BUFFERDUiPCciii; [a] size, name, three ints; [b] RCMP_rcmp_sys allocate; [d] fourth slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_new_array1
+names5c	0x00255750	SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1	func_00255750	[e] preview linkonce __dl__25SSX_VD_PS2_SINGLE_BUFFERDPv (operator delete(void *)); [a] one pointer; [b] RCMP_rcmp_sys.FreeMemFunc; [d] fifth slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_delete1
+names5c	0x00255778	SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1	func_00255778	[e] preview linkonce __vd__25SSX_VD_PS2_SINGLE_BUFFERDPv (operator delete[](void *)); [a] one pointer; [b] RCMP_rcmp_sys.FreeMemFunc; [d] sixth slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_delete_array1
+names5c	0x002557A0	SSX_VD_PS2_SINGLE_BUFFERD_operator_new	func_002557A0	[e] preview linkonce __nw__25SSX_VD_PS2_SINGLE_BUFFERDUiPv (placement new); [a] (size, place); [b] returns the place; [d] seventh slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_new (the placement form)
+names5c	0x002557A8	SSX_VD_PS2_SINGLE_BUFFERD_operator_delete	func_002557A8	[e] preview linkonce __dl__25SSX_VD_PS2_SINGLE_BUFFERDPvT1 (placement delete); [b] empty body; [d] eighth slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_delete (the placement form)
+names5c	0x002557B0	SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array	func_002557B0	[e] preview linkonce __vn__25SSX_VD_PS2_SINGLE_BUFFERDUiPv (placement new[]); [a] (size, place); [b] returns the place; [d] ninth slot of the reversed linkonce run; suffix as PS2_SONY_CODEC_INTERNAL_operator_new_array
+names5c	0x002557B8	SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array	func_002557B8	[e] preview linkonce __vd__25SSX_VD_PS2_SINGLE_BUFFERDPvT1 (placement delete[]); [b] empty body; [d] last slot of the reversed linkonce run (the preview list's first entry); suffix as PS2_SONY_CODEC_INTERNAL_operator_delete_array
+names5c	0x002CB350	drawTexturedScreenQuad	func_002CB350	[desc] fills four tBxVertex corners from a screen rect and a texture rect and draws them as one tri strip (GrMan RenderTriStrip); cMenu_drawBox's helper
+names5c	0x003ADDC0	RCMP_AV_PLAYER_AV_PLAYER	func_003ADDC0	[b][c] constructor (returns self) that forwards to the player's Init (func_003ADEC8), as On Tour PspAvPlayer::PspAvPlayer calls PspAvPlayer::Init (pspavplayer.cpp); video-only overload; class = our class_hint RCMP_AV_PLAYER (avplayer.h, PS2 class name unattested), overloads numbered by address as RCMP_CODEC_IDATA_CODEC_IDATA1
+names5c	0x003ADE08	RCMP_AV_PLAYER_AV_PLAYER1	func_003ADE08	[b][c] constructor overload (separate video and audio sources) forwarding to Init (func_003ADEC8), as On Tour PspAvPlayer::PspAvPlayer -> Init; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003ADE58	RCMP_AV_PLAYER_AV_PLAYER2	func_003ADE58	[b][c] constructor overload taking every source parameter, forwarding to Init (func_003ADEC8), as On Tour PspAvPlayer::PspAvPlayer -> Init; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003ADE90	RCMP_AV_PLAYER_AV_PLAYER3	func_003ADE90	[b][c] constructor overload for in-memory sources (type 2), forwarding to Init (func_003ADEC8), as On Tour PspAvPlayer::PspAvPlayer -> Init; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003ADEC8	RCMP_AV_PLAYER_Init	func_003ADEC8	[b] clears the player, allocates its stream buffers and opens its sources, as On Tour PspAvPlayer::Init (pspavplayer.cpp); [c] every constructor calls it, as On Tour's constructor calls Init; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003AE2F8	RCMP_AV_PLAYER_SetSubtitle	func_003AE2F8	[a] (this, AV_SUBTITLE_ARRAY *) void, as On Tour PspAvPlayer::SetSubtitle(AV_SUBTITLE_ARRAY *); [b] stores the subtitle table (+0x70) that GetSubtitle searches; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003AE300	RCMP_AV_PLAYER__AV_PLAYER	func_003AE300	[a] (this, in-charge flags) destructor shape, as On Tour PspAvPlayer::~PspAvPlayer; [b] deletes the decoder, audio object, timer, streams and buffers, frees self on flag bit 0; class = our class_hint RCMP_AV_PLAYER
+names5c	0x003AE450	RCMP_AV_PLAYER_GetFirstFrame	func_003AE450	[a] (this, unsigned frames to buffer, int latency ms) returning the frame, as On Tour PspAvPlayer::GetFirstFrame(unsigned MaxFramesOutstanding, int VideoLatencyInMs); [b] builds the decoder, audio and timer and returns frame 0; [d] after the destructor, as in pspavplayer.cpp; class = our class_hint
+names5c	0x003AE6C8	RCMP_AV_PLAYER_GetFrame	func_003AE6C8	[a] (this, float goal frame) returning FRAME *, as On Tour PspAvPlayer::GetFrame(float GoalFrame); [b] stores the goal and asks the DECODER for that frame; [d] right after GetFirstFrame, as in pspavplayer.cpp; class = our class_hint
+names5c	0x003AE718	RCMP_AV_PLAYER_GetSubtitle	func_003AE718	[a] (this) returning AV_SUBTITLE *, as On Tour PspAvPlayer::GetSubtitle; [b] looks the current frame up in the subtitle table with RCMP_AV_SUBTITLE_ARRAY_FindSubtitle; class = our class_hint
+names5c	0x003AE780	RCMP_AV_PLAYER_IsTimeForDecode	func_003AE780	[a] bool(this), as On Tour PspAvPlayer::IsTimeForDecode; [b] goal frame from the synced time * frame rate compared with current frame + 1; [c] calls the SyncedAudioTime counterpart func_003AE9A0; class = our class_hint
+names5c	0x003AE860	RCMP_AV_PLAYER_IsAudioFinished	func_003AE860	[a] bool/int(this), as On Tour PspAvPlayer::IsAudioFinished; [b] asks the audio object (its IsAudioFinished, func_003AEFA8), 1 without one; class = our class_hint
+names5c	0x003AE888	RCMP_AV_PLAYER_SetSpeed	func_003AE888	[a] int(this, unsigned speed), as On Tour PspAvPlayer::SetSpeed(unsigned int Speed); [b] clamps to 0x4000, passes it to the audio object and rescales the ms timer; [c] Pause / UnPause call it with 0 / 0x1000; class = our class_hint
+names5c	0x003AE938	RCMP_AV_PLAYER_Pause__FPv	func_003AE938__FPv	[a] int(this), as On Tour PspAvPlayer::Pause; [b] SetSpeed(self, 0); [c] cMoviePlayer_asyncPause calls it; [d] next to SetSpeed / UnPause as in pspavplayer.cpp; class = our class_hint
+names5c	0x003AE958	RCMP_AV_PLAYER_UnPause__FPv	func_003AE958__FPv	[a] int(this), as On Tour PspAvPlayer::UnPause; [b] SetSpeed(self, 0x1000); [c] cMoviePlayer_asyncResume calls it; class = our class_hint
+names5c	0x003AE978	RCMP_AV_PLAYER_SetVol	func_003AE978	[a] int(this, unsigned vol), as On Tour PspAvPlayer::SetVol(unsigned int Vol); [b] forwards the volume to the audio object (func_003AEF48), 0 without one; class = our class_hint
+names5c	0x003AE9A0	RCMP_AV_PLAYER_SyncedAudioTime	func_003AE9A0	[a] unsigned(this), as On Tour unsigned PspAvPlayer::SyncedAudioTime(); [b] playback ms from the timer, corrected by a filtered drift against the audio stream's position; [c] only caller IsTimeForDecode (func_003AE780), as On Tour; class = our class_hint
+names5c	0x003AEAD0	RCMP_AV_PLAYER_getVideoChunk	func_003AEAD0	[desc] pulls blocks from the video STREAM until one with an MPEG tag, wraps it in a new CHUNK for the decoder (and chooses the codec on the first)
+names5c	0x003AECB8	RCMP_avGetDataCallback__FPvT0	func_003AECB8__FPvT0	[desc] the CODEC_IDATA get-data hook func_003AE450 installs: forwards to the player's getVideoChunk (func_003AEAD0)
+names5c	0x003AECE0	RCMP_AV_PLAYER_releaseVideoChunk	func_003AECE0	[desc] returns a CHUNK's block to the video STREAM (STREAM_release) and frees the CHUNK
+names5c	0x003AED20	RCMP_avReleaseDataCallback__FPvT0i	func_003AED20__FPvT0i	[desc] the CODEC_IDATA release-data hook func_003AE450 installs: forwards to the player's releaseVideoChunk (func_003AECE0)
+names5c	0x003AED40	RCMP_AV_AUDIO_AV_AUDIO	func_003AED40	[b] constructor (returns self): allocates "AV_audiobuff" and opens the SNDSTRM stream of the movie audio, the PS2 counterpart of On Tour PspAudioPlayer::PspAudioPlayer; [c] RCMP_AV_PLAYER_GetFirstFrame constructs it; class = our class_hint RCMP_AV_AUDIO (avplayer.h)
+names5c	0x003AEE30	RCMP_AV_AUDIO__AV_AUDIO	func_003AEE30	[a] (this, in-charge flags) destructor, as On Tour PspAudioPlayer::~PspAudioPlayer; [b] destroys the SNDSTRM stream, frees the buffer and self on flag bit 0; [c] the player's destructor calls it with 3; class = our class_hint
+names5c	0x003AEE98	RCMP_AV_AUDIO_SetSpeed	func_003AEE98	[a] int(this, unsigned speed), as On Tour PspAudioPlayer::SetSpeed(unsigned int Speed); [b] SNDSTRM_pitchmult on the stream; [c] called by RCMP_AV_PLAYER_SetSpeed, as On Tour's player calls its audio player's; class = our class_hint
+names5c	0x003AEEF8	RCMP_AV_AUDIO_StartSound	func_003AEEF8	[a] int(this), as On Tour PspAudioPlayer::StartSound; [b] releases the hold on the queued request (SNDSTRM_modifyhold 0); [c] called by GetFirstFrame (func_003AE450); class = our class_hint
+names5c	0x003AEF48	RCMP_AV_AUDIO_SetVol	func_003AEF48	[a] int(this, unsigned vol), as On Tour PspAudioPlayer::SetVol(unsigned int Vol); [b] sets the stream volume (func_003B7E70); [c] only caller RCMP_AV_PLAYER_SetVol, as On Tour PspAvPlayer::SetVol -> PspAudioPlayer::SetVol; class = our class_hint
+names5c	0x003AEFA8	RCMP_AV_AUDIO_IsAudioFinished	func_003AEFA8	[a] bool(this), as On Tour PspAudioPlayer::IsAudioFinished; [b] true when the stream's current request has no time left; [c] only caller RCMP_AV_PLAYER_IsAudioFinished; class = our class_hint
+names5c	0x003B07F8	PS2_SONY_FRAME_PS2_SONY_FRAME	func_003B07F8	[a] constructor (this, width, height) returning self, as On Tour PspSonyFrame::PspSonyFrame(width, height, codec) less the codec; [b] makes the frame's 32-bit SHAPE; [c] merged.tsv pairs it with PspSonyFrame::PspSonyFrame (callers in both builds); class = our class_hint PS2_SONY_FRAME
+names5c	0x003B08E0	PS2_SONY_FRAME__PS2_SONY_FRAME	func_003B08E0	[a] (this, in-charge flags) destructor, as On Tour PspSonyFrame::~PspSonyFrame; [b] destroys its SHAPE, frees self on flag bit 0; [c] PS2_SONY_CODEC_INTERNAL's destructor calls it; class = our class_hint
+names5c	0x003B0B10	RCMP_mpegNoDataCallback	func_003B0B10	[desc] the libmpeg callback PS2_SONY_CODEC_INTERNAL_Init registers with type 1 (no data): feeds the codec's next chunk (func_003B0B40) and returns 1
+names5c	0x003B0B40	PS2_SONY_CODEC_INTERNAL_feedChunk	func_003B0B40	[desc] gets the next CHUNK from the DECODER, copies it into the codec's buffer (or end codes when none) and passes it to sceMpegAddBs
+names5c	0x003B10D0	PS2_SONY_CODEC_INTERNAL_takeFreeFrame	func_003B10D0	[desc] moves the first frame of the free list to the used list with reference count 1 and returns it (0 when none)
+names5c	0x003B11A0	RCMP_createSonyCodec	func_003B11A0	[desc] allocates 0x80 bytes from RCMP_rcmp_sys and constructs a PS2_SONY_CODEC_INTERNAL in it (the PS2 twin of On Tour PSP_MPEG4_CODEC_create, name not attested)
+names5c	0x003B11F0	RCMP_isMpegChunkTag	func_003B11F0	[desc] returns whether a chunk tag is one of the two MPEG tags ("MPCh", "MPCd") in D_00495448
+names5c	0x003B3D40	SHAPE_getMetalBinData	func_003B3D40	[desc] walks the shape's attached blocks for the metal-bin block (kSHAPE_BLOCK_METALBIN 0x69) and returns its data when flag 0x10 of +6 is set, else 0
+names5c	0x003B5440	SNDSYS_isInstalled	func_003B5440	[desc] returns sndgs.installed (whether the sound system is started); the movie player checks it before using sound
+names5c	0x003B5B20	SNDSYS_setMemLimits	func_003B5B20	[desc] calls SNDPLATFORM_memlimits(start, end) inside SNDSYS_entercritical / SNDSYS_leavecritical
+names5c	0x003B5B68	SNDSYS_getLargestUnusedMem	func_003B5B68	[desc] calls SNDPLATFORM_memlargestunused inside the critical section and returns the largest free block's size
+names5c	0x003B6670	SNDBANK_readPatchHeader	func_003B6670	[desc] fills a patch's sample format, attributes and description with SNDI_patchtohdr, then frees the time-stretch data copies it made
+names5c	0x003B6788	SNDBANKI_resolvePatchSamples	func_003B6788	[desc] for each of a patch's tags whose render mode matches the mask: SNDPLATFORM_asyncresolvetimbre and SNDBANKI_userdatacallback (called by SNDbankadd)
+names5c	0x003B7DE8	SNDSTRM_queueFileRequest	func_003B7DE8	[desc] SNDSTRMI_queue(stream, hold, 0, request, 2): queues an existing file STREAM request on a sound stream
+names5c	0x003B7E10	SNDSTRM_queueMemory	func_003B7E10	[desc] SNDSTRMI_queue(stream, hold, buffer + offset, 0, 1): queues a block of memory on a sound stream
+names5c	0x003B7E38	SNDSTRM_createFromFileStream	func_003B7E38	[desc] SNDSTRMI_create with the fromtap flag: a sound stream that reads from an existing file STREAM
+names5c	0x003B7E70	SNDSTRM_setVolume	func_003B7E70	[desc] stores the volume in the stream's play options (po.vol) and applies it to its voice with SNDvol
+names5c	0x003B7EB0	SNDSTRM_fadeVolume	func_003B7EB0	[desc] stores the target volume in po.vol and starts SNDautovol on the stream's voice over time / 10 ticks
+names5c	0x003B7F18	SNDSTRM_getVolume	func_003B7F18	[desc] returns the stream voice's volume (SND_getVolume), or po.vol when it has no live voice
+names5c	0x003B7F60	SNDSTRM_set3dPos	func_003B7F60	[desc] stores azimuth and elevation in the stream's play options and applies them with SND3dpos
+names5c	0x003B8010	SNDSTRM_setDryLevel	func_003B8010	[desc] stores the dry level in po.drylevel and applies it to the stream's voice (SND_setDryLevel)
+names5c	0x003B8050	SNDSTRM_setFxLevel	func_003B8050	[desc] stores the send level in po.fxlevel0 and applies it for the bus to the stream's voice (SND_setFxLevel)
+names5c	0x003B80A0	SNDSTRM_setLowPass	func_003B80A0	[desc] stores the cutoff in po.lowpasscutoff and applies it to the stream's voice (SND_setLowPass)
+names5c	0x003B8218	SNDFX_getBus	func_003B8218	[desc] returns the 0x14-byte effect-bus record for a bus number and render kind (8, 4 or 0x100 tables), 0 for other kinds
+names5c	0x003B8290	SNDFX_flagsToRenderKinds	func_003B8290	[desc] converts bus selector flags to render-kind bits: 0x10 -> 4, 0x20 -> 0x100, 0x40 -> 8
+names5c	0x003B82B8	SNDFX_configureBuses	func_003B82B8	[desc] writes the type and two parameters into each selected bus record (SNDFX_getBus), applies them per render kind and sets the bus level
+names5c	0x003B83A0	SNDFX_setBusLevel	func_003B83A0	[desc] sets the level of the selected effect buses (kind 8 also its pan pair) and recomputes every channel's send for the bus
+names5c	0x003B84E0	SNDFX_setBusPan	func_003B84E0	[desc] stores a kind-8 bus's left/right gain pair and passes it on to the SPU reverb output levels
+names5c	0x003B86C0	SND_getVolume	func_003B86C0	[desc] returns the integer part of the sound's channel volume (+0x3A of its channel), -8 for a dead handle
+names5c	0x003B8700	SND_setDryLevel	func_003B8700	[desc] stores the dry level in each of the sound's grouped channels (+0x5F) and applies it
+names5c	0x003B88C8	SND_setFxLevel	func_003B88C8	[desc] stores a bus send level in each of the sound's grouped channels, recomputes the send and applies it with SNDPLATFORM_setfxlevel
+names5c	0x003B8978	SND_setLowPass	func_003B8978	[desc] applies a low-pass cutoff to each of the sound's voices with SNDPLATFORM_lowpass
+names5c	0x003B8A38	SND_stopAll	func_003B8A38	[desc] SNDstop on every channel's handle inside the critical section
+names5c	0x003BA740	SNDI_updateFxSend	func_003BA740	[desc] recomputes a channel's send to one bus: program level * send level * the bus level >> 6 into the channel's per-bus send
+names5c	0x003BC930	DTSENC_install	func_003BC930	[desc] installs the DTS encoder's three output hooks (sizes, setup, encode) in D_0050C840 / D_0050C844 / D_0050C848
+names5c	0x003BC968	DTSENC_dmaToScratchpad	func_003BC968	[desc] copies quadwords from main memory to the scratchpad with DMA channel 9 (to SPR), optionally waiting
+names5c	0x003BCA28	DTSENC_dmaFromScratchpad	func_003BCA28	[desc] copies quadwords from the scratchpad to main memory with DMA channel 8 (from SPR), optionally waiting
+names5c	0x003BCAE8	DTSENC_writeBits	func_003BCAE8	[desc] appends the low n bits of a value, most significant first, to the encoder's byte-swapped output frame
+names5c	0x003BCBA0	DTSENC_writeFrameHeader	func_003BCBA0	[desc] writes the IEC 61937 preamble, DTS sync word, frame header and per-channel side information into the output frame
+names5c	0x003BD078	DTSENC_encodeLfe	func_003BD078	[desc] decimates the LFE input to 8 samples and quantizes them to signed bytes with a scale-factor index
+names5c	0x003BD220	DTSENC_analyzeChannel	func_003BD220	[desc] runs one channel's input block through the windowing and transform stages of the subband analysis filterbank
+names5c	0x003BD5B8	DTSENC_quantizeChannel40	func_003BD5B8	[desc] picks each band's scale factor and quantizes / packs one channel's subband samples into a DTS 4.0 frame (mode 1)
+names5c	0x003BD9C0	DTSENC_packScaleFactors40	func_003BD9C0	[desc] packs every channel's 24 7-bit scale-factor indices into a DTS 4.0 frame
+names5c	0x003BDE08	DTSENC_quantizeChannel51	func_003BDE08	[desc] picks each band's scale factor and quantizes / packs one channel's subband samples into a DTS 5.1 frame (mode 2)
+names5c	0x003BE6E0	DTSENC_packScaleFactors51	func_003BE6E0	[desc] packs the channels' scale-factor indices and the encoded LFE samples into a DTS 5.1 frame
+names5c	0x003BECA0	DTSENC_getBufferSizes	func_003BECA0	[desc] returns the state and work-area sizes the encoder needs for a mode and quality (the size hook)
+names5c	0x003BED30	DTSENC_init	func_003BED30	[desc] sets up the encoder state in a buffer for a mode and quality: filter length, channels, band weights, coefficient table (the setup hook)
+names5c	0x003BF0F0	DTSENC_encodeFrame	func_003BF0F0	[desc] encodes one frame: filterbank, quantizing and packing of every channel into the output buffer (the encode hook)
+names5c	0x003BF3E0	DTSENC_copyBlock	func_003BF3E0	[desc] copies a block of quadwords through VU0 registers, eight per pass (the filterbank's history copy when the scratchpad is not used)
+names5c	0x003BF440	DTSENC_convertPcmToFloat	func_003BF440	[desc] converts 16-bit PCM samples to floats scaled by 256, sixteen per pass (MMI + VU0)
+names5c	0x003BF4C0	DTSENC_windowBlock4Tap	func_003BF4C0	[desc] windows one block for the filterbank with the 0xE0-length prototype filter (4 taps per output)
+names5c	0x003BF5A0	DTSENC_windowBlock6Tap	func_003BF5A0	[desc] windows one block for the filterbank with the 0x160-length prototype filter (6 taps per output)
+names5c	0x003BF6B0	DTSENC_windowBlock8Tap	func_003BF6B0	[desc] windows one block for the filterbank with the 0x1E0-length prototype filter (8 taps per output)
+names5c	0x003BF800	DTSENC_transformStage1	func_003BF800	[desc] first transform stage DTSENC_analyzeChannel runs on the windowed block: an in-place butterfly over 64 vec4 rows
+names5c	0x003BF8D0	DTSENC_transformStage2	func_003BF8D0	[desc] second transform stage DTSENC_analyzeChannel runs: running sums of adjacent rows
+names5c	0x003BF960	DTSENC_transformStage3	func_003BF960	[desc] third transform stage DTSENC_analyzeChannel runs: sums of adjacent rows reordered into even and odd halves
+names5c	0x003BFAC0	DTSENC_transformStage4	func_003BFAC0	[desc] fourth transform stage DTSENC_analyzeChannel runs: pairwise sums over four blocks of eight rows
+names5c	0x003BFB90	DTSENC_transformStage5	func_003BFB90	[desc] fifth transform stage DTSENC_analyzeChannel runs: pairwise row sums over four blocks of eight rows
+names5c	0x003BFC50	DTSENC_transformStage6	func_003BFC50	[desc] sixth transform stage DTSENC_analyzeChannel runs: twiddle-scaled butterflies in place over four blocks of eight rows
+names5c	0x003BFD60	DTSENC_transformStage7	func_003BFD60	[desc] seventh transform stage DTSENC_analyzeChannel runs: sums and differences of row halves scaled by two twiddle vectors
+names5c	0x003BFE80	DTSENC_transformStage8	func_003BFE80	[desc] eighth transform stage DTSENC_analyzeChannel runs: butterflies of upper and lower row halves scaled per lane
+names5c	0x003BFFA0	DTSENC_transformStage9	func_003BFFA0	[desc] ninth transform stage DTSENC_analyzeChannel runs: butterfly add/sub of rows scaled per lane (VU0)
+names5c	0x003C01A0	DTSENC_transformStage10	func_003C01A0	[desc] last transform stage DTSENC_analyzeChannel runs: scaled sums and differences stored with a stride into the per-band arrays
+names5c	0x003C03E0	DTSENC_findBandPeaks	func_003C03E0	[desc] stores the largest magnitude of each of the 24 subbands' 16 samples (MMI)
+names5c	0x003C04F0	DTSENC_quantize12Bit	func_003C04F0	[desc] scales 16 floats, truncates them and packs them as halfwords masked with 0xFFF
+names5c	0x003C0564	DTSENC_quantize10Bit	func_003C0564	[desc] scales 16 floats, truncates them and packs them as halfwords masked with 0x3FF
+names5c	0x003C05E0	DTSENC_quantize8Bit	func_003C05E0	[desc] scales 16 floats, truncates them and packs them as bytes
+names5c	0x003C0640	DTSENC_quantize5Bit	func_003C0640	[desc] scales 16 floats, truncates them and packs them as bytes masked with 0x1F
+names5c	0x003C06B0	DTSENC_decimateLfe	func_003C06B0	[desc] low-pass filters and decimates the LFE input into 8 samples, keeping the filter state across calls
+names5c	0x003C07A8	SNDDRV_setVu0MacFlags	func_003C07A8	[desc] recreates a saved VU0 MAC flag word by performing one vector multiply that sets those flags (vf1 / vf2 preserved)
+names5c	0x003C0858	SNDDRV_saveVu0	func_003C0858	[desc] saves vf1..vf31, the accumulator and the MAC flags into a buffer before the sound thread uses VU0
+names5c	0x003C08F8	SNDDRV_restoreVu0	func_003C08F8	[desc] restores the VU0 registers, accumulator and MAC flags SNDDRV_saveVu0 saved
+names5c	0x003C09B8	SNDDRV_saveScratchpad	func_003C09B8	[desc] saves the scratchpad DMA registers and copies the scratchpad area the DTS encoder uses out to main memory
+names5c	0x003C0A60	SNDDRV_restoreScratchpad	func_003C0A60	[desc] copies the saved scratchpad area back and restores the scratchpad DMA registers
+names5c	0x003C0B10	SNDDRV_callIopRpc	func_003C0B10	[desc] copies the command data into the RPC send buffer, waits while the client is busy and calls the IOP driver's function with sceSifCallRpc
+names5c	0x003C1578	SNDDRV_handleSifCommand	func_003C1578	[desc] SIF command handler 1: mode 2 completes a sound-memory transfer, mode 0 stores the value and signals the sound thread
+names5c	0x003C15D8	SNDDRV_appendString	func_003C15D8	[desc] appends src to dst (strcat without a return value); SNDPLATFORM_init builds the IOP module paths with it
+names5c	0x003C1638	SNDDRV_buildIopCommandBuffer	func_003C1638	[desc] clears the shared EE-to-IOP command buffer and lays out its tagged blocks (header, voices, PCM, effect, end)
+names5c	0x003C1980	SNDDRV_vblankHandler	func_003C1980	[desc] VBlank interrupt handler: increments the sound tick counter (sndgs +0x1C0), then sync and ei
+names5c	0x003C2A50	SNDDRV_applyVolume	func_003C2A50	[desc] applies a channel's volume and speaker gains to each of its voices, per render kind
+names5c	0x003C2EC8	SNDDRV_applyDryLevel	func_003C2EC8	[desc] applies a channel's dry level to its voices (SPU dry mask bits, or the volume for other render kinds)
+names5c	0x003C30C8	SNDDRV_setClipLevel	func_003C30C8	[desc] sets the clip level of a mixer channel's voices (MIX_setClipFilter on each)
+names5c	0x003C3450	SNDDRV_setupIopEffect	func_003C3450	[desc] sends the kind-0x100 bus's effect data (or "FX" off) to the IOP and installs or clears the send hook
+names5c	0x003C3500	SNDDRV_setupSpuReverb	func_003C3500	[desc] maps the kind-8 bus type to an SPU2 reverb mode and stores the mode, work area, depth and delay for the IOP
+names5c	0x003C35F8	SNDDRV_applyFxBus	func_003C35F8	[desc] applies the effect-bus configuration of one render kind (SPU reverb, IOP effect or software reverb) in the critical section
+names5c	0x003C36A8	SNDDRV_updateFxBus	func_003C36A8	[desc] applies one render kind's bus configuration (SNDDRV_applyFxBus) and returns 0; the bus number is unused
+names5c	0x003C36C8	SNDDRV_setSpuReverbLevels	func_003C36C8	[desc] writes the kind-8 bus's left / right gains times 32767 to the SPU reverb output levels
+names5c	0x003C3728	SNDDRV_lookupPanGains	func_003C3728	[desc] looks up a pair of pan gains for an azimuth in the 256-entry table D_0044DD78, each divided by 32767
+names5c	0x003C3780	SNDDRV_mirrorGains	func_003C3780	[desc] negates a pair of speaker gains to mirror them into the quadrant of a direction
+names5c	0x003C43C0	SNDDRV_copyToIop	func_003C43C0	[desc] flushes the cache, waits for the previous SIF DMA and starts one copying a block from EE memory to IOP memory
+names5c	0x003C4450	SNDDRV_startNextTransfer	func_003C4450	[desc] picks the queued sound-memory transfer with the highest priority, DMAs it to the IOP staging block and sends the IOP its request
+names5c	0x003C45E8	SNDDRV_kickTransfers	func_003C45E8	[desc] starts the next sound-memory transfer when none is running and some are queued
+names5c	0x003C4668	SNDDRV_queueTransfer	func_003C4668	[desc] queues one transfer to sound memory in the 28-slot queue (or copies straight for location 0x100) and returns its id
+names5c	0x003C4788	SNDDRV_queueUpload	func_003C4788	[desc] queues a transfer to sound memory in pieces of up to 4 KB, waiting for free queue slots, and returns the last id
+names5c	0x003C4898	SNDDRV_isTransferDone	func_003C4898	[desc] returns whether the transfer with an id has left the queue, restarting a transfer stuck for 500 ticks
+names5c	0x003C4918	SNDDRV_completeTransfer	func_003C4918	[desc] frees the finished transfer's queue slot, clears the running flag and starts the next one
+names5c	0x003C4978	SNDDRV_dmaToScratchpad	func_003C4978	[desc] copies quadwords from main memory to the scratchpad with DMA channel 9 (the sound driver's copy of DTSENC_dmaToScratchpad)
+names5c	0x003C4A38	SNDDRV_dmaFromScratchpad	func_003C4A38	[desc] copies quadwords from the scratchpad to main memory with DMA channel 8 (the sound driver's copy of DTSENC_dmaFromScratchpad)
+names5c	0x003C4AF8	SNDDRV_clipFreeGap	func_003C4AF8	[desc] clips a free sound-RAM gap to the usable range between the low limit and the high limit / reverb work area
+names5c	0x003C6380	SNDI_multiply64	func_003C6380	[desc] multiplies two unsigned 32-bit values into a 64-bit {low, high} result from 16 x 16 partial products
+names5c	0x003C64A8	SNDI_divide64	func_003C64A8	[desc] divides a 64-bit {low, high} value by a 32-bit one (shift and subtract) and returns the 32-bit quotient
+names5c	0x003C7480	SNDI_setDefaultSpeakerLayouts	func_003C7480	[desc] copies the seven default speaker layout tables into sndgs +0x238 at platform init
+names5c	0x003C8B80	MIX_setClipFilter	func_003C8B80	[desc] adds (or updates) a mixer voice's 80-byte clipping filter node for a positive level, removes and frees it otherwise
+names5c	0x003C9DA0	MIXI_convert16ToFloatUnaligned	func_003C9DA0	[desc] converts 16-bit samples to floats one at a time, then four per pass (the unaligned fallback of MIXI_convert16ToFloat)
+names5c	0x003C9E50	MIXI_convert16ToFloat	func_003C9E50	[desc] converts 16-bit samples to floats, 16 at a time with MMI / VU0 when aligned, the rest through MIXI_convert16ToFloatUnaligned
+names5c	0x003CB328	SFILTER_clip	func_003CB328	[desc] the clipping filter node's process function: pulls the input, clamps each sample to the node's range and scales it back up
+names5c	0x003CB4A8	SFILTER_setClipLevel	func_003CB4A8	[desc] sets the clipping node's bounds -(32768 - t) / 32767 - t and its make-up gain from a level
+names5c	0x003CB528	SFILTER_initClip	func_003CB528	[desc] sets a clipping node's process function to SFILTER_clip
+names5c	0x003CBB78	MIXI_mixScaled	func_003CBB78	[desc] adds a block of floats scaled by a gain into another, 16 at a time (MIX_reset's mix function)
+names5c	0x003CBC00	MIX_setFxSendOutput	func_003CBC00	[desc] sets where the effect send is delivered (D_00515B54) instead of running the software effect
+names5c	0x003CBC10	MIX_getFxSendBuffer	func_003CBC10	[desc] returns the mixer's effect send buffer (D_00515D80)
+names5c	0x003CBC20	SNDMIXI_getFxOutputSlot	func_003CBC20	[desc] looks up which effect output feeds a speaker in the 6 x 6 x 6 table D_0044E770
+names5c	0x003CBC58	SNDMIXI_runFx	func_003CBC58	[desc] the mixer's output hook: runs the send buffer through the software effect graph and mixes its outputs into the mixer outputs
+names5c	0x003CC070	SNDMIXI_buildFxGraph	func_003CC070	[desc] creates the software effect's filter nodes by type, maps their outputs and connects their links
+names5c	0x003CC630	MIX_startSoftwareFx	func_003CC630	[desc] removes the current software effect, picks a channel layout, builds the graph and installs SNDMIXI_runFx as the output hook
+names5c	0x003CC848	MIX_stopSoftwareFx	func_003CC848	[desc] clears the mixer's output hook, frees the effect graph and turns the send off
+names5c	0x003CC878	SNDMIXI_sendFxToIop	func_003CC878	[desc] output hook: scales the send buffer by 127 into integers at the IOP destination and clears it
+names5c	0x003CCA38	decodexac_decodeBlocks	func_003CCA38	[desc] the loop decodexac falls into: decodes EA-XA 15-byte blocks of 28 samples to floats (raw blocks through process_raw_block)
+names5c	0x003CE410	lpcSynthesisFilter	func_003CE410	[desc] MicroTalk 12-tap all-pole synthesis filter run in place over blocks of 12 floats (the loop filter() calls)
+names5c	0x003CF300	SFILTER_runResonator	func_003CF300	[desc] runs the two-pole resonator over n floats, or copies them through when its parameters are out of range (SFILTER_reson's kernel)
+names5c	0x003D0B18	PATHI_appendItem	func_003D0B18	[desc] copies a 16-byte item into the event's next item slot (count at +0xC bits 16-21) and increments the count
+names5c	0x003D0B78	PATHI_skipToBlockEnd	func_003D0B78	[desc] flags the event's items as skipped (0x4000000) across nested type-1 blocks up to the n-th unmatched block end
+names5c	0x003D0C20	PATHI_skipToNextBlock	func_003D0C20	[desc] flags the items after the current one as skipped up to the next type-1 item or the event's end
+names5c	0x003D0C78	PATHI_skipNextItem	func_003D0C78	[desc] flags the item right after the current one as skipped, if it is within the event
+names5c	0x003D0CA0	PATH_getVoiceState	func_003D0CA0	[desc] finds the voice for the caller's path id (PATHI_findVoice) and returns PATHI_computeVoiceState on it
+names5c	0x003D0CC8	PATHI_computeVoiceState	func_003D0CC8	[desc] works out and stores a path voice's play state (+0x100): idle, waiting, due, playing or near the end
+names5c	0x003D0D70	PATH_setVolume	func_003D0D70	[desc] stores a volume (below 0x80) in +0x1 of every voice of the selected players, keeping the old one in +0x2; cSongInstance_SetVolume's callee
+names5c	0x003D0ED0	PATH_postPauseEvent	func_003D0ED0	[desc] builds a one-item event of type 4 (the interpreter's pause / resume action, pathxSND_setPaused) and queues a copy on each selected player
+names5c	0x003D1038	PATH_setPaused	func_003D1038	[desc] pauses or resumes the selected voices (pathxSND_setPaused, +0x3); a -1 mask also sets the global pause; cSongInstance_Pause / Resume call it
+names5c	0x003D1470	PATH_stopVoices	func_003D1470	[desc] stops every voice of the selected players (pathxSND_stop on its sound, node -1)
+names5c	0x003D15C8	PATH_setVoicePosition	func_003D15C8	[desc] sets the play position (+0x24) of the voice the path id names to value & 0xFFFF
+names5c	0x003D1608	PATHI_fatalError	func_003D1608	[desc] marks the path system busy (D_0044F430 = -1) and calls exit(0); its printf-style arguments are ignored
+names5c	0x003D1658	PATHI_debugPrintf	func_003D1658	[desc] compiled-out debug print: an empty variadic body that PATH_status, PATHI_copyevent and the interpreter call with printf formats
+names5c	0x003D16D0	PATHI_getDebugFlags	func_003D16D0	[desc] returns the path library's debug-message flags (D_0044F43C)
+names5c	0x003D16F0	PATH_postEvent	func_003D16F0	[desc] copies event definition @p prog of the path data (PATHI_copyevent) and queues it on every matching player; cSongInstance_SendMusicEvent's callee
+names5c	0x003D1940	PATH_cancelEvents	func_003D1940	[desc] removes the pending events of the selected players (PATHI_removeEvent with mode 2)
+names5c	0x003D1A88	PATH_countPendingEvents	func_003D1A88	[desc] returns the number of pending events of the first player whose group bits overlap the mask
+names5c	0x003D1BA8	PATHI_removeEvent	func_003D1BA8	[desc] removes a pending event from the selected player, compacting its event buffer or handing it to the release hook
+names5c	0x003D1D28	PATHI_runEventItems	func_003D1D28	[desc] runs the due items of one pending event through the interpreter, flagging passed ones skipped; returns how many it got through
+names5c	0x003D1E80	PATHI_serviceEvents	func_003D1E80	[desc] drops the selected player's finished and timed-out events (PATHI_removeEvent) and runs the rest (PATHI_runEventItems)
+names5c	0x003D1F80	PATHI_queueEvent	func_003D1F80	[desc] stamps a copied event with the current time and appends it to the pending list of every matching player
+names5c	0x003D2138	PATHI_isPendingItemSkipped	func_003D2138	[desc] returns the skip bit of the first item of a type in the selected player's pending events of the same number
+names5c	0x003D21C0	PATHI_setEventDisabled	func_003D21C0	[desc] sets or clears the disable bit (0x20000000) of an event definition in the selected player's path data
+names5c	0x003D2218	PATHI_enableAllEvents	func_003D2218	[desc] clears the disable bit (0x20000000) of every event definition in the selected player's path data
+names5c	0x003D2290	PATH_init	func_003D2290	[desc] clears the 4 path players and marks the path system initialised (D_0044F42C = 1, debug flags 0x100)
+names5c	0x003D2A68	PATH_closeVoice	func_003D2A68	[desc] closes the first voice a mask names (pathxSND_closePlayer), freeing the player and stopping the system when nothing is left
+names5c	0x003D2C20	PATH_getScaledSegmentRatio	func_003D2C20	[desc] returns (int)(a voice's last stream-segment ratio * multiplier + 0.5)
+names5c	0x003D2DF8	PATH_requestPart	func_003D2DF8	[desc] requests a part on a path voice's sound (pathxSND_addBank), first evicting a buffered part when the voice's limits would be exceeded
+names5c	0x003D2FE0	PATH_shutdown	func_003D2FE0	[desc] PATH_closeVoice(-1), then clears the initialised and busy flags
+names5c	0x003D3018	PATH_setCallbacks	func_003D3018	[desc] installs the node-change callback (D_0044F424) and the event release callback (D_0044F428)
+names5c	0x003D3030	PATH_getVoiceMonitor	func_003D3030	[desc] returns the sound-monitor index (+0x54) of the voice the caller's path id names, -8 when none
+names5c	0x003D3058	PATH_getPlayerMemSize	func_003D3058	[desc] returns the memory a path player needs for n voices: the monitor size + 272 + 16 * n, aligned
+names5c	0x003D30A8	PATH_setPreload	func_003D30A8	[desc] gives a path voice's sound monitor a memory-resident copy of its data (pathxSND_setPreload)
+names5c	0x003D3140	PATH_releaseRequest	func_003D3140	[desc] releases one request of a path voice's sound monitor (pathxSND_removeBank)
+names5c	0x003D31E8	PATH_setLookAhead	func_003D31E8	[desc] sets the two look-ahead times (+0xC, +0x10) of every player whose group bits overlap the mask
+names5c	0x003D32B8	PATHI_getVoiceSegment	func_003D32B8	[desc] returns which segment of its node a path voice is in and optionally fills the node timing (lengths, distance to the boundary)
+names5c	0x003D37A0	PATHI_pickBranch	func_003D37A0	[desc] picks the node that follows a path node for a selector value from its branch table (repeat counts included)
+names5c	0x003D3900	PATHI_followPath	func_003D3900	[desc] follows a path from a node through its control nodes (remaps, cues, repeats, random selectors) to a playable node
+names5c	0x003D3C90	PATHI_remapNode	func_003D3C90	[desc] remaps a node number through a node's remap list, mapping by mapping
+names5c	0x003D3D20	PATHI_advanceVoice	func_003D3D20	[desc] moves a voice of the selected player on to its next node and queues it, or hands the path over to another voice
+names5c	0x003D4050	PATHI_postNodeStart	func_003D4050	[desc] builds and queues an event that starts a node on its own voice, after the current voice's segment
+names5c	0x003D4898	PATHI_getNodeLength	func_003D4898	[desc] returns the first word of a node's length entry (player table +0x50), 0 for an invalid node or none
+names5c	0x003D4900	PATHI_getTimeToSegmentEnd	func_003D4900	[desc] returns how far a path voice is from its next segment boundary, optionally the segment length (PATHI_getVoiceSegment)
+names5c	0x003D4950	PATHI_getQueuedAmount	func_003D4950	[desc] sums pathxSND_getRequestPosition over a voice's request entries
+names5c	0x003D49D0	PATHI_findNearestBranch	func_003D49D0	[desc] returns the target of the branch whose selector range edge is nearest a value, -1 for an empty table
+names5c	0x003D4A50	PATHI_getRequestTable	func_003D4A50	[desc] returns the request table (player +0x924) of the voice a path id names
+names5c	0x003D4B00	PATHI_findLeadingVoice	func_003D4B00	[desc] records the selected player's active voice with the largest position (+0x0 index, +0x4 position)
+names5c	0x003D4BB0	PATHI_selectPlayerById	func_003D4BB0	[desc] selects the player in use whose id equals the given class / group byte exactly
+names5c	0x003D4C40	PATHI_sortPlayers	func_003D4C40	[desc] sorts the players that have path data by id, swapping whole 0x928-byte records
+names5c	0x003D4F10	PATHI_serviceVoices	func_003D4F10	[desc] one service pass over the selected player: services events, steps the voices' ramps and advances due voices
+names5c	0x003D5128	PATHI_serviceTick	func_003D5128	[desc] runs one service pass of a kind (' ' or 'B') over every player in use unless paused, down or busy
+names5c	0x003D5290	PATHI_findVoice	func_003D5290	[desc] returns the voice a path id names: the lowest voice bit in the first player sharing its class and group bits
+names5c	0x003D5330	PATHI_countVoices	func_003D5330	[desc] counts the voices in use of the players whose group bit is set in the mask
+names5c	0x003D53B8	PATH_getPlayingVoiceId	func_003D53B8	[desc] returns the id of a playing voice for a group and voice slot, trying class 2 before class 1
+names5c	0x003D5450	PATHI_selectPlayer	func_003D5450	[desc] selects a path player (D_0044F420, its id in D_0044F430), or with -1 marks the system busy
+names5c	0x003D54C8	PATHI_serviceNormalPass	func_003D54C8	[desc] PATHI_serviceTick(' ')
+names5c	0x003D54E8	PATHI_serviceBPass	func_003D54E8	[desc] PATHI_serviceTick('B'), which services only the voices flagged for that pass
+names5c	0x003D5508	PATH_setLevel	func_003D5508	[desc] clamps a level to 0..100 and sets it on every selected voice (PATHI_setVoiceLevel); cSongInstance_SetOverlayLevel's callee
+names5c	0x003D5698	PATH_fadeVolume	func_003D5698	[desc] starts a volume fade to a target over a time on every selected voice (PATHI_startVolumeFade)
+names5c	0x003D5800	PATH_setSendTarget	func_003D5800	[desc] sets the effect-send target of every selected voice (PATHI_setVoiceSendTarget)
+names5c	0x003D5968	PATHI_settleFades	func_003D5968	[desc] finishes the volume fades of the selected player's voices that reached their target, stopping those faded to 0
+names5c	0x003D5A98	PATHI_stepVolumeRamp	func_003D5A98	[desc] sets a voice's volume along its ramp curve, or the node volume once the ramp has run out
+names5c	0x003D5CC0	PATHI_stepSendRamp	func_003D5CC0	[desc] steps a voice's effect-send ramp (pathxSND_setFxLevel), clearing it once it has run out
+names5c	0x003D5EE8	PATHI_stepDryRamp	func_003D5EE8	[desc] steps a voice's dry-level ramp (pathxSND_setDryLevel), clearing it once it has run out
+names5c	0x003D6108	PATH_setRampDuration	func_003D6108	[desc] sets the volume-ramp duration (+0x14) of every player whose group bits overlap the mask
+names5c	0x003D61E8	PATH_setRampCurve	func_003D61E8	[desc] sets the volume-ramp curve mode (+0x18) of every player whose group bits overlap the mask
+names5c	0x003D62C8	PATHI_setVoiceLevel	func_003D62C8	[desc] stores a voice's level (+0x4, percent) and applies node volume * level / 100 when no fade is pending
+names5c	0x003D6318	PATHI_startVolumeFade	func_003D6318	[desc] sets a voice's fade target and fades its monitor to target * level / 100 over a time (pathxSND_fadeVolume)
+names5c	0x003D6360	PATHI_setVoiceSendTarget	func_003D6360	[desc] stores a voice's effect-send target (+0x16) and, when not negative, its ramp flag (+0x15)
+names5c	0x003D6378	PATHI_startVolumeRamp	func_003D6378	[desc] starts a volume ramp from the voice's current volume to a target, stamped with the path tick
+names5c	0x003D63F8	PATHI_startSendRamp	func_003D63F8	[desc] starts an effect-send ramp from the voice's current send level to a target
+names5c	0x003D6448	PATHI_startDryRamp	func_003D6448	[desc] starts a dry-level ramp from the voice's current dry level to a target
+names5c	0x003D6498	SPCHI_registerBank	func_003D6498	[desc] registers speech bank data (magic 0xC03) under a key in the first free of the 8 bank slots unless its ids are already registered, then resets that key's usage bytes; returns 1 when registered
+names5c	0x003D6618	SPCHI_resetBankUsage	func_003D6618	[desc] sets the usage bytes of every bank registered under a key to 0xFF (the step SPCHI_registerBank inlines)
+names5c	0x003D66C0	SPCH_registerBank	func_003D66C0	[desc] registers a speech bank under a key below 8 (SPCHI_registerBank); cSpeechInstance_LoadEventFile's call
+names5c	0x003D66F0	SPCH_unregisterBank	func_003D66F0	[desc] clears the bank slot holding this data under this key; returns 1 when found
+names5c	0x003D6748	SPCH_registerBankKey0	func_003D6748	[desc] registers a speech bank under key 0 (SPCHI_registerBank) and discards the result
+names5c	0x003D6768	SPCH_getCallbackBlock	func_003D6768	[desc] returns the driver's callback block D_0044FFA8, whose +0x8 SPCH_Init sets to the time source TIMER_gettick
+names5c	0x003D6778	SPCH_getBufferSize	func_003D6778	[desc] returns a speech buffer size in bytes from a sample rate, bits per sample and mode (one second, a tenth or two sevenths); SPCH_Init's call
+names5c	0x003D67F8	SPCH_shutdown	func_003D67F8	[desc] when initialised: clears the marker and the callback block, forgets the table list and clears the bank slots; cSpeechSys_Shutdown's call
+names5c	0x003D6840	SPCH_initDriver	func_003D6840	[desc] installs the play callback, post function, seed and work buffer, resets the random generator, play list, bank slots, channels and requests, and sets the initialised marker; SPCH_Init's call
+names5c	0x003D6940	SPCH_setTagHooks	func_003D6940	[desc] when initialised, installs the tag condition hook (+0x4) and the tag event hook (+0x8) of the callback block
+names5c	0x003D6968	SPCH_setRetryHook	func_003D6968	[desc] when initialised, installs the hook (+0x10) SPCHI_buildRequest calls when a request builds nothing
+names5c	0x003D6988	SPCH_setApproveHook	func_003D6988	[desc] when initialised, installs the hook (+0xC) SPCH_startNextRequest asks before a request plays
+names5c	0x003D69A8	SPCHI_resetChannelLines	func_003D69A8	[desc] resets the 8 channels' current-line records (D_00450660): id 0xFFFF, repeat count 0
+names5c	0x003D69F0	SPCH_addTable	func_003D69F0	[desc] adds a speech table to the first free slot of the table list (marking its random subset); returns the slot or -1; cSpeechBank_Create's call
+names5c	0x003D6BC0	SPCH_setSeed	func_003D6BC0	[desc] sets the driver's seed and re-draws the random subset of every registered random-subset table
+names5c	0x003D6C58	SPCH_getTableListSize	func_003D6C58	[desc] returns the memory a table list of n slots needs (4 bytes each); SPCH_Init's call
+names5c	0x003D6C60	SPCH_initTableList	func_003D6C60	[desc] sets up the table list: slot count and slot memory, all cleared; SPCH_Init's call
+names5c	0x003D6CA0	SPCH_removeTable	func_003D6CA0	[desc] clears one slot of the table list; cSpeechBank's destructor calls it
+names5c	0x003D6CC0	SPCH_getTable	func_003D6CC0	[desc] returns the table in a slot, 0 when the driver is not initialised or has no list
+names5c	0x003D6CF8	SPCHI_isTableEntryInRange	func_003D6CF8	[desc] returns whether an entry index is below the entry count (+0xA) of the table in a slot
+names5c	0x003D6D30	SPCHI_clearTableList	func_003D6D30	[desc] forgets the table list (pointer and count cleared); SPCH_shutdown's call (same body as SPCHI_resetTableList)
+names5c	0x003D6D40	SPCHI_resetTableList	func_003D6D40	[desc] forgets the table list (pointer and count cleared); SPCH_initDriver's call (same body as SPCHI_clearTableList)
+names5c	0x003D6D50	SPCHI_findTableById	func_003D6D50	[desc] returns the slot of the first registered table whose id (first halfword) matches, or -1
+names5c	0x003D6DB8	SPCHI_findTableBySubId	func_003D6DB8	[desc] returns the slot of the registered table whose id and second halfword both match, or -1
+names5c	0x003D6E30	SPCHI_getHistoryRecency	func_003D6E30	[desc] returns how recently a table picked a row (1 latest, 2 the one before ...), 0 when absent from its history ring
+names5c	0x003D6EE8	SPCHI_recordHistory	func_003D6EE8	[desc] records a picked row in a table's history ring and advances the ring position
+names5c	0x003D6F80	SPCHI_markRandomSubset	func_003D6F80	[desc] sets the row bits of a random-subset table's current subset (seed modulo the subset count)
+names5c	0x003D7038	SPCHI_clearRandomSubset	func_003D7038	[desc] clears a random-subset table's row bitmask when its subset count is not 0
+names5c	0x003D70B0	SPCHI_findFreeTableSlot	func_003D70B0	[desc] returns the first free slot of the table list, or -1
+names5c	0x003D7110	SPCHI_findBankEntry	func_003D7110	[desc] finds a speech key's entry (by id) in the first registered bank whose ids match the key's bank bytes; returns it or 0
+names5c	0x003D71D8	SPCHI_resetRequests	func_003D71D8	[desc] resets the request state: the 8 channels' counts and request words and the 16 request records
+names5c	0x003D72A0	SPCHI_allocRequest	func_003D72A0	[desc] returns a request record for a new request: a free one, else one evicted for age or lower priority on the channel; -1 when none
+names5c	0x003D76F0	SPCH_postRequest	func_003D76F0	[desc] copies a packed speech key and n int arguments into a 20-word buffer and queues it (func_003D7418); installed as the game's speech post function
+names5c	0x003D7760	SPCHI_pickRequest	func_003D7760	[desc] picks a channel's queued request to play (drops expired ones; optional id list; highest priority, then youngest); returns its index or -1
+names5c	0x003D7A50	SPCHI_pickNextRequest	func_003D7A50	[desc] picks a channel's next request, first from the follow-up id list of its current line's bank entry, else any (SPCHI_pickRequest)
+names5c	0x003D7B98	SPCH_cancelAllRequests	func_003D7B98	[desc] frees every queued request, resets each channel's count and request words and the channel lines
+names5c	0x003D7C38	SPCHI_freeRequest	func_003D7C38	[desc] frees a request record and its chained continuations, clearing the channel's words that point at it and decrementing its count
+names5c	0x003D7D58	SPCHI_pruneChannelQueue	func_003D7D58	[desc] before a request plays, drops the channel's older requests (unless flagged to keep) and flags a newer priority-100 one
+names5c	0x003D7EC8	SPCH_startNextRequest	func_003D7EC8	[desc] picks and approves a channel's next request, resets the play list and builds the request and its continuations into it; cSpeechInstance_StartNextSpeech's call
+names5c	0x003D8008	SPCH_makeKey	func_003D8008	[desc] packs a speech key (bank id byte 3, sub id byte 2, entry id low halfword); the cSSXAudio_Speak* functions call it
+names5c	0x003D8028	SPCH_getQueuedCount	func_003D8028	[desc] returns the number of requests queued on a channel
+names5c	0x003D8040	SPCH_updateChannel	func_003D8040	[desc] plays a channel's play list when it still has lines or a new request starts, guarded against re-entry; cSpeechSys_TriggerSpeech's call
+names5c	0x003D80B0	SPCH_playLatestRequest	func_003D80B0	[desc] builds a channel's latest request into a fresh play list, frees it and plays the list, guarded against re-entry
+names5c	0x003D8158	SPCH_setChannelMode	func_003D8158	[desc] sets a channel's mode (mode 1 holds back flagged requests below the bank's minimum priority)
+names5c	0x003D8170	SPCH_startNextRequestChannel0	func_003D8170	[desc] SPCH_startNextRequest(0), result discarded
+names5c	0x003D8190	SPCH_updateChannel0	func_003D8190	[desc] the body of SPCH_updateChannel for channel 0, without a result
+names5c	0x003D81F0	SPCHI_getBankRegKey	func_003D81F0	[desc] looks up the key the bank matching a speech key was registered under; returns 1 when found
+names5c	0x003D8278	SPCHI_clearBanks	func_003D8278	[desc] clears the 8 bank slots (data and key)
+names5c	0x003D82B0	SPCHI_getBankLengthLimit	func_003D82B0	[desc] returns halfword +0x14 of the bank matching a speech key (0 when none); func_003D9FB0 passes it as the length limit (percent) to SPCHI_chooseRows
+names5c	0x003D8330	SPCHI_getBankSubId	func_003D8330	[desc] looks up the sub id (+0x9) of the bank matching a speech key; returns 1 when found
+names5c	0x003D83B8	SPCHI_getBankUsage	func_003D83B8	[desc] looks up the usage bytes of the bank matching a speech key; returns 1 when found
+names5c	0x003D8460	SPCHI_findEntryInBank	func_003D8460	[desc] returns a bank's entry whose first halfword matches an id, or 0
+names5c	0x003D84A0	SPCHI_findBankSlot	func_003D84A0	[desc] finds the bank slot whose ids match a speech key's bank bytes; returns 1 when found
+names5c	0x003D8500	SPCHI_hasLatestRequest	func_003D8500	[desc] returns whether a channel's two request words are both valid indices (the test SPCH_playLatestRequest makes)
+names5c	0x003D8530	SPCHI_clearIdList	func_003D8530	[desc] clears an id list {count, ids}
+names5c	0x003D8540	SPCHI_isInIdList	func_003D8540	[desc] returns whether an id's low halfword is in an id list {count, ids}
+names5c	0x003D85C8	SPCHI_meetsConditions	func_003D85C8	[desc] returns whether a set of tag values meets a rule's column conditions (mask, variable, usage area or argument word per kind)
+names5c	0x003D8780	SPCHI_isRowAllowed	func_003D8780	[desc] returns whether a table row may be picked after the previous pick (transition matrix and current random subset)
+names5c	0x003D8CB0	SPCHI_orderOptionsByWeight	func_003D8CB0	[desc] orders an event's options by weighted random draws without repeats, zero-weight options last
+names5c	0x003D8E58	SPCHI_checkVariables	func_003D8E58	[desc] checks a phrase's chosen rows against its shared variables, binding them pass by pass; 0 on a conflict
+names5c	0x003D9088	SPCHI_buildCandidates	func_003D9088	[desc] resolves each slot's speech table of a phrase template and collects its candidate rows; 1 when every slot has candidates
+names5c	0x003D93C0	SPCHI_findFittingCombination	func_003D93C0	[desc] steps through the slots' candidate combinations until one fits the length limit and the variables; 1 when found
+names5c	0x003D95B8	SPCHI_chooseRows	func_003D95B8	[desc] chooses the rows a phrase plays (combination search or a random candidate per slot) and stores bound tags in the bank's usage area
+names5c	0x003D9830	SPCHI_sendPhraseLines	func_003D9830	[desc] sends a phrase's lines to the play callback and records them in the tables' histories; returns their length in percent of the buffer
+names5c	0x003D9A40	SPCHI_resetPlayList	func_003D9A40	[desc] resets the play list (D_00450700): no channel, no phrases, line entries cleared
+names5c	0x003D9AC8	SPCHI_appendPhrase	func_003D9AC8	[desc] appends a built phrase and its line entries to the play list for a channel when the list is free or already that channel's
+names5c	0x003D9BD8	SPCHI_playList	func_003D9BD8	[desc] runs the tag hooks and sends the play list's phrases when it is a channel's, updates the channel's current line and clears the list
+names5c	0x003D9ED0	SPCHI_checkConstraints	func_003D9ED0	[desc] returns whether a phrase template's set variables agree with the request words named by the event's constraints
+names5c	0x003DA3A8	SPCHI_getBankIds	func_003DA3A8	[desc] reads a bank's two ids (bytes +0x8 and +0x9)
+names5c	0x003DA3C0	SPCH_setClockOffset	func_003DA3C0	[desc] sets the offset added to the time source when requests are aged
+names5c	0x003DA3C8	SPCHI_getOptionWeight	func_003DA3C8	[desc] returns an option's weight: its low 5 bits times the scale its top 3 bits select
+names5c	0x003DA3F0	SPCHI_hasPlayList	func_003DA3F0	[desc] returns whether the play list belongs to a channel and holds phrases
+names5c	0x003DA418	SPCHI_buildRequest	func_003DA418	[desc] builds a request into the play list (func_003D9FB0), retrying through the retry hook while nothing is built; result at least 0
+names5c	0x003DA4E0	SPCHI_bindVariables	func_003DA4E0	[desc] ORs the given values' bits into the phrase variables a rule's bind conditions (kind 0xFE) target
+names5c	0x003DA578	SPCHI_hasBindCondition	func_003DA578	[desc] returns whether any of a rule's conditions is a bind (kind 0xFE)
+names5c	0x003DA5C8	SPCHI_resolveSlotTable	func_003DA5C8	[desc] finds a phrase slot's speech table by id, by id and argument word, or by id with an entry index check; 1 when found
+names5c	0x003DA6B0	SPCHI_removeFromSubset	func_003DA6B0	[desc] clears a row's bit in a random-subset table's subset mask (marks it used)
+names5c	0x003DA718	SPCHI_testBit	func_003DA718	[desc] returns bit n of a byte-packed bit array (nonzero when set)
+names5c	0x003DA750	SPCHI_isTransitionAllowed	func_003DA750	[desc] returns a table's transition-matrix bit for a row after the previous row
+names5c	0x003DA810	SPCHI_addCandidate	func_003DA810	[desc] appends a row to a selection set's candidate list (at most 200); 0 when full
+names5c	0x003DA848	SPCHI_isTableSuitable	func_003DA848	[desc] returns whether a table's column masks share a bit with each argument word the slot's conditions name
+names5c	0x003DA8E0	SPCHI_lengthToPercent	func_003DA8E0	[desc] returns a length as a percentage of the speech buffer size (0 when it is 0)
+names5c	0x003DA910	SPCHI_getSelectionPercent	func_003DA910	[desc] returns the total length of a selection's current rows as a percentage of the buffer size
+names5c	0x003DA9C8	SPCHI_canRepeatEntry	func_003DA9C8	[desc] returns 0 when a bank entry is the channel's current line and has reached its repeat limit, else 1
+names5c	0x003DAA10	SPCHI_isTemplateModeOk	func_003DAA10	[desc] returns whether a phrase template's kind suits a request mode (0 any, 1 mode 2 only, 2 any other)
+names5c	0x003DAA50	SPCHI_clearVariables	func_003DAA50	[desc] clears a phrase template's variable words
+names5c	0x003DAAB0	SPCHI_hasRequiredVariables	func_003DAAB0	[desc] returns whether every variable a rule requires (kind 0xFF on a variable) is already set
+names5c	0x003DAB58	SPCHI_shuffleCandidates	func_003DAB58	[desc] shuffles each slot's candidate rows of a selection set (Fisher-Yates with SPCHI_random)
+names5c	0x003DAC20	SPCHI_nextCombination	func_003DAC20	[desc] steps a selection's slots to the next candidate combination, last slot fastest; 1 when it wrapped
+names5c	0x003DACA8	SPCHI_pickRandomCandidate	func_003DACA8	[desc] sets a selection slot's current row to a random candidate keyed by its table
+names5c	0x003DACE8	SPCHI_storeBoundTags	func_003DACE8	[desc] stores the chosen rows' tags of a phrase's bind columns in the usage area of the speech key's bank
+names5c	0x003DAE48	SPCHI_reportSlotTags	func_003DAE48	[desc] reports each slot's chosen-row tag hits to the tag event hook with the bank's sub id
+names5c	0x003DAFD0	SPCHI_clearSelectionSet	func_003DAFD0	[desc] clears a selection set's two counts and its 12 slots' done flags
+names5c	0x003DB008	SPCHI_rollChance	func_003DB008	[desc] returns 1 when a random draw below 100 is under the record's chance byte (+0x1)
+names5c	0x003DB040	SPCHI_reportEventTags	func_003DB040	[desc] reports a bank event's type 0 / 3 tags whose argument the variant's template uses to the tag event hook
+names5c	0x003DB208	SPCHI_askTagConditions	func_003DB208	[desc] asks the condition hook about each of a bank event's tags; returns the bits of those that hold, the refused ones in a second mask
+names5c	0x003DB3B8	SPCHI_matchFlags	func_003DB3B8	[desc] returns whether a request's flag byte matches a template's flag value on its care bits minus an ignore mask
+names5c	0x003DB3E0	SPCHI_getTagId	func_003DB3E0	[desc] returns the tag id of a bank event's tag entry n, -1 for n of 8 or more
+names5c	0x003DB440	SPCHI_templateUsesArg	func_003DB440	[desc] returns whether any slot of a phrase template uses an argument word as its table argument or in a condition
+names5c	0x003DB4D0	SPCHI_nextRandom	func_003DB4D0	[desc] advances the speech random generator (six words with carries) and returns its top word
+names5c	0x003DB5C0	SPCHI_random	func_003DB5C0	[desc] returns a random number below a range; with a key it redraws to avoid the key's recent results
+names5c	0x003DB790	SPCHI_seedRandom	func_003DB790	[desc] seeds the speech random generator from a seed and clears its 32-entry history
+names5c	0x003DB838	SPCHI_readRow	func_003DB838	[desc] reads a table row's sample start, length and column tags (aliases resolved); 0 for a row past the count
+names5c	0x003DB978	SPCHI_resetRowInfo	func_003DB978	[desc] resets a row info: length 0, start -1, column count 0, tags 0xFF
+names5c	0x003DB9A0	SPCHI_getClock	func_003DB9A0	[desc] returns the time source's value (TIMER_gettick from SPCH_Init), 0 when none is set
+names5c	0x003E3588	CDVD_signalAlarmSema	func_003E3588	[desc] alarm handler of CDVD_sleepHsyncs: signals the waiting semaphore (iSignalSema) and re-enables interrupts
+names5c	0x003E35B0	CDVD_sleepHsyncs	func_003E35B0	[desc] sleeps the calling thread for n H-sync alarm ticks: an alarm signals a new semaphore that it waits on, then deletes
+names5c	0x003E3618	CDVD_readCurrentSector	func_003E3618	[desc] reads the CD state's current sector into the sector buffer, retrying (re-initialising the CD every 10 failures) until it succeeds; returns the buffer
+names5c	0x003E39A8	CDVD_buildFileTable	func_003E39A8	[desc] hashes the raw directory entries (CDVD_hashname) into the sorted file table (qsort, fi_cmp), re-seeding on equal hashes; returns the seed; On Tour BuildFileList does the same job but its signature and place differ, so not taken
+names5c	0x003E3AD8	CDVD_wakeReader	func_003E3AD8	[desc] the CD callback: signals the reader thread's semaphore
+names5c	0x003E3B00	CDVD_issueStepRead	func_003E3B00	[desc] issues the sceCdRead of the current read step (into the sector buffer or straight to the destination) with up to three tries, flagging reading or failed
+names5c	0x003E3BE0	CDVD_readerThread	func_003E3BE0	[desc] the CD reader thread: for each finished CD command copies the step's data, plans and issues the next step, and completes the command (iFILESYS_CommandCompleteCallback)
+names5c	0x003E3D78	CDVD_recoverRead	func_003E3D78	[desc] recovers a failed read synchronously: re-initialises the CD until the step's sectors read, then restarts the callback and signals the reader
+names5c	0x003E4000	CDVD_checkFailedRead	func_003E4000	[desc] the CD file system's sync task: when a read has failed, clears the flags and recovers it (CDVD_recoverRead)
+names5c	0x003E4040	CDVD_initFileSystem	func_003E4040	[desc] starts the CD, lists the disc's files (built-in list or ISO 9660 walk), builds the hashed file table and starts the reader thread, callback and sync task; returns the file count
+names5c	0x003E44B0	CDVD_shutdownFileSystem	func_003E44B0	[desc] removes the sync task and CD callback, terminates and deletes the reader thread and its semaphore and shuts the CD down
+names5c	0x003E4508	CDVD_findFileNumber	func_003E4508	[desc] normalises a path (one leading '/', slashes, upper case), hashes it and binary-searches the file table for its 1-based entry number; FILEDEV_open's lookup
+names5c	0x003E48D8	CDVD_readFileEntry	func_003E48D8	[desc] reads file-table entry n (name, size, start sector) and returns its size; FILEDEV_getsize / FILEDEV_getstartsector call it
+names5c	0x003E4968	CDVD_findFileEntry	func_003E4968	[desc] returns the file-table entry for a path (CDVD_findFileNumber), or 0
+names5c	0x003E5290	THREAD_wakeOnAlarm	func_003E5290	[desc] the alarm handler THREAD_yieldticks sets: passes its thread id to iWakeupThread
+names5c	0x003E62B0	DEBUG_breakIfEnabled	func_003E62B0	[desc] executes break 6 when the debug-break switch D_00450DA4 is set (RCMP error paths call it)
+names5c	0x003E6690	TIMER_setHblankRate	func_003E6690	[desc] stores the H-blank line rate for a video mode (15750 NTSC, 15625 PAL, 28800 31 kHz) that THREAD_yieldticks converts ticks with; TIMER_init's call
+names5c	0x003E6878	NetGameLink_completeStatus	func_003E6878	[desc] completion routine of the IOP NetGameLinkStatus request: copies the 336-byte status from the uncached area to the block and clears its busy flag
+names5c	0x003E7038	NetGameUtil_queryStatus	func_003E7038	[desc] sends 'gmut'/'stat' with a handle and selector to the IOP and returns the answer (uncalled)
+names5c	0x003E70B8	NetGameUtil_postStatus	func_003E70B8	[desc] sends 'gmut'/'stat' with a handle and no selector, ignoring the answer (uncalled)
+names5c	0x003E7120	NetGameUtil_advertise	func_003E7120	[desc] sends 'gmut'/'advt' with "kind\tname" so the IOP game util advertises it (LobbyMan advertises "SSX-PS2-2004" with the persona)
+names5c	0x003E7218	NetGameUtil_locate	func_003E7218	[desc] sends 'gmut'/'loca' with a name and returns the address the IOP finds for it
+names5c	0x003E7340	PingRpc_create	func_003E7340	[desc] allocates the 2132-byte EE ping block (RpcAlloc) and creates the IOP ping object ('ping'/'crea'); DirtySock module name unattested
+names5c	0x003E73E0	PingRpc_destroy	func_003E73E0	[desc] sends 'ping'/'dest' for the block's IOP object and frees the block (RpcFree)
+names5c	0x003E7450	PingRpc_request	func_003E7450	[desc] sends 'ping'/'requ' (address, payload) through a ping block and returns the IOP's result
+names5c	0x003E74E8	PingRpc_completeResponse	func_003E74E8	[desc] completion routine of the 'ping'/'resp' request: stores the received byte count in the block and clears its busy flag
+names5c	0x003E7500	PingRpc_pollResponse	func_003E7500	[desc] returns a ping reply's round-trip time and payload if one has arrived, and keeps a 'ping'/'resp' request outstanding
+names5c	0x003E76A8	LobbyApi_debugPrintf	func_003E76A8	[desc] vsprintf's a message and passes it to the lobby's debug routine (+0x548) when one is set
+names5c	0x003E7718	LobbyApi_queueRequest	func_003E7718	[desc] allocates a pending-request record (new id, command, completion routine) and links it ahead of the ping records
+names5c	0x003E77F0	LobbyApi_takeRequest	func_003E77F0	[desc] unlinks, copies and frees the head pending-request record when its command matches ('DQUE' takes any)
+names5c	0x003E7918	LobbyApi_takePing	func_003E7918	[desc] unlinks, copies and frees the pending ping record matching an address and name, or the first one past a deadline
+names5c	0x003E7AC0	LobbyApi_dropRequests	func_003E7AC0	[desc] drops every pending-request record (LobbyApi_takeRequest with 'DQUE' until empty)
+names5c	0x003E7B00	LobbyApi_setRoomPopulation	func_003E7B00	[desc] updates a room's user count (number and "%d" text) in the lobby's room list
+names5c	0x003E7BA0	LobbyApi_notifyListChanges	func_003E7BA0	[desc] calls the routine of every open list slot whose list reports changes, with a list-change event
+names5c	0x003E7C40	LobbyApi_handlePings	func_003E7C40	[desc] completes pending pings from the replies (NAME, ADDR, PING tags, "%dms" into the room / user lists) and expires overdue ones
+names5c	0x003E7F58	LobbyApi_resetServerPing	func_003E7F58	[desc] clears the server-ping failure count and next-ping time and sets the last result to -1
+names5c	0x003E7F70	LobbyApi_dropConnection	func_003E7F70	[desc] sets the state 'term', ORs in event flags, resets the server ping and reports a 'disc' event with the reason to the connection routine
+names5c	0x003E7FF0	LobbyApi_create	func_003E7FF0	[desc] allocates and sets up the 1360-byte LobbyApiRefT (default tags, protocol session, ping object, debug routine); LobbyMan_createLobbyApi's call
+names5c	0x003E80C0	LobbyApi_disconnect	func_003E80C0	[desc] sets the state 'offl', disconnects the session, empties the open lists, frees pending requests and resets the ping state
+names5c	0x003E81C8	LobbyApi_destroy	func_003E81C8	[desc] disconnects the lobby, destroys its lists, ping object and session, and frees it
+names5c	0x003E8248	LobbyApi_setEventRoutine	func_003E8248	[desc] stores one of the lobby's five event routines and its context
+names5c	0x003E8260	LobbyApi_connect	func_003E8260	[desc] stores the server address and port, queues the 'skey' request, reconnects the session and sends '@dir', entering state 'rdir'
+names5c	0x003E8368	LobbyApi_setListEnabled	func_003E8368	[desc] opens or closes a list slot and, when connected, tells the server with 'sele' ROOMS / USERS / RANKS =1 or =0; returns the list
+names5c	0x003E85B0	LobbyApi_openList	func_003E85B0	[desc] creates a list slot's index and list with a change routine and returns the list
+names5c	0x003E8650	LobbyApi_setListRoutine	func_003E8650	[desc] changes a list slot's change routine and context and returns its list
+names5c	0x003E8688	LobbyApi_closeList	func_003E8688	[desc] frees a list's entries, destroys its index and list and clears the slot
+names5c	0x003E8778	LobbyApi_addListEntry	func_003E8778	[desc] adds a named record to a keyed list slot (3-7) unless the name is present
+names5c	0x003E8968	LobbyApi_removeListEntry	func_003E8968	[desc] removes a named record from a keyed list slot (3-7) and frees it
+names5c	0x003E8A28	LobbyApi_hasListEntry	func_003E8A28	[desc] returns whether a list slot's index holds a name (-1 for a bad or closed slot)
+names5c	0x003E8A70	LobbyApi_getText	func_003E8A70	[desc] returns a text field by FourCC: 'user' / 'acct', 'pers', 'room', 'play', 'down'
+names5c	0x003E8AF8	LobbyApi_clearField	func_003E8AF8	[desc] clears a field by FourCC; only 'play' (the session's WHEN time) does anything
+names5c	0x003E8B10	LobbyApi_sendCommand	func_003E8B10	[desc] queues a request record and sends a command with its tags (passwords encrypted, 'snap' lists reset); returns the request id
+names5c	0x003E8D70	LobbyApi_cancelCallbacks	func_003E8D70	[desc] clears the completion routine of the pending requests with an id (or all for -1)
+names5c	0x003E8DC0	LobbyApi_ping	func_003E8DC0	[desc] queues a ping record and pings a host through the ping object (NAME / ADDR tags); returns the ping's request id
+names5c	0x003E8F08	LobbyApi_getStatus	func_003E8F08	[desc] returns a status value by FourCC: 'stat', 'rflg', 'extn', 'locl', 'inat', 'more', 'slot'
+names5c	0x003E8FB8	LobbyApi_takeEvent	func_003E8FB8	[desc] clears and returns the lowest pending event flag bit (0 when none); LobbyMan's update polls it
+names5c	0x003E8FD0	LobbyApi_printMessage	func_003E8FD0	[desc] prints an incoming message ("recv: kind/code" and the text, or a null / binary / long note) through the debug routine
+names5c	0x003E9160	LobbyApi_rankList	func_003E9160	[desc] ranks the rank list's entries by score histogram, keeps the top n and removes the rest (uncalled)
+names5c	0x003E9378	LobbyApi_pickRoom	func_003E9378	[desc] picks the room to join among matching rooms: the fullest below a fill limit, else the emptiest (uncalled)
+names5c	0x003E94F0	LobbyApi_onServerPing	func_003E94F0	[desc] the server ping's routine: counts timeouts (retry at once, up to 3) or stores the time and schedules the next ping in 30000
+names5c	0x003E9590	LobbyApi_pingServer	func_003E9590	[desc] LobbyApi_ping with "@server", the server address, a 3000 timeout and LobbyApi_onServerPing
+names5c	0x003E95C8	LobbyApi_update	func_003E95C8	[desc] runs the lobby client: timeouts, server pings, list notifications and every message from the server
+names5c	0x003EAE68	LobbyApi_parseDecimal	func_003EAE68	[desc] reads the leading decimal digits of a string into a number and returns the position after them (the tag time parser uses it)
+names5c	0x003EAEB8	LobbyApi_secondsToCalendar	func_003EAEB8	[desc] converts seconds since 1970 into UTC calendar fields (struct tm without the weekday)
+names5c	0x003EB090	LobbyApi_calendarToSeconds	func_003EB090	[desc] converts calendar fields back into seconds since 1970 by binary search with LobbyApi_secondsToCalendar

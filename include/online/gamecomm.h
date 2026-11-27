@@ -197,8 +197,8 @@ struct cGameComm {
                                  //       online-error overlay tests it
     int mPingReceived;           // 0x13C (name ours) [U] ping: a reply arrived (also set without broadband); the
                                  //       online-error overlay then shows its ping-received message
-    void* mPingSocket;           // 0x140 (name ours) [R] func_003E7340() (a DirtySock handle; the destructor frees it
-                                 //       with func_003E73E0); [U] the ping server's socket ("SSXPingServer")
+    void* mPingSocket;           // 0x140 (name ours) [R] PingRpc_create() (a DirtySock handle; the destructor frees it
+                                 //       with PingRpc_destroy); [U] the ping server's socket ("SSXPingServer")
     tGameCommQueue mReadQueue[4]; // 0x144 [O] (On Tour [4][4]); [U] one per packet type (tGameCommPacket::mType)
     tGameCommQueue mWriteQueue;  // 0x364 [O] (On Tour [4]); [U] packets waiting for the channel (updateWriteQueue)
     char* mBEBuffer;             // 0x3EC [O] (On Tour [4]); [U] syncGame allocates it ("bebuffer", mBEBufferSize) for

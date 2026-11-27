@@ -6,7 +6,7 @@
 // rcmp/dev/source/av/cmn/avsubtitle.cpp (SSX On Tour's DWARF). Retail code: unit ealib/seg_2AEDC0,
 // RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY .. RCMP_AV_SUBTITLE_SetB (0x3AF000..0x3B0408), plus the subtitle-file parser
 // func_003AF7F0 and its helpers (keywords "FRAME", "STRINGID", "WIDTH", "HEIGHT", "JUSTIFY_X", "JUSTIFY_Y", "SHAPE").
-// The movie player (ealib/avplayer.h, +0x70) keeps the array; nothing in SSX 3 sets one (func_003AE2F8 has no caller).
+// The movie player (ealib/avplayer.h, +0x70) keeps the array; nothing in SSX 3 sets one (RCMP_AV_PLAYER_SetSubtitle has no caller).
 //
 // Names: On Tour's classes AV_SUBTITLE (0x34) and AV_SUBTITLE_ARRAY (0x8) in namespace RCMP (enum names
 // RCMP::AV_SUBTITLE::JUST_*), with the same members at the same offsets as every retail access, and the project's function

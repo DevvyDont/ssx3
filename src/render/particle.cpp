@@ -6015,7 +6015,7 @@ extern "C" void cTextureMan_freeAllHeapBlocks(int gs);
 void* cTextureMan_initTempHeap(void* self, int a1, int a2);
 extern "C" int cTextureMan_allocLockedPages(int gs, int size);
 extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* self, int arg1, int arg2);
-extern "C" void func_003E6690(int a);
+extern "C" void TIMER_setHblankRate(int a);
 extern "C" void sceGsResetGraph(int a, int b, int c, int d);
 
 
@@ -6038,7 +6038,7 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * texture manager's second heap (cTextureMan_initTempHeap): from the draw buffer over a1 * a2 + 2 * w * h words when both colour
  * formats are PSMCT24, from the display buffer over a1 * a2 + w * h when only the display format is, else from the z
  * buffer over w * h. Finally it flushes the data cache, waits for the next vertical sync on GS CSR (0x12001000), calls
- * sceGsResetGraph(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1),
+ * sceGsResetGraph(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and TIMER_setHblankRate(@p flag ? 3 : 1),
  * and sets the display registers with cPS2GraphicsMan_flipDisplayBuffers(self, 0, 1). cPS2GraphicsMan_SetDisplayMode1 calls it.
  *
  * @param displayWidth  display width in pixels
@@ -6051,7 +6051,7 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * @param resetMode  first argument of the GS reset call sceGsResetGraph
  * @param interlaceMode  interlace setting (mInterlace), passed on to sceGsResetGraph
  * @param fieldMode  field/frame setting (mFieldMode), passed on to sceGsResetGraph
- * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in mDTV
+ * @param flag  nonzero for output mode 80 (0x50) instead of 2 and TIMER_setHblankRate(3) instead of 1; kept in mDTV
  * @return true when the mode was set, false when the draw and z formats do not go together
  */
 extern "C" bool cPS2GraphicsMan_applyDisplayMode(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight,
@@ -6166,7 +6166,7 @@ extern "C" bool cPS2GraphicsMan_applyDisplayMode(cPS2GraphicsMan* self, unsigned
     *(volatile long*)0x12001000;
 
     sceGsResetGraph(resetMode, self->mInterlace, flag ? 80 : self->mOutputMode, self->mFieldMode);
-    func_003E6690(flag ? 3 : 1);
+    TIMER_setHblankRate(flag ? 3 : 1);
     cPS2GraphicsMan_flipDisplayBuffers(self, 0, 1);
     return true;
 }

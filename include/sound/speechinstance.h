@@ -20,8 +20,8 @@
 
 // cSpeechBank (0x4C): one loaded speech bank header (a "<name>.hdr" file).
 struct cSpeechBank {
-    int mBankId;       // 0x00 (our name) [R] ctor -1; cSpeechBank_Create = func_003D69F0(data) (the driver's bank id);
-                       //      [U] cSpeechBank_HasBankId compares it with a requested bank id; dtor func_003D6CA0()s it
+    int mBankId;       // 0x00 (our name) [R] ctor -1; cSpeechBank_Create = SPCH_addTable(data) (the driver's bank id);
+                       //      [U] cSpeechBank_HasBankId compares it with a requested bank id; dtor SPCH_removeTable()s it
     char mName[0x3C];  // 0x04 (our name) [R] ctor clears byte 0; cSpeechBank_Create strcpy()s the bank path; [U] cSpeechInstance_PlayEvent builds the stream file name from it and its language suffix (SPCH_GetBankLanguage)
     char* mShortName;  // 0x40 (our name) [R] cSpeechBank_Create: the part of mName after the last '\\'; [U] cSpeechInstance_PlayEvent passes it to cSpeechSys's vtable slot 2
     void* mpData;      // 0x44 (our name) [R] ctor 0; cSpeechBank_Create: the .hdr data (passed in, or FILE_load()ed); dtor MEM_free()s it when mOwnsData
@@ -30,7 +30,7 @@ struct cSpeechBank {
 
 // One speech event file of a cSpeechInstance (8 bytes; our names).
 struct tSpeechEventFile {
-    void* mpData; // 0x0 [U] cSpeechInstance_LoadEventFile: the event data (located inside the loaded headers .big, or FILE_loadz("%seventdat\events.evt")); registered with func_003D66C0
+    void* mpData; // 0x0 [U] cSpeechInstance_LoadEventFile: the event data (located inside the loaded headers .big, or FILE_loadz("%seventdat\events.evt")); registered with SPCH_registerBank
     int mOwned;   // 0x4 [U] cSpeechInstance_LoadEventFile 1 when loaded on its own; dtor MEM_free()s mpData then
 };
 
@@ -76,8 +76,8 @@ struct cSpeechInstance {
     int mViewport;                     // 0x8FC (our name) [U] cSpeechSys cSpeechSys_ApplyRequest (the request rider's mViewIndex,
                                        //       -1 without one); cSpeechInstance_PlayEvent passes it to the play slot as viewport
     int mReadyForSpeech;               // 0x900 (our name) [R] ctor 1; [U] set while the stream can take the next
-                                       //       speech: cSpeechInstance_Update / cSpeechInstance_StartNextSpeech clear it once func_003D7EC8
-                                       //       starts one, cSpeechInstance_Update sets it again (func_003D8040) or while busy
+                                       //       speech: cSpeechInstance_Update / cSpeechInstance_StartNextSpeech clear it once SPCH_startNextRequest
+                                       //       starts one, cSpeechInstance_Update sets it again (SPCH_updateChannel) or while busy
 };
 
 CHECK_OFFSET(cSpeechBank, mBankId, 0x00);

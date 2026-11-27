@@ -48,7 +48,7 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
     void** mVtbl;                       // 0x04 [R] ctor D_00480270; the dtor ends with RCMP_VIDEO_DRIVER_vtbl
     // --- SSX_VD_PS2_SINGLE_BUFFERD
     cPS2GraphicsMan* m_pGrMan;          // 0x08 [O] (SSX_VD_PSP_ONE_TEXTURE); [R] ctor: its graphics-manager argument; [U]
-                                        //      CompleteDraw polls its slot 18 (IsRenderIdle), the quad drawer (func_002548D0)
+                                        //      CompleteDraw polls its slot 18 (IsRenderIdle), the quad drawer (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles)
                                         //      uses it; [P] same
     RCMP_FRAME* mpCurrentFrame;         // 0x0C [R] ctor 0; [U] Draw stores the frame it is given; CompleteDraw and the dtor
                                         //      release it and clear it; [P] same
@@ -58,16 +58,16 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
                                         //      tiles {texture handle, width 16, height} (graphics-manager slot 47); [U] Draw
                                         //      updates each tile's texture (SetNewTextureData1), the dtor frees them; [P]
     int mNumTiles;                      // 0x18 [R] ctor mNumColumns * mNumRows; [U] dtor loop bound; [P]
-    int mNumColumns;                    // 0x1C [R] ctor width / 16; [U] Draw / func_002548D0 outer loop
-    int mNumRows;                       // 0x20 [R] ctor: number of strips; [U] Draw / func_002548D0 inner loop
-    int mRowHeights[6];                 // 0x24 [R] ctor: the power-of-two strip heights (func_00254350); [U] Draw /
-                                        //      func_002548D0 step by them
-    int mDrawLayer;                     // 0x3C [R] ctor: its DrawLayer argument; [U] func_002548D0
-    float mPosX;                        // 0x40 [R] ctor centres the frame (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition); [U] SetPosition; func_002548D0
-    float mPosY;                        // 0x44 [R]; [U] SetPosition; func_002548D0
-    float mPosZ;                        // 0x48 [R] ctor D_004A2EB0; [U] SetPosition; func_002548D0
-    float mScaleX;                      // 0x4C [R] ctor 1.0f (SSX_VD_PS2_SINGLE_BUFFERD_SetScale); [U] SetScale; func_002548D0
-    float mScaleY;                      // 0x50 [R] ctor 1.0f; [U] SetScale; func_002548D0
+    int mNumColumns;                    // 0x1C [R] ctor width / 16; [U] Draw / SSX_VD_PS2_SINGLE_BUFFERD_drawTiles outer loop
+    int mNumRows;                       // 0x20 [R] ctor: number of strips; [U] Draw / SSX_VD_PS2_SINGLE_BUFFERD_drawTiles inner loop
+    int mRowHeights[6];                 // 0x24 [R] ctor: the power-of-two strip heights (SSX_VD_floorLog2); [U] Draw /
+                                        //      SSX_VD_PS2_SINGLE_BUFFERD_drawTiles step by them
+    int mDrawLayer;                     // 0x3C [R] ctor: its DrawLayer argument; [U] SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
+    float mPosX;                        // 0x40 [R] ctor centres the frame (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition); [U] SetPosition; SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
+    float mPosY;                        // 0x44 [R]; [U] SetPosition; SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
+    float mPosZ;                        // 0x48 [R] ctor D_004A2EB0; [U] SetPosition; SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
+    float mScaleX;                      // 0x4C [R] ctor 1.0f (SSX_VD_PS2_SINGLE_BUFFERD_SetScale); [U] SetScale; SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
+    float mScaleY;                      // 0x50 [R] ctor 1.0f; [U] SetScale; SSX_VD_PS2_SINGLE_BUFFERD_drawTiles
 
     // Methods bound to their retail symbols by asm labels.
     void SetPosition(float posX, float posY, float posZ) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SetPosition");

@@ -15,12 +15,12 @@ struct RCMP_RCMP_SYSTEM {
 };
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 extern char D_004953E8[];
-extern int *func_003B07F8_x(void* a0, int a1, int a2) __asm__("func_003B07F8");
+extern int *PS2_SONY_FRAME_PS2_SONY_FRAME_x(void* a0, int a1, int a2) __asm__("PS2_SONY_FRAME_PS2_SONY_FRAME");
 /**
  * Creates a video frame for the Sony codec and links it at the front of the codec's frame list.
  *
  * Allocates 20 bytes from the movie allocator (RCMP_rcmp_sys with an empty name and the memory type at D_00509438), builds
- * the frame with func_003B07F8 (a cleared 32-bit SHAPE of the given size) and links the frame's list node (+8) after
+ * the frame with PS2_SONY_FRAME_PS2_SONY_FRAME (a cleared 32-bit SHAPE of the given size) and links the frame's list node (+8) after
  * the list head at @p sonyCodec + 0x20 (word 8). Likely bug: when the allocation fails the null node is still linked.
  *
  * @param sonyCodec  the PS2_SONY_CODEC_INTERNAL object
@@ -28,7 +28,7 @@ extern int *func_003B07F8_x(void* a0, int a1, int a2) __asm__("func_003B07F8");
  * @param frameHeight  frame height in pixels
  */
 void PS2_SONY_CODEC_INTERNAL_CreateFrame(int *sonyCodec, int frameWidth, int frameHeight) {
-    int *n = func_003B07F8_x(RCMP_rcmp_sys.AllocMemFunc(D_004953E8, 20, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir),
+    int *n = PS2_SONY_FRAME_PS2_SONY_FRAME_x(RCMP_rcmp_sys.AllocMemFunc(D_004953E8, 20, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir),
                              frameWidth, frameHeight);
     int *node = n ? n + 2 : 0;
     int *head = (int *)sonyCodec[8];
@@ -530,7 +530,7 @@ extern unsigned TIMER_gettick(void);
  *
  * Reads TIMER_gettick. When rate is 0x1000 (1.0 in 4.12 fixed point) it adds the elapsed ticks (now - last) to the
  * 64-bit acc; otherwise it adds rate * elapsed >> 12, computed in 64 bits. Then stores the new tick in last. Called by
- * func_003AE450 and func_003AE9A0.
+ * RCMP_AV_PLAYER_GetFirstFrame and RCMP_AV_PLAYER_SyncedAudioTime.
  *
  * @param clock  the timer (last tick, accumulated time, rate)
  */

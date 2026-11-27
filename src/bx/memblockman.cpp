@@ -1410,15 +1410,15 @@ INCLUDE_ASM("bx/memblockman", cd_recoverReadError);
 extern int D_00519C40[];
 extern int D_004A3ED4;
 extern "C" int sceCdTrayReq(int cmd, int* out);
-extern "C" void func_003E3D78(void);
+extern "C" void CDVD_recoverRead(void);
 
 /**
  * Recovers from a failed disc read and notes whether the disc tray was opened (a sync task).
  *
- * systemInit installs it with SYNCTASK_add in place of the CD file system's func_003E4000, which does the same
+ * systemInit installs it with SYNCTASK_add in place of the CD file system's CDVD_checkFailedRead, which does the same
  * recovery. When D_004A3ED4 is set, clears it and calls sceCdTrayReq(2, ...) (command 2, the result is discarded).
  * When both bits 2 and 4 (mask 6) of the CD file system flags (D_00519C40) are set, calls sceCdTrayReq(2, ...) again
- * and sets D_004A3ED0 when it reports a nonzero count, clears the two bits and re-runs the read with func_003E3D78.
+ * and sets D_004A3ED0 when it reports a nonzero count, clears the two bits and re-runs the read with CDVD_recoverRead.
  *
  * @return 0
  */
@@ -1437,7 +1437,7 @@ extern "C" int cd_recoverReadError(void)
         if (trayChanged != 0)
             D_004A3ED0 = 1;
         D_00519C40[0] &= ~6;
-        func_003E3D78();
+        CDVD_recoverRead();
     }
     return 0;
 }

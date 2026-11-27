@@ -619,7 +619,7 @@ CHECK_SIZE(SNDFILTERDEF, 0x18);
 // indexed with a 0x60 stride; On Tour 0x5C): one software-mixer voice. [O] MIX_sethighpass's local `SNDMIXVOICE*
 // psmv` and the member names; retail's views of it in ealib/seg_2B4578: Ent_8468, Ent_85D0, E_8560, E_8598, Ent_8158,
 // E_8B80. Retail has one wet bus, kept inline as floats (On Tour: float* to per-bus arrays), and its 0x50..0x5B differ
-// from On Tour's prss / plps (a clipping-filter node at 0x54, func_003C8B80).
+// from On Tour's prss / plps (a clipping-filter node at 0x54, MIX_setClipFilter).
 struct SNDMIXVOICE {
     char status;                        // 0x00 [O]; [U] the views' state / active byte
     signed char gainchanged;            // 0x01 [O]; [U] SNDMIX_setdrygain / setwetgain set it, MIX_play clears it
@@ -637,7 +637,7 @@ struct SNDMIXVOICE {
     void* pups;                         // 0x48 [O]; [U] MIX_playinit: the unpacker state
     TIMESTRETCHSTATE* ptss;             // 0x4C [O]; [U] MIX_playinit: the 6184-byte time stretcher
     int unk_50;                         // 0x50 [R] MIX_playinit 0 (On Tour has RSFSTATE* prss here)
-    void* unk_54;                       // 0x54 [U] func_003C8B80: the voice's 80-byte clipping filter node (priority 0x78)
+    void* unk_54;                       // 0x54 [U] MIX_setClipFilter: the voice's 80-byte clipping filter node (priority 0x78)
     int unk_58;                         // 0x58 [R] MIX_playinit 0
     HPFSTATE* phps;                     // 0x5C [O]; [R] MIX_playinit 0; [U] MIX_sethighpass: the 288-byte high-pass node
 };
@@ -674,9 +674,9 @@ struct SNDMIXSTATE {
     unsigned short outputframeincr;     // 0x00C [O]; [U] the per-slice output frame step (view H_8968::add)
     unsigned char resamplequality;      // 0x00E [O]; [U] sB40::f0E
     signed char unk_0F[1];              // 0x00F [U] MIX_create clears it; the effect send is on while it is set
-                                        //       (func_003CC630 sets it, view G_C630::fF); On Tour has a pad byte here
-    void (*fxadd)(int);                 // 0x010 [O]; [U] func_003CC630 installs the reverb's output hook
-                                        //       (func_003CBC58); MIX_audioslice calls it when set
+                                        //       (MIX_startSoftwareFx sets it, view G_C630::fF); On Tour has a pad byte here
+    void (*fxadd)(int);                 // 0x010 [O]; [U] MIX_startSoftwareFx installs the reverb's output hook
+                                        //       (SNDMIXI_runFx); MIX_audioslice calls it when set
     int* wetbusactive;                  // 0x014 [O]; [U] sB40::f14
     void (*filterunpackinit[6][3])(SNDMIXVOICE*, UNPACKINITPARAMS*); // 0x018 [O] ([3][7] there); [R]
                                         //       MIXI_initunpack16 / initunpackxa / initunpackmt fill their rows;

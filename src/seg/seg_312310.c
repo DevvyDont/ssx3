@@ -24,7 +24,7 @@ extern void func_001001C8(int);
  * Ends the program: runs the static destructors, the C library clean-up, then leaves with @p status.
  *
  * Calls __do_global_dtors (destructors), _cleanup and func_001001C8 (the start-up code's process end) with @p status.
- * func_003D1608 calls it as a no-return function.
+ * PATHI_fatalError calls it as a no-return function.
  *
  * @param status  the status code handed on to func_001001C8
  */

@@ -58,7 +58,7 @@ struct cSongInstance {
                                   //      (func_003D25F0(0x11000002, ...))
     void* mpPathfinderStream;     // 0x24 (our name, after the tag) [R] ctor operator new(0x37000, "PathfinderStream");
                                   //      dtor cMemMan_free; [U] main stream buffer
-    void* mpPathfinderOverlay;    // 0x28 (our name, after the tag) [R] ctor operator new(func_003D3058(1, 0),
+    void* mpPathfinderOverlay;    // 0x28 (our name, after the tag) [R] ctor operator new(PATH_getPlayerMemSize(1, 0),
                                   //      "PathfinderOverlay"); dtor cMemMan_free; [U] overlay stream buffer (0x6A400)
     int mStreamsOpen;             // 0x2C (our name) [R] ctor 0; [U] cSongInstance_Update sets 1 once the streams are open;
                                   //      cSongInstance_SendMusicEvent tests it

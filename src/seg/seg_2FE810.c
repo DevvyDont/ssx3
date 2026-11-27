@@ -3927,7 +3927,7 @@ extern void SignalSema(int);
  * Takes the N-command channel (func_004011E0(8)), sends the address of the work buffer D_00526780 (written back from
  * the cache first) and waits for the 8-byte reply in D_00451680. The pending code D_00451658 is 3 during the call.
  * Copies 0x400 bytes (CD) or 2064 bytes (when reply word 1 is non-zero, a DVD) from the buffer's uncached alias to @p
- * dst. The EA disc check func_003E4040 calls it after checking for a PS2 CD or DVD.
+ * dst. The EA disc check CDVD_initFileSystem calls it after checking for a PS2 CD or DVD.
  *
  * @param dst  the destination (2064 bytes for a DVD)
  * @return the reply's result word, or 0 on failure
@@ -3966,7 +3966,7 @@ extern void SignalSema(int);
  * Asks the drive what kind of disc is loaded (libcdvd S-command, RPC function 3).
  *
  * Takes the S-command channel (func_004014F8(1)), calls the function with a 4-byte reply in D_00452800 and releases the
- * semaphore. The EA disc check func_003E4040 compares the result with 18 and 20 (PS2 CD and PS2 DVD).
+ * semaphore. The EA disc check CDVD_initFileSystem compares the result with 18 and 20 (PS2 CD and PS2 DVD).
  *
  * @return the disc type, or 0 on failure
  */
@@ -4315,7 +4315,7 @@ extern int func_00403500(int, int, int);
  * Hands a block of MPEG bitstream to the decoder: starts the IPU input DMA over it.
  *
  * Passes the decoder's internal state (mpeg[16]), @p dataAddr and the size plus 4 rounded up to 16 bytes to
- * func_00403500, which builds the DMA tag chain and starts channel 4 (to IPU). The EA codec func_003B0B40 calls it with
+ * func_00403500, which builds the DMA tag chain and starts channel 4 (to IPU). The EA codec PS2_SONY_CODEC_INTERNAL_feedChunk calls it with
  * each chunk it has read.
  *
  * @param mpeg  the decoder handle
@@ -4569,7 +4569,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceMpegAddCallback);
  *
  * The callbacks live in the internal state at +0x0C as (function, data) pairs indexed by type: 0 error (see
  * func_004034A8), 1 needs data (func_00402C80), 2 / 3 around the decoder's own use of the IPU DMA (func_00403AD0).
- * PS2_SONY_CODEC_INTERNAL_Init installs func_003B0B10 for type 1.
+ * PS2_SONY_CODEC_INTERNAL_Init installs RCMP_mpegNoDataCallback for type 1.
  *
  * @param mpeg  the decoder handle
  * @param n  the callback type

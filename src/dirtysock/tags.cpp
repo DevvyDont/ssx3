@@ -1106,7 +1106,7 @@ struct sDsTmK2 {
 
 // ds_timeinsecs / ds_secstotime
 extern "C" unsigned int func_003EF088();
-extern "C" sDsTmK2* func_003EAEB8(sDsTmK2* tm, unsigned long secs);
+extern "C" sDsTmK2* LobbyApi_secondsToCalendar(sDsTmK2* tm, unsigned long secs);
 
 /**
  * Stores a time in a tag record as "year.month.day hour:mm:ss".
@@ -1127,7 +1127,7 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
 
     if (secs == 0)
         secs = func_003EF088();
-    timeParts = func_003EAEB8(&tm, secs);
+    timeParts = LobbyApi_secondsToCalendar(&tm, secs);
     if (timeParts == 0)
         return -1;
     char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
@@ -1141,13 +1141,13 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetDateTime);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
-extern "C" unsigned long func_003EB090(sDsTmK2* tm);
+extern "C" unsigned long LobbyApi_calendarToSeconds(sDsTmK2* tm);
 
 /**
  * Stores a calendar date and time in a tag record as epoch seconds.
  *
  * Fills a zeroed tm (memset) with @p year - 1900, @p mon - 1, the day and time, tm_isdst -1, converts it with
- * func_003EB090() and passes the result minus @p adj to cDirtysock_tag_TagFieldSetEpoch() (0 when the conversion gives
+ * LobbyApi_calendarToSeconds() and passes the result minus @p adj to cDirtysock_tag_TagFieldSetEpoch() (0 when the conversion gives
  * 0).
  *
  * @param record  the tag record to edit
@@ -1175,7 +1175,7 @@ extern "C" int cDirtysock_tag_TagFieldSetDateTime(char* record, int len, char* n
     tm.tm_hour = hour;
     tm.tm_min = min;
     tm.tm_sec = sec;
-    secs = (int)func_003EB090(&tm);
+    secs = (int)LobbyApi_calendarToSeconds(&tm);
     return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs != 0 ? secs - adj : 0);
 }
 #endif
@@ -1184,7 +1184,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetPackedDateTime);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
-extern "C" unsigned long func_003EB090(sDsTmK2* tm);
+extern "C" unsigned long LobbyApi_calendarToSeconds(sDsTmK2* tm);
 
 /**
  * Stores a packed date and time in a tag record as epoch seconds.
@@ -1213,7 +1213,7 @@ extern "C" int cDirtysock_tag_TagFieldSetPackedDateTime(char* record, int len, c
     tm.tm_hour = (time >> 16) & 0xFF;
     tm.tm_min = (time >> 8) & 0xFF;
     tm.tm_sec = time & 0xFF;
-    secs = (int)func_003EB090(&tm);
+    secs = (int)LobbyApi_calendarToSeconds(&tm);
     return cDirtysock_tag_TagFieldSetEpoch(record, len, name, secs != 0 ? secs - adj : 0);
 }
 #endif
@@ -1263,7 +1263,7 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
  *
  * Skips whitespace, stops at the end or at a line that starts with '=' or ':', and hands each term to
  * cDirtysock_tag__TagFieldSetupTerm() (which replaces a field of the same name). The LobbyApi request builder
- * func_003E8B10 calls it.
+ * LobbyApi_sendCommand calls it.
  *
  * @param record  the tag record to edit
  * @param len     size of the record buffer in bytes
@@ -1962,10 +1962,10 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
 #ifdef SKIP_ASM
 // _TagFieldParseNumber / memset / ds_tmtosecs
-extern "C" char* func_003EAE68(const char* data, int* value);
+extern "C" char* LobbyApi_parseDecimal(const char* data, int* value);
 extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
-extern "C" unsigned long func_003EB090(sDsTmK2* tm);
+extern "C" unsigned long LobbyApi_calendarToSeconds(sDsTmK2* tm);
 
 /**
  * Parses a time from a tag field value, as seconds since 1970.
@@ -1990,33 +1990,33 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
                 result = (result << 4) | D_004962C0[*data];
             }
         } else if ((*data >= '0') && (*data <= '9')) {
-            const char* parseEnd = func_003EAE68(data, &value);
+            const char* parseEnd = LobbyApi_parseDecimal(data, &value);
             if (*parseEnd <= ' ') {
                 result = value;
             } else if ((*data >= '0') && (*data <= '9')) {
                 memset(&tm, 0, sizeof(tm));
                 tm.tm_isdst = -1;
-                data = func_003EAE68(data, &tm.tm_year);
+                data = LobbyApi_parseDecimal(data, &tm.tm_year);
                 if ((unsigned char)(*data - '-') <= 1) {
                     data++;
                 }
-                data = func_003EAE68(data, &tm.tm_mon);
+                data = LobbyApi_parseDecimal(data, &tm.tm_mon);
                 if ((unsigned char)(*data - '-') <= 1) {
                     data++;
                 }
-                data = func_003EAE68(data, &tm.tm_mday);
+                data = LobbyApi_parseDecimal(data, &tm.tm_mday);
                 if (*data == ' ') {
                     data++;
                 }
-                data = func_003EAE68(data, &tm.tm_hour);
+                data = LobbyApi_parseDecimal(data, &tm.tm_hour);
                 if (*data == ':') {
                     data++;
                 }
-                data = func_003EAE68(data, &tm.tm_min);
+                data = LobbyApi_parseDecimal(data, &tm.tm_min);
                 if (*data == ':') {
                     data++;
                 }
-                data = func_003EAE68(data, &tm.tm_sec);
+                data = LobbyApi_parseDecimal(data, &tm.tm_sec);
                 if ((tm.tm_year < 1970) || (tm.tm_year > 2099) || (tm.tm_mon < 1) || (tm.tm_mon > 12) || (tm.tm_mday < 1) || (tm.tm_mday > 31)) {
                     tm.tm_year = 0;
                 }
@@ -2026,7 +2026,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
                 if (tm.tm_year != 0) {
                     tm.tm_year -= 1900;
                     tm.tm_mon -= 1;
-                    result = func_003EB090(&tm);
+                    result = LobbyApi_calendarToSeconds(&tm);
                 }
             }
         }
@@ -2049,7 +2049,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
 /**
  * Reads a time field from a tag record into separate calendar fields.
  *
- * Reads the value with cDirtysock_tag_TagFieldGetTime() (default 1) and converts value + @p offset with func_003EAEB8()
+ * Reads the value with cDirtysock_tag_TagFieldGetTime() (default 1) and converts value + @p offset with LobbyApi_secondsToCalendar()
  * into a tm; every non-null output gets its field (year as tm_year + 1900, month as tm_mon + 1). The buddy-message
  * reader BuddyMan_onReceiveMessage calls it.
  *
@@ -2071,7 +2071,7 @@ extern "C" int cDirtysock_tag_TagFieldGetDateTime(char* data, int* year, int* mo
     unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
     if (secs < 2)
         return -1;
-    calendar = func_003EAEB8(&tm, secs + offset);
+    calendar = LobbyApi_secondsToCalendar(&tm, secs + offset);
     if (calendar == 0)
         return -1;
     if (year)
@@ -2113,7 +2113,7 @@ extern "C" int cDirtysock_tag_TagFieldGetPackedDateTime(char* data, unsigned int
     unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
     if (secs < 2)
         return -1;
-    calendar = func_003EAEB8(&tm, secs + offset);
+    calendar = LobbyApi_secondsToCalendar(&tm, secs + offset);
     if (calendar == 0)
         return -1;
     if (date)
