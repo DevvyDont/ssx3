@@ -209,30 +209,30 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->MusicSys.mVtbl = D_00483688;
     self->SpeechSys.mVtbl = D_004836D8;
     self->mVtbl = cSSXAudio_vtbl;
-    self->unk_5728 = 0;
-    self->unk_572C = -1;
+    self->mLanguageBigFile = 0;
+    self->mSpeechLanguage = -1;
     self->mFrontEndDJVolume = 1.0f;
     self->mGruntPatchCycle = 0;
-    self->unk_5740 = 0;
-    self->unk_5744 = 0;
-    self->unk_574C = 0;
-    self->unk_5750 = 0;
-    self->unk_5754 = 0;
-    self->unk_5758 = 0;
+    self->mPendingLine8422 = 0;
+    self->mPendingPlaceLine = 0;
+    self->mPendingBetweenEventsLine = 0;
+    self->mPendingBetweenEventsLine2 = 0;
+    self->mPendingBonusBetweenEventsLine = 0;
+    self->mPendingLocationPartLine = 0;
     self->unk_5764 = -1;
-    self->unk_5768 = 0;
-    self->unk_576C = 0;
-    self->unk_5770 = 0;
+    self->mPendingChoiceLine = 0;
+    self->mPendingPeakLine8378 = 0;
+    self->mPendingLocationLine = 0;
     self->mSongAnnouncePending = 0;
-    self->unk_577C = 0;
-    self->unk_5780 = 1;
-    self->unk_5784 = 0;
+    self->mPendingLine8492 = 0;
+    self->mLine8492Played = 1;
+    self->mPendingPeakLine8491 = 0;
     self->mRiderRemarkPending = 0;
-    self->unk_578C = 0;
-    self->unk_5790 = 1;
-    self->unk_5794 = 1;
-    self->unk_5798 = -1;
-    self->unk_5818 = 0;
+    self->mFirstTimeOnPeak = 0;
+    self->mPeakIntroDone = 1;
+    self->mChoiceLineFirstTime = 1;
+    self->mQueuedBetweenEventsPick = -1;
+    self->mScriptedDJLine = 0;
     self->mLastUberLevel = -1;
     self->mUberViewIndex = 0;
     self->mStopSpeechOnResume = 0;
@@ -252,12 +252,12 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->mRadioModeID = 0;
     self->mFrontEndRadioModeID = 0;
     *(long*)&self->mRadioPlayList = 0;
-    self->unk_6254 = 0;
+    self->mInTransport = 0;
     self->mRaceMusicOn = 1;
     self->mTransportTrack = 23;
-    self->unk_6294 = 0;
+    self->mReplayMusicStarted = 0;
     self->mReplaySongPlaying = 0;
-    self->unk_62A4 = -1;
+    self->mLastPlaylistSong = -1;
     self->mLoadingLoopHandle = -1;
     self->mArcadeSFX = 0;
     self->mDJSpeech = 0;
@@ -273,7 +273,7 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     self->mRMSStepFrame = 1;
     self->mPlayIntroMovieWithDJ = 1;
     self->mAudioMode = heap;
-    self->unk_6250 = 0;
+    self->mJumpCountdown = 0;
     for (int i = 0; i < 11; i++) {
         A_4C68->m6394[i] = 1.0f;
         A_4C68->m63E4[i] = 1.0f;
@@ -395,8 +395,8 @@ extern "C" void cSSXAudio__cSSXAudio(cSSXAudio* self, int flags)
     func_0028F730(self);
     SNDSYS_removeuserdataclient(cSSXAudio_HandleUserChunk);
     func_002B0DA0(speechSys);
-    if (self->unk_5728)
-        FILESYS_delbigsync(self->unk_5728, 100);
+    if (self->mLanguageBigFile)
+        FILESYS_delbigsync(self->mLanguageBigFile, 100);
     if (self->mPlayHistory.Array)
         cMemMan_free(self->mPlayHistory.Array);
     cController__cController(self, 0);

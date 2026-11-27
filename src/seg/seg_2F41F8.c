@@ -24,14 +24,14 @@ typedef struct { unsigned count; unsigned st[4]; unsigned char buf[64]; } sMd5;
  * @param n  output size: 16 for raw bytes, more than 32 for hex text
  */
 void func_003F31F8(sMd5 *ctx, unsigned char *out, int n) {
-    unsigned char c = 0x80;
+    unsigned char fillByte = 0x80;
     unsigned w = 0;
     int i;
     i = ctx->count & 0x3F;
     do {
-        ctx->buf[i] = c;
+        ctx->buf[i] = fillByte;
         i++;
-        c = 0;
+        fillByte = 0;
         if (i == 0x40) {
             f2220(ctx);
             i = 0;
@@ -362,16 +362,16 @@ int *f39C8impl(int a, int b) __asm__("func_003F39C8");
  * @return the lookup object, or 0 when the allocation fails
  */
 int *f39C8impl(int hostName, int timeout) {
-    int f;
+    int word;
     int *lookup = RpcAlloc(92);
     if (lookup) {
         f6210k(lookup, 0, 92);
-        f = (int)_SocketLookupDone;
+        word = (int)_SocketLookupDone;
         lookup[3] = (int)_SocketLookupFree;
-        lookup[2] = f;
+        lookup[2] = word;
         func_003F4C98(D_0051F020, 'name', 'look');
-        f = 1;
-        f4C68k(D_0051F020, f, 0, timeout, hostName, -f, 0, 0, f, lookup + 88 / 4);
+        word = 1;
+        f4C68k(D_0051F020, word, 0, timeout, hostName, -word, 0, 0, word, lookup + 88 / 4);
     }
     return lookup;
 }
@@ -873,18 +873,33 @@ INCLUDE_ASM("seg/seg_2F41F8", NetPrintfCode);
 /**
  * Does nothing and returns 1 (a printf-style debug stub; nothing in retail calls it).
  *
- * @param a  first argument (ignored)
+ * @param format  first argument (ignored)
  * @return 1
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int NetPrintfCode(int a, ...) { return 1; }
+int NetPrintfCode(int format, ...) { return 1; }
 #endif
 
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
-struct sSifReq { int f0; int f4; int pad8[5]; int key; };
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
+struct sSifReq {                        /* one request record (0x20 bytes, DMAed to the IOP); names ours,
+        [U] func_003F4528
+                                           fills every word from its arguments */
+    int payloadAddr;                    /* 0x00: IOP address of the payload (iopPayload + its offset) */
+    int payloadSize;                    /* 0x04: payload byte count */
+    int replyAddr;                      /* 0x08: the reply buffer (dst) */
+    int replySize;                      /* 0x0C: its size (dstsize) */
+    int objectId;                       /* 0x10: target object id on the IOP (fno) */
+    int callArg;                        /* 0x14: call argument word */
+    int serviceId;                      /* 0x18: the service's IOP id (handle +0xC) */
+    int key;                            /* 0x1C */
+};
 
-struct sSifRes { int pad0[2]; int f8; int fC; int f10; int f14; int pad18; int key; };
+/* One reply record (0x20 bytes, written by the IOP). Names ours: [U] func_003F4A78 stores result in a blocking
+   request's result pointer and passes the other words to a callback completion; func_003F5A50 ('sess'/'recv') reads
+   replySize as the received byte count. replyAddr / objectId are named after the request words at the same offsets
+   (guess: the IOP echoes the record back; no reader in retail). */
+struct sSifRes { int pad0[2]; int replyAddr; int replySize; int objectId; int result; int pad18; int key; };
 
 /* A request's completion: SIF_DONE_NONE, SIF_DONE_WAIT (the sender sleeps until the reply's result is stored), or a
    callback run with the reply (sentinel function pointers, as signal()'s SIG_DFL / SIG_IGN). */
@@ -894,7 +909,9 @@ typedef int (*SifDoneFn)(int, int, int, int, char *, int, int, int, int *);
 
 struct sSifCb { SifDoneFn fn; int *out; int arg; int th; };
 
-struct sSifEnt { int idx; int k1; int k2; int v; };
+/* A service handle / service directory entry (16 bytes): [U] func_003F4C98 matches moduleTag and funcTag (names ours:
+   the 'netw' / 'sess' ... and 'crea' / 'look' ... tags it is called with) and copies idx and v (the IOP id). */
+struct sSifEnt { int idx; int moduleTag; int funcTag; int v; };
 
 /* The areas func_003F5000 lays out in buf (each used through the EE's uncached segment, and mirrored on the IOP at
    iopBase + 0x40): service directory 0x0 (0x800 bytes; byte 0 is also func_003F4F40's answer flag), requests a[]
@@ -928,10 +945,10 @@ struct sSifQueue {
     int writeOff;                       /* 0x4DDC: payload offset of the next request */
     int pos;                            /* 0x4DE0 */
     int payloadSize;                    /* 0x4DE4 */
-    int h4DE8;
-    int h4DEC;
-    int h4DF0;
-    int h4DF4;
+    int threadId;                       /* 0x4DE8: the queue thread (CreateThread; func_003F4448 wakes it) */
+    int sendAlarmId;                    /* 0x4DEC: the wake alarm func_003F4528 arms for a blocking request, -1 none */
+    int pollAlarmId;                    /* 0x4DF0: the alarm func_003F4448 re-arms itself with, -1 none */
+    int intcHandlerId;                  /* 0x4DF4: the Count interrupt handler (AddIntcHandler2, func_003F4410) */
     volatile unsigned last;             /* 0x4DF8: Count at the last update */
     int pad4DFC;
     volatile unsigned long total;       /* 0x4E00 */
@@ -1000,11 +1017,12 @@ void func_003F4448(int a, int b, struct sSifQueue *s);
  * @param queue  the queue (D_0051F0C0)
  */
 void func_003F4448(int alarmId, int alarmTime, struct sSifQueue *queue) {
-    if (alarmId == queue->h4DEC) queue->h4DEC = -1;
-    if (alarmId == queue->h4DF0) queue->h4DF0 = -1;
+    if (alarmId == queue->sendAlarmId) queue->sendAlarmId = -1;
+    if (alarmId == queue->pollAlarmId) queue->pollAlarmId = -1;
     if (queue->tail != queue->head) {
-        if (queue->b[queue->tail].key == queue->a[queue->tail].key) f4C50(queue->h4DE8);
-        if (queue->h4DEC < 0 && queue->h4DF0 < 0) queue->h4DF0 = f3B80(0x10, (void *)func_003F4448, queue);
+        if (queue->b[queue->tail].key == queue->a[queue->tail].key) f4C50(queue->threadId);
+        if (queue->sendAlarmId < 0 && queue->pollAlarmId < 0) queue->pollAlarmId = f3B80(0x10, (void *)func_003F4448,
+                queue);
     }
 }
 #endif
@@ -1149,13 +1167,13 @@ int func_003F4528(struct sSifEnt *cl, int flags, int fno, int callArg, char *dat
             func_0041605C(queue->payload + off, data, size);
         }
     }
-    queue->a[queue->head].f0 = queue->iopPayload + off;
-    queue->a[queue->head].f4 = size;
-    queue->a[queue->head].pad8[0] = dst;
-    queue->a[queue->head].pad8[1] = dstsize;
-    queue->a[queue->head].pad8[2] = fno;
-    queue->a[queue->head].pad8[3] = callArg;
-    queue->a[queue->head].pad8[4] = cl->v;
+    queue->a[queue->head].payloadAddr = queue->iopPayload + off;
+    queue->a[queue->head].payloadSize = size;
+    queue->a[queue->head].replyAddr = dst;
+    queue->a[queue->head].replySize = dstsize;
+    queue->a[queue->head].objectId = fno;
+    queue->a[queue->head].callArg = callArg;
+    queue->a[queue->head].serviceId = cl->v;
     queue->a[queue->head].key = queue->nextKey;
     if (wb) f4528_wb(dst, dstsize + 0x80);
     // ORIGINAL-PTR: Sony SDK sceSifDmaData holds the transfer's EE source address as an unsigned int word
@@ -1180,7 +1198,7 @@ int func_003F4528(struct sSifEnt *cl, int flags, int fno, int callArg, char *dat
     queue->nextKey = (queue->nextKey + 1) % queue->keyLimit;
     queue->head = (queue->head + 1) % queue->cnt;
     SignalSema(queue->sema);
-    if (queue->h4DEC < 0 && fn == SIF_DONE_WAIT) queue->h4DEC = SetAlarm(8, (void *)func_003F4448, queue);
+    if (queue->sendAlarmId < 0 && fn == SIF_DONE_WAIT) queue->sendAlarmId = SetAlarm(8, (void *)func_003F4448, queue);
     if (fn == SIF_DONE_WAIT) {
         D_004A5B08 = 2;
         SleepThread();
@@ -1198,7 +1216,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4A78);
 #define SYNC_2F41() __asm__ volatile("sync")
 
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 extern volatile int D_004A5B00;
@@ -1232,14 +1250,14 @@ int func_003F4A78(void) {
             return n;
         }
         th = 0;
-        addr = queue->payload + (queue->a[queue->tail].f0 - queue->iopPayload);
-        replyWord8 = queue->b[queue->tail].f8;
-        pC = queue->b[queue->tail].fC;
-        replyWord10 = queue->b[queue->tail].f10;
-        replyResult = queue->b[queue->tail].f14;
+        addr = queue->payload + (queue->a[queue->tail].payloadAddr - queue->iopPayload);
+        replyWord8 = queue->b[queue->tail].replyAddr;
+        pC = queue->b[queue->tail].replySize;
+        replyWord10 = queue->b[queue->tail].objectId;
+        replyResult = queue->b[queue->tail].result;
         done = queue->c[queue->tail].fn;
         reqFlags = queue->c[queue->tail].arg;
-        len = queue->a[queue->tail].f4;
+        len = queue->a[queue->tail].payloadSize;
         if (done != SIF_DONE_NONE) {
             if (done == SIF_DONE_WAIT) {
                 if (queue->c[queue->tail].out != 0) *queue->c[queue->tail].out = replyResult;
@@ -1249,9 +1267,9 @@ int func_003F4A78(void) {
                 SYNC_2F41();
             }
         }
-        if (queue->a[queue->tail].f4 > 0) {
-            queue->pos = queue->a[queue->tail].f0 - queue->iopPayload;
-            queue->pos += (queue->a[queue->tail].f4 + 0x3F) & ~0x3F;
+        if (queue->a[queue->tail].payloadSize > 0) {
+            queue->pos = queue->a[queue->tail].payloadAddr - queue->iopPayload;
+            queue->pos += (queue->a[queue->tail].payloadSize + 0x3F) & ~0x3F;
         }
         queue->tail = (queue->tail + 1) % queue->cnt;
         SignalSema(queue->sema);
@@ -1299,7 +1317,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4C98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("func_003F4C98");
@@ -1319,19 +1337,19 @@ int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("func_003F4C98");
 int f4C98impl(struct sSifEnt *handle, int moduleTag, int funcTag) {
     struct sSifQueue *queue = &D_0051F0C0;
     struct sSifEnt *dirEntry;
-    if (moduleTag == handle->k1 && funcTag == handle->k2) {
+    if (moduleTag == handle->moduleTag && funcTag == handle->funcTag) {
         int i = handle->idx;
         if (i >= 0) {
             if (i < 129) {
                 struct sSifEnt *ent = (struct sSifEnt *)(i * 16 + (int)queue->beg);
-                if (ent->v == handle->v && ent->k1 == moduleTag) return 0;
+                if (ent->v == handle->v && ent->moduleTag == moduleTag) return 0;
             }
         }
     }
-    handle->k2 = funcTag;
-    handle->k1 = moduleTag;
+    handle->funcTag = funcTag;
+    handle->moduleTag = moduleTag;
     for (dirEntry = queue->beg; dirEntry != queue->end; dirEntry++) {
-        if (dirEntry->k1 == handle->k1 && dirEntry->k2 == handle->k2) {
+        if (dirEntry->moduleTag == handle->moduleTag && dirEntry->funcTag == handle->funcTag) {
             handle->idx = dirEntry->idx;
             handle->v = dirEntry->v;
             return 1;
@@ -1349,7 +1367,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4D68);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 extern int func_003F4C68d(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
@@ -1472,7 +1490,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4F40);
 #define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
 
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
@@ -1489,7 +1507,7 @@ extern void sceSifSendCmd(int, void *, int, int, int, int);
 int func_003F4F40(void) {
     int answered;
     unsigned start;
-    unsigned c;
+    unsigned now;
     char *flag = D_0051F0C0.buf;
     unsigned limit = 0x2FAF080;
     // ORIGINAL-PTR: the IOP gets the flag's EE address as a word of the SIF command packet (Sony SDK sceSifCmdHdr's
@@ -1501,8 +1519,8 @@ int func_003F4F40(void) {
     answered = 1;
     MFC0_COUNT_2F41(start);
     while (*flag == 0) {
-        MFC0_COUNT_2F41(c);
-        if (c - start > limit) {
+        MFC0_COUNT_2F41(now);
+        if (now - start > limit) {
             answered = 0;
             break;
         }
@@ -1517,7 +1535,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5000);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 extern int D_004A4BB0;
@@ -1525,7 +1543,8 @@ extern char D_00523F00[];   /* the queue thread's stack (0x2000 bytes) */
 extern int _gp;   /* the linker-script $gp value (0x4A30F0, D_004A30F0); gas never addresses _gp off $gp */
 
 /* What func_003F5000 DMAs to the IOP buffer's first 0x40 bytes: per region, its IOP start / end and EE address. */
-struct sSifQueueHdr { int f0; int f4; int v[14]; };
+/* (names ours: [U] func_003F5000 copies the queue's headerWord0 and keyLimit into the first two words) */
+struct sSifQueueHdr { int firstWord; int keyLimit; int v[14]; };
 /* The kernel's CreateSema / CreateThread parameter blocks (Sony eekernel.h SemaParam / ThreadParam), as far as this
    call fills them. */
 struct sSemaParam {
@@ -1613,8 +1632,8 @@ int func_003F5000(void) {
     if (queue->iopBase == 0) return -2;
     iop = (queue->iopBase & 0xFFFFFFF) | 0xA0000000;
     queue->iopBase = iop;
-    hdr.f0 = queue->headerWord0;
-    hdr.f4 = queue->keyLimit;
+    hdr.firstWord = queue->headerWord0;
+    hdr.keyLimit = queue->keyLimit;
     hdr.v[0] = iop + 0x40;
     hdr.v[1] = hdr.v[0] + (queue->end - queue->beg) * sizeof(struct sSifEnt);
     hdr.v[2] = (int)queue->beg;
@@ -1664,19 +1683,19 @@ int func_003F5000(void) {
     sema.max_count = 1;
     sema.option = 0;
     queue->sema = CreateSema(&sema);
-    queue->h4DEC = -1;
-    queue->h4DF0 = -1;
+    queue->sendAlarmId = -1;
+    queue->pollAlarmId = -1;
     tp.func = func_003F44F8;
     tp.initPriority = 10;
     tp.stack = D_00523F00;
     tp.stackSize = 0x2000;
     tp.gpReg = &_gp;
     tp.option = 0;
-    queue->h4DE8 = CreateThread(&tp);
-    if (queue->h4DE8 <= 0) return -5;
-    queue->h4DF4 = AddIntcHandler2(2, func_003F4410, -1, queue);
+    queue->threadId = CreateThread(&tp);
+    if (queue->threadId <= 0) return -5;
+    queue->intcHandlerId = AddIntcHandler2(2, func_003F4410, -1, queue);
     EnableIntc(2);
-    StartThread(queue->h4DE8, queue);
+    StartThread(queue->threadId, queue);
     D_004A4BB0 = 1;
     return 0;
 }
@@ -1687,7 +1706,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F53F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
-   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue D_0051F0C0;
 
 extern int D_004A4BB0;
@@ -1707,11 +1726,11 @@ extern void DeleteSema(int);
  */
 int func_003F53F8(void) {
     struct sSifQueue *queue = &D_0051F0C0;
-    if (queue->h4DEC >= 0) ReleaseAlarm(queue->h4DEC);
-    if (queue->h4DF0 >= 0) ReleaseAlarm(queue->h4DF0);
-    RemoveIntcHandler(2, queue->h4DF4);
-    TerminateThread(queue->h4DE8);
-    DeleteThread(queue->h4DE8);
+    if (queue->sendAlarmId >= 0) ReleaseAlarm(queue->sendAlarmId);
+    if (queue->pollAlarmId >= 0) ReleaseAlarm(queue->pollAlarmId);
+    RemoveIntcHandler(2, queue->intcHandlerId);
+    TerminateThread(queue->threadId);
+    DeleteThread(queue->threadId);
     DeleteSema(queue->sema);
     D_004A4BB0 = 0;
     return 0;
@@ -1750,15 +1769,18 @@ struct sSessAddr {
 };
 
 /* Network session handle (0x9C bytes, created by func_003F5478). The receive callback func_003F5A50 (an RPC
-   completion) writes f8 / fC / f10, so they are volatile in every accessor. */
+   completion) writes recvPending / readOffset / recvLength, so they are volatile in every accessor. Member names are
+   ours, from that use. */
 struct sSess {
-    int f0;                             /* 0x00: the IOP session id */
-    struct sSessAddr *f4;               /* 0x04: the address block, 64-byte aligned inside space */
-    volatile int f8;
-    volatile int fC;
-    volatile int f10;
-    int f14;                            /* 0x14: receive buffer size */
-    unsigned char *f18;                 /* 0x18: receive buffer, 0x40 bytes after the address block */
+    int id;                             /* 0x00: the IOP session id */
+    struct sSessAddr *addr;             /* 0x04: the address block, 64-byte aligned inside space */
+    volatile int recvPending;           /* 0x08: [U] func_003F5A70 sets it when it sends 'sess'/'recv', the callback
+                                           clears it */
+    volatile int readOffset;            /* 0x0C: [U] offset of the next unread packet in recvBuf (func_003F5C38
+                                           advances it) */
+    volatile int recvLength;            /* 0x10: [U] bytes received ('ibuf' of func_003F57C8) */
+    int recvSize;                       /* 0x14: receive buffer size */
+    unsigned char *recvBuf;             /* 0x18: receive buffer, 0x40 bytes after the address block */
     unsigned char space[0x80];          /* 0x1C: room for the aligned address block (the receive buffer starts in it
                                            and runs on into the allocation) */
 };
@@ -1796,17 +1818,17 @@ struct sSess *func_003F5478(int size) {
     session = RpcAlloc(size + 156);
     if (session == 0) return 0;
     f6210h(session, 0, 156);
-    session->f4 = (struct sSessAddr *)((int)&session->space[0x3F] & ~0x3F);
-    session->f14 = size;
-    session->f18 = (unsigned char *)&session->f4[2];
-    f6210h(session->f4, 0, 0x20);
-    f6210h(session->f18, 0, session->f14);
-    f5478_SyncDCache(session->f4, session->f4 + 1);
-    f5478_SyncDCache(session->f18, session->f18 + session->f14);
+    session->addr = (struct sSessAddr *)((int)&session->space[0x3F] & ~0x3F);
+    session->recvSize = size;
+    session->recvBuf = (unsigned char *)&session->addr[2];
+    f6210h(session->addr, 0, 0x20);
+    f6210h(session->recvBuf, 0, session->recvSize);
+    f5478_SyncDCache(session->addr, session->addr + 1);
+    f5478_SyncDCache(session->recvBuf, session->recvBuf + session->recvSize);
     FlushCache(0);
     func_003F4C98(D_00525F00, 'sess', 'crea');
     f5478_4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, session);
-    if (session->f0 == 0) {
+    if (session->id == 0) {
         RpcFree(session);
         session = 0;
     }
@@ -1841,7 +1863,8 @@ extern char D_00525F20[];
 extern int func_003F4C98(char *, int, int);
 extern int f5638_4C68(char *, int, int, int, struct sSessAddr *, int, int, int, int, int) __asm__("func_003F4C68");
 extern int f5638_SyncDCache(void *, void *) __asm__("SyncDCache");
-typedef struct { unsigned short family; unsigned short port; int addr; int z8; int zC; } SA5638;
+/* the address block's peer as a BSD sockaddr_in; sin_zero (8 bytes) is cleared as two words */
+typedef struct { unsigned short family; unsigned short port; int addr; int sin_zero0; int sin_zero1; } SA5638;
 /**
  * Connects a network packet session to an IPv4 address and port ('sess'/'conn', not waited for).
  *
@@ -1855,26 +1878,26 @@ typedef struct { unsigned short family; unsigned short port; int addr; int z8; i
  */
 int func_003F5638(struct sSess *self, unsigned addr, int port) {
     unsigned addrShift;
-    if (((SA5638 *)self->f4)->family != 0) return -1;
-    ((SA5638 *)self->f4)->family = 2;
-    ((SA5638 *)self->f4)->port = 0;
-    ((SA5638 *)self->f4)->addr = 0;
-    ((SA5638 *)self->f4)->z8 = 0;
-    ((SA5638 *)self->f4)->zC = 0;
-    self->f4->peer.sa_data[0] = port >> 8;
-    self->f4->peer.sa_data[1] = port;
+    if (((SA5638 *)self->addr)->family != 0) return -1;
+    ((SA5638 *)self->addr)->family = 2;
+    ((SA5638 *)self->addr)->port = 0;
+    ((SA5638 *)self->addr)->addr = 0;
+    ((SA5638 *)self->addr)->sin_zero0 = 0;
+    ((SA5638 *)self->addr)->sin_zero1 = 0;
+    self->addr->peer.sa_data[0] = port >> 8;
+    self->addr->peer.sa_data[1] = port;
     addrShift = addr;
-    self->f4->peer.sa_data[5] = addrShift;
+    self->addr->peer.sa_data[5] = addrShift;
     addrShift >>= 8;
-    self->f4->peer.sa_data[4] = addrShift;
+    self->addr->peer.sa_data[4] = addrShift;
     addrShift >>= 8;
-    self->f4->peer.sa_data[3] = addrShift;
+    self->addr->peer.sa_data[3] = addrShift;
     addrShift >>= 8;
-    self->f4->peer.sa_data[2] = addrShift;
-    f5638_SyncDCache(self->f4, self->f4 + 1);
+    self->addr->peer.sa_data[2] = addrShift;
+    f5638_SyncDCache(self->addr, self->addr + 1);
     func_003F4C98(D_00525F20, 'sess', 'conn');
-    f5638_4C68(D_00525F20, 0, self->f0, 0, self->f4, 0x10, 0, 0, 0, 0);
-    self->f10 = 0;
+    f5638_4C68(D_00525F20, 0, self->id, 0, self->addr, 0x10, 0, 0, 0, 0);
+    self->recvLength = 0;
     return 0;
 }
 #endif
@@ -1895,9 +1918,9 @@ extern void func_00416210b(void *, int, int) __asm__("memset");
  */
 int func_003F5738(struct sSess *self) {
     func_003F4C98(D_00525F30, 'sess', 'disc');
-    func_003F4C68(D_00525F30, 0, self->f0, 0, 0, 0, 0, 0, 0, 0);
-    func_00416210b(self->f4, 0, 0x20);
-    self->f10 = 0;
+    func_003F4C68(D_00525F30, 0, self->id, 0, 0, 0, 0, 0, 0, 0);
+    func_00416210b(self->addr, 0, 0x20);
+    self->recvLength = 0;
     return 0;
 }
 #endif
@@ -1924,23 +1947,24 @@ int func_003F57C8_impl(struct sSess *self, int key) __asm__("func_003F57C8");
  */
 int func_003F57C8_impl(struct sSess *self, int key) {
     func_003F4C98(D_00525F40, 'sess', 'stat');
-    c57_4C68(D_00525F40, 0, self->f0, 0, 0, 0, self->f4, 0x20, 1, 0);
+    c57_4C68(D_00525F40, 0, self->id, 0, 0, 0, self->addr, 0x20, 1, 0);
     if (key == 'port') {
-        return (self->f4->peer.sa_data[0] << 8) | self->f4->peer.sa_data[1];
+        return (self->addr->peer.sa_data[0] << 8) | self->addr->peer.sa_data[1];
     }
     if (key == 'addr') {
-        return (((self->f4->peer.sa_data[2] << 8 | self->f4->peer.sa_data[3]) << 8 | self->f4->peer.sa_data[4]) << 8) |
-               self->f4->peer.sa_data[5];
+        return (((self->addr->peer.sa_data[2] << 8 | self->addr->peer.sa_data[3]) << 8 |
+                 self->addr->peer.sa_data[4]) << 8) |
+               self->addr->peer.sa_data[5];
     }
     if (key == 'ladr') {
-        return (((self->f4->local.sa_data[2] << 8 | self->f4->local.sa_data[3]) << 8 | self->f4->local.sa_data[4])
-                << 8) | self->f4->local.sa_data[5];
+        return (((self->addr->local.sa_data[2] << 8 | self->addr->local.sa_data[3]) << 8 | self->addr->local.sa_data[4])
+                << 8) | self->addr->local.sa_data[5];
     }
     if (key == 'lprt') {
-        return (self->f4->local.sa_data[0] << 8) | self->f4->local.sa_data[1];
+        return (self->addr->local.sa_data[0] << 8) | self->addr->local.sa_data[1];
     }
     if (key == 'ibuf') {
-        return self->f10;
+        return self->recvLength;
     }
     return 0;
 }
@@ -2032,9 +2056,9 @@ int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int
  * @return 0
  */
 int func_003F5A50_cb(int requestKey, int requestFlags, int replyWord10, int replyResult, int payloadAddr, int payloadSize, int replyWord8, int len, struct sSess *self) {
-    self->f10 = len;
-    self->fC = 0;
-    self->f8 = 0;
+    self->recvLength = len;
+    self->readOffset = 0;
+    self->recvPending = 0;
     return 0;
 }
 #endif
@@ -2069,23 +2093,23 @@ extern int func_003F5A50(void);
  */
 int func_003F5A70(struct sSess *self, unsigned *kindOut, unsigned *argOut, char **dataOut) {
     int n;
-    if (self->fC >= self->f10) {
-        if (self->f8 == 0 && self->fC >= self->f10) {
-            self->f8 = 1;
-            if (self->f10 > 0) {
-                a70_47D8(self->f18, self->f18 + self->f14 - 1);
-                self->f10 = 0;
-                self->fC = self->f10;
+    if (self->readOffset >= self->recvLength) {
+        if (self->recvPending == 0 && self->readOffset >= self->recvLength) {
+            self->recvPending = 1;
+            if (self->recvLength > 0) {
+                a70_47D8(self->recvBuf, self->recvBuf + self->recvSize - 1);
+                self->recvLength = 0;
+                self->readOffset = self->recvLength;
             }
             func_003F4C98(D_00525F60, 'sess', 'recv');
-            a70_4C68(D_00525F60, 0, self->f0, 0, 0, 0, self->f18, self->f14, func_003F5A50, self);
+            a70_4C68(D_00525F60, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, func_003F5A50, self);
         }
         return -1;
     } else {
-        unsigned char *header = self->f18 + self->fC;
+        unsigned char *header = self->recvBuf + self->readOffset;
         // ORIGINAL-PTR: the receive buffer is a byte stream of variable-length packets (a 12-byte big-endian header,
         // then the payload), so the payload is reached by a byte offset from the packet
-        char *payload = (char *)(self->f18 + self->fC) + 0xC;
+        char *payload = (char *)(self->recvBuf + self->readOffset) + 0xC;
         n = header[8] << 24 | header[9] << 16 | header[10] << 8 | header[11];
         n -= 0xC;
         if (n < 1) payload = str_empty_l;
@@ -2132,18 +2156,18 @@ int func_003F5C38_impl(struct sSess *self, int kindOut, int argOut, char *buf, i
     int n = c38_5A70(self, kindOut, argOut, 0);
     if (n >= 0) {
         if (n < max) max = n;
-        if (buf) c38_605C(buf, self->f18 + self->fC + 0xC, max);
-        dataStart = self->fC + 0xC;
-        self->fC = dataStart + n;
-        if (self->fC >= self->f10 && self->f8 == 0 && self->fC >= self->f10) {
-            self->f8 = 1;
-            if (self->f10 > 0) {
-                c38_47D8(self->f18, self->f18 + self->f14 - 1);
-                self->f10 = 0;
-                self->fC = self->f10;
+        if (buf) c38_605C(buf, self->recvBuf + self->readOffset + 0xC, max);
+        dataStart = self->readOffset + 0xC;
+        self->readOffset = dataStart + n;
+        if (self->readOffset >= self->recvLength && self->recvPending == 0 && self->readOffset >= self->recvLength) {
+            self->recvPending = 1;
+            if (self->recvLength > 0) {
+                c38_47D8(self->recvBuf, self->recvBuf + self->recvSize - 1);
+                self->recvLength = 0;
+                self->readOffset = self->recvLength;
             }
             func_003F4C98(D_00525F70, 'sess', 'recv');
-            c38_4C68(D_00525F70, 0, self->f0, 0, 0, 0, self->f18, self->f14, func_003F5A50, self);
+            c38_4C68(D_00525F70, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, func_003F5A50, self);
         }
     }
     return n;
@@ -2198,8 +2222,8 @@ struct sKb {
     int b;
     int tick;                           /* 0xB4 */
     int period;
-    void (*cb1)(int, int);              /* 0xBC */
-    int (*cb2)(int);                    /* 0xC0 */
+    void (*onConnect)(int, int);        /* 0xBC: (names ours) [U] called with (keyboard, connected) on a change */
+    int (*idleHook)(int);               /* 0xC0: [U] polled by func_003F63F0 */
 };
 
 extern struct sKb D_00525F80;
@@ -2318,7 +2342,7 @@ int func_003F5F88(void) {
     syncBusy = f810(1, &syncResult);
     if (syncBusy != 0) return syncBusy;
     for (i = 0; i < D_00525F80.cnt; i++) {
-        if (D_00525F80.prev[i] != D_00525F80.v[i]) D_00525F80.cb1(i, D_00525F80.v[i]);
+        if (D_00525F80.prev[i] != D_00525F80.v[i]) D_00525F80.onConnect(i, D_00525F80.v[i]);
     }
     D_00525F80.flag = 0;
     D_00525F80.st = 0;
@@ -2464,11 +2488,11 @@ static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 -
  * @param name  directory of USBD.IRX / USBKB.IRX, or 0 to skip loading
  * @param str  argument text for USBKB.IRX
  * @param ents  read buffers, 0x8C bytes per keyboard
- * @param cb1  called with (keyboard, connected) when a keyboard connects or disconnects (0 for func_003F6358)
- * @param cb2  idle hook polled by func_003F63F0 (0 for func_003F61C8)
+ * @param onConnect  called with (keyboard, connected) when a keyboard connects or disconnects (0 for func_003F6358)
+ * @param idleHook  idle hook polled by func_003F63F0 (0 for func_003F61C8)
  * @return 0, or -1 when a module or the library fails to start
  */
-int func_003F61D0(char *name, char *str, struct sKbRead *ents, void (*cb1)(int, int), int (*cb2)(int)) {
+int func_003F61D0(char *name, char *str, struct sKbRead *ents, void (*onConnect)(int, int), int (*idleHook)(int)) {
     int i;
     if (func_003F5DA8(name, str) < 0) return -1;
     if (f0C028(D_00526010) == -1) return -1;
@@ -2483,8 +2507,8 @@ int func_003F61D0(char *name, char *str, struct sKbRead *ents, void (*cb1)(int, 
     D_00525F80.period = 0x3C;
     D_00525F80.tick = 0x3C;
     D_00525F80.flag = 0;
-    D_00525F80.cb1 = cb1 ? cb1 : f6358;
-    D_00525F80.cb2 = cb2 ? cb2 : f61C8;
+    D_00525F80.onConnect = onConnect ? onConnect : f6358;
+    D_00525F80.idleHook = idleHook ? idleHook : f61C8;
     f5F08();
     while (f5F88()) ;
     return 0;
@@ -2603,10 +2627,10 @@ void func_003F63F0_63F0(void) {
     case 1: func_003F5F88(); break;
     case 0: break;
     case 2: func_003F6138(); break;
-    case 3: if (D_00525F80.cb2(1) != 0) D_00525F80.st = 0; break;
+    case 3: if (D_00525F80.idleHook(1) != 0) D_00525F80.st = 0; break;
     }
     if (D_00525F80.st == 0) {
-        if (D_00525F80.cb2(0) != 0) D_00525F80.st = 3;
+        if (D_00525F80.idleHook(0) != 0) D_00525F80.st = 3;
         if (D_00525F80.st == 0) {
             D_00525F80.tick = D_00525F80.tick + 1;
             if (D_00525F80.period < D_00525F80.tick) { D_00525F80.tick = 0; func_003F5F08(); } else { func_003F60B8(); }
@@ -3172,12 +3196,13 @@ struct sNetStep {
     void *cleanup;                      /* +0x14: run once by the poll when the poll itself fails */
 };
 
+/* Handler names are ours, from [U] func_003F7A60 (which installs them per mode) and func_003F6EE0 (which runs them). */
 struct sNetPhase {
     unsigned mode;                      /* +0x00 */
-    void *fDC;
-    void *fE0;
-    void *fE4;
-    void *fE8;
+    void *stepFn;                       /* +0x04 (session +0xDC): a card mode's step function (func_003F6F68) */
+    void *nextModeFn;                   /* +0x08: picks the next mode when one finishes (func_003F7218, ...) */
+    void *errorFn;                      /* +0x0C: the mode's error handler (func_003F71B8, ...) */
+    void *dispatchFn;                   /* +0x10: mode 9's dispatcher that chooses the first mode (func_003F7328) */
     struct sNetStep step;               /* +0x14 */
 };
 
@@ -3188,16 +3213,20 @@ struct sNetAcct {
     char pass[0x11];                    /* 0xB9 */
     struct sAcctOut *out;               /* 0xCC */
     unsigned st;                        /* 0xD0 */
-    void *fD4;
+    void *operationPoll;                /* 0xD4: (name ours) [U] func_003F7990 installs func_003F6EE0, which
+                                           func_003F80E0 runs every frame */
     struct sNetPhase cur;               /* 0xD8 */
-    unsigned f104;
+    unsigned lastOperation;             /* 0x104: (name ours) [U] func_003F7990 stores the operation started;
+                                           func_003F8200 returns it (st goes back to 4 when idle, this does not) */
     int f108;
     struct sNetPhase saved;             /* 0x10C */
-    int f138;
-    int f13C;
+    int portList;                       /* 0x138: (names ours) [U] func_003F6C70 0 and -1: the -1-terminated unit */
+    int portListEnd;                    /* 0x13C: list {0, -1} func_003F6DC8 passes to func_003FC0E8 */
     int heap;                           /* 0x140 */
-    char *f144;
-    int f148;
+    char *recordBuf;                    /* 0x144: (name ours) [U] the 17-byte ACCT / PASS record buffer
+                                           (func_003FCE10 allocates it, func_003F7920 / func_003F7958 free it) */
+    int pendingError;                   /* 0x148: (name ours) [U] func_003F71B8 keeps an error here while the save
+                                           closes; func_003F72F8 hands it back */
 };
 
 extern struct sNetAcct *D_004A4BC4;
@@ -3226,12 +3255,12 @@ int func_003F6C70_impl(struct sNetInit *initParams) {
     session->hdr = *initParams->callbacks;
     sessionReload = D_004A4BC4;
     sessionReload->st = 4;
-    sessionReload->f104 = 4;
-    sessionReload->f148 = 0;
-    sessionReload->f138 = 0;
+    sessionReload->lastOperation = 4;
+    sessionReload->pendingError = 0;
+    sessionReload->portList = 0;
     sessionReload->cur.mode = 10;
     sessionReload->cur.step.phase = 5;
-    sessionReload->f13C = -1;
+    sessionReload->portListEnd = -1;
     return 0;
 }
 #endif
@@ -3287,7 +3316,7 @@ int func_003F6DC8(void) {
     struct sNetAcct *session = D_004A4BC4;
     buf = D_00497060;
     req.a = 2;
-    req.p = &session->f138;
+    req.p = &session->portList;
     req.d = session;
     req.len = 26;
     req.buf = &buf;
@@ -3364,8 +3393,8 @@ int func_003F6EE0(int *out) {
     session = D_004A4BC4;
     if (session->st >= 4) err = 0xF;
     if (err == 0) {
-        if (D_004A4BC4->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))session->cur.fDC)(out, session);
-        else ((void (*)(int *, int *))D_004A4BC4->cur.fE8)(out, &err);
+        if (D_004A4BC4->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))session->cur.stepFn)(out, session);
+        else ((void (*)(int *, int *))D_004A4BC4->cur.dispatchFn)(out, &err);
     }
     return err;
 }
@@ -3418,7 +3447,7 @@ int func_003F6F68(int *out) {
             } else {
                 D_004A4BC4->saved.step = D_004A4BC4->cur.step;
                 D_004A4BC4->cur.step.phase = 2;
-                ((int (*)(int *))D_004A4BC4->cur.fDC)(&startFailOut);
+                ((int (*)(int *))D_004A4BC4->cur.stepFn)(&startFailOut);
                 func_003F7D98();
             }
             break;
@@ -3433,7 +3462,7 @@ int func_003F6F68(int *out) {
             } else {
                 D_004A4BC4->saved.step = D_004A4BC4->cur.step;
                 D_004A4BC4->cur.step.phase = 2;
-                ((int (*)(int *))D_004A4BC4->cur.fDC)(&pollFailOut);
+                ((int (*)(int *))D_004A4BC4->cur.stepFn)(&pollFailOut);
                 func_003F7D98();
             }
             break;
@@ -3449,9 +3478,9 @@ int func_003F6F68(int *out) {
         }
     }
     if (result == 0) {
-        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.fE0)(out, &result);
+        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.nextModeFn)(out, &result);
     } else {
-        ((void (*)(int *, int *))D_004A4BC4->cur.fE4)(out, &result);
+        ((void (*)(int *, int *))D_004A4BC4->cur.errorFn)(out, &result);
     }
     return result;
 }
@@ -3477,7 +3506,7 @@ extern int f7A60c(int, int) __asm__("func_003F7A60");
  */
 int func_003F71B8(int *statusOut, int *errorInOut) {
     *statusOut = 1;
-    D_004A4BC4->f148 = *errorInOut;
+    D_004A4BC4->pendingError = *errorInOut;
     *errorInOut = 0;
     return f7A60c(7, 0);
 }
@@ -3567,8 +3596,8 @@ extern int func_003F7BD0(void);
  * @return func_003F7BD0's result (0)
  */
 int func_003F72F8(int statusOut, int *errorOut) {
-    *errorOut = D_004A4BC4->f148;
-    D_004A4BC4->f148 = 0;
+    *errorOut = D_004A4BC4->pendingError;
+    D_004A4BC4->pendingError = 0;
     return func_003F7BD0();
 }
 #endif
@@ -3731,12 +3760,12 @@ int func_003F7478(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->cur.step.completion = fn78E0;
     session->cur.step.cleanup = fn7920;
-    result = func_003F8178_7478(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    result = func_003F8178_7478(func_003FCE10((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
         struct sNetAcct *sessionReload = D_004A4BC4;
-        struct sName17 *dst = (struct sName17 *)sessionReload->f144;
+        struct sName17 *dst = (struct sName17 *)sessionReload->recordBuf;
         *dst = *(struct sName17 *)sessionReload->name;
-        result = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, D_004A4BC4->f144, 17));
+        result = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, D_004A4BC4->recordBuf, 17));
     }
     return result;
 }
@@ -3769,12 +3798,12 @@ int func_003F7528(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->cur.step.completion = fn7900;
     session->cur.step.cleanup = fn7958;
-    result = func_003F8178_7528(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    result = func_003F8178_7528(func_003FCE10((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
         struct sNetAcct *sessionReload = D_004A4BC4;
-        struct sName17 *dst = (struct sName17 *)sessionReload->f144;
+        struct sName17 *dst = (struct sName17 *)sessionReload->recordBuf;
         *dst = *(struct sName17 *)sessionReload->pass;
-        result = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, D_004A4BC4->f144, 17));
+        result = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, D_004A4BC4->recordBuf, 17));
     }
     return result;
 }
@@ -3807,10 +3836,10 @@ int func_003F75D8(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->cur.step.completion = fn7840;
     session->cur.step.cleanup = fn7920;
-    result = func_003F8178_75D8(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    result = func_003F8178_75D8(func_003FCE10((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
         struct sNetAcct *sessionReload = D_004A4BC4;
-        result = func_003F8178_75D8(func_003FC708(&sessionReload->params, 0x41434354, 0, sessionReload->f144, 17));
+        result = func_003F8178_75D8(func_003FC708(&sessionReload->params, 0x41434354, 0, sessionReload->recordBuf, 17));
     }
     return result;
 }
@@ -3843,10 +3872,10 @@ int func_003F7658(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->cur.step.completion = fn7890;
     session->cur.step.cleanup = fn7958;
-    result = func_003F8178_7658(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    result = func_003F8178_7658(func_003FCE10((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
         struct sNetAcct *sessionReload = D_004A4BC4;
-        result = func_003F8178_7658(func_003FC708(&sessionReload->params, 0x50415353, 0, sessionReload->f144, 17));
+        result = func_003F8178_7658(func_003FC708(&sessionReload->params, 0x50415353, 0, sessionReload->recordBuf, 17));
     }
     return result;
 }
@@ -3995,7 +4024,7 @@ extern int func_003F7920(int);
  * the record buffer (func_003F7920).
  */
 void func_003F7840(void) {
-    D_004A4BC4->out->name = *(struct sName17 *)D_004A4BC4->f144;
+    D_004A4BC4->out->name = *(struct sName17 *)D_004A4BC4->recordBuf;
     func_003F7920(0);
 }
 #endif
@@ -4015,7 +4044,7 @@ extern int func_003F7958(int);
  * record buffer (func_003F7958).
  */
 void func_003F7890(void) {
-    D_004A4BC4->out->pass = *(struct sName17 *)D_004A4BC4->f144;
+    D_004A4BC4->out->pass = *(struct sName17 *)D_004A4BC4->recordBuf;
     func_003F7958(0);
 }
 #endif
@@ -4060,11 +4089,11 @@ extern int func_003F8178_7920(int) __asm__("func_003F8178");
 /**
  * Frees the network-account record buffer (+0x144, 17 bytes) with func_003FCF00. Used for the 'ACCT' modes.
  *
- * @param unused  ignored (callers pass 0)
+ * @param ignored  ignored (callers pass 0)
  * @return the error mapped by func_003F8178
  */
-int func_003F7920(int unused) {
-    return func_003F8178_7920(func_003FCF00_7920(D_004A4BC4->f144, D_004A4BC4->heap, 17, 0));
+int func_003F7920(int ignored) {
+    return func_003F8178_7920(func_003FCF00_7920(D_004A4BC4->recordBuf, D_004A4BC4->heap, 17, 0));
 }
 #endif
 
@@ -4083,11 +4112,11 @@ extern int func_003F8178_7958(int) __asm__("func_003F8178");
  * Frees the network-account record buffer (+0x144, 17 bytes) with func_003FCF00; identical to func_003F7920 and used
  * for the 'PASS' modes.
  *
- * @param unused  ignored (callers pass 0)
+ * @param ignored  ignored (callers pass 0)
  * @return the error mapped by func_003F8178
  */
-int func_003F7958(int unused) {
-    return func_003F8178_7958(func_003FCF00_7958(D_004A4BC4->f144, D_004A4BC4->heap, 17, 0));
+int func_003F7958(int ignored) {
+    return func_003F8178_7958(func_003FCF00_7958(D_004A4BC4->recordBuf, D_004A4BC4->heap, 17, 0));
 }
 #endif
 
@@ -4117,18 +4146,18 @@ int f7990(unsigned operation) {
     int errorCode = 0;
     unsigned i;
     D_004A4BC4->st = operation;
-    D_004A4BC4->f104 = operation;
+    D_004A4BC4->lastOperation = operation;
     if (operation < 4) {
-        D_004A4BC4->fD4 = fn6EE0;
+        D_004A4BC4->operationPoll = fn6EE0;
     } else {
         errorCode = 0xF;
     }
     D_004A4BC4->cur.mode = 9;
     D_004A4BC4->cur.step.phase = 4;
-    D_004A4BC4->cur.fE8 = fn7328;
-    D_004A4BC4->cur.fE0 = 0;
-    D_004A4BC4->cur.fE4 = 0;
-    D_004A4BC4->cur.fDC = 0;
+    D_004A4BC4->cur.dispatchFn = fn7328;
+    D_004A4BC4->cur.nextModeFn = 0;
+    D_004A4BC4->cur.errorFn = 0;
+    D_004A4BC4->cur.stepFn = 0;
     for (i = 0; i < 3; i++)
         ;
     D_004A4BC4->cur.step.start = 0;
@@ -4158,8 +4187,8 @@ extern int func_003F7BD0(void);
 int func_003F7A30(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->st = 4;
-    session->fD4 = 0;
-    session->cur.fE8 = 0;
+    session->operationPoll = 0;
+    session->cur.dispatchFn = 0;
     return func_003F7BD0();
 }
 #endif
@@ -4206,19 +4235,19 @@ int func_003F7A60(int mode, unsigned char copy) {
     if (copy)
         D_004A4BC4->saved = D_004A4BC4->cur;
     if (D_004A4BC4->cur.mode < 9)
-        D_004A4BC4->cur.fDC = (void *)func_003F6F68;
+        D_004A4BC4->cur.stepFn = (void *)func_003F6F68;
     else
         err = 13;
     if (err == 0) {
         switch (D_004A4BC4->cur.mode) {
         case 0: case 1: case 2: case 3: case 4: case 5:
-            D_004A4BC4->cur.fE0 = (void *)func_003F7218;
+            D_004A4BC4->cur.nextModeFn = (void *)func_003F7218;
             break;
         case 6: case 8:
-            D_004A4BC4->cur.fE0 = (void *)func_003F72C8_7A60;
+            D_004A4BC4->cur.nextModeFn = (void *)func_003F72C8_7A60;
             break;
         case 7:
-            D_004A4BC4->cur.fE0 = (void *)func_003F72F8;
+            D_004A4BC4->cur.nextModeFn = (void *)func_003F72F8;
             break;
         default:
             err = 13;
@@ -4228,13 +4257,13 @@ int func_003F7A60(int mode, unsigned char copy) {
     if (err == 0) {
         switch (D_004A4BC4->cur.mode) {
         case 0: case 1: case 2: case 3: case 4: case 5:
-            D_004A4BC4->cur.fE4 = (void *)func_003F71B8;
+            D_004A4BC4->cur.errorFn = (void *)func_003F71B8;
             break;
         case 6: case 8:
-            D_004A4BC4->cur.fE4 = (void *)func_003F71F8_7A60;
+            D_004A4BC4->cur.errorFn = (void *)func_003F71F8_7A60;
             break;
         case 7:
-            D_004A4BC4->cur.fE4 = (void *)func_003F72F8;
+            D_004A4BC4->cur.errorFn = (void *)func_003F72F8;
             break;
         }
     }
@@ -4260,9 +4289,9 @@ extern int func_003F7D98(void);
 int func_003F7BD0(void) {
     struct sNetAcct *session = D_004A4BC4;
     session->cur.mode = 10;
-    session->cur.fDC = 0;
-    session->cur.fE0 = 0;
-    session->cur.fE4 = 0;
+    session->cur.stepFn = 0;
+    session->cur.nextModeFn = 0;
+    session->cur.errorFn = 0;
     return func_003F7D98();
 }
 #endif
@@ -4386,7 +4415,9 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7DE0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* The output block a digest interface's finish slot hands back (the CRC one: func_003FB558, +0x4 of D_00451518). */
 typedef struct { int size; unsigned *digest; } sDigestBlock;
-typedef struct { char pad[0xC]; int (*f0)(void); int (*f1)(int, int); int (*f2)(sDigestBlock **); } sDigestIface;
+/* The CRC interface's reset / update / finish slots (as sMcIfB, names ours) */
+typedef struct { char pad[0xC]; int (*reset)(void); int (*update)(int,
+        int); int (*finish)(sDigestBlock **); } sDigestIface;
 extern sDigestIface *fB5E8(void) __asm__("func_003FB5E8");
 /**
  * Checks the embedded save icon: its 10606 bytes must have the CRC-32 0x0836C71D.
@@ -4401,11 +4432,11 @@ int func_003F7DE0(int iconData) {
     sDigestIface *crcIface = fB5E8();
     int crcStatus;
     sDigestBlock *w;
-    crcStatus = crcIface->f0();
+    crcStatus = crcIface->reset();
     if (crcStatus == 0) {
-        crcStatus = crcIface->f1(iconData, 10606);
+        crcStatus = crcIface->update(iconData, 10606);
         if (crcStatus == 0) {
-            crcStatus = crcIface->f2(&w);
+            crcStatus = crcIface->finish(&w);
             if (crcStatus == 0) {
                 err = 21;
                 if (*w->digest == 0x836C71D) err = 0;
@@ -4631,7 +4662,7 @@ int func_003F80E0(int *out) {
     } else {
         *out = 0;
         if (D_004A4BC4->st != 4) {
-            err = ((int (*)(int *))D_004A4BC4->fD4)(out);
+            err = ((int (*)(int *))D_004A4BC4->operationPoll)(out);
             if (err == 0) {
                 status = *out;
                 if (status == 2) {
@@ -4696,7 +4727,7 @@ extern struct sNetAcct *D_004A4BC4;
  * @param operationOut  output
  * @return 0
  */
-int func_003F8200(int *operationOut) { *operationOut = D_004A4BC4->f104; return 0; }
+int func_003F8200(int *operationOut) { *operationOut = D_004A4BC4->lastOperation; return 0; }
 #endif
 
 //100%
@@ -4876,10 +4907,13 @@ struct sMcReqBody { int port; int slot; char dir[32]; char file[32]; char name[0
 struct sMcReq {
     int op;                             /* 0x00: request kind, 0 = none */
     int st;                             /* 0x04: state */
-    int f08;
+    int error;                          /* 0x08: (name ours) [U] func_003F86F0 records the error, func_003F8710
+                                           returns it */
     struct sMcReqBody body;             /* 0x0C */
-    int f6C;
-    int f70;
+    int searchDir;                      /* 0x6C: (name ours) [U] the start functions store their searchDir;
+                                           func_003F85C0 takes it to pick the next unit */
+    int expected;                       /* 0x70: (name ours) [U] the seek target / byte count a step compares with
+                                           the card call's result */
 };
 
 extern struct sMcReq *D_004A4BD8;
@@ -4944,7 +4978,7 @@ void func_003F86F0_impl(int a) __asm__("func_003F86F0");
  */
 void func_003F86F0_impl(int errorCode) {
     struct sMcReq *request = D_004A4BD8;
-    if ((unsigned)(request->op - 11) >= 3) request->f08 = errorCode;
+    if ((unsigned)(request->op - 11) >= 3) request->error = errorCode;
 }
 #endif
 
@@ -4960,7 +4994,7 @@ extern struct sMcReq *D_004A4BD8;
  *
  * @return the recorded error
  */
-int func_003F8710(void) { return D_004A4BD8->f08; }
+int func_003F8710(void) { return D_004A4BD8->error; }
 #endif
 
 //100%
@@ -4970,32 +5004,34 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8720);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. The callback
+   names are ours, from [U] the step handlers (func_003FA8F8 create, func_003FAE50 delete, the cleanups func_003F8720 /
+   func_003F8768 / func_003F87B0, the read / write / seek / close starters and the poll func_003FA040). */
 struct sMcDrv {
     unsigned short ports;               /* 0x00: bit per usable slot */
     short pad02;
-    void (*f04)(char *, int);           /* 0x04: [U] (search pattern, slot) */
-    void (*f08)(int);
-    void (*f0C)(int);
-    void (*f10)(int);                   /* 0x10 */
-    void (*f14)(int);
-    void (*f18)(char *, char *, int, int); /* 0x18: [U] (directory, file name, slot, mode) */
-    void (*f1C)(int);
-    void (*f20)(char *, int, int);      /* 0x20: [U] (directory, size, slot) */
-    void (*f24)(char *, char *, int);   /* 0x24: [U] (directory, file name, slot) */
-    void (*f28)(char *, int);           /* 0x28: [U] (directory, slot) */
-    void (*f2C)(int, int, int);         /* 0x2C */
-    void (*f30)(int, void *, int);      /* 0x30: [U] (descriptor, data, size) */
-    void (*f34)(int, int, int);
-    void (*f38)(int);
-    int f3C;
-    int (*f40)(int *, int *);           /* 0x40 */
-    void (*f44)(char *);                /* 0x44: [U] (directory) */
-    int (**f48)(int, int *, int *);     /* 0x48: by op */
-    int (**f4C)(int, int, int);         /* 0x4C: by state */
+    void (*getDir)(char *, int);        /* 0x04: [U] (search pattern, slot): the save search */
+    void (*queryFreeSpace)(int);        /* 0x08: [U] (slot); its result must reach saveSize */
+    void (*queryFreeEntries)(int);      /* 0x0C: [U] (slot); its result must reach entriesNeeded */
+    void (*checkUnit)(int);             /* 0x10: [U] (slot): every request starts with it */
+    void (*releaseUnit)(int);           /* 0x14: [U] (slot): every request ends with it */
+    void (*open)(char *, char *, int, int); /* 0x18: [U] (directory, file name, slot, mode) */
+    void (*close)(int);                 /* 0x1C: [U] (descriptor), after flush */
+    void (*makeDir)(char *, int, int);  /* 0x20: [U] (directory, size, slot) */
+    void (*deleteFile)(char *, char *, int); /* 0x24: [U] (directory, file name, slot) */
+    void (*deleteDir)(char *, int);     /* 0x28: [U] (directory, slot) */
+    void (*read)(int, int, int);        /* 0x2C: [U] (descriptor, buffer, size) */
+    void (*write)(int, void *, int);    /* 0x30: [U] (descriptor, data, size) */
+    void (*seek)(int, int, int);        /* 0x34: [U] (descriptor, offset, origin) */
+    void (*flush)(int);                 /* 0x38: [U] (descriptor), before close */
+    int reserved;                       /* 0x3C: [U] must be set (func_003F9218); never called */
+    int (*sync)(int *, int *);          /* 0x40: [U] the poll: (status, result) of the running card call */
+    void (*getFoundName)(char *);       /* 0x44: [U] (directory): the name the search found */
+    int (**opHandlers)(int, int *, int *); /* 0x48: by op */
+    int (**stateHandlers)(int, int, int); /* 0x4C: by state */
     sMcSaveParam saveDesc;              /* 0x50: [U] func_003FA240 copies the 976-byte save description here */
-    int f420;
-    int f424;
+    int saveSize;                       /* 0x420: (name ours) [U] bytes a new save needs (func_003FB280) */
+    int entriesNeeded;                  /* 0x424: (name ours) [U] 3 (func_003FB280): the save's three files */
     int h;                              /* 0x428: heap */
 };
 
@@ -5019,7 +5055,7 @@ int func_003F8720(struct sMcReqBody *reqBody, int *out) {
     driver = D_004A4BDC;
     request->op = 11;
     request->st = 0x18;
-    driver->f38(request->body.port);
+    driver->flush(request->body.port);
     return 0;
 }
 #endif
@@ -5050,7 +5086,7 @@ int func_003F8768(struct sMcReqBody *reqBody, int *out) {
     driver = D_004A4BDC;
     request->op = 0xC;
     request->st = 25;
-    driver->f1C(request->body.port);
+    driver->close(request->body.port);
     return 0;
 }
 #endif
@@ -5081,7 +5117,7 @@ int func_003F87B0(int unitCode, int *out) {
     driver = D_004A4BDC;
     request->op = 13;
     request->st = 26;
-    driver->f14(unitCode);
+    driver->releaseUnit(unitCode);
     return 0;
 }
 #endif
@@ -5425,7 +5461,7 @@ int func_003F8C38(int callResult, int *out, int *pollResult) {
         if (callResult == 0) {
             func_003FA7A0(buf, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
-            D_004A4BDC->f04(buf, D_004A4BD8->body.slot);
+            D_004A4BDC->getDir(buf, D_004A4BD8->body.slot);
             break;
         }
         if (callResult != 3) {
@@ -5433,11 +5469,11 @@ int func_003F8C38(int callResult, int *out, int *pollResult) {
             return callResult;
         }
         if (D_004A4BD8->op == 3) {
-            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
             D_004A4BD8->body.slot = slot;
             if (slot != -1) {
                 D_004A4BD8->st = 1;
-                D_004A4BDC->f10(slot);
+                D_004A4BDC->checkUnit(slot);
                 return 0;
             }
         }
@@ -5448,13 +5484,13 @@ int func_003F8C38(int callResult, int *out, int *pollResult) {
             if (*pollResult == 1) {
                 fA818(D_004A4BD8->body.dir, D_004A4BD8->body.file, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
                 D_004A4BD8->st = 22;
-                D_004A4BDC->f18(D_004A4BD8->body.dir, D_004A4BD8->body.file, D_004A4BD8->body.slot, 3);
+                D_004A4BDC->open(D_004A4BD8->body.dir, D_004A4BD8->body.file, D_004A4BD8->body.slot, 3);
                 break;
             }
             if (*pollResult == 0) {
                 f86F0(4);
                 D_004A4BD8->st = 26;
-                D_004A4BDC->f14(D_004A4BD8->body.slot);
+                D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
                 break;
             }
             *out = 2;
@@ -5485,11 +5521,11 @@ int func_003F8C38(int callResult, int *out, int *pollResult) {
                 *out = 2;
                 break;
             }
-            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
             D_004A4BD8->body.slot = slot;
             if (slot != -1) {
                 D_004A4BD8->st = 1;
-                D_004A4BDC->f10(slot);
+                D_004A4BDC->checkUnit(slot);
                 return 0;
             }
             *out = 2;
@@ -5543,7 +5579,7 @@ int func_003F8EF8(int callResult, int *out, int *pollResult) {
     case 0x1C:
     case 29:
         if (callResult == 0) {
-            if (D_004A4BD8->f70 == *pollResult) {
+            if (D_004A4BD8->expected == *pollResult) {
                 *out = 2;
                 return 0;
             }
@@ -5587,7 +5623,7 @@ int func_003F8FF0(int callResult, int *out, int pollResult) {
     case 0x18:
         if (callResult == 0) {
             D_004A4BD8->st = 25;
-            D_004A4BDC->f1C(D_004A4BD8->body.port);
+            D_004A4BDC->close(D_004A4BD8->body.port);
             break;
         }
         f86F0(callResult);
@@ -5595,7 +5631,7 @@ int func_003F8FF0(int callResult, int *out, int pollResult) {
     case 25:
         if (callResult == 0) {
             D_004A4BD8->st = 26;
-            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
             break;
         }
         f86F0(callResult);
@@ -5640,11 +5676,11 @@ int func_003F9130(int callResult, int *out, int pollResult) {
     switch ((unsigned)D_004A4BD8->st) {
     case 0x18:
         D_004A4BD8->st = 25;
-        D_004A4BDC->f1C(D_004A4BD8->body.port);
+        D_004A4BDC->close(D_004A4BD8->body.port);
         break;
     case 25:
         D_004A4BD8->st = 26;
-        D_004A4BDC->f14(D_004A4BD8->body.slot);
+        D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
         break;
     case 26:
         *out = 2;
@@ -5685,23 +5721,23 @@ extern struct sMcDrv *D_004A4BDC;
 /* The caller's callback table (17 entries, copied slot by slot to sMcDrv 0x04..0x44, so each slot has the type and the
    name of the sMcDrv slot it fills); every entry is required. */
 struct sMcCallbacks {
-    void (*f04)(char *, int);
-    void (*f08)(int);
-    void (*f0C)(int);
-    void (*f10)(int);
-    void (*f14)(int);
-    void (*f18)(char *, char *, int, int);
-    void (*f1C)(int);
-    void (*f20)(char *, int, int);
-    void (*f24)(char *, char *, int);
-    void (*f28)(char *, int);
-    void (*f2C)(int, int, int);
-    void (*f30)(int, void *, int);
-    void (*f34)(int, int, int);
-    void (*f38)(int);
-    int f3C;
-    int (*f40)(int *, int *);
-    void (*f44)(char *);
+    void (*getDir)(char *, int);
+    void (*queryFreeSpace)(int);
+    void (*queryFreeEntries)(int);
+    void (*checkUnit)(int);
+    void (*releaseUnit)(int);
+    void (*open)(char *, char *, int, int);
+    void (*close)(int);
+    void (*makeDir)(char *, int, int);
+    void (*deleteFile)(char *, char *, int);
+    void (*deleteDir)(char *, int);
+    void (*read)(int, int, int);
+    void (*write)(int, void *, int);
+    void (*seek)(int, int, int);
+    void (*flush)(int);
+    int reserved;
+    int (*sync)(int *, int *);
+    void (*getFoundName)(char *);
 };
 
 extern int func_003F9208(void);
@@ -5734,9 +5770,10 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
     if (ports == 0) return 0xC;
     if (*ports == -1) return 0xC;
     if (cb == 0) return 0xC;
-    if (cb->f04 == 0 || cb->f08 == 0 || cb->f0C == 0 || cb->f10 == 0 || cb->f14 == 0 || cb->f18 == 0 ||
-        cb->f1C == 0 || cb->f20 == 0 || cb->f24 == 0 || cb->f28 == 0 || cb->f2C == 0 || cb->f30 == 0 ||
-        cb->f34 == 0 || cb->f38 == 0 || cb->f3C == 0 || cb->f40 == 0 || cb->f44 == 0)
+    if (cb->getDir == 0 || cb->queryFreeSpace == 0 || cb->queryFreeEntries == 0 || cb->checkUnit == 0 ||
+        cb->releaseUnit == 0 || cb->open == 0 || cb->close == 0 || cb->makeDir == 0 || cb->deleteFile == 0 ||
+        cb->deleteDir == 0 || cb->read == 0 || cb->write == 0 || cb->seek == 0 || cb->flush == 0 || cb->reserved == 0 ||
+        cb->sync == 0 || cb->getFoundName == 0)
         return 0xC;
     if (D_004A4BDC != 0 || D_004A4BD8 != 0) return 1;
     D_004A4BDC = func_00266728(heap, 1068, 4);
@@ -5754,25 +5791,25 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
             D_004A4BDC->ports |= 1 << (unsigned short)*unitEntry;
         }
     }
-    D_004A4BDC->f04 = cb->f04;
-    D_004A4BDC->f08 = cb->f08;
-    D_004A4BDC->f0C = cb->f0C;
-    D_004A4BDC->f10 = cb->f10;
-    D_004A4BDC->f14 = cb->f14;
-    D_004A4BDC->f18 = cb->f18;
-    D_004A4BDC->f1C = cb->f1C;
-    D_004A4BDC->f20 = cb->f20;
-    D_004A4BDC->f24 = cb->f24;
-    D_004A4BDC->f28 = cb->f28;
-    D_004A4BDC->f2C = cb->f2C;
-    D_004A4BDC->f30 = cb->f30;
-    D_004A4BDC->f34 = cb->f34;
-    D_004A4BDC->f38 = cb->f38;
-    D_004A4BDC->f3C = cb->f3C;
-    D_004A4BDC->f40 = cb->f40;
-    D_004A4BDC->f44 = cb->f44;
-    D_004A4BDC->f48 = D_00451468;
-    D_004A4BDC->f4C = D_004514A0;
+    D_004A4BDC->getDir = cb->getDir;
+    D_004A4BDC->queryFreeSpace = cb->queryFreeSpace;
+    D_004A4BDC->queryFreeEntries = cb->queryFreeEntries;
+    D_004A4BDC->checkUnit = cb->checkUnit;
+    D_004A4BDC->releaseUnit = cb->releaseUnit;
+    D_004A4BDC->open = cb->open;
+    D_004A4BDC->close = cb->close;
+    D_004A4BDC->makeDir = cb->makeDir;
+    D_004A4BDC->deleteFile = cb->deleteFile;
+    D_004A4BDC->deleteDir = cb->deleteDir;
+    D_004A4BDC->read = cb->read;
+    D_004A4BDC->write = cb->write;
+    D_004A4BDC->seek = cb->seek;
+    D_004A4BDC->flush = cb->flush;
+    D_004A4BDC->reserved = cb->reserved;
+    D_004A4BDC->sync = cb->sync;
+    D_004A4BDC->getFoundName = cb->getFoundName;
+    D_004A4BDC->opHandlers = D_00451468;
+    D_004A4BDC->stateHandlers = D_004514A0;
     D_004A4BD8->op = 0;
     D_004A4BD8->st = 0;
     return 0;
@@ -5804,23 +5841,23 @@ int func_003F9530(void) {
     driver = D_004A4BDC;
     request = D_004A4BD8;
     if (driver == 0 || request == 0) return 2;
-    driver->f04 = 0;
-    driver->f08 = 0;
-    driver->f0C = 0;
-    driver->f10 = 0;
-    driver->f14 = 0;
-    driver->f18 = 0;
-    driver->f1C = 0;
-    driver->f20 = 0;
-    driver->f24 = 0;
-    driver->f28 = 0;
-    driver->f2C = 0;
-    driver->f30 = 0;
-    driver->f34 = 0;
-    driver->f38 = 0;
-    driver->f3C = 0;
-    driver->f40 = 0;
-    driver->f44 = 0;
+    driver->getDir = 0;
+    driver->queryFreeSpace = 0;
+    driver->queryFreeEntries = 0;
+    driver->checkUnit = 0;
+    driver->releaseUnit = 0;
+    driver->open = 0;
+    driver->close = 0;
+    driver->makeDir = 0;
+    driver->deleteFile = 0;
+    driver->deleteDir = 0;
+    driver->read = 0;
+    driver->write = 0;
+    driver->seek = 0;
+    driver->flush = 0;
+    driver->reserved = 0;
+    driver->sync = 0;
+    driver->getFoundName = 0;
     request->op = 0;
     request->st = 0;
     func_00266760(driver->h, (char *)request, 116, 4);
@@ -5889,7 +5926,6 @@ int func_003F9698(char *str, int a, int b);
  */
 int func_003F9698(char *str, int unitCode, int searchDir) {
     int firstUnit;
-    int t;
     struct sMcReq *request;
     struct sMcReq *request2;
     unsigned unitBit;
@@ -5928,9 +5964,9 @@ int func_003F9698(char *str, int unitCode, int searchDir) {
     }
     c9698_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = searchDir;
+    D_004A4BD8->searchDir = searchDir;
     c9698_B2F8(1);
-    D_004A4BDC->f10(D_004A4BD8->body.slot);
+    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
     return 0;
 }
@@ -5971,7 +6007,6 @@ int func_003F9818(char *str, int a, int b);
  */
 int func_003F9818(char *str, int unitCode, int searchDir) {
     int firstUnit;
-    int t;
     struct sMcReq *request;
     struct sMcReq *request2;
     unsigned unitBit;
@@ -6011,9 +6046,9 @@ int func_003F9818(char *str, int unitCode, int searchDir) {
     }
     c9818_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = searchDir;
+    D_004A4BD8->searchDir = searchDir;
     c9818_B2F8(1);
-    D_004A4BDC->f10(D_004A4BD8->body.slot);
+    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
     return 0;
 }
@@ -6052,7 +6087,6 @@ int func_003F99B8_impl(char *str, int a, int b) __asm__("func_003F99B8");
  */
 int func_003F99B8_impl(char *str, int unitCode, int searchDir) {
     int firstUnit;
-    int t;
     struct sMcReq *request;
     struct sMcReq *request2;
     unsigned unitBit;
@@ -6091,9 +6125,9 @@ int func_003F99B8_impl(char *str, int unitCode, int searchDir) {
     }
     c99b8_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = searchDir;
+    D_004A4BD8->searchDir = searchDir;
     c99b8_B2F8(1);
-    D_004A4BDC->f10(D_004A4BD8->body.slot);
+    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
     return 0;
 }
@@ -6126,7 +6160,7 @@ int func_003F9B38_impl(int *src) {
     __builtin_memcpy(&D_004A4BD8->body, src, 0x60);
     D_004A4BD8->op = 7;
     D_004A4BD8->st = 0x18;
-    D_004A4BDC->f38(src[0]);
+    D_004A4BDC->flush(src[0]);
     return 0;
 }
 #endif
@@ -6175,13 +6209,13 @@ int func_003F9C48_impl(int *src, int offset, int origin) {
         target = offset + func_003FA6E8_9C48();
         requestAgain = D_004A4BD8;
         driver = D_004A4BDC;
-        requestAgain->f70 = target;
-        driver->f34(requestAgain->body.port, offset + func_003FA6E8_9C48(), 0);
+        requestAgain->expected = target;
+        driver->seek(requestAgain->body.port, offset + func_003FA6E8_9C48(), 0);
     } else {
         struct sMcReq *requestInner = D_004A4BD8;
         struct sMcDrv *driverInner = D_004A4BDC;
-        requestInner->f70 = offset;
-        driverInner->f34(requestInner->body.port, offset, origin);
+        requestInner->expected = offset;
+        driverInner->seek(requestInner->body.port, offset, origin);
     }
     return 0;
 }
@@ -6225,8 +6259,8 @@ int func_003F9DC0_impl(int *src, int buffer, int byteCount) {
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
     requestAgain = D_004A4BD8;
     driver = D_004A4BDC;
-    requestAgain->f70 = byteCount;
-    driver->f2C(src[0], buffer, byteCount);
+    requestAgain->expected = byteCount;
+    driver->read(src[0], buffer, byteCount);
     return 0;
 }
 #endif
@@ -6268,8 +6302,8 @@ int func_003F9F00_impl(int *src, void *buffer, int byteCount) {
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
     requestAgain = D_004A4BD8;
     driver = D_004A4BDC;
-    requestAgain->f70 = byteCount;
-    driver->f30(src[0], buffer, byteCount);
+    requestAgain->expected = byteCount;
+    driver->write(src[0], buffer, byteCount);
     return 0;
 }
 #endif
@@ -6304,15 +6338,15 @@ extern void fB2F8w(int) __asm__("func_003FB2F8");
 int func_003FA040(int *statusOut, int *resultOut) {
     int result;
     if (func_003F9208() == 0) return 2;
-    if (D_004A4BDC->f40 == 0) return 13;
+    if (D_004A4BDC->sync == 0) return 13;
     if (statusOut == 0) return 0xC;
     if (resultOut == 0) return 0xC;
-    result = D_004A4BDC->f40(statusOut, resultOut);
+    result = D_004A4BDC->sync(statusOut, resultOut);
     if (statusOut[0] == 0) {
         if (D_004A4BD8->op != 0) return 0xF;
     }
     if (statusOut[0] != 2) return result;
-    result = D_004A4BDC->f4C[D_004A4BD8->st](result, 2, resultOut[0]);
+    result = D_004A4BDC->stateHandlers[D_004A4BD8->st](result, 2, resultOut[0]);
     if (result == 10) {
         struct sMcReq *request = D_004A4BD8;
         request->op = 0;
@@ -6320,7 +6354,7 @@ int func_003FA040(int *statusOut, int *resultOut) {
         return 10;
     }
     if (result == 0x10) return 0x10;
-    result = D_004A4BDC->f48[D_004A4BD8->op](result, statusOut, resultOut);
+    result = D_004A4BDC->opHandlers[D_004A4BD8->op](result, statusOut, resultOut);
     if (statusOut[0] == 2) {
         int finishedOp = D_004A4BD8->op;
         struct sMcReq *request;
@@ -6378,7 +6412,7 @@ int func_003FA240_impl(char *src) {
     if (src == 0) return 0xC;
     if (func_003F9208() == 0) return 2;
     __builtin_memcpy(&D_004A4BDC->saveDesc, src, 976);
-    fA6A8(src, &D_004A4BDC->f420, &D_004A4BDC->f424);
+    fA6A8(src, &D_004A4BDC->saveSize, &D_004A4BDC->entriesNeeded);
     return fB308(src);
 }
 #endif
@@ -6661,15 +6695,15 @@ int func_003FA8F8(int callResult, int *st, int *res) {
         if (callResult == 0) {
             fA8F8_A7A0(path, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
-            D_004A4BDC->f04(path, D_004A4BD8->body.slot);
+            D_004A4BDC->getDir(path, D_004A4BD8->body.slot);
             break;
         }
         if (callResult == 3) {
             if (D_004A4BD8->op == 1) {
-                D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+                D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
                 if (D_004A4BD8->body.slot != -1) {
                     D_004A4BD8->st = 1;
-                    D_004A4BDC->f10(D_004A4BD8->body.slot);
+                    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
                     return 0;
                 }
                 *st = 2;
@@ -6685,13 +6719,13 @@ int func_003FA8F8(int callResult, int *st, int *res) {
             pollValue = *res;
             if (pollValue == 0) {
                 D_004A4BD8->st = 3;
-                D_004A4BDC->f08(D_004A4BD8->body.slot);
+                D_004A4BDC->queryFreeSpace(D_004A4BD8->body.slot);
                 break;
             }
             if (pollValue == 1) {
                 fA8F8_86F0(8);
                 D_004A4BD8->st = 26;
-                D_004A4BDC->f14(D_004A4BD8->body.slot);
+                D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
                 break;
             }
             *st = 2;
@@ -6706,14 +6740,14 @@ int func_003FA8F8(int callResult, int *st, int *res) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->f420) {
+            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->saveSize) {
                 D_004A4BD8->st = 4;
-                D_004A4BDC->f0C(D_004A4BD8->body.slot);
+                D_004A4BDC->queryFreeEntries(D_004A4BD8->body.slot);
                 break;
             }
             fA8F8_86F0(0xE);
             D_004A4BD8->st = 26;
-            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6725,17 +6759,17 @@ int func_003FA8F8(int callResult, int *st, int *res) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->f424) {
+            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->entriesNeeded) {
                 func_003FA818_impl(D_004A4BD8->body.dir, D_004A4BD8->body.file, &D_004A4BDC->saveDesc,
                                    D_004A4BD8->body.name);
                 D_004A4BD8->st = 5;
-                D_004A4BDC->f20(D_004A4BD8->body.dir, D_004A4BDC->f420,
+                D_004A4BDC->makeDir(D_004A4BD8->body.dir, D_004A4BDC->saveSize,
                                                               D_004A4BD8->body.slot);
                 break;
             }
             fA8F8_86F0(0xE);
             D_004A4BD8->st = 26;
-            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6743,7 +6777,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 5:
         if (callResult == 0) {
             D_004A4BD8->st = 0xE;
-            D_004A4BDC->f18(D_004A4BD8->body.dir,
+            D_004A4BDC->open(D_004A4BD8->body.dir,
                                                                   D_004A4BD8->body.dir, D_004A4BD8->body.slot, 515);
             break;
         }
@@ -6755,7 +6789,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
             if (openResult >= 0) {
                 D_004A4BD8->st = 0x10;
                 D_004A4BD8->body.port = openResult;
-                D_004A4BDC->f38(openResult);
+                D_004A4BDC->flush(openResult);
                 break;
             }
             fA8F8_86F0(0);
@@ -6766,7 +6800,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 0x10:
         if (callResult == 0) {
             D_004A4BD8->st = 17;
-            D_004A4BDC->f1C(D_004A4BD8->body.port);
+            D_004A4BDC->close(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6774,7 +6808,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 17:
         if (callResult == 0) {
             D_004A4BD8->st = 6;
-            D_004A4BDC->f18(D_004A4BD8->body.dir, str_view_ico_b,
+            D_004A4BDC->open(D_004A4BD8->body.dir, str_view_ico_b,
                                                                   D_004A4BD8->body.slot, 515);
             break;
         }
@@ -6785,7 +6819,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
                 int openResult = *res;
             D_004A4BD8->st = 7;
             D_004A4BD8->body.port = openResult;
-            D_004A4BDC->f30(openResult, D_004A4BDC->saveDesc.port, D_004A4BDC->saveDesc.id);
+            D_004A4BDC->write(openResult, D_004A4BDC->saveDesc.port, D_004A4BDC->saveDesc.id);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6793,7 +6827,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 7:
         if (callResult == 0) {
             D_004A4BD8->st = 8;
-            D_004A4BDC->f38(D_004A4BD8->body.port);
+            D_004A4BDC->flush(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6801,7 +6835,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 8:
         if (callResult == 0) {
             D_004A4BD8->st = 9;
-            D_004A4BDC->f1C(D_004A4BD8->body.port);
+            D_004A4BDC->close(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6809,7 +6843,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 9:
         if (callResult == 0) {
             D_004A4BD8->st = 10;
-            D_004A4BDC->f18(D_004A4BD8->body.dir, str_icon_sys_b,
+            D_004A4BDC->open(D_004A4BD8->body.dir, str_icon_sys_b,
                                                                   D_004A4BD8->body.slot, 515);
             break;
         }
@@ -6820,7 +6854,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
                 int openResult = *res;
             D_004A4BD8->body.port = openResult;
             D_004A4BD8->st = 11;
-            D_004A4BDC->f30(openResult, &D_004A4BDC->saveDesc.icon, 964);
+            D_004A4BDC->write(openResult, &D_004A4BDC->saveDesc.icon, 964);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6828,7 +6862,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 11:
         if (callResult == 0) {
             D_004A4BD8->st = 0xC;
-            D_004A4BDC->f38(D_004A4BD8->body.port);
+            D_004A4BDC->flush(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6836,7 +6870,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 0xC:
         if (callResult == 0) {
             D_004A4BD8->st = 13;
-            D_004A4BDC->f1C(D_004A4BD8->body.port);
+            D_004A4BDC->close(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6844,7 +6878,7 @@ int func_003FA8F8(int callResult, int *st, int *res) {
     case 13:
         if (callResult == 0) {
             D_004A4BD8->st = 26;
-            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
@@ -6859,10 +6893,10 @@ int func_003FA8F8(int callResult, int *st, int *res) {
                 *st = 2;
                 return 0;
             }
-            D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
             if (D_004A4BD8->body.slot != -1) {
                 D_004A4BD8->st = 1;
-                D_004A4BDC->f10(D_004A4BD8->body.slot);
+                D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
                 return 0;
             }
             *st = 2;
@@ -6920,15 +6954,15 @@ int func_003FAE50(int callResult, int *st, int *res) {
         if (callResult == 0) {
             fAE50_A7A0(path, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
-            D_004A4BDC->f04(path, D_004A4BD8->body.slot);
+            D_004A4BDC->getDir(path, D_004A4BD8->body.slot);
             break;
         }
         if (callResult == 3) {
             if (D_004A4BD8->op == 2) {
-                D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+                D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
                 if (D_004A4BD8->body.slot != -1) {
                     D_004A4BD8->st = 1;
-                    D_004A4BDC->f10(D_004A4BD8->body.slot);
+                    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
                     return 0;
                 }
                 *st = 2;
@@ -6942,9 +6976,9 @@ int func_003FAE50(int callResult, int *st, int *res) {
     case 2:
         if (callResult == 0) {
             if (*res == 1) {
-                D_004A4BDC->f44(D_004A4BD8->body.dir);
+                D_004A4BDC->getFoundName(D_004A4BD8->body.dir);
                 D_004A4BD8->st = 19;
-                D_004A4BDC->f24(D_004A4BD8->body.dir, str_icon_sys_b,
+                D_004A4BDC->deleteFile(D_004A4BD8->body.dir, str_icon_sys_b,
                                                                 D_004A4BD8->body.slot);
                 break;
             }
@@ -6966,7 +7000,7 @@ int func_003FAE50(int callResult, int *st, int *res) {
             if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 20;
-        D_004A4BDC->f24(D_004A4BD8->body.dir, str_view_ico_b,
+        D_004A4BDC->deleteFile(D_004A4BD8->body.dir, str_view_ico_b,
                                                         D_004A4BD8->body.slot);
         break;
     case 20:
@@ -6978,7 +7012,7 @@ int func_003FAE50(int callResult, int *st, int *res) {
             if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 21;
-        D_004A4BDC->f24(D_004A4BD8->body.dir,
+        D_004A4BDC->deleteFile(D_004A4BD8->body.dir,
                                                         D_004A4BD8->body.dir, D_004A4BD8->body.slot);
         break;
     case 21:
@@ -6990,13 +7024,13 @@ int func_003FAE50(int callResult, int *st, int *res) {
             if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 18;
-        D_004A4BDC->f28(D_004A4BD8->body.dir, D_004A4BD8->body.slot);
+        D_004A4BDC->deleteDir(D_004A4BD8->body.dir, D_004A4BD8->body.slot);
         break;
     case 18:
         if (callResult == 0) {
             if (func_003F8710() == 0) fAE50_86F0(0);
             D_004A4BD8->st = 26;
-            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
             break;
         }
         if (func_003F8710() == 0) fAE50_86F0(callResult);
@@ -7011,10 +7045,10 @@ int func_003FAE50(int callResult, int *st, int *res) {
                 *st = 2;
                 return 0;
             }
-            D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->searchDir);
             if (D_004A4BD8->body.slot != -1) {
                 D_004A4BD8->st = 1;
-                D_004A4BDC->f10(D_004A4BD8->body.slot);
+                D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
                 return 0;
             }
             *st = 2;
@@ -7051,14 +7085,14 @@ static inline unsigned roundup_kb(unsigned v) { if (v & 0x3FF) return ((v >> 10)
  * Computes the space a new save needs: the record size (+0x3CC) and the icon size (+0x4) of the save description, each
  * rounded up to 1 KB, plus 5120 bytes; @p kind is set to 3.
  *
- * @param p  the save description
+ * @param saveDesc  the save description
  * @param out  receives the byte count
  * @param kind  receives 3 (compared with the second space query)
  */
-void func_003FB280(sMcSaveParam *p, int *out, int *kind) {
-    unsigned a = roundup_kb(p->recordSize);
-    unsigned b = roundup_kb(p->id);
-    *out = a + b + 5120;
+void func_003FB280(sMcSaveParam *saveDesc, int *out, int *kind) {
+    unsigned recordBytes = roundup_kb(saveDesc->recordSize);
+    unsigned iconBytes = roundup_kb(saveDesc->id);
+    *out = recordBytes + iconBytes + 5120;
     *kind = 3;
 }
 #endif
@@ -7069,13 +7103,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB2C8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char *func_003FB5E8(void);
 /**
- * Stores the CRC interface (func_003FB5E8, D_00497508) through @p a when it is not 0.
+ * Stores the CRC interface (func_003FB5E8, D_00497508) through @p out when it is not 0.
  *
- * @param a  output pointer
+ * @param out  output pointer
  */
-void func_003FB2C8(char **a) {
-    char *r = func_003FB5E8();
-    if (a) *a = r;
+void func_003FB2C8(char **out) {
+    char *crcIface = func_003FB5E8();
+    if (out) *out = crcIface;
 }
 #endif
 
@@ -7157,7 +7191,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB3A0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
-struct sCrc { unsigned *table; int f04; int *f08; unsigned crc; int heap; };
+/* outSize / outDigest are the output block (sDigestBlock: size, digest pointer) its finish slot hands back */
+struct sCrc { unsigned *table; int outSize; int *outDigest; unsigned crc; int heap; };
 
 extern struct sCrc D_00451518;
 
@@ -7177,9 +7212,9 @@ int func_003FB3A0(unsigned heapId) {
     if (table == 0) return 1;
     D_00451518.heap = heapId;
     func_003FB358(table);
-    D_00451518.f04 = 4;
+    D_00451518.outSize = 4;
     D_00451518.crc = 0xFFFFFFFF;
-    D_00451518.f08 = 0;
+    D_00451518.outDigest = 0;
     return 0;
 }
 #endif
@@ -7289,10 +7324,10 @@ int func_003FB558(int **out) {
     struct sCrc *crcState = &D_00451518;
     if (D_00451518.table == 0) return 6;
     if (out == 0) return 2;
-    crcState->f08 = &D_004A5B1C;
-    crcState->f04 = 4;
+    crcState->outDigest = &D_004A5B1C;
+    crcState->outSize = 4;
     D_004A5B1C = ~crcState->crc;
-    *out = &crcState->f04;
+    *out = &crcState->outSize;
     return 0;
 }
 #endif
@@ -7634,12 +7669,12 @@ int func_003FB898(int size, int memType) {
     int x = 4;
     unsigned y = 1;
     unsigned rawSize;
-    unsigned pad;
+    unsigned extra;
     func_003FB858b(memType, &x, (int *)&y);
     rawSize = size + 0xC;
     if (rawSize < y) return y;
-    pad = (y - rawSize % y) % y;
-    return size + 0xC + pad;
+    extra = (y - rawSize % y) % y;
+    return size + 0xC + extra;
 }
 #endif
 
@@ -7730,35 +7765,57 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBA20);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 struct sMcEnt { int key; int a; int b; int c; };
 
 struct sMcKey { char b[4]; };
 
-struct sMcIfA { int (*f00)(int); int (*f04)(void); int pad08; int (*f0C)(char *, int); int (*f10)(int, int); int (*f14)(int, int); int (*f18)(void); };
+/* The save cipher interface (names ours): [U] func_003FC0E8 starts it with the heap, func_003FC260 stops it;
+   func_003FBC40 / func_003FBCD8 set the key, encrypt or decrypt a buffer, then rewind. */
+struct sMcIfA {
+    int (*start)(int);                  /* 0x00 */
+    int (*stop)(void);                  /* 0x04 */
+    int pad08;
+    int (*setKey)(char *, int);         /* 0x0C: (key, length) */
+    int (*encrypt)(int, int);           /* 0x10: (data, byte count) */
+    int (*decrypt)(int, int);           /* 0x14: (data, byte count) */
+    int (*rewind)(void);                /* 0x18 */
+};
 
-struct sMcIfB { int (*f00)(int); int (*f04)(void); int pad08; int (*f0C)(int, int, int); int (*f10)(int, int); int (*f14)(int); };
+/* The CRC interface (names ours): [U] start / stop as sMcIfA; func_003FBB50 resets, updates over a buffer and
+   finishes into the output block. */
+struct sMcIfB {
+    int (*start)(int);                  /* 0x00 */
+    int (*stop)(void);                  /* 0x04 */
+    int pad08;
+    int (*reset)(int, int, int);        /* 0x0C */
+    int (*update)(int, int);            /* 0x10: (data, byte count) */
+    int (*finish)(int);                 /* 0x14: (output block) */
+};
 
+/* Member names are ours, from [U]: func_003FC0E8 / func_003FC260 (open, close), func_003FBD70.. (the operations) and
+   the poll func_003FCA40. f74 .. f9C keep their offsets: code that may not change spells them. */
 struct sMcState {
     struct sMcParams params;            /* 0x00 */
-    char *f64;
-    int f68;
-    struct sMcIfA *f6C;
-    struct sMcIfB *f70;
+    char *cipherKey;                    /* 0x64: copy of the open parameters' cipher key */
+    int cipherKeyLen;                   /* 0x68 */
+    struct sMcIfA *cipher;              /* 0x6C: the save cipher (may be 0) */
+    struct sMcIfB *crcIface;            /* 0x70: the CRC interface (func_003FA6C8) */
     int f74;
     int f78;                            /* current step */
-    int f7C;
-    int f80;
-    int f84;
-    struct sMcKey f88;
-    int f8C;
+    int recordBuf;                      /* 0x7C: the record being read or written (func_003FC548 / func_003FC708) */
+    int headerBuf;                      /* 0x80: the 12-byte record header buffer */
+    int recordSize;                     /* 0x84 */
+    struct sMcKey recordCrc;            /* 0x88: the record's CRC (func_003FBB50) */
+    int recordKey;                      /* 0x8C */
     int f90;
     int f94;
     int f98;
     struct sMcEnt *f9C;
-    int fA0;
-    int fA4;
-    char fA8;
+    int heap;                           /* 0xA0 */
+    int readOffset;                     /* 0xA4: func_003FC708's read offset */
+    char justCreated;                   /* 0xA8: set when a create finished; the next open then stops after its
+                                           first seek (a just-created save has no records) */
 };
 
 extern struct sMcState *D_004A5B20;
@@ -7790,7 +7847,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBA78);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 /**
@@ -7863,7 +7920,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBB50);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB840c(int) __asm__("func_003FB840");
@@ -7877,12 +7934,12 @@ int func_003FBB50_impl(int a, int b, int c) __asm__("func_003FBB50");
  * @return 0, or the CRC error + 300
  */
 int func_003FBB50_impl(int data, int byteCount, int digestOut) {
-    struct sMcIfB *vt = D_004A5B20->f70;
-    int result = vt->f0C(data, byteCount, digestOut);
+    struct sMcIfB *vt = D_004A5B20->crcIface;
+    int result = vt->reset(data, byteCount, digestOut);
     if (result == 0) {
-        result = vt->f10(data, byteCount);
+        result = vt->update(data, byteCount);
         if (result == 0) {
-            result = vt->f14(digestOut);
+            result = vt->finish(digestOut);
             if (result == 0) return 0;
         }
     }
@@ -7895,7 +7952,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBBE0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FBB50(void *, int, sDigestBlock **);
@@ -7923,7 +7980,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBC40);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int fB828b(int) __asm__("func_003FB828");
@@ -7938,12 +7995,12 @@ int func_003FBC40_impl(int x, int y) __asm__("func_003FBC40");
  */
 int func_003FBC40_impl(int x, int y) {
     int result;
-    if (D_004A5B20->f6C == 0) return 0;
-    result = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
+    if (D_004A5B20->cipher == 0) return 0;
+    result = D_004A5B20->cipher->setKey(D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen);
     if (result == 0) {
-        result = D_004A5B20->f6C->f10(x, y);
+        result = D_004A5B20->cipher->encrypt(x, y);
         if (result == 0) {
-            result = D_004A5B20->f6C->f18();
+            result = D_004A5B20->cipher->rewind();
             if (result == 0) return 0;
         }
     }
@@ -7957,7 +8014,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBCD8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int fB828(int) __asm__("func_003FB828");
@@ -7971,12 +8028,12 @@ int func_003FBCD8_impl(int x, int y) __asm__("func_003FBCD8");
  */
 int func_003FBCD8_impl(int x, int y) {
     int result;
-    if (D_004A5B20->f6C == 0) return 0;
-    result = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
+    if (D_004A5B20->cipher == 0) return 0;
+    result = D_004A5B20->cipher->setKey(D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen);
     if (result == 0) {
-        result = D_004A5B20->f6C->f14(x, y);
+        result = D_004A5B20->cipher->decrypt(x, y);
         if (result == 0) {
-            result = D_004A5B20->f6C->f18();
+            result = D_004A5B20->cipher->rewind();
             if (result == 0) return 0;
         }
     }
@@ -7989,7 +8046,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBD70);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003F99B8(int, int, int);
@@ -8018,7 +8075,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBDB8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003F9C48(struct sMcState *, int, int);
@@ -8041,7 +8098,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBDF0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB898_BDF0(int, int) __asm__("func_003FB898");
@@ -8055,7 +8112,7 @@ extern int func_003FB810(int);
 int func_003FBDF0(void) {
     struct sMcState *state = D_004A5B20;
     state->f78 = 7;
-    return func_003FB810(func_003F9DC0(D_004A5B20, state->f80, func_003FB898_BDF0(0, 1)));
+    return func_003FB810(func_003F9DC0(D_004A5B20, state->headerBuf, func_003FB898_BDF0(0, 1)));
 }
 #endif
 
@@ -8065,7 +8122,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBE40);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB810(int);
@@ -8086,12 +8143,12 @@ int func_003FBE40(void) {
     int recordKey, recordSize;
     x[1] = 0;
     D_004A5B20->f78 = 11;
-    result = fBCD8(D_004A5B20->f80, 0xC);
+    result = fBCD8(D_004A5B20->headerBuf, 0xC);
     if (result != 0) return result;
-    fB9D0(D_004A5B20->f80, &x[0], &x[1], D_004A5B20->f88.b);
+    fB9D0(D_004A5B20->headerBuf, &x[0], &x[1], D_004A5B20->recordCrc.b);
     recordSize = x[1];
     recordKey = x[0];
-    result = fBAD0(recordKey, recordSize, D_004A5B20->f88.b);
+    result = fBAD0(recordKey, recordSize, D_004A5B20->recordCrc.b);
     if (D_004A5B20->f98 == result) return 5;
     return func_003FB810(f9C48(D_004A5B20, D_004A5B20->f98, 0));
 }
@@ -8103,7 +8160,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBED0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB898_BED0(int, int) __asm__("func_003FB898");
@@ -8126,14 +8183,14 @@ int func_003FBED0(void) {
     int header;
     int result;
     D_004A5B20->f78 = 6;
-    header = func_003FB910(D_004A5B20->f7C, 1);
+    header = func_003FB910(D_004A5B20->recordBuf, 1);
     if (header == 0) return 4;
-    fB958(header, D_004A5B20->f8C, D_004A5B20->f84, D_004A5B20->f88.b);
+    fB958(header, D_004A5B20->recordKey, D_004A5B20->recordSize, D_004A5B20->recordCrc.b);
     result = fBC40(header, 0xC);
     if (result != 0) return result;
-    result = fBC40(D_004A5B20->f7C, D_004A5B20->f84);
+    result = fBC40(D_004A5B20->recordBuf, D_004A5B20->recordSize);
     if (result != 0) return result;
-    result = func_003FB898_BED0(D_004A5B20->f84, 2);
+    result = func_003FB898_BED0(D_004A5B20->recordSize, 2);
     return func_003FB810(f9F00(D_004A5B20, header, result));
 }
 #endif
@@ -8144,7 +8201,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBF80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB910(int, int);
@@ -8161,8 +8218,8 @@ int func_003FBF80(void) {
     struct sMcState *state = D_004A5B20;
     int header;
     state->f78 = 10;
-    header = func_003FB910(state->f7C, 0);
-    return func_003FB810(func_003F9DC0(D_004A5B20, header, func_003FB898_BF80(D_004A5B20->f84, 1)));
+    header = func_003FB910(state->recordBuf, 0);
+    return func_003FB810(func_003F9DC0(D_004A5B20, header, func_003FB898_BF80(D_004A5B20->recordSize, 1)));
 }
 #endif
 
@@ -8172,7 +8229,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBFE0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 typedef struct { int tag; int p; } P3FBFE0;
@@ -8190,20 +8247,20 @@ extern int f5FC8(int, char *, int) __asm__("memcmp");
  */
 int func_003FBFE0(void) {
     L3FBFE0 x; int header; int result; int err = 10; int hh;
-    x.p = 0; hh = D_004A5B20->f7C; x.b = 0;
+    x.p = 0; hh = D_004A5B20->recordBuf; x.b = 0;
     D_004A5B20->f78 = err;
     header = func_003FB910(hh, 0);
     result = fBCD8(header, 0xC);
     if (result != 0) return result;
-    fB9D0(header, &x.a, &x.b, D_004A5B20->f88.b);
-    if (x.a != D_004A5B20->f8C) return 11;
-    if (x.b != D_004A5B20->f84) return 110;
-    result = fBCD8(D_004A5B20->f7C, x.b);
+    fB9D0(header, &x.a, &x.b, D_004A5B20->recordCrc.b);
+    if (x.a != D_004A5B20->recordKey) return 11;
+    if (x.b != D_004A5B20->recordSize) return 110;
+    result = fBCD8(D_004A5B20->recordBuf, x.b);
     if (result != 0) return result;
-    result = fBB50(D_004A5B20->f7C, D_004A5B20->f84, &x.p);
+    result = fBB50(D_004A5B20->recordBuf, D_004A5B20->recordSize, &x.p);
     if (result != 0) return result;
     if (x.p->tag != 4) return 11;
-    if (f5FC8(x.p->p, D_004A5B20->f88.b, 4) == 0) err = 0;
+    if (f5FC8(x.p->p, D_004A5B20->recordCrc.b, 4) == 0) err = 0;
     return err;
 }
 #endif
@@ -8213,7 +8270,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC0D8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 /**
@@ -8230,10 +8287,19 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC0E8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
-typedef struct { int f0; int f4; int f8; char *fC; int f10; struct sMcIfA *f14; int f18; } P0E8;
+/* the open parameters (names ours, from [U] below) */
+typedef struct {
+    int maxRecords;                     /* 0x00: record table size */
+    int units;                          /* 0x04: the card unit list */
+    int callbacks;                      /* 0x08: the 17 card callbacks */
+    char *cipherKey;                    /* 0x0C */
+    int cipherKeyLen;                   /* 0x10 */
+    struct sMcIfA *cipher;              /* 0x14: may be 0 */
+    int heap;                           /* 0x18 */
+} P0E8;
 extern int func_003FC0D8(void);
 extern int func_003F9218(int, int, int);
 extern int func_003FB810(int);
@@ -8259,34 +8325,34 @@ int func_003FC0E8(P0E8 *openParams) {
     int result;
     struct sMcIfA *cb;
     if (func_003FC0D8() != 0) return 1;
-    result = func_003F9218(openParams->f4, openParams->f8, openParams->f18);
+    result = func_003F9218(openParams->units, openParams->callbacks, openParams->heap);
     if (result != 0) return func_003FB810(result);
-    D_004A5B20 = c0e8_6728(openParams->f18, 172, 4);
+    D_004A5B20 = c0e8_6728(openParams->heap, 172, 4);
     if (D_004A5B20 == 0) return 6;
-    c0e8_A6C8(&D_004A5B20->f70);
-    result = D_004A5B20->f70->f00(openParams->f18);
+    c0e8_A6C8(&D_004A5B20->crcIface);
+    result = D_004A5B20->crcIface->start(openParams->heap);
     if (result != 0) return func_003FB840c(result);
-    D_004A5B20->f6C = cb = openParams->f14;
+    D_004A5B20->cipher = cb = openParams->cipher;
     if (cb != 0) {
         int n;
-        result = cb->f00(openParams->f18);
+        result = cb->start(openParams->heap);
         if (result != 0) return fB828(result);
-        n = openParams->f10;
-        D_004A5B20->f68 = n;
-        D_004A5B20->f64 = c0e8_6728(openParams->f18, n, 4);
-        if (D_004A5B20->f64 == 0) return 6;
-        func_0041605C(D_004A5B20->f64, openParams->fC, D_004A5B20->f68);
+        n = openParams->cipherKeyLen;
+        D_004A5B20->cipherKeyLen = n;
+        D_004A5B20->cipherKey = c0e8_6728(openParams->heap, n, 4);
+        if (D_004A5B20->cipherKey == 0) return 6;
+        func_0041605C(D_004A5B20->cipherKey, openParams->cipherKey, D_004A5B20->cipherKeyLen);
     }
-    D_004A5B20->f90 = openParams->f0;
+    D_004A5B20->f90 = openParams->maxRecords;
     D_004A5B20->f94 = 0;
     D_004A5B20->f98 = 0;
-    D_004A5B20->f9C = c0e8_6728(openParams->f18, openParams->f0 << 4, 4);
+    D_004A5B20->f9C = c0e8_6728(openParams->heap, openParams->maxRecords << 4, 4);
     if (D_004A5B20->f9C == 0) return 6;
-    result = func_003FCE10((char *)&D_004A5B20->f80, D_004A5B20->fA0, 0, 1);
+    result = func_003FCE10((char *)&D_004A5B20->headerBuf, D_004A5B20->heap, 0, 1);
     if (result != 0) return result;
-    D_004A5B20->f80 -= 0xC;
-    D_004A5B20->fA0 = openParams->f18;
-    D_004A5B20->fA8 = 0;
+    D_004A5B20->headerBuf -= 0xC;
+    D_004A5B20->heap = openParams->heap;
+    D_004A5B20->justCreated = 0;
     return 0;
 }
 #endif
@@ -8297,7 +8363,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC260);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FCF00(int, int, int, int);
@@ -8321,27 +8387,27 @@ int func_003FC260(void) {
     int userBuf;
     struct sMcIfA *cipher;
     if (func_003FC0D8() == 0) return 2;
-    c260_B9A0(D_004A5B20->f80);
-    userBuf = D_004A5B20->f80 + 0xC;
-    D_004A5B20->f80 = userBuf;
-    result = func_003FCF00(userBuf, D_004A5B20->fA0, 0, 1);
+    c260_B9A0(D_004A5B20->headerBuf);
+    userBuf = D_004A5B20->headerBuf + 0xC;
+    D_004A5B20->headerBuf = userBuf;
+    result = func_003FCF00(userBuf, D_004A5B20->heap, 0, 1);
     if (result != 0) return result;
-    c260_6760(D_004A5B20->fA0, D_004A5B20->f9C, D_004A5B20->f90 * 16, 4);
-    cipher = D_004A5B20->f6C;
+    c260_6760(D_004A5B20->heap, D_004A5B20->f9C, D_004A5B20->f90 * 16, 4);
+    cipher = D_004A5B20->cipher;
     D_004A5B20->f9C = 0;
     if (cipher != 0) {
-        result = cipher->f04();
+        result = cipher->stop();
         if (result != 0) return c260_B828(result);
-        c260_6760(D_004A5B20->fA0, D_004A5B20->f64, D_004A5B20->f68, 4);
-        D_004A5B20->f64 = 0;
+        c260_6760(D_004A5B20->heap, D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen, 4);
+        D_004A5B20->cipherKey = 0;
     }
-    D_004A5B20->f6C = 0;
-    result = D_004A5B20->f70->f04();
+    D_004A5B20->cipher = 0;
+    result = D_004A5B20->crcIface->stop();
     if (result != 0) return c260_B840(result);
-    D_004A5B20->f70 = 0;
+    D_004A5B20->crcIface = 0;
     result = c260_9530();
     if (result != 0) return c260_B810(result, D_004A5B20);
-    c260_6760(D_004A5B20->fA0, D_004A5B20, 172, 4);
+    c260_6760(D_004A5B20->heap, D_004A5B20, 172, 4);
     D_004A5B20 = 0;
     return 0;
 }
@@ -8352,7 +8418,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC390);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003F9818(char *str, int a, int b);
@@ -8378,7 +8444,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC3C0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003F9698(char *str, int a, int b);
@@ -8405,7 +8471,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC3F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int fBD70(char *, int, int, int) __asm__("func_003FBD70");
@@ -8482,7 +8548,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC548);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB810(int);
@@ -8523,18 +8589,18 @@ int func_003FC548(sMcParamsAligned *saveParams, int recordKey, int recordIndex, 
     D_004A5B20->f74 = 6;
     D_004A5B20->f78 = 5;
     __builtin_memcpy(D_004A5B20, saveParams, 100);
-    D_004A5B20->f84 = recordSize;
-    D_004A5B20->f7C = recordBuf;
-    D_004A5B20->f8C = recordKey;
+    D_004A5B20->recordSize = recordSize;
+    D_004A5B20->recordBuf = recordBuf;
+    D_004A5B20->recordKey = recordKey;
     k = func_003FBA20(recordKey, recordIndex);
-    if (fBB50w(D_004A5B20->f7C, D_004A5B20->f84, digestBlock) == 0) {
-        D_004A5B20->f88 = *(struct sMcKey *)digestBlock[0]->digest;
+    if (fBB50w(D_004A5B20->recordBuf, D_004A5B20->recordSize, digestBlock) == 0) {
+        D_004A5B20->recordCrc = *(struct sMcKey *)digestBlock[0]->digest;
         if (k == 0) {
             writeOffset = D_004A5B20->f98;
-            fBAD0w(recordKey, D_004A5B20->f84, &D_004A5B20->f88);
+            fBAD0w(recordKey, D_004A5B20->recordSize, &D_004A5B20->recordCrc);
         } else {
             writeOffset = k->a;
-            fBA78w(recordKey, recordIndex, &D_004A5B20->f88);
+            fBA78w(recordKey, recordIndex, &D_004A5B20->recordCrc);
         }
         fBBE0w(&saveParams->crc);
         return func_003FB810(f9C48w(saveParams, writeOffset, 0));
@@ -8548,7 +8614,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC708);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB810(int);
@@ -8576,14 +8642,14 @@ int func_003FC708_impl(struct sMcParams *src, int recordKey, int recordIndex, in
     state->f74 = 8;
     state->f78 = 5;
     state->params = *src;
-    D_004A5B20->f7C = recordBuf;
-    D_004A5B20->f8C = recordKey;
-    D_004A5B20->f84 = recordSize;
+    D_004A5B20->recordBuf = recordBuf;
+    D_004A5B20->recordKey = recordKey;
+    D_004A5B20->recordSize = recordSize;
     entry = func_003FBA20(recordKey, recordIndex);
     if (entry == 0) return 7;
     if (recordSize != entry->b) return 110;
     readOffset = entry->a;
-    D_004A5B20->fA4 = readOffset;
+    D_004A5B20->readOffset = readOffset;
     return func_003FB810(c708_9C48(src, readOffset, 0));
 }
 #endif
@@ -8594,7 +8660,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC850);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FC0D8(void);
@@ -8630,7 +8696,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC8F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 // (prototype from their definition at line 3805)
 struct sMcEnt *func_003FBA20(int key, int n);
 
@@ -8665,7 +8731,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC990);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 int func_003FC990_impl(struct sMcParams *dst) __asm__("func_003FC990");
@@ -8687,7 +8753,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FCA40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* D_004A5B20: the memory-card session (0xAC bytes, allocated by func_003FC0E8). params is the caller's 0x64-byte
-   block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
+   block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FB810(int);
@@ -8723,20 +8789,20 @@ int func_003FCA40(int *st, int *res) {
     }
     if (st[0] != 2) return func_003FB810(cardResult);
     if (cardResult != 0 && D_004A5B20->f74 != 4 && D_004A5B20->f74 != 5) return func_003FB810(cardResult);
-    if (D_004A5B20->f74 == 1 && cardResult == 0) D_004A5B20->fA8 = 1;
-    if (D_004A5B20->f74 != 1 && D_004A5B20->f74 != 4) D_004A5B20->fA8 = 0;
+    if (D_004A5B20->f74 == 1 && cardResult == 0) D_004A5B20->justCreated = 1;
+    if (D_004A5B20->f74 != 1 && D_004A5B20->f74 != 4) D_004A5B20->justCreated = 0;
     if (D_004A5B20->f74 == 6) {
         if (D_004A5B20->f78 == 5) {
             *st = 1;
             return func_003FBED0();
         }
         if (D_004A5B20->f78 == 6) {
-            int header = func_003FB910(D_004A5B20->f7C, 0);
+            int header = func_003FB910(D_004A5B20->recordBuf, 0);
             int stepError;
             fCA40_B9A0(header);
-            if (func_003FB898(D_004A5B20->f84, 2) != *res) return 110;
-            *res = D_004A5B20->f84;
-            stepError = func_003FBCD8(D_004A5B20->f7C, D_004A5B20->f84);
+            if (func_003FB898(D_004A5B20->recordSize, 2) != *res) return 110;
+            *res = D_004A5B20->recordSize;
+            stepError = func_003FBCD8(D_004A5B20->recordBuf, D_004A5B20->recordSize);
             if (stepError != 0) return func_003FB828(stepError);
             if (cardResult == 0) func_003FBBE0((struct sMcKey *)&D_004A5B20->params.crc);
         }
@@ -8747,10 +8813,10 @@ int func_003FCA40(int *st, int *res) {
             return func_003FBF80();
         }
         if (D_004A5B20->f78 == 10) {
-            int header = func_003FB910(D_004A5B20->f7C, 0);
+            int header = func_003FB910(D_004A5B20->recordBuf, 0);
             int stepError;
-            if (func_003FB898(D_004A5B20->f84, 1) == *res) {
-                *res = D_004A5B20->f84;
+            if (func_003FB898(D_004A5B20->recordSize, 1) == *res) {
+                *res = D_004A5B20->recordSize;
                 stepError = func_003FBFE0();
             } else {
                 stepError = 110;
@@ -8762,7 +8828,7 @@ int func_003FCA40(int *st, int *res) {
     if (D_004A5B20->f74 == 4 || D_004A5B20->f74 == 5) {
         if (D_004A5B20->f78 == 4) {
             if (cardResult != 0) {
-                D_004A5B20->fA8 = 0;
+                D_004A5B20->justCreated = 0;
                 return func_003FB810(cardResult);
             }
             func_003F95E8((char *)D_004A5B20);
@@ -8771,26 +8837,26 @@ int func_003FCA40(int *st, int *res) {
         }
         if (D_004A5B20->f78 == 9) {
             if (cardResult != 0) {
-                D_004A5B20->fA8 = 0;
+                D_004A5B20->justCreated = 0;
                 return func_003FB810(cardResult);
             }
-            if ((unsigned char)D_004A5B20->fA8 != 0) {
-                D_004A5B20->fA8 = 0;
+            if ((unsigned char)D_004A5B20->justCreated != 0) {
+                D_004A5B20->justCreated = 0;
                 *st = 2;
                 return 0;
             }
-            D_004A5B20->fA8 = 0;
+            D_004A5B20->justCreated = 0;
             *st = 1;
             return func_003FBDF0();
         }
         if (D_004A5B20->f78 == 7) {
             if (cardResult != 0 && cardResult != 10) {
-                D_004A5B20->fA8 = 0;
+                D_004A5B20->justCreated = 0;
                 return func_003FB810(cardResult);
             }
             if (cardResult == 10 || D_004A5B20->f94 == D_004A5B20->f90) {
                 *st = 2;
-                fCA40_B9A0(D_004A5B20->f80);
+                fCA40_B9A0(D_004A5B20->headerBuf);
                 func_003FBBE0((struct sMcKey *)&key);
                 if (D_004A5B20->f74 == 5) return fCA40_5FC8(&key, &D_004A5B20->params.crc, 4) != 0 ? 9 : 0;
                 D_004A5B20->params.crc = key;

@@ -52,7 +52,9 @@ struct tCrowdData {
 struct tCrowdAmbientInfo;
 struct tCrowdObjectInfo {
     const t4Vector* pCrowdObjectPos; // 0x0 [P] "mCrowdObjectsInfo[ crowdObjectHandle ].pCrowdObjectPos != NULL", "pCurrCrowdObjectInfo->pCrowdObjectPos"; [U] 0 = free slot
-    int unk_4;                       // 0x4 [U] set per object through cCrowdSys func_002A7340 -> func_002A5CD8; func_002A4E88 weights the ambient loops by it
+    int loudness;                       // 0x4 (name ours) [U] func_002A5D08 takes the object's OPTS base volume;
+                                        //        cCrowdSys func_002A7340 -> func_002A5CD8 sets it; func_002A4E88
+                                        //        weights the positions and loops by it
     tCrowdAmbientInfo* pInfo;        // 0x8 [P] "pCurrCrowdObjectInfo->pInfo" (the ambient loop the object feeds; func_002A4E88 calls it pCurrAmbientInfo)
 };
 
@@ -62,8 +64,10 @@ struct tCrowdAmbientInfo {
     int handle;        // 0x04 [P] "mCrowdAmbientInfo[ iCount ].handle == -1" (preview lw 0xE4 + i * 0x30); [R] ctor -1
     int numObjects;    // 0x08 [P] "pInfo->numObjects"; [R] ctor 0; [U] crowd objects feeding this loop
     char unk_0C[0x4];  // 0x0C padding (t4Vector alignment)
-    t4Vector unk_10;   // 0x10 [U] func_002A4E88: the loop's averaged object position
-    int unk_20;        // 0x20 [R] ctor stores the loop's index (0..2); [U] func_002A4E88 indexes its per-loop sums with it
+    t4Vector averagePos;                // 0x10 (name ours) [U] func_002A4E88: the loop's averaged object position;
+                                        //        func_002A5D08 plays the loop there
+    int index;                          // 0x20 (name ours) [R] ctor stores the loop's index (0..2); [U] func_002A4E88
+                                        //        indexes its per-loop sums with it
     char unk_24[0xC];  // 0x24 padding (16-byte stride)
 };
 
@@ -73,20 +77,34 @@ struct tCrowdAmbientInfo {
 struct cCrowdInstance {
     int mViewPort;                             // 0x000 [P] "mViewPort >= 0", "mViewPort == -1", "mViewPort == pOpts->OPTS_GetViewport()"; [R] ctor -1; [U] OPTS_Viewport of its sounds (func_002A64A0)
     char unk_004[0xC];                         // 0x004 no access (t4Vector alignment)
-    t4Vector unk_010;                          // 0x010 [R] ctor zeroes; [U] func_002A4E88 / func_002A5D08 (sq): the crowd's averaged position; func_002A64A0 passes &unk_010 as the cheer's OPTS_Position
+    t4Vector mCrowdPos;                 // 0x010 (name ours) [R] ctor zeroes; [U] func_002A4E88 / func_002A5D08 (sq):
+                                        //        the crowd's averaged position; func_002A64A0 passes &mCrowdPos as the
+                                        //        cheer's OPTS_Position
     tCrowdObjectInfo mCrowdObjectsInfo[15];    // 0x020 [P] "crowdObjectHandle < kCROWDSYS_MAXCROWDOBJECTS_PER_VIEWPORT" (15: preview slti 15); [R] ctor zeroes
     int mNumCrowdObjects;                      // 0x0D4 [P] "mNumCrowdObjects > 0" (preview lw 0xD4); [R] ctor 0
-    int unk_0D8;                               // 0x0D8 [R] ctor -1; cCrowdSys::Init sets every instance's to its 4th argument; [U] the MIDI bank of the cheer (func_002A64A0 -> MIDI_Begin(unk_0D8, sample))
+    int mCrowdBank;                     // 0x0D8 (name ours) [R] ctor -1; cCrowdSys::Init sets every instance's to its
+                                        //        4th argument; [U] the MIDI bank of the cheer and the ambient loops
+                                        //        (func_002A64A0 -> MIDI_Begin(mCrowdBank, sample))
     char unk_0DC[0x4];                         // 0x0DC no access (padding)
     tCrowdAmbientInfo mCrowdAmbientInfo[3];    // 0x0E0 [P] the asserts above; [R] ctor
     int mNumCrowdAmbience;                     // 0x170 [P] "mNumCrowdAmbience" (preview lw 0x170); [R] ctor 0
-    int unk_174;                               // 0x174 [R] ctor -1; [U] the cheer's voice handle (func_002A64A0 = MIDI_End(); func_002A6848 BANKMONITOR_StopHandle()s it and resets -1)
-    int unk_178;                               // 0x178 [R] ctor 0; [U] the cheer's base volume (func_002A64A0 OPTS_Vol); func_002A4E88 / func_002A62F0 write it
-    float* unk_17C;                            // 0x17C [R] ctor 0; [U] func_002A64A0 stores it as the cheer's OPTS_VolControl (a float*)
-    int unk_180;                               // 0x180 [R] ctor 0; [U] cheer state 0/1/2 (func_002A67F0 0 -> 1, func_002A6808 / func_002A6848 -> 0, func_002A62F0 2 -> 1)
+    int mCheerHandle;                   // 0x174 (name ours) [R] ctor -1; [U] the cheer's voice handle (func_002A64A0 =
+                                        //        MIDI_End(); func_002A6848 BANKMONITOR_StopHandle()s it and resets -1)
+    int mLoudness;                      // 0x178 (name ours) [R] ctor 0; [U] the crowd's loudness: func_002A4E88 /
+                                        //        func_002A62F0 write it, func_002A64A0 plays the cheer at it (OPTS_Vol)
+    float* mpVolControl;                // 0x17C (name ours) [R] ctor 0; [U] func_002A5D08 copies the object's
+                                        //        OPTS_VolControl (a float*) in; func_002A64A0 and the ambient loops
+                                        //        play with it
+    int mCheerState;                    // 0x180 (name ours) [R] ctor 0; [U] cheer state 0/1/2 (func_002A67F0 0 -> 1,
+                                        //        func_002A6808 / func_002A6848 -> 0, func_002A62F0 2 -> 1)
     int mAmbientCheerIntensity;                // 0x184 [P] "mAmbientCheerIntensity != keCrowdIntensity_Num" (preview lw 0x184 vs 3); [R] ctor 3 (keCrowdIntensity_Num); [U] func_002A64A0 / func_002A6648 store the intensity played
-    float unk_188;                             // 0x188 [R] ctor 0; [U] cheer time left: func_002A64A0 = mAttack + mDecay, func_002A68B0 counts it down, func_002A6848 / func_002A62F0 clamp it to 0.25
-    int unk_18C;                               // 0x18C [R] ctor 0; [U] func_002A64A0 = intensity + 1, func_002A62F0 / func_002A4E88 0; cCrowdSys func_002A77C8 returns it
+    float mCheerTimeLeft;               // 0x188 (name ours) [R] ctor 0; [U] cheer time left: func_002A64A0 = mAttack +
+                                        //        mDecay, func_002A68B0 counts it down, func_002A6848 / func_002A62F0
+                                        //        clamp it to 0.25
+    int mCurrentCheer;                  // 0x18C (name ours) [R] ctor 0; [U] the cheer playing: func_002A64A0 =
+                                        //        intensity + 1 (ANTICIPATE), func_002A6648 = ~intensity (FALL),
+                                        //        func_002A62F0 / func_002A4E88 0 (none); cCrowdSys func_002A77C8
+                                        //        returns it
 };
 
 struct cCrowdSys {
@@ -117,33 +135,33 @@ CHECK_OFFSET(tCrowdData, mDecay, 0x4C);
 CHECK_OFFSET(tCrowdData, mMaxBend, 0x50);
 CHECK_SIZE(tCrowdData, 0x54);
 CHECK_OFFSET(tCrowdObjectInfo, pCrowdObjectPos, 0x0);
-CHECK_OFFSET(tCrowdObjectInfo, unk_4, 0x4);
+CHECK_OFFSET(tCrowdObjectInfo, loudness, 0x4);
 CHECK_OFFSET(tCrowdObjectInfo, pInfo, 0x8);
 CHECK_SIZE(tCrowdObjectInfo, 0xC);
 CHECK_OFFSET(tCrowdAmbientInfo, sampleID, 0x00);
 CHECK_OFFSET(tCrowdAmbientInfo, handle, 0x04);
 CHECK_OFFSET(tCrowdAmbientInfo, numObjects, 0x08);
 CHECK_OFFSET(tCrowdAmbientInfo, unk_0C, 0x0C);
-CHECK_OFFSET(tCrowdAmbientInfo, unk_10, 0x10);
-CHECK_OFFSET(tCrowdAmbientInfo, unk_20, 0x20);
+CHECK_OFFSET(tCrowdAmbientInfo, averagePos, 0x10);
+CHECK_OFFSET(tCrowdAmbientInfo, index, 0x20);
 CHECK_OFFSET(tCrowdAmbientInfo, unk_24, 0x24);
 CHECK_SIZE(tCrowdAmbientInfo, 0x30);
 CHECK_OFFSET(cCrowdInstance, mViewPort, 0x000);
 CHECK_OFFSET(cCrowdInstance, unk_004, 0x004);
-CHECK_OFFSET(cCrowdInstance, unk_010, 0x010);
+CHECK_OFFSET(cCrowdInstance, mCrowdPos, 0x010);
 CHECK_OFFSET(cCrowdInstance, mCrowdObjectsInfo, 0x020);
 CHECK_OFFSET(cCrowdInstance, mNumCrowdObjects, 0x0D4);
-CHECK_OFFSET(cCrowdInstance, unk_0D8, 0x0D8);
+CHECK_OFFSET(cCrowdInstance, mCrowdBank, 0x0D8);
 CHECK_OFFSET(cCrowdInstance, unk_0DC, 0x0DC);
 CHECK_OFFSET(cCrowdInstance, mCrowdAmbientInfo, 0x0E0);
 CHECK_OFFSET(cCrowdInstance, mNumCrowdAmbience, 0x170);
-CHECK_OFFSET(cCrowdInstance, unk_174, 0x174);
-CHECK_OFFSET(cCrowdInstance, unk_178, 0x178);
-CHECK_OFFSET(cCrowdInstance, unk_17C, 0x17C);
-CHECK_OFFSET(cCrowdInstance, unk_180, 0x180);
+CHECK_OFFSET(cCrowdInstance, mCheerHandle, 0x174);
+CHECK_OFFSET(cCrowdInstance, mLoudness, 0x178);
+CHECK_OFFSET(cCrowdInstance, mpVolControl, 0x17C);
+CHECK_OFFSET(cCrowdInstance, mCheerState, 0x180);
 CHECK_OFFSET(cCrowdInstance, mAmbientCheerIntensity, 0x184);
-CHECK_OFFSET(cCrowdInstance, unk_188, 0x188);
-CHECK_OFFSET(cCrowdInstance, unk_18C, 0x18C);
+CHECK_OFFSET(cCrowdInstance, mCheerTimeLeft, 0x188);
+CHECK_OFFSET(cCrowdInstance, mCurrentCheer, 0x18C);
 CHECK_SIZE(cCrowdInstance, 0x190);
 CHECK_OFFSET(cCrowdSys, mpVBankManager, 0x000);
 CHECK_OFFSET(cCrowdSys, mBank, 0x004);

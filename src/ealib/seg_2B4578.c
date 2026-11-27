@@ -23708,7 +23708,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0D70);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_0D70 { char b0; unsigned char b1; unsigned char b2; };
 struct G_0D70 { char pad[0x58]; struct E_0D70 *list[24]; };
-struct T_0D70 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_0D70 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_0D70 __asm__("D_0044F42C");
 extern int D_0044F430_0D70 __asm__("D_0044F430");
 extern struct G_0D70 *D_0044F420_0D70 __asm__("D_0044F420");
@@ -23739,8 +23739,8 @@ int func_003D0D70(unsigned int mask, unsigned int val) {
     if (val < 0x80) {
         for (i = 0; i < 4; i++) {
             unsigned int playerMask;
-            if (D_00517610_0D70[i].f34 == 0) continue;
-            playerMask = D_00517610_0D70[i].f30;
+            if (D_00517610_0D70[i].pathData == 0) continue;
+            playerMask = D_00517610_0D70[i].pathId;
             if (has_0D70(playerMask & 0xF0000000, mask) == 0) continue;
             if (has_0D70(playerMask & 0x0F000000, mask) == 0) continue;
             if (func_003D5450_0D70(i & 0xFF) == 0) continue;
@@ -23767,7 +23767,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0ED0);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct A_0ED0 { int v[4]; };
 struct B_0ED0 { unsigned int f0; char pad4[4]; char b8; char b9; char padA[2]; short hC; char bE; char padF; };
-struct T_0ED0 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_0ED0 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_0ED0 __asm__("D_0044F42C");
 extern int D_0044F430_0ED0 __asm__("D_0044F430");
 extern void *D_0044F420_0ED0 __asm__("D_0044F420");
@@ -23810,8 +23810,8 @@ int func_003D0ED0(unsigned int mask, int val) {
     func_003D0B18_0ED0(&eventHeader, &item);
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_0ED0[i].f34 == 0) continue;
-        playerMask = D_00517610_0ED0[i].f30;
+        if (D_00517610_0ED0[i].pathData == 0) continue;
+        playerMask = D_00517610_0ED0[i].pathId;
         if (has_0ED0(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_0ED0(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_0ED0(i & 0xFF) == 0) continue;
@@ -23830,7 +23830,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1038);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_1038 { char pad[3]; unsigned char b3; char pad2[0x50]; int f54; };
 struct G_1038 { char pad[0x58]; struct E_1038 *list[24]; };
-struct T_1038 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_1038 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_1038 __asm__("D_0044F42C");
 extern unsigned char D_0044F42D_1038 __asm__("D_0044F42D");
 extern int D_0044F430_1038 __asm__("D_0044F430");
@@ -23860,8 +23860,8 @@ void func_003D1038(unsigned int mask, unsigned char val) {
     if (mask == 0xFFFFFFFF) D_0044F42D_1038 = val;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_1038[i].f34 == 0) continue;
-        playerMask = D_00517610_1038[i].f30;
+        if (D_00517610_1038[i].pathData == 0) continue;
+        playerMask = D_00517610_1038[i].pathId;
         if (has_1038(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_1038(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_1038(i & 0xFF) == 0) continue;
@@ -24037,7 +24037,7 @@ struct G_1470 { char pad[0x58]; struct E_1470 *list[24]; };
 extern unsigned char D_0044F42C_1470 __asm__("D_0044F42C");
 extern int D_0044F430_1470 __asm__("D_0044F430");
 extern struct G_1470 *D_0044F420_1470 __asm__("D_0044F420");
-struct T_1470 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_1470 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern struct T_1470 D_00517610_1470[] __asm__("D_00517610");
 extern int func_003D5450_1470(int) __asm__("func_003D5450");
 extern void func_002AF838_1470(int) __asm__("func_002AF838");
@@ -24060,8 +24060,8 @@ void func_003D1470(unsigned int mask) {
     if (func_003D5450_1470(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_1470[i].f34 == 0) continue;
-        playerMask = D_00517610_1470[i].f30;
+        if (D_00517610_1470[i].pathData == 0) continue;
+        playerMask = D_00517610_1470[i].pathId;
         if (has_1470(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_1470(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_1470(i) == 0) continue;
@@ -24199,7 +24199,10 @@ struct H_16F0 { int f0; int f4; int f8; };
 struct E_16F0 { int w0; int w4; int w8; unsigned int wC; };
 struct Hdr_16F0 { char pad[0xF]; unsigned char bF; };
 struct G_16F0 { char pad[0x34]; struct Hdr_16F0 *hdr; char pad2[0x40 - 0x38]; short *idx; };
-struct T_16F0 { char pad[0x30]; unsigned int f30; int f34; char pad2[0xDC - 0x38]; struct H_16F0 *list[16]; char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920]; };
+struct T_16F0 {
+    char pad[0x30]; unsigned int pathId; int pathData; char pad2[0xDC - 0x38]; struct H_16F0 *list[16];
+    char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920];
+};
 extern unsigned char D_0044F42C_16F0 __asm__("D_0044F42C");
 extern int D_0044F430_16F0 __asm__("D_0044F430");
 extern struct G_16F0 *D_0044F420_16F0 __asm__("D_0044F420");
@@ -24242,8 +24245,8 @@ int func_003D16F0(unsigned int mask, short prog) {
         struct H_16F0 *pending;
         unsigned int top;
         int k, err;
-        if (D_00517610_16F0[i].f34 == 0) continue;
-        playerMask = D_00517610_16F0[i].f30;
+        if (D_00517610_16F0[i].pathData == 0) continue;
+        playerMask = D_00517610_16F0[i].pathId;
         if (has_16F0(playerMask, bit) == 0) continue;
         if (has_16F0(playerMask & 0x0F000000, mask) == 0) continue;
         if (has_16F0(playerMask & 0xF0000000, mask) == 0) continue;
@@ -24254,12 +24257,12 @@ int func_003D16F0(unsigned int mask, short prog) {
         if (event->wC & 0x20000000) continue;
         err = -8;
         event = (struct E_16F0 *)func_003D2068_16F0(event);
-        top = D_00517610_16F0[i].f30;
+        top = D_00517610_16F0[i].pathId;
         top &= 0xFF000000;
         for (k = 0; k < 4; k++) {
             int n;
-            if (D_00517610_16F0[k].f34 == 0) continue;
-            if ((D_00517610_16F0[k].f30 & top) != top) continue;
+            if (D_00517610_16F0[k].pathData == 0) continue;
+            if ((D_00517610_16F0[k].pathId & top) != top) continue;
             n = D_00517610_16F0[k].n;
             if (n >= 16) { result = -13; goto next; }
             err = 0;
@@ -24334,7 +24337,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1A88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct E_1A88 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct E_1A88 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 struct G_1A88 { char pad[0xDC]; void *arr[16]; };
 extern unsigned char D_0044F42C_1A88 __asm__("D_0044F42C");
 extern int D_0044F430_1A88 __asm__("D_0044F430");
@@ -24359,8 +24362,8 @@ int func_003D1A88(unsigned int mask) {
     }
     mask &= 0x0F000000;
     for (i = 0; i < 4; i++) {
-        if (D_00517610_1A88[i].f34 == 0) continue;
-        if ((D_00517610_1A88[i].f30 & mask) == 0) continue;
+        if (D_00517610_1A88[i].pathData == 0) continue;
+        if ((D_00517610_1A88[i].pathId & mask) == 0) continue;
         if (func_003D5450_1A88(i & 0xFF)) {
             for (j = 0; j < 16; j++) {
                 if (D_0044F420_1A88->arr[j]) cnt++;
@@ -24550,8 +24553,10 @@ struct sPath {                      /* 0x928 */
     unsigned int f10;
     struct sPathRamp f14[3];
     char pad2C[0x30 - 0x2C];
-    unsigned int f30;
-    unsigned int *f34;              /* the loaded path data (32-bit words) */
+    unsigned int pathId;            /* (name ours) the player's id, class and group bits: func_003D4BB0 finds the
+                                       player whose pathId equals an id, the others test it against a mask; the
+                                       per-function views of D_00517610 below use the same two names */
+    unsigned int *pathData;         /* (name ours) the loaded path data (32-bit words); nonzero = player in use */
     short *f38;                     /* word offsets of its nodes */
     short *f3C;
     short *f40;
@@ -24785,8 +24790,8 @@ struct E_2218 { int w0; int w4; int w8; unsigned int wC; };
  */
 void func_003D2218(void) {
     int i;
-    for (i = 0; i < ((unsigned char *)D_0044F420->f34)[0xF]; i++) {
-        struct E_2218 *eventDef = (struct E_2218 *)(D_0044F420->f34 + D_0044F420->f40[i]);
+    for (i = 0; i < ((unsigned char *)D_0044F420->pathData)[0xF]; i++) {
+        struct E_2218 *eventDef = (struct E_2218 *)(D_0044F420->pathData + D_0044F420->f40[i]);
         if (eventDef != 0) {
             eventDef->wC &= 0xDFFFFFFF;
         }
@@ -24826,7 +24831,7 @@ int func_003D2290(void) {
     int i, j;
     if (D_0044F430 != 0) return -18;
     for (i = 0; i < 4; i++) {
-        D_00517610[i].f34 = 0;
+        D_00517610[i].pathData = 0;
         D_00517610[i].f924 = 0;
         for (j = 0; j < 24; j++) {
             D_00517610[i].f58[j] = 0;
@@ -24890,8 +24895,8 @@ struct sPathVoice *func_003D2A68_impl(unsigned int mask) {
     if (D_0044F430 != 0) return 0;
     if (f5450_2A68(-1) == 0) return 0;
     for (i = 0; i < 4; i++) {
-        if (D_00517610[i].f34 != 0) {
-            fl = D_00517610[i].f30;
+        if (D_00517610[i].pathData != 0) {
+            fl = D_00517610[i].pathId;
             classBits = fl & 0xF0000000;
             if ((classBits & mask) != 0) {
                 groupBits = fl & 0x0F000000;
@@ -24911,7 +24916,7 @@ struct sPathVoice *func_003D2A68_impl(unsigned int mask) {
     }
 done:
     if (func_003D5330(0x1000000 << i) == 0) {
-        D_0044F420->f34 = 0;
+        D_0044F420->pathData = 0;
         D_0044F420->fB8 = 0;
         func_003D4C40();
     }
@@ -25286,7 +25291,9 @@ ok:
 INCLUDE_ASM("ealib/seg_2B4578", func_003D31E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct S_31E8 { char p0[0xC]; int f0c; int f10; char p1[0x1C]; unsigned int f30; int f34; char p2[0x928 - 0x38]; };
+struct S_31E8 {
+    char p0[0xC]; int f0c; int f10; char p1[0x1C]; unsigned int pathId; int pathData; char p2[0x928 - 0x38];
+};
 extern struct S_31E8 D_00517610_31E8[] __asm__("D_00517610");
 extern unsigned char D_0044F42C_31E8[] __asm__("D_0044F42C");
 extern int D_0044F430_31E8[] __asm__("D_0044F430");
@@ -25308,7 +25315,7 @@ void func_003D31E8(unsigned int pathMask, int lookAhead, int lookAheadB) {
         if (func_003D5450(-1)) {
             pathMask &= 0x0F000000;
             for (i = 0; i < 4; i++) {
-                if (D_00517610_31E8[i].f34 != 0 && (D_00517610_31E8[i].f30 & pathMask) != 0) {
+                if (D_00517610_31E8[i].pathData != 0 && (D_00517610_31E8[i].pathId & pathMask) != 0) {
                     D_00517610_31E8[i].f0c = lookAhead;
                     D_00517610_31E8[i].f10 = lookAheadB;
                 }
@@ -25477,7 +25484,7 @@ struct R_37A0 { signed char lo; signed char hi; short v; };
 int func_003D37A0(int node, int selector) {
     struct sPath *pathPlayer = D_0044F420;
     int nextNode = -1;
-    unsigned int *nodeRec = pathPlayer->f34 + pathPlayer->f38[node];
+    unsigned int *nodeRec = pathPlayer->pathData + pathPlayer->f38[node];
     unsigned int w0 = nodeRec[0];
     struct sPathVoice *pathVoice = pathPlayer->f58[(w0 >> 16) & 0x1F];
     struct R_37A0 *branch = (struct R_37A0 *)(nodeRec + 4);
@@ -26032,7 +26039,7 @@ int func_003D49D0(int n, int target, struct E_49D0 *tab) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4A50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_4A50 { char pad[0x30]; unsigned mask; int w34; char pad2[0x8EC]; int *tab; };
+struct E_4A50 { char pad[0x30]; unsigned mask; int pathData; char pad2[0x8EC]; int *tab; };
 extern struct E_4A50 D_00517610_4A50[] __asm__("D_00517610");
 
 /**
@@ -26049,7 +26056,7 @@ int func_003D4A50(unsigned pathId) {
     unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
         unsigned mk = D_00517610_4A50[i].mask;
-        if (D_00517610_4A50[i].tab != 0 && D_00517610_4A50[i].w34 != 0 &&
+        if (D_00517610_4A50[i].tab != 0 && D_00517610_4A50[i].pathData != 0 &&
             (mk & hi) && (mk & mid)) {
             for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
                 if ((voiceBits >> voiceBit) & 1)
@@ -26100,14 +26107,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D4BB0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Finds the active entry whose id (f30) matches and selects it through the inlined func_003D5450 body.
-struct E_4BB0 { char pad[0x30]; int f30; int f34; char pad2[0x928 - 0x38]; };
+struct E_4BB0 { char pad[0x30]; int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern struct E_4BB0 D_00517610_4BB0[] __asm__("D_00517610");
 extern unsigned int D_0044F430_4BB0 __asm__("D_0044F430");
 extern struct E_4BB0 *D_0044F420_4BB0 __asm__("D_0044F420");
 static inline int select_4BB0(int i) {
     if (D_0044F430_4BB0 == 0) D_0044F430_4BB0 = 0xFFFFFFFF;
-    if ((unsigned int)i < 4 && D_00517610_4BB0[i].f34 != 0) {
-        D_0044F430_4BB0 = D_00517610_4BB0[i].f30;
+    if ((unsigned int)i < 4 && D_00517610_4BB0[i].pathData != 0) {
+        D_0044F430_4BB0 = D_00517610_4BB0[i].pathId;
         D_0044F420_4BB0 = &D_00517610_4BB0[i];
         return D_0044F430_4BB0;
     }
@@ -26123,7 +26130,7 @@ static inline int select_4BB0(int i) {
 int func_003D4BB0(int id) {
     int i;
     for (i = 0; i < 4; i++) {
-        if (D_00517610_4BB0[i].f34 != 0 && D_00517610_4BB0[i].f30 == id) {
+        if (D_00517610_4BB0[i].pathData != 0 && D_00517610_4BB0[i].pathId == id) {
             return select_4BB0(i);
         }
     }
@@ -26299,7 +26306,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5128);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct T_5128 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_5128 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5128 __asm__("D_0044F42C");
 extern unsigned char D_0044F42D_5128 __asm__("D_0044F42D");
 extern unsigned char D_0044F434_5128 __asm__("D_0044F434");
@@ -26315,7 +26322,7 @@ extern void func_003D4F10_5128(void) __asm__("func_003D4F10");
 static inline unsigned int select_5128(int i) {
     if ((unsigned int)i < 4) {
         D_0044F420_5128 = &D_00517610_5128[i];
-        return D_0044F430_5128 = D_00517610_5128[i].f30;
+        return D_0044F430_5128 = D_00517610_5128[i].pathId;
     } else if (i != -1) {
         D_0044F430_5128 = 0;
     }
@@ -26344,7 +26351,7 @@ void func_003D5128_impl(unsigned char k) {
     D_0044F438_5128 = func_002AF370_5128();
     func_002AEFA8_5128(0);
     for (i = 0; i < 4; i++) {
-        if (D_00517610_5128[i].f34 == 0) continue;
+        if (D_00517610_5128[i].pathData == 0) continue;
         if (D_0044F430_5128 == 0) D_0044F430_5128 = 0xFFFFFFFF;
         if (select_5128(i) != 0) {
             func_003D4B00_5128();
@@ -26380,8 +26387,8 @@ int func_003D5290(unsigned pathId) {
     unsigned mid = pathId & 0x0F000000;
     unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
-        unsigned mk = D_00517610[i].f30;
-        if (D_00517610[i].f34 != 0 &&
+        unsigned mk = D_00517610[i].pathId;
+        if (D_00517610[i].pathData != 0 &&
             (mk & hi) && (mk & mid)) {
             for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
                 if ((voiceBits >> voiceBit) & 1)
@@ -26399,7 +26406,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5330);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // D_00517610: an array of 0x928-byte records (the unit's other views read f30/f34 too).
-struct E_5330 { char pad00[0x30]; unsigned int f30; int f34; char pad38[0x20]; int w[24]; char padB8[0x928 - 0xB8]; };
+struct E_5330 {
+    char pad00[0x30]; unsigned int pathId; int pathData; char pad38[0x20]; int w[24]; char padB8[0x928 - 0xB8];
+};
 extern struct E_5330 D_00517610_5330[] __asm__("D_00517610");
 
 /**
@@ -26415,7 +26424,7 @@ int func_003D5330(unsigned int mask) {
     int j;
     for (i = 0; i < 4; i++) {
         if (mask & (0x1000000 << i)) {
-            if (D_00517610_5330[i].f34 != 0) {
+            if (D_00517610_5330[i].pathData != 0) {
                 for (j = 0; j < 24; j++) {
                     if (D_00517610_5330[i].w[j] != 0) {
                         n++;
@@ -26468,7 +26477,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5450);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Selects entry i (0..3) of D_00517610 as current; any other i except -1 clears the current id.
-struct E_5450 { char pad[0x30]; int f30; int f34; char pad2[0x928 - 0x38]; };
+struct E_5450 { char pad[0x30]; int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern struct E_5450 D_00517610_5450[] __asm__("D_00517610");
 extern unsigned int D_0044F430_5450 __asm__("D_0044F430");
 extern struct E_5450 *D_0044F420_5450 __asm__("D_0044F420");
@@ -26484,8 +26493,8 @@ extern struct E_5450 *D_0044F420_5450 __asm__("D_0044F420");
  */
 int func_003D5450(int i) {
     if (D_0044F430_5450 == 0) D_0044F430_5450 = 0xFFFFFFFF;
-    if ((unsigned int)i < 4 && D_00517610_5450[i].f34 != 0) {
-        D_0044F430_5450 = D_00517610_5450[i].f30;
+    if ((unsigned int)i < 4 && D_00517610_5450[i].pathData != 0) {
+        D_0044F430_5450 = D_00517610_5450[i].pathId;
         D_0044F420_5450 = &D_00517610_5450[i];
         return D_0044F430_5450;
     }
@@ -26528,7 +26537,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
 // Same walk as func_003D1038: clamps val to 0..100 and applies it to every voice
 // in mask through func_003D62C8.
 struct G_5508 { char pad[0x58]; void *list[24]; };
-struct T_5508 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_5508 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5508 __asm__("D_0044F42C");
 extern signed char D_0044F42E_5508 __asm__("D_0044F42E");
 extern int D_0044F430_5508 __asm__("D_0044F430");
@@ -26559,8 +26568,8 @@ void func_003D5508(unsigned int mask, signed char val) {
     if (mask == 0xFFFFFFFF) D_0044F42E_5508 = val;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5508[i].f34 == 0) continue;
-        playerMask = D_00517610_5508[i].f30;
+        if (D_00517610_5508[i].pathData == 0) continue;
+        playerMask = D_00517610_5508[i].pathId;
         if (has_5508(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5508(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5508(i) == 0) continue;
@@ -26582,7 +26591,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5698);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct G_5698 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
-struct T_5698 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_5698 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5698 __asm__("D_0044F42C");
 extern int D_0044F430_5698 __asm__("D_0044F430");
 extern struct G_5698 *D_0044F420_5698 __asm__("D_0044F420");
@@ -26610,8 +26619,8 @@ void func_003D5698(unsigned int mask, int targetVol, int fadeMs) {
     if (func_003D5450_5698(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5698[i].f34 == 0) continue;
-        playerMask = D_00517610_5698[i].f30;
+        if (D_00517610_5698[i].pathData == 0) continue;
+        playerMask = D_00517610_5698[i].pathId;
         if (has_5698(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5698(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5698(i) == 0) continue;
@@ -26633,7 +26642,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5800);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct G_5800 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
-struct T_5800 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+struct T_5800 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5800 __asm__("D_0044F42C");
 extern int D_0044F430_5800 __asm__("D_0044F430");
 extern struct G_5800 *D_0044F420_5800 __asm__("D_0044F420");
@@ -26661,8 +26670,8 @@ void func_003D5800(unsigned int mask, int sendTarget, int b) {
     if (func_003D5450_5800(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5800[i].f34 == 0) continue;
-        playerMask = D_00517610_5800[i].f30;
+        if (D_00517610_5800[i].pathData == 0) continue;
+        playerMask = D_00517610_5800[i].pathId;
         if (has_5800(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5800(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5800(i) == 0) continue;

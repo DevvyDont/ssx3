@@ -1596,7 +1596,7 @@ void cFEStateOptionsSound::setSoundMode(unsigned int mode)
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
         int djSpeech = cAudioInterface_bxAudio()->mDJSpeech;
         int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
-        int saved534 = cAudioInterface_bxAudio()->MusicSys.unk_41C;
+        int saved534 = cAudioInterface_bxAudio()->MusicSys.mMusicState;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);

@@ -1601,15 +1601,15 @@ void cMusicSys::setCurrentSongNum(int songNum)
 INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
 #ifdef SKIP_ASM
 /**
- * Returns the music system's unk_41C word.
+ * Returns the music system's mMusicState word.
  *
  * func_002B3838 sets it to -1; func_002B3BC0 compares and stores it.
  *
  * @param musicSys  the cMusicSys
- * @return unk_41C
+ * @return mMusicState
  */
 extern "C" int func_002BACE8(cMusicSys* musicSys) {
-    return (musicSys->unk_41C);
+    return (musicSys->mMusicState);
 }
 #endif
 
@@ -1676,14 +1676,14 @@ tCrowdData* cCrowdSys::CROWD_GetData(int i)
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD30);
 #ifdef SKIP_ASM
 /**
- * Sets three cSSXAudio words: unk_5790 to 0, unk_578C to 1 and unk_6254 to 1.
+ * Sets three cSSXAudio words: mPeakIntroDone to 0, mFirstTimeOnPeak to 1 and mInTransport to 1.
  *
  * @param audio  the cSSXAudio
  */
 extern "C" void func_002BAD30(cSSXAudio* audio) {
-    audio->unk_5790 = 0;
-    audio->unk_578C = 1;
-    audio->unk_6254 = 1;
+    audio->mPeakIntroDone = 0;
+    audio->mFirstTimeOnPeak = 1;
+    audio->mInTransport = 1;
 }
 #endif
 
@@ -1691,13 +1691,13 @@ extern "C" void func_002BAD30(cSSXAudio* audio) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD48);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's unk_578C (set by func_002BAD30; func_002A2E50 and func_002A4A78 use it).
+ * Returns cSSXAudio's mFirstTimeOnPeak (set by func_002BAD30; func_002A2E50 and func_002A4A78 use it).
  *
  * @param audio  the cSSXAudio
- * @return unk_578C
+ * @return mFirstTimeOnPeak
  */
 extern "C" int func_002BAD48(cSSXAudio* audio) {
-    return (audio->unk_578C);
+    return (audio->mFirstTimeOnPeak);
 }
 #endif
 
@@ -1705,13 +1705,13 @@ extern "C" int func_002BAD48(cSSXAudio* audio) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD50);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's unk_5790 (1 after construction, cleared by func_002BAD30).
+ * Returns cSSXAudio's mPeakIntroDone (1 after construction, cleared by func_002BAD30).
  *
  * @param audio  the cSSXAudio
- * @return unk_5790
+ * @return mPeakIntroDone
  */
 extern "C" int func_002BAD50(cSSXAudio* audio) {
-    return (audio->unk_5790);
+    return (audio->mPeakIntroDone);
 }
 #endif
 
@@ -1820,10 +1820,10 @@ int cSSXAudio::GetPlayListIndex()
 INCLUDE_ASM("bx/seg_1BA100", func_002BADA0);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's unk_6280.
+ * Returns cSSXAudio's mPathfinderCanChangeVolume.
  *
  * @param audio  the cSSXAudio
- * @return unk_6280
+ * @return mPathfinderCanChangeVolume
  */
 extern "C" int func_002BADA0(cSSXAudio* audio) {
     return (audio->mPathfinderCanChangeVolume);

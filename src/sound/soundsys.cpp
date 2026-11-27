@@ -382,16 +382,18 @@ int cBankSys::SFX_End()
 {
     cBankSys* self = this;
     cBankManager* bankMgr = ((cBankManager*)self->mpVBankManager);
-    cBankMonitor* s = &bankMgr->BankMonitor;
-    int BaseVol = s->mBaseVol[s->mInst];
+    cBankMonitor* playOpts = &bankMgr->BankMonitor;
+    int BaseVol = playOpts->mBaseVol[playOpts->mInst];
     if (bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] != 0) {
-        s->mBaseVol[bankMgr->BankMonitor.mInst] = 0;
-        s->mCurrent[bankMgr->BankMonitor.mInst].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->mBaseVol[s->mInst], 0x7F));
-    } else if (s->mVolControl[s->mInst] != 0) {
-        float gain = *(float*)s->mVolControl[s->mInst];
-        s->mBaseVol[bankMgr->BankMonitor.mInst] = (int)SND_06B8_FMAX(SND_06B8_MIN((float)s->mBaseVol[s->mInst] * gain,
-                127.0f), 0.0f);
-        s->mCurrent[s->mInst].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->mBaseVol[s->mInst], 0x7F));
+        playOpts->mBaseVol[bankMgr->BankMonitor.mInst] = 0;
+        playOpts->mCurrent[bankMgr->BankMonitor.mInst].vol = SND_06B8_MAX(0,
+                SND_06B8_MIN(playOpts->mBaseVol[playOpts->mInst], 0x7F));
+    } else if (playOpts->mVolControl[playOpts->mInst] != 0) {
+        float gain = *(float*)playOpts->mVolControl[playOpts->mInst];
+        playOpts->mBaseVol[bankMgr->BankMonitor.mInst] =
+                (int)SND_06B8_FMAX(SND_06B8_MIN((float)playOpts->mBaseVol[playOpts->mInst] * gain, 127.0f), 0.0f);
+        playOpts->mCurrent[playOpts->mInst].vol = SND_06B8_MAX(0, SND_06B8_MIN(playOpts->mBaseVol[playOpts->mInst],
+                0x7F));
     }
     int Inst = ((cBankManager*)self->mpVBankManager)->BankMonitor.mInst;
     SNDSYS_entercritical();
@@ -3053,7 +3055,8 @@ struct sSndQuad2 {
     t4Vector b;
 };
 struct sSSXAudioView : public sSndSys69A0 {  // a view of cSSXAudio (sound/ssxaudio.h) as this unit first modelled it
-    cBankManager** p118;     // 0x118
+    cBankManager** mpVStreamSys; // 0x118 MusicSys.mpVStreamSys (sound/musicsys.h); typed as the address of the
+                                 //       cStreamSys's first word, its mpVBankManager
     char pad11C[0x597C - 0x11C];
     cCircBuffer mPlayHistory; // 0x597C
     char pad598C[0x59E0 - 0x598C];
@@ -3173,7 +3176,7 @@ state23:
         bankNum = 10;
         patchNum = 9;
     } else {
-        patchNum = (cSoundSys_SndRand((*self->p118)->BankMonitor.mpVSoundSys) & 0x7FFF) * 3 / 0x7FFF + 0x30;
+        patchNum = (cSoundSys_SndRand((*self->mpVStreamSys)->BankMonitor.mpVSoundSys) & 0x7FFF) * 3 / 0x7FFF + 0x30;
     }
     int flag = 0;
     int ok = obj->mIsHuman && obj->mIsLocal;
@@ -3184,22 +3187,22 @@ state23:
         }
     }
     sfxBegin_6310(self, bankNum, patchNum);
-    optsVol_6310(*self->p118, vol);
-    struct cBankManager** pp = self->p118;
+    optsVol_6310(*self->mpVStreamSys, vol);
+    struct cBankManager** pp = self->mpVStreamSys;
     float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
     (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
     {
-        struct cBankManager* optsManager = *self->p118;
+        struct cBankManager* optsManager = *self->mpVStreamSys;
         optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &obj->mPosition;
     }
     {
-        struct cBankManager** pq = self->p118;
+        struct cBankManager** pq = self->mpVStreamSys;
         int listenerView = cSSXAudio_GetClosestCamera1(self, ((char*)obj));
         (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = listenerView;
     }
     if (flag) {
-        (*self->p118)->BankMonitor.mTwoPlayerPan[(*self->p118)->BankMonitor.mInst] = 1;
-        (*self->p118)->BankMonitor.mTwoPlayerSide[(*self->p118)->BankMonitor.mInst] = obj->mViewIndex;
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerPan[(*self->mpVStreamSys)->BankMonitor.mInst] = 1;
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerSide[(*self->mpVStreamSys)->BankMonitor.mInst] = obj->mViewIndex;
     }
     self->SFX_End();
 }
@@ -3303,34 +3306,34 @@ void cSSXAudio::WipeoutSlideStart(cWipeoutControl* wipeoutControl)
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
     self->mBank[self->mpVBankManager->BankMonitor.mInst] = 0;
     self->mPatch[self->mpVBankManager->BankMonitor.mInst] = patchNum;
-    cBankManager* volumeManager = *self->p118;
+    cBankManager* volumeManager = *self->mpVStreamSys;
     cBankMonitor* volumeOpts = &volumeManager->BankMonitor;
     volumeOpts->mBaseVol[volumeManager->BankMonitor.mInst] = vol;
     volumeOpts->mCurrent[volumeManager->BankMonitor.mInst].vol
             = (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F && volumeOpts->mBaseVol[volumeOpts->mInst] < 0) ? 0
             : (volumeOpts->mBaseVol[volumeOpts->mInst] < 0x7F ? (unsigned char)volumeOpts->mBaseVol[volumeOpts->mInst]
             : 0x7F);
-    cBankManager** pp = self->p118;
+    cBankManager** pp = self->mpVStreamSys;
     float* volumeControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
     (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volumeControl;
     {
-        cBankManager* optsManager = *self->p118;
+        cBankManager* optsManager = *self->mpVStreamSys;
         optsManager->BankMonitor.mPosition[optsManager->BankMonitor.mInst] = &wipeoutControl->mRider->mPosition;
     }
     {
-        cBankManager** pq = self->p118;
+        cBankManager** pq = self->mpVStreamSys;
         int listenerView = cSSXAudio_GetClosestCamera1(self, wipeoutControl ? wipeoutControl->mRider : 0);
         (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = listenerView;
     }
     {
-        cBankManager* optsManager = *self->p118;
+        cBankManager* optsManager = *self->mpVStreamSys;
         optsManager->BankMonitor.mPtr[optsManager->BankMonitor.mInst] = wipeoutControl;
     }
-    OPTS_Callback(*self->p118, D_004A36B0_cb[0]);
-    (*self->p118)->BankMonitor.mCloseOnEnd[(*self->p118)->BankMonitor.mInst] = 0;
+    OPTS_Callback(*self->mpVStreamSys, D_004A36B0_cb[0]);
+    (*self->mpVStreamSys)->BankMonitor.mCloseOnEnd[(*self->mpVStreamSys)->BankMonitor.mInst] = 0;
     if (flag) {
-        (*self->p118)->BankMonitor.mTwoPlayerPan[(*self->p118)->BankMonitor.mInst] = 1;
-        (*self->p118)->BankMonitor.mTwoPlayerSide[(*self->p118)->BankMonitor.mInst]
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerPan[(*self->mpVStreamSys)->BankMonitor.mInst] = 1;
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerSide[(*self->mpVStreamSys)->BankMonitor.mInst]
                 = wipeoutControl->mRider->mViewIndex;
     }
     wipeoutControl->mRider->mWipeoutSlideHandle = self->SFX_End();
@@ -3473,33 +3476,33 @@ void cSSXAudio::WipeoutTumbleStart(cWipeoutControl* wipeoutControl)
     playOpts->mCloseOnEnd[bankManager->BankMonitor.mInst] = 1;
     self->mBank[self->mpVBankManager->BankMonitor.mInst] = 0;
     self->mPatch[self->mpVBankManager->BankMonitor.mInst] = patchNum;
-    cBankManager* volManager = *self->p118;
+    cBankManager* volManager = *self->mpVStreamSys;
     cBankMonitor* volOpts = &volManager->BankMonitor;
     volOpts->mBaseVol[volManager->BankMonitor.mInst] = vol;
     volOpts->mCurrent[volManager->BankMonitor.mInst].vol
             = (volOpts->mBaseVol[volOpts->mInst] < 0x7F && volOpts->mBaseVol[volOpts->mInst] < 0) ? 0
             : (volOpts->mBaseVol[volOpts->mInst] < 0x7F ? (unsigned char)volOpts->mBaseVol[volOpts->mInst] : 0x7F);
-    cBankManager** pp = self->p118;
+    cBankManager** pp = self->mpVStreamSys;
     float* volControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
     (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volControl;
     {
-        cBankManager* levelManager = *self->p118;
+        cBankManager* levelManager = *self->mpVStreamSys;
         levelManager->BankMonitor.mPosition[levelManager->BankMonitor.mInst] = &wipeoutControl->mRider->mPosition;
     }
     {
-        cBankManager** pq = self->p118;
+        cBankManager** pq = self->mpVStreamSys;
         int viewIndex = cSSXAudio_GetClosestCamera1(self, wipeoutControl ? wipeoutControl->mRider : 0);
         (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = viewIndex;
     }
     {
-        cBankManager* levelManager = *self->p118;
+        cBankManager* levelManager = *self->mpVStreamSys;
         levelManager->BankMonitor.mPtr[levelManager->BankMonitor.mInst] = wipeoutControl;
     }
-    OPTS_Callback(*self->p118, D_004A36B8_cb[0]);
-    (*self->p118)->BankMonitor.mCloseOnEnd[(*self->p118)->BankMonitor.mInst] = 0;
+    OPTS_Callback(*self->mpVStreamSys, D_004A36B8_cb[0]);
+    (*self->mpVStreamSys)->BankMonitor.mCloseOnEnd[(*self->mpVStreamSys)->BankMonitor.mInst] = 0;
     if (flag) {
-        (*self->p118)->BankMonitor.mTwoPlayerPan[(*self->p118)->BankMonitor.mInst] = 1;
-        (*self->p118)->BankMonitor.mTwoPlayerSide[(*self->p118)->BankMonitor.mInst]
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerPan[(*self->mpVStreamSys)->BankMonitor.mInst] = 1;
+        (*self->mpVStreamSys)->BankMonitor.mTwoPlayerSide[(*self->mpVStreamSys)->BankMonitor.mInst]
                 = wipeoutControl->mRider->mViewIndex;
     }
     wipeoutControl->mRider->mWipeoutTumbleHandle = self->SFX_End();
@@ -3730,9 +3733,9 @@ extern "C" void* cAudioInterface_getBE();
 static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
-    (*self->p118)->BankMonitor.mPosition[(*self->p118)->BankMonitor.mInst] = (const t4Vector*)tgt;
-    cSndPlayOpts_OPTS_Radius(&(*self->p118)->BankMonitor, f, -1.0f);
-    (*self->p118)->BankMonitor.mMapToMaxVol[(*self->p118)->BankMonitor.mInst] = pri;
+    (*self->mpVStreamSys)->BankMonitor.mPosition[(*self->mpVStreamSys)->BankMonitor.mInst] = (const t4Vector*)tgt;
+    cSndPlayOpts_OPTS_Radius(&(*self->mpVStreamSys)->BankMonitor, f, -1.0f);
+    (*self->mpVStreamSys)->BankMonitor.mMapToMaxVol[(*self->mpVStreamSys)->BankMonitor.mInst] = pri;
     return self->SFX_End();
 }
 
@@ -5032,10 +5035,12 @@ static inline float ffloor_AB40(float x)
     return t;
 }
 
+// Views of the rider's HUD effects: cRiderMetrix::HUDfx (0x1B0) points at its cHUDFX array (0x9C each), and the
+// boost bar reads entry 6 (+0x3A8). MaxDecay / CurDecay are cHUDFX's [O] names at the same offsets (ai/hudfx.h).
 struct sMon_AB40 {
     char pad0[4];
-    float f4;
-    float f8;
+    float MaxDecay;     // 0x4
+    float CurDecay;     // 0x8
 };
 struct sMon1B0_AB40 {
     char pad[0x3A8];
@@ -5043,7 +5048,7 @@ struct sMon1B0_AB40 {
 };
 struct sMon790_AB40 {
     char pad[0x1B0];
-    sMon1B0_AB40* p1B0;
+    sMon1B0_AB40* HUDfx;  // 0x1B0
 };
 
 
@@ -5088,10 +5093,10 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
  * Plays the boost-bar sounds of each local view: a rising tick as the bar fills and a countdown beep as uber runs out.
  *
  * Does nothing while replaying. Handles riders 0..1 in the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath), else
- * rider 0; riders that are not local humans are skipped. The bar fill in tenths is floor(10 * f8 / f4) of the rider's
- * metrix HUD fx (mMetrix + 0x1B0, + 0x3A8); when it rose above mBoostBarPreviousValue[i] (and is above 0) a 150 ms
- * monitor (cMonitor_MONITOR_Create, callback cBankSys_Play2DCallbackWithPitchMult through D_004A36C0) plays bank 0,
- * patch 101 at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0) and pitch
+ * rider 0; riders that are not local humans are skipped. The bar fill in tenths is floor(10 * CurDecay / MaxDecay) of
+ * the rider's metrix HUD fx (mMetrix + 0x1B0, + 0x3A8); when it rose above mBoostBarPreviousValue[i] (and is above 0) a
+ * 150 ms monitor (cMonitor_MONITOR_Create, callback cBankSys_Play2DCallbackWithPitchMult through D_004A36C0) plays bank
+ * 0, patch 101 at volume 127 with the volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0) and pitch
  * mBoostBarPitchMult[mViewIndex], which then grows by 0x100. The half-seconds left of uber, floor(mUberTimer * 2), are
  * kept in mUberSecPreviousValue[i]; when they drop by one to a value below 13 that is even or below 5, and the rider is
  * not past the finish line, the game is not paused (cPauseState_Flags bit 0, cReplay_isPauseAI) and the game state is
@@ -5112,9 +5117,9 @@ void cSSXAudio::UpdateBoostBar()
         bool ok = viewRider->mIsHuman && viewRider->mIsLocal;
         if (!ok) continue;
         cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[i];
-        sMon1B0_AB40* mon = ((sMon790_AB40*)rider->mMetrix)->p1B0;
+        sMon1B0_AB40* mon = ((sMon790_AB40*)rider->mMetrix)->HUDfx;
         sMon_AB40* mp = mon ? &mon->m : 0;
-        int barTenths = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
+        int barTenths = (int)ffloor_AB40(mp->CurDecay / mp->MaxDecay * 10.0f);
         if (self->mBoostBarPreviousValue[i] < barTenths && barTenths > 0) {
             void* sub = &(self->MusicSys.mpVStreamSys->mpVBankManager)->BankMonitor;
             float* volControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
@@ -6559,7 +6564,7 @@ void cSSXAudio::Avalanche(int on)
                 *(sOutDEF0*)&self->xf = out;
             }
             sndBeginVoice(self, 8, 2);
-            cBankManager** bankManagerRef = self->p118;
+            cBankManager** bankManagerRef = self->mpVStreamSys;
             int volume = ((cSSXAudio*)self)->GetAvalancheVolume((tAvalanchePositionalData*)&self->xf);
             cBankManager* volManager = *bankManagerRef;
             cBankMonitor* volOpts = &volManager->BankMonitor;
@@ -6568,27 +6573,27 @@ void cSSXAudio::Avalanche(int on)
                     = (volOpts->mBaseVol[volOpts->mInst] < 0x7F && volOpts->mBaseVol[volOpts->mInst] < 0) ? 0
                     : (volOpts->mBaseVol[volOpts->mInst] < 0x7F ? (unsigned char)volOpts->mBaseVol[volOpts->mInst]
                     : 0x7F);
-            cBankManager** pp = self->p118;
+            cBankManager** pp = self->mpVStreamSys;
             float* volControl = (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
             (*pp)->BankMonitor.mVolControl[(*pp)->BankMonitor.mInst] = volControl;
             {
-                cBankManager* levelManager = *self->p118;
+                cBankManager* levelManager = *self->mpVStreamSys;
                 levelManager->BankMonitor.mPosition[levelManager->BankMonitor.mInst] = (const t4Vector*)&self->xf;
             }
-            cSndPlayOpts_OPTS_Radius(&(*self->p118)->BankMonitor, 100.0f, -1.0f);
-            OPTS_Callback(*self->p118, D_004A36D0_cb[0]);
+            cSndPlayOpts_OPTS_Radius(&(*self->mpVStreamSys)->BankMonitor, 100.0f, -1.0f);
+            OPTS_Callback(*self->mpVStreamSys, D_004A36D0_cb[0]);
             {
-                cBankManager** pq = self->p118;
+                cBankManager** pq = self->mpVStreamSys;
                 int viewIndex = cSSXAudio_GetClosestCamera1(self, rider);
                 (*pq)->BankMonitor.mViewport[(*pq)->BankMonitor.mInst] = viewIndex;
             }
-            (*self->p118)->BankMonitor.mExternalVol[(*self->p118)->BankMonitor.mInst] = 1;
+            (*self->mpVStreamSys)->BankMonitor.mExternalVol[(*self->mpVStreamSys)->BankMonitor.mInst] = 1;
             self->handle5FF4 = self->SFX_End();
         }
     } else {
         if (--self->users == 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(&(*self->p118)->BankMonitor, self->handle5FF4, 1, 2.0f);
-            cBankManager* mg = *self->p118;
+            cBankMonitor_BANKMONITOR_StopHandle(&(*self->mpVStreamSys)->BankMonitor, self->handle5FF4, 1, 2.0f);
+            cBankManager* mg = *self->mpVStreamSys;
             sSndVtCb* vt = (sSndVtCb*)mg->BankMonitor.mVtbl;
             char* sub = (char*)&mg->BankMonitor;
             vt[3].fn(vthis(sub, vt[3]), D_004A36D0_cb[0]);
@@ -6921,26 +6926,26 @@ static inline void sndStreamLoad(const char* name, void** h)
 /**
  * Opens the speech .big file of the language chosen in the options, and optionally restarts the speech system on it.
  *
- * Takes the language from func_0029F198 and returns when it equals unk_572C (the language already open). With
+ * Takes the language from func_0029F198 and returns when it equals mSpeechLanguage (the language already open). With
  * @p restart set it first calls func_002B0DA0 on the speech system (SpeechSys, frees its bank buffer). The open stream
- * in unk_5728 is closed (FILESYS_delbigsync(h, 100)), then "data/audio/french.big" (kSPEECHLANG_French), "german.big"
- * (kSPEECHLANG_German), "spanish.big" (kSPEECHLANG_Spanish) or "english.big" (otherwise) is opened into unk_5728
- * through FILESYS_addbigsync when BXFILE_exists finds it, and the language is recorded in unk_572C. With @p restart set
- * it then re-initialises the speech system (SPCH_Init) and starts speech instance 0 on "CHAR" with the Character volume
- * control cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0) (func_002B0E60).
+ * in mLanguageBigFile is closed (FILESYS_delbigsync(h, 100)), then "data/audio/french.big" (kSPEECHLANG_French),
+ * "german.big" (kSPEECHLANG_German), "spanish.big" (kSPEECHLANG_Spanish) or "english.big" (otherwise) is opened into
+ * mLanguageBigFile through FILESYS_addbigsync when BXFILE_exists finds it, and the language is recorded in
+ * mSpeechLanguage. With @p restart set it then re-initialises the speech system (SPCH_Init) and starts speech instance
+ * 0 on "CHAR" with the Character volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0) (func_002B0E60).
  *
  * @param restart  nonzero when the speech system is already running (the options screen); 0 from the constructor
  */
 extern "C" void func_0029ED90(cSSXAudio* self, int restart)
 {
     int mode = func_0029F198((cSSXAudio*)(((char*)self)));
-    if (mode == self->unk_572C) {
+    if (mode == self->mSpeechLanguage) {
         return;
     }
     if (restart) {
         func_002B0DA0(&self->SpeechSys);
     }
-    void** streamHandle = (void**)(&self->unk_5728);
+    void** streamHandle = (void**)(&self->mLanguageBigFile);
     if (*streamHandle) {
         FILESYS_delbigsync(*streamHandle, 100);
     }
@@ -6953,7 +6958,7 @@ extern "C" void func_0029ED90(cSSXAudio* self, int restart)
     } else {
         sndStreamLoad(str_data_audio_english_big, streamHandle);
     }
-    self->unk_572C = mode;
+    self->mSpeechLanguage = mode;
     if (restart) {
         SPCH_Init(&self->SpeechSys);
         func_002B0E60(&self->SpeechSys, 0, 0, str_CHAR, (float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0), 1, -1);
@@ -7150,8 +7155,10 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+// cBEOptionInterface_mOption as this function reads it (a tBEOptionDB, be/beintoption.h; reading its iLanguage
+// bit-field directly changes the switch's code). bitFieldWord (name ours) is that struct's first word of bit-fields.
 struct sSsOpts9F198 {
-    unsigned int w0;
+    unsigned int bitFieldWord;
     int data[0x288 / 4 - 1];
 };
 extern sSsOpts9F198 cBEOptionInterface_mOption_ss9F198 __asm__("cBEOptionInterface_mOption");
@@ -7170,7 +7177,7 @@ extern "C" int func_0029F198(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sSsOpts9F198 optionCopy = cBEOptionInterface_mOption_ss9F198;
-    unsigned languageIndex = optionCopy.w0 >> 22;
+    unsigned languageIndex = optionCopy.bitFieldWord >> 22;
     languageIndex &= 7;
     switch (languageIndex) {
     case kOPTLANG_English:
@@ -9001,7 +9008,7 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, the language bit, the bit func_002A1BD8(current location, @p subLocation) and 3.
- * func_002A19D8 (event 12, with -1) and func_002A43B8 (with unk_575C) call it.
+ * func_002A19D8 (event 12, with -1) and func_002A43B8 (with mPendingLocationPart) call it.
  *
  * @param subLocation  the part of a combined location (func_002A1BD8), or -1
  */
@@ -9037,7 +9044,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A19D8 (event 14) and
- * func_002A43B8 (pending flag unk_576C) call it.
+ * func_002A43B8 (pending flag mPendingPeakLine8378) call it.
  */
 extern "C" void func_002A2638(cSSXAudio* self)
 {
@@ -9067,9 +9074,10 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  * Interrupts speech instance 0 and requests DJ speech line 8421 with two yes/no choices.
  *
  * Needs DJ speech allowed (func_0029F0D8). Stops speech instance 0 (func_002B11B0), then requests 8421 with identity
- * 10; when queued, clears unk_5794 and the speech hook D_004A482C gets its packed id, the language bit, 1 when @p firstChoice is
- * set (else 2) and 2 when @p secondChoice is set (else 1). The music code (cSSXAudio_StartEventWithNoStartGate, func_0028E100, func_0028E8C0),
- * func_002A3170 and func_002A43B8 call it, mostly with (0, 0).
+ * 10; when queued, clears mChoiceLineFirstTime and the speech hook D_004A482C gets its packed id, the language bit, 1
+ * when @p firstChoice is set (else 2) and 2 when @p secondChoice is set (else 1). The music code
+ * (cSSXAudio_StartEventWithNoStartGate, func_0028E100, func_0028E8C0), func_002A3170 and func_002A43B8 call it, mostly
+ * with (0, 0).
  *
  * @param firstChoice  the first choice
  * @param secondChoice  the second choice
@@ -9083,8 +9091,8 @@ extern "C" void func_002A26F0(cSSXAudio* self, int firstChoice, int secondChoice
             int languageBit = func_0029F198(self);
             int x = 2;
             if (firstChoice) x = 1;
-            if (self->unk_5794 != 0) {
-                self->unk_5794 = 0;
+            if (self->mChoiceLineFirstTime != 0) {
+                self->mChoiceLineFirstTime = 0;
             }
             int y = 2;
             if (!secondChoice) y = 1;
@@ -9107,7 +9115,8 @@ extern void (*D_004A482C)(void*, int, int);
  * Requests DJ speech line 8422 with the language.
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id and the language bit. func_002A43B8 calls it for the pending flag unk_5740.
+ * speech hook D_004A482C gets its packed id and the language bit. func_002A43B8 calls it for the pending flag
+ * mPendingLine8422.
  */
 extern "C" void func_002A27D8(cSSXAudio* self)
 {
@@ -9256,7 +9265,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A43B8 calls it for the pending
- * flag unk_5784.
+ * flag mPendingPeakLine8491.
  */
 extern "C" void func_002A2AD0(cSSXAudio* self)
 {
@@ -9282,21 +9291,22 @@ extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
 /**
- * Requests DJ speech line 8492, telling it whether it was played before (unk_5780), and marks it played.
+ * Requests DJ speech line 8492, telling it whether it was played before (mLine8492Played), and marks it played.
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and unk_5780. unk_5780 is then set to 1 even when the
- * request was not queued. func_002A2E50 (pick 4) and func_002A43B8 (pending flag unk_577C) call it.
+ * speech hook D_004A482C gets its packed id, the language bit and mLine8492Played. mLine8492Played is then set to 1
+ * even when the request was not queued. func_002A2E50 (pick 4) and func_002A43B8 (pending flag mPendingLine8492) call
+ * it.
  */
 extern "C" void func_002A2B88(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458(&self->SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = func_0029F198(self);
-            int playedBefore = self->unk_5780;
+            int playedBefore = self->mLine8492Played;
             D_004A482C_4(func_003D8008(1, 0, 8492), 2, languageBit, playedBefore);
         }
-        self->unk_5780 = 1;
+        self->mLine8492Played = 1;
     }
 }
 #endif
@@ -9321,7 +9331,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
  * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(location, -1).
- * func_002A43B8 calls it for the pending flag unk_5770.
+ * func_002A43B8 calls it for the pending flag mPendingLocationLine.
  */
 extern "C" void func_002A2C30(cSSXAudio* self)
 {
@@ -9427,14 +9437,15 @@ void func_002B1758(void* snd, int a1);
 /**
  * Picks and plays the DJ's next between-events line, avoiding lines already used.
  *
- * The first time (unk_5790 and unk_6258 both 0) it sets unk_5790, queues pick 3 for next time (unk_5798), marks pick 7
- * used in the mask unk_573C, clears unk_578C and plays pick 0. Otherwise it returns at once when func_002A4770 played
- * an event-result line; a queued pick is used next (when unk_6258 is 0); else one of the first 8 picks (5 with
- * @p bonus) not yet set in unk_573C is chosen at random (cSoundSys_SndRand). When all are used the mask is cleared, and bit
- * 3 is pre-set when the human rider's character holds both the medal 4 and 5 of the peak's track 14, 15 or 16
- * (cBERewardInterface_getTrackMedal). The pick is marked in unk_573C and played: 0 func_002A2188, 1 func_002A23D0(-1),
- * 2 func_002A2018, 3 func_002A2A10, 4 func_002A2B88, 5 func_002A2260, 6 func_002A2318, 7 func_002A20D0. Finally
- * func_002B1758(SpeechSys, 0). func_002A43B8 and func_002A4770 call it.
+ * The first time (mPeakIntroDone and mBonusLineQueued both 0) it sets mPeakIntroDone, queues pick 3 for next time
+ * (mQueuedBetweenEventsPick), marks pick 7 used in the mask mUsedBetweenEventsPicks, clears mFirstTimeOnPeak and plays
+ * pick 0. Otherwise it returns at once when func_002A4770 played an event-result line; a queued pick is used next (when
+ * mBonusLineQueued is 0); else one of the first 8 picks (5 with
+ * @p bonus) not yet set in mUsedBetweenEventsPicks is chosen at random (cSoundSys_SndRand). When all are used the mask
+ * is cleared, and bit 3 is pre-set when the human rider's character holds both the medal 4 and 5 of the peak's track
+ * 14, 15 or 16 (cBERewardInterface_getTrackMedal). The pick is marked in mUsedBetweenEventsPicks and played: 0
+ * func_002A2188, 1 func_002A23D0(-1), 2 func_002A2018, 3 func_002A2A10, 4 func_002A2B88, 5 func_002A2260, 6
+ * func_002A2318, 7 func_002A20D0. Finally func_002B1758(SpeechSys, 0). func_002A43B8 and func_002A4770 call it.
  *
  * @param vself  the audio system
  * @param bonus  nonzero to choose among the first 5 lines only
@@ -9442,27 +9453,27 @@ void func_002B1758(void* snd, int a1);
 extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
 {
     int pick = 0;
-    if (vself->unk_5790 == 0 && vself->unk_6258 == 0) {
-        vself->unk_5790 = 1;
-        vself->unk_5798 = 3;
-        vself->unk_573C |= 0x80;
-        vself->unk_578C = 0;
+    if (vself->mPeakIntroDone == 0 && vself->mBonusLineQueued == 0) {
+        vself->mPeakIntroDone = 1;
+        vself->mQueuedBetweenEventsPick = 3;
+        vself->mUsedBetweenEventsPicks |= 0x80;
+        vself->mFirstTimeOnPeak = 0;
     } else {
         if (func_002A4770(vself) != 0) {
             return;
         }
-        int queued = vself->unk_5798;
-        if (queued != -1 && vself->unk_6258 == 0) {
+        int queued = vself->mQueuedBetweenEventsPick;
+        if (queued != -1 && vself->mBonusLineQueued == 0) {
             pick = queued;
-            vself->unk_5798 = -1;
+            vself->mQueuedBetweenEventsPick = -1;
         } else {
             int n = bonus == 0 ? 8 : 5;
             int left = 0;
             for (int i = 0; i < n; i++) {
-                left += ((vself->unk_573C >> i) ^ 1) & 1;
+                left += ((vself->mUsedBetweenEventsPicks >> i) ^ 1) & 1;
             }
             if (left == 0) {
-                vself->unk_573C = (int)0;
+                vself->mUsedBetweenEventsPicks = (int)0;
                 left = n;
                 int track = 0xE;
                 void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -9475,7 +9486,7 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
                 int gold = cBERewardInterface_getTrackMedal(rewards, 0, ch, 4, track) != -1;
                 int plat = cBERewardInterface_getTrackMedal(rewards, 0, ch, 5, track) != -1;
                 if (gold && plat) {
-                    vself->unk_573C |= 8;
+                    vself->mUsedBetweenEventsPicks |= 8;
                 }
             }
             int nthUnplayed =
@@ -9483,12 +9494,12 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
                 * left / 0x7FFF + 1;
             int cnt = 0;
             while (cnt < nthUnplayed) {
-                cnt += ((vself->unk_573C >> pick) ^ 1) & 1;
+                cnt += ((vself->mUsedBetweenEventsPicks >> pick) ^ 1) & 1;
                 pick += cnt < nthUnplayed;
             }
         }
     }
-    vself->unk_573C |= 1 << pick;
+    vself->mUsedBetweenEventsPicks |= 1 << pick;
     char* snd = (char*)&vself->SpeechSys;
     switch (pick) {
     case 0:
@@ -10550,57 +10561,59 @@ extern "C" void func_002A2E50(cSSXAudio* self, int a);
  * Plays the most urgent pending DJ line when speech instance 0 is free, then any pending place line.
  *
  * Fills slot 4 of cSSXAudio's cSpeechSys vtable (D_004836D8); func_002AFC88 calls it while the speech instance is idle.
- * The first set pending flag, in this order, is cleared and its line played: unk_5768 func_002A26F0(0, 0), unk_5784
- * func_002A2AD0, unk_576C func_002A2638, unk_577C func_002A2B88, unk_5770 func_002A2C30, mRiderRemarkPending
- * func_002A1138(0, 0), mSongAnnouncePending func_002A2860(mSongAnnounceNum), unk_574C and unk_5750 func_002A2E50(0),
- * unk_5754 func_002A2E50(1), unk_5758 func_002A2568(unk_575C), unk_5740 func_002A27D8. Independently, unk_5744 requests
- * the place line func_002A1400 for the cAI's rider unk_5748 (when there is one) and is cleared.
+ * The first set pending flag, in this order, is cleared and its line played: mPendingChoiceLine func_002A26F0(0, 0),
+ * mPendingPeakLine8491 func_002A2AD0, mPendingPeakLine8378 func_002A2638, mPendingLine8492 func_002A2B88,
+ * mPendingLocationLine func_002A2C30, mRiderRemarkPending func_002A1138(0, 0), mSongAnnouncePending
+ * func_002A2860(mSongAnnounceNum), mPendingBetweenEventsLine and mPendingBetweenEventsLine2 func_002A2E50(0),
+ * mPendingBonusBetweenEventsLine func_002A2E50(1), mPendingLocationPartLine func_002A2568(mPendingLocationPart),
+ * mPendingLine8422 func_002A27D8. Independently, mPendingPlaceLine requests the place line func_002A1400 for the cAI's
+ * rider mPlaceLineRider (when there is one) and is cleared.
  */
 extern "C" void func_002A43B8(cSSXAudio* self)
 {
-    if (self->unk_5768 != 0) {
+    if (self->mPendingChoiceLine != 0) {
         func_002A26F0(self, 0, 0);
-        self->unk_5768 = 0;
-    } else if (self->unk_5784 != 0) {
+        self->mPendingChoiceLine = 0;
+    } else if (self->mPendingPeakLine8491 != 0) {
         func_002A2AD0((cSSXAudio*)self);
-        self->unk_5784 = 0;
-    } else if (self->unk_576C != 0) {
+        self->mPendingPeakLine8491 = 0;
+    } else if (self->mPendingPeakLine8378 != 0) {
         func_002A2638((cSSXAudio*)self);
-        self->unk_576C = 0;
-    } else if (self->unk_577C != 0) {
+        self->mPendingPeakLine8378 = 0;
+    } else if (self->mPendingLine8492 != 0) {
         func_002A2B88(self);
-        self->unk_577C = 0;
-    } else if (self->unk_5770 != 0) {
+        self->mPendingLine8492 = 0;
+    } else if (self->mPendingLocationLine != 0) {
         func_002A2C30((cSSXAudio*)self);
-        self->unk_5770 = 0;
+        self->mPendingLocationLine = 0;
     } else if (self->mRiderRemarkPending != 0) {
         func_002A1138(((char*)self), 0, 0);
         self->mRiderRemarkPending = 0;
     } else if (self->mSongAnnouncePending != 0) {
         func_002A2860((cSSXAudio*)self, self->mSongAnnounceNum);
         self->mSongAnnouncePending = 0;
-    } else if (self->unk_574C != 0) {
+    } else if (self->mPendingBetweenEventsLine != 0) {
         func_002A2E50(self, 0);
-        self->unk_574C = 0;
-    } else if (self->unk_5750 != 0) {
+        self->mPendingBetweenEventsLine = 0;
+    } else if (self->mPendingBetweenEventsLine2 != 0) {
         func_002A2E50(self, 0);
-        self->unk_5750 = 0;
-    } else if (self->unk_5754 != 0) {
+        self->mPendingBetweenEventsLine2 = 0;
+    } else if (self->mPendingBonusBetweenEventsLine != 0) {
         func_002A2E50(self, 1);
-        self->unk_5754 = 0;
-    } else if (self->unk_5758 != 0) {
-        func_002A2568((cSSXAudio*)self, self->unk_575C);
-        self->unk_5758 = 0;
-    } else if (self->unk_5740 != 0) {
+        self->mPendingBonusBetweenEventsLine = 0;
+    } else if (self->mPendingLocationPartLine != 0) {
+        func_002A2568((cSSXAudio*)self, self->mPendingLocationPart);
+        self->mPendingLocationPartLine = 0;
+    } else if (self->mPendingLine8422 != 0) {
         func_002A27D8((cSSXAudio*)self);
-        self->unk_5740 = 0;
+        self->mPendingLine8422 = 0;
     }
-    if (self->unk_5744 != 0) {
-        cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[self->unk_5748];
+    if (self->mPendingPlaceLine != 0) {
+        cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[self->mPlaceLineRider];
         if (rider != 0) {
             func_002A1400(self, rider);
         }
-        self->unk_5744 = 0;
+        self->mPendingPlaceLine = 0;
     }
 }
 #endif
@@ -10609,25 +10622,26 @@ extern "C" void func_002A43B8(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A4550);
 #ifdef SKIP_ASM
 /**
- * Clears every pending DJ / place line flag that func_002A43B8 checks (unk_5740 .. mRiderRemarkPending, plus unk_5760).
+ * Clears every pending DJ / place line flag that func_002A43B8 checks (mPendingLine8422 .. mRiderRemarkPending, plus
+ * mPendingOtherLine).
  *
  * cSSXAudio_InGameDeInit, cSSXAudio_ResumeAudio and func_0028E8C0 call it.
  */
 extern "C" void func_002A4550(cSSXAudio* self)
 {
-    self->unk_5740 = 0;
-    self->unk_5744 = 0;
-    self->unk_574C = 0;
-    self->unk_5750 = 0;
-    self->unk_5754 = 0;
-    self->unk_5758 = 0;
-    self->unk_5760 = 0;
-    self->unk_5768 = 0;
-    self->unk_576C = 0;
-    self->unk_5770 = 0;
+    self->mPendingLine8422 = 0;
+    self->mPendingPlaceLine = 0;
+    self->mPendingBetweenEventsLine = 0;
+    self->mPendingBetweenEventsLine2 = 0;
+    self->mPendingBonusBetweenEventsLine = 0;
+    self->mPendingLocationPartLine = 0;
+    self->mPendingOtherLine = 0;
+    self->mPendingChoiceLine = 0;
+    self->mPendingPeakLine8378 = 0;
+    self->mPendingLocationLine = 0;
     self->mSongAnnouncePending = 0;
-    self->unk_577C = 0;
-    self->unk_5784 = 0;
+    self->mPendingLine8492 = 0;
+    self->mPendingPeakLine8491 = 0;
     self->mRiderRemarkPending = 0;
 }
 #endif
@@ -10638,24 +10652,25 @@ INCLUDE_ASM("sound/soundsys", func_002A4590);
 /**
  * Resets the event-result tracking the DJ comments on after an event.
  *
- * Clears the pending flag unk_57F8, the allow flag unk_57FC and the frag and uber-trick sums (unk_5804, unk_5808), sets
- * the place unk_5800 and the location unk_5810 to -1, the last location unk_5814 to 23 (none) and, with @p flag set,
- * the last result line unk_580C to -1. The constructor calls it with 1 and func_002A45C0 with 0 in heat 1.
+ * Clears the pending flag mEventResultPending, the allow flag mEventFinished and the frag and uber-trick sums
+ * (mEventResultFrags, mEventResultUberTricks), sets the place mEventResultPlace and the location mEventResultLocation
+ * to -1, the last location mLastTransportTrack to 23 (none) and, with @p flag set, the last result line
+ * mLastEventResultLine to -1. The constructor calls it with 1 and func_002A45C0 with 0 in heat 1.
  *
  * @param flag  nonzero to also forget the last result line played
  */
 extern "C" void func_002A4590(cSSXAudio* self, int flag)
 {
-    self->unk_57F8 = 0;
-    self->unk_57FC = 0;
-    self->unk_5804 = 0;
-    self->unk_5808 = 0;
-    self->unk_5800 = -1;
-    self->unk_5810 = -1;
+    self->mEventResultPending = 0;
+    self->mEventFinished = 0;
+    self->mEventResultFrags = 0;
+    self->mEventResultUberTricks = 0;
+    self->mEventResultPlace = -1;
+    self->mEventResultLocation = -1;
     if (flag) {
-        self->unk_580C = -1;
+        self->mLastEventResultLine = -1;
     }
-    self->unk_5814 = 23;
+    self->mLastTransportTrack = 23;
 }
 #endif
 
@@ -10703,9 +10718,10 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 /**
  * Adds one heat's result to the event-result tracking, and on the event's last heat marks the result as pending.
  *
- * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p finished is
- * set and the heat is cGameModeMan::kFinalHeat, and stores the place (unk_5800) and the current location (unk_5810).
- * The frag and uber-trick counts are always added to unk_5804 and unk_5808. func_002A4770 picks the line from these.
+ * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets mEventResultPending, sets mEventFinished when
+ * @p finished is set and the heat is cGameModeMan::kFinalHeat, and stores the place (mEventResultPlace) and the current
+ * location (mEventResultLocation). The frag and uber-trick counts are always added to mEventResultFrags and
+ * mEventResultUberTricks. func_002A4770 picks the line from these.
  *
  * @param rank  the rider's rank (0 = first)
  * @param frags  the frags of the heat
@@ -10716,15 +10732,15 @@ extern "C" void func_002A4660(cSSXAudio* self, int rank, int frags, int uberTric
 {
     cGameModeMan* gameModeMan = SSXApp->GameModeMan;
     if (gameModeMan->bIsLastHeat != 0 || gameModeMan->iNextHeat <= gameModeMan->iHeatNum) {
-        self->unk_57F8 = 1;
+        self->mEventResultPending = 1;
         if (finished != 0 && gameModeMan->iHeatNum == cGameModeMan::kFinalHeat) {
-            self->unk_57FC = 1;
+            self->mEventFinished = 1;
         }
-        self->unk_5800 = rank;
-        self->unk_5810 = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
+        self->mEventResultPlace = rank;
+        self->mEventResultLocation = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
     }
-    self->unk_5804 += frags;
-    self->unk_5808 += uberTricks;
+    self->mEventResultFrags += frags;
+    self->mEventResultUberTricks += uberTricks;
 }
 #endif
 
@@ -10737,8 +10753,8 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 /**
- * Tells whether the location of the last event result (unk_5814) is set (not kMAX_LOCATIONS) and differs from the
- * current one.
+ * Tells whether the track recorded at the last transport start (mLastTransportTrack) is set (not kMAX_LOCATIONS) and
+ * differs from the current one.
  *
  * func_0028E8C0 uses it.
  *
@@ -10747,7 +10763,7 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" bool func_002A4718(cSSXAudio* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-    int cur = self->unk_5814;
+    int cur = self->mLastTransportTrack;
     if (id == cur || cur == kMAX_LOCATIONS) {
         return false;
     }
@@ -10770,69 +10786,70 @@ extern "C" unsigned int cSoundSys_SndRand(void* mon);
 /**
  * Plays the DJ's comment on the last event's result when one is pending; returns whether a line was played.
  *
- * With unk_57F8 set it is cleared and up to three results qualify when unk_57FC allows: first place (unk_5800 == 0), 5
- * or more frags (unk_5804), or at least 27 uber tricks (24 outside the locations 0..7 and 11..13; unk_5808). None
- * qualifying: when unk_6254 is set and a last location unk_5814 is known, it plays func_002A2E50(0) for locations
- * 17..21, func_002A23D0 for 14..16, else func_002A24B0, and returns true (false otherwise). With two or more, the
- * result played last time (unk_580C) is dropped. One is picked at random (cSoundSys_SndRand): func_002A2938 (first
- * place), func_002A2CF0 (frags) or func_002A2DA0 (uber tricks) with unk_5810, and remembered in unk_580C. func_002A2E50
- * calls it before choosing a between-events line.
+ * With mEventResultPending set it is cleared and up to three results qualify when mEventFinished (the rider finished
+ * the final heat) allows: first place (mEventResultPlace == 0), 5 or more frags (mEventResultFrags), or at least 27
+ * uber tricks (24 outside the locations 0..7 and 11..13; mEventResultUberTricks). None qualifying: when mInTransport is
+ * set and a last location mLastTransportTrack is known, it plays func_002A2E50(0) for locations 17..21, func_002A23D0
+ * for 14..16, else func_002A24B0, and returns true (false otherwise). With two or more, the result played last time
+ * (mLastEventResultLine) is dropped. One is picked at random (cSoundSys_SndRand): func_002A2938 (first place),
+ * func_002A2CF0 (frags) or func_002A2DA0 (uber tricks) with mEventResultLocation, and remembered in
+ * mLastEventResultLine. func_002A2E50 calls it before choosing a between-events line.
  *
  * @return true when a line was played, else false
  */
 extern "C" bool func_002A4770(cSSXAudio* self)
 {
-    if (self->unk_57F8 != 0) {
-        self->unk_57F8 = 0;
+    if (self->mEventResultPending != 0) {
+        self->mEventResultPending = 0;
         int flags[3];
         int i;
         for (i = 2; i >= 0; i--) {
             flags[i] = 0;
         }
         int n = 0;
-        if (self->unk_57FC != 0) {
-            if (self->unk_5800 == 0) {
+        if (self->mEventFinished != 0) {
+            if (self->mEventResultPlace == 0) {
                 flags[0] = 1;
                 n = 1;
             }
-            if (self->unk_5804 >= 5) {
+            if (self->mEventResultFrags >= 5) {
                 flags[1] = 1;
                 n++;
             }
             int lim;
-            if (func_002A40E0(self, self->unk_5810)) {
+            if (func_002A40E0(self, self->mEventResultLocation)) {
                 lim = 27;
-            } else if (func_002A4158(self, self->unk_5810)) {
+            } else if (func_002A4158(self, self->mEventResultLocation)) {
                 lim = 27;
             } else {
-                lim = func_002A4238(self, self->unk_5810) ? 27 : 0x18;
+                lim = func_002A4238(self, self->mEventResultLocation) ? 27 : 0x18;
             }
-            if (self->unk_5808 >= lim) {
+            if (self->mEventResultUberTricks >= lim) {
                 flags[2] = 1;
                 n++;
             }
         }
-        self->unk_57FC = 0;
+        self->mEventFinished = 0;
         if (n == 0) {
-            if (self->unk_6254 != 0) {
-                int cur = self->unk_5814;
+            if (self->mInTransport != 0) {
+                int cur = self->mLastTransportTrack;
                 if (cur != kMAX_LOCATIONS) {
                     if (func_002A3FD8(self, cur)) {
                         func_002A2E50(self, 0);
                         return true;
                     }
-                    if (func_002A4030(self, self->unk_5814)) {
-                        func_002A23D0((cSSXAudio*)self, self->unk_5814);
+                    if (func_002A4030(self, self->mLastTransportTrack)) {
+                        func_002A23D0((cSSXAudio*)self, self->mLastTransportTrack);
                         return true;
                     }
-                    func_002A24B0((cSSXAudio*)self, self->unk_5814);
+                    func_002A24B0((cSSXAudio*)self, self->mLastTransportTrack);
                     return true;
                 }
             }
             return false;
         }
         if (n >= 2) {
-            int last = self->unk_580C;
+            int last = self->mLastEventResultLine;
             if (last != -1 && flags[last] != 0) {
                 flags[last] = 0;
                 n--;
@@ -10852,13 +10869,13 @@ extern "C" bool func_002A4770(cSSXAudio* self)
             func_002A2938((cSSXAudio*)self);
             break;
         case 1:
-            func_002A2CF0((cSSXAudio*)self, self->unk_5810);
+            func_002A2CF0((cSSXAudio*)self, self->mEventResultLocation);
             break;
         case 2:
-            func_002A2DA0((cSSXAudio*)self, self->unk_5810);
+            func_002A2DA0((cSSXAudio*)self, self->mEventResultLocation);
             break;
         }
-        self->unk_580C = pick;
+        self->mLastEventResultLine = pick;
         return true;
     }
     return false;
@@ -10873,16 +10890,16 @@ extern const sSndKey8 D_004A36F0[];
 extern "C" void cMonitor_MONITOR_Create(void* bank, int a1, long id, void* a3, int a4, int a5, int a6, int a7);
 
 /**
- * Marks a scripted DJ moment for 30 seconds: sets unk_5818 and starts a 30000 ms monitor that clears it.
+ * Marks a scripted DJ moment for 30 seconds: sets mScriptedDJLine and starts a 30000 ms monitor that clears it.
  *
- * The monitor (cMonitor_MONITOR_Create) has the callback D_004A36F0 (func_002A4A68). While unk_5818 is set, func_002A4A38 reports
- * a playing DJ line, so func_0028E8C0 leaves speech instance 0 alone. The script command SectionFunc calls it with its
- * action 3 (cGame_setState(game, 0xE, 2, 0)).
+ * The monitor (cMonitor_MONITOR_Create) has the callback D_004A36F0 (func_002A4A68). While mScriptedDJLine is set,
+ * func_002A4A38 reports a playing DJ line, so func_0028E8C0 leaves speech instance 0 alone. The script command
+ * SectionFunc calls it with its action 3 (cGame_setState(game, 0xE, 2, 0)).
  */
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
 extern "C" void func_002A49E8(cSSXAudio* self)
 {
-    self->unk_5818 = 1;
+    self->mScriptedDJLine = 1;
     cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                             30000, D_004A36F0[0].v, 0, 0, 0, 0, 0);
 }
@@ -10894,7 +10911,8 @@ INCLUDE_ASM("sound/soundsys", func_002A4A38);
 extern "C" bool func_002A10C0(cSSXAudio* self, int id);
 
 /**
- * Tells whether a scripted DJ line is playing: unk_5818 is set (func_002A49E8) and speech instance 0 says identity 10.
+ * Tells whether a scripted DJ line is playing: mScriptedDJLine is set (func_002A49E8) and speech instance 0 says
+ * identity 10.
  *
  * Uses func_002A10C0(self, 10). func_0028E8C0 checks it before it interrupts the speech.
  *
@@ -10902,7 +10920,7 @@ extern "C" bool func_002A10C0(cSSXAudio* self, int id);
  */
 extern "C" bool func_002A4A38(cSSXAudio* self)
 {
-    if (self->unk_5818 != 0) {
+    if (self->mScriptedDJLine != 0) {
         return func_002A10C0((cSSXAudio*)self, 10) != 0;
     }
     return false;
@@ -10913,7 +10931,7 @@ extern "C" bool func_002A4A38(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", func_002A4A68);
 #ifdef SKIP_ASM
 /**
- * Monitor callback: ends the scripted DJ moment by clearing unk_5818; returns 1.
+ * Monitor callback: ends the scripted DJ moment by clearing mScriptedDJLine; returns 1.
  *
  * Its pointer to member is D_004A36F0, which func_002A49E8 installs with a 30 s delay.
  *
@@ -10921,7 +10939,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4A68);
  * @return 1
  */
 extern "C" int func_002A4A68(cSSXAudio* ssxAudio) {
-    ssxAudio->unk_5818 = 0;
+    ssxAudio->mScriptedDJLine = 0;
     return 1;
 }
 #endif
@@ -10937,16 +10955,16 @@ extern "C" int func_0028DEF0(void* self, int a1);
 /**
  * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through func_0028E548.
  *
- * Only when unk_578C is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90) it sets
- * mLastMusicState to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback D_004A3650
- * (func_0028E548) and kind 2; elsewhere the kind is 4 with the current song value (func_002B4908) as its argument.
- * cSSXAudio_InGameInit calls it.
+ * Only when mFirstTimeOnPeak is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90)
+ * it sets mLastMusicState to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback
+ * D_004A3650 (func_0028E548) and kind 2; elsewhere the kind is 4 with the current song value (func_002B4908) as its
+ * argument. cSSXAudio_InGameInit calls it.
  */
 // PORT: 64-bit long sound key
 extern "C" void func_002A4A78(cSSXAudio* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (self->unk_578C == 0 && cBENewRaceInterface_newRace.cGamePath == 0) {
+    if (self->mFirstTimeOnPeak == 0 && cBENewRaceInterface_newRace.cGamePath == 0) {
         if (func_002A3F90(self) != 0) {
             func_0028DEF0(self, 13);
             cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
@@ -11116,40 +11134,43 @@ struct cCrowdInstance_cCrowdInstance_sChan {
     cCrowdInstance_cCrowdInstance_sChan() {}
 };
 
+// The constructor's view of a cCrowdInstance (sound/crowdsys.h): the named fields carry the class's member names at
+// the same offsets (f10..f1C are the words of mCrowdPos, all ints here as the constructor stores them).
 struct cCrowdInstance_cCrowdInstance_sObj {
-    int f0;
+    int mViewPort;
     char pad4[0x10 - 0x4];
     int f10;
     int f14;
     int f18;
     int f1C;
     cCrowdInstance_cCrowdInstance_sTriple triples[15];  // 0x20
-    int fD4;
-    int fD8;
+    int mNumCrowdObjects;
+    int mCrowdBank;
     int fDC;
     cCrowdInstance_cCrowdInstance_sChan chans[3];       // 0xE0
-    int f170;
-    int f174;
-    int f178;
-    int f17C;
-    int f180;
-    int f184;
-    int f188;
-    int f18C;
+    int mNumCrowdAmbience;
+    int mCheerHandle;
+    int mLoudness;
+    int mpVolControl;
+    int mCheerState;
+    int mAmbientCheerIntensity;
+    int mCheerTimeLeft;
+    int mCurrentCheer;
     cCrowdInstance_cCrowdInstance_sObj() __asm__("cCrowdInstance_cCrowdInstance");
 };
 
 /**
  * Constructs a crowd instance: no viewport, no crowd objects or ambient loops, no cheer.
  *
- * Sets mViewPort, unk_0D8 and the cheer handle unk_174 to -1, mAmbientCheerIntensity to 3 (none), the averaged
+ * Sets mViewPort, mCrowdBank and the cheer handle mCheerHandle to -1, mAmbientCheerIntensity to 3 (none), the averaged
  * position, mNumCrowdObjects, mNumCrowdAmbience and the cheer fields to 0, clears the 15 crowd object slots and gives
- * the 3 ambient loops their index (unk_20) and sampleID / handle -1. func_002A6D78 runs it on each element of its
+ * the 3 ambient loops their index (index) and sampleID / handle -1. func_002A6D78 runs it on each element of its
  * "CrowdInstances" array.
  */
 cCrowdInstance_cCrowdInstance_sObj::cCrowdInstance_cCrowdInstance_sObj()
-    : f0(-1), f10(0), f14(0), f18(0), f1C(0), fD4(0), fD8(-1),
-      f170(0), f174(-1), f178(0), f17C(0), f180(0), f184(3), f188(0), f18C(0)
+    : mViewPort(-1), f10(0), f14(0), f18(0), f1C(0), mNumCrowdObjects(0), mCrowdBank(-1),
+      mNumCrowdAmbience(0), mCheerHandle(-1), mLoudness(0), mpVolControl(0), mCheerState(0), mAmbientCheerIntensity(3),
+      mCheerTimeLeft(0), mCurrentCheer(0)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -11267,7 +11288,7 @@ struct sCrowdGrp4E88 {
 };
 struct sCrowdSlot4E88 {
     sCrowdVec* pCrowdObjectPos; // 0x00
-    int v4;                  // 0x04
+    int loudness;                  // 0x04
     sCrowdGrp4E88* grp;      // 0x08
 };
 struct sCrowd4E88 {
@@ -11276,16 +11297,16 @@ struct sCrowd4E88 {
     sCrowdVec vec10;          // 0x010
     sCrowdSlot4E88 slots[15]; // 0x020
     int count;               // 0x0D4
-    int fD8;                 // 0x0D8
+    int mCrowdBank;                 // 0x0D8
     char padDC[4];
     sCrowdGrp4E88 groups[3]; // 0x0E0
     int mode;                // 0x170
     int handle;              // 0x174
     int vol;                 // 0x178
-    float* f17C;                // 0x17C
+    float* mpVolControl;                // 0x17C
     int state;               // 0x180
     char pad184[8];
-    int f18C;                // 0x18C
+    int mCurrentCheer;                // 0x18C
 };
 // The voice cBankMonitor_BANKMONITOR_GetHandle hands back (only its volume is set here).
 struct sCrowdVoice {
@@ -11300,16 +11321,16 @@ void func_002A4E88_c(sCrowd4E88* self) __asm__("func_002A4E88");
 /**
  * Updates a crowd instance each frame: its averaged position and loudness, its ambient loops and its cheer voice.
  *
- * With no crowd objects it does nothing. The objects' positions are averaged, each weighted by its loudness unk_4
- * against the loudest so far, and every quieter object adds a quarter of its loudness; with two or more ambient loops
+ * With no crowd objects it does nothing. The objects' positions are averaged, each weighted by its loudness against the
+ * loudest so far, and every quieter object adds a quarter of its loudness; with two or more ambient loops
  * (mNumCrowdAmbience) the same is done per loop. With one loop, that loop follows the overall average at the overall
- * loudness; otherwise each used loop follows its own. A loop whose voice is gone is restarted (bank unk_0D8, its
- * sampleID, the vol control unk_17C, viewport mViewPort, callback D_004A3700); a live one just gets the volume. When a
- * cheer is wanted (unk_180), the crowd system's vtable slot 2 (in cSSXAudio func_00290FD0) gives the anticipation
- * intensity 0..2 or 3 (none); 1 and 2 are kept in unk_18C, and state 1 with an intensity starts a random ANTICIPATE
- * sample of it (func_002A8450 / func_002A86B8) at the averaged position, moving to state 2. A cheer voice that has
- * ended is stopped (func_002A6848) and unk_18C cleared; a live one gets the loudness. The loudness and position are
- * stored in unk_178 and unk_010. func_002A6D18 calls it for every instance.
+ * loudness; otherwise each used loop follows its own. A loop whose voice is gone is restarted (bank mCrowdBank, its
+ * sampleID, the vol control mpVolControl, viewport mViewPort, callback D_004A3700); a live one just gets the volume.
+ * When a cheer is wanted (mCheerState), the crowd system's vtable slot 2 (in cSSXAudio func_00290FD0) gives the
+ * anticipation intensity 0..2 or 3 (none); 1 and 2 are kept in mCurrentCheer, and state 1 with an intensity starts a
+ * random ANTICIPATE sample of it (func_002A8450 / func_002A86B8) at the averaged position, moving to state 2. A cheer
+ * voice that has ended is stopped (func_002A6848) and mCurrentCheer cleared; a live one gets the loudness. The loudness
+ * and position are stored in mLoudness and mCrowdPos. func_002A6D18 calls it for every instance.
  */
 void func_002A4E88_c(sCrowd4E88* self)
 {
@@ -11346,9 +11367,9 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
     } while (k < 15);
     mean = *pCurrCrowdObjectInfo->pCrowdObjectPos;
-    int best = pCurrCrowdObjectInfo->v4;
+    int best = pCurrCrowdObjectInfo->loudness;
     chanPos[pCurrAmbientInfo->idx] = mean;
-    chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->v4;
+    chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->loudness;
     for (i = 1; i < self->count; i++) {
         do {
             pCurrCrowdObjectInfo = &self->slots[k];
@@ -11358,26 +11379,27 @@ void func_002A4E88_c(sCrowd4E88* self)
                 break;
             }
         } while (k < 15);
-        float w = (float)pCurrCrowdObjectInfo->v4 / (float)(best + pCurrCrowdObjectInfo->v4);
+        float w = (float)pCurrCrowdObjectInfo->loudness / (float)(best + pCurrCrowdObjectInfo->loudness);
         mean[0] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[0] - mean[0]) * w;
         mean[1] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[1] - mean[1]) * w;
         mean[2] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[2] - mean[2]) * w;
-        if (best < pCurrCrowdObjectInfo->v4) {
+        if (best < pCurrCrowdObjectInfo->loudness) {
             bonus += best >> 2;
-            best = pCurrCrowdObjectInfo->v4;
+            best = pCurrCrowdObjectInfo->loudness;
         } else {
-            bonus += pCurrCrowdObjectInfo->v4 >> 2;
+            bonus += pCurrCrowdObjectInfo->loudness >> 2;
         }
         if (self->mode >= 2) {
-            w = (float)pCurrCrowdObjectInfo->v4 / (float)(chanDist[pCurrAmbientInfo->idx] + pCurrCrowdObjectInfo->v4);
+            w = (float)pCurrCrowdObjectInfo->loudness /
+                (float)(chanDist[pCurrAmbientInfo->idx] + pCurrCrowdObjectInfo->loudness);
             chanPos[pCurrAmbientInfo->idx][0] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[0] - chanPos[pCurrAmbientInfo->idx][0]) * w;
             chanPos[pCurrAmbientInfo->idx][1] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[1] - chanPos[pCurrAmbientInfo->idx][1]) * w;
             chanPos[pCurrAmbientInfo->idx][2] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[2] - chanPos[pCurrAmbientInfo->idx][2]) * w;
-            if (chanDist[pCurrAmbientInfo->idx] < pCurrCrowdObjectInfo->v4) {
+            if (chanDist[pCurrAmbientInfo->idx] < pCurrCrowdObjectInfo->loudness) {
                 chanSum[pCurrAmbientInfo->idx] += chanDist[pCurrAmbientInfo->idx] >> 2;
-                chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->v4;
+                chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->loudness;
             } else {
-                chanSum[pCurrAmbientInfo->idx] += pCurrCrowdObjectInfo->v4 >> 2;
+                chanSum[pCurrAmbientInfo->idx] += pCurrCrowdObjectInfo->loudness >> 2;
             }
         }
     }
@@ -11390,7 +11412,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                     = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->BankMonitor,
                     pCurrAmbientInfo->handle, 1);
             if (voiceInst == 0) {
-                crowdBegin((sSndSys69A0*)gpCrowdSys, self->fD8, pCurrAmbientInfo->key, 1);
+                crowdBegin((sSndSys69A0*)gpCrowdSys, self->mCrowdBank, pCurrAmbientInfo->key, 1);
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] = (const t4Vector*)pos;
@@ -11403,7 +11425,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 }
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
-                    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->f17C;
+                    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->mpVolControl;
                 }
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
@@ -11437,7 +11459,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                         = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->BankMonitor,
                         pCurrAmbientInfo->handle, 1);
                 if (voiceInst == 0) {
-                    crowdBegin((sSndSys69A0*)gpCrowdSys, self->fD8, pCurrAmbientInfo->key, 1);
+                    crowdBegin((sSndSys69A0*)gpCrowdSys, self->mCrowdBank, pCurrAmbientInfo->key, 1);
                     {
                         cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] = (const t4Vector*)pos;
@@ -11452,7 +11474,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                     }
                     {
                         cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
-                        bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->f17C;
+                        bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->mpVolControl;
                     }
                     {
                         cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
@@ -11485,13 +11507,13 @@ void func_002A4E88_c(sCrowd4E88* self)
         sCrowdVt4E88* vt = (sCrowdVt4E88*)((void*)sys->mVtbl);
         int anticipateLevel = vt[2].fn(vthis(sys, vt[2]), self->mViewPort, &outA, &outB);
         if (anticipateLevel == 1 || anticipateLevel == 2) {
-            self->f18C = anticipateLevel;
+            self->mCurrentCheer = anticipateLevel;
         }
         if (self->state == 1 && anticipateLevel != 3) {
             func_002A6848((cCrowdInstance*)self);
             int cheerSample = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)gpCrowdSys)->ent[anticipateLevel].c);
             if (cheerSample != 0) {
-                func_002A8450_c((sSndSys69A0*)gpCrowdSys, self->fD8, cheerSample);
+                func_002A8450_c((sSndSys69A0*)gpCrowdSys, self->mCrowdBank, cheerSample);
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] = (const t4Vector*)&self->vec10;
@@ -11504,7 +11526,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 }
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
-                    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->f17C;
+                    bankMgr->BankMonitor.mVolControl[bankMgr->BankMonitor.mInst] = self->mpVolControl;
                 }
                 {
                     cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
@@ -11527,7 +11549,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 self->handle, 2);
         if (voiceInst == 0) {
             func_002A6848((cCrowdInstance*)self);
-            self->f18C = 0;
+            self->mCurrentCheer = 0;
         } else {
             int cheerVolume = best;
             if (self->state == 2) {
@@ -11557,7 +11579,7 @@ struct s2A5CD8 {
 };
 
 /**
- * Sets the loudness (unk_4) of one crowd object of a crowd instance, when that slot is in use.
+ * Sets the loudness of one crowd object of a crowd instance, when that slot is in use.
  *
  * func_002A7340 calls it for a world trigger's crowd.
  *
@@ -11600,7 +11622,7 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* P, int key) __asm__("
  * free slot with the level's position pointer and volume (as its loudness). It joins the ambient loop playing the same
  * sample (@p key); the first object also sets the instance's viewport, vol control and averaged position. Without a
  * matching loop it takes a free one (mNumCrowdAmbience grows), places it at the object and starts the sample from the
- * instance's bank unk_0D8 at the loop's position, with the object's loudness, the vol control, external volume, the
+ * instance's bank mCrowdBank at the loop's position, with the object's loudness, the vol control, external volume, the
  * viewport and the callback D_004A3700, keeping the handle. func_002A7678 calls it.
  *
  * @param objectOpts  the current play-option level (cBankManager + 0x1D8) that describes the object
@@ -11624,7 +11646,7 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
     }
     self->mNumCrowdObjects++;
     found->pCrowdObjectPos = objectOpts->mPosition[objectOpts->mInst];
-    found->unk_4 = objectOpts->mBaseVol[objectOpts->mInst];
+    found->loudness = objectOpts->mBaseVol[objectOpts->mInst];
     i = 0;
     do {
         if (self->mCrowdAmbientInfo[i].sampleID == key) {
@@ -11636,8 +11658,8 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
     } while (i < 3);
     if (self->mNumCrowdObjects == 1) {
         self->mViewPort = objectOpts->mViewport[objectOpts->mInst];
-        self->unk_17C = objectOpts->mVolControl[objectOpts->mInst];
-        self->unk_010 = *((t4Vector*)found->pCrowdObjectPos);
+        self->mpVolControl = objectOpts->mVolControl[objectOpts->mInst];
+        self->mCrowdPos = *((t4Vector*)found->pCrowdObjectPos);
     }
     if (found->pInfo == 0) {
         int groupIndex = 0;
@@ -11651,10 +11673,10 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
             }
             groupIndex++;
         } while (groupIndex < 3);
-        found->pInfo->unk_10 = *((t4Vector*)found->pCrowdObjectPos);
+        found->pInfo->averagePos = *((t4Vector*)found->pCrowdObjectPos);
         cCrowdSys* sys = gpCrowdSys;
         cBankManager* bankMgr = (cBankManager*)sys->mpVBankManager;
-        int crowdBank = self->unk_0D8;
+        int crowdBank = self->mCrowdBank;
         cBankMonitor* playOpts = &bankMgr->BankMonitor;
         bankMgr->BankMonitor.mInst++;
         playOpts->mCurrent[bankMgr->BankMonitor.mInst] = bankMgr->BankMonitor.mDefault;
@@ -11681,16 +11703,16 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
         {
             cCrowdSys* crowdSys = gpCrowdSys;
             ((cBankManager*)crowdSys->mpVBankManager)->BankMonitor.mPosition[
-                    ((cBankManager*)crowdSys->mpVBankManager)->BankMonitor.mInst] = &found->pInfo->unk_10;
+                    ((cBankManager*)crowdSys->mpVBankManager)->BankMonitor.mInst] = &found->pInfo->averagePos;
             cBankManager* curBankMgr = (cBankManager*)crowdSys->mpVBankManager;
             cBankMonitor* ss = &curBankMgr->BankMonitor;
-            ss->mBaseVol[curBankMgr->BankMonitor.mInst] = found->unk_4;
+            ss->mBaseVol[curBankMgr->BankMonitor.mInst] = found->loudness;
             ss->mCurrent[curBankMgr->BankMonitor.mInst].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->mBaseVol[ss->mInst],
                     0x7F));
         }
         {
             cBankManager* curBankMgr = (cBankManager*)gpCrowdSys->mpVBankManager;
-            curBankMgr->BankMonitor.mVolControl[curBankMgr->BankMonitor.mInst] = self->unk_17C;
+            curBankMgr->BankMonitor.mVolControl[curBankMgr->BankMonitor.mInst] = self->mpVolControl;
         }
         {
             cBankManager* curBankMgr = (cBankManager*)gpCrowdSys->mpVBankManager;
@@ -11724,31 +11746,32 @@ int func_002A5D08_5D08(cCrowdInstance* self, cBankMonitor* objectOpts, int key)
 INCLUDE_ASM("sound/soundsys", func_002A62F0);
 #ifdef SKIP_ASM
 
-struct sSsVoice62F0 { int f0; int id; int refs; };
+struct sSsVoice62F0 { int sampleID; int id; int refs; };
 struct sSsEnt62F0 { int active; int f4; sSsVoice62F0* v; };
 struct sSsMgr62F0 {
-    int f0;
+    int mViewPort;
     char pad4[0x20 - 0x4];
     sSsEnt62F0 ent[15];         // 0x20
     int nactive;                // 0xD4
     char padD8[0x170 - 0xD8];
     int nvoices;                // 0x170
     int id;                     // 0x174
-    int f178;                   // 0x178
+    int mLoudness;                   // 0x178
     int f17C;
     int state;                  // 0x180
     int f184;
     float vol;                  // 0x188
-    int f18C;                   // 0x18C
+    int mCurrentCheer;                   // 0x18C
 };
 
 /**
  * Removes a crowd object from a crowd instance, stopping its ambient loop when no object feeds it any more.
  *
  * Does nothing for a negative or unused slot. The slot is freed and its loop's numObjects drops; at 0 the loop's voice
- * is stopped (mode 1 with @p fade), its sampleID and handle reset to -1, unk_18C cleared and mNumCrowdAmbience lowered.
- * When the last object goes, the cheer time unk_188 is capped at 0.25, the cheer voice is stopped (only when
- * @p fade is 0) and forgotten, a playing anticipation (state 2) drops back to 1, and unk_178 and mViewPort are reset.
+ * is stopped (mode 1 with @p fade), its sampleID and handle reset to -1, mCurrentCheer cleared and mNumCrowdAmbience
+ * lowered. When the last object goes, the cheer time mCheerTimeLeft is capped at 0.25, the cheer voice is stopped (only
+ * when
+ * @p fade is 0) and forgotten, a playing anticipation (state 2) drops back to 1, and mLoudness and mViewPort are reset.
  * func_002A6430 and func_002A72D8 call it.
  *
  * @param vself  the crowd instance
@@ -11769,8 +11792,8 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
             cBankMonitor_BANKMONITOR_StopHandle(&gpCrowdSys->mpVBankManager->BankMonitor, ambientInfo->id, 1, fade);
         }
         ambientInfo->id = -1;
-        ambientInfo->f0 = -1;
-        self->f18C = 0;
+        ambientInfo->sampleID = -1;
+        self->mCurrentCheer = 0;
         self->nvoices--;
     }
     if (self->nactive != 0) return;
@@ -11782,8 +11805,8 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
         self->id = -1;
         if (self->state == 2) self->state = 1;
     }
-    self->f178 = 0;
-    self->f0 = -1;
+    self->mLoudness = 0;
+    self->mViewPort = -1;
 }
 #endif
 
@@ -11834,10 +11857,10 @@ static inline void crowdOptsUpdate64A0(cBankMonitor* o, int i)
  * Plays a TRICK cheer of a crowd instance at an intensity: a random sample of that intensity's TRICK list.
  *
  * Stops the current cheer (func_002A6848). With crowd objects present it records the intensity in
- * mAmbientCheerIntensity, sets the cheer time unk_188 to mAttack + mDecay and, when the list has a sample, plays it
- * from bank unk_0D8 (func_002A8450 / func_002A86B8) at the instance's averaged position, loudness unk_178, vol control
- * unk_17C, external volume and viewport mViewPort; the handle goes to unk_174 and unk_18C becomes intensity + 1.
- * func_002A73A8 calls it.
+ * mAmbientCheerIntensity, sets the cheer time mCheerTimeLeft to mAttack + mDecay and, when the list has a sample, plays
+ * it from bank mCrowdBank (func_002A8450 / func_002A86B8) at the instance's averaged position, loudness mLoudness, vol
+ * control mpVolControl, external volume and viewport mViewPort; the handle goes to mCheerHandle and mCurrentCheer
+ * becomes intensity + 1. func_002A73A8 calls it.
  *
  * @param vself  the crowd instance
  * @param idx  the crowd intensity (0..2)
@@ -11848,23 +11871,23 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
     if (vself->mNumCrowdObjects == 0) return;
     tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
-    vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
+    vself->mCheerTimeLeft = crowdData->mAttack + crowdData->mDecay;
     int cheerSample = func_002A4CA0((sSndRandList*)crowdData);
     if (cheerSample == 0) return;
-    func_002A8450((char**)gpCrowdSys, vself->unk_0D8, cheerSample);
+    func_002A8450((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
     cBankManager* posMgr = gpCrowdSys->mpVBankManager;
-    posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->unk_010;
+    posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->mCrowdPos;
     cBankManager* volMgr = gpCrowdSys->mpVBankManager;
-    crowdOptsSetVol64A0(&volMgr->BankMonitor, volMgr->BankMonitor.mInst, vself->unk_178);
+    crowdOptsSetVol64A0(&volMgr->BankMonitor, volMgr->BankMonitor.mInst, vself->mLoudness);
     crowdOptsUpdate64A0(&volMgr->BankMonitor, volMgr->BankMonitor.mInst);
     cBankManager* ctlMgr = gpCrowdSys->mpVBankManager;
-    ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = vself->unk_17C;
+    ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = vself->mpVolControl;
     cBankManager* extMgr = gpCrowdSys->mpVBankManager;
     extMgr->BankMonitor.mExternalVol[extMgr->BankMonitor.mInst] = 1;
     cBankManager* viewMgr = gpCrowdSys->mpVBankManager;
     viewMgr->BankMonitor.mViewport[viewMgr->BankMonitor.mInst] = vself->mViewPort;
-    vself->unk_174 = func_002A86B8((char**)gpCrowdSys);
-    vself->unk_18C = idx + 1;
+    vself->mCheerHandle = func_002A86B8((char**)gpCrowdSys);
+    vself->mCurrentCheer = idx + 1;
 }
 #endif
 
@@ -11894,8 +11917,8 @@ static inline void crowdOptsUpdate6648(cBankMonitor* o, int i)
 /**
  * Plays a FALL cheer of a crowd instance at an intensity: a random sample of that intensity's FALL list.
  *
- * As func_002A64A0 with the FALL list (tCrowdData + 0x18); unk_18C becomes ~intensity (negative). func_002A73D8 calls
- * it.
+ * As func_002A64A0 with the FALL list (tCrowdData + 0x18); mCurrentCheer becomes ~intensity (negative). func_002A73D8
+ * calls it.
  *
  * @param vself  the crowd instance
  * @param idx  the crowd intensity (0..2)
@@ -11906,23 +11929,23 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     if (vself->mNumCrowdObjects == 0) return;
     tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
-    vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
+    vself->mCheerTimeLeft = crowdData->mAttack + crowdData->mDecay;
     int cheerSample = func_002A4CA0((sSndRandList*)&crowdData->mFall);
     if (cheerSample == 0) return;
-    func_002A8450((char**)gpCrowdSys, vself->unk_0D8, cheerSample);
+    func_002A8450((char**)gpCrowdSys, vself->mCrowdBank, cheerSample);
     cBankManager* posMgr = gpCrowdSys->mpVBankManager;
-    posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->unk_010;
+    posMgr->BankMonitor.mPosition[posMgr->BankMonitor.mInst] = &vself->mCrowdPos;
     cBankManager* volMgr = gpCrowdSys->mpVBankManager;
-    crowdOptsSetVol6648(&volMgr->BankMonitor, volMgr->BankMonitor.mInst, vself->unk_178);
+    crowdOptsSetVol6648(&volMgr->BankMonitor, volMgr->BankMonitor.mInst, vself->mLoudness);
     crowdOptsUpdate6648(&volMgr->BankMonitor, volMgr->BankMonitor.mInst);
     cBankManager* ctlMgr = gpCrowdSys->mpVBankManager;
-    ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = vself->unk_17C;
+    ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = vself->mpVolControl;
     cBankManager* extMgr = gpCrowdSys->mpVBankManager;
     extMgr->BankMonitor.mExternalVol[extMgr->BankMonitor.mInst] = 1;
     cBankManager* viewMgr = gpCrowdSys->mpVBankManager;
     viewMgr->BankMonitor.mViewport[viewMgr->BankMonitor.mInst] = vself->mViewPort;
-    vself->unk_174 = func_002A86B8((char**)gpCrowdSys);
-    vself->unk_18C = ~idx;
+    vself->mCheerHandle = func_002A86B8((char**)gpCrowdSys);
+    vself->mCurrentCheer = ~idx;
 }
 #endif
 
@@ -11930,12 +11953,13 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
 INCLUDE_ASM("sound/soundsys", func_002A67F0);
 #ifdef SKIP_ASM
 /**
- * Asks a crowd instance for an anticipation cheer: the cheer state unk_180 goes from 0 to 1 (func_002A4E88 starts it).
+ * Asks a crowd instance for an anticipation cheer: the cheer state mCheerState goes from 0 to 1 (func_002A4E88 starts
+ * it).
  */
 extern "C" void func_002A67F0(cCrowdInstance* self)
 {
-    if (self->unk_180 == 0) {
-        self->unk_180 = 1;
+    if (self->mCheerState == 0) {
+        self->mCheerState = 1;
     }
 }
 #endif
@@ -11950,10 +11974,10 @@ extern "C" void func_002A6848(cCrowdInstance* self);
  */
 extern "C" void func_002A6808(cCrowdInstance* self)
 {
-    if (self->unk_180 == 2) {
+    if (self->mCheerState == 2) {
         func_002A6848(self);
     }
-    self->unk_180 = 0;
+    self->mCheerState = 0;
 }
 #endif
 
@@ -11963,20 +11987,21 @@ INCLUDE_ASM("sound/soundsys", func_002A6848);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
- * Stops a crowd instance's cheer: caps the cheer time unk_188 at 0.25, clears the state and stops the voice unk_174.
+ * Stops a crowd instance's cheer: caps the cheer time mCheerTimeLeft at 0.25, clears the state and stops the voice
+ * mCheerHandle.
  *
- * The voice is stopped with cBankMonitor_BANKMONITOR_StopHandle (mode 2, fade 0) and unk_174 reset to -1.
+ * The voice is stopped with cBankMonitor_BANKMONITOR_StopHandle (mode 2, fade 0) and mCheerHandle reset to -1.
  */
 extern "C" void func_002A6848(cCrowdInstance* self)
 {
     float lim = 0.25f;
-    if (lim < self->unk_188) {
-        self->unk_188 = lim;
+    if (lim < self->mCheerTimeLeft) {
+        self->mCheerTimeLeft = lim;
     }
-    self->unk_180 = 0;
-    if (self->unk_174 >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle(&gpCrowdSys->mpVBankManager->BankMonitor, self->unk_174, 2, 0.0f);
-        self->unk_174 = -1;
+    self->mCheerState = 0;
+    if (self->mCheerHandle >= 0) {
+        cBankMonitor_BANKMONITOR_StopHandle(&gpCrowdSys->mpVBankManager->BankMonitor, self->mCheerHandle, 2, 0.0f);
+        self->mCheerHandle = -1;
     }
 }
 #endif
@@ -11991,10 +12016,10 @@ extern "C" void SNDpitchbend(int, int);
  * Bends the pitch of a crowd ambient loop over a cheer's attack and decay, or resets the monitor once the voice is
  * gone.
  *
- * A voice handle (+4) below 0 resets the instance (cBankMonitorInstance_Reset). Otherwise, while the cheer time unk_188
- * is above 0 it is lowered by @p dt and the pitch bend (SNDpitchbend, in a sound-driver critical section) is set from
- * the intensity's tCrowdData: rising to 0x40 + mMaxBend during mAttack, then falling back to 0x40 over mDecay.
- * func_002A77A8 (the loops' callback D_004A3700) calls it.
+ * A voice handle (+4) below 0 resets the instance (cBankMonitorInstance_Reset). Otherwise, while the cheer time
+ * mCheerTimeLeft is above 0 it is lowered by @p dt and the pitch bend (SNDpitchbend, in a sound-driver critical
+ * section) is set from the intensity's tCrowdData: rising to 0x40 + mMaxBend during mAttack, then falling back to 0x40
+ * over mDecay. func_002A77A8 (the loops' callback D_004A3700) calls it.
  *
  * @param obj  the voice's monitor instance (cBankMonitorInstance)
  * @param dt  the elapsed time
@@ -12004,12 +12029,12 @@ extern "C" void func_002A68B0(cCrowdInstance* self, cBankMonitorInstance* obj, f
         cBankMonitorInstance_Reset(obj);
         return;
     }
-    float timeLeft = self->unk_188;
+    float timeLeft = self->mCheerTimeLeft;
     if (!(timeLeft <= 0.0f)) {
         int idx = self->mAmbientCheerIntensity;
         cCrowdSys* base = gpCrowdSys;
         float rem = timeLeft - dt;
-        self->unk_188 = rem;
+        self->mCheerTimeLeft = rem;
         tCrowdData* crowdData = &base->mCrowdData[idx];
         float decayTime = crowdData->mDecay;
         int vol = 0x40;
@@ -12272,7 +12297,7 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
         func_002A4CF8(&self->ent[i].mTrick);
     }
     for (int i = 0; i < n; i++) {
-        self->voices[i].fD8 = cheerBank;
+        self->voices[i].mCrowdBank = cheerBank;
     }
     sSnd6D78Parser infParser;
     FileParser_FileParser((FileParser*)((FileParser*)&infParser), name, 0x100);
@@ -12691,7 +12716,7 @@ INCLUDE_ASM("sound/soundsys", func_002A77C8);
 extern "C" int func_002A77C8(cCrowdSys* self, int i)
 {
     if (i < self->mNumInstances) {
-        return (self->mpCrowdInstances)[i].unk_18C;
+        return (self->mpCrowdInstances)[i].mCurrentCheer;
     }
     return 0;
 }
@@ -13375,13 +13400,13 @@ INCLUDE_ASM("sound/soundsys", func_002A8450);
 extern "C" void* memset(void* dst, int c, int n);
 
 struct sSnd8450E8 {
-    int a;
-    int b;
+    int mBank;
+    int mpData;
 };
 struct sSnd8450Sys {
-    cBankManager* mgr;
+    cBankManager* mpVBankManager;
     char pad4[0xC];
-    sSnd8450E8* e10;         // 0x10
+    sSnd8450E8* mMidiBanks;         // 0x10
 };
 
 /**
@@ -13397,7 +13422,7 @@ struct sSnd8450Sys {
 extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
 {
     sSnd8450Sys* self = (sSnd8450Sys*)sys;
-    cBankManager* bankMgr = self->mgr;
+    cBankManager* bankMgr = self->mpVBankManager;
     cBankMonitor* playOpts = &bankMgr->BankMonitor;
     bankMgr->BankMonitor.mInst++;
     playOpts->mCurrent[bankMgr->BankMonitor.mInst] = bankMgr->BankMonitor.mDefault;
@@ -13419,8 +13444,8 @@ extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
     playOpts->mTwoPlayerSide[bankMgr->BankMonitor.mInst] = 0;
     playOpts->mMapToMaxVol[bankMgr->BankMonitor.mInst] = 0x7F;
     playOpts->mCloseOnEnd[bankMgr->BankMonitor.mInst] = 1;
-    self->e10[self->mgr->BankMonitor.mInst].a = bankIndex;
-    self->e10[self->mgr->BankMonitor.mInst].b = midiData;
+    self->mMidiBanks[self->mpVBankManager->BankMonitor.mInst].mBank = bankIndex;
+    self->mMidiBanks[self->mpVBankManager->BankMonitor.mInst].mpData = midiData;
 }
 #endif
 
@@ -13438,15 +13463,15 @@ extern "C" void cMonitor_MONITOR_Create(void*, int, long, void*, int, int, int, 
 extern const sSndKey8 D_004A3748_86B8[] __asm__("D_004A3748");
 
 struct sSnd86B8Pair {
-    int id;
-    int f4;
+    int mBank;
+    int mpData;
 };
 struct sSnd86B8Sys {
-    cBankManager* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
+    cBankManager* mpVBankManager;
+    int* mBank;                 // 0x4
+    int* mPatch;                 // 0x8
     char padC[4];
-    sSnd86B8Pair* p10;       // 0x10
+    sSnd86B8Pair* mMidiBanks;       // 0x10
 };
 
 #define SND_86B8_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -13494,33 +13519,36 @@ static inline int snd86B8Handle(cBankManager* m, int id)
 extern "C" int func_002A86B8(char** vself)
 {
     sSnd86B8Sys* self = (sSnd86B8Sys*)vself;
-    cBankManager* bankMgr = self->mgr;
-    cBankMonitor* s = &bankMgr->BankMonitor;
-    int BaseVol = s->mBaseVol[s->mInst];
+    cBankManager* bankMgr = self->mpVBankManager;
+    cBankMonitor* playOpts = &bankMgr->BankMonitor;
+    int BaseVol = playOpts->mBaseVol[playOpts->mInst];
     if (bankMgr->BankMonitor.mPosition[bankMgr->BankMonitor.mInst] != 0) {
-        s->mBaseVol[bankMgr->BankMonitor.mInst] = 0;
-        s->mCurrent[bankMgr->BankMonitor.mInst].vol = SND_86B8_MAX(0, SND_86B8_MIN(s->mBaseVol[s->mInst], 0x7F));
-    } else if (s->mVolControl[s->mInst] != 0) {
-        float gain = *(float*)s->mVolControl[s->mInst];
-        s->mBaseVol[bankMgr->BankMonitor.mInst] = (int)SND_86B8_FMAX(SND_86B8_MIN((float)s->mBaseVol[s->mInst] * gain,
-                127.0f), 0.0f);
-        s->mCurrent[s->mInst].vol = SND_86B8_MAX(0, SND_86B8_MIN(s->mBaseVol[s->mInst], 0x7F));
+        playOpts->mBaseVol[bankMgr->BankMonitor.mInst] = 0;
+        playOpts->mCurrent[bankMgr->BankMonitor.mInst].vol = SND_86B8_MAX(0,
+                SND_86B8_MIN(playOpts->mBaseVol[playOpts->mInst], 0x7F));
+    } else if (playOpts->mVolControl[playOpts->mInst] != 0) {
+        float gain = *(float*)playOpts->mVolControl[playOpts->mInst];
+        playOpts->mBaseVol[bankMgr->BankMonitor.mInst] =
+                (int)SND_86B8_FMAX(SND_86B8_MIN((float)playOpts->mBaseVol[playOpts->mInst] * gain, 127.0f), 0.0f);
+        playOpts->mCurrent[playOpts->mInst].vol = SND_86B8_MAX(0, SND_86B8_MIN(playOpts->mBaseVol[playOpts->mInst],
+                0x7F));
     }
-    int Inst = self->mgr->BankMonitor.mInst;
+    int Inst = self->mpVBankManager->BankMonitor.mInst;
     int Handle = -1;
-    int bank = snd86B8Handle(self->mgr, self->p10[Inst].id);
-    cBankMonitor* levelOpts = &self->mgr->BankMonitor;
+    int bank = snd86B8Handle(self->mpVBankManager, self->mMidiBanks[Inst].mBank);
+    cBankMonitor* levelOpts = &self->mpVBankManager->BankMonitor;
     if (levelOpts->mRadius[levelOpts->mInst] == 0.0f && bank >= 0) {
-        int sound = self->p10[Inst].f4;
+        int sound = self->mMidiBanks[Inst].mpData;
         SNDSYS_entercritical();
-        Handle = SNDMIDI_play(&self->mgr->BankMonitor.mCurrent[self->mgr->BankMonitor.mInst], sound, bank, -1);
+        Handle = SNDMIDI_play(&self->mpVBankManager->BankMonitor.mCurrent[self->mpVBankManager->BankMonitor.mInst],
+                sound, bank, -1);
         SNDSYS_leavecritical();
     }
-    void* Mon = cBankMonitor_BANKMONITOR_Create(&self->mgr->BankMonitor, Handle, BaseVol, 2);
+    void* Mon = cBankMonitor_BANKMONITOR_Create(&self->mpVBankManager->BankMonitor, Handle, BaseVol, 2);
     if (Mon != 0) {
-        cBankMonitorInstance_SetMIDI(Mon, self->p10[Inst].f4, bank);
+        cBankMonitorInstance_SetMIDI(Mon, self->mMidiBanks[Inst].mpData, bank);
     }
-    cDelayOpts* Delay = &self->mgr->BankMonitor.mDelay[self->mgr->BankMonitor.mInst];
+    cDelayOpts* Delay = &self->mpVBankManager->BankMonitor.mDelay[self->mpVBankManager->BankMonitor.mInst];
     if (Delay->mCount > 0) {
         int DelayTime = 0;
         int Vol = BaseVol * Delay->mLevel / 100;
@@ -13531,12 +13559,12 @@ extern "C" int func_002A86B8(char** vself)
             if (Vol > 0x7F) Vol = 0x7F;
             if (Vol < 0) Vol = 0;
             if (Vol == 0) break;
-            cBankMonitor* opts = &self->mgr->BankMonitor;
+            cBankMonitor* opts = &self->mpVBankManager->BankMonitor;
             cMonitor_MONITOR_Create(opts, DelayTime, D_004A3748_86B8->v, opts->mVolControl[opts->mInst],
-                    self->p10[Inst].id, self->p10[Inst].f4, Vol, 0);
+                    self->mMidiBanks[Inst].mBank, self->mMidiBanks[Inst].mpData, Vol, 0);
         }
     }
-    self->mgr->BankMonitor.mInst--;
+    self->mpVBankManager->BankMonitor.mInst--;
     return Handle;
 }
 #endif
@@ -13564,11 +13592,11 @@ extern "C" int func_002A8B28(cMidiSys* midiSys, cMonitorInstance* obj)
     cBankManager* ctlMgr = (cBankManager*)D_004A3744->mpVBankManager;
     ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = (float*)obj->mPtr;
     cBankManager* volMgr = (cBankManager*)D_004A3744->mpVBankManager;
-    cBankMonitor* s = &volMgr->BankMonitor;
-    s->mBaseVol[volMgr->BankMonitor.mInst] = obj->mData3;
-#define SND_X (s->mBaseVol[s->mInst])
+    cBankMonitor* playOpts = &volMgr->BankMonitor;
+    playOpts->mBaseVol[volMgr->BankMonitor.mInst] = obj->mData3;
+#define SND_X (playOpts->mBaseVol[playOpts->mInst])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
-    s->mCurrent[volMgr->BankMonitor.mInst].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
+    playOpts->mCurrent[volMgr->BankMonitor.mInst].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
     func_002A86B8((char**)D_004A3744);
     return 1;
 }
@@ -14022,15 +14050,6 @@ INCLUDE_ASM("sound/soundsys", func_002A92F8);
 #ifdef SKIP_ASM
 extern "C" void func_003B5B20(int a, int b);
 
-struct s2A92F8Entry {
-    int index;
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int next;
-};
-
 /**
  * Returns the block at the top of main sound memory to the pool and puts its node back on the unused chain.
  *
@@ -14040,13 +14059,13 @@ struct s2A92F8Entry {
  *
  * @param memNode  the memory node
  */
-extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* memNode)
+extern "C" void func_002A92F8(cPS2SoundManager* self, tPS2SoundMemNode* memNode)
 {
-    self->mMainMemHighAddr = memNode->unk8;
-    memNode->unk4 = -1;
-    memNode->unk8 = -1;
-    memNode->unkC = 0;
-    memNode->unk10 = 0;
+    self->mMainMemHighAddr = memNode->highAddr;
+    memNode->lowAddr = -1;
+    memNode->highAddr = -1;
+    memNode->size = 0;
+    memNode->state = 0;
     memNode->next = self->mUnusedNodeHead;
     self->mUnusedNodeHead = memNode->index;
     if (self->mMemLoadLimited == 0) {

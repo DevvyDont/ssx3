@@ -54,26 +54,42 @@ struct cSongInstance {
     cSongConfiguration* mpConfig; // 0x00 (our name) [R] ctor arg 3; [U] every method reads the song's settings through it
     SNDPLAYOPTS mPlayOpts;        // 0x04 (our name) [R] ctor copies the current cSndPlayOpts level (mCurrent[mInst], sdl/sdr); [U] func_002B21E0 passes &mPlayOpts to the stream opens
     int mHandle;                   // 0x1C [P] assert "mHandle == -1" (musicsys.cpp:295, this+0x1C); [R] ctor -1; [U] func_002B21E0: main stream handle (func_003D25F0(0x11000001, ...))
-    int unk_20;                   // 0x20 [U] func_002B21E0: overlay stream handle (func_003D25F0(0x11000002, ...))
-    void* unk_24;                 // 0x24 [R] ctor operator new(0x37000, "PathfinderStream"); dtor cMemMan_free; [U] main stream buffer
-    void* unk_28;                 // 0x28 [R] ctor operator new(func_003D3058(1, 0), "PathfinderOverlay"); dtor cMemMan_free; [U] overlay stream buffer (0x6A400)
-    int unk_2C;                   // 0x2C [R] ctor 0; [U] func_002B21E0 sets 1 once the streams are open; func_002B20C8 tests it
-    int unk_30;                   // 0x30 [R] ctor -1; [U] func_002B20C8 parks a value here until the streams open; func_002B21E0 applies and resets it
-    // unk_30 with no music event parked (name ours). [R] ctor -1; [U] func_002B20C8 parks one only while it is -1,
-    // func_002B21E0 sends a parked one and stores -1 again.
+    int mOverlayHandle;           // 0x20 (our name) [U] func_002B21E0: overlay stream handle
+                                  //      (func_003D25F0(0x11000002, ...))
+    void* mpPathfinderStream;     // 0x24 (our name, after the tag) [R] ctor operator new(0x37000, "PathfinderStream");
+                                  //      dtor cMemMan_free; [U] main stream buffer
+    void* mpPathfinderOverlay;    // 0x28 (our name, after the tag) [R] ctor operator new(func_003D3058(1, 0),
+                                  //      "PathfinderOverlay"); dtor cMemMan_free; [U] overlay stream buffer (0x6A400)
+    int mStreamsOpen;             // 0x2C (our name) [R] ctor 0; [U] func_002B21E0 sets 1 once the streams are open;
+                                  //      func_002B20C8 tests it
+    int mPendingEvent;            // 0x30 (our name) [R] ctor -1; [U] func_002B20C8 parks a music event here until
+                                  //      the streams open; func_002B21E0 applies and resets it
+    // mPendingEvent with no music event parked (name ours). [R] ctor -1; [U] func_002B20C8 parks one only while it is
+    // -1, func_002B21E0 sends a parked one and stores -1 again.
     enum { kNoPendingEvent = -1 };
-    int unk_34;                   // 0x34 [R] ctor arg 7; [U] a cBankManager bank index: func_002B27C0 checks BANK_Used / BANK_Handle of it, the dtor unloads it (cAsyncSys_ASYNCSYS_Cancel)
-    int unk_38;                   // 0x38 [R] ctor 0
-    float* unk_3C;                // 0x3C [R] ctor arg 6; [U] func_002B21E0: optional volume control (*unk_3C scales the volume)
-    signed char unk_40;           // 0x40 [R] ctor arg 5 (sb); [U] func_002B21E0 lb: the base volume
+    int mBankIndex;               // 0x34 (our name) [R] ctor arg 7; [U] a cBankManager bank index: func_002B27C0 checks
+                                  //      BANK_Used / BANK_Handle of it, the dtor unloads it (cAsyncSys_ASYNCSYS_Cancel)
+    int mLoopBankState;           // 0x38 (our name) [R] ctor 0; [U] func_002B43D8 1 when it starts loading a loop bank;
+                                  //      func_002B4620 2 once it hands the loaded bank to the overlay stream
+    float* mpVolumeControl;       // 0x3C (our name) [R] ctor arg 6; [U] func_002B21E0: optional volume control
+                                  //      (*mpVolumeControl scales the volume)
+    signed char mBaseVolume;      // 0x40 (our name) [R] ctor arg 5 (sb); [U] func_002B21E0 lb: the base volume
     char unk_41[0x3];             // 0x41 padding
-    int unk_44;                   // 0x44 [R] ctor = the play options' low-pass cutoff (SNDPLAYOPTS lowpasscutoff); [U] func_002B2160 caches the cutoff it set
-    int unk_48;                   // 0x48 [R] ctor 0; [U] func_002B2418 1 (fade out started); func_002B21E0 stops updating the volume then
-    int unk_4C;                   // 0x4C [R] ctor 0; [U] func_002B27C0: 0 = check the bank first
-    int unk_50;                   // 0x50 [R] ctor 0
-    int unk_54;                   // 0x54 [R] ctor 1; [U] func_002B21E0 / func_002B23E8 test it
-    int unk_58;                   // 0x58 [R] ctor -1
-    int unk_5C;                   // 0x5C [R] ctor 0; [U] func_002B20C8: when set, only a forced call applies
+    int mLowPassCutoff;           // 0x44 (our name) [R] ctor = the play options' low-pass cutoff (SNDPLAYOPTS
+                                  //      lowpasscutoff); [U] func_002B2160 caches the cutoff it set
+    int mFadingOut;               // 0x48 (our name) [R] ctor 0; [U] func_002B2418 1 (fade out started); func_002B21E0
+                                  //      stops updating the volume then
+    int mOverlayArmed;            // 0x4C (our name) [R] ctor 0; [U] func_002B4470 / func_002B4620 set it when the
+                                  //      overlay's loop-bank callback is armed, func_002B4708 clears it; func_002B27C0:
+                                  //      0 = check the bank first
+    int mOverlayRequested;        // 0x50 (our name) [R] ctor 0; [U] func_002B46D0 sets it; func_002B4388 then starts
+                                  //      the overlay (func_002B4620)
+    int mVolumeEnabled;           // 0x54 (our name) [R] ctor 1; [U] func_002B3CC0 sets it; func_002B21E0 /
+                                  //      func_002B23E8 apply the volume and level only while set
+    int mSongTag;                 // 0x58 (our name) [R] ctor -1; [U] func_002B49C0 sets the eSongTag, func_002B49E0
+                                  //      returns it
+    int mHoldEvents;              // 0x5C (our name) [R] ctor 0; [U] func_002B4A08 sets it; func_002B20C8: when set,
+                                  //      only a forced call applies
     char mPath[0x64];             // 0x60 (our name) [R] ctor sprintf("%s%s%s", "data/", "audio/music.big" or "audio/music2.big", name); [U] func_002B21E0 prefixes the stream file names with it
 };
 
@@ -103,23 +119,23 @@ CHECK_SIZE(cSongConfiguration, 0xAC);
 CHECK_OFFSET(cSongInstance, mpConfig, 0x00);
 CHECK_OFFSET(cSongInstance, mPlayOpts, 0x04);
 CHECK_OFFSET(cSongInstance, mHandle, 0x1C);
-CHECK_OFFSET(cSongInstance, unk_20, 0x20);
-CHECK_OFFSET(cSongInstance, unk_24, 0x24);
-CHECK_OFFSET(cSongInstance, unk_28, 0x28);
-CHECK_OFFSET(cSongInstance, unk_2C, 0x2C);
-CHECK_OFFSET(cSongInstance, unk_30, 0x30);
-CHECK_OFFSET(cSongInstance, unk_34, 0x34);
-CHECK_OFFSET(cSongInstance, unk_38, 0x38);
-CHECK_OFFSET(cSongInstance, unk_3C, 0x3C);
-CHECK_OFFSET(cSongInstance, unk_40, 0x40);
+CHECK_OFFSET(cSongInstance, mOverlayHandle, 0x20);
+CHECK_OFFSET(cSongInstance, mpPathfinderStream, 0x24);
+CHECK_OFFSET(cSongInstance, mpPathfinderOverlay, 0x28);
+CHECK_OFFSET(cSongInstance, mStreamsOpen, 0x2C);
+CHECK_OFFSET(cSongInstance, mPendingEvent, 0x30);
+CHECK_OFFSET(cSongInstance, mBankIndex, 0x34);
+CHECK_OFFSET(cSongInstance, mLoopBankState, 0x38);
+CHECK_OFFSET(cSongInstance, mpVolumeControl, 0x3C);
+CHECK_OFFSET(cSongInstance, mBaseVolume, 0x40);
 CHECK_OFFSET(cSongInstance, unk_41, 0x41);
-CHECK_OFFSET(cSongInstance, unk_44, 0x44);
-CHECK_OFFSET(cSongInstance, unk_48, 0x48);
-CHECK_OFFSET(cSongInstance, unk_4C, 0x4C);
-CHECK_OFFSET(cSongInstance, unk_50, 0x50);
-CHECK_OFFSET(cSongInstance, unk_54, 0x54);
-CHECK_OFFSET(cSongInstance, unk_58, 0x58);
-CHECK_OFFSET(cSongInstance, unk_5C, 0x5C);
+CHECK_OFFSET(cSongInstance, mLowPassCutoff, 0x44);
+CHECK_OFFSET(cSongInstance, mFadingOut, 0x48);
+CHECK_OFFSET(cSongInstance, mOverlayArmed, 0x4C);
+CHECK_OFFSET(cSongInstance, mOverlayRequested, 0x50);
+CHECK_OFFSET(cSongInstance, mVolumeEnabled, 0x54);
+CHECK_OFFSET(cSongInstance, mSongTag, 0x58);
+CHECK_OFFSET(cSongInstance, mHoldEvents, 0x5C);
 CHECK_OFFSET(cSongInstance, mPath, 0x60);
 CHECK_SIZE(cSongInstance, 0xC4);
 

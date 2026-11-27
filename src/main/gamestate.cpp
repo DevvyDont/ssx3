@@ -377,9 +377,9 @@ void cGFTrackStartState::preloadInit()
             cRider* rider = cGameState_mpGame->AI->Players[0]->mRider;
             if (cBENewPlayerInterface_isFirstTimeOnTrack(iface, rider->getAIIndex(), locationId) != 0) {
                 cSSXAudio* audio = cAudioInterface_bxAudio();
-                audio->unk_5790 = 0;
-                audio->unk_578C = 1;
-                audio->unk_6254 = 1;
+                audio->mPeakIntroDone = 0;
+                audio->mFirstTimeOnPeak = 1;
+                audio->mInTransport = 1;
                 mPlayFirstTimeBCVideo = 1;
             }
         }

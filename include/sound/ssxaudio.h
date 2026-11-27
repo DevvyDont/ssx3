@@ -203,9 +203,9 @@ enum eIconType {
     keIcon_Collectable = 5
 };
 
-// The speech language as a bit (func_0029F198's result, cSSXAudio::unk_572C; names ours). [U] func_0029ED90 opens
-// data/audio/french.big for 2, german.big for 4, spanish.big for 8 and english.big otherwise; the speech hooks get it
-// as the request's language bit.
+// The speech language as a bit (func_0029F198's result, cSSXAudio::mSpeechLanguage; names ours). [U] func_0029ED90
+// opens data/audio/french.big for 2, german.big for 4, spanish.big for 8 and english.big otherwise; the speech hooks
+// get it as the request's language bit.
 enum eSpeechLanguageBit {
     kSPEECHLANG_English = 1, kSPEECHLANG_French = 2, kSPEECHLANG_German = 4, kSPEECHLANG_Spanish = 8
 };
@@ -256,8 +256,11 @@ struct cSSXAudio {
     int unk_5720;                       // 0x5720 [R] cController ctor 0
     char unk_5724[0x4];                 // 0x5724 padding (cController's non-virtual part ends 8-aligned)
     // --- cSSXAudio (own fields 0x5728..0x6C90; fields from mGruntCycle on follow On Tour's cSSXAudio member order, retail-only fields before it)
-    void* unk_5728;                     // 0x5728 [R] ctor 0; dtor closes it with FILESYS_delbigsync(h, 100); [U] func_0029ED90 opens a language stream file into it
-    int unk_572C;                       // 0x572C [R] ctor -1; [U] func_0029ED90: language mode of the stream in unk_5728
+    void* mLanguageBigFile;             // 0x5728 (name ours) [R] ctor 0; dtor closes it with FILESYS_delbigsync(h,
+                                        //        100); [U] func_0029ED90 opens the chosen language's speech file
+                                        //        ("data/audio/<language>.big") into it
+    int mSpeechLanguage;                // 0x572C (name ours) [R] ctor -1; [U] func_0029ED90: the language
+                                        //        (func_0029F198) whose file is open in mLanguageBigFile
     float mFrontEndDJVolume;            // 0x5730 (name ours) [R] ctor 1.0f; [U] cSSXAudio_UpdateSpeechVolume returns
                                         //        &it as the volume control of a front-end DJ line (class 11), so those
                                         //        play at 1.0
@@ -271,20 +274,42 @@ struct cSSXAudio {
                                         //        instance 0's volume class from the file name prefix (DJ_ 2/11, PA_ 3,
                                         //        Arcade 10, else 4: eVolumeControl, 11 past it for the front-end DJ);
                                         //        func_0029F088 returns it
-    int unk_573C;                       // 0x573C [U] func_002A2E50
-    int unk_5740;                       // 0x5740 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5744;                       // 0x5744 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5748;                       // 0x5748 no retail access seen
-    int unk_574C;                       // 0x574C [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5750;                       // 0x5750 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5754;                       // 0x5754 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5758;                       // 0x5758 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_575C;                       // 0x575C [U] func_002A43B8
-    int unk_5760;                       // 0x5760 [U] func_002A4550
+    int mUsedBetweenEventsPicks;        // 0x573C (name ours) [U] func_002A2E50: bit mask of the between-events lines
+                                        //        (picks 0..7) already used; cleared once all are
+    int mPendingLine8422;               // 0x5740 (name ours, after the speech line) [R] ctor; [U] func_002A43B8 plays
+                                        //        DJ speech line 8422 (func_002A27D8) while set and clears it; reset by
+                                        //        func_002A4550
+    int mPendingPlaceLine;              // 0x5744 (name ours) [R] ctor; [U] func_002A43B8 requests the place line
+                                        //        (func_002A1400) for rider mPlaceLineRider while set and clears it;
+                                        //        reset by func_002A4550
+    int mPlaceLineRider;                // 0x5748 (name ours) [U] func_002A43B8: the cAI Riders[] index the place line
+                                        //        is about
+    int mPendingBetweenEventsLine;      // 0x574C (name ours) [R] ctor; [U] func_0028E548 (kinds 1, 2) and func_0028E8C0
+                                        //        set it; func_002A43B8 then plays a between-events line
+                                        //        (func_002A2E50(0)) and clears it; reset by func_002A4550
+    int mPendingBetweenEventsLine2;     // 0x5750 (name ours) [R] ctor; [U] a second flag for the same line:
+                                        //        func_002A43B8 plays func_002A2E50(0) while set and clears it; reset by
+                                        //        func_002A4550; no setter found
+    int mPendingBonusBetweenEventsLine; // 0x5754 (name ours) [R] ctor; [U] func_0028E8C0 sets it with mBonusLineQueued;
+                                        //        func_002A43B8 then plays func_002A2E50(1) and clears it; reset by
+                                        //        func_002A4550
+    int mPendingLocationPartLine;       // 0x5758 (name ours) [R] ctor; [U] func_002A43B8 plays DJ speech line 8396
+                                        //        about mPendingLocationPart (func_002A2568) while set and clears it;
+                                        //        reset by func_002A4550
+    int mPendingLocationPart;           // 0x575C (name ours) [U] func_002A43B8 passes it to func_002A2568: the part of
+                                        //        a combined location (-1 = all of it)
+    int mPendingOtherLine;              // 0x5760 (name ours) [U] func_002A4550 clears it with the pending-line flags;
+                                        //        no other access found
     int unk_5764;                       // 0x5764 [R] ctor -1
-    int unk_5768;                       // 0x5768 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_576C;                       // 0x576C [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5770;                       // 0x5770 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
+    int mPendingChoiceLine;             // 0x5768 (name ours) [R] ctor; [U] func_002A43B8 plays DJ speech line 8421 with
+                                        //        two yes/no choices (func_002A26F0(0, 0)) while set and clears it;
+                                        //        reset by func_002A4550
+    int mPendingPeakLine8378;           // 0x576C (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
+                                        //        0) sets it; func_002A43B8 plays DJ speech line 8378 with the peak
+                                        //        (func_002A2638) and clears it; reset by func_002A4550
+    int mPendingLocationLine;           // 0x5770 (name ours) [R] ctor; [U] func_0028E548 sets it on a first visit;
+                                        //        func_002A43B8 plays DJ speech line 8493 about the location
+                                        //        (func_002A2C30) and clears it; reset by func_002A4550
     int mSongAnnouncePending;           // 0x5774 (name ours) [R] ctor; [U] the DJ's pending song announcement: set with
                                         //        mSongAnnounceNum by cSSXAudio_CountdownGateDrop, func_002A3170 and
                                         //        cSSXAudio_StartEventWithNoStartGate; func_002A43B8 plays
@@ -292,30 +317,57 @@ struct cSSXAudio {
     int mSongAnnounceNum;               // 0x5778 (name ours) [U] the song number func_002A43B8 passes to func_002A2860
                                         //        (the DJ's song announcement); stored from func_002B4908 (the current
                                         //        song) with mSongAnnouncePending
-    int unk_577C;                       // 0x577C [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5780;                       // 0x5780 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
-    int unk_5784;                       // 0x5784 [R] ctor; [U] reset by func_002A4550, read by func_002A43B8
+    int mPendingLine8492;               // 0x577C (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
+                                        //        0, peak 1) sets it; func_002A43B8 plays DJ speech line 8492
+                                        //        (func_002A2B88) and clears it; reset by func_002A4550 and
+                                        //        func_0028EF90
+    int mLine8492Played;                // 0x5780 (name ours) [R] ctor; [U] func_002A2B88 passes it with speech line
+                                        //        8492, then sets it to 1 (played before); func_0028E548 stores 2
+    int mPendingPeakLine8491;           // 0x5784 (name ours, after the speech line) [R] ctor; [U] func_0028E548 (kind
+                                        //        7) sets it; func_002A43B8 plays DJ speech line 8491 with the peak
+                                        //        (func_002A2AD0) and clears it; reset by func_002A4550
     int mRiderRemarkPending;            // 0x5788 (name ours) [R] ctor; [U] cSSXAudio_StartEventWithNoStartGate sets it
                                         //        in game events 4 and 5; func_002A43B8 then plays func_002A1138(0, 0)
                                         //        (speech line 8403, a rider about another) and clears it; reset by
                                         //        func_002A4550
-    int unk_578C;                       // 0x578C [R] ctor 0; [U] func_002A2E50, func_002A4A78; retail accessor 0x2BAD48 (lw)
-    int unk_5790;                       // 0x5790 [R] ctor 1; [U] func_002A2E50; retail accessor 0x2BAD50 (lw)
-    int unk_5794;                       // 0x5794 [R] ctor 1; [U] func_002A26F0
-    int unk_5798;                       // 0x5798 [R] ctor -1; [U] func_002A2E50
+    int mFirstTimeOnPeak;               // 0x578C (name ours, after the preview's GetFirstTimeOnPeak /
+                                        //        SetFirstTimeOnPeak accessors) [R] ctor 0; func_002BAD30 sets 1; retail
+                                        //        getter 0x2BAD48 (lw); [U] func_0028E8C0 plays the peak's first-visit
+                                        //        music while set; func_002A2E50, func_0028E8C0 (event 20) and
+                                        //        func_0028EF90 clear it; func_002A4A78 opens the event only while 0
+    int mPeakIntroDone;                 // 0x5790 (name ours) [R] ctor 1; func_002BAD30 clears it; retail getter
+                                        //        0x2BAD50 (lw); [U] func_002A2E50: while 0 the next between-events call
+                                        //        plays the opening line (pick 0) and sets it
+    int mChoiceLineFirstTime;           // 0x5794 (name ours) [R] ctor 1; [U] func_002A26F0 clears it once speech line
+                                        //        8421 is queued
+    int mQueuedBetweenEventsPick;       // 0x5798 (name ours) [R] ctor -1 (none); [U] func_002A2E50: a pick (0..7) to
+                                        //        play next instead of a random one; it queues 3 after the opening line
     int mFirstTimeOnTrack[23];          // 0x579C (name ours) [R] ctor zeroes 23; [U] cSSXAudio_InGameInit fills entry i
                                         //        with cBENewPlayerInterface_isFirstTimeOnTrack(rider, i) for the 23
                                         //        tracks; func_0028E548 tests entries for 1 and clears them,
                                         //        func_0028E8C0 tests [mTransportTrack] != 1
-    int unk_57F8;                       // 0x57F8 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_57FC;                       // 0x57FC [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5800;                       // 0x5800 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5804;                       // 0x5804 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5808;                       // 0x5808 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_580C;                       // 0x580C [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5810;                       // 0x5810 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5814;                       // 0x5814 [U] set by func_002A4590, used by func_002A4660/func_002A4718/func_002A4770
-    int unk_5818;                       // 0x5818 [R] ctor 0; [U] func_002A49E8/func_002A4A38/func_002A4A68
+    int mEventResultPending;            // 0x57F8 (name ours) [U] func_002A4660 sets it on the event's last heat;
+                                        //        func_002A4770 clears it and plays a result line; func_002A4590 resets
+                                        //        it
+    int mEventFinished;                 // 0x57FC (name ours) [U] func_002A4660 sets it when the rider finished the
+                                        //        final heat; func_002A4770 picks a result line only then; func_002A4590
+                                        //        resets it
+    int mEventResultPlace;              // 0x5800 (name ours) [U] func_002A4660: the rider's rank on the last heat (0 =
+                                        //        first; func_002A4590 -1 = none); func_002A4770 tests for first place
+    int mEventResultFrags;              // 0x5804 (name ours) [U] func_002A4660 adds each heat's frags; func_002A4770
+                                        //        comments on 5 or more
+    int mEventResultUberTricks;         // 0x5808 (name ours) [U] func_002A4660 adds each heat's uber tricks;
+                                        //        func_002A4770 compares them with 27 (24 at some locations)
+    int mLastEventResultLine;           // 0x580C (name ours) [U] func_002A4770: the result line played last time (-1 =
+                                        //        none), dropped when another one qualifies
+    int mEventResultLocation;           // 0x5810 (name ours) [U] func_002A4660 stores the current location on the last
+                                        //        heat; func_002A4770 passes it to the result line; func_002A4590 -1
+    int mLastTransportTrack;            // 0x5814 (name ours) [U] func_0028E8C0 (event 20, the transport start) copies
+                                        //        mTransportTrack into it; func_002A4590 resets it to 23
+                                        //        (kMAX_LOCATIONS, none); func_002A4718 compares it with the current
+                                        //        location, func_002A4770 picks a line about it
+    int mScriptedDJLine;                // 0x5818 (name ours) [R] ctor 0; [U] func_002A49E8 sets it for 30 s (a scripted
+                                        //        DJ moment), func_002A4A68 clears it, func_002A4A38 tests it
     int mLastUberLevel;                 // 0x581C (name ours) [R] ctor -1; [U] cSSXAudio_UpdateLandedUber: the focus
                                         //        rider's mUberLevel last frame (the DJ event fires when it becomes 10)
     int mUberViewIndex;                 // 0x5820 (name ours) [R] ctor 0; [U] cSSXAudio_UpdateLandedUber: the focus
@@ -397,22 +449,33 @@ struct cSSXAudio {
                                         //        when it or mRadioModeID is 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
-    float unk_60A0;                     // 0x60A0 [U] func_0028C8C8: the song's overlay level during a long jump
+    float mOverlayLevel;                // 0x60A0 (name ours) [U] func_0028C8C8 sets it every frame to the music volume,
+                                        //        lowered during a long jump, and hands it to the song overlay
+                                        //        (func_002B3D10); func_0028C430 uses it as the volume control of the
+                                        //        loop-bank phrases
     char mPlayListName[20][20];         // 0x60A4 [P] GetPlayListName(int) returns this + 0x60A4 + i * 20 (retail 0x2BAD80; preview 0x6144)
     int mNumPlayLists;                  // 0x6234 [P] GetNumPlayLists (preview 0x62D4, same -0xA0 shift; retail accessor 0x2BAD78); [U] func_00289470 counts them
     int mPlayListIndex;                 // 0x6238 [P] GetPlayListIndex (preview 0x62D8; retail accessor 0x2BAD98); [U] func_00289520 stores it
-    int unk_623C;                       // 0x623C [U] the running rider music event: func_0028D630 starts it,
-                                        //        func_0028D898 returns it, func_0028D740 / func_0028D7D8 end it,
+    int mRiderMusicEvent;               // 0x623C (name ours) [U] the running rider music event: func_0028D630 starts
+                                        //        it, func_0028D898 returns it, func_0028D740 / func_0028D7D8 end it,
                                         //        func_0028CF98 clears it
-    int unk_6240;                       // 0x6240 [U] the event to follow it: func_0028D740 records it
-    float unk_6244;                     // 0x6244 [U] func_0028C8C8: the air time, cached on the jump's first frame
-    float unk_6248;                     // 0x6248 [U] func_0028C8C8: the largest current air time of the jump
-    float unk_624C;                     // 0x624C [U] func_0028C8C8: the volume scale's air time, set on the
+    int mNextRiderMusicEvent;           // 0x6240 (name ours) [U] the event to follow it: func_0028D740 records it
+    float mJumpAirTime;                 // 0x6244 (name ours) [U] func_0028C8C8: the air time, cached on the jump's
+                                        //        first frame
+    float mJumpMaxAirTime;              // 0x6248 (name ours) [U] func_0028C8C8: the largest current air time of the
+                                        //        jump
+    float mJumpVolumeAirTime;           // 0x624C (name ours) [U] func_0028C8C8: the volume scale's air time, set on the
                                         //        jump's first frame
-    int unk_6250;                       // 0x6250 [R] ctor 0; [U] func_0028C8C8 counts it down, func_0028C8C0 sets
-                                        //        it; nothing reads it otherwise
-    int unk_6254;                       // 0x6254 [R] ctor 0; [U] func_002A4770; retail accessor 0x2BAD30 sets it to 1
-    int unk_6258;                       // 0x6258 [U] func_002A2E50
+    int mJumpCountdown;                 // 0x6250 (name ours) [R] ctor 0; [U] func_0028C8C8 counts it down,
+                                        //        func_0028C8C0 sets it; nothing reads it otherwise
+    int mInTransport;                   // 0x6254 (name ours) [R] ctor 0; [U] set by func_0028E8C0 event 20 (the
+                                        //        transport start) and by func_002BAD30 (retail 0x2BAD30); func_0028E888
+                                        //        (the NIS list ended) runs event 19 and clears it; func_002A4770
+                                        //        comments on mLastTransportTrack only while set
+    int mBonusLineQueued;               // 0x6258 (name ours) [U] func_0028E8C0 sets it with
+                                        //        mPendingBonusBetweenEventsLine and clears it after events 19 / 20, as
+                                        //        does func_0028EF90; while set func_002A2E50 skips the opening line and
+                                        //        the queued pick, and func_0028E8C0 holds its other DJ cues
     tWorldPainterQuery* mpMusicTriggerQuery[2]; // 0x625C (name ours) [U] cSSXAudio_InGameInit creates two
                                         //        kWPR_MusicTrigger queries, cSSXAudio_InGameDeInit frees them,
                                         //        cSSXAudio_UpdateAudioWorldPainter queries them
@@ -450,7 +513,9 @@ struct cSSXAudio {
                                         //        (0-9) only when it differs from this, then stores it;
                                         //        cSSXAudio_FrontEndLoad stores 10 (no mode, so the next switch
                                         //        applies); func_0028FC58 restores it
-    int unk_6294;                       // 0x6294 [R] ctor 0
+    int mReplayMusicStarted;            // 0x6294 (name ours) [R] ctor 0; [U] func_0028F200 sets it when the replay
+                                        //        starts its own song (none was playing); func_0028F2C0 then stops the
+                                        //        song; func_0028CF98 loads music in a replay only while set
     int mReplaySongPlaying;             // 0x6298 (name ours) [R] ctor 0; [U] func_0028F200 (replay music) sets it when
                                         //        a song is playing, func_0028F2C0 then sets music state 36 and clears
                                         //        it; cSSXAudio_CountdownGateDrop sets state 37 in a replay when set
@@ -459,7 +524,9 @@ struct cSSXAudio {
     int mMusicEventOwner;               // 0x62A0 (name ours) [U] the AI index (cRider virtual slot 7) of the rider
                                         //        whose music event runs, -1 for none: func_0028CF98 resets it,
                                         //        func_0028D630 claims it, func_0028D740 / func_0028D7D8 test and release
-    int unk_62A4;                       // 0x62A4 [R] ctor -1
+    int mLastPlaylistSong;              // 0x62A4 (name ours) [R] ctor -1; [U] func_0028CF98 stores the playlist song it
+                                        //        started (MusicSys.mCurrentSongNum); func_0028D488 avoids picking it
+                                        //        again
     int mLoadingLoopHandle;             // 0x62A8 (name ours) [R] ctor -1; [U] the loading-screen loop's voice handle
                                         //        (bank 13, patch 0): func_0028F768 starts it, func_0028FA98 stops it
                                         //        (-1 = none); cSSXAudio_WorldSound and cSSXAudio_AttachSound play
@@ -731,45 +798,45 @@ CHECK_OFFSET(cSSXAudio, MusicSys, 0x118);
 CHECK_OFFSET(cSSXAudio, SpeechSys, 0x5560);
 CHECK_OFFSET(cSSXAudio, unk_5720, 0x5720);
 CHECK_OFFSET(cSSXAudio, unk_5724, 0x5724);
-CHECK_OFFSET(cSSXAudio, unk_5728, 0x5728);
-CHECK_OFFSET(cSSXAudio, unk_572C, 0x572C);
+CHECK_OFFSET(cSSXAudio, mLanguageBigFile, 0x5728);
+CHECK_OFFSET(cSSXAudio, mSpeechLanguage, 0x572C);
 CHECK_OFFSET(cSSXAudio, mFrontEndDJVolume, 0x5730);
 CHECK_OFFSET(cSSXAudio, mGruntPatchCycle, 0x5734);
 CHECK_OFFSET(cSSXAudio, mSpeechVolumeID, 0x5738);
-CHECK_OFFSET(cSSXAudio, unk_573C, 0x573C);
-CHECK_OFFSET(cSSXAudio, unk_5740, 0x5740);
-CHECK_OFFSET(cSSXAudio, unk_5744, 0x5744);
-CHECK_OFFSET(cSSXAudio, unk_5748, 0x5748);
-CHECK_OFFSET(cSSXAudio, unk_574C, 0x574C);
-CHECK_OFFSET(cSSXAudio, unk_5750, 0x5750);
-CHECK_OFFSET(cSSXAudio, unk_5754, 0x5754);
-CHECK_OFFSET(cSSXAudio, unk_5758, 0x5758);
-CHECK_OFFSET(cSSXAudio, unk_575C, 0x575C);
-CHECK_OFFSET(cSSXAudio, unk_5760, 0x5760);
+CHECK_OFFSET(cSSXAudio, mUsedBetweenEventsPicks, 0x573C);
+CHECK_OFFSET(cSSXAudio, mPendingLine8422, 0x5740);
+CHECK_OFFSET(cSSXAudio, mPendingPlaceLine, 0x5744);
+CHECK_OFFSET(cSSXAudio, mPlaceLineRider, 0x5748);
+CHECK_OFFSET(cSSXAudio, mPendingBetweenEventsLine, 0x574C);
+CHECK_OFFSET(cSSXAudio, mPendingBetweenEventsLine2, 0x5750);
+CHECK_OFFSET(cSSXAudio, mPendingBonusBetweenEventsLine, 0x5754);
+CHECK_OFFSET(cSSXAudio, mPendingLocationPartLine, 0x5758);
+CHECK_OFFSET(cSSXAudio, mPendingLocationPart, 0x575C);
+CHECK_OFFSET(cSSXAudio, mPendingOtherLine, 0x5760);
 CHECK_OFFSET(cSSXAudio, unk_5764, 0x5764);
-CHECK_OFFSET(cSSXAudio, unk_5768, 0x5768);
-CHECK_OFFSET(cSSXAudio, unk_576C, 0x576C);
-CHECK_OFFSET(cSSXAudio, unk_5770, 0x5770);
+CHECK_OFFSET(cSSXAudio, mPendingChoiceLine, 0x5768);
+CHECK_OFFSET(cSSXAudio, mPendingPeakLine8378, 0x576C);
+CHECK_OFFSET(cSSXAudio, mPendingLocationLine, 0x5770);
 CHECK_OFFSET(cSSXAudio, mSongAnnouncePending, 0x5774);
 CHECK_OFFSET(cSSXAudio, mSongAnnounceNum, 0x5778);
-CHECK_OFFSET(cSSXAudio, unk_577C, 0x577C);
-CHECK_OFFSET(cSSXAudio, unk_5780, 0x5780);
-CHECK_OFFSET(cSSXAudio, unk_5784, 0x5784);
+CHECK_OFFSET(cSSXAudio, mPendingLine8492, 0x577C);
+CHECK_OFFSET(cSSXAudio, mLine8492Played, 0x5780);
+CHECK_OFFSET(cSSXAudio, mPendingPeakLine8491, 0x5784);
 CHECK_OFFSET(cSSXAudio, mRiderRemarkPending, 0x5788);
-CHECK_OFFSET(cSSXAudio, unk_578C, 0x578C);
-CHECK_OFFSET(cSSXAudio, unk_5790, 0x5790);
-CHECK_OFFSET(cSSXAudio, unk_5794, 0x5794);
-CHECK_OFFSET(cSSXAudio, unk_5798, 0x5798);
+CHECK_OFFSET(cSSXAudio, mFirstTimeOnPeak, 0x578C);
+CHECK_OFFSET(cSSXAudio, mPeakIntroDone, 0x5790);
+CHECK_OFFSET(cSSXAudio, mChoiceLineFirstTime, 0x5794);
+CHECK_OFFSET(cSSXAudio, mQueuedBetweenEventsPick, 0x5798);
 CHECK_OFFSET(cSSXAudio, mFirstTimeOnTrack, 0x579C);
-CHECK_OFFSET(cSSXAudio, unk_57F8, 0x57F8);
-CHECK_OFFSET(cSSXAudio, unk_57FC, 0x57FC);
-CHECK_OFFSET(cSSXAudio, unk_5800, 0x5800);
-CHECK_OFFSET(cSSXAudio, unk_5804, 0x5804);
-CHECK_OFFSET(cSSXAudio, unk_5808, 0x5808);
-CHECK_OFFSET(cSSXAudio, unk_580C, 0x580C);
-CHECK_OFFSET(cSSXAudio, unk_5810, 0x5810);
-CHECK_OFFSET(cSSXAudio, unk_5814, 0x5814);
-CHECK_OFFSET(cSSXAudio, unk_5818, 0x5818);
+CHECK_OFFSET(cSSXAudio, mEventResultPending, 0x57F8);
+CHECK_OFFSET(cSSXAudio, mEventFinished, 0x57FC);
+CHECK_OFFSET(cSSXAudio, mEventResultPlace, 0x5800);
+CHECK_OFFSET(cSSXAudio, mEventResultFrags, 0x5804);
+CHECK_OFFSET(cSSXAudio, mEventResultUberTricks, 0x5808);
+CHECK_OFFSET(cSSXAudio, mLastEventResultLine, 0x580C);
+CHECK_OFFSET(cSSXAudio, mEventResultLocation, 0x5810);
+CHECK_OFFSET(cSSXAudio, mLastTransportTrack, 0x5814);
+CHECK_OFFSET(cSSXAudio, mScriptedDJLine, 0x5818);
 CHECK_OFFSET(cSSXAudio, mLastUberLevel, 0x581C);
 CHECK_OFFSET(cSSXAudio, mUberViewIndex, 0x5820);
 CHECK_OFFSET(cSSXAudio, mGateDropHeat, 0x5824);
@@ -824,18 +891,18 @@ CHECK_OFFSET(cSSXAudio, mRadioModeID, 0x608C);
 CHECK_OFFSET(cSSXAudio, mFrontEndRadioModeID, 0x6090);
 CHECK_OFFSET(cSSXAudio, unk_6094, 0x6094);
 CHECK_OFFSET(cSSXAudio, mRadioPlayList, 0x6098);
-CHECK_OFFSET(cSSXAudio, unk_60A0, 0x60A0);
+CHECK_OFFSET(cSSXAudio, mOverlayLevel, 0x60A0);
 CHECK_OFFSET(cSSXAudio, mPlayListName, 0x60A4);
 CHECK_OFFSET(cSSXAudio, mNumPlayLists, 0x6234);
 CHECK_OFFSET(cSSXAudio, mPlayListIndex, 0x6238);
-CHECK_OFFSET(cSSXAudio, unk_623C, 0x623C);
-CHECK_OFFSET(cSSXAudio, unk_6240, 0x6240);
-CHECK_OFFSET(cSSXAudio, unk_6244, 0x6244);
-CHECK_OFFSET(cSSXAudio, unk_6248, 0x6248);
-CHECK_OFFSET(cSSXAudio, unk_624C, 0x624C);
-CHECK_OFFSET(cSSXAudio, unk_6250, 0x6250);
-CHECK_OFFSET(cSSXAudio, unk_6254, 0x6254);
-CHECK_OFFSET(cSSXAudio, unk_6258, 0x6258);
+CHECK_OFFSET(cSSXAudio, mRiderMusicEvent, 0x623C);
+CHECK_OFFSET(cSSXAudio, mNextRiderMusicEvent, 0x6240);
+CHECK_OFFSET(cSSXAudio, mJumpAirTime, 0x6244);
+CHECK_OFFSET(cSSXAudio, mJumpMaxAirTime, 0x6248);
+CHECK_OFFSET(cSSXAudio, mJumpVolumeAirTime, 0x624C);
+CHECK_OFFSET(cSSXAudio, mJumpCountdown, 0x6250);
+CHECK_OFFSET(cSSXAudio, mInTransport, 0x6254);
+CHECK_OFFSET(cSSXAudio, mBonusLineQueued, 0x6258);
 CHECK_OFFSET(cSSXAudio, mpMusicTriggerQuery, 0x625C);
 CHECK_OFFSET(cSSXAudio, mLastMusicTriggerType, 0x6264);
 CHECK_OFFSET(cSSXAudio, mLastMusicTriggerValue, 0x6268);
@@ -849,11 +916,11 @@ CHECK_OFFSET(cSSXAudio, mTransportTrack, 0x6284);
 CHECK_OFFSET(cSSXAudio, mMusicRampState, 0x6288);
 CHECK_OFFSET(cSSXAudio, mMusicRampCounter, 0x628C);
 CHECK_OFFSET(cSSXAudio, mFrontEndMusicMode, 0x6290);
-CHECK_OFFSET(cSSXAudio, unk_6294, 0x6294);
+CHECK_OFFSET(cSSXAudio, mReplayMusicStarted, 0x6294);
 CHECK_OFFSET(cSSXAudio, mReplaySongPlaying, 0x6298);
 CHECK_OFFSET(cSSXAudio, mLastMusicState, 0x629C);
 CHECK_OFFSET(cSSXAudio, mMusicEventOwner, 0x62A0);
-CHECK_OFFSET(cSSXAudio, unk_62A4, 0x62A4);
+CHECK_OFFSET(cSSXAudio, mLastPlaylistSong, 0x62A4);
 CHECK_OFFSET(cSSXAudio, mLoadingLoopHandle, 0x62A8);
 CHECK_OFFSET(cSSXAudio, mSavedSongNum, 0x62AC);
 CHECK_OFFSET(cSSXAudio, mAudioMode, 0x62B0);

@@ -41,16 +41,18 @@ struct sBmVoiceCD08 {
     void operator delete[](void* p, unsigned int size);
 };
 
+// The constructor's view of a cBankMonitor; the fields from mReEntry on carry the class's member names at the same
+// offsets (sound/bankmonitor.h).
 struct sBankMonitorCD08 {
-    char* vbase;                // 0x0
+    char* vbase;            // 0x0
     char pad_0x4[0x8D8 - 0x4];
-    void** vtbl;                // 0x8D8
-    volatile int f8DC;          // 0x8DC
-    int f8E0;                   // 0x8E0
-    int f8E4;                   // 0x8E4
-    int f8E8;                   // 0x8E8
-    sBmVoiceCD08* voices;       // 0x8EC
-    char vb[0x4];               // 0x8F0
+    void** vtbl;            // 0x8D8
+    volatile int mReEntry;  // 0x8DC
+    int mDopplerEnable;     // 0x8E0
+    int mPositionalEnable;  // 0x8E4
+    int mBankMonitorPaused; // 0x8E8
+    sBmVoiceCD08* voices;   // 0x8EC
+    char vb[0x4];           // 0x8F0
 };
 
 /**
@@ -80,9 +82,9 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
         vt.e[1].delta = D_00483B88.e[1].delta + thisAdjust;
     }
     self->vtbl = cBankMonitor_vtbl;
-    self->f8DC = 0;
-    self->f8E0 = 1;
-    self->f8E4 = 1;
+    self->mReEntry = 0;
+    self->mDopplerEnable = 1;
+    self->mPositionalEnable = 1;
     sBmVoiceCD08** slot = &self->voices;
     *slot = new (str_mBankMonitorInstance, 0, 0) sBmVoiceCD08[64];
     return self;
@@ -214,27 +216,28 @@ struct sSndOptsDelay {
 };
 
 // cSndPlayOpts (prototype class, as in sound/soundsys): the play-option stack; push = cur++ and copy def into
-// ch[cur]. Field names follow sound/soundsys (ch = mCurrent, vals = mBaseVol, p70 = mDelay, ...).
+// ch[cur] (ch = mCurrent, vals = mBaseVol). From mPosStatic on the fields carry cSndPlayOpts's member names at the
+// same offsets (sound/bankmonitor.h).
 struct sSndPlayOptsView {
-    char* vbase;                // 0x00 virtual-base pointer
-    sSndOptsRec def;            // 0x04
-    volatile int cur;           // 0x1C
-    sSndOptsRec* ch;            // 0x20
-    sBmQuad* tgt[4];            // 0x24
-    int* p34;                   // 0x34
-    int* vals;                  // 0x38
-    int* p3C;                   // 0x3C
-    sSndCallback callbacks[4];  // 0x40
-    int* p60;                   // 0x60
-    int* p64;                   // 0x64
-    float* p68;                 // 0x68
-    float* p6C;                 // 0x6C
-    sSndOptsDelay* p70;         // 0x70
-    int* p74;                   // 0x74
-    int* p78;                   // 0x78
-    int* p7C;                   // 0x7C
-    int* p80;                   // 0x80
-    int* p84;                   // 0x84
+    char* vbase;               // 0x00 virtual-base pointer
+    sSndOptsRec def;           // 0x04
+    volatile int cur;          // 0x1C
+    sSndOptsRec* ch;           // 0x20
+    sBmQuad* tgt[4];           // 0x24
+    int* mPosStatic;           // 0x34
+    int* vals;                 // 0x38
+    int* mVolControl;          // 0x3C
+    sSndCallback callbacks[4]; // 0x40
+    int* mPtr;                 // 0x60
+    int* mViewport;            // 0x64
+    float* mVanish;            // 0x68
+    float* mRadius;            // 0x6C
+    sSndOptsDelay* mDelay;     // 0x70
+    int* mExternalVol;         // 0x74
+    int* mMapToMaxVol;         // 0x78
+    int* mCloseOnEnd;          // 0x7C
+    int* mTwoPlayerPan;        // 0x80
+    int* mTwoPlayerSide;       // 0x84
 };
 
 // A complete cSpeechSys (the in-charge ctor builds it): g++ 2.95 puts the virtual bases after the non-virtual part.
@@ -260,31 +263,32 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Create);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBankMonitorInstance_cBankMonitorInstance(void* self);
 
-// One of a bank monitor's 64 voices (0xC0 bytes).
+// One of a bank monitor's 64 voices (0xC0 bytes): a cBankMonitorInstance. The fields from mCloseStateLocked on carry
+// that class's member names at the same offsets (sound/bankmonitor.h; mVolControl is a float* there).
 struct sBmVoice {
-    int kind;                   // 0x00 (1 / 2: which sound system plays it)
-    int id;                     // 0x04
-    int valid;                  // 0x08
-    int handle;                 // 0x0C
+    int kind;               // 0x00 (1 / 2: which sound system plays it)
+    int id;                 // 0x04
+    int valid;              // 0x08
+    int handle;             // 0x0C
     char pad10[0x58 - 0x10];
-    int f58;                    // 0x58
-    float value;                // 0x5C
-    int f60;                    // 0x60
-    int vol;                    // 0x64
-    sBmQuad* tgt;               // 0x68
-    int f6C;                    // 0x6C
-    sBmQuad tgtCopy;            // 0x70
-    int f80;                    // 0x80
-    int f84;                    // 0x84
-    float f88;                  // 0x88
-    float f8C;                  // 0x8C
-    float f90;                  // 0x90
-    int f94;                    // 0x94
-    int f98;                    // 0x98
-    int f9C;                    // 0x9C
-    int fA0;                    // 0xA0
-    int fA4;                    // 0xA4
-    sSndCallback callback;      // 0xA8
+    int mCloseStateLocked;  // 0x58
+    float value;            // 0x5C
+    int mVolControl;        // 0x60
+    int vol;                // 0x64
+    sBmQuad* tgt;           // 0x68
+    int f6C;                // 0x6C
+    sBmQuad tgtCopy;        // 0x70
+    int mPtr;               // 0x80
+    int mViewport;          // 0x84
+    float mVanish;          // 0x88
+    float mRadius;          // 0x8C
+    float mVolMultiplier;   // 0x90
+    int mExternalVol;       // 0x94
+    int mMapToMaxVol;       // 0x98
+    int mCloseOnEnd;        // 0x9C
+    int mTwoPlayerPan;      // 0xA0
+    int mTwoPlayerSide;     // 0xA4
+    sSndCallback callback;  // 0xA8
     char padB0[0xC0 - 0xB0];
     sBmVoice() { cBankMonitorInstance_cBankMonitorInstance(this); }
     void operator delete[](void* p, unsigned int size);
@@ -294,13 +298,13 @@ struct sBmVoice {
 // virtual base at 0x8F0.
 struct sBankMonitorView : public sSndPlayOptsView {  // this unit's model of cBankMonitor (sound/bankmonitor.h)
     char pad88[0x8D8 - 0x88];
-    void** vtbl;                // 0x8D8
-    volatile int busy;          // 0x8DC
-    int f8E0;                   // 0x8E0
-    int f8E4;                   // 0x8E4
-    int f8E8;                   // 0x8E8
-    sBmVoice* voices;           // 0x8EC
-    char vb[0x4];               // 0x8F0
+    void** vtbl;            // 0x8D8
+    volatile int busy;      // 0x8DC
+    int mDopplerEnable;     // 0x8E0
+    int mPositionalEnable;  // 0x8E4
+    int mBankMonitorPaused; // 0x8E8
+    sBmVoice* voices;       // 0x8EC
+    char vb[0x4];           // 0x8F0
 };
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void bxLogPrint(const char* fmt, ...);
@@ -344,26 +348,26 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
         cBankMonitorInstance_Reset(instance);
         instance->kind = kind;
         instance->id = id;
-        instance->f60 = self->p3C[self->cur];
+        instance->mVolControl = self->mVolControl[self->cur];
         instance->vol = vol;
         instance->tgt = self->tgt[self->cur];
         setCallback_Create(instance, OPTS_GetCallback_Create(self));
-        instance->f80 = self->p60[self->cur];
-        instance->f84 = self->p64[self->cur];
-        if (self->p34[self->cur] != 0) {
+        instance->mPtr = self->mPtr[self->cur];
+        instance->mViewport = self->mViewport[self->cur];
+        if (self->mPosStatic[self->cur] != 0) {
             instance->tgtCopy = *instance->tgt;
             instance->tgt = &instance->tgtCopy;
         }
-        instance->f88 = self->p68[self->cur];
-        instance->f8C = self->p6C[self->cur];
-        instance->f94 = self->p74[self->cur];
-        instance->f98 = self->p78[self->cur];
-        int f9C = self->p7C[self->cur];
-        if (instance->f58 == 0)
-            instance->f9C = f9C;
-        instance->f90 = -1.0f;
-        instance->fA0 = self->p80[self->cur];
-        instance->fA4 = self->p84[self->cur];
+        instance->mVanish = self->mVanish[self->cur];
+        instance->mRadius = self->mRadius[self->cur];
+        instance->mExternalVol = self->mExternalVol[self->cur];
+        instance->mMapToMaxVol = self->mMapToMaxVol[self->cur];
+        int closeOnEnd = self->mCloseOnEnd[self->cur];
+        if (instance->mCloseStateLocked == 0)
+            instance->mCloseOnEnd = closeOnEnd;
+        instance->mVolMultiplier = -1.0f;
+        instance->mTwoPlayerPan = self->mTwoPlayerPan[self->cur];
+        instance->mTwoPlayerSide = self->mTwoPlayerSide[self->cur];
         if (self->tgt[self->cur] != 0)
             cBankMonitorInstance_SetLastDistance(instance, self);
         instance->valid = id >= 0;
@@ -853,7 +857,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AD998);
 class func_002AD998_cObj {
 public:
     char data[0x8D8];
-    virtual void v01();
+    virtual void MONITOR_Update();  // slot 1: cMonitor_vtbl holds cMonitor_MONITOR_Update there
 };
 
 
@@ -865,7 +869,7 @@ public:
  */
 extern "C" void func_002AD998()
 {
-    ((func_002AD998_cObj*)gMonitor)->v01();
+    ((func_002AD998_cObj*)gMonitor)->MONITOR_Update();
 }
 #endif
 
@@ -1195,9 +1199,11 @@ void cMonitor_MONITOR_DestroyAll1_impl(void* vself, sBmKeyDDE0 key)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSoundSys_cSoundSys);
 #ifdef SKIP_ASM
+// The platform sound manager (cSoundManager). Slot names: [O] On Tour's cSoundManager declares Init, SetMode,
+// Shutdown in that order, and the retail cSoundSys ctor, SetMode and dtor call slots 1, 2 and 3.
 class cSoundSys_cSoundSys_cObj {
 public:
-    virtual void v01(int a);
+    virtual void Init(int audioMode);
 };
 
 extern "C" cSoundSys_cSoundSys_cObj* cSoundManager_Construct();
@@ -1218,7 +1224,7 @@ extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int audioMode)
     SoundSys = (cSoundSys*)(((void*)self));
     cSoundSys_cSoundSys_cObj* obj = cSoundManager_Construct();
     *(cSoundSys_cSoundSys_cObj**)self = obj;
-    obj->v01(audioMode);
+    obj->Init(audioMode);
     return ((void*)self);
 }
 #endif
@@ -1226,11 +1232,12 @@ extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int audioMode)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cSoundSys__cSoundSys);
 #ifdef SKIP_ASM
+// The platform sound manager (cSoundManager); slot names as in cSoundSys_cSoundSys's view.
 class cSoundSys__cSoundSys_cObj {
 public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03(int a);
+    virtual void Init();
+    virtual void SetMode();
+    virtual void Shutdown(int flags);
 };
 
 void operator_delete(int* ptr);
@@ -1247,7 +1254,7 @@ extern char cSoundSys_vtbl[];
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags)
 {
     self->mVtbl = (void**)cSoundSys_vtbl;
-    ((cSoundSys__cSoundSys_cObj*)self->pManager)->v03(flags);
+    ((cSoundSys__cSoundSys_cObj*)self->pManager)->Shutdown(flags);
     operator_delete((int*)self->pManager);
     SoundSys = 0;
     if (flags & 1) {
@@ -1291,9 +1298,10 @@ INCLUDE_ASM("sound/bankmonitor", cSoundSys_SetMode);
 #ifdef SKIP_ASM
 class cSoundSys_SetMode_cObj {
 public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual int v02(int a);
+    // vptr at 0x0; slot N at vtable offset N*8. The platform sound manager (cSoundManager); slot names as in
+    // cSoundSys_cSoundSys's view.
+    virtual void Init();
+    virtual int SetMode(int mode);
 };
 
 
@@ -1308,7 +1316,7 @@ public:
  */
 int cSoundSys::SetMode(int mode)
 {
-    return ((cSoundSys_SetMode_cObj*)pManager)->v02(mode);
+    return ((cSoundSys_SetMode_cObj*)pManager)->SetMode(mode);
 }
 #endif
 
@@ -2676,12 +2684,14 @@ extern "C" void SNDvol(int h, int v);
 extern "C" void func_003B7E70(int h, int v);
 
 /**
- * Sets a Pathfinder player slot's volume when no fade is pending; only while the audio system's unk_6280 is set.
+ * Sets a Pathfinder player slot's volume when no fade is pending; only while the audio system's
+ * mPathfinderCanChangeVolume is set.
  *
- * Returns 0 at once when gSSXAudio's unk_6280 (cAudioInterface_bxAudio) is 0. Refreshes the status when the slot is
- * dirty; when the fade target (+0x8) is unset or reached it clears it and, if v differs from the current volume (+0xC)
- * and both are >= 0, applies v with SNDvol (bank player) or func_003B7E70 (stream) inside the critical section and
- * stores it. A pending fade makes it return -8. Called by func_002AE7A8 and the Pathfinder library.
+ * Returns 0 at once when gSSXAudio's mPathfinderCanChangeVolume (cAudioInterface_bxAudio) is 0. Refreshes the status
+ * when the slot is dirty; when the fade target (+0x8) is unset or reached it clears it and, if v differs from the
+ * current volume (+0xC) and both are >= 0, applies v with SNDvol (bank player) or func_003B7E70 (stream) inside the
+ * critical section and stores it. A pending fade makes it return -8. Called by func_002AE7A8 and the Pathfinder
+ * library.
  *
  * @param idx  the player-slot index
  * @param volume  the new volume
@@ -2939,10 +2949,10 @@ extern "C" void func_002B0088(cSpeechInstance* self, int a, int b, int c);
 /**
  * Constructs a cSpeechInstance: one speech stream of cSpeechSys, with its event files and speech banks.
  *
- * Stores the index (unk_000), stream id (unk_004) and a6 (unk_008), sets unk_900 = 1, zeroes the counters and request
- * fields and the four event-file pairs, opens the stream through cStreamSys (cStreamSys_STREAM_Create(stream id, memType, 0,
- * 0x20000)) and reads its speech.inf section (func_002B0088(index, section, loadLangHead)). func_002B0E60 calls it on
- * cMemMan_alloc(0x904, "SpeechInstance").
+ * Stores the index (mIndex), stream id (mStreamId) and @p reserved (unk_008), sets mReadyForSpeech = 1, zeroes the
+ * counters and request fields and the four event-file pairs, opens the stream through cStreamSys
+ * (cStreamSys_STREAM_Create(stream id, memType, 0, 0x20000)) and reads its speech.inf section (func_002B0088(index,
+ * section, loadLangHead)). func_002B0E60 calls it on cMemMan_alloc(0x904, "SpeechInstance").
  *
  * @param mem  the memory for the object
  * @param instanceIndex  the instance's index in cSpeechSys::mSpeechInstance
@@ -2950,17 +2960,17 @@ extern "C" void func_002B0088(cSpeechInstance* self, int a, int b, int c);
  * @param section  the speech.inf section to read
  * @param memType  the memory type passed to the stream open
  * @param loadLangHead  nonzero to also load the language headers ("%slanghead.big")
- * @param a6  stored in unk_008 (no reader found)
+ * @param reserved  stored in unk_008, which nothing reads (name ours; func_002B0E60's callers pass -1)
  * @return mem
  */
 extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int streamId, int section,
-        int memType, int loadLangHead, int a6)
+        int memType, int loadLangHead, int reserved)
 {
     cSpeechInstance* self = mem;
-    self->unk_000 = instanceIndex;
-    self->unk_004 = streamId;
-    self->unk_900 = 1;
-    self->unk_008 = a6;
+    self->mIndex = instanceIndex;
+    self->mStreamId = streamId;
+    self->mReadyForSpeech = 1;
+    self->unk_008 = reserved;
     self->mNumEventFiles = 0;
     self->mNumBanks = 0;
     self->unk_8C4 = 0;
@@ -2973,7 +2983,7 @@ extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int instanceInde
         self->mEventFile[i].mpData = 0;
         self->mEventFile[i].mOwned = 0;
     }
-    cStreamSys_STREAM_Create(D_004A37B4->mpVStreamSys, self->unk_004, memType, 0, 0x20000);
+    cStreamSys_STREAM_Create(D_004A37B4->mpVStreamSys, self->mStreamId, memType, 0, 0x20000);
     func_002B0088(self, instanceIndex, section, loadLangHead);
     return self;
 }
@@ -3018,7 +3028,7 @@ extern "C" void func_002AFB38(cSpeechInstance* self, int flags)
             self->mEventFile[i].mpData = 0;
         }
     }
-    cStreamSys_STREAM_Destroy(D_004A37B4->mpVStreamSys, self->unk_004);
+    cStreamSys_STREAM_Destroy(D_004A37B4->mpVStreamSys, self->mStreamId);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3038,33 +3048,34 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void OnReadyForSpeech();  // slot 4 (name ours): cSSXAudio fills it with func_002A43B8, which plays
+                                      // the most urgent pending DJ line
 };
 
 /**
  * Per-frame update of one speech instance: lets the speech driver start or advance speech on channel i.
  *
- * When the stream can take speech (func_002B0290): with unk_900 set it calls cSpeechSys's virtual slot 4 (on
- * D_004A37B4) and then the driver's func_003D7EC8(i), clearing unk_900 when that returns nonzero; with unk_900 clear it
- * calls func_003D8040(i) and sets unk_900. When the stream is busy it sets unk_900. Called by func_002B0C78 for both
- * instances.
+ * When the stream can take speech (func_002B0290): with mReadyForSpeech set it calls cSpeechSys's virtual slot 4 (on
+ * D_004A37B4) and then the driver's func_003D7EC8(i), clearing mReadyForSpeech when that returns nonzero; with
+ * mReadyForSpeech clear it calls func_003D8040(i) and sets mReadyForSpeech. When the stream is busy it sets
+ * mReadyForSpeech. Called by func_002B0C78 for both instances.
  *
  * @param i  the instance's index (the speech driver channel)
  */
 extern "C" void func_002AFC88(cSpeechInstance* self, int i)
 {
     if (func_002B0290(self) != 0) {
-        if (self->unk_900 != 0) {
-            ((func_002AFC88_cObj*)D_004A37B4)->v04();
+        if (self->mReadyForSpeech != 0) {
+            ((func_002AFC88_cObj*)D_004A37B4)->OnReadyForSpeech();
             if (func_003D7EC8(i) != 0) {
-                self->unk_900 = 0;
+                self->mReadyForSpeech = 0;
             }
         } else {
             func_003D8040(i);
-            self->unk_900 = 1;
+            self->mReadyForSpeech = 1;
         }
     } else {
-        self->unk_900 = 1;
+        self->mReadyForSpeech = 1;
     }
 }
 #endif
@@ -3078,7 +3089,8 @@ extern "C" int func_003D7EC8(int channel);
 int func_002AFD10_impl(cSpeechInstance* self, int channel) __asm__("func_002AFD10");
 
 /**
- * Starts the next speech on a channel (func_003D7EC8) and clears the instance's unk_900 when that returns nonzero.
+ * Starts the next speech on a channel (func_003D7EC8) and clears the instance's mReadyForSpeech when that returns
+ * nonzero.
  *
  * func_002B1758 calls it on cSpeechSys's instance for the channel.
  *
@@ -3089,7 +3101,7 @@ int func_002AFD10_impl(cSpeechInstance* self, int channel)
 {
     int result = func_003D7EC8(channel);
     if (result != 0) {
-        self->unk_900 = 0;
+        self->mReadyForSpeech = 0;
     }
     return result;
 }
@@ -3250,7 +3262,7 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int instanceIndex
             if (strcasecmp(str_BIGFILE, key) == 0)
             {
                 FileParser_AssignString(parser, str_BIGFILE, bigFileName);
-                cStreamSys_STREAM_SetBigFile_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, bigFileName);
+                cStreamSys_STREAM_SetBigFile_2B0088(D_004A37B4->mpVStreamSys, speechInstance->mStreamId, bigFileName);
             }
             if (strcasecmp(str_BASEPATH, key) == 0)
             {
@@ -3287,25 +3299,25 @@ extern "C" int cStreamSys_STREAM_Playing(void* self, int i);
 /**
  * Returns whether a speech instance's stream can take a new speech: idle, or playing with under 500 left.
  *
- * Asks cStreamSys about the instance's stream (unk_004): state 0 (cStreamSys_STREAM_Requests) gives 1; state 1 gives 1 when
- * cStreamSys_STREAM_Playing is nonzero and cStreamSys_STREAM_TimeRemaining is below 500; anything else 0.
+ * Asks cStreamSys about the instance's stream (mStreamId): state 0 (cStreamSys_STREAM_Requests) gives 1; state 1 gives
+ * 1 when cStreamSys_STREAM_Playing is nonzero and cStreamSys_STREAM_TimeRemaining is below 500; anything else 0.
  *
  * @param speechInstance  the cSpeechInstance
  * @return 1 or 0
  */
 extern "C" int func_002B0290(cSpeechInstance* speechInstance)
 {
-    int state = cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, speechInstance->unk_004);
+    int state = cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, speechInstance->mStreamId);
     if (state == 0) {
         return 1;
     }
     if (state != 1) {
         return 0;
     }
-    if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, speechInstance->unk_004) == 0) {
+    if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, speechInstance->mStreamId) == 0) {
         return 0;
     }
-    int ok = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, speechInstance->unk_004) < 500;
+    int ok = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, speechInstance->mStreamId) < 500;
     int canPlay = 0;
     if (ok) {
         canPlay = state;
@@ -3320,7 +3332,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0320);
 extern "C" void cStreamSys_STREAM_Purge(void* self, int i);
 
 /**
- * Purges a speech instance's stream (cStreamSys_STREAM_Purge on cStreamSys with unk_004).
+ * Purges a speech instance's stream (cStreamSys_STREAM_Purge on cStreamSys with mStreamId).
  *
  * func_002B11B0 calls it.
  *
@@ -3328,7 +3340,7 @@ extern "C" void cStreamSys_STREAM_Purge(void* self, int i);
  */
 extern "C" void func_002B0320(cSpeechInstance* speechInstance)
 {
-    cStreamSys_STREAM_Purge(D_004A37B4->mpVStreamSys, speechInstance->unk_004);
+    cStreamSys_STREAM_Purge(D_004A37B4->mpVStreamSys, speechInstance->mStreamId);
 }
 #endif
 
@@ -3406,11 +3418,13 @@ extern "C" void cStreamSys_STREAM_SetVolControl(void* self, int i, int w);
 
 typedef int (*Fn1_04D8)(void*, int, char*, int, int, int, int, float, int, int);
 
+// A speech driver event (names ours, from use): func_002B04D8 matches bankId against its banks' driver ids, passes
+// fileOffset to cSpeechSys's play slot (cSSXAudio::PlayPositional's fileOffset) and requestKey to func_002B1520.
 struct sBmArgs_04D8 {
-    int f0;
-    int f4;
+    int bankId;                // 0x0
+    int fileOffset;            // 0x4
     char pad8[4];
-    unsigned short fC;
+    unsigned short requestKey; // 0xC
 };
 
 static inline cSpeechBank** at_04D8(cSpeechBank** base, int i)
@@ -3434,23 +3448,23 @@ extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* a) __asm_
  * (UpdateSpeechVolume) to the stream (cStreamSys_STREAM_SetVolControl) and starts the speech with hold mHoldTime.
  * Called by func_002B0F48.
  *
- * @param speechEvent  the speech driver event (bank id, play argument, request key)
+ * @param speechEvent  the speech driver event (bankId, fileOffset, requestKey)
  * @return the speech handle from the play slot, or -1
  */
 extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* speechEvent)
 {
     int idx = -1;
     int i;
-    if (func_002AFA58(self->mBanks[speechEvent->f0], speechEvent->f0)) {
-        idx = speechEvent->f0;
+    if (func_002AFA58(self->mBanks[speechEvent->bankId], speechEvent->bankId)) {
+        idx = speechEvent->bankId;
     } else {
         for (i = 0; i < self->mNumBanks; i++) {
-            if (func_002AFA58(self->mBanks[i], speechEvent->f0)) {
+            if (func_002AFA58(self->mBanks[i], speechEvent->bankId)) {
                 idx = i;
             }
         }
     }
-    if (idx >= 0 && func_002B1520_c((char*)D_004A37B4, self->unk_000, speechEvent->fC)) {
+    if (idx >= 0 && func_002B1520_c((char*)D_004A37B4, self->mIndex, speechEvent->requestKey)) {
         cSpeechBank** slot = at_04D8(self->mBanks, idx);
         int lang = func_002B03B8((*slot)->mName);
         char buf[0x100];
@@ -3458,17 +3472,18 @@ extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* speechEve
                 (*slot)->mName);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
-        int volumeId = ((int (*)(void*, int, int))vt0[2].fn)(vthis(speechSys, vt0[2]), self->unk_000,
+        int volumeId = ((int (*)(void*, int, int))vt0[2].fn)(vthis(speechSys, vt0[2]), self->mIndex,
                                                              (int)(*slot)->mShortName);
         cSpeechSys* speechBase;
         sSndVtSlot* vt;
-        int remainingMs = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, self->unk_004);
+        int remainingMs = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, self->mStreamId);
         int playHandle;
-        if (cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, self->unk_004) != 0) {
-            if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->unk_004) != 0) {
+        if (cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, self->mStreamId) != 0) {
+            if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->mStreamId) != 0) {
                 speechBase = D_004A37B4;
                 vt = (sSndVtSlot*)speechBase->mVtbl;
-                playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->unk_004, buf, speechEvent->f4,
+                playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->mStreamId, buf,
+                        speechEvent->fileOffset,
                                                   self->mPosition, -1, self->mUserInfo, self->mRadius, self->mIsHuman,
                                                   self->mViewport);
                 if (playHandle >= 0) {
@@ -3479,7 +3494,7 @@ extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* speechEve
             }
             speechBase = D_004A37B4;
             vt = (sSndVtSlot*)speechBase->mVtbl;
-            playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->unk_004, buf, speechEvent->f4,
+            playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->mStreamId, buf, speechEvent->fileOffset,
                                               self->mPosition, -1, self->mUserInfo, self->mRadius, self->mIsHuman,
                                               self->mViewport);
             if (playHandle >= 0) {
@@ -3490,14 +3505,15 @@ extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* speechEve
         }
         speechBase = D_004A37B4;
         vt = (sSndVtSlot*)speechBase->mVtbl;
-        int w = ((int (*)(void*, int, int, int))vt[3].fn)(vthis(speechBase, vt[3]), self->unk_000, volumeId,
+        int w = ((int (*)(void*, int, int, int))vt[3].fn)(vthis(speechBase, vt[3]), self->mIndex, volumeId,
                                                           self->mUserInfo);
         if (w != 0) {
-            cStreamSys_STREAM_SetVolControl(D_004A37B4->mpVStreamSys, self->unk_004, w);
+            cStreamSys_STREAM_SetVolControl(D_004A37B4->mpVStreamSys, self->mStreamId, w);
         }
         cSpeechSys* speechSystem = D_004A37B4;
         sSndVtSlot* vt2 = (sSndVtSlot*)speechSystem->mVtbl;
-        return ((Fn1_04D8)vt2[1].fn)(vthis(speechSystem, vt2[1]), self->unk_004, buf, speechEvent->f4, self->mPosition,
+        return ((Fn1_04D8)vt2[1].fn)(vthis(speechSystem, vt2[1]), self->mStreamId, buf, speechEvent->fileOffset,
+                self->mPosition,
                                      self->mHoldTime, self->mUserInfo, self->mRadius, self->mIsHuman, self->mViewport);
     }
     return -1;
@@ -3508,13 +3524,14 @@ extern "C" int func_002B04D8_impl(cSpeechInstance* self, sBmArgs_04D8* speechEve
 INCLUDE_ASM("sound/bankmonitor", func_002B07C0);
 #ifdef SKIP_ASM
 /**
- * Calls cStreamSys cStreamSys_STREAM_Playing on the speech instance's stream (unk_004); the result is not returned in C.
+ * Calls cStreamSys cStreamSys_STREAM_Playing on the speech instance's stream (mStreamId); the result is not returned in
+ * C.
  *
  * func_002B11E8 uses the value left in v0.
  */
 extern "C" void func_002B07C0(cSpeechInstance* self)
 {
-    cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->unk_004);
+    cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->mStreamId);
 }
 #endif
 //100%
@@ -3587,7 +3604,7 @@ extern const sBmonVtblB07F8 D_004838C0_07F8 __asm__("D_004838C0");
  *
  * When @p inchrg is set it builds the virtual bases first (cSpeechSysComplete): cSoundSys at +0x1C0, cBankManager at
  * +0x1C8 and cStreamSys at +0xC98. Installs the cSpeechSys vtables (cSpeechSys_vtbl at mVtbl, D_004838A0 / D_004838C0
- * in the virtual bases, adjusted on the stack when not in charge), sets mCallbackInstance -1, clears unk_008 and
+ * in the virtual bases, adjusted on the stack when not in charge), sets mCallbackInstance -1, clears mpBankMem and
  * mCallback, stores itself in D_004A37B4, allocates the two-entry mSpeechInstance array (both empty), clears the
  * request table (func_002B1428) and copies the five speech .big file names into mBigFileName.
  *
@@ -3628,7 +3645,7 @@ extern "C" char* cSpeechSys_cSpeechSys(cSpeechSys* self, int inchrg, int maxBank
     }
     self->mVtbl = cSpeechSys_vtbl;
     self->mCallbackInstance = -1;
-    self->unk_008 = 0;
+    self->mpBankMem = 0;
     self->mCallback = 0;
     D_004A37B4 = (cSpeechSys*)(self);
     self->mSpeechInstance = new (str_mSpeechInstance, 0, 0) cSpeechInstance*[2];
@@ -3758,7 +3775,7 @@ extern char str_bank_mem[];
  *
  * Allocates a 0x5622-byte buffer (func_003D6778) and prints "SPCH_Init: rNum=%d". It passes func_002AF8A8, a
  * random number (cSoundSys_SndRand on the shared cSoundSys, BankMonitor.mpVSoundSys) and the buffer to func_003D6840.
- * It then sizes a "bank mem" block for 500 (func_003D6C58), allocates it into unk_008 and hands it to func_003D6C60.
+ * It then sizes a "bank mem" block for 500 (func_003D6C58), allocates it into mpBankMem and hands it to func_003D6C60.
  * The callees are unknown.
  */
 extern "C" void SPCH_Init(cSpeechSys* self)
@@ -3769,7 +3786,7 @@ extern "C" void SPCH_Init(cSpeechSys* self)
     func_003D6840((void*)func_002AF8A8, seed, buf);
     int n = func_003D6C58(500);
     void* workMem = MEM_alloc(str_bank_mem, n, 0);
-    self->unk_008 = workMem;
+    self->mpBankMem = workMem;
     func_003D6C60(500, workMem);
     *(void**)((char*)func_003D6768() + 0x8) = (void*)TIMER_gettick;
 }
@@ -3785,7 +3802,7 @@ extern "C" void func_003D67F8(void);
  * Shuts the speech system down: destroys both speech instances and frees the speech bank buffer.
  *
  * Destroys each instance (func_002AFB38 with 3) and clears its slot, calls the driver's func_003D67F8 and MEM_free()s
- * unk_008, clearing it. Called by the audio system's shutdown.
+ * mpBankMem, clearing it. Called by the audio system's shutdown.
  */
 extern "C" void func_002B0DA0(cSpeechSys* self)
 {
@@ -3797,8 +3814,8 @@ extern "C" void func_002B0DA0(cSpeechSys* self)
         (self->mSpeechInstance)[i] = 0;
     }
     func_003D67F8();
-    MEM_free(self->unk_008);
-    self->unk_008 = 0;
+    MEM_free(self->mpBankMem);
+    self->mpBankMem = 0;
 }
 #endif
 
@@ -3829,7 +3846,7 @@ extern "C" int func_002B0E28(cSpeechSys* self, int i)
 INCLUDE_ASM("sound/bankmonitor", func_002B0E60);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int e);
+extern "C" cSpeechInstance* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int reserved);
 extern const char str_SpeechInstance[];
 
 /**
@@ -3842,13 +3859,15 @@ extern const char str_SpeechInstance[];
  * @param section  the speech.inf section
  * @param memType  the memory type for the stream
  * @param loadLangHead  nonzero to load the language headers
- * @param e  stored in the instance (unk_008)
+ * @param reserved  stored in the instance's unk_008, which nothing reads (name ours; both callers pass -1)
  */
-extern "C" void func_002B0E60(cSpeechSys* self, int i, int streamId, int section, int memType, int loadLangHead, int e)
+extern "C" void func_002B0E60(cSpeechSys* self, int i, int streamId, int section, int memType, int loadLangHead,
+        int reserved)
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)self->mSpeechInstance);
-    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section, memType, loadLangHead, e);
+    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section,
+            memType, loadLangHead, reserved);
 }
 #endif
 
@@ -4053,7 +4072,7 @@ extern "C" int func_002B11E8(cSpeechSys* self, int i)
 INCLUDE_ASM("sound/bankmonitor", func_002B1220);
 #ifdef SKIP_ASM
 /**
- * Returns speech instance i's stream id (unk_004), or -1 when the instance does not exist.
+ * Returns speech instance i's stream id (mStreamId), or -1 when the instance does not exist.
  *
  * @param i  the instance index
  * @return the stream id, or -1
@@ -4062,7 +4081,7 @@ extern "C" int func_002B1220(cSpeechSys* self, int i)
 {
     cSpeechInstance* instance = (cSpeechInstance*)(self->mSpeechInstance)[i];
     if (((void*)instance) != 0) {
-        return instance->unk_004;
+        return instance->mStreamId;
     }
     return -1;
 }
@@ -4111,7 +4130,7 @@ struct sVE1268 { short delta; short index; int (*fn)(void*, int, int, int); };
 extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg)
 {
     cSpeechInstance* ent = (cSpeechInstance*)msg->mPtr;
-    int channel = func_002B1220((cSpeechSys*)D_004A37B4, ent->unk_000);
+    int channel = func_002B1220((cSpeechSys*)D_004A37B4, ent->mIndex);
     if (cStreamSys_STREAM_GetCurrActiveSampleHandle(self->mpVStreamSys, channel) != msg->mData1) {
         cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, 200,
                                 D_004A37E0_2B1268[0].v, msg->mPtr, msg->mData1, msg->mData2, 0, 0);
@@ -4120,9 +4139,9 @@ extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg)
     int slot = msg->mData2;
     if (slot != -1) {
         sVE1268* vt = (sVE1268*)self->mVtbl;
-        int speechVolume = vt[3].fn(vthis(self, vt[3]), ent->unk_000, slot, ent->mUserInfo);
+        int speechVolume = vt[3].fn(vthis(self, vt[3]), ent->mIndex, slot, ent->mUserInfo);
         if (speechVolume != 0) {
-            cStreamSys_STREAM_SetVolControl(self->mpVStreamSys, ent->unk_004, speechVolume);
+            cStreamSys_STREAM_SetVolControl(self->mpVStreamSys, ent->mStreamId, speechVolume);
         }
     }
     return func_002B1248_pp(self, msg);
@@ -4153,14 +4172,14 @@ extern "C" int func_002B1268(cSpeechSys* self, cMonitorInstance* msg);
 extern "C" int func_002B1348(cSpeechSys* self, cMonitorInstance* msg)
 {
     cSpeechInstance* ent = (cSpeechInstance*)((char*)msg->mPtr);
-    if (cStreamSys_STREAM_Requests(self->mpVStreamSys, ent->unk_004) - 1 > 0) {
-        if (cStreamSys_STREAM_Playing(self->mpVStreamSys, ent->unk_004) != 0) {
-            float remainingMs = cStreamSys_STREAM_TimeRemaining(self->mpVStreamSys, ent->unk_004);
+    if (cStreamSys_STREAM_Requests(self->mpVStreamSys, ent->mStreamId) - 1 > 0) {
+        if (cStreamSys_STREAM_Playing(self->mpVStreamSys, ent->mStreamId) != 0) {
+            float remainingMs = cStreamSys_STREAM_TimeRemaining(self->mpVStreamSys, ent->mStreamId);
             cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, (int)remainingMs,
                                     D_004A37D8_2B1348[0].v, ent, msg->mData1, msg->mData2, 0, 0);
             return 1;
         }
-        int channel = func_002B1220((cSpeechSys*)D_004A37B4, ent->unk_000);
+        int channel = func_002B1220((cSpeechSys*)D_004A37B4, ent->mIndex);
         if (cStreamSys_STREAM_GetCurrActiveSampleHandle(self->mpVStreamSys, channel) != msg->mData1) {
             return 0;
         }
@@ -4269,13 +4288,14 @@ class cBMVoice_1520 {
 public:
     // vptr at 0; slot N at vtable offset N*8
     virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05();
-    virtual int v06();
-    virtual int v07();
-    virtual int v08();
+    // slots 2-8: [P] the preview's cRider vtable names (ai/rider.h kRiderVt_*)
+    virtual int getVelocity();
+    virtual int isIntersecting();
+    virtual int applyBoost();
+    virtual int getPosition();
+    virtual int getTransform();
+    virtual int getAIIndex();
+    virtual int isHuman();
 };
 
 struct sBMObj_1520 {
@@ -4326,8 +4346,8 @@ extern "C" bool func_002B1520(sBMon_1520* self, int id, int key)
             int slotEightValue = 0;
             int z = -1;
             if (self->ents[j].obj != 0) {
-                slotFiveValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->v05();
-                slotEightValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->v08();
+                slotFiveValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->getPosition();
+                slotEightValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->isHuman();
                 z = self->ents[j].obj->z;
             }
             self->slots[id]->mPosition = slotFiveValue;
@@ -4614,10 +4634,12 @@ extern char str_pct_spct_spct_s_b[];
 extern char str_data_b[];
 extern char str_pct_spct_s_c[];
 
+// The constructor's view of the play options (SNDPLAYOPTS, ealib/snd.h): vol and lowpasscutoff are On Tour's [O]
+// member names at the same offsets.
 struct sBankEntry_1C50 {
-    unsigned char vol;      // 0x0
+    unsigned char vol;              // 0x0
     char pad1[0x13];
-    unsigned short f14;     // 0x14
+    unsigned short lowpasscutoff;   // 0x14
     short pad16;
 };
 
@@ -4629,27 +4651,29 @@ struct sBankDef_1C50 {
     int* vols;                  // 0x38
 };
 
+// The constructor's view of the cSongInstance it builds; the fields carry the class's member names at the same offsets
+// (include/sound/songinstance.h has the evidence for each).
 struct sBankMon_1C50 {
-    cSongConfiguration* snd;    // 0x0
-    sBankEntry_1C50 entry;      // 0x4
-    int f1C;                    // 0x1C
-    int f20;
-    void* buf24;                // 0x24
-    void* buf28;                // 0x28
-    int f2C;                    // 0x2C
-    int f30;                    // 0x30
-    int f34;                    // 0x34
-    int f38;                    // 0x38
-    int f3C;                    // 0x3C
-    char f40;                   // 0x40
-    int f44;                    // 0x44
-    int f48;                    // 0x48
-    int f4C;                    // 0x4C
-    int f50;                    // 0x50
-    int f54;                    // 0x54
-    int f58;                    // 0x58
-    int f5C;                    // 0x5C
-    char name[0x40];            // 0x60
+    cSongConfiguration* mpConfig;   // 0x0
+    sBankEntry_1C50 mPlayOpts;      // 0x4
+    int mHandle;                    // 0x1C
+    int mOverlayHandle;             // 0x20
+    void* mpPathfinderStream;       // 0x24
+    void* mpPathfinderOverlay;      // 0x28
+    int mStreamsOpen;               // 0x2C
+    int mPendingEvent;              // 0x30
+    int mBankIndex;                 // 0x34
+    int mLoopBankState;             // 0x38
+    int mpVolumeControl;            // 0x3C (a float* in the class)
+    char mBaseVolume;               // 0x40
+    int mLowPassCutoff;             // 0x44
+    int mFadingOut;                 // 0x48
+    int mOverlayArmed;              // 0x4C
+    int mOverlayRequested;          // 0x50
+    int mVolumeEnabled;             // 0x54
+    int mSongTag;                   // 0x58
+    int mHoldEvents;                // 0x5C
+    char mPath[0x40];               // 0x60
 };
 
 #define BM_MIN_1C50(a, b) ((a) < (b) ? (a) : (b))
@@ -4666,10 +4690,11 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2,
 /**
  * Constructs a cSongInstance (0xC4): the playing song's streams, buffers and settings.
  *
- * Initialises the fields (unk_1C/unk_30/unk_58 -1, unk_54 1, others 0), stores the bank index (unk_34), volume control
- * (unk_3C), base volume (unk_40) and the current play options' low-pass cutoff (unk_44), and allocates the 0x37000-byte
- * "PathfinderStream" and the func_003D3058(1, 0)-byte "PathfinderOverlay" buffers. Scales mBaseVol[mInst] by the song's
- * mPathlevel / 100 (clamped 0..127) into the play level's vol and copies that level into mPlayOpts.
+ * Initialises the fields (mHandle/mPendingEvent/mSongTag -1, mVolumeEnabled 1, others 0), stores the bank index
+ * (mBankIndex), volume control (mpVolumeControl), base volume (mBaseVolume) and the current play options' low-pass
+ * cutoff (mLowPassCutoff), and allocates the 0x37000-byte "PathfinderStream" and the func_003D3058(1, 0)-byte
+ * "PathfinderOverlay" buffers. Scales mBaseVol[mInst] by the song's mPathlevel / 100 (clamped 0..127) into the play
+ * level's vol and copies that level into mPlayOpts.
  *
  * mPath becomes "data/" + "audio/music.big" (mSongBig 1) or "audio/music2.big" + a0. Loads the MPF file
  * "<mPath><mPathData>" (func_002B4A20) and, with a7 set, opens the streams at once (func_002B21E0 with force). Note a1
@@ -4689,36 +4714,36 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int basePath, int secti
 {
     cSongConfiguration* snd = (cSongConfiguration*)songConfig;
     sBankDef_1C50* def = (sBankDef_1C50*)playOpts;
-    self->f1C = -1;
-    self->buf24 = 0;
-    self->buf28 = 0;
-    self->f2C = 0;
-    self->f30 = -1;
-    self->f38 = 0;
-    self->f34 = bankIndex;
-    self->f3C = volControl;
-    self->f40 = baseVol;
-    self->f48 = 0;
-    self->f4C = 0;
-    self->f50 = 0;
-    self->f54 = 1;
-    self->f58 = -1;
-    self->f5C = 0;
-    self->f44 = bankCur_1C50(def)->f14;
-    self->buf24 = bmNew_1C50(0x37000, str_PathfinderStream, 0, 0);
-    self->buf28 = bmNew_1C50(func_003D3058(1, 0), str_PathfinderOverlay, 0, 0);
+    self->mHandle = -1;
+    self->mpPathfinderStream = 0;
+    self->mpPathfinderOverlay = 0;
+    self->mStreamsOpen = 0;
+    self->mPendingEvent = -1;
+    self->mLoopBankState = 0;
+    self->mBankIndex = bankIndex;
+    self->mpVolumeControl = volControl;
+    self->mBaseVolume = baseVol;
+    self->mFadingOut = 0;
+    self->mOverlayArmed = 0;
+    self->mOverlayRequested = 0;
+    self->mVolumeEnabled = 1;
+    self->mSongTag = -1;
+    self->mHoldEvents = 0;
+    self->mLowPassCutoff = bankCur_1C50(def)->lowpasscutoff;
+    self->mpPathfinderStream = bmNew_1C50(0x37000, str_PathfinderStream, 0, 0);
+    self->mpPathfinderOverlay = bmNew_1C50(func_003D3058(1, 0), str_PathfinderOverlay, 0, 0);
     float scale = (float)snd->mPathlevel * 0.01f;
     def->vols[def->cur] = (int)BM_MAX_1C50(BM_MIN_1C50((float)def->vols[def->cur] * scale, 127.0f), 0.0f);
     def->entries[def->cur].vol = BM_MAX_1C50(BM_MIN_1C50(def->vols[def->cur], 127), 0);
     if (snd->mSongBig == cSongConfiguration::kMusicBig) {
-        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music_big, basePath);
+        sprintf(self->mPath, str_pct_spct_spct_s_b, str_data_b, str_audio_music_big, basePath);
     } else {
-        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music2_big, basePath);
+        sprintf(self->mPath, str_pct_spct_spct_s_b, str_data_b, str_audio_music2_big, basePath);
     }
-    self->snd = snd;
-    self->entry = *bankCur_1C50(def);
+    self->mpConfig = snd;
+    self->mPlayOpts = *bankCur_1C50(def);
     char buf[0x100];
-    sprintf(buf, str_pct_spct_s_c, self->name, snd->mPathData);
+    sprintf(buf, str_pct_spct_s_c, self->mPath, snd->mPathData);
     func_002B4A20(gMusicSys, buf, syncLoad);
     if (syncLoad != 0) {
         func_002B21E0((cSongInstance*)self, 1);
@@ -4738,24 +4763,25 @@ void operator_delete(int* ptr);
 /**
  * Destroys a cSongInstance: cancels its overlay bank load, closes its Pathfinder streams and frees its buffers.
  *
- * Cancels the async load of bank unk_34 (cAsyncSys_ASYNCSYS_Cancel), closes the main path stream (func_003D2A68 with
- * 0x11000001) and, when the song has loop banks (mNumBankData > 0), the overlay (0x11000002), and frees the stream and
- * overlay buffers (unk_24, unk_28). Called with 3 by func_002B3AC0 and the cMusicSys destructor.
+ * Cancels the async load of bank mBankIndex (cAsyncSys_ASYNCSYS_Cancel), closes the main path stream (func_003D2A68
+ * with 0x11000001) and, when the song has loop banks (mNumBankData > 0), the overlay (0x11000002), and frees the stream
+ * and overlay buffers (mpPathfinderStream, mpPathfinderOverlay). Called with 3 by func_002B3AC0 and the cMusicSys
+ * destructor.
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
 extern "C" void func_002B1F78(cSongInstance* self, int flags)
 {
-    cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), self->unk_34);
+    cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), self->mBankIndex);
     func_003D2A68(0x11000001);
     if (self->mpConfig->mNumBankData > 0) {
         func_003D2A68(0x11000002);
     }
-    if (self->unk_24 != 0) {
-        cMemMan_free(self->unk_24);
+    if (self->mpPathfinderStream != 0) {
+        cMemMan_free(self->mpPathfinderStream);
     }
-    if (self->unk_28 != 0) {
-        cMemMan_free(self->unk_28);
+    if (self->mpPathfinderOverlay != 0) {
+        cMemMan_free(self->mpPathfinderOverlay);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4821,22 +4847,22 @@ extern "C" void func_003D16F0(int id, short v);
 /**
  * Sends a music event to the song's Pathfinder players (func_003D16F0(-1, v)), or parks it until they open.
  *
- * Does nothing while unk_5C is set unless force is. Without open streams (unk_2C 0) the event is kept in unk_30 (only
- * when none is parked yet); func_002B21E0 sends it with force after opening them. Reached from cMusicSys's slot 3
- * (func_002B3B88).
+ * Does nothing while mHoldEvents is set unless force is. Without open streams (mStreamsOpen 0) the event is kept in
+ * mPendingEvent (only when none is parked yet); func_002B21E0 sends it with force after opening them. Reached from
+ * cMusicSys's slot 3 (func_002B3B88).
  *
  * @param musicEvent  the music event (the cMusicSys state code)
- * @param force  nonzero to send even while unk_5C is set
+ * @param force  nonzero to send even while mHoldEvents is set
  */
 extern "C" void func_002B20C8(cSongInstance* self, int musicEvent, int force)
 {
-    if (self->unk_5C != 0 && force == 0) {
+    if (self->mHoldEvents != 0 && force == 0) {
         return;
     }
-    if (self->unk_2C != 0) {
+    if (self->mStreamsOpen != 0) {
         func_003D16F0(-1, musicEvent);
-    } else if (self->unk_30 == cSongInstance::kNoPendingEvent) {
-        self->unk_30 = musicEvent;
+    } else if (self->mPendingEvent == cSongInstance::kNoPendingEvent) {
+        self->mPendingEvent = musicEvent;
     }
 }
 #endif
@@ -4884,7 +4910,7 @@ extern "C" void func_003B80A0(int h, int v);
 /**
  * Sets the low-pass cutoff of the song's main stream (func_003B80A0), clamped to 0..0xFFFF, when it changed.
  *
- * The cutoff is cached in unk_44 (only when the stream has a handle) and applied inside the critical section.
+ * The cutoff is cached in mLowPassCutoff (only when the stream has a handle) and applied inside the critical section.
  *
  * @param lowPass  the cutoff
  */
@@ -4896,11 +4922,11 @@ extern "C" void func_002B2160(cSongInstance* self, int lowPass)
     if (lowPass < 0) {
         lowPass = 0;
     }
-    if (lowPass != self->unk_44) {
+    if (lowPass != self->mLowPassCutoff) {
         SNDSYS_entercritical();
         int streamHandle = func_002B2488(self);
         if (streamHandle >= 0) {
-            self->unk_44 = lowPass;
+            self->mLowPassCutoff = lowPass;
             func_003B80A0(streamHandle, lowPass);
         }
         SNDSYS_leavecritical();
@@ -4929,15 +4955,16 @@ extern float gMusicScaling;
 /**
  * Updates a song: opens its Pathfinder streams once the MPF file is loaded, then keeps the low-pass and volume set.
  *
- * While the streams are closed (unk_2C 0) it waits for the MPF load (func_002B4AA0, unless force), sets unk_2C, passes
- * cMusicSys::mMPFFile to Pathfinder (func_003D2350) and opens the main path stream "<mPath><mMusData>"
- * (func_003D25F0(0x11000001, .., 500, &mPlayOpts, 2, 150, unk_24, 0x37000)) and, with loop banks, the overlay
- * "<mPath><mBankData[0]>" (0x11000002, 10 requests, the 0x6A400-byte unk_28 buffer); a parked event (unk_30) is then
- * sent with force (func_002B20C8).
+ * While the streams are closed (mStreamsOpen 0) it waits for the MPF load (func_002B4AA0, unless force), sets
+ * mStreamsOpen, passes cMusicSys::mMPFFile to Pathfinder (func_003D2350) and opens the main path stream
+ * "<mPath><mMusData>" (func_003D25F0(0x11000001, .., 500, &mPlayOpts, 2, 150, mpPathfinderStream, 0x37000)) and, with
+ * loop banks, the overlay "<mPath><mBankData[0]>" (0x11000002, 10 requests, the 0x6A400-byte mpPathfinderOverlay
+ * buffer); a parked event (mPendingEvent) is then sent with force (func_002B20C8).
  *
- * Once open it applies the song's mLowPass (func_002B2160) and, unless fading out (unk_48) or unk_54 is 0, sets the
- * stream volume (func_003B7E70) to base volume (unk_40) x mPathlevel / 100 x the volume control (unk_3C, when set) x
- * gMusicScaling, clamped to 0..127. Called by the constructor with force and by func_002B4388.
+ * Once open it applies the song's mLowPass (func_002B2160) and, unless fading out (mFadingOut) or mVolumeEnabled is 0,
+ * sets the stream volume (func_003B7E70) to base volume (mBaseVolume) x mPathlevel / 100 x the volume control
+ * (mpVolumeControl, when set) x gMusicScaling, clamped to 0..127. Called by the constructor with force and by
+ * func_002B4388.
  *
  * @param mon  the cSongInstance
  * @param force  nonzero to open the streams without waiting for the async MPF load
@@ -4945,38 +4972,39 @@ extern float gMusicScaling;
 // PORT: g++ `<?` / `>?` (min/max) operators.
 extern "C" void func_002B21E0(cSongInstance* mon, int force)
 {
-    if (mon->unk_2C == 0)
+    if (mon->mStreamsOpen == 0)
     {
         if (func_002B4AA0(gMusicSys, force) == 0)
             return;
-        (mon)->unk_2C = 1;
+        (mon)->mStreamsOpen = 1;
         func_003D2350(gMusicSys->GetMPFFile());
         char buf[256];
         sprintf(buf, str_pct_spct_s_c, mon->mPath, mon->mpConfig->mMusData);
-        mon->mHandle = func_003D25F0(0x11000001, buf, 500, &mon->mPlayOpts, 2, 150, mon->unk_24, 0x37000);
+        mon->mHandle = func_003D25F0(0x11000001, buf, 500, &mon->mPlayOpts, 2, 150, mon->mpPathfinderStream, 0x37000);
         if (mon->mpConfig->mNumBankData > 0)
         {
             sprintf(buf, str_pct_spct_s_c, mon->mPath, mon->mpConfig->mBankData[0]);
-            mon->unk_20 = func_003D25F0(0x11000002, buf, 10, &mon->mPlayOpts, 1, 0, mon->unk_28, 0x6A400);
+            mon->mOverlayHandle = func_003D25F0(0x11000002, buf, 10, &mon->mPlayOpts, 1, 0, mon->mpPathfinderOverlay,
+                    0x6A400);
         }
-        if (mon->unk_30 != cSongInstance::kNoPendingEvent)
+        if (mon->mPendingEvent != cSongInstance::kNoPendingEvent)
         {
-            func_002B20C8(mon, mon->unk_30, 1);
-            mon->unk_30 = cSongInstance::kNoPendingEvent;
+            func_002B20C8(mon, mon->mPendingEvent, 1);
+            mon->mPendingEvent = cSongInstance::kNoPendingEvent;
         }
         return;
     }
     func_002B2160(mon, mon->mpConfig->mLowPass);
-    if (mon->unk_48 != 0)
+    if (mon->mFadingOut != 0)
         return;
-    if (mon->unk_54 == 0)
+    if (mon->mVolumeEnabled == 0)
         return;
     float volume;
-    float* volumeControl = mon->unk_3C;
+    float* volumeControl = mon->mpVolumeControl;
     if (volumeControl)
-        volume = (float)mon->unk_40 * 0.009999999776482582f * (float)mon->mpConfig->mPathlevel * *volumeControl;
+        volume = (float)mon->mBaseVolume * 0.009999999776482582f * (float)mon->mpConfig->mPathlevel * *volumeControl;
     else
-        volume = (float)mon->unk_40 * 0.009999999776482582f * (float)mon->mpConfig->mPathlevel;
+        volume = (float)mon->mBaseVolume * 0.009999999776482582f * (float)mon->mpConfig->mPathlevel;
     volume *= gMusicScaling;
     SNDSYS_entercritical();
     int streamHandle = func_002B2488(mon);
@@ -4995,13 +5023,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002B23E8);
 extern "C" void func_003D5508(int cmd, int v);
 
 /**
- * Sets the song overlay's level (func_003D5508(0x11000002, v), 0..100) when unk_54 is set.
+ * Sets the song overlay's level (func_003D5508(0x11000002, v), 0..100) when mVolumeEnabled is set.
  *
  * @param levelPercent  the level in percent
  */
 extern "C" void func_002B23E8(cSongInstance* self, signed char levelPercent)
 {
-    if (self->unk_54 != 0) {
+    if (self->mVolumeEnabled != 0) {
         func_003D5508(0x11000002, levelPercent);
     }
 }
@@ -5016,10 +5044,10 @@ extern "C" void SNDSYS_leavecritical(void);
 extern "C" void func_003B7EB0(int h, int v, int c);
 
 /**
- * Fades the song's main stream out to 0 over t seconds (func_003B7EB0) and marks it fading (unk_48 = 1).
+ * Fades the song's main stream out to 0 over t seconds (func_003B7EB0) and marks it fading (mFadingOut = 1).
  *
  * The fade runs inside the critical section, only when the stream has a handle; func_002B21E0 stops applying the volume
- * once unk_48 is set.
+ * once mFadingOut is set.
  *
  * @param fadeSeconds  the fade time in seconds
  */
@@ -5031,7 +5059,7 @@ extern "C" void func_002B2418(cSongInstance* self, float fadeSeconds)
         func_003B7EB0(streamHandle, (int)(fadeSeconds * 1000.0f), 0);
     }
     SNDSYS_leavecritical();
-    self->unk_48 = 1;
+    self->mFadingOut = 1;
 }
 #endif
 
@@ -5295,9 +5323,9 @@ extern "C" int cBankManager_BANK_Handle(void*, int);
 extern "C" int SNDbankinuse(int);
 
 /**
- * Returns whether the song's loop bank is ready: unk_4C set, or bank unk_34 loaded (USED) and in use.
+ * Returns whether the song's loop bank is ready: mOverlayArmed set, or bank mBankIndex loaded (USED) and in use.
  *
- * With unk_4C clear it checks inside the critical section that the cBankManager's bank record is USED and that
+ * With mOverlayArmed clear it checks inside the critical section that the cBankManager's bank record is USED and that
  * SNDbankinuse(cBankManager_BANK_Handle(..)) is true (a voice plays from it).
  *
  * @param other  the cBankManager
@@ -5305,8 +5333,8 @@ extern "C" int SNDbankinuse(int);
  */
 extern "C" bool func_002B27C0(cSongInstance* self, cBankManager* other)
 {
-    if (self->unk_4C == 0) {
-        int slot = self->unk_34;
+    if (self->mOverlayArmed == 0) {
+        int slot = self->mBankIndex;
         int ok = 0;
         SNDSYS_entercritical();
         bool notReady = other->mBank[slot].mBankStatus != USED;
@@ -5505,7 +5533,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
     *(long*)&self->mActiveMap = 0;
     self->mSongInstance = 0;
     self->mSongPlaying = 0;
-    self->unk_5438 = 0;
+    self->mpMpfFile = 0;
     self->mShortcut = 0;
     gMusicSys = self;
     self->mMPFFile = new (str_MPF_data_file, 0, 0) char[25600];
@@ -5813,7 +5841,7 @@ static inline float bmMax3838(float a, float b)
  * Scales the play level's base volume by its volume control (clamped 0..127) and writes it to the level. With a1 it
  * searches mSongName from the end (strcmp) and stores the index in mCurrentSongNum; likely bug: an unknown name
  * leaves -1 and reads mSongConfig[-1]. Creates the song with func_002B1B98(mBasePath, name, config, play options, base
- * volume, volume control, a2, a3), loads its overlay bank (func_002B43D8), sets unk_41C = -1 and mSongPlaying = 1.
+ * volume, volume control, a2, a3), loads its overlay bank (func_002B43D8), sets mMusicState = -1 and mSongPlaying = 1.
  *
  * @param self  the cMusicSys
  * @param songName  the song name, or 0 for mCurrentSongNum
@@ -5871,7 +5899,7 @@ extern "C" void func_002B3838(cMusicSys* self, int songName, int bankIndex, int 
                                                             (int)pf, bankIndex, syncLoad);
     }
     func_002B43D8(self);
-    self->unk_41C = -1;
+    self->mMusicState = -1;
     self->mSongPlaying = 1;
 }
 #endif
@@ -5929,7 +5957,7 @@ extern "C" void func_002B1F78(cSongInstance* self, int flags);
 /**
  * Stops the current song: cancels its callbacks, unloads its overlay bank and destroys it.
  *
- * Cancels D_004A3838, D_004A3840 and D_004A3848 (cMonitor_MONITOR_DestroyAll1), cancels and unloads bank unk_34
+ * Cancels D_004A3838, D_004A3840 and D_004A3848 (cMonitor_MONITOR_DestroyAll1), cancels and unloads bank mBankIndex
  * (cAsyncSys_ASYNCSYS_Cancel, cBankManager_BANK_UnLoad), resumes the song (func_002B3A98), clears mSongPlaying, destroys mCurrent
  * (func_002B1F78 with 3) and clears it.
  */
@@ -5940,8 +5968,8 @@ extern "C" void func_002B3AC0(cMusicSys* self)
     cMonitor_MONITOR_DestroyAll1_3AC0(&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3840[0].v);
     cMonitor_MONITOR_DestroyAll1_3AC0(&self->mpVStreamSys->mpVBankManager->BankMonitor, D_004A3848[0].v);
     if (self->mSongInstance != 0) {
-        cAsyncSys_ASYNCSYS_Cancel(self->mpVStreamSys->mpVBankManager, self->mSongInstance->unk_34);
-        cBankManager_BANK_UnLoad(self->mpVStreamSys->mpVBankManager, self->mSongInstance->unk_34);
+        cAsyncSys_ASYNCSYS_Cancel(self->mpVStreamSys->mpVBankManager, self->mSongInstance->mBankIndex);
+        cBankManager_BANK_UnLoad(self->mpVStreamSys->mpVBankManager, self->mSongInstance->mBankIndex);
     }
     func_002B3A98(self);
     self->mSongPlaying = 0;
@@ -5983,7 +6011,7 @@ struct sBankMonVEntry {
 };
 
 /**
- * cMusicSys virtual slot 4: changes the music state; calls virtual slot 3 and stores v in unk_41C when it differs.
+ * cMusicSys virtual slot 4: changes the music state; calls virtual slot 3 and stores v in mMusicState when it differs.
  *
  * Only while a song is playing (mSongPlaying). v stays in the second argument register for the slot 3 call.
  *
@@ -5993,10 +6021,10 @@ struct sBankMonVEntry {
 extern "C" int func_002B3BC0(cMusicSys* self, int musicState)
 {
     int changed = 0;
-    if (self->mSongPlaying != 0 && musicState != self->unk_41C) {
+    if (self->mSongPlaying != 0 && musicState != self->mMusicState) {
         sBankMonVEntry* vt = (sBankMonVEntry*)self->mVtbl;
         vt[3].fn(vthis(self, vt[3]));
-        self->unk_41C = musicState;
+        self->mMusicState = musicState;
         changed = 1;
     }
     return changed;
@@ -6052,7 +6080,7 @@ extern "C" void func_002B3C60(cMusicSys* musicSys) {
 INCLUDE_ASM("sound/bankmonitor", func_002B3C98);
 #ifdef SKIP_ASM
 /**
- * Sets the current song's base volume (unk_40) while a song is playing.
+ * Sets the current song's base volume (mBaseVolume) while a song is playing.
  *
  * @param baseVol  the base volume
  */
@@ -6061,7 +6089,7 @@ extern "C" void func_002B3C98(cMusicSys* self, signed char baseVol)
     if (self->mSongPlaying != 0) {
         cSongInstance* curSong = self->mSongInstance;
         if (((void*)curSong) != 0) {
-            curSong->unk_40 = baseVol;
+            curSong->mBaseVolume = baseVol;
         }
     }
 }
@@ -6071,7 +6099,7 @@ extern "C" void func_002B3C98(cMusicSys* self, signed char baseVol)
 INCLUDE_ASM("sound/bankmonitor", func_002B3CC0);
 #ifdef SKIP_ASM
 /**
- * Sets the current song's unk_54, which func_002B21E0 and func_002B23E8 need set to apply volume and level.
+ * Sets the current song's mVolumeEnabled, which func_002B21E0 and func_002B23E8 need set to apply volume and level.
  *
  * @param enabled  the new value
  */
@@ -6079,7 +6107,7 @@ extern "C" void func_002B3CC0(cMusicSys* self, int enabled)
 {
     cSongInstance* curSong = self->mSongInstance;
     if (((void*)curSong) != 0) {
-        curSong->unk_54 = enabled;
+        curSong->mVolumeEnabled = enabled;
     }
 }
 #endif
@@ -6158,9 +6186,9 @@ extern void cMonitor_MONITOR_Create_3D80(cBankMonitor* a, int b, long t, int c, 
 /**
  * Starts a base-volume fade of the current song to target over duration seconds, stepped by func_002B3E20.
  *
- * When the song's unk_40 differs it sets unk_414 = target, unk_410 = the current value and unk_40C = ((target -
- * current) / 25) / duration (integer division first, so differences below 25 give no step) and arms D_004A3850 every 40
- * ms.
+ * When the song's mBaseVolume differs it sets mFadeTarget = target, mFadeVolume = the current value and mFadeStep =
+ * ((target - current) / 25) / duration (integer division first, so differences below 25 give no step) and arms
+ * D_004A3850 every 40 ms.
  *
  * @param target  the target base volume
  * @param duration  the fade time in seconds
@@ -6169,11 +6197,11 @@ extern "C" void func_002B3D80(cMusicSys* self, signed char target, float duratio
 {
     signed char cur;
     cSongInstance* voice = self->mSongInstance;
-    if (((void*)voice) != 0 && target != (cur = voice->unk_40)) {
+    if (((void*)voice) != 0 && target != (cur = voice->mBaseVolume)) {
         int steps = (target - cur) / 25;
-        self->unk_414 = target;
-        self->unk_410 = (float)cur;
-        self->unk_40C = (float)steps / duration;
+        self->mFadeTarget = target;
+        self->mFadeVolume = (float)cur;
+        self->mFadeStep = (float)steps / duration;
         cMonitor_MONITOR_Create_3D80(&self->mpVStreamSys->mpVBankManager->BankMonitor, 40, D_004A3850_3D80[0].v,
                                      0, 0, 0, 0, 0);
     }
@@ -6183,25 +6211,25 @@ extern "C" void func_002B3D80(cMusicSys* self, signed char target, float duratio
 INCLUDE_ASM("sound/bankmonitor", func_002B3E20);
 #ifdef SKIP_ASM
 /**
- * Monitor callback stepping the base-volume fade started by func_002B3D80 (adds unk_40C to unk_410).
+ * Monitor callback stepping the base-volume fade started by func_002B3D80 (adds mFadeStep to mFadeVolume).
  *
- * Writes the new value to the current song's unk_40 and returns false while short of the target (unk_414); then writes
- * the target and returns true. Reached through D_004A3850.
+ * Writes the new value to the current song's mBaseVolume and returns false while short of the target (mFadeTarget);
+ * then writes the target and returns true. Reached through D_004A3850.
  *
  * @return true when the fade is done, else false
  */
 extern "C" bool func_002B3E20(cMusicSys* self)
 {
-    float step = self->unk_40C;
-    float cur = self->unk_410 + step;
-    self->unk_410 = cur;
-    if ((step > 0.0f && cur < (float)self->unk_414)
-        || (step < 0.0f && cur > (float)self->unk_414)) {
-        self->mSongInstance->unk_40 = (signed char)(int)self->unk_410;
+    float step = self->mFadeStep;
+    float cur = self->mFadeVolume + step;
+    self->mFadeVolume = cur;
+    if ((step > 0.0f && cur < (float)self->mFadeTarget)
+        || (step < 0.0f && cur > (float)self->mFadeTarget)) {
+        self->mSongInstance->mBaseVolume = (signed char)(int)self->mFadeVolume;
         return false;
     }
-    signed char targetVol = self->unk_414;
-    self->mSongInstance->unk_40 = targetVol;
+    signed char targetVol = self->mFadeTarget;
+    self->mSongInstance->mBaseVolume = targetVol;
     return true;
 }
 #endif
@@ -6536,14 +6564,15 @@ extern "C" void func_002B21E0(cSongInstance*, int);
 extern "C" void func_002B4620(void*);
 
 /**
- * Updates the current song (func_002B21E0 without force) and starts its overlay (func_002B4620) when unk_50 is set.
+ * Updates the current song (func_002B21E0 without force) and starts its overlay (func_002B4620) when mOverlayRequested
+ * is set.
  */
 extern "C" void func_002B4388(cMusicSys* self)
 {
     void* curSong = self->mSongInstance;
     if (curSong != 0) {
         func_002B21E0((cSongInstance*)curSong, 0);
-        if (self->mSongInstance->unk_50 != 0) {
+        if (self->mSongInstance->mOverlayRequested != 0) {
             func_002B4620(self);
         }
     }
@@ -6560,7 +6589,8 @@ extern char str_pct_spct_s_c[];
 
 
 /**
- * Loads a random loop bank of the current song into its cBankManager bank (cBankManager_BANK_AsyncLoad) and sets unk_38 to 1.
+ * Loads a random loop bank of the current song into its cBankManager bank (cBankManager_BANK_AsyncLoad) and sets
+ * mLoopBankState to 1.
  *
  * Only when the song has loop banks; the file is "<mPath><mBankData[n]>" with n from func_002B24C0.
  */
@@ -6569,13 +6599,13 @@ extern "C" void func_002B43D8(cMusicSys* self)
     char buf[256];
     cSongInstance* songInstance = (cSongInstance*)self->mSongInstance;
     if (((void*)songInstance) != 0) {
-        int bank = songInstance->unk_34;
+        int bank = songInstance->mBankIndex;
         if (songInstance->mpConfig->mNumBankData != 0) {
             int n = func_002B24C0((cSongInstance*)songInstance);
             cSongInstance* currentSong = self->mSongInstance;
             sprintf(buf, str_pct_spct_s_c, currentSong->mPath, currentSong->mpConfig->mBankData[n]);
             cBankManager_BANK_AsyncLoad(self->mpVStreamSys->mpVBankManager, bank, buf, 0x100);
-            self->mSongInstance->unk_38 = 1;
+            self->mSongInstance->mLoopBankState = 1;
         }
     }
 }
@@ -6590,14 +6620,15 @@ extern void cMonitor_MONITOR_Create_4470(cBankMonitor* a, int b, long t, int c, 
         int g) __asm__("cMonitor_MONITOR_Create");
 
 /**
- * Arms the D_004A3838 callback (func_002B4740) at once and sets unk_4C, when the current song's unk_4C is 0.
+ * Arms the D_004A3838 callback (func_002B4740) at once and sets mOverlayArmed, when the current song's mOverlayArmed is
+ * 0.
  */
 // PORT: 64-bit long sound key, read unaligned from a const table
 extern "C" void func_002B4470(cMusicSys* self)
 {
     cSongInstance* songInstance = self->mSongInstance;
-    if (((void*)songInstance) != 0 && songInstance->unk_4C == 0) {
-        songInstance->unk_4C = 1;
+    if (((void*)songInstance) != 0 && songInstance->mOverlayArmed == 0) {
+        songInstance->mOverlayArmed = 1;
         cMonitor_MONITOR_Create_4470(&self->mpVStreamSys->mpVBankManager->BankMonitor, 0, D_004A3838_4470[0].v,
                                      0, 0, 0, 0, 0);
     }
@@ -6615,7 +6646,8 @@ extern "C" void cMonitor_MONITOR_DestroyAll1(cBankMonitor* a, long t);
 extern "C" void func_002B4708(cMusicSys* self);
 
 /**
- * Cancels the song's D_004A3838 and D_004A3840 callbacks (cMonitor_MONITOR_DestroyAll1) and clears unk_4C (func_002B4708).
+ * Cancels the song's D_004A3838 and D_004A3840 callbacks (cMonitor_MONITOR_DestroyAll1) and clears mOverlayArmed
+ * (func_002B4708).
  *
  * Only when there is a current song.
  */
@@ -6636,7 +6668,8 @@ public:
     int unk0;
     void* entries[(0x5440 - 4) / 4];
     // vptr at 0x5440; slot N at vtable offset N*8
-    virtual int v01(int a);
+    virtual int PlayNextPhrase(int monitorInst);  // slot 1 (name ours): cSSXAudio's is func_0028C430, which
+                                                  // plays the next loop-bank phrase
 };
 
 /**
@@ -6648,7 +6681,7 @@ public:
  */
 extern "C" void func_002B4540(cMusicSys* self, int monitorInst)
 {
-    ((func_002B4540_cObj*)self)->v01(monitorInst);
+    ((func_002B4540_cObj*)self)->PlayNextPhrase(monitorInst);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -6699,8 +6732,9 @@ int func_002B4620_impl(void* self) __asm__("func_002B4620");
 /**
  * Starts the current song's overlay once its loop bank is loaded; returns whether the overlay is running.
  *
- * Sets unk_4C. With unk_38 == 1 and the bank record in state 1 it passes the bank handle to the overlay stream
- * (func_003D2DF8(0x11000002, 0, handle)) and sets unk_38 = 2. Called by func_002B4388 and the audio update.
+ * Sets mOverlayArmed. With mLoopBankState == 1 and the bank record in state 1 it passes the bank handle to the overlay
+ * stream (func_003D2DF8(0x11000002, 0, handle)) and sets mLoopBankState = 2. Called by func_002B4388 and the audio
+ * update.
  *
  * @return 1 when started or already running, 0 otherwise (also without a song)
  */
@@ -6709,17 +6743,17 @@ int func_002B4620_impl(void* vself)
     cMusicSys* self = (cMusicSys*)vself;
     int one = 1;
     if ((char*)self->mSongInstance == 0) return 0;
-    self->mSongInstance->unk_4C = one;
+    self->mSongInstance->mOverlayArmed = one;
     int ready = 0;
     cSongInstance* curSong = self->mSongInstance;
-    int st = curSong->unk_38;
+    int st = curSong->mLoopBankState;
     if (st == one) {
         // PORT: pointer arithmetic through int (index first, as retail adds it)
         cBankInstance* bankInst =
-            (cBankInstance*)(curSong->unk_34 * 0x60 + (int)self->mpVStreamSys->mpVBankManager->mBank);
+            (cBankInstance*)(curSong->mBankIndex * 0x60 + (int)self->mpVStreamSys->mpVBankManager->mBank);
         if (func_002B4620_ready(bankInst)) {
             func_003D2DF8(0x11000002, 0, bankInst->mBankHandle);
-            self->mSongInstance->unk_38 = 2;
+            self->mSongInstance->mLoopBankState = 2;
             ready = 1;
         }
     } else if (st == 2) {
@@ -6733,13 +6767,13 @@ int func_002B4620_impl(void* vself)
 INCLUDE_ASM("sound/bankmonitor", func_002B46D0);
 #ifdef SKIP_ASM
 /**
- * Sets the current song's unk_50, so func_002B4388 starts its overlay.
+ * Sets the current song's mOverlayRequested, so func_002B4388 starts its overlay.
  */
 extern "C" void func_002B46D0(cMusicSys* self)
 {
     cSongInstance* curSong = self->mSongInstance;
     if (((void*)curSong) != 0) {
-        curSong->unk_50 = 1;
+        curSong->mOverlayRequested = 1;
     }
 }
 #endif
@@ -6748,9 +6782,9 @@ extern "C" void func_002B46D0(cMusicSys* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B46E8);
 #ifdef SKIP_ASM
 /**
- * Returns the current song's unk_4C (set while its overlay is armed), or 0 without a song.
+ * Returns the current song's mOverlayArmed (set while its overlay is armed), or 0 without a song.
  *
- * @return unk_4C, or 0
+ * @return mOverlayArmed, or 0
  */
 extern "C" void* func_002B46E8(cMusicSys* self)
 {
@@ -6758,7 +6792,7 @@ extern "C" void* func_002B46E8(cMusicSys* self)
     if (((void*)inner) == 0) {
         return 0;
     }
-    return (void*)inner->unk_4C;
+    return (void*)inner->mOverlayArmed;
 }
 #endif
 
@@ -6766,13 +6800,13 @@ extern "C" void* func_002B46E8(cMusicSys* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B4708);
 #ifdef SKIP_ASM
 /**
- * Clears the current song's unk_4C when there is a song.
+ * Clears the current song's mOverlayArmed when there is a song.
  */
 extern "C" void func_002B4708(cMusicSys* self)
 {
     cSongInstance* curSong = self->mSongInstance;
     if (((void*)curSong) != 0) {
-        curSong->unk_4C = 0;
+        curSong->mOverlayArmed = 0;
     }
 }
 #endif
@@ -6781,7 +6815,7 @@ extern "C" void func_002B4708(cMusicSys* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B4720);
 #ifdef SKIP_ASM
 /**
- * Returns the current song's base volume (unk_40), or 0 without a song.
+ * Returns the current song's base volume (mBaseVolume), or 0 without a song.
  *
  * @return the base volume
  */
@@ -6791,7 +6825,7 @@ extern "C" int func_002B4720(cMusicSys* self)
     if (((char*)curSong) == 0) {
         return 0;
     }
-    return curSong->unk_40;
+    return curSong->mBaseVolume;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -6811,7 +6845,7 @@ extern "C" bool func_002B4740(cMusicSys* self)
 {
     cSongInstance* ent = self->mSongInstance;
     cBankInstance* table = self->mpVStreamSys->mpVBankManager->mBank;
-    int state = table[ent->unk_34].mBankStatus;
+    int state = table[ent->mBankIndex].mBankStatus;
     switch (state) {
     case EMPTY:
         return true;
@@ -6832,16 +6866,16 @@ extern "C" int cBankManager_BANK_Handle(void*, int);
 extern "C" int SNDbankinuse(int);
 
 /**
- * Monitor callback (D_004A3848): when the song's loop bank is not loaded or not in use, clears unk_4C and ends.
+ * Monitor callback (D_004A3848): when the song's loop bank is not loaded or not in use, clears mOverlayArmed and ends.
  *
  * The check (mBankStatus USED and SNDbankinuse true) runs inside the critical section.
  *
- * @return true when unk_4C was cleared, false to be called again
+ * @return true when mOverlayArmed was cleared, false to be called again
  */
 extern "C" bool func_002B47C0(cMusicSys* self)
 {
     int ok = 0;
-    int slot = self->mSongInstance->unk_34;
+    int slot = self->mSongInstance->mBankIndex;
     cBankManager* other = self->mpVStreamSys->mpVBankManager;
     SNDSYS_entercritical();
     bool notReady = other->mBank[slot].mBankStatus != USED;
@@ -6850,7 +6884,7 @@ extern "C" bool func_002B47C0(cMusicSys* self)
     }
     SNDSYS_leavecritical();
     if (ok == 0) {
-        self->mSongInstance->unk_4C = 0;
+        self->mSongInstance->mOverlayArmed = 0;
         return true;
     }
     return false;
@@ -6977,7 +7011,8 @@ public:
     // vptr at 0x5440; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual void v03(int a);
+    virtual void SendMusicEvent(int event);  // slot 3 (name ours): func_002B3BC0 sends a new music state and
+                                             // func_0028C8C8 music events 7 / 8 through it
 };
 
 /**
@@ -6991,7 +7026,7 @@ extern "C" void func_002B4978(func_002B4978_cObj* self, int i)
 {
     int previewValue = self->entries[i]->mPreview;
     if (previewValue >= 0) {
-        self->v03(previewValue);
+        self->SendMusicEvent(previewValue);
     }
 }
 #endif
@@ -7000,7 +7035,7 @@ extern "C" void func_002B4978(func_002B4978_cObj* self, int i)
 INCLUDE_ASM("sound/bankmonitor", func_002B49C0);
 #ifdef SKIP_ASM
 /**
- * Sets the current song's tag (unk_58) while a song is playing.
+ * Sets the current song's tag (mSongTag) while a song is playing.
  *
  * The audio code tags songs 101-103 (peak ambience), 201, 301 ("charsel") and 401 ("pktrans").
  *
@@ -7011,7 +7046,7 @@ extern "C" void func_002B49C0(cMusicSys* self, int songTag)
     if (self->mSongPlaying != 0) {
         cSongInstance* curSong = self->mSongInstance;
         if (((void*)curSong) != 0) {
-            curSong->unk_58 = songTag;
+            curSong->mSongTag = songTag;
         }
     }
 }
@@ -7021,7 +7056,7 @@ extern "C" void func_002B49C0(cMusicSys* self, int songTag)
 INCLUDE_ASM("sound/bankmonitor", func_002B49E0);
 #ifdef SKIP_ASM
 /**
- * Returns the current song's tag (unk_58) while a song is playing, otherwise -1.
+ * Returns the current song's tag (mSongTag) while a song is playing, otherwise -1.
  *
  * @return the tag, or -1
  */
@@ -7030,7 +7065,7 @@ extern "C" int func_002B49E0(cMusicSys* self)
     if (self->mSongPlaying != 0) {
         cSongInstance* curSong = self->mSongInstance;
         if (((void*)curSong) != 0) {
-            return curSong->unk_58;
+            return curSong->mSongTag;
         }
     }
     return -1;
@@ -7041,7 +7076,7 @@ extern "C" int func_002B49E0(cMusicSys* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B4A08);
 #ifdef SKIP_ASM
 /**
- * Sets the current song's unk_5C, which makes func_002B20C8 ignore unforced music events.
+ * Sets the current song's mHoldEvents, which makes func_002B20C8 ignore unforced music events.
  *
  * @param holdEvents  the new value
  */
@@ -7049,7 +7084,7 @@ extern "C" void func_002B4A08(cMusicSys* self, int holdEvents)
 {
     cSongInstance* curSong = self->mSongInstance;
     if (((void*)curSong) != 0) {
-        curSong->unk_5C = holdEvents;
+        curSong->mHoldEvents = holdEvents;
     }
 }
 #endif
@@ -7065,19 +7100,19 @@ extern "C" void FILE_loadat(void* name, void* buf, int size);
 /**
  * Loads an MPF file into mMPFFile (25600 bytes), asynchronously (ASYNCFILE_loadat) or at once (FILE_loadat).
  *
- * A pending async load (unk_5438) is cancelled and released first; an async load's handle is kept in unk_5438.
+ * A pending async load (mpMpfFile) is cancelled and released first; an async load's handle is kept in mpMpfFile.
  *
  * @param name  the file name
  * @param sync  nonzero to load synchronously
  */
 extern "C" void func_002B4A20(cMusicSys* self, void* name, int sync)
 {
-    if (self->unk_5438 != 0) {
-        ASYNCFILE_cancel(self->unk_5438);
-        ASYNCFILE_release(self->unk_5438, 0, 0);
+    if (self->mpMpfFile != 0) {
+        ASYNCFILE_cancel(self->mpMpfFile);
+        ASYNCFILE_release(self->mpMpfFile, 0, 0);
     }
     if (sync == 0) {
-        self->unk_5438 = ASYNCFILE_loadat(name, self->mMPFFile, 25600);
+        self->mpMpfFile = ASYNCFILE_loadat(name, self->mMPFFile, 25600);
     } else {
         FILE_loadat(name, self->mMPFFile, 25600);
     }
@@ -7090,7 +7125,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4AA0);
 extern "C" int ASYNCFILE_getstatus(void*);
 
 /**
- * Returns whether the MPF file can be used: force set, or the async load (unk_5438) reports kASYNCFILE_Done.
+ * Returns whether the MPF file can be used: force set, or the async load (mpMpfFile) reports kASYNCFILE_Done.
  *
  * @param force  nonzero to return true at once
  * @return true when the MPF file can be used
@@ -7101,7 +7136,7 @@ extern "C" bool func_002B4AA0(cMusicSys* self, int force)
     if (force != 0) {
         return true;
     }
-    asyncFile = self->unk_5438;
+    asyncFile = self->mpMpfFile;
     if (asyncFile != 0 && ASYNCFILE_getstatus(asyncFile) == kASYNCFILE_Done) {
         return true;
     }

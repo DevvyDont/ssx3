@@ -36,8 +36,15 @@ struct tSpeechEventFile {
 
 // cSpeechInstance (0x904): one speech stream.
 struct cSpeechInstance {
-    int unk_000;                       // 0x000 [R] ctor arg 1 = the instance's index in cSpeechSys::mSpeechInstance; [U] func_002B04D8 passes it to cSpeechSys (request match func_002B1520, vtable slots 2/3)
-    int unk_004;                       // 0x004 [R] ctor arg 2; [U] the cStreamSys stream id: STREAM_ calls (cStreamSys_STREAM_Create in the ctor, cStreamSys_STREAM_Destroy in the dtor, cStreamSys_STREAM_Requests / cStreamSys_STREAM_Purge / cStreamSys_STREAM_TimeRemaining / cStreamSys_STREAM_Playing / cStreamSys_STREAM_SetVolControl) and STREAM_SetBigFile (cStreamSys_STREAM_SetBigFile, speech.inf BIGFILE)
+    int mIndex;                        // 0x000 (our name) [R] ctor arg 1 = the instance's index in
+                                       //       cSpeechSys::mSpeechInstance; [U] func_002B04D8 passes it to
+                                       //       cSpeechSys (request match func_002B1520, vtable slots 2/3)
+    int mStreamId;                     // 0x004 (our name) [R] ctor arg 2; [U] the cStreamSys stream id: STREAM_
+                                       //       calls (cStreamSys_STREAM_Create in the ctor, cStreamSys_STREAM_Destroy
+                                       //       in the dtor, cStreamSys_STREAM_Requests / cStreamSys_STREAM_Purge /
+                                       //       cStreamSys_STREAM_TimeRemaining / cStreamSys_STREAM_Playing /
+                                       //       cStreamSys_STREAM_SetVolControl) and STREAM_SetBigFile
+                                       //       (cStreamSys_STREAM_SetBigFile, speech.inf BIGFILE)
     int unk_008;                       // 0x008 [R] ctor arg 6; no read found
     char unk_00C[0x60];                // 0x00C [R] ctor clears byte 0 (an empty string); no other access found
     char mBasePath[0x60];              // 0x06C [R] speech.inf BASEPATH (func_002B0088 AssignString); [U] func_002AFD40 / func_002B0088 sprintf the .big / events / bank paths from it
@@ -68,7 +75,9 @@ struct cSpeechInstance {
                                        //       func_002B04D8 passes it to the play slot as isHuman
     int mViewport;                     // 0x8FC (our name) [U] cSpeechSys func_002B1520 (the request rider's mViewIndex,
                                        //       -1 without one); func_002B04D8 passes it to the play slot as viewport
-    int unk_900;                       // 0x900 [R] ctor 1; [U] func_002AFC88 / func_002AFD10 toggle it around func_003D7EC8 / func_003D8040 (stream pause state)
+    int mReadyForSpeech;               // 0x900 (our name) [R] ctor 1; [U] set while the stream can take the next
+                                       //       speech: func_002AFC88 / func_002AFD10 clear it once func_003D7EC8
+                                       //       starts one, func_002AFC88 sets it again (func_003D8040) or while busy
 };
 
 CHECK_OFFSET(cSpeechBank, mBankId, 0x00);
@@ -80,8 +89,8 @@ CHECK_SIZE(cSpeechBank, 0x4C);
 CHECK_OFFSET(tSpeechEventFile, mpData, 0x0);
 CHECK_OFFSET(tSpeechEventFile, mOwned, 0x4);
 CHECK_SIZE(tSpeechEventFile, 0x8);
-CHECK_OFFSET(cSpeechInstance, unk_000, 0x000);
-CHECK_OFFSET(cSpeechInstance, unk_004, 0x004);
+CHECK_OFFSET(cSpeechInstance, mIndex, 0x000);
+CHECK_OFFSET(cSpeechInstance, mStreamId, 0x004);
 CHECK_OFFSET(cSpeechInstance, unk_008, 0x008);
 CHECK_OFFSET(cSpeechInstance, unk_00C, 0x00C);
 CHECK_OFFSET(cSpeechInstance, mBasePath, 0x06C);
@@ -97,7 +106,7 @@ CHECK_OFFSET(cSpeechInstance, mHeaderBigData, 0x8D4);
 CHECK_OFFSET(cSpeechInstance, mRadius, 0x8F4);
 CHECK_OFFSET(cSpeechInstance, mIsHuman, 0x8F8);
 CHECK_OFFSET(cSpeechInstance, mViewport, 0x8FC);
-CHECK_OFFSET(cSpeechInstance, unk_900, 0x900);
+CHECK_OFFSET(cSpeechInstance, mReadyForSpeech, 0x900);
 CHECK_SIZE(cSpeechInstance, 0x904);
 
 #endif /* SOUND_SPEECHINSTANCE_H */
