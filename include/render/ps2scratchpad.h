@@ -16,7 +16,8 @@
 // and the same file's "Size <= GetTempSize()", SPRMan->GetTempSize() / GetMaxBlockSize().
 //
 // Evidence tags: [P] the July 2003 preview (asserts above, same code shape as retail); [R] retail code and the size of
-// the global object; [U] how retail code uses the member. Members without an EA name keep unk_ names.
+// the global object; [U] how retail code uses the member. Members without an EA name are marked "name ours" or keep
+// unk_ names.
 
 #include "layout.h"
 
@@ -28,8 +29,8 @@ struct cPS2ScratchPad {
         kLayout_3x320 = 6, kLayout_3x256 = 7
     };
     int unk_00;                     // 0x00 [U] func_0038F300: the current layout mode, eLayout (returns when unchanged)
-    int unk_04;                     // 0x04 [U] func_0038F300: the number of blocks (1..3); func_0038F460 / func_0038F598
-                                    //      wrap the block indices with it
+    int mNumBlocks;                 // 0x04 (name ours) [U] func_0038F300: the number of blocks (1..3);
+                                    //      func_0038F460 / func_0038F598 wrap the block indices with it
     int unk_08;                     // 0x08 [U] func_0038F460: the next block to open (post-incremented, wrapped)
     int mDMABlock;                  // 0x0C [P] "mBlockAddr[mDMABlock] != NULL"; [U] func_0038F598: the block being
                                     //      flushed (advanced, wrapped)
@@ -37,19 +38,19 @@ struct cPS2ScratchPad {
                                     //      (0x400 .. 0x100); func_0038F460's default size
     char* mBlockAddr[3];            // 0x14 [P] "mBlockAddr[mDMABlock] != NULL"; [U] func_0038F300: 0x70000000 +
                                     //      i * mBlockSize * 16; func_0038F460 returns one
-    unsigned int unk_20[3];         // 0x20 [U] func_0038F460: the main-memory address of each open block; func_0038F598
-                                    //      DMAs the block there
+    unsigned int mBlockMainAddr[3]; // 0x20 (name ours) [U] func_0038F460: the main-memory address of each open
+                                    //      block; func_0038F598 DMAs the block there
     int unk_2C[3];                  // 0x2C [U] func_0038F460: each open block's size in quadwords; func_0038F560 flushes
                                     //      with it
 };
 
 CHECK_OFFSET(cPS2ScratchPad, unk_00, 0x00);
-CHECK_OFFSET(cPS2ScratchPad, unk_04, 0x04);
+CHECK_OFFSET(cPS2ScratchPad, mNumBlocks, 0x04);
 CHECK_OFFSET(cPS2ScratchPad, unk_08, 0x08);
 CHECK_OFFSET(cPS2ScratchPad, mDMABlock, 0x0C);
 CHECK_OFFSET(cPS2ScratchPad, mBlockSize, 0x10);
 CHECK_OFFSET(cPS2ScratchPad, mBlockAddr, 0x14);
-CHECK_OFFSET(cPS2ScratchPad, unk_20, 0x20);
+CHECK_OFFSET(cPS2ScratchPad, mBlockMainAddr, 0x20);
 CHECK_OFFSET(cPS2ScratchPad, unk_2C, 0x2C);
 CHECK_SIZE(cPS2ScratchPad, 0x38);
 

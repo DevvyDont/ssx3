@@ -8,6 +8,8 @@
 #include "scripter/scriptobjcamera.h"
 #include "camera/trigger/cameratriggerlist.h"
 #include "scripter/ssxscriptengine.h"
+#include "camera/cameraalgolist.h"
+#include "main/gameviewman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
@@ -57,7 +59,7 @@ extern "C" void* cScriptCameraController_cScriptCameraController(cScriptCameraCo
     int i;
     cCameraController_cCameraController(self, camera);
     self->mVtbl = cScriptCameraController_vtbl;
-    *(int*)self = 3;
+    self->Type = 3;
     self->ScriptObj = (cScriptObjCamera**)((void**)operator_new_K2(8, str_ScriptObjCamArray, 0, 0));
     for (i = 0; i < 2; i++) {
         void** slot = (void**)((i << 2) + (int)self->ScriptObj);
@@ -163,18 +165,7 @@ void cScriptCameraController::addCamera(cScriptObjCamera* cam)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_removeCamera);
 #ifdef SKIP_ASM
-struct sScrAlgoNode {
-    int key;              // 0x0
-    char pad_0x04[0x10];
-    sScrAlgoNode* next;   // 0x14
-};
-
-struct sScrAlgoList {
-    sScrAlgoNode* head;   // 0x0
-    int count;            // 0x4
-};
-
-extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
+extern "C" void cCameraAlgoList_remove(cCameraAlgoList* list, cCameraAlgoListNode* node);
 
 /**
  * Removes a script camera's algorithm from the controller.
@@ -188,15 +179,15 @@ extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
 void cScriptCameraController::removeCamera(cScriptObjCamera* algo)
 {
     if (IsActive != 0) {
-        sScrAlgoList* list = (sScrAlgoList*)AlgorithmList;
-        for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
-            int k = (int)algo->mpCameraAlgorithm;
-            if (n->key == k) {
+        cCameraAlgoList* list = AlgorithmList;
+        for (cCameraAlgoListNode* n = list->Head; n != 0; n = n->Next) {
+            cCameraAlgorithm* target = algo->mpCameraAlgorithm;
+            if (n->Algorithm == target) {
                 cCameraAlgoList_remove(list, n);
                 break;
             }
         }
-        if (list->count <= 0)
+        if (list->Length <= 0)
             IsActive = 0;
     }
 }
@@ -225,7 +216,7 @@ void cScriptCameraController::addAlgorithm(void* algo)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// cScriptAlgorithm_getScriptObj returns a pointer (the unit declares it int); bind a pointer-returning alias.
+// The list nodes hold the algorithm as a cScrCamAlgoK2; reach cScriptAlgorithm_getScriptObj through this alias.
 cScriptObjCamera* cScriptAlgorithm_getScriptObj_K2(void* self) __asm__("cScriptAlgorithm_getScriptObj__FPv");
 
 class cScrCamAlgoK2 {
@@ -280,18 +271,6 @@ extern void* cScriptAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
 extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
-struct sCamCtlK9418 {
-    float fov;      // 0x0
-    float nearZ;    // 0x4
-    float farZ;     // 0x8
-    int type;       // 0xC
-    void** vtbl;    // 0x10
-    int f14;        // 0x14
-    int f18;        // 0x18
-    int pad_1C;
-    t4Vector v20; // 0x20
-};
-
 /**
  * Constructs the generic script camera algorithm base: default view, script controller of the first view.
  *
@@ -305,21 +284,20 @@ struct sCamCtlK9418 {
  */
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* object)
 {
-    sCamCtlK9418* self = (sCamCtlK9418*)object;
-    self->vtbl = cCameraAlgorithm_vtbl;
-    float fov = cCameraAlgorithm_getDefaultView(self);
-    self->type = 85;
-    self->vtbl = cScriptAlgorithm_vtbl;
-    self->fov = fov;
-    self->nearZ = 10.0f;
-    self->farZ = 30000.0f;
-    self->f14 = 0;
-    cGame* cam = SSXApp->Game;
-    void* chase = cam->ViewMan;
-    void* ctrl = *(void**)((char*)chase + 0x4);
-    self->f18 = *(int*)((char*)ctrl + 0xAC);
-    self->v20 = t4vect_Origin;
-    return self;
+    VPTR_OF(cCameraAlgorithm, object) = cCameraAlgorithm_vtbl;
+    float fov = cCameraAlgorithm_getDefaultView(object);
+    object->AlgorithmType = 85;
+    VPTR_OF(cCameraAlgorithm, object) = cScriptAlgorithm_vtbl;
+    object->View = fov;
+    object->Near = 10.0f;
+    object->Far = 30000.0f;
+    object->ScriptObj = 0;
+    cGame* game = SSXApp->Game;
+    cGameViewMan* viewMan = game->ViewMan;
+    cCamera* camera = viewMan->PlayerCamera[0];
+    object->Controller = camera->ScriptController;
+    object->Target = t4vect_Origin;
+    return object;
 }
 #endif
 
@@ -347,9 +325,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_getScriptObj__FPv
  *
  * @return the script object (On Tour's cScriptObjCamera*); cScriptCameraController_update reads its time at +0x18
  */
-int cScriptAlgorithm::getScriptObj()
+cScriptObjCamera* cScriptAlgorithm::getScriptObj()
 {
-    return (int)ScriptObj;
+    return ScriptObj;
 }
 #endif
 
@@ -376,11 +354,11 @@ extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgo
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptManualAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(t4Vector*)&self->Position = t4vect_Origin;
+    self->Position = t4vect_Origin;
     self->AlgorithmType = 86;
-    *(int*)&self->Heading = 0;
-    *(int*)&self->Pitch = 0;
-    *(int*)&self->Roll = 0;
+    self->Heading = 0.0f;
+    self->Pitch = 0.0f;
+    self->Roll = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -748,11 +726,11 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorit
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptPointAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(t4Vector*)&self->Position = t4vect_Origin;
+    self->Position = t4vect_Origin;
     self->AlgorithmType = 87;
-    *(int*)&self->Roll = 0;
-    *(int*)&self->Heading = 0;
-    *(int*)&self->Pitch = 0;
+    self->Roll = 0.0f;
+    self->Heading = 0.0f;
+    self->Pitch = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -1090,11 +1068,11 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgo
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptTargetAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(t4Vector*)&self->Position = t4vect_Origin;
+    self->Position = t4vect_Origin;
     self->AlgorithmType = 88;
-    *(int*)&self->Roll = 0;
-    *(int*)&self->Heading = 0;
-    *(int*)&self->Pitch = 0;
+    self->Roll = 0.0f;
+    self->Heading = 0.0f;
+    self->Pitch = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -1133,7 +1111,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* GetSSXCameraSubjectHeader(void* cam);
-extern "C" cRider* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
+extern "C" cRider* cSSXScriptEngine_GetSubjectRider(void* self, int subject, cScriptPlayerMain* player);
 extern "C" void GetSSXCameraSubjectFrame(void* cam, void* out);
 extern "C" float func_0031C228(float x);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
@@ -1284,7 +1262,8 @@ void cScriptTargetAlgorithm::update()
     char* cam = (char*)ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraSubjectHeader(cam);
     char* baseTransform = (char*)&ScriptObj->mBaseTransform;
-    char* rider = (char*)cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[34], *(int*)(cam + 8));
+    char* rider = (char*)cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[34],
+            *(cScriptPlayerMain**)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
     }
@@ -1507,11 +1486,11 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelati
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptRelativeAlgorithm_vtbl;
     cCameraJitterer_cCameraJitterer(&self->Jitterer);
-    *(t4Vector*)&self->Position = t4vect_Origin;
+    self->Position = t4vect_Origin;
     self->AlgorithmType = 89;
-    *(int*)&self->Roll = 0;
-    *(int*)&self->Heading = 0;
-    *(int*)&self->Pitch = 0;
+    self->Roll = 0.0f;
+    self->Heading = 0.0f;
+    self->Pitch = 0.0f;
     return ((void*)self);
 }
 #endif
@@ -1521,7 +1500,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snap);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 tSSXHeaderCameraAlgorithmic* GetSSXCameraAlgorithmicHeader(void* cam);
-extern "C" cRider* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
+extern "C" cRider* cSSXScriptEngine_GetSubjectRider(void* self, int subject, cScriptPlayerMain* player);
 extern "C" void GetSSXCameraAlgorithmicFrame(void* cam, void* out);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float x);
@@ -1667,7 +1646,7 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
     self->Far = header->farPlane;
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
     self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
-    cRider* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, header->subject, (int)cam->mpOwner);
+    cRider* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, header->subject, cam->mpOwner);
     if (rider == 0) {
         rider = SSXApp->Game->AI->Riders[0];
     }
@@ -1900,7 +1879,7 @@ void cScriptRelativeAlgorithm::update()
     cScriptRelativeAlgorithm* self = this;
     cScriptPlayerEntity* cam = ScriptObj->mpCameraEntity->mpEntity;
     tSSXHeaderCameraAlgorithmic* header = GetSSXCameraAlgorithmicHeader(cam);
-    cRider* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, header->subject, (int)cam->mpOwner);
+    cRider* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, header->subject, cam->mpOwner);
     if (rider == 0) {
         rider = SSXApp->Game->AI->Riders[0];
     }
@@ -2132,7 +2111,9 @@ extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(cScriptRelativeAlgorithm*
 {
     sM_B7B8 mat;
     vu0CopyMtx_B7B8(&mat, &t4mat_Identity_B7B8);
-    vu0TransMtx_B7B8(&mat, Add_B7B8(*(t4Vector*)&algorithm->Position, cCameraJitterer_getPositionalJitter_B7B8((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    vu0TransMtx_B7B8(&mat, Add_B7B8(algorithm->Position,
+            cCameraJitterer_getPositionalJitter_B7B8((char*)&algorithm->Jitterer, algorithm->Heading,
+            algorithm->Pitch)));
     RotAxis_B7B8(&mat, t4vect_XAxis_B7B8, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
     RotAxis_B7B8(&mat, t4vect_YAxis_B7B8, -algorithm->Pitch);
     RotAxis_B7B8(&mat, t4vect_ZAxis_B7B8, algorithm->Heading);

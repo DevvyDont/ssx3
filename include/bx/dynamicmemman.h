@@ -115,13 +115,13 @@ struct cDynamicMemMan {
         __asm__("cDynamicMemMan_dlindependent_comalloc");
     void* iALLOc(unsigned int n, unsigned int* sizes, int opts, void** chunks) __asm__("cDynamicMemMan_iALLOc");
     void* alloc(unsigned int bytes) __asm__("cDynamicMemMan_alloc");
-    bool isBlock(unsigned int addr) __asm__("cDynamicMemMan_isBlock");
+    bool isBlock(const void* addr) __asm__("cDynamicMemMan_isBlock"); // [O] isBlock(void* mem)
     unsigned int dlmalloc_usable_size(void* mem) __asm__("cDynamicMemMan_dlmalloc_usable_size__FPvT0");
     int allocAlign() __asm__("cDynamicMemMan_allocAlign__FPv");
     int allocAlignHdr() __asm__("cDynamicMemMan_allocAlignHdr__FPv");
     int free() __asm__("cDynamicMemMan_free__FPv");
     void init(unsigned int base, unsigned int size) __asm__("cDynamicMemMan_init");
-    unsigned int dlmorecore(long incr) __asm__("cDynamicMemMan_dlmorecore");
+    void* dlmorecore(long incr) __asm__("cDynamicMemMan_dlmorecore"); // [O] returns void*
     void dlfree(void* mem) __asm__("cDynamicMemMan_dlfree");
 };
 

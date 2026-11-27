@@ -30,7 +30,7 @@ struct cStreamInstance {
     cStreamInstance* cStreamInstance1(cSndPlayOpts* p, char* mem, int size, int n, int maxChunks)
         __asm__("cStreamInstance_cStreamInstance1");
     void * cStreamInstance2(int handle) __asm__("cStreamInstance_cStreamInstance2");
-    void SetBigFile(int name) __asm__("cStreamInstance_SetBigFile");
+    void SetBigFile(const char* name) __asm__("cStreamInstance_SetBigFile");
     void Set3DPosition(int azimuth, int elevation) __asm__("cStreamInstance_Set3DPosition");
     void SetBaseVolume(int val) __asm__("cStreamInstance_SetBaseVolume__FPvi");
     void SetPitch(int pitch) __asm__("cStreamInstance_SetPitch");
@@ -46,7 +46,7 @@ struct cStreamInstance {
     float GetRequestLength() __asm__("cStreamInstance_GetRequestLength");
     void Pause() __asm__("cStreamInstance_Pause");
     void Resume() __asm__("cStreamInstance_Resume");
-    int Queue(int holdTime, int buf, int off) __asm__("cStreamInstance_Queue");
+    int Queue(int holdTime, const char* buf, int off) __asm__("cStreamInstance_Queue");
     int Queue1(int holdTime, int element, int off) __asm__("cStreamInstance_Queue1");
     void* Purge() __asm__("cStreamInstance_Purge__FPv");
     int Requests() __asm__("cStreamInstance_Requests");

@@ -45,6 +45,9 @@ struct tMoviePlayOptions {
     int iDrawLayer;             // 0x1C [O]; [R] SetDefaults 31; [U] cVidEngine_ReadyVideo 9; startPlay passes it to
                                 //       SSX_VD_create
     float fPlaySpeed;           // 0x20 [O]; [R] SetDefaults 1.0f; [U] the ctor and init copy it to m_fSpeed
+
+    // Method bound to its retail symbol by an asm label.
+    void SetDefaults() __asm__("tMoviePlayOptions_SetDefaults");
 };
 
 struct cMoviePlayer {
@@ -75,7 +78,7 @@ struct cMoviePlayer {
                                 //       only while it is set
 
     // Methods bound to their retail symbols by asm labels.
-    void init1(int videoFile) __asm__("cMoviePlayer_init1");
+    void init1(const char* videoFile) __asm__("cMoviePlayer_init1");
     void purge() __asm__("cMoviePlayer_purge");
     void startPlay() __asm__("cMoviePlayer_startPlay");
     void syncPlay() __asm__("cMoviePlayer_syncPlay");

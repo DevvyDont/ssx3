@@ -40,8 +40,8 @@ void* cBERewardInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_loadRewards);
 #ifdef SKIP_ASM
-extern "C" void cBERewardDB_init(void* db, int flag);
-extern void* cBELibrary_rewardDB[];
+extern "C" void cBERewardDB_init(cBERewardDB* db, int flag);
+extern cBERewardDB cBELibrary_rewardDB;
 
 /**
  * Starts loading the reward database asynchronously: cBERewardDB_init(cBELibrary_rewardDB, 1).
@@ -50,15 +50,14 @@ extern void* cBELibrary_rewardDB[];
  */
 extern "C" void cBERewardInterface_loadRewards()
 {
-    cBERewardDB_init(cBELibrary_rewardDB, 1);
+    cBERewardDB_init(&cBELibrary_rewardDB, 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_isRewardsLoaded);
 #ifdef SKIP_ASM
-// PORT: compares a pointer cast to int against -1; not 64-bit safe.
-extern void* cBELibrary_rewardDB[];
+extern cBERewardDB cBELibrary_rewardDB;
 
 /**
  * Returns whether the reward database has finished loading.
@@ -71,8 +70,8 @@ extern void* cBELibrary_rewardDB[];
 extern "C" int cBERewardInterface_isRewardsLoaded(void)
 {
     int result = 0;
-    if ((int)cBELibrary_rewardDB[0] == kNoBoltFile) {
-        result = cBELibrary_rewardDB[1] != 0;
+    if (cBELibrary_rewardDB.mRewardFileIndex == kNoBoltFile) {
+        result = cBELibrary_rewardDB.mpRewardsFile != 0;
     }
     return result;
 }
@@ -170,9 +169,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophies);
  *
  * @return the trophy records
  */
-int cBERewardInterface::getTrophies()
+const tTrophyInfo* cBERewardInterface::getTrophies()
 {
-    return ((int)getDB()->mpTrophies);
+    return getDB()->mpTrophies;
 }
 #endif
 //100%
@@ -183,9 +182,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedals);
  *
  * @return the medal records
  */
-int cBERewardInterface::getMedals()
+const tMedalInfo* cBERewardInterface::getMedals()
 {
-    return ((int)getDB()->mpMedals);
+    return getDB()->mpMedals;
 }
 #endif
 //100%
@@ -196,9 +195,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPasses);
  *
  * @return the peak pass records
  */
-int cBERewardInterface::getPeakPasses()
+const tPeakPassInfo* cBERewardInterface::getPeakPasses()
 {
-    return ((int)getDB()->mpPeakPasses);
+    return getDB()->mpPeakPasses;
 }
 #endif
 //100%
@@ -209,9 +208,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPosters);
  *
  * @return the poster records
  */
-int cBERewardInterface::getPosters()
+const tPosterInfo* cBERewardInterface::getPosters()
 {
-    return ((int)getDB()->mpPosters);
+    return getDB()->mpPosters;
 }
 #endif
 //100%
@@ -222,9 +221,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTradingCards);
  *
  * @return the trading card records
  */
-int cBERewardInterface::getTradingCards()
+const tTradingCardInfo* cBERewardInterface::getTradingCards()
 {
-    return ((int)getDB()->mpTradingCards);
+    return getDB()->mpTradingCards;
 }
 #endif
 //100%
@@ -235,9 +234,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getConceptArts);
  *
  * @return the concept-art records
  */
-int cBERewardInterface::getConceptArts()
+const tConceptArtInfo* cBERewardInterface::getConceptArts()
 {
-    return ((int)getDB()->mpConceptArts);
+    return getDB()->mpConceptArts;
 }
 #endif
 //100%
@@ -248,9 +247,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getToys);
  *
  * @return the toy records
  */
-int cBERewardInterface::getToys()
+const tToyInfo* cBERewardInterface::getToys()
 {
-    return ((int)getDB()->mpToys);
+    return getDB()->mpToys;
 }
 #endif
 //100%
@@ -261,9 +260,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getVideos);
  *
  * @return the video records
  */
-int cBERewardInterface::getVideos()
+const tVideoInfo* cBERewardInterface::getVideos()
 {
-    return ((int)getDB()->mpVideos);
+    return getDB()->mpVideos;
 }
 #endif
 
@@ -279,24 +278,13 @@ extern "C" void* func_0014D998(sBELibTables* self, int i);
 unsigned int BXrand();
 
 
-struct sBEEntry_6C70 {
-    char pad_0x0[4];
-    short id;           // 0x4
-    char pad_0x6[0x2E];
-    int flags;          // 0x34
-};
-
-static inline tBEProfileBolt* Flag_6C70(char* p, sBEEntry_6C70* e)
+// The character's state for a bolt definition (its mpBoltsMap slot in mBolts), or 0 when the map has none.
+static inline tBEProfileBolt* Flag_6C70(cBECharProfileDB* charRecord, tBEBoltDef* def)
 {
-    short s = (*(short**)(p + 0x288))[e->id];
-    if (s >= 0)
-        return (tBEProfileBolt*)(p + 0x290) + s;
+    short slot = charRecord->mpBoltsMap[def->id];
+    if (slot >= 0)
+        return &charRecord->mBolts[slot];
     return 0;
-}
-
-static inline int Match_6C70(sBEEntry_6C70* e, int type)
-{
-    return (type == 0 && (e->flags & 0x100)) || (type == 1 && (e->flags & 0x200)) || (type == 2 && (e->flags & 0x400));
 }
 
 /**
@@ -325,30 +313,30 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
-    sBEEntry_6C70* def = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, characterId);
+    tBEBoltDef* def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
     int i;
     for (i = 0; i < count; i++, def++)
     {
         if (type == kPEAK_1 && (*(unsigned char*)((char*)def + 0x35) & 1))
         {
-            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
         else if (type == kPEAK_2 && (def->flags & 0x200))
         {
-            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
         else if (type == kPEAK_3 && (def->flags & 0x400))
         {
-            if ((Flag_6C70(((char*)charRecord), def)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
     }
     if (n > 0)
     {
         n = BXrand() % n;
-        def = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, characterId);
+        def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
         int j;
         for (j = 0; j < count; j++, def++)
         {
@@ -358,7 +346,7 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
                 short flagSlot = (charRecord->mpBoltsMap)[id];
                 tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
+                    flagEntry = &charRecord->mBolts[flagSlot];
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -373,7 +361,7 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
                 short flagSlot = (charRecord->mpBoltsMap)[id];
                 tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
+                    flagEntry = &charRecord->mBolts[flagSlot];
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -388,7 +376,7 @@ extern "C" int func_00156C70(cBERewardInterface* self, int profileIndex, int cha
                 short flagSlot = (charRecord->mpBoltsMap)[id];
                 tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
+                    flagEntry = &charRecord->mBolts[flagSlot];
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -414,23 +402,12 @@ int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(sBELibTables* self, int i);
 unsigned int BXrand();
 
-struct sBEFlagEntry_6EE0 {
-    unsigned short field_0x0;
-    unsigned short flags;
-};
-
-struct sBEEntry_6EE0 {
-    char pad_0x0[4];
-    short id;           // 0x4
-    char pad_0x6[0x2E];
-    int flags;          // 0x34
-};
-
-static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
+// The character's state for a bolt definition (its mpBoltsMap slot in mBolts), or 0 when the map has none.
+static inline tBEProfileBolt* Flag_6EE0(cBECharProfileDB* charRecord, tBEBoltDef* def)
 {
-    short s = (*(short**)(p + 0x288))[e->id];
-    if (s >= 0)
-        return (sBEFlagEntry_6EE0*)(p + 0x290) + s;
+    short slot = charRecord->mpBoltsMap[def->id];
+    if (slot >= 0)
+        return &charRecord->mBolts[slot];
     return 0;
 }
 
@@ -453,20 +430,20 @@ extern "C" int func_00156EE0(cBERewardInterface* self, int profileIndex, int cha
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
-    sBEEntry_6EE0* def = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, characterId);
+    tBEBoltDef* def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
     int i;
     for (i = 0; i < count; i++, def++)
     {
         if (def->flags & 0x800)
         {
-            if ((Flag_6EE0(((char*)charRecord), def)->flags & 2) == 0)
+            if ((Flag_6EE0(charRecord, def)->flags & 2) == 0)
                 n++;
         }
     }
     if (n > 0)
     {
         n = BXrand() % n;
-        def = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, characterId);
+        def = (tBEBoltDef*)func_0014D998((sBELibTables*)lib, characterId);
         int j;
         for (j = 0; j < count; j++, def++)
         {
@@ -474,9 +451,9 @@ extern "C" int func_00156EE0(cBERewardInterface* self, int profileIndex, int cha
             {
                 short id = def->id;
                 short flagSlot = (charRecord->mpBoltsMap)[id];
-                sBEFlagEntry_6EE0* flagEntry;
+                tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6EE0*)(&charRecord->mBolts[0]) + flagSlot;
+                    flagEntry = &charRecord->mBolts[flagSlot];
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -2236,14 +2213,14 @@ bool cBERewardInterface_isBetterMedal(void* self, int a, int b);
  *
  * @param iProfileIndex  profile index (On Tour: iProfileIndex)
  * @param iCharacterID  character id (On Tour: iCharacterID)
- * @return the first unreached target (as a pointer-typed value), or 0 when all three are reached
+ * @return the first unreached target, or 0 when all three are reached
  */
-void* cBERewardInterface::calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
+int cBERewardInterface::calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
 {
     for (int i = 0; i < 3; i++)
     {
         if (!this->isBetterMedal(-1, getEarningsMedal(iProfileIndex, iCharacterID, i)))
-            return (void*)gEarningsMedalLevel[i];
+            return gEarningsMedalLevel[i];
     }
     return 0;
 }
@@ -2321,10 +2298,10 @@ int cBERewardInterface::calculateNextBigChallengesLevel(int iProfileIndex, int i
 INCLUDE_ASM("be/beintreward", cBERewardInterface_clearUserAwards);
 #ifdef SKIP_ASM
 int cBELibrary_getRiderIndex(int);
-extern void* gNextEarningsLimit;
+extern unsigned int gNextEarningsLimit;
 extern int gNextCollectiblesLimit[];
 extern int gNextBigChallengesLimit[];
-extern void* cBELibrary_userAwards[];
+extern cBEUserAwards cBELibrary_userAwards;
 extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 
 /**
@@ -2336,7 +2313,7 @@ extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
  */
 void cBERewardInterface::clearUserAwards()
 {
-    ((cBEUserAwards*)cBELibrary_userAwards)->clear();
+    cBELibrary_userAwards.clear();
     int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
     gNextEarningsLimit = calculateNextEarningsLevel(0, charID);
     for (int i = 0; i < 3; i++)
@@ -2349,7 +2326,7 @@ void cBERewardInterface::clearUserAwards()
 }
 #endif
 
-extern void* cBELibrary_userAwards[];
+extern cBEUserAwards cBELibrary_userAwards;
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getUserAwards__FPv);
@@ -2359,13 +2336,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getUserAwards__FPv);
  *
  * @return cBELibrary_userAwards
  */
-void* cBERewardInterface::getUserAwards()
+const cBEUserAwards* cBERewardInterface::getUserAwards()
 {
-    return (void*)cBELibrary_userAwards;
+    return &cBELibrary_userAwards;
 }
 #endif
-
-extern "C" void* cBEUserAwards_getTotalNumAwards(void*);
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumUserAwards__FPv);
@@ -2373,14 +2348,13 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumUserAwards__FPv);
 /**
  * Returns how many awards the players have earned in total.
  *
- * cBEUserAwards_getTotalNumAwards (cBEUserAwards::getTotalNumAwards) on cBELibrary_userAwards. The C declares the result as void *; it is
- * the int count.
+ * cBEUserAwards_getTotalNumAwards (cBEUserAwards::getTotalNumAwards) on cBELibrary_userAwards.
  *
  * @return the award count
  */
-void* cBERewardInterface::getTotalNumUserAwards()
+int cBERewardInterface::getTotalNumUserAwards()
 {
-    return cBEUserAwards_getTotalNumAwards((void*)cBELibrary_userAwards);
+    return cBELibrary_userAwards.getTotalNumAwards();
 }
 #endif
 
@@ -2393,8 +2367,8 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getAwardedCash);
  *
  * @return the awarded cash
  */
-extern "C" void *cBERewardInterface_getAwardedCash(void) {
-    return *cBELibrary_userAwards;
+extern "C" unsigned int cBERewardInterface_getAwardedCash(void) {
+    return cBELibrary_userAwards.mAwards.iCash;
 }
 #endif
 
@@ -2402,7 +2376,7 @@ extern "C" void *cBERewardInterface_getAwardedCash(void) {
 INCLUDE_ASM("be/beintreward", cBERewardInterface_awardUserPeakPass);
 #ifdef SKIP_ASM
 extern "C" void cBEUserAwards_setAward(cBEUserAwards* self, int row, int col, int value);
-extern void* cBELibrary_userAwards[];
+extern cBEUserAwards cBELibrary_userAwards;
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
@@ -2423,7 +2397,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  */
 void cBERewardInterface::awardUserPeakPass(int profile, int characterId, int row, int mode)
 {
-    cBEUserAwards* awards = (cBEUserAwards*)cBELibrary_userAwards;
+    cBEUserAwards* awards = &cBELibrary_userAwards;
     switch (mode)
     {
     case kPEAK_1:
@@ -2558,12 +2532,9 @@ struct sProfileChar_1591E8 {
 extern sProfileChar_1591E8 cBELibrary_profileLib_1591E8[][10] __asm__("cBELibrary_profileLib");
 extern "C" int cBECharProfileDB_updateMedalStats(sProfileChar_1591E8* pc, int event, int mode, int medal);
 
-struct sScoreStat_1591E8 {
-    char pad0;
-    signed char medal;      // 0x1
-    unsigned short count;   // 0x2
-};
-sScoreStat_1591E8* cBECharProfileDB_getScoreStats_1591E8(void* self, int a, int b) __asm__("cBECharProfileDB_getScoreStats__FPvii");
+// cBECharProfileDB::getScoreStats, called on the flags view of the record; it returns the event's score record
+tBETrackScore* cBECharProfileDB_getScoreStats_1591E8(void* self, int a,
+        int b) __asm__("cBECharProfileDB_getScoreStats__FPvii");
 
 struct sRewardReq_1591E8
 {
@@ -2586,8 +2557,8 @@ extern signed char D_005305F9[];
  * event, @p mode). The award category (eBEAwardCategory) is the peak plus kAWARD_PEAK1_EVENT_MEDAL (events 0-3),
  * kAWARD_PEAK1_RIVALTIME_MEDAL (4), kAWARD_PEAK1_RIVALPOINTS_MEDAL (5), kAWARD_PEAK1_TIMECHALLENGE_MEDAL (6-8) or
  * kAWARD_PEAK1_POINTSCHALLENGE_MEDAL (9-11). A medal of 0 or 1 calls cBERewardInterface_awardUser for it on the first
- * result (score-record count 0); events 6-11 with kMEDAL_BRONZE or kMEDAL_SILVER call func_001E1DD0 instead, unless
- * raceDB byte +0x49 (D_005305F9) is set.
+ * result (the score record's iNumGoldOrPlat is 0); events 6-11 with kMEDAL_BRONZE or kMEDAL_SILVER call func_001E1DD0
+ * instead, unless raceDB byte +0x49 (D_005305F9) is set.
  *
  * When the medal beats the stored one (cBERewardInterface_isBetterMedal), pays the full cash (cBERewardInterface_awardUserCash1), records
  * the medal (cBECharProfileDB_updateMedalStats) and gives the trophy with cBERewardInterface_awardUserTrophy if it became owned; otherwise
@@ -2610,11 +2581,11 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
     sProfileChar_1591E8* pc = &cBELibrary_profileLib_1591E8[profile][charID];
     int bit = -1;
     void* score = cBE_getInterface_Fv(cBE_getBE(), 11);
-    sScoreStat_1591E8* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
+    tBETrackScore* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
     int tier = getTrackTrophyID(mode, event);
     int group = getTrackPeakID(event);
     unsigned int money;
-    int oldMedal = stats->medal;
+    int oldMedal = stats->BestMedal;
     if (mode == kGAMEEVENT_TIME_PEAK1 || mode == kGAMEEVENT_POINTS_PEAK1)
         group = kPEAK_1;
     else if (mode == kGAMEEVENT_TIME_PEAK2 || mode == kGAMEEVENT_POINTS_PEAK2)
@@ -2650,7 +2621,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
         break;
     }
     if ((unsigned int)medal < 2) {
-        if (stats->count == 0)
+        if (stats->iNumGoldOrPlat == 0)
             awardUser(profile, charID, bit);
     } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
         if (medal == kMEDAL_BRONZE)
@@ -2774,10 +2745,10 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a, int b, int c, int i);
 extern "C" void cBEEconInterface_addMoney(void* econ, int a, int b, int amount);
-extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b);
+extern "C" int cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b);
 extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
-extern void* gNextEarningsLimit;
-extern void* cBELibrary_userAwards[];
+extern unsigned int gNextEarningsLimit;
+extern cBEUserAwards cBELibrary_userAwards;
 
 /**
  * Gives a character cash, logging it and awarding any earnings trophies the new total earns.
@@ -2796,8 +2767,9 @@ extern void* cBELibrary_userAwards[];
 void cBERewardInterface::awardUserCash1(int profileIndex, int characterId, int amount)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-    *(int*)cBELibrary_userAwards += amount;
-    if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, profileIndex, characterId) + amount) >= (unsigned int)gNextEarningsLimit)
+    cBELibrary_userAwards.mAwards.iCash += amount;
+    if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, profileIndex,
+            characterId) + amount) >= gNextEarningsLimit)
     {
         int before[3];
         int i;
@@ -2977,7 +2949,7 @@ extern sSlots2_00159CD0 D_004A1268[];
 void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
 {
     cBECharProfileDB* rec = &cBELibrary_profileLib[profile][iCharacterID];
-    cBEUserAwards* rewardLog = (cBEUserAwards*)cBELibrary_userAwards;
+    cBEUserAwards* rewardLog = &cBELibrary_userAwards;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
     int item = kNoBoltID;
@@ -3245,7 +3217,7 @@ int cBERewardInterface::getTrackTrophyID(int eventID, int locationID)
 }
 #endif
 
-extern void* cBELibrary_rewardDB[];
+extern cBERewardDB cBELibrary_rewardDB;
 
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getDB);
 #ifdef SKIP_ASM
@@ -3256,7 +3228,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getDB);
  */
 cBERewardDB* cBERewardInterface::getDB()
 {
-    return (cBERewardDB*)(void*)cBELibrary_rewardDB;
+    return &cBELibrary_rewardDB;
 }
 #endif
 
@@ -3416,15 +3388,10 @@ void cBEUserAwards::setAward(int row, int col, int value)
 //100%
 INCLUDE_ASM("be/beintreward", cBEUserAwards_getTotalNumAwards);
 #ifdef SKIP_ASM
-// PORT: the unit declares cBEUserAwards_getTotalNumAwards as returning void* (line ~378, used by
-// cBERewardInterface_getTotalNumUserAwards); the body returns an int sum, so it is bound by asm label.
-// The lander should change that declaration to int instead.
-
 /**
  * Counts all awards recorded in a user-awards table.
  *
- * Sums the 32 x 10 signed bytes of iNumAwards. The C definition is cBEUserAwards_getTotalNumAwards (bound to the symbol
- * by asm label) because the unit declares cBEUserAwards_getTotalNumAwards as returning void *.
+ * Sums the 32 x 10 signed bytes of iNumAwards.
  *
  * @return the total award count
  */
@@ -3468,9 +3435,9 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getAwardBits__FPvi);
  * @param i  the reward type (On Tour rewardType)
  * @return the bit array, or null for types without one
  */
-int cBEUserAwards::getAwardBits(int i)
+const unsigned char* cBEUserAwards::getAwardBits(int i)
 {
-    return (int)mpAwardBits[i];
+    return mpAwardBits[i];
 }
 #endif
 
@@ -3588,6 +3555,9 @@ struct sRewardData {
  */
 extern "C" void cBERewardDB_initRewards(sRewardData* self, int* data)
 {
+    // ORIGINAL-PTR: a reward file blob (On Tour initRewards(char* pFileData)): variable-length records, each
+    // (type, count) pair followed by its count records, whose char* strings (On Tour tTrophyInfo::mNameStringID and
+    // the like) hold pool offsets + 1 that are relocated in place.
     int n;
     int* cursor = data;
     self->base = data;

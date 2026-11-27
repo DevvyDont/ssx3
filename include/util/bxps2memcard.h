@@ -177,9 +177,9 @@ struct cPS2MemCard {
     int mBuffer;                    // 0x002C [R] Reset 0; [O] ReadData / WriteData buffer: the caller's buffer for
                                     //       sceMcWrite/Read (slots 30/36/37/41, func_002C6B50/6BD0 store it);
                                     //       SetState(1/0x17) clears it
-    int mIconFileData;              // 0x0030 [R] Reset 0; [U] the icon file's data (ASYNCFILE_release(mIconFileHandle,
-                                    //       &mIconFileData, &mIconFileSize)), written with sceMcWrite, MEM_free'd; dtor
-                                    //       frees it
+    void* mIconFileData;            // 0x0030 [R] Reset 0; [U] the icon file's data (ASYNCFILE_release(mIconFileHandle,
+                                    //       &mIconFileData, &mIconFileSize); [O] its address out-parameter is void**),
+                                    //       written with sceMcWrite, MEM_free'd; dtor frees it
     int mIconFileSize;              // 0x0034 [R] Reset 0; [U] the icon file's size (see mIconFileData)
     int mIconFileHandle;            // 0x0038 [P] "mIconFileHandle != 0"; [R] Reset -1; [U] SetState(0x28/0x2C/0x30) =
                                     //       ASYNCFILE_load(icon path, 0x100) (async open); Update polls and releases it
@@ -262,8 +262,8 @@ struct cPS2MemCard {
     bool DidFormatFail() __asm__("cPS2MemCard_DidFormatFail");
     bool DidErrorOccur() __asm__("cPS2MemCard_DidErrorOccur__FPv");
     bool IsInvalid(int device) __asm__("cPS2MemCard_IsInvalid");
-    void* GetFreeSpace1(int device) __asm__("cPS2MemCard_GetFreeSpace1");
-    void* GetFreeSpace() __asm__("cPS2MemCard_GetFreeSpace__FPv");
+    int GetFreeSpace1(int device) __asm__("cPS2MemCard_GetFreeSpace1");
+    int GetFreeSpace() __asm__("cPS2MemCard_GetFreeSpace__FPv");
     bool IsAvailable(int i) __asm__("cPS2MemCard_IsAvailable");
     bool IsFormatted(int device) __asm__("cPS2MemCard_IsFormatted");
     bool CardChanged(int device) __asm__("cPS2MemCard_CardChanged");

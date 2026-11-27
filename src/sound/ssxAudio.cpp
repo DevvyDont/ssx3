@@ -445,7 +445,7 @@ extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int id, int vol, int
 extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
-extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int a, int b, int c);
+extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int a, const char* b, int c);
 int cStreamSys_STREAM_GetInstance(void* self, int a1);
 extern "C" void cBankMonitorInstance_SetStream(void* self, int a, const char* name, int b);
 extern "C" void* memset(void* dst, int c, int n);
@@ -503,8 +503,7 @@ int cSSXAudio::PlayPositional(int streamIndex, const char* fileName, int fileOff
                               int userInfo, int isHuman, float radius, int viewport)
 {
     cSSXAudio* self = this;
-    // PORT: a2 (a name pointer) is passed through cStreamSys_STREAM_Queue as an int
-    int voiceHandle = cStreamSys_STREAM_Queue(self->MusicSys.mpVStreamSys, streamIndex, holdTime, (int)fileName,
+    int voiceHandle = cStreamSys_STREAM_Queue(self->MusicSys.mpVStreamSys, streamIndex, holdTime, fileName,
                                               fileOffset);
     if (voiceHandle < 0) {
         return voiceHandle;
@@ -628,7 +627,7 @@ static inline float Atan2_5930(float y, float x)
  */
 float cSSXAudio::Calc3DPos(cBankMonitorInstance* source, SNDPLAYOPTS* outAngles)
 {
-    if ((int)cAudioInterface_getApp()->Game == 0)
+    if (cAudioInterface_getApp()->Game == 0)
         return 1.0f;
     cGame* game = cAudioInterface_getGame();
     cCamera* camera = game->ViewMan->PlayerCamera[source->mViewport];
@@ -642,16 +641,16 @@ float cSSXAudio::Calc3DPos(cBankMonitorInstance* source, SNDPLAYOPTS* outAngles)
     relPos.y = (tp.y + cy) * 0.009999999776482582f;
     relPos.z = (tp.z + cz) * 0.009999999776482582f;
     if (mAudioMode == 0) {
-        *(short*)&outAngles->azimuth = 0;
+        outAngles->azimuth = 0;
         outAngles->elevation = 0;
     } else {
         if (source->mTwoPlayerPan != 0) {
             if (source->mTwoPlayerSide != 0)
-                *(short*)&outAngles->azimuth = 0x4000;
+                outAngles->azimuth = 0x4000;
             else
                 outAngles->azimuth = 0xC000;
         } else {
-            *(short*)&outAngles->azimuth = (int)(Atan2_5930(relPos.x, relPos.z) * 10430.3779296875f);
+            outAngles->azimuth = (int)(Atan2_5930(relPos.x, relPos.z) * 10430.3779296875f);
         }
         float len = sqrt_5930(relPos.x * relPos.x + relPos.z * relPos.z);
         outAngles->elevation = (int)(Atan2_5930(relPos.y, len) * 10430.3779296875f);
@@ -730,15 +729,15 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
     int st = self->mDuckStream;
     if (st != kNoDuckStream) {
         if (self->mDuckedStreamHasStarted == 0) {
-            if (cStreamSys_STREAM_Playing(*(void**)&self->MusicSys, st) != 0)
+            if (cStreamSys_STREAM_Playing(self->MusicSys.mpVStreamSys, st) != 0)
                 self->mDuckedStreamHasStarted = 1;
-        } else if (cStreamSys_STREAM_Playing(*(void**)&self->MusicSys, st) == 0) {
+        } else if (cStreamSys_STREAM_Playing(self->MusicSys.mpVStreamSys, st) == 0) {
             self->DuckToStream(kNoDuckStream, 0.5f, 1.0f);
         }
     }
     self->UpdateDuck();
     self->UpdateMix();
-    if ((int)cAudioInterface_getApp()->Game != 0) {
+    if (cAudioInterface_getApp()->Game != 0) {
         func_0028C8C8(((char*)self));
         if (self->mAudioUpdateState == INGAME_UPDATE) {
             if (self->mAudioPaused == 0)
@@ -781,17 +780,16 @@ static inline int isLocalHuman(cRider* rider)
  * from cAI's Riders (cAudioInterface_getAI): kFocusLeadingHuman (-1) picks, among the first NumberOfPlayersAllocated
  * riders, the local human (mIsHuman and mIsLocal) with the lowest +0xEC value (RaceRanking); kFocusFirstHuman (-2) the
  * first local human of all NumberOfRidersAllocated riders; any other value the rider whose mViewIndex equals it. Falls
- * back to Riders[0]. The fork's C returns the pointer as an int.
+ * back to Riders[0].
  *
  * @param which  viewport index (On Tour viewport), or kFocusLeadingHuman / kFocusFirstHuman as above
  * @return the rider (cRider*)
  */
-// PORT: returns a rider pointer; the unit declares the return type as int.
-int cSSXAudio::GetFocusRider(int which)
+cRider* cSSXAudio::GetFocusRider(int which)
 {
     if (ReplayMode() != 0) {
         cPlayer* player = ((cAI*)cAudioInterface_getAI())->Players[0];
-        return player ? (int)player->mRider : 0;
+        return player ? player->mRider : 0;
     }
     if (which == kFocusLeadingHuman) {
         int best = 0;
@@ -803,22 +801,22 @@ int cSSXAudio::GetFocusRider(int which)
                 best = i;
             }
         }
-        return (int)((cAI*)cAudioInterface_getAI())->Riders[best];
+        return ((cAI*)cAudioInterface_getAI())->Riders[best];
     }
     if (which == kFocusFirstHuman) {
         for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated; i++) {
             cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
             if (isLocalHuman(curRider))
-                return (int)curRider;
+                return curRider;
         }
     } else {
         for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated; i++) {
             cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
             if (curRider->mViewIndex == which)
-                return (int)curRider;
+                return curRider;
         }
     }
-    return (int)((cAI*)cAudioInterface_getAI())->Riders[0];
+    return ((cAI*)cAudioInterface_getAI())->Riders[0];
 }
 
 #endif
@@ -943,7 +941,7 @@ void cSSXAudio::FrontEndLoad()
             if (strcasecmp(k, str_MAIN) == 0) {
                 FileParser_AssignString_r(&parser, str_MAIN, val);
                 sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0, msg, 0);
+                cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 0, msg, 0);
             }
         }
     }
@@ -1052,7 +1050,7 @@ void cSSXAudio::InGameLoad()
     char msg[0x70];
     __builtin_memcpy(ext, D_004A35A0, 6);
     InitSoundLevels(eGameAudioState_Mountain);
-    cAsyncSys_Init3(**(cAsyncSys***)&MusicSys, 0, 0);
+    cAsyncSys_Init3((cAsyncSys*)MusicSys.mpVStreamSys->mpVBankManager, 0, 0);
     mUsedBank[0] = str_empty_j[0];
     mNextUsedBank = 0;
     FileParser_FileParser_r(&parser, str_H_H, 0x100);
@@ -1076,45 +1074,45 @@ void cSSXAudio::InGameLoad()
                 if (strcasecmp(k, str_MAIN) == 0) {
                     FileParser_AssignString_r(&parser, str_MAIN, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 0, msg, 0);
                 } else if (strcasecmp(k, str_BOARD) == 0) {
                     FileParser_AssignString_r(&parser, str_BOARD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 1, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 1, msg, 0);
                 } else if (strcasecmp(k, str_SPUBOARD) == 0) {
                     FileParser_AssignString_r(&parser, str_SPUBOARD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 0x10, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 0x10, msg, 0);
                 } else if (strcasecmp(k, str_CROWD) == 0) {
                     FileParser_AssignString_r(&parser, str_CROWD, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 5, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 5, msg, 0);
                 } else if (strcasecmp(k, str_AUX) == 0) {
                     FileParser_AssignString_r(&parser, str_AUX, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 6, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 6, msg, 0);
                 } else if (strcasecmp(k, str_TRICKY) == 0) {
                     FileParser_AssignString_r(&parser, str_TRICKY, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 7, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 7, msg, 0);
                 } else if (strcasecmp(k, str_MOUNTAIN) == 0) {
                     FileParser_AssignString_r(&parser, str_MOUNTAIN, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 2, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 2, msg, 0);
                 } else if (strcasecmp(k, str_TRANSPORT) == 0) {
                     FileParser_AssignString_r(&parser, str_TRANSPORT, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 4, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 4, msg, 0);
                 } else if (strcasecmp(k, str_LAND) == 0) {
                     FileParser_AssignString_r(&parser, str_LAND, val);
                     sprintf(msg, str_pct_spct_spct_s_b, str_data_b, name, val);
-                    cBankManager_BANK_SyncLoad(**(void***)&MusicSys, 10, msg, 0);
+                    cBankManager_BANK_SyncLoad(MusicSys.mpVStreamSys->mpVBankManager, 10, msg, 0);
                 }
             }
         }
     }
-    cBankManager_BANK_AllocMem(**(void***)&MusicSys, 3, 0x19000, 0, 0);
-    cBankManager_BANK_AllocMem(**(void***)&MusicSys, 12, 0x6A400, 0, 0);
+    cBankManager_BANK_AllocMem(MusicSys.mpVStreamSys->mpVBankManager, 3, 0x19000, 0, 0);
+    cBankManager_BANK_AllocMem(MusicSys.mpVStreamSys->mpVBankManager, 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         func_002A6D78(((char*)this), str_H, ext, 2, 5);
@@ -1351,7 +1349,7 @@ void cSSXAudio::AttachAudioBank(unsigned int id, int on)
 {
     unsigned int bank = id >> 8;
     if (on != 0) {
-        cBankManager_BANK_Attach(**(void***)&MusicSys, bank + 8, on, 0x20000);
+        cBankManager_BANK_Attach(MusicSys.mpVStreamSys->mpVBankManager, bank + 8, on, 0x20000);
         mTrackBankLoaded[bank] = 1;
         mTrackBankLoadedSection[bank] = id & 0xFF;
     }
@@ -1447,12 +1445,12 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_OnFinishEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
+extern "C" cRider* cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void func_002A73A8(void* p, int a1, int id);
-extern "C" void cSSXAudio_WipeoutSlideEnd(void* self, int id);
-extern "C" void cSSXAudio_WipeoutTumbleEnd(void* self, int id);
-extern "C" void cSSXAudio_EndUberSpin(void* self, int a1);
+extern "C" void cSSXAudio_WipeoutSlideEnd(void* self, cRider* rider);
+extern "C" void cSSXAudio_WipeoutTumbleEnd(void* self, cRider* rider);
+extern "C" void cSSXAudio_EndUberSpin(void* self, cRider* rider);
 extern "C" int func_0028D960(void* self);
 extern "C" int func_002A4078(void* self);
 extern "C" int cAI_isRaceFinished(void* p);
@@ -1481,16 +1479,15 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
  *
  * @param rider  the rider (cRider)
  */
-// PORT: rider pointers passed through int parameters of some callees.
 void cSSXAudio::OnFinishEvent(cRider* rider)
 {
-    if (((char*)rider) != (char*)GetFocusRider(rider->mViewIndex))
+    if (rider != GetFocusRider(rider->mViewIndex))
         return;
     func_002A73A8((char*)gSSXAudio, 2, ReplayMode() ? 0 : rider->mViewIndex);
     int flag = 1;
-    cSSXAudio_WipeoutSlideEnd(((char*)this), (int)rider);
-    cSSXAudio_WipeoutTumbleEnd(((char*)this), (int)rider);
-    cSSXAudio_EndUberSpin(((char*)this), (int)rider);
+    cSSXAudio_WipeoutSlideEnd(((char*)this), rider);
+    cSSXAudio_WipeoutTumbleEnd(((char*)this), rider);
+    cSSXAudio_EndUberSpin(((char*)this), rider);
     cGameModeMan* cfg = SSXApp->GameModeMan;
     int nextHeat = cfg->iNextHeat;
     int heatNum = cfg->iHeatNum;
@@ -1587,11 +1584,11 @@ void cSSXAudio::PartialRestart()
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ResetAudioVariables);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ResetLift(void* self);
-extern "C" void cSSXAudio_EndUberSpin(void* self, int a1);
+extern "C" void cSSXAudio_EndUberSpin(void* self, cRider* rider);
 extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float f1);
 extern "C" char* cAudioInterface_getAI();
-extern "C" void cSSXAudio_WipeoutSlideEnd(void* self, int id);
-extern "C" void cSSXAudio_WipeoutTumbleEnd(void* self, int id);
+extern "C" void cSSXAudio_WipeoutSlideEnd(void* self, cRider* rider);
+extern "C" void cSSXAudio_WipeoutTumbleEnd(void* self, cRider* rider);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -1612,13 +1609,14 @@ void cSSXAudio::ResetAudioVariables()
     cWorldTriggerManager_ResetStates(gWorldTriggerManager);
     int n = ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated;
     for (; i < n; i++) {
-        cSSXAudio_WipeoutSlideEnd(this, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
-        cSSXAudio_WipeoutTumbleEnd(this, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
+        cSSXAudio_WipeoutSlideEnd(this, ((cAI*)cAudioInterface_getAI())->Riders[i]);
+        cSSXAudio_WipeoutTumbleEnd(this, ((cAI*)cAudioInterface_getAI())->Riders[i]);
     }
-    *(int*)&mCurTrickPower[0] = 0;
-    *(int*)&mCurTrickPower[1] = 0;
+    mCurTrickPower[0] = 0.0f;
+    mCurTrickPower[1] = 0.0f;
     if (mTurboRef > 0) {
-        cBankMonitor_BANKMONITOR_StopHandle(**(char***)&MusicSys + 0x1D8, mTurboHandle, 1, mCurTrickPower[0]);
+        cBankMonitor_BANKMONITOR_StopHandle(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, mTurboHandle, 1,
+                                            mCurTrickPower[0]);
         mTurboRef = 0;
     }
 }
@@ -2856,7 +2854,7 @@ extern "C" int cAudioInterface_getNumGameView();
  */
 extern "C" int cSSXAudio_GetNumViews()
 {
-    if ((int)cAudioInterface_getApp()->Game != 0) {
+    if (cAudioInterface_getApp()->Game != 0) {
         return cAudioInterface_getNumGameView();
     }
     return 1;
@@ -3120,7 +3118,7 @@ void cSSXAudio::DelayMonitorTriggers()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_HandleDelayMonitorTriggers);
 #ifdef SKIP_ASM
-extern "C" void cWorldTriggerManager_MonitorTriggers(int, int, int);
+extern "C" void cWorldTriggerManager_MonitorTriggers(cWorldTriggerManager* self, int enable, int delay);
 
 /**
  * Monitor callback: re-enables the world triggers (cWorldTriggerManager_MonitorTriggers(gWorldTriggerManager, 1, 0)); returns 1.
@@ -3130,7 +3128,7 @@ extern "C" void cWorldTriggerManager_MonitorTriggers(int, int, int);
  * @return 1
  */
 extern "C" int cSSXAudio_HandleDelayMonitorTriggers(void) {
-    cWorldTriggerManager_MonitorTriggers(*(int*)&gWorldTriggerManager, 1, 0);
+    cWorldTriggerManager_MonitorTriggers(gWorldTriggerManager, 1, 0);
     return 1;
 }
 #endif
@@ -3225,7 +3223,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
         }
     }
     func_002B4060((char*)&self->MusicSys);
-    *(long*)&self->MusicSys.mDefaultActiveMap = (long)self->MusicSys.mActiveMap;
+    self->MusicSys.mDefaultActiveMap = self->MusicSys.mActiveMap;
     FileParser__FileParser(parser, 2);
 }
 #endif
@@ -3393,7 +3391,7 @@ extern "C" int func_0028D960(void* self);
 extern "C" void func_0028D988(void* self, void* rider, const void* obj);
 extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self);
 extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj);
-extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj);
+extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj);
 
 
 /**
@@ -3418,8 +3416,7 @@ void cSSXAudio::UpdateAudioWorldPainter(cRider* rider)
         tWorldPainterQuery* musicQuery = mpMusicTriggerQuery[idx];
         func_0028D988(this, rider, musicQuery->queryPosition(pos.x, pos.y, k));
         tWorldPainterQuery* mixQuery = mpMixQuery[idx];
-        // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        ReactToWPMixEvent((int)rider, (tWPInGameData*)mixQuery->queryPosition(pos.x, pos.y, k));
+        ReactToWPMixEvent(rider, (tWPInGameData*)mixQuery->queryPosition(pos.x, pos.y, k));
     }
     if (NeedWPAmbience() != 0) {
         tWorldPainterQuery* ambienceQuery = mpAmbienceQuery[idx];
@@ -3626,21 +3623,21 @@ int cSSXAudio::GetCharacterLevel(cRider* src)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReactToWPMixEvent);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
+extern "C" cRider* cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
 extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id);
 
 /**
  * Applies the mix preset from a world-painter result, when it is for the listening rider.
  *
- * The preset is the value that virtual slot 3 of @p obj returns. Nothing happens unless @p id is the rider
+ * The preset is the value that virtual slot 3 of @p obj returns. Nothing happens unless @p rider is the rider
  * cSSXAudio_GetFocusRider(self, -1) returns, and @p obj is set.
  *
- * @param id   the rider (On Tour pRider), passed as an int
+ * @param rider  the rider (On Tour pRider)
  * @param obj  the painter data at the rider's position (On Tour const tWPInGameData*), or 0
  */
-void cSSXAudio::ReactToWPMixEvent(int id, tWPInGameData* obj)
+void cSSXAudio::ReactToWPMixEvent(cRider* rider, tWPInGameData* obj)
 {
-    if (id == GetFocusRider(-1) && ((void*)obj) != 0) {
+    if (rider == GetFocusRider(-1) && ((void*)obj) != 0) {
         MixVolume(obj->MixPreset());
     }
 }
@@ -3687,7 +3684,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_AudioModeToBEAudioMode);
  * @param audioMode  the driver mode (eSOUNDDEF_MODE)
  * @return the options' sound mode
  */
-void* cSSXAudio::AudioModeToBEAudioMode(int audioMode)
+int cSSXAudio::AudioModeToBEAudioMode(int audioMode)
 {
     int result = 0;
     switch (audioMode) {
@@ -3703,7 +3700,7 @@ void* cSSXAudio::AudioModeToBEAudioMode(int audioMode)
         result = 3;
         break;
     }
-    return (void*)result;
+    return result;
 }
 #endif
 
@@ -3719,7 +3716,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrentSoundMode__FPv);
  *
  * @return the options' sound mode
  */
-void* cSSXAudio::GetCurrentSoundMode()
+int cSSXAudio::GetCurrentSoundMode()
 {
     return AudioModeToBEAudioMode(mAudioMode);
 }

@@ -54,7 +54,7 @@ struct cBEUserAwards {
     int isBitSet(int bit, unsigned char* bits) __asm__("cBEUserAwards_isBitSet");
     void setAward(int row, int col, int value) __asm__("cBEUserAwards_setAward");
     signed char getNumAwards(int row, int column) __asm__("cBEUserAwards_getNumAwards");
-    int getAwardBits(int i) __asm__("cBEUserAwards_getAwardBits__FPvi");
+    const unsigned char* getAwardBits(int i) __asm__("cBEUserAwards_getAwardBits__FPvi"); // [O] return type
     int getTotalNumAwards() __asm__("cBEUserAwards_getTotalNumAwards");
 };
 

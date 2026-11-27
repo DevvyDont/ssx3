@@ -308,6 +308,8 @@ struct cWorldCache {
     void update() __asm__("cWorldCache_update");
     void initPageMap() __asm__("cWorldCache_initPageMap");
     void resetPageMap() __asm__("cWorldCache_resetPageMap");
+    void touchPage(int i, float priority) __asm__("cWorldCache_touchPage");
+    void flushPage(int i) __asm__("cWorldCache_flushPage");
     void setPageLock(int hullPage, int lock) __asm__("cWorldCache_setPageLock");
     int isPageLocked(int hullPage) __asm__("cWorldCache_isPageLocked");
     void purgePage(int cell) __asm__("cWorldCache_purgePage");
@@ -317,9 +319,9 @@ struct cWorldCache {
     void updatePages() __asm__("cWorldCache_updatePages");
     void flushInActivePages() __asm__("cWorldCache_flushInActivePages");
     void flushOnePage() __asm__("cWorldCache_flushOnePage");
-    unsigned int addBxStreamDataTest(int slot, int type, unsigned int key, int size)
+    void* addBxStreamDataTest(int slot, int type, unsigned int key, int size)
         __asm__("cWorldCache_addBxStreamDataTest");
-    void addBxStreamDataSubmit(int group, int id, unsigned int key, int chunk)
+    void addBxStreamDataSubmit(int group, int id, unsigned int key, void* chunk)
         __asm__("cWorldCache_addBxStreamDataSubmit");
     void activateSectionPatches(int idx) __asm__("cWorldCache_activateSectionPatches");
 };

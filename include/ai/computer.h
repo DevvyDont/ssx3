@@ -193,6 +193,7 @@ struct cComputer {
     void setIndividualRiderDifficulty(int level, int mode) __asm__("cComputer_setIndividualRiderDifficulty");
     void setAttributeLevels() __asm__("cComputer_setAttributeLevels");
     void initRiderDifficulty() __asm__("cComputer_initRiderDifficulty");
+    void updateRiderDifficulty() __asm__("cComputer_updateRiderDifficulty");
     int chooseGrabMain(float airTime) __asm__("cComputer_chooseGrabMain");
     int chooseRandomGrab(float time) __asm__("cComputer_chooseRandomGrab");
     int chooseRandomTweakGrab(float time) __asm__("cComputer_chooseRandomTweakGrab");
@@ -207,7 +208,7 @@ struct cComputer {
     int checkForAttack(int oppID) __asm__("cComputer_checkForAttack");
     int checkForBlock() __asm__("cComputer_checkForBlock");
     bool checkForPunching(int* side) __asm__("cComputer_checkForPunching");
-    int getRival() __asm__("cComputer_getRival");
+    cRider* getRival() __asm__("cComputer_getRival"); // [O] returns cRider*
     float setupWarp() __asm__("cComputer_setupWarp");
     void setInput(cInput* input) __asm__("cComputer_setInput");
     int getCurrentTarget() __asm__("cComputer_getCurrentTarget");

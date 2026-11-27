@@ -143,7 +143,7 @@ extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* self, int flag
 INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBigFile);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
-extern "C" int FILE_loadbigheader(const char* name, int a1);
+extern "C" char* FILE_loadbigheader(const char* name, int a1);
 
 /**
  * Uses a big file for the stream's requests: when it exists, keeps its name (+0x14) and loads its directory (+0x74,
@@ -151,12 +151,11 @@ extern "C" int FILE_loadbigheader(const char* name, int a1);
  *
  * @param name  the big-file name
  */
-// PORT: second parameter is a const char* passed as int (unit declares cStreamInstance_SetBigFile(void*, int)).
-void cStreamInstance::SetBigFile(int name)
+void cStreamInstance::SetBigFile(const char* name)
 {
-    if (BXFILE_exists((const char*)name) != 0) {
-        strcpy((char*)&mBigFileName, (const char*)name);
-        mBigHeader = (char*)FILE_loadbigheader((char*)&mBigFileName, mMemAllocType);
+    if (BXFILE_exists(name) != 0) {
+        strcpy((char*)&mBigFileName, name);
+        mBigHeader = FILE_loadbigheader((char*)&mBigFileName, mMemAllocType);
     }
 }
 #endif
@@ -194,7 +193,7 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBaseVolume__FPvi);
  */
 void cStreamInstance::SetBaseVolume(int val)
 {
-    *(char*)&mBaseVol = (char)val;
+    mBaseVol = (char)val;
 }
 #endif
 
@@ -555,8 +554,8 @@ void cStreamInstance::Resume()
 //100%
 INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue);
 #ifdef SKIP_ASM
-extern "C" int SNDSTRM_queuefile(int h, int a, int buf, int off);
-extern "C" void BIG_locateentry(void* dec, int src, int a, int* out, int b);
+extern "C" int SNDSTRM_queuefile(int h, int a, const char* name, int off);
+extern "C" void BIG_locateentry(void* dec, const char* name, int a, int* out, int b);
 
 /**
  * Queues a file on the stream: through the big file when one is set (its entry for @p buf adds its offset), else the
@@ -567,13 +566,12 @@ extern "C" void BIG_locateentry(void* dec, int src, int a, int* out, int b);
  * @param off  the offset in the file
  * @return the request handle
  */
-// PORT: buf is a pointer carried in an int (the unit's caller declares this function with int params).
-int cStreamInstance::Queue(int holdTime, int buf, int off)
+int cStreamInstance::Queue(int holdTime, const char* buf, int off)
 {
     if (mBigHeader != 0) {
         int n;
         BIG_locateentry(mBigHeader, buf, 0, &n, 0);
-        return SNDSTRM_queuefile(mHandle, holdTime, (int)((char*)&mBigFileName), off + n);
+        return SNDSTRM_queuefile(mHandle, holdTime, mBigFileName, off + n);
     }
     return SNDSTRM_queuefile(mHandle, holdTime, buf, off);
 }
@@ -598,7 +596,7 @@ int cStreamInstance::Queue1(int holdTime, int element, int off)
     if (dec != 0) {
         int n;
         BIG_locateentry(dec, 0, element, &n, 0);
-        return SNDSTRM_queuefile(mHandle, holdTime, (int)((char*)&mBigFileName), off + n);
+        return SNDSTRM_queuefile(mHandle, holdTime, mBigFileName, off + n);
     }
     return 0;
 }
@@ -875,7 +873,7 @@ extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int a1, int a
  * @param memType  the memory type
  * @param buffSpace  the extra buffer space
  */
-void cStreamSys::STREAM_Create(int streamIndex, int volControl, int memType, int buffSpace)
+void cStreamSys::STREAM_Create(int streamIndex, float* volControl, int memType, int buffSpace)
 {
     cBankManager* bankMgr = mpVBankManager;
     cBankMonitor* st = &bankMgr->BankMonitor;
@@ -899,7 +897,7 @@ void cStreamSys::STREAM_Create(int streamIndex, int volControl, int memType, int
     st->mTwoPlayerSide[bankMgr->BankMonitor.mInst] = 0;
     st->mMapToMaxVol[bankMgr->BankMonitor.mInst] = 127;
     st->mCloseOnEnd[bankMgr->BankMonitor.mInst] = 1;
-    mpVBankManager->BankMonitor.mVolControl[mpVBankManager->BankMonitor.mInst] = (float*)volControl;
+    mpVBankManager->BankMonitor.mVolControl[mpVBankManager->BankMonitor.mInst] = volControl;
     STREAM_CreateInstance(streamIndex, memType, buffSpace);
     mpVBankManager->BankMonitor.mInst--;
 }
@@ -908,7 +906,7 @@ void cStreamSys::STREAM_Create(int streamIndex, int volControl, int memType, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBigFile);
 #ifdef SKIP_ASM
-extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, int);
+extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, const char*);
 
 /**
  * Sets the big file of stream @p i (cStreamInstance_SetBigFile), when that stream exists.
@@ -916,7 +914,7 @@ extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, int);
  * @param i  the stream index
  * @param val  the big-file name
  */
-void cStreamSys::STREAM_SetBigFile(int i, int val)
+void cStreamSys::STREAM_SetBigFile(int i, const char* val)
 {
     cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
@@ -1006,7 +1004,7 @@ void cStreamSys::STREAM_Resume()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Queue);
 #ifdef SKIP_ASM
-extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, int b, int c);
+extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, const char* b, int c);
 
 /**
  * Queues a file on stream @p i (cStreamInstance_Queue); -1 when the stream does not exist.
@@ -1017,7 +1015,7 @@ extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, int b, int c);
  * @param offset  the offset in the file
  * @return the request handle, or -1
  */
-int cStreamSys::STREAM_Queue(int i, int holdTime, int buf, int offset)
+int cStreamSys::STREAM_Queue(int i, int holdTime, const char* buf, int offset)
 {
     cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
@@ -1280,11 +1278,11 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
  * @param i  the stream index
  * @param val  the volume control
  */
-void cStreamSys::STREAM_SetVolControl(int i, int val)
+void cStreamSys::STREAM_SetVolControl(int i, float* val)
 {
     cStreamInstance* stream = mStreamInstance[i];
     if (((void*)stream) != 0) {
-        stream->mVolControl = (float*)val;
+        stream->mVolControl = val;
     }
 }
 #endif
@@ -1355,9 +1353,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetInstance__FPvi);
  * @param index  the stream index
  * @return the stream instance
  */
-int cStreamSys::STREAM_GetInstance(int index)
+cStreamInstance* cStreamSys::STREAM_GetInstance(int index)
 {
-    return (int)mStreamInstance[index];
+    return mStreamInstance[index];
 }
 #endif
 
@@ -2105,7 +2103,7 @@ void cBankMonitorInstance::PosUpdate(int pos, int elevation)
         SNDSYS_leavecritical();
         break;
     case MONITOR_STREAM:
-        ((cStreamInstance*)(*(void**)&mRestartInfo))->Set3DPosition(pos, elevation);
+        mRestartInfo.stream.mStreamID->Set3DPosition(pos, elevation);
         break;
     }
 }
@@ -2154,7 +2152,7 @@ void cBankMonitorInstance::PitchUpdate(int vol)
         SNDSYS_leavecritical();
         break;
     case MONITOR_STREAM:
-        ((cStreamInstance*)(*(void**)&mRestartInfo))->SetPitch(vol);
+        mRestartInfo.stream.mStreamID->SetPitch(vol);
         break;
     }
 }
@@ -2244,9 +2242,9 @@ void cBankMonitorInstance::VolUpdate(int vol)
         }
         mLastVolume = vol;
         if (orig == none)
-            cStreamInstance_Purge(*(void**)&mRestartInfo);
+            cStreamInstance_Purge(mRestartInfo.stream.mStreamID);
         else
-            cStreamInstance_SetBaseVolume(*(void**)&mRestartInfo, vol);
+            cStreamInstance_SetBaseVolume(mRestartInfo.stream.mStreamID, vol);
         break;
     }
     }
@@ -2460,24 +2458,6 @@ bool cBankMonitorInstance::CheckActive(float radius)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Update3D);
 #ifdef SKIP_ASM
-class cStreamBM_C868 {
-public:
-    char pad[0x8D8];
-    // vptr at 0x8D8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual float v06(void* a, void* out);
-};
-struct sPos_C868 {
-    int a;
-    int b;
-    unsigned short pos;     // 0x8
-    short pos2;             // 0xA
-    int c[5];
-};
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); its second argument is a status buffer here.
@@ -2525,7 +2505,7 @@ void cBankMonitorInstance::Update3D(cBankMonitor* bm, float time)
         return;
     }
     int st[4];
-    sPos_C868 pos;
+    SNDPLAYOPTS pos;
     int vol = 0;
     if (mMonitorType == MONITOR_STREAM) {
         SNDSYS_entercritical();
@@ -2535,8 +2515,10 @@ void cBankMonitorInstance::Update3D(cBankMonitor* bm, float time)
             return;
         }
     }
-    if (bm->mPositionalEnable != 0 && (int)mPosition != 0) {
-        float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(this, &pos));
+    if (bm->mPositionalEnable != 0 && mPosition != 0) {
+        sVEntry<float(void*, cBankMonitorInstance*, SNDPLAYOPTS*)>* vtable =
+            (sVEntry<float(void*, cBankMonitorInstance*, SNDPLAYOPTS*)>*)bm->mVtbl;
+        float dist = Sqrt_C868(vtable[6].fn(vthis(bm, vtable[6]), this, &pos));
         if (mExternalVol != 0 || cBankMonitorInstance_CheckActive_3(this, bm, dist) != 0) {
             float prevDist = mLastDist;
             if (prevDist != -1.0f && bm->mDopplerEnable != 0) {
@@ -2544,7 +2526,7 @@ void cBankMonitorInstance::Update3D(cBankMonitor* bm, float time)
             } else {
                 time = 1.0f;
             }
-            PosUpdate(pos.pos, pos.pos2);
+            PosUpdate(pos.azimuth, pos.elevation);
             PitchUpdate((int)(time * 4096.0f));
             if (mExternalVol != 0) {
                 vol = mBaseVol;
@@ -2709,9 +2691,9 @@ void cBankMonitorInstance::Fade(int n, int resetMonitor, float duration)
         break;
     case MONITOR_STREAM:
         if (mFading != 0) {
-            cStreamInstance_Purge(*(void**)&mRestartInfo);
+            cStreamInstance_Purge(mRestartInfo.stream.mStreamID);
         } else {
-            cStreamInstance_SetBaseVolume(*(void**)&mRestartInfo, n);
+            cStreamInstance_SetBaseVolume(mRestartInfo.stream.mStreamID, n);
         }
         break;
     }

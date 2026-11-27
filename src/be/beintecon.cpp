@@ -1388,8 +1388,8 @@ static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
 extern "C" bool func_001520E8(cBECharProfileDB* self, int* changed)
 {
     void* db = func_0014BDB8((self));
-    int n = func_0014D988(db, *((char*)&self->unk_BC0));
-    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((char*)&self->unk_BC0));
+    int n = func_0014D988(db, self->unk_BC0);
+    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, self->unk_BC0);
     *changed = 0;
     for (int i = 0; i < n; i++, def++)
     {

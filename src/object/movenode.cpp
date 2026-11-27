@@ -145,7 +145,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
 void cMoveNode::addModifierBlock()
 {
     void* mem = cMemMan_alloc(40, str_ModifierBlock, 0x20000000, 0);
-    *(void**)&ModifierBlock = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
+    ModifierBlock = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
 #endif
 
@@ -421,7 +421,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addPosition);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char str_PositionModifier[];
-extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sMoveQuad* pos);
+extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, const t4Vector* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
@@ -432,7 +432,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  *
  * @param pos  offset to apply
  */
-extern "C" void cMoveNode_addPosition(cMoveNode* self, sMoveQuad* pos)
+extern "C" void cMoveNode_addPosition(cMoveNode* self, const t4Vector* pos)
 {
     self->addTransformModifier((cTransformModifier*)cPositionModifier_cPositionModifier(
         (cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
@@ -466,7 +466,8 @@ INCLUDE_ASM("object/movenode", cMoveNode_addParent);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char str_ParentModifier[];
-extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
+extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, tInstanceRecord* parentInstance, int meshIndex,
+                                                  const t4Vector* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
@@ -477,7 +478,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
  * @param mesh  the parent's mesh index (On Tour int mesh)
  * @param pos  the offset from the parent (On Tour const t4Vector& offset)
  */
-extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
+extern "C" void cMoveNode_addParent(cMoveNode* self, tInstanceRecord* parentinst, int mesh, const t4Vector* pos)
 {
     self->addTransformModifier((cTransformModifier*)cParentModifier_cParentModifier1(
         (cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
@@ -860,10 +861,10 @@ INCLUDE_ASM("object/movenode", cMoveNode_getInstAnimMats);
 struct sMnVEntryI2_60C0 {
     short delta;
     short index;
-    int (*fn)(void*, int);
+    const t4Matrix* (*fn)(void*, tInstanceRecord*);
 };
 // Taking the object by reference matches the target's register allocation (see cMoveNode_getRootTransform).
-static inline int VCall23_60C0(char*& o, int a)
+static inline const t4Matrix* VCall23_60C0(char*& o, tInstanceRecord* a)
 {
     sMnVEntryI2_60C0* vt = *(sMnVEntryI2_60C0**)o;
     return vt[23].fn(vthis(o, vt[23]), a);
@@ -872,19 +873,19 @@ static inline int VCall23_60C0(char*& o, int a)
  * Returns the animation matrices for an instance: the root transform modifier's (slot 23), else the node's
  * own (slot 27).
  *
- * @param inst  the instance record (On Tour tInstanceRecord*, passed as int)
- * @return the matrices (On Tour const t4Matrix*, as int), or 0
+ * @param inst  the instance record (On Tour tInstanceRecord*)
+ * @return the matrices (On Tour const t4Matrix*), or 0
  */
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
-extern "C" int cMoveNode_getInstAnimMats(cMoveNode* self, int inst)
+extern "C" const t4Matrix* cMoveNode_getInstAnimMats(cMoveNode* self, tInstanceRecord* inst)
 {
     char** modBlock = (char**)self->ModifierBlock;
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier != 0) {
-        int animMats = VCall23_60C0(transformModifier, inst);
+        const t4Matrix* animMats = VCall23_60C0(transformModifier, inst);
         if (animMats != 0) return animMats;
     }
-    return (int)self->getAnimMats();
+    return self->getAnimMats();
 }
 #endif
 
@@ -1875,10 +1876,10 @@ extern sMoveQuad t4mat_Identity[];
  * @param pos  offset
  * @return self
  */
-extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sMoveQuad* pos)
+extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, const t4Vector* pos)
 {
     *(void***)self = cPositionModifier_vtbl;
-    *(sMoveQuad*)&self->Offset = *pos;
+    self->Offset = *pos;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1895,7 +1896,7 @@ extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sM
         : "r"((char*)&self->Transform), "r"(t4mat_Identity)
         : "memory");
     self->RootTransformDirty = 1;
-    *(sMoveQuad*)&self->Transform.row[3] = *(sMoveQuad*)&self->Offset;
+    self->Transform.row[3] = self->Offset;
     return ((void*)self);
 }
 #endif
@@ -1903,10 +1904,6 @@ extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sM
 //100%
 INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier1);
 #ifdef SKIP_ASM
-struct sMoveQuad2 {
-    float v[4];
-} __attribute__((aligned(16)));
-
 extern void* cPositionModifier_vtbl[];
 
 /**
@@ -1921,8 +1918,8 @@ extern void* cPositionModifier_vtbl[];
 extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, t4Matrix* src)
 {
     *(void***)self = cPositionModifier_vtbl;
-    sMoveQuad2 translation = *(sMoveQuad2*)&src->row[3];
-    *(sMoveQuad2*)&self->Offset = translation;
+    t4Vector translation = src->row[3];
+    self->Offset = translation;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2031,12 +2028,13 @@ extern char cParentModifier_vtbl[];
  * @param pos  offset from it
  * @return self
  */
-extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
+extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, tInstanceRecord* parentInstance, int meshIndex,
+                                                  const t4Vector* pos)
 {
     cPositionModifier_cPositionModifier((cPositionModifier*)self, pos);
     VPTR_AT(self, 0) = (void**)cParentModifier_vtbl;
-    self->ParentInst = (tInstanceRecord*)parentInstance;
-    self->Mesh = (int)meshIndex;
+    self->ParentInst = parentInstance;
+    self->Mesh = meshIndex;
     return ((void*)self);
 }
 #endif
@@ -2235,7 +2233,7 @@ extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, tInstanc
     self->Radius = radius;
     self->Speed = speed * 27.77777862548828f;
     self->Being = -1;
-    *(int*)&self->Time = 0;
+    self->Time = 0.0f;
     self->AllowCollide = 0;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, mat -> self+0x60).
     __asm__ __volatile__(
@@ -2253,8 +2251,8 @@ extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, tInstanc
         : "r"((char*)&self->Transform), "r"(((void*)mat))
         : "memory");
     self->RootTransformDirty = 1;
-    sMoveQuad translation = *(sMoveQuad*)&self->Transform.row[3];
-    *(sMoveQuad*)&self->Offset = translation;
+    t4Vector translation = self->Transform.row[3];
+    self->Offset = translation;
     return ((void*)self);
 }
 #endif
@@ -2484,7 +2482,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self,
 {
     *(void***)self = cAvaSplineModifier_vtbl;
     self->Instance = (tInstanceRecord*)src;
-    *(int*)&self->Radius = 0;
+    self->Radius = 0.0f;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -2634,7 +2632,7 @@ extern "C" void cParticleNode_update(cParticleNode* self)
 {
     self->cMoveNode::update();
     tModifierBlock* mb = self->ModifierBlock;
-    if (mb != 0 && *(int*)&mb->Effect != 0) {
+    if (mb != 0 && mb->Effect.Next != 0) {
         return;
     }
     delete self;
@@ -2712,7 +2710,7 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 #ifdef SKIP_ASM
 extern char str_MultiParticle[];
-extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* a1, void* a2);
+extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, int maxInst);
 
 /**
  * Creates the cMultiParticle for slot @p i if the slot is empty (On Tour addParticle(int id, tParticleData* pdata,
@@ -2725,7 +2723,7 @@ extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* a1, vo
  * @param pdata  the tParticleData the particles use
  * @param numInst  how many instances the cMultiParticle can track (On Tour numInst)
  */
-void cMultiParticleMan::addParticle(int i, void* pdata, void* numInst)
+void cMultiParticleMan::addParticle(int i, void* pdata, int numInst)
 {
     void** slot = (void**)&Particles[i];
     if (*slot == 0) {
@@ -2734,7 +2732,7 @@ void cMultiParticleMan::addParticle(int i, void* pdata, void* numInst)
 }
 #endif
 
-extern "C" void* cMultiParticle_addInst(int, int);
+extern "C" void* cMultiParticle_addInst(cMultiParticle* particle, int instId);
 
 //100%
 INCLUDE_ASM("object/movenode", cMultiParticleMan_addInst__FPvii);
@@ -2748,11 +2746,11 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_addInst__FPvii);
  */
 void* cMultiParticleMan::addInst(int particleIndex, int instId)
 {
-    return cMultiParticle_addInst((int)Particles[particleIndex], instId);
+    return cMultiParticle_addInst(Particles[particleIndex], instId);
 }
 #endif
 
-extern "C" void* cMultiParticle_remInst(int, int);
+extern "C" void* cMultiParticle_remInst(cMultiParticle* particle, int instId);
 
 //100%
 INCLUDE_ASM("object/movenode", cMultiParticleMan_remInst__FPvii);
@@ -2767,7 +2765,7 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_remInst__FPvii);
  */
 void* cMultiParticleMan::remInst(int particleIndex, int instId)
 {
-    return cMultiParticle_remInst((int)Particles[particleIndex], instId);
+    return cMultiParticle_remInst(Particles[particleIndex], instId);
 }
 #endif
 
@@ -2960,13 +2958,13 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
  * @param maxInst  maximum instance count
  * @return mem
  */
-extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, void* maxInst)
+extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, int maxInst)
 {
     cMultiParticle* self = mem;
-    *(void**)&self->MaxInst = maxInst;
+    self->MaxInst = maxInst;
     self->NumInst = 0;
-    void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
-    *(void**)&self->Particle = buf;
+    tParticleData* buf = (tParticleData*)cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
+    self->Particle = buf;
     MEM_copy(buf, particleData, 216);
     cMultiParticle_setupMultiParticle(self);
     sPartDesc_7DD8* emitterDesc = ((sPartDesc_7DD8*)self->Emitter);
@@ -3003,15 +3001,15 @@ void* cMultiParticle::cMultiParticle1(cBxReplayFrame* stream)
     sQuad_7DD8* ab = (sQuad_7DD8*)&self->BoundBox;
     read_357E80(stream, self, 4);
     read_357E80(stream, &self->NumInst, 4);
-    void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
-    *(void**)&self->Particle = buf;
+    tParticleData* buf = (tParticleData*)cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
+    self->Particle = buf;
     read_357E80(stream, buf, 216);
     cMultiParticle_setupMultiParticle(self);
     cStaticEmitter_readFromReplayFrame(((sPartDesc_7DD8*)self->Emitter), stream);
     read_357E80(stream, (sQuad_7DD8*)&self->Offset, 0x10);
     read_357E80(stream, ab, 0x20);
     if (self->NumInst > 0) {
-        read_357E80(stream, (void*)((int)self->InstIds), self->NumInst * 4);
+        read_357E80(stream, self->InstIds, self->NumInst * 4);
     }
     return self;
 }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ai/rideranim.h"
 #include "ai/riderhandler.h"
@@ -31,7 +32,7 @@ void cAI::setAIState(int state)
     int old = CurrentAIState;
     if (state != old) {
         PreviousAIState = old;
-        PreviousAIStateHandler = (cAIStateHandler*)((int)CurrentAIStateHandler);
+        PreviousAIStateHandler = CurrentAIStateHandler;
         cAI_forceAIState(this);
     }
 }
@@ -112,28 +113,25 @@ extern "C" void cAI_forceAIState_impl(char* vself, int state)
 //100%
 INCLUDE_ASM("seg/seg_14B10", cAI_AIStateUpdate);
 #ifdef SKIP_ASM
-class cAIState_3C20 {
-public:
-    virtual void m0(void *);
-    virtual void m1(void *);
-    virtual void m2(void *);
-};
-
 /**
  * Runs the AI's game-flow state: on a change, the old handler's exit and the new handler's enter, then the
- * update.
+ * update (the handler's vtable slots 2, 1 and 3: OnLoseState, OnGainState, OnUpdate).
  */
 void cAI::AIStateUpdate()
 {
     if (PreviousAIState != CurrentAIState) {
-        cAIState_3C20 *prev = (cAIState_3C20*)PreviousAIStateHandler;
-        if (prev != 0)
-            prev->m1((char*)this);
-        ((cAIState_3C20*)CurrentAIStateHandler)->m0((char*)this);
+        cAIStateHandler* prev = PreviousAIStateHandler;
+        if (prev != 0) {
+            sVEntry<void(void*, cAI*)>* vtable = (sVEntry<void(void*, cAI*)>*)prev->mVtbl;
+            vtable[2].fn(vthis(prev, vtable[2]), this);
+        }
+        sVEntry<void(void*, cAI*)>* vtable = (sVEntry<void(void*, cAI*)>*)CurrentAIStateHandler->mVtbl;
+        vtable[1].fn(vthis(CurrentAIStateHandler, vtable[1]), this);
         PreviousAIStateHandler = 0;
         PreviousAIState = CurrentAIState;
     }
-    ((cAIState_3C20*)CurrentAIStateHandler)->m2((char*)this);
+    sVEntry<void(void*, cAI*)>* vtable = (sVEntry<void(void*, cAI*)>*)CurrentAIStateHandler->mVtbl;
+    vtable[3].fn(vthis(CurrentAIStateHandler, vtable[3]), this);
 }
 #endif
 
@@ -309,7 +307,6 @@ extern "C" void cCountdownHandler_OnLoseState(void *handler, cAI* aiManager) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cRaceHandler_OnGainState);
 #ifdef SKIP_ASM
-extern "C" void cGameComm_gameStartRace(int);
 
 /**
  * Tells the online game layer that the race has started.
@@ -320,7 +317,7 @@ extern "C" void cGameComm_gameStartRace(int);
  */
 extern "C" void cRaceHandler_OnGainState(void) {
     if (cGameComm_mGameComm != 0) {
-        cGameComm_gameStartRace((int)cGameComm_mGameComm);
+        cGameComm_mGameComm->gameStartRace();
     }
 }
 #endif
@@ -330,7 +327,6 @@ INCLUDE_ASM("seg/seg_14B10", cRaceHandler_OnUpdate);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 extern "C" int cAI_isRaceFinished(void *);
-extern "C" void cGame_setState(int, int, int, int);
 
 /**
  * Advances the race clock and ends the race once it is finished.
@@ -346,7 +342,7 @@ extern "C" void cRaceHandler_OnUpdate(void *handler, cAI* aiManager) {
     aiManager->EventTimerTick = (int) ((aiManager->EventTimerTick) + 1);
     if (cAI_isRaceFinished(aiManager) == 1) {
         aiManager->setAIState(6);
-        cGame_setState(((int)SSXApp->Game), 5, 0, 0);
+        SSXApp->Game->setState(5, 0, 0);
     }
 }
 #endif
@@ -354,7 +350,6 @@ extern "C" void cRaceHandler_OnUpdate(void *handler, cAI* aiManager) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cEndRaceHandler_OnGainState);
 #ifdef SKIP_ASM
-extern "C" void cGameComm_gameEnded(int);
 
 /**
  * The end-race state handler's enter step: tells the online game layer the game has ended.
@@ -364,7 +359,7 @@ extern "C" void cGameComm_gameEnded(int);
  */
 extern "C" void cEndRaceHandler_OnGainState(void) {
     if (cGameComm_mGameComm != 0) {
-        cGameComm_gameEnded((int)cGameComm_mGameComm);
+        cGameComm_mGameComm->gameEnded();
     }
 }
 #endif
@@ -1039,7 +1034,7 @@ struct V3_4CC0 {
     V3_4CC0(float ax, float ay, float az) { x = ax; y = ay; z = az; }
 } __attribute__((aligned(16)));
 
-static inline V3_4CC0 Vec3Of_4CC0(Q_4CC0 v)
+static inline V3_4CC0 Vec3Of_4CC0(t4Vector v)
 {
     return V3_4CC0(v.x, v.y, v.z);
 }
@@ -1053,7 +1048,7 @@ extern "C" void cRider_updateOrientationImplicit_4CC0(void* self) __asm__("cRide
 extern "C" void cRider_doChangeFakie_4CC0(char* s) __asm__("cRider_doChangeFakie");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_4CC0(const Q_4CC0& a, const Q_4CC0& b)
+static inline float Dot_4CC0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1073,9 +1068,9 @@ static inline float Dot_4CC0(const Q_4CC0& a, const Q_4CC0& b)
 }
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline Q_4CC0 QuatMul_4CC0(const Q_4CC0& a, const Q_4CC0& b)
+static inline t4Vector QuatMul_4CC0(const Q_4CC0& a, const t4Vector& b)
 {
-    Q_4CC0 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -1114,11 +1109,11 @@ extern "C" int cRider_isChangeFakieGround_i(char* vrider)
     if (rider->mSlewed[3].cur != 0.0f) {
         return 0;
     }
-    float fwdSpeed = Dot_4CC0(*(Q_4CC0*)&rider->mVelocity, *(Q_4CC0*)&rider->mGroundForward);
+    float fwdSpeed = Dot_4CC0(rider->mVelocity, rider->mGroundForward);
     if (-k < fwdSpeed) {
         return 0;
     }
-    *(Q_4CC0*)&rider->mRotation = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)&rider->mMatrix.row[2])), *(Q_4CC0*)&rider->mRotation);
+    rider->mRotation = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(rider->mMatrix.row[2])), rider->mRotation);
     cRider_updateOrientationImplicit_4CC0(rider);
     cRider_doChangeFakie_4CC0(((char*)rider));
     return 1;
@@ -1371,9 +1366,9 @@ static inline void SetHeading_5168(cRiderAnim* a, float angle)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline Q_5168 Scale_5168(const Q_5168& v, float s)
+static inline t4Vector Scale_5168(const t4Vector& v, float s)
 {
-    Q_5168 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1407,8 +1402,8 @@ void cRider::doChangeFakie()
         SetHeading_5168(mRiderAnim, 0.0f);
     }
     mRiderAnim->IsFlipped = IsRidingFakie;
-    *(Q_5168*)&mGroundForward = Scale_5168(*(Q_5168*)&mGroundForward, -1.0f);
-    *(Q_5168*)&mGroundSide = Scale_5168(*(Q_5168*)&mGroundSide, -1.0f);
+    mGroundForward = Scale_5168(mGroundForward, -1.0f);
+    mGroundSide = Scale_5168(mGroundSide, -1.0f);
     mSlewed[0].cur = -mSlewed[0].cur;
     mSlewed[0].target = -mSlewed[0].target;
     mSlewed[3].cur = -mSlewed[3].cur;
@@ -1520,7 +1515,7 @@ struct Q_5640 {
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
+extern "C" void cRider_rotateOrientation(void* self, t4Vector dir, float angle);
 // PORT: the unit defines cRider_verifyRailslideModeDEBUG with no parameters; this caller passes the rider.
 extern "C" void cRider_verifyRailslideModeDEBUG_p(void* self) __asm__("cRider_verifyRailslideModeDEBUG");
 int cRider_getMotionState(void* self);
@@ -1565,11 +1560,11 @@ void cRider::undoRailslideModeOrientation()
             cRiderAnimBase_play(mRiderAnim, 268, 0, -1.0f);
     } else if (cRider_getMotionState((char*)this) == 0) {
         if (RailslideMode == 3) {
-            cRider_rotateOrientation(((char*)this), *(Q_5640*)&mMatrix.row[2], 1.5707964f);
+            cRider_rotateOrientation(((char*)this), mMatrix.row[2], 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(mRiderAnim, 1.5707964f);
             SetHeading_5640(mRiderAnim, 0.0f);
         } else if (RailslideMode == 4) {
-            cRider_rotateOrientation(((char*)this), *(Q_5640*)&mMatrix.row[2], -1.5707964f);
+            cRider_rotateOrientation(((char*)this), mMatrix.row[2], -1.5707964f);
             cRiderAnimBase_changeHeadingOffset(mRiderAnim, -1.5707964f);
             SetHeading_5640(mRiderAnim, 0.0f);
         }
@@ -1752,26 +1747,26 @@ void cRider::checkForReaction()
         }
         switch (ReactionEventType) {
         case 1:
-            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
-            *(long*)&mRiderAnim->GraftMask = -1;
+            mRiderAnim->GraftMask = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 0);
             break;
         case 2:
-            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
-            *(long*)&mRiderAnim->GraftMask = -1;
+            mRiderAnim->GraftMask = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)this), 1);
             break;
         case 3:
-            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 315, 0, -1.0f);
-            *(long*)&mRiderAnim->GraftMask = -1;
+            mRiderAnim->GraftMask = -1;
             break;
         case 4:
-            *(long*)&mRiderAnim->GraftMask = *(long*)&GraftFromUpperSpine;
+            mRiderAnim->GraftMask = GraftFromUpperSpine;
             cRiderAnimBase_play(mRiderAnim, 314, 0, -1.0f);
-            *(long*)&mRiderAnim->GraftMask = -1;
+            mRiderAnim->GraftMask = -1;
             break;
         case 5:
         case 6:
@@ -1848,7 +1843,7 @@ void cRider::checkForProximityAction()
                         if (ad > glance) {
                             mRelations[i].unk_20 = AITick();
                             // PORT: 64-bit long
-                            *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+                            mRiderAnim->GraftMask = mUpperBodyBoneMask;
                             if (ad > behind) {
                                 cRiderAnimBase_play(mRiderAnim, 319, 0, -1.0f);
                             } else {
@@ -1858,7 +1853,7 @@ void cRider::checkForProximityAction()
                                 else
                                     cRiderAnimBase_play(mRiderAnim, 320, 0, -1.0f);
                             }
-                            *(long*)&mRiderAnim->GraftMask = -1;
+                            mRiderAnim->GraftMask = -1;
                             return;
                         }
                     }
@@ -1874,13 +1869,13 @@ void cRider::checkForProximityAction()
                 float diff = Wrap_5D48(mRelations[i].mAngle - heading);
                 if (mRelations[i].mDistance < 1000.0f) {
                     if (__builtin_fabsf(diff) > wide) {
-                        *(long*)&mRiderAnim->GraftMask = mHeadBoneMask;
+                        mRiderAnim->GraftMask = mHeadBoneMask;
                         int left = diff < 0.0f;
                         if (left == IsRidingFakie)
                             cRiderAnimBase_play(mRiderAnim, 317, 0, -1.0f);
                         else
                             cRiderAnimBase_play(mRiderAnim, 316, 0, -1.0f);
-                        *(long*)&mRiderAnim->GraftMask = -1;
+                        mRiderAnim->GraftMask = -1;
                         return;
                     }
                 }
@@ -1899,7 +1894,7 @@ extern "C" void cRider_setMotionState_6120(void *, int) __asm__("cRider_setMotio
 extern "C" void cRider_setControlState_6120(void *, int) __asm__("cRider_setControlState__FPv");
 extern "C" int cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayerResetEvent(int, void *);
-extern "C" void cReplay_eventReset(int, int);
+extern "C" void cReplay_eventReset(cReplay* replay, int riderIndex);
 
 /**
  * Resets the rider when the reset input is pressed or an automatic reset is forced.
@@ -1915,15 +1910,15 @@ extern "C" void cReplay_eventReset(int, int);
 int cRider::checkForReset(int isResetInput, int forceAutoReset)
 {
     if (isResetInput != 0 || forceAutoReset != 0) {
-        *(int*)&mPowerUpBoostTimer = 0;
-        *(int*)&mPowerUpTrickTimer = 0;
+        mPowerUpBoostTimer = 0.0f;
+        mPowerUpTrickTimer = 0.0f;
         if (forceAutoReset == 1 || forceAutoReset == 4)
             cRiderMetrix_evAutoResetSurface(mMetrix);
         mRiderHandler->ResetControl.IsAutoReset = (forceAutoReset != 0);
         cRider_setControlState_6120(((char*)this), 9);
         cRider_setMotionState_6120(((char*)this), 3);
         cSSXAudio_PlayerResetEvent(cAudioInterface_bxAudio(), ((char*)this));
-        cReplay_eventReset((int)SSXApp->Game->Replay, mAIIndex);
+        cReplay_eventReset(SSXApp->Game->Replay, mAIIndex);
         return 1;
     }
     return 0;
@@ -2108,7 +2103,7 @@ int cRider::checkForPunch(int isLeft, int isRight)
         if (isLeft != 0 && isRight != 0) {
             if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events)) {
                 cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 0.0f;
-                *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+                mRiderAnim->GraftMask = mUpperBodyBoneMask;
                 cRiderAnimBase_play(mRiderAnim, 325, 0, -1.0f);
                 float w = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->CurrentWeight;
                 float targWeight = cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TargetWeight;
@@ -2119,7 +2114,7 @@ int cRider::checkForPunch(int isLeft, int isRight)
                 if (weightTimer != 0.0f)
                     cAnimSequence_fadeWeight(cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 0), targWeight,
                             weightTimer);
-                *(long*)&mRiderAnim->GraftMask = -1;
+                mRiderAnim->GraftMask = -1;
             }
         } else {
             cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 1.0f;
@@ -2132,12 +2127,12 @@ int cRider::checkForPunch(int isLeft, int isRight)
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
             if (seqDone_163B0(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events)) {
                 cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->TimeScale = 0.0f;
-                *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+                mRiderAnim->GraftMask = mUpperBodyBoneMask;
                 if (id == 323)
                     cRiderAnimBase_play(mRiderAnim, 326, 0, -1.0f);
                 else
                     cRiderAnimBase_play(mRiderAnim, 327, 0, -1.0f);
-                *(long*)&mRiderAnim->GraftMask = -1;
+                mRiderAnim->GraftMask = -1;
             }
             if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 0) == 13) {
                 float blendStep = mTimeScale * 0.01111111231148243f;
@@ -2168,9 +2163,9 @@ int cRider::checkForPunch(int isLeft, int isRight)
         if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
                 1) == 3 && tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(mRiderAnim, 1)->Events, 1) == 0)
             return 1;
-        *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+        mRiderAnim->GraftMask = mUpperBodyBoneMask;
         cRiderAnimBase_play(mRiderAnim, 322, 1, -1.0f);
-        *(long*)&mRiderAnim->GraftMask = -1;
+        mRiderAnim->GraftMask = -1;
         PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
         if (cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
@@ -2188,9 +2183,9 @@ int cRider::checkForPunch(int isLeft, int isRight)
             PunchVect = GetSide_163B0(this);
             anim = IsRidingFakie ? 324 : 323;
         }
-        *(long*)&mRiderAnim->GraftMask = mUpperBodyBoneMask;
+        mRiderAnim->GraftMask = mUpperBodyBoneMask;
         cRiderAnimBase_play(mRiderAnim, anim, 1, -1.0f);
-        *(long*)&mRiderAnim->GraftMask = -1;
+        mRiderAnim->GraftMask = -1;
         PunchStrength = 0.0f;
     }
     return cRiderAnimBase_getCurrentAnimCategory(mRiderAnim,
@@ -2472,7 +2467,7 @@ void cHUDFX::set(int id, signed char *displayStr, int decayTime, float fparg0)
     ID = id;
     MaxDecay = fparg0;
     Data = decayTime;
-    *(int*)&CurDecay = 0;
+    CurDecay = 0.0f;
     DisplayInt = 0;
 }
 #endif
@@ -2502,7 +2497,7 @@ void cHUDFX::set1(int id, int displayInt, float fparg0, int data)
     ID = id;
     MaxDecay = fparg0;
     Data = data;
-    *(int*)&CurDecay = 0;
+    CurDecay = 0.0f;
 }
 #endif
 
@@ -2593,7 +2588,7 @@ extern "C" void *cRiderMetrix_cRiderMetrix(cRiderMetrix* self) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cRiderMetrix__cRiderMetrix);
 #ifdef SKIP_ASM
-extern "C" void cMemMan_free__FPv(int);
+extern "C" void cMemMan_free__FPv(void* mem);
 extern "C" void operator_delete__FPi(void *);
 
 /**
@@ -2606,11 +2601,9 @@ extern "C" void operator_delete__FPi(void *);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cRiderMetrix__cRiderMetrix(cRiderMetrix* metrix, int flags) {
-    int temp_4;
-
-    temp_4 = ((int)metrix->HUDfx);
-    if (temp_4 != 0) {
-        cMemMan_free__FPv(temp_4);
+    cHUDFX* hudFx = metrix->HUDfx;
+    if (hudFx != 0) {
+        cMemMan_free__FPv(hudFx);
     }
     if (flags & 1) {
         operator_delete__FPi(metrix);

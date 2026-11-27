@@ -639,7 +639,7 @@ struct cSSXAudio {
         __asm__("cSSXAudio_PlayPositional");
     float Calc3DPos(cBankMonitorInstance* source, SNDPLAYOPTS* outAngles) __asm__("cSSXAudio_Calc3DPos");
     void SetAudioUpdateState(int State) __asm__("cSSXAudio_SetAudioUpdateState");
-    int GetFocusRider(int which) __asm__("cSSXAudio_GetFocusRider");
+    cRider* GetFocusRider(int which) __asm__("cSSXAudio_GetFocusRider");
     void BANKMONITOR_DestroyAll() __asm__("cSSXAudio_BANKMONITOR_DestroyAll");
     void FrontEndLoad() __asm__("cSSXAudio_FrontEndLoad");
     void FrontEndFadeSong() __asm__("cSSXAudio_FrontEndFadeSong");
@@ -695,10 +695,10 @@ struct cSSXAudio {
     void PauseAudio() __asm__("cSSXAudio_PauseAudio");
     void ResumeAudio() __asm__("cSSXAudio_ResumeAudio");
     int GetCharacterLevel(cRider* src) __asm__("cSSXAudio_GetCharacterLevel");
-    void ReactToWPMixEvent(int id, tWPInGameData* obj) __asm__("cSSXAudio_ReactToWPMixEvent");
+    void ReactToWPMixEvent(cRider* rider, tWPInGameData* obj) __asm__("cSSXAudio_ReactToWPMixEvent");
     int BEAudioModeToAudioMode(unsigned char beMode) __asm__("cSSXAudio_BEAudioModeToAudioMode");
-    void* AudioModeToBEAudioMode(int audioMode) __asm__("cSSXAudio_AudioModeToBEAudioMode");
-    void* GetCurrentSoundMode() __asm__("cSSXAudio_GetCurrentSoundMode__FPv");
+    int AudioModeToBEAudioMode(int audioMode) __asm__("cSSXAudio_AudioModeToBEAudioMode");
+    int GetCurrentSoundMode() __asm__("cSSXAudio_GetCurrentSoundMode__FPv");
     int PlayIntroMovieWithDJ() __asm__("cSSXAudio_PlayIntroMovieWithDJ__FPv");
     void SwapBankStopped() __asm__("cSSXAudio_SwapBankStopped__FPv");
     void CountdownStart() __asm__("cSSXAudio_CountdownStart__FPv");

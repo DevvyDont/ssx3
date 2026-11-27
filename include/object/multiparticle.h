@@ -69,7 +69,7 @@ struct cMultiParticleMan {
                                     //       update/render/replay/unloadSection loop over 4
 
     // Methods bound to their retail symbols by asm labels.
-    void addParticle(int i, void* pdata, void* numInst) __asm__("cMultiParticleMan_addParticle");
+    void addParticle(int i, void* pdata, int numInst) __asm__("cMultiParticleMan_addParticle");
     void* addInst(int particleIndex, int instId) __asm__("cMultiParticleMan_addInst__FPvii");
     void* remInst(int particleIndex, int instId) __asm__("cMultiParticleMan_remInst__FPvii");
 };

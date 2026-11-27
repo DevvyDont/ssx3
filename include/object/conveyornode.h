@@ -30,6 +30,7 @@
 #include "layout.h"
 #include "wscript/wscriptnull.h"
 #include "object/instancenode.h"
+#include "bx/math3d.h"
 
 struct cObjNode;
 struct tInstanceRecord;
@@ -80,9 +81,9 @@ struct cConveyorNode : public cInstanceNode {
                                     //      the push by it (lwc1)
     char Rotate[24];                // 0x20 [O] char[24]; [R] ctor stores data Rotate0..7 into [0..7] (lbu/sb); [U]
                                     //      updateIntersectInfo: Rotate[mesh] (lb) picks a linear push (!= 0) or a spin
-    float UVScroll[2];              // 0x38 [O] t2Vector; [R] ctor = (data UScroll +0x8, VScroll +0xC) (8-byte copy,
+    t2Vector UVScroll;              // 0x38 [O] t2Vector; [R] ctor = (data UScroll +0x8, VScroll +0xC) (8-byte copy,
                                     //      sdl/sdr); [P] 0x38 / 0x3C; [U] update adds it to UV (lwc1)
-    float UV[2];                    // 0x40 [O] t2Vector; [R] ctor 0 (sw $0); [P] 0x40 / 0x44; [U] update advances and
+    t2Vector UV;                    // 0x40 [O] t2Vector; [R] ctor 0 (sw $0); [P] 0x40 / 0x44; [U] update advances and
                                     //      wraps it (lwc1/swc1), render puts it in the draw matrix's position row
 
     // Methods bound to their retail symbols by asm labels.

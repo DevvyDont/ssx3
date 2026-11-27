@@ -27,6 +27,15 @@
 #include "be/beinterface.h"
 
 struct cBERewardDB;
+struct cBEUserAwards;
+struct tTrophyInfo;
+struct tMedalInfo;
+struct tPeakPassInfo;
+struct tPosterInfo;
+struct tTradingCardInfo;
+struct tConceptArtInfo;
+struct tToyInfo;
+struct tVideoInfo;
 
 // A medal (cBERewardInterface::mLastEventMedal). Names [O] from On Tour's enum eBEMedalID (kMEDAL_NONE -1,
 // kMEDAL_GOLD 0, kMEDAL_SILVER 1, kMEDAL_BRONZE 2); retail ranks a platinum medal first (name ours), so the others
@@ -92,14 +101,15 @@ struct cBERewardInterface : public cBEInterface {
     char* getTrophy(int peakId, int trophyId) __asm__("cBERewardInterface_getTrophy");
     char* getMedal(int trophyId, int medalId) __asm__("cBERewardInterface_getMedal");
     char* getPeakPass(int peakId, int charId) __asm__("cBERewardInterface_getPeakPass");
-    int getTrophies() __asm__("cBERewardInterface_getTrophies");
-    int getMedals() __asm__("cBERewardInterface_getMedals");
-    int getPeakPasses() __asm__("cBERewardInterface_getPeakPasses");
-    int getPosters() __asm__("cBERewardInterface_getPosters");
-    int getTradingCards() __asm__("cBERewardInterface_getTradingCards");
-    int getConceptArts() __asm__("cBERewardInterface_getConceptArts");
-    int getToys() __asm__("cBERewardInterface_getToys");
-    int getVideos() __asm__("cBERewardInterface_getVideos");
+    // the reward tables' getters return On Tour's types (const tTrophyInfo* getTrophies() and so on)
+    const tTrophyInfo* getTrophies() __asm__("cBERewardInterface_getTrophies");
+    const tMedalInfo* getMedals() __asm__("cBERewardInterface_getMedals");
+    const tPeakPassInfo* getPeakPasses() __asm__("cBERewardInterface_getPeakPasses");
+    const tPosterInfo* getPosters() __asm__("cBERewardInterface_getPosters");
+    const tTradingCardInfo* getTradingCards() __asm__("cBERewardInterface_getTradingCards");
+    const tConceptArtInfo* getConceptArts() __asm__("cBERewardInterface_getConceptArts");
+    const tToyInfo* getToys() __asm__("cBERewardInterface_getToys");
+    const tVideoInfo* getVideos() __asm__("cBERewardInterface_getVideos");
     int getRandomLockedRewardIndex(int profile, int characterId, int kind)
         __asm__("cBERewardInterface_getRandomLockedRewardIndex");
     int getTotalNumRewards(int kind) __asm__("cBERewardInterface_getTotalNumRewards");
@@ -161,7 +171,7 @@ struct cBERewardInterface : public cBEInterface {
     int getEarningsMedal(int iProfileIndex, int iCharacterID, int medal) __asm__("cBERewardInterface_getEarningsMedal");
     int calculateBigChallengeMedal(int idx, int numCompleted) __asm__("cBERewardInterface_calculateBigChallengeMedal");
     int calculateEarningMedal(int idx, unsigned int totalCash) __asm__("cBERewardInterface_calculateEarningMedal");
-    void* calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
+    int calculateNextEarningsLevel(int iProfileIndex, int iCharacterID)
         __asm__("cBERewardInterface_calculateNextEarningsLevel");
     int calculateNextCollectiblesLevel(int iProfileIndex, int iCharacterID, int kind)
         __asm__("cBERewardInterface_calculateNextCollectiblesLevel");
@@ -197,8 +207,8 @@ struct cBERewardInterface : public cBEInterface {
     int getEarningsTarget(int peakID) __asm__("cBERewardInterface_getEarningsTarget__FPvi");
     signed char getTrackMedal(int iProfileIndex, int iCharacterID, int eventID, int location)
         __asm__("cBERewardInterface_getTrackMedal__FPviiii");
-    void* getUserAwards() __asm__("cBERewardInterface_getUserAwards__FPv");
-    void* getTotalNumUserAwards() __asm__("cBERewardInterface_getTotalNumUserAwards__FPv");
+    const cBEUserAwards* getUserAwards() __asm__("cBERewardInterface_getUserAwards__FPv");
+    int getTotalNumUserAwards() __asm__("cBERewardInterface_getTotalNumUserAwards__FPv");
 };
 
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);

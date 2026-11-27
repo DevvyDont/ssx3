@@ -44,7 +44,7 @@ void* cBENewRaceInterface_getThis()
     if (cBENewRaceInterface_instance == 0) {
         cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&VPTR_OF(cBEInterface, mem)) = cBENewRaceInterface_vtbl;
+        VPTR_OF(cBEInterface, mem) = cBENewRaceInterface_vtbl;
         cBENewRaceInterface_instance = (cBENewRaceInterface*)(mem);
     }
     return cBENewRaceInterface_instance;
@@ -62,7 +62,7 @@ extern cBERaceDB cBELibrary_raceDB;
  */
 extern "C" void cBENewRaceInterface_submit(void)
 {
-    cBELibrary_raceDB = *(cBERaceDB*)&cBENewRaceInterface_newRace.playerID[0];
+    cBELibrary_raceDB = cBENewRaceInterface_newRace;
 }
 #endif
 
@@ -76,7 +76,7 @@ extern cBERaceDB cBELibrary_raceDB;
  */
 extern "C" void cBENewRaceInterface_discard(void)
 {
-    *(cBERaceDB*)&cBENewRaceInterface_newRace.playerID[0] = cBELibrary_raceDB;
+    cBENewRaceInterface_newRace = cBELibrary_raceDB;
 }
 #endif
 
@@ -307,29 +307,22 @@ int cBENewRaceInterface::getLocationType(int iLocation)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationIDFromScript);
 #ifdef SKIP_ASM
-struct sRaceEntryFull_00144CE0 {
-    int field_0x0;
-    char pad_0x04[0x58];
-    int field_0x5C;
-    int field_0x60;
-};
-
 /**
- * Returns the id (+0x0) of the first of the 23 cBELibrary_locationDB records whose word at +0x5C equals @p scriptId, or 22
- * when none does.
+ * Returns the locationID of the first of the 23 cBELibrary_locationDB records whose scriptID equals @p scriptId, or 22
+ * (kLOCATION_DEBUG) when none does.
  *
  * @param scriptId  the script id
  * @return the location id
  */
 int cBENewRaceInterface::getLocationIDFromScript(int scriptId)
 {
-    sRaceEntryFull_00144CE0* locations = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
-    for (int i = 0; i < 23; i++) {
-        if (locations[i].field_0x5C == scriptId) {
-            return locations[i].field_0x0;
+    tBELocationDB* locations = cBELibrary_locationDB;
+    for (int i = 0; i < kMAX_LOCATIONS; i++) {
+        if (locations[i].scriptID == scriptId) {
+            return locations[i].locationID;
         }
     }
-    return 22;
+    return kLOCATION_DEBUG;
 }
 #endif
 
@@ -523,7 +516,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGamePath);
 void cBENewRaceInterface::setGamePath(int mode)
 {
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
-    *((char*)&beRaceDB->cGamePath) = mode;
+    beRaceDB->cGamePath = mode;
     switch (mode)
     {
     case kGAMEPATH_WORLDCIRCUIT:
@@ -730,7 +723,7 @@ extern sRaceLookup_00440B38 cBELibrary_simDB[];
 int cBENewRaceInterface::getTimeLimit(int kind)
 {
     cBERaceDB* newRaceDb = &(*(&cBENewRaceInterface_newRace));
-    unsigned char mode = *(unsigned char*)&newRaceDb->cGameEvent;
+    unsigned char mode = newRaceDb->cGameEvent;
     if (mode >= 6 && mode < 12)
     {
         return getPeakTimeLimit((signed char)mode, kind);

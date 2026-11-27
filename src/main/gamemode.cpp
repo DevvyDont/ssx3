@@ -13,6 +13,7 @@
 #include "ai/rider.h"
 #include "ai/ai.h"
 #include "replay/bxreplayframe.h"
+#include "replay/frameptr.h"
 
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
@@ -432,31 +433,10 @@ void cGameModeMan::getHeatScore(int iRider, int iHeat)
 INCLUDE_ASM("main/gamemode", cGameModeMan_writeToReplayFrame);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-class cGmStream_385D0 {
-public:
-    virtual void write(void* p, int n);
-    virtual void read(void* p, int n);
-};
-
-class cGameModeObj_2385D0 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void save(cGmStream_385D0* s);
-    virtual void load(cGmStream_385D0* s);
-};
-
 extern int cGameModeMan_iCharRank[];
 
 /**
- * Saves the game-mode manager to a replay frame, then lets the current handler save itself (its save virtual).
+ * Saves the game-mode manager to a replay frame, then lets the current handler save itself (writeToReplayFrame).
  *
  * Writes iCurrModeHandler, iHeatNum, iCurrentGameEvent, iNumberAI, iSimAI, iCharacters, iLocation, iNextLocation,
  * iNextHeat, the score tables cGameModeMan_iRanking and cGameModeMan_iCharRank, uiTimeLimit, uiPointTarget, unk_80, the table D_00536640,
@@ -488,32 +468,17 @@ void cGameModeMan::writeToReplayFrame(cBxReplayFrame* data)
     data->write((const char*)&unk_94, 4);
     data->write((const char*)&bIsLastHeat, 4);
     data->write((const char*)&bAreResultsLocked, 4);
-    ((cGameModeObj_2385D0*)cGameModeMan_aHandler[iCurrModeHandler])->save((cGmStream_385D0*)data);
+    cGameModeMan_aHandler[iCurrModeHandler]->writeToReplayFrame(static_cast<cReplayFramePtr*>(data));
 }
 #endif
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_readFromReplayFrame);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-class cGameModeObj_2388A0 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void save(cGmStream_385D0* s);
-    virtual void load(cGmStream_385D0* s);
-};
-
 /**
  * Restores the game-mode manager from a replay frame in cGameModeMan_writeToReplayFrame's order, then the handler.
  *
- * The handler is aHandler[iCurrModeHandler] after iCurrModeHandler has been read back (its load virtual).
+ * The handler is aHandler[iCurrModeHandler] after iCurrModeHandler has been read back (readFromReplayFrame).
  *
  * @param data  the replay frame read from (On Tour cReplayFramePtr* data)
  */
@@ -541,7 +506,7 @@ void cGameModeMan::readFromReplayFrame(cBxReplayFrame* data)
     data->read((char*)&unk_94, 4);
     data->read((char*)&bIsLastHeat, 4);
     data->read((char*)&bAreResultsLocked, 4);
-    ((cGameModeObj_2388A0*)cGameModeMan_aHandler[iCurrModeHandler])->load((cGmStream_385D0*)data);
+    cGameModeMan_aHandler[iCurrModeHandler]->readFromReplayFrame(static_cast<cReplayFramePtr*>(data));
 }
 #endif
 
@@ -730,8 +695,7 @@ extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
 // PORT: func_00239938 is defined as (void); this caller passes self.
 extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
-struct sScore_239AA0;
-extern "C" void cGMBigAirHandler_fillScoreTable(sScore_239AA0* self);
+extern "C" void cGMBigAirHandler_fillScoreTable(cGMBigAirHandler* self);
 extern "C" void* memset(void* dst, int c, int n);
 extern unsigned int D_00536640[];
 extern int cGameModeMan_iCharRank[];
@@ -809,7 +773,7 @@ void cGMBigAirHandler::init()
         cGameModeMan* modeMan = cGameModeHandler_pManager;
         modeMan->iNextHeat = 3;
         modeMan->iRestoreHeat = 3;
-        cGMBigAirHandler_fillScoreTable((sScore_239AA0*)this);
+        cGMBigAirHandler_fillScoreTable(this);
     }
     cGameModeHandler_pManager->uiTimeLimit = cBENewRaceInterface_getTimeLimit(race, cGameModeHandler_pManager->iHeatNum) * 60;
     cGameModeMan* modeManager = cGameModeHandler_pManager;
@@ -843,7 +807,7 @@ void cGMBigAirHandler::init()
             memset(firstHeatScores, 0, 0x78);
             cleanRiderRanksPoints();
             func_00239938_self(this);
-            cGMBigAirHandler_fillScoreTable((sScore_239AA0*)this);
+            cGMBigAirHandler_fillScoreTable(this);
         }
         D_00536640[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
@@ -907,11 +871,6 @@ extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
-struct sScore_239230 {
-    void* vt;
-    int t[3][10];
-};
-
 
 
 static inline cAI* Race_239230()
@@ -935,7 +894,7 @@ static inline cRider* Rider_239230(int i)
  *
  * @param idx  the rider index
  */
-extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
+extern "C" void cGMBigAirHandler_raceFinish(cGMBigAirHandler* self, int idx)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -943,10 +902,10 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     tRiderStats st = *(&Rider_239230(idx)->mMetrix->Totals);
     if (Rider_239230(idx)->mDidNotFinish != 0) {
-        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = 0;
+        self->uiScore[cGameModeHandler_pManager->iHeatNum - 1][idx] = 0;
         D_005366A8[idx] = 1;
     } else {
-        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.TotalPoints;
+        self->uiScore[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.TotalPoints;
         D_005366A8[idx] = 0;
     }
     if (cAI_isRaceFinished(Race_239230()) == 0)
@@ -956,14 +915,14 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
     case cGameModeMan::kHeat1:
         gm->iRestoreHeat = gm->iNextHeat;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = self->t[0][i] + self->t[1][i];
+            D_00536640[i] = self->uiScore[0][i] + self->uiScore[1][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         if (cGameModeMan_iRanking[idx] < 3)
             cGameModeHandler_pManager->iNextHeat = 3;
         else
             cGameModeHandler_pManager->iNextHeat = cGameModeHandler_pManager->iHeatNum + 1;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = self->t[0][i];
+            D_00536640[i] = self->uiScore[0][i];
         if (cGameModeMan_iRanking[idx] >= 3) {
             cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
             if (cGameModeMan_iRanking[idx] >= 3) {
@@ -975,10 +934,10 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
         break;
     case cGameModeMan::kHeat2:
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = self->t[0][i] + self->t[1][i];
+            D_00536640[i] = self->uiScore[0][i] + self->uiScore[1][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = self->t[1][i];
+            D_00536640[i] = self->uiScore[1][i];
         gm = cGameModeHandler_pManager;
         gm->iRestoreHeat = gm->iNextHeat;
         if (cGameModeMan_iRanking[idx] < 3) {
@@ -1000,10 +959,10 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
             cRider* rider = Rider_239230(i);
             int done = rider->mFinishTime >= 0.0f;
             if (!done)
-                self->t[2][i] = cRider_estimateFinishScore(rider);
+                self->uiScore[2][i] = cRider_estimateFinishScore(rider);
         }
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = self->t[2][i];
+            D_00536640[i] = self->uiScore[2][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         gm = cGameModeHandler_pManager;
         gm->iRestoreHeat = gm->iNextHeat;
@@ -1141,11 +1100,6 @@ extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 
 
-struct sScore_239AA0 {
-    int f0;
-    int t[3][10];
-};
-
 static inline int opt49_239AA0(cBERaceDB* o)
 {
     return o->cGamePath;
@@ -1158,7 +1112,7 @@ static inline int opt49_239AA0(cBERaceDB* o)
  * the race interface (cBENewRaceInterface_getSimThreshold) for a score per heat (or repeats heat 1's when the race setting at newRace + 0x49
  * is set), then ranks everyone with sortScores (cGameModeMan_sortScores).
  */
-extern "C" void cGMBigAirHandler_fillScoreTable(sScore_239AA0* self)
+extern "C" void cGMBigAirHandler_fillScoreTable(cGMBigAirHandler* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1168,25 +1122,26 @@ extern "C" void cGMBigAirHandler_fillScoreTable(sScore_239AA0* self)
     for (int i = 0; i < numNonSimulated + 1; i++) {
         cGameModeMan_iRanking[i] = 5 - i;
         for (int j = 0; j < 3; j++) {
-            self->t[j][i] = 0;
+            self->uiScore[j][i] = 0;
         }
-        D_00536640[i] = self->t[0][i];
+        D_00536640[i] = self->uiScore[0][i];
         k++;
     }
     int nA = numNonSimulated + 1;
     for (int simRider = 0; simRider < nB; simRider++) {
         for (int heat = 0; heat < 3; heat++) {
-            int repeatFirstHeat = opt49_239AA0((cBERaceDB*)((signed char*)&cBENewRaceInterface_newRace));
+            int repeatFirstHeat = opt49_239AA0(&cBENewRaceInterface_newRace);
             int same = 0;
             if (heat != 0) same = 1;
             if (repeatFirstHeat == 0) same = 0;
             if (same) {
-                self->t[heat][k] = self->t[0][k];
+                self->uiScore[heat][k] = self->uiScore[0][k];
             } else {
-                self->t[heat][k] = cBENewRaceInterface_getSimThreshold(race, heat + 1, simRider, cBENewPlayerInterface_getDifficultyLevel(player, 0));
+                self->uiScore[heat][k] = cBENewRaceInterface_getSimThreshold(race, heat + 1, simRider,
+                        cBENewPlayerInterface_getDifficultyLevel(player, 0));
             }
         }
-        D_00536640[k] = self->t[0][k];
+        D_00536640[k] = self->uiScore[0][k];
         cGameModeMan_iRanking[k] = simRider;
         k++;
     }
@@ -2027,80 +1982,41 @@ extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" void cGameModeMan_sortTimes(cGameModeMan* self, int n);
 
-struct sVEnt_23AE00 { short delta; short index; int (*fn)(void*); };
-
-struct sRider_23AE00 {
-    char pad000[0x100];
-    int f100;
-    char pad104[0x36C];
-    float f470;
-    int pad474;
-    int f478;
-    int pad47C;
-    int f480;
-    char pad484[0x23C];
-    sVEnt_23AE00* subvt;
-};
-
-struct sRace_23AE00 {
-    char pad00[0x28];
-    sRider_23AE00* riders[8];
-};
-
-struct sSelf_23AE00 {
-    int f0;
-    int times[8];
-};
-
-static inline sRace_23AE00* race_23AE00()
-{
-    return (sRace_23AE00*)SSXApp->Game->AI;
-}
-
-static inline int subActive_23AE00(char* obj)
-{
-    sVEnt_23AE00* vt = *(sVEnt_23AE00**)obj;
-    return vt[9].fn(vthis(obj, vt[9]));
-}
-
-static inline int finished_23AE00(sRider_23AE00* r)
-{
-    return r->f470 >= 0.0f;
-}
-
 /**
  * Records a rider's time in the online race of handler 8 and ranks the riders when the race is over.
  *
- * Stores the rider's time (360000 for did-not-finish) in its table (+0x0) and D_00536640. Once cAI_isRaceFinished,
- * estimates the unfinished riders (cRider_estimateFinishTick), ranks with sortTimes (cGameModeMan_sortTimes), clears +0x100 of a
- * rider placed 4th or worse and locks the results. Slot +0x44 (raceFinish) of cGMMPRaceHandler_vtbl.
+ * While the race runs or for a human rider (not isComputer()), stores the rider's time (360000 for did-not-finish) in
+ * uiTime and D_00536640. Once cAI_isRaceFinished, estimates the unfinished riders (cRider_estimateFinishTick), ranks
+ * with sortTimes (cGameModeMan_sortTimes), clears ShouldCelebrateAtFinish of a rider placed 4th or worse and locks the
+ * results. Slot +0x44 (raceFinish) of cGMMPRaceHandler_vtbl.
  *
  * @param idx  the rider index
  */
-extern "C" void cGMMPRaceHandler_raceFinish(sSelf_23AE00* self, int idx)
+extern "C" void cGMMPRaceHandler_raceFinish(cGMMPRaceHandler* self, int idx)
 {
-    sRace_23AE00* rc = race_23AE00();
-    if (cAI_isRaceFinished(rc) == 0 || subActive_23AE00((char*)rc->riders[idx] + 0x6C0) == 0) {
-        if (race_23AE00()->riders[idx]->f480) {
-            D_00536640[idx] = self->times[idx] = 360000;
+    cAI* rc = SSXApp->Game->AI;
+    if (cAI_isRaceFinished(rc) == 0 || !rc->Riders[idx]->isComputer()) {
+        if (SSXApp->Game->AI->Riders[idx]->mDidNotFinish) {
+            D_00536640[idx] = self->uiTime[idx] = 360000;
             D_005366A8[idx] = 1;
         } else {
-            int finishTick = rc->riders[idx]->f478;
-            self->times[idx] = finishTick;
+            int finishTick = rc->Riders[idx]->mFinishTick;
+            self->uiTime[idx] = finishTick;
             D_00536640[idx] = finishTick;
             D_005366A8[idx] = 0;
         }
     }
     if (cAI_isRaceFinished(rc)) {
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 2; i++) {
-            if (!finished_23AE00(rc->riders[i]) && i != idx) {
-                self->times[i] = cRider_estimateFinishTick(rc->riders[i]);
+            int finished = rc->Riders[i]->mFinishTime >= 0.0f;
+            if (!finished && i != idx) {
+                self->uiTime[i] = cRider_estimateFinishTick(rc->Riders[i]);
             }
-            D_00536640[i] = self->times[i];
+            D_00536640[i] = self->uiTime[i];
         }
         cGameModeHandler_pManager->sortTimes(10);
         if (cGameModeMan_iRanking[idx] >= 3) {
-            race_23AE00()->riders[idx]->f100 = 0;
+            SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
         }
         cGameModeHandler_pManager->bAreResultsLocked = 1;
     }
@@ -2327,7 +2243,7 @@ void cGMTimeHandler::init()
     gm3->unk_94 = 0;
     gm3->bIsLastHeat = 0;
     gm3->bAreResultsLocked = 0;
-    *(short*)&uiTrackProgress = 0;
+    uiTrackProgress = 0;
 }
 #endif
 
@@ -2367,11 +2283,6 @@ struct sGM_23B468 {
     int f9C;
 };
 
-static inline char* rider_23B468(char* g, int off)
-{
-    return *(char**)(*(char**)(*(char**)(g + 0x84) + 0xC) + off + 0x28);
-}
-
 /**
  * Records the rider's time in the timed event of handler 4 and awards a place by the medal times.
  *
@@ -2384,17 +2295,16 @@ static inline char* rider_23B468(char* g, int off)
 void cGMTimeHandler::raceFinish(int riderIndex)
 {
     int one = 1;
-    int off = riderIndex << 2;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* ssxApp = (char*)SSXApp;
+    cSSXApp* ssxApp = SSXApp;
     cGameModeMan* gm = cGameModeHandler_pManager;
     unsigned int* timeSlot = &D_00536640[riderIndex];
-    *timeSlot = *(unsigned int*)(rider_23B468(ssxApp, off) + 0x478);
+    *timeSlot = ssxApp->Game->AI->Riders[riderIndex]->mFinishTick;
     gm->bAreResultsLocked = one;
-    cRider* rider = (cRider*)rider_23B468(ssxApp, off);
+    cRider* rider = ssxApp->Game->AI->Riders[riderIndex];
     if (rider->mDidNotFinish != 0) {
         *timeSlot = 0x57E40;
-        *(int*)(rider_23B468(ssxApp, off) + 0x100) = 0;
+        ssxApp->Game->AI->Riders[riderIndex]->ShouldCelebrateAtFinish = 0;
         gm->iNextHeat = one;
         D_005366A8[riderIndex] = one;
     } else if (uiTimeToBeat < *timeSlot) {
@@ -2563,43 +2473,23 @@ extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
-class cRiderState_23B8C8 {
-public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual int isActive();
-    virtual int isFinished();
-};
-
-struct sClk_23B8C8 {
-    char pad_0x0[0x28];
-    char* riders[1];    // 0x28
-};
-
-static inline char* Rider_23B8C8(int i)
-{
-    return ((sClk_23B8C8*)SSXApp->Game->AI)->riders[i];
-}
 
 /**
  * Records a rider's time in the head-to-head event of kHANDLER_RIVALTIME and decides the winner when the race is over.
  *
- * Stores the finish tick (0x57E40 for did-not-finish). Online it ranks with sortTimes and returns early for the faster
- * player. Offline it estimates unfinished riders, ranks with sortTimes, and a human in first place that finished ends
- * the event (iNextHeat 0); otherwise the rider's +0x100 is cleared. Slot +0x44 (raceFinish) of cGMRivalTimeHandler_vtbl.
+ * Stores the finish tick (0x57E40 for did-not-finish) while the race runs or for a human rider (not isComputer());
+ * the rest runs only for a human (isHuman()) once the race is over. Online it ranks with sortTimes and returns early
+ * for the faster player. Offline it estimates unfinished riders, ranks with sortTimes, and a human in first place that
+ * finished ends the event (iNextHeat 0); otherwise the rider's ShouldCelebrateAtFinish is cleared. Slot +0x44
+ * (raceFinish) of cGMRivalTimeHandler_vtbl.
  *
  * @param idx  the rider index
  */
 extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
 {
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0 ||
-        ((cRiderState_23B8C8*)(Rider_23B8C8(idx) + 0x6C0))->isFinished() == 0) {
-        cRider* rider = (cRider*)Rider_23B8C8(idx);
+        !SSXApp->Game->AI->Riders[idx]->isComputer()) {
+        cRider* rider = SSXApp->Game->AI->Riders[idx];
         if (rider->mDidNotFinish != 0) {
             D_00536640[idx] = 0x57E40;
             D_005366A8[idx] = 1;
@@ -2611,7 +2501,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
         return;
     }
-    if (((cRiderState_23B8C8*)(Rider_23B8C8(idx) + 0x6C0))->isActive() == 0) {
+    if (!SSXApp->Game->AI->Riders[idx]->isHuman()) {
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2627,7 +2517,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
         }
     } else {
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            cRider* rider = (cRider*)Rider_23B8C8(i);
+            cRider* rider = SSXApp->Game->AI->Riders[i];
             int done = rider->mFinishTime >= 0.0f;
             if (!done) {
                 D_00536640[i] = cRider_estimateFinishTick(rider);
@@ -2638,8 +2528,8 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
         gm->sortTimes(10);
-        if (cGameModeMan_iRanking[n] == 0 && *(int*)(Rider_23B8C8(idx) + 0x480) == 0) {
-            *(int*)(Rider_23B8C8(idx) + 0x100) = 1;
+        if (cGameModeMan_iRanking[n] == 0 && SSXApp->Game->AI->Riders[idx]->mDidNotFinish == 0) {
+            SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
             gm2->bIsEventDone = 1;
             gm2->iRestoreHeat = gm2->iNextHeat;
@@ -2647,7 +2537,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
             return;
         }
     }
-    *(int*)(Rider_23B8C8(idx) + 0x100) = 0;
+    SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
 }
 #endif
 
@@ -2757,29 +2647,20 @@ extern int cGameModeMan_iRanking[];
 
 
 
-struct sClk_23BDB8 {
-    char pad_0x0[0x28];
-    char* riders[1];    // 0x28
-};
-
-static inline char* Rider_23BDB8(int i)
-{
-    return ((sClk_23BDB8*)SSXApp->Game->AI)->riders[i];
-}
 
 /**
  * Records a rider's score in the head-to-head scored event of kHANDLER_RIVALPOINT and decides the winner when the race
  * is over.
  *
- * Stores the score (0 for did-not-finish). Online it ranks the two players with sortScores and clears +0x100 of the
- * loser; offline it estimates unfinished riders' scores, ranks, and a human in first place that finished ends the event
- * (iNextHeat 0). Slot +0x44 (raceFinish) of cGMRivalPointHandler_vtbl.
+ * Stores the score (0 for did-not-finish). Online it ranks the two players with sortScores and clears
+ * ShouldCelebrateAtFinish of the loser; offline it estimates unfinished riders' scores, ranks, and a human in first
+ * place that finished ends the event (iNextHeat 0). Slot +0x44 (raceFinish) of cGMRivalPointHandler_vtbl.
  *
  * @param idx  the rider index
  */
 extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
 {
-    cRider* rider = (cRider*)Rider_23BDB8(idx);
+    cRider* rider = SSXApp->Game->AI->Riders[idx];
     if (rider->mDidNotFinish != 0) {
         D_00536640[idx] = 0;
         D_005366A8[idx] = 1;
@@ -2802,10 +2683,10 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
         if (idx == w) {
             return;
         }
-        *(int*)(Rider_23BDB8(idx) + 0x100) = 0;
+        SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
     } else {
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            cRider* rider = (cRider*)Rider_23BDB8(i);
+            cRider* rider = SSXApp->Game->AI->Riders[i];
             int done = rider->mFinishTime >= 0.0f;
             if (!done) {
                 D_00536640[i] = cRider_estimateFinishScore(rider);
@@ -2816,15 +2697,15 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
         gm->sortScores(2);
-        if (cGameModeMan_iRanking[n] == 0 && *(int*)(Rider_23BDB8(idx) + 0x480) == 0) {
-            *(int*)(Rider_23BDB8(idx) + 0x100) = 1;
+        if (cGameModeMan_iRanking[n] == 0 && SSXApp->Game->AI->Riders[idx]->mDidNotFinish == 0) {
+            SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
             gm2->bIsEventDone = 1;
             gm2->iRestoreHeat = gm2->iNextHeat;
             gm2->iNextHeat = 0;
             return;
         }
-        *(int*)(Rider_23BDB8(idx) + 0x100) = 0;
+        SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
     }
 }
 #endif
@@ -2932,7 +2813,7 @@ void cGMPointHandler::init()
     gm4->unk_94 = 0;
     gm4->bIsLastHeat = 0;
     gm4->bAreResultsLocked = 0;
-    *(short*)&uiTrackProgress = 0;
+    uiTrackProgress = 0;
 }
 #endif
 
@@ -2973,11 +2854,6 @@ struct sGM_23C2D8 {
 };
 
 
-struct sClk_23C2D8 {
-    char pad_0x0[0x28];
-    char* riders[1];    // 0x28
-};
-
 /**
  * Records the rider's score in the point-target event of handler 7 and awards a place by the medal scores.
  *
@@ -2989,14 +2865,14 @@ struct sClk_23C2D8 {
  */
 void cGMPointHandler::raceFinish(int idx)
 {
-    sClk_23C2D8* clk = (sClk_23C2D8*)SSXApp->Game->AI;
-    tRiderStats st = *(tRiderStats*)(*(char**)(clk->riders[idx] + 0x790) + 0xFC);
+    cAI* ai = SSXApp->Game->AI;
+    tRiderStats st = ai->Riders[idx]->mMetrix->Totals;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cRider* rider = (cRider*)((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx];
+    cRider* rider = SSXApp->Game->AI->Riders[idx];
     if (rider->mDidNotFinish != 0) {
         D_00536640[idx] = 0;
         cGameModeHandler_pManager->iNextHeat = 1;
-        *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 0;
+        SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
         D_005366A8[idx] = 1;
     } else {
         cGameModeMan* gm = cGameModeHandler_pManager;
@@ -3009,7 +2885,7 @@ void cGMPointHandler::raceFinish(int idx)
             int tier2Target = cBENewRaceInterface_getPeakGoal(race, gm->iCurrentGameEvent, 2) * 100;
             int tier1Target = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
-            *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 1;
+            SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 1;
             D_00536640[idx] = st.TotalPoints;
             gm2->bIsEventDone = 1;
             if (st.TotalPoints >= tier2Target) {

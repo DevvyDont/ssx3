@@ -7,6 +7,7 @@
 #include "worldpainter/quadtree.h"
 #include "main/ssxapp.h"
 #include "util/locale.h"
+#include "ealib/threads.h"
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getFreeNode);
@@ -45,15 +46,15 @@ unsigned short cQuadTree::getFreeNode()
             newnodelist[i].setNext(i + 1);
         }
         newnodelist[m_numNodes + 1023].setNext(0);
-        (*(tQuadTreeNode**)&m_freeNodes) = &newnodelist[m_numNodes];
+        m_freeNodes = &newnodelist[m_numNodes];
         m_numNodes += 1024;
         if (m_nodes != 0) {
             cMemMan_free(m_nodes);
         }
-        (*(tQuadTreeNode**)&m_nodes) = newnodelist;
+        m_nodes = newnodelist;
     }
     ret = getNodeId_17D0(this, m_freeNodes);
-    (*(tQuadTreeNode**)&m_freeNodes) = &m_nodes[m_freeNodes->getNext()];
+    m_freeNodes = &m_nodes[m_freeNodes->getNext()];
     m_numUsedNodes++;
     return ret;
 }
@@ -137,19 +138,19 @@ void* cQuadTree::getLeaf(float fx, float fz)
     int x = (int)((fx - m_offsetX) * *(float*)this);
     int z = (int)((fz - m_offsetY) * *(float*)this);
     if ((unsigned int)x > 0x7FFF || (unsigned int)z > 0x7FFF) {
-        return (char*)&m_defaultNode;
+        return &m_defaultNode;
     }
     unsigned short ux = x << 1;
     unsigned short uz = z << 1;
     tQuadTreeNode* nodes = m_nodes;
-    unsigned short* node = &nodes[m_root].m_sub.m_children[0];
-    while (node[0] & 1) {
+    tQuadTreeNode* node = &nodes[m_root];
+    while (node->m_sub.m_children[0] & 1) {
         int idx = ((ux >> 15) << 1) | (uz >> 15);
         ux <<= 1;
         uz <<= 1;
-        node = &nodes[*(unsigned short*)((char*)node + (idx << 1)) >> 1].m_sub.m_children[0];
+        node = &nodes[node->m_sub.m_children[idx] >> 1];
     }
-    if (node[0] & 1) {
+    if (node->m_sub.m_children[0] & 1) {
         return 0;
     }
     return node;
@@ -163,25 +164,9 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" void tQuadTreeNode_setSubNodes(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
-struct cQuadTree_exportNode_sOut;
-struct cQuadTree_exportNode_sNode;
-extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node);
+extern "C" void cQuadTree_exportNode(cQuadTree* self, tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node);
 extern char str_QuadTreeRemapTable[];
 extern char str_QuadTreeOutputBuffer[];
-
-struct sQTHeader_1DA8 {
-    float f0;           // 0x00
-    float f4;           // 0x04
-    float f8;           // 0x08
-    int fC;             // 0x0C
-    int f10;            // 0x10
-    unsigned short f14; // 0x14
-    unsigned short f16;
-    int f18;            // 0x18
-    int f1C;            // 0x1C
-    char* f20;          // 0x20
-    int f24;            // 0x24
-};
 
 /**
  * Writes a quad tree into a new flat buffer ("QuadTreeOutputBuffer"), remapping node links and converting
@@ -207,46 +192,42 @@ void cQuadTree::exportTree(char** out, int* size, void* ctx, float (*fixFloat)(v
         map[i] = -1;
     *out = new (str_QuadTreeOutputBuffer, 0, 0) char[*size];
     memset(*out, 0xDEADBEEF, *size);
-    sQTHeader_1DA8* header = (sQTHeader_1DA8*)*out;
-    *header = *((sQTHeader_1DA8*)this);
+    // ORIGINAL-PTR: the buffer is the streamed tree record (the 0x28-byte object followed by its nodes, which
+    // cQuadTree::resolve finds at this + 0x28), and On Tour's exportTree converts with int (*convertInt)(), so the
+    // leaf data pointers (void* m_data in On Tour) go through it as ints.
+    cQuadTree* header = (cQuadTree*)*out;
+    *header = *this;
     int cnt = 0;
-    unsigned short* nodeData = (unsigned short*)(header + 1);
-    cQuadTree_exportNode(this, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map,
-            (cQuadTree_exportNode_sNode*)&m_nodes[m_root]);
-    for (i = 0; i < cnt; i++, nodeData += 4) {
-        if (nodeData[0] & 1) {
-            tQuadTreeNode_setSubNodes(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
-            nodeData[0] = fixShort(nodeData[0], ctx);
-            nodeData[1] = fixShort(nodeData[1], ctx);
-            nodeData[2] = fixShort(nodeData[2], ctx);
-            nodeData[3] = fixShort(nodeData[3], ctx);
+    tQuadTreeNode* nodeData = (tQuadTreeNode*)(header + 1);
+    cQuadTree_exportNode(this, nodeData, &cnt, map, &m_nodes[m_root]);
+    for (i = 0; i < cnt; i++, nodeData++) {
+        unsigned short* children = nodeData->m_sub.m_children;
+        if (children[0] & 1) {
+            tQuadTreeNode_setSubNodes(children, map[children[0] >> 1], map[children[1] >> 1], map[children[2] >> 1],
+                                      map[children[3] >> 1]);
+            children[0] = fixShort(children[0], ctx);
+            children[1] = fixShort(children[1], ctx);
+            children[2] = fixShort(children[2], ctx);
+            children[3] = fixShort(children[3], ctx);
         } else {
-            ((int*)nodeData)[0] = fixInt(((int*)nodeData)[0], ctx);
-            ((int*)nodeData)[1] = fixInt(((int*)nodeData)[1], ctx);
+            nodeData->m_leaf.m_data = (void*)fixInt((int)nodeData->m_leaf.m_data, ctx);
+            nodeData->m_leaf.m_key = fixInt(nodeData->m_leaf.m_key, ctx);
         }
     }
-    header->f10 = 0;
-    header->f24 = 0;
-    header->f1C = fixInt((int)m_defaultNode.m_key, ctx);
-    header->f18 = fixInt(*(int*)&m_defaultNode, ctx);
-    header->f0 = fixFloat(ctx, header->f0);
-    header->f4 = fixFloat(ctx, header->f4);
-    header->f8 = fixFloat(ctx, header->f8);
-    header->fC = fixInt(header->fC, ctx);
+    header->m_numNodes = 0;
+    header->m_freeNodes = 0;
+    header->m_defaultNode.m_key = fixInt((int)m_defaultNode.m_key, ctx);
+    header->m_defaultNode.m_data = (void*)fixInt((int)m_defaultNode.m_data, ctx);
+    header->m_scale = fixFloat(ctx, header->m_scale);
+    header->m_offsetX = fixFloat(ctx, header->m_offsetX);
+    header->m_offsetY = fixFloat(ctx, header->m_offsetY);
+    header->m_numUsedNodes = fixInt(header->m_numUsedNodes, ctx);
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportNode);
 #ifdef SKIP_ASM
-struct cQuadTree_exportNode_sNode {
-    unsigned short child[4];
-};
-struct cQuadTree_exportNode_sOut {
-    int f0;
-    int f4;
-};
-
 /**
  * Copies a node and, for a branch, its four subtrees depth first into an export list, recording each node's new
  * index.
@@ -260,17 +241,17 @@ struct cQuadTree_exportNode_sOut {
  * @param node  the node to export
  */
 // PORT: node index computed from pointers cast to unsigned int
-extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node)
+extern "C" void cQuadTree_exportNode(cQuadTree* self, tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node)
 {
     int i;
     unsigned short* childPtr;
-    out[*count].f4 = *(int*)((char*)node + 4);
-    out[*count].f0 = *(int*)((char*)node + 0);
+    out[*count].m_leaf.m_key = node->m_leaf.m_key;
+    out[*count].m_leaf.m_data = node->m_leaf.m_data;
     map[(unsigned short)(((unsigned int)node - (unsigned int)self->m_nodes) >> 3)] = (*count)++;
-    if (node->child[0] & 1) {
-        childPtr = node->child;
+    if (node->m_sub.m_children[0] & 1) {
+        childPtr = node->m_sub.m_children;
         for (i = 0; i < 4; i++) {
-            cQuadTree_exportNode(self, out, count, map, (cQuadTree_exportNode_sNode*)self->m_nodes + (*childPtr++ >> 1));
+            cQuadTree_exportNode(self, out, count, map, &self->m_nodes[*childPtr++ >> 1]);
         }
     }
 }
@@ -836,9 +817,9 @@ extern char str_GAMELINK_data[];
  * @param zeroFlag  nonzero to pass the 0x100 allocation flag
  * @return the block's address
  */
-extern "C" int func_002C28C0(int name, int size, int zeroFlag)
+extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag)
 {
-    return (int)new (str_GAMELINK_data, zeroFlag ? 0x100 : 0, 0) char[size];
+    return new (str_GAMELINK_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
@@ -884,9 +865,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2940);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MUTEX_lock_p(void*) __asm__("MUTEX_lock");
 extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
-extern "C" int cMemMan_internalResizeBlock(int, int);
-extern "C" int func_002C28C0(int, int, int);
-extern "C" void func_002C28F8(int);
+extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
+extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag);
+extern "C" void func_002C28F8(void* block);
 extern char cMemMan_m_mutex[];
 
 /**
@@ -901,7 +882,7 @@ extern char cMemMan_m_mutex[];
  * @param zeroFlag  passed to func_002C28C0 for a new block
  * @return the block's (new) address, or 0
  */
-extern "C" int func_002C2940(int block, int name, int size, int zeroFlag) {
+extern "C" void* func_002C2940(void* block, const char* name, int size, int zeroFlag) {
     if (block == 0) {
         return func_002C28C0(name, size, zeroFlag);
     }
@@ -909,7 +890,7 @@ extern "C" int func_002C2940(int block, int name, int size, int zeroFlag) {
         func_002C28F8(block);
         return 0;
     } else {
-        int result;
+        void* result;
         MUTEX_lock_p(cMemMan_m_mutex);
         result = cMemMan_internalResizeBlock(block, size);
         MUTEX_unlock_p(cMemMan_m_mutex);
@@ -921,19 +902,31 @@ extern "C" int func_002C2940(int block, int name, int size, int zeroFlag) {
 INCLUDE_ASM("worldpainter/quadtree", func_002C29D0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002C28C0_29D0(int, int, int) __asm__("func_002C28C0");
-extern "C" int func_002C28F8_29D0(int) __asm__("func_002C28F8");
-extern "C" int THREAD_createparam(int* self, int a1, int a2, int a3, int a4, int a5);
+extern "C" void* func_002C28C0_29D0(const char* name, int size, int zeroFlag) __asm__("func_002C28C0");
+extern "C" int func_002C28F8_29D0(void* block) __asm__("func_002C28F8");
+extern "C" int THREAD_createparam(THREAD* thread, int entryProc, int param, void* stackAddr, int stackSize,
+                                  int priority);
 extern char str_threadstack[];
 
+// A GameLink thread handle (0xC bytes; name ours): the stack func_002C29D0 allocates, then REAL's THREAD record that
+// THREAD_createparam fills.
+struct tGameLinkThread {
+    void* stack;                    // 0x0 [U] func_002C29D0 allocates it ("threadstack"); func_002C2AA8 frees it
+    THREAD thread;                  // 0x4 [U] THREAD_createparam's record
+};
+
+CHECK_OFFSET(tGameLinkThread, stack, 0x0);
+CHECK_OFFSET(tGameLinkThread, thread, 0x4);
+CHECK_SIZE(tGameLinkThread, 0xC);
+
 // Predicate helper; keeps p[0] in one register for both tests.
-inline int func_002C29D0_valid(int arg0)
+inline int func_002C29D0_valid(void* stack)
 {
-    return arg0 != 0;
+    return stack != 0;
 }
 
 // PORT: the unit later declares func_002C29D0() for its address use; bound by asm label
-int* func_002C29D0_impl(int a0, int a1, int size) __asm__("func_002C29D0");
+tGameLinkThread* func_002C29D0_impl(int threadEntry, int threadArg, int size) __asm__("func_002C29D0");
 
 /**
  * Creates and starts a thread for GameLink and returns its 0xC-byte handle, or 0 on failure.
@@ -947,25 +940,25 @@ int* func_002C29D0_impl(int a0, int a1, int size) __asm__("func_002C29D0");
  * @param size  the stack size in bytes
  * @return the handle, or 0
  */
-int* func_002C29D0_impl(int threadEntry, int threadArg, int size)
+tGameLinkThread* func_002C29D0_impl(int threadEntry, int threadArg, int size)
 {
-    int* thread = (int*)func_002C28C0_29D0(0, 0xC, 0);
-    thread[0] = 0;
-    thread[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
-    if (thread[0] != 0) {
-        if (THREAD_createparam(thread + 1, threadEntry, threadArg, thread[0], size, 99) == 0) {
-            func_002C28F8_29D0(thread[0]);
-            thread[0] = 0;
+    tGameLinkThread* thread = (tGameLinkThread*)func_002C28C0_29D0(0, sizeof(tGameLinkThread), 0);
+    thread->stack = 0;
+    thread->stack = func_002C28C0_29D0(str_threadstack, size, 0);
+    if (thread->stack != 0) {
+        if (THREAD_createparam(&thread->thread, threadEntry, threadArg, thread->stack, size, 99) == 0) {
+            func_002C28F8_29D0(thread->stack);
+            thread->stack = 0;
         }
     }
-    if (func_002C29D0_valid(thread[0])) {
+    if (func_002C29D0_valid(thread->stack)) {
         return thread;
     }
     if (thread != 0) {
-        if (thread[0] != 0) {
-            func_002C28F8_29D0(thread[0]);
+        if (thread->stack != 0) {
+            func_002C28F8_29D0(thread->stack);
         }
-        func_002C28F8_29D0((int)thread);
+        func_002C28F8_29D0(thread);
     }
     return 0;
 }
@@ -973,22 +966,22 @@ int* func_002C29D0_impl(int threadEntry, int threadArg, int size)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2AA8);
 #ifdef SKIP_ASM
-extern "C" void func_002C28F8(int);
+extern "C" void func_002C28F8(void* block);
 
 /**
  * Frees a thread handle made by func_002C29D0: frees its stack (first word) and clears it, then frees the handle itself
  * with func_002C28F8. The handle is read before it is checked for 0.
  */
-extern "C" void func_002C2AA8(int *self) {
-    if (*self != 0) {
-        func_002C28F8(*self);
-        *self = 0;
+extern "C" void func_002C2AA8(tGameLinkThread* self) {
+    if (self->stack != 0) {
+        func_002C28F8(self->stack);
+        self->stack = 0;
     }
     if (self != 0) {
-        if (*self != 0) {
-            func_002C28F8(*self);
+        if (self->stack != 0) {
+            func_002C28F8(self->stack);
         }
-        func_002C28F8((int)self);
+        func_002C28F8(self);
     }
 }
 #endif
@@ -1008,12 +1001,12 @@ extern "C" void func_002C2B08(void) {
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B28);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_002C28C0(int, int, int);
-extern "C" void MUTEX_create(int);
+extern "C" void* func_002C28C0(const char* name, int size, int zeroFlag);
+extern "C" void MUTEX_create(void* mutex);
 extern char str_mutex[];
 
 // The unit declares func_002C2B28 later as void(); keep the real signature under an asm label.
-extern "C" int func_002C2B28_impl(void) __asm__("func_002C2B28");
+extern "C" void* func_002C2B28_impl(void) __asm__("func_002C2B28");
 
 /**
  * Allocates a 0x10-byte block with func_002C28C0 and initialises it as a mutex with MUTEX_create (GameLink's mutex
@@ -1021,9 +1014,9 @@ extern "C" int func_002C2B28_impl(void) __asm__("func_002C2B28");
  *
  * @return the mutex block
  */
-extern "C" int func_002C2B28_impl(void)
+extern "C" void* func_002C2B28_impl(void)
 {
-    int mutex = func_002C28C0((int)str_mutex, 0x10, 0);
+    void* mutex = func_002C28C0(str_mutex, 0x10, 0);
     MUTEX_create(mutex);
     return mutex;
 }
@@ -1031,7 +1024,7 @@ extern "C" int func_002C2B28_impl(void)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B68);
 #ifdef SKIP_ASM
-extern "C" void func_002C28F8(int);
+extern "C" void func_002C28F8(void* block);
 extern "C" void MUTEX_destroy();
 
 /**
@@ -1039,7 +1032,7 @@ extern "C" void MUTEX_destroy();
  *
  * @param mutexBlock  the mutex block
  */
-extern "C" void func_002C2B68(int mutexBlock) {
+extern "C" void func_002C2B68(void* mutexBlock) {
     MUTEX_destroy();
     func_002C28F8(mutexBlock);
 }
@@ -1191,9 +1184,9 @@ extern char str_ISTR_data[];
  * @param zeroFlag  nonzero to pass the 0x100 allocation flag
  * @return the block's address
  */
-extern "C" int func_002C2D30(int name, int size, int zeroFlag)
+extern "C" void* func_002C2D30(const char* name, int size, int zeroFlag)
 {
-    return (int)new (str_ISTR_data, zeroFlag ? 0x100 : 0, 0) char[size];
+    return new (str_ISTR_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
 #endif
 //100%
@@ -1239,9 +1232,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2DB0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MUTEX_lock_p(void*) __asm__("MUTEX_lock");
 extern "C" void MUTEX_unlock_p(void*) __asm__("MUTEX_unlock");
-extern "C" int cMemMan_internalResizeBlock(int, int);
-extern "C" int func_002C2D30(int, int, int);
-extern "C" void func_002C2D68(int);
+extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
+extern "C" void* func_002C2D30(const char* name, int size, int zeroFlag);
+extern "C" void func_002C2D68(void* block);
 extern char cMemMan_m_mutex[];
 
 /**
@@ -1256,7 +1249,7 @@ extern char cMemMan_m_mutex[];
  * @param zeroFlag  passed to func_002C2D30 for a new block
  * @return the block's (new) address, or 0
  */
-extern "C" int func_002C2DB0(int block, int name, int size, int zeroFlag) {
+extern "C" void* func_002C2DB0(void* block, const char* name, int size, int zeroFlag) {
     if (block == 0) {
         return func_002C2D30(name, size, zeroFlag);
     }
@@ -1264,7 +1257,7 @@ extern "C" int func_002C2DB0(int block, int name, int size, int zeroFlag) {
         func_002C2D68(block);
         return 0;
     } else {
-        int result;
+        void* result;
         MUTEX_lock_p(cMemMan_m_mutex);
         result = cMemMan_internalResizeBlock(block, size);
         MUTEX_unlock_p(cMemMan_m_mutex);
@@ -1422,7 +1415,7 @@ extern "C" void cPS2MemCard__cPS2MemCard(cPS2MemCard* self, int flags)
 {
     *(void***)self = cPS2MemCard_vtbl;
     self->CleanUp();
-    void* iconData = (void*)self->mIconFileData;
+    void* iconData = self->mIconFileData;
     if (iconData != 0) {
         MEM_free(iconData);
     }
@@ -2172,7 +2165,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
     case 1: {
         self->mDevices[self->mDevice].mLastError = D_004A3940;
         if (self->mIconFileData != 0) {
-            MEM_free((void*)self->mIconFileData);
+            MEM_free(self->mIconFileData);
             self->mIconFileData = 0;
         }
         if (self->mFileDescriptor >= 0) {
@@ -2246,7 +2239,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
     case 40: case 44: case 0x30: {
         char path[64];
         if (self->mIconFileData != 0) {
-            MEM_free((void*)self->mIconFileData);
+            MEM_free(self->mIconFileData);
             self->mIconFileData = 0;
         }
         int slot = slotOf_48C0(self->mState, 44, 0x30);
@@ -2269,7 +2262,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
         break;
     }
     case 42: case 46: case 50: {
-        int mcResult = sceMcWrite(self->mFileDescriptor, self->mIconFileData, self->mIconFileSize);
+        int mcResult = sceMcWrite(self->mFileDescriptor, (int)self->mIconFileData, self->mIconFileSize);
         D_004A3940 = mcResult;
         if (mcResult < 0)
             func_002C48C0(self, 1);
@@ -2277,7 +2270,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* self, int state)
     }
     case 43: case 47: case 51: {
         if (self->mIconFileData != 0) {
-            MEM_free((void*)self->mIconFileData);
+            MEM_free(self->mIconFileData);
             self->mIconFileData = 0;
         }
         int mcResult = sceMcClose(self->mFileDescriptor);
@@ -2615,8 +2608,8 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5250);
  */
 extern "C" void func_002C5250(cPS2MemCard* self)
 {
-    ((&self->mDevices[0]))[self->mDevice].mType = 0;
-    (*(void**)&((&self->mDevices[0]))[self->mDevice].mFreeClusters) = 0;
+    self->mDevices[self->mDevice].mType = 0;
+    self->mDevices[self->mDevice].mFreeClusters = 0;
 }
 #endif
 
@@ -2682,9 +2675,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace1);
  * @param device  the memory-card port (0 or 1)
  * @return the free clusters (1 KB each on a PS2 card)
  */
-void* cPS2MemCard::GetFreeSpace1(int device)
+int cPS2MemCard::GetFreeSpace1(int device)
 {
-    return (void*)mDevices[device].mFreeClusters;
+    return mDevices[device].mFreeClusters;
 }
 #endif
 
@@ -2699,7 +2692,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace__FPv);
  *
  * @return the free space in KB
  */
-void* cPS2MemCard::GetFreeSpace()
+int cPS2MemCard::GetFreeSpace()
 {
     return GetFreeSpace1(mDevice);
 }
@@ -2770,8 +2763,6 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetStatus);
 int GetHashValue32(char*);
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-// PORT: the unit defines cPS2MemCard_GetFreeSpace1 as returning void*; it returns an int count here.
-extern "C" int cPS2MemCard_GetFreeSpace1_i(void* self, int idx) __asm__("cPS2MemCard_GetFreeSpace1");
 extern char str_sp_d[];
 extern char str_kT_MEMFreePS2[];
 
@@ -2804,7 +2795,7 @@ void cPS2MemCard::GetStatus(int idx, unsigned short* dst)
         break;
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
-        int freeClusters = cPS2MemCard_GetFreeSpace1_i(this, idx) >? 0;
+        int freeClusters = GetFreeSpace1(idx) >? 0;
         cFELocale* obj = SSXApp->FELocale;
         cPS2MemCard_GetStatus_sVEntry* vt = (cPS2MemCard_GetStatus_sVEntry*)VPTR_OF(cUILocaleInterface, obj);
         void* thisp = vthis(obj, vt[4]);
@@ -2958,7 +2949,7 @@ extern "C" int cPS2MemCard_GetLastError_i(void* self, int i) __asm__("cPS2MemCar
 extern "C" void func_002C6280_v(void* self) __asm__("func_002C6280");
 extern "C" bool func_002C63E8(cPS2MemCard* self, unsigned int a1);
 extern "C" int ASYNCFILE_getstatus(int h);
-extern "C" void ASYNCFILE_release(int h, int* a, int* b);
+extern "C" void ASYNCFILE_release(int handle, void** address, int* size);
 extern "C" void func_002C4210(cPS2MemCard* self);
 extern "C" void func_002C42B0(cPS2MemCard* self);
 extern "C" void func_002C4388(cPS2MemCard* self);
@@ -4338,7 +4329,9 @@ extern "C" void cLocaleFile__cLocaleFile(cLocaleFile* self, int flags)
 }
 #endif
 
-extern "C" void* LOCALE_getstr(int);
+// LOCALE_getstr(const void* localefile, int stringid) (On Tour); the string id is the caller's second argument
+// register, passed through untouched.
+extern "C" void* LOCALE_getstr(const void* localefile);
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
@@ -4351,7 +4344,7 @@ INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
  */
 void* cLocaleFile::getStringByIndex()
 {
-    return LOCALE_getstr((int)mpStringTableData);
+    return LOCALE_getstr(mpStringTableData);
 }
 #endif
 
@@ -4374,7 +4367,7 @@ int cLocaleFile::getStringByHash(unsigned int key)
 {
     int lo = 0;
     int hi = ((int)mNumEntries);
-    if (((int)mpHashTableHeader) != 0) {
+    if (mpHashTableHeader != 0) {
         if (mpHashTableData[hi].mHashID < key || key < mpHashTableData[0].mHashID) {
             return 0;
         }
@@ -4407,10 +4400,6 @@ extern "C" int strncmp(const void* a, const void* b, int n);
 void* cLocaleFile_getStringByIndex_2(void* self, int v) __asm__("cLocaleFile_getStringByIndex__FPv");
 extern char str_LOCT[];
 
-struct cLocaleFile_loadFile_sEnt {
-    int f0;
-    int f4;
-};
 struct cLocaleFile_loadFile_sChunk {
     int id;
     int size;
@@ -4432,19 +4421,21 @@ void cLocaleFile::loadFile(const char* name, char kind)
     unsigned int i;
     int size;
     mLanguage = kind;
-    (*(cLocaleFile_loadFile_sChunk**)&mpStringTableData) = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
-    mNumEntries = LOCALE_getstate(((cLocaleFile_loadFile_sChunk*)mpStringTableData), 2);
+    // ORIGINAL-PTR: variable-length records: the "LOCT" chunk sits the first chunk's size word after the file start,
+    // the table that chunk's size word after it; and On Tour's tHashEntry::mID is unsigned int, yet it receives
+    // getStringByIndex's string (unsigned short* in On Tour).
+    mpStringTableData = (char*)FILE_load(name, 0);
+    mNumEntries = LOCALE_getstate(mpStringTableData, 2);
     size = ((cLocaleFile_loadFile_sChunk*)mpStringTableData)->size;
-    (*(cLocaleFile_loadFile_sChunk**)&mpHashTableHeader) = (cLocaleFile_loadFile_sChunk*)((char*)((cLocaleFile_loadFile_sChunk*)mpStringTableData) + size);
-    if (strncmp(((cLocaleFile_loadFile_sChunk*)mpHashTableHeader), str_LOCT, 4) != 0) {
-        (*(cLocaleFile_loadFile_sChunk**)&mpHashTableHeader) = 0;
+    mpHashTableHeader = mpStringTableData + size;
+    if (strncmp(mpHashTableHeader, str_LOCT, 4) != 0) {
+        mpHashTableHeader = 0;
         return;
     }
     size = ((cLocaleFile_loadFile_sChunk*)mpHashTableHeader)->size;
-    (*(cLocaleFile_loadFile_sEnt**)&mpHashTableData) = (cLocaleFile_loadFile_sEnt*)((char*)((cLocaleFile_loadFile_sChunk*)mpHashTableHeader) + size);
+    mpHashTableData = (tHashEntry*)(mpHashTableHeader + size);
     for (i = 0; i < ((int)mNumEntries); i++) {
-        ((cLocaleFile_loadFile_sEnt*)mpHashTableData)[i].f4 = (int)cLocaleFile_getStringByIndex_2(this,
-                ((cLocaleFile_loadFile_sEnt*)mpHashTableData)[i].f4);
+        mpHashTableData[i].mID = (unsigned int)cLocaleFile_getStringByIndex_2(this, mpHashTableData[i].mID);
     }
 }
 #endif

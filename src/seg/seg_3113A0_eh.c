@@ -75,9 +75,14 @@ void __empty(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", new_eh_context);
 #ifdef SKIP_ASM
-extern int *new_eh_context_alloc(int) __asm__("malloc");
+/* [L] libgcc2.c new_eh_context: the context and the top element of its handler chain in one allocation. */
+struct eh_full_context {
+    struct eh_context c;
+    void *top_elt[2];
+};
+extern struct eh_full_context *new_eh_context_alloc(int) __asm__("malloc");
 extern void __terminate(void);
-extern void memset(int *, int, int);
+extern void memset(void *, int, int);
 /**
  * Allocates and clears a new EH context with its own top element for the handler chain.
  *
@@ -87,20 +92,20 @@ extern void memset(int *, int, int);
  *
  * @return the context
  */
-int *new_eh_context(void) {
-    int *fullContext = new_eh_context_alloc(0x18);
-    if (!fullContext)
+struct eh_context *new_eh_context(void) {
+    struct eh_full_context *ehfc = new_eh_context_alloc(sizeof *ehfc);
+    if (!ehfc)
         __terminate();
-    memset(fullContext, 0, 0x18);
-    fullContext[1] = (int)(fullContext + 4);
-    return fullContext;
+    memset(ehfc, 0, sizeof *ehfc);
+    ehfc->c.dynamic_handler_chain = ehfc->top_elt;
+    return &ehfc->c;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_context);
 #ifdef SKIP_ASM
-extern int (*get_eh_context[])(void);
+extern struct eh_context *(*get_eh_context[])(void);
 /**
  * Calls the EH-context getter get_eh_context and leaves its result as this function's result.
  *
@@ -122,22 +127,23 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_info);
  *
  * @return the address of the context's info word
  */
-int *__get_eh_info(void) {
-    return (int *)get_eh_context[0]() + 2;
+void **__get_eh_info(void) {
+    struct eh_context *eh = get_eh_context[0]();
+    return &eh->info;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", eh_context_initialize);
 #ifdef SKIP_ASM
-extern int eh_context_static(void);
+extern struct eh_context *eh_context_static(void);
 /**
  * First EH-context getter: switches the getter get_eh_context to eh_context_static and calls it.
  *
  * Without threads there is one static context, so the switch happens on the first call.
  */
 void eh_context_initialize(void) {
-    int (*staticGetter)(void) = eh_context_static;
+    struct eh_context *(*staticGetter)(void) = eh_context_static;
     get_eh_context[0] = staticGetter;
     staticGetter();
 }
@@ -146,8 +152,8 @@ void eh_context_initialize(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", eh_context_static);
 #ifdef SKIP_ASM
-extern int D_0052ADA0[];
-extern char D_0052ADB8[];
+extern struct eh_context D_0052ADA0[];
+extern void *D_0052ADB8[];
 extern int D_0052ADB0[];
 extern void *memset_4104E0(void *, int, int) __asm__("memset");
 /**
@@ -158,13 +164,13 @@ extern void *memset_4104E0(void *, int, int) __asm__("memset");
  *
  * @return the address of D_0052ADA0
  */
-int eh_context_static(void) {
+struct eh_context *eh_context_static(void) {
     if (D_0052ADB0[0] == 0) {
         D_0052ADB0[0] = 1;
-        memset_4104E0(D_0052ADA0, 0, 16);
-        *(char **)(D_0052ADA0 + 1) = D_0052ADB8;
+        memset_4104E0(D_0052ADA0, 0, sizeof D_0052ADA0[0]);
+        D_0052ADA0[0].dynamic_handler_chain = D_0052ADB8;
     }
-    return (int)D_0052ADA0;
+    return D_0052ADA0;
 }
 #endif
 
@@ -178,15 +184,16 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __get_dynamic_handler_chain);
  *
  * @return the address of the chain pointer
  */
-int *__get_dynamic_handler_chain(void) {
-    return (int *)get_eh_context[0]() + 1;
+void ***__get_dynamic_handler_chain(void) {
+    struct eh_context *eh = get_eh_context[0]();
+    return &eh->dynamic_handler_chain;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __sjthrow);
 #ifdef SKIP_ASM
-extern int (*get_eh_context[])(void);
+extern struct eh_context *(*get_eh_context[])(void);
 extern void __terminate(void);
 struct N570 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 void sjthrow_410570(void) __asm__("__sjthrow");
@@ -199,15 +206,18 @@ void sjthrow_410570(void) __asm__("__sjthrow");
  * empty chain it calls __terminate; otherwise it pops the top handler and longjmps into its buffer. Never returns.
  */
 void sjthrow_410570(void) {
+    // ORIGINAL-PTR: libgcc2.c __sjthrow: a dynamic handler chain element is a raw word buffer (the next element at word
+    // 0, the cleanup chain at word 1, the jmpbuf from word 2) that the library reads through casts
+    // (void ***cleanup = (void***)&(*dhc)[1]; func = (void(*)(void*, int))cleanup[0][1]).
     struct N570 node;
-    int *eh;
+    struct eh_context *eh;
     int **pchain;
     int *topHandler;
     int **pcl;
     struct N570 *tempHandler;
-    eh = (int *)get_eh_context[0]();
-    pchain = (int **)&eh[1];
-    topHandler = (int *)eh[1];
+    eh = get_eh_context[0]();
+    pchain = (int **)&eh->dynamic_handler_chain;
+    topHandler = (int *)eh->dynamic_handler_chain;
     pcl = (int **)&topHandler[1];
     if (topHandler[1] != 0) {
         node.next = topHandler;
@@ -228,7 +238,7 @@ void sjthrow_410570(void) {
             __terminate();
         }
     }
-    if (eh[2] == 0 || ((int *)*pchain)[0] == 0)
+    if (eh->info == 0 || ((int *)*pchain)[0] == 0)
         __terminate();
     {
         int *target = *pchain;
@@ -242,7 +252,7 @@ __asm__(".globl D_00410628\n\t.type D_00410628,@function\n\tD_00410628 = __sjthr
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __sjpopnthrow);
 #ifdef SKIP_ASM
-extern int (*get_eh_context[])(void);
+extern struct eh_context *(*get_eh_context[])(void);
 extern int __sjthrow(void) __attribute__((noreturn));
 struct N6E8 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 /**
@@ -254,15 +264,18 @@ struct N6E8 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
  * @return never returns
  */
 int __sjpopnthrow(void) {
+    // ORIGINAL-PTR: libgcc2.c __sjpopnthrow: a dynamic handler chain element is a raw word buffer (the next element at
+    // word 0, the cleanup chain at word 1, the jmpbuf from word 2) that the library reads through casts
+    // (void ***cleanup = (void***)&(*dhc)[1]; func = (void(*)(void*, int))cleanup[0][1]).
     struct N6E8 node;
-    int *eh;
+    struct eh_context *eh;
     int *topHandler;
     int **pchain;
     int **pcl;
     struct N6E8 *tempHandler;
-    eh = (int *)get_eh_context[0]();
-    pchain = (int **)&eh[1];
-    topHandler = (int *)eh[1];
+    eh = get_eh_context[0]();
+    pchain = (int **)&eh->dynamic_handler_chain;
+    topHandler = (int *)eh->dynamic_handler_chain;
     pcl = (int **)&topHandler[1];
     if (topHandler[1] != 0) {
         node.next = topHandler;
@@ -292,18 +305,18 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __eh_rtime_match);
 /**
  * Asks the current exception's match function whether it matches a runtime type.
  *
- * Reads the info record through __get_eh_info; without a match function (its word 0) it returns 0, otherwise the
- * function's result (info, @p rtime, 0) as 1 or 0.
+ * Reads the info record through __get_eh_info; without a match function (match_function) it returns 0, otherwise
+ * the function's result (info, @p rtime, 0) as 1 or 0.
  *
  * @param rtime  the runtime type to test
  * @return 1 on a match, else 0
  */
-int __eh_rtime_match(int rtime) {
-    int *info = *(int **)__get_eh_info();
-    int (*fn)(int *, int, int) = (int (*)(int *, int, int))info[0];
-    if (fn == 0)
+int __eh_rtime_match(void *rtime) {
+    __eh_info *info = *__get_eh_info();
+    __eh_matcher matcher = info->match_function;
+    if (matcher == 0)
         return 0;
-    return fn(info, rtime, 0) != 0;
+    return matcher(info, rtime, 0) != 0;
 }
 #endif
 
@@ -348,19 +361,20 @@ INCLUDE_ASM("seg/seg_3113A0_eh", old_find_exception_handler);
  * @param tab  the table, or 0
  * @return the handler address, or 0
  */
-int old_find_exception_handler(unsigned pc, struct old_exception_table *tab) {
+void *old_find_exception_handler(void *pc, old_exception_table *tab) {
     int best, i;
     if (tab) {
         best = -1;
-        for (i = 0; ((unsigned int)tab[i].start_region) != 0xFFFFFFFF; i++) {
-            if (pc >= ((unsigned int)tab[i].start_region) && pc < ((unsigned int)tab[i].end_region)) {
-                if (best == -1 || (((unsigned int)tab[best].end_region) >= ((unsigned int)tab[i].end_region) && ((unsigned int)tab[best].start_region) <= ((unsigned int)tab[i].start_region)))
+        for (i = 0; tab[i].start_region != (void *)-1; i++) {
+            if (pc >= tab[i].start_region && pc < tab[i].end_region) {
+                if (best == -1
+                    || (tab[best].end_region >= tab[i].end_region && tab[best].start_region <= tab[i].start_region))
                     best = i;
-            } else if (best >= 0 && pc < ((unsigned int)tab[i].start_region))
+            } else if (best >= 0 && pc < tab[i].start_region)
                 break;
         }
         if (best != -1)
-            return ((int)tab[best].exception_handler);
+            return tab[best].exception_handler;
     }
     return 0;
 }
@@ -384,33 +398,35 @@ INCLUDE_ASM("seg/seg_3113A0_eh", find_exception_handler);
  * @param out  receives 1 when only a cleanup was found, 0 for a real handler
  * @return the handler address, or 0
  */
-int find_exception_handler(unsigned pc, int obj, struct __eh_info *ctx, int flag, int *out) {
-    int retval = 0;
+void *find_exception_handler(void *pc, exception_descriptor *obj, __eh_info *ctx, int flag, int *out) {
+    // ORIGINAL-PTR: libgcc2.c find_exception_handler: on a rethrow pc is the region table entry to rethrow out of
+    // (pos = ((exception_table *) pc) - tab; pc = ((exception_table *) pc)->end_region - 1).
+    void *retval = 0;
     *out = 1;
     if (obj != 0) {
         int idx = 0;
-        struct exception_table *tbl = (struct exception_table *)(obj + 8);
+        exception_table *tbl = &obj->table[0];
         if (flag) {
-            idx = ((int)pc - (int)tbl) >> 4;
-            pc = ((unsigned *)pc)[1] - 1;
-            if (((unsigned int)tbl[idx].start_region) != 0xFFFFFFFF)
+            idx = (exception_table *)pc - tbl;
+            pc = ((exception_table *)pc)->end_region - 1;
+            if (tbl[idx].start_region != (void *)-1)
                 idx++;
         } else {
-            pc = pc - 1;
+            pc--;
         }
-        for (; ((unsigned int)tbl[idx].start_region) != 0xFFFFFFFF; idx++) {
-            if (pc >= ((unsigned int)tbl[idx].start_region) && pc < ((unsigned int)tbl[idx].end_region)) {
-                if (((int)tbl[idx].match_info)) {
-                    if (((int (*)(struct C410930*, int, int))ctx->match_function)) {
-                        if (((int (*)(struct C410930*, int, int))ctx->match_function)(ctx, ((int)tbl[idx].match_info), obj)) {
+        for (; tbl[idx].start_region != (void *)-1; idx++) {
+            if (pc >= tbl[idx].start_region && pc < tbl[idx].end_region) {
+                if (tbl[idx].match_info) {
+                    if (ctx->match_function) {
+                        if (ctx->match_function(ctx, tbl[idx].match_info, obj)) {
                             if (retval == 0)
-                                retval = ((int)tbl[idx].exception_handler);
+                                retval = tbl[idx].exception_handler;
                             *out = 0;
                             break;
                         }
                     }
                 } else if (retval == 0) {
-                    retval = ((int)tbl[idx].exception_handler);
+                    retval = tbl[idx].exception_handler;
                 }
             }
         }
@@ -422,7 +438,6 @@ int find_exception_handler(unsigned pc, int obj, struct __eh_info *ctx, int flag
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", get_reg_addr);
 #ifdef SKIP_ASM
-struct S410A78 { int base; char pad[0x14]; long e[0x50]; unsigned short n; short pad2; signed char kind[1]; };
 extern int abort(void);
 /**
  * Returns the address where a frame saved a register.
@@ -435,23 +450,24 @@ extern int abort(void);
  * @param z  the callee's frame state (unused)
  * @return the save address
  */
-int get_reg_addr(int idx, struct S410A78 *udata, int z) {
-    if (udata->kind[idx] == 2) {
+long long *get_reg_addr(int idx, frame_state *udata, frame_state *z) {
+    // word_type is a quadword here: next_stack_level and throw_helper read the save slot with lq.
+    // ORIGINAL-PTR: libgcc2.c get_reg_addr: return (word_type *)(udata->cfa + udata->reg_or_offset[reg]).
+    if (udata->saved[idx] == REG_SAVED_REG) {
         do {
-            idx = (int)udata->e[idx];
-        } while (udata->kind[idx] == 2);
+            idx = (int)udata->reg_or_offset[idx];
+        } while (udata->saved[idx] == REG_SAVED_REG);
     }
-    if (udata->kind[idx] == 1)
-        return udata->base + (int)udata->e[idx];
-    return abort();
+    if (udata->saved[idx] == REG_SAVED_OFFSET)
+        return (long long *)(udata->cfa + udata->reg_or_offset[idx]);
+    abort();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", copy_reg);
 #ifdef SKIP_ASM
-extern int get_reg_addr();
-extern int func_0041605C(int, int, int);
+extern void *func_0041605C(void *, const void *, int);
 /**
  * Copies a register's saved value from one frame's save slot to another's.
  *
@@ -463,9 +479,9 @@ extern int func_0041605C(int, int, int);
  * @param targetUdata  the frame to copy to
  * @return func_0041605C's result
  */
-int copy_reg(int reg, int udata, int targetUdata) {
-    int x = get_reg_addr(reg, udata, 0);
-    int y = get_reg_addr(reg, targetUdata, 0);
+void *copy_reg(int reg, frame_state *udata, frame_state *targetUdata) {
+    long long *x = get_reg_addr(reg, udata, 0);
+    long long *y = get_reg_addr(reg, targetUdata, 0);
     int k;
     k = reg < 31 ? 16 : (reg <= 63 ? 4 : 8);
     return func_0041605C(y, x, k);
@@ -475,8 +491,7 @@ int copy_reg(int reg, int udata, int targetUdata) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", next_stack_level);
 #ifdef SKIP_ASM
-extern int *__frame_state_for();
-extern long long *next_stack_level_idx() __asm__("get_reg_addr");
+extern frame_state *__frame_state_for(void *, frame_state *);
 /**
  * Computes the frame state of the caller of a frame.
  *
@@ -489,20 +504,22 @@ extern long long *next_stack_level_idx() __asm__("get_reg_addr");
  * @param callerBuf  the buffer for the caller's state
  * @return the caller's frame state, or 0
  */
-int *next_stack_level(int framePc, int *udata, int callerBuf) {
-    int *callerUdata = __frame_state_for(framePc, callerBuf);
+frame_state *next_stack_level(void *framePc, frame_state *udata, frame_state *callerBuf) {
+    // ORIGINAL-PTR: libgcc2.c next_stack_level: caller_udata->cfa = get_reg (caller_udata->cfa_reg, udata, 0) stores
+    // a saved register word as the CFA, and caller_udata->cfa += caller_udata->cfa_offset.
+    frame_state *callerUdata = __frame_state_for(framePc, callerBuf);
     unsigned short i;
     if (callerUdata == 0)
         return 0;
-    i = *(unsigned short *)((char *)callerUdata + 0x298);
-    if (*((char *)udata + i + 0x29C) != 0)
+    i = callerUdata->cfa_reg;
+    if (udata->saved[i] != REG_UNSAVED)
         {
-            long long cfaValue = *next_stack_level_idx(i, udata, 0);
-            callerUdata[0] = (int)cfaValue;
+            long long cfaValue = *get_reg_addr(i, udata, 0);
+            callerUdata->cfa = (void *)(int)cfaValue;
         }
     else
-        callerUdata[0] = udata[0];
-    callerUdata[0] = callerUdata[0] + callerUdata[2];
+        callerUdata->cfa = udata->cfa;
+    callerUdata->cfa = callerUdata->cfa + callerUdata->cfa_offset;
     return callerUdata;
 }
 #endif
@@ -518,50 +535,45 @@ void __unwinding_cleanup(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", throw_helper);
 #ifdef SKIP_ASM
-/* frame.h frame_state: cfa, eh_ptr, cfa_offset, args_size, reg_or_offset[], cfa_reg, retaddr_column (idx), saved[]
-   (kind) */
-struct F410C18 { int f0; unsigned *p; long cfa_offset; long args_size; long reg_or_offset[0x50]; unsigned short cfa_reg;
-    unsigned short idx; signed char kind[0x50]; } __attribute__((aligned(8)));
 extern void __terminate(void);
 extern void __unwinding_cleanup(void);
-extern struct F410C18 *f_b80_410C18(int, struct F410C18 *, struct frame_state *) __asm__("next_stack_level");
-extern long long *f_a78_410C18(int, struct F410C18 *, struct frame_state *) __asm__("get_reg_addr");
-extern void f_b00_410C18(int, struct F410C18 *, struct frame_state *) __asm__("copy_reg");
-extern int f_930_410C18(int, int, int, int, int *) __asm__("find_exception_handler");
-extern int f_858_410C18(int, int) __asm__("old_find_exception_handler");
 /* libgcc2.c: without INCOMING_REGNO (MIPS) no register lives in a register window */
-static inline int in_reg_window_410C18(int reg, struct F410C18 *udata) { return 0; }
-int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **pout) __asm__("throw_helper");
+static inline int in_reg_window_410C18(int reg, frame_state *udata) { return 0; }
+void *unwind_410C18(struct eh_context *eh, void *pc, frame_state *buf, frame_state **pout) __asm__("throw_helper");
 /**
  * Finds the handler for the exception being thrown and unwinds the saved registers to its frame.
  *
  * Walks the callers' frames from @p pc (next_stack_level). Each frame's table is searched: from the context's rethrow
- * entry (word 3, cleared afterwards) on a rethrow, as a new-format table (runtime id 0xFFFFFFFE, find_exception_handler) or an
- * old one (old_find_exception_handler). The first cleanup-only match is remembered and the walk goes on; a real handler stops it.
- * With only cleanups it uses the remembered one and calls __unwinding_cleanup; with nothing it calls __terminate
- * (terminate). The handler goes into the context's word 0.
+ * entry (table_index, cleared afterwards) on a rethrow, as a new-format table (runtime id -2,
+ * find_exception_handler) or an old one (old_find_exception_handler). The first cleanup-only match is remembered and
+ * the walk goes on; a real handler stops it. With only cleanups it uses the remembered one and calls
+ * __unwinding_cleanup; with nothing it calls __terminate (terminate). The handler goes into the context's
+ * handler_label.
  *
  * When the handler is not in the throwing frame it walks again from @p pc, copying every register each frame saved into
  * @p buf (copy_reg), and at the end the return-address register when that was saved in another register. *@p pout
  * receives the state of the frame the handler's frame called (@p buf when no unwinding was needed).
  *
- * @param info  the EH context
+ * @param eh  the EH context
  * @param pc  the throw address (return address - 1)
  * @param buf  the thrower's frame state; receives the unwound registers
  * @param pout  in: a frame-state buffer to work in; out: the frame state below the handler
  * @return the handler address
  */
-int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **pout) {
-    struct frame_state first;
-    struct frame_state save;
-    struct F410C18 *cur;
-    struct F410C18 *calleeFrame;
-    struct frame_state *prev;
+void *unwind_410C18(struct eh_context *eh, void *pc, frame_state *buf, frame_state **pout) {
+    // ORIGINAL-PTR: libgcc2.c get_return_addr, which throw_helper steps with: the return address is a saved register
+    // word, (void *)(ptr_type)get_reg (udata->retaddr_column, udata, sub_udata).
+    frame_state first;
+    frame_state save;
+    frame_state *cur;
+    frame_state *calleeFrame;
+    frame_state *prev;
     int flag;
-    int pc0, sres, spc, have2, have;
-    int result = 0;
-    int regs = info[2];
-    int fl3 = info[3] != 0;
+    void *pc0, *sres, *spc;
+    int have2, have;
+    void *result = 0;
+    __eh_info *regs = eh->info;
+    int fl3 = eh->table_index != 0;
     have2 = 0;
     have = 0;
     pc0 = pc;
@@ -570,30 +582,30 @@ int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **p
     prev = &first;
     for (;;) {
         calleeFrame = cur;
-        cur = f_b80_410C18(pc, calleeFrame, prev);
-        prev = (struct frame_state *)calleeFrame;
+        cur = next_stack_level(pc, calleeFrame, prev);
+        prev = calleeFrame;
         if (cur == 0)
             break;
         {
             int newEhModel;
-            if (cur->p == 0)
+            if (cur->eh_ptr == 0)
                 newEhModel = 0;
             else
-                newEhModel = *cur->p == 0xFFFFFFFE;
+                newEhModel = ((exception_descriptor *)cur->eh_ptr)->runtime_id_field == (void *)-2;
             if (fl3) {
                 fl3 = 0;
-                result = f_930_410C18(info[3], (int)cur->p, regs, 1, &flag);
-                info[3] = 0;
+                result = find_exception_handler(eh->table_index, cur->eh_ptr, regs, 1, &flag);
+                eh->table_index = 0;
             } else if (newEhModel) {
-                result = f_930_410C18(pc, (int)cur->p, regs, 0, &flag);
+                result = find_exception_handler(pc, cur->eh_ptr, regs, 0, &flag);
             } else {
-                result = f_858_410C18(pc, (int)cur->p);
+                result = old_find_exception_handler(pc, cur->eh_ptr);
             }
         }
         if (result != 0) {
             if (flag != 0) {
                 if (have == 0) {
-                    save = *(struct frame_state *)cur;
+                    save = *cur;
                     spc = pc;
                     sres = result;
                     have = 1;
@@ -605,12 +617,12 @@ int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **p
             }
         }
         {
-            long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct frame_state *)calleeFrame);
-            pc = (int)returnAddr - 1;
+            long long returnAddr = *get_reg_addr(cur->retaddr_column, cur, calleeFrame);
+            pc = (void *)(int)returnAddr - 1;
         }
     }
     if (have) {
-        cur = (struct F410C18 *)&save;
+        cur = &save;
         result = sres;
         pc = spc;
         if (have2)
@@ -618,37 +630,38 @@ int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **p
     }
     if (result == 0)
         __terminate();
-    *info = result;
+    eh->handler_label = result;
     {
-        int end = pc;
+        void *end = pc;
         if (end == pc0) {
-            cur = (struct F410C18 *)buf;
+            cur = buf;
         } else {
             int i;
-            int stop = end;
+            void *stop = end;
             pc = pc0;
-            *cur = *(struct F410C18 *)buf;
+            *cur = *buf;
             while (pc != stop) {
                 calleeFrame = cur;
-                cur = f_b80_410C18(pc, calleeFrame, (struct frame_state *)prev);
-                prev = (struct frame_state *)calleeFrame;
+                cur = next_stack_level(pc, calleeFrame, prev);
+                prev = calleeFrame;
                 for (i = 0; i < 79; i++) {
-                    if (i != cur->idx && cur->kind[i] != 0) {
-                        if (in_reg_window_410C18(i, cur) && cur->kind[cur->idx] == 2 && cur->reg_or_offset[cur->idx] == i)
+                    if (i != cur->retaddr_column && cur->saved[i] != REG_UNSAVED) {
+                        if (in_reg_window_410C18(i, cur) && cur->saved[cur->retaddr_column] == REG_SAVED_REG
+                            && cur->reg_or_offset[cur->retaddr_column] == i)
                             continue;
-                        f_b00_410C18(i, cur, buf);
+                        copy_reg(i, cur, buf);
                     }
                 }
                 {
-                    long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct frame_state *)calleeFrame);
-                    pc = (int)returnAddr - 1;
+                    long long returnAddr = *get_reg_addr(cur->retaddr_column, cur, calleeFrame);
+                    pc = (void *)(int)returnAddr - 1;
                 }
             }
             /* update the return address register saved in a register (REG_SAVED_REG) by the last frame unwound */
-            if (cur->kind[cur->idx] == 2) {
-                i = cur->reg_or_offset[cur->idx];
+            if (cur->saved[cur->retaddr_column] == REG_SAVED_REG) {
+                i = cur->reg_or_offset[cur->retaddr_column];
                 if (in_reg_window_410C18(i, cur))
-                    f_b00_410C18(i, cur, buf);
+                    copy_reg(i, cur, buf);
             }
         }
         *pout = cur;
@@ -661,45 +674,44 @@ int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **p
 INCLUDE_ASM("seg/seg_3113A0_eh", __throw);
 #ifdef SKIP_ASM
 extern void __terminate(void);
-extern struct frame_state *get_410F48(void *, void *) __asm__("__frame_state_for");
-extern void *throw_helper(void *, int, void *, void *);
 /**
  * Throws the current exception: finds its handler and jumps there with the registers restored.
  *
- * Gets the EH context from the getter get_eh_context and calls __terminate when no exception is active (word 2 is 0).
+ * Gets the EH context from the getter get_eh_context and calls __terminate when no exception is active (info is 0).
  * Gets its own frame state (__frame_state_for; terminate when missing) with the CFA, copies it and passes its return
  * address - 1 to throw_helper. __builtin_eh_return then restores the handler frame's registers, moves the stack by the
  * difference of the two CFAs and jumps to the handler. Never returns. The C++ throw helpers of seg_313800_exception
  * call it.
  */
 void __throw(void) {
-    struct frame_state ctx0;
-    struct frame_state buf;
-    struct frame_state *frameState;
-    int *info;
-    struct frame_state *pb;
-    void **pa;
+    frame_state ctx0;
+    frame_state buf;
+    frame_state *frameState;
+    struct eh_context *eh;
+    frame_state *pb;
+    frame_state **pa;
     void *pc;
     __builtin_unwind_init();
-    info = (int *)get_eh_context[0]();
+    eh = get_eh_context[0]();
     pb = &buf;
     frameState = &ctx0;
-    if (info[2] == 0) {
+    // Retail tests info with a word load: a pointer-typed test (if (!eh->info)) schedules the code differently.
+    if (*(int *)&eh->info == 0) {
         __terminate();
-        pa = (void **)&frameState;
+        pa = &frameState;
     } else {
-        pa = (void **)&frameState;
+        pa = &frameState;
     }
 lbl:
-    pc = (void *)&&lbl;
-    frameState = get_410F48(pc, (void *)frameState);
+    pc = &&lbl;
+    frameState = __frame_state_for(pc, frameState);
     if (frameState == 0)
         __terminate();
-    *(void **)frameState = __builtin_dwarf_cfa();
+    frameState->cfa = __builtin_dwarf_cfa();
     buf = *frameState;
     {
-        void *handlerAddr = throw_helper(info, (int)__builtin_return_address(0) - 1, pb, pa);
-        __builtin_eh_return(info, *(int *)frameState - *(int *)pb, handlerAddr);
+        void *handlerAddr = unwind_410C18(eh, __builtin_return_address(0) - 1, pb, pa);
+        __builtin_eh_return(eh, frameState->cfa - pb->cfa, handlerAddr);
     }
 }
 __asm__(".globl D_004110B8\n\t.type D_004110B8,@function\n\tD_004110B8 = __throw + 0x170\n");
@@ -709,42 +721,41 @@ __asm__(".globl D_004110B8\n\t.type D_004110B8,@function\n\tD_004110B8 = __throw
 INCLUDE_ASM("seg/seg_3113A0_eh", __rethrow);
 #ifdef SKIP_ASM
 extern void __terminate(void);
-extern struct frame_state *get_411128(void *, void *) __asm__("__frame_state_for");
-extern void *throw_helper(void *, int, void *, void *);
 /**
  * Rethrows the current exception from a given exception-table entry.
  *
- * Like __throw, but first stores @p val in the context's rethrow index (word 3), so throw_helper starts its
+ * Like __throw, but first stores @p val in the context's rethrow index (table_index), so throw_helper starts its
  * search after that region. Never returns.
  *
  * @param val  the table entry to rethrow out of
  */
-void __rethrow(int val) {
-    struct frame_state ctx0;
-    struct frame_state buf;
-    struct frame_state *frameState;
-    int *info;
-    struct frame_state *pb;
-    void **pa;
+void __rethrow(void *val) {
+    frame_state ctx0;
+    frame_state buf;
+    frame_state *frameState;
+    struct eh_context *eh;
+    frame_state *pb;
+    frame_state **pa;
     void *pc;
     __builtin_unwind_init();
-    info = (int *)get_eh_context[0]();
+    eh = get_eh_context[0]();
     pb = &buf;
     frameState = &ctx0;
-    if (info[2] == 0)
+    // Retail tests info with a word load, as in __throw.
+    if (*(int *)&eh->info == 0)
         __terminate();
-    info[3] = val;
-    pa = (void **)&frameState;
+    eh->table_index = val;
+    pa = &frameState;
 lbl:
-    pc = (void *)&&lbl;
-    frameState = get_411128(pc, (void *)frameState);
+    pc = &&lbl;
+    frameState = __frame_state_for(pc, frameState);
     if (frameState == 0)
         __terminate();
-    *(void **)frameState = __builtin_dwarf_cfa();
+    frameState->cfa = __builtin_dwarf_cfa();
     buf = *frameState;
     {
-        void *handlerAddr = throw_helper(info, (int)__builtin_return_address(0) - 1, pb, pa);
-        __builtin_eh_return(info, *(int *)frameState - *(int *)pb, handlerAddr);
+        void *handlerAddr = unwind_410C18(eh, __builtin_return_address(0) - 1, pb, pa);
+        __builtin_eh_return(eh, frameState->cfa - pb->cfa, handlerAddr);
     }
 }
 __asm__(".globl D_004112A0\n\t.type D_004112A0,@function\n\tD_004112A0 = __rethrow + 0x178\n");

@@ -43,6 +43,17 @@ typedef struct frame_state
 #define REG_SAVED_OFFSET 1
 #define REG_SAVED_REG 2
 
+/* [L] eh-common.h: the per-thread EH state (one static context in this single-threaded build). */
+struct eh_context
+{
+  void *handler_label;              /* 0x0 [L]; [U] throw_helper stores the handler it found */
+  void **dynamic_handler_chain;     /* 0x4 [L]; [U] __sjthrow / __sjpopnthrow; new_eh_context, eh_context_static
+                                       point it at a two-word top element */
+  void *info;                       /* 0x8 [L] the language's exception info; [U] __throw / __sjthrow: 0 = none
+                                       active */
+  void *table_index;                /* 0xC [L] the table entry to rethrow from; [U] __rethrow stores it */
+};
+
 /* [L] eh-common.h. */
 typedef struct old_exception_table
 {

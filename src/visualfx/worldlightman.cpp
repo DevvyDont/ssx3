@@ -265,7 +265,7 @@ cIrradiance* cWorldLightMan::getRealTimeLights(tInstanceRecord* obj, int force)
     if (!found) {
         reload = 1;
         moved = 1;
-        if ((int)obj->m_pActiveNode != 0) {
+        if (obj->m_pActiveNode != 0) {
             t4Matrix meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
@@ -273,7 +273,7 @@ cIrradiance* cWorldLightMan::getRealTimeLights(tInstanceRecord* obj, int force)
             pos = ObjPos_5400(obj);
         }
     } else if (force) {
-        if ((int)obj->m_pActiveNode != 0) {
+        if (obj->m_pActiveNode != 0) {
             t4Matrix meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
@@ -690,9 +690,9 @@ extern "C" bool cWorldLightMan_CalcLightDist(cWorldLightMan* self, cWorldLightMa
         tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
-    float dx = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).x - point->x;
-    float dy = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).y - point->y;
-    float dz = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).z - point->z;
+    float dx = light->m_fvWorldPos[0] - point->x;
+    float dy = light->m_fvWorldPos[1] - point->y;
+    float dz = light->m_fvWorldPos[2] - point->z;
     float distSq = dx * dx + dy * dy + dz * dz;
     float dist;
     float inv;
@@ -708,7 +708,7 @@ extern "C" bool cWorldLightMan_CalcLightDist(cWorldLightMan* self, cWorldLightMa
         dist = 1.0f;
     }
     if (outDot != 0) {
-        *outDot = -(dx * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).x + dy * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).y + dz * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).z) * inv;
+        *outDot = -(dx * light->m_fvDirection[0] + dy * light->m_fvDirection[1] + dz * light->m_fvDirection[2]) * inv;
     }
     *outDist = dist;
     *outInvDist = inv;
@@ -965,11 +965,11 @@ void cCheatFX::update()
     updateState();
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        (*(signed char*)&m_cheatState) = 0;
+        m_cheatState.m_state = 0;
     }
-    if ((*(signed char*)&m_cheatState) == tCheatState::kCheat_On) {
+    if (m_cheatState.m_state == tCheatState::kCheat_On) {
         mRider->mUberLevel = eUS_UltraUber;
-        mRider->mAllowNaturalAir = ((*(unsigned char*)&m_cheatState.m_misc) >> 1) & 1;
+        mRider->mAllowNaturalAir = (m_cheatState.m_misc >> 1) & 1;
         mRider->BoostPowerBar = 1.0f;
         mRider->mUberTimer = 60.0f;
         mRider->mPowerUpTrickTimer = 60.0f;
@@ -994,29 +994,29 @@ void cCheatFX::update()
     if (!(0.0f < curRider->mBoostStrength)) {
         return;
     }
-    float len = len6518((*(t4Vector*)&curRider->mVelocity));
+    float len = len6518(curRider->mVelocity);
     if (len < curRider->mBoostMaxSpeed && len != 0.0f) {
-        (*(t4Vector*)&curRider->mVelocity) = norm6518((*(t4Vector*)&curRider->mVelocity));
-        scaleEq6518((*(t4Vector*)&mRider->mVelocity),
+        curRider->mVelocity = norm6518(curRider->mVelocity);
+        scaleEq6518(mRider->mVelocity,
                 mRider->mBoostMaxSpeed * mRider->mCheatSpeedLerp + len * (1.0f - mRider->mCheatSpeedLerp));
-        len = len6518((*(t4Vector*)&mRider->mVelocity));
+        len = len6518(mRider->mVelocity);
     }
     curRider = (mRider);
     if (curRider->mCheatSteerAlign == 0.0f) {
         return;
     }
-    if (!(0.0010000000474974513f < len6518((*(t4Vector*)&curRider->mGroundForward)))) {
+    if (!(0.0010000000474974513f < len6518(curRider->mGroundForward))) {
         return;
     }
-    if (!(9.999999747378752e-05f < len6518((*(t4Vector*)&curRider->mVelocity)))) {
+    if (!(9.999999747378752e-05f < len6518(curRider->mVelocity))) {
         return;
     }
-    (*(t4Vector*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(t4Vector*)&curRider->mGroundForward)),
+    curRider->mVelocity = add6518(scale6518(norm6518(curRider->mGroundForward),
             len * mRider->mCheatSteerAlign),
-                     scale6518(norm6518((*(t4Vector*)&mRider->mVelocity)), len * (1.0f - mRider->mCheatSteerAlign)));
+                     scale6518(norm6518(mRider->mVelocity), len * (1.0f - mRider->mCheatSteerAlign)));
     curRider = (mRider);
-    if ((*(t4Vector*)&curRider->mVelocity).x < 0.0f && (*(t4Vector*)&curRider->mVelocity).x >= 0.0f) {
-        (*(t4Vector*)&curRider->mVelocity) = t4vect_Origin;
+    if (curRider->mVelocity.x < 0.0f && curRider->mVelocity.x >= 0.0f) {
+        curRider->mVelocity = t4vect_Origin;
     }
 }
 #endif
@@ -1057,17 +1057,17 @@ void cCheatFX::updateState()
     int cheatInput = getInput();
     clearInput();
     if (cheatInput == 0) {
-        (*(unsigned char*)&m_cheatState.m_misc) &= ~1;
+        m_cheatState.m_misc &= ~1;
         return;
     }
-    if ((*(unsigned char*)&m_cheatState.m_misc) & 1) {
+    if (m_cheatState.m_misc & 1) {
         return;
     }
-    (*(unsigned char*)&m_cheatState.m_misc) |= 1;
-    switch ((*(signed char*)&m_cheatState)) {
+    m_cheatState.m_misc |= 1;
+    switch (m_cheatState.m_state) {
     case tCheatState::kCheat_Failed:
         if (cheatInput & kCheatBit_Handplant) {
-            (*(signed char*)&m_cheatState) = tCheatState::kCheat_Entering;
+            m_cheatState.m_state = tCheatState::kCheat_Entering;
             m_cheatState.m_count = 0;
             m_cheatState.m_index = 0;
             m_cheatState.m_misc = 0;
@@ -1075,18 +1075,18 @@ void cCheatFX::updateState()
         break;
     case tCheatState::kCheat_Entering:
         if (cheatInput & kCheatBit_Boost) {
-            (*(signed char*)&m_cheatState.m_count)++;
+            m_cheatState.m_count++;
         } else if (cheatInput & kCheatBit_Jump) {
-            if ((*(signed char*)&m_cheatState.m_count) == cCheatFX_m_cheatStateEnterCounts[(signed char)(*(unsigned char*)&m_cheatState.m_index)]) {
+            if (m_cheatState.m_count == cCheatFX_m_cheatStateEnterCounts[(signed char)m_cheatState.m_index]) {
                 m_cheatState.m_count = 0;
-                (*(unsigned char*)&m_cheatState.m_index)++;
-                if ((*(unsigned char*)&m_cheatState.m_index) == tCheatState::kCheatCodeSteps) {
+                m_cheatState.m_index++;
+                if (m_cheatState.m_index == tCheatState::kCheatCodeSteps) {
                     m_cheatState.m_index = 0;
                     m_cheatState.m_count = 0;
-                    (*(signed char*)&m_cheatState) = tCheatState::kCheat_On;
+                    m_cheatState.m_state = tCheatState::kCheat_On;
                 }
             } else {
-                (*(signed char*)&m_cheatState) = tCheatState::kCheat_Failed;
+                m_cheatState.m_state = tCheatState::kCheat_Failed;
             }
         }
         break;
@@ -1094,7 +1094,7 @@ void cCheatFX::updateState()
         if (cheatInput == (kCheatBit_Jump | kCheatBit_Handplant)) {
             cCheatFX_m_resetStates = 8;
         } else if (cheatInput & kCheatBit_Handplant) {
-            (*(unsigned char*)&m_cheatState.m_misc) ^= 2;
+            m_cheatState.m_misc ^= 2;
         }
         break;
     }
@@ -1153,13 +1153,13 @@ void cCheatFX::setCheatInput(int type)
 {
     switch (type) {
     case kCheatInput_Boost:
-        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Boost;
+        m_cheatState.m_misc |= kCheatBit_Boost;
         break;
     case kCheatInput_Jump:
-        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Jump;
+        m_cheatState.m_misc |= kCheatBit_Jump;
         break;
     case kCheatInput_Handplant:
-        *(unsigned char*)&m_cheatState.m_misc |= kCheatBit_Handplant;
+        m_cheatState.m_misc |= kCheatBit_Handplant;
         break;
     }
 }
@@ -1175,7 +1175,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_clearInput);
  */
 void cCheatFX::clearInput()
 {
-    unsigned char* flagByte = (unsigned char*)(&m_cheatState.m_misc);
+    unsigned char* flagByte = &m_cheatState.m_misc;
     *flagByte &= 0x8f;
 }
 #endif
@@ -1192,7 +1192,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_getInput);
  */
 int cCheatFX::getInput()
 {
-    return *(unsigned char*)&m_cheatState.m_misc & 0x70;
+    return m_cheatState.m_misc & 0x70;
 }
 #endif
 

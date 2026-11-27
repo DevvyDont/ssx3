@@ -154,10 +154,10 @@ void cBoardTrailFX::reset()
     State = 2;
     BufLen = 0;
     BufHead = 0;
-    (*(int*)&CurAlpha) = 0;
-    (*(int*)&CurDepth) = 0;
-    (*(int*)&CurHeight) = 0;
-    (*(int*)&LightSide) = 0;
+    CurAlpha = 0.0f;
+    CurDepth = 0.0f;
+    CurHeight = 0.0f;
+    LightSide = 0.0f;
     LastCen = t4vect_Origin;
     LastVel = t4vect_Zero;
     LastSide = t4vect_Zero;
@@ -1259,13 +1259,6 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_FindTVParameters);
 #ifdef SKIP_ASM
-struct sBTState {
-    int mode;
-    float a;
-    float b;
-    float c;
-    float d;
-};
 
 
 
@@ -1280,21 +1273,21 @@ void cCutSceneTransitionMan::FindTVParameters()
 {
     cCutSceneTransitionMan* transMan = this;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    (*(sBTState*)&transMan->mRegularTVFormat) = *(sBTState*)obj->GetTVDisplayFormat();
+    transMan->mRegularTVFormat = *obj->GetTVDisplayFormat();
     float xAspectAngle = 0.75f;
     float yAspectAngle = 0.6299999952316284f;
-    if ((*(sBTState*)&transMan->mRegularTVFormat).mode == GM_ANIMORPHIC) {
-        (*(sBTState*)&transMan->mCutSceneTVFormat).d = yAspectAngle;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = GM_ANIMORPHIC;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).b = 1.0f;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.0f;
+    if (transMan->mRegularTVFormat.mDisplayFormat == GM_ANIMORPHIC) {
+        transMan->mCutSceneTVFormat.mfYAspectAdjust = yAspectAngle;
+        transMan->mCutSceneTVFormat.mDisplayFormat = GM_ANIMORPHIC;
+        transMan->mCutSceneTVFormat.mfTVYScale = 1.0f;
+        transMan->mCutSceneTVFormat.mfXAspectAdjust = xAspectAngle;
+        transMan->mCutSceneTVFormat.mfTVYOffset = 0.0f;
     } else {
-        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = GM_WIDESCREEN;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.125f;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).b = xAspectAngle;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
-        (*(sBTState*)&transMan->mCutSceneTVFormat).d = yAspectAngle;
+        transMan->mCutSceneTVFormat.mDisplayFormat = GM_WIDESCREEN;
+        transMan->mCutSceneTVFormat.mfTVYOffset = 0.125f;
+        transMan->mCutSceneTVFormat.mfTVYScale = xAspectAngle;
+        transMan->mCutSceneTVFormat.mfXAspectAdjust = xAspectAngle;
+        transMan->mCutSceneTVFormat.mfYAspectAdjust = yAspectAngle;
     }
 }
 #endif
@@ -1666,7 +1659,7 @@ extern float gUWidth;
 extern float gVStart;
 extern float gVHeight;
 
-extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
+extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, const tARGB* color, float f);
 
 /**
  * Draws the fade transition: a full-screen (640x480) rectangle in the fade colour with its alpha scaled by @p amount.
@@ -1678,8 +1671,8 @@ extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, fl
  */
 void cFade_TObj::Draw(float amount)
 {
-    sBTRect4 color = *(sBTRect4*)&mColour;
-    color.x = ((sBTRect4*)(&mColour))->x * amount;
+    tARGB color = mColour;
+    color.A = mColour.A * amount;
     sBTRect4 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
@@ -1700,10 +1693,6 @@ INCLUDE_ASM("visualfx/boardtrailfx", cWipe_TObj_cWipe_TObj);
 void cTransitionObj_cTransitionObj(void* self);
 extern void* cWipe_TObj_vtbl[];
 
-struct cWipe_TObj_cWipe_TObj_sVec4 {
-    float x, y, z, w;
-};
-
 
 /**
  * Constructs a wipe transition object with a colour and a horizontal and vertical direction.
@@ -1717,12 +1706,13 @@ struct cWipe_TObj_cWipe_TObj_sVec4 {
  * @param verticalDir  vertical direction: -1, 0 or 1
  * @return @p self
  */
-extern "C" cWipe_TObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
+extern "C" cWipe_TObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, const tARGB& colour, int horizontalDir,
+                                             int verticalDir)
 {
-    cWipe_TObj_cWipe_TObj_sVec4 vecCopy = colour;
+    tARGB vecCopy = colour;
     cTransitionObj_cTransitionObj(self);
     self->mVtbl = cWipe_TObj_vtbl;
-    (*(cWipe_TObj_cWipe_TObj_sVec4*)&self->mColour) = vecCopy;
+    self->mColour = vecCopy;
     self->mHDir = horizontalDir;
     self->mVDir = verticalDir;
     return (self);
@@ -1738,7 +1728,7 @@ extern float gUWidth;
 extern float gVStart;
 extern float gVEnd;
 extern float gVHeight;
-extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
+extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, const tARGB* color, float f);
 
 /**
  * Draws the wipe transition: a full-screen rectangle in the wipe colour slid in from the side by @p amount.
@@ -1789,7 +1779,7 @@ void cWipe_TObj::Draw(float amount)
     rect.y = vStart;
     rect.z = uw;
     rect.w = vh;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&mColour), 0.0f);
+    func_002EB938(&pos, &rect, &mColour, 0.0f);
 }
 #endif
 
@@ -1831,7 +1821,6 @@ unsigned int BXrand();
 void* cTransitionObj_cTransitionObj_r(void* self) __asm__("cTransitionObj_cTransitionObj__FPv");
 extern void* cCircle_TObj_vtbl[];
 
-struct sBtRectBE20 { float x, y, w, h; };
 
 /**
  * Constructs a circle transition object with a colour and a random circle centre.
@@ -1843,11 +1832,11 @@ struct sBtRectBE20 { float x, y, w, h; };
  * @param rect  the colour (alpha first)
  * @return @p self
  */
-extern "C" void* cCircle_TObj_cCircle_TObj(cCircle_TObj* self, sBtRectBE20 rect)
+extern "C" void* cCircle_TObj_cCircle_TObj(cCircle_TObj* self, tARGB rect)
 {
     cTransitionObj_cTransitionObj_r(self);
     *(void***)self = cCircle_TObj_vtbl;
-    *(sBtRectBE20*)&self->mScreenColour = rect;
+    self->mScreenColour = rect;
     unsigned int randX = BXrand() % 1000;
     float* outX = (float*)(&self->mOriginX);
     *outX = (float)randX * 0.64000004529953f;
@@ -1914,7 +1903,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCircle_TObj_Draw);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
+extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, const tARGB* color, float f);
 
 extern float gUStart;
 
@@ -1978,7 +1967,7 @@ void cCircle_TObj::Draw(float amount)
     rect.x = gUStart;
     rect.y = gVStart;
     rect.w = gVHeight;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&mScreenColour), 0.0f);
+    func_002EB938(&pos, &rect, &mScreenColour, 0.0f);
     float w = 640.0f - x1;
     pos.x = x1;
     pos.y = 0.0f;
@@ -1988,7 +1977,7 @@ void cCircle_TObj::Draw(float amount)
     rect.y = gVStart;
     rect.z = gUStart + gUWidth * w * 0.0015625000232830644f;
     rect.w = gVHeight;
-    func_002EB938(&pos, &rect, (sBTRect4*)(&mScreenColour), 0.0f);
+    func_002EB938(&pos, &rect, &mScreenColour, 0.0f);
 
     float ys[40];
     float xs[40];

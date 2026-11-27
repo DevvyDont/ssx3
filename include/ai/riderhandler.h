@@ -58,9 +58,10 @@ struct tCheatState {
     // cheat on when m_index reaches it.
     enum { kCheatCodeSteps = 9 };
     char m_state;           // 0x0 [O] eCheatState; [U] lb/sb (cCheatFX_update, cCheatFX_updateState)
-    char m_index;           // 0x1 [O]; [U] lb/lbu/sb
+    unsigned char m_index;  // 0x1 [O] char; [U] lbu/sb, compared unsigned with kCheatCodeSteps (cCheatFX_updateState)
     char m_count;           // 0x2 [O]; [U] lb/lbu/sb
-    char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput cCheatFX_setCheatInput, cCheatFX_clearInput, cCheatFX_getInput)
+    unsigned char m_misc;   // 0x3 [O] char; [U] lbu/sb only (cCheatFX_setCheatInput, cCheatFX_clearInput,
+                            //      cCheatFX_getInput, cCheatFX_update's srl)
 };
 
 CHECK_OFFSET(tCheatState, m_state, 0x0);

@@ -176,7 +176,7 @@ struct cAI {
     void UpdateGroupAI() __asm__("cAI_UpdateGroupAI");
     void UpdateAggression() __asm__("cAI_UpdateAggression");
     void UpdateRankingPlacement() __asm__("cAI_UpdateRankingPlacement");
-    int ridersOnPath(int value) __asm__("cAI_ridersOnPath");
+    int ridersOnPath(cAIPath* value) __asm__("cAI_ridersOnPath");
     int aiRidersOnPath(cAIPath* path) __asm__("cAI_aiRidersOnPath");
     cDangerMan* getDangerMan() __asm__("cAI_getDangerMan");
     int getNumRiders() __asm__("cAI_getNumRiders");

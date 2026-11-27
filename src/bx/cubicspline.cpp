@@ -16,6 +16,7 @@ struct sCubicSplineFlags {
     unsigned int Loaded : 1;
     unsigned int LoadingIndex : 8;
     unsigned int NumSplines : 8;
+    unsigned int LastEvaluatedIndex : 8;
 };
 
 struct sCubicSpline {
@@ -243,7 +244,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
         ((float*)self->data)[i * 5 + 4] = x[i];
     }
     self->MaxX = x[n];
-    *(unsigned int*)&self->flags &= 0xF807FFFF;
+    self->flags.LastEvaluatedIndex = 0;
 }
 #endif
 
@@ -419,8 +420,8 @@ void malloc_init_state(void* vself)
     }
     self->mmap_threshold = 0x40000;
     self->trim_threshold = 0x8000;
-    *(int*)&self->morecore_properties |= 1;
-    *(int*)self = (*(int*)self & 3) | 0x50;
+    self->morecore_properties |= 1;
+    self->max_fast = (self->max_fast & 3) | 0x50;
     self->top = (malloc_chunk*)(&self->bins[0]);
     self->top_pad = 0;
     self->n_mmaps_max = 0;
@@ -433,7 +434,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_sYSMALLOc);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 sYSMALLOc()
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" unsigned int cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr); // PORT: 64-bit long param
+extern "C" void* cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr); // PORT: 64-bit long param
 extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes);
 struct sMState_31EEE8;
 extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, malloc_state* av);
@@ -590,7 +591,7 @@ void* cDynamicMemMan::sYSMALLOc(unsigned int nb, malloc_state* av)
 //100%
 INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_sYSTRIm);
 #ifdef SKIP_ASM
-extern "C" unsigned int cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr); // PORT: 64-bit long param
+extern "C" void* cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr); // PORT: 64-bit long param
 // PORT: libgcc 64-bit helpers called by name so the relocations match
 // (__divdi3 / __muldi3 in the retail ELF's unnamed libgcc copy).
 extern "C" long __divdi3(long a, long b);
@@ -1884,9 +1885,9 @@ void cDynamicMemMan::init(unsigned int base, unsigned int size)
     MallocState = (malloc_state*)start;
     HeapSize = (size - (start - base)) & 0xFFFFFFF0;
     MEM_fill((void*)start, 0, 888);
-    *(unsigned int*)&Heap += 0x380;
+    Heap += 0x380;
     HeapSize -= 0x380;
-    CoreTop = (char*)((unsigned int)Heap);
+    CoreTop = Heap;
 }
 #endif
 
@@ -1903,19 +1904,19 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmorecore);
  * @param incr  the number of bytes to add (negative to give back)
  * @return the old top (new top when shrinking), or -1 (0xFFFFFFFF)
  */
-unsigned int cDynamicMemMan::dlmorecore(long incr)
+void* cDynamicMemMan::dlmorecore(long incr)
 {
     if (incr >= 0) {
-        unsigned int old = (unsigned int)CoreTop;
-        unsigned int top = old + incr;
-        if (top <= (unsigned int)Heap + HeapSize) {
-            CoreTop = (char*)top;
+        char* old = CoreTop;
+        char* top = old + incr;
+        if (top <= Heap + HeapSize) {
+            CoreTop = top;
             return old;
         }
     } else {
-        return *(unsigned int*)&CoreTop += incr;
+        return CoreTop += incr;
     }
-    return 0xFFFFFFFF;
+    return (void*)0xFFFFFFFF;
 }
 #endif
 
@@ -1986,10 +1987,10 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_isBlock);
  * @param addr  the address to test
  * @return true when inside
  */
-bool cDynamicMemMan::isBlock(unsigned int addr)
+bool cDynamicMemMan::isBlock(const void* addr)
 {
-    unsigned int base = (unsigned int)Heap;
-    unsigned int end = base + HeapSize;
+    const char* base = Heap;
+    const char* end = base + HeapSize;
     return base < addr && addr < end;
 }
 #endif
@@ -2046,7 +2047,7 @@ void* TMemContainer8_TMemContainer8(void* vself)
         cursor += 8;
         next += 8;
     }
-    *(int*)&self->m_blockList[255] = 0;
+    self->m_blockList[255].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2073,7 +2074,7 @@ void* TMemContainer16_TMemContainer16(void* vself)
         cursor += 0x10;
         next += 0x10;
     }
-    *(int*)&self->m_blockList[511] = 0;
+    self->m_blockList[511].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2100,7 +2101,7 @@ void* TMemContainer32_TMemContainer32(void* vself)
         cursor += 0x20;
         next += 0x20;
     }
-    *(int*)&self->m_blockList[767] = 0;
+    self->m_blockList[767].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2128,7 +2129,7 @@ void* TMemContainer64_TMemContainer64(void* vself)
         cursor += 0x40;
         next += 0x40;
     }
-    *(int*)&self->m_blockList[3199] = 0;
+    self->m_blockList[3199].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2156,7 +2157,7 @@ void* TMemContainer128_TMemContainer128(void* vself)
         cursor += 0x80;
         next += 0x80;
     }
-    *(int*)&self->m_blockList[1199] = 0;
+    self->m_blockList[1199].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2184,7 +2185,7 @@ void* TMemContainer256_TMemContainer256(void* vself)
         cursor += 0x100;
         next += 0x100;
     }
-    *(int*)&self->m_blockList[511] = 0;
+    self->m_blockList[511].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2212,7 +2213,7 @@ void* TMemContainer512_TMemContainer512(void* vself)
         cursor += 0x200;
         next += 0x200;
     }
-    *(int*)&self->m_blockList[255] = 0;
+    self->m_blockList[255].m_pNext = 0;
     return ((void*)self);
 }
 #endif
@@ -2351,7 +2352,7 @@ extern "C" void* cMemBlockMan_alloc_0408(unsigned int size, unsigned int align) 
 static inline void* reserveBlock_0408(TMemBlock256** blockptr)
 {
     TMemBlock256* block = *blockptr;
-    *blockptr = block->unk_00;
+    *blockptr = block->m_pNext;
     return block;
 }
 
@@ -2368,7 +2369,7 @@ void* TMemContainer256_alloc(TMemContainer256* self, unsigned int align) __asm__
 void* TMemContainer256::alloc(unsigned int align)
 {
     if (m_freeList != 0) {
-        return reserveBlock_0408(&(*(TMemBlock256**)&m_freeList));
+        return reserveBlock_0408(&m_freeList);
     }
     return cMemBlockMan_alloc_0408(260, align);
 }
@@ -2385,7 +2386,7 @@ extern "C" void* cMemBlockMan_alloc_0448(unsigned int size, unsigned int align) 
 static inline void* reserveBlock_0448(TMemBlock512** blockptr)
 {
     TMemBlock512* block = *blockptr;
-    *blockptr = block->unk_00;
+    *blockptr = block->m_pNext;
     return block;
 }
 
@@ -2402,7 +2403,7 @@ void* TMemContainer512_alloc(TMemContainer512* self, unsigned int align) __asm__
 void* TMemContainer512::alloc(unsigned int align)
 {
     if (m_freeList != 0) {
-        return reserveBlock_0448(&(*(TMemBlock512**)&m_freeList));
+        return reserveBlock_0448(&m_freeList);
     }
     return cMemBlockMan_alloc_0448(516, align);
 }

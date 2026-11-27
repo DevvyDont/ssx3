@@ -164,7 +164,7 @@ struct cScriptAlgorithm : public cCameraAlgorithm {
 
     // Methods bound to their retail symbols by asm labels.
     void setScriptObj(int val) __asm__("cScriptAlgorithm_setScriptObj__FPvi");
-    int getScriptObj() __asm__("cScriptAlgorithm_getScriptObj__FPv");
+    cScriptObjCamera* getScriptObj() __asm__("cScriptAlgorithm_getScriptObj__FPv"); // [O] returns cScriptObjCamera*
 };
 
 CHECK_OFFSET(cScriptAlgorithm, ScriptObj, 0x14);

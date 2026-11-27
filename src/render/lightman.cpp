@@ -57,12 +57,12 @@ INCLUDE_ASM("render/lightman", func_0038DC28);
  *
  * No caller.
  */
-extern "C" void func_0038DC28(void* self)
+extern "C" void func_0038DC28(unsigned int* self)
 {
-    *(unsigned int*)((char*)self + 0x0) = 0xFFFFFFFF;
-    *(unsigned int*)((char*)self + 0x4) = 0xFFFFFFFF;
-    *(unsigned int*)((char*)self + 0x8) = 0xFFFFFFFF;
-    *(unsigned int*)((char*)self + 0xC) = 0xFFFFFFFF;
+    self[0] = 0xFFFFFFFF;
+    self[1] = 0xFFFFFFFF;
+    self[2] = 0xFFFFFFFF;
+    self[3] = 0xFFFFFFFF;
 }
 #endif
 //100%
@@ -200,7 +200,8 @@ void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
         col.b = lights[i].m_fvColor[2];
         switch (lights[i].m_eLightType) {
         case eNEWLight_Directional: {
-            sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
+            sV3_DC70 dir = Normalize_DC70(lights[i].m_fvDirection[0], lights[i].m_fvDirection[1],
+                                          lights[i].m_fvDirection[2]);
             cLightInst_CreateDirectional_DC70(obj, &col, &dir, lights[i].m_fIntensity);
             break;
         }
@@ -209,7 +210,8 @@ void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
             break;
         case eNEWLight_Spot: {
             char* pos = ((char*)&lights[i].m_fvWorldPos[0]);
-            sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
+            sV3_DC70 dir = Normalize_DC70(lights[i].m_fvDirection[0], lights[i].m_fvDirection[1],
+                                          lights[i].m_fvDirection[2]);
             cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].unk_05C), lights[i].m_fIntensity, lights[i].m_cDecayRate, (float)lights[i].m_cDropOff);
             break;
         }
@@ -1020,20 +1022,22 @@ extern char* D_004A5B84_F300 __asm__("D_004A5B84");
  */
 extern "C" void func_0038F300(cPS2ScratchPad* self, int mode)
 {
+    // ORIGINAL-PTR: the EE scratchpad RAM (SPR) sits at the fixed address 0x70000000 (EE User's Manual); the buffers
+    // are carved out of it from that base.
     int i;
     if (self->unk_00 == mode) {
         return;
     }
     self->unk_00 = mode;
     switch (mode) {
-    case cPS2ScratchPad::kLayout_1x1024: self->unk_04 = 1; break;
-    case cPS2ScratchPad::kLayout_2x512: self->unk_04 = 2; break;
-    case cPS2ScratchPad::kLayout_2x448: self->unk_04 = 2; break;
-    case cPS2ScratchPad::kLayout_2x384: self->unk_04 = 2; break;
-    case cPS2ScratchPad::kLayout_2x256: self->unk_04 = 2; break;
+    case cPS2ScratchPad::kLayout_1x1024: self->mNumBlocks = 1; break;
+    case cPS2ScratchPad::kLayout_2x512: self->mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x448: self->mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x384: self->mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x256: self->mNumBlocks = 2; break;
     case cPS2ScratchPad::kLayout_3x320:
     case cPS2ScratchPad::kLayout_3x256:
-        self->unk_04 = 3;
+        self->mNumBlocks = 3;
         break;
     }
     self->unk_08 = 0;
@@ -1049,12 +1053,12 @@ extern "C" void func_0038F300(cPS2ScratchPad* self, int mode)
         self->mBlockSize = 0x100;
         break;
     }
-    for (i = 0; i < self->unk_04; i++) {
+    for (i = 0; i < self->mNumBlocks; i++) {
         self->mBlockAddr[i] = (char*)0x70000000 + self->mBlockSize * i * 16;
-        ((int*)&self->unk_20[0])[i] = 0;
+        ((int*)&self->mBlockMainAddr[0])[i] = 0;
         self->unk_2C[i] = 0;
     }
-    int total = self->mBlockSize * self->unk_04;
+    int total = self->mBlockSize * self->mNumBlocks;
     if (total < 0x400) {
         D_004A5B84_F300 = (char*)0x70000000 + total * 16;
     } else {
@@ -1157,23 +1161,13 @@ extern "C" unsigned int func_0038F560(cPS2ScratchPad* self, int flags)
 //100%
 INCLUDE_ASM("render/lightman", func_0038F598);
 #ifdef SKIP_ASM
-struct sLightDma_F598 {
-    int field_0x0;
-    int count;              // 0x4
-    int next;               // 0x8
-    int cur;                // 0xC
-    int defSize;            // 0x10
-    int result[3];          // 0x14
-    unsigned int addr[3];   // 0x20
-};
-
 extern "C" void func_0038F768(void);
-extern "C" void func_0038F6A8(void* self);
+extern "C" void func_0038F6A8(cPS2ScratchPad* self);
 extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
 
 // PORT: the unit declares func_0038F598 as `void (sLmStack*, int, int, int)`; the body takes
 // (self, size, flags) and returns the buffer address, so it is bound by asm label.
-unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags) __asm__("func_0038F598");
+unsigned int func_0038F598_impl(cPS2ScratchPad* self, int size, int flags) __asm__("func_0038F598");
 
 /**
  * Copies @p size bytes of the ring's current scratchpad buffer to its main-memory address by fromSPR DMA and moves to
@@ -1187,24 +1181,23 @@ unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags) __asm
  * @param flags  func_00371DD8's wait flags
  * @return the main-memory address just past the copied data
  */
-unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
+unsigned int func_0038F598_impl(cPS2ScratchPad* self, int size, int flags)
 {
     if (size == 0) {
         if (flags & 6) {
             func_0038F768();
         }
-        unsigned int retAddr = self->addr[self->cur];
+        unsigned int retAddr = self->mBlockMainAddr[self->mDMABlock];
         func_0038F6A8(self);
         return retAddr;
     }
     size >>= 4;
     // PORT: EE sync (memory barrier before kicking the DMA)
     __asm__ __volatile__("sync");
-    unsigned int* addrs = self->addr;
-    func_00371DD8(self->result[self->cur], *(unsigned int*)((char*)addrs + (self->cur << 2)), size, flags);
-    int cur = self->cur;
-    unsigned int retAddr = *(unsigned int*)((char*)addrs + (cur << 2)) + (size << 4);
-    self->cur = (cur + 1) % self->count;
+    func_00371DD8((int)self->mBlockAddr[self->mDMABlock], self->mBlockMainAddr[self->mDMABlock], size, flags);
+    int cur = self->mDMABlock;
+    unsigned int retAddr = self->mBlockMainAddr[cur] + (size << 4);
+    self->mDMABlock = (cur + 1) % self->mNumBlocks;
     return retAddr;
 }
 #endif
@@ -1242,11 +1235,11 @@ extern "C" void func_0038F668(sLmStack* self, int end, int flags)
 INCLUDE_ASM("render/lightman", func_0038F6A8);
 #ifdef SKIP_ASM
 /**
- * Advances the ring's current-buffer index: (+0xC + 1) % the buffer count at +0x4.
+ * Advances the ring's current-buffer index: mDMABlock = (mDMABlock + 1) % mNumBlocks.
  */
-extern "C" void func_0038F6A8(void* self)
+extern "C" void func_0038F6A8(cPS2ScratchPad* self)
 {
-    *(int*)((char*)self + 0xC) = (*(int*)((char*)self + 0xC) + 1) % *(int*)((char*)self + 0x4);
+    self->mDMABlock = (self->mDMABlock + 1) % self->mNumBlocks;
 }
 #endif
 
@@ -1775,7 +1768,7 @@ extern "C" int func_00390198(cTextureMan* self, int w, int height, unsigned char
         int colsTimes64 = cols << 6;
         int sstep = bw * colsTimes64;
         for (j = 0; j < cols; j++) {
-            unsigned char* srcRow = (unsigned char*)((int)src + sstep * i + bw * j);
+            unsigned char* srcRow = src + sstep * i + bw * j;
             unsigned char* bufARow = bufA;
             for (k = 0; k < th; k++) {
                 func_0041605C_0198(bufARow, srcRow, bw);
@@ -1784,7 +1777,7 @@ extern "C" int func_00390198(cTextureMan* self, int w, int height, unsigned char
             }
             func_0038FC48_0198(self, 0x80, 0x40, bufA, bufB);
             int dstep = bs * th2 * cols;
-            unsigned char* dstRow = (unsigned char*)((int)dst + dstep * i + bs * j);
+            unsigned char* dstRow = dst + dstep * i + bs * j;
             unsigned char* bufBRow = bufB;
             for (k = 0; k < th2; k++) {
                 func_0041605C_0198(dstRow, bufBRow, bs);
@@ -1807,10 +1800,6 @@ extern float cScreenTint_m_FillR;
 extern float cScreenTint_m_FillG;
 extern float cScreenTint_m_FillB;
 
-struct sLmEntry_0458 {
-    float v[6];
-};
-
 
 /**
  * Copies the screen-tint colour and fill tweak values into the graphics manager's tint entry for view @p idx.
@@ -1820,15 +1809,15 @@ struct sLmEntry_0458 {
  *
  * @param idx  the view index
  */
-extern "C" void func_00390458(void* self, int idx)
+extern "C" void func_00390458(cPS2GraphicsMan* self, int idx)
 {
-    char* entry = (char*)&((sLmEntry_0458*)&((cPS2GraphicsMan*)self)->unk_6CA4[0][0])[idx];
-    *(float*)(entry + 0x0) = cScreenTint_m_ColourR;
-    *(float*)(entry + 0x4) = cScreenTint_m_ColourG;
-    *(float*)(entry + 0x8) = cScreenTint_m_ColourB;
-    *(float*)(entry + 0xC) = cScreenTint_m_FillR;
-    *(float*)(entry + 0x10) = cScreenTint_m_FillG;
-    *(float*)(entry + 0x14) = cScreenTint_m_FillB;
+    float* entry = self->unk_6CA4[idx];
+    entry[0] = cScreenTint_m_ColourR;
+    entry[1] = cScreenTint_m_ColourG;
+    entry[2] = cScreenTint_m_ColourB;
+    entry[3] = cScreenTint_m_FillR;
+    entry[4] = cScreenTint_m_FillG;
+    entry[5] = cScreenTint_m_FillB;
 }
 #endif
 
@@ -1865,7 +1854,7 @@ extern "C" void func_003904A0(cPS2GraphicsMan* self, int idx, void* pkt, int* ad
     if (cScreenTint_m_OverrideWP != 0) {
         func_00390458(self, idx);
     }
-    float* tint = ((sLmEntry_0458*)&(self)->unk_6CA4[0][0])[idx].v;
+    float* tint = self->unk_6CA4[idx];
     if (tint[0] == 1.0f && tint[1] == 1.0f && tint[2] == 1.0f && tint[3] == 0.0f && tint[4] == 0.0f && tint[5] == 0.0f) {
         return;
     }
@@ -1908,7 +1897,7 @@ INCLUDE_ASM("render/lightman", cScreenTint_update);
 extern int cScreenTint_m_LightningEnable;
 extern int cScreenTint_m_timeTillThunder;
 extern int cScreenTint_m_lightningFrame;
-extern int cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_lightningBrightness;
 extern int cScreenTint_m_FrameId;
 extern float cScreenTint_m_LightningChance;
 extern int cScreenTint_m_LightningFadeIn;
@@ -1966,7 +1955,6 @@ static inline float RandRange_0C60(float lo, float hi)
  *
  * Slot 2 of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
  */
-// PORT: cScreenTint_m_lightningBrightness holds a float (declared int elsewhere in the unit).
 extern "C" void cScreenTint_update()
 {
     if (cScreenTint_m_LightningEnable == 0) {
@@ -1991,25 +1979,29 @@ extern "C" void cScreenTint_update()
     int cur = cScreenTint_m_lightningFrame;
     int fadeInFrames = cScreenTint_m_LightningFadeIn;
     if (cur <= fadeInFrames) {
-        *(float*)&cScreenTint_m_lightningBrightness = ((float)cur / (float)fadeInFrames) * cScreenTint_m_LightningScale;
+        cScreenTint_m_lightningBrightness = ((float)cur / (float)fadeInFrames) * cScreenTint_m_LightningScale;
         cScreenTint_m_redColour = cScreenTint_m_LightningColourR;
         cScreenTint_m_greenColour = cScreenTint_m_LightningColourG;
         cScreenTint_m_blueColour = cScreenTint_m_LightningColourB;
         cScreenTint_m_blendMode = 5;
     } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut) {
-        *(float*)&cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale;
+        cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale;
         cScreenTint_m_redColour = cScreenTint_m_LightningColourR;
         cScreenTint_m_greenColour = cScreenTint_m_LightningColourG;
         cScreenTint_m_blueColour = cScreenTint_m_LightningColourB;
         cScreenTint_m_blendMode = 5;
     } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2) {
-        *(float*)&cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale2;
+        cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale2;
         cScreenTint_m_redColour = cScreenTint_m_LightningColour2R;
         cScreenTint_m_greenColour = cScreenTint_m_LightningColour2G;
         cScreenTint_m_blueColour = cScreenTint_m_LightningColour2B;
         cScreenTint_m_blendMode = 5;
     } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + cScreenTint_m_LightningFadeIn3) {
-        *(float*)&cScreenTint_m_lightningBrightness = (1.0f - ((float)cur - (float)fadeInFrames - (float)cScreenTint_m_LightningFadeOut - (float)cScreenTint_m_LightningFadeIn2) / (float)cScreenTint_m_LightningFadeIn3) * cScreenTint_m_LightningScale3;
+        cScreenTint_m_lightningBrightness = (1.0f - ((float)cur - (float)fadeInFrames
+                                                     - (float)cScreenTint_m_LightningFadeOut
+                                                     - (float)cScreenTint_m_LightningFadeIn2)
+                                                    / (float)cScreenTint_m_LightningFadeIn3)
+                                            * cScreenTint_m_LightningScale3;
         cScreenTint_m_redColour = cScreenTint_m_LightningColour3R;
         cScreenTint_m_greenColour = cScreenTint_m_LightningColour3G;
         cScreenTint_m_blueColour = cScreenTint_m_LightningColour3B;
@@ -2020,7 +2012,7 @@ extern "C" void cScreenTint_update()
         cScreenTint_m_greenColour = cScreenTint_m_ColourG;
         cScreenTint_m_blueColour = cScreenTint_m_ColourB;
         cScreenTint_m_blendMode = 5;
-        *(float*)&cScreenTint_m_lightningBrightness = 0.0f;
+        cScreenTint_m_lightningBrightness = 0.0f;
     }
 }
 #endif
@@ -2030,7 +2022,7 @@ INCLUDE_ASM("render/lightman", DoLightningFlash);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
 extern int cScreenTint_m_lightningFrame;
-extern int cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_lightningBrightness;
 extern float cScreenTint_m_flashDistance;
 extern int cScreenTint_m_timeTillThunder;
 
@@ -2046,7 +2038,7 @@ extern "C" void DoLightningFlash(float flashDistance)
 {
     if (cScreenTint_m_LightningEnable != 0) {
         cScreenTint_m_lightningFrame = 0;
-        cScreenTint_m_lightningBrightness = 0;
+        cScreenTint_m_lightningBrightness = 0.0f;
         cScreenTint_m_flashDistance = flashDistance;
         cScreenTint_m_timeTillThunder = (int)(flashDistance * 0.0018072288949042559f);
     }
@@ -2247,6 +2239,8 @@ extern "C" void func_003912A8(void)
 {
     while (*(volatile int*)0x10008000 & 0x100) {
     }
+    // ORIGINAL-PTR: the DMA tag address register (D0_TADR) takes the chain's address as a 32-bit word (Sony SDK
+    // eeregs.h, DPUT_D0_TADR(u_int)).
     *(volatile int*)0x10008030 = (int)D_0043BD00;
     *(volatile int*)0x10008020 = 0;
     *(volatile int*)0x10008000 = 260;
@@ -2273,6 +2267,8 @@ extern "C" void func_00391360(void)
 {
     while (*(volatile int*)0x10008000 & 0x100) {
     }
+    // ORIGINAL-PTR: the DMA tag address register (D0_TADR) takes the chain's address as a 32-bit word (Sony SDK
+    // eeregs.h, DPUT_D0_TADR(u_int)).
     *(volatile int*)0x10008030 = (int)D_0043CCA0;
     *(volatile int*)0x10008020 = 0;
     *(volatile int*)0x10008000 = 260;
@@ -2443,7 +2439,7 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
  */
 extern "C" cFont* cFont_cFont(cFont* self, const char* name, int flags)
 {
-    (*(int*)&self->MissingGlyph) = 0;
+    self->MissingGlyph = 0;
     (*(t2Vector*)&self->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     (*(t2Vector*)&self->BaseScale[0]) = t2Vector(1.0f, 1.0f);
     (*(t2Vector*)&self->Scale[0]) = (*(t2Vector*)&self->BaseScale[0]);

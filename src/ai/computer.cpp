@@ -182,26 +182,6 @@ struct sApp {
     char* fC0;                  // 0xC0 (ai/ai: p)
 };
 extern sApp* SSXApp_UR __asm__("SSXApp");
-struct sAiTune {
-    char pad0[0xDC];
-    float accel;     // 0xDC
-    float speed;     // 0xE0
-    int boost;       // 0xE4
-};
-
-// cComputer as the difficulty code sees it: the rider at 0x18 read as its AI tuning, the skill values.
-struct sCompSkill {
-    char pad_0x0[0x18];
-    sAiTune* tune;                  // 0x18
-    char pad_0x1C[0xDF8 - 0x1C];
-    float skillA;                   // 0xDF8
-    float skillB;                   // 0xDFC
-    short diff;                     // 0xE00
-    short pad_0xE02;
-    int f4;                         // 0xE04
-    int f8;                         // 0xE08
-};
-
 extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -217,7 +197,6 @@ static inline int ValidOr_UR(int v, int invalid, int def)
     return v;
 }
 
-void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_updateRiderDifficulty");
 /**
  * Sets this computer rider's difficulty values for the race from its AI index (1-5) and the heat number.
  *
@@ -232,55 +211,57 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_upd
  * kPD_Hard (levels 1-2) or kPD_Medium and returns; otherwise locations kLOCATION_ERA5 (+25%) and kLOCATION_CRA3 /
  * kLOCATION_DRA4 (+10%) raise mTrickDifficulty, capped at 1.
  */
-void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
+void cComputer::updateRiderDifficulty()
 {
-    cRider* rider = *(cRider**)((char*)self + 0x18);
+    cRider* rider = RiderHandler.GroundMotion.mRider;
     int mode = *(int*)SSXApp_UR->fC0;
     int aiIndex = rider->getAIIndex();
     int level = ValidOr_UR(aiIndex, -1, 1);
-    self->diff = cComputer_updateRiderPathDifficulty(self, level, mode);
+    mPathDifficulty = cComputer_updateRiderPathDifficulty(this, level, mode);
     if (level == 1 && mode == cGameModeMan::kFinalHeat) {
-        self->f4 = 1;
+        mShouldTakeShortcuts = 1;
     } else {
-        self->f4 = 0;
+        mShouldTakeShortcuts = 0;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_SLOPESTYLE
         || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_PNTSCHALLENGE
         || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_TIMECHALLENGE) {
-        self->f8 = 1;
+        mShouldBeRandom = 1;
     } else {
-        self->f8 = 0;
+        mShouldBeRandom = 0;
     }
-    cComputer_setIndividualRiderDifficulty_UR(self, level, cBENewPlayerInterface_getDifficultyLevel(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace.cGameMode == 0));
+    cComputer_setIndividualRiderDifficulty_UR(this, level,
+            cBENewPlayerInterface_getDifficultyLevel(cBE_getInterface_Fv(cBE_getBE(), 1),
+            cBENewRaceInterface_newRace.cGameMode == 0));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME) {
-        self->diff = cComputer::kPD_Easy;
+        mPathDifficulty = cComputer::kPD_Easy;
     } else if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS) {
-        self->diff = cComputer::kPD_Hard;
+        mPathDifficulty = cComputer::kPD_Hard;
     }
     if ((D_005308D0[0] >> 2) & 1) {
-        self->skillB = 1.0f;
-        self->skillA = 100.0f;
-        self->f4 = 1;
-        self->tune->accel = -100.0f;
-        self->tune->speed = 100.0f;
-        self->tune->boost = 2;
+        mTrickDifficulty = 1.0f;
+        mRiderDifficulty = 100.0f;
+        mShouldTakeShortcuts = 1;
+        RiderHandler.GroundMotion.mRider->mRubberBandBehind = -100.0f;
+        RiderHandler.GroundMotion.mRider->mRubberBandAhead = 100.0f;
+        RiderHandler.GroundMotion.mRider->mGlueStrengthLevel = AI_GLUE_SPEEDUP;
         if (level == 1 || level == 2) {
-            self->diff = cComputer::kPD_Hard;
+            mPathDifficulty = cComputer::kPD_Hard;
         } else {
-            self->diff = cComputer::kPD_Medium;
+            mPathDifficulty = cComputer::kPD_Medium;
         }
         return;
     }
     if (cBENewRaceInterface_getLocationID(iface) == kLOCATION_ERA5) {
-        self->skillB += self->skillB * 0.25f;
+        mTrickDifficulty += mTrickDifficulty * 0.25f;
     } else if (cBENewRaceInterface_getLocationID(iface) == kLOCATION_CRA3
                || cBENewRaceInterface_getLocationID(iface) == kLOCATION_DRA4) {
-        self->skillB += self->skillB * 0.10000000149011612f;
+        mTrickDifficulty += mTrickDifficulty * 0.10000000149011612f;
     }
-    if (self->skillB > 1.0f) {
-        self->skillB = 1.0f;
+    if (mTrickDifficulty > 1.0f) {
+        mTrickDifficulty = 1.0f;
     }
 }
 #endif
@@ -323,8 +304,6 @@ void cComputer::setAttributeLevels()
 }
 #endif
 
-extern "C" void cComputer_updateRiderDifficulty(void*);
-
 //99.29% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
 INCLUDE_ASM("ai/computer", cComputer_initRiderDifficulty);
@@ -334,7 +313,7 @@ INCLUDE_ASM("ai/computer", cComputer_initRiderDifficulty);
  */
 void cComputer::initRiderDifficulty()
 {
-    cComputer_updateRiderDifficulty(this);
+    updateRiderDifficulty();
 }
 #endif
 
@@ -948,7 +927,7 @@ int cComputer::myOpponentIndex()
 //100%
 INCLUDE_ASM("ai/computer", cComputer_isFarBehind);
 #ifdef SKIP_ASM
-extern "C" int cComputer_getRival(cComputer* self);
+extern "C" cRider* cComputer_getRival(cComputer* self);
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -962,11 +941,10 @@ float cRider_getDistanceLeft(void* self);
  */
 bool cComputer::isFarBehind()
 {
-    // PORT: cComputer_getRival returns a pointer as int (unit declaration).
-    int opponent = getRival();
+    cRider* opponent = getRival();
     if (opponent == 0)
         return false;
-    float relDist = cRider_getDistanceLeft((void*)opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
+    float relDist = cRider_getDistanceLeft(opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
     if (relDist < RiderHandler.GroundMotion.mRider->mRubberBandBehind)
         return true;
     return false;
@@ -975,7 +953,7 @@ bool cComputer::isFarBehind()
 //100%
 INCLUDE_ASM("ai/computer", cComputer_isFarAhead);
 #ifdef SKIP_ASM
-extern "C" int cComputer_getRival(cComputer* self);
+extern "C" cRider* cComputer_getRival(cComputer* self);
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -988,11 +966,10 @@ float cRider_getDistanceLeft(void* self);
  */
 bool cComputer::isFarAhead()
 {
-    // PORT: cComputer_getRival returns a pointer as int (unit declaration).
-    int opponent = getRival();
+    cRider* opponent = getRival();
     if (opponent == 0)
         return false;
-    float relDist = cRider_getDistanceLeft((void*)opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
+    float relDist = cRider_getDistanceLeft(opponent) - (RiderHandler.GroundMotion.mRider)->mDistToFinish;
     if (RiderHandler.GroundMotion.mRider->mRubberBandAhead < relDist)
         return true;
     return false;
@@ -1187,16 +1164,14 @@ INCLUDE_ASM("ai/computer", cComputer_getRival);
 /**
  * Returns the computer's opponent rider: SSXApp->Game->AI's Riders[myOpponentIndex()], or 0 when it has none.
  *
- * The C declaration returns the pointer as an int.
- *
  * @return the opponent's cRider, or 0
  */
-int cComputer::getRival()
+cRider* cComputer::getRival()
 {
     int i = myOpponentIndex();
     if (i < 0)
         return 0;
-    return (int)SSXApp->Game->AI->Riders[i];
+    return SSXApp->Game->AI->Riders[i];
 }
 #endif
 
@@ -1223,15 +1198,14 @@ float cRider_getDistanceLeft(void* self);
 float cComputer::setupWarp()
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    // PORT: cComputer_getRival returns a pointer as int (unit declaration).
-    int rival = getRival();
+    cRider* rival = getRival();
     if (rival == 0) return 1.0f;
     cRider* rider = RiderHandler.GroundMotion.mRider;
     if (rider->mGlueStrengthLevel == AI_GLUE_NONE) return 1.0f;
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) return 1.0f;
     if (rider->mDistToFinish < 50000.0f) return 1.0f;
     float warpVal;
-    float relDist = cRider_getDistanceLeft((void*)rival) - RiderHandler.GroundMotion.mRider->mDistToFinish;
+    float relDist = cRider_getDistanceLeft(rival) - RiderHandler.GroundMotion.mRider->mDistToFinish;
     cRider* rider2 = RiderHandler.GroundMotion.mRider;
     float k = rider2->mRubberBandBehind;
     if (relDist < k && (rider2->mGlueStrengthLevel == AI_GLUE_SPEEDUP || rider2->mGlueStrengthLevel == AI_GLUE_ALL))
@@ -1647,7 +1621,7 @@ void cRider::flagEventTrickMultiplier(float value)
 INCLUDE_ASM("ai/computer", cRider_flagEventAddPoints);
 #ifdef SKIP_ASM
 extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
-extern "C" float cRiderMetrix_evAddPoints(int);
+extern "C" float cRiderMetrix_evAddPoints(cRiderMetrix* metrix);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
@@ -1659,7 +1633,7 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
  */
 void cRider::flagEventAddPoints()
 {
-    flagEventBoostPowerUp(0x10, cRiderMetrix_evAddPoints((int)mMetrix));
+    flagEventBoostPowerUp(0x10, cRiderMetrix_evAddPoints(mMetrix));
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 3, this, 1.0f);
 }
 #endif
@@ -1949,7 +1923,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  */
 void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt)
 {
-    sVE_EB30* vt = *(sVE_EB30**)&VPTR_AT(this, sizeof(cRiderState));
+    sVE_EB30* vt = (sVE_EB30*)VPTR_AT(this, sizeof(cRiderState));
     vt[kRiderVt_vibrationBump].fn(vthis(this, vt[kRiderVt_vibrationBump]), evt->Vel * 5.0f);
     float amt = cRiderMetrix_evWipeout(mMetrix, isPunch);
     flagEventBoostPowerUp(1, amt);
@@ -2064,7 +2038,7 @@ void cRider::flagEventWorld(int kind, float amt)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", cRider_flagEventWipeoutRecover);
 #ifdef SKIP_ASM
-extern "C" float cRiderMetrix_evWipeoutRecover(int);
+extern "C" float cRiderMetrix_evWipeoutRecover(cRiderMetrix* metrix);
 extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 
 /**
@@ -2075,11 +2049,11 @@ extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
  */
 void cRider::flagEventWipeoutRecover()
 {
-    flagEventBoostPowerUp(1, cRiderMetrix_evWipeoutRecover((int)mMetrix));
+    flagEventBoostPowerUp(1, cRiderMetrix_evWipeoutRecover(mMetrix));
 }
 #endif
 
-extern "C" void* cRiderMetrix_evMissionStart(int);
+extern "C" void* cRiderMetrix_evMissionStart(cRiderMetrix* metrix);
 
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventMissionStart__FPv);
@@ -2091,7 +2065,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventMissionStart__FPv);
  */
 void* cRider::flagEventMissionStart()
 {
-    return cRiderMetrix_evMissionStart((int)mMetrix);
+    return cRiderMetrix_evMissionStart(mMetrix);
 }
 #endif
 
@@ -2101,7 +2075,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventMissionSuccess);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cRiderMetrix_evMissionSuccess(int, int);
+extern "C" void cRiderMetrix_evMissionSuccess(cRiderMetrix* metrix, int money);
 extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
 
 /**
@@ -2116,7 +2090,7 @@ extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
  */
 void cRider::flagEventMissionSuccess(int peakID, int money)
 {
-    cRiderMetrix_evMissionSuccess((int)mMetrix, money);
+    cRiderMetrix_evMissionSuccess(mMetrix, money);
     cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 13), mAIIndex, peakID);
 }
 #endif
@@ -2127,7 +2101,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventAddCollectible);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cRiderMetrix_evAddCash(int, int);
+extern "C" void cRiderMetrix_evAddCash(cRiderMetrix* metrix, int amount);
 extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
 
 /**
@@ -2141,7 +2115,7 @@ extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
  */
 void cRider::flagEventAddCollectible(int peakID)
 {
-    cRiderMetrix_evAddCash((int)mMetrix, 3);
+    cRiderMetrix_evAddCash(mMetrix, 3);
     cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 13), mAIIndex, peakID);
 }
 #endif
@@ -2167,51 +2141,47 @@ void* cAI::InitGroupAI()
 //100%
 INCLUDE_ASM("ai/computer", cAI_RefreshGroupAI);
 #ifdef SKIP_ASM
-struct sEnt_0010F3B8 { int vis; int val; float dist; int c; int d; int e; int f; int g; int h; };
-struct sRider_0010F3B8 { sEnt_0010F3B8 ent[6]; char pad[0x10]; int fE8; char pad2[0x4D8 - 0xEC]; float f4D8; };
-struct sAI_0010F3B8 { char pad[0x28]; sRider_0010F3B8* riders[20]; int count; };
 extern "C" bool cRider_isLoaded(void*);
 float cRider_getDistanceLeft(void* self);
 
 // PORT: the unit declares this as returning void*; it returns nothing.
-extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self) __asm__("cAI_RefreshGroupAI");
+extern "C" void cAI_RefreshGroupAI_impl(cAI* self) __asm__("cAI_RefreshGroupAI");
 /**
  * Rebuilds every race rider's relation table (mRelations) after the AI's rider list changes.
  *
  * For rider i and slot j it sets mValid when j != i, j is a race rider and cRider_isLoaded() holds for rider
- * i (not j); fills the +0x4 word with rider j's isHuman(); sets mDistance to 1e10 and clears mAngle and the
- * five words after it. It then copies the rider's mDistToFinish to +0x4D8 and sets +0xE8 to -1.
+ * i (not j); fills IsHuman with rider j's isHuman(); sets mDistance to 1e10 and clears mAngle and the
+ * five words after it. It then stores the rider's distance left (cRider_getDistanceLeft) in TotalPathDistance and
+ * sets PrevRanking to -1.
  */
-extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self)
+extern "C" void cAI_RefreshGroupAI_impl(cAI* self)
 {
     int i;
-    for (i = 0; i < self->count; i++)
+    for (i = 0; i < self->NumberOfRidersAllocated; i++)
     {
         int j;
         for (j = 0; j < 6; j++)
         {
-            sEnt_0010F3B8* relation = &self->riders[i]->ent[j];
+            sRiderPair* relation = &self->Riders[i]->mRelations[j];
             int visible = 0;
-            if (i != j && j < self->count)
-                visible = cRider_isLoaded(self->riders[i]) != 0;
-            relation->vis = visible;
-            if (j < self->count)
+            if (i != j && j < self->NumberOfRidersAllocated)
+                visible = cRider_isLoaded(self->Riders[i]) != 0;
+            relation->mValid = visible;
+            if (j < self->NumberOfRidersAllocated)
             {
-                char* otherBeing = (char*)self->riders[j] + 0x6C0;
-                sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)otherBeing)[8];
-                self->riders[i]->ent[j].val = ve->fn(vthis(otherBeing, *ve));
+                self->Riders[i]->mRelations[j].IsHuman = self->Riders[j]->isHuman();
             }
-            self->riders[i]->ent[j].dist = 10000000000.0f;
-            self->riders[i]->ent[j].c = 0;
-            self->riders[i]->ent[j].d = 0;
-            self->riders[i]->ent[j].e = 0;
-            self->riders[i]->ent[j].f = 0;
-            self->riders[i]->ent[j].g = 0;
-            self->riders[i]->ent[j].h = 0;
+            self->Riders[i]->mRelations[j].mDistance = 10000000000.0f;
+            self->Riders[i]->mRelations[j].mAngle = 0.0f;
+            self->Riders[i]->mRelations[j].CollideTick = 0;
+            self->Riders[i]->mRelations[j].OverlapTick = 0;
+            self->Riders[i]->mRelations[j].PunchTick = 0;
+            self->Riders[i]->mRelations[j].mAggressive = 0;
+            self->Riders[i]->mRelations[j].unk_20 = 0;
         }
         int none = -1;
-        self->riders[i]->f4D8 = cRider_getDistanceLeft(self->riders[i]);
-        self->riders[i]->fE8 = none;
+        self->Riders[i]->TotalPathDistance = cRider_getDistanceLeft(self->Riders[i]);
+        self->Riders[i]->PrevRanking = none;
     }
 }
 #endif
@@ -2453,15 +2423,16 @@ INCLUDE_ASM("ai/computer", cAI_ridersOnPath);
  *
  * Goes over the AI's NumberOfRidersAllocated Riders. Nothing in the source calls it.
  *
- * @param value  the value to look for (cComputer_scorePath passes a path pointer to the similar cAI_aiRidersOnPath)
+ * @param value  the path to look for (On Tour cAIPath* path; cComputer_scorePath passes one to the similar
+ *               cAI_aiRidersOnPath)
  * @return the number of matching riders
  */
-int cAI::ridersOnPath(int value)
+int cAI::ridersOnPath(cAIPath* value)
 {
     int count = 0;
     for (int i = 0; i < NumberOfRidersAllocated; i++) {
         cRider* rider = Riders[i];
-        if ((int)rider->AIPath == value) {
+        if (rider->AIPath == value) {
             count++;
         }
     }
@@ -3452,7 +3423,7 @@ void cRiderHandler::readFromReplayFrame(cBxReplayFrame* data)
     GroundMotion.mRider->AIPath = (cAIPath*)cPathSys_getAIPath(gPaths, ids[1]);
     cFocusBox* focusBox = (cFocusBox*)GroundMotion.mRider->mFocusBox;
     if (focusBox != 0) {
-        *focusBox = *(cFocusBox*)&GroundMotion.mRider->mPosition;
+        focusBox->Position = GroundMotion.mRider->mPosition;
     }
     cRiderAnimBase_setupAnimation(GroundMotion.mRider->mRiderAnim, 0);
     cAnimModel_buildSkelMatrices(GroundMotion.mRider->mAnimModel);

@@ -188,24 +188,6 @@ INCLUDE_ASM("object/debouncenode", cConveyorNode_cConveyorNode);
 #ifdef SKIP_ASM
 
 
-struct sFlags_3010 {
-    char pad_0x00[0x8];
-    unsigned int w;
-};
-
-struct sDebounce_3010 {
-    char pad_0x00[0xC];
-    char* vt;               // 0xC
-    char pad_0x10[0x8];
-    sFlags_3010* flags;     // 0x18
-    float f1C;              // 0x1C
-    unsigned char c20[8];   // 0x20
-    char pad_0x28[0x10];
-    t2Vector v38;         // 0x38
-    int f40;
-    int f44;
-};
-
 extern char cConveyorNode_vtbl[];
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 
@@ -222,21 +204,22 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
  * @param desc  conveyor make-data (Vel, UScroll, VScroll, Rotate0..7)
  * @return self
  */
-extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket, void* instRecord, tMakeConveyorData* desc)
+extern "C" void* cConveyorNode_cConveyorNode(cConveyorNode* self, void* bucket, void* instRecord,
+                                             tMakeConveyorData* desc)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 0xF, instRecord);
-    self->vt = cConveyorNode_vtbl;
-    self->f1C = desc->Vel;
+    VPTR_OF(cObjNode, self) = (void**)cConveyorNode_vtbl;
+    self->Vel = desc->Vel;
     t2Vector uvScroll;
     uvScroll.x = desc->UScroll;
     uvScroll.y = desc->VScroll;
-    self->v38 = uvScroll;
-    self->f40 = 0;
-    self->f44 = 0;
+    self->UVScroll = uvScroll;
+    self->UV.x = 0.0f;
+    self->UV.y = 0.0f;
     for (int i = 0; i < 8; i++) {
-        self->c20[i] = ((int*)&desc->Rotate0)[i];
+        self->Rotate[i] = ((int*)&desc->Rotate0)[i];
     }
-    self->flags->w = (self->flags->w & ~2) | 4;
+    self->Instance->m_iFlags = (self->Instance->m_iFlags & ~2u) | 4;
     return self;
 }
 #endif
@@ -549,17 +532,17 @@ struct sDebounceScroll {
  */
 extern "C" void cConveyorNode_update(cConveyorNode* self)
 {
-    self->UV[0] += self->UVScroll[0];
-    self->UV[1] += self->UVScroll[1];
-    if (self->UV[0] > 1.0f) {
-        self->UV[0] -= 1.0f;
-    } else if (self->UV[0] < -1.0f) {
-        self->UV[0] += 1.0f;
+    self->UV.x += self->UVScroll.x;
+    self->UV.y += self->UVScroll.y;
+    if (self->UV.x > 1.0f) {
+        self->UV.x -= 1.0f;
+    } else if (self->UV.x < -1.0f) {
+        self->UV.x += 1.0f;
     }
-    if (self->UV[1] > 1.0f) {
-        self->UV[1] -= 1.0f;
-    } else if (self->UV[1] < -1.0f) {
-        self->UV[1] += 1.0f;
+    if (self->UV.y > 1.0f) {
+        self->UV.y -= 1.0f;
+    } else if (self->UV.y < -1.0f) {
+        self->UV.y += 1.0f;
     }
 }
 #endif
@@ -648,8 +631,8 @@ void cConveyorNode::render()
     }
     t4Matrix xf;
     MatCopy_343588(&xf, &t4mat_Identity);
-    xf.row[3].x = UV[0];
-    xf.row[3].y = UV[1];
+    xf.row[3].x = UV.x;
+    xf.row[3].y = UV.y;
     sVEntry<void>* vt = (sVEntry<void>*)VPTR_OF(cGraphicsMan, gfx);
     ((tRenderModelFn*)vt[96].fn)(vthis(gfx, vt[96]), Instance, 0, &xf, 2);
 }
@@ -863,18 +846,6 @@ struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
 extern void* TheCrowdMan3d_p __asm__("TheCrowdMan3d");
 
-struct sSlot00343A68 {
-    unsigned int id;
-    int value;
-};
-struct sState00343A68 {
-    int f0;
-    unsigned int f4;
-    unsigned int f8;
-    sSlot00343A68 slots[32];
-    char rest[0x1F4 - 0x10C];
-};
-
 /**
  * Constructs the 3D crowd manager: five crowd blocks of 0x1F4 bytes, all empty.
  *
@@ -884,17 +855,17 @@ struct sState00343A68 {
  *
  * @return self
  */
-extern "C" sState00343A68* cCrowdMan3d_cCrowdMan3d(sState00343A68* self)
+extern "C" cCrowdMan3d* cCrowdMan3d_cCrowdMan3d(cCrowdMan3d* self)
 {
-    sState00343A68* crowdBlock = self;
+    tCrowdBlock3d* crowdBlock = self->mBlocks;
     int i;
     for (i = 4; i != -1; i--) {
-        sState00343A68* next = crowdBlock + 1;
-        crowdBlock->f4 = 0xFFFFFFFF;
-        sSlot00343A68* memberSlot = crowdBlock->slots;
+        tCrowdBlock3d* next = crowdBlock + 1;
+        crowdBlock->mModelId = tCrowdBlock3d::kFree;
+        tCrowdMember3d* memberSlot = crowdBlock->mMembers;
         int j;
         for (j = 31; j != -1; j--) {
-            memberSlot->id = 0xFFFFFFFF;
+            memberSlot->mInstanceId = tCrowdBlock3d::kFree;
             memberSlot++;
         }
         func_003442E0((sDebounceState*)crowdBlock);
@@ -902,7 +873,7 @@ extern "C" sState00343A68* cCrowdMan3d_cCrowdMan3d(sState00343A68* self)
     }
     TheCrowdMan3d_p = self;
     for (i = 0; i < 5; i++) {
-        func_003442E0((sDebounceState*)&self[i]);
+        func_003442E0((sDebounceState*)&self->mBlocks[i]);
     }
     return self;
 }
@@ -974,10 +945,6 @@ extern "C" void func_00343BC0(sDebounceBlock* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343C08);
 #ifdef SKIP_ASM
-struct sDebounceElem3C08 {
-    char data[0x1F4];
-};
-
 extern "C" void func_00344898(void* elem, void* arg);
 
 /**
@@ -988,11 +955,11 @@ extern "C" void func_00344898(void* elem, void* arg);
  *
  * @param sectionId  world section id being unloaded
  */
-extern "C" void func_00343C08(sDebounceElem3C08* self, void* sectionId)
+extern "C" void func_00343C08(cCrowdMan3d* self, void* sectionId)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344898(&self[i], sectionId);
+        func_00344898(&self->mBlocks[i], sectionId);
     }
 }
 #endif
@@ -1118,13 +1085,6 @@ extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
 //100%
 INCLUDE_ASM("object/debouncenode", func_003440C8);
 #ifdef SKIP_ASM
-struct sDebounceElem40C8 {
-    int field_0x0;
-    unsigned int field_0x4;
-    unsigned int field_0x8;
-    char pad_0xc[0x1E8];
-};
-
 extern "C" void func_003449F0(void* elem);
 
 /**
@@ -1133,12 +1093,12 @@ extern "C" void func_003449F0(void* elem);
  * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block goes through func_003449F0.
  * Called once per game update for cGame's CrowdMan3d.
  */
-extern "C" void func_003440C8(sDebounceElem40C8* self)
+extern "C" void func_003440C8(cCrowdMan3d* self)
 {
     int i;
-    sDebounceElem40C8* crowdBlock = self;
+    tCrowdBlock3d* crowdBlock = self->mBlocks;
     for (i = 0; i < 5; i++) {
-        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
+        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
             func_003449F0(crowdBlock);
         }
         crowdBlock++;
@@ -1149,13 +1109,6 @@ extern "C" void func_003440C8(sDebounceElem40C8* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344138);
 #ifdef SKIP_ASM
-struct sDebounceElem4138 {
-    int field_0x0;
-    unsigned int field_0x4;
-    unsigned int field_0x8;
-    char pad_0xc[0x1E8];
-};
-
 extern "C" void func_00344E18(void* elem);
 
 /**
@@ -1164,12 +1117,12 @@ extern "C" void func_00344E18(void* elem);
  * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block is drawn by func_00344E18. Called
  * from the game render pass.
  */
-extern "C" void func_00344138(sDebounceElem4138* self)
+extern "C" void func_00344138(cCrowdMan3d* self)
 {
     int i;
-    sDebounceElem4138* crowdBlock = self;
+    tCrowdBlock3d* crowdBlock = self->mBlocks;
     for (i = 0; i < 5; i++) {
-        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
+        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
             func_00344E18(crowdBlock);
         }
         crowdBlock++;
@@ -1183,12 +1136,6 @@ INCLUDE_ASM("object/debouncenode", func_003441A8);
 class cDebounceStream;
 extern "C" void func_00344FC0(void* self, cBxReplayFrame* s);
 
-struct sDebounceElem41A8 {
-    int field_0x0;
-    unsigned int field_0x4;
-    unsigned int field_0x8;
-    char pad_0xc[0x1E8];
-};
 
 
 /**
@@ -1199,13 +1146,13 @@ struct sDebounceElem41A8 {
  *
  * @param replayStream  replay stream to write to
  */
-extern "C" void func_003441A8(sDebounceElem41A8* self, cBxReplayFrame* replayStream)
+extern "C" void func_003441A8(cCrowdMan3d* self, cBxReplayFrame* replayStream)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        replayStream->write((const char*)&self[i].field_0x8, 4);
-        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
-            func_00344FC0(&self[i], replayStream);
+        replayStream->write((const char*)&self->mBlocks[i].mKey, 4);
+        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+            func_00344FC0(&self->mBlocks[i], replayStream);
         }
     }
 }
@@ -1217,12 +1164,6 @@ INCLUDE_ASM("object/debouncenode", func_00344240);
 class cDebounceStream;
 extern "C" void func_00344FF8(void* self, cBxReplayFrame* s);
 
-struct sDebounceElem4240 {
-    int field_0x0;
-    unsigned int field_0x4;
-    unsigned int field_0x8;
-    char pad_0xc[0x1E8];
-};
 
 
 /**
@@ -1233,14 +1174,14 @@ struct sDebounceElem4240 {
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344240(sDebounceElem4240* self, cBxReplayFrame* replayStream)
+extern "C" void func_00344240(cCrowdMan3d* self, cBxReplayFrame* replayStream)
 {
     int i;
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
-        replayStream->read((char*)&self[i].field_0x8, 4);
-        if (self[i].field_0x8 != tCrowdBlock3d::kFree) {
-            func_00344FF8(&self[i], replayStream);
+        replayStream->read((char*)&self->mBlocks[i].mKey, 4);
+        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+            func_00344FF8(&self->mBlocks[i], replayStream);
         }
     }
 }
