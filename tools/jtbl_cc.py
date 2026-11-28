@@ -133,9 +133,14 @@ def retail_dwords() -> dict[str, int]:
     out = {}
     word = r"\s+/\* [0-9A-F]+ [0-9A-F]{8} [0-9A-F]{8} \*/ \.word 0x([0-9A-Fa-f]+)\n"
     for f in (ROOT / "asm/data").glob("*.rodata.s"):
-        for name, lo, hi in re.findall(r"dlabel (D_[0-9A-F]{8})\n" + word + word, f.read_text(errors="replace")):
+        for name, lo, hi in re.findall(r"dlabel (" + DSYM + r")\n" + word + word, f.read_text(errors="replace")):
             out[name] = int(hi, 16) << 32 | int(lo, 16)
     return out
+
+
+# A retail data label: splat's D_XXXXXXXX, or the name config/symbol_addrs.txt gives it (tools/apply_data_names.py
+# rounds name strings and pool constants too). Every match is looked up in the retail data tables below.
+DSYM = r"(?<![\w$.])[A-Za-z_$.][\w$.]*"
 
 
 LI_D = re.compile(r"^(\s*)li\.d\s+(\$\d+),\s*(\S+)\s*$", re.M)
@@ -155,7 +160,7 @@ def repoint_literals(text: str, unit: str) -> tuple[str, list[str]]:
         if not p.exists():
             continue
         vals = retail_dwords()
-        refs = [s for s in re.findall(r"\bld\s+\$\d+, %lo\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")) if s in vals]
+        refs = [s for s in re.findall(r"\bld\s+\$\d+, %lo\((" + DSYM + r")\)", p.read_text(errors="replace")) if s in vals]
         used = set()
 
         def sub(m):
@@ -188,7 +193,7 @@ def retail_strings() -> dict[str, bytes]:
     out = {}
     item = re.compile(r'^\s+/\* [0-9A-F]+ [0-9A-F]{8}(?: [0-9A-F]+)? \*/ \.(asciz|ascii|word|short|half|byte) (.*)$')
     for f in [*(ROOT / "asm/data").glob("*.rodata.s"), *(ROOT / "asm/data").glob("*.sdata.s")]:
-        for name, block in re.findall(r"dlabel (D_[0-9A-F]{8})\n(.*?)enddlabel \1", f.read_text(errors="replace"), re.S):
+        for name, block in re.findall(r"dlabel (" + DSYM + r")\n(.*?)enddlabel \1", f.read_text(errors="replace"), re.S):
             data = b""
             for line in block.split("\n"):
                 m = item.match(line)
@@ -218,7 +223,7 @@ def retail_strings() -> dict[str, bytes]:
 def sdata_names() -> frozenset:
     out = set()
     for f in (ROOT / "asm/data").glob("*.sdata.s"):
-        out.update(re.findall(r"dlabel (D_[0-9A-F]{8})", f.read_text(errors="replace")))
+        out.update(re.findall(r"dlabel (" + DSYM + r")\n", f.read_text(errors="replace")))
     return frozenset(out)
 
 
@@ -252,7 +257,7 @@ def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
         p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
         if not p.exists():
             continue
-        refs = [s for s in dict.fromkeys(x if isinstance(x, str) else (x[0] or x[1]) for x in re.findall(r"%(?:hi|lo)\((D_[0-9A-F]{8})\)|\s\((D_[0-9A-F]{8})\) /\* gp_rel", p.read_text(errors="replace")))
+        refs = [s for s in dict.fromkeys(x if isinstance(x, str) else (x[0] or x[1]) for x in re.findall(r"%(?:hi|lo)\((" + DSYM + r")\)|\s\((" + DSYM + r")\) /\* gp_rel", p.read_text(errors="replace")))
                 if s in strings]
         for label in labels:
             hit = next((s for s in refs if _same_string(defs[label], strings[s])), None)
@@ -301,8 +306,8 @@ def repoint_pool(text: str, unit: str) -> tuple[str, list[str]]:
         p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
         if not p.exists():
             continue
-        named = set(re.findall(r"\bD_[0-9A-F]{8}\b", body))
-        refs = [s for s in dict.fromkeys(re.findall(r"%lo\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")))
+        named = {s for s in re.findall(DSYM, body) if s in data}
+        refs = [s for s in dict.fromkeys(re.findall(r"%lo\((" + DSYM + r")\)", p.read_text(errors="replace")))
                 if s in data and s not in named]
         used = set()
         for label in labels:
