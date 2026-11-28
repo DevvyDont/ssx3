@@ -971,23 +971,25 @@ extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 
-typedef _List_node<online_Event*> sMsgListNode_00269008;
+// LobbyMan::mEventList's node and iterator, and the std::list<online::Event*>::insert(pos, x) that the
+// event-posting functions below inline (SGI STL's code as g++ 2.95 ships it; the three names are ours).
+typedef _List_node<online_Event*> tEventListNode;
 
-struct sMsgListIter_00269008 {
-    sMsgListNode_00269008* node;
-    sMsgListIter_00269008(sMsgListNode_00269008* x) : node(x) {}
-    sMsgListIter_00269008(const sMsgListIter_00269008& x) : node(x.node) {}
+struct tEventListIter {
+    tEventListNode* node;
+    tEventListIter(tEventListNode* x) : node(x) {}
+    tEventListIter(const tEventListIter& x) : node(x.node) {}
 };
 
-static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_00269008 pos, online_Event* const& x)
+static inline tEventListIter EventList_insert(tEventListIter pos, online_Event* const& x)
 {
-    sMsgListNode_00269008* tmp = (sMsgListNode_00269008*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
+    tEventListNode* tmp = (tEventListNode*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
     online_Event** data = &tmp->_M_data;
     if (data != 0)
         *data = x;
     tmp->_M_next = pos.node;
     tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269008*)pos.node->_M_prev)->_M_next = tmp;
+    ((tEventListNode*)pos.node->_M_prev)->_M_next = tmp;
     pos.node->_M_prev = tmp;
     return tmp;
 }
@@ -1013,7 +1015,7 @@ void cSetupMan::handleCharPickEcho(int riderId, int hostState)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_00269008_insert(((sMsgListNode_00269008*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1028,27 +1030,6 @@ extern "C" void cSetupMan_applyMyCharacter(void* self, int a1);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_002690C8;
-
-struct sMsgListIter_002690C8 {
-    sMsgListNode_002690C8* node;
-    sMsgListIter_002690C8(sMsgListNode_002690C8* x) : node(x) {}
-    sMsgListIter_002690C8(const sMsgListIter_002690C8& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690C8 pos, online_Event* const& x)
-{
-    sMsgListNode_002690C8* tmp = (sMsgListNode_002690C8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_002690C8*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host echoing the client's character confirmation: takes the host's state, applies the character and posts
@@ -1071,7 +1052,7 @@ void cSetupMan::handleCharConfirmEcho(int riderId, int hostState)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_002690C8_insert(((sMsgListNode_002690C8*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1086,27 +1067,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269188;
-
-struct sMsgListIter_00269188 {
-    sMsgListNode_00269188* node;
-    sMsgListIter_00269188(sMsgListNode_00269188* x) : node(x) {}
-    sMsgListIter_00269188(const sMsgListIter_00269188& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_00269188 pos, online_Event* const& x)
-{
-    sMsgListNode_00269188* tmp = (sMsgListNode_00269188*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269188*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 
 /**
@@ -1127,7 +1087,7 @@ void cSetupMan::handleWithdrawEcho(int hostState)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_00269188_insert(((sMsgListNode_00269188*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1142,27 +1102,6 @@ extern "C" void cSetupMan_applyOpponentCharacter(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269240;
-
-struct sMsgListIter_00269240 {
-    sMsgListNode_00269240* node;
-    sMsgListIter_00269240(sMsgListNode_00269240* x) : node(x) {}
-    sMsgListIter_00269240(const sMsgListIter_00269240& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_00269240 pos, online_Event* const& x)
-{
-    sMsgListNode_00269240* tmp = (sMsgListNode_00269240*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269240*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host's character pick on the client: takes the host's state, records the opponent's character and posts
@@ -1187,7 +1126,7 @@ void cSetupMan::handleHostCharPick(int riderId, int hostState, void* riderStats)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_00269240_insert(((sMsgListNode_00269240*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1202,27 +1141,6 @@ extern "C" void cSetupMan_applyOpponentCharacter(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269300;
-
-struct sMsgListIter_00269300 {
-    sMsgListNode_00269300* node;
-    sMsgListIter_00269300(sMsgListNode_00269300* x) : node(x) {}
-    sMsgListIter_00269300(const sMsgListIter_00269300& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_00269300 pos, online_Event* const& x)
-{
-    sMsgListNode_00269300* tmp = (sMsgListNode_00269300*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269300*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host's character confirmation on the client: takes the host's state, records the opponent's character and
@@ -1246,7 +1164,7 @@ void cSetupMan::handleHostCharConfirm(int riderId, int hostState)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_00269300_insert(((sMsgListNode_00269300*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1261,27 +1179,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_002693C0;
-
-struct sMsgListIter_002693C0 {
-    sMsgListNode_002693C0* node;
-    sMsgListIter_002693C0(sMsgListNode_002693C0* x) : node(x) {}
-    sMsgListIter_002693C0(const sMsgListIter_002693C0& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693C0 pos, online_Event* const& x)
-{
-    sMsgListNode_002693C0* tmp = (sMsgListNode_002693C0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_002693C0*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 
 /**
@@ -1302,7 +1199,7 @@ void cSetupMan::handleHostWithdraw(int hostState)
     netEvent->mType = kind;
     netEvent->mVtbl = online_Event_vtbl;
     online_Event* mp = netEvent;
-    sMsgList_002693C0_insert(((sMsgListNode_002693C0*)lobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1316,27 +1213,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRowEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269478;
-
-struct sMsgListIter_00269478 {
-    sMsgListNode_00269478* node;
-    sMsgListIter_00269478(sMsgListNode_00269478* x) : node(x) {}
-    sMsgListIter_00269478(const sMsgListIter_00269478& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_00269478 pos, online_Event* const& x)
-{
-    sMsgListNode_00269478* tmp = (sMsgListNode_00269478*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269478*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the client's highlighted bragging-rights row on the host: posts it as a lobby event.
@@ -1356,7 +1232,7 @@ void cSetupMan::handleClientBragRow(int rowIndex)
     netEvent->mFlag = 1;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269478_insert(((sMsgListNode_00269478*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1370,27 +1246,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRuleEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269538;
-
-struct sMsgListIter_00269538 {
-    sMsgListNode_00269538* node;
-    sMsgListIter_00269538(sMsgListNode_00269538* x) : node(x) {}
-    sMsgListIter_00269538(const sMsgListIter_00269538& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_00269538 pos, online_Event* const& x)
-{
-    sMsgListNode_00269538* tmp = (sMsgListNode_00269538*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269538*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a bragging-rights rule change from the client on the host: posts it as a lobby event.
@@ -1412,7 +1267,7 @@ void cSetupMan::handleClientBragRule(int ruleSlot, int ruleValue)
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269538_insert(((sMsgListNode_00269538*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1427,27 +1282,6 @@ extern const char str_cSetupMan_Update[];
 extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
 extern void* online_SetupLockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269608;
-
-struct sMsgListIter_00269608 {
-    sMsgListNode_00269608* node;
-    sMsgListIter_00269608(sMsgListNode_00269608* x) : node(x) {}
-    sMsgListIter_00269608(const sMsgListIter_00269608& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_00269608 pos, online_Event* const& x)
-{
-    sMsgListNode_00269608* tmp = (sMsgListNode_00269608*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269608*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the client locking its bragging-rights panel on the host: advances the state, answers and posts an event.
@@ -1475,7 +1309,7 @@ void cSetupMan::handleClientBragLock()
     netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269608_insert(((sMsgListNode_00269608*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1490,27 +1324,6 @@ extern const char str_cSetupMan_Update[];
 extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
 extern void* online_SetupUnlockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_002696F8;
-
-struct sMsgListIter_002696F8 {
-    sMsgListNode_002696F8* node;
-    sMsgListIter_002696F8(sMsgListNode_002696F8* x) : node(x) {}
-    sMsgListIter_002696F8(const sMsgListIter_002696F8& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696F8 pos, online_Event* const& x)
-{
-    sMsgListNode_002696F8* tmp = (sMsgListNode_002696F8*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_002696F8*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the client unlocking its bragging-rights panel on the host: steps the state back, answers and posts an event.
@@ -1530,7 +1343,7 @@ void cSetupMan::handleClientBragUnlock()
     netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_002696F8_insert(((sMsgListNode_002696F8*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1544,27 +1357,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRowEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_002697D0;
-
-struct sMsgListIter_002697D0 {
-    sMsgListNode_002697D0* node;
-    sMsgListIter_002697D0(sMsgListNode_002697D0* x) : node(x) {}
-    sMsgListIter_002697D0(const sMsgListIter_002697D0& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697D0 pos, online_Event* const& x)
-{
-    sMsgListNode_002697D0* tmp = (sMsgListNode_002697D0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_002697D0*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host's highlighted bragging-rights row on the client: posts it as a lobby event.
@@ -1584,7 +1376,7 @@ void cSetupMan::handleHostBragRow(int rowIndex)
     netEvent->mFlag = 1;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_002697D0_insert(((sMsgListNode_002697D0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1598,27 +1390,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRowEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269890;
-
-struct sMsgListIter_00269890 {
-    sMsgListNode_00269890* node;
-    sMsgListIter_00269890(sMsgListNode_00269890* x) : node(x) {}
-    sMsgListIter_00269890(const sMsgListIter_00269890& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_00269890 pos, online_Event* const& x)
-{
-    sMsgListNode_00269890* tmp = (sMsgListNode_00269890*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269890*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a type-7 highlighted-row message on the client: posts it as a lobby event with flag 0.
@@ -1637,7 +1408,7 @@ void cSetupMan::handleBragRowMessage(int rowIndex)
     netEvent->mFlag = 0;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269890_insert(((sMsgListNode_00269890*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1651,27 +1422,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRuleEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269948;
-
-struct sMsgListIter_00269948 {
-    sMsgListNode_00269948* node;
-    sMsgListIter_00269948(sMsgListNode_00269948* x) : node(x) {}
-    sMsgListIter_00269948(const sMsgListIter_00269948& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_00269948 pos, online_Event* const& x)
-{
-    sMsgListNode_00269948* tmp = (sMsgListNode_00269948*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269948*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a bragging-rights rule change from the host on the client: posts it as a lobby event.
@@ -1693,7 +1443,7 @@ void cSetupMan::handleHostBragRule(int ruleSlot, int ruleValue)
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269948_insert(((sMsgListNode_00269948*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1707,27 +1457,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupRuleEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269A18;
-
-struct sMsgListIter_00269A18 {
-    sMsgListNode_00269A18* node;
-    sMsgListIter_00269A18(sMsgListNode_00269A18* x) : node(x) {}
-    sMsgListIter_00269A18(const sMsgListIter_00269A18& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A18 pos, online_Event* const& x)
-{
-    sMsgListNode_00269A18* tmp = (sMsgListNode_00269A18*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269A18*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a type-9 rule-change message on the client: posts it as a lobby event with flag 0.
@@ -1749,7 +1478,7 @@ void cSetupMan::handleBragRuleMessage(int ruleSlot, int ruleValue)
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269A18_insert(((sMsgListNode_00269A18*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1763,27 +1492,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupLockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269AE0;
-
-struct sMsgListIter_00269AE0 {
-    sMsgListNode_00269AE0* node;
-    sMsgListIter_00269AE0(sMsgListNode_00269AE0* x) : node(x) {}
-    sMsgListIter_00269AE0(const sMsgListIter_00269AE0& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269AE0 pos, online_Event* const& x)
-{
-    sMsgListNode_00269AE0* tmp = (sMsgListNode_00269AE0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269AE0*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
@@ -1802,7 +1510,7 @@ void cSetupMan::handleHostBragLock(int hostState)
     netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269AE0_insert(((sMsgListNode_00269AE0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1816,27 +1524,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupLockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269B90;
-
-struct sMsgListIter_00269B90 {
-    sMsgListNode_00269B90* node;
-    sMsgListIter_00269B90(sMsgListNode_00269B90* x) : node(x) {}
-    sMsgListIter_00269B90(const sMsgListIter_00269B90& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B90 pos, online_Event* const& x)
-{
-    sMsgListNode_00269B90* tmp = (sMsgListNode_00269B90*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269B90*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles the host's answer to the client's lock (type 11, sent by cSetupMan_handleClientBragLock): takes the host's state and posts an
@@ -1856,7 +1543,7 @@ void cSetupMan::handleBragLockAnswer(int hostState)
     netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 0;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269B90_insert(((sMsgListNode_00269B90*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1870,27 +1557,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupUnlockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269C40;
-
-struct sMsgListIter_00269C40 {
-    sMsgListNode_00269C40* node;
-    sMsgListIter_00269C40(sMsgListNode_00269C40* x) : node(x) {}
-    sMsgListIter_00269C40(const sMsgListIter_00269C40& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C40 pos, online_Event* const& x)
-{
-    sMsgListNode_00269C40* tmp = (sMsgListNode_00269C40*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269C40*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
@@ -1910,7 +1576,7 @@ void cSetupMan::handleHostBragUnlock(int hostState)
     netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269C40_insert(((sMsgListNode_00269C40*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1924,27 +1590,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
 extern void* online_SetupUnlockEvent_vtbl[];
-
-typedef _List_node<online_Event*> sMsgListNode_00269CF0;
-
-struct sMsgListIter_00269CF0 {
-    sMsgListNode_00269CF0* node;
-    sMsgListIter_00269CF0(sMsgListNode_00269CF0* x) : node(x) {}
-    sMsgListIter_00269CF0(const sMsgListIter_00269CF0& x) : node(x.node) {}
-};
-
-static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269CF0 pos, online_Event* const& x)
-{
-    sMsgListNode_00269CF0* tmp = (sMsgListNode_00269CF0*)operator new(0xC, str_StlBlock_b, 0x20000000, 0);
-    online_Event** data = &tmp->_M_data;
-    if (data != 0)
-        *data = x;
-    tmp->_M_next = pos.node;
-    tmp->_M_prev = pos.node->_M_prev;
-    ((sMsgListNode_00269CF0*)pos.node->_M_prev)->_M_next = tmp;
-    pos.node->_M_prev = tmp;
-    return tmp;
-}
 
 /**
  * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
@@ -1963,7 +1608,7 @@ void cSetupMan::handleBragUnlockMessage(int hostState)
     netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 0;
     online_Event* mp = (online_Event*)netEvent;
-    sMsgList_00269CF0_insert(((sMsgListNode_00269CF0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
+    EventList_insert(((tEventListNode*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
