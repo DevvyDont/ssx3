@@ -407,7 +407,7 @@ int *__user_type_info___user_type_info(int *typeInfo, int typeName) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__user_type_info);
 #ifdef SKIP_ASM
 extern int __ti16__user_type_info[];
-extern int D_00499A88[];
+extern int str_16_user_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -416,14 +416,14 @@ int *__tf16__user_type_info_a(void) __asm__("__tf16__user_type_info");
  * Returns the type_info object of class __user_type_info, building it on first use.
  *
  * When __ti16__user_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti16__user_type_info with __rtti_si, name "16__user_type_info" (D_00499A88) and base __ti9type_info.
+ * type_info in __ti16__user_type_info with __rtti_si, name "16__user_type_info" (str_16_user_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti16__user_type_info
  */
 int *__tf16__user_type_info_a(void) {
     if (__ti16__user_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti16__user_type_info, (int)D_00499A88, (int)__ti9type_info);
+        __rtti_si(__ti16__user_type_info, (int)str_16_user_type_info, (int)__ti9type_info);
     }
     return __ti16__user_type_info;
 }
@@ -616,7 +616,7 @@ int *type_info_type_info(int *typeInfo, int typeName) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf9type_info);
 #ifdef SKIP_ASM
-extern int D_00499AC0[];
+extern int str_9type_info[];
 extern int __ti9type_info[];
 extern void __rtti_user(int *, int);
 int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -624,13 +624,13 @@ int *__tf9type_info_a(void) __asm__("__tf9type_info");
  * Returns the type_info object of class type_info itself, building it on first use.
  *
  * When __ti9type_info is still zero, constructs a type_info for a class without bases there with __rtti_user and the name
- * "9type_info" (D_00499AC0).
+ * "9type_info" (str_9type_info).
  *
  * @return the type_info object __ti9type_info
  */
 int *__tf9type_info_a(void) {
     if (__ti9type_info[0] == 0)
-        __rtti_user(__ti9type_info, (int)D_00499AC0);
+        __rtti_user(__ti9type_info, (int)str_9type_info);
     return __ti9type_info;
 }
 #endif
@@ -1382,7 +1382,7 @@ void __ptmd_type_info____ptmd_type_info(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__ptmf_type_info);
 #ifdef SKIP_ASM
 extern int __ti16__ptmf_type_info[];
-extern int D_00499C08[];
+extern int str_16_ptmf_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -1391,14 +1391,14 @@ int *__tf16__ptmf_type_info_a(void) __asm__("__tf16__ptmf_type_info");
  * Returns the type_info object of class __ptmf_type_info, building it on first use.
  *
  * When __ti16__ptmf_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti16__ptmf_type_info with __rtti_si, name "16__ptmf_type_info" (D_00499C08) and base __ti9type_info.
+ * type_info in __ti16__ptmf_type_info with __rtti_si, name "16__ptmf_type_info" (str_16_ptmf_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti16__ptmf_type_info
  */
 int *__tf16__ptmf_type_info_a(void) {
     if (__ti16__ptmf_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti16__ptmf_type_info, (int)D_00499C08, (int)__ti9type_info);
+        __rtti_si(__ti16__ptmf_type_info, (int)str_16_ptmf_type_info, (int)__ti9type_info);
     }
     return __ti16__ptmf_type_info;
 }
@@ -1421,7 +1421,7 @@ void __ptmf_type_info____ptmf_type_info(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__func_type_info);
 #ifdef SKIP_ASM
 extern int __ti16__func_type_info[];
-extern int D_00499C20[];
+extern int str_16_func_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -1430,14 +1430,14 @@ int *__tf16__func_type_info_a(void) __asm__("__tf16__func_type_info");
  * Returns the type_info object of class __func_type_info, building it on first use.
  *
  * When __ti16__func_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti16__func_type_info with __rtti_si, name "16__func_type_info" (D_00499C20) and base __ti9type_info.
+ * type_info in __ti16__func_type_info with __rtti_si, name "16__func_type_info" (str_16_func_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti16__func_type_info
  */
 int *__tf16__func_type_info_a(void) {
     if (__ti16__func_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti16__func_type_info, (int)D_00499C20, (int)__ti9type_info);
+        __rtti_si(__ti16__func_type_info, (int)str_16_func_type_info, (int)__ti9type_info);
     }
     return __ti16__func_type_info;
 }
@@ -1460,7 +1460,7 @@ void __func_type_info____func_type_info(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__builtin_type_info);
 #ifdef SKIP_ASM
 extern int __ti19__builtin_type_info[];
-extern int D_00499C38[];
+extern int str_19_builtin_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -1469,14 +1469,14 @@ int *__tf19__builtin_type_info_a(void) __asm__("__tf19__builtin_type_info");
  * Returns the type_info object of class __builtin_type_info, building it on first use.
  *
  * When __ti19__builtin_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti19__builtin_type_info with __rtti_si, name "19__builtin_type_info" (D_00499C38) and base __ti9type_info.
+ * type_info in __ti19__builtin_type_info with __rtti_si, name "19__builtin_type_info" (str_19_builtin_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti19__builtin_type_info
  */
 int *__tf19__builtin_type_info_a(void) {
     if (__ti19__builtin_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti19__builtin_type_info, (int)D_00499C38, (int)__ti9type_info);
+        __rtti_si(__ti19__builtin_type_info, (int)str_19_builtin_type_info, (int)__ti9type_info);
     }
     return __ti19__builtin_type_info;
 }
@@ -1499,7 +1499,7 @@ void __builtin_type_info____builtin_type_info(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__attr_type_info);
 #ifdef SKIP_ASM
 extern int __ti16__attr_type_info[];
-extern int D_00499C50[];
+extern int str_16_attr_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -1508,14 +1508,14 @@ int *__tf16__attr_type_info_a(void) __asm__("__tf16__attr_type_info");
  * Returns the type_info object of class __attr_type_info, building it on first use.
  *
  * When __ti16__attr_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti16__attr_type_info with __rtti_si, name "16__attr_type_info" (D_00499C50) and base __ti9type_info.
+ * type_info in __ti16__attr_type_info with __rtti_si, name "16__attr_type_info" (str_16_attr_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti16__attr_type_info
  */
 int *__tf16__attr_type_info_a(void) {
     if (__ti16__attr_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti16__attr_type_info, (int)D_00499C50, (int)__ti9type_info);
+        __rtti_si(__ti16__attr_type_info, (int)str_16_attr_type_info, (int)__ti9type_info);
     }
     return __ti16__attr_type_info;
 }
@@ -1538,7 +1538,7 @@ void __attr_type_info____attr_type_info(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__pointer_type_info);
 #ifdef SKIP_ASM
 extern int __ti19__pointer_type_info[];
-extern int D_00499C68[];
+extern int str_19_pointer_type_info[];
 extern int __ti9type_info[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
@@ -1547,14 +1547,14 @@ int *__tf19__pointer_type_info_a(void) __asm__("__tf19__pointer_type_info");
  * Returns the type_info object of class __pointer_type_info, building it on first use.
  *
  * When __ti19__pointer_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in __ti19__pointer_type_info with __rtti_si, name "19__pointer_type_info" (D_00499C68) and base __ti9type_info.
+ * type_info in __ti19__pointer_type_info with __rtti_si, name "19__pointer_type_info" (str_19_pointer_type_info) and base __ti9type_info.
  *
  * @return the type_info object __ti19__pointer_type_info
  */
 int *__tf19__pointer_type_info_a(void) {
     if (__ti19__pointer_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(__ti19__pointer_type_info, (int)D_00499C68, (int)__ti9type_info);
+        __rtti_si(__ti19__pointer_type_info, (int)str_19_pointer_type_info, (int)__ti9type_info);
     }
     return __ti19__pointer_type_info;
 }

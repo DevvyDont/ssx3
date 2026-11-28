@@ -948,9 +948,9 @@ extern char str_CharaPics[];
 extern char str_data_ui_courspic_big[];
 extern char str_coursePics[];
 extern char str_pct_s_ssh[];
-extern char* D_00442928[];
+extern char* cFELoadScreen_riderNameTable[];
 extern char* str_at_plus_J[];
-extern int D_004A2B3C;
+extern int cFELoadScreen_smallFlatSuffix;
 
 static inline int loadTex_3048(char* data, const char* name)
 {
@@ -979,7 +979,7 @@ void cGameLoadScreen::loadTexture()
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
         int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
-            sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
+            sprintf(name, str_pct_spct_s_ssh, cFELoadScreen_riderNameTable[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], cFELoadScreen_smallFlatSuffix);
             char* data = FILE_loadpackz(name, 0x3000100);
             *slot = loadTex_3048(data, str_CharaPics);
             if (data != 0)

@@ -277,7 +277,7 @@ extern char cOVState_RESTARTCHALLENGE_vtbl[];
 extern char cOVState_QUIT_vtbl[];
 extern char cOVState_RESTART_vtbl[];
 extern char cOVState_REPLAY_vtbl[];
-extern char D_00474B80[];
+extern char cOVState_EMPTY_vtbl[];
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 
 /**
@@ -449,7 +449,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == kOVSTATE_EMPTY) {
         cOVState* overlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(overlay, mgr);
-        VPTR_OF(cListNode, overlay) = (void**)D_00474B80;
+        VPTR_OF(cListNode, overlay) = (void**)cOVState_EMPTY_vtbl;
         *(unsigned short*)overlay->mszChatBuff = str_sp_b[0];
         overlay->mOVID = type;
         overlay->mDoneTransition = 0;
@@ -783,7 +783,7 @@ extern char cOVState_RESTARTCHALLENGE_vtbl[];
 extern char cOVState_QUIT_vtbl[];
 extern char cOVState_RESTART_vtbl[];
 extern char cOVState_REPLAY_vtbl[];
-extern char D_00474B80[];
+extern char cOVState_EMPTY_vtbl[];
 
 /**
  * Creates the in-game overlay state of the given type and pushes it as a popup over the current UI state.
@@ -963,7 +963,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == kOVSTATE_EMPTY) {
         cOVState* newOverlay = (cOVState*)((char*)operator new(156, str_cOVStateOverlay, 0, 0));
         cUIState_cUIState(newOverlay, mgr);
-        VPTR_OF(cListNode, newOverlay) = (void**)D_00474B80;
+        VPTR_OF(cListNode, newOverlay) = (void**)cOVState_EMPTY_vtbl;
         *(unsigned short*)newOverlay->mszChatBuff = str_sp_b[0];
         newOverlay->mOVID = type;
         newOverlay->mDoneTransition = 0;
@@ -1651,7 +1651,7 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_004A2860[2];
+extern int cOVTemplate_Simple_optionLabelTable[2];
 extern char* cOVState_overlayOptionTextIDs[];
 extern char str_overlayMenu[];
 extern char str_overlayOptpct_d[];
@@ -1660,7 +1660,7 @@ extern char str_overlayOptpct_d[];
  * Builds the screen of a simple overlay: the base overlay screen plus a menu with one visible option.
  *
  * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
- * "overlayOpt4" of mpScreen: option 0 gets the localised string named cOVState_overlayOptionTextIDs[D_004A2860[0]] and that index as its
+ * "overlayOpt4" of mpScreen: option 0 gets the localised string named cOVState_overlayOptionTextIDs[cOVTemplate_Simple_optionLabelTable[0]] and that index as its
  * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and made static (setStatic(1), slot 8). It fills the
  * onCreateScreen slot (+0x24) of cOVTemplate_Simple_vtbl, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; cOVState_FREESTYLE_PREEVENT_onCreateScreen
  * and cOVState_HEAT_PREEVENT_onCreateScreen call it as their base.
@@ -1676,7 +1676,7 @@ void cOVTemplate_Simple::onCreateScreen()
         cUIThing* optionWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (optionWidget != 0) {
             if (i < 1) {
-                int labelIndex = D_004A2860[i];
+                int labelIndex = cOVTemplate_Simple_optionLabelTable[i];
                 cUIText_setUnicodeStringByID((cUIText*)optionWidget, GetHashValue32(cOVState_overlayOptionTextIDs[labelIndex]));
                 *(int*)((char*)optionWidget + 0x18) = labelIndex;
             } else {

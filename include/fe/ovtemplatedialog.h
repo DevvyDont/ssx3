@@ -118,7 +118,7 @@ CHECK_SIZE(cPDATemplate, 0x48);
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cOVTemplate_Simple: the simple one-option overlay template: cOVState's screen plus an "overlayMenu" with one visible
-// option ("overlayOpt0", the localised name of cOVState_overlayOptionTextIDs[D_004A2860[0]]); picking it (event 5) sets
+// option ("overlayOpt0", the localised name of cOVState_overlayOptionTextIDs[cOVTemplate_Simple_optionLabelTable[0]]); picking it (event 5) sets
 // cOVStateManager_mStatus to 1. Its onCreateScreen / onWidgetMenu / onWidgetEvent fill the slots of the overlay vtables
 // built on it (cOVState_MULTI_PREEVENT_vtbl, cOVState_FREESTYLE_PREEVENT_vtbl, cOVState_HEAT_PREEVENT_vtbl cOVState_HEAT_PREEVENT, ...; those classes have their own headers).
 // (There is no class "cOVTemplate": the cOVTemplate_* prefix covers cOVTemplate_Simple, cOVTemplate_Dialog (above) and

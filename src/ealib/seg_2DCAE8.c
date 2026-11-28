@@ -6709,14 +6709,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_readexec);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int FILEDEV_lasthandle_33B0 __asm__("FILEDEV_lasthandle");
-extern int D_00450C4C_33B0 __asm__("D_00450C4C");
+extern int FILEDEV_lastReadEnd_33B0 __asm__("FILEDEV_lastReadEnd");
 extern int sceRead_33B0(int, int, int) __asm__("sceRead");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 int FILEDEV_readexec_i(void) __asm__("FILEDEV_readexec");
 /**
  * Sync task of the host device: does the read FILEDEV_readreq recorded. It seeks unless the file and offset are where the
- * last read ended (FILEDEV_lasthandle, D_00450C4C), reads, remembers the new position and completes the command
+ * last read ended (FILEDEV_lasthandle, FILEDEV_lastReadEnd), reads, remembers the new position and completes the command
  * (iFILESYS_CommandCompleteCallback, success when every byte was read). Returns 0.
  *
  * @return 0
@@ -6725,13 +6725,13 @@ int FILEDEV_readexec_i(void) {
     int bytesRead;
     int ok;
     if (gHarddriveReadRequest_3350.a != 0) {
-        if (FILEDEV_lasthandle_33B0 != gHarddriveReadRequest_3350.b || D_00450C4C_33B0 != gHarddriveReadRequest_3350.d) {
+        if (FILEDEV_lasthandle_33B0 != gHarddriveReadRequest_3350.b || FILEDEV_lastReadEnd_33B0 != gHarddriveReadRequest_3350.d) {
             sceLseek(gHarddriveReadRequest_3350.b, gHarddriveReadRequest_3350.d, 0);
         }
         bytesRead = sceRead_33B0(gHarddriveReadRequest_3350.b, gHarddriveReadRequest_3350.c, gHarddriveReadRequest_3350.e);
         ok = bytesRead == gHarddriveReadRequest_3350.e;
         FILEDEV_lasthandle_33B0 = gHarddriveReadRequest_3350.b;
-        D_00450C4C_33B0 = gHarddriveReadRequest_3350.d + gHarddriveReadRequest_3350.e;
+        FILEDEV_lastReadEnd_33B0 = gHarddriveReadRequest_3350.d + gHarddriveReadRequest_3350.e;
         gHarddriveReadRequest_3350.a = 0;
         iFILESYS_CommandCompleteCallback_33B0(ok);
     }
@@ -6745,7 +6745,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_write);
 /**
  * Writes to a host file: seeks to @p offset, writes and completes the command as a success
  * (iFILESYS_CommandCompleteCallback(1)) whatever happened. Returns 0. Quirk: the remembered read position (FILEDEV_lasthandle,
- * D_00450C4C) is not cleared, so a later read of the same file at that position skips its seek and reads after the
+ * FILEDEV_lastReadEnd) is not cleared, so a later read of the same file at that position skips its seek and reads after the
  * written data.
  *
  * @param handle  the device handle
@@ -6863,7 +6863,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readCurrentSector);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int CDVD_state_3618[] __asm__("CDVD_state");
-extern char D_00519C80_3618[] __asm__("D_00519C80");
+extern char CDVD_sectorBuffer_3618[] __asm__("CDVD_sectorBuffer");
 extern int FILESYS_cdSettings_3618[] __asm__("FILESYS_cdSettings");
 extern int sceCdRead_3618(int, int, void *, int *) __asm__("sceCdRead");
 extern int sceCdSync_3618(int) __asm__("sceCdSync");
@@ -6872,7 +6872,7 @@ extern void sceCdMmode_3618(int) __asm__("sceCdMmode");
 extern void sceCdDiskReady_3618(int) __asm__("sceCdDiskReady");
 extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 /**
- * Reads one disc sector, the one at the CD state's sector (CDVD_state +0x2C), into the sector buffer D_00519C80 and
+ * Reads one disc sector, the one at the CD state's sector (CDVD_state +0x2C), into the sector buffer CDVD_sectorBuffer and
  * returns it. Retries until the read reports no error, waiting 480 ticks between polls; every 10 failures the CD is
  * initialised again (sceCdInit(0), media mode from FILESYS_cdSettings +0x8).
  *
@@ -6889,7 +6889,7 @@ char *CDVD_readCurrentSector(void) {
             sceCdMmode_3618(FILESYS_cdSettings_3618[2]);
         }
         sceCdDiskReady_3618(0);
-        while (sceCdRead_3618(CDVD_state_3618[11], 1, D_00519C80_3618, &CDVD_state_3618[7]) == 0) {
+        while (sceCdRead_3618(CDVD_state_3618[11], 1, CDVD_sectorBuffer_3618, &CDVD_state_3618[7]) == 0) {
             CDVD_sleepHsyncs(0x1E0);
         }
         do {
@@ -6899,7 +6899,7 @@ char *CDVD_readCurrentSector(void) {
         done = sceCdGetError_3618() == 0;
         if (!done) n--;
     } while (!done);
-    return D_00519C80_3618;
+    return CDVD_sectorBuffer_3618;
 }
 #endif
 
@@ -7088,8 +7088,8 @@ struct sC40Read {                   /* the read in progress */
     int lba;                        /* sector */
     int nsect;                      /* sectors in this step */
     int buf;                        /* destination */
-    char *files;                    /* the file table (also D_00519C78) */
-    int *sector;                    /* sector buffer (D_00519C80) */
+    char *files;                    /* the file table (also CDVD_fileTable) */
+    int *sector;                    /* sector buffer (CDVD_sectorBuffer) */
 };
 struct sC40 {                       /* 0x40, CDVD_state: the CD file system */
     int flags;                      /* flags */
@@ -7200,7 +7200,7 @@ struct CdState_3D78 {
 
 extern struct CdState_3D78 CDVD_state_3D78 __asm__("CDVD_state");
 extern int FILESYS_cdSettings[];
-extern char D_0051A480[];
+extern char CDVD_callbackThreadStack[];
 
 /**
  * Recovers a failed disc read synchronously. Removes the CD callback, then, until no error is left: initialises the CD
@@ -7256,7 +7256,7 @@ int CDVD_recoverRead(void) {
             } while (req.count > 0);
         }
     } while (sceCdGetError_3D78() != 0);
-    sceCdInitEeCB_3D78(11, D_0051A480, 0x800);
+    sceCdInitEeCB_3D78(11, CDVD_callbackThreadStack, 0x800);
     sceCdCallback_3D78(CDVD_wakeReader);
     SignalSema_3D78(CDVD_state_3D78.fC);
     return 0;
@@ -7372,8 +7372,8 @@ extern unsigned int D_00450C6C;
 extern int D_00450C70;
 extern char str_Named_Dir[];
 extern char str_slash_c[];
-extern char D_00519C80[];
-extern char D_0051A480[];
+extern char CDVD_sectorBuffer[];
+extern char CDVD_callbackThreadStack[];
 extern char D_0051AC80[];
 extern char D_0051EC80[];
 extern int D_004A30F0;
@@ -7458,7 +7458,7 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
         D_0051EC80[0] = '/';
         if (*FILESYS_cdSettings_4040.root != 0) {
             CDVD_state_4040.lba = pvd->root.lba;
-            for (rec = CDVD_readCurrentSector_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
+            for (rec = CDVD_readCurrentSector_4040(); (char *)rec <= CDVD_sectorBuffer + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
                 if (strncmp_4040(rec->name, FILESYS_cdSettings_4040.root, rec->name_len) == 0) {
                     strcat_4040(D_0051EC80, FILESYS_cdSettings_4040.root);
                     strcat_4040(D_0051EC80, str_slash_c);
@@ -7493,9 +7493,9 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
     tp.option = 0;
     CDVD_state_4040.tid = CreateThread_4040(&tp);
     StartThread_4040(CDVD_state_4040.tid, 0);
-    sceCdInitEeCB_4040(11, D_0051A480, 0x800);
+    sceCdInitEeCB_4040(11, CDVD_callbackThreadStack, 0x800);
     sceCdCallback_4040(CDVD_wakeReader_4040);
-    CDVD_state_4040.sector = D_00519C80;
+    CDVD_state_4040.sector = CDVD_sectorBuffer;
     SYNCTASK_add(CDVD_checkFailedRead_4040, 0, 0);
     return CDVD_state_4040.count;
 }
@@ -7547,7 +7547,7 @@ int CDVD_findFileNumber_4508(char *path, int unused, int *out) __asm__("CDVD_fin
  * Builds a normalised copy of @p path in a 256-byte buffer: exactly one leading '/', every '\\' turned into '/', and
  * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with CDVD_hashname (seed word 6 of
  * the file-system state CDVD_state) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
- * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with fi_cmp. Used by
+ * CDVD_fileTable) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with fi_cmp. Used by
  * FILEDEV_open, which tags the number with device 1 in the top byte, and by CDVD_findFileEntry.
  *
  * @param path  the file path ('/' or '\\' separated)
@@ -7607,7 +7607,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readFileEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C5C_48D8[] __asm__("D_00450C5C");
-extern char *D_00519C78_48D8[] __asm__("D_00519C78");
+extern char *CDVD_fileTable_48D8[] __asm__("CDVD_fileTable");
 extern char *strncpy(char *, const char *, int);
 
 int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEntry");
@@ -7615,7 +7615,7 @@ int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEnt
 /**
  * Reads one entry of the disc file table by its 1-based number.
  *
- * Entries sit in the table D_00519C78, each D_00450C5C + 12 bytes: +4 the start sector, +8 the size, then the stored
+ * Entries sit in the table CDVD_fileTable, each D_00450C5C + 12 bytes: +4 the start sector, +8 the size, then the stored
  * name (D_00450C5C bytes, copied with strncpy). Every output pointer may be 0. FILEDEV_getsize calls it for the size of
  * an open disc file (device 1) and FILEDEV_getstartsector for its start sector.
  *
@@ -7627,7 +7627,7 @@ int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEnt
  */
 int CDVD_readFileEntry_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOut) {
     char *entry;
-    entry = D_00519C78_48D8[0] + (fileIndex - 1) * (D_00450C5C_48D8[0] + 0xC);
+    entry = CDVD_fileTable_48D8[0] + (fileIndex - 1) * (D_00450C5C_48D8[0] + 0xC);
     if (nameOut != 0) {
         strncpy(nameOut, entry + 0xC, D_00450C5C_48D8[0]);
     }
@@ -7647,12 +7647,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_findFileEntry);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int CDVD_findFileNumber(int, int, int *);
 extern int D_00450C5C_0C5C[] __asm__("D_00450C5C");
-extern int D_00519C78_9C78[] __asm__("D_00519C78");
+extern int CDVD_fileTable_9C78[] __asm__("CDVD_fileTable");
 
 /**
  * Returns the disc file-table entry for a path, or 0 when the table has none.
  *
- * Finds the entry number with CDVD_findFileNumber and turns it into a pointer into D_00519C78 (entries of D_00450C5C + 12
+ * Finds the entry number with CDVD_findFileNumber and turns it into a pointer into CDVD_fileTable (entries of D_00450C5C + 12
  * bytes).
  *
  * @param filePath  the file path
@@ -7665,7 +7665,7 @@ int CDVD_findFileEntry(int filePath) {
     if (CDVD_findFileNumber(filePath, 0, &entryNumber) == 0) {
         entry = 0;
     } else {
-        entry = D_00519C78_9C78[0] + (entryNumber - 1) * (D_00450C5C_0C5C[0] + 0xC);
+        entry = CDVD_fileTable_9C78[0] + (entryNumber - 1) * (D_00450C5C_0C5C[0] + 0xC);
     }
     return entry;
 }
@@ -7780,7 +7780,7 @@ extern int TIMERhz;
 /* tick counter, incremented by the timer interrupt handler (tmrint) */
 extern volatile int TIMER_ticks;
 extern int hTimerId;
-extern unsigned short D_00450DE0;
+extern unsigned short TIMER_comparePeriod;
 
 #define T0_COUNT_4AF0 (*(volatile int *)0x10000000)
 #define T0_MODE_4AF0 (*(volatile int *)0x10000010)
@@ -7793,7 +7793,7 @@ extern unsigned short D_00450DE0;
  *
  * When the interrupt handler is already installed (hTimerId) it only returns TIMERhz. A @p hz of 0 means 100. It
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
- * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in TIMERhz, programs
+ * or 0x8CA0000 counts a second), stores the compare period in TIMER_comparePeriod and the resulting rate in TIMERhz, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
  * as the INTC 10 (timer 1) handler (AddIntcHandler) and enables it (EnableIntc). While the H-blank rate TIMER_hblankRate is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
@@ -7821,21 +7821,21 @@ int TIMER_init(int hz) {
     }
     if (hz < 3150) {
         if (hz < 196) {
-            D_00450DE0 = (hz / 2 + 0x8CA00) / hz;
-            TIMERhz = 0x8CA00 / D_00450DE0;
+            TIMER_comparePeriod = (hz / 2 + 0x8CA00) / hz;
+            TIMERhz = 0x8CA00 / TIMER_comparePeriod;
             mode = 2;
         } else {
-            D_00450DE0 = (hz / 2 + 0x8CA000) / hz;
-            TIMERhz = 0x8CA000 / D_00450DE0;
+            TIMER_comparePeriod = (hz / 2 + 0x8CA000) / hz;
+            TIMERhz = 0x8CA000 / TIMER_comparePeriod;
             mode = 1;
         }
     } else {
-        D_00450DE0 = (hz / 2 + 0x8CA0000) / hz;
-        TIMERhz = 0x8CA0000 / D_00450DE0;
+        TIMER_comparePeriod = (hz / 2 + 0x8CA0000) / hz;
+        TIMERhz = 0x8CA0000 / TIMER_comparePeriod;
         mode = 0;
     }
     T1_COUNT_4AF0 = 0;
-    T1_COMP_4AF0 = D_00450DE0;
+    T1_COMP_4AF0 = TIMER_comparePeriod;
     T1_MODE_4AF0 = mode | 0x180;
     hTimerId = AddIntcHandler_4AF0(10, tmrint_4AF0, 0);
     EnableIntc_4AF0(10);
@@ -7899,7 +7899,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", tmrint);
 #ifdef SKIP_ASM
 // PORT: PS2-only (EE timer 1 registers, inline asm).
 /* tmrint: the EE timer 1 compare interrupt (inittmr.c; On Tour's PSP tmrint has the same tick/callback body). */
-extern unsigned short D_00450DE0;               /* compare period */
+extern unsigned short TIMER_comparePeriod;               /* compare period */
 extern volatile int TIMER_ticks;                 /* ticks */
 extern volatile int libticks;                 /* libticks */
 extern int bInTimerSubroutine;                          /* bInTimerSubroutine */
@@ -7912,7 +7912,7 @@ extern void (*tmrsub[8])(void);             /* tmrsub */
 /**
  * Handles the EE timer 1 compare interrupt: one library tick.
  *
- * Moves the compare value on by one period (D_00450DE0) from where the count stands, resets T1_COUNT and acknowledges
+ * Moves the compare value on by one period (TIMER_comparePeriod) from where the count stands, resets T1_COUNT and acknowledges
  * the interrupt (T1_MODE | 0x400), increments the tick counters TIMER_ticks and libticks, then calls each of the 8
  * timer routines in tmrsub that is set, with bInTimerSubroutine set to 1 around the call (the thread and mutex code checks
  * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
@@ -7923,7 +7923,7 @@ extern void (*tmrsub[8])(void);             /* tmrsub */
 int tmrint(void) {
     int i;
 
-    T1_COMP = D_00450DE0 + T1_COMP - T1_COUNT;
+    T1_COMP = TIMER_comparePeriod + T1_COMP - T1_COUNT;
     T1_COUNT = 0;
     T1_MODE |= 0x400;
     TIMER_ticks++;
@@ -8116,22 +8116,22 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_init);
 extern int GetThreadId_5018(void) __asm__("GetThreadId");
 extern void ChangeThreadPriority_5018(int, int) __asm__("ChangeThreadPriority");
 extern void MUTEX_create_5018(void *) __asm__("MUTEX_create");
-extern int D_00450DF8_5018[] __asm__("D_00450DF8");
-extern int D_0051ED88_5018[] __asm__("D_0051ED88");
+extern int THREAD_mainThread_5018[] __asm__("THREAD_mainThread");
+extern int THREAD_libraryMutex_5018[] __asm__("THREAD_libraryMutex");
 
 /**
  * Sets up the thread layer for the main thread.
  *
- * Records the calling thread in the main-thread record D_00450DF8 (signature 0x50533254 'PS2T', then the id from
- * GetThreadId), sets that thread's priority to 100 and creates the library mutex D_0051ED88 with MUTEX_create. Called
+ * Records the calling thread in the main-thread record THREAD_mainThread (signature 0x50533254 'PS2T', then the id from
+ * GetThreadId), sets that thread's priority to 100 and creates the library mutex THREAD_libraryMutex with MUTEX_create. Called
  * by systemInit.
  */
 void THREAD_init(void) {
     int mainThreadId = GetThreadId_5018();
-    D_00450DF8_5018[0] = 0x50533254;
-    D_00450DF8_5018[1] = mainThreadId;
+    THREAD_mainThread_5018[0] = 0x50533254;
+    THREAD_mainThread_5018[1] = mainThreadId;
     ChangeThreadPriority_5018(mainThreadId, 100);
-    MUTEX_create_5018(D_0051ED88_5018);
+    MUTEX_create_5018(THREAD_libraryMutex_5018);
 }
 #endif
 
@@ -8141,18 +8141,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_restore);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_destroy(void *);
 extern void MEM_clear_5068(int *, int) __asm__("MEM_clear");
-extern int D_00450DF8_5068[] __asm__("D_00450DF8");
-extern int D_0051ED88_5068[] __asm__("D_0051ED88");
+extern int THREAD_mainThread_5068[] __asm__("THREAD_mainThread");
+extern int THREAD_libraryMutex_5068[] __asm__("THREAD_libraryMutex");
 
 /**
  * Shuts the thread layer down.
  *
- * Destroys the library mutex D_0051ED88 (MUTEX_destroy) and clears the 8-byte main-thread record D_00450DF8 that
+ * Destroys the library mutex THREAD_libraryMutex (MUTEX_destroy) and clears the 8-byte main-thread record THREAD_mainThread that
  * THREAD_init filled. Nothing in the build calls it.
  */
 void THREAD_restore(void) {
-    MUTEX_destroy(D_0051ED88_5068);
-    MEM_clear_5068(D_00450DF8_5068, 8);
+    MUTEX_destroy(THREAD_libraryMutex_5068);
+    MEM_clear_5068(THREAD_mainThread_5068, 8);
 }
 #endif
 

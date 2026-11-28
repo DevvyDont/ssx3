@@ -534,14 +534,14 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_addTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char **SPCHI_tableSlots_69F0 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_69F0 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_69F0 __asm__("SPCHI_tableSlotCount");
 extern unsigned int SPCHI_seed_69F0 __asm__("SPCHI_seed");
 
 static inline int findfree_69F0(void) {
     int i, idx;
 
     idx = -1;
-    for (i = 0; i < D_004A4828_69F0; i++) {
+    for (i = 0; i < SPCHI_tableSlotCount_69F0; i++) {
         if (SPCHI_tableSlots_69F0[i] == 0) {
             idx = i;
             break;
@@ -556,7 +556,7 @@ static inline unsigned char *tail_69F0(unsigned char *s) {
 }
 
 /**
- * Adds a speech table (bank) to the driver's table list (SPCHI_tableSlots, D_004A4828 slots); returns its slot or -1.
+ * Adds a speech table (bank) to the driver's table list (SPCHI_tableSlots, SPCHI_tableSlotCount slots); returns its slot or -1.
  *
  * A table with a history (byte +0x6) is refused while its history area is in use (position byte not 0 or an entry not
  * 0xFF). It goes into the first free slot; a table with the random-subset flag (0x80 in +0x4) first gets the rows of
@@ -628,7 +628,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_setSeed);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SPCHI_initMagic;
 extern unsigned char **SPCHI_tableSlots_6BC0 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_6BC0 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_6BC0 __asm__("SPCHI_tableSlotCount");
 extern int SPCHI_seed_6BC0 __asm__("SPCHI_seed");
 void SPCHI_clearRandomSubset(unsigned char *p);
 void SPCHI_markRandomSubset(unsigned char *p);
@@ -647,7 +647,7 @@ void SPCH_setSeed(int seed) {
     if (SPCHI_initMagic != 0) {
         SPCHI_seed_6BC0 = seed;
         if (SPCHI_tableSlots_6BC0 != 0) {
-            for (i = 0; i < D_004A4828_6BC0; i++) {
+            for (i = 0; i < SPCHI_tableSlotCount_6BC0; i++) {
                 table = SPCHI_tableSlots_6BC0[i];
                 if (table != 0 && (table[4] & 0x80)) {
                     SPCHI_clearRandomSubset(table);
@@ -678,10 +678,10 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_initTableList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *SPCHI_tableSlots_6C60 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_6C60 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_6C60 __asm__("SPCHI_tableSlotCount");
 
 /**
- * Sets up the speech table list: D_004A4828 = @p slotCount slots at @p slotMem (SPCHI_tableSlots), all cleared.
+ * Sets up the speech table list: SPCHI_tableSlotCount = @p slotCount slots at @p slotMem (SPCHI_tableSlots), all cleared.
  *
  * @param slotCount  the number of slots
  * @param slotMem  the slot memory (SPCH_getTableListSize bytes), or 0
@@ -689,10 +689,10 @@ extern int D_004A4828_6C60 __asm__("D_004A4828");
 void SPCH_initTableList(int slotCount, int *slotMem) {
     int i;
 
-    D_004A4828_6C60 = slotCount;
+    SPCHI_tableSlotCount_6C60 = slotCount;
     SPCHI_tableSlots_6C60 = slotMem;
     if (slotMem != 0) {
-        for (i = 0; i < D_004A4828_6C60; i++) {
+        for (i = 0; i < SPCHI_tableSlotCount_6C60; i++) {
             SPCHI_tableSlots_6C60[i] = 0;
         }
     }
@@ -771,14 +771,14 @@ int SPCHI_isTableEntryInRange(int slot, unsigned int entryIndex) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_clearTableList);
 #ifdef SKIP_ASM
 extern int SPCHI_tableSlots;
-extern int D_004A4828;
+extern int SPCHI_tableSlotCount;
 
 /**
- * Forgets the speech table list (SPCHI_tableSlots and its count D_004A4828 cleared). Used by SPCH_shutdown at shutdown.
+ * Forgets the speech table list (SPCHI_tableSlots and its count SPCHI_tableSlotCount cleared). Used by SPCH_shutdown at shutdown.
  */
 void SPCHI_clearTableList(void) {
     SPCHI_tableSlots = 0;
-    D_004A4828 = 0;
+    SPCHI_tableSlotCount = 0;
 }
 #endif
 
@@ -786,15 +786,15 @@ void SPCHI_clearTableList(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_resetTableList);
 #ifdef SKIP_ASM
 extern int SPCHI_tableSlots;
-extern int D_004A4828;
+extern int SPCHI_tableSlotCount;
 
 /**
- * Forgets the speech table list (SPCHI_tableSlots and its count D_004A4828 cleared); the same body as SPCHI_clearTableList, used by
+ * Forgets the speech table list (SPCHI_tableSlots and its count SPCHI_tableSlotCount cleared); the same body as SPCHI_clearTableList, used by
  * SPCH_initDriver at init.
  */
 void SPCHI_resetTableList(void) {
     SPCHI_tableSlots = 0;
-    D_004A4828 = 0;
+    SPCHI_tableSlotCount = 0;
 }
 #endif
 
@@ -803,7 +803,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findTableById);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short **SPCHI_tableSlots_6D50 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_6D50 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_6D50 __asm__("SPCHI_tableSlotCount");
 
 /**
  * Returns the slot of the first registered speech table whose id (first halfword) is @p tableId, or -1.
@@ -817,7 +817,7 @@ int SPCHI_findTableById(unsigned short tableId) {
 
     slotPtr = SPCHI_tableSlots_6D50;
     if (slotPtr != 0) {
-        for (i = 0; i < D_004A4828_6D50; i++) {
+        for (i = 0; i < SPCHI_tableSlotCount_6D50; i++) {
             if (*slotPtr != 0 && **slotPtr == tableId) {
                 return i;
             }
@@ -833,7 +833,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findTableBySubId);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short **SPCHI_tableSlots_6DB8 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_6DB8 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_6DB8 __asm__("SPCHI_tableSlotCount");
 
 /**
  * Returns the slot of the registered speech table whose two first halfwords are @p tableId and @p subId, or -1.
@@ -847,7 +847,7 @@ int SPCHI_findTableBySubId(unsigned short tableId, unsigned short subId) {
     unsigned short *table;
 
     if (SPCHI_tableSlots_6DB8 != 0) {
-        for (i = 0; i < D_004A4828_6DB8; i++) {
+        for (i = 0; i < SPCHI_tableSlotCount_6DB8; i++) {
             table = SPCHI_tableSlots_6DB8[i];
             if (table != 0 && table[0] == tableId && table[1] == subId) {
                 return i;
@@ -1016,7 +1016,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findFreeTableSlot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *SPCHI_tableSlots_4824 __asm__("SPCHI_tableSlots");
-extern int D_004A4828_4828 __asm__("D_004A4828");
+extern int SPCHI_tableSlotCount_4828 __asm__("SPCHI_tableSlotCount");
 
 /**
  * Returns the first free slot of the speech table list, or -1.
@@ -1027,7 +1027,7 @@ int SPCHI_findFreeTableSlot(void) {
     int i;
     int freeSlot = -1;
 
-    for (i = 0; i < D_004A4828_4828; i++) {
+    for (i = 0; i < SPCHI_tableSlotCount_4828; i++) {
         if (SPCHI_tableSlots_4824[i] == 0) {
             freeSlot = i;
             break;
@@ -2300,7 +2300,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_checkVariables);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **SPCHI_tableSlots_8E58 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
+extern unsigned char **SPCHI_tableSlots_8E58 __asm__("SPCHI_tableSlots");      /* shape table, SPCHI_tableSlotCount entries */
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 
 /**
@@ -2552,7 +2552,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findFittingCombination);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **SPCHI_tableSlots_93C0 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
+extern unsigned char **SPCHI_tableSlots_93C0 __asm__("SPCHI_tableSlots");      /* shape table, SPCHI_tableSlotCount entries */
 extern int SPCHI_bufferSize_93C0 __asm__("SPCHI_bufferSize");
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 /* Combination search: reset every entry, then advance the odometer until the usage
@@ -2749,8 +2749,8 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_sendPhraseLines);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **SPCHI_tableSlots_9830 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
-extern int D_004A4830_9830 __asm__("D_004A4830");
+extern unsigned char **SPCHI_tableSlots_9830 __asm__("SPCHI_tableSlots");      /* shape table, SPCHI_tableSlotCount entries */
+extern int SPCHI_dropPlayedRowsFlag_9830 __asm__("SPCHI_dropPlayedRowsFlag");
 extern int SPCHI_bufferSize_9830 __asm__("SPCHI_bufferSize");
 /* regKey (SPCHI_getBankRegKey), tableSubId (the table's subId) and bankSubId (SPCHI_getBankSubId): names ours, from use */
 struct sFF90Msg { int id; int start; int len; SPCHKEY k; int regKey; int tableSubId; int bankSubId; };
@@ -2781,7 +2781,7 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
  * Sends a phrase's lines to the speech play callback and returns their total length as a percentage of the buffer.
  *
  * Does nothing without a play callback (SPCHI_hooks +0x0, SPCH_StartSpeechCallback). Each of the template's slots takes a play list
- * entry from @p firstEntry (SPCHI_playListState): table and row. A random-subset table drops the row from its subset when D_004A4830 is
+ * entry from @p firstEntry (SPCHI_playListState): table and row. A random-subset table drops the row from its subset when SPCHI_dropPlayedRowsFlag is
  * set. The message holds the table slot, the row's start (plus the repeat index times the table length when set), its
  * length, the key, the bank's sub id (SPCHI_getBankSubId) and registration key (SPCHI_getBankRegKey) and the table's +0x2
  * halfword. The row is then recorded in the table's history (SPCHI_recordHistory).
@@ -2821,7 +2821,7 @@ int SPCHI_sendPhraseLines(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
                 x = listEntry->x;
                 table = SPCHI_tableSlots_9830[x];
                 y = listEntry->y;
-                if ((table[4] & 0x80) && D_004A4830_9830 != 0) {
+                if ((table[4] & 0x80) && SPCHI_dropPlayedRowsFlag_9830 != 0) {
                     clearBit_9830(table, y);
                 }
                 if (SPCHI_readRow(table, y, &rowInfo)) {
@@ -3811,7 +3811,7 @@ void SPCHI_storeBoundTags(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLa
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_reportSlotTags);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **SPCHI_tableSlots_AE48 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
+extern unsigned char **SPCHI_tableSlots_AE48 __asm__("SPCHI_tableSlots");      /* shape table, SPCHI_tableSlotCount entries */
 extern struct sFF90 SPCHI_hooks_AE48 __asm__("SPCHI_hooks");
 struct G_AE48 { int f0, f4, f8; struct sPlayLine q[0x30]; };
 extern struct G_AE48 SPCHI_playListState_AE48 __asm__("SPCHI_playListState");
@@ -4193,15 +4193,15 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_random);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct { unsigned short val; unsigned short key; } Hist_B5C0;
-extern Hist_B5C0 D_00450B88_B5C0[] __asm__("D_00450B88");
-extern int D_004A4858;
+extern Hist_B5C0 SPCHI_randomHistory_B5C0[] __asm__("SPCHI_randomHistory");
+extern int SPCHI_randomHistoryPos;
 extern unsigned int SPCHI_nextRandom(void);
 
 /**
  * Returns a random number below @p range; with a key it tries to avoid the key's recent results.
  *
  * Without a key (-1) one draw is returned. Otherwise up to 32 draws are made until one is not among the last min(@p
- * range / 2, 10) results kept for that key in the 32-entry history (D_00450B88), keeping the draw whose repeat is
+ * range / 2, 10) results kept for that key in the 32-entry history (SPCHI_randomHistory), keeping the draw whose repeat is
  * oldest; the kept value is recorded under the key. Quirk: it returns the last draw rather than the kept value, so
  * after 32 repeating draws the history records a value that was not returned.
  *
@@ -4232,16 +4232,16 @@ int SPCHI_random(int range, int key) {
         draw = (SPCHI_nextRandom() >> 16) * range >> 16;
         n = half;
         if (n > 32) n = 32;
-        idx = D_004A4858;
+        idx = SPCHI_randomHistoryPos;
         found = -1;
         i = 0;
         k = 0;
         stop = 0;
         do {
             if (i < n) {
-                if (D_00450B88_B5C0[idx].key == kk) {
+                if (SPCHI_randomHistory_B5C0[idx].key == kk) {
                     i++;
-                    if (D_00450B88_B5C0[idx].val == draw) {
+                    if (SPCHI_randomHistory_B5C0[idx].val == draw) {
                         stop = 1;
                         found = i - 1;
                     }
@@ -4264,10 +4264,10 @@ int SPCHI_random(int range, int key) {
         tries++;
         if (tries >= 32) done = 1;
     } while (!done);
-    D_004A4858++;
-    if (D_004A4858 >= 32) D_004A4858 = 0;
-    D_00450B88_B5C0[D_004A4858].val = kept;
-    D_00450B88_B5C0[D_004A4858].key = kk;
+    SPCHI_randomHistoryPos++;
+    if (SPCHI_randomHistoryPos >= 32) SPCHI_randomHistoryPos = 0;
+    SPCHI_randomHistory_B5C0[SPCHI_randomHistoryPos].val = kept;
+    SPCHI_randomHistory_B5C0[SPCHI_randomHistoryPos].key = kk;
     return draw;
 }
 #endif
@@ -4280,13 +4280,13 @@ struct P_B790 {
     unsigned short a;
     unsigned short b;
 };
-extern struct P_B790 D_00450B88_B790[32] __asm__("D_00450B88");
+extern struct P_B790 SPCHI_randomHistory_B790[32] __asm__("SPCHI_randomHistory");
 extern unsigned int SPCHI_randomState_B790[6] __asm__("SPCHI_randomState");
-extern int D_004A4858;
+extern int SPCHI_randomHistoryPos;
 
 /**
  * Seeds the speech random generator from @p seed (SPCHI_randomState, six words from seed + (seed << 16) and fixed constants)
- * and clears its 32-entry history (D_00450B88, 0xFFFF) and position (D_004A4858).
+ * and clears its 32-entry history (SPCHI_randomHistory, 0xFFFF) and position (SPCHI_randomHistoryPos).
  *
  * @param seed  the seed (SPCH_Init's "rNum")
  */
@@ -4295,8 +4295,8 @@ void SPCHI_seedRandom(int seed) {
     unsigned int state;
 
     for (i = 0; i < 32; i++) {
-        D_00450B88_B790[i].a = 0xFFFF;
-        D_00450B88_B790[i].b = 0xFFFF;
+        SPCHI_randomHistory_B790[i].a = 0xFFFF;
+        SPCHI_randomHistory_B790[i].b = 0xFFFF;
     }
     seed += seed << 16;
     state = seed + 0xF22D0E56;
@@ -4310,7 +4310,7 @@ void SPCHI_seedRandom(int seed) {
     state += 0x97327AE1;
     SPCHI_randomState_B790[4] = state;
     state += 0xD1A9FBE7;
-    D_004A4858 = 0;
+    SPCHI_randomHistoryPos = 0;
     SPCHI_randomState_B790[5] = state;
 }
 #endif

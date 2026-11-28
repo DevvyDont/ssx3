@@ -149,9 +149,9 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_data_ui_charpic_big[];
 extern char str_pct_spct_s_ssh[];
 extern char str_CharaPics[];
-extern char* D_00442928[];
+extern char* cFELoadScreen_riderNameTable[];
 extern int D_004A2B38;
-extern int D_004A2B3C;
+extern int cFELoadScreen_smallFlatSuffix;
 
 
 static inline int loadTex_3640(char* data, const char* name)
@@ -168,7 +168,7 @@ static inline int loadTex_3640(char* data, const char* name)
  * otherwise, else the first human rider's character (cBENewPlayerInterface_getRiderCharID()). Type 2, only when the
  * game path (newRace.cGamePath) is 2 (online), loads players 0 and 1's characters
  * (cBENewPlayerInterface_getPlayerCharID()) into +0x10 and +0x14. Each file is "%s%s.ssh" of the character's name
- * D_00442928[id] and a suffix (D_004A2B38, "_flat", for type 1; D_004A2B3C for type 2), loaded with FILE_loadpackz()
+ * cFELoadScreen_riderNameTable[id] and a suffix (D_004A2B38, "_flat", for type 1; cFELoadScreen_smallFlatSuffix for type 2), loaded with FILE_loadpackz()
  * and uploaded through the graphics manager's slot 46 (cPS2GraphicsMan_AddTexture) as "CharaPics"; the file buffer is then freed.
  * cFELoadScreen_load() calls it with 1 or 2 depending on the screen it pushes.
  *
@@ -187,12 +187,12 @@ void cFELoadScreen::loadTexture(int type)
         tBENetworkDB* opt = ((&cBENetworkInterface_networkOpt));
         if (opt->bIsNetworkGame != 0) {
             if (opt->bIsHost != 0) {
-                sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 0)], D_004A2B38);
+                sprintf(name, fmt, cFELoadScreen_riderNameTable[cBENewPlayerInterface_getRiderCharID(plr, 0)], D_004A2B38);
             } else {
-                sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, 1)], D_004A2B38);
+                sprintf(name, fmt, cFELoadScreen_riderNameTable[cBENewPlayerInterface_getRiderCharID(plr, 1)], D_004A2B38);
             }
         } else {
-            sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
+            sprintf(name, fmt, cFELoadScreen_riderNameTable[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
         }
         char* data = FILE_loadpackz(name, 0x3000100);
         mTexID[0] = loadTex_3640(data, str_CharaPics);
@@ -201,7 +201,7 @@ void cFELoadScreen::loadTexture(int type)
     } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         int* slot = (int*)(&mTexID[0]);
         for (int i = 0; i < 2; i++) {
-            sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
+            sprintf(name, str_pct_spct_s_ssh, cFELoadScreen_riderNameTable[cBENewPlayerInterface_getPlayerCharID(plr, i)], cFELoadScreen_smallFlatSuffix);
             char* data = FILE_loadpackz(name, 0x3000100);
             *slot = loadTex_3640(data, str_CharaPics);
             if (data != 0)

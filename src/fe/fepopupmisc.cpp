@@ -7470,7 +7470,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* cOVState_MESSAGECENTER_squareButtonName;
-extern char* D_004A2098;
+extern char* cOVState_MESSAGECENTER_crossButtonWidgetName;
 extern char str_btext3_b[];
 extern char str_btext1[];
 extern char str_TotalMessagesLabel[];
@@ -7505,7 +7505,7 @@ void cOVState_MESSAGECENTER::onWidgetCreate(cUIThing* w)
         mpButtonSquare = w;
     else if (widgetHash == GetHashValue32(str_btext3_b))
         mpButtonText3 = w;
-    if (widgetHash == GetHashValue32(D_004A2098)) {
+    if (widgetHash == GetHashValue32(cOVState_MESSAGECENTER_crossButtonWidgetName)) {
         mpButtonCross = w;
         return;
     }
@@ -9391,7 +9391,7 @@ extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern int cGameModeMan_iCharRank[];
 extern int D_005366A8[];
 extern char* cOVState_overlayOptionTextIDs[];
-extern int D_004A213C;
+extern int cOVState_platinumMedalFlag;
 struct sIdx5_6718 {
     int v[5];
 };
@@ -9452,7 +9452,7 @@ static inline unsigned short* Loc1E6718(char* name)
  * results, rival challenge, final results), the Time or Score column, then up to six rider rows (two for rival
  * challenges and two-player games, the AI's rider count for races) with names and times, scores or DNF; the help text
  * (won / lost challenge, go to the semi-final, sorry, platinum / gold / silver / bronze, or the two-player winner line
- * kT_OVRCMNCongratP1); the medal icons (platinum instead of gold when D_004A213C is set) and the option buttons from
+ * kT_OVRCMNCongratP1); the medal icons (platinum instead of gold when cOVState_platinumMedalFlag is set) and the option buttons from
  * D_0046E648, or only option 8 in a network game. Raises "screenData" (y = 200) in two-player and challenge games.
  *
  * @return 0 (the transition is not finished)
@@ -9622,7 +9622,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 } else {
                     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNSorryGetThird));
                 }
-            } else if (D_004A213C != 0) {
+            } else if (cOVState_platinumMedalFlag != 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsPlatinum));
             } else if (cGameModeMan_iRanking[pl0] == 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsGold));
@@ -9687,7 +9687,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 } else if (cGameModeMan_iRanking[pl0] == 2) {
                     cUIState_showObjSafe(this, str_bronze);
                 }
-                if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT && D_004A213C != 0) {
+                if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_WORLDCIRCUIT && cOVState_platinumMedalFlag != 0) {
                     void* goldIcon = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_gold));
                     cUIIcon_setTextureByHashValue(goldIcon, GetHashValue32(str_platinum));
                 }
@@ -10014,7 +10014,7 @@ extern "C" char* formatMinutesSeconds(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
-extern int D_004A213C;
+extern int cOVState_platinumMedalFlag;
 extern int cGameModeMan_iRanking[];
 extern unsigned int D_00536640[];
 extern char str_finishov[];
@@ -10053,7 +10053,7 @@ public:
  * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (mElapsedTime), sets flag
  * 8 in "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only
  * their "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's mLastEventMedal
- * (kMEDAL_PLATINUM .. kMEDAL_BRONZE) in a final (heat 3) or kGAMEEVENT_RIVALTIME, setting D_004A213C for platinum, and
+ * (kMEDAL_PLATINUM .. kMEDAL_BRONZE) in a final (heat 3) or kGAMEEVENT_RIVALTIME, setting cOVState_platinumMedalFlag for platinum, and
  * "new_record" when the score interface has a new record (+0x18 or +0x1C not negative). Online, when the human rider's
  * word +0x480 is set, or for the time challenges (kGAMEEVENT_TIME_PEAK1..3) hides "screendata" and "3D_Ov"; otherwise
  * plays menu sound 0xE.
@@ -10099,10 +10099,10 @@ void cOVState_RACE_FINISHOV::onCreateScreen()
     }
     if (ifaceD->mLastEventMedal == kMEDAL_PLATINUM
         && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME)) {
-        D_004A213C = 1;
+        cOVState_platinumMedalFlag = 1;
         cUIState_showObjSafe(this, str_platinum);
     } else {
-        D_004A213C = 0;
+        cOVState_platinumMedalFlag = 0;
         cUIState_hideObjSafe(this, str_platinum);
     }
     if (ifaceD->mLastEventMedal == kMEDAL_GOLD
@@ -10272,7 +10272,7 @@ extern char str_place6[];
  *
  * Like the race finish overlay: "finishov" screen, timer reset, "Menu0000" flag 8. Shows firstrun / secondrun /
  * finalrun by the game mode manager's heat (not for kGAMEMODE_PNTSCHALLENGE), the medal icon by the reward interface's
- * mLastEventMedal in a final or kGAMEEVENT_RIVALTIME / kGAMEEVENT_RIVALPOINTS (platinum also sets D_004A213C), the
+ * mLastEventMedal in a final or kGAMEEVENT_RIVALTIME / kGAMEEVENT_RIVALPOINTS (platinum also sets cOVState_platinumMedalFlag), the
  * human rider's "place%d" (or "place6" past sixth), "pointstotal" as kT_OVRCMNPointstotal with the rider's points and
  * "new_record". Hides "screendata" and "3D_Ov" online, when the human rider's word +0x480 is set, for the points
  * challenges (kGAMEEVENT_POINTS_PEAK1..3) or in a final qualifying round; plays menu sound 0xE.
@@ -10324,10 +10324,10 @@ void cOVState_BASSSP_QUAL_FINISHOV::onCreateScreen()
     if (ifaceD->mLastEventMedal == kMEDAL_PLATINUM
         && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALTIME
             || cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS)) {
-        D_004A213C = 1;
+        cOVState_platinumMedalFlag = 1;
         cUIState_showObjSafe(this, str_platinum);
     } else {
-        D_004A213C = 0;
+        cOVState_platinumMedalFlag = 0;
         cUIState_hideObjSafe(this, str_platinum);
     }
     if (ifaceD->mLastEventMedal == kMEDAL_GOLD

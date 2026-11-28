@@ -276,11 +276,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the overlay with vtable D_00474B80 (overlay id 14).
+ * Destroys the overlay with vtable cOVState_EMPTY_vtbl (overlay id 14).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00474B80.
+ * own. It is the destructor slot (+0xC) of cOVState_EMPTY_vtbl.
  *
  */
 void cOVState::EMPTY()

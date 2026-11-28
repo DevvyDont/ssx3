@@ -1367,7 +1367,7 @@ extern "C" void* pathxSND_alloc(int size)
 INCLUDE_ASM("sound/bankmonitor", pathxSND_free__FPv);
 #ifdef SKIP_ASM
 /**
- * Frees a block with MEM_free; pathxSND_init installs it as the Pathfinder back end's free hook (D_004A3794).
+ * Frees a block with MEM_free; pathxSND_init installs it as the Pathfinder back end's free hook (pathxSND_freeHook).
  *
  * @return MEM_free's result
  */
@@ -1406,21 +1406,21 @@ extern "C" void printf();
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void* resizeBlock(void* block, int size);
 extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
-extern int D_004A379C;
+extern int pathxSND_timerClientId;
 extern void (*D_004A3780)();
 extern void (*D_004A3784)();
 extern void* (*pathxSND_allocHook)(void*, int, int);
 extern void* (*D_004A3790)(void*, int);
-extern void* (*D_004A3794)(void*);
+extern void* (*pathxSND_freeHook)(void*);
 
 /**
  * Starts the Pathfinder sound back end ("pathxSND"): clears its slot tables and installs its hooks and clients.
  *
  * Clears the 24 player-slot pointers pathxSND_players and resets the 24 bank records pathxSND_banks (words 0, 1, 2 = -1, word 6 =
- * 0). Stores cb in pathxSND_syncCallback and id in D_004A379C, registers id as a 100 Hz sound-system client
+ * 0). Stores cb in pathxSND_syncCallback and id in pathxSND_timerClientId, registers id as a 100 Hz sound-system client
  * (SNDSYS_add100hzclient) and pathxSND_syncTask as a sync task (SYNCTASK_add(.., 5, 100)), and installs the hooks
  * D_004A3780 = REAL_abortmessage, D_004A3784 = printf, pathxSND_allocHook = MEM_alloc, D_004A3790 = resizeBlock,
- * D_004A3794 = pathxSND_free. Called by the Pathfinder library (func_003D25F0) when it opens its first player.
+ * pathxSND_freeHook = pathxSND_free. Called by the Pathfinder library (func_003D25F0) when it opens its first player.
  *
  * @param cb  the callback the sync task pathxSND_syncTask calls
  * @param id  the 100 Hz client to register (a function address)
@@ -1435,14 +1435,14 @@ extern "C" void pathxSND_init(void (*cb)(), int id)
         pathxSND_banks[i].unk_18 = 0;
     }
     pathxSND_syncCallback = cb;
-    D_004A379C = id;
+    pathxSND_timerClientId = id;
     SNDSYS_add100hzclient((void*)id);
     SYNCTASK_add(pathxSND_syncTask, 5, 100);
     D_004A3780 = REAL_abortmessage;
     D_004A3784 = printf;
     pathxSND_allocHook = MEM_alloc;
     D_004A3790 = resizeBlock;
-    D_004A3794 = pathxSND_free;
+    pathxSND_freeHook = pathxSND_free;
 }
 #endif
 
@@ -1453,21 +1453,21 @@ extern "C" int pathxSND_syncTask();
 extern "C" void SYNCTASK_del(int (*fn)());
 extern "C" void SNDSYS_remove100hzclient(int id);
 extern void (*pathxSND_syncCallback)();
-extern int D_004A379C;
+extern int pathxSND_timerClientId;
 
 /**
  * Stops the Pathfinder sound back end: unregisters its 100 Hz client and sync task when a callback is installed.
  *
- * Calls SNDSYS_remove100hzclient(D_004A379C) and SYNCTASK_del(pathxSND_syncTask), then clears pathxSND_syncCallback and D_004A379C.
+ * Calls SNDSYS_remove100hzclient(pathxSND_timerClientId) and SYNCTASK_del(pathxSND_syncTask), then clears pathxSND_syncCallback and pathxSND_timerClientId.
  * Called by the Pathfinder library (PATH_closeVoice) when its last player closes.
  */
 extern "C" void pathxSND_shutdown()
 {
     if (pathxSND_syncCallback != 0) {
-        SNDSYS_remove100hzclient(D_004A379C);
+        SNDSYS_remove100hzclient(pathxSND_timerClientId);
         SYNCTASK_del(pathxSND_syncTask);
         pathxSND_syncCallback = 0;
-        D_004A379C = 0;
+        pathxSND_timerClientId = 0;
     }
 }
 #endif
@@ -1804,14 +1804,14 @@ extern "C" int pathxSND_openPlayer(char* name, SNDPLAYOPTS* desc, int count, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", pathxSND_closePlayer);
 #ifdef SKIP_ASM
-extern void* (*D_004A3794)(void*);
+extern void* (*pathxSND_freeHook)(void*);
 extern "C" void SNDSTRM_destroy(int id);
 
 /**
  * Closes a Pathfinder player slot: frees a bank player's banks or destroys the stream, then forgets the slot.
  *
  * For a bank player (byte +0x64) it walks the slot's bank records (pathxSND_findBank(idx, -1)), passes each record's memory
- * (+0x14) to the free hook D_004A3794 and clears the record (pathxSND_clearBank); for a stream it calls SNDSTRM_destroy on
+ * (+0x14) to the free hook pathxSND_freeHook and clears the record (pathxSND_clearBank); for a stream it calls SNDSTRM_destroy on
  * its handle. Then clears the slot pointer (pathxSND_forgetPlayer). Called by the Pathfinder library (PATH_closeVoice).
  *
  * @param idx  the player-slot index
@@ -1823,8 +1823,8 @@ extern "C" void pathxSND_closePlayer(int idx)
         int id = pathxSND_findBank(idx, -1);
         while (id >= 0) {
             tPathBank* record = &pathxSND_banks[id];
-            if (D_004A3794 != 0 && record->mMemory != 0) {
-                D_004A3794(record->mMemory);
+            if (pathxSND_freeHook != 0 && record->mMemory != 0) {
+                pathxSND_freeHook(record->mMemory);
             }
             pathxSND_clearBank(record);
             id = pathxSND_findBank(idx, -1);
@@ -3205,7 +3205,7 @@ extern "C" int FileParser_AssignString(void* parser, const char* key, char* out)
 void cStreamSys_STREAM_SetBigFile_2B0088(void* self, int i, char* val) __asm__("cStreamSys_STREAM_SetBigFile");
 extern "C" bool cSpeechInstance_LoadEventFile(cSpeechInstance* self, int a, char* name, int b, int c);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern void* D_004A37B0;
+extern void* cSpeechInstance_configFilePath;
 extern char str_BIGFILE[];
 extern char str_BASEPATH[];
 extern char str_BANK[];
@@ -3215,7 +3215,7 @@ extern char str_pct_spct_s_c[];
 extern "C" void cSpeechInstance_AddBank(cSpeechInstance* self, const char* bankPath, const char* shortName, void* headerData);
 
 /**
- * Reads a cSpeechInstance's speech.inf section (D_004A37B0): its .big file, base paths and extra banks.
+ * Reads a cSpeechInstance's speech.inf section (cSpeechInstance_configFilePath): its .big file, base paths and extra banks.
  *
  * Parses the section whose name starts with a2 (FileParser_FindPartialSection). BIGFILE sets the stream's .big file
  * (cStreamSys_STREAM_SetBigFile on cStreamSys); each BASEPATH stores mBasePath, loads "<base>headers.big" (cSpeechInstance_LoadEventFile; stops at the
@@ -3234,7 +3234,7 @@ void cSpeechInstance::ReadConfig(int instanceIndex, int section, int loadLangHea
     char bigFileName[0x40];
     char path[0x80];
     char name[0x60];
-    __10FileParserPCci(parser, D_004A37B0, 0x100);
+    __10FileParserPCci(parser, cSpeechInstance_configFilePath, 0x100);
     if (FileParser_FindPartialSection(parser, section) != 0)
     {
         FileParser_SkipSectionNames(parser);

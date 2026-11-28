@@ -8849,7 +8849,7 @@ extern "C" void cPS2DeferManager_writeStateChange_impl(__SIZE_TYPE__ selfi, sDra
 INCLUDE_ASM("object/railmodifier", cPS2DeferManager_sortItems);
 #ifdef SKIP_ASM
 
-extern tDeferSortItem D_00505B70[];
+extern tDeferSortItem cPS2DeferManager_sortSwapBuffer[];
 extern void* SPRMan;
 extern "C" void* cPS2ScratchPad_claimBuffer(void* ring, unsigned int addr, int size, int flags);
 extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
@@ -8857,13 +8857,13 @@ extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
 /**
  * Sorts the defer manager's sort items (+0x67CA8, count +0x67CA4) by key with a four-pass 8-bit radix sort.
  *
- * The 4 x 257 histogram lives in the scratchpad ring (cPS2ScratchPad_claimBuffer) and D_00505B70 is the swap buffer; after the
+ * The 4 x 257 histogram lives in the scratchpad ring (cPS2ScratchPad_claimBuffer) and cPS2DeferManager_sortSwapBuffer is the swap buffer; after the
  * fourth pass the sorted items are back in place.
  */
 void cPS2DeferManager::sortItems()
 {
     void* ring = SPRMan;
-    tDeferSortItem* dst = D_00505B70;
+    tDeferSortItem* dst = cPS2DeferManager_sortSwapBuffer;
     int n = mNumSortItems;
     tDeferSortItem* src = ((&mSortItems[0]));
     int (*hist)[257] = (int (*)[257])cPS2ScratchPad_claimBuffer(ring, 0, -1, 0);

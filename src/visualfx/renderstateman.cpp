@@ -1547,14 +1547,14 @@ extern sRSEntry_002EFF98* cGraphicsMan_TheGraphicsMan_renderstateman __asm__("cG
 struct sShadowCfg_002EFF98 {
     int texIndex;
 };
-extern sShadowCfg_002EFF98 D_004A45D4;
+extern sShadowCfg_002EFF98 cBoardTrail_m_Texture;
 extern int D_004A443C;
 extern cVisualEffectsMan* gVisualEffectsMan;
 
 /**
  * Constructs the visual-effects manager base: empty effect slots, default effect textures, global pointer.
  *
- * Sets the vtable (+0x44), clears the 17 effect-object slots, stores 0x37 in D_004A45D4 and 0x30 in
+ * Sets the vtable (+0x44), clears the 17 effect-object slots, stores 0x37 in cBoardTrail_m_Texture and 0x30 in
  * D_004A443C and makes itself the manager gVisualEffectsMan. On the graphics manager it sets view 6's specular,
  * patch specular, snow sparkle and rim texture ids (0x2E, 0x31, 0x44, 0x2F) and zeroes views 6 and 7 of the
  * per-view arrays m_isInNIS through m_ScreenTintOffsetB.
@@ -1581,7 +1581,7 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(cVisualEffectsMan* self)
     self->m_SplashToggles = 0;
     self->m_Tube = 0;
     self->m_PathArrow = 0;
-    D_004A45D4.texIndex = 55;
+    cBoardTrail_m_Texture.texIndex = 55;
     D_004A443C = 0x30;
     gVisualEffectsMan = self;
     sRSEntry_002EFF98* rsEntries = cGraphicsMan_TheGraphicsMan_renderstateman;

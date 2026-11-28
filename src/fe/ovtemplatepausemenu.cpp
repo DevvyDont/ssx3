@@ -179,10 +179,10 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 extern char str_pct_d_j[];
-extern char D_004C8AE8[];
-extern char D_004C8AF8[];
-extern char D_004C8B08[];
-extern char D_004C8B18[];
+extern char cOVTemplate_PauseMenu_selectedLockedColour[];
+extern char cOVTemplate_PauseMenu_selectedColour[];
+extern char cOVTemplate_PauseMenu_lockedColour[];
+extern char cOVTemplate_PauseMenu_regularColour[];
 
 struct sVEnt_001F85C0 { short delta; short index; void (*fn)(void*, void*); };
 
@@ -209,15 +209,15 @@ void cOVTemplate_PauseMenu::onGainFocus(cUIState* pPrevState)
         if (obj != 0) {
             if (i == cOVTemplate_PauseMenu_mSelectedMenuIndex) {
                 if (*(int*)(flags + (*sel << 2)) != 0) {
-                    setColor_001F85C0(obj, D_004C8AF8);
+                    setColor_001F85C0(obj, cOVTemplate_PauseMenu_selectedColour);
                 } else {
-                    setColor_001F85C0(obj, D_004C8AE8);
+                    setColor_001F85C0(obj, cOVTemplate_PauseMenu_selectedLockedColour);
                 }
             } else {
                 if (*(int*)(flags + (*sel << 2)) != 0) {
-                    setColor_001F85C0(obj, D_004C8B18);
+                    setColor_001F85C0(obj, cOVTemplate_PauseMenu_regularColour);
                 } else {
-                    setColor_001F85C0(obj, D_004C8B08);
+                    setColor_001F85C0(obj, cOVTemplate_PauseMenu_lockedColour);
                 }
             }
         }
@@ -392,10 +392,10 @@ extern char str_help0[];
 extern char str_trans_out[];
 extern char str_cFEStateAudioOptions_b[];
 extern char* str_H_J_b[];
-extern char D_004C8AE8[];
-extern char D_004C8AF8[];
-extern char D_004C8B08[];
-extern char D_004C8B18[];
+extern char cOVTemplate_PauseMenu_selectedLockedColour[];
+extern char cOVTemplate_PauseMenu_selectedColour[];
+extern char cOVTemplate_PauseMenu_lockedColour[];
+extern char cOVTemplate_PauseMenu_regularColour[];
 
 struct sVE_PMWE {
     short delta;
@@ -535,9 +535,9 @@ void cOVTemplate_PauseMenu::onWidgetEvent(cUIThing* pWidget, unsigned int event)
     case cUIState::kONGAINFOCUS: {
         if (mScreenExiting == 0) {
             if (mPauseOptionUnlocked[w->idx] != 0)
-                setColor_PMWE(w, D_004C8AF8);
+                setColor_PMWE(w, cOVTemplate_PauseMenu_selectedColour);
             else
-                setColor_PMWE(w, D_004C8AE8);
+                setColor_PMWE(w, cOVTemplate_PauseMenu_selectedLockedColour);
             if (mScreenExiting == 0)
                 setPDAIconColor(w->idx, 1);
         }
@@ -550,9 +550,9 @@ void cOVTemplate_PauseMenu::onWidgetEvent(cUIThing* pWidget, unsigned int event)
         if (mScreenExiting != 0)
             return;
         if (mPauseOptionUnlocked[w->idx] != 0)
-            setColor_PMWE(w, D_004C8B18);
+            setColor_PMWE(w, cOVTemplate_PauseMenu_regularColour);
         else
-            setColor_PMWE(w, D_004C8B08);
+            setColor_PMWE(w, cOVTemplate_PauseMenu_lockedColour);
         if (mScreenExiting == 0)
             setPDAIconColor(w->idx, 0);
         break;

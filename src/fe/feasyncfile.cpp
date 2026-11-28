@@ -8179,7 +8179,7 @@ extern char str_kT_CMNHUDNone[];
 extern char str_1_c[];
 extern char str_2[];
 extern char str_3[];
-extern char D_004A1510[];
+extern char str_4[];
 extern char str_ListBoxPowerUps[];
 extern char str_ListBoxMultipliers[];
 extern char str_ListBoxPointicons[];
@@ -8276,7 +8276,7 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
         cUIListBox_addEntryByAsciiString(item, str_1_c, 1);
         cUIListBox_addEntryByAsciiString(item, str_2, 2);
         cUIListBox_addEntryByAsciiString(item, str_3, 3);
-        cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
+        cUIListBox_addEntryByAsciiString(item, str_4, 4);
         obj->setVisible(1);
         obj->setUseStaticColourListBox(1);
         mpLBCPURiders = (cUIListBox*)item;

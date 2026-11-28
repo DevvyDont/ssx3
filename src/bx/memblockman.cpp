@@ -1408,7 +1408,7 @@ extern "C" void clearDiscTrayOpened()
 INCLUDE_ASM("bx/memblockman", cd_recoverReadError);
 #ifdef SKIP_ASM
 extern int CDVD_state[];
-extern int D_004A3ED4;
+extern int cd_trayCheckPendingFlag;
 extern "C" int sceCdTrayReq(int cmd, int* out);
 extern "C" void CDVD_recoverRead(void);
 
@@ -1416,7 +1416,7 @@ extern "C" void CDVD_recoverRead(void);
  * Recovers from a failed disc read and notes whether the disc tray was opened (a sync task).
  *
  * systemInit installs it with SYNCTASK_add in place of the CD file system's CDVD_checkFailedRead, which does the same
- * recovery. When D_004A3ED4 is set, clears it and calls sceCdTrayReq(2, ...) (command 2, the result is discarded).
+ * recovery. When cd_trayCheckPendingFlag is set, clears it and calls sceCdTrayReq(2, ...) (command 2, the result is discarded).
  * When both bits 2 and 4 (mask 6) of the CD file system flags (CDVD_state) are set, calls sceCdTrayReq(2, ...) again
  * and sets cd_discTrayOpenedFlag when it reports a nonzero count, clears the two bits and re-runs the read with CDVD_recoverRead.
  *
@@ -1425,9 +1425,9 @@ extern "C" void CDVD_recoverRead(void);
 extern "C" int cd_recoverReadError(void)
 {
     int flags = CDVD_state[0];
-    if (D_004A3ED4 != 0) {
+    if (cd_trayCheckPendingFlag != 0) {
         int trayStatus;
-        D_004A3ED4 = 0;
+        cd_trayCheckPendingFlag = 0;
         trayStatus = 0;
         sceCdTrayReq(2, &trayStatus);
     }

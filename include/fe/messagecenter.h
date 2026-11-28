@@ -78,7 +78,7 @@ struct cOVState_MESSAGECENTER : public cOVState {
     cUIThing* mpButtonSquare;       // 0x14C [R] zeroed; [U] widget named by cOVState_MESSAGECENTER_squareButtonName ("ps2sq"); cOVState_MESSAGECENTER_updateButtons /
                                     //       cOVState_MESSAGECENTER_fillRows show or hide it
     cUIThing* mpButtonText3;        // 0x150 [R] zeroed; [U] widget "btext3"; shown/hidden with mpButtonSquare
-    cUIThing* mpButtonCross;        // 0x154 [R] zeroed; [U] widget named by D_004A2098 ("ps2x"); cOVState_MESSAGECENTER_fillRows
+    cUIThing* mpButtonCross;        // 0x154 [R] zeroed; [U] widget named by cOVState_MESSAGECENTER_crossButtonWidgetName ("ps2x"); cOVState_MESSAGECENTER_fillRows
     cUIText* mpButtonText1;         // 0x158 [R] zeroed; [U] widget "btext1"; cOVState_MESSAGECENTER_updateButtons sets kT_BTNView / Expand /
                                     //       Collapse
     cUIThing* mpArrowUp;            // 0x15C [R] zeroed; [U] widget "arr_up"; cOVState_MESSAGECENTER_updateScrollArrows shows it when mScrollOffset != 0

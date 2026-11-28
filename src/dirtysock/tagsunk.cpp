@@ -11092,21 +11092,21 @@ void cSharedLoginMan::startSaveAccount()
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_startCreateAccount);
 #ifdef SKIP_ASM
 extern char AccountData[0x11];
-extern char D_00442A60[];
+extern char sharedlogin_accountIconData[];
 extern int sharedlogin_cardCheckedFlag;
 extern "C" int slogin_startCreateAccount(void* a, void* b);
 
 /**
  * Starts creating the account save: the shared-login manager's step for state 10.
  *
- * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag, starts slogin_startCreateAccount(D_00442A60, AccountData) (which also copies the
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag, starts slogin_startCreateAccount(sharedlogin_accountIconData, AccountData) (which also copies the
  * user name and password from the buffer) and sets the state word to 11.
  */
 void cSharedLoginMan::startCreateAccount()
 {
     mError = 0;
     sharedlogin_cardCheckedFlag = 0;
-    slogin_startCreateAccount(D_00442A60, AccountData);
+    slogin_startCreateAccount(sharedlogin_accountIconData, AccountData);
     *(int*)this = 11;
 }
 #endif

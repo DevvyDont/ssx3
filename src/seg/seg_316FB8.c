@@ -2955,25 +2955,25 @@ INCLUDE_ASM("seg/seg_316FB8", __malloc_lock);
 #ifdef SKIP_ASM
 extern int GetThreadId(void);
 extern void WaitSema(int);
-extern int D_00454CA8;
-extern int D_00454CAC;
+extern int __malloc_lock_owner;
+extern int call_count;
 extern int __sce_sema_id;
 /**
  * Takes the recursive C heap lock for the calling thread.
  *
- * When the current thread (GetThreadId) already owns it (D_00454CA8) the count D_00454CAC goes up; otherwise it waits
+ * When the current thread (GetThreadId) already owns it (__malloc_lock_owner) the count call_count goes up; otherwise it waits
  * on the semaphore __sce_sema_id, records the owner and counts 1.
  *
  * @param reent  the reentrancy struct (ignored)
  */
 void __malloc_lock(struct _reent *reent) {
     int id = GetThreadId();
-    if (D_00454CA8 == id) {
-        D_00454CAC++;
+    if (__malloc_lock_owner == id) {
+        call_count++;
     } else {
         WaitSema(__sce_sema_id);
-        D_00454CA8 = id;
-        D_00454CAC++;
+        __malloc_lock_owner = id;
+        call_count++;
     }
 }
 #endif
@@ -2982,20 +2982,20 @@ void __malloc_lock(struct _reent *reent) {
 INCLUDE_ASM("seg/seg_316FB8", __malloc_unlock);
 #ifdef SKIP_ASM
 extern void SignalSema(int);
-extern int D_00454CA8;
-extern int D_00454CAC;
+extern int __malloc_lock_owner;
+extern int call_count;
 extern int __sce_sema_id;
 /**
  * Releases the recursive C heap lock taken by __malloc_lock.
  *
- * Decrements the count D_00454CAC; when it reaches 0 it clears the owner D_00454CA8 to -1 and signals the semaphore
+ * Decrements the count call_count; when it reaches 0 it clears the owner __malloc_lock_owner to -1 and signals the semaphore
  * __sce_sema_id.
  *
  * @param reent  the reentrancy struct (ignored)
  */
 void __malloc_unlock(struct _reent *reent) {
-    if (--D_00454CAC == 0) {
-        D_00454CA8 = -1;
+    if (--call_count == 0) {
+        __malloc_lock_owner = -1;
         SignalSema(__sce_sema_id);
     }
 }
@@ -4635,7 +4635,7 @@ extern unsigned long D_004550F8;
     }
 
 #define set_head_size(p, s) ((p)->size = (((p)->size & 1) | (s)))
-extern char *D_00455100;
+extern char *__malloc_sbrk_base;
 extern int D_00455118;
 extern unsigned long D_00455108;
 extern unsigned long D_00455110;
@@ -4647,7 +4647,7 @@ void malloc_extend_top_(int ptr, unsigned nb) __asm__("malloc_extend_top");
  *
  * Doug Lea's allocator 2.6.4 as built into newlib. Asks _sbrk_r for nb + top_pad (D_004550F8) + 16, rounded to
  * 0x1000 pages once the heap has a base. Contiguous space just extends the top chunk. Otherwise it records the first
- * sbrk base (D_00455100), aligns the new space to 16 bytes with a second sbrk to the next page, makes it the top, and
+ * sbrk base (__malloc_sbrk_base), aligns the new space to 16 bytes with a second sbrk to the next page, makes it the top, and
  * fences the old top with two 5-byte-size headers before freeing it with _free_r. Updates sbrked_mem D_00455118
  * and the peaks D_00455108 and D_00455110. Gives up silently when sbrk fails or returns memory below the old top.
  *
@@ -4665,7 +4665,7 @@ void malloc_extend_top_(int ptr, unsigned nb) {
     char *old_end = (char *)chunk_at_offset(old_top, old_top_size);
     unsigned sbrk_size = nb + D_004550F8 + 16;
     unsigned long pagesz = 0x1000;
-    if (D_00455100 != (char *)-1)
+    if (__malloc_sbrk_base != (char *)-1)
         sbrk_size = (sbrk_size + (pagesz - 1)) & ~(pagesz - 1);
     brk = _sbrk_r_sbrk(ptr, sbrk_size);
     if (brk == (char *)-1 || (brk < old_end && old_top != (mchunkptr)__malloc_av_))
@@ -4675,8 +4675,8 @@ void malloc_extend_top_(int ptr, unsigned nb) {
         top_size = sbrk_size + old_top_size;
         set_head(top, top_size | 1);
     } else {
-        if (D_00455100 == (char *)-1)
-            D_00455100 = brk;
+        if (__malloc_sbrk_base == (char *)-1)
+            __malloc_sbrk_base = brk;
         else
             D_00455118 += brk - old_end;
         front_misalign = (unsigned long)(brk + 8) & 15;
@@ -5210,7 +5210,7 @@ int _malloc_trim_r_(int reent_ptr, unsigned int retainBytes)
         top_size = current_brk - (char*)top;
         if (top_size >= (long)16) /* if not, we are very very dead! */
         {
-          sbrked_mem_E638 = current_brk - D_00455100;
+          sbrked_mem_E638 = current_brk - __malloc_sbrk_base;
           set_head(top, top_size | 1);
         }
         __malloc_unlock_unlock(reent_ptr);

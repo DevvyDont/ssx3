@@ -66,10 +66,10 @@ int GetHashValue32(char* str);
 extern char str_1_c[];
 extern char str_2[];
 extern char str_3[];
-extern char D_004A1510[];
-extern char D_004A1518[];
+extern char str_4[];
+extern char str_5[];
 extern char str_6[];
-extern char D_004A1528[];
+extern char str_7[];
 extern char str_8[];
 
 static inline int Is_00188870(int id, char* s) { return id == GetHashValue32(s); }
@@ -90,13 +90,13 @@ void cFEStateOptions::onWidgetCreate(cUIThing* item)
         item->mMiscData = 29;
     } else if (Is_00188870(item->mHashName, str_3)) {
         item->mMiscData = 0x1F;
-    } else if (Is_00188870(item->mHashName, D_004A1510)) {
+    } else if (Is_00188870(item->mHashName, str_4)) {
         item->mMiscData = 0x1E;
-    } else if (Is_00188870(item->mHashName, D_004A1518)) {
+    } else if (Is_00188870(item->mHashName, str_5)) {
         item->mMiscData = 0x20;
     } else if (Is_00188870(item->mHashName, str_6)) {
         item->mMiscData = 36;
-    } else if (Is_00188870(item->mHashName, D_004A1528)) {
+    } else if (Is_00188870(item->mHashName, str_7)) {
         item->mMiscData = 36;
     } else if (Is_00188870(item->mHashName, str_8)) {
         item->mMiscData = 34;
@@ -129,7 +129,7 @@ extern int cFEStateOptions_gameChangedFlag;
 extern int cFEStateOptions_soundChangedFlag;
 extern int cFEStateOptions_hudChangedFlag;
 extern int cFEStateOptions_controllerChangedFlag;
-extern int D_004A14E0;
+extern int cFEStateOptions_savePromptShownFlag;
 extern char gUISoundNull;
 
 
@@ -147,7 +147,7 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  *
  * kONNEXT (select): entry "6" opens a cKeyboardPopup with empty text; entry "8" asks to save first
  * (cFEStateOptions_saveOptionPrompt, probably saveOptionPrompt) when an options-changed flag (cFEStateOptions_gameChangedFlag/D4/D8/DC) is set and
- * D_004A14E0 is clear, otherwise it sets the pending-delete bit 0x80 of mAttrState (+0x1C), plays
+ * cFEStateOptions_savePromptShownFlag is clear, otherwise it sets the pending-delete bit 0x80 of mAttrState (+0x1C), plays
  * "TransitionOut" and, when +0x48 is set, stores 0x18 at +0xC of the custom interface; every other entry (and
  * "8" with +0x48 set) pushes the state that the engine's custom interface (engine + 0x0) virtual slot 4,
  * probably getNextState returns for the widget's misc data.
@@ -173,11 +173,11 @@ void cFEStateOptions::onWidgetEvent(cUIThing* widget, unsigned int event)
             cUIStateStack_pushPopup(&mpEngine->mStateStack, mpKeyboard);
             break;
         } else if (Is_00188980(widget->mHashName, str_8)) {
-            if (D_004A14E0 == 0 && (cFEStateOptions_gameChangedFlag != 0 || cFEStateOptions_soundChangedFlag != 0 || cFEStateOptions_controllerChangedFlag != 0 || cFEStateOptions_hudChangedFlag != 0)) {
+            if (cFEStateOptions_savePromptShownFlag == 0 && (cFEStateOptions_gameChangedFlag != 0 || cFEStateOptions_soundChangedFlag != 0 || cFEStateOptions_controllerChangedFlag != 0 || cFEStateOptions_hudChangedFlag != 0)) {
                 saveOptionPrompt();
                 break;
             }
-            D_004A14E0 = 0;
+            cFEStateOptions_savePromptShownFlag = 0;
             mAttrState |= 0x80;
             int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut));
             if (frame != cUIScreen::kNoFrame)
@@ -197,11 +197,11 @@ void cFEStateOptions::onWidgetEvent(cUIThing* widget, unsigned int event)
         }
         break;
     case cUIState::kONPREV: {
-        if (D_004A14E0 == 0 && (cFEStateOptions_gameChangedFlag != 0 || cFEStateOptions_soundChangedFlag != 0 || cFEStateOptions_controllerChangedFlag != 0 || cFEStateOptions_hudChangedFlag != 0)) {
+        if (cFEStateOptions_savePromptShownFlag == 0 && (cFEStateOptions_gameChangedFlag != 0 || cFEStateOptions_soundChangedFlag != 0 || cFEStateOptions_controllerChangedFlag != 0 || cFEStateOptions_hudChangedFlag != 0)) {
             saveOptionPrompt();
             break;
         }
-        D_004A14E0 = 0;
+        cFEStateOptions_savePromptShownFlag = 0;
         mAttrState |= 0x80;
         int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != cUIScreen::kNoFrame)
@@ -365,7 +365,7 @@ extern int cFEStateOptions_gameChangedFlag;
 extern int cFEStateOptions_soundChangedFlag;
 extern int cFEStateOptions_hudChangedFlag;
 extern int cFEStateOptions_controllerChangedFlag;
-extern int D_004A14E0;
+extern int cFEStateOptions_savePromptShownFlag;
 
 /**
  * Pushes the save-options popup (a cFEPopupOptionReset) over the options menu and clears every options-changed flag.
@@ -376,7 +376,7 @@ extern int D_004A14E0;
  * kT_FESaveOptionsQuesPS2 and handles the answer.
  *
  * It then clears the game, sound, HUD and controller changed flags (cFEStateOptions_gameChangedFlag, cFEStateOptions_soundChangedFlag, cFEStateOptions_hudChangedFlag, cFEStateOptions_controllerChangedFlag),
- * sets D_004A14E0 to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
+ * sets cFEStateOptions_savePromptShownFlag to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
  * and clears +0x4C, which cFEStateOptions_onPopupEvent sets to 1 once the popup is answered.
  */
 void cFEStateOptions::saveOptionPrompt()
@@ -387,7 +387,7 @@ void cFEStateOptions::saveOptionPrompt()
     savePopup->mAccept = 0;
     cUIStateStack_pushPopup(&mpEngine->mStateStack, savePopup);
     cFEStateOptions_hudChangedFlag = 0;
-    D_004A14E0 = 1;
+    cFEStateOptions_savePromptShownFlag = 1;
     cFEStateOptions_controllerChangedFlag = 0;
     cFEStateOptions_soundChangedFlag = 0;
     cFEStateOptions_gameChangedFlag = 0;
@@ -451,7 +451,7 @@ extern char str_2[];
 extern char str_Menu[];
 extern char* D_00440FB8[];
 extern char* D_00440FC8[];
-extern char* D_00440FD8[];
+extern char* cFEStateOptionsGame_listBoxNameTable[];
 extern char* D_00440FE8[];
 extern char* D_00440FF8[];
 
@@ -513,7 +513,7 @@ void cFEStateOptionsGame::onCreateScreen()
     if (menu != 0)
         cUIMenu_setSelectedByIndex(menu, 1);
     if (((signed char*)&mLanguageSlot)[0] >= 0) {
-        void* w = find_188F28((this), D_00440FD8, 0);
+        void* w = find_188F28((this), cFEStateOptionsGame_listBoxNameTable, 0);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGAmerican), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGFrench), 1);
@@ -535,7 +535,7 @@ void cFEStateOptionsGame::onCreateScreen()
         }
     }
     if (((signed char*)&mLanguageSlot)[1] >= 0) {
-        void* w = find_188F28((this), D_00440FD8, 1);
+        void* w = find_188F28((this), cFEStateOptionsGame_listBoxNameTable, 1);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNMPH), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNKPH), 0);
@@ -553,7 +553,7 @@ void cFEStateOptionsGame::onCreateScreen()
         }
     }
     if (((signed char*)&mLanguageSlot)[2] >= 0) {
-        void* w = find_188F28((this), D_00440FD8, 2);
+        void* w = find_188F28((this), cFEStateOptionsGame_listBoxNameTable, 2);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19Widescreen169), 0);
@@ -753,8 +753,8 @@ extern void* cFEPopupScreenPos_vtbl[];
 extern void* cFEPopupVideoCalibration_vtbl[];
 extern void* cFEPopupOptionReset_vtbl[];
 extern char str_6[];
-extern char D_004A1528[];
-extern char* D_00440FD8[];
+extern char str_7[];
+extern char* cFEStateOptionsGame_listBoxNameTable[];
 extern int cFEStateOptions_gameChangedFlag;
 
 // cBEOptionInterface_mOption's first word (field names from On Tour's tBEOptionDB bitfields).
@@ -838,7 +838,7 @@ void cFEStateOptionsGame::onWidgetEvent(cUIThing* widget, unsigned int event)
             ((cFEPopupScreenPos*)popup)->mX = 0;
             ((cFEPopupScreenPos*)popup)->mAccept = 0;
             cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
-        } else if (Is_189980(widget->mHashName, D_004A1528)) {
+        } else if (Is_189980(widget->mHashName, str_7)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
             cUIState_cUIState1(popup, (char*)mpEngine, (this));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
@@ -868,7 +868,7 @@ void cFEStateOptionsGame::onWidgetEvent(cUIThing* widget, unsigned int event)
     }
     case cUIState::kONCHANGE:
         if (((signed char*)&mLanguageSlot)[0] >= 0 && Is_189980(widget->mHashName,
-                D_00440FD8[((signed char*)&mLanguageSlot)[0]])) {
+                cFEStateOptionsGame_listBoxNameTable[((signed char*)&mLanguageSlot)[0]])) {
             cBEOptionInterface_mOption_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
             cFELocale* locale = SSXApp->FELocale;
             sVE_189980b* vt = (sVE_189980b*)VPTR_OF(cUILocaleInterface, locale);
@@ -878,12 +878,12 @@ void cFEStateOptionsGame::onWidgetEvent(cUIThing* widget, unsigned int event)
             cSSXAudio_OpenSpeechLanguage(cAudioInterface_bxAudio(), 1);
         }
         if (((signed char*)&mLanguageSlot)[1] >= 0 && Is_189980(widget->mHashName,
-                D_00440FD8[((signed char*)&mLanguageSlot)[1]])) {
+                cFEStateOptionsGame_listBoxNameTable[((signed char*)&mLanguageSlot)[1]])) {
             bool on = *(unsigned char*)(((char*)widget) + 0x319);
             cBEOptionInterface_mOption_189980.iUseMetricUnits = on;
         }
         if (((signed char*)&mLanguageSlot)[2] >= 0 && Is_189980(widget->mHashName,
-                D_00440FD8[((signed char*)&mLanguageSlot)[2]])) {
+                cFEStateOptionsGame_listBoxNameTable[((signed char*)&mLanguageSlot)[2]])) {
             cBEOptionInterface_mOption_189980.iUseWidescreen = *(unsigned char*)(((char*)widget) + 0x319);
         }
         cSSXApp_activateBEOptions(SSXApp);
@@ -903,7 +903,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
-extern char* D_00440FD8[];
+extern char* cFEStateOptionsGame_listBoxNameTable[];
 
 // cBEOptionInterface_mOption's first word (field names from On Tour's tBEOptionDB bitfields).
 struct sGameCfg_189D60 {
@@ -938,13 +938,13 @@ struct sVE_189D60c {
 
 static inline void* find_189D60(cFEStateOptionsGame* self, int i)
 {
-    return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(D_00440FD8[((signed char*)&self->mLanguageSlot)[i]]));
+    return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(cFEStateOptionsGame_listBoxNameTable[((signed char*)&self->mLanguageSlot)[i]]));
 }
 
 /**
  * Pushes the current game options into the game options screen's widgets and applies them.
  *
- * The three list boxes are found on mpScreen (+0x40) by the names D_00440FD8[item[i]] (item[0..2] at +0x48: language,
+ * The three list boxes are found on mpScreen (+0x40) by the names cFEStateOptionsGame_listBoxNameTable[item[i]] (item[0..2] at +0x48: language,
  * speed units and widescreen; a negative slot is skipped, as is a missing widget). Their current entries come from
  * cBEOptionInterface_mOption: item[0] from bits 22-24 (the view's `mode`), whose selected entry data is also passed to
  * SSXApp->FELocale's virtual slot 3 before virtual slot 16 of the screen's sub-object at +0x40 is called; item[1] from
@@ -1030,7 +1030,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* self);
 extern char str_141advsettings[];
 extern char str_ongroup[];
 extern char str_fegroup[];
-extern char D_004A1528[];
+extern char str_7[];
 extern int cFEStateNet_fePath;
 
 /**
@@ -1057,7 +1057,7 @@ void cFEStateOptionsSound::onCreateScreen()
     if (offObj != 0) {
         offObj->setVisible(on ^ 1);
     }
-    cUIThing* item7 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A1528));
+    cUIThing* item7 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_7));
     if (item7 != 0) {
         item7->setVisible(on);
         item7->setStatic(on ^ 1);

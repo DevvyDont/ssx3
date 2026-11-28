@@ -723,7 +723,7 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueDepthFogPass);
 extern int cDepthFog_m_Enable;
 extern int cDepthFog_m_OverrideWP;
 extern void* SPRMan;
-extern char D_00507B80[];
+extern char cPS2GraphicsMan_depthFogTableArray[];
 extern "C" void cPS2GraphicsMan_copyDepthFog(void* self, int idx);
 extern "C" void func_0036A428(void* self, void* mat, int idx);
 extern "C" char* cPS2ScratchPad_claimBuffer(void* self, unsigned int addr, int size, int flags);
@@ -753,7 +753,7 @@ struct sGmOwner_AC00 {
  *
  * Returns at once unless cDepthFog_m_Enable. When cDepthFog_m_OverrideWP is set it first refreshes the view's fog entry
  * (cPS2GraphicsMan_copyDepthFog); it skips the view when the entry's density is 0.0 and its exponent is non-zero. func_0036A428 fills
- * the 1 KB table at D_00507B80 + @p idx * 0x400; vramHeap_allocBlock on mTexMan + 0x1F60 reserves 0x400 bytes of GS
+ * the 1 KB table at cPS2GraphicsMan_depthFogTableArray + @p idx * 0x400; vramHeap_allocBlock on mTexMan + 0x1F60 reserves 0x400 bytes of GS
  * memory, whose address is the record word at *(mTexMan + 0x3F50) + slot * 0x1C, shifted right 8.
  *
  * Three packets then go out through SPRMan (each opened with cPS2ScratchPad_claimBuffer and closed with cPS2ScratchPad_flushBufferTo, which
@@ -778,7 +778,7 @@ void cPS2GraphicsMan::queueDepthFogPass(int idx, void* pkt2, int* handle)
     if (fogEntry->w == 0.0f && fogEntry->z != 0) {
         return;
     }
-    char* mat = D_00507B80 + (idx << 10);
+    char* mat = cPS2GraphicsMan_depthFogTableArray + (idx << 10);
     func_0036A428(((char*)this), mat, idx);
     void* dma = SPRMan;
     char* pkt = cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);

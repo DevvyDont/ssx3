@@ -391,7 +391,7 @@ struct sScoreSlot_00155190
     char data[0x88];
 };
 extern sScoreSlot_00155190 D_00530990[];
-extern void* D_004A1244;
+extern void* cBEScoreInterface_noHighScoreText;
 
 /**
  * Returns the character record (D_00530990, 0x88 bytes each) of the rider who set one entry of the current race's
@@ -401,14 +401,14 @@ extern void* D_004A1244;
  * the result as text next to the entry.
  *
  * @param i  entry index, 0 (best) to 4
- * @return the character record, or D_004A1244 when the event has no table
+ * @return the character record, or cBEScoreInterface_noHighScoreText when the event has no table
  */
 void* cBEScoreInterface::getCurrentHighScoreCharacter(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores == 0)
-        return D_004A1244;
+        return cBEScoreInterface_noHighScoreText;
     return &D_00530990[highScores[i].cCharacter];
 }
 #endif
@@ -416,7 +416,7 @@ void* cBEScoreInterface::getCurrentHighScoreCharacter(int i)
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScoreName);
 #ifdef SKIP_ASM
-extern void* D_004A1244;
+extern void* cBEScoreInterface_noHighScoreText;
 
 /**
  * Returns the player name stored in one entry of the current race's high-score table.
@@ -424,7 +424,7 @@ extern void* D_004A1244;
  * The table is cBELibrary_getHighScoreTable(raceDB +0x40, newRace.cGameEvent); the 12-byte name is at +0x8 of the entry.
  *
  * @param i  entry index, 0 (best) to 4
- * @return the name, or D_004A1244 when the event has no table
+ * @return the name, or cBEScoreInterface_noHighScoreText when the event has no table
  */
 void* cBEScoreInterface::getCurrentHighScoreName(int i)
 {
@@ -432,7 +432,7 @@ void* cBEScoreInterface::getCurrentHighScoreName(int i)
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
         return highScores[i].strUserName;
-    return D_004A1244;
+    return cBEScoreInterface_noHighScoreText;
 }
 #endif
 

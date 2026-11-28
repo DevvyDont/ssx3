@@ -1832,7 +1832,7 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 extern "C" const char* getDollarString(int value);
 extern char D_004A2550[];
 extern char D_004A2560_oals[] __asm__("str_empty_e");
-extern char D_004A23C0[];
+extern char str_lbracket_pct_s_rbracket[];
 extern char str_pct_S_pct_s_b[];
 extern char str_pct_S_Jam_b_oals[] __asm__("str_pct_S_Jam_b");
 extern char str_kT_cmnRaceCaps_b_oals[] __asm__("str_kT_cmnRaceCaps_b");
@@ -1967,7 +1967,7 @@ void cUITemplate_MAP::setupPeakGoals()
             if (medalLevel != kMEDAL_NONE) {
                 unsigned short fmt[8];
                 done++;
-                strcpy3_oals(fmt, D_004A23C0);
+                strcpy3_oals(fmt, str_lbracket_pct_s_rbracket);
                 sprintf1(medal, fmt, cUITemplate_MAP_getMedalStr_oals(((char*)this), medalLevel));
                 cUIState_showObjSafe(mpUIState, name1);
             } else {

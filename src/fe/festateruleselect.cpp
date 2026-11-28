@@ -56,8 +56,8 @@ extern char str_0[];
 extern char str_1_c[];
 extern char str_2[];
 extern char str_3[];
-extern char D_004A1510[];
-extern char D_004A1518[];
+extern char str_4[];
+extern char str_5[];
 extern signed char D_00441008[];
 extern char* D_00441018[];
 // PORT: the frame labels are copied with the builtin block move (the original likely used
@@ -139,8 +139,8 @@ void cFEStateRuleSelect::setupMenu(signed char first)
                 cUIListBox_addEntryByAsciiString(lb, str_1_c, 0);
                 cUIListBox_addEntryByAsciiString(lb, str_2, 0);
                 cUIListBox_addEntryByAsciiString(lb, str_3, 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A1510, 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A1518, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_4, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_5, 0);
                 break;
             case 6:
                 cUIListBox_addEntryByStringID(lb, GetHashValue32(str_kT_CMNSkillLevel1), 0);

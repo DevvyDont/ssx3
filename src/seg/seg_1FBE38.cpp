@@ -1840,7 +1840,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cParticleNode_cParticleNode1_D420(void*, int, void*, void*, int) __asm__("cParticleNode_cParticleNode1");
 void operator_delete(int*);
 extern char D_00489718_D420[] __asm__("D_00489718");
-extern char D_00489730_D420[] __asm__("D_00489730");
+extern char str_ParticleNode_D420[] __asm__("str_ParticleNode");
 extern t3Vector luno_gLunoNil_D420 __asm__("luno_gLunoNil");
 // World-script data that makes a particle node (On Tour tMakeParticleData; same offsets): the block below fills it.
 struct tMakeParticleData {
@@ -2093,7 +2093,7 @@ extern "C" t3Vector MakeParticleFunc(int n, luno_cLunoCArg *params) {
     }
     if (data->LifeR > data->Life)
         data->LifeR = data->Life;
-    cParticleNode_cParticleNode1_D420(cMemMan_alloc(44, D_00489730_D420, 0x20000000, 0), 1, obj, buf, 0);
+    cParticleNode_cParticleNode1_D420(cMemMan_alloc(44, str_ParticleNode_D420, 0x20000000, 0), 1, obj, buf, 0);
     return luno_gLunoNil_D420;
 }
 #endif
@@ -2909,7 +2909,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cParticleNode_cParticleNode1_E840(void*, int, void*, void*, int) __asm__("cParticleNode_cParticleNode1");
 void operator_delete(int*);
 extern char D_00489740_E840[] __asm__("D_00489740");
-extern char D_00489730_E840[] __asm__("D_00489730");
+extern char str_ParticleNode_E840[] __asm__("str_ParticleNode");
 extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector vSub_E840(const t4Vector &a, const t4Vector &b) {
@@ -3201,7 +3201,7 @@ extern "C" t3Vector AddParticleFunc(int n, luno_cLunoCArg *params) {
     } else {
         t4Vector pos = *(t4Vector*)obj->m_fmTransform.m[3];
         if (nearViewer_E840(pos)) {
-            cParticleNode_cParticleNode1_E840(cMemMan_alloc(44, D_00489730_E840, 0x20000000, 0), 1, obj, buf, 0);
+            cParticleNode_cParticleNode1_E840(cMemMan_alloc(44, str_ParticleNode_E840, 0x20000000, 0), 1, obj, buf, 0);
             return luno_gLunoNil_E840;
         }
     }
@@ -5716,7 +5716,7 @@ extern "C" luno_cLunoVar SetGamePathFunc(int n, luno_cLunoCArg* params) {
 INCLUDE_ASM("seg/seg_1FBE38", SetGameModeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00445E40_2048[] __asm__("D_00445E40");
+extern int SetGameModeFunc_sectionModeTable_2048[] __asm__("SetGameModeFunc_sectionModeTable");
 extern "C" void cWScriptMan_failActiveLocalMission_2048(cWScriptMan*, int)
     __asm__("cWScriptMan_failActiveLocalMission");
 extern "C" void cSectionMan_eventbegin_2048(cSectionMan*, int) __asm__("cSectionMan_eventbegin");
@@ -5742,7 +5742,7 @@ extern "C" void* MEM_copy_2048(void*, void*, int) __asm__("MEM_copy");
  *
  * Defaults (D_004FBC10, under D_004A572C: -1, -1) take the keyword arguments (types from D_004A3CC0). Only when the
  * script's rider is set and not a computer rider (cBeing virtual isComputer, slot 9): the mode index (< 8) selects the
- * eSectionManMode in D_00445E40;
+ * eSectionManMode in SetGameModeFunc_sectionModeTable;
  * if the second value is 0, cWScriptMan_failActiveLocalMission runs unless that mode is kSMMode_Freeride, then
  * cSectionMan_eventbegin(SSXApp->Game->SectionMan, mode).
  *
@@ -5783,7 +5783,7 @@ extern "C" t3Vector SetGameModeFunc(int n, luno_cLunoCArg *params) {
         int secondValue = buf[1];
         cSectionMan *w = SSXApp->Game->SectionMan;
         if (id < 8)
-            mode = D_00445E40_2048[id];
+            mode = SetGameModeFunc_sectionModeTable_2048[id];
         if (secondValue == 0) {
             if (mode != kSMMode_Freeride)
                 cWScriptMan_failActiveLocalMission_2048(cWScriptMan_TheWScriptMan, id);
@@ -5817,7 +5817,7 @@ extern "C" void* MEM_copy_2210(void*, void*, int) __asm__("MEM_copy");
 extern tSectionData sSectionDefaults __asm__("D_004FBC20");
 extern int D_004A5730_2210 __asm__("D_004A5730");
 extern const int D_004465C8_2210[] __asm__("D_004465C8");
-extern char* const D_00445E40_2210[] __asm__("D_00445E40");
+extern char* const SetGameModeFunc_sectionModeTable_2210[] __asm__("SetGameModeFunc_sectionModeTable");
 extern t3Vector luno_gLunoNil_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" cBEInterface* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -5834,13 +5834,13 @@ extern "C" void cSSXAudio_BeginScriptedDJLine_2210(void* self) __asm__("cSSXAudi
  *
  * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
  * script's rider is set and not a computer rider (cBeing virtual isComputer): the location comes from the script ID
- * through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and the mode from D_00445E40 (index < 8). The
+ * through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and the mode from SetGameModeFunc_sectionModeTable (index < 8). The
  * action (eSectionCmd): kSectionCmd_Load cSectionMan_load, kSectionCmd_Activate cSectionMan_activate,
  * kSectionCmd_UserSelectDJ cGame_setState(game, 0xE, 2, 0) and cSSXAudio_BeginScriptedDJLine(cAudioInterface_bxAudio()),
  * kSectionCmd_UserSelect cGame_setState(game, 0xE, 0, 0), kSectionCmd_SkySwap sets SectionMan->m_bTriggerSkySwap;
  * kSectionCmd_Ignored does nothing (load and activate act on SSXApp->Game->SectionMan).
  *
- * The view types D_00445E40 as strings (name) and the location as a hash, but the table is the eSectionManMode one that
+ * The view types SetGameModeFunc_sectionModeTable as strings (name) and the location as a hash, but the table is the eSectionManMode one that
  * SetGameModeFunc reads as ints, and the value is the location ID.
  *
  * @param n  the number of keyword arguments
@@ -5885,7 +5885,7 @@ extern "C" t3Vector SectionFunc(int n, luno_cLunoCArg* params)
         void* iface = cBE_getInterface_2210(cBE_getBE_2210(), 0);
         cSectionMan* ui = SSXApp->Game->SectionMan;
         if ((unsigned int)sel < 8) {
-            name = D_00445E40_2210[sel];
+            name = SetGameModeFunc_sectionModeTable_2210[sel];
         }
         int hash = cBENewRaceInterface_getLocationIDFromScript_2210(iface, id);
         switch ((unsigned int)action) {

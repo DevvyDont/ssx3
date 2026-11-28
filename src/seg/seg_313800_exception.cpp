@@ -678,7 +678,7 @@ int *exception_exception(int **excObject) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __tf9exception);
 #ifdef SKIP_ASM
-extern char D_004998E0[];
+extern char str_9exception[];
 extern int __ti9exception[];
 extern void __rtti_user(void *, const char *);
 int *__tf9exception_a(void) __asm__("__tf9exception");
@@ -686,13 +686,13 @@ int *__tf9exception_a(void) __asm__("__tf9exception");
  * Returns the type_info object of class exception, building it on first use.
  *
  * When __ti9exception is still zero, constructs a user type_info (no bases) there with __rtti_user and the name
- * "9exception" (D_004998E0). The bad_exception, bad_cast and bad_typeid type_info functions call it for their base.
+ * "9exception" (str_9exception). The bad_exception, bad_cast and bad_typeid type_info functions call it for their base.
  *
  * @return the type_info object __ti9exception
  */
 int *__tf9exception_a(void) {
     if (__ti9exception[0] == 0)
-        __rtti_user(__ti9exception, D_004998E0);
+        __rtti_user(__ti9exception, str_9exception);
     return __ti9exception;
 }
 #endif

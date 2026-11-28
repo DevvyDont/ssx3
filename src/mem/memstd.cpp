@@ -1175,7 +1175,7 @@ struct sMemHdr_2A10 {
 
 
 extern int MEM_defaultClass_2A10 __asm__("MEM_defaultClass");
-extern int (*D_004A2E7C_2A10)(int, int, int) __asm__("D_004A2E7C");
+extern int (*MEM_outOfMemoryHook_2A10)(int, int, int) __asm__("MEM_outOfMemoryHook");
 
 // First free block of at least size bytes (same body as FREE_find).
 static inline FREEBLOCK* FirstFit_2A10(MEMCLASS* cls, int size, int back)
@@ -1278,7 +1278,7 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
  * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (MEM_tailsize), 8 at least. The chosen
  * free block is unlinked, the data placed at its aligned start (or end, from the top), a remainder of more than
  * alignment + 0x30 becomes a new free block, and MEM_initblock writes the header with the class's header size (+0x30)
- * and @p flags. When nothing fits, the out-of-memory callback D_004A2E7C (0, size, flags) is asked and a result of 1
+ * and @p flags. When nothing fits, the out-of-memory callback MEM_outOfMemoryHook (0, size, flags) is asked and a result of 1
  * retries. Runs under the class mutex when the class is locked. A negative size returns 0.
  *
  * @param name  the block's name (not stored)
@@ -1359,8 +1359,8 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
                 (*(FREEBLOCK**)&((FREEBLOCK*)blk->prev)->next) = blk;
             }
             MEM_initblock((FREEBLOCK*)(allocation - 0x10), 0, size, cls->infosize, flags, ((FREEBLOCK*)blk->prev), ((FREEBLOCK*)blk->next));
-        } else if (D_004A2E7C_2A10 != 0) {
-            retry = D_004A2E7C_2A10(0, size, flags);
+        } else if (MEM_outOfMemoryHook_2A10 != 0) {
+            retry = MEM_outOfMemoryHook_2A10(0, size, flags);
         }
         if (cls->hasmutex != 0)
             MUTEX_unlock(((int*)&cls->mutex));

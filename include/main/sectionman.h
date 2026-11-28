@@ -119,7 +119,7 @@ enum eStreamRate {
 };
 
 // A section-manager game mode (mMode, eventbegin's mode): [O] enum eSectionManMode, names and values. [U] the script
-// mode table D_00445E40 that SetGameModeFunc and SectionFunc read holds {2, 3, 4, 5, 1, 1, 1, 0}: script modes 0-3 are
+// mode table SetGameModeFunc_sectionModeTable that SetGameModeFunc and SectionFunc read holds {2, 3, 4, 5, 1, 1, 1, 0}: script modes 0-3 are
 // race, slopestyle, big air and halfpipe, 4-6 freeride, 7 none.
 enum eSectionManMode {
     kSMMode_None = 0,

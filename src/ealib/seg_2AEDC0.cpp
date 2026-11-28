@@ -2369,9 +2369,9 @@ extern int D_005094F4_s __asm__("D_005094F4") BSS_B0C58;
 extern int D_005094F8_s __asm__("D_005094F8") BSS_B0C58;
 extern int D_005094FC_s __asm__("D_005094FC") BSS_B0C58;
 extern int D_00509500_s __asm__("D_00509500") BSS_B0C58;
-extern int D_00509524_s __asm__("D_00509524") BSS_B0C58;
+extern int mpeg2_progressive_sequence_s __asm__("mpeg2_progressive_sequence") BSS_B0C58;
 extern int D_00509548_s __asm__("D_00509548") BSS_B0C58;
-extern int D_00509584_s __asm__("D_00509584") BSS_B0C58;
+extern int mpeg2_picture_structure_s __asm__("mpeg2_picture_structure") BSS_B0C58;
 extern int D_0050958C_s __asm__("D_0050958C") BSS_B0C58;
 extern int D_005095A0_s __asm__("D_005095A0") BSS_B0C58;
 extern int D_005094D4_s __asm__("D_005094D4") BSS_B0C58;
@@ -2427,14 +2427,14 @@ int PS2_SONY_CODEC_INTERNAL::Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
     Get_Hdr();
     int mode = mpeg2_base.MPEG2_Flag;
     if (mode == 0) {
-        D_00509524_s = 1;
+        mpeg2_progressive_sequence_s = 1;
         D_005095A0_s = 1;
-        D_00509584_s = 3;
+        mpeg2_picture_structure_s = 3;
         D_0050958C_s = 1;
         D_00509548_s = 5;
     }
     D_005094FC_s = (D_005094F4_s + 15) / 16;
-    D_00509500_s = (mode != 0 && D_00509524_s == 0) ? (D_005094F8_s + 31) / 32 * 2 : (D_005094F8_s + 15) / 16;
+    D_00509500_s = (mode != 0 && mpeg2_progressive_sequence_s == 0) ? (D_005094F8_s + 31) / 32 * 2 : (D_005094F8_s + 15) / 16;
     int w = D_005094FC_s * 16;
     D_005094D4_s = w;
     mWidth = w;
@@ -2981,9 +2981,9 @@ extern "C" void sequence_header(void)
 INCLUDE_ASM("ealib/seg_2AEDC0", group_of_pictures_header);
 #ifdef SKIP_ASM
 extern layer_data mpeg2_base;
-extern int D_0044C378[];
+extern int Temporal_Reference_Base[];
 extern int D_0044C37C[];
-extern int D_0044C380[];
+extern int Temporal_Reference_GOP_Reset[];
 extern int D_00509628[];
 extern int D_0050962C[];
 extern int D_00509630[];
@@ -3005,8 +3005,8 @@ extern "C" void extension_and_user_data(void);
 extern "C" void group_of_pictures_header(void)
 {
     if (ld == &mpeg2_base) {
-        D_0044C378[0] = D_0044C37C[0] + 1;
-        D_0044C380[0] = 1;
+        Temporal_Reference_Base[0] = D_0044C37C[0] + 1;
+        Temporal_Reference_GOP_Reset[0] = 1;
     }
     D_00509628[0] = Get_Bits(1);
     D_0050962C[0] = Get_Bits(5);
@@ -3023,8 +3023,8 @@ extern "C" void group_of_pictures_header(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", picture_header);
 #ifdef SKIP_ASM
-extern int D_00509554[];
-extern int D_00509558[];
+extern int mpeg2_temporal_reference[];
+extern int mpeg2_picture_coding_type[];
 extern int D_0050955C[];
 extern int D_00509560[];
 extern int D_00509564[];
@@ -3038,7 +3038,7 @@ extern "C" void Update_Temporal_Reference_Tacking_Data(void);
  * Parses an MPEG picture header.
  *
  * Part of the unit's copy of the MSSG mpeg2decode header parser, reading from the bit reader at ld (D_0050A088). Clears
- * ld +0x430, reads the temporal reference (10 bits, D_00509554), picture coding type (3, D_00509558) and VBV delay
+ * ld +0x430, reads the temporal reference (10 bits, mpeg2_temporal_reference), picture coding type (3, mpeg2_picture_coding_type) and VBV delay
  * (16); for P and B pictures the full-pel forward vector flag and forward code, for B pictures also the backward ones.
  * Then the extra-bit information (extra_bit_information), extensions (extension_and_user_data) and the temporal reference tracking
  * (Update_Temporal_Reference_Tacking_Data).
@@ -3046,14 +3046,14 @@ extern "C" void Update_Temporal_Reference_Tacking_Data(void);
 extern "C" void picture_header(void)
 {
     ld->pict_scal = 0;
-    D_00509554[0] = Get_Bits(10);
-    D_00509558[0] = Get_Bits(3);
+    mpeg2_temporal_reference[0] = Get_Bits(10);
+    mpeg2_picture_coding_type[0] = Get_Bits(3);
     D_0050955C[0] = Get_Bits(0x10);
-    if (D_00509558[0] == P_TYPE || D_00509558[0] == B_TYPE) {
+    if (mpeg2_picture_coding_type[0] == P_TYPE || mpeg2_picture_coding_type[0] == B_TYPE) {
         D_00509560[0] = Get_Bits(1);
         D_00509564[0] = Get_Bits(3);
     }
-    if (D_00509558[0] == B_TYPE) {
+    if (mpeg2_picture_coding_type[0] == B_TYPE) {
         D_00509568[0] = Get_Bits(1);
         D_0050956C[0] = Get_Bits(3);
     }
@@ -3179,7 +3179,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", sequence_extension);
 #ifdef SKIP_ASM
 extern int D_005095DC[];
 extern int D_00509520[];
-extern int D_00509524[];
+extern int mpeg2_progressive_sequence[];
 extern int D_00509528[];
 extern int D_0050952C[];
 extern int D_00509530[];
@@ -3216,7 +3216,7 @@ extern "C" void sequence_extension(void)
     layer->scalable_mode = 0;
     D_005095DC[0] = 0;
     D_00509520[0] = Get_Bits(8);
-    D_00509524[0] = Get_Bits(1);
+    mpeg2_progressive_sequence[0] = Get_Bits(1);
     D_00509528[0] = Get_Bits(2);
     int hext = Get_Bits(2);
     int vext = Get_Bits(2);
@@ -3411,9 +3411,9 @@ extern "C" void sequence_scalable_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", picture_display_extension);
 #ifdef SKIP_ASM
-extern int D_00509524[];
-extern int D_00509584[];
-extern int D_00509588[];
+extern int mpeg2_progressive_sequence[];
+extern int mpeg2_picture_structure[];
+extern int mpeg2_top_field_first[];
 extern int D_00509598[];
 extern int D_005095C0[];
 extern int D_005095D0[];
@@ -3433,13 +3433,13 @@ extern "C" void picture_display_extension(void)
 {
     int n;
     int i;
-    if (D_00509524[0] != 0) {
+    if (mpeg2_progressive_sequence[0] != 0) {
         if (D_00509598[0] == 0) {
             n = 1;
         } else {
-            n = D_00509588[0] != 0 ? 3 : 2;
+            n = mpeg2_top_field_first[0] != 0 ? 3 : 2;
         }
-    } else if (D_00509584[0] != FRAME_PICTURE) {
+    } else if (mpeg2_picture_structure[0] != FRAME_PICTURE) {
         n = 1;
     } else {
         n = D_00509598[0] != 0 ? 3 : 2;
@@ -3458,8 +3458,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", picture_coding_extension);
 #ifdef SKIP_ASM
 extern int D_00509570[];
 extern int D_00509580[];
-extern int D_00509584[];
-extern int D_00509588[];
+extern int mpeg2_picture_structure[];
+extern int mpeg2_top_field_first[];
 extern int D_0050958C[];
 extern int D_00509590[];
 extern int D_00509594[];
@@ -3488,8 +3488,8 @@ extern "C" void picture_coding_extension(void)
     D_00509570[2] = Get_Bits(4);
     D_00509570[3] = Get_Bits(4);
     D_00509580[0] = Get_Bits(2);
-    D_00509584[0] = Get_Bits(2);
-    D_00509588[0] = Get_Bits(1);
+    mpeg2_picture_structure[0] = Get_Bits(2);
+    mpeg2_top_field_first[0] = Get_Bits(1);
     D_0050958C[0] = Get_Bits(1);
     D_00509590[0] = Get_Bits(1);
     ld->q_scale_type = Get_Bits(1);
@@ -3664,11 +3664,11 @@ extern "C" void copyright_extension(void)
 INCLUDE_ASM("ealib/seg_2AEDC0", Update_Temporal_Reference_Tacking_Data);
 #ifdef SKIP_ASM
 extern layer_data mpeg2_base;
-extern int D_00509554[];
-extern int D_00509558[];
-extern int D_0044C378[];
+extern int mpeg2_temporal_reference[];
+extern int mpeg2_picture_coding_type[];
+extern int Temporal_Reference_Base[];
 extern int D_0044C37C[];
-extern int D_0044C380[];
+extern int Temporal_Reference_GOP_Reset[];
 extern int D_0044C3C8[];
 extern int D_0044C3CC[];
 extern int D_0050A098[];
@@ -3677,7 +3677,7 @@ extern int D_0050A098[];
  * Updates the true frame number from the picture's temporal reference, handling wraps.
  *
  * Only for the base layer (ld == mpeg2_base). For a new non-B picture: a pending wrap (D_0044C3C8) adds 1024 to the
- * base (D_0044C378); a temporal reference below the last one (D_0044C3CC) without a GOP reset (D_0044C380) marks a
+ * base (Temporal_Reference_Base); a temporal reference below the last one (D_0044C3CC) without a GOP reset (Temporal_Reference_GOP_Reset) marks a
  * wrap. Then the true frame number D_0050A098 = base + temporal reference (+1024 while a wrap is pending and the
  * reference has not passed the old one), and D_0044C37C keeps the maximum. Called by picture_header.
  */
@@ -3687,19 +3687,19 @@ extern "C" void Update_Temporal_Reference_Tacking_Data(void)
         return;
     }
     int last;
-    if (D_00509558[0] != B_TYPE && D_00509554[0] != (last = D_0044C3CC[0])) {
+    if (mpeg2_picture_coding_type[0] != B_TYPE && mpeg2_temporal_reference[0] != (last = D_0044C3CC[0])) {
         if (D_0044C3C8[0] != 0) {
             D_0044C3C8[0] = 0;
-            D_0044C378[0] += 0x400;
+            Temporal_Reference_Base[0] += 0x400;
         }
-        if (D_00509554[0] < last && D_0044C380[0] == 0) {
+        if (mpeg2_temporal_reference[0] < last && Temporal_Reference_GOP_Reset[0] == 0) {
             D_0044C3C8[0] = 1;
         }
-        D_0044C380[0] = 0;
-        D_0044C3CC[0] = D_00509554[0];
+        Temporal_Reference_GOP_Reset[0] = 0;
+        D_0044C3CC[0] = mpeg2_temporal_reference[0];
     }
-    D_0050A098[0] = D_0044C378[0] + D_00509554[0];
-    if (D_0044C3C8[0] != 0 && D_0044C3CC[0] >= D_00509554[0]) {
+    D_0050A098[0] = Temporal_Reference_Base[0] + mpeg2_temporal_reference[0];
+    if (D_0044C3C8[0] != 0 && D_0044C3CC[0] >= mpeg2_temporal_reference[0]) {
         D_0050A098[0] += 0x400;
     }
     D_0044C37C[0] = (D_0044C37C[0] < D_0050A098[0]) ? D_0050A098[0] : D_0044C37C[0];

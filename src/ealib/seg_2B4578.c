@@ -13024,7 +13024,7 @@ void SNDDRV_setupIopEffect(int busType) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_setupSpuReverb);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044DD48_3500[] __asm__("D_0044DD48");
+extern int SNDDRV_reverbWorkSizeTable_3500[] __asm__("SNDDRV_reverbWorkSizeTable");
 struct A_3500 {
     char pad0[0xCB0];
     char *p;
@@ -13044,7 +13044,7 @@ extern struct B_3500 sndgs_3500 __asm__("sndgs");
  * Sets up the SPU2 reverb for the kind-8 bus from its type (D_0050AB08).
  *
  * Maps the type to the hardware reverb mode: below 2 off, 5 room, 10 / 20 / 30 studio A/B/C, 40 hall, 50 space, 100
- * pipe, 110 delay, 120 echo (other values pass through). Stores the work-area start ((0x200000 - D_0044DD48[mode]) >>
+ * pipe, 110 delay, 120 echo (other values pass through). Stores the work-area start ((0x200000 - SNDDRV_reverbWorkSizeTable[mode]) >>
  * 6) in +0x1A9E of SNDDRV_state and the mode, then the bus record's +0x04 and +0x08 bytes (depth / delay), in
  * +0x10..+0x12 of the IOP voice block. Called by SNDDRV_applyFxBus.
  *
@@ -13073,7 +13073,7 @@ void SNDDRV_setupSpuReverb(unsigned busType) {
     } else if (busType == 120) {
         reverbMode = 7;
     }
-    SNDDRV_state_3500.s = (0x200000 - D_0044DD48_3500[reverbMode]) >> 6;
+    SNDDRV_state_3500.s = (0x200000 - SNDDRV_reverbWorkSizeTable_3500[reverbMode]) >> 6;
     SNDDRV_state_3500.p[0x10] = reverbMode;
     SNDDRV_state_3500.p[0x11] = sndgs_3500.a;
     SNDDRV_state_3500.p[0x12] = sndgs_3500.b;
@@ -20110,10 +20110,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIXI_runFx);
 struct Q_BC58 { int x; int arr[1]; };
 struct Obj_BC58 { int (*fn)(struct Obj_BC58 *, int, int, int, int); };
 extern char MIX_fxSendBuffer_BC58[] __asm__("MIX_fxSendBuffer");
-extern int D_00515D40_BC58 __asm__("D_00515D40");
+extern int SNDMIXI_fxDescPtr_BC58 __asm__("SNDMIXI_fxDescPtr");
 extern int *D_00515D44_BC58 __asm__("D_00515D44");
-extern struct Obj_BC58 **D_00515D48_BC58 __asm__("D_00515D48");
-extern int D_00515D58_BC58 __asm__("D_00515D58");
+extern struct Obj_BC58 **SNDMIXI_fxOutputSlots_BC58 __asm__("SNDMIXI_fxOutputSlots");
+extern int SNDMIXI_fxChannelCount_BC58 __asm__("SNDMIXI_fxChannelCount");
 extern int D_00517600_BC58 __asm__("D_00517600");
 extern signed char D_0044E164_BC58[][6][6][6] __asm__("D_0044E164");
 extern void *f_6210_BC58(void *, int, int) __asm__("memset");
@@ -20152,16 +20152,16 @@ void SNDMIXI_runFx(int n) {
     if (++*(int *)(buf + 0x1800) >= 3000) {
         return;
     }
-    if (f_72F8_BC58((int)&((struct Q_BC58 *)D_00515D40_BC58)->arr[D_00515D58_BC58], 4) != 0) {
+    if (f_72F8_BC58((int)&((struct Q_BC58 *)SNDMIXI_fxDescPtr_BC58)->arr[SNDMIXI_fxChannelCount_BC58], 4) != 0) {
         f_F798_BC58(D_00515D44_BC58[D_00517600_BC58], buf);
         for (i = 0; i < sndmix.mc.outputchannels; i++) {
             if (done[i] != 0) continue;
-            obj = D_00515D48_BC58[i + 1];
+            obj = SNDMIXI_fxOutputSlots_BC58[i + 1];
             if (obj == 0) continue;
             obj->fn(obj, n, scratchBuffer, wetBuffer, i + 1);
             ((void (*)(int, int, int, float))sndmix.mix)(n, wetBuffer, (int)sndmix.pmixbuf[i], 1.0f);
             done[i] = 1;
-            routeTable = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
+            routeTable = (signed char *)D_0044E164_BC58[SNDMIXI_fxChannelCount_BC58];
             routeEntry = routeTable + sndmix.mc.outputchannels * 36 + i * 6;
             for (j = 0; j < sndmix.mc.outputchannels; j++, routeEntry++) {
                 if (*routeEntry >= 0) {
@@ -20190,14 +20190,14 @@ struct Hdr_C070 {
     int cnt[6];
     int len[6];
 };
-extern struct Hdr_C070 *D_00515D40;
+extern struct Hdr_C070 *SNDMIXI_fxDescPtr;
 extern void **D_00515D44;
-extern void **D_00515D48;
+extern void **SNDMIXI_fxOutputSlots;
 extern unsigned char *D_00515D4C;
 extern unsigned char *D_00515D50;
-extern int D_00515D58;
+extern int SNDMIXI_fxChannelCount;
 extern int MIX_fxSendBuffer_C070[] __asm__("MIX_fxSendBuffer");
-extern struct Hdr_C070 D_005175C0_C070 __asm__("D_005175C0");
+extern struct Hdr_C070 SNDMIXI_fxDesc_C070 __asm__("SNDMIXI_fxDesc");
 extern unsigned char *D_005175F8;
 extern unsigned char *D_005175FC;
 extern int D_00517600;
@@ -20222,9 +20222,9 @@ extern int f_F998_C070(void *) __asm__("SFILTER_createECHO");
 extern void f_F9D8_C070(void *, int *) __asm__("SFILTER_modifyECHO");
 
 /**
- * Builds the software effect's filter graph from its description (D_005175C0, read by MIX_startSoftwareFx).
+ * Builds the software effect's filter graph from its description (SNDMIXI_fxDesc, read by MIX_startSoftwareFx).
  *
- * Allocates the node list and output slots (D_00515D44, D_00515D48), then for each node record of the chosen layout
+ * Allocates the node list and output slots (D_00515D44, SNDMIXI_fxOutputSlots), then for each node record of the chosen layout
  * creates the node by type (0-9; type 1 a one-pole low-pass, type 3 a high-pass FIR, the others set up by SFILTER_createLPFFIR8
  * .. SFILTER_createECHO) with its parameters at the output rate, and maps nodes with a channel code to their output slot
  * (SNDMIXI_getFxOutputSlot). Then it connects the links (12-byte records: source, destination, slots; SFILTER_connect), primes the
@@ -20241,13 +20241,13 @@ void SNDMIXI_buildFxGraph(int rate) {
     void *obj;
     int params[4];
 
-    D_00515D40 = &D_005175C0_C070;
-    D_00515D48 = f_5C60_C070(0x1C);
-    memset_C070(D_00515D48, 0, 0x1C);
-    last = D_00515D58 - 1;
+    SNDMIXI_fxDescPtr = &SNDMIXI_fxDesc_C070;
+    SNDMIXI_fxOutputSlots = f_5C60_C070(0x1C);
+    memset_C070(SNDMIXI_fxOutputSlots, 0, 0x1C);
+    last = SNDMIXI_fxChannelCount - 1;
     D_00515D4C = D_005175F8;
     D_00515D50 = D_005175FC;
-    count = f_72F8_C070(&D_00515D40->cnt[last], 4);
+    count = f_72F8_C070(&SNDMIXI_fxDescPtr->cnt[last], 4);
     D_00515D44 = f_5C60_C070(count * 4);
     nodeRecord = D_00515D4C;
     for (i = 0; i < count; i++) {
@@ -20319,18 +20319,18 @@ void SNDMIXI_buildFxGraph(int rate) {
             break;
         }
         if (nodeRecord[1] != 0) {
-            if (nodeRecord[0] == 9 && D_00515D40->ver >= 11) {
+            if (nodeRecord[0] == 9 && SNDMIXI_fxDescPtr->ver >= 11) {
                 unsigned char ch = nodeRecord[1];
-                D_00515D48[SNDMIXI_getFxOutputSlot(D_00515D58, sndmix.mc.outputchannels, ch & 0xF)] = D_00515D44[i];
-                D_00515D48[SNDMIXI_getFxOutputSlot(D_00515D58, sndmix.mc.outputchannels, ch >> 4)] = D_00515D44[i];
+                SNDMIXI_fxOutputSlots[SNDMIXI_getFxOutputSlot(SNDMIXI_fxChannelCount, sndmix.mc.outputchannels, ch & 0xF)] = D_00515D44[i];
+                SNDMIXI_fxOutputSlots[SNDMIXI_getFxOutputSlot(SNDMIXI_fxChannelCount, sndmix.mc.outputchannels, ch >> 4)] = D_00515D44[i];
             } else {
-                D_00515D48[SNDMIXI_getFxOutputSlot(D_00515D58, sndmix.mc.outputchannels, nodeRecord[1])] = D_00515D44[i];
+                SNDMIXI_fxOutputSlots[SNDMIXI_getFxOutputSlot(SNDMIXI_fxChannelCount, sndmix.mc.outputchannels, nodeRecord[1])] = D_00515D44[i];
             }
         }
         nodeRecord += D_0044E870_C070[*nodeRecord];
     }
     link = D_00515D50;
-    for (i = 0; i < f_72F8_C070(&D_00515D40->len[last], 4); i++) {
+    for (i = 0; i < f_72F8_C070(&SNDMIXI_fxDescPtr->len[last], 4); i++) {
         SFILTER_connect((SFILTERNODE*)D_00515D44[f_72F8_C070(link, 4)], (SFILTERNODE*)D_00515D44[f_72F8_C070(link + 4, 4)], link[8], link[9]);
         link += 12;
     }
@@ -20363,12 +20363,12 @@ struct G_C630 {
     signed char fF;
     void *f10;
 };
-extern struct Hdr_C630 D_005175C0_C630 __asm__("D_005175C0");
+extern struct Hdr_C630 SNDMIXI_fxDesc_C630 __asm__("SNDMIXI_fxDesc");
 extern int D_005175C8_C630[] __asm__("D_005175C8");
 extern int D_0044E870_C630[] __asm__("D_0044E870");
 extern int D_0044E898;
 extern int D_00515D54;
-extern int D_00515D58;
+extern int SNDMIXI_fxChannelCount;
 extern unsigned char *D_005175F8;
 extern unsigned char *D_005175FC;
 extern void SNDMIXI_runFx();
@@ -20382,7 +20382,7 @@ extern struct G_C630 sndmix_C630 __asm__("sndmix");
  * Loads a software effect (reverb) and starts it.
  *
  * Removes the current one (MIX_stopSoftwareFx), copies the 0x38-byte header, picks the largest channel layout the effect has
- * nodes for up to the mixer's output count (D_00515D58), finds that layout's node and link lists (D_005175F8,
+ * nodes for up to the mixer's output count (SNDMIXI_fxChannelCount), finds that layout's node and link lists (D_005175F8,
  * D_005175FC), builds the graph (SNDMIXI_buildFxGraph), installs SNDMIXI_runFx as the mixer's output hook (+0x10) and turns
  * the send on (+0x0F). Called by SNDDRV_applyFxBus.
  *
@@ -20398,17 +20398,17 @@ void MIX_startSoftwareFx(int outputRate, unsigned char *data) {
 
     MIX_stopSoftwareFx_C630();
     D_0044E898 = 1;
-    Util_MemCpy_C630(&D_005175C0_C630, data, 0x38);
+    Util_MemCpy_C630(&SNDMIXI_fxDesc_C630, data, 0x38);
     n = sndmix_C630.n - 1;
-    if (SNDI_getb_C630(&D_005175C0_C630.cnt[n], 4) != 0) {
-        D_00515D58 = sndmix_C630.n;
+    if (SNDI_getb_C630(&SNDMIXI_fxDesc_C630.cnt[n], 4) != 0) {
+        SNDMIXI_fxChannelCount = sndmix_C630.n;
     } else {
         while (SNDI_getb_C630(&D_005175C8_C630[n], 4) == 0) {
             n--;
         }
-        D_00515D58 = n + 1;
+        SNDMIXI_fxChannelCount = n + 1;
     }
-    D_00515D54 = D_00515D58;
+    D_00515D54 = SNDMIXI_fxChannelCount;
     for (i = 0; i < n; i++) {
         k = SNDI_getb_C630(&D_005175C8_C630[i], 4);
         for (j = 0; j < k; j++) {
@@ -23709,7 +23709,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setVolume);
 struct E_0D70 { char b0; unsigned char b1; unsigned char b2; };
 struct G_0D70 { char pad[0x58]; struct E_0D70 *list[24]; };
 struct T_0D70 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_0D70 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_0D70 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_0D70 __asm__("PATHI_selectedId");
 extern struct G_0D70 *PATHI_selectedPlayer_0D70 __asm__("PATHI_selectedPlayer");
 extern struct T_0D70 PATHI_players_0D70[] __asm__("PATHI_players");
@@ -23721,7 +23721,7 @@ static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a &
  * Sets a value on every voice of the path players a mask selects, keeping the previous one: +0x1 = @p val, old +0x1 to
  * +0x2.
  *
- * Returns -18 unless the path system is up (D_0044F42C) and idle (PATHI_selectedId clear, PATHI_selectPlayer(-1) non-zero). Only
+ * Returns -18 unless the path system is up (PATHI_initializedFlag) and idle (PATHI_selectedId clear, PATHI_selectPlayer(-1) non-zero). Only
  * values below 0x80 are applied; each of the 4 players (PATHI_players) that is in use (+0x34) and shares a class bit
  * (0xF0000000) and a group bit (0x0F000000) with @p mask is selected with PATHI_selectPlayer and all 24 of its voices
  * (+0x58) are updated, whatever the low mask bits say. Clears the selection (PATHI_selectedId, PATHI_selectedPlayer) at the end.
@@ -23733,7 +23733,7 @@ static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a &
  */
 int PATH_setVolume(unsigned int mask, unsigned int val) {
     int i, j;
-    if (D_0044F42C_0D70 == 0 || PATHI_selectedId_0D70 != 0 || PATHI_selectPlayer_0D70(-1) == 0) {
+    if (PATHI_initializedFlag_0D70 == 0 || PATHI_selectedId_0D70 != 0 || PATHI_selectPlayer_0D70(-1) == 0) {
         return -18;
     }
     if (val < 0x80) {
@@ -23768,7 +23768,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_postPauseEvent);
 struct A_0ED0 { int v[4]; };
 struct B_0ED0 { unsigned int f0; char pad4[4]; char b8; char b9; char padA[2]; short hC; char bE; char padF; };
 struct T_0ED0 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_0ED0 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_0ED0 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_0ED0 __asm__("PATHI_selectedId");
 extern void *PATHI_selectedPlayer_0ED0 __asm__("PATHI_selectedPlayer");
 extern struct T_0ED0 PATHI_players_0ED0[] __asm__("PATHI_players");
@@ -23783,7 +23783,7 @@ static inline unsigned int has_0ED0(unsigned int a, unsigned int b) { return a &
 /**
  * Queues a type-4 item for the path players a mask selects: builds a one-item event and posts a copy to each.
  *
- * Returns -18 unless the path system is up and idle (D_0044F42C, PATHI_selectedId, PATHI_selectPlayer(-1)). The item gets
+ * Returns -18 unless the path system is up and idle (PATHI_initializedFlag, PATHI_selectedId, PATHI_selectPlayer(-1)). The item gets
  * @p mask at +0x0, type 4 (+0x9), -1 at +0x8 and +0xE and @p val at +0xC; PATHI_appendItem appends it to a cleared 16-byte
  * event header. For each player in use whose class and group bits overlap @p mask, PATHI_selectPlayer selects it,
  * PATHI_copyevent copies the event into the player's buffer and PATHI_queueEvent schedules the copy. Clears the selection
@@ -23797,7 +23797,7 @@ int PATH_postPauseEvent(unsigned int mask, int val) {
     struct B_0ED0 item;
     struct A_0ED0 eventHeader;
     unsigned int i;
-    if (D_0044F42C_0ED0 == 0 || PATHI_selectedId_0ED0 != 0 || PATHI_selectPlayer_0ED0(-1) == 0) {
+    if (PATHI_initializedFlag_0ED0 == 0 || PATHI_selectedId_0ED0 != 0 || PATHI_selectPlayer_0ED0(-1) == 0) {
         return -18;
     }
     memset_0ED0(&eventHeader, 0, 16);
@@ -23831,7 +23831,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setPaused);
 struct E_1038 { char pad[3]; unsigned char b3; char pad2[0x50]; int f54; };
 struct G_1038 { char pad[0x58]; struct E_1038 *list[24]; };
 struct T_1038 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_1038 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_1038 __asm__("PATHI_initializedFlag");
 extern unsigned char D_0044F42D_1038 __asm__("D_0044F42D");
 extern int PATHI_selectedId_1038 __asm__("PATHI_selectedId");
 extern struct G_1038 *PATHI_selectedPlayer_1038 __asm__("PATHI_selectedPlayer");
@@ -23854,7 +23854,7 @@ static inline unsigned int has_1038(unsigned int a, unsigned int b) { return a &
  */
 void PATH_setPaused(unsigned int mask, unsigned char val) {
     int i, j;
-    if (D_0044F42C_1038 == 0) return;
+    if (PATHI_initializedFlag_1038 == 0) return;
     if (PATHI_selectedId_1038 != 0) return;
     if (PATHI_selectPlayer_1038(-1) == 0) return;
     if (mask == 0xFFFFFFFF) D_0044F42D_1038 = val;
@@ -23921,7 +23921,7 @@ struct G_11B8 {
     char *hdr;
     short *a;
 };
-extern unsigned char D_0044F42C_11B8 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_11B8 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_11B8 __asm__("PATHI_selectedId");
 extern int PATHI_debugFlags_11B8 __asm__("PATHI_debugFlags");
 extern struct G_11B8 *PATHI_selectedPlayer_11B8 __asm__("PATHI_selectedPlayer");
@@ -23962,7 +23962,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) {
     int len;
 
     ret = -8;
-    if (D_0044F42C_11B8 == 0 || PATHI_selectedId_11B8 != 0 || f_5450_11B8(-1) == 0) {
+    if (PATHI_initializedFlag_11B8 == 0 || PATHI_selectedId_11B8 != 0 || f_5450_11B8(-1) == 0) {
         return -18;
     }
     info->a = -1;
@@ -24034,7 +24034,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_stopVoices);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_1470 { char pad[0x36]; short h36; char pad2[0x1C]; int f54; };
 struct G_1470 { char pad[0x58]; struct E_1470 *list[24]; };
-extern unsigned char D_0044F42C_1470 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_1470 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_1470 __asm__("PATHI_selectedId");
 extern struct G_1470 *PATHI_selectedPlayer_1470 __asm__("PATHI_selectedPlayer");
 struct T_1470 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
@@ -24055,7 +24055,7 @@ static inline unsigned int has_1470(unsigned int a, unsigned int b) { return a &
  */
 void PATH_stopVoices(unsigned int mask) {
     int i, j;
-    if (D_0044F42C_1470 == 0) return;
+    if (PATHI_initializedFlag_1470 == 0) return;
     if (PATHI_selectedId_1470 != 0) return;
     if (PATHI_selectPlayer_1470(-1) == 0) return;
     for (i = 0; i < 4; i++) {
@@ -24203,7 +24203,7 @@ struct T_16F0 {
     char pad[0x30]; unsigned int pathId; int pathData; char pad2[0xDC - 0x38]; struct H_16F0 *list[16];
     char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920];
 };
-extern unsigned char D_0044F42C_16F0 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_16F0 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_16F0 __asm__("PATHI_selectedId");
 extern struct G_16F0 *PATHI_selectedPlayer_16F0 __asm__("PATHI_selectedPlayer");
 extern struct T_16F0 PATHI_players_16F0[] __asm__("PATHI_players");
@@ -24233,7 +24233,7 @@ int PATH_postEvent(unsigned int mask, short prog) {
     int result = 0;
     unsigned int bit;
     unsigned int i;
-    if (D_0044F42C_16F0 == 0 || PATHI_selectedId_16F0 != 0 || PATHI_selectPlayer_16F0(-1) == 0) {
+    if (PATHI_initializedFlag_16F0 == 0 || PATHI_selectedId_16F0 != 0 || PATHI_selectPlayer_16F0(-1) == 0) {
         return -18;
     }
     bit = 0x1000000 << ((prog & 0xF00) >> 8);
@@ -24288,7 +24288,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_cancelEvents);
 extern void PATHI_removeEvent_1940(int, int) __asm__("PATHI_removeEvent");
 extern int PATHI_selectPlayer_1940(int) __asm__("PATHI_selectPlayer");
 extern int PATHI_selectedPlayer_1940[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_0044F42C_1940[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_1940[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_1940[] __asm__("PATHI_selectedId");
 extern char PATHI_players_1940[] __asm__("PATHI_players");
 
@@ -24306,7 +24306,7 @@ struct P_1940 { char pad[0xDC]; int a[16]; };
 void PATH_cancelEvents(unsigned int mask) {
     int i, j;
     unsigned int fl, classBits, groupBits;
-    if (D_0044F42C_1940[0] != 0) {
+    if (PATHI_initializedFlag_1940[0] != 0) {
         if (PATHI_selectedId_1940[0] == 0) {
             if (PATHI_selectPlayer_1940(-1) != 0) {
                 for (i = 0; i < 4; i++) {
@@ -24339,7 +24339,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_countPendingEvents);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_1A88 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 struct G_1A88 { char pad[0xDC]; void *arr[16]; };
-extern unsigned char D_0044F42C_1A88 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_1A88 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_1A88 __asm__("PATHI_selectedId");
 extern struct G_1A88 *PATHI_selectedPlayer_1A88 __asm__("PATHI_selectedPlayer");
 extern struct E_1A88 PATHI_players_1A88[] __asm__("PATHI_players");
@@ -24357,7 +24357,7 @@ extern int PATHI_selectPlayer_1A88(int) __asm__("PATHI_selectPlayer");
 int PATH_countPendingEvents(unsigned int mask) {
     int cnt = 0;
     int i, j;
-    if (D_0044F42C_1A88 == 0 || PATHI_selectedId_1A88 != 0 || PATHI_selectPlayer_1A88(-1) == 0) {
+    if (PATHI_initializedFlag_1A88 == 0 || PATHI_selectedId_1A88 != 0 || PATHI_selectPlayer_1A88(-1) == 0) {
         return -18;
     }
     mask &= 0x0F000000;
@@ -24809,7 +24809,7 @@ extern struct sPath *PATHI_selectedPlayer;
 
 extern struct sPath PATHI_players[4];
 
-extern unsigned char D_0044F42C;
+extern unsigned char PATHI_initializedFlag;
 
 extern unsigned char D_0044F42D;
 
@@ -24822,7 +24822,7 @@ extern int PATHI_debugFlags;                  /* flags */
  * Initialises the path library: clears the 4 players and marks the system ready.
  *
  * Returns -18 while a selection is active (PATHI_selectedId). Each player (PATHI_players, 0x928 bytes) gets its in-use flag
- * (+0x34), +0x924 and its 24 voice pointers (+0x58) cleared; then D_0044F42C = 1 (initialised), the debug flags
+ * (+0x34), +0x924 and its 24 voice pointers (+0x58) cleared; then PATHI_initializedFlag = 1 (initialised), the debug flags
  * PATHI_debugFlags = 0x100, the selection PATHI_selectedPlayer and the global pause D_0044F42D are reset.
  *
  * @return 0, or -18
@@ -24837,7 +24837,7 @@ int PATH_init(void) {
             PATHI_players[i].f58[j] = 0;
         }
     }
-    D_0044F42C = 1;
+    PATHI_initializedFlag = 1;
     PATHI_debugFlags = 0x100;
     PATHI_selectedPlayer = 0;
     D_0044F42D = 0;
@@ -24860,7 +24860,7 @@ extern struct sPath *PATHI_selectedPlayer;
 
 extern struct sPath PATHI_players[4];
 
-extern unsigned char D_0044F42C;
+extern unsigned char PATHI_initializedFlag;
 
 extern unsigned int PATHI_selectedId;
 
@@ -24879,7 +24879,7 @@ struct sPathVoice *PATH_closeVoice_impl(unsigned int mask) __asm__("PATH_closeVo
  * @p mask and, in it, the first voice whose bit is set in @p mask; the slot (+0x58) is cleared and pathxSND_closePlayer
  * releases the voice's sound (+0x54). When that player has no voices left (PATHI_countVoices) its in-use flag (+0x34) and
  * +0xB8 are cleared and PATHI_sortPlayers re-sorts the players; when no group has voices any more and a voice was closed,
- * pathxSND_shutdown stops the bank monitor's service and D_0044F42C is cleared. Likely bug: when nothing matches, the
+ * pathxSND_shutdown stops the bank monitor's service and PATHI_initializedFlag is cleared. Likely bug: when nothing matches, the
  * "player empty" step still runs on the stale selection PATHI_selectedPlayer (the loop index is 4, so PATHI_countVoices finds no
  * voices). The music monitor closes 0x11000001 and 0x11000002 on destruction.
  *
@@ -24891,7 +24891,7 @@ struct sPathVoice *PATH_closeVoice_impl(unsigned int mask) {
     int i, j;
     unsigned int fl, classBits, groupBits;
     int st;
-    if (D_0044F42C == 0) return 0;
+    if (PATHI_initializedFlag == 0) return 0;
     if (PATHI_selectedId != 0) return 0;
     if (f5450_2A68(-1) == 0) return 0;
     for (i = 0; i < 4; i++) {
@@ -24921,9 +24921,9 @@ done:
         PATHI_sortPlayers();
     }
     st = PATHI_countVoices(0x0F000000);
-    if (D_0044F42C != 0 && st == 0 && pathVoice != 0) {
+    if (PATHI_initializedFlag != 0 && st == 0 && pathVoice != 0) {
         fAE100_2A68();
-        D_0044F42C = 0;
+        PATHI_initializedFlag = 0;
     }
     PATHI_selectedId = 0;
     PATHI_selectedPlayer = 0;
@@ -24942,7 +24942,7 @@ extern double func_00413AF8_2C20(float) __asm__("fptodp");
 extern double func_00411F18_2C20(double, double) __asm__("dpadd");
 extern int func_004126A0_2C20(double) __asm__("dptoul");
 extern char *PATHI_selectedPlayer_2C20[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_0044F42C_2C20[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_2C20[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_2C20[] __asm__("PATHI_selectedId");
 
 static inline int bitclear_2C20(int x) {
@@ -24973,7 +24973,7 @@ int PATH_getScaledSegmentRatio(int pathId, int multiplier) {
 
     ratio = 0.0f;
     max = 0.0f;
-    if (D_0044F42C_2C20[0] == 0 || PATHI_selectedId_2C20[0] != 0 || PATHI_selectPlayer_2C20(-1) == 0) {
+    if (PATHI_initializedFlag_2C20[0] == 0 || PATHI_selectedId_2C20[0] != 0 || PATHI_selectPlayer_2C20(-1) == 0) {
         return -18;
     }
     if (PATHI_selectPlayerById_2C20(pathId & 0xFF000000) == 0) {
@@ -25016,7 +25016,7 @@ extern int PATH_releaseRequest_2DF8(int, int) __asm__("PATH_releaseRequest");
 extern int pathxSND_evictOldestBank_2DF8(int) __asm__("pathxSND_evictOldestBank");
 extern int pathxSND_addBank_2DF8(int, char *, int, int) __asm__("pathxSND_addBank");
 extern int PATHI_selectedPlayer_2DF8[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_0044F42C_2DF8[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_2DF8[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_2DF8[] __asm__("PATHI_selectedId");
 
 /**
@@ -25040,7 +25040,7 @@ int PATH_requestPart(int pathId, int idx, int userHandle) {
     struct R_2DF8 *reqTable;
     struct E_2DF8 *reqEntry;
 
-    if (D_0044F42C_2DF8[0] != 0) {
+    if (PATHI_initializedFlag_2DF8[0] != 0) {
         if (PATHI_selectedId_2DF8[0] != 0) {
             return -18;
         }
@@ -25113,18 +25113,18 @@ void func_003D2FC0(void) {
 INCLUDE_ASM("ealib/seg_2B4578", PATH_shutdown);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char D_0044F42C_2FE0 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_2FE0 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_2FE0 __asm__("PATHI_selectedId");
 int PATH_closeVoice(int);
 /**
- * Shuts the path system down: PATH_closeVoice(-1), then clears the initialised (D_0044F42C) and busy (PATHI_selectedId) flags.
+ * Shuts the path system down: PATH_closeVoice(-1), then clears the initialised (PATHI_initializedFlag) and busy (PATHI_selectedId) flags.
  * Quirk: PATH_closeVoice closes only the first voice it finds.
  *
  * @return 0
  */
 int PATH_shutdown(void) {
     PATH_closeVoice(-1);
-    D_0044F42C_2FE0 = 0;
+    PATHI_initializedFlag_2FE0 = 0;
     PATHI_selectedId_2FE0 = 0;
     return 0;
 }
@@ -25210,7 +25210,7 @@ extern void pathxSND_setPreload_30A8(int, int, int) __asm__("pathxSND_setPreload
 extern void *PATHI_findVoice_30A8(int) __asm__("PATHI_findVoice");
 extern int PATHI_selectPlayer_30A8(int) __asm__("PATHI_selectPlayer");
 extern int PATHI_selectedPlayer_30A8[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_0044F42C_30A8[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_30A8[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_30A8[] __asm__("PATHI_selectedId");
 
 /**
@@ -25229,7 +25229,7 @@ void PATH_setPreload(int pathId, int memBuffer, int memLimit) {
     int var_4;
     void *temp_2;
 
-    if ((D_0044F42C_30A8[0] != 0) && (PATHI_selectedId_30A8[0] == 0) && (PATHI_selectPlayer_30A8(-1) != 0)) {
+    if ((PATHI_initializedFlag_30A8[0] != 0) && (PATHI_selectedId_30A8[0] == 0) && (PATHI_selectPlayer_30A8(-1) != 0)) {
         temp_2 = PATHI_findVoice_30A8(pathId);
         var_4 = -8;
         if (temp_2 != 0) {
@@ -25250,7 +25250,7 @@ extern int pathxSND_removeBank_3140(int, int) __asm__("pathxSND_removeBank");
 extern char *PATHI_findVoice_3140(int) __asm__("PATHI_findVoice");
 extern int PATHI_selectPlayer_3140(int) __asm__("PATHI_selectPlayer");
 extern int PATHI_selectedPlayer_3140[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_0044F42C_3140[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_3140[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_3140[] __asm__("PATHI_selectedId");
 int PATH_releaseRequest_3140(int arg0, int arg1) __asm__("PATH_releaseRequest");
 
@@ -25267,7 +25267,7 @@ int PATH_releaseRequest_3140(int pathId, int requestIndex) {
     int result;
     char *pathVoice;
     result = 0;
-    if (D_0044F42C_3140[0] != 0) {
+    if (PATHI_initializedFlag_3140[0] != 0) {
         if (PATHI_selectedId_3140[0] != 0) {
             return -18;
         }
@@ -25295,7 +25295,7 @@ struct S_31E8 {
     char p0[0xC]; int f0c; int f10; char p1[0x1C]; unsigned int pathId; int pathData; char p2[0x928 - 0x38];
 };
 extern struct S_31E8 PATHI_players_31E8[] __asm__("PATHI_players");
-extern unsigned char D_0044F42C_31E8[] __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_31E8[] __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_31E8[] __asm__("PATHI_selectedId");
 extern int PATHI_selectedPlayer_31E8[] __asm__("PATHI_selectedPlayer");
 
@@ -25311,7 +25311,7 @@ extern int PATHI_selectedPlayer_31E8[] __asm__("PATHI_selectedPlayer");
  */
 void PATH_setLookAhead(unsigned int pathMask, int lookAhead, int lookAheadB) {
     int i;
-    if (D_0044F42C_31E8[0] != 0 && PATHI_selectedId_31E8[0] == 0) {
+    if (PATHI_initializedFlag_31E8[0] != 0 && PATHI_selectedId_31E8[0] == 0) {
         if (PATHI_selectPlayer(-1)) {
             pathMask &= 0x0F000000;
             for (i = 0; i < 4; i++) {
@@ -26307,7 +26307,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_serviceTick);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct T_5128 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_5128 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_5128 __asm__("PATHI_initializedFlag");
 extern unsigned char D_0044F42D_5128 __asm__("D_0044F42D");
 extern unsigned char D_0044F434_5128 __asm__("D_0044F434");
 extern unsigned int PATHI_selectedId_5128 __asm__("PATHI_selectedId");
@@ -26334,7 +26334,7 @@ void PATHI_serviceTick_impl(unsigned char k) __asm__("PATHI_serviceTick");
 /**
  * Runs one service tick of the path system over every player in use, unless it is paused, down or busy.
  *
- * Does nothing when the global pause (D_0044F42D) is set, the system is not initialised (D_0044F42C) or a selection is
+ * Does nothing when the global pause (D_0044F42D) is set, the system is not initialised (PATHI_initializedFlag) or a selection is
  * active (PATHI_selectedId). Stores the pass kind @p k in D_0044F434, marks the system busy, reads the tick PATHI_tick from
  * pathxSND_getTimeMs and brackets the work with pathxSND_refreshAll(0) / (1). Each player in use is selected and gets
  * PATHI_findLeadingVoice (leading voice) and PATHI_serviceVoices (voice service). Clears the selection at the end.
@@ -26344,7 +26344,7 @@ void PATHI_serviceTick_impl(unsigned char k) __asm__("PATHI_serviceTick");
 void PATHI_serviceTick_impl(unsigned char k) {
     unsigned char i;
     if (D_0044F42D_5128 != 0) return;
-    if (D_0044F42C_5128 == 0) return;
+    if (PATHI_initializedFlag_5128 == 0) return;
     if (PATHI_selectedId_5128 != 0) return;
     D_0044F434_5128 = k;
     PATHI_selectedId_5128 = 0xFFFFFFFF;
@@ -26538,7 +26538,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setLevel);
 // in mask through PATHI_setVoiceLevel.
 struct G_5508 { char pad[0x58]; void *list[24]; };
 struct T_5508 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_5508 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_5508 __asm__("PATHI_initializedFlag");
 extern signed char D_0044F42E_5508 __asm__("D_0044F42E");
 extern int PATHI_selectedId_5508 __asm__("PATHI_selectedId");
 extern struct G_5508 *PATHI_selectedPlayer_5508 __asm__("PATHI_selectedPlayer");
@@ -26560,7 +26560,7 @@ static inline unsigned int has_5508(unsigned int a, unsigned int b) { return a &
  */
 void PATH_setLevel(unsigned int mask, signed char val) {
     int i, j;
-    if (D_0044F42C_5508 == 0) return;
+    if (PATHI_initializedFlag_5508 == 0) return;
     if (PATHI_selectedId_5508 != 0) return;
     if (PATHI_selectPlayer_5508(-1) == 0) return;
     if (val > 100) val = 100;
@@ -26592,7 +26592,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_fadeVolume);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct G_5698 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
 struct T_5698 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_5698 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_5698 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_5698 __asm__("PATHI_selectedId");
 extern struct G_5698 *PATHI_selectedPlayer_5698 __asm__("PATHI_selectedPlayer");
 extern struct T_5698 PATHI_players_5698[] __asm__("PATHI_players");
@@ -26614,7 +26614,7 @@ static inline unsigned int has_5698(unsigned int a, unsigned int b) { return a &
  */
 void PATH_fadeVolume(unsigned int mask, int targetVol, int fadeMs) {
     int i, j;
-    if (D_0044F42C_5698 == 0) return;
+    if (PATHI_initializedFlag_5698 == 0) return;
     if (PATHI_selectedId_5698 != 0) return;
     if (PATHI_selectPlayer_5698(-1) == 0) return;
     for (i = 0; i < 4; i++) {
@@ -26643,7 +26643,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setSendTarget);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct G_5800 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
 struct T_5800 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern unsigned char D_0044F42C_5800 __asm__("D_0044F42C");
+extern unsigned char PATHI_initializedFlag_5800 __asm__("PATHI_initializedFlag");
 extern int PATHI_selectedId_5800 __asm__("PATHI_selectedId");
 extern struct G_5800 *PATHI_selectedPlayer_5800 __asm__("PATHI_selectedPlayer");
 extern struct T_5800 PATHI_players_5800[] __asm__("PATHI_players");
@@ -26665,7 +26665,7 @@ static inline unsigned int has_5800(unsigned int a, unsigned int b) { return a &
  */
 void PATH_setSendTarget(unsigned int mask, int sendTarget, int b) {
     int i, j;
-    if (D_0044F42C_5800 == 0) return;
+    if (PATHI_initializedFlag_5800 == 0) return;
     if (PATHI_selectedId_5800 != 0) return;
     if (PATHI_selectPlayer_5800(-1) == 0) return;
     for (i = 0; i < 4; i++) {
@@ -26996,7 +26996,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setRampDuration);
 struct P_6108 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_6108(int) __asm__("PATHI_selectPlayer");
 extern int D_f420_6108[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_f42C_6108[] __asm__("D_0044F42C");
+extern unsigned char D_f42C_6108[] __asm__("PATHI_initializedFlag");
 extern int D_f430_6108[] __asm__("PATHI_selectedId");
 extern struct P_6108 D_7610_6108[4] __asm__("PATHI_players");
 
@@ -27030,7 +27030,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setRampCurve);
 struct P_61E8 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_61E8(int) __asm__("PATHI_selectPlayer");
 extern int D_f420_61E8[] __asm__("PATHI_selectedPlayer");
-extern unsigned char D_f42C_61E8[] __asm__("D_0044F42C");
+extern unsigned char D_f42C_61E8[] __asm__("PATHI_initializedFlag");
 extern int D_f430_61E8[] __asm__("PATHI_selectedId");
 extern struct P_61E8 D_7610_61E8[4] __asm__("PATHI_players");
 

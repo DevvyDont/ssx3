@@ -2673,7 +2673,7 @@ extern char gBlockMan[];
 extern char BXrandom[];
 extern char AIrandom[];
 extern char tRGB_kRed[], tRGB_kBlue[], tRGB_kYellow[], tRGB_kPurple[], tRGB_kGreen[], tRGB_kOrange[], tRGB_kBlack[], tRGB_kWhite[], tRGB_kGray[];
-extern char D_004A5958;
+extern char bxIop_object;
 extern void* bxIop_instance;
 extern char t2vect_Zero[], t2vect_XAxis[], t2vect_YAxis[];
 extern char t3vect_Zero[], t3vect_XAxis[], t3vect_YAxis[], t3vect_ZAxis[];
@@ -2707,7 +2707,7 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
             new (tRGB_kBlack) sV3_0550(0.0f, 0.0f, 0.0f);
             new (tRGB_kWhite) sV3_0550(1.0f, 1.0f, 1.0f);
             new (tRGB_kGray) sV3_0550(0.25f, 0.25f, 0.25f);
-            bxIop_instance = &D_004A5958;
+            bxIop_instance = &bxIop_object;
             new (t2vect_Zero) sV2_0550(0.0f, 0.0f);
             new (t2vect_XAxis) sV2_0550(1.0f, 0.0f);
             new (t2vect_YAxis) sV2_0550(0.0f, 1.0f);

@@ -1186,7 +1186,7 @@ extern char str_pct_d_j[];
 extern char str_pct_d_pct_d_d[];
 extern char str_pct_s_Race[];
 extern char str_timepct_d_b[];
-extern int D_004780D0[];
+extern int cFEStateCareerStats_raceLocationTable[];
 extern int D_004780F0[];
 
 
@@ -1195,7 +1195,7 @@ extern int D_004780F0[];
  *
  * Shows "race_arrowup" while the scroll is above 0 and "race_arrowdown" while rows remain below; "race_medals" reads
  * "%d / %d" (owned +0x5C of the total +0x58). Each row gets its peak number (D_004780F0 + 1), the location name
- * (cBENewRaceInterface_getLocationName of D_004780D0; "%s Race" with the mode-4 time for every third event, else the
+ * (cBENewRaceInterface_getLocationName of cFEStateCareerStats_raceLocationTable; "%s Race" with the mode-4 time for every third event, else the
  * mode-0 time), the best time formatted by formatMinutesSeconds (cBENewRaceInterface_getPlatinumGoal) and the "race_medal%d" icon when bit idx of
  * +0x60 is set; rows past the total are hidden.
  *
@@ -1234,12 +1234,12 @@ void cFEStateCareerStats::setupRacePlatinumMedalsList()
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(track));
             int raceTime;
             if (idx % 3 == 0) {
-                sprintf(text, str_pct_s_Race, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
-                raceTime = cBENewRaceInterface_getPlatinumGoal(race, D_004780D0[idx], 4);
+                sprintf(text, str_pct_s_Race, cBENewRaceInterface_getLocationName(race, cFEStateCareerStats_raceLocationTable[idx]));
+                raceTime = cBENewRaceInterface_getPlatinumGoal(race, cFEStateCareerStats_raceLocationTable[idx], 4);
                 cUIText_setAsciiString(textWidget, text);
             } else {
-                raceTime = cBENewRaceInterface_getPlatinumGoal(race, D_004780D0[idx], 0);
-                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
+                raceTime = cBENewRaceInterface_getPlatinumGoal(race, cFEStateCareerStats_raceLocationTable[idx], 0);
+                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, cFEStateCareerStats_raceLocationTable[idx]));
             }
             sprintf(text, str_timepct_d_b, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(text));
@@ -1294,13 +1294,13 @@ extern char str_fs_medalpct_d[];
 extern char str_pct_d_j[];
 extern char str_pct_d_pct_d_d[];
 extern char str_pct_s_Jam[];
-extern int D_00478110[];
+extern int cFEStateCareerStats_freestyleLocationTable[];
 
 
 /**
  * Fills the career-stats freestyle platinum medal list: five rows from the scroll position (+0x54).
  *
- * Like the race list with the "fs_" widgets: the peak number is idx / 4 + 1, the location name of D_00478110 ("%s Jam"
+ * Like the race list with the "fs_" widgets: the peak number is idx / 4 + 1, the location name of cFEStateCareerStats_freestyleLocationTable ("%s Jam"
  * with the mode-5 score for every fourth event, else the score of the location's mode from cBENewRaceInterface_getLocationDefaultGameEvent), the points
  * as "%d" and the medal icon by bit idx of +0x70; the counter reads +0x6C of +0x68.
  *
@@ -1342,12 +1342,12 @@ void cFEStateCareerStats::setupFSPlatinumMedalsList()
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(track));
             int eventPoints;
             if (idx % 4 == 0) {
-                sprintf(text, str_pct_s_Jam, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
+                sprintf(text, str_pct_s_Jam, cBENewRaceInterface_getLocationName(race, cFEStateCareerStats_freestyleLocationTable[idx]));
                 cUIText_setAsciiString(textWidget, text);
-                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, D_00478110[idx], 5);
+                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, cFEStateCareerStats_freestyleLocationTable[idx], 5);
             } else {
-                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
-                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, D_00478110[idx], cBENewRaceInterface_getLocationDefaultGameEvent(race, D_00478110[idx]));
+                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, cFEStateCareerStats_freestyleLocationTable[idx]));
+                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, cFEStateCareerStats_freestyleLocationTable[idx], cBENewRaceInterface_getLocationDefaultGameEvent(race, cFEStateCareerStats_freestyleLocationTable[idx]));
             }
             sprintf(text, str_pct_d_j, eventPoints);
             sprintf(timeName, str_fs_pointspct_d, i);
@@ -1418,7 +1418,7 @@ extern char str_dash[] __attribute__((aligned(8)));
 extern char str_pct_d_j[];
 extern char str_dash_sp_dash_sp_dash[];
 extern char str_ko[];
-extern char D_004A23C0[];
+extern char str_lbracket_pct_s_rbracket[];
 extern char str_pct_d_sec[];
 extern char str_ubers[];
 extern char str_airtime[];
@@ -1474,7 +1474,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ko, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ko_event, buf);
         } else {
             self->setTextSafe(str_ko, str_dash);
@@ -1487,7 +1487,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
             self->setTextSafe(str_handplants, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_handplants_event, buf);
         } else {
             self->setTextSafe(str_handplants, str_dash);
@@ -1500,7 +1500,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ubers, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ubers_event, buf);
         } else {
             self->setTextSafe(str_ubers, str_dash);
@@ -1513,7 +1513,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_superubers, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_superubers_event, buf);
         } else {
             self->setTextSafe(str_superubers, str_dash);
@@ -1526,7 +1526,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ubergrinds, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ubergrinds_event, buf);
         } else {
             self->setTextSafe(str_ubergrinds, str_dash);
@@ -1539,7 +1539,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_0_1f_m, fptodp((float)value * 0.009999999776482582f));
             self->setTextSafe(str_longrail, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_longrail_event, buf);
         } else {
             self->setTextSafe(str_longrail, str_dash);
@@ -1552,7 +1552,7 @@ void cFEStateCareerStats::setupRidersBest()
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
             self->setTextSafe(str_airtime, buf);
-            sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
+            sprintf(buf, str_lbracket_pct_s_rbracket, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_airtime_event, buf);
         } else {
             self->setTextSafe(str_airtime, str_dash);
@@ -1605,15 +1605,15 @@ extern "C" int cBERewardInterface_isPeakLocked(void* reward, int id, int n);
 extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(void* game, int track);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
 int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int mode, int track);
-extern int D_004780D0[];
-extern int D_00478110[];
+extern int cFEStateCareerStats_raceLocationTable[];
+extern int cFEStateCareerStats_freestyleLocationTable[];
 
 /**
  * Counts the career-stats events and the platinum medals the human rider owns.
  *
  * For each peak not locked for the human rider (cBERewardInterface_isPeakLocked returns 0; peaks 1 and 2 can be) adds 3, 3 or 2 race
- * events (+0x58) and 4 freestyle events (+0x68). Then for the 8 race events (D_004780D0; mode 4 for every third, else
- * 0) and the 12 freestyle events (D_00478110; mode 5 for every fourth, else cBENewRaceInterface_getLocationDefaultGameEvent's mode) whose
+ * events (+0x58) and 4 freestyle events (+0x68). Then for the 8 race events (cFEStateCareerStats_raceLocationTable; mode 4 for every third, else
+ * 0) and the 12 freestyle events (cFEStateCareerStats_freestyleLocationTable; mode 5 for every fourth, else cBENewRaceInterface_getLocationDefaultGameEvent's mode) whose
  * cBERewardInterface_getTrackMedal is 0, sets bit i of +0x60 / +0x70 and counts +0x5C / +0x6C. All events are checked
  * whether or not their peak is counted.
  *
@@ -1639,7 +1639,7 @@ void cFEStateCareerStats::initTotalEventMedal()
     for (int i = 0; i < 8; i++) {
         int mode = 0;
         if (i % 3 == 0) mode = 4;
-        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_004780D0[i]);
+        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, cFEStateCareerStats_raceLocationTable[i]);
         if (medal == 0) {
             mbitOwnedRaceMedal |= 1 << i;
             mTotalOwnedRaceEvent += 1;
@@ -1650,9 +1650,9 @@ void cFEStateCareerStats::initTotalEventMedal()
         if ((i & 3) == 0) {
             mode = 5;
         } else {
-            mode = cBENewRaceInterface_getLocationDefaultGameEvent(game, D_00478110[i]);
+            mode = cBENewRaceInterface_getLocationDefaultGameEvent(game, cFEStateCareerStats_freestyleLocationTable[i]);
         }
-        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_00478110[i]);
+        char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, cFEStateCareerStats_freestyleLocationTable[i]);
         if (medal == 0) {
             mbitOwnedFSMedal |= 1 << i;
             mTotalOwnedFSEvent += 1;

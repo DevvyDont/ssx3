@@ -193,7 +193,7 @@ extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDif
 extern "C" void vu0_waitReadVi1(void* t);
 extern "C" void vu0_readDataMemory(void* t, void* a);
 struct sGp2930 { int a, b; };
-extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
+extern sGp2930 vu0_context; // placeholder: target is a raw $gp+0x2930 reference
 
 /**
  * Tessellates a terrain patch into an AI forward-difference cache node on VU0.
@@ -208,7 +208,7 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  */
 void cAIFwdDiffCache::TesselatePatch(tPatchRecord* patch, tAIFwdDiff* fwdDiff)
 {
-    sGp2930* patchEval = &D_004A5A20;
+    sGp2930* patchEval = &vu0_context;
     vu0_runProgramWithMatrices(patchEval, patch->m_fBm0);
     InitializeCache(fwdDiff);
     vu0_waitReadVi1(patchEval);

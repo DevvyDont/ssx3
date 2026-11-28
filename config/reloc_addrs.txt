@@ -380,9 +380,9 @@ rom:0x277120 reloc:MIPS_HI16 symbol:D_005083C0
 rom:0x277170 reloc:MIPS_LO16 symbol:D_00508380
 rom:0x27718C reloc:MIPS_LO16 symbol:D_005083C0
 // ealib/seg_2DCAE8 CDVD_initFileSystem: the directory-scan loop's bound is the end of the 0x800-byte sector buffer at
-// D_00519C80; the separate buffer D_0051A480 starts at the same address (its own lui/addiu at 0x2E5418 stay named).
-rom:0x2E52A4 reloc:MIPS_HI16 symbol:D_00519C80 addend:0x800
-rom:0x2E52AC reloc:MIPS_LO16 symbol:D_00519C80 addend:0x800
+// CDVD_sectorBuffer; the separate buffer CDVD_callbackThreadStack starts at the same address (its own lui/addiu at 0x2E5418 stay named).
+rom:0x2E52A4 reloc:MIPS_HI16 symbol:CDVD_sectorBuffer addend:0x800
+rom:0x2E52AC reloc:MIPS_LO16 symbol:CDVD_sectorBuffer addend:0x800
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // ealib/seg_2B4578 SNDMIXI_buildFxGraph (tools/gen/reloc_from_diff.py)

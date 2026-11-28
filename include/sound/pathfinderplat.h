@@ -123,7 +123,7 @@ struct tPathBank {
                         //      (< 0: free); pathxSND_removeBank resets it to -1
     int unk_0C;         // 0x0C
     int unk_10;         // 0x10
-    void* mMemory;      // 0x14 [U] pathxSND_closePlayer passes it to the free hook D_004A3794 when set; pathxSND_removeBank clears
+    void* mMemory;      // 0x14 [U] pathxSND_closePlayer passes it to the free hook pathxSND_freeHook when set; pathxSND_removeBank clears
                         //      it (no store of a nonzero value found)
     int unk_18;         // 0x18 [R] pathxSND_init: 0
     int mUsed;          // 0x1C [U] pathxSND_addBank stores 1; pathxSND_removeBank stores 0

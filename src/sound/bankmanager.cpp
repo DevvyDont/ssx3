@@ -1074,7 +1074,7 @@ extern "C" int cMusicSys_StartOverlay(void* mon);
 extern "C" int cMusicSys_IsOverlayArmed(void* mon);
 extern "C" void cMusicSys_ClearOverlayArmed(void* mon);
 extern "C" int cMusicSys_GetDuckToLoops(void* mon);
-extern int D_004A361C;
+extern int cSSXAudio_longAirFlag;
 extern int cSSXAudio_prevLongAirFlag;
 
 struct sBmVtC8C8 { short delta; short index; void (*fn)(void*, int); };
@@ -1086,14 +1086,14 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
     if (s == cAirPredictor::kSS_SimDone || s == cAirPredictor::kSS_SimCheckObjectsDone)
         air = 1;
     if (air) {
-        if (D_004A361C == true)
+        if (cSSXAudio_longAirFlag == true)
             return self->mJumpAirTime;
         float v = rider->mAirPredictor->TotalAirTime;
         self->mJumpMaxAirTime = 0.0f;
         self->mJumpAirTime = v;
         return v;
     }
-    if (D_004A361C == true)
+    if (cSSXAudio_longAirFlag == true)
         return self->mJumpAirTime;
     return 0.0f;
 }
@@ -1103,11 +1103,11 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
  *
  * Counts mJumpCountdown down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state MS_Air with its
  * mAirPredictor's SimState kSS_SimDone or kSS_SimCheckObjectsDone, the air time is the predictor's TotalAirTime, cached
- * in mJumpAirTime on the first frame (mJumpMaxAirTime cleared); while D_004A361C is set the cached value is reused;
+ * in mJumpAirTime on the first frame (mJumpMaxAirTime cleared); while cSSXAudio_longAirFlag is set the cached value is reused;
  * otherwise it is 0. mOverlayLevel is set to the music volume (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)), and
- * cSSXAudio_prevLongAirFlag takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
+ * cSSXAudio_prevLongAirFlag takes last frame's cSSXAudio_longAirFlag, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
  * (cMusicSys_GetDuckToLoops) is set, cSSXAudio_IsBigAirEvent and cSSXAudio_IsHalfpipeEvent are false and no rider event runs (cSSXAudio_GetRiderMusicEvent), the song
- * is driven too (local play). Outside replays, above 2 s: D_004A361C = 1; mJumpMaxAirTime keeps the largest current air
+ * is driven too (local play). Outside replays, above 2 s: cSSXAudio_longAirFlag = 1; mJumpMaxAirTime keeps the largest current air
  * time (CurAirTime), and mJumpVolumeAirTime, set on the first frame, is that plus max((ApexTime - CurAirTime) / 2,
  * 0.5). From their ratio and a volume falling with the air time (20..127) it sets mWindVolume (then scaled by the SFX
  * volume, control 5) and, with play, the song's base volume (cMusicSys_SetBaseVolume) and overlay level (mOverlayLevel via
@@ -1128,7 +1128,7 @@ void cSSXAudio::UpdateAirTimeVolume()
         if (simState == cAirPredictor::kSS_SimDone || simState == cAirPredictor::kSS_SimCheckObjectsDone)
             air = 1;
         if (air) {
-            if (D_004A361C == true) {
+            if (cSSXAudio_longAirFlag == true) {
                 airTime = mJumpAirTime;
             } else {
                 airTime = rider->mAirPredictor->TotalAirTime;
@@ -1137,7 +1137,7 @@ void cSSXAudio::UpdateAirTimeVolume()
             }
             goto have;
         }
-        if (D_004A361C == true) {
+        if (cSSXAudio_longAirFlag == true) {
             airTime = mJumpAirTime;
             goto have;
         }
@@ -1146,8 +1146,8 @@ void cSSXAudio::UpdateAirTimeVolume()
 have:
     int play = 0;
     mOverlayLevel = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
-    cSSXAudio_prevLongAirFlag = D_004A361C;
-    D_004A361C = 0;
+    cSSXAudio_prevLongAirFlag = cSSXAudio_longAirFlag;
+    cSSXAudio_longAirFlag = 0;
     if (3.9994986057281494f < airTime) {
         int duckToLoops = cMusicSys_GetDuckToLoops(&MusicSys);
         if (duckToLoops == true && !cSSXAudio_IsBigAirEvent(this) && !cSSXAudio_IsHalfpipeEvent(this)) {
@@ -1157,7 +1157,7 @@ have:
     }
     if (cSSXAudio_ReplayMode(this) == 0) {
         if (2.0f < airTime) {
-            D_004A361C = 1;
+            cSSXAudio_longAirFlag = 1;
             float lo = rider->mAirPredictor->CurAirTime;
             if (lo < mJumpMaxAirTime)
                 lo = mJumpMaxAirTime;

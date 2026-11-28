@@ -5003,7 +5003,7 @@ struct sPtEnt_9860 {
 
 
 
-extern int D_004A4380;
+extern int cPS2GraphicsMan_triStripFirstFlag;
 extern int SPRMan;
 extern char D_12B0[];
 extern char D_12B8[];
@@ -5030,7 +5030,7 @@ static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, uns
 /**
  * Draws a triangle strip.
  *
- * Picks the VU program (D_12B0 once after D_004A4380 is set, else D_12B8) and the textured or untextured primitive from
+ * Picks the VU program (D_12B0 once after cPS2GraphicsMan_triStripFirstFlag is set, else D_12B8) and the textured or untextured primitive from
  * the top draw state, then copies the vertices into DMA packets of at most 72 vertices; each new chunk starts again two
  * vertices back so the strip stays connected. Packets that would overflow the buffer are flushed with cPS2ScratchPad_flushBufferTo.
  * The bool argument On Tour has (isstatic) is not read.
@@ -5042,12 +5042,12 @@ static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, uns
 void cPS2GraphicsMan::RenderTriStrip(int numVerts, tBxVertex* src, int)
 {
     unsigned int prog;
-    if (D_004A4380) {
+    if (cPS2GraphicsMan_triStripFirstFlag) {
         prog = (unsigned int)D_12B0 >> 3;
     } else {
         prog = (unsigned int)D_12B8 >> 3;
     }
-    D_004A4380 = 0;
+    cPS2GraphicsMan_triStripFirstFlag = 0;
     m_pCurrentDrawState->m_bitGroups[0] = (((int)(m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
     (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     if (mMatricesValid == 0) {
@@ -5132,7 +5132,7 @@ extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, 
 
 extern int SPRMan;
 
-extern int D_004A4380;
+extern int cPS2GraphicsMan_triStripFirstFlag;
 extern char D_12B0[];
 extern char D_12B8[];
 
@@ -5149,7 +5149,7 @@ static inline unsigned long gsPrim_A260(int prim)
  * cursor in mStripCursor) it writes a DMA cnt tag (n * 3 + 4 qwords), a VIF UNPACK header and a PACKED GIF tag for @p n
  * loops of three registers: PRIM 0x5C (Gouraud, textured, blended tri strip) with ST, RGBAQ, XYZ2 when the draw state
  * has a texture, else PRIM 0x4C with NOP, RGBAQ, XYZ2. After the n * 3 quadwords of vertex space it adds a VIF MSCAL of
- * the VU1 program at D_12B0 when the flag D_004A4380 is set (clearing it) or D_12B8 otherwise. cPS2GraphicsMan_endTriStripPacket closes the
+ * the VU1 program at D_12B0 when the flag cPS2GraphicsMan_triStripFirstFlag is set (clearing it) or D_12B8 otherwise. cPS2GraphicsMan_endTriStripPacket closes the
  * packet. cSpeedBoostFX_render uses the pair.
  *
  * @param n  the number of vertices
@@ -5158,10 +5158,10 @@ static inline unsigned long gsPrim_A260(int prim)
 // PORT: PS2-only GS packet build (DMA tag + GIF tag + PRIM/TEX registers).
 unsigned long* cPS2GraphicsMan::beginTriStripPacket(int n)
 {
-    unsigned int addr = (D_004A4380 ? (unsigned int)D_12B0 : (unsigned int)D_12B8) >> 3;
+    unsigned int addr = (cPS2GraphicsMan_triStripFirstFlag ? (unsigned int)D_12B0 : (unsigned int)D_12B8) >> 3;
     int primType;
     long regList;
-    D_004A4380 = 0;
+    cPS2GraphicsMan_triStripFirstFlag = 0;
     ((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[0]
             = (((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[0] & ~0x3C0) | 0xC0;
     ((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
@@ -11563,7 +11563,7 @@ struct sPkt_6E78 {
 struct sShadowCfg_6E78 {
     int texIndex;
 };
-extern sShadowCfg_6E78 D_004A45D4;
+extern sShadowCfg_6E78 cBoardTrail_m_Texture;
 struct sShadowOpt_6E78 {
     int fba;
 };
@@ -11660,7 +11660,7 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, cPS2GraphicsMan* self)
  * Draws @p n board trails as a multi-pass destination-alpha effect and queues the passes on the defer manager.
  *
  * Resets the current draw state (m_pCurrentDrawState) to sDrawState_s_defaultDrawState, sets its layer and blend bits
- * and its texture to _EffectTexMap[D_004A45D4], recomputes the matrices (cPS2GraphicsMan_computeMatrices) when mMatricesValid is 0 and
+ * and its texture to _EffectTexMap[cBoardTrail_m_Texture], recomputes the matrices (cPS2GraphicsMan_computeMatrices) when mMatricesValid is 0 and
  * reads the screen width (virtual slot 10). Each pass is a DMA packet at mVifCursor built through cPS2ScratchPad_freeSpace (VIF
  * FLUSH, A+D GS registers, optionally mGuardScale / mGuardOffset unpacked to the VU), followed by trail draws: 1) FRAME
  * writing alpha only, z writes masked, z test always, guard band, ribbon 0-1 untextured (cPS2GraphicsMan_drawTrailRibbons); 2) z test
@@ -11693,7 +11693,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] &= ~0xFF000;
     ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x7C)
             | 0x14;
-    int tex = _EffectTexMap[D_004A45D4.texIndex];
+    int tex = _EffectTexMap[cBoardTrail_m_Texture.texIndex];
     ((sRS_6E78*)m_pCurrentDrawState)->tex = tex;
 
     int width = GetScreenWidth();

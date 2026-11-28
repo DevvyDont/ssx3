@@ -39,7 +39,7 @@ extern sSifClient sifload_client;
 
 /* 4-byte server version tags returned by the fileio and loadfile RPC servers */
 typedef struct { char b[4]; } sRpcVer;
-extern sRpcVer D_0052EE28;      /* fileio (follows fileio_client) */
+extern sRpcVer fileio_serverVersion;      /* fileio (follows fileio_client) */
 extern sRpcVer sifload_serverVersion;      /* loadfile (follows sifload_client) */
 
 
@@ -88,7 +88,7 @@ extern sFioFile *fileio_getDescriptor(unsigned fd);
 
 /* fileio RPC buffers */
 typedef struct { void (*fn)(int); int arg; } sFioCb;
-extern sFioCb D_0052EE80;      /* user callback run by fileio_onCallbackCmd (set by fileio_setCallback) */
+extern sFioCb fileio_userCallback;      /* user callback run by fileio_onCallbackCmd (set by fileio_setCallback) */
 extern char fileio_recvBuffer[];      /* RPC receive buffer */
 extern char D_0052E380[];      /* 0x440-byte read-ahead buffers */
 extern char D_0052EE40[];
@@ -182,7 +182,7 @@ extern int fileio_noWaitSema;
 extern int libkernl_iopHeapBindState;
 extern int libkernl_iopHeapResult;          /* RPC result for libkernl_iopHeapClient */
 extern int libkernl_iopHeapArgs;          /* RPC argument for libkernl_iopHeapClient */
-extern int D_00455228;          /* loadfile bound (< 0 = not yet) */
+extern int sifload_bindState;          /* loadfile bound (< 0 = not yet) */
 extern int sysTable_base;
 extern int execArgs_kernelArea;
 
@@ -969,7 +969,7 @@ void iDisableDmac(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", libkernl_requestThread);
 #ifdef SKIP_ASM
-extern char D_0049AAE0[];
+extern char str_internel_error_in_libkernl_a[];
 extern int kprintf_pf(const char *, ...) __asm__("kprintf");
 extern int WaitSema_i(int) __asm__("WaitSema");
 extern void RotateThreadReadyQueue(int);
@@ -1007,7 +1007,7 @@ void libkernl_requestThread(sWakeQueue *wakeQueue) {
             SuspendThread(*(entryThreads + j));
             break;
         default:
-            kprintf_pf(D_0049AAE0);
+            kprintf_pf(str_internel_error_in_libkernl_a);
             break;
         }
     }
@@ -1283,7 +1283,7 @@ INCLUDE_ASM("seg/seg_325220", libkernl_ttySend);
 /* DECI2 send packet: the 8-byte DECI2 header (length, reserved, protocol, source and destination node) and a word
    before the text (0; the text starts at +12). Names ours, from libkernl_openTtyChannel's set-up. */
 struct Pkt_5040 { short length; short reserved; short protocol; char source; char destination; int textHeader; };
-extern char D_0052B900[];
+extern char libkernl_ttySendPacket[];
 extern int f5040_send(int, char) __asm__("sceDeci2ReqSend");
 extern void f5040_poll(int) __asm__("sceDeci2Poll");
 int libkernl_ttySend_d(char *buf, int len) __asm__("libkernl_ttySend");
@@ -1291,7 +1291,7 @@ int libkernl_ttySend_d(char *buf, int len) __asm__("libkernl_ttySend");
  * Sends bytes to the host console over DECI2 and returns how many were taken, or -1.
  *
  * Fails when a send is in progress (fC). With interrupts off (DIntr) it builds the packet in the uncached buffer
- * D_0052B900: payload from +12, each '\n' expanded to "\r\n", at most 256 payload bytes (the rest is left to the
+ * libkernl_ttySendPacket: payload from +12, each '\n' expanded to "\r\n", at most 256 payload bytes (the rest is left to the
  * caller). It sets wlen and the packet length, requests the send with sceDeci2ReqSend and polls sceDeci2Poll until
  * libkernl_onTtyDeci2Event clears fC, then calls EIntr. _write calls it.
  *
@@ -1307,7 +1307,7 @@ int libkernl_ttySend_d(char *buf, int len) {
     if (libkernl_ttyState.fC != 0)
         return -1;
     DIntr();
-    pkt = (struct Pkt_5040 *)((int)D_0052B900 | 0x20000000);
+    pkt = (struct Pkt_5040 *)((int)libkernl_ttySendPacket | 0x20000000);
     libkernl_ttyState.fC = 1;
     libkernl_ttyState.wp = (char *)pkt;
     payloadCursor = (char *)pkt + 12;
@@ -1375,7 +1375,7 @@ INCLUDE_ASM("seg/seg_325220", libkernl_openTtyChannel);
 // The binary re-reads fd right after storing it (sTty.fd is volatile).
 /* libkernl_ttySend's Pkt_5040 (names ours) */
 struct Pkt_5260 { short length; short reserved; short protocol; char source; char destination; int textHeader; };
-extern char D_0052B900[];
+extern char libkernl_ttySendPacket[];
 extern char D_0052BA40[];
 extern void FlushCache(int);
 extern int f5260_open(int, void *, void *) __asm__("sceDeci2Open");
@@ -1384,7 +1384,7 @@ extern int f5260_open(int, void *, void *) __asm__("sceDeci2Open");
  *
  * Flushes the caches (FlushCache(0)) and opens protocol 0x210 with sceDeci2Open, registering libkernl_ttyState and the
  * callback libkernl_onTtyDeci2Event. Then it clears the state, points the receive buffer at the uncached D_0052BA40, prepares the
- * send packet header in the uncached D_0052B900 (protocol 0x210, source 'E', destination 'H') and creates the
+ * send packet header in the uncached libkernl_ttySendPacket (protocol 0x210, source 'E', destination 'H') and creates the
  * 0x100-byte input ring with libkernl_initTtyRing.
  *
  * @return 1 when open, else 0
@@ -1398,7 +1398,7 @@ int libkernl_openTtyChannel(void) {
     libkernl_ttyState.wlen = 0;
     libkernl_ttyState.pos = 0;
     libkernl_ttyState.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
-    sendPacket = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
+    sendPacket = (struct Pkt_5260 *)((int)libkernl_ttySendPacket | 0x20000000);
     libkernl_ttyState.wp = (char *)sendPacket;
     sendPacket->protocol = 528;
     sendPacket->source = 69;
@@ -1953,12 +1953,12 @@ typedef struct {
 } sCmdData_5D38;
 /* sifcmd_data is declared int[] in this unit; this is its real layout */
 extern sCmdData_5D38 cmd_5D38 __asm__("sifcmd_data");
-extern int D_0045517C;          /* SIF command layer initialised */
+extern int sifcmd_initializedFlag;          /* SIF command layer initialised */
 extern char D_0052BC00[];       /* receive packet buffer */
 extern char D_0052BC80[];
 extern sCmdHandler_5D38 D_0052BD00[32];
 extern int D_0052BCC0[5];       /* change-address / init packet */
-extern int D_0052BCD4;          /* DMAC 5 handler id */
+extern int sifcmd_dmacHandlerId;          /* DMAC 5 handler id */
 extern int func_00426230();
 extern int f5D38_adddh(int, int (*)(), int) __asm__("AddDmacHandler");
 extern void sceSifSetDChain(void);
@@ -1969,7 +1969,7 @@ extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("sceSifSend
 /**
  * Initialises the SIF command layer once and starts the handshake with the IOP.
  *
- * With interrupts off it returns at once when D_0045517C is set; otherwise it sets the flag and fills the command data
+ * With interrupts off it returns at once when sifcmd_initializedFlag is set; otherwise it sets the flag and fills the command data
  * sifcmd_data: the uncached receive buffer D_0052BC00, the 32-entry system handler table D_0052BD00 (cleared, then
  * entries 0 and 1 set to sifcmd_onChangeAddrCmd and sifcmd_onSetSregCmd), no user table, and the 32 cleared software registers
  * sifcmd_sregs.
@@ -1984,11 +1984,11 @@ extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("sceSifSend
 void sceSifInitCmd(void) {
     int i;
     DIntr();
-    if (D_0045517C) {
+    if (sifcmd_initializedFlag) {
         EIntr();
         return;
     }
-    D_0045517C = 1;
+    sifcmd_initializedFlag = 1;
     cmd_5D38.iopbuf = 0;
     cmd_5D38.pktbuf = (void *)((int)D_0052BC00 | 0x20000000);
     cmd_5D38.unused = (void *)((int)D_0052BC80 | 0x20000000);
@@ -2013,7 +2013,7 @@ void sceSifInitCmd(void) {
         *(volatile int *)0x1000E010 = 0x20;
     if (!(*(volatile int *)0x1000C000 & 0x100))
         sceSifSetDChain();
-    D_0052BCD4 = f5D38_adddh(5, func_00426230, 0);
+    sifcmd_dmacHandlerId = f5D38_adddh(5, func_00426230, 0);
     EnableDmac(5);
     cmd_5D38.iopbuf = (void *)f5D38_getreg(0x80000000);
     if (cmd_5D38.iopbuf) {
@@ -2038,18 +2038,18 @@ INCLUDE_ASM("seg/seg_325220", sceSifExitCmd);
 #ifdef SKIP_ASM
 extern int DisableDmac(int a0);
 extern int RemoveDmacHandler(int a0, int a1);
-extern int D_0045517C;
-extern int D_0052BCD4;
+extern int sifcmd_initializedFlag;
+extern int sifcmd_dmacHandlerId;
 /**
  * Shuts the SIF command layer down.
  *
  * Disables DMA channel 5 (DisableDmac), removes the channel 5 handler with RemoveDmacHandler and clears the
- * initialised flag D_0045517C. sceSifExitRpc and shutdownAndLoadExec call it.
+ * initialised flag sifcmd_initializedFlag. sceSifExitRpc and shutdownAndLoadExec call it.
  */
 void sceSifExitCmd(void) {
     DisableDmac(5);
-    RemoveDmacHandler(5, D_0052BCD4);
-    D_0045517C = 0;
+    RemoveDmacHandler(5, sifcmd_dmacHandlerId);
+    sifcmd_initializedFlag = 0;
 }
 #endif
 
@@ -3583,7 +3583,7 @@ extern void fileio_unlockCall(void);
  * Installs the callback run when the IOP file server sends SIF command 0x80000013, returning the previous one.
  *
  * Under the call lock (fileio_lockCall ... fileio_unlockCall), initialising the library first when fileio_initFlag is 0
- * (fileio_init), it stores @p callbackFn and @p callbackArg in D_0052EE80 with interrupts disabled (re-enabled only when they were
+ * (fileio_init), it stores @p callbackFn and @p callbackArg in fileio_userCallback with interrupts disabled (re-enabled only when they were
  * on). fileio_onCallbackCmd runs the callback. No caller in this build.
  *
  * @param callbackFn  callback, called with @p callbackArg
@@ -3593,15 +3593,15 @@ extern void fileio_unlockCall(void);
 void (*fileio_setCallback(void (*callbackFn)(int), int callbackArg))(int) {
     int intrWasOn;
     void (*old)(int);
-    sFioCb *callbackSlot = &D_0052EE80;
+    sFioCb *callbackSlot = &fileio_userCallback;
     fileio_lockCall_a(27);
     if (fileio_initFlag == 0) {
         fileio_init();
     }
     intrWasOn = DIntr_i();
-    old = D_0052EE80.fn;
+    old = fileio_userCallback.fn;
     callbackSlot->arg = callbackArg;
-    D_0052EE80.fn = callbackFn;
+    fileio_userCallback.fn = callbackFn;
     if (intrWasOn != 0) {
         EIntr();
     }
@@ -3619,7 +3619,7 @@ INCLUDE_ASM("seg/seg_325220", fileio_onCallbackCmd);
  * Calls @p callback->fn(@p callback->arg) when set, then executes sync and ei: interrupts are re-enabled on return.
  *
  * @param cause  the received command packet (unused)
- * @param callback  D_0052EE80, set by fileio_setCallback
+ * @param callback  fileio_userCallback, set by fileio_setCallback
  */
 void fileio_onCallbackCmd(int cause, sFioCb *callback) {
     if (callback->fn)
@@ -3645,11 +3645,11 @@ int fileio_init_d(void) __asm__("fileio_init");
 /**
  * Initialises the EE side of the IOP file library: binds the file server and reads its version.
  *
- * Calls func_00426408(0), clears the user callback D_0052EE80 and, with interrupts disabled, installs fileio_onCompletionCmd
+ * Calls func_00426408(0), clears the user callback fileio_userCallback and, with interrupts disabled, installs fileio_onCompletionCmd
  * (SIF command 0x80000011, reply buffer D_0052EE40) and fileio_onCallbackCmd (0x80000013, the callback) with sceSifAddCmdHandler.
  * Then binds fileio_client to server 0x80000001 (sceSifBindRpc), retrying after a 0x100000-iteration spin until the server
  * is bound. It frees all 32 descriptor slots of fileio_descriptors under fileio_tableSema, sends the addresses of the two 0x440-byte
- * reply buffers D_0052E380 (in D_0052D6C0) with RPC function 0xFF and copies the 4-byte server version to D_0052EE28;
+ * reply buffers D_0052E380 (in D_0052D6C0) with RPC function 0xFF and copies the 4-byte server version to fileio_serverVersion;
  * D_00455210 becomes 1 when the second reply word is 2 (the server then names a reply buffer per request). Sets the
  * initialised flag fileio_initFlag. The file calls in this unit call it when the flag is 0.
  *
@@ -3659,10 +3659,10 @@ int fileio_init_d(void) {
     int old;
     int spinCount;
     sFioFile *fileSlot;
-    sFioCb *callbackSlot = &D_0052EE80;
+    sFioCb *callbackSlot = &fileio_userCallback;
     sRpcVer w;
     func_00426408_z(0);
-    D_0052EE80.fn = 0;
+    fileio_userCallback.fn = 0;
     callbackSlot->arg = 0;
     old = DIntr_z();
     sceSifAddCmdHandler_z(0x80000011, fileio_onCompletionCmd_z, D_0052EE40);
@@ -3688,7 +3688,7 @@ int fileio_init_d(void) {
     D_0052D6C0[1] = D_0052D6C0[0] + 1088;
     if (sceSifCallRpc(&fileio_client, 0xFF, 0, D_0052D6C0, 8, fileio_recvBuffer, 8, 0, 0) < 0)
         return 0xFFFEFFFF;
-    D_0052EE28 = *(sRpcVer *)((int)fileio_recvBuffer | 0x20000000);
+    fileio_serverVersion = *(sRpcVer *)((int)fileio_recvBuffer | 0x20000000);
     w = *(sRpcVer *)((int)(fileio_recvBuffer + 4) | 0x20000000);
     D_00455210 = *(int *)&w == 2;
     fileio_initFlag = 1;
@@ -3699,21 +3699,21 @@ int fileio_init_d(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", fileio_isServerRejected);
 #ifdef SKIP_ASM
-extern char D_00455164[];
+extern char libkernl_versionTag[];
 extern char *D_00455220;
 extern int memcmp(char *, char *, int);
 /**
  * Returns whether the bound file server's version tag is one the library does not accept.
  *
- * Compares the 4-byte tag D_0052EE28 (set by fileio_init) with the library's "2710" (D_00455164) and with the tag
+ * Compares the 4-byte tag fileio_serverVersion (set by fileio_init) with the library's "2710" (libkernl_versionTag) and with the tag
  * D_00455220 points at ("....", D_0049AD48) using memcmp (memcmp). Returns 0 when it equals either; otherwise
  * the result of comparing the two accepted tags, which always differ, so 1. sceOpen refuses to open files then.
  *
  * @return 1 when the server's tag matches neither accepted tag, else 0
  */
 int fileio_isServerRejected(void) {
-    char *libVersion = D_00455164;
-    char *serverVersion = D_0052EE28.b;
+    char *libVersion = libkernl_versionTag;
+    char *serverVersion = fileio_serverVersion.b;
     int mismatch = 0;
     if (memcmp(serverVersion, libVersion, 4) != 0 &&
         memcmp(serverVersion, D_00455220, 4) != 0) {
@@ -3730,14 +3730,14 @@ extern void memset(void *a0, int a1, int a2);
 /**
  * Marks the file library as uninitialised so the next file call rebinds the server.
  *
- * Clears fileio_initFlag and zeroes the 4-byte server version D_0052EE28 (memset, memset). bxIop_initIop calls it
+ * Clears fileio_initFlag and zeroes the 4-byte server version fileio_serverVersion (memset, memset). bxIop_initIop calls it
  * after rebooting the IOP.
  *
  * @return 0
  */
 int sceFsReset(void) {
     fileio_initFlag = 0;
-    memset(&D_0052EE28, 0, 4);
+    memset(&fileio_serverVersion, 0, 4);
     return 0;
 }
 #endif
@@ -5819,11 +5819,11 @@ int func_0042AD08(void) {
 INCLUDE_ASM("seg/seg_325220", sceSifLoadIopHeap);
 #ifdef SKIP_ASM
 struct S2AD28 { int cmd; char name[IOP_NAME_SIZE]; };
-extern struct S2AD28 D_0052EF80;
+extern struct S2AD28 libkernl_iopHeapLoadArgs;
 /**
  * Loads a file into IOP memory through the heap RPC server.
  *
- * When the heap server is bound (libkernl_iopHeapBindState >= 0) it sends request 3 with @p iopAddr and the path (copied into D_0052EF80,
+ * When the heap server is bound (libkernl_iopHeapBindState >= 0) it sends request 3 with @p iopAddr and the path (copied into libkernl_iopHeapLoadArgs,
  * up to 0xFB characters; the request is 4 bytes plus the name and its NUL) and returns the reply word libkernl_iopHeapResult. No
  * caller in this build.
  *
@@ -5837,21 +5837,21 @@ int sceSifLoadIopHeap(char *filePath, int iopAddr) {
         return 0;
     }
     i = 0;
-    if ((D_0052EF80.name[0] = filePath[0]) != 0) {
+    if ((libkernl_iopHeapLoadArgs.name[0] = filePath[0]) != 0) {
         do {
             i++;
             if (i >= IOP_NAME_SIZE) {
                 break;
             }
-        } while ((D_0052EF80.name[i] = filePath[i]) != 0);
+        } while ((libkernl_iopHeapLoadArgs.name[i] = filePath[i]) != 0);
     }
     if (i == IOP_NAME_SIZE) {
-        D_0052EF80.name[IOP_NAME_SIZE - 1] = 0;
+        libkernl_iopHeapLoadArgs.name[IOP_NAME_SIZE - 1] = 0;
         i = IOP_NAME_SIZE - 1;
     }
-    D_0052EF80.cmd = iopAddr;
-    D_0052EF80.name[IOP_NAME_SIZE - 1] = 0;
-    if (sceSifCallRpc(&libkernl_iopHeapClient, 3, 0, &D_0052EF80, i + 5, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
+    libkernl_iopHeapLoadArgs.cmd = iopAddr;
+    libkernl_iopHeapLoadArgs.name[IOP_NAME_SIZE - 1] = 0;
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 3, 0, &libkernl_iopHeapLoadArgs, i + 5, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return -1;
     }
     return libkernl_iopHeapResult;
@@ -5973,21 +5973,21 @@ INCLUDE_ASM("seg/seg_325220", sifload_bindLoader);
 /**
  * Binds the IOP module-loader RPC server once and reads its version.
  *
- * Does nothing when D_00455228 is already >= 0. Otherwise binds sifload_client to server 0x80000006 (sceSifBindRpc),
- * spinning 0x100000 iterations between attempts until the client has a server, sets D_00455228 to 0 and fetches the
+ * Does nothing when sifload_bindState is already >= 0. Otherwise binds sifload_client to server 0x80000006 (sceSifBindRpc),
+ * spinning 0x100000 iterations between attempts until the client has a server, sets sifload_bindState to 0 and fetches the
  * 4-byte version with request 0xFF into sifload_serverVersion. Every module-loader call in this unit calls it first.
  *
  * @return 0; -1 when a bind fails; 0xFFFEFFFF when the version call fails
  */
 int sifload_bindLoader(void) {
     int i;
-    if (D_00455228 < 0) {
+    if (sifload_bindState < 0) {
         for (;;) {
             if (sceSifBindRpc(&sifload_client, 0x80000006, 0) < 0) {
                 return -1;
             }
             if (sifload_client.server != 0) {
-                D_00455228 = 0;
+                sifload_bindState = 0;
                 if (sceSifCallRpc(&sifload_client, 0xFF, 0, 0, 0, &sifload_cmd.ver, 4, 0, 0) < 0) {
                     return 0xFFFEFFFF;
                 }
@@ -6007,19 +6007,19 @@ int sifload_bindLoader(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sifload_isServerRejected);
 #ifdef SKIP_ASM
-extern char D_00455164[];
+extern char libkernl_versionTag[];
 extern char *D_0045522C;
 extern int memcmp(char *, char *, int);
 /**
  * Returns whether the bound module-loader server's version tag is one the library does not accept.
  *
- * Same test as fileio_isServerRejected on sifload_serverVersion: 0 when it equals the library's "2710" (D_00455164) or the tag D_0045522C
+ * Same test as fileio_isServerRejected on sifload_serverVersion: 0 when it equals the library's "2710" (libkernl_versionTag) or the tag D_0045522C
  * points at (memcmp, memcmp), else 1 (the final compare of the two accepted tags always differs).
  *
  * @return 1 when the tag matches neither accepted tag, else 0
  */
 int sifload_isServerRejected(void) {
-    char *libVersion = D_00455164;
+    char *libVersion = libkernl_versionTag;
     char *serverVersion = sifload_serverVersion.b;
     int mismatch = 0;
     if (memcmp(serverVersion, libVersion, 4) != 0 &&
@@ -6035,14 +6035,14 @@ INCLUDE_ASM("seg/seg_325220", sceSifLoadFileReset);
 #ifdef SKIP_ASM
 extern void memset(void *a0, int a1, int a2);
 /**
- * Marks the module-loader server as unbound (D_00455228 = -1) and zeroes its version sifload_serverVersion (memset).
+ * Marks the module-loader server as unbound (sifload_bindState = -1) and zeroes its version sifload_serverVersion (memset).
  *
  * The next module-loader call rebinds it (sifload_bindLoader). No caller in this build.
  *
  * @return 0
  */
 int sceSifLoadFileReset(void) {
-    D_00455228 = -1;
+    sifload_bindState = -1;
     memset(&sifload_serverVersion, 0, 4);
     return 0;
 }
@@ -6713,10 +6713,10 @@ int EIntr_r(void) {
 INCLUDE_ASM("seg/seg_325220", libkernl_createMallocSemas);
 #ifdef SKIP_ASM
 extern int __sce_sema_id;
-extern int D_0045524C;
+extern int libkernl_secondSemaId;
 extern int CreateSema(int *a0);
 /**
- * Creates two semaphores (max and initial count 1) and stores their ids in __sce_sema_id and D_0045524C.
+ * Creates two semaphores (max and initial count 1) and stores their ids in __sce_sema_id and libkernl_secondSemaId.
  *
  * __sce_sema_id is the one the recursive lock __malloc_lock / __malloc_unlock waits on and signals. Called by _InitSys
  * at start-up.
@@ -6729,7 +6729,7 @@ void libkernl_createMallocSemas(void) {
     secondSemaParam[1] = 1;
     secondSemaParam[2] = 1;
     __sce_sema_id = CreateSema(firstSemaParam);
-    D_0045524C = CreateSema(secondSemaParam);
+    libkernl_secondSemaId = CreateSema(secondSemaParam);
 }
 #endif
 
@@ -6824,13 +6824,13 @@ int sysTable_getEntry(int syscallNum) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sysTable_init);
 #ifdef SKIP_ASM
-extern int D_00455238[];
+extern int sysTable_syscallList[];
 extern int FindAddress(int, int, void *);
 extern void func_0042C2F0(int, int);
 /**
  * Installs two helper syscalls and locates the kernel's syscall table, storing its base in sysTable_base.
  *
- * Installs the pairs of D_00455238 with syscall 116 (func_0042C2F0): sysTable_kernelFindWord as syscall 131 (word search) and
+ * Installs the pairs of sysTable_syscallList with syscall 116 (func_0042C2F0): sysTable_kernelFindWord as syscall 131 (word search) and
  * sysTable_kernelCopyWords as syscall 90 (word copy). Then searches kernel memory 0x80000000-0x80080000 with FindAddress for words
  * holding those two handler addresses: each hit minus the slot offset (131 * 4 = 524, 90 * 4 = 360) is a candidate
  * table base, and the lower candidate is advanced to its next hit until both agree. Called by _InitSys at
@@ -6841,8 +6841,8 @@ void sysTable_init(void) {
     int copyHit;
     unsigned x;
     unsigned y;
-    func_0042C2F0(D_00455238[0], D_00455238[1]);
-    func_0042C2F0(D_00455238[2], D_00455238[3]);
+    func_0042C2F0(sysTable_syscallList[0], sysTable_syscallList[1]);
+    func_0042C2F0(sysTable_syscallList[2], sysTable_syscallList[3]);
     searchHit = FindAddress(0x80000000, 0x80080000, (void *)sysTable_kernelFindWord);
     x = searchHit - 524;
     copyHit = FindAddress(0x80000000, 0x80080000, (void *)sysTable_kernelCopyWords);
@@ -6867,7 +6867,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042C2F0);
  * Calls EE kernel syscall 116 with the caller's arguments (syscall number, handler address): installs a syscall
  * handler.
  *
- * Used by sysTable_init to install the pairs of D_00455238.
+ * Used by sysTable_init to install the pairs of sysTable_syscallList.
  */
 SYSCALL_STUB(func_0042C2F0, 116)
 #endif
@@ -7064,7 +7064,7 @@ SYSCALL_STUB(func_0042C500, 116)
 //100%
 INCLUDE_ASM("seg/seg_325220", execArgs_copyToKernel);
 #ifdef SKIP_ASM
-extern int D_00455A10[];
+extern int execArgs_syscallEntry[];
 extern int strlen(char *);
 extern int func_0042C4C0(int, void *, int);
 extern void func_0042C500(int, int);
@@ -7072,7 +7072,7 @@ int execArgs_copyToKernel_d(char *, int, char **) __asm__("execArgs_copyToKernel
 /**
  * Copies a program name and its arguments into the kernel's argument area for the exec calls.
  *
- * Installs the byte-copy routine execArgs_kernelCopyBytes as syscall 90 (D_00455A10) and caps @p argc at 15. The area at
+ * Installs the byte-copy routine execArgs_kernelCopyBytes as syscall 90 (execArgs_syscallEntry) and caps @p argc at 15. The area at
  * execArgs_kernelArea holds a table of string addresses followed, from +0x40, by the strings: first @p progName, then each argv
  * string, each with its NUL; the addresses and strings are written with syscall 90 (func_0042C4C0). Called by
  * ExecPS2, LoadExecPS2 and ExecOSD.
@@ -7090,7 +7090,7 @@ int execArgs_copyToKernel_d(char *progName, int argc, char **argv) {
     char **argvCursor;
     pos = ptrSlot + 0x40;
     ret = pos;
-    func_0042C500(D_00455A10[0], D_00455A10[1]);
+    func_0042C500(execArgs_syscallEntry[0], execArgs_syscallEntry[1]);
     if (argc >= 0x10) {
         argc = 0xF;
     }

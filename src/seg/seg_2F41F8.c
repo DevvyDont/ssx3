@@ -88,7 +88,7 @@ extern unsigned LobbyCrypt_crcTable[];
 
 extern struct sCipherState LobbyCrypt_sharedState;
 
-extern int D_004A4B9C;
+extern int LobbyCrypt_sharedStateKeyedFlag;
 extern unsigned char str_hello_world[];
 /**
  * Keys a CRC-mixed byte-permutation stream cipher state (0x108 bytes: 256-byte permutation, index byte at +0x100, CRC
@@ -110,8 +110,8 @@ void LobbyCrypt_setKey(struct sCipherState *cipherState, unsigned char *key, int
     int lim;
     unsigned crc;
 
-    if (D_004A4B9C == 0) {
-        D_004A4B9C = 1;
+    if (LobbyCrypt_sharedStateKeyedFlag == 0) {
+        LobbyCrypt_sharedStateKeyedFlag = 1;
         LobbyCrypt_setKey(&LobbyCrypt_sharedState, str_hello_world, -1, 10);
     }
     i = 0xFF;
@@ -1059,7 +1059,7 @@ struct sSifSeg { int len; void *ptr; };
 /* Sony SDK sif.h: one EE-to-IOP DMA transfer for sceSifSetDma (addresses are words). */
 typedef struct { unsigned int data; unsigned int addr; unsigned int size; unsigned int mode; } sceSifDmaData;
 extern struct { unsigned char b; char pad[11]; int w; } D_00451300;
-extern volatile int D_004A5B00;
+extern volatile int NetLib_queueSemaWaitCode;
 extern volatile int D_004A5B08;
 extern int WaitSema(int);
 extern int SignalSema(int);
@@ -1125,9 +1125,9 @@ int NetLib_queueRequest(struct sSifEnt *cl, int flags, int fno, int callArg, cha
         size = 0;
         for (i = 0; seg[i].len > 0; i++) size += seg[i].len;
     }
-    D_004A5B00 = 2;
+    NetLib_queueSemaWaitCode = 2;
     WaitSema(queue->sema);
-    D_004A5B00 = 0;
+    NetLib_queueSemaWaitCode = 0;
     if ((queue->head + 1) % queue->cnt == queue->tail) {
         while ((queue->head + 1) % queue->cnt == queue->tail) {
             SignalSema(queue->sema);
@@ -1219,7 +1219,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_completeReplies);
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue NetLib_queue;
 
-extern volatile int D_004A5B00;
+extern volatile int NetLib_queueSemaWaitCode;
 extern int WaitSema(int);
 extern int SignalSema(int);
 extern int WakeupThread(int);
@@ -1241,9 +1241,9 @@ int NetLib_completeReplies(void) {
         int th, key, reqFlags, replyWord10, replyResult, len, replyWord8, pC;
         SifDoneFn done;
         char *addr;
-        D_004A5B00 = 1;
+        NetLib_queueSemaWaitCode = 1;
         WaitSema(queue->sema);
-        D_004A5B00 = 0;
+        NetLib_queueSemaWaitCode = 0;
         key = queue->b[queue->tail].key;
         if (key != queue->a[queue->tail].key) {
             SignalSema(queue->sema);
@@ -1493,7 +1493,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_pingIop);
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 extern struct sSifQueue NetLib_queue;
 
-extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
+extern struct { unsigned char b; char pad[11]; int w; } NetLib_addressCmdPacket;
 extern void FlushCache(int);
 extern void sceSifSendCmd(int, void *, int, int, int, int);
 /**
@@ -1513,9 +1513,9 @@ int NetLib_pingIop(void) {
     // ORIGINAL-PTR: the IOP gets the flag's EE address as a word of the SIF command packet (Sony SDK sceSifCmdHdr's
     // opt word is an unsigned int) and writes the flag there
     *flag = 0;
-    D_00451340.w = (int)flag + 1;
+    NetLib_addressCmdPacket.w = (int)flag + 1;
     FlushCache(0);
-    sceSifSendCmd(1, &D_00451340, D_00451340.b, 0, 0, 0);
+    sceSifSendCmd(1, &NetLib_addressCmdPacket, NetLib_addressCmdPacket.b, 0, 0, 0);
     answered = 1;
     MFC0_COUNT_2F41(start);
     while (*flag == 0) {
@@ -1670,9 +1670,9 @@ int NetLib_startQueue(void) {
     while (sceSifDmaStat(id) >= 0) {
     }
     sceSifInitCmd();
-    D_00451340.w = queue->iopBase;
+    NetLib_addressCmdPacket.w = queue->iopBase;
     FlushCache(0);
-    f5000_61B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
+    f5000_61B0(1, &NetLib_addressCmdPacket, NetLib_addressCmdPacket.b, 0, 0, 0);
     queue->nextKey = 1;
     queue->cnt = (queue->aEnd - queue->a);
     queue->tail = 1;
@@ -2707,17 +2707,17 @@ int kbReader_updateAnyConnected(void) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_getAltKeyMapEntry);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern short D_004513DC[], D_0045133A[], D_00451350[];
+extern short D_004513DC[], D_0045133A[], kbReader_defaultKeyTable[];
 /**
  * Returns the 2-byte key-map entry for a USB key code in the alternate layout: codes 46..53 use D_004513DC, codes
- * 135..139 D_0045133A, every other code the default map D_00451350 (all indexed by the code).
+ * 135..139 D_0045133A, every other code the default map kbReader_defaultKeyTable (all indexed by the code).
  *
  * @param keyCode  USB HID key code
  * @return the key-map entry
  */
 short *kbReader_getAltKeyMapEntry(unsigned int keyCode) {
     if (keyCode - 46 < 8) return &D_004513DC[keyCode];
-    if (keyCode - 135 >= 5) return &D_00451350[keyCode];
+    if (keyCode - 135 >= 5) return &kbReader_defaultKeyTable[keyCode];
     return &D_0045133A[keyCode];
 }
 #endif
@@ -2726,13 +2726,13 @@ short *kbReader_getAltKeyMapEntry(unsigned int keyCode) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_getVirtualKey);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern short D_00451420[], D_00451350[];
+extern short D_00451420[], kbReader_defaultKeyTable[];
 extern short *kbReader_getAltKeyMapEntry(unsigned int);
 /**
  * Translates a USB key code to its virtual-key byte (byte 1 of its key-map entry).
  *
  * With Num Lock on (bit 0 of the LED word at @p flags) the keypad codes 89..99 use D_00451420; otherwise map mode 0
- * uses the default map D_00451350 and any other mode the alternate one (kbReader_getAltKeyMapEntry).
+ * uses the default map kbReader_defaultKeyTable and any other mode the alternate one (kbReader_getAltKeyMapEntry).
  *
  * @param out  receives the virtual-key byte
  * @param flags  the keyboard read buffer (LED word first)
@@ -2745,7 +2745,7 @@ void kbReader_getVirtualKey(char *out, struct sKbRead *flags, int mode, int keyC
     if ((flags->led & 1) && (keypadIndex = keyCode - 89, keypadIndex < 11)) {
         mapEntry = (unsigned char *)&D_00451420[keypadIndex];
     } else if (mode == 0) {
-        mapEntry = (unsigned char *)&D_00451350[keyCode];
+        mapEntry = (unsigned char *)&kbReader_defaultKeyTable[keyCode];
     } else {
         mapEntry = (unsigned char *)kbReader_getAltKeyMapEntry(keyCode);
     }
@@ -2916,11 +2916,11 @@ INCLUDE_ASM("seg/seg_2F41F8", voipRpc_call);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, voipRpc_client the client data, D_00526080 the
    send buffer. */
 extern unsigned char voipRpc_boundFlag;
 
-extern int D_00526100[];
+extern int voipRpc_client[];
 
 struct sRpcSend { int a; int b; };
 
@@ -2933,7 +2933,7 @@ void voipRpc_call_impl(int a, int b, int c, int d, int e) __asm__("voipRpc_call"
  * Calls the voice-chat IOP module (VOIPF) through its SIF RPC client.
  *
  * Only when bound (voipRpc_boundFlag): waits for the previous call to finish (sceSifCheckStatRpc), puts two words in the send
- * buffer D_00526080 and calls RPC function @p rpcFunc (sceSifCallRpc on the client D_00526100, 0x80-byte send buffer),
+ * buffer D_00526080 and calls RPC function @p rpcFunc (sceSifCallRpc on the client voipRpc_client, 0x80-byte send buffer),
  * retrying until the call is accepted.
  *
  * @param rpcFunc  RPC function number
@@ -2945,11 +2945,11 @@ void voipRpc_call_impl(int a, int b, int c, int d, int e) __asm__("voipRpc_call"
 void voipRpc_call_impl(int rpcFunc, int argWord0, int argWord1, int recvBuf, int recvSize) {
     struct sRpcSend *sendBuf = D_00526080;
     if (voipRpc_boundFlag) {
-        while (f6F08(D_00526100) > 0) ;
+        while (f6F08(voipRpc_client) > 0) ;
         sendBuf->a = argWord0;
         sendBuf->b = argWord1;
         do {
-            if (f6D18(D_00526100, rpcFunc, 0, D_00526080, 0x80, recvBuf, recvSize, 0, 0) >= 0) break;
+            if (f6D18(voipRpc_client, rpcFunc, 0, D_00526080, 0x80, recvBuf, recvSize, 0, 0) >= 0) break;
         } while (1);
     }
 }
@@ -2960,11 +2960,11 @@ INCLUDE_ASM("seg/seg_2F41F8", voipRpc_bind);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, voipRpc_client the client data, D_00526080 the
    send buffer. */
 extern unsigned char voipRpc_boundFlag;
 
-extern int D_00526100[];
+extern int voipRpc_client[];
 
 extern int D_005261C0[];
 
@@ -2983,7 +2983,7 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("voipRpc_call");
 void voipRpc_bind(void) {
     int *statusWord;
     voipRpc_boundFlag = 1;
-    sceSifBindRpc(D_00526100, 567, 0);
+    sceSifBindRpc(voipRpc_client, 567, 0);
     // ORIGINAL-PTR: the IOP module gets the status word's EE address as an RPC argument word and writes it there, so
     // the EE reads it through the uncached segment (address & 0x0FFFFFFF | 0x20000000, a hardware address segment)
     statusWord = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
@@ -2996,7 +2996,7 @@ void voipRpc_bind(void) {
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_unbind);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, voipRpc_client the client data, D_00526080 the
    send buffer. */
 extern unsigned char voipRpc_boundFlag;
 
@@ -3296,7 +3296,7 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_openSaveRecords);
 extern struct sNetAcct *slogin_session;
 
 typedef struct { char b[0x1A]; } K6DC8;
-extern K6DC8 D_00497060;
+extern K6DC8 str_Copyright_Electronic_Arts;
 extern int fB800(void) __asm__("xorIface_get");
 extern int fC0E8(void *) __asm__("saveRec_open");
 extern int slogin_mapSaveRecordError_6DC8(int) __asm__("slogin_mapSaveRecordError");
@@ -3314,7 +3314,7 @@ int slogin_openSaveRecords(void) {
     K6DC8 buf;
     R6DC8 req;
     struct sNetAcct *session = slogin_session;
-    buf = D_00497060;
+    buf = str_Copyright_Electronic_Arts;
     req.a = 2;
     req.p = &session->portList;
     req.d = session;
@@ -7310,11 +7310,11 @@ INCLUDE_ASM("seg/seg_2F41F8", crcIface_finish);
 /* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
 extern struct sCrc crcIface_state;
 
-extern int D_004A5B1C;
+extern int crcIface_digest;
 /**
  * Finishes the CRC-32 digest. Slot 5 of the CRC interface.
  *
- * Stores the inverted digest in D_004A5B1C and points the output block (size 4, then that pointer, at +0x4 of
+ * Stores the inverted digest in crcIface_digest and points the output block (size 4, then that pointer, at +0x4 of
  * crcIface_state) at it.
  *
  * @param out  receives the output block
@@ -7324,9 +7324,9 @@ int crcIface_finish(int **out) {
     struct sCrc *crcState = &crcIface_state;
     if (crcIface_state.table == 0) return 6;
     if (out == 0) return 2;
-    crcState->outDigest = &D_004A5B1C;
+    crcState->outDigest = &crcIface_digest;
     crcState->outSize = 4;
-    D_004A5B1C = ~crcState->crc;
+    crcIface_digest = ~crcState->crc;
     *out = &crcState->outSize;
     return 0;
 }

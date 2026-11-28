@@ -30,7 +30,7 @@ struct cUIScreen;
 // id the class named here (its vtable cOVState_<NAME>_vtbl; retail has more overlays than On Tour, so the values
 // differ).
 // Names ours for the ids whose class has no name, after what [U] its methods show: 9 (onCreateScreen cOVState_FREESTYLE_PREEVENT_onCreateScreen
-// adds "41freestyle_pre"), 14 (a bare cOVState: its vtable D_00474B80 overrides nothing), 20 (the rival / peak
+// adds "41freestyle_pre"), 14 (a bare cOVState: its vtable cOVState_EMPTY_vtbl overrides nothing), 20 (the rival / peak
 // challenge pre-event: cOVState_CHALLENGE_PREEVENT_onGainTransition; cOVStateManager_gotoOverlay picks it for events kGAMEEVENT_RIVALTIME ..
 // kGAMEEVENT_POINTS_PEAK3), 21 (cOVState_MULTI_PREEVENT_onCreateScreen adds "50multifs_pre"; picked on the multiplayer path), 22 (its
 // onCreateScreen cOVState_PEAKCHAL_RESULTS_onCreateScreen adds "70peakchal_results"; cOVStateManager_getResultsOverlay picks it for the peak
