@@ -8,7 +8,7 @@
 // follows the units that use it (ai/ai.cpp builds it, ai/control/handplantcontrol.cpp holds its destructor).
 // Size 0x1950 [R]: cAI_initMissionRiders allocates it with cMemMan_alloc(6480, "MissionRider", 0x80000000, 0) and runs
 // its (inlined) constructor: the 31 virtual-base pointers = this + 0xE10, cRider_cRider(this + 0xE10), cPlayer_cPlayer(this, 0),
-// then the cRider base's vtables _vt$13cMissionRider$6cRider (D_00458288, at Rider + 0x6C0), D_00459B90 (+0x6D0) and
+// then the cRider base's vtables _vt$13cMissionRider$6cRider (D_00458288, at Rider + 0x6C0), cRider_cScriptObjRider_vtbl (+0x6D0) and
 // _vt$13cMissionRider$13cScriptObject (D_00458240, +0x6E8), and cPlayer's own vtable cPlayer_vtbl at 0xDE8 (cMissionRider
 // overrides none of cPlayer's three virtuals). Destructor cMissionRider__cMissionRider (0x1446F8).
 // Bases (On Tour: class cMissionRider : cPlayer; cPlayer : cRiderHandler with cRider a virtual base): the layout is

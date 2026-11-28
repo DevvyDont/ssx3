@@ -1107,7 +1107,7 @@ __asm__(".globl cAirStreamerFX_cAirStreamerFX\n.type cAirStreamerFX_cAirStreamer
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("__12cRiderVb_rsm = cRider_cRider\n"
         "_vt$11cRsm_2EF3B0$13cRiderVbC_rsm = D_004888D0\n"
-        "_vt$11cRsm_2EF3B0$14cRiderVbBC_rsm = D_00459B90\n"
+        "_vt$11cRsm_2EF3B0$14cRiderVbBC_rsm = cRider_cScriptObjRider_vtbl\n"
         "_vt$11cRsm_2EF3B0$12cRiderVb_rsm = D_00488918\n");
 #endif
 
@@ -1133,7 +1133,7 @@ __asm__(".globl cAirStreamerFX__cAirStreamerFX\n.type cAirStreamerFX__cAirStream
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
-        "_vt$15cVbDtor002EF530$14cRiderVbBC_rsm = D_00459B90\n"
+        "_vt$15cVbDtor002EF530$14cRiderVbBC_rsm = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002EF530$12cRiderVb_rsm = D_00488918\n"
         "_$_12cRiderVb_rsm = cRider__cRider\n");
 #endif

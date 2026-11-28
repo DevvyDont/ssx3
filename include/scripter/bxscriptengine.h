@@ -17,7 +17,7 @@
 // Bases (g++ 2.95 puts each base's vptr after that base's own data):
 //   cScriptDatabaseObject (0x000, size 0x2AC: 0x2A8 of data, vptr at 0x2A8), cInSeqComm (0x2AC, a vptr only).
 // The ctor stores _vt$15cBXScriptEngine = cBXScriptEngine_vtbl (0x004824B8, 12 slots) at 0x2A8 and
-// _vt$15cBXScriptEngine$10cInSeqComm (D_00482450, 11 slots, delta -0x2AC) at 0x2AC; the cSSXScriptEngine ctor then
+// _vt$15cBXScriptEngine$10cInSeqComm (cBXScriptEngine_cInSeqComm_vtbl, 11 slots, delta -0x2AC) at 0x2AC; the cSSXScriptEngine ctor then
 // overwrites both. The class static cBXScriptEngine::mpScriptEngine is cBXScriptEngine_mpScriptEngine (ctor sets it, dtor clears it,
 // cBXScriptEngine_GetScriptEngine returns it; still unnamed in config/symbol_addrs.txt).
 //
@@ -132,7 +132,7 @@ struct cBXScriptEngine {
                                             //       RequestAnimationScript
                                             //       make virtual calls through it
     // --- cInSeqComm (second base: a vptr only)
-    void** mInSeqCommVtbl;                  // 0x2AC [R] _vt$15cBXScriptEngine$10cInSeqComm (D_00482450); [U]
+    void** mInSeqCommVtbl;                  // 0x2AC [R] _vt$15cBXScriptEngine$10cInSeqComm (cBXScriptEngine_cInSeqComm_vtbl); [U]
                                             //       SetupBXEngine
                                             //       hands self + 0x2AC to cInSeq::cInSeq as the comm interface
     // --- cBXScriptEngine

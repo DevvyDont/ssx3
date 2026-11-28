@@ -24,7 +24,7 @@
 //   [R] retail's constructors cFEStateNet_cFEStateNet / cFEStateNet_cFEStateNet1 and destructor cFEStateNet__cFEStateNet (and the cUIState
 //       constructor cUIState_cUIState1 for the base);
 //   [P] the July 2003 preview: _vt$11cFEStateNet, its inline isProcessingEvents (lw 0x38 = preview mpScreen),
-//       getFEPath/fePathIsOnline (a global, D_004A1A70 in retail, not a member) and its default constructor
+//       getFEPath/fePathIsOnline (a global, cFEStateNet_fePath in retail, not a member) and its default constructor
 //       __11cFEStateNet (a 0xAC-byte class; its list at 0xA4/0xA8 is retail 0x6C8/0x6CC, +0x624: the preview had no
 //       text buffers). Preview offsets are not used directly;
 //   [U] how retail code uses the field (the methods named above and the subclasses' methods);
@@ -132,7 +132,7 @@ struct cFEStateNet : public cUIState {
                                     //       are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
 
-    // The front-end path, the global D_004A1A70 (names ours): [P] the preview reads it through getFEPath and
+    // The front-end path, the global cFEStateNet_fePath (names ours): [P] the preview reads it through getFEPath and
     // fePathIsOnline (path == 1); [U] its setter cFEStateNet_setFEPath is only passed 0 or 1 (fereal enters the online menus
     // with 1; leaving them and ovstates pass 0, which also logs out of the buddy server).
     enum { kFEPathOffline = 0, kFEPathOnline = 1 };

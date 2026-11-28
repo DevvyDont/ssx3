@@ -14,13 +14,13 @@
 // _$_Q24RCMP12VIDEO_DRIVER, _vt$Q24RCMP12VIDEO_DRIVER and On Tour's class VIDEO_DRIVER {DECODER* m_pdecoder} (0x8, vptr
 // at +0x4); flattened as RCMP_VIDEO_DRIVER (the project's functions say VIDEO_DRIVER__VIDEO_DRIVER /
 // VIDEO_DRIVER_CompleteDraw__FPv). SSX_VD_PS2_SINGLE_BUFFERD from the preview's _vt$25SSX_VD_PS2_SINGLE_BUFFERD and its
-// operator new / delete linkonces: that vtable has retail D_00480270's six slots in the same order, and the preview's
+// operator new / delete linkonces: that vtable has retail SSX_VD_PS2_SINGLE_BUFFERD_vtbl's six slots in the same order, and the preview's
 // slot bodies match retail's (SetPosition 3 floats, SetScale 2, the dtor walks the tile table at +0x14 / +0x18 and
 // releases +0xC to the decoder at +0x0, CompleteDraw polls graphics-manager slot 18 through +0x8); the preview's
 // position / scale sit 4 bytes earlier (0x3C..0x4C: one word less somewhere in 0x24..0x3C).
 //
 // Vtables: RCMP_VIDEO_DRIVER_vtbl RCMP::VIDEO_DRIVER (slot 1 VIDEO_DRIVER__VIDEO_DRIVER, 2-5 pure virtual, 6
-// VIDEO_DRIVER_CompleteDraw__FPv); D_00480270 SSX_VD_PS2_SINGLE_BUFFERD (1 SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD dtor, 2 SSX_VD_PS2_SINGLE_BUFFERD_SetPosition
+// VIDEO_DRIVER_CompleteDraw__FPv); SSX_VD_PS2_SINGLE_BUFFERD_vtbl SSX_VD_PS2_SINGLE_BUFFERD (1 SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD dtor, 2 SSX_VD_PS2_SINGLE_BUFFERD_SetPosition
 // SetPosition, 3 SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff SetScale, 4 SSX_VD_PS2_SINGLE_BUFFERD_Draw Draw, 5 SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv ReDraw, 6 SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw
 // CompleteDraw) - On Tour's VIDEO_DRIVER method order (SetPosition, SetScale, Draw, ReDraw, CompleteDraw).
 //
@@ -37,7 +37,7 @@ struct SHAPE;
 // RCMP::VIDEO_DRIVER (0x8 [O]; [R] VIDEO_DRIVER__VIDEO_DRIVER stores RCMP_VIDEO_DRIVER_vtbl at +0x4).
 struct RCMP_VIDEO_DRIVER {
     RCMP_DECODER* m_pdecoder;           // 0x0 [O]; [R] SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD stores the decoder
-    void** mVtbl;                       // 0x4 [R] RCMP_VIDEO_DRIVER_vtbl (base) / D_00480270
+    void** mVtbl;                       // 0x4 [R] RCMP_VIDEO_DRIVER_vtbl (base) / SSX_VD_PS2_SINGLE_BUFFERD_vtbl
 };
 
 // SSX_VD_PS2_SINGLE_BUFFERD (0x54 [R] SSX_VD_create allocates 84 bytes).
@@ -45,7 +45,7 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
     // --- RCMP::VIDEO_DRIVER
     RCMP_DECODER* m_pdecoder;           // 0x00 [O]; [R] ctor: its FramesDecoder argument; [U] the dtor and CompleteDraw
                                         //      return the held frame to it (RCMP_DECODER_ReleaseFrame); [P] same
-    void** mVtbl;                       // 0x04 [R] ctor D_00480270; the dtor ends with RCMP_VIDEO_DRIVER_vtbl
+    void** mVtbl;                       // 0x04 [R] ctor SSX_VD_PS2_SINGLE_BUFFERD_vtbl; the dtor ends with RCMP_VIDEO_DRIVER_vtbl
     // --- SSX_VD_PS2_SINGLE_BUFFERD
     cPS2GraphicsMan* m_pGrMan;          // 0x08 [O] (SSX_VD_PSP_ONE_TEXTURE); [R] ctor: its graphics-manager argument; [U]
                                         //      CompleteDraw polls its slot 18 (IsRenderIdle), the quad drawer (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles)

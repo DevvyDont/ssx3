@@ -30,7 +30,7 @@ struct sVt22_BS {
 
 extern const sVt9_BS D_00488CB0;
 extern const sVt22_BS D_00488CF8;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern char str_mEmitter[];
 extern char str_mEmitterData[];
 extern char str_Board_Spark_Emitter[];
@@ -153,7 +153,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
         cRider_cRider((char*)self + 0xB0);
     }
     self->mRider->mScriptObjectVtbl = (void*)(&D_00488CB0);
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)(&D_00488CF8);
     if (inChrg == 0) {
         int vc;
@@ -273,7 +273,7 @@ __asm__(".globl cBoardSparkFX__cBoardSparkFX\n.type cBoardSparkFX__cBoardSparkFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
-        "_vt$15cVbDtor002DA8E8$14cRiderVbBC_bsf = D_00459B90\n"
+        "_vt$15cVbDtor002DA8E8$14cRiderVbBC_bsf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002DA8E8$12cRiderVb_bsf = D_00488CF8\n"
         "_$_12cRiderVb_bsf = cRider__cRider\n");
 #endif

@@ -81,7 +81,7 @@ struct cPS2ExecutionMan {
     char unk_0403C[0x4];            // 0x0403C untouched
     char mLoadThreadStack[0x10000]; // 0x04040 [U] init: CreateThread stack (0x10000 bytes) of the loader thread
                                     //         (cPS2ExecutionMan_runLoaderThread)
-    int mLoadThreadId;              // 0x14040 [U] init: CreateThread (also kept in D_004A3ECC); halt suspends it when
+    int mLoadThreadId;              // 0x14040 [U] init: CreateThread (also kept in cPS2ExecutionMan_loaderThreadId); halt suspends it when
                                     //         called from another thread; purge Terminate/DeleteThread
     int mLoadSema;                  // 0x14044 [U] init: CreateSema (max 0x400); load SignalSema, the loader thread
                                     //       waits;

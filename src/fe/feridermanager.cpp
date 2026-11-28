@@ -77,7 +77,7 @@ extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int a1, int 
 extern "C" int cFEBoltFileManager_requestFile(void* mgr, int bank, char* buf, int a3, int a4, int a5);
 extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
 extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 struct sBoneEntE7F0 {
     char f0;
@@ -99,7 +99,7 @@ static inline tBEProfileBolt* getItemK19E7F0(cBECharProfileDB* list, int i)
  * Queues the loading of the front-end rider's extra textures.
  *
  * Clears +0xCB8, then for each of the character's part entries (cBEBoltDB_getCharBolts / cBEBoltDB_getNumCharBolts on the item database) of
- * type 6 whose item has no texture file queued yet (cBoltFileIndexManager_getPartTextureFile on D_004A1968 below 0), builds the file name
+ * type 6 whose item has no texture file queued yet (cBoltFileIndexManager_getPartTextureFile on cBoltFileIndexManager_instance below 0), builds the file name
  * (cBEBoltInterface_buildBoltModelFileName) and, when there is one, queues it in the front end's file manager (cFEBoltFileManager_requestFile at RealFE + 0x1A70,
  * kind 11) and records the file slot (cBoltFileIndexManager_setPartTextureFile).
  */
@@ -116,11 +116,11 @@ void cFERider::queueLoadExtraTextures()
     for (i = 0; i < n; i++, partEntry++) {
         if (partEntry->type == 6) {
             tBEProfileBolt* it = getItemK19E7F0(list, list->mpBoltsMap[partEntry->slot]);
-            if (cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id) < 0) {
+            if (cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id) < 0) {
                 char buf[0x100];
                 if (cBEBoltInterface_buildBoltModelFileName(iface, mProfileIndex, mCharID, partEntry, buf)) {
                     int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, buf, 11, 1, 1);
-                    cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, fileSlot);
+                    cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
@@ -278,7 +278,7 @@ extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int 
 extern "C" void cBoltFileIndexManager_setModelPartFile(void* self, int bit, int a2, int val);
 extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 
 /**
@@ -302,15 +302,15 @@ void cFERider::cancelAllFiles()
     int n = list->mNumBolts;
     int i;
     for (i = 0; i < n; i++) {
-        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, self[1], list->mBolts[i].id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
             cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
-            cBoltFileIndexManager_setPartTextureFile(D_004A1968, self[1], list->mBolts[i].id, -1);
+            cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager_instance, self[1], list->mBolts[i].id, -1);
         }
-        fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], list->mBolts[i].id);
+        fileSlot = cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, self[1], list->mBolts[i].id);
         if (fileSlot >= 0) {
             cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
-            cBoltFileIndexManager_setModelPartFile(D_004A1968, self[1], list->mBolts[i].id, -1);
+            cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, self[1], list->mBolts[i].id, -1);
         }
     }
 }
@@ -1070,7 +1070,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_addTextureFile);
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
-extern char D_004A19A8[];
+extern char str_empty_s[];
 extern char str_charshp[];
 
 struct sPkgEnt_F908 {
@@ -1081,7 +1081,7 @@ struct sName2_F908 { char c[2]; };
 /**
  * Registers the textures of a loaded shape package in the front-end rider's texture table.
  *
- * For each image of @p pkg builds its name (prefix D_004A19A8, SHAPE_name); a known name is reloaded in place (graphics
+ * For each image of @p pkg builds its name (prefix str_empty_s, SHAPE_name); a known name is reloaded in place (graphics
  * manager vtable entry 48) only when @p replace is set; a new one is created (vtable entry 46, kind "charshp") and
  * appended to the table.
  *
@@ -1096,7 +1096,7 @@ void cFERider::addTextureFile(SHAPEFILE* pkg, int replace)
         sPkgEnt_F908* imageEntry = &((sPkgEnt_F908*)&pkg->tbl[0].offset)[i];
         char* data = (char*)pkg + imageEntry->off;
         char name[8];
-        *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
+        *(sName2_F908*)name = *(sName2_F908*)str_empty_s;
         memset(name + 2, 0, 6);
         SHAPE_name(pkg, i, name);
         int id = getTextureID(name);
@@ -1130,7 +1130,7 @@ int cBEBoltDB_getNumCharBolts(void* db, int g);
 extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int a2);
 extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 struct sBoneEntFA78 {
     char f0;
@@ -1174,11 +1174,11 @@ void cFERider::releasePartTextures(cBECharProfileDB* list)
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FA78(list, list->mpBoltsMap[partEntry->slot]);
-        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (partEntry->type != 6) {
                 cFEBoltFileManager_releaseFile(mgr, mCharID, fileSlot);
-                cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, -1);
+                cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, -1);
             } else {
                 flag = 0;
             }
@@ -1204,7 +1204,7 @@ extern "C" int cBoltFileIndexManager_getPartTextureFile(void* self, int a1, int 
 extern "C" void cBoltFileIndexManager_setPartTextureFile(void* self, int bit, int a2, int val);
 extern "C" void cFEBoltFileManager_startDeferredPartTextureLoads(void* mgr, int bank);
 extern "C" void cFERider_releasePartTextures(cFERider* self, cBECharProfileDB* list);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 struct sBoneEntFBE0 {
     char f0;
@@ -1246,12 +1246,12 @@ void cFERider::loadTextures(cBECharProfileDB* list, int ignored, int keepLoaded)
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FBE0(list, list->mpBoltsMap[partEntry->slot]);
-        if (cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id) < 0) {
+        if (cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
                 if (cBEBoltInterface_buildBoltModelFileName(iface, mProfileIndex, mCharID, partEntry, buf)) {
                     int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, buf, 11, keepLoaded, 1);
-                    cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, fileSlot);
+                    cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, fileSlot);
                 }
             }
         }
@@ -1273,7 +1273,7 @@ extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" int cFEBoltFileManager_isFileLoaded(void* mgr, int bank, int i);
 extern "C" void* cFEBoltFileManager_getFileDataValue(void* mgr, int bank, int i);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 
 /**
@@ -1296,7 +1296,7 @@ int cFERider::isDoneLoadingTextures()
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (cFEBoltFileManager_isFileLoaded(mgr, mCharID, fileSlot) == 0) {
                 ok = 0;
@@ -1308,7 +1308,7 @@ int cFERider::isDoneLoadingTextures()
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             tBEProfileBolt* it = &list->mBolts[i];
-            int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
+            int fileSlot = cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id);
             if (fileSlot >= 0) {
                 if (cFEBoltFileManager_getFileDataValue(mgr, mCharID, fileSlot) && used[fileSlot] == 0) {
                     SHAPEFILE* pkg = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(mgr, mCharID, fileSlot);
@@ -1317,7 +1317,7 @@ int cFERider::isDoneLoadingTextures()
                 }
                 used[fileSlot] = 1;
                 cFEBoltFileManager_releaseFile(mgr, mCharID, fileSlot);
-                cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, -1);
+                cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, -1);
             }
         }
     }
@@ -1336,7 +1336,7 @@ extern "C" void cBoltFileIndexManager_setModelPartFile(void* self, int bit, int 
 extern "C" int cFEBoltFileManager_requestFile(void* mgr, int bank, char* buf, int a3, int a4, int a5);
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" void cFEBoltFileManager_startDeferredModelPartLoads(void* mgr, int bank);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 struct sBoneEntFF00 {
     char pad_0x0[0x28];
@@ -1376,24 +1376,24 @@ void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int forc
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
-            if (cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id) >= 0) {
-                cFEBoltFileManager_releaseFile(mgr, mCharID, cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id));
-                cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, -1);
+            if (cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id) >= 0) {
+                cFEBoltFileManager_releaseFile(mgr, mCharID, cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id));
+                cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, -1);
             }
         }
     }
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
-        if (cBoltFileIndexManager_getModelPartFile(D_004A1968, mProfileIndex, it->id) < 0) {
+        if (cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
                 sBoneEntFF00* partEntry = getEntK19FF00(db, cBEBoltDB_findBoltIndex(db, mCharID, it->id));
                 if (partEntry->file) {
                     int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, partEntry->file, 8, keepLoaded, 1);
-                    cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, fileSlot);
+                    cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, fileSlot);
                     mDoneLoadingModels = 0;
                     mCompiledModel = 0;
                 } else {
-                    cBoltFileIndexManager_setModelPartFile(D_004A1968, mProfileIndex, it->id, -1);
+                    cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, -1);
                 }
             }
             if (prev) {
@@ -1426,7 +1426,7 @@ void* cMdfArchive_attachConstArchive_data(void* self, void* data) __asm__("cMdfA
 extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
-extern void* D_004A1968;
+extern void* cBoltFileIndexManager_instance;
 
 struct sBoneEnt_A0100 {
     char f0;
@@ -1461,8 +1461,8 @@ static inline sBoneEnt_A0100* getEnt_A0100(sBoneDb_A0100* db, int id, int g)
  *
  * @return 1 when every part is loaded, else 0
  */
-// FAKEMATCH: identical arms on an always-non-null pointer in the inner loop (`void* g; if (self) g = D_004A1968; else
-// g = D_004A1968;`, g passed to the first cBoltFileIndexManager_getModelPartFile call); the extra inner-loop insns keep the `li 56` (sizeof entry)
+// FAKEMATCH: identical arms on an always-non-null pointer in the inner loop (`void* g; if (self) g = cBoltFileIndexManager_instance; else
+// g = cBoltFileIndexManager_instance;`, g passed to the first cBoltFileIndexManager_getModelPartFile call); the extra inner-loop insns keep the `li 56` (sizeof entry)
 // out of loop.c's hoisting, and cross-jumping merges the arms after reload; plain form 98.50%. Byte-identical and
 // behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
 // replace it when an honest spelling matches.
@@ -1478,7 +1478,7 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &((&list->mBolts[0]))[i];
-        int fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], it->id);
+        int fileSlot = cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, self[1], it->id);
         if (fileSlot >= 0) {
             if (cFEBoltFileManager_isFileLoaded(mgr, self[0], fileSlot) == 0) {
                 ok = 0;
@@ -1489,7 +1489,7 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
         for (int i = 0; i < n;) {
             int next = i + 1;
             tBEProfileBolt* it = &((&list->mBolts[0]))[i];
-            int fileSlot = cBoltFileIndexManager_getModelPartFile(D_004A1968, self[1], it->id);
+            int fileSlot = cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, self[1], it->id);
             if (fileSlot >= 0) {
                 cMdfArchive arc;
                 cMdfArchive_cMdfArchive(&arc);
@@ -1501,9 +1501,9 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
                     tBEProfileBolt* jt = &((&list->mBolts[0]))[j];
                     void* slotTable;
                     if (self) {
-                        slotTable = D_004A1968;
+                        slotTable = cBoltFileIndexManager_instance;
                     } else {
-                        slotTable = D_004A1968;
+                        slotTable = cBoltFileIndexManager_instance;
                     }
                     if (cBoltFileIndexManager_getModelPartFile(slotTable, self[1], jt->id) == fileSlot) {
                         if (pkg) {
@@ -1516,7 +1516,7 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
                             }
                         }
                         cFEBoltFileManager_releaseFile(mgr, self[0], fileSlot);
-                        cBoltFileIndexManager_setModelPartFile(D_004A1968, self[1], jt->id, -1);
+                        cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, self[1], jt->id, -1);
                     }
                 }
                 cMdfArchive__cMdfArchive((int*)&arc, 2);

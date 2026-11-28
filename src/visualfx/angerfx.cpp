@@ -35,7 +35,7 @@ __asm__(".globl cAngerFX_cAngerFX\n.type cAngerFX_cAngerFX,@function\ncAngerFX_c
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("__12cRiderVb_agf = cRider_cRider\n"
         "_vt$12cAngerFX_ang$13cRiderVbC_agf = D_00488AC0\n"
-        "_vt$12cAngerFX_ang$14cRiderVbBC_agf = D_00459B90\n"
+        "_vt$12cAngerFX_ang$14cRiderVbBC_agf = cRider_cScriptObjRider_vtbl\n"
         "_vt$12cAngerFX_ang$12cRiderVb_agf = D_00488B08\n");
 #endif
 
@@ -59,7 +59,7 @@ __asm__(".globl cAngerFX__cAngerFX\n.type cAngerFX__cAngerFX,@function\ncAngerFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002D4A70$13cRiderVbC_agf = D_00488AC0\n"
-        "_vt$15cVbDtor002D4A70$14cRiderVbBC_agf = D_00459B90\n"
+        "_vt$15cVbDtor002D4A70$14cRiderVbBC_agf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002D4A70$12cRiderVb_agf = D_00488B08\n"
         "_$_12cRiderVb_agf = cRider__cRider\n");
 #endif

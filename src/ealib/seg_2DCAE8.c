@@ -1911,7 +1911,7 @@ extern char *str_I_DE78[] __asm__("str_I");
 extern int currentfilesystem_DE78[] __asm__("currentfilesystem");
 extern int availablefilesystems_DE78[] __asm__("availablefilesystems");
 extern char currentdirectory_DE78[] __asm__("currentdirectory");
-extern char D_00495D78_DE78[] __asm__("D_00495D78");
+extern char str_slash_e_DE78[] __asm__("str_slash_e");
 
 /**
  * Sets the file system's current path (currentdirectory) from @p path.
@@ -1939,7 +1939,7 @@ void FILESYS_setcurrentpath(char *path) {
     if (currentdirectory_DE78[0xFF] == 0) {
         len = strlen_DE78(currentdirectory_DE78);
         if (len > 0 && currentdirectory_DE78[len - 1] != 47) {
-            strcat_DE78(currentdirectory_DE78, D_00495D78_DE78);
+            strcat_DE78(currentdirectory_DE78, str_slash_e_DE78);
         }
     }
 }
@@ -2386,11 +2386,11 @@ void FILESYS_setmemcallbacks(int mallocFn, int freeFn) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_getopts);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* gFileSysOpts (FILESYSOPTS's names at these offsets) and the live CD settings D_00450C58 (CDVD_initFileSystem's
+/* gFileSysOpts (FILESYSOPTS's names at these offsets) and the live CD settings FILESYS_cdSettings (CDVD_initFileSystem's
    CdCfg_4040 names, names ours). */
 struct A_E928 { int size, malloc, free, cdMediaMode, cdNameLen, useDisc, cdRoot, REAL_filedevice; };
 struct B_E928 { int root, namelen, mmode, useDisc; };
-extern struct B_E928 D_00450C58_E928 __asm__("D_00450C58");
+extern struct B_E928 FILESYS_cdSettings_E928 __asm__("FILESYS_cdSettings");
 extern int REAL_filedevice_E928[] __asm__("REAL_filedevice");
 extern void MEM_clear_E928(int, int) __asm__("MEM_clear");
 extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
@@ -2408,9 +2408,9 @@ int FILESYS_getopts(int *opts) {
     if (n >= 37) {
         MEM_clear_E928(opts, n);
     }
-    gFileSysOpts_E928.cdRoot = D_00450C58_E928.root;
-    gFileSysOpts_E928.cdNameLen = D_00450C58_E928.namelen;
-    gFileSysOpts_E928.useDisc = D_00450C58_E928.useDisc != 0;
+    gFileSysOpts_E928.cdRoot = FILESYS_cdSettings_E928.root;
+    gFileSysOpts_E928.cdNameLen = FILESYS_cdSettings_E928.namelen;
+    gFileSysOpts_E928.useDisc = FILESYS_cdSettings_E928.useDisc != 0;
     gFileSysOpts_E928.REAL_filedevice = REAL_filedevice_E928[0];
     MEM_copy_E928(opts, &gFileSysOpts_E928, n);
     return 1;
@@ -2422,14 +2422,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setopts);
 #ifdef SKIP_ASM
 /* The live CD settings (CDVD_initFileSystem's CdCfg_4040 names, names ours). */
 struct B_E9B8 { int root, namelen, mmode, useDisc; };
-extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
+extern struct B_E9B8 FILESYS_cdSettings_E9B8 __asm__("FILESYS_cdSettings");
 extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
 extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
 
 /**
  * Takes the file system's options from the caller's record (size first; a short record clears the 36-byte options
- * first) and applies them to the live settings (D_00450C58, REAL_filedevice).
+ * first) and applies them to the live settings (FILESYS_cdSettings, REAL_filedevice).
  *
  * @param opts  the options record (size first)
  * @return 1
@@ -2439,10 +2439,10 @@ int FILESYS_setopts(int *opts) {
         MEM_clear_E9B8(&gFileSysOpts, 36);
     }
     MEM_copy_E9B8(&gFileSysOpts, opts, *opts);
-    D_00450C58_E9B8.root = ((int)gFileSysOpts.cdRoot);
-    D_00450C58_E9B8.namelen = gFileSysOpts.cdNameLen;
-    D_00450C58_E9B8.mmode = gFileSysOpts.cdMediaMode;
-    D_00450C58_E9B8.useDisc = gFileSysOpts.useDisc;
+    FILESYS_cdSettings_E9B8.root = ((int)gFileSysOpts.cdRoot);
+    FILESYS_cdSettings_E9B8.namelen = gFileSysOpts.cdNameLen;
+    FILESYS_cdSettings_E9B8.mmode = gFileSysOpts.cdMediaMode;
+    FILESYS_cdSettings_E9B8.useDisc = gFileSysOpts.useDisc;
     REAL_filedevice_E9B8[0] = ((int)gFileSysOpts.REAL_filedevice);
     return 1;
 }
@@ -3157,7 +3157,7 @@ extern E_F488 *hlafile_request_F488 __asm__("hlafile_request");
 extern int numrequests_F488 __asm__("numrequests");
 extern E_F488 *freequeue_F488[2] __asm__("freequeue");
 extern char hlafile_mutex_F488[] __asm__("hlafile_mutex");
-extern char D_00495DB8_F488[] __asm__("D_00495DB8");
+extern char str_ASYNCFILE_F488[] __asm__("str_ASYNCFILE");
 extern void MUTEX_create_F488(void *) __asm__("MUTEX_create");
 
 /**
@@ -3173,7 +3173,7 @@ void ASYNCFILE_init(int n, int x) {
     int i;
     if (hlafile_request_F488 == 0 && n < 257) {
         numrequests_F488 = n;
-        reqs = ((E_F488*(*)(char*, int, int))gFileSysOpts.malloc)(D_00495DB8_F488, n * 0x30, x);
+        reqs = ((E_F488*(*)(char*, int, int))gFileSysOpts.malloc)(str_ASYNCFILE_F488, n * 0x30, x);
         freequeue_F488[1] = &reqs[n - 1];
         freequeue_F488[0] = reqs;
         hlafile_request_F488 = reqs;
@@ -6644,10 +6644,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_close);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void sceClose(int);
-extern int D_00450C40_0C40[] __asm__("D_00450C40");
+extern int FILEDEV_lasthandle_0C40[] __asm__("FILEDEV_lasthandle");
 
 /**
- * Closes a device handle: a host file is closed (forgetting it as the last-read file D_00450C40); disc handles need
+ * Closes a device handle: a host file is closed (forgetting it as the last-read file FILEDEV_lasthandle); disc handles need
  * nothing. Returns 0.
  *
  * @param fsHandle  the device handle
@@ -6661,8 +6661,8 @@ int FILEDEV_close(int fsHandle) {
     fileDesc = fsHandle & 0xFFFFFF;
     if (temp_5 == 2) {
         sceClose(fileDesc);
-        if (D_00450C40_0C40[0] == fileDesc) {
-            D_00450C40_0C40[0] = -1;
+        if (FILEDEV_lasthandle_0C40[0] == fileDesc) {
+            FILEDEV_lasthandle_0C40[0] = -1;
         }
     }
     return 0;
@@ -6708,7 +6708,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_readexec);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00450C40_33B0 __asm__("D_00450C40");
+extern int FILEDEV_lasthandle_33B0 __asm__("FILEDEV_lasthandle");
 extern int D_00450C4C_33B0 __asm__("D_00450C4C");
 extern int sceRead_33B0(int, int, int) __asm__("sceRead");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
@@ -6716,7 +6716,7 @@ extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_Command
 int FILEDEV_readexec_i(void) __asm__("FILEDEV_readexec");
 /**
  * Sync task of the host device: does the read FILEDEV_readreq recorded. It seeks unless the file and offset are where the
- * last read ended (D_00450C40, D_00450C4C), reads, remembers the new position and completes the command
+ * last read ended (FILEDEV_lasthandle, D_00450C4C), reads, remembers the new position and completes the command
  * (iFILESYS_CommandCompleteCallback, success when every byte was read). Returns 0.
  *
  * @return 0
@@ -6725,12 +6725,12 @@ int FILEDEV_readexec_i(void) {
     int bytesRead;
     int ok;
     if (gHarddriveReadRequest_3350.a != 0) {
-        if (D_00450C40_33B0 != gHarddriveReadRequest_3350.b || D_00450C4C_33B0 != gHarddriveReadRequest_3350.d) {
+        if (FILEDEV_lasthandle_33B0 != gHarddriveReadRequest_3350.b || D_00450C4C_33B0 != gHarddriveReadRequest_3350.d) {
             sceLseek(gHarddriveReadRequest_3350.b, gHarddriveReadRequest_3350.d, 0);
         }
         bytesRead = sceRead_33B0(gHarddriveReadRequest_3350.b, gHarddriveReadRequest_3350.c, gHarddriveReadRequest_3350.e);
         ok = bytesRead == gHarddriveReadRequest_3350.e;
-        D_00450C40_33B0 = gHarddriveReadRequest_3350.b;
+        FILEDEV_lasthandle_33B0 = gHarddriveReadRequest_3350.b;
         D_00450C4C_33B0 = gHarddriveReadRequest_3350.d + gHarddriveReadRequest_3350.e;
         gHarddriveReadRequest_3350.a = 0;
         iFILESYS_CommandCompleteCallback_33B0(ok);
@@ -6744,7 +6744,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_write);
 #ifdef SKIP_ASM
 /**
  * Writes to a host file: seeks to @p offset, writes and completes the command as a success
- * (iFILESYS_CommandCompleteCallback(1)) whatever happened. Returns 0. Quirk: the remembered read position (D_00450C40,
+ * (iFILESYS_CommandCompleteCallback(1)) whatever happened. Returns 0. Quirk: the remembered read position (FILEDEV_lasthandle,
  * D_00450C4C) is not cleared, so a later read of the same file at that position skips its seek and reads after the
  * written data.
  *
@@ -6862,9 +6862,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readCurrentSector);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_00519C40_3618[] __asm__("D_00519C40");
+extern int CDVD_state_3618[] __asm__("CDVD_state");
 extern char D_00519C80_3618[] __asm__("D_00519C80");
-extern int D_00450C58_3618[] __asm__("D_00450C58");
+extern int FILESYS_cdSettings_3618[] __asm__("FILESYS_cdSettings");
 extern int sceCdRead_3618(int, int, void *, int *) __asm__("sceCdRead");
 extern int sceCdSync_3618(int) __asm__("sceCdSync");
 extern void sceCdInit_3618(int) __asm__("sceCdInit");
@@ -6872,9 +6872,9 @@ extern void sceCdMmode_3618(int) __asm__("sceCdMmode");
 extern void sceCdDiskReady_3618(int) __asm__("sceCdDiskReady");
 extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 /**
- * Reads one disc sector, the one at the CD state's sector (D_00519C40 +0x2C), into the sector buffer D_00519C80 and
+ * Reads one disc sector, the one at the CD state's sector (CDVD_state +0x2C), into the sector buffer D_00519C80 and
  * returns it. Retries until the read reports no error, waiting 480 ticks between polls; every 10 failures the CD is
- * initialised again (sceCdInit(0), media mode from D_00450C58 +0x8).
+ * initialised again (sceCdInit(0), media mode from FILESYS_cdSettings +0x8).
  *
  * @return the sector buffer
  */
@@ -6886,10 +6886,10 @@ char *CDVD_readCurrentSector(void) {
         if (n == 0) {
             sceCdInit_3618(0);
             n = 10;
-            sceCdMmode_3618(D_00450C58_3618[2]);
+            sceCdMmode_3618(FILESYS_cdSettings_3618[2]);
         }
         sceCdDiskReady_3618(0);
-        while (sceCdRead_3618(D_00519C40_3618[11], 1, D_00519C80_3618, &D_00519C40_3618[7]) == 0) {
+        while (sceCdRead_3618(CDVD_state_3618[11], 1, D_00519C80_3618, &CDVD_state_3618[7]) == 0) {
             CDVD_sleepHsyncs(0x1E0);
         }
         do {
@@ -6963,14 +6963,14 @@ extern int CDVD_hashname_39A8(char *, int) __asm__("CDVD_hashname");
 extern void qsort_39A8(char *, int, int, void *) __asm__("qsort");
 extern char *strcpy_39A8(char *, char *) __asm__("strcpy");
 extern void fi_cmp_39A8(void) __asm__("fi_cmp");
-extern int D_00450C58_39A8[] __asm__("D_00450C58");
+extern int FILESYS_cdSettings_39A8[] __asm__("FILESYS_cdSettings");
 extern int hashcollision_39A8[] __asm__("hashcollision");
 
 /**
  * Builds the sorted CD file table from the raw directory list and returns the hash seed it settled on.
  *
  * Each 0x108-byte source entry (path, sector, size) becomes {hash of the path (CDVD_hashname), sector, size, then the
- * path when D_00450C58 +0x4, the name length, is above 0} in entries of name length + 0xC bytes, sorted by hash
+ * path when FILESYS_cdSettings +0x4, the name length, is above 0} in entries of name length + 0xC bytes, sorted by hash
  * (qsort with fi_cmp). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
  * two identical paths hash alike for every seed, so the loop never ends; the path is copied with no length limit.
  *
@@ -6994,17 +6994,17 @@ int CDVD_buildFileTable(char *src, char *dst, int n, int seed) {
                 *(int *)dstEntry = CDVD_hashname_39A8(srcEntry, seed);
                 *(int *)(dstEntry + 4) = *(int *)(srcEntry + 0x100);
                 *(int *)(dstEntry + 8) = *(int *)(srcEntry + 0x104);
-                if (D_00450C58_39A8[1] > 0) {
+                if (FILESYS_cdSettings_39A8[1] > 0) {
                     strcpy_39A8(dstEntry + 0xC, srcEntry);
                 }
-                sz = D_00450C58_39A8[1];
+                sz = FILESYS_cdSettings_39A8[1];
                 i--;
                 srcEntry += 0x108;
                 dstEntry += sz + 0xC;
             } while (i != 0);
         }
         hashcollision_39A8[0] = 0;
-        qsort_39A8(dst, n, D_00450C58_39A8[1] + 0xC, fi_cmp_39A8);
+        qsort_39A8(dst, n, FILESYS_cdSettings_39A8[1] + 0xC, fi_cmp_39A8);
         if (hashcollision_39A8[0] != 0) {
             seed = seed * 101 + 7;
         } else {
@@ -7019,13 +7019,13 @@ int CDVD_buildFileTable(char *src, char *dst, int n, int seed) {
 INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_wakeReader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519C40_3AD8[] __asm__("D_00519C40");
+extern int CDVD_state_3AD8[] __asm__("CDVD_state");
 void iSignalSema_3AD8(int) __asm__("iSignalSema");
 /**
- * CD callback: wakes the CD reader thread (CDVD_readerThread) by signalling its semaphore (D_00519C40 +0xC).
+ * CD callback: wakes the CD reader thread (CDVD_readerThread) by signalling its semaphore (CDVD_state +0xC).
  */
 void CDVD_wakeReader(void) {
-    iSignalSema_3AD8(D_00519C40_3AD8[3]);
+    iSignalSema_3AD8(CDVD_state_3AD8[3]);
 }
 #endif
 
@@ -7034,7 +7034,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_issueStepRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_00519C40_3B00[] __asm__("D_00519C40");
+extern int CDVD_state_3B00[] __asm__("CDVD_state");
 extern int sceCdRead_3B00(int, int, int, int *) __asm__("sceCdRead");
 extern void sceCdSync_3B00(int) __asm__("sceCdSync");
 /**
@@ -7043,8 +7043,8 @@ extern void sceCdSync_3B00(int) __asm__("sceCdSync");
  * flag 2 (reading) on success or flags 2 and 4 (failed, for the recovery in CDVD_checkFailedRead) otherwise.
  */
 void CDVD_issueStepRead(void) {
-    int *readState = &D_00519C40_3B00[8];
-    int *cdState = D_00519C40_3B00;
+    int *readState = &CDVD_state_3B00[8];
+    int *cdState = CDVD_state_3B00;
     int readBuf;
     int ok;
     int i;
@@ -7055,8 +7055,8 @@ void CDVD_issueStepRead(void) {
     }
     ok = 0;
     for (i = 0; i < 3; i++) {
-        if (sceCdRead_3B00(readState[3], readState[4], readBuf, &D_00519C40_3B00[7]) != 0) {
-            D_00519C40_3B00[0] |= 2;
+        if (sceCdRead_3B00(readState[3], readState[4], readBuf, &CDVD_state_3B00[7]) != 0) {
+            CDVD_state_3B00[0] |= 2;
             ok = 1;
             break;
         }
@@ -7064,7 +7064,7 @@ void CDVD_issueStepRead(void) {
         sceCdSync_3B00(0);
     }
     if (!ok) {
-        D_00519C40_3B00[0] |= 6;
+        CDVD_state_3B00[0] |= 6;
     }
 }
 #endif
@@ -7091,7 +7091,7 @@ struct sC40Read {                   /* the read in progress */
     char *files;                    /* the file table (also D_00519C78) */
     int *sector;                    /* sector buffer (D_00519C80) */
 };
-struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
+struct sC40 {                       /* 0x40, CDVD_state: the CD file system */
     int flags;                      /* flags */
     int count;                      /* number of files */
     int tid;                        /* reader thread */
@@ -7102,7 +7102,7 @@ struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
     struct sC40Mode mode;
     struct sC40Read read;
 };
-extern struct sC40 D_00519C40;
+extern struct sC40 CDVD_state;
 extern void CDVD_issueStepRead_3BE0(void) __asm__("CDVD_issueStepRead");
 extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 extern void MEM_copy_2190(int, int, int) __asm__("MEM_copy");
@@ -7120,27 +7120,27 @@ void CDVD_readerThread_impl(void) __asm__("CDVD_readerThread");
  * (iFILESYS_CommandCompleteCallback(1)). Never returns.
  */
 void CDVD_readerThread_impl(void) {
-    struct sC40Read *curRead = &D_00519C40.read;
+    struct sC40Read *curRead = &CDVD_state.read;
 
     while (1) {
         int fl;
-        WaitSema(D_00519C40.sema);
-        if (sceCdGetError_3618() != 0 || (D_00519C40.flags & 8)) {
-            fl = D_00519C40.flags & ~8;
-            D_00519C40.flags = fl;
+        WaitSema(CDVD_state.sema);
+        if (sceCdGetError_3618() != 0 || (CDVD_state.flags & 8)) {
+            fl = CDVD_state.flags & ~8;
+            CDVD_state.flags = fl;
             if (fl & 2) {
-                if (--D_00519C40.retries > 0) {
+                if (--CDVD_state.retries > 0) {
                     CDVD_issueStepRead_3BE0();
                 } else {
-                    D_00519C40.flags = fl | 4;
+                    CDVD_state.flags = fl | 4;
                 }
             }
             continue;
         }
-        if (D_00519C40.flags & 1) {
-            D_00519C40.flags &= ~1;
-            D_00519C40.cached = curRead->lba;
-            MEM_copy_2190(curRead->buf, (int)D_00519C40.read.sector + curRead->ofs, curRead->stepBytes);
+        if (CDVD_state.flags & 1) {
+            CDVD_state.flags &= ~1;
+            CDVD_state.cached = curRead->lba;
+            MEM_copy_2190(curRead->buf, (int)CDVD_state.read.sector + curRead->ofs, curRead->stepBytes);
         }
         if (curRead->restBytes > 0) {
             curRead->buf += curRead->stepBytes;
@@ -7148,22 +7148,22 @@ void CDVD_readerThread_impl(void) {
             curRead->lba += curRead->nsect;
             if (curRead->restBytes < 0x800) {
                 curRead->stepBytes = curRead->restBytes;
-                D_00519C40.flags |= 1;
+                CDVD_state.flags |= 1;
                 curRead->nsect = 1;
             } else if ((curRead->buf & 0x3F) != 0) {
                 curRead->stepBytes = 0x800;
-                D_00519C40.flags |= 1;
+                CDVD_state.flags |= 1;
                 curRead->nsect = 1;
             } else {
                 int k = curRead->restBytes & -0x800;
-                D_00519C40.flags &= ~1;
+                CDVD_state.flags &= ~1;
                 curRead->nsect = k >> 11;
                 curRead->stepBytes = k;
             }
             curRead->restBytes -= curRead->stepBytes;
             CDVD_issueStepRead_3BE0();
         } else {
-            D_00519C40.flags &= ~2;
+            CDVD_state.flags &= ~2;
             iFILESYS_CommandCompleteCallback_33B0(1);
         }
     }
@@ -7198,8 +7198,8 @@ struct CdState_3D78 {
     char *buf;
 };
 
-extern struct CdState_3D78 D_00519C40_3D78 __asm__("D_00519C40");
-extern int D_00450C58[];
+extern struct CdState_3D78 CDVD_state_3D78 __asm__("CDVD_state");
+extern int FILESYS_cdSettings[];
 extern char D_0051A480[];
 
 /**
@@ -7217,7 +7217,7 @@ int CDVD_recoverRead(void) {
 
     tries = 0;
     sceCdCallback_3D78(0);
-    MEM_copy_3D78(&req, &D_00519C40_3D78.req, 0x18);
+    MEM_copy_3D78(&req, &CDVD_state_3D78.req, 0x18);
     do {
         tries++;
         while (sceCdInit_3D78(0) == 0) {
@@ -7226,9 +7226,9 @@ int CDVD_recoverRead(void) {
                 CDVD_sleepHsyncs(7200);
             }
         }
-        sceCdMmode_3D78(D_00450C58[2]);
+        sceCdMmode_3D78(FILESYS_cdSettings[2]);
         CDVD_sleepHsyncs(tries * 0x1E0);
-        while (sceCdRead_3D78(0x10, 1, D_00519C40_3D78.buf, D_00519C40_3D78.mode) == 0) {
+        while (sceCdRead_3D78(0x10, 1, CDVD_state_3D78.buf, CDVD_state_3D78.mode) == 0) {
             CDVD_sleepHsyncs(tries * 0x1E0);
         }
         do {
@@ -7238,7 +7238,7 @@ int CDVD_recoverRead(void) {
         if (sceCdGetError_3D78() == 0 && req.count > 0) {
             do {
                 sceCdDiskReady_3D78(0);
-                while (sceCdRead_3D78(req.lba, 1, (D_00519C40_3D78.flags & 1) ? D_00519C40_3D78.buf : req.buf, D_00519C40_3D78.mode) == 0) {
+                while (sceCdRead_3D78(req.lba, 1, (CDVD_state_3D78.flags & 1) ? CDVD_state_3D78.buf : req.buf, CDVD_state_3D78.mode) == 0) {
                     CDVD_sleepHsyncs(tries * 0x1E0);
                 }
                 do {
@@ -7258,7 +7258,7 @@ int CDVD_recoverRead(void) {
     } while (sceCdGetError_3D78() != 0);
     sceCdInitEeCB_3D78(11, D_0051A480, 0x800);
     sceCdCallback_3D78(CDVD_wakeReader);
-    SignalSema_3D78(D_00519C40_3D78.fC);
+    SignalSema_3D78(CDVD_state_3D78.fC);
     return 0;
 }
 #endif
@@ -7267,7 +7267,7 @@ int CDVD_recoverRead(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_checkFailedRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519C40_4000[] __asm__("D_00519C40");
+extern int CDVD_state_4000[] __asm__("CDVD_state");
 void CDVD_recoverRead_4000(void) __asm__("CDVD_recoverRead");
 
 /**
@@ -7277,9 +7277,9 @@ void CDVD_recoverRead_4000(void) __asm__("CDVD_recoverRead");
  * @return 0
  */
 int CDVD_checkFailedRead(void) {
-    int cdFlags = D_00519C40_4000[0];
+    int cdFlags = CDVD_state_4000[0];
     if ((cdFlags & 6) == 6) {
-        D_00519C40_4000[0] = cdFlags & ~6;
+        CDVD_state_4000[0] = cdFlags & ~6;
         CDVD_recoverRead_4000();
     }
     return 0;
@@ -7365,8 +7365,8 @@ struct CdState_4040 {
 struct ThreadParam_4040 { int status; void (*func)(void); void *stack; int stackSize; void *gpReg; int initPriority; int currentPriority; unsigned int attr; unsigned int option; };
 struct SemaParam_4040 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
 
-extern struct CdState_4040 D_00519C40_4040 __asm__("D_00519C40");
-extern struct CdCfg_4040 D_00450C58_4040 __asm__("D_00450C58");
+extern struct CdState_4040 CDVD_state_4040 __asm__("CDVD_state");
+extern struct CdCfg_4040 FILESYS_cdSettings_4040 __asm__("FILESYS_cdSettings");
 extern struct IsoEntry_4040 *D_00450C68;
 extern unsigned int D_00450C6C;
 extern int D_00450C70;
@@ -7387,7 +7387,7 @@ extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E375
  * TOC (sceCdGetToc), sets the read mode and sector 0x10 and lists every file into a temporary table (n * 264 bytes,
  * gFileSysOpts allocator): from the built-in file list (gFileSysOpts +0x20; the 7-character device prefix and the
  * 2-character version suffix are dropped and backslashes become slashes), or by walking the ISO 9660 directories
- * (func_003E3758) from the root or from the root directory D_00450C58 names. More than @p n files fails. Otherwise it
+ * (func_003E3758) from the root or from the root directory FILESYS_cdSettings names. More than @p n files fails. Otherwise it
  * builds the sorted hash table into @p files (CDVD_buildFileTable, seed D_00450C70), creates the semaphore and the reader
  * thread CDVD_readerThread (priority 12), starts the CD callback thread, installs CDVD_wakeReader and adds the sync task
  * CDVD_checkFailedRead.
@@ -7410,12 +7410,12 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
     struct IsoDirRec_4040 *rec;
 
     ok = 0;
-    MEM_fill_4040(&D_00519C40_4040, 0, 0x40);
-    MEM_fill_4040(files, 0, (D_00450C58_4040.namelen + 0xC) * n);
+    MEM_fill_4040(&CDVD_state_4040, 0, 0x40);
+    MEM_fill_4040(files, 0, (FILESYS_cdSettings_4040.namelen + 0xC) * n);
     if (sceCdInit_4040(0) == 0) {
         return 0;
     }
-    sceCdMmode_4040(D_00450C58_4040.mmode);
+    sceCdMmode_4040(FILESYS_cdSettings_4040.mmode);
     sceCdDiskReady_4040(0);
     if (sceCdGetDiskType_4040() == 18 || sceCdGetDiskType_4040() == 20) {
         ok = 1;
@@ -7425,10 +7425,10 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
     }
     sceCdDiskReady_4040(0);
     sceCdGetToc_4040(toc);
-    D_00519C40_4040.mode[1] = 1;
-    D_00519C40_4040.lba = 0x10;
-    D_00519C40_4040.mode[0] = 0;
-    D_00519C40_4040.mode[2] = 0;
+    CDVD_state_4040.mode[1] = 1;
+    CDVD_state_4040.lba = 0x10;
+    CDVD_state_4040.mode[0] = 0;
+    CDVD_state_4040.mode[2] = 0;
     FlushCache_4040(0);
     D_00450C68 = gFileSysOpts.malloc(str_Named_Dir, n * 264, 0);
     MEM_clear_4040(D_00450C68, n * 264);
@@ -7456,11 +7456,11 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
         pvd = (struct IsoPvd_4040 *)CDVD_readCurrentSector_4040();
         D_0051EC80[1] = 0;
         D_0051EC80[0] = '/';
-        if (*D_00450C58_4040.root != 0) {
-            D_00519C40_4040.lba = pvd->root.lba;
+        if (*FILESYS_cdSettings_4040.root != 0) {
+            CDVD_state_4040.lba = pvd->root.lba;
             for (rec = CDVD_readCurrentSector_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
-                if (strncmp_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
-                    strcat_4040(D_0051EC80, D_00450C58_4040.root);
+                if (strncmp_4040(rec->name, FILESYS_cdSettings_4040.root, rec->name_len) == 0) {
+                    strcat_4040(D_0051EC80, FILESYS_cdSettings_4040.root);
                     strcat_4040(D_0051EC80, str_slash_c);
                     func_003E3758_4040(rec->lba, (rec->size + 0x7FF) >> 11);
                     break;
@@ -7476,28 +7476,28 @@ unsigned int CDVD_initFileSystem(unsigned int n, void *files) {
         D_00450C6C = 0;
         return 0;
     }
-    D_00519C40_4040.files = files;
-    D_00519C40_4040.count = D_00450C6C;
-    D_00519C40_4040.sorted = CDVD_buildFileTable_4040(D_00450C68, files, D_00450C6C, D_00450C70);
+    CDVD_state_4040.files = files;
+    CDVD_state_4040.count = D_00450C6C;
+    CDVD_state_4040.sorted = CDVD_buildFileTable_4040(D_00450C68, files, D_00450C6C, D_00450C70);
     ((void (*)(void*))gFileSysOpts.free)(D_00450C68);
     D_00450C6C = 0;
     sp.init_count = 0;
     sp.max_count = 0x20;
     D_00450C68 = 0;
-    D_00519C40_4040.sema = CreateSema_4040(&sp);
+    CDVD_state_4040.sema = CreateSema_4040(&sp);
     tp.func = CDVD_readerThread_4040;
     tp.stack = D_0051AC80;
     tp.gpReg = &D_004A30F0;
     tp.stackSize = 0x4000;
     tp.initPriority = 0xC;
     tp.option = 0;
-    D_00519C40_4040.tid = CreateThread_4040(&tp);
-    StartThread_4040(D_00519C40_4040.tid, 0);
+    CDVD_state_4040.tid = CreateThread_4040(&tp);
+    StartThread_4040(CDVD_state_4040.tid, 0);
     sceCdInitEeCB_4040(11, D_0051A480, 0x800);
     sceCdCallback_4040(CDVD_wakeReader_4040);
-    D_00519C40_4040.sector = D_00519C80;
+    CDVD_state_4040.sector = D_00519C80;
     SYNCTASK_add(CDVD_checkFailedRead_4040, 0, 0);
-    return D_00519C40_4040.count;
+    return CDVD_state_4040.count;
 }
 #endif
 
@@ -7511,7 +7511,7 @@ extern void sceCdInit(int);
 extern void DeleteThread(int);
 extern void TerminateThread(int);
 extern void DeleteSema(int);
-extern int D_00519C40_9C40[] __asm__("D_00519C40");
+extern int CDVD_state_9C40[] __asm__("CDVD_state");
 extern void CDVD_checkFailedRead_4000(void) __asm__("CDVD_checkFailedRead");
 
 /**
@@ -7521,9 +7521,9 @@ extern void CDVD_checkFailedRead_4000(void) __asm__("CDVD_checkFailedRead");
 void CDVD_shutdownFileSystem(void) {
     SYNCTASK_del_44B0(CDVD_checkFailedRead_4000);
     sceCdCallback(0);
-    TerminateThread(D_00519C40_9C40[2]);
-    DeleteThread(D_00519C40_9C40[2]);
-    DeleteSema(D_00519C40_9C40[3]);
+    TerminateThread(CDVD_state_9C40[2]);
+    DeleteThread(CDVD_state_9C40[2]);
+    DeleteSema(CDVD_state_9C40[3]);
     sceCdInit(5);
 }
 #endif
@@ -7536,9 +7536,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_findFileNumber);
 extern int CDVD_hashname_4508(char *, int) __asm__("CDVD_hashname");
 extern unsigned int bsearch_4508(int *, int, int, int, void *) __asm__("bsearch");
 extern void fi_cmp_4508(void) __asm__("fi_cmp");
-extern int D_00450C58_4508[] __asm__("D_00450C58");
+extern int FILESYS_cdSettings_4508[] __asm__("FILESYS_cdSettings");
 extern char D_00499C81_4508[] __asm__("D_00499C81");
-extern int D_00519C40_4508[] __asm__("D_00519C40");
+extern int CDVD_state_4508[] __asm__("CDVD_state");
 
 int CDVD_findFileNumber_4508(char *path, int unused, int *out) __asm__("CDVD_findFileNumber");
 /**
@@ -7546,7 +7546,7 @@ int CDVD_findFileNumber_4508(char *path, int unused, int *out) __asm__("CDVD_fin
  *
  * Builds a normalised copy of @p path in a 256-byte buffer: exactly one leading '/', every '\\' turned into '/', and
  * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with CDVD_hashname (seed word 6 of
- * the file-system state D_00519C40) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
+ * the file-system state CDVD_state) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
  * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with fi_cmp. Used by
  * FILEDEV_open, which tags the number with device 1 in the top byte, and by CDVD_findFileEntry.
  *
@@ -7589,13 +7589,13 @@ int CDVD_findFileNumber_4508(char *path, int modeFlags, int *out) {
         bufCursor++;
     }
     *bufCursor = 0;
-    key = CDVD_hashname_4508(buf, D_00519C40_4508[6]);
-    foundEntry = bsearch_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, fi_cmp_4508);
+    key = CDVD_hashname_4508(buf, CDVD_state_4508[6]);
+    foundEntry = bsearch_4508(&key, CDVD_state_4508[14], CDVD_state_4508[1], FILESYS_cdSettings_4508[1] + 0xC, fi_cmp_4508);
     if (foundEntry == 0) {
         *out = 0;
         return 0;
     }
-    *out = (foundEntry - D_00519C40_4508[14]) / (unsigned)(D_00450C58_4508[1] + 0xC) + 1;
+    *out = (foundEntry - CDVD_state_4508[14]) / (unsigned)(FILESYS_cdSettings_4508[1] + 0xC) + 1;
     return 1;
 }
 #endif
@@ -7775,10 +7775,10 @@ extern void REAL_addexit_4AF0(void (*)(void)) __asm__("REAL_addexit");
 extern void tmrint_4AF0(void) __asm__("tmrint");
 extern void TIMER_restore_4AF0(void) __asm__("TIMER_restore");
 
-extern int D_00450DA0;
+extern int TIMER_hblankRate;
 extern int TIMERhz;
 /* tick counter, incremented by the timer interrupt handler (tmrint) */
-extern volatile int D_00450DCC;
+extern volatile int TIMER_ticks;
 extern int hTimerId;
 extern unsigned short D_00450DE0;
 
@@ -7795,7 +7795,7 @@ extern unsigned short D_00450DE0;
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
  * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in TIMERhz, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
- * as the INTC 10 (timer 1) handler (AddIntcHandler) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
+ * as the INTC 10 (timer 1) handler (AddIntcHandler) and enables it (EnableIntc). While the H-blank rate TIMER_hblankRate is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
  * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to TIMER_setHblankRate. Finally it registers the teardown
  * TIMER_restore with REAL_addexit. systemInit calls it with 60.
@@ -7839,14 +7839,14 @@ int TIMER_init(int hz) {
     T1_MODE_4AF0 = mode | 0x180;
     hTimerId = AddIntcHandler_4AF0(10, tmrint_4AF0, 0);
     EnableIntc_4AF0(10);
-    if (D_00450DA0 == 0) {
+    if (TIMER_hblankRate == 0) {
         count = T0_COUNT_4AF0;
         tmode = T0_MODE_4AF0;
         T0_MODE_4AF0 = 131;
-        end = D_00450DCC + TIMERhz;
-        if (D_00450DCC < end) {
+        end = TIMER_ticks + TIMERhz;
+        if (TIMER_ticks < end) {
             do {
-            } while (D_00450DCC < end);
+            } while (TIMER_ticks < end);
         }
         hblankCount = T0_COUNT_4AF0 - count;
         T0_COUNT_4AF0 = count;
@@ -7900,7 +7900,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", tmrint);
 // PORT: PS2-only (EE timer 1 registers, inline asm).
 /* tmrint: the EE timer 1 compare interrupt (inittmr.c; On Tour's PSP tmrint has the same tick/callback body). */
 extern unsigned short D_00450DE0;               /* compare period */
-extern volatile int D_00450DCC;                 /* ticks */
+extern volatile int TIMER_ticks;                 /* ticks */
 extern volatile int libticks;                 /* libticks */
 extern int bInTimerSubroutine;                          /* bInTimerSubroutine */
 extern void (*tmrsub[8])(void);             /* tmrsub */
@@ -7913,7 +7913,7 @@ extern void (*tmrsub[8])(void);             /* tmrsub */
  * Handles the EE timer 1 compare interrupt: one library tick.
  *
  * Moves the compare value on by one period (D_00450DE0) from where the count stands, resets T1_COUNT and acknowledges
- * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and libticks, then calls each of the 8
+ * the interrupt (T1_MODE | 0x400), increments the tick counters TIMER_ticks and libticks, then calls each of the 8
  * timer routines in tmrsub that is set, with bInTimerSubroutine set to 1 around the call (the thread and mutex code checks
  * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
  * TIMER_init.
@@ -7926,7 +7926,7 @@ int tmrint(void) {
     T1_COMP = D_00450DE0 + T1_COMP - T1_COUNT;
     T1_COUNT = 0;
     T1_MODE |= 0x400;
-    D_00450DCC++;
+    TIMER_ticks++;
     libticks++;
     for (i = 0; i < 8; i++) {
         if (tmrsub[i]) {
@@ -7944,19 +7944,19 @@ int tmrint(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_gettick);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern volatile int D_00450DCC;
+extern volatile int TIMER_ticks;
 
 /**
  * Returns the library tick counter.
  *
- * D_00450DCC, incremented by the timer interrupt tmrint at the rate TIMER_init set (TIMER_getfrequency returns
+ * TIMER_ticks, incremented by the timer interrupt tmrint at the rate TIMER_init set (TIMER_getfrequency returns
  * it). Used for timeouts throughout the library, the sound code and the quadtree loader.
  *
  * @return the current tick count
  */
 int TIMER_gettick(void)
 {
-    return D_00450DCC;
+    return TIMER_ticks;
 }
 #endif
 
@@ -7964,19 +7964,19 @@ int TIMER_gettick(void)
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_elapsedticks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DEC_4EA8[] __asm__("D_00450DEC");
+extern int TIMER_lastElapsedTick_4EA8[] __asm__("TIMER_lastElapsedTick");
 
 /**
  * Returns the ticks elapsed since the previous call.
  *
- * Stores the current tick count (TIMER_gettick) in D_00450DEC and returns it minus the value stored last time.
+ * Stores the current tick count (TIMER_gettick) in TIMER_lastElapsedTick and returns it minus the value stored last time.
  *
  * @return ticks since the last call (since the reset in TIMER_reset on the first call)
  */
 int TIMER_elapsedticks(void) {
-    int old = D_00450DEC_4EA8[0];
+    int old = TIMER_lastElapsedTick_4EA8[0];
     int now = TIMER_gettick();
-    D_00450DEC_4EA8[0] = now;
+    TIMER_lastElapsedTick_4EA8[0] = now;
     return now - old;
 }
 #endif
@@ -7985,21 +7985,21 @@ int TIMER_elapsedticks(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_reset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DE8_4EE8[] __asm__("D_00450DE8");
-extern int D_00450DEC_4EE8[] __asm__("D_00450DEC");
-extern volatile int D_00450DCC_4EE8[] __asm__("D_00450DCC");
+extern int TIMER_deadline_4EE8[] __asm__("TIMER_deadline");
+extern int TIMER_lastElapsedTick_4EE8[] __asm__("TIMER_lastElapsedTick");
+extern volatile int TIMER_ticks_4EE8[] __asm__("TIMER_ticks");
 
 /**
  * Resets the tick bookkeeping to zero.
  *
- * Clears the last-call mark D_00450DEC (TIMER_elapsedticks), the tick counter D_00450DCC and the deadline D_00450DE8
+ * Clears the last-call mark TIMER_lastElapsedTick (TIMER_elapsedticks), the tick counter TIMER_ticks and the deadline TIMER_deadline
  * (TIMER_settimeout / TIMER_testtimeout).
  */
 // Resets the timer state.
 void TIMER_reset(void) {
-    int *deadlinePtr = D_00450DE8_4EE8;
-    D_00450DEC_4EE8[0] = 0;
-    D_00450DCC_4EE8[0] = 0;
+    int *deadlinePtr = TIMER_deadline_4EE8;
+    TIMER_lastElapsedTick_4EE8[0] = 0;
+    TIMER_ticks_4EE8[0] = 0;
     deadlinePtr[0] = 0;
 }
 #endif
@@ -8009,18 +8009,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_settimeout);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int TIMER_gettick_4F08(void) __asm__("TIMER_gettick");
-extern int D_00450DE8_4F08[] __asm__("D_00450DE8");
+extern int TIMER_deadline_4F08[] __asm__("TIMER_deadline");
 
 /**
  * Sets the tick deadline a number of ticks from now.
  *
- * Stores the current tick count (TIMER_gettick) plus @p delayTicks in D_00450DE8; TIMER_testtimeout tests it and TIMER_waittimeout
+ * Stores the current tick count (TIMER_gettick) plus @p delayTicks in TIMER_deadline; TIMER_testtimeout tests it and TIMER_waittimeout
  * waits for it.
  *
  * @param delayTicks  ticks from now
  */
 void TIMER_settimeout(int delayTicks) {
-    int *deadlinePtr = D_00450DE8_4F08;
+    int *deadlinePtr = TIMER_deadline_4F08;
     *deadlinePtr = TIMER_gettick_4F08() + delayTicks;
 }
 #endif
@@ -8052,17 +8052,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_testtimeout);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int TIMER_gettick();
-extern int D_00450DE8_4F80[] __asm__("D_00450DE8");
+extern int TIMER_deadline_4F80[] __asm__("TIMER_deadline");
 
 /**
  * Tells whether the tick deadline has been reached.
  *
- * Compares the current tick count (TIMER_gettick) with the deadline D_00450DE8 set by TIMER_settimeout.
+ * Compares the current tick count (TIMER_gettick) with the deadline TIMER_deadline set by TIMER_settimeout.
  *
  * @return 1 when the deadline is now or past, 0 before it
  */
 int TIMER_testtimeout(void) {
-    int sinceDeadline = TIMER_gettick() - D_00450DE8_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
+    int sinceDeadline = TIMER_gettick() - TIMER_deadline_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
 }
 #endif
 
@@ -8358,7 +8358,7 @@ extern void f3CA0_YT(int, int *) __asm__("ReferThreadStatus");
 extern void f3CB0_YT(int, int *) __asm__("iReferThreadStatus");
 extern void f3CC0_YT(void) __asm__("SleepThread");
 extern void f4CE8_YT(int) __asm__("iRotateThreadReadyQueue");
-extern int D_0DA0_YT[] __asm__("D_00450DA0");
+extern int D_0DA0_YT[] __asm__("TIMER_hblankRate");
 extern int D_0DE4_YT[] __asm__("bInTimerSubroutine");
 extern char D_5E20_YT[] __asm__("D_00495E20");
 extern char fE5290_YT[] __asm__("THREAD_wakeOnAlarm");
@@ -8366,7 +8366,7 @@ extern char fE5290_YT[] __asm__("THREAD_wakeOnAlarm");
 /**
  * Puts the calling thread to sleep for a number of library timer ticks, or just yields when given none.
  *
- * For @p numTicks > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate D_00450DA0, divided by the
+ * For @p numTicks > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate TIMER_hblankRate, divided by the
  * tick rate), sets a kernel alarm whose handler wakes this thread, and sleeps; it aborts with "ERROR SETTING
  * WAKEUP ALARM" if the alarm can't be set. Otherwise it rotates the ready queue at the thread's current
  * priority (through iRotateThreadReadyQueue inside a timer handler).
@@ -8839,12 +8839,12 @@ struct sSyncTask {                  /* 16 bytes, systemtasksubs[16]: a task SYNC
     int exec;                        /* running */
 };
 extern struct sSyncTask systemtasksubs[16];
-extern int D_00450E04_5928 __asm__("D_00450E04");
+extern int SYNCTASK_runTick_5928 __asm__("SYNCTASK_runTick");
 
 /**
  * Runs every synchronous task that is due.
  *
- * Records the current library tick in D_00450E04. Each task whose due time has passed and that isn't
+ * Records the current library tick in SYNCTASK_runTick. Each task whose due time has passed and that isn't
  * already running is marked running, called with (@p mode, ticks late), and rescheduled one period after now.
  *
  * @param mode  value passed to every task
@@ -8854,7 +8854,7 @@ int SYNCTASK_run(int mode) {
     int i;
     int result = 0;
 
-    D_00450E04_5928 = libticks_STA;
+    SYNCTASK_runTick_5928 = libticks_STA;
     for (i = 0; i < 16; i++) {
         int (*fn)(int, int) = systemtasksubs[i].func;
         if (fn != 0 && libticks_STA >= systemtasksubs[i].next && systemtasksubs[i].exec == 0) {
@@ -9451,15 +9451,15 @@ int MEMSYS_validaddress(unsigned int addr) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", DEBUG_breakIfEnabled);
 #ifdef SKIP_ASM
-extern int D_00450DA4[];
+extern int DEBUG_breakEnabled[];
 
 /**
- * Breaks into the debugger (break 6) when the debug-break switch D_00450DA4 is set; does nothing otherwise.
+ * Breaks into the debugger (break 6) when the debug-break switch DEBUG_breakEnabled is set; does nothing otherwise.
  *
  * Called on error paths in seg_2AEDC0 (RCMP_AV_PLAYER_Init, RCMP_AV_AUDIO_AV_AUDIO).
  */
 void DEBUG_breakIfEnabled(void) {
-    if (D_00450DA4[0] != 0) {
+    if (DEBUG_breakEnabled[0] != 0) {
         __asm__ volatile("break 6");  // PORT: trap
     }
 }
@@ -9767,12 +9767,12 @@ __asm__(
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_setHblankRate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
+extern int TIMER_hblankRate_0DA0[] __asm__("TIMER_hblankRate");
 
 /**
  * Sets the H-blank rate used for timing from a video mode.
  *
- * Stores the line rate in D_00450DA0: 15750 for mode 1 (NTSC), 15625 for 2 (PAL), 28800 for 3 (the 31 kHz modes); any
+ * Stores the line rate in TIMER_hblankRate: 15750 for mode 1 (NTSC), 15625 for 2 (PAL), 28800 for 3 (the 31 kHz modes); any
  * other value leaves it. THREAD_yieldticks converts ticks to H-blank counts with it. Called by the timer calibration in
  * TIMER_init, by systemInit with 1 and by cPS2GraphicsMan_applyDisplayMode (3 or 1).
  *
@@ -9781,13 +9781,13 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
 void TIMER_setHblankRate(int videoMode) {
     switch (videoMode) {
     case 1:
-        D_00450DA0_0DA0[0] = 15750;
+        TIMER_hblankRate_0DA0[0] = 15750;
         return;
     case 2:
-        D_00450DA0_0DA0[0] = 15625;
+        TIMER_hblankRate_0DA0[0] = 15625;
         return;
     case 3:
-        D_00450DA0_0DA0[0] = 28800;
+        TIMER_hblankRate_0DA0[0] = 28800;
         return;
     }
 }
@@ -9854,7 +9854,7 @@ NetGameLinkRefT *NetGameLinkCreate(int commRef, int owner, int n) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkDestroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0051EE98_67F8[] __asm__("D_0051EE98");
+extern int NetGameLink_destroyService_67F8[] __asm__("NetGameLink_destroyService");
 extern void RpcFree(int *);
 extern void NetLib_callService(int *, int, int, int, int, int, int, int, int, int);
 extern void NetLib_resolveService(int *, int, int);
@@ -9862,14 +9862,14 @@ extern void NetLib_resolveService(int *, int, int);
 /**
  * Destroys a DirtySock game link (EE-side stub of the IOP call).
  *
- * Builds the 'gmlk'/'dest' request in D_0051EE98 with NetLib_resolveService, sends it with NetLib_callService carrying the
+ * Builds the 'gmlk'/'dest' request in NetGameLink_destroyService with NetLib_resolveService, sends it with NetLib_callService carrying the
  * link's IOP reference (*@p linkRef), then releases the EE-side ref with RpcFree.
  *
  * @param linkRef  the game link ref
  */
 void NetGameLinkDestroy(int *linkRef) {
-    NetLib_resolveService(D_0051EE98_67F8, 'gmlk', 'dest');
-    NetLib_callService(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService(NetGameLink_destroyService_67F8, 'gmlk', 'dest');
+    NetLib_callService(NetGameLink_destroyService_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
     RpcFree(linkRef);
 }
 #endif
@@ -9917,14 +9917,14 @@ typedef struct { int iopref; int statstate; char pad8[0x150]; int statbuf; } G_6
 extern int NetLib_callService_6958(int *, int, int, int, int, int, int, int, void *, void *) __asm__("NetLib_callService");
 extern int NetLib_resolveService_6958(int *, int, int) __asm__("NetLib_resolveService");
 extern int NetGameLink_completeStatus_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("NetGameLink_completeStatus");
-extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
+extern int NetGameLink_statusService_6958[] __asm__("NetGameLink_statusService");
 
 /**
  * Returns the game link's latest status, starting a refresh when none is in flight.
  *
  * The status is the 336-byte copy at the block's +8. The busy flag +4 is -1 on a new link: then the first 'gmlk'/'stat'
  * request is sent and waited for (mode 1, completion 1) and copied in with NetGameLink_completeStatus at once. When it is 0 (idle),
- * it is set to 1 and an asynchronous request goes out (into D_0051EEA8) with NetGameLink_completeStatus as completion, which copies
+ * it is set to 1 and an asynchronous request goes out (into NetGameLink_statusService) with NetGameLink_completeStatus as completion, which copies
  * the status and clears the flag; the caller gets the previous copy meanwhile.
  *
  * @return the link's status copy (block +8)
@@ -9937,11 +9937,11 @@ char *NetGameLinkStatus(G_6958 *self) {
     }
     if (self->statstate == 0) {
         self->statstate = 1;
-        NetLib_resolveService_6958(D_0051EEA8_6958, 'gmlk', 'stat');
+        NetLib_resolveService_6958(NetGameLink_statusService_6958, 'gmlk', 'stat');
         if (was == 0) {
-            NetLib_callService_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, NetGameLink_completeStatus_6958, self);
+            NetLib_callService_6958(NetGameLink_statusService_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, NetGameLink_completeStatus_6958, self);
         } else {
-            NetLib_callService_6958(D_0051EEA8_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
+            NetLib_callService_6958(NetGameLink_statusService_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
             NetGameLink_completeStatus_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
         }
     }
@@ -9995,7 +9995,7 @@ extern int NetTick(void);
 extern int NetLib_resolveService_6B10(int *, int, int) __asm__("NetLib_resolveService");
 extern int NetLib_callService_6B10(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
 extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
-extern int D_0051EEB8_6B10[] __asm__("D_0051EEB8");
+extern int NetGameLink_recvService_6B10[] __asm__("NetGameLink_recvService");
 
 int NetGameLinkRecv_impl(char *self, short *out, int n) __asm__("NetGameLinkRecv");
 /**
@@ -10006,7 +10006,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) __asm__("NetGameLinkRecv
  * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (NetGameLinkPeek) and
  * advances by its length; any other @p n copies all the waiting bytes when they fit in @p n (nothing otherwise). Once
  * the buffer is consumed it resets the positions (0, -1), stamps +0x170 with NetTick and sends 'gmlk'/'recv'
- * (into D_0051EEB8) for the next fill.
+ * (into NetGameLink_recvService) for the next fill.
  *
  * @param out  the destination buffer
  * @param n  1 to read one packet, otherwise the buffer size in bytes
@@ -10045,8 +10045,8 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
         *(int *)(self + 0x160) = 0;
         *(int *)(self + 0x164) = -1;
         *(int *)(self + 0x170) = NetTick();
-        NetLib_resolveService_6B10(D_0051EEB8_6B10, 'gmlk', 'recv');
-        NetLib_callService_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
+        NetLib_resolveService_6B10(NetGameLink_recvService_6B10, 'gmlk', 'recv');
+        NetLib_callService_6B10(NetGameLink_recvService_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
     }
     return ret;
 }
@@ -10062,7 +10062,7 @@ typedef struct { char b[4]; } U4_6C80;
 typedef struct { int id; char pad[0x170]; int sendwindow; int sendpos; unsigned int sendreadpos; } S_6C80;
 extern int NetLib_callService_6C80(int *, int, int, int, char *, int, int, int, int, int) __asm__("NetLib_callService");
 extern int NetLib_resolveService_6C80(int *, int, int) __asm__("NetLib_resolveService");
-extern int D_0051EEC8_6C80[] __asm__("D_0051EEC8");
+extern int NetGameLink_sendService_6C80[] __asm__("NetGameLink_sendService");
 
 /**
  * Queues a packet on a game link's (@p self) IOP send buffer and tells the IOP side ("gmlk" "send") to send
@@ -10085,8 +10085,8 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
     w = self->sendpos;
     if (self->sendwindow - (w - *(int *)&readPos) < len) return 0;
     self->sendpos = w + len;
-    NetLib_resolveService_6C80(D_0051EEC8_6C80, 'gmlk', 'send');
-    NetLib_callService_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
+    NetLib_resolveService_6C80(NetGameLink_sendService_6C80, 'gmlk', 'send');
+    NetLib_callService_6C80(NetGameLink_sendService_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
     return 1;
 }
 #endif
@@ -10097,13 +10097,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkControl);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int NetLib_callService_6D78(int *, int, int, int, int *, int, int, int, int, int *) __asm__("NetLib_callService");
 extern void NetLib_resolveService_6D78(int *, int, int) __asm__("NetLib_resolveService");
-extern int D_0051EED8_6D78[] __asm__("D_0051EED8");
+extern int NetGameLink_controlService_6D78[] __asm__("NetGameLink_controlService");
 
 int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
 /**
  * Sends a control request to the game link on the IOP and returns its answer.
  *
- * Sends 'gmlk'/'ctrl' (into D_0051EED8) with the link's IOP reference (*@p link), @p selector and the 4 bytes of @p value, and waits
+ * Sends 'gmlk'/'ctrl' (into NetGameLink_controlService) with the link's IOP reference (*@p link), @p selector and the 4 bytes of @p value, and waits
  * for the result. Nothing in the build calls it.
  *
  * @param link  the link block (its +0 is the IOP reference)
@@ -10114,8 +10114,8 @@ int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
 int NetGameLinkControl_impl(int *link, int selector, int value) {
     int out;
 
-    NetLib_resolveService_6D78(D_0051EED8_6D78, 'gmlk', 'ctrl');
-    NetLib_callService_6D78(D_0051EED8_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
+    NetLib_resolveService_6D78(NetGameLink_controlService_6D78, 'gmlk', 'ctrl');
+    NetLib_callService_6D78(NetGameLink_controlService_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
     return out;
 }
 #endif
@@ -10300,12 +10300,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_advertise);
 extern void NetLib_callService_7120(int *, int, int, int, char *, int, int, int, int, int) __asm__("NetLib_callService");
 extern int NetLib_resolveService_7120(int *, int, int) __asm__("NetLib_resolveService");
 extern int sprintf_7120(char *, int *, int, int) __asm__("sprintf");
-extern int D_004A4860_7120[] __asm__("D_004A4860");
+extern int str_pct_s_pct_s_d_7120[] __asm__("str_pct_s_pct_s_d");
 
 /**
  * Advertises a name of a given kind on the network through the IOP game util.
  *
- * Joins @p kind and @p name with a tab ("%s\t%s", D_004A4860) and sends the text with 'gmut'/'advt'. LobbyMan's
+ * Joins @p kind and @p name with a tab ("%s\t%s", str_pct_s_pct_s_d) and sends the text with 'gmut'/'advt'. LobbyMan's
  * LobbyMan_createConfig calls it with its config util, "SSX-PS2-2004" and the persona name.
  *
  * @param util  the IOP game-util reference
@@ -10316,7 +10316,7 @@ void NetGameUtil_advertise(int util, int kind, int name) {
     char advertText[256];
     int request[4];
 
-    sprintf_7120(advertText, D_004A4860_7120, kind, name);
+    sprintf_7120(advertText, str_pct_s_pct_s_d_7120, kind, name);
     NetLib_resolveService_7120(request, 'gmut', 'advt');
     NetLib_callService_7120(request, 1, util, 0, advertText, -1, 0, 0, 1, 0);
 }
@@ -10348,7 +10348,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_locate);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int NetLib_callService_7218(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
 extern void NetLib_resolveService_7218(int *, int, int) __asm__("NetLib_resolveService");
-extern char D_004A4868_7218[] __asm__("D_004A4868");
+extern char str_empty_r_7218[] __asm__("str_empty_r");
 
 int NetGameUtil_locate_impl(int a, int b, char *c) __asm__("NetGameUtil_locate");
 /**
@@ -10367,7 +10367,7 @@ int NetGameUtil_locate_impl(int util, int kind, char *name) {
     int foundAddress;
 
     if (name == 0) {
-        name = D_004A4868_7218;
+        name = str_empty_r_7218;
     }
     NetLib_resolveService_7218(request, 'gmut', 'loca');
     NetLib_callService_7218(request, 1, util, 0, (int)name, -1, 0, 0, 1, &foundAddress);
@@ -10381,7 +10381,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilQuery);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int NetLib_callService_72A0(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
 extern void NetLib_resolveService_72A0(int *, int, int) __asm__("NetLib_resolveService");
-extern char D_004A4868_72A0[] __asm__("D_004A4868");
+extern char str_empty_r_72A0[] __asm__("str_empty_r");
 
 int NetGameUtilQuery_impl(int a, char *b, int c, int d) __asm__("NetGameUtilQuery");
 /**
@@ -10401,7 +10401,7 @@ int NetGameUtilQuery_impl(int util, char *kind, int buffer, int bufferSize) {
     int count;
 
     if (kind == 0) {
-        kind = D_004A4868_72A0;
+        kind = str_empty_r_72A0;
     }
     NetLib_resolveService_72A0(request, 'gmut', 'quer');
     NetLib_callService_72A0(request, 5, util, 0, (int)kind, -1, buffer, bufferSize, 1, &count);
@@ -10537,7 +10537,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_pollResponse);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { char b[4]; } U4_7500;
-extern int D_0051EEE8_7500[] __asm__("D_0051EEE8");
+extern int PingRpc_responseService_7500[] __asm__("PingRpc_responseService");
 extern void InvalidDCache_7500(char *, char *) __asm__("InvalidDCache");
 extern void func_0041605C_7500(char *, char *, int) __asm__("func_0041605C");
 extern int NetLib_resolveService_7500(int *, int, int) __asm__("NetLib_resolveService");
@@ -10551,7 +10551,7 @@ int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *a2, int *a3) 
  * When the block holds a reply (+0 > 0 bytes in the 2 KB buffer +0x10): the result is its first word; the 16-byte
  * header is copied to @p response and the payload (up to *@p bufLen bytes, *@p bufLen updated) to @p buf; then the count and the time
  * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
- * request (into D_0051EEE8) with the 2 KB buffer and PingRpc_completeResponse as completion, at most once per 6 units of
+ * request (into PingRpc_responseService) with the 2 KB buffer and PingRpc_completeResponse as completion, at most once per 6 units of
  * NetTick (+8 holds the last send) and, for a fresh buffer, after passing it to InvalidDCache and marking the
  * count -1.
  *
@@ -10590,8 +10590,8 @@ int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *bufLen, int *
             InvalidDCache_7500(self->respBuf, self->respBuf + 0x7FF);
             self->recvLen = -1;
         }
-        NetLib_resolveService_7500(D_0051EEE8_7500, 'ping', 'resp');
-        NetLib_callService_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, PingRpc_completeResponse_7500, self);
+        NetLib_resolveService_7500(PingRpc_responseService_7500, 'ping', 'resp');
+        NetLib_callService_7500(PingRpc_responseService_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, PingRpc_completeResponse_7500, self);
     }
     return res;
 }
@@ -10777,7 +10777,7 @@ extern void SortList_setValue(int, int, void *);
 extern void *SortList_getValue(int, int);
 extern int HashTable_findInt(int);
 extern void sprintf(void *, int *, int);
-extern int D_004A4870_7B00[] __asm__("D_004A4870");
+extern int str_pct_d_e_7B00[] __asm__("str_pct_d_e");
 
 /**
  * Updates a room's user count in the lobby's room list.
@@ -10802,7 +10802,7 @@ void LobbyApi_setRoomPopulation(void *lobby, int roomId, int population) {
             temp_2_2 = SortList_getValue((*(int *)((char*)(lobby) + (0x314))), temp_2);
             if ((temp_2_2 != 0) && (population != (*(int *)((char*)(temp_2_2) + (0x10))))) {
                 (*(int *)((char*)(temp_2_2) + (0x10))) = population;
-                sprintf(temp_2_2 + 0x14, D_004A4870_7B00, population);
+                sprintf(temp_2_2 + 0x14, str_pct_d_e_7B00, population);
                 SortList_setValue((*(int *)((char*)(lobby) + (0x314))), temp_2, temp_2_2);
             }
         }
@@ -11194,7 +11194,7 @@ extern void NetSession_connect_8260(int, int, int) __asm__("NetSession_connect")
 extern void NetSession_disconnect_8260(int) __asm__("NetSession_disconnect");
 extern int NetSession_send_8260(int, int, int, void *, int) __asm__("NetSession_send");
 extern int NetSession_getTick_8260(int) __asm__("NetSession_getTick");
-extern int D_00495F30_8260[] __asm__("D_00495F30");
+extern int str_connecting_to_pct_08x_pct_d_8260[] __asm__("str_connecting_to_pct_08x_pct_d");
 
 /* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
 struct S_8260 {
@@ -11235,7 +11235,7 @@ int LobbyApi_connect(struct S_8260 *lobby, int serverAddr, int serverPort, int c
     }
     NetSession_disconnect_8260(lobby->mpSession);
     NetSession_connect_8260(lobby->mpSession, lobby->mAddress, lobby->mPort);
-    LobbyApi_debugPrintf_8260(lobby, D_00495F30_8260, lobby->mAddress, lobby->mPort);
+    LobbyApi_debugPrintf_8260(lobby, str_connecting_to_pct_08x_pct_d_8260, lobby->mAddress, lobby->mPort);
     cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->mTags);
     NetSession_send_8260(lobby->mpSession, 0x40646972, 0, buf, -1);
     lobby->mState = 'rdir';
@@ -12287,9 +12287,9 @@ extern int NetSession_peek_95C8(int, int *, int *, char **) __asm__("NetSession_
 extern void NetSession_recv_95C8(int, int, int, int, int) __asm__("NetSession_recv");
 extern unsigned int NetSession_getTick_95C8(int) __asm__("NetSession_getTick");
 
-extern char D_00495F30_95C8[] __asm__("D_00495F30");
+extern char str_connecting_to_pct_08x_pct_d_95C8[] __asm__("str_connecting_to_pct_08x_pct_d");
 extern char D_00495FB0_95C8[] __asm__("D_00495FB0");
-extern char D_004A4870_95C8[] __asm__("D_004A4870");
+extern char str_pct_d_e_95C8[] __asm__("str_pct_d_e");
 extern char str_NAME_b_95C8[] __asm__("str_NAME_b");
 extern char D_004A4888_95C8[] __asm__("str_empty_k");
 extern char str_ADDR_b_95C8[] __asm__("str_ADDR_b");
@@ -12425,7 +12425,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
                     if (self->mAddress != 0) {
                         self->mState = 'conn';
                         LobbyApi_pingServer_95C8(self);
-                        LobbyApi_debugPrintf_95C8(self, D_00495F30_95C8, self->mAddress, self->mPort);
+                        LobbyApi_debugPrintf_95C8(self, str_connecting_to_pct_08x_pct_d_95C8, self->mAddress, self->mPort);
                         NetSession_connect_95C8(self->mpSession, self->mAddress, self->mPort);
                         buf[0] = 0;
                         TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->mLocalAddr);
@@ -12566,7 +12566,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
                         roomRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
                         roomRecord->userCount = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0);
                         roomRecord->userLimit = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F8_95C8), 0);
-                        sprintf_95C8(roomRecord->userCountText, D_004A4870_95C8, roomRecord->userCount);
+                        sprintf_95C8(roomRecord->userCountText, str_pct_d_e_95C8, roomRecord->userCount);
                         strcpy(roomRecord->flagText, (roomRecord->flags & 0x10000) ? D_004A4A00_95C8 : D_004A4A08_95C8);
                         roomRecord->ping[0] = 0;
                         len = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A10_95C8), -1);
@@ -12792,7 +12792,7 @@ unsigned char *LobbyApi_parseDecimal(unsigned char *str, int *out) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_secondsToCalendar);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern int D_004969E0[];
+extern int LobbyApi_monthDaysTable[];
 
 struct sTm_3EAEB8 {
     int sec;
@@ -12810,14 +12810,14 @@ struct sTm_3EAEB8 {
  * Converts seconds since 1970 into calendar fields (UTC) and returns @p tm.
  *
  * Fills seconds, minutes, hours, day of the month (1-based), month (0-based), year since 1900 and day of the year; the
- * weekday is not set and isdst is 0. Leap years follow the Gregorian rules; the month lengths come from D_004969E0.
+ * weekday is not set and isdst is 0. Leap years follow the Gregorian rules; the month lengths come from LobbyApi_monthDaysTable.
  * Used by the tag time routines (TagFieldSetEpoch and others) and by LobbyApi_calendarToSeconds.
  *
  * @param tm  the 9-word time structure to fill
  * @param seconds  seconds since 1970-01-01 (unsigned)
  * @return @p tm
  */
-// Seconds since 1970 -> broken-down time (no wday). D_004969E0 holds two rows of month
+// Seconds since 1970 -> broken-down time (no wday). LobbyApi_monthDaysTable holds two rows of month
 // lengths: row 0 is picked for a 366-day year, row 1 for a 365-day year.
 struct sTm_3EAEB8* LobbyApi_secondsToCalendar(struct sTm_3EAEB8* tm, long seconds)
 {
@@ -12851,7 +12851,7 @@ struct sTm_3EAEB8* LobbyApi_secondsToCalendar(struct sTm_3EAEB8* tm, long second
     tm->year = y - 1900;
     tm->yday = days;
     tm->mon = 0;
-    ip = D_004969E0 + (ylen & 1) * 12;
+    ip = LobbyApi_monthDaysTable + (ylen & 1) * 12;
     while (days >= *ip) {
         days -= *ip;
         ip++;

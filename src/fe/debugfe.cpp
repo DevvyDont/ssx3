@@ -401,7 +401,7 @@ extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 //100%
 INCLUDE_ASM("fe/debugfe", dispatchLobbyEvent);
 #ifdef SKIP_ASM
-extern void* D_004A4E90;
+extern void* cDebugLobbyScreen_instance;
 extern "C" void cDebugLobbyScreen_handleLobbyEvent(cDebugLobbyScreen* self, online_Event* ev);
 extern "C" void lobbyman_postEventToTopScreen(void* ev);
 
@@ -409,15 +409,15 @@ extern "C" void lobbyman_postEventToTopScreen(void* ev);
  * Passes one lobby event to the debug lobby screen, when one exists, and then to the real front end.
  *
  * The lobby manager's update (LobbyMan_update) calls it for every event it pops from mEventList, with itself as @p self
- * (unused here). When the debug lobby screen pointer D_004A4E90 is set (cDebugLobbyScreen_cDebugLobbyScreen sets it, cDebugLobbyScreen__cDebugLobbyScreen clears it)
+ * (unused here). When the debug lobby screen pointer cDebugLobbyScreen_instance is set (cDebugLobbyScreen_cDebugLobbyScreen sets it, cDebugLobbyScreen__cDebugLobbyScreen clears it)
  * the event goes to cDebugLobbyScreen_handleLobbyEvent; lobbyman_postEventToTopScreen then hands it to the real front end's top UI state.
  *
  * @param ev  the event (its type at +0x0)
  */
 extern "C" void dispatchLobbyEvent(LobbyMan* self, void* ev)
 {
-    if (D_004A4E90 != 0)
-        ((cDebugLobbyScreen*)D_004A4E90)->handleLobbyEvent((online_Event*)ev);
+    if (cDebugLobbyScreen_instance != 0)
+        ((cDebugLobbyScreen*)cDebugLobbyScreen_instance)->handleLobbyEvent((online_Event*)ev);
     lobbyman_postEventToTopScreen(ev);
 }
 #endif
@@ -427,7 +427,7 @@ INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_cDebugLobbyScreen);
 #ifdef SKIP_ASM
 extern void* cDebugLobbyScreen_vtbl[];
 extern int cBXString_EmptyString;
-extern void* D_004A4E90;
+extern void* cDebugLobbyScreen_instance;
 extern "C" void* __8cMenuSys(void* self);
 extern "C" void* AccountMenu_AccountMenu(void* self, void* a, void* b);
 extern "C" void* PersonaMenu_PersonaMenu(void* self, void* a, void* b, void* c);
@@ -451,7 +451,7 @@ extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
  * cBXStrings at +0x1C04 (typed user name), +0x1C08 (typed password) and +0x1C0C (challenger's name) start empty. The
  * menu system's font, input and box texture (its +0x58, +0x5C, +0x60, here +0x60, +0x64, +0x68) are taken from the
  * debug front end's font (+0x18), SSXApp->Inputs[0] and its box texture (+0x20). Finally the screen registers itself in
- * D_004A4E90, which dispatchLobbyEvent uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
+ * cDebugLobbyScreen_instance, which dispatchLobbyEvent uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
  * its second screen.
  *
  * @return @p self
@@ -501,7 +501,7 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     self->mMenuSys.Font = (cFont*)((int)app->DebugFE->Font);
     self->mMenuSys.Input = (cInput*)((int)app->Inputs[0]);
     self->mMenuSys.BoxTexture = app->DebugFE->BoxTID;
-    D_004A4E90 = ((char*)self);
+    cDebugLobbyScreen_instance = ((char*)self);
     return ((char*)self);
 }
 #endif
@@ -518,7 +518,7 @@ extern "C" void _$_8cMenuSys(void* self, int flags);
 void operator_delete(int* ptr);
 extern void* cDebugLobbyScreen_vtbl[];
 extern void* cDebugScreen_vtbl[];
-extern void* D_004A4E90;
+extern void* cDebugLobbyScreen_instance;
 
 struct sVE_17D3B0 {
     short delta;
@@ -589,7 +589,7 @@ static inline void dtorF_17D3B0(char* sub)
  * Destroys the debug lobby screen: unregisters it, destroys its strings, menus and menu system, and frees it when
  * asked.
  *
- * Stores the vtable cDebugLobbyScreen_vtbl again, clears the screen pointer D_004A4E90, destroys the cBXStrings at +0x1C0C, +0x1C08
+ * Stores the vtable cDebugLobbyScreen_vtbl again, clears the screen pointer cDebugLobbyScreen_instance, destroys the cBXStrings at +0x1C0C, +0x1C08
  * and +0x1C04, then the menus in reverse order: Abort (+0x1AAC), You've been Challenged (+0x18C0), the chat menu
  * (+0x1534, its 14 line items through their virtual destructors), Room Occupants (+0x1044, 24 items), Select Room
  * (+0xD2C, 12 items), Select Persona (+0x74C, PersonaMenu__PersonaMenu), Continue (+0x604) and Login Method (+0x70,
@@ -601,7 +601,7 @@ static inline void dtorF_17D3B0(char* sub)
 extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, int flags)
 {
     *(void***)self = cDebugLobbyScreen_vtbl;
-    D_004A4E90 = 0;
+    cDebugLobbyScreen_instance = 0;
     cBXString__cBXString(&self->mChallenger, 2);
     cBXString__cBXString(&self->mPassword, 2);
     cBXString__cBXString(&self->mUserName, 2);
@@ -3184,7 +3184,7 @@ extern "C" void cScreenKeyboard_pressKey(sDbgKbd* self)
 INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getKeyObjName);
 #ifdef SKIP_ASM
 struct sStr10 { char c[10]; };
-extern sStr10 D_0045D550;
+extern sStr10 str_keyboard;
 extern char str_arrLeft[];
 extern char str_arrRight[];
 extern char str_spc[];
@@ -3194,7 +3194,7 @@ extern "C" char* strcat(char*, const char*);
 /**
  * Builds the UI object name of a keyboard key: "keyboard_" plus the key's label.
  *
- * Starts @p dst with "keyboard_" (D_0045D550) and appends the digit for 0-9, the upper-case letter for 10-35, or
+ * Starts @p dst with "keyboard_" (str_keyboard) and appends the digit for 0-9, the upper-case letter for 10-35, or
  * "arrLeft", "arrRight", "spc" or "end" for 36..39; other values leave just the prefix.
  * cScreenKeyboard_initScreenKeyboard uses it to find the key objects.
  *
@@ -3204,7 +3204,7 @@ extern "C" char* strcat(char*, const char*);
 void cScreenKeyboard::getKeyObjName(int keyIndex, char* dst)
 {
     char buf[2];
-    *(sStr10*)dst = D_0045D550;
+    *(sStr10*)dst = str_keyboard;
     if (keyIndex < 10) {
         buf[0] = keyIndex + '0';
         buf[1] = 0;

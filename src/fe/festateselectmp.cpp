@@ -33,8 +33,8 @@ void cFEStateSelectMultiplayerMode::onCreateScreen()
 INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A14F8[];
-extern char D_004A1500[];
+extern char str_1_c[];
+extern char str_2[];
 
 /**
  * Tags the multiplayer-mode choices as they are created: the widget named "1" gets misc data 0, "2" gets 1.
@@ -46,11 +46,11 @@ extern char D_004A1500[];
 void cFEStateSelectMultiplayerMode::onWidgetCreate(cUIThing* item)
 {
     int id = item->mHashName;
-    if (id == GetHashValue32(D_004A14F8)) {
+    if (id == GetHashValue32(str_1_c)) {
         item->mMiscData = 0;
     } else {
         int id2 = item->mHashName;
-        if (id2 == GetHashValue32(D_004A1500)) {
+        if (id2 == GetHashValue32(str_2)) {
             item->mMiscData = 1;
         }
     }

@@ -30,9 +30,9 @@ void cFEStateBonusMaterial::onCreateScreen()
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A14F8[];
-extern char D_004A1500[];
-extern char D_004A1508[];
+extern char str_1_c[];
+extern char str_2[];
+extern char str_3[];
 
 /**
  * Numbers the bonus material entries "1", "2" and "3" as 0-2.
@@ -42,15 +42,15 @@ extern char D_004A1508[];
 void cFEStateBonusMaterial::onWidgetCreate(cUIThing* menu)
 {
     int menuHash = menu->mHashName;
-    if (menuHash == GetHashValue32(D_004A14F8)) {
+    if (menuHash == GetHashValue32(str_1_c)) {
         menu->mMiscData = 0;
     }
     menuHash = menu->mHashName;
-    if (menuHash == GetHashValue32(D_004A1500)) {
+    if (menuHash == GetHashValue32(str_2)) {
         menu->mMiscData = 1;
     }
     menuHash = menu->mHashName;
-    if (menuHash == GetHashValue32(D_004A1508)) {
+    if (menuHash == GetHashValue32(str_3)) {
         menu->mMiscData = 2;
     }
 }
@@ -104,13 +104,13 @@ extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* 
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEStateVideoPlayer[];
-extern const char* D_00441128[];
+extern const char* cFEStateBonusMaterial_videoFiles[];
 
 
 /**
  * Plays the selected bonus video in a cFEStateVideoPlayer popup, or on kONPREV pushes the factory's state.
  *
- * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
+ * @param item  the entry (its index at +0x18 picks the video from cFEStateBonusMaterial_videoFiles), or 0
  * @param event  widget event number (On Tour Event)
  */
 void cFEStateBonusMaterial::onWidgetEvent(cUIThing* item, unsigned int event)
@@ -124,7 +124,7 @@ void cFEStateBonusMaterial::onWidgetEvent(cUIThing* item, unsigned int event)
         void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0),
                 mpEngine, this,
                                 mUserNum);
-        cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[item->mMiscData], 0);
+        cFEStateVideoPlayer_setVideoSourceFiles(popup, cFEStateBonusMaterial_videoFiles[item->mMiscData], 0);
         cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
         break;
     }

@@ -24,7 +24,7 @@ struct tDNASKey {
     int word[2];
 };
 
-// The 4-byte XOR key "CONFIG.DAT" is stored with (name ours): [U] DNASMan_updateLoadConfig copies D_004A2EE8 as one word and
+// The 4-byte XOR key "CONFIG.DAT" is stored with (name ours): [U] DNASMan_updateLoadConfig copies DNASMan_configKey as one word and
 // XORs byte i of the loaded file with b[i % 4].
 struct tDNASFileKey {
     unsigned char b[4];

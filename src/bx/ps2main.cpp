@@ -5,7 +5,7 @@
 //100%
 INCLUDE_ASM("bx/ps2main", systemInit);
 #ifdef SKIP_ASM
-extern void* D_004A3E94;
+extern void* bxIop_instance;
 extern char str_SIO2MAN_IRX[];
 extern char str_PADMAN_IRX[];
 extern char str_LIBSD_IRX[];
@@ -58,13 +58,13 @@ struct sIoCfg_SysInit {
 // Boot-time setup: IOP modules, timers, random seed, heap, file system and the per-frame sync task.
 extern "C" void systemInit(void)
 {
-    bxIop_initIop(D_004A3E94);
-    bxIop_loadModule(D_004A3E94, str_SIO2MAN_IRX, 1, 0, 0);
-    bxIop_loadModule(D_004A3E94, str_PADMAN_IRX, 1, 0, 0);
-    bxIop_loadModule(D_004A3E94, str_LIBSD_IRX, 1, 0, 0);
-    bxIop_loadModule(D_004A3E94, str_SNDDRV_IRX, 1, 0, 0);
-    bxIop_loadModule(D_004A3E94, str_MCMAN_IRX, 1, 0, 0);
-    bxIop_loadModule(D_004A3E94, str_MCSERV_IRX, 1, 0, 0);
+    bxIop_initIop(bxIop_instance);
+    bxIop_loadModule(bxIop_instance, str_SIO2MAN_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_PADMAN_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_LIBSD_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_SNDDRV_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_MCMAN_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_MCSERV_IRX, 1, 0, 0);
     sceMcInit();
     scePadInit(0);
     int clock[2];

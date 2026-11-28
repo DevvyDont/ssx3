@@ -192,12 +192,12 @@ enum tOnlineErrorCode {
 // (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule in dirtysock/tagsunk) and its message handlers (cSetupMan_handleClientBragRow ... cSetupMan_handleBragUnlockMessage in
 // bx/bxstringctor) allocate one and push it onto LobbyMan's mEventList for the front end.
 // Types 253 / 254, size 0xC ([R] cSetupMan_handleClientBragLock / cSetupMan_handleHostBragLock / cSetupMan_handleBragLockAnswer allocate 0xC with type 253, vtable
-// D_004813E0; cSetupMan_handleClientBragUnlock / cSetupMan_handleHostBragUnlock / cSetupMan_handleBragUnlockMessage type 254, vtable D_004813C0). Their clones (vtable slot 2)
+// online_SetupLockEvent_vtbl; cSetupMan_handleClientBragUnlock / cSetupMan_handleHostBragUnlock / cSetupMan_handleBragUnlockMessage type 254, vtable online_SetupUnlockEvent_vtbl). Their clones (vtable slot 2)
 // are func_00269DC0 (253) and func_00269E40 (254).
 struct online_SetupEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 253 / 254
-    void** mVtbl;                   // 0x4 [R] D_004813E0 / D_004813C0
+    void** mVtbl;                   // 0x4 [R] online_SetupLockEvent_vtbl / online_SetupUnlockEvent_vtbl
     // --- the setup event
     int mFlag;                      // 0x8 [R] 1 from cSetupMan_handleClientBragLock, cSetupMan_handleClientBragUnlock, cSetupMan_handleHostBragLock and cSetupMan_handleHostBragUnlock;
                                     //     0 from cSetupMan_handleBragLockAnswer and cSetupMan_handleBragUnlockMessage
@@ -208,12 +208,12 @@ CHECK_OFFSET(online_SetupEvent, mVtbl, 0x4);
 CHECK_OFFSET(online_SetupEvent, mFlag, 0x8);
 CHECK_SIZE(online_SetupEvent, 0xC);
 
-// The bragging-rights row event: type 251, size 0x10, vtable D_00481150 ([R] cSetupMan_sendBraggingSelection, cSetupMan_handleClientBragRow,
+// The bragging-rights row event: type 251, size 0x10, vtable online_SetupRowEvent_vtbl ([R] cSetupMan_sendBraggingSelection, cSetupMan_handleClientBragRow,
 // cSetupMan_handleHostBragRow and cSetupMan_handleBragRowMessage allocate 0x10).
 struct online_SetupRowEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 251
-    void** mVtbl;                   // 0x4 [R] D_00481150
+    void** mVtbl;                   // 0x4 [R] online_SetupRowEvent_vtbl
     // --- the setup row event
     int mFlag;                      // 0x8 [R] 1 from cSetupMan_handleClientBragRow and cSetupMan_handleHostBragRow; 0 from cSetupMan_sendBraggingSelection and
                                     //     cSetupMan_handleBragRowMessage
@@ -224,12 +224,12 @@ CHECK_OFFSET(online_SetupRowEvent, mFlag, 0x8);
 CHECK_OFFSET(online_SetupRowEvent, mRow, 0xC);
 CHECK_SIZE(online_SetupRowEvent, 0x10);
 
-// The race-rule event: type 252, size 0x14, vtable D_00481130 ([R] cSetupMan_sendBraggingRule, cSetupMan_handleClientBragRule, cSetupMan_handleHostBragRule and
+// The race-rule event: type 252, size 0x14, vtable online_SetupRuleEvent_vtbl ([R] cSetupMan_sendBraggingRule, cSetupMan_handleClientBragRule, cSetupMan_handleHostBragRule and
 // cSetupMan_handleBragRuleMessage allocate 0x14).
 struct online_SetupRuleEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 252
-    void** mVtbl;                   // 0x4 [R] D_00481130
+    void** mVtbl;                   // 0x4 [R] online_SetupRuleEvent_vtbl
     // --- the setup rule event
     int mFlag;                      // 0x8 [R] 1 from cSetupMan_handleClientBragRule and cSetupMan_handleHostBragRule; 0 from cSetupMan_sendBraggingRule and
                                     //     cSetupMan_handleBragRuleMessage
@@ -407,12 +407,12 @@ CHECK_OFFSET(online_PingEvent, mPing, 0xC);
 CHECK_SIZE(online_PingEvent, 0x10);
 
 // online::ChatEvent: type 222, size 0x10 ([R] LobbyMan_postChatEvent and online_ChatEvent_clone allocate 0x10 bytes tagged
-// "ChatEvent"). Vtable 0x00481230 (D_00481230: 1 online_ChatEvent__ChatEvent, 2 online_ChatEvent_clone). Retail only
+// "ChatEvent"). Vtable 0x00481230 (online_ChatEvent_vtbl: 1 online_ChatEvent__ChatEvent, 2 online_ChatEvent_clone). Retail only
 // (not in the preview), so the class and member names are ours.
 struct online_ChatEvent {
     // --- online::Event
     int mType;                      // 0x0 [R] 222 (LobbyMan_postChatEvent, clone)
-    void** mVtbl;                   // 0x4 [R] D_00481230; the destructor stores online_Event_vtbl back
+    void** mVtbl;                   // 0x4 [R] online_ChatEvent_vtbl; the destructor stores online_Event_vtbl back
     // --- online::ChatEvent
     char* mSender;                  // 0x8 [R] cBXString: LobbyMan_postChatEvent copies its sender argument (the chat line's
                                     //     sender, from LobbyMan_onchatmsg); clone copies it; destroyed second

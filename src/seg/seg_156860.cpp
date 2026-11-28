@@ -605,15 +605,15 @@ INCLUDE_ASM("seg/seg_156860", netConfig_launchGui);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void shutdownAndLoadExec_6088(void *, int, void *) __asm__("shutdownAndLoadExec");
 extern char str_cdrom0_NETGUI_NTGUI_ELF_1[];
-extern int D_004A2EC0;
+extern int netConfig_launchArgs;
 
 /**
- * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (shutdownAndLoadExec with 1 and D_004A2EC0).
+ * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (shutdownAndLoadExec with 1 and netConfig_launchArgs).
  *
  * cFEStateNetConfig_onCreateConfigPopupEvent and the debug menu screen call it.
  */
 extern "C" void netConfig_launchGui(void) {
-    shutdownAndLoadExec_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
+    shutdownAndLoadExec_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &netConfig_launchArgs);
 }
 #endif
 
@@ -668,15 +668,15 @@ INCLUDE_ASM("seg/seg_156860", dnas_addOverlayArchive);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void FILESYS_addbigsync_6188(void *, int, int, void *) __asm__("FILESYS_addbigsync");
 extern char str_data_config_slusovf_big[];
-extern int D_004A2ED4;
+extern int dnas_overlayArchiveResult;
 
 /**
- * Adds the archive "data/config/slusovf.big" to the file system (FILESYS_addbigsync with 0, 100 and D_004A2ED4).
+ * Adds the archive "data/config/slusovf.big" to the file system (FILESYS_addbigsync with 0, 100 and dnas_overlayArchiveResult).
  *
  * cSSXApp_initload calls it.
  */
 extern "C" void dnas_addOverlayArchive(void) {
-    FILESYS_addbigsync_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
+    FILESYS_addbigsync_6188(str_data_config_slusovf_big, 0, 100, &dnas_overlayArchiveResult);
 }
 #endif
 
@@ -914,13 +914,13 @@ INCLUDE_ASM("seg/seg_156860", DNASMan_updateLoadConfig);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int ASYNCFILE_getstatus_6510(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void ASYNCFILE_release_6510(int, int, void *) __asm__("ASYNCFILE_release");
-extern tDNASFileKey D_004A2EE8[];
+extern tDNASFileKey DNASMan_configKey[];
 
 /**
  * DNAS state 2: once "CONFIG.DAT" has loaded, decodes it.
  *
  * When the load (+0x18) is done it releases it with the size in +0x10; for a nonzero size it sets the state to 3 and
- * XORs every byte of the data (+0xC) with the 4-byte key D_004A2EE8, repeating.
+ * XORs every byte of the data (+0xC) with the 4-byte key DNASMan_configKey, repeating.
  */
 void DNASMan::updateLoadConfig()
 {
@@ -932,7 +932,7 @@ void DNASMan::updateLoadConfig()
             int n = AuthSize;
             if (n > 0) {
                 State = 3;
-                tDNASFileKey key = D_004A2EE8[0];
+                tDNASFileKey key = DNASMan_configKey[0];
                 int i;
                 unsigned char *bytePtr;
                 for (i = 0, bytePtr = fileData; i < AuthSize; i++, bytePtr++) {
@@ -1376,7 +1376,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 #ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, int *, int, int);
 extern "C" cGameComm *__9cGameCommii(void *, int, int);
-extern int D_004804B8[];
+extern int str_cGameComm[];
 
 /**
  * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by cGameComm::cGameComm.
@@ -1387,7 +1387,7 @@ extern int D_004804B8[];
  * @param isServer  nonzero to run the server side of the handshake (mServer)
  */
 extern "C" void cGameComm_construct(int channel, int isServer) {
-    cGameComm_mGameComm = __9cGameCommii(cMemMan_alloc(1520, D_004804B8, 0x20000000, 0), channel, isServer);
+    cGameComm_mGameComm = __9cGameCommii(cMemMan_alloc(1520, str_cGameComm, 0x20000000, 0), channel, isServer);
 }
 #endif
 
@@ -1580,7 +1580,7 @@ extern "C" void clearDiscTrayOpened(void);
  * Switches the handshake and race state machine (mState) to a new tGameComm state.
  *
  * Entering GameActive (14) computes the latency (cGameComm_calcLatency), arms a 3600-frame link timeout and clears the
- * flag D_004A3ED0 (clearDiscTrayOpened); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
+ * flag cd_discTrayOpenedFlag (clearDiscTrayOpened); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
  * 13 (each step's start, not its Wait) arm an 1800-frame timeout. cGameComm_armLinkTimeout skips arming while either side is
  * paused before the start gate.
  *
@@ -2115,7 +2115,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_checkActive);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_setCommError(cGameComm* self);
 extern "C" void cGameComm_displayError(cGameComm* self);
-extern int D_004A3ED0;
+extern int cd_discTrayOpenedFlag;
 
 /**
  * Watches the game link for a stalled or silent peer.
@@ -2124,7 +2124,7 @@ extern int D_004A3ED0;
  * paused or unpausing, it counts mStallThreshold and +0x60; in AI states 4 and 5 mStallTimer grows once mStallThreshold
  * reaches 10 (mStallCount counts each time it reaches 10). At 60 for +0x60 mWaitingMessage is set. During a race a
  * desync, or 1800 frames of +0x5C (counted while the peer is not paused), raise the comm error and show it. Last, when
- * D_004A3ED0 is set, mCheating[0] becomes 1 and the error is shown.
+ * cd_discTrayOpenedFlag is set, mCheating[0] becomes 1 and the error is shown.
  *
  */
 void cGameComm::checkActive()
@@ -2159,7 +2159,7 @@ void cGameComm::checkActive()
             }
         }
     }
-    if (D_004A3ED0 != 0) {
+    if (cd_discTrayOpenedFlag != 0) {
         mCheating[0] = 1;
         displayError();
     }

@@ -11,7 +11,7 @@
 // Bases, in retail order (the ctor: cScriptEntity_cScriptEntity(self), cScriptObject_cScriptObject(self + 0xC, 3)):
 //   cScriptEntity (scripter/scriptentity.h, 0xC) at 0x00: vptr 0x00 = cScriptObjRider_vtbl (D_00481FD8: 1-4 cScriptEntity's
 //                 OnInSeq* hooks, 5 cScriptObjRider_IsMatchingEntity, 6 GetAttachedRider = __pure_virtual, cRider overrides it);
-//   cScriptObject (0x10) at 0x0C: mObjType, mObjID, mInUse, vptr 0x18 = D_00482018 (_vt$15cScriptObjRider$13cScriptObject:
+//   cScriptObject (0x10) at 0x0C: mObjType, mObjID, mInUse, vptr 0x18 = cScriptObjRider_cScriptObject_vtbl (_vt$15cScriptObjRider$13cScriptObject:
 //                 1 dtor, 2/3 cScriptObject_Pause/ResumeObjScript, 4 OnStartObjectUse, 5 OnEndObjectUse,
 //                 6 GetNumScriptEntities, 7 GetScriptEntity; slots 1 and 4-7 carry delta -0xC, so they get the whole object).
 // (cScriptObjCameraManager, scripter/scriptobjcammgr.h, has the two bases the other way round.)
@@ -49,7 +49,7 @@ struct cScriptObjRider {
     int mObjID;                           // 0x10 [O]; [R] cScriptObject ctor -1
     int mInUse;                           // 0x14 [O]; [R] cScriptObject ctor 0; [U] cScriptObject_OnStart/OnEndObjectUse
                                           //      (called on self + 0xC)
-    void** mScriptObjectVtbl;             // 0x18 [R] D_00482018 (ctor and dtor); the dtor runs cScriptObject__cScriptObject on +0xC
+    void** mScriptObjectVtbl;             // 0x18 [R] cScriptObjRider_cScriptObject_vtbl (ctor and dtor); the dtor runs cScriptObject__cScriptObject on +0xC
     // --- cScriptObjRider
     tScriptAnimBankInfo* mpAnimBankInfo;  // 0x1C [O]; [R] ctor 0; [U] OnStartObjectUse binds the script's anim bank
                                           //      (cSSXScriptEngine_GetAnimationBankInfo), OnEndObjectUse clears it;

@@ -18,7 +18,7 @@
 //   cScriptEntity (scripter/scriptentity.h, 0xC) at 0x00: vptr 0x00 = cScriptObjGS_vtbl (0x004822E0, 5 slots:
 //                 1/2 cScriptEntity_OnInSeqLock / OnInSeqRelease, 3 cScriptObjGS_OnInSeqKeyEvent,
 //                 4 cScriptEntity_OnInSeqUpdate, 5 cScriptObjGS_IsMatchingEntity);
-//   cScriptObject (scripter/scriptobj.h, 0x10) at 0x0C: vptr 0x18 = D_00482318 (_vt$12cScriptObjGS$13cScriptObject:
+//   cScriptObject (scripter/scriptobj.h, 0x10) at 0x0C: vptr 0x18 = cScriptObjGS_cScriptObject_vtbl (_vt$12cScriptObjGS$13cScriptObject:
 //                 1 dtor cScriptObjGS__cScriptObjGS, 2/3 cScriptObject_Pause/ResumeObjScript, 4 cScriptObject_
 //                 OnStartObjectUse__FPv, 5 cScriptObjGS_OnEndObjectUse, 6 GetNumScriptEntities, 7 GetScriptEntity;
 //                 slots 1 and 5-7 carry delta -0xC, so they get the whole object).
@@ -44,7 +44,7 @@ struct cScriptObjGS {
     int mObjID;                         // 0x10 [O]; [R] cScriptObject ctor -1
     int mInUse;                         // 0x14 [O]; [R] cScriptObject ctor 0; [U] OnEndObjectUse calls
                                         //      cScriptObject_OnEndObjectUse on self + 0xC
-    void** mScriptObjectVtbl;           // 0x18 [R] D_00482318 (ctor and dtor); [P] the paired dtor stores it at 0x18 in
+    void** mScriptObjectVtbl;           // 0x18 [R] cScriptObjGS_cScriptObject_vtbl (ctor and dtor); [P] the paired dtor stores it at 0x18 in
                                         //      both builds; the dtor runs cScriptObject__cScriptObject on +0xC
 
     // Methods bound to their retail symbols by asm labels.

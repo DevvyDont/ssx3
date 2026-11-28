@@ -65,7 +65,7 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 // PORT: memset-like; called as void here.
 extern "C" void MEM_fill_v(void* dst, int value, int size) __asm__("MEM_fill");
 extern void* cRider_vtbl[];
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern void* D_00459BD0[];
 extern void* cBeing_vtbl[];
 extern const char str_Track_path_intersect_info[];
@@ -108,7 +108,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mAIIndex = -1;
     self->mViewIndex = -1;
     self->mSafeRenderTick = -1;
-    self->mScriptObjRiderVtbl = D_00459B90;
+    self->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self, sizeof(cRiderState)) = cRider_vtbl;
     self->mGroundMaterial = 49;
     self->mLoadStep = 0;
@@ -200,9 +200,9 @@ extern "C" void cRiderMetrix__cRiderMetrix(void* p, int flags);
 extern "C" void _$_13cPlayerShadow(void* p, int flags);
 void operator_delete(int* p);
 extern void* cRider_vtbl[];
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern void* D_00459BD0[];
-extern void* D_00482018[];
+extern void* cScriptObjRider_cScriptObject_vtbl[];
 extern void* cScriptObjRider_vtbl[];
 extern void* cBeing_vtbl[];
 
@@ -226,7 +226,7 @@ static inline void vdel_11B978(char* o, int off)
 extern "C" void cRider__cRider(cRider* self, int flags)
 {
     self->mScriptObjectVtbl = D_00459BD0;
-    self->mScriptObjRiderVtbl = D_00459B90;
+    self->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self, sizeof(cRiderState)) = cRider_vtbl;
     cSSXAudio_RiderDeleted_impl(cAudioInterface_bxAudio(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
@@ -263,7 +263,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     member = self->mShadow;
     if (member != 0)
         _$_13cPlayerShadow(member, 3);
-    self->mScriptObjectVtbl = D_00482018;
+    self->mScriptObjectVtbl = cScriptObjRider_cScriptObject_vtbl;
     self->mScriptObjRiderVtbl = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject(self->unk_6DC, 0);
     VPTR_AT(self, sizeof(cRiderState)) = cBeing_vtbl;
@@ -6680,7 +6680,7 @@ struct sVt22_125C70 {
 } __attribute__((aligned(8)));
 extern const sVt9_125C70 D_00458360;
 extern const sVt22_125C70 D_004583A8;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern char cPlayer_vtbl[];
 extern "C" void cRider_cRider(void* self);
 extern "C" void cRiderHandler_cRiderHandler(void* self, int inChrg);
@@ -6745,7 +6745,7 @@ extern "C" void* cPlayer_cPlayer(cPlayer* self, int inChrg)
     }
     cRiderHandler_cRiderHandler(self, 0);
     self->mRider->mScriptObjectVtbl = (void*)&D_00458360;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_004583A8;
     if (inChrg == 0) {
         int vc;
@@ -6819,7 +6819,7 @@ __asm__("_vt$13cRider_125EB8 = cPlayer_vtbl\n"
         "_vt$13cRider_125EB8$15cRiderVbC_rider = D_00458360\n"
         "_vt$13cRider_125EB8$14cRiderVb_rider = D_004583A8\n"
         "_vt$17cRiderBase_125EB8 = cRiderHandler_vtbl\n"
-        "_vt$16cRiderVbB0_rider = D_00459B90\n"
+        "_vt$16cRiderVbB0_rider = cRider_cScriptObjRider_vtbl\n"
         "_vt$16cVbPart3A0_rider$15cRiderVbC_rider = D_00458928\n"
         "_vt$16cVbPart3A0_rider$14cRiderVb_rider = D_00458970\n"
         "_vt$16cVbPart390_rider$15cRiderVbC_rider = D_00458D08\n"

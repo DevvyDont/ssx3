@@ -108,22 +108,22 @@ CHECK_SIZE(FILEOPERATION_def, 0x30);
 // names for size / malloc / free / REAL_filedevice; retail orders the rest differently (On Tour: powercallback 0x0C,
 // REAL_filedevice 0x10, DemoCdRoot 0x14, UseDisc 0x18), so only the members with a retail use that matches On Tour's
 // meaning carry its names; the others are named from use (names ours). [U] FILESYS_getopts / FILESYS_setopts mirror
-// 0x0C / 0x10 / 0x14 / 0x18 into the live settings D_00450C58 and 0x1C into the REAL_filedevice global;
+// 0x0C / 0x10 / 0x14 / 0x18 into the live settings FILESYS_cdSettings and 0x1C into the REAL_filedevice global;
 // iFILE_addbigreadcallback allocates and frees the archive header through malloc / free (also the splat symbols
 // D_00450C14 / D_00450C18).
 struct FILESYSOPTS {
     int size;                           // 0x00 [O]; [U] the record's byte count (getopts / setopts read it first)
     void* (*malloc)(char*, int, int);   // 0x04 [O]; [U] iFILE_addbigreadcallback: (name, size, memflags)
     int (*free)(void*);                 // 0x08 [O]; [U] iFILE_addbigreadcallback frees a header buffer
-    int cdMediaMode;                    // 0x0C (name ours) [U] setopts: D_00450C58 + 0x8, the CD media mode that
+    int cdMediaMode;                    // 0x0C (name ours) [U] setopts: FILESYS_cdSettings + 0x8, the CD media mode that
                                         //       CDVD_readCurrentSector / CDVD_recoverRead / CDVD_initFileSystem pass to sceCdMmode
                                         //       (FILESYS_initadr builds the disc directory when it is set)
-    int cdNameLen;                      // 0x10 (name ours) [U] get / setopts: D_00450C58 + 0x4, the disc directory
+    int cdNameLen;                      // 0x10 (name ours) [U] get / setopts: FILESYS_cdSettings + 0x4, the disc directory
                                         //       entry's name size (FILESYS_overhead, CDVD_buildFileTable and CDVD_initFileSystem
                                         //       size each entry as it + 0xC)
     int useDisc;                        // 0x14 (name ours; a bool like On Tour's UseDisc) [U] get / setopts:
-                                        //       D_00450C58 + 0xC (getopts stores it as a 0 / 1 flag); no other reader
-    char* cdRoot;                       // 0x18 (name ours) [U] get / setopts: D_00450C58 + 0x0, the root prefix file
+                                        //       FILESYS_cdSettings + 0xC (getopts stores it as a 0 / 1 flag); no other reader
+    char* cdRoot;                       // 0x18 (name ours) [U] get / setopts: FILESYS_cdSettings + 0x0, the root prefix file
                                         //       names are matched against (CDVD_initFileSystem lists the disc from it)
     char* REAL_filedevice;              // 0x1C [O] (0x10 there); [U] getopts / setopts copy it to and from the global
                                         //       REAL_filedevice (the host-device prefix)

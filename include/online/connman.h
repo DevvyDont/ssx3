@@ -55,7 +55,7 @@ struct cGameConnMan {
                                     //      cGameComm_construct
     int mCancel;                    // 0x0C [U] cGameConnMan_connect's last argument; cGameConnMan_update shuts down with reason 1 as
                                     //      soon as the channel connects when it is set
-    float mTimeout;                 // 0x10 [U] cGameConnMan_connect: 60.0 (D_004A2F14); cGameConnMan_update counts it down by
+    float mTimeout;                 // 0x10 [U] cGameConnMan_connect: 60.0 (cGameConnMan_connectTimeout); cGameConnMan_update counts it down by
                                     //      SSXApp->TimerPeriod and shuts down (reason 0) below 0
     void** mVtbl;                   // 0x14 [R] cGameConnMan_vtbl (ctor, dtor); slot 1 = destructor
 

@@ -6,7 +6,7 @@
 // declare it ad hoc: `extern int cBELibrary_profileLib[]` and per-unit views, so it is not declared here). Methods:
 // init (cBECharProfileDB_init on each character), copy (record-by-record, keeping the destination's bolt lookup tables),
 // backupCharProfile / restoreCharProfile (one character's record to / from the static BackupCharProfile = cBEProfileLib_BackupCharProfile,
-// the index in D_004A125C), and cBEProfileLib_resetAllRelations (each character's kind defaults).
+// the index in cBEProfileLib_backupCharIndex), and cBEProfileLib_resetAllRelations (each character's kind defaults).
 // No EA path for the class (the preview has be/bedbprofile.cpp / .h and be/belibrary.cpp, but no cBEProfileLib string);
 // its methods sit in the retail unit be/beprepoststate (0x001567B8..0x00156988), so the header takes the be/ directory.
 //

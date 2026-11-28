@@ -1306,7 +1306,7 @@ extern "C" void updateTimedMessages(void);
 extern "C" void cBXLoadIndicator_Update(void* p);
 
 extern void* PadCache;
-extern unsigned int D_004A20CC;
+extern unsigned int cOVState_MESSAGECENTER_openRequest;
 extern char str_90bc_fail_b[];
 
 
@@ -1446,10 +1446,10 @@ static inline int updateState_2306B8(cGame* self)
             }
         }
     }
-    if (~D_004A20CC != 0) {
+    if (~cOVState_MESSAGECENTER_openRequest != 0) {
         cOVStateManager_triggerOverlay(0x22);
         pushState_2306B8(12);
-        D_004A20CC = 0xFFFFFFFF;
+        cOVState_MESSAGECENTER_openRequest = 0xFFFFFFFF;
         cSSXAudio_StopRiderLoops(cAudioInterface_bxAudio());
         return 0;
     }

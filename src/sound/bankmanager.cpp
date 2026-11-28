@@ -363,7 +363,7 @@ struct sBmVEntry {
 struct sBmVtbl {
     sBmVEntry e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtbl D_00483AB8;
+extern const sBmVtbl cBankManager_cSoundSys_vtbl;
 
 struct sBmBank {
     char pad_0x0[0x60];
@@ -398,14 +398,14 @@ extern "C" cBankManager* cBankManager_cBankManager(cBankManager* self, int embed
     }
     cAsyncSys_cAsyncSys(self);
     cBankMonitor_cBankMonitor(&self->BankMonitor, 0, heap);
-    *(const sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &D_00483AB8;
+    *(const sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &cBankManager_cSoundSys_vtbl;
     if (!embedded) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtbl vt = D_00483AB8;
+        sBmVtbl vt = cBankManager_cSoundSys_vtbl;
         *(sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &vt;
         int base = (int)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int thisDelta = (int)self - base;
-        vt.e[1].delta = D_00483AB8.e[1].delta + thisDelta;
+        vt.e[1].delta = cBankManager_cSoundSys_vtbl.e[1].delta + thisDelta;
     }
     self->mMaxBanks = count;
     self->BankMonitor.mVtbl = cBankMonitor_vtbl;
@@ -438,7 +438,7 @@ struct sBmVEntryBB10 {
 struct sBmVtblBB10 {
     sBmVEntryBB10 e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
+extern const sBmVtblBB10 cBankManager_cSoundSys_vtbl_BB10 __asm__("cBankManager_cSoundSys_vtbl");
 
 
 
@@ -446,7 +446,7 @@ extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
  * Destroys the bank manager: frees its bank instances, tears down its monitor and async-loader parts and clears
  * gpBankManager.
  *
- * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (D_00483AB8; with flags 0 the g++
+ * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (cBankManager_cSoundSys_vtbl; with flags 0 the g++
  * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array
  * mBank last-first with cBankInstance::~cBankInstance (its count is the word 0x10 bytes before it) and frees it, then
  * runs cBankMonitor__cBankMonitor on BankMonitor and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object.
@@ -458,14 +458,14 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
 {
     self->BankMonitor.mVtbl = cBankMonitor_vtbl;
     self->mVtbl = cBankManager_vtbl;
-    self->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483AB8_BB10;
+    self->BankMonitor.mpVSoundSys->mVtbl = (void**)&cBankManager_cSoundSys_vtbl_BB10;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtblBB10 vt = D_00483AB8_BB10;
+        sBmVtblBB10 vt = cBankManager_cSoundSys_vtbl_BB10;
         self->BankMonitor.mpVSoundSys->mVtbl = (void**)&vt;
         char* base = (char*)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int soundSysAdjust = (char*)self - base;
-        vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
+        vt.e[1].delta = cBankManager_cSoundSys_vtbl_BB10.e[1].delta + soundSysAdjust;
     }
     gpBankManager = 0;
     if (self->mBank != 0) {
@@ -1075,7 +1075,7 @@ extern "C" int cMusicSys_IsOverlayArmed(void* mon);
 extern "C" void cMusicSys_ClearOverlayArmed(void* mon);
 extern "C" int cMusicSys_GetDuckToLoops(void* mon);
 extern int D_004A361C;
-extern int D_004A3620;
+extern int cSSXAudio_prevLongAirFlag;
 
 struct sBmVtC8C8 { short delta; short index; void (*fn)(void*, int); };
 
@@ -1105,7 +1105,7 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
  * mAirPredictor's SimState kSS_SimDone or kSS_SimCheckObjectsDone, the air time is the predictor's TotalAirTime, cached
  * in mJumpAirTime on the first frame (mJumpMaxAirTime cleared); while D_004A361C is set the cached value is reused;
  * otherwise it is 0. mOverlayLevel is set to the music volume (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)), and
- * D_004A3620 takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
+ * cSSXAudio_prevLongAirFlag takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
  * (cMusicSys_GetDuckToLoops) is set, cSSXAudio_IsBigAirEvent and cSSXAudio_IsHalfpipeEvent are false and no rider event runs (cSSXAudio_GetRiderMusicEvent), the song
  * is driven too (local play). Outside replays, above 2 s: D_004A361C = 1; mJumpMaxAirTime keeps the largest current air
  * time (CurAirTime), and mJumpVolumeAirTime, set on the first frame, is that plus max((ApexTime - CurAirTime) / 2,
@@ -1146,7 +1146,7 @@ void cSSXAudio::UpdateAirTimeVolume()
 have:
     int play = 0;
     mOverlayLevel = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
-    D_004A3620 = D_004A361C;
+    cSSXAudio_prevLongAirFlag = D_004A361C;
     D_004A361C = 0;
     if (3.9994986057281494f < airTime) {
         int duckToLoops = cMusicSys_GetDuckToLoops(&MusicSys);
@@ -1163,7 +1163,7 @@ have:
                 lo = mJumpMaxAirTime;
             mJumpMaxAirTime = lo;
             float hi;
-            if (D_004A3620 == 0) {
+            if (cSSXAudio_prevLongAirFlag == 0) {
                 hi = (rider->mAirPredictor->ApexTime - rider->mAirPredictor->CurAirTime) * 0.5f;
                 if (hi < 0.5f)
                     hi = 0.5f;
@@ -1202,7 +1202,7 @@ have:
                 }
             }
             mWindVolume = mWindVolume * *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 5, 0);
-            if (D_004A3620 == 0) {
+            if (cSSXAudio_prevLongAirFlag == 0) {
                 cSSXAudio_BeginWind(this);
                 if (play) {
                     char* mon = (char*)&MusicSys;
@@ -1216,7 +1216,7 @@ have:
         }
     }
     char* mon = (char*)&MusicSys;
-    if (D_004A3620 == true) {
+    if (cSSXAudio_prevLongAirFlag == true) {
         cSSXAudio_EndWind(this);
         if (cMusicSys_IsOverlayArmed(mon)) {
             if (IsMusicRadioMode()) {
@@ -2569,7 +2569,7 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_SendMusicEvent);
 #ifdef SKIP_ASM
 extern "C" void cMusicSys_SendMusicEvent(void* self, int a1);
 extern "C" int cMusicSys_GetSongTag(void* monitor);
-extern int D_004A3620;
+extern int cSSXAudio_prevLongAirFlag;
 
 class cBankMonitor_F328 {
 public:
@@ -2584,7 +2584,7 @@ public:
  * cSSXAudio's override of cMusicSys virtual slot 3: calls cMusicSys_SendMusicEvent, then handles codes 10, 11 and 18.
  *
  * When the current song has no tag (cMusicSys_GetSongTag == kSONGTAG_None) and code is 10, 11 or 18 it calls cMusicSys's
- * virtual slot 3 with 8 (only while D_004A3620 is set) and clears mSongPlaying. Slot 3 of D_00483688.
+ * virtual slot 3 with 8 (only while cSSXAudio_prevLongAirFlag is set) and clears mSongPlaying. Slot 3 of D_00483688.
  *
  * @param code  the music state
  */
@@ -2594,7 +2594,7 @@ void cSSXAudio::SendMusicEvent(int code)
     cMusicSys_SendMusicEvent(monitor, code);
     if (cMusicSys_GetSongTag(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
-            if (D_004A3620 == true) {
+            if (cSSXAudio_prevLongAirFlag == true) {
                 ((cBankMonitor_F328*)(&MusicSys))->SendMusicEvent(8);
             }
             MusicSys.mSongPlaying = 0;
@@ -2612,7 +2612,7 @@ extern "C" int cMusicSys_SetMusicState(void* self, int v);
  * cSSXAudio's override of cMusicSys virtual slot 4: sets the music state (cMusicSys_SetMusicState), then as cSSXAudio_SendMusicEvent.
  *
  * When the current song has no tag (kSONGTAG_None) and code is 10, 11 or 18 it calls virtual slot 3 with 8 (only while
- * D_004A3620 is set) and clears mSongPlaying. Slot 4 of D_00483688; the music code calls it to change state.
+ * cSSXAudio_prevLongAirFlag is set) and clears mSongPlaying. Slot 4 of D_00483688; the music code calls it to change state.
  *
  * @param code  the new music state
  * @return cMusicSys_SetMusicState's result (whether the state changed)
@@ -2623,7 +2623,7 @@ int cSSXAudio::SetMusicState(int code)
     int changed = cMusicSys_SetMusicState(monitor, code);
     if (cMusicSys_GetSongTag(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
-            if (D_004A3620 == true) {
+            if (cSSXAudio_prevLongAirFlag == true) {
                 ((cBankMonitor_F328*)(&MusicSys))->SendMusicEvent(8);
             }
             MusicSys.mSongPlaying = 0;
@@ -2825,7 +2825,7 @@ void cSSXAudio::LeaveMapScreen(int restartMusic)
 INCLUDE_ASM("sound/bankmanager", cSSXAudio_LoadLoadingScreenBank);
 #ifdef SKIP_ASM
 extern "C" void cBankManager_BANK_SyncLoad(cBankManager* self, int i, void* id, int a3);
-extern void* D_004A3624;
+extern void* cSSXAudio_loadingScreenBankName;
 
 /**
  * Loads the loading-screen sound bank ("data/audio/audio.big|data\\audio\\LoadingScreen.bnk") into bank 13.
@@ -2834,7 +2834,7 @@ extern void* D_004A3624;
  */
 void cSSXAudio::LoadLoadingScreenBank()
 {
-    MusicSys.mpVStreamSys->mpVBankManager->BANK_SyncLoad(13, D_004A3624, 0);
+    MusicSys.mpVStreamSys->mpVBankManager->BANK_SyncLoad(13, cSSXAudio_loadingScreenBankName, 0);
 }
 #endif
 

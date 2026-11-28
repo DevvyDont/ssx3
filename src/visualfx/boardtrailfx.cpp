@@ -20,7 +20,7 @@ extern "C" void* cRider_cRider(void* self);
 extern "C" void MEM_fill(void* p, int c, int n);
 struct cBoardTrailFX_reset_sTrail;
 extern "C" void cBoardTrailFX_reset(cBoardTrailFX* self);
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern char str_BoardTrailVertices[];
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -67,7 +67,7 @@ void* cBoardTrailFX::initialize(int inChrg)
         cRider_cRider((char*)this + 0xF0);
     }
     mRider->mScriptObjectVtbl = (void*)(&D_00488BB8);
-    mRider->mScriptObjRiderVtbl = D_00459B90;
+    mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(mRider, sizeof(cRiderState)) = (void**)&D_00488C00;
     if (inChrg == 0) {
         int vc;
@@ -121,7 +121,7 @@ __asm__(".globl cBoardTrailFX__cBoardTrailFX\n.type cBoardTrailFX__cBoardTrailFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E83F0$13cRiderVbC_btf = D_00488BB8\n"
-        "_vt$15cVbDtor002E83F0$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$15cVbDtor002E83F0$14cRiderVbBC_btf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002E83F0$12cRiderVb_btf = D_00488C00\n"
         "_$_12cRiderVb_btf = cRider__cRider\n");
 #endif
@@ -1317,7 +1317,7 @@ __asm__(".globl cTrickBoostFX_cTrickBoostFX\n.type cTrickBoostFX_cTrickBoostFX,@
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$11cBtf_2EAAE0$13cRiderVbC_btf = D_00488458\n"
-        "_vt$11cBtf_2EAAE0$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$11cBtf_2EAAE0$14cRiderVbBC_btf = cRider_cScriptObjRider_vtbl\n"
         "_vt$11cBtf_2EAAE0$12cRiderVb_btf = D_004884A0\n");
 #endif
 
@@ -1341,7 +1341,7 @@ __asm__(".globl cTrickBoostFX__cTrickBoostFX\n.type cTrickBoostFX__cTrickBoostFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
-        "_vt$15cVbDtor002EAC60$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$15cVbDtor002EAC60$14cRiderVbBC_btf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002EAC60$12cRiderVb_btf = D_004884A0\n"
         "_$_12cRiderVb_btf = cRider__cRider\n");
 #endif

@@ -73,7 +73,7 @@ void cBXString::Realloc(int size)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_Reset);
 #ifdef SKIP_ASM
-extern char D_0048DCD4[];
+extern char cBXString_emptyText[];
 extern char* cBXString_EmptyString;
 void cMemMan_free(void*);
 
@@ -85,7 +85,7 @@ void cMemMan_free(void*);
  */
 void cBXString::Reset()
 {
-    if (Str != D_0048DCD4)
+    if (Str != cBXString_emptyText)
     {
         if (--getData()->NumRefs == 0)
         {
@@ -188,7 +188,7 @@ void cBXString::allocCopy(cBXString* dst, int len, int pos, int extra)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString__cBXString);
 #ifdef SKIP_ASM
-extern char D_0048DCD4[];
+extern char cBXString_emptyText[];
 void cMemMan_free(void*);
 void operator_delete(int*);
 
@@ -202,7 +202,7 @@ void operator_delete(int*);
  */
 extern "C" void cBXString__cBXString(cBXString* self, int flags)
 {
-    if (self->Str != D_0048DCD4)
+    if (self->Str != cBXString_emptyText)
     {
         if (--self->getData()->NumRefs <= 0)
         {
@@ -286,7 +286,7 @@ cBXString* cBXString::cBXString3(const char* str, int n)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_InitFromCString);
 #ifdef SKIP_ASM
-extern char D_0048DCD4[];
+extern char cBXString_emptyText[];
 
 /**
  * Sets the string to the first @p len characters of a C string.
@@ -300,7 +300,7 @@ extern char D_0048DCD4[];
 void cBXString::InitFromCString(int len, const char* str)
 {
     Resize(len);
-    if (Str != D_0048DCD4)
+    if (Str != cBXString_emptyText)
     {
         func_0041605C(Str, str, len);
         getData()->DataLength = len;
@@ -312,7 +312,7 @@ void cBXString::InitFromCString(int len, const char* str)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_operatorE);
 #ifdef SKIP_ASM
-extern char D_0048DCD4[];
+extern char cBXString_emptyText[];
 
 /**
  * Assigns another string to this one (operator=), sharing its buffer when it can.
@@ -328,7 +328,7 @@ cBXString* cBXString::operatorE(cBXString* other)
 {
     if (Str != other->Str)
     {
-        if ((getData()->NumRefs < 0 && Str != D_0048DCD4) || other->getData()->NumRefs < 0)
+        if ((getData()->NumRefs < 0 && Str != cBXString_emptyText) || other->getData()->NumRefs < 0)
         {
             InitFromCString(other->getData()->DataLength, other->Str);
         }
@@ -705,7 +705,7 @@ char* cBXString::getBuffer(int size)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_releaseBuffer);
 #ifdef SKIP_ASM
-extern char D_0048DCD4[];
+extern char cBXString_emptyText[];
 
 /**
  * Finishes a direct write into the string's buffer: stores the new length and the terminator.
@@ -720,7 +720,7 @@ void cBXString::releaseBuffer(int len)
     copyBeforeWrite();
     if (len == kMeasureLength)
         len = strlen(Str);
-    if (Str != D_0048DCD4)
+    if (Str != cBXString_emptyText)
     {
         getData()->DataLength = len;
         Str[len] = 0;
@@ -798,7 +798,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_unlockBuffer);
 /**
  * Unlocks a string's buffer: sets the reference count (Str - 0xC) back to 1.
  *
- * Undoes cBXString_lockBuffer, which sets it to -1. The shared empty string's text (D_0048DCD4) is left alone. Nothing
+ * Undoes cBXString_lockBuffer, which sets it to -1. The shared empty string's text (cBXString_emptyText) is left alone. Nothing
  * in the C calls it.
  *
  * @param bxString  the string
@@ -807,7 +807,7 @@ extern "C" void cBXString_unlockBuffer(void **bxString) {
     tStringData* temp_4;
 
     temp_4 = (tStringData *)*bxString;
-    if ((void *)temp_4 != &D_0048DCD4) {
+    if ((void *)temp_4 != &cBXString_emptyText) {
         temp_4[-1].NumRefs = 1;
     }
 }

@@ -1070,7 +1070,7 @@ extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void makeDead_C420(void*, void*) __asm__("makeDead");
 extern t3Vector luno_gLunoNil_C420 __asm__("luno_gLunoNil");
 extern tMakeDeadData sDeadDefaults __asm__("D_004FB500");
-extern int D_004A55E4;
+extern int MakeDeadFunc_initFlag;
 extern int MakeDeadFunc_types[2];
 extern "C" void* MEM_copy_C420(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -1090,10 +1090,10 @@ extern "C" void* MEM_copy_C420(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector MakeDeadFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A55E4 == 0) {
+    if (MakeDeadFunc_initFlag == 0) {
         sDeadDefaults.InstId = 0xFFFFFFFF;
         sDeadDefaults.Type = 0;
-        D_004A55E4 = 1;
+        MakeDeadFunc_initFlag = 1;
         sDeadDefaults.null = WScriptNullType(sDeadDefaults.null);
     }
     unsigned buf64[3];
@@ -2273,7 +2273,7 @@ CHECK_OFFSET(tAddParentData, OffsetZ, 0x14);
 CHECK_OFFSET(tAddParentData, null, 0x18);
 CHECK_SIZE(tAddParentData, 0x1C);
 extern tAddParentData sParentDefaults __asm__("D_004FB738");
-extern int D_004A560C;
+extern int AddParentFunc_initFlag;
 extern const int AddParentFunc_types[];
 extern "C" void* MEM_copy_D9F8(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -2296,7 +2296,7 @@ extern "C" void* MEM_copy_D9F8(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector AddParentFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A560C == 0) {
+    if (AddParentFunc_initFlag == 0) {
         sParentDefaults.InstId = 0xFFFFFFFF;
         sParentDefaults.ParentId = 0xFFFFFFFF;
         sParentDefaults.Mesh = 0;
@@ -2304,7 +2304,7 @@ extern "C" t3Vector AddParentFunc(int n, luno_cLunoCArg *params) {
         sParentDefaults.OffsetX = z;
         sParentDefaults.OffsetY = z;
         sParentDefaults.OffsetZ = z;
-        D_004A560C = 1;
+        AddParentFunc_initFlag = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
         sParentDefaults.null = WScriptNullType(sParentDefaults.null);
@@ -2392,7 +2392,7 @@ CHECK_OFFSET(tAddChildData, OffsetZ, 0x14);
 CHECK_OFFSET(tAddChildData, null, 0x18);
 CHECK_SIZE(tAddChildData, 0x1C);
 extern tAddChildData sChildDefaults __asm__("D_004FB758");
-extern int D_004A5610;
+extern int AddChildFunc_initFlag;
 extern const int AddChildFunc_types[];
 extern "C" void* MEM_copy_DC60(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -2416,7 +2416,7 @@ extern "C" void* MEM_copy_DC60(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector AddChildFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A5610 == 0) {
+    if (AddChildFunc_initFlag == 0) {
         sChildDefaults.InstId = 0xFFFFFFFF;
         sChildDefaults.ChildId = 0xFFFFFFFF;
         sChildDefaults.Mesh = 0;
@@ -2424,7 +2424,7 @@ extern "C" t3Vector AddChildFunc(int n, luno_cLunoCArg *params) {
         sChildDefaults.OffsetX = z;
         sChildDefaults.OffsetY = z;
         sChildDefaults.OffsetZ = z;
-        D_004A5610 = 1;
+        AddChildFunc_initFlag = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
         sChildDefaults.null = WScriptNullType(sChildDefaults.null);
@@ -2490,7 +2490,7 @@ static inline tInstanceRecord *refToPtr_DED0(unsigned i) { return (tInstanceReco
 static inline tInstanceRecord *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
 extern t3Vector luno_gLunoNil_DED0 __asm__("luno_gLunoNil");
 extern tAddSplineData sSplineDefaults __asm__("D_004FB778");
-extern int D_004A5614;
+extern int AddSplineFunc_initFlag;
 extern const int AddSplineFunc_types[];
 extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -2505,7 +2505,7 @@ extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
  * @return a void script value
  */
 extern "C" t3Vector AddSplineFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A5614 == 0) {
+    if (AddSplineFunc_initFlag == 0) {
         sSplineDefaults.InstId = 0xFFFFFFFF;
         sSplineDefaults.SplineId = 0xFFFFFFFF;
         sSplineDefaults.Sequence = 1;
@@ -2518,7 +2518,7 @@ extern "C" t3Vector AddSplineFunc(int n, luno_cLunoCArg *params) {
         sSplineDefaults.Start = 1;
         sSplineDefaults.Force = z;
         sSplineDefaults.ForceTime = z;
-        D_004A5614 = 1;
+        AddSplineFunc_initFlag = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
         sSplineDefaults.null = WScriptNullType(sSplineDefaults.null);
@@ -2571,7 +2571,7 @@ static inline tInstanceRecord *refToPtr_E0C0(unsigned i) { return (tInstanceReco
 static inline tInstanceRecord *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
 extern t3Vector luno_gLunoNil_E0C0 __asm__("luno_gLunoNil");
 extern tAddMultiSplineData sMultiSplineDefaults __asm__("D_004FB7A8");
-extern int D_004A5618;
+extern int AddMultiSplineFunc_initFlag;
 extern const int AddMultiSplineFunc_types[];
 extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -2586,7 +2586,7 @@ extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
  * @return a void script value
  */
 extern "C" t3Vector AddMultiSplineFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A5618 == 0) {
+    if (AddMultiSplineFunc_initFlag == 0) {
         sMultiSplineDefaults.InstId = 0xFFFFFFFF;
         sMultiSplineDefaults.SplineId = 0xFFFFFFFF;
         sMultiSplineDefaults.Orient = 3;
@@ -2600,7 +2600,7 @@ extern "C" t3Vector AddMultiSplineFunc(int n, luno_cLunoCArg *params) {
         sMultiSplineDefaults.ColourB = z;
         sMultiSplineDefaults.DrawSpline = 1;
         sMultiSplineDefaults.NumModels = 2;
-        D_004A5618 = 1;
+        AddMultiSplineFunc_initFlag = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
         //       0(sp)).
         sMultiSplineDefaults.null = WScriptNullType(sMultiSplineDefaults.null);
@@ -4075,7 +4075,7 @@ CHECK_OFFSET(tPlayAudioData, SoundId, 0x04);
 CHECK_OFFSET(tPlayAudioData, null, 0x08);
 CHECK_SIZE(tPlayAudioData, 0xC);
 extern tPlayAudioData sPlayAudioDefaults __asm__("D_004FBB08");
-extern int D_004A5664;
+extern int PlayAudioFunc_initFlag;
 extern int PlayAudioFunc_types[2];
 extern "C" void* MEM_copy_FF00(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -4094,10 +4094,10 @@ extern "C" void* MEM_copy_FF00(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector PlayAudioFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A5664 == 0) {
+    if (PlayAudioFunc_initFlag == 0) {
         sPlayAudioDefaults.InstId = 0xFFFFFFFF;
         sPlayAudioDefaults.SoundId = 0xFFFFFFFF;
-        D_004A5664 = 1;
+        PlayAudioFunc_initFlag = 1;
         sPlayAudioDefaults.null = WScriptNullType(sPlayAudioDefaults.null);
     }
     unsigned buf64[3];
@@ -4160,7 +4160,7 @@ CHECK_OFFSET(tAttachAudioData, Mesh, 0x08);
 CHECK_OFFSET(tAttachAudioData, null, 0x0C);
 CHECK_SIZE(tAttachAudioData, 0x10);
 extern tAttachAudioData sAttachAudioDefaults __asm__("D_004FBB18");
-extern int D_004A5668;
+extern int AttachAudioFunc_initFlag;
 extern const int AttachAudioFunc_types[];
 extern "C" void* MEM_copy_00A8(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -4179,11 +4179,11 @@ extern "C" void* MEM_copy_00A8(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector AttachAudioFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A5668 == 0) {
+    if (AttachAudioFunc_initFlag == 0) {
         sAttachAudioDefaults.InstId = 0xFFFFFFFF;
         sAttachAudioDefaults.SoundId = 0xFFFFFFFF;
         sAttachAudioDefaults.Mesh = -1;
-        D_004A5668 = 1;
+        AttachAudioFunc_initFlag = 1;
         sAttachAudioDefaults.null = WScriptNullType(sAttachAudioDefaults.null);
     }
     unsigned buf64[4];
@@ -4247,7 +4247,7 @@ CHECK_OFFSET(tDetachAudioData, Mesh, 0x08);
 CHECK_OFFSET(tDetachAudioData, null, 0x0C);
 CHECK_SIZE(tDetachAudioData, 0x10);
 extern tDetachAudioData sDetachAudioDefaults __asm__("D_004FBB28");
-extern int D_004A566C;
+extern int DetachAudioFunc_initFlag;
 extern const int DetachAudioFunc_types[];
 extern "C" void* MEM_copy_0260(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -4266,11 +4266,11 @@ extern "C" void* MEM_copy_0260(void*, void*, int) __asm__("MEM_copy");
  * @return the nil script value (luno_gLunoNil)
  */
 extern "C" t3Vector DetachAudioFunc(int n, luno_cLunoCArg *params) {
-    if (D_004A566C == 0) {
+    if (DetachAudioFunc_initFlag == 0) {
         sDetachAudioDefaults.InstId = 0xFFFFFFFF;
         sDetachAudioDefaults.SoundId = 0xFFFFFFFF;
         sDetachAudioDefaults.Mesh = -1;
-        D_004A566C = 1;
+        DetachAudioFunc_initFlag = 1;
         sDetachAudioDefaults.null = WScriptNullType(sDetachAudioDefaults.null);
     }
     unsigned buf64[4];
@@ -4861,7 +4861,7 @@ CHECK_OFFSET(tCollectInstData, null, 0x54);
 CHECK_SIZE(tCollectInstData, 0x58);
 extern tCollectInstData sCollectInstDefaults __asm__("D_004FBB78");
 extern int D_56B0_0F50 __asm__("D_004A56B0");
-extern const int D_00446570_0F50[] __asm__("D_00446570");
+extern const int CollectInstFunc_types_0F50[] __asm__("CollectInstFunc_types");
 extern "C" void* MEM_copy_0F50(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cWScriptMan_collectInst_0F50(cWScriptMan*, unsigned, unsigned*, int) __asm__("cWScriptMan_collectInst");
 /**
@@ -4870,7 +4870,7 @@ extern "C" void cWScriptMan_collectInst_0F50(cWScriptMan*, unsigned, unsigned*, 
  * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tCollectInstData:
  * PoolId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, InstId9, InstId10, InstId11,
  * InstId12, InstId13, InstId14, InstId15, InstId16, InstId17, InstId18, InstId19, InstId20) and lets each argument
- * override the field its index names, turning an int into a float where the field type table D_00446570 says
+ * override the field its index names, turning an int into a float where the field type table CollectInstFunc_types says
  * eLunoVar_Float. Defaults: PoolId -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7
  * -1, InstId8 -1, InstId9 -1, InstId10 -1, InstId11 -1, InstId12 -1, InstId13 -1, InstId14 -1, InstId15 -1, InstId16
  * -1, InstId17 -1, InstId18 -1, InstId19 -1, InstId20 -1.
@@ -4935,7 +4935,7 @@ extern "C" t3Vector CollectInstFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_00446570_0F50[idx];
+        int keywordType = CollectInstFunc_types_0F50[idx];
         setArgField(&buf[idx], x, keywordType);
     }
     if (buf[0] != kWScriptId_None)
@@ -7093,7 +7093,7 @@ extern int TheCrowdMan2d_3BA0 __asm__("TheCrowdMan2d");
 extern t3Vector luno_gLunoNil_3BA0 __asm__("luno_gLunoNil");
 extern tCrowd2dData sCrowd2dDefaults __asm__("D_004FBC80");
 extern int D_57E0_3BA0 __asm__("D_004A57E0");
-extern const int D_004465D8_3BA0[] __asm__("D_004465D8");
+extern const int Crowd2dFunc_types_3BA0[] __asm__("Crowd2dFunc_types");
 extern "C" void* MEM_copy_3BA0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cCrowdMan2d_attachBoneToCrowdPose_3BA0(int, unsigned, int, int) __asm__("cCrowdMan2d_attachBoneToCrowdPose");
 extern "C" void cCrowdMan2d_addQuad_3BA0(int, unsigned, int, int) __asm__("cCrowdMan2d_addQuad");
@@ -7103,7 +7103,7 @@ extern "C" void cCrowdMan2d_removeQuad_3BA0(int, unsigned, int, int) __asm__("cC
  *
  * Copies the static defaults (set up on the first call) into a 20-byte parameter block (On Tour tCrowd2dData: InstId,
  * Cmd, Mesh, Context) and lets each argument override the field its index names, turning an int into a float where the
- * field type table D_004465D8 says eLunoVar_Float. Defaults: InstId -1, Cmd -1, Mesh 0, Context 0.
+ * field type table Crowd2dFunc_types says eLunoVar_Float. Defaults: InstId -1, Cmd -1, Mesh 0, Context 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, its id (m_RID) goes to the 2D crowd
@@ -7133,7 +7133,7 @@ extern "C" t3Vector Crowd2dFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_004465D8_3BA0[idx];
+        int keywordType = Crowd2dFunc_types_3BA0[idx];
         setArgField(&buf[idx], x, keywordType);
     }
     unsigned id = buf[0];
@@ -7180,11 +7180,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGamePath);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3D90(void) __asm__("cBE_getBE");
 cBEInterface* cBE_getInterface_Fv_3D90(int be, int kind) __asm__("cBE_getInterface__Fv");
-extern const int D_004465E8_3D90[] __asm__("D_004465E8");
+extern const int isGamePath_map_3D90[] __asm__("isGamePath_map");
 /**
  * Returns whether script game path @p i is the current game path.
  *
- * For @p i below 4 it maps @p i through D_004465E8 (0, 1, 2, 0) and compares it with the race DB's cGamePath
+ * For @p i below 4 it maps @p i through isGamePath_map (0, 1, 2, 0) and compares it with the race DB's cGamePath
  * (newRace.cGamePath); 4 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game path (0-3)
@@ -7193,7 +7193,7 @@ extern const int D_004465E8_3D90[] __asm__("D_004465E8");
 extern "C" bool isGamePath(unsigned i) {
     if (i < 4) {
         cBE_getInterface_Fv_3D90(cBE_getBE_3D90(), 0);
-        return D_004465E8_3D90[i] == cBENewRaceInterface_newRace.cGamePath;
+        return isGamePath_map_3D90[i] == cBENewRaceInterface_newRace.cGamePath;
     }
     return false;
 }
@@ -7205,11 +7205,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameMode);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3DF8(void) __asm__("cBE_getBE");
 cBEInterface* cBE_getInterface_Fv_3DF8(int be, int kind) __asm__("cBE_getInterface__Fv");
-extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
+extern const int isGameMode_map_3DF8[] __asm__("isGameMode_map");
 /**
  * Returns whether script game mode @p i is the current game mode.
  *
- * For @p i below 8 it maps @p i through D_004465F8 (0-6, then 0) and compares it with the race DB's cGameMode
+ * For @p i below 8 it maps @p i through isGameMode_map (0-6, then 0) and compares it with the race DB's cGameMode
  * (newRace.cGameMode); 8 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game mode (0-7)
@@ -7218,7 +7218,7 @@ extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
 extern "C" bool isGameMode(unsigned i) {
     if (i < 8) {
         cBE_getInterface_Fv_3DF8(cBE_getBE_3DF8(), 0);
-        return D_004465F8_3DF8[i] == cBENewRaceInterface_newRace.cGameMode;
+        return isGameMode_map_3DF8[i] == cBENewRaceInterface_newRace.cGameMode;
     }
     return false;
 }
@@ -7230,11 +7230,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameEvent);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3E60(void) __asm__("cBE_getBE");
 cBEInterface* cBE_getInterface_Fv_3E60(int be, int kind) __asm__("cBE_getInterface__Fv");
-extern const int D_00446618_3E60[] __asm__("D_00446618");
+extern const int isGameEvent_map_3E60[] __asm__("isGameEvent_map");
 /**
  * Returns whether script game event @p i is the current game event.
  *
- * For @p i below 15 it maps @p i through D_00446618 (0-13, then 0) and compares it with the race DB's cGameEvent
+ * For @p i below 15 it maps @p i through isGameEvent_map (0-13, then 0) and compares it with the race DB's cGameEvent
  * (newRace.cGameEvent); 15 and above give false. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game event (0-14)
@@ -7243,7 +7243,7 @@ extern const int D_00446618_3E60[] __asm__("D_00446618");
 extern "C" bool isGameEvent(unsigned i) {
     if (i < 0xF) {
         cBE_getInterface_Fv_3E60(cBE_getBE_3E60(), 0);
-        return D_00446618_3E60[i] == cBENewRaceInterface_newRace.cGameEvent;
+        return isGameEvent_map_3E60[i] == cBENewRaceInterface_newRace.cGameEvent;
     }
     return false;
 }
@@ -7683,7 +7683,7 @@ CHECK_SIZE(tUpdateDisplayTrickData, 0x44);
 extern t3Vector luno_gLunoNil_45B8 __asm__("luno_gLunoNil");
 extern tUpdateDisplayTrickData sDisplayTrickDefaults __asm__("D_004FBCC8");
 extern int D_580C_45B8 __asm__("D_004A580C");
-extern const int D_00446650_45B8[] __asm__("D_00446650");
+extern const int UpdateDisplayTrickFunc_types_45B8[] __asm__("UpdateDisplayTrickFunc_types");
 extern "C" void* MEM_copy_45B8(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cWScriptMan_updateMissionTrick_45B8(cWScriptMan*,
         tTrickNameDef*) __asm__("cWScriptMan_updateMissionTrick");
@@ -7693,7 +7693,7 @@ extern "C" void cWScriptMan_updateMissionTrick_45B8(cWScriptMan*,
  * Copies the static defaults (set up on the first call) into a 68-byte parameter block (On Tour
  * tUpdateDisplayTrickData: Rail, RailSpin, TakeOff, Orient, Spin, Reps, Flip, Special, PostSpin, UberGrind, Grab,
  * ToLate, LateGrab, HandPlant, Land, Press) and lets each argument override the field its index names, turning an int
- * into a float where the field type table D_00446650 says eLunoVar_Float. Defaults: all 0.
+ * into a float where the field type table UpdateDisplayTrickFunc_types says eLunoVar_Float. Defaults: all 0.
  *
  * Packs the 16 values into an 8-byte trick definition (bit fields; Land and Press are stored in the opposite order of
  * the block) and passes it to cWScriptMan_updateMissionTrick, which sets MissionTrickEnable and MissionTrick.
@@ -7733,7 +7733,7 @@ extern "C" t3Vector UpdateDisplayTrickFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_00446650_45B8[idx];
+        int keywordType = UpdateDisplayTrickFunc_types_45B8[idx];
         setArgField(&fields[idx], x, keywordType);
     }
     trick.rail = buf->Rail;
@@ -8269,7 +8269,7 @@ CHECK_SIZE(tAddMagnetData, 0x10);
 extern t3Vector luno_gLunoNil_5478 __asm__("luno_gLunoNil");
 extern tAddMagnetData sMagnetDefaults __asm__("D_004FBD58");
 extern int D_5840_5478 __asm__("D_004A5840");
-extern const int D_004466A0_5478[] __asm__("D_004466A0");
+extern const int AddMagnetFunc_types_5478[] __asm__("AddMagnetFunc_types");
 extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addMagnet_5478(cInstanceNode*, const t4Matrix*, float, float) __asm__("cMoveNode_addMagnet");
 /**
@@ -8277,7 +8277,7 @@ extern "C" void cMoveNode_addMagnet_5478(cInstanceNode*, const t4Matrix*, float,
  *
  * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAddMagnetData: InstId,
  * Radius, Speed) and lets each argument override the field its index names, turning an int into a float where the field
- * type table D_004466A0 says eLunoVar_Float. Defaults: InstId -1, Radius 400, Speed 30.
+ * type table AddMagnetFunc_types says eLunoVar_Float. Defaults: InstId -1, Radius 400, Speed 30.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found and its active node (m_pActiveNode) is
@@ -8306,7 +8306,7 @@ extern "C" t3Vector AddMagnetFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_004466A0_5478[idx];
+        int keywordType = AddMagnetFunc_types_5478[idx];
         setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
@@ -8394,7 +8394,7 @@ INCLUDE_ASM("seg/seg_1FBE38", AddHaloFunc);
 extern t3Vector luno_gLunoNil_57C0 __asm__("luno_gLunoNil");
 extern tAddHaloData sHaloDefaults __asm__("D_004FBD68");
 extern int D_5854_57C0 __asm__("D_004A5854");
-extern const int D_004466B0_57C0[] __asm__("D_004466B0");
+extern const int AddHaloFunc_types_57C0[] __asm__("AddHaloFunc_types");
 extern "C" void* MEM_copy_57C0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addHalo_57C0(void*, void*) __asm__("cMoveNode_addHalo");
 /**
@@ -8402,7 +8402,7 @@ extern "C" void cMoveNode_addHalo_57C0(void*, void*) __asm__("cMoveNode_addHalo"
  *
  * Copies the static defaults (set up on the first call) into a 40-byte parameter block (On Tour tAddHaloData: InstId,
  * Type, Mesh, ColourA, ColourR, ColourG, ColourB, Radius, Speed) and lets each argument override the field its index
- * names, turning an int into a float where the field type table D_004466B0 says eLunoVar_Float. Defaults: InstId -1,
+ * names, turning an int into a float where the field type table AddHaloFunc_types says eLunoVar_Float. Defaults: InstId -1,
  * Type 0, Mesh -1, ColourA, ColourR, ColourG and ColourB 1, Radius 100, Speed 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
@@ -8437,7 +8437,7 @@ extern "C" t3Vector AddHaloFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_004466B0_57C0[idx];
+        int keywordType = AddHaloFunc_types_57C0[idx];
         setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
@@ -8718,7 +8718,7 @@ extern t3Vector luno_gLunoNil_5F40 __asm__("luno_gLunoNil");
 // the same defaults; On Tour's SetAvalancheEmitterDataFunc is an empty stub, so its own type name is unknown.
 extern tAddParticleData sAvalancheEmitterDefaults __asm__("D_004FBE58");
 extern int D_587C_5F40 __asm__("D_004A587C");
-extern const int D_004467A0_5F40[] __asm__("D_004467A0");
+extern const int SetAvalancheEmitterDataFunc_types_5F40[] __asm__("SetAvalancheEmitterDataFunc_types");
 extern "C" void* MEM_copy_5F40(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cAvalanche_setAvalancheNodeEmitterData_5F40(tInstanceRecord*, tAddParticleData*)
     __asm__("cAvalanche_setAvalancheNodeEmitterData");
@@ -8729,7 +8729,7 @@ static inline tInstanceRecord *conv_5F40(unsigned i) { if (i == 0) return 0; ret
  * instance.
  *
  * Copies the static defaults (set up on the first call) into a 224-byte parameter block and lets each argument override
- * the field its index names, turning an int into a float where the field type table D_004467A0 says eLunoVar_Float. The
+ * the field its index names, turning an int into a float where the field type table SetAvalancheEmitterDataFunc_types says eLunoVar_Float. The
  * block has the layout of AddParticleFunc's tAddParticleData: emitter parameters first (NumParticles 1, Duration -1,
  * Damp 1, Size 4, ...), then InstId at +0xD8 (default -1).
  *
@@ -8813,7 +8813,7 @@ extern "C" t3Vector SetAvalancheEmitterDataFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int keywordType = D_004467A0_5F40[idx];
+        int keywordType = SetAvalancheEmitterDataFunc_types_5F40[idx];
         setArgField(&fields[idx], x, keywordType);
     }
     unsigned id = buf->InstId;
@@ -9405,7 +9405,7 @@ CHECK_SIZE(tMultiParticleData, 0xE4);
 extern t3Vector luno_gLunoNil_6A90 __asm__("luno_gLunoNil");
 extern tMultiParticleData sMultiParticleDefaults __asm__("D_004FBF68");
 extern int D_58B4_6A90 __asm__("D_004A58B4");
-extern const int D_00446890_6A90[] __asm__("D_00446890");
+extern const int MultiParticleFunc_types_6A90[] __asm__("MultiParticleFunc_types");
 extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int cMultiParticleMan_TheMultiParticleMan_6A90 __asm__("cMultiParticleMan_TheMultiParticleMan");
 extern "C" void cMultiParticleMan_addParticle_6A90(int, int, tMultiParticleData*,
@@ -9414,7 +9414,7 @@ extern "C" void cMultiParticleMan_addParticle_6A90(int, int, tMultiParticleData*
  * Script command MultiParticle: adds a particle system to the multi-particle manager.
  *
  * Copies the static tMultiParticleData defaults (D_004FBF68, set once under D_004A58B4: identity colour/vectors, 16,
- * 20.0, MaxInst 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the
+ * 20.0, MaxInst 0x80, ...) into a local, applies the keyword arguments (types from MultiParticleFunc_types; int to float where the
  * type is eLunoVar_Float), and calls cMultiParticleMan_addParticle(TheMultiParticleMan, Id, data, MaxInst).
  *
  * @param n  the number of keyword arguments
@@ -9494,7 +9494,7 @@ extern "C" t3Vector MultiParticleFunc(int n, luno_cLunoCArg *params) {
     luno_cLunoCArg *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->Index;
-        int argType = D_00446890_6A90[idx];
+        int argType = MultiParticleFunc_types_6A90[idx];
         setArgField(&fields[idx], x, argType);
     }
     cMultiParticleMan_addParticle_6A90(cMultiParticleMan_TheMultiParticleMan_6A90, buf->Id, buf, buf->MaxInst);
@@ -9613,7 +9613,7 @@ CHECK_OFFSET(tCheckGateData, InstId3, 0x08);
 CHECK_OFFSET(tCheckGateData, null, 0x0C);
 CHECK_SIZE(tCheckGateData, 0x10);
 extern tCheckGateData sCheckGateDefaults __asm__("D_004FC060");
-extern int D_004A58BC;
+extern int CheckGateFunc_initFlag;
 extern const int CheckGateFunc_types[];
 extern "C" void* MEM_copy_6E68(void*, void*, int) __asm__("MEM_copy");
 /**
@@ -9634,11 +9634,11 @@ extern "C" void* MEM_copy_6E68(void*, void*, int) __asm__("MEM_copy");
  * @return @p ret
  */
 extern "C" luno_cLunoVar* CheckGateFunc(luno_cLunoVar *ret, int n, luno_cLunoCArg *params) {
-    if (D_004A58BC == 0) {
+    if (CheckGateFunc_initFlag == 0) {
         sCheckGateDefaults.InstId1 = 0xFFFFFFFF;
         sCheckGateDefaults.InstId2 = 0xFFFFFFFF;
         sCheckGateDefaults.InstId3 = 0xFFFFFFFF;
-        D_004A58BC = 1;
+        CheckGateFunc_initFlag = 1;
         sCheckGateDefaults.null = WScriptNullType(sCheckGateDefaults.null);
     }
     unsigned buf64[4];

@@ -549,7 +549,7 @@ extern "C" void cFEStateBuyAttrib_updateBank(cFEStateBuyAttrib* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" int cBEEconInterface_buyAttribute(void* iface, int a1, int charID, int attr);
 extern char str_PopupGroup[];
-extern const int D_004780B0[];
+extern const int cFEStateBuyAttrib_attributeOrder[];
 
 
 
@@ -560,7 +560,7 @@ extern const int D_004780B0[];
  *
  * Takes the total cost (+0xA0) from the bank (+0xA4) and zeroes it (cFEStateBuyAttrib_updateTotalCost), clears the
  * prompt flag (+0xA8), hides "PopupGroup" and focuses the attribute menu (+0xAC, vtable entry 7 with 1). For each of
- * the seven attributes it calls cBEEconInterface_buyAttribute(BE interface 11, 0, character, D_004780B0[i]) once per point bought
+ * the seven attributes it calls cBEEconInterface_buyAttribute(BE interface 11, 0, character, cFEStateBuyAttrib_attributeOrder[i]) once per point bought
  * (+0x84), then calls that interface's vtable entry 1; adds the bought points to the experience (+0x4C) and zeroes
  * them, and refreshes the levels, cost per level, experience display and bank. cFEStateBuyAttrib_onPopupEvent calls it
  * when the confirm popup closes with a yes.
@@ -579,7 +579,7 @@ void cFEStateBuyAttrib::buyExperience()
     cBEEconInterface* iface = (cBEEconInterface*)cBE_getInterface_Fv(cBE_getBE(), 11);
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->mPotentialExperience[i]; j++) {
-            cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
+            cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), cFEStateBuyAttrib_attributeOrder[i]);
         }
     }
     iface->submit();
@@ -1182,7 +1182,7 @@ extern char str_race_medals[];
 extern char str_race_peakNumpct_d[];
 extern char str_race_trackpct_d[];
 extern char str_race_medalpct_d[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_pct_d_pct_d_d[];
 extern char str_pct_s_Race[];
 extern char str_timepct_d_b[];
@@ -1228,7 +1228,7 @@ void cFEStateCareerStats::setupRacePlatinumMedalsList()
             char medal[80];
             sprintf(peak, str_race_peakNumpct_d, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(peak));
-            sprintf(num, D_004A2138, D_004780F0[idx] + 1);
+            sprintf(num, str_pct_d_j, D_004780F0[idx] + 1);
             cUIText_setAsciiString(textWidget, num);
             sprintf(track, str_race_trackpct_d, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(track));
@@ -1291,7 +1291,7 @@ extern char str_fs_peakNumpct_d[];
 extern char str_fs_trackpct_d[];
 extern char str_fs_pointspct_d[];
 extern char str_fs_medalpct_d[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_pct_d_pct_d_d[];
 extern char str_pct_s_Jam[];
 extern int D_00478110[];
@@ -1336,7 +1336,7 @@ void cFEStateCareerStats::setupFSPlatinumMedalsList()
             int level = idx / 4;
             sprintf(peak, str_fs_peakNumpct_d, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(peak));
-            sprintf(num, D_004A2138, level + 1);
+            sprintf(num, str_pct_d_j, level + 1);
             cUIText_setAsciiString(textWidget, num);
             sprintf(track, str_fs_trackpct_d, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(track));
@@ -1349,7 +1349,7 @@ void cFEStateCareerStats::setupFSPlatinumMedalsList()
                 cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
                 eventPoints = cBENewRaceInterface_getPlatinumGoal(race, D_00478110[idx], cBENewRaceInterface_getLocationDefaultGameEvent(race, D_00478110[idx]));
             }
-            sprintf(text, D_004A2138, eventPoints);
+            sprintf(text, str_pct_d_j, eventPoints);
             sprintf(timeName, str_fs_pointspct_d, i);
             textWidget = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(timeName));
             cUIText_setAsciiString(textWidget, text);
@@ -1415,7 +1415,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
 extern "C" char* fptodp(float v);
 extern char str_dash[] __attribute__((aligned(8)));
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_dash_sp_dash_sp_dash[];
 extern char str_ko[];
 extern char D_004A23C0[];
@@ -1472,7 +1472,7 @@ void cFEStateCareerStats::setupRidersBest()
         value = ((sBestEntry_6890*)&best.eventStat[0][0])[0].value;
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[0].track;
         if (value > 0) {
-            sprintf(buf, D_004A2138, value);
+            sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ko, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ko_event, buf);
@@ -1498,7 +1498,7 @@ void cFEStateCareerStats::setupRidersBest()
         value = ((sBestEntry_6890*)&best.eventStat[0][0])[1].value;
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[1].track;
         if (value > 0) {
-            sprintf(buf, D_004A2138, value);
+            sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ubers_event, buf);
@@ -1511,7 +1511,7 @@ void cFEStateCareerStats::setupRidersBest()
         value = ((sBestEntry_6890*)&best.eventStat[0][0])[2].value;
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[2].track;
         if (value > 0) {
-            sprintf(buf, D_004A2138, value);
+            sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_superubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_superubers_event, buf);
@@ -1524,7 +1524,7 @@ void cFEStateCareerStats::setupRidersBest()
         value = ((sBestEntry_6890*)&best.eventStat[0][0])[3].value;
         track = ((sBestEntry_6890*)&best.eventStat[0][0])[3].track;
         if (value > 0) {
-            sprintf(buf, D_004A2138, value);
+            sprintf(buf, str_pct_d_j, value);
             self->setTextSafe(str_ubergrinds, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             self->setTextSafe(str_ubergrinds_event, buf);
@@ -1562,7 +1562,7 @@ void cFEStateCareerStats::setupRidersBest()
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_favoriteEvent_label));
     cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_ovrcmnBestCombo));
     if (((sBestEntry_6890*)&best.eventStat[0][0])[4].value > 0) {
-        sprintf(buf, D_004A2138, ((sBestEntry_6890*)&best.eventStat[0][0])[4].value);
+        sprintf(buf, str_pct_d_j, ((sBestEntry_6890*)&best.eventStat[0][0])[4].value);
     } else {
         // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
         __builtin_memcpy(buf, str_dash, 2);

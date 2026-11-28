@@ -25,7 +25,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern signed char D_004A2C38;
+extern signed char cFELoadHintState_hintCounter;
 extern char str_101QPMPHints[];
 extern char str_kT_FEHINTTitlepct_d[];
 extern char str_kT_FEHINTDESpct_d[];
@@ -36,7 +36,7 @@ extern char str_Bitmap0000_b[];
 /**
  * Creates the loading-hint screen ("101QPMPHints") and fills it with the next hint and the loading image.
  *
- * Hints cycle through kT_FEHINTTitle%d / kT_FEHINTDES%d numbers 1-15, skipping 12 (counter D_004A2C38). The
+ * Hints cycle through kT_FEHINTTitle%d / kT_FEHINTDES%d numbers 1-15, skipping 12 (counter cFELoadHintState_hintCounter). The
  * image comes from the load info at +0x48 (its word at +0x10) and goes on the "Bitmap0000" widget.
  */
 void cFELoadHintState::onCreateScreen()
@@ -47,16 +47,16 @@ void cFELoadHintState::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    int n = D_004A2C38 + 1;
+    int n = cFELoadHintState_hintCounter + 1;
     if (n == 12) {
-        D_004A2C38++;
-        n = D_004A2C38 + 1;
+        cFELoadHintState_hintCounter++;
+        n = cFELoadHintState_hintCounter + 1;
     }
     char title[0x40];
     char body[0x40];
     sprintf(title, str_kT_FEHINTTitlepct_d, n);
     sprintf(body, str_kT_FEHINTDESpct_d, n);
-    D_004A2C38 = (D_004A2C38 + 1) % 15;
+    cFELoadHintState_hintCounter = (cFELoadHintState_hintCounter + 1) % 15;
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_hint_title));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(title));

@@ -6352,7 +6352,7 @@ struct sVtbl9_108C80 { sVEntry_108C80 e[9]; } __attribute__((aligned(8)));
 struct sVtbl22_108C80 { sVEntry_108C80 e[22]; } __attribute__((aligned(8)));
 
 extern const sVtbl9_108C80 D_00458618;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtbl22_108C80 D_00458660;
 extern char cComputer_vtbl[];
 
@@ -6410,7 +6410,7 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
     }
     cRiderHandler_cRiderHandler(((char*)self), 0);
     self->RiderHandler.GroundMotion.mRider->mScriptObjectVtbl = (void*)&D_00458618;
-    self->RiderHandler.GroundMotion.mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->RiderHandler.GroundMotion.mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->RiderHandler.GroundMotion.mRider, sizeof(cRiderState)) = (void**)&D_00458660;
     if (!inChrg)
     {
@@ -6524,7 +6524,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer__cComputer);
 // Compiler-generated: the composite's parts are destroyed in reverse order (the out-of-line part destructors
 // are called, the others are inlined), then the cRider virtual base when this is the most-derived object.
 // Needs -fno-rtti for this unit: the retail vtables carry no typeinfo pointer, and every level here stores
-// cRider's own 0x6D0 vtable (D_00459B90), which g++ only shares between classes without RTTI.
+// cRider's own 0x6D0 vtable (cRider_cScriptObjRider_vtbl), which g++ only shares between classes without RTTI.
 cRiderE_108C80::~cRiderE_108C80()
 {
 }
@@ -6552,7 +6552,7 @@ __asm__("_vt$14cRiderE_108C80 = cComputer_vtbl\n"
         "_vt$14cRiderE_108C80$12cRiderVb_s12 = D_00458660\n"
         "_vt$9cComp_s12 = cRiderHandler_vtbl\n"
         "_vt$9cComp_s12$13cRiderVbC_s12 = D_00458738\n"
-        "_vt$14cRiderVbB0_s12 = D_00459B90\n"
+        "_vt$14cRiderVbB0_s12 = cRider_cScriptObjRider_vtbl\n"
         "_vt$9cComp_s12$12cRiderVb_s12 = D_00458780\n"
         "_vt$15cCompPart19_s12$13cRiderVbC_s12 = D_00458928\n"
         "_vt$15cCompPart19_s12$12cRiderVb_s12 = D_00458970\n"

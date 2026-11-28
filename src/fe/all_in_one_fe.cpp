@@ -682,10 +682,10 @@ extern "C" void tRadarRiderInfo_Reset(int *block) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cHUDRadar_ShowRadar);
 #ifdef SKIP_ASM
-extern int D_004A275C;
+extern int cHUDRadar_showRadarFlag;
 
 /**
- * Sets the global flag D_004A275C.
+ * Sets the global flag cHUDRadar_showRadarFlag.
  *
  * cOVStateHUD1P_onUpdate also writes it, and the HUD marker drawers cHUDRadar_renderTracker / cHUDRadar_renderSplitTracker draw nothing while it
  * is 0. No callers.
@@ -693,22 +693,22 @@ extern int D_004A275C;
  * @param newValue  the new value
  */
 extern "C" void cHUDRadar_ShowRadar(int newValue) {
-    D_004A275C = newValue;
+    cHUDRadar_showRadarFlag = newValue;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cHUDRadar_IsRadarShown);
 #ifdef SKIP_ASM
-extern int D_004A275C;
+extern int cHUDRadar_showRadarFlag;
 
 /**
- * Returns the global flag D_004A275C (see cHUDRadar_ShowRadar). No callers.
+ * Returns the global flag cHUDRadar_showRadarFlag (see cHUDRadar_ShowRadar). No callers.
  *
- * @return the current value of D_004A275C
+ * @return the current value of cHUDRadar_showRadarFlag
  */
 extern "C" int cHUDRadar_IsRadarShown(void) {
-    return D_004A275C;
+    return cHUDRadar_showRadarFlag;
 }
 #endif
 
@@ -764,8 +764,8 @@ extern char cOVStateHUD1P_vtbl[];
  *
  * Restores cOVStateHUD1P_vtbl, destroys the two 0x8C-byte elements at +0x48 last to first (each through
  * cHUDRadar__cHUDRadar() on its part at +8, with flags 2 so nothing is freed), then calls the cUIState destructor
- * cUIState__cUIState(). cHUDRadar__cHUDRadar drops the shared instance count D_004A276C and clears the textures-loaded
- * flag D_004A2768 when the last element goes.
+ * cUIState__cUIState(). cHUDRadar__cHUDRadar drops the shared instance count cHUDRadar_instanceCount and clears the textures-loaded
+ * flag cHUDRadar_texturesLoadedFlag when the last element goes.
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
  */
@@ -924,11 +924,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the overlay with vtable D_00473ED8 (overlay id 22).
+ * Destroys the overlay with vtable cOVState_PEAKCHAL_RESULTS_vtbl (overlay id 22).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00473ED8.
+ * own. It is the destructor slot (+0xC) of cOVState_PEAKCHAL_RESULTS_vtbl.
  *
  */
 void cOVState::PEAKCHAL_RESULTS()
@@ -943,12 +943,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESU
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CE28(void*) __asm__("cUIState_cUIState");
-extern char D_00473ED8[];
+extern char cOVState_PEAKCHAL_RESULTS_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00473ED8 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_PEAKCHAL_RESULTS_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -969,7 +969,7 @@ void * cOVState::PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(int engine, int over
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_00473ED8;
+    VPTR_OF(cListNode, this) = (void**)cOVState_PEAKCHAL_RESULTS_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -1847,7 +1847,7 @@ void tHUDDef_getColour(void*, void*);
 
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 
-extern char D_00477F30[];
+extern char cOVStateHUD1P_rankHUDDefs[];
 extern "C" void cOVStateHUD1P_renderGlow_E1B0(char* self, sColour* colp, t2Vector* pos, t2Vector* size,
                                    float t, float sx, float sy, float amin, float amax) __asm__("cOVStateHUD1P_renderGlow");
 
@@ -1856,7 +1856,7 @@ extern "C" void cOVStateHUD1P_renderGlow_E1B0(char* self, sColour* colp, t2Vecto
  * riders in the race.
  *
  * The rider is AI->Riders[aiIndex] (SSXApp->Game->AI; aiIndex from @p rider) and its place is cRider::RaceRanking (0-based;
- * the ranking pass writes it). Element 24 of @p obj (+0x360) gives position and scale and D_00477F30, a 9-entry tHUDDef
+ * the ranking pass writes it). Element 24 of @p obj (+0x360) gives position and scale and cOVStateHUD1P_rankHUDDefs, a 9-entry tHUDDef
  * table, the rest: entry [place] the digit (size fallback: the digit texture w444[place], "nm1w".."nm6w"), entry 6 the
  * suffix, entry 7 the slash, entry 8 the total. cOVStateHUD1P_calcElemPos places the digit-plus-suffix box with element 24's
  * alignment and @p x, on element 24's layer. Under the suffix it draws the slash (w444[10], "slash") in entry 7's
@@ -1894,7 +1894,7 @@ void cOVStateHUD1P::renderRank(char* obj, int* rider, int x)
     scale.y = 1.0f;
     float k = 1.0f;
     cRider* panelRider = SSXApp->Game->AI->Riders[rider[0]];
-    tHUDDef_getColour(D_00477F30 + panelRider->RaceRanking * 36, &col);
+    tHUDDef_getColour(cOVStateHUD1P_rankHUDDefs + panelRider->RaceRanking * 36, &col);
     float rankAnimFrame = ((float*)rider)[0x12];
     if (rankAnimFrame >= 0.0f) {
         if (panelRider->RaceRanking == 0) {
@@ -1906,11 +1906,11 @@ void cOVStateHUD1P::renderRank(char* obj, int* rider, int x)
     tHUDDef_getScale(obj + 0x360, &sc);
     int* tex = (int*)(&mpNumWhite[0]);
     tHUDDef_getPos(obj + 0x360, &elemPos);
-    tHUDDef_getSize(D_00477F30 + 0xD8, &size1, 0);
+    tHUDDef_getSize(cOVStateHUD1P_rankHUDDefs + 0xD8, &size1, 0);
     size1.x *= sc.x;
     size1.y *= sc.y;
     int off = panelRider->RaceRanking << 2;
-    tHUDDef_getSize(D_00477F30 + panelRider->RaceRanking * 36, &size2, *(int*)((char*)tex + off));
+    tHUDDef_getSize(cOVStateHUD1P_rankHUDDefs + panelRider->RaceRanking * 36, &size2, *(int*)((char*)tex + off));
     size2.x *= sc.x;
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
@@ -1920,14 +1920,14 @@ void cOVStateHUD1P::renderRank(char* obj, int* rider, int x)
     drawPos.y += size1.y;
     int* w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
-    tHUDDef_getColour(D_00477F30 + 0xFC, &totalColour);
-    tHUDDef_getSize(D_00477F30 + 0xFC, &size3, 0);
+    tHUDDef_getColour(cOVStateHUD1P_rankHUDDefs + 0xFC, &totalColour);
+    tHUDDef_getSize(cOVStateHUD1P_rankHUDDefs + 0xFC, &size3, 0);
     size3.x *= sc.x;
     size3.y *= sc.y;
     cOVStateHUD1P_renderBitmap(((char*)this), (int)mpNumSlash, &drawPos, &size3, &scale, &totalColour);
     drawPos.x += size3.x;
-    tHUDDef_getColour(D_00477F30 + 0x120, &totalColour);
-    tHUDDef_getSize(D_00477F30 + 0x120, &size3, 0);
+    tHUDDef_getColour(cOVStateHUD1P_rankHUDDefs + 0x120, &totalColour);
+    tHUDDef_getSize(cOVStateHUD1P_rankHUDDefs + 0x120, &size3, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int off3 = (cBENewRaceInterface_newRace.iNumberRiders - 1) << 2;
     cOVStateHUD1P_renderBitmap(((char*)this), *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
@@ -2429,7 +2429,7 @@ struct Obj_F660 {
 };
 extern int D_00536640[];
 extern char str_pct_02d_pct_02d_pct_02d_b[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern tARGB D_004C8808;
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2502,7 +2502,7 @@ void cOVStateHUD1P::renderFinishMessage(int elems, int* rider, int x, int flag)
             int rem = t % 3600;
             sprintf(buf, str_pct_02d_pct_02d_pct_02d_b, t / 3600, rem / 60, rem % 60);
         } else {
-            sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
+            sprintf(buf, str_pct_d_j, val + rider[0x7C / 4]);
         }
         cFont* t = mpHUDFont;
         drawPos.x += size.x * 0.5f;
@@ -2537,7 +2537,7 @@ struct Obj_F9B0 {
     virtual int getAIIndex();
 };
 extern float cSinCosTable_gSinCosTable[];
-extern V4_F9B0 D_004C8648;
+extern V4_F9B0 cOVStateHUD1P_collectibleFlashColour;
 extern char str_pct_d_pct_d_b[];
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2562,7 +2562,7 @@ extern "C" void cFont_text(void*, float, float, char*);
  * cSinCosTable_gSinCosTable). Element 57 of @p obj (+0x804) gives position, size (fallback: the texture icons[5], +0x4A8) and scale;
  * cOVStateHUD1P_calcElemPos places the icon with the element's alignment and @p x, and it is drawn white at the element's size
  * (times the pulse) on the element's layer; the element's scale applies to the text only. The text goes right of the
- * icon, centred on it vertically, in the HUD font (+0x42C), coloured D_004C8648 while @p animFrame <= 0.44 and in the element's
+ * icon, centred on it vertically, in the HUD font (+0x42C), coloured cOVStateHUD1P_collectibleFlashColour while @p animFrame <= 0.44 and in the element's
  * colour after. It prints "%d/%d" with cBEMissionInterface_getCurrentCollectForSection (the rider's collected count for the location, from its profile)
  * and cBEMissionInterface_getTotalCollectForSection (the location's total) on back-end interface 10, the rider given by its AI index (cBeing interface
  * at +0x6C0, virtual getAIIndex). The font Scale is then restored to BaseScale.
@@ -2613,7 +2613,7 @@ void cOVStateHUD1P::renderCollectibles(char* obj, cRider* rider, int x, float an
         if (animFrame > 0.4399542808532715f) {
             tHUDDef_getColour(obj + 0x804, &col);
         } else {
-            col = D_004C8648;
+            col = cOVStateHUD1P_collectibleFlashColour;
         }
         cFont* tx2 = mpHUDFont;
         tx2->Scale[0] = tx2->BaseScale[0] * sc.x;
@@ -2657,14 +2657,14 @@ extern float D_004A5B44;
 extern sColour D_004C8828;
 extern sColour D_004C8848;
 extern sColour D_004C8868;
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern "C" int cBEMissionInterface_isMissionCompleted(void*, int);
 extern "C" int cBEMissionInterface_getMissionIdx(void*, int);
 extern "C" void cFont_centertextf(void* font, float x, float y, const char* fmt, ...);
 
 static inline void PrintAt_FD38(void* font, float x, float y, const t2Vector& off, float f, int n)
 {
-    cFont_centertextf(font, off.x + x, (off.y + y) - f, D_004A2138, n);
+    cFont_centertextf(font, off.x + x, (off.y + y) - f, str_pct_d_j, n);
 }
 static inline float* scaleP() { return &D_004A5B38; }
 /**
@@ -2782,7 +2782,7 @@ struct sSettings_00C0 {
 extern sSettings_00C0 cBEOptionInterface_mOption_00C0 __asm__("cBEOptionInterface_mOption");
 extern char str_KM_H[];
 extern char str_MPH[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern "C" void cFont_textExtent(void* self, const char* str, float* rect, int n, float sx, float sy);
 extern "C" void cFont_text(void*, float, float, char*);
 extern "C" void cFont_centertext(void*, float, float, char*);
@@ -2892,7 +2892,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     cOVStateHUD1P_calcElemPos_00C0(((char*)self), &drawPos, &elemPos, &size, t2Vector(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
     cFont_text(font_00C0(((char*)self)), drawPos.x, drawPos.y, units);
     char buf[8];
-    sprintf(buf, D_004A2138, (int)(speed + 0.5f));
+    sprintf(buf, str_pct_d_j, (int)(speed + 0.5f));
     if (strlen(buf) > 2)
         ScaleV2_00C0(sc, 1.1214120388031006f);
     else
@@ -3652,12 +3652,12 @@ extern "C" void cOVState_MAP_onMenuGainFocus(void) {
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
-extern char D_00473248[];
+extern char cOVState_PRIVATEMESSAGE_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00473248 (overlay id 40) without an engine.
+ * Constructs the overlay with vtable cOVState_PRIVATEMESSAGE_vtbl (overlay id 40) without an engine.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
@@ -3675,7 +3675,7 @@ void * cOVState::PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1()
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_00473248;
+    VPTR_OF(cListNode, this) = (void**)cOVState_PRIVATEMESSAGE_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -3686,12 +3686,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE)
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1468(void*) __asm__("cUIState_cUIState");
-extern char D_00473248[];
+extern char cOVState_PRIVATEMESSAGE_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00473248 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_PRIVATEMESSAGE_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -3712,7 +3712,7 @@ void * cOVState::PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE(int engine, int overlayI
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_00473248;
+    VPTR_OF(cListNode, this) = (void**)cOVState_PRIVATEMESSAGE_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -3725,11 +3725,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PRIVATEMESSAGE__cOVState_PRIVATEMESSAGE
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 /**
- * Destroys the overlay with vtable D_00473248 (overlay id 40).
+ * Destroys the overlay with vtable cOVState_PRIVATEMESSAGE_vtbl (overlay id 40).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00473248.
+ * own. It is the destructor slot (+0xC) of cOVState_PRIVATEMESSAGE_vtbl.
  *
  * @return whatever cUIState__cUIState returns
  */
@@ -4667,11 +4667,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_FREESTYLE_PREEVENT__cOVState_FREESTYLE_
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 /**
- * Destroys the overlay with vtable D_00472778 (overlay id 9).
+ * Destroys the overlay with vtable cOVState_FREESTYLE_PREEVENT_vtbl (overlay id 9).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00472778.
+ * own. It is the destructor slot (+0xC) of cOVState_FREESTYLE_PREEVENT_vtbl.
  *
  * @return whatever cUIState__cUIState returns
  */
@@ -4687,12 +4687,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_FREESTYLE_PREEVENT_cOVState_FREESTYLE_P
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1EA8(void*) __asm__("cUIState_cUIState");
-extern char D_00472778[];
+extern char cOVState_FREESTYLE_PREEVENT_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00472778 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_FREESTYLE_PREEVENT_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4713,7 +4713,7 @@ void * cOVState::FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT(int engine, int 
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_00472778;
+    VPTR_OF(cListNode, this) = (void**)cOVState_FREESTYLE_PREEVENT_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -4726,11 +4726,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_MULTI_PREEVENT__cOVState_MULTI_PREEVENT
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 /**
- * Destroys the overlay with vtable D_004726A0 (overlay id 21).
+ * Destroys the overlay with vtable cOVState_MULTI_PREEVENT_vtbl (overlay id 21).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_004726A0.
+ * own. It is the destructor slot (+0xC) of cOVState_MULTI_PREEVENT_vtbl.
  *
  * @return whatever cUIState__cUIState returns
  */
@@ -4746,12 +4746,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_MULTI_PREEVENT_cOVState_MULTI_PREEVENT)
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1F38(void*) __asm__("cUIState_cUIState");
-extern char D_004726A0[];
+extern char cOVState_MULTI_PREEVENT_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_004726A0 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_MULTI_PREEVENT_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4772,7 +4772,7 @@ void * cOVState::MULTI_PREEVENT_cOVState_MULTI_PREEVENT(int engine, int overlayI
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_004726A0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_MULTI_PREEVENT_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -4785,11 +4785,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_CHALLENGE_PREEVENT__cOVState_CHALLENGE_
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 /**
- * Destroys the overlay with vtable D_004725C8 (overlay id 20).
+ * Destroys the overlay with vtable cOVState_CHALLENGE_PREEVENT_vtbl (overlay id 20).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_004725C8.
+ * own. It is the destructor slot (+0xC) of cOVState_CHALLENGE_PREEVENT_vtbl.
  *
  * @return whatever cUIState__cUIState returns
  */
@@ -4805,12 +4805,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_CHALLENGE_PREEVENT_cOVState_CHALLENGE_P
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1FC8(void*) __asm__("cUIState_cUIState");
-extern char D_004725C8[];
+extern char cOVState_CHALLENGE_PREEVENT_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_004725C8 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_CHALLENGE_PREEVENT_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4831,7 +4831,7 @@ void * cOVState::CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(int engine, int 
     mAllowPauseMenu = 0;
     mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, this) = (void**)D_004725C8;
+    VPTR_OF(cListNode, this) = (void**)cOVState_CHALLENGE_PREEVENT_vtbl;
     *(unsigned short*)mszChatBuff = chatInit;
     return ((void*)this);
 }
@@ -5264,13 +5264,13 @@ extern "C" void func_00222428(void) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", calcCRC16);
 #ifdef SKIP_ASM
-extern unsigned short D_00441D38[];
+extern unsigned short calcCRC16_table[];
 
 /**
- * Computes a CRC-16 over @p n bytes at @p bytes with the 256-entry table D_00441D38.
+ * Computes a CRC-16 over @p n bytes at @p bytes with the 256-entry table calcCRC16_table.
  *
- * D_00441D38 is the reflected CRC-16/IBM table (0x0000, 0xC0C1, 0xC181, 0x0140, ...; polynomial 0xA001). Byte-wise: crc
- * = D_00441D38[(byte ^ crc) & 0xFF] ^ (crc >> 8), starting from 0xFBEA (64490), with no final XOR. No callers.
+ * calcCRC16_table is the reflected CRC-16/IBM table (0x0000, 0xC0C1, 0xC181, 0x0140, ...; polynomial 0xA001). Byte-wise: crc
+ * = calcCRC16_table[(byte ^ crc) & 0xFF] ^ (crc >> 8), starting from 0xFBEA (64490), with no final XOR. No callers.
  *
  * @param bytes  the bytes to checksum
  * @param n  how many bytes
@@ -5280,7 +5280,7 @@ extern "C" unsigned int calcCRC16(const unsigned char *bytes, int n) {
     const unsigned char *end = bytes + n;
     unsigned int crc = 64490;
     while (bytes < end) {
-        crc = D_00441D38[(*bytes++ ^ crc) & 0xFF] ^ (crc >> 8);
+        crc = calcCRC16_table[(*bytes++ ^ crc) & 0xFF] ^ (crc >> 8);
     }
     return crc;
 }

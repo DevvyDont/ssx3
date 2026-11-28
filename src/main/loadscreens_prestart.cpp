@@ -614,7 +614,7 @@ extern char str_GLUIInput[];
 extern char str_cFEStateMemCard[];
 extern char str_cFEStateProgressive[];
 extern void* cFEInput_vtbl[];
-extern void* D_0047CA18[];
+extern void* cFEStateProgressive_vtbl[];
 
 
 /**
@@ -624,7 +624,7 @@ extern void* D_0047CA18[];
  * into mpUI, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (mpLocaleInterface) and Fonts
  * (mpFontInterface) and a new 0x1C-byte cFEInput (tag "GLUIInput", vtable cFEInput_vtbl, fields cleared) as its
  * mpInput. Type (meStartScreen_type) eStartScreen_Legal pushes a cFEStateMemCard (584 bytes, cFEStateMemCard_cFEStateMemCard1);
- * eStartScreen_Progressive pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable D_0047CA18);
+ * eStartScreen_Progressive pushes a 72-byte "cFEStateProgressive" (cUIState base cUIState_cUIState, vtable cFEStateProgressive_vtbl);
  * any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
 void cStartScreen::load()
@@ -650,7 +650,7 @@ void cStartScreen::load()
     } else if (mode == eStartScreen_Progressive) {
         cUIState* progressiveState = (cUIState*)operator new(72, str_cFEStateProgressive, 0, 0);
         cUIState_cUIState(progressiveState, mpUI);
-        VPTR_OF(cListNode, progressiveState) = D_0047CA18;
+        VPTR_OF(cListNode, progressiveState) = cFEStateProgressive_vtbl;
         cUIStateStack_push(&mpUI->mStateStack, progressiveState);
     }
 }
@@ -804,7 +804,7 @@ extern char str_cGameLoadStateConquer[];
 extern char str_cGameLoadState[];
 extern void* cFEInput_vtbl[];
 extern char cGameLoadStateOutLodge_vtbl[];
-extern char D_0047C7A8[];
+extern char cGameLoadStateConquer_vtbl[];
 extern char cGameLoadState_vtbl[];
 
 
@@ -843,7 +843,7 @@ struct cLoadItemB_2E20 {
     cLoadItemB_2E20(void* ui)
     {
         cUIState_cUIState(this, ui);
-        *(void**)(pad + 8) = D_0047C7A8;
+        *(void**)(pad + 8) = cGameLoadStateConquer_vtbl;
         D_004A19DC = 0;
     }
 };
@@ -867,7 +867,7 @@ struct cLoadItemC_2E20 {
  * "GLUIInput" input. Then pushes one 0x48-byte state built on cUIState_cUIState:
  * - "cGameLoadStateOutLodge" (vtable cGameLoadStateOutLodge_vtbl, clears gInLodge) when gInLodge is set, or on the career path
  *   (cGamePath kGAMEPATH_WORLDCIRCUIT) in kGAMEMODE_TIMECHALLENGE or kGAMEMODE_PNTSCHALLENGE;
- * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
+ * - "cGameLoadStateConquer" (cGameLoadStateConquer_vtbl, clears D_004A19DC) on the career path in any other mode;
  * - otherwise "cGameLoadState" (cGameLoadState_vtbl) with this screen as its owner (+0x48), after
  *   cGameLoadScreen_loadTexture(this, 0).
  *

@@ -217,7 +217,7 @@ public:
 // The controller classes defined above are this class's bases; their destructors were inline in the original
 // (retail expands each one here), so these twins repeat the same layouts with in-class destructors. The matched
 // out-of-line copies above keep their own definitions. The retail TU was built without RTTI: every class shares
-// cRider's +0x6D0 vtable (D_00459B90), which g++ 2.95 only does with -fno-rtti.
+// cRider's +0x6D0 vtable (cRider_cScriptObjRider_vtbl), which g++ 2.95 only does with -fno-rtti.
 #define VB_INLINE_BASE(addr, Head)                                                                   \
     class cVbIn##addr : public Head, virtual public cRiderVb_hpc {                                   \
     public:                                                                                          \

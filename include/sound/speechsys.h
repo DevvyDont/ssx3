@@ -6,7 +6,7 @@
 // d:/ssx/code/source/sound/speechsys.cpp (preview assert strings); retail methods are in the sound/bankmonitor unit
 // (0x2B07F8..0x2B1780) plus out-of-line inline functions in bx/seg_1BA100 (0x2BACF0..0x2BAD14).
 // One instance: the cSpeechSys base of cController, i.e. gSSXAudio + 0x5560 (sound/ssxaudio.h), built by the
-// cController ctor cSpeechSys_cSpeechSys(this + 0x5560, 0, ...); D_004A37B4 points at it.
+// cController ctor cSpeechSys_cSpeechSys(this + 0x5560, 0, ...); cSpeechSys_instance points at it.
 //   cSpeechSys : virtual cStreamSys (: virtual cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
 // Non-virtual part 0x1C0 [R]: in a complete cSpeechSys the ctor (inchrg != 0) puts cSoundSys at +0x1C0, cBankManager
 // at +0x1C8 and cStreamSys at +0xC98; in cSSXAudio the cController data starts at 0x5560 + 0x1C0 = 0x5720. Vtable
@@ -105,6 +105,6 @@ CHECK_SIZE(cSpeechSys, 0x1C0);
 
 // The speech system inside the audio system (cSSXAudio::SpeechSys): its constructor stores itself here, its
 // destructor clears it. EA's name for it is unknown.
-extern cSpeechSys* D_004A37B4;
+extern cSpeechSys* cSpeechSys_instance;
 
 #endif /* SOUND_SPEECHSYS_H */

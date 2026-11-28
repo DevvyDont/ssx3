@@ -89,13 +89,13 @@ int cRiderAnimBase::getSequencer(int slot)
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimSequencerName);
 #ifdef SKIP_ASM
 extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int anim);
-extern int D_0044AF80[];
+extern int cRiderAnimBase_sequencerNames[];
 
 /**
  * Returns the name of the sequencer that AI anim @p anim plays on.
  *
  * Word 3 of the anim's attribute record (cAIAnimEventMap_getAnimPlayAttr) is the sequencer slot; the name comes from
- * D_0044AF80: "GraftCycle", "Graft", "Body", "HeadRel2nd", "TorsoRel2nd", "LegsRel2nd".
+ * cRiderAnimBase_sequencerNames: "GraftCycle", "Graft", "Body", "HeadRel2nd", "TorsoRel2nd", "LegsRel2nd".
  *
  * @param anim  the AI anim id
  * @return the sequencer name (as an int)
@@ -103,7 +103,7 @@ extern int D_0044AF80[];
 int cRiderAnimBase::getAIAnimSequencerName(int anim)
 {
     int i = cAIAnimEventMap_getAnimPlayAttr(anim)->SequencerID;
-    return D_0044AF80[i];
+    return cRiderAnimBase_sequencerNames[i];
 }
 #endif
 //100%

@@ -115,14 +115,14 @@ void cOVStateTrophy::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_cHUDRadar);
 #ifdef SKIP_ASM
 extern char cHUDRadar_vtbl[];
-extern int D_004A276C;
+extern int cHUDRadar_instanceCount;
 extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* a, tRect* r);
 
 /**
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
  *
  * Installs its vtable cHUDRadar_vtbl at +0x38, lays it out over the whole 640 x 480 screen with cHUDRadar_calcLayout and counts
- * the instance in D_004A276C (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and cOVStateHUD1P_cOVStateHUD1P1 call it.
+ * the instance in cHUDRadar_instanceCount (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and cOVStateHUD1P_cOVStateHUD1P1 call it.
  *
  * @return @p self
  */
@@ -135,7 +135,7 @@ extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
     screenRect.W = 640.0f;
     screenRect.H = 480.0f;
     self->calcLayout(&screenRect, &screenRect);
-    D_004A276C++;
+    cHUDRadar_instanceCount++;
     return ((void*)self);
 }
 #endif
@@ -144,14 +144,14 @@ extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar__cHUDRadar);
 #ifdef SKIP_ASM
 extern char cHUDRadar_vtbl[];
-extern int D_004A276C;
-extern int D_004A2768;
+extern int cHUDRadar_instanceCount;
+extern int cHUDRadar_texturesLoadedFlag;
 void operator_delete(int*);
 
 /**
- * Destroys a course-progress tracker: restores its vtable cHUDRadar_vtbl and drops the instance count D_004A276C.
+ * Destroys a course-progress tracker: restores its vtable cHUDRadar_vtbl and drops the instance count cHUDRadar_instanceCount.
  *
- * When the last tracker goes, D_004A2768 is cleared so the next layout (cHUDRadar_init) looks the icon textures and the
+ * When the last tracker goes, cHUDRadar_texturesLoadedFlag is cleared so the next layout (cHUDRadar_init) looks the icon textures and the
  * font up again. It is the only slot of cHUDRadar_vtbl (+0xC); cOVStateHUD1P__cOVStateHUD1P calls it for the panels'
  * trackers.
  *
@@ -159,11 +159,11 @@ void operator_delete(int*);
  */
 extern "C" void cHUDRadar__cHUDRadar(cHUDRadar* self, int flags)
 {
-    int n = D_004A276C - 1;
+    int n = cHUDRadar_instanceCount - 1;
     self->mVtbl = (void**)cHUDRadar_vtbl;
-    D_004A276C = n;
+    cHUDRadar_instanceCount = n;
     if (n == 0) {
-        D_004A2768 = 0;
+        cHUDRadar_texturesLoadedFlag = 0;
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -179,7 +179,7 @@ extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* a, tRect* r);
 extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
 extern "C" int cUIFontInterface_getFontByHashName(void* bank, int hash);
 extern int D_004A2764;
-extern int D_004A2768;
+extern int cHUDRadar_texturesLoadedFlag;
 extern char str_fefont[];
 struct sTex_20EB50 {
     int name;
@@ -192,10 +192,10 @@ extern sTex_20EB50 D_004C8C58[];
 /**
  * Lays out a course-progress tracker in a screen rectangle, loading the shared icons and font first when needed.
  *
- * On the first call after the last tracker was destroyed (D_004A2768 clear) it looks up the 11 icon records of
+ * On the first call after the last tracker was destroyed (cHUDRadar_texturesLoadedFlag clear) it looks up the 11 icon records of
  * D_004C8C58 (name hash, width, height, texture) in the UI texture bank (SSXApp->Game->UI + 0x58,
  * cUITextureBank_getElementByHashname) and the "fefont" font in the UI's font bank (cUIFontInterface_getFontByHashName on UI + 0x8) into
- * D_004A2764, and sets D_004A2768. Then cHUDRadar_calcLayout does the layout. cOVStateHUD1P_onCreateScreen calls it for both
+ * D_004A2764, and sets cHUDRadar_texturesLoadedFlag. Then cHUDRadar_calcLayout does the layout. cOVStateHUD1P_onCreateScreen calls it for both
  * panels' trackers.
  *
  * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
@@ -203,7 +203,7 @@ extern sTex_20EB50 D_004C8C58[];
  */
 void cHUDRadar::init(tRect* screenRect, tRect* area)
 {
-    if (D_004A2768 == 0) {
+    if (cHUDRadar_texturesLoadedFlag == 0) {
         cUIEngine* res = SSXApp->Game->UI;
         int i;
         for (i = 0; i < 11; i++) {
@@ -211,7 +211,7 @@ void cHUDRadar::init(tRect* screenRect, tRect* area)
         }
         void* bank = res->mpFontInterface;
         D_004A2764 = cUIFontInterface_getFontByHashName(bank, GetHashValue32(str_fefont));
-        D_004A2768 = 1;
+        cHUDRadar_texturesLoadedFlag = 1;
     }
     calcLayout(screenRect, area);
 }
@@ -221,7 +221,7 @@ void cHUDRadar::init(tRect* screenRect, tRect* area)
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_calcLayout);
 #ifdef SKIP_ASM
 extern int D_004A2764;
-extern int D_004A2768;
+extern int cHUDRadar_texturesLoadedFlag;
 // D_004C8C58 is the 11-entry texture table (size 0xB0); this float sits at +0x48 inside it.
 extern float D_004C8C58_f[] __asm__("D_004C8C58");
 
@@ -243,7 +243,7 @@ extern float D_004C8C58_f[] __asm__("D_004C8C58");
 void cHUDRadar::calcLayout(tRect* screenRect, tRect* area)
 {
     float textHeight;
-    if (D_004A2768 != 0) {
+    if (cHUDRadar_texturesLoadedFlag != 0) {
         cFont* tex = (cFont*)((char*)D_004A2764);
         textHeight = (float)tex->MaxCharHeight * tex->BaseScale[1] * 0.666700005531311f;
     } else {
@@ -270,16 +270,16 @@ struct sTrophySlot20ED20 {
     int pad[5];
 };
 struct sPad16;
-extern sPad16 D_004C8BC8;
+extern sPad16 cHUDRadar_riderSlots;
 extern char* cHUDRadar_mpRadarHeader;
-extern int D_004A2760;
+extern int cHUDRadar_ridersResetFlag;
 extern "C" void updateRadarRider(int i);
 
 /**
  * Updates every rider's course progress for the trackers.
  *
  * When course data is loaded (cHUDRadar_mpRadarHeader) it runs updateRadarRider for each rider of the race (SSXApp->Game->AI, count at
- * +0x78), clears that rider's reset flag in D_004C8BC8 and finally clears D_004A2760 so the trackers may draw.
+ * +0x78), clears that rider's reset flag in cHUDRadar_riderSlots and finally clears cHUDRadar_ridersResetFlag so the trackers may draw.
  * cOVStateHUD1P_onUpdate calls it.
  */
 extern "C" void updateRadarRiders(void)
@@ -289,9 +289,9 @@ extern "C" void updateRadarRiders(void)
         int i;
         for (i = 0; i < *(int*)(race + 0x78); i++) {
             updateRadarRider(i);
-            ((sTrophySlot20ED20*)&D_004C8BC8)[i].active = 0;
+            ((sTrophySlot20ED20*)&cHUDRadar_riderSlots)[i].active = 0;
         }
-        D_004A2760 = 0;
+        cHUDRadar_ridersResetFlag = 0;
     }
 }
 #endif
@@ -403,7 +403,7 @@ struct sSlot_EDA0 {
     float rel;
     int relValid;
 };
-extern sSlot_EDA0 D_004C8BC8_EDA0[6] __asm__("D_004C8BC8");
+extern sSlot_EDA0 cHUDRadar_riderSlots_EDA0[6] __asm__("cHUDRadar_riderSlots");
 
 struct sMarker_EDA0 {
     int type;
@@ -458,8 +458,8 @@ extern char str_pct_dpct_pct[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFont_centertext(void* font, float x, float y, const char* str);
 
-extern int D_004A275C;
-extern char* D_004A2758;
+extern int cHUDRadar_showRadarFlag;
+extern char* cHUDRadar_markerTable;
 extern int D_005308D0[];
 
 // The race (SSXApp->0x84->0xC; as in seg/seg_1FBE38): rider objects at 0x28, rider count at 0x78.
@@ -485,7 +485,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  * Draws the single-player course-progress tracker for @p rider: a vertical bar over the 10000-unit stretch of course
  * around the rider, with every racer, the course markers and the percentage done.
  *
- * It draws nothing until the progress table has been updated (D_004A2760 clear), while the tracker is off (D_004A275C,
+ * It draws nothing until the progress table has been updated (cHUDRadar_ridersResetFlag clear), while the tracker is off (cHUDRadar_showRadarFlag,
  * cHUDRadar_ShowRadar), without a rider or without course data. The viewer is the rider's AI index (the cBeing at rider +
  * 0x6C0). First each racer's lateral offset from the viewer (its slot position minus the viewer's, clamped to +-2000)
  * is smoothed into the slot (+0x10), moving at most 46.3 per frame unless the slot is invalid, and all slots are
@@ -499,7 +499,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  *   the part done;
  * - each racer inside the window (plus a 20 px margin) at its distance, shifted sideways by its offset and clipped to
  *   the bar with matching uvs: the viewer icon 1, humans icon 3, AI racers icon 2 (layers 12, 13, 14);
- * - the course markers (D_004A2758: type and distance pairs) inside the window as icon 5 + type, except type 1 when bit
+ * - the course markers (cHUDRadar_markerTable: type and distance pairs) inside the window as icon 5 + type, except type 1 when bit
  *   9 of D_005308D0 is set and GameModeMan + 0x88 is nonzero.
  *
  * Each quad goes through cPS2GraphicsMan_RenderTriStrip (GrMan's virtual slot 70) with its layer in bits 5-9 of the
@@ -510,34 +510,34 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  */
 void cHUDRadar::renderTracker(cRider* rider)
 {
-    if (D_004A2760 != 0)
+    if (cHUDRadar_ridersResetFlag != 0)
         return;
-    if (D_004A275C == 0)
+    if (cHUDRadar_showRadarFlag == 0)
         return;
     if (((char*)rider) == 0)
         return;
-    sMarker_EDA0* markers = (sMarker_EDA0*)D_004A2758;
+    sMarker_EDA0* markers = (sMarker_EDA0*)cHUDRadar_markerTable;
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
     int me = ((cBeing_EDA0*)(&VPTR_AT(rider, sizeof(cRiderState))))->getAIIndex();
     sRace_EDA0* race = (sRace_EDA0*)SSXApp->Game->AI;
-    float myDist = D_004C8BC8_EDA0[me].dist;
-    float myPos = D_004C8BC8_EDA0[me].pos;
+    float myDist = cHUDRadar_riderSlots_EDA0[me].dist;
+    float myPos = cHUDRadar_riderSlots_EDA0[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
         if (unk_034 != me)
-            D_004C8BC8_EDA0[i].relValid = 0;
+            cHUDRadar_riderSlots_EDA0[i].relValid = 0;
         if (i < n) {
-            float d = D_004C8BC8_EDA0[i].pos - myPos;
+            float d = cHUDRadar_riderSlots_EDA0[i].pos - myPos;
             if (d < -2000.0f)
                 d = -2000.0f;
             else if (d > 2000.0f)
                 d = 2000.0f;
-            if (D_004C8BC8_EDA0[i].relValid != 0)
-                d = limitStep_EDA0(d, D_004C8BC8_EDA0[i].rel, 46.29629898071289f);
-            D_004C8BC8_EDA0[i].rel = d;
-            D_004C8BC8_EDA0[i].relValid = 1;
+            if (cHUDRadar_riderSlots_EDA0[i].relValid != 0)
+                d = limitStep_EDA0(d, cHUDRadar_riderSlots_EDA0[i].rel, 46.29629898071289f);
+            cHUDRadar_riderSlots_EDA0[i].rel = d;
+            cHUDRadar_riderSlots_EDA0[i].relValid = 1;
         }
     }
     sVert_EDA0 verts[4];
@@ -559,7 +559,7 @@ void cHUDRadar::renderTracker(cRider* rider)
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
-    float frac = D_004C8BC8_EDA0[me].dist / *(float*)(course + 0x10);
+    float frac = cHUDRadar_riderSlots_EDA0[me].dist / *(float*)(course + 0x10);
     if (D_004A4EB4 == 0) {
         D_004C6868.r = 1.0f;
         D_004C6868.g = 1.0f;
@@ -592,14 +592,14 @@ void cHUDRadar::renderTracker(cRider* rider)
     sIcon_EDA0* arrow = &D_004C8C58_EDA0[4];
     sTex_EDA0* atex = arrow->tex;
     for (int i = 0; i < n; i++) {
-        float d = D_004C8BC8_EDA0[i].dist;
+        float d = cHUDRadar_riderSlots_EDA0[i].dist;
         if (lo <= d && d <= hi)
             continue;
         float va = atex->v1;
         float vb = atex->v0;
         float y = unk_00C;
         // retail scale literal is 0x3BA3D70B, one ulp above 0.005f
-        float ax = unk_010 + -D_004C8BC8_EDA0[i].rel * 0.0050000004f;
+        float ax = unk_010 + -cHUDRadar_riderSlots_EDA0[i].rel * 0.0050000004f;
         float hw = arrow->w * 0.5f;
         if (d > hi) {
             y = unk_008;
@@ -719,7 +719,7 @@ void cHUDRadar::renderTracker(cRider* rider)
     float lo2 = lo - margin;
     float hi2 = hi + margin;
     for (int i = 0; i < n; i++) {
-        float d = D_004C8BC8_EDA0[i].dist;
+        float d = cHUDRadar_riderSlots_EDA0[i].dist;
         if (d < lo2)
             continue;
         if (d > hi2)
@@ -729,7 +729,7 @@ void cHUDRadar::renderTracker(cRider* rider)
         int prim = 0xC;
         int icon = 1;
         if (me != i) {
-            x -= D_004C8BC8_EDA0[i].rel * 0.0050000004f;
+            x -= cHUDRadar_riderSlots_EDA0[i].rel * 0.0050000004f;
             char* otherRider = race->riders[i];
             if (((cBeing_EDA0*)(otherRider + 0x6C0))->isHuman()) {
                 prim = 13;
@@ -975,7 +975,7 @@ struct sSlot_FB40 {
     float rel;
     int relValid;
 };
-extern sSlot_FB40 D_004C8BC8_FB40[6] __asm__("D_004C8BC8");
+extern sSlot_FB40 cHUDRadar_riderSlots_FB40[6] __asm__("cHUDRadar_riderSlots");
 
 struct sMarker_FB40 {
     int type;
@@ -989,8 +989,8 @@ struct sTrophyBox_FB40 {
     int last;           // 0x34
 };
 
-extern int D_004A275C;
-extern char* D_004A2758;
+extern int cHUDRadar_showRadarFlag;
+extern char* cHUDRadar_markerTable;
 extern int D_005308D0[];
 
 // The race (SSXApp->0x84->0xC; as in seg/seg_1FBE38): rider objects at 0x28, rider count at 0x78.
@@ -1031,34 +1031,34 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  */
 void cHUDRadar::renderSplitTracker(cRider* rider, int right)
 {
-    if (D_004A2760 != 0)
+    if (cHUDRadar_ridersResetFlag != 0)
         return;
-    if (D_004A275C == 0)
+    if (cHUDRadar_showRadarFlag == 0)
         return;
     if (((char*)rider) == 0)
         return;
-    sMarker_FB40* markers = (sMarker_FB40*)D_004A2758;
+    sMarker_FB40* markers = (sMarker_FB40*)cHUDRadar_markerTable;
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
     int me = ((cBeing_FB40*)(&VPTR_AT(rider, sizeof(cRiderState))))->getAIIndex();
     sRace_FB40* race = (sRace_FB40*)SSXApp->Game->AI;
-    float myDist = D_004C8BC8_FB40[me].dist;
-    float myPos = D_004C8BC8_FB40[me].pos;
+    float myDist = cHUDRadar_riderSlots_FB40[me].dist;
+    float myPos = cHUDRadar_riderSlots_FB40[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
         if (unk_034 != me)
-            D_004C8BC8_FB40[i].relValid = 0;
+            cHUDRadar_riderSlots_FB40[i].relValid = 0;
         if (i < n) {
-            float d = D_004C8BC8_FB40[i].pos - myPos;
+            float d = cHUDRadar_riderSlots_FB40[i].pos - myPos;
             if (d < -2000.0f)
                 d = -2000.0f;
             else if (d > 2000.0f)
                 d = 2000.0f;
-            if (D_004C8BC8_FB40[i].relValid != 0)
-                d = limitStep_FB40(d, D_004C8BC8_FB40[i].rel, 46.29629898071289f);
-            D_004C8BC8_FB40[i].rel = d;
-            D_004C8BC8_FB40[i].relValid = 1;
+            if (cHUDRadar_riderSlots_FB40[i].relValid != 0)
+                d = limitStep_FB40(d, cHUDRadar_riderSlots_FB40[i].rel, 46.29629898071289f);
+            cHUDRadar_riderSlots_FB40[i].rel = d;
+            cHUDRadar_riderSlots_FB40[i].relValid = 1;
         }
     }
     sVert_FB40 verts[4];
@@ -1122,7 +1122,7 @@ void cHUDRadar::renderSplitTracker(cRider* rider, int right)
     float topFade = top + 60.0f;
     float bottomFade = bottom - 60.0f;
     for (int i = 0; i < n; i++) {
-        float d = D_004C8BC8_FB40[i].dist;
+        float d = cHUDRadar_riderSlots_FB40[i].dist;
         if (d < lo)
             continue;
         if (d > hi)
@@ -1328,7 +1328,7 @@ void cHUDRadar::renderSplitTracker(cRider* rider, int right)
 #endif
 
 struct sPad16 { char x; int pad[3]; };
-extern sPad16 D_004C8BC8;
+extern sPad16 cHUDRadar_riderSlots;
 
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", setRadarRiderResetFlag);
@@ -1336,7 +1336,7 @@ INCLUDE_ASM("fe/ovstatetrophy", setRadarRiderResetFlag);
 /**
  * Flags rider @p riderIndex's course-progress slot for a reset.
  *
- * Sets the first word of slot @p riderIndex of D_004C8BC8 (0x18-byte slots): the next update (updateRadarRider) then takes the
+ * Sets the first word of slot @p riderIndex of cHUDRadar_riderSlots (0x18-byte slots): the next update (updateRadarRider) then takes the
  * rider's real progress instead of limiting the change, and getRadarRiderLateralPos invalidates the slot's smoothed offset.
  * cRider_putAt calls it when a rider is moved.
  *
@@ -1344,7 +1344,7 @@ INCLUDE_ASM("fe/ovstatetrophy", setRadarRiderResetFlag);
  */
 extern "C" void setRadarRiderResetFlag(int riderIndex)
 {
-    char* slot = (char*)&D_004C8BC8 + riderIndex * 0x18;
+    char* slot = (char*)&cHUDRadar_riderSlots + riderIndex * 0x18;
     *(int*)slot = 1;
 }
 #endif
@@ -1353,15 +1353,15 @@ extern "C" void setRadarRiderResetFlag(int riderIndex)
 INCLUDE_ASM("fe/ovstatetrophy", setRadarCourseData);
 #ifdef SKIP_ASM
 extern char* cHUDRadar_mpRadarHeader;
-extern char* D_004A2754;
-extern char* D_004A2758;
+extern char* cHUDRadar_segmentTable;
+extern char* cHUDRadar_markerTable;
 extern "C" void resetRadarRiders(void);
 
 /**
  * Installs the course-progress data of a resolved world chunk (kind 21 in cPS2ChunkResolve_resolve).
  *
- * Stores @p data in cHUDRadar_mpRadarHeader, its segment table (data + the offset at +0x4) in D_004A2754 and its marker table (data
- * + the offset at +0xC) in D_004A2758, then resets every rider slot (resetRadarRiders). The data also holds the segment
+ * Stores @p data in cHUDRadar_mpRadarHeader, its segment table (data + the offset at +0x4) in cHUDRadar_segmentTable and its marker table (data
+ * + the offset at +0xC) in cHUDRadar_markerTable, then resets every rider slot (resetRadarRiders). The data also holds the segment
  * count (+0x0), the marker count (+0x8) and the course length (+0x10).
  *
  * @param data  the chunk's data
@@ -1371,8 +1371,8 @@ extern "C" void setRadarCourseData(char* data)
     char* segments = data + *(int*)(data + 4);
     char* markers = data + *(int*)(data + 0xC);
     cHUDRadar_mpRadarHeader = data;
-    D_004A2754 = segments;
-    D_004A2758 = markers;
+    cHUDRadar_segmentTable = segments;
+    cHUDRadar_markerTable = markers;
     resetRadarRiders();
 }
 #endif
@@ -1381,17 +1381,17 @@ extern "C" void setRadarCourseData(char* data)
 INCLUDE_ASM("fe/ovstatetrophy", clearRadarCourseData);
 #ifdef SKIP_ASM
 extern char* cHUDRadar_mpRadarHeader;
-extern char* D_004A2754;
-extern char* D_004A2758;
+extern char* cHUDRadar_segmentTable;
+extern char* cHUDRadar_markerTable;
 
 /**
- * Forgets the course-progress data: clears cHUDRadar_mpRadarHeader, D_004A2754 and D_004A2758 (cPS2ChunkResolve_unresolve calls it).
+ * Forgets the course-progress data: clears cHUDRadar_mpRadarHeader, cHUDRadar_segmentTable and cHUDRadar_markerTable (cPS2ChunkResolve_unresolve calls it).
  */
 extern "C" void clearRadarCourseData(void)
 {
     cHUDRadar_mpRadarHeader = 0;
-    D_004A2754 = 0;
-    D_004A2758 = 0;
+    cHUDRadar_segmentTable = 0;
+    cHUDRadar_markerTable = 0;
 }
 #endif
 
@@ -1400,7 +1400,7 @@ INCLUDE_ASM("fe/ovstatetrophy", updateRadarRider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* cHUDRadar_mpRadarHeader;
-extern char* D_004A2754;
+extern char* cHUDRadar_segmentTable;
 float cRider_getDistanceLeft(void* rider);
 extern "C" float getRadarRiderLateralPos(int i);
 
@@ -1417,8 +1417,8 @@ struct sTrophySeg_210618 {
     float dist;
 };
 
-// The unit declares D_004C8BC8 as a 16-byte pad struct; view it as the per-rider table by asm label.
-extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
+// The unit declares cHUDRadar_riderSlots as a 16-byte pad struct; view it as the per-rider table by asm label.
+extern sTrophyEntry_210618 cHUDRadar_riderSlots_210618[] __asm__("cHUDRadar_riderSlots");
 
 /**
  * Updates rider @p i's course progress: its distance along the course, current segment and lateral position.
@@ -1434,16 +1434,16 @@ extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
 extern "C" void updateRadarRider(int i)
 {
     char* course = cHUDRadar_mpRadarHeader;
-    sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
+    sTrophySeg_210618* segs = (sTrophySeg_210618*)cHUDRadar_segmentTable;
     if (course == 0)
         return;
     char* race = (char*)SSXApp->Game->AI;
     if (i >= *(int*)(race + 0x78))
         return;
     float travelled = *(float*)(course + 0x10) - cRider_getDistanceLeft(*(void**)(race + (i << 2) + 0x28));
-    if (D_004C8BC8_210618[i].active == 0)
+    if (cHUDRadar_riderSlots_210618[i].active == 0)
     {
-        float prev = D_004C8BC8_210618[i].dist;
+        float prev = cHUDRadar_riderSlots_210618[i].dist;
         float dd = travelled - prev;
         float lim = 138.88890075683594f;
         if (dd > lim)
@@ -1453,29 +1453,29 @@ extern "C" void updateRadarRider(int i)
     }
     if (travelled <= 0.0f)
     {
-        D_004C8BC8_210618[i].seg = 0;
-        D_004C8BC8_210618[i].dist = 0.0f;
-        D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
+        cHUDRadar_riderSlots_210618[i].seg = 0;
+        cHUDRadar_riderSlots_210618[i].dist = 0.0f;
+        cHUDRadar_riderSlots_210618[i].pos = getRadarRiderLateralPos(i);
     }
     else
     {
         int last = *(int*)course - 1;
         if (segs[last].dist <= travelled)
         {
-            D_004C8BC8_210618[i].seg = last;
-            D_004C8BC8_210618[i].dist = *(float*)(course + 0x10);
-            D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
+            cHUDRadar_riderSlots_210618[i].seg = last;
+            cHUDRadar_riderSlots_210618[i].dist = *(float*)(course + 0x10);
+            cHUDRadar_riderSlots_210618[i].pos = getRadarRiderLateralPos(i);
         }
         else
         {
-            int k = D_004C8BC8_210618[i].seg;
+            int k = cHUDRadar_riderSlots_210618[i].seg;
             while (segs[k].dist <= travelled)
                 k++;
             while (travelled < segs[k].dist)
                 k--;
-            D_004C8BC8_210618[i].seg = k;
-            D_004C8BC8_210618[i].dist = travelled;
-            D_004C8BC8_210618[i].pos = getRadarRiderLateralPos(i);
+            cHUDRadar_riderSlots_210618[i].seg = k;
+            cHUDRadar_riderSlots_210618[i].dist = travelled;
+            cHUDRadar_riderSlots_210618[i].pos = getRadarRiderLateralPos(i);
         }
     }
 }
@@ -1500,8 +1500,8 @@ struct sSlot_210820 {
     int zone;
     int b, c, d, e;
 };
-extern sSlot_210820 D_slots210820[6] __asm__("D_004C8BC8");
-extern char* D_004A2754;
+extern sSlot_210820 D_slots210820[6] __asm__("cHUDRadar_riderSlots");
+extern char* cHUDRadar_segmentTable;
 
 static inline float subx_210820(sZone_210820* z, t4Vector& p)
 {
@@ -1533,7 +1533,7 @@ static inline float sy_210820(sZone_210820* z)
  */
 extern "C" float getRadarRiderLateralPos(int idx)
 {
-    sZone_210820* zones = (sZone_210820*)D_004A2754;
+    sZone_210820* zones = (sZone_210820*)cHUDRadar_segmentTable;
     char* world = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(world + (idx << 2) + 0x28);
     t4Vector pos = *((cPosObj_210820*)(rider + 0x6C0))->getPosition();
@@ -1555,8 +1555,8 @@ struct sTrophySlot2108F8 {
     int active;
     int a, b, c, d, e;
 };
-extern sTrophySlot2108F8 D_slots2108F8[6] __asm__("D_004C8BC8");
-extern int D_004A2760;
+extern sTrophySlot2108F8 D_slots2108F8[6] __asm__("cHUDRadar_riderSlots");
+extern int cHUDRadar_ridersResetFlag;
 
 static inline void resetSlot2108F8(sTrophySlot2108F8* s)
 {
@@ -1569,9 +1569,9 @@ static inline void resetSlot2108F8(sTrophySlot2108F8* s)
 }
 
 /**
- * Resets all six rider slots of the course-progress table D_004C8BC8.
+ * Resets all six rider slots of the course-progress table cHUDRadar_riderSlots.
  *
- * Each slot gets its reset flag set and its segment, distance, position and smoothed offset cleared; then D_004A2760 is
+ * Each slot gets its reset flag set and its segment, distance, position and smoothed offset cleared; then cHUDRadar_ridersResetFlag is
  * set so the trackers wait for the next update (updateRadarRiders).
  */
 extern "C" void resetRadarRiders(void)
@@ -1580,7 +1580,7 @@ extern "C" void resetRadarRiders(void)
     for (i = 0; i < 6; i++) {
         resetSlot2108F8(&D_slots2108F8[i]);
     }
-    D_004A2760 = 1;
+    cHUDRadar_ridersResetFlag = 1;
 }
 #endif
 
@@ -1626,7 +1626,7 @@ extern char str_ChatUpArrow_b[];
 extern char str_ChatDownArrow_b[];
 extern char str_slideroutline2_b[];
 extern char str_textScrollChat_b[];
-extern sRect_210940 D_004C8D08;
+extern sRect_210940 cOVState_PRIVATEMESSAGE_chatSelectedColour;
 
 /**
  * Builds the in-race private-message screen ("282ReadPrivateMessage") of the online chat overlay (overlay id 40).
@@ -1635,7 +1635,7 @@ extern sRect_210940 D_004C8D08;
  * "AgreementSlider" becomes a vertical scroll bar (mAttr bit 0) with "ChatUpArrow", "ChatDownArrow" and
  * "slideroutline2" as its mpUpArrow, mpDownArrow and mpHideOnEmpty and meHideState 2. The chat scroller
  * "textScrollChat" gets bit 0 of mAttrTextScroll and input map 1 (cUITextScroll_setInputMap), is shown, gets the wrap
- * bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual slot 11, mSelectedColour D_004C8D08 and the scroll bar
+ * bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual slot 11, mSelectedColour cOVState_PRIVATEMESSAGE_chatSelectedColour and the scroll bar
  * as mpScrollBar. Ends with cOVState_onCreateScreen; returns early when the screen cannot be added. "AgreementSlider"
  * is used without a null check.
  */
@@ -1671,7 +1671,7 @@ void cOVState::PRIVATEMESSAGE_onCreateScreen()
         chatScroll->setVisible(1);
         *(int*)((char*)chatScroll + 0x14) |= 0x80;
         chatScroll->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sRect_210940*)((char*)chatScroll + 0xA8) = D_004C8D08;
+        *(sRect_210940*)((char*)chatScroll + 0xA8) = cOVState_PRIVATEMESSAGE_chatSelectedColour;
         *(char**)((char*)chatScroll + 0xB8) = ((char*)scrollBar);
     }
     cOVState_onCreateScreen(this);

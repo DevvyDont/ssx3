@@ -816,7 +816,7 @@ struct sVtbl9_MR { sVEntry_MR e[9]; } __attribute__((aligned(8)));
 struct sVtbl22_MR { sVEntry_MR e[22]; } __attribute__((aligned(8)));
 
 extern const sVtbl9_MR D_00458240;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtbl22_MR D_00458288;
 extern char cPlayer_vtbl[];
 
@@ -865,7 +865,7 @@ static inline char* cMissionRider_ctor(char* vself, int inChrg)
     }
     cPlayer_cPlayer(self, 0);
     self->mRider->mScriptObjectVtbl = (void*)(&D_00458240);
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)(&D_00458288);
     self->mVtbl = (void**)cPlayer_vtbl;
     if (!inChrg)
@@ -4210,9 +4210,9 @@ void cWipeoutControl::playWipeoutGroundRecoverAnim()
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_playWipeoutStuckAnim);
 #ifdef SKIP_ASM
-// D_004A4C08 is its own 8-byte config struct (config/symbol_addrs.txt), not D_004A4C00 + 8.
+// kAnimIDInvalid_2 is its own 8-byte config struct (config/symbol_addrs.txt), not D_004A4C00 + 8.
 struct sCfg_E010 { int a; int b; };
-extern sCfg_E010 D_004A4C08_E010 __asm__("D_004A4C08");
+extern sCfg_E010 kAnimIDInvalid_2_E010 __asm__("kAnimIDInvalid_2");
 extern "C" void cRiderAnimBase_getAIAnimFrame(void* buf, void* anim, int id, int a3, float t);
 extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
 extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
@@ -4364,7 +4364,7 @@ void cWipeoutControl::playWipeoutStuckAnim()
     if (rider->mUseRootPoseOverride != true)
         anim = kAID_WS_FwdFaceDown;
     char buf[80];
-    cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08_E010.a, 0.0f);
+    cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, kAnimIDInvalid_2_E010.a, 0.0f);
     tPose newPose;
     func_0030ECD8(&newPose, mRider->mAnimModel, buf, 0);
     cRider* rd = mRider;
@@ -9688,7 +9688,7 @@ struct sVtbl9_136980 { sVEntry_136980 e[9]; } __attribute__((aligned(8)));
 struct sVtbl22_136980 { sVEntry_136980 e[22]; } __attribute__((aligned(8)));
 
 extern const sVtbl9_136980 D_004597B0;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtbl22_136980 D_004597F8;
 
 /**
@@ -9713,7 +9713,7 @@ extern "C" void* cWipeoutMotion_cWipeoutMotion(cWipeoutMotion* self, int inChrg)
         cRider_cRider(vb);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_004597B0;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_004597F8;
     if (!inChrg)
     {
@@ -9756,7 +9756,7 @@ __asm__(".globl cWipeoutMotion__cWipeoutMotion\n.type cWipeoutMotion__cWipeoutMo
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00136AD0$12cRiderVbC_ai = D_004597B0\n"
-        "_vt$15cVbDtor00136AD0$13cRiderVbBC_ai = D_00459B90\n"
+        "_vt$15cVbDtor00136AD0$13cRiderVbBC_ai = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00136AD0$11cRiderVb_ai = D_004597F8\n"
         "_$_17cVbMember00136AD0 = cRiderSphereTree__cRiderSphereTree\n"
         "_$_11cRiderVb_ai = cRider__cRider\n");

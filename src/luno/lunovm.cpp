@@ -978,7 +978,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char str_LunoTable[];
 extern char str_TableData[];
-extern char D_00479890[];
+extern char luno_cLunoTableEntry_vtbl[];
 
 struct cLunoNode_ct {
     cLunoValue key;
@@ -987,7 +987,7 @@ struct cLunoNode_ct {
     void* vt;
     cLunoNode_ct()
     {
-        vt = D_00479890;
+        vt = luno_cLunoTableEntry_vtbl;
         key.type = 0;
         key.word0 = 0;
         val.type = 0;
@@ -1051,13 +1051,13 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable_emptyTable);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char str_TableData[];
-extern char D_00479890[];
+extern char luno_cLunoTableEntry_vtbl[];
 
 
 /**
  * Empties a Luno table: destroys every entry of its array and allocates a fresh array of empty entries.
  *
- * The old entries (0x20 bytes: key, value, chain link +0x18, vtable D_00479890 at +0x1C) are destroyed through their
+ * The old entries (0x20 bytes: key, value, chain link +0x18, vtable luno_cLunoTableEntry_vtbl at +0x1C) are destroyed through their
  * virtual destructor (slot 1) from the last to the first and the block (count in its 0x10-byte header) is freed. The
  * new array has modulus (+0xC) + 1 nil entries, allocated with operator_new__FUi tagged "TableData", flags 0xA0000000.
  * Called by cWScriptMan_readFromReplayFrame.
@@ -1232,7 +1232,7 @@ extern "C" cLunoValue* luno_cLunoTable_get1(cLunoTableRef* self, cLunoValue* key
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_set);
 #ifdef SKIP_ASM
 extern char str_cLunoTableEntry[];
-extern char D_00479890[];
+extern char luno_cLunoTableEntry_vtbl[];
 
 struct sLunoPair_set {
     int word0;
@@ -1349,7 +1349,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
         cLunoNode_set* node = (cLunoNode_set*)operator new(0x20, str_cLunoTableEntry, 0x20000000, 0);
         node->value.type = 0;
         node->value.word0 = 0;
-        node->vtable = (cLunoVtEntry*)D_00479890;
+        node->vtable = (cLunoVtEntry*)luno_cLunoTableEntry_vtbl;
         node->key.type = 0;
         node->key.word0 = 0;
         LUNO_ASSIGN_SET(node->key, key)
@@ -1438,7 +1438,7 @@ struct cLunoNode_9A8 {
     void* vt;
     cLunoNode_9A8()
     {
-        vt = D_00479890;
+        vt = luno_cLunoTableEntry_vtbl;
         key.type = 0;
         key.word0 = 0;
         val.type = 0;
@@ -1814,20 +1814,20 @@ extern "C" cLunoValue* luno_cLunoVar_operatorPlus(cLunoValue* self, const cLunoV
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoTableEntry__cLunoTableEntry);
 #ifdef SKIP_ASM
-extern char D_00479890[];
+extern char luno_cLunoTableEntry_vtbl[];
 
 /**
  * Destroys a Luno table entry: its chained successor, its value and its key.
  *
- * Restores the entry vtable D_00479890 (+0x1C), destroys the next entry in the chain (+0x18) through its virtual
+ * Restores the entry vtable luno_cLunoTableEntry_vtbl (+0x1C), destroys the next entry in the chain (+0x18) through its virtual
  * destructor with flags 3 (so a whole chain is freed recursively), runs luno_cLunoVar__cLunoVar on the value (+0xC) and
- * the key (+0x0) with flags 2, and frees the entry when bit 0 of @p flags is set. Slot 1 of D_00479890.
+ * the key (+0x0) with flags 2, and frees the entry when bit 0 of @p flags is set. Slot 1 of luno_cLunoTableEntry_vtbl.
  *
  * @param flags  destructor flags; bit 0 frees the entry
  */
 extern "C" void luno_cLunoTableEntry__cLunoTableEntry(luno_cLunoTableEntry* self, int flags)
 {
-    self->mVtbl = (void**)D_00479890;
+    self->mVtbl = (void**)luno_cLunoTableEntry_vtbl;
     luno_cLunoTableEntry* obj = self->Next;
     if (((void*)obj) != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;

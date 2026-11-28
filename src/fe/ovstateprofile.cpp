@@ -575,7 +575,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_initGeneral);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_playerpct_d_b[];
 
 /**
@@ -589,7 +589,7 @@ void cOVState_PROFILE::initGeneral()
     char buf[16];
     int i;
     for (i = 1; i < 7; i++) {
-        sprintf(buf, D_004A2138, i);
+        sprintf(buf, str_pct_d_j, i);
         cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf)), buf);
         sprintf(buf, str_playerpct_d_b, i);
         ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf)))->mMiscData = i - 1;

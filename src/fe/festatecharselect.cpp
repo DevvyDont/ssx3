@@ -132,14 +132,14 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* self);
-extern signed char D_00440F68[];
+extern signed char cFEStateCharSelect_characterOrder[];
 extern char str_Menu[];
 
 /**
  * Gives the character-select screen the focus: selects the player's character in "Menu" and shows the rider.
  *
- * Finds the player's character among the 10 selectable ones (D_00440F68) and selects its entry. The front-end
- * rider is then set to D_00440F68[0] (not the player's character), its +0xCCC cleared, and cFEStateCharSelect_updateCharacter3DPos
+ * Finds the player's character among the 10 selectable ones (cFEStateCharSelect_characterOrder) and selects its entry. The front-end
+ * rider is then set to cFEStateCharSelect_characterOrder[0] (not the player's character), its +0xCCC cleared, and cFEStateCharSelect_updateCharacter3DPos
  * places it before cUIState_onGainFocus() runs.
  *
  * @param pPrevState  the state that had focus before, passed on
@@ -149,14 +149,14 @@ void cFEStateCharSelect::onGainFocus(cUIState* pPrevState)
     int i = 0;
     int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
     for (; i < 10; i++) {
-        if (D_00440F68[i] == id) {
+        if (cFEStateCharSelect_characterOrder[i] == id) {
             void* menu = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu));
             if (menu != 0)
                 cUIMenu_setSelectedByIndex(menu, i);
             break;
         }
     }
-    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, D_00440F68[0], 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, cFEStateCharSelect_characterOrder[0], 0);
     cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
     feRider->mAnimateBoard = 0;
     updateCharacter3DPos();
@@ -293,14 +293,14 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
-extern signed char D_00440F68[];
+extern signed char cFEStateCharSelect_characterOrder[];
 extern char str_names_menu[];
 extern char str_titlesel_character[];
 extern char str_titlesel_character_multi[];
 extern char str_kT_TITLEPlayer1SelectCharacter[];
 extern char str_kT_TITLEPlayer2SelectCharacter[];
 struct sCharKey_1620 { char c[2]; };
-extern sCharKey_1620 D_004A13A0[];
+extern sCharKey_1620 str_0[];
 
 struct sWVt_1620 { short delta; short index; void (*fn)(void*, int); };
 struct sWidget_1620 {
@@ -362,11 +362,11 @@ void cFEStateCharSelect::onWidgetCreate(cUIThing* pWidget)
         refresh_1620(w);
         return;
     }
-    sCharKey_1620 key = D_004A13A0[0];
+    sCharKey_1620 key = str_0[0];
     for (int i = 0; i < 10; i++) {
         key.c[0] = '0' + i;
         if (hashName == GetHashValue32(key.c)) {
-            cUIText_setAsciiString((cUIText*)w, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0));
+            cUIText_setAsciiString((cUIText*)w, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cFEStateCharSelect_characterOrder[i], 0));
             w->id18 = i;
             refresh_1620(w);
             return;
@@ -394,7 +394,7 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int rider, in
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* iface, int rider, int id);
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
 extern "C" void cUIStateStack_push(void* stack, void* state);
-extern signed char D_00440F68[];
+extern signed char cFEStateCharSelect_characterOrder[];
 extern char str_FEOptions[];
 extern char str_cFEStateProfileLoad[];
 
@@ -473,7 +473,7 @@ void cFEStateCharSelect::onWidgetEvent(cUIThing* pWidget, unsigned int event)
         feRider->mCustomized = 0;
         int rider = mUserNum;
         int player = mCurrentCtrl;
-        int ch = D_00440F68[widget->id];
+        int ch = cFEStateCharSelect_characterOrder[widget->id];
         int board = mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
@@ -500,10 +500,10 @@ void cFEStateCharSelect::onWidgetEvent(cUIThing* pWidget, unsigned int event)
     }
     case cUIState::kONGAINFOCUS: {
         widget->setVisible(1);
-        cFEStateCharSelect_updateWidget((this), mUserNum, D_00440F68[widget->id]);
+        cFEStateCharSelect_updateWidget((this), mUserNum, cFEStateCharSelect_characterOrder[widget->id]);
         int rider = mUserNum;
         int player = mCurrentCtrl;
-        int ch = D_00440F68[widget->id];
+        int ch = cFEStateCharSelect_characterOrder[widget->id];
         int board = mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
@@ -574,7 +574,7 @@ extern char str_NumAttrOver[];
 extern char str_overall[];
 struct sStr9_181BD0 { char c[9]; };
 struct sStr4_181BD0 { char c[4]; };
-extern sStr9_181BD0 D_0045D6E0;
+extern sStr9_181BD0 str_NumAttr0;
 extern char str_0pb[];
 
 // PORT: the unit declares cFEStateCharSelect_updateWidget with an int index; the body sign-extends both id arguments.
@@ -595,7 +595,7 @@ extern char str_0pb[];
  */
 void cFEStateCharSelect::updateWidget(signed char rider, signed char charID)
 {
-    sStr9_181BD0 name = D_0045D6E0;
+    sStr9_181BD0 name = str_NumAttr0;
     char bar[8];
     *(sStr4_181BD0*)bar = *(sStr4_181BD0*)str_0pb;
     memset(bar + 4, 0, 4);

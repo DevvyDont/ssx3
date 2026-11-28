@@ -17,7 +17,7 @@
 // World->m_pWorldCache (the global cWorld::m_pTheWorld is cWorld_m_pTheWorld). No vtable, no base class. Size 0x1C00 [R]: the
 // last field is 0x1BF0; 0x1BF4-0x1BFF is tail padding to the 16-byte alignment that cWorldView's t4Vectors give it
 // (no retail code touches it). On Tour's cWorldCache is 0x1C10 and adds a model-cache list at 0x1BF0+ that retail lacks.
-// Its static m_SectionLoadPriority[3] is D_0044C208 = {0.90, 0.91, 0.92} (cSectionMan_update indexes it).
+// Its static m_SectionLoadPriority[3] is cWorldCache_m_SectionLoadPriority = {0.90, 0.91, 0.92} (cSectionMan_update indexes it).
 // Hull page states (On Tour eHullPageState): 0 Empty, 1 Queued, 2 Loading, 3 Active, 4 InActive.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Member names are EA's, from SSX On Tour's PSP
@@ -96,7 +96,7 @@ CHECK_SIZE(tWorldMemBlock, 0x18);
 
 // A pool of equal blocks (On Tour cWorldBlockAllocator, 0x14; retail cWorldMemoryMan holds three, 0x14 apart).
 // Methods: cWorldBlockAllocator_init, cWorldBlockAllocator__cWorldBlockAllocator (dtor), cWorldBlockAllocator_getFreeBlock, cWorldBlockAllocator_releaseBlock.
-// The pool sizes are cWorldMemoryMan::m_BlockMemType[3] = D_0044C1E0: {type, uiNumBlock, uiBlockSize} =
+// The pool sizes are cWorldMemoryMan::m_BlockMemType[3] = cWorldMemoryMan_m_BlockMemType: {type, uiNumBlock, uiBlockSize} =
 // {0, 2, 0x4000}, {1, 0, 0x8000}, {2, 0x35, 0x20000}.
 struct cWorldBlockAllocator {
     unsigned int m_uiBlockSize;     // 0x00 [O]; [R] init's third argument

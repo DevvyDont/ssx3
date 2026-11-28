@@ -1711,7 +1711,7 @@ struct sRing_D690 {
     sEnt_D690 ents[1];              // 0x80
 };
 extern float cDetailSystem_m_PS2SparkleCount;
-extern void* D_004A4474;
+extern void* SPRMan;
 extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D690 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char D_1460[];
 extern "C" char* cPS2ScratchPad_claimBuffer(void* self, unsigned int addr, int size, int flags);
@@ -1733,7 +1733,7 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
  * The count is the squared diagonal of the patch's bounding box (+0x158..+0x16C) times cDetailSystem_m_PS2SparkleCount * 3.333e-7 times
  * m_SnowSparkleDensity[6] of the graphics manager, halved when the entry's level at +8 is below 2 (never the case from
  * cPS2BezierMan_drawSnowSparkles, which only passes LOD-2 entries); nothing is drawn when it is not positive. The count goes into the
- * word at +0x43C. The packet (opened and closed with cPS2ScratchPad_claimBuffer / cPS2ScratchPad_flushBufferTo on D_004A4474) unpacks 22 V4-32
+ * word at +0x43C. The packet (opened and closed with cPS2ScratchPad_claimBuffer / cPS2ScratchPad_flushBufferTo on SPRMan) unpacks 22 V4-32
  * quadwords to VU address 0: the 16 control points at +0x40 of the record, the effect matrix at +0x3E0 and the two
  * quadwords at +0x420 that cPS2BezierMan_DrawPatches fills (colour 128 and cDetailSystem_m_PS2SparkleSize..cDetailSystem_m_PS2MaxSparkleSize, then the count),
  * then MSCALs the program at D_1460 and flushes. It is registered in the draw ring with flag 0 (fewer than 2600
@@ -1764,7 +1764,7 @@ void cPS2BezierMan::addSnowSparklePass(void* obj, tBezierPatchEntry* patch, unsi
         return;
     }
     unsigned int buf = *handle;
-    char* packetCursor = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    char* packetCursor = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     ((long*)packetCursor)[0] = 0x10000018;
     ((long*)packetCursor)[1] = 0;
     ((long*)packetCursor)[2] = 0;
@@ -1777,7 +1777,7 @@ void cPS2BezierMan::addSnowSparklePass(void* obj, tBezierPatchEntry* patch, unsi
     ((long*)packetCursor)[0] = (long)(((unsigned int)D_1460 >> 3) | 0x14000000) << 32;
     ((long*)packetCursor)[1] = (long)0x11000000 << 32;
     packetCursor += 0x10;
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packetCursor, 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, packetCursor, 4);
     *handle = next;
     sRing_D690* ring = ((sRing_D690*)gfx->mpDeferMan);
     sDrawState* rs = (gfx->m_pCurrentDrawState);

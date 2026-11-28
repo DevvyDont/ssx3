@@ -1047,7 +1047,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double conversion (the source passed floats to sprintf).
 extern "C" double fptodp(float f);
-extern char D_004C6848[];
+extern char formatMinutesSeconds_buffer[];
 extern char str_pct_02_0f_pct_02_0f_b[];
 extern char str_pct_02_0f_pct_02_0f_c[];
 
@@ -1063,11 +1063,11 @@ extern sGameSettings_A1A8 cBEOptionInterface_mOption_A1A8 __asm__("cBEOptionInte
  *
  * Fetches back-end interface 4 (result unused), splits @p secs into minutes and seconds, and prints them as floats with
  * "%02.0f:%02.0f" when the language field (bits 22-24 of cBEOptionInterface_mOption) is 0 or 2, or "%02.0f'%02.0f\""
- * when it is 1 or 3, into D_004C6848. Other values leave the buffer as it was. Used by the map, pause, HUD-popup and
+ * when it is 1 or 3, into formatMinutesSeconds_buffer. Other values leave the buffer as it was. Used by the map, pause, HUD-popup and
  * load-hint screens.
  *
  * @param secs  the time in whole seconds
- * @return D_004C6848, the formatted text (overwritten by the next call)
+ * @return formatMinutesSeconds_buffer, the formatted text (overwritten by the next call)
  */
 // Format a time in seconds as minutes/seconds for the current language.
 extern "C" char* formatMinutesSeconds(int secs)
@@ -1079,14 +1079,14 @@ extern "C" char* formatMinutesSeconds(int secs)
     switch ((set.flags >> 22) & 7) {
     case 0:
     case 2:
-        sprintf(D_004C6848, str_pct_02_0f_pct_02_0f_b, fptodp((float)minuteCount), fptodp((float)secondCount));
+        sprintf(formatMinutesSeconds_buffer, str_pct_02_0f_pct_02_0f_b, fptodp((float)minuteCount), fptodp((float)secondCount));
         break;
     case 1:
     case 3:
-        sprintf(D_004C6848, str_pct_02_0f_pct_02_0f_c, fptodp((float)minuteCount), fptodp((float)secondCount));
+        sprintf(formatMinutesSeconds_buffer, str_pct_02_0f_pct_02_0f_c, fptodp((float)minuteCount), fptodp((float)secondCount));
         break;
     }
-    return D_004C6848;
+    return formatMinutesSeconds_buffer;
 }
 #endif
 

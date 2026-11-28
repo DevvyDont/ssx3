@@ -593,13 +593,13 @@ rom:0x2DF750 reloc:MIPS_LO16 symbol:gFileDevice addend:0x14
 rom:0x2EB60C reloc:MIPS_HI16 symbol:D_004A49F0
 rom:0x2EB668 reloc:MIPS_HI16 symbol:D_004A49F0
 
-// ealib/seg_2B4578: D_0050B980 is D_0050AD00+0xC80, an inner address of the driver state (our C builds it as
-// &D_0050AD00 + 0xC80; SNDDRV_callIopRpc has its own lui for it). Splat named it from these two functions' uses only.
-rom:0x2C1B50 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xC80
-rom:0x2C1B68 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
-rom:0x2C1B8C reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
-rom:0x2C30D4 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xC80
-rom:0x2C30D8 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
+// ealib/seg_2B4578: D_0050B980 is SNDDRV_state+0xC80, an inner address of the driver state (our C builds it as
+// &SNDDRV_state + 0xC80; SNDDRV_callIopRpc has its own lui for it). Splat named it from these two functions' uses only.
+rom:0x2C1B50 reloc:MIPS_HI16 symbol:SNDDRV_state addend:0xC80
+rom:0x2C1B68 reloc:MIPS_LO16 symbol:SNDDRV_state addend:0xC80
+rom:0x2C1B8C reloc:MIPS_LO16 symbol:SNDDRV_state addend:0xC80
+rom:0x2C30D4 reloc:MIPS_HI16 symbol:SNDDRV_state addend:0xC80
+rom:0x2C30D8 reloc:MIPS_LO16 symbol:SNDDRV_state addend:0xC80
 // func_003C38E0: D_0050AB22 is D_0050AB20+0x2 (its only use).
 rom:0x2C4D7C reloc:MIPS_HI16 symbol:D_0050AB20 addend:0x2
 rom:0x2C4D88 reloc:MIPS_LO16 symbol:D_0050AB20 addend:0x2
@@ -631,9 +631,9 @@ rom:0x5700C reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x57014 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x57038 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC2
 rom:0x57040 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC2
-// ealib/seg_2B4578 SNDDRV_startNextTransfer: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
-rom:0x2C5454 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xCC8
-rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8
+// ealib/seg_2B4578 SNDDRV_startNextTransfer: D_0050B9C8 is SNDDRV_state+0xCC8 (the transfer queue fCC8; its only use).
+rom:0x2C5454 reloc:MIPS_HI16 symbol:SNDDRV_state addend:0xCC8
+rom:0x2C5458 reloc:MIPS_LO16 symbol:SNDDRV_state addend:0xCC8
 // visualfx/lensfx cRenderStateMan_update: D_004FA3A8 is cRenderStateMan_m_state+0x38 (slot 0's second vec4).
 rom:0x1EEA38 reloc:MIPS_HI16 symbol:cRenderStateMan_m_state addend:0x38
 rom:0x1EEA40 reloc:MIPS_LO16 symbol:cRenderStateMan_m_state addend:0x38
@@ -656,26 +656,26 @@ rom:0x2C8E70 reloc:MIPS_HI16 symbol:sndmix addend:0xD0
 rom:0x2C8EE4 reloc:MIPS_LO16 symbol:sndmix addend:0xD0
 // Library tail Phase B: %hi halves splat could not pair (the %lo follows a loop or a branch) (2026-11-14).
 rom:0x30DBEC reloc:MIPS_HI16 symbol:D_00529008
-rom:0x32C2C0 reloc:MIPS_HI16 symbol:D_0052F280
-rom:0x32C4C8 reloc:MIPS_HI16 symbol:D_0052F280
-rom:0x32C8E4 reloc:MIPS_HI16 symbol:D_0052F280
-rom:0x329270 reloc:MIPS_HI16 symbol:D_0052E340
-rom:0x329710 reloc:MIPS_HI16 symbol:D_0052E340
-rom:0x329728 reloc:MIPS_HI16 symbol:D_0052E340
-rom:0x32B408 reloc:MIPS_HI16 symbol:D_0052E340
-rom:0x2D0D98 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D0F1C reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D0F44 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D0F60 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D0FC8 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D1030 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D10F0 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D11DC reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D1210 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D1244 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D12B8 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D12E4 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D1318 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D13C0 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D13D8 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
-rom:0x2D14B0 reloc:MIPS_LO16 symbol:D_0044F420 // func_003CFC30 ($23 = %hi(D_0044F420); lw -0xBE0)
+rom:0x32C2C0 reloc:MIPS_HI16 symbol:sifload_client
+rom:0x32C4C8 reloc:MIPS_HI16 symbol:sifload_client
+rom:0x32C8E4 reloc:MIPS_HI16 symbol:sifload_client
+rom:0x329270 reloc:MIPS_HI16 symbol:fileio_recvBuffer
+rom:0x329710 reloc:MIPS_HI16 symbol:fileio_recvBuffer
+rom:0x329728 reloc:MIPS_HI16 symbol:fileio_recvBuffer
+rom:0x32B408 reloc:MIPS_HI16 symbol:fileio_recvBuffer
+rom:0x2D0D98 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D0F1C reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D0F44 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D0F60 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D0FC8 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D1030 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D10F0 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D11DC reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D1210 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D1244 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D12B8 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D12E4 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D1318 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D13C0 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D13D8 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)
+rom:0x2D14B0 reloc:MIPS_LO16 symbol:PATHI_selectedPlayer // func_003CFC30 ($23 = %hi(PATHI_selectedPlayer); lw -0xBE0)

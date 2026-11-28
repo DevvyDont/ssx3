@@ -34,7 +34,7 @@ extern "C" unsigned char cUIListBox_addEntryByStringID_2DB0(void* box, int id, i
 extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const char* str, int data) __asm__("cUIListBox_addEntryByAsciiString");
 extern "C" int cUIListBox_getEntryByData_2DB0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
 extern "C" void cUIListBox_setCurrentEntryByIndex_2DB0(void* item, int v) __asm__("cUIListBox_setCurrentEntryByIndex");
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern signed char D_004A1710[6];
 extern signed char D_004A1718[7];
 extern signed char D_004A1720[7];
@@ -43,7 +43,7 @@ extern signed char D_004A1730[5];
 extern signed char D_004A1738[7];
 extern char* D_00441108[];
 extern char str_65bragrights[];
-extern char D_004A14F8[];
+extern char str_1_c[];
 extern char str_kT_CMNNo[];
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNOff[];
@@ -86,7 +86,7 @@ static inline void* find_2DB0(cFEStateBraggingRights* self, char* name)
 
 static inline bool isNet_2DB0()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 
 /**
@@ -96,7 +96,7 @@ static inline bool isNet_2DB0()
  * count (5-7) from the game event. Each row's label gets the rule's text id (D_00441108), and each panel's
  * list gets No/Yes for kBRAGRIGHTS_GIVEFULLBOOST .. kBRAGRIGHTS_TAKEHALFPOINTS, Off/5s-20s for
  * kBRAGRIGHTS_GIVEHEADSTART and Off/3000-15000 for kBRAGRIGHTS_STARTINHOLE, with the current value
- * (cFEStateBraggingRights_getBEData) selected. Online (D_004A1A70 == cFEStateNet::kFEPathOnline) shows "ongroup" and
+ * (cFEStateBraggingRights_getBEData) selected. Online (cFEStateNet_fePath == cFEStateNet::kFEPathOnline) shows "ongroup" and
  * hides the second player's widgets.
  */
 // Bragging rights screen: builds the rule rows of both player panels for the current mode.
@@ -148,7 +148,7 @@ void cFEStateBraggingRights::onCreateScreen()
     cBraggingRightsMenu_setEnableFlag(secondPanel, mask);
     cBraggingRightsMenu_setEnableItem_2DB0(firstPanel, ((void*)mpScreen));
     cBraggingRightsMenu_setEnableItem_2DB0(secondPanel, ((void*)mpScreen));
-    sStr2_2DB0 name = *(sStr2_2DB0*)D_004A14F8;
+    sStr2_2DB0 name = *(sStr2_2DB0*)str_1_c;
     for (int row = 0; row < n; row++) {
         name.c[0] = row + '1';
         cUIText* txt = (cUIText*)find_2DB0(this, name.c);
@@ -267,7 +267,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 
 
 extern void* cSetupMan_mSetupMan;
@@ -353,14 +353,14 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern char str_wait_1[];
 extern char str_wait_2[];
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 // cUIState_onGainFocus returns nothing (ends in a void vcall).
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 
 static inline int isOn00193568()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 
 static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
@@ -511,7 +511,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern void* cSetupMan_mSetupMan;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 extern "C" void cFEStateBraggingRights_updateConfirmedState(cFEStateBraggingRights* self);
@@ -546,7 +546,7 @@ struct sVObj_38F8 {
 
 static inline int isOn_38F8()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 
 static inline void* vcall_38F8(char* self, int slot, cUIThing* w)
@@ -681,13 +681,13 @@ void cFEStateBraggingRights::fillHelpPopup(cFEStateNetHelpPopup* popup)
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern void* cSetupMan_mSetupMan;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 extern "C" void cSetupMan_sendBraggingSelection(void* snd, int id);
 static inline int isOn00193CF8()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 /**
  * Handles menu events of the two bragging-rights menus: recolouring and which events pass on.
@@ -872,18 +872,18 @@ void cFEStateBraggingRights::updateConfirmedState()
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_handleEvent);
 #ifdef SKIP_ASM
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern "C" int cFEStateNet_handleEvent(void* self, int msg, void* pParam);
 
 static inline int isOn00194138()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 
 /**
  * Passes an event on to the online states' shared handler while the game is online.
  *
- * When D_004A1A70 is 1 it returns cFEStateNet_handleEvent(this, @p msgId, @p data), the slot-24 handler that every
+ * When cFEStateNet_fePath is 1 it returns cFEStateNet_handleEvent(this, @p msgId, @p data), the slot-24 handler that every
  * cFEStateNet-derived state uses; otherwise it ignores the event and returns 0.
  *
  * @param msgId  the event id (On Tour: int msg)
@@ -902,13 +902,13 @@ int cFEStateBraggingRights::handleEvent(int msgId, void* data)
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onPopupEvent);
 #ifdef SKIP_ASM
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern "C" void cFEStateBraggingRights_onCancelChallengePopupEvent(cFEStateBraggingRights* self, cUIState* a1, int a2);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 static inline int isOn00194168()
 {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 
 /**

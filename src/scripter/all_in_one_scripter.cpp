@@ -204,7 +204,7 @@ bool cScriptObject::IsInUse()
 #endif
 
 /**
- * Does nothing: cBXScriptEngine's per-frame InSeq player update hook (slot 2 of its cInSeqComm table, D_00482450).
+ * Does nothing: cBXScriptEngine's per-frame InSeq player update hook (slot 2 of its cInSeqComm table, cBXScriptEngine_cInSeqComm_vtbl).
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnInSeqUpdate (D_00482100).
  */
@@ -213,7 +213,7 @@ extern "C" void cBXScriptEngine_OnInSeqUpdate(void) {
 
 /**
  * Does nothing: cBXScriptEngine's hook for an InSeq player that is stopping (slot 3 of its cInSeqComm table,
- * D_00482450).
+ * cBXScriptEngine_cInSeqComm_vtbl).
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnInSeqPlayStopping (D_00482100).
  */
@@ -224,7 +224,7 @@ extern "C" void cBXScriptEngine_OnInSeqPlayStopping(void) {
 INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_OnInSeqLoop);
 #ifdef SKIP_ASM
 /**
- * Returns 1: the script engine's InSeq loop hook (slot 5 of the cInSeqComm tables D_00482450 and D_00482100).
+ * Returns 1: the script engine's InSeq loop hook (slot 5 of the cInSeqComm tables cBXScriptEngine_cInSeqComm_vtbl and D_00482100).
  *
  * @return always 1
  */
@@ -234,14 +234,14 @@ extern "C" int cBXScriptEngine_OnInSeqLoop(void) {
 #endif
 
 /**
- * Does nothing: the script engine's InSeq remote-disconnect hook (slot 7 of the cInSeqComm tables D_00482450 and
+ * Does nothing: the script engine's InSeq remote-disconnect hook (slot 7 of the cInSeqComm tables cBXScriptEngine_cInSeqComm_vtbl and
  * D_00482100).
  */
 extern "C" void cBXScriptEngine_OnInSeqRemoteDisconnect(void) {
 }
 
 /**
- * Does nothing: the script engine's InSeq remote-message hook (slot 8 of the cInSeqComm tables D_00482450 and
+ * Does nothing: the script engine's InSeq remote-message hook (slot 8 of the cInSeqComm tables cBXScriptEngine_cInSeqComm_vtbl and
  * D_00482100).
  */
 extern "C" void cBXScriptEngine_OnInSeqRemoteMessageSend(void) {
@@ -252,7 +252,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_IsInSeqReadyForRemot
 #ifdef SKIP_ASM
 /**
  * Returns 1: the script engine's answer to whether InSeq is ready for remote play commands (last slot of the cInSeqComm
- * tables D_00482450 and D_00482100).
+ * tables cBXScriptEngine_cInSeqComm_vtbl and D_00482100).
  *
  * @return always 1
  */
@@ -479,12 +479,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS__cScriptObjGS);
 extern "C" void cScriptObject__cScriptObject_48D8(void *, int) __asm__("cScriptObject__cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjGS_vtbl[];
-extern char D_00482318[];
+extern char cScriptObjGS_cScriptObject_vtbl[];
 
 /**
  * Destroys a cScriptObjGS: puts back its vtables, destroys the cScriptObject base, and frees it when asked.
  *
- * Stores cScriptObjGS_vtbl at +0x0 and D_00482318 at +0x18 (the cScriptObject part's vtable), calls
+ * Stores cScriptObjGS_vtbl at +0x0 and cScriptObjGS_cScriptObject_vtbl at +0x18 (the cScriptObject part's vtable), calls
  * cScriptObject__cScriptObject on the cScriptObject part at +0xC, then calls operator_delete on the object when bit 0
  * of
  * @p deleteFlags is set.
@@ -493,7 +493,7 @@ extern char D_00482318[];
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
 extern "C" void cScriptObjGS__cScriptObjGS(cScriptObjGS* gsObject, int deleteFlags) {
-    gsObject->mScriptObjectVtbl = (void**)D_00482318;
+    gsObject->mScriptObjectVtbl = (void**)cScriptObjGS_cScriptObject_vtbl;
     gsObject->mVtbl = (void**)cScriptObjGS_vtbl;
     cScriptObject__cScriptObject_48D8(&gsObject->mObjType, 0);
     if (deleteFlags & 1) {
@@ -506,7 +506,7 @@ extern "C" void cScriptObjGS__cScriptObjGS(cScriptObjGS* gsObject, int deleteFla
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS_GetNumScriptEntities);
 #ifdef SKIP_ASM
 /**
- * Returns 1: a cScriptObjGS has a single script entity, itself (slot 6 of D_00482318).
+ * Returns 1: a cScriptObjGS has a single script entity, itself (slot 6 of cScriptObjGS_cScriptObject_vtbl).
  *
  * @return always 1
  */
@@ -521,7 +521,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS_GetScriptEntity);
 /**
  * Returns the cScriptObjGS itself as its only script entity (the cScriptEntity part at +0x0).
  *
- * Called through slot 7 of D_00482318, whose entry moves the cScriptObject pointer back by 0xC to the object start; the
+ * Called through slot 7 of cScriptObjGS_cScriptObject_vtbl, whose entry moves the cScriptObject pointer back by 0xC to the object start; the
  * entity index (second argument, not declared here) is ignored.
  *
  * @param gsObject  the cScriptObjGS
@@ -539,12 +539,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent__cScriptObjEvent);
 extern "C" void cScriptObject__cScriptObject_4950(void *, int) __asm__("cScriptObject__cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjEvent_vtbl[];
-extern char D_00482298[];
+extern char cScriptObjEvent_cScriptObject_vtbl[];
 
 /**
  * Destroys a cScriptObjEvent: puts back its vtables, destroys the cScriptObject base, and frees it when asked.
  *
- * Stores cScriptObjEvent_vtbl at +0x0 and D_00482298 at +0x18 (the cScriptObject part's vtable), calls
+ * Stores cScriptObjEvent_vtbl at +0x0 and cScriptObjEvent_cScriptObject_vtbl at +0x18 (the cScriptObject part's vtable), calls
  * cScriptObject__cScriptObject on the cScriptObject part at +0xC, then calls operator_delete on the object when bit 0
  * of
  * @p deleteFlags is set.
@@ -553,7 +553,7 @@ extern char D_00482298[];
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
 extern "C" void cScriptObjEvent__cScriptObjEvent(cScriptObjEvent* eventObject, int deleteFlags) {
-    eventObject->mScriptObjectVtbl = (void**)D_00482298;
+    eventObject->mScriptObjectVtbl = (void**)cScriptObjEvent_cScriptObject_vtbl;
     eventObject->mVtbl = (void**)cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject_4950(&eventObject->mObjType, 0);
     if (deleteFlags & 1) {
@@ -566,7 +566,7 @@ extern "C" void cScriptObjEvent__cScriptObjEvent(cScriptObjEvent* eventObject, i
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent_GetNumScriptEntities);
 #ifdef SKIP_ASM
 /**
- * Returns 1: a cScriptObjEvent has a single script entity, itself (slot 6 of D_00482298).
+ * Returns 1: a cScriptObjEvent has a single script entity, itself (slot 6 of cScriptObjEvent_cScriptObject_vtbl).
  *
  * @return always 1
  */
@@ -581,7 +581,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent_GetScriptEntity);
 /**
  * Returns the cScriptObjEvent itself as its only script entity (the cScriptEntity part at +0x0).
  *
- * Called through slot 7 of D_00482298, whose entry moves the cScriptObject pointer back by 0xC to the object start; the
+ * Called through slot 7 of cScriptObjEvent_cScriptObject_vtbl, whose entry moves the cScriptObject pointer back by 0xC to the object start; the
  * entity index (second argument, not declared here) is ignored.
  *
  * @param eventObject  the cScriptObjEvent
@@ -940,12 +940,12 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider__cScriptObjRider);
 extern "C" void cScriptObject__cScriptObject_4AE8(void *, int) __asm__("cScriptObject__cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjRider_vtbl[];
-extern char D_00482018[];
+extern char cScriptObjRider_cScriptObject_vtbl[];
 
 /**
  * Destroys a cScriptObjRider: puts back its vtables, destroys the cScriptObject base, and frees it when asked.
  *
- * Stores cScriptObjRider_vtbl at +0x0 and D_00482018 at +0x18 (the cScriptObject part's vtable), calls
+ * Stores cScriptObjRider_vtbl at +0x0 and cScriptObjRider_cScriptObject_vtbl at +0x18 (the cScriptObject part's vtable), calls
  * cScriptObject__cScriptObject on the cScriptObject part at +0xC, then calls operator_delete on the object when bit 0
  * of
  * @p deleteFlags is set.
@@ -954,7 +954,7 @@ extern char D_00482018[];
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
 extern "C" void cScriptObjRider__cScriptObjRider(cScriptObjRider* riderObject, int deleteFlags) {
-    riderObject->mScriptObjectVtbl = (void**)D_00482018;
+    riderObject->mScriptObjectVtbl = (void**)cScriptObjRider_cScriptObject_vtbl;
     riderObject->mVtbl = (void**)cScriptObjRider_vtbl;
     cScriptObject__cScriptObject_4AE8(&riderObject->mObjType, 0);
     if (deleteFlags & 1) {
@@ -982,7 +982,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetScriptEntity);
 /**
  * Returns the cScriptObjRider itself as its only script entity (the cScriptEntity part at +0x0).
  *
- * Called through slot 7 of the riders' cScriptObject tables (D_00482018 and the cRider-derived ones), whose entries
+ * Called through slot 7 of the riders' cScriptObject tables (cScriptObjRider_cScriptObject_vtbl and the cRider-derived ones), whose entries
  * move the cScriptObject pointer back by 0xC; the entity index (second argument, not declared here) is ignored.
  *
  * @param riderObject  the cScriptObjRider

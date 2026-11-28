@@ -794,10 +794,10 @@ extern "C" void cTextureMan_ShadowClearLockTexture(sPs2TexSet7F18* self, int idx
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cTextureMan_appendFixedPacketRef);
 #ifdef SKIP_ASM
-extern char D_0044B200[];
+extern char cTextureMan_fixedPacket[];
 
 /**
- * Appends a DMA ref tag that sends the fixed 0x22-quadword packet D_0044B200.
+ * Appends a DMA ref tag that sends the fixed 0x22-quadword packet cTextureMan_fixedPacket.
  *
  * Writes the tag at *@p pkt and advances it by one quadword. The texture upload builders (cTextureMan_buildPixelUpload, cTextureMan_buildClutUpload)
  * and several draw paths in render/graphicsman and render/lightman end their uploads with it.
@@ -807,7 +807,7 @@ extern char D_0044B200[];
 // PORT: 64-bit `ulong` DMA tag, pointer packed into the upper word
 void cTextureMan::appendFixedPacketRef(ulong** pkt)
 {
-    (*pkt)[0] = ((ulong)(int)D_0044B200 << 32) | 0x30000022;
+    (*pkt)[0] = ((ulong)(int)cTextureMan_fixedPacket << 32) | 0x30000022;
     (*pkt)[1] = 0;
     *pkt += 2;
 }
@@ -1041,7 +1041,7 @@ extern "C" void cTextureMan_buildPixelUpload(cTextureMan* self, int idx, ulong**
 extern "C" void cTextureMan_selectContextTexture(cTextureMan* self, int idx, int slot, ulong** dma);
 extern "C" ulong* cPS2ScratchPad_claimBuffer(void* ring, unsigned int addr, int size, int flags);
 extern "C" void* cPS2ScratchPad_flushBufferTo(void* ring, ulong* p, int a2);
-extern void* D_004A4474;
+extern void* SPRMan;
 
 struct sUpNode_8660 {
     int flags;
@@ -1115,7 +1115,7 @@ void cTextureMan::ensureContextTextures(int context1Tex, int context2Tex, int ev
             texRecord->mTexBlock = n;
             texRecord->mTexAddr = (fl >> 8) << shift;
             if (gif == 0)
-                gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+                gif = cPS2ScratchPad_claimBuffer(SPRMan, *(unsigned int*)gifOut, -1, 0);
             buildPixelUpload(idx, &cur, &gif);
             sent = 1;
         }
@@ -1128,13 +1128,13 @@ void cTextureMan::ensureContextTextures(int context1Tex, int context2Tex, int ev
             texRecord->mCLUTBlock = n;
             texRecord->mCLUTAddr = fl >> 8;
             if (gif == 0)
-                gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
+                gif = cPS2ScratchPad_claimBuffer(SPRMan, *(unsigned int*)gifOut, -1, 0);
             cTextureMan_buildClutUpload((sPs2UpMgr*)this, idx, &cur, &gif);
             sent = 1;
         }
     }
     if (gif != 0)
-        *gifOut = cPS2ScratchPad_flushBufferTo(D_004A4474, gif, 4);
+        *gifOut = cPS2ScratchPad_flushBufferTo(SPRMan, gif, 4);
     if (!sent) {
         cur[0] = 0x10000001;
         cur[1] = 0;
@@ -1478,7 +1478,7 @@ struct sGfxState_691F8 {
 
 
 extern sRS_691F8 sDrawState_s_defaultDrawState;
-extern sTexPair_691F8 D_004A5A10[];
+extern sTexPair_691F8 cGraphicsMan_noTexturePair[];
 extern t2Vector t2vect_Zero[];
 
 static inline void gfxSet0_691F8(sRS_691F8* r, int v, int mask, int shift)
@@ -1521,7 +1521,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
     new ((char*)&self->m_pCurrentDrawState) sGfxState_691F8;
     self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
-    for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
+    for (unsigned int i = 0; i < 2; i++) cGraphicsMan_noTexturePair[0].s[i] = -1;
     memset(&sDrawState_s_defaultDrawState, 0, 0x10);
     gfxSetA_691F8(&sDrawState_s_defaultDrawState, 1, 3, 23);
     gfxSetA_691F8(&sDrawState_s_defaultDrawState, 0, 1, 22);
@@ -1541,7 +1541,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
     for (unsigned int k = 0; k < 2; k++) {
         gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 3, 2 + k * 2);
     }
-    gfxSetTex_691F8(&sDrawState_s_defaultDrawState, D_004A5A10[0]);
+    gfxSetTex_691F8(&sDrawState_s_defaultDrawState, cGraphicsMan_noTexturePair[0]);
     for (int k = 0; k < 4; k++) {
         ((sRS_691F8*)(&self->m_drawStateStack[0]))[k] = sDrawState_s_defaultDrawState;
     }

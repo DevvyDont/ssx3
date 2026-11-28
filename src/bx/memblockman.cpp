@@ -880,18 +880,18 @@ extern "C" int intc_callWithFpuSaved(int handlerArg, void (*handler)(int))
 //100%
 INCLUDE_ASM("bx/memblockman", setLoaderThreadPriority);
 #ifdef SKIP_ASM
-extern int D_004A3ECC;
+extern int cPS2ExecutionMan_loaderThreadId;
 extern "C" void ChangeThreadPriority(int, int);
 
 /**
- * Sets the PS2 execution manager's loader thread (D_004A3ECC) to priority 101 with ChangeThreadPriority.
+ * Sets the PS2 execution manager's loader thread (cPS2ExecutionMan_loaderThreadId) to priority 101 with ChangeThreadPriority.
  *
- * cPS2ExecutionMan_init creates that thread at the main thread's priority + 1 and stores its id in D_004A3ECC;
+ * cPS2ExecutionMan_init creates that thread at the main thread's priority + 1 and stores its id in cPS2ExecutionMan_loaderThreadId;
  * cSSXApp_initload calls this afterwards.
  */
 extern "C" void setLoaderThreadPriority(void)
 {
-    ChangeThreadPriority(D_004A3ECC, 101);
+    ChangeThreadPriority(cPS2ExecutionMan_loaderThreadId, 101);
 }
 #endif
 
@@ -915,7 +915,7 @@ extern "C" void DisableIntc(int n);
 extern "C" int AddIntcHandler2(int n, void (*a)(), int b, void (*c)());
 extern "C" int EnableIntc(int n);
 extern int _gp;     // linker-defined $gp base (0x4A30F0; splat names it D_004A30F0)
-extern int D_004A3ECC;
+extern int cPS2ExecutionMan_loaderThreadId;
 
 struct sMgr_31A6D8 {
     char pad0[0xC];
@@ -971,7 +971,7 @@ struct sSemaParam_31A6D8 {
  * calling (main) thread's id (+0x10) and its current priority (+0x14, from ReferThreadStatus). Creates the halt
  * semaphore (+0xC) and the sync semaphore (+0x18, its waiting flag +0x1C cleared), and a counting semaphore (max
  * 0x400) for loader jobs (+0x14044, pending job +0x14048 cleared). Creates and starts the loader thread
- * (cPS2ExecutionMan_runLoaderThread, 0x10000-byte stack at +0x4040, priority main + 1; id at +0x14040 and in D_004A3ECC), clears the
+ * (cPS2ExecutionMan_runLoaderThread, 0x10000-byte stack at +0x4040, priority main + 1; id at +0x14040 and in cPS2ExecutionMan_loaderThreadId), clears the
  * halt-request flag (+0x4038), creates the timer counting semaphore (+0x4034, max 0x400) and starts the timer thread
  * (cPS2ExecutionMan_runTimerThread, 0x4000-byte stack at +0x30, priority main - 1; id at +0x4030). Both threads get @p self as their
  * argument and _gp as their $gp. Finally, between DisableIntc(3) and EnableIntc(3), installs intc_callWithFpuSaved as
@@ -1010,7 +1010,7 @@ extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
     tp.attr = 0;
     tp.option = 0;
     self->f14040 = CreateThread(&tp);
-    D_004A3ECC = self->f14040;
+    cPS2ExecutionMan_loaderThreadId = self->f14040;
     StartThread(self->f14040, self);
     self->f4038 = 0;
     memset(&countingSemaParam, 0, 0x18);
@@ -1386,7 +1386,7 @@ bool cPS2ExecutionMan::isLoadDone()
 }
 #endif
 
-extern "C" unsigned int D_004A3ED0;
+extern "C" unsigned int cd_discTrayOpenedFlag;
 
 //99.5% - single $gp-relative sw; SN's assembler doesn't support %gp_rel(),
 // so our object always carries a real relocation here while the target's
@@ -1394,20 +1394,20 @@ extern "C" unsigned int D_004A3ED0;
 INCLUDE_ASM("bx/memblockman", clearDiscTrayOpened);
 #ifdef SKIP_ASM
 /**
- * Clears the flag D_004A3ED0, which cd_recoverReadError sets when it finds the disc tray has been opened.
+ * Clears the flag cd_discTrayOpenedFlag, which cd_recoverReadError sets when it finds the disc tray has been opened.
  *
  * cGameComm_setState calls it on entering the GameActive state.
  */
 extern "C" void clearDiscTrayOpened()
 {
-    D_004A3ED0 = 0;
+    cd_discTrayOpenedFlag = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", cd_recoverReadError);
 #ifdef SKIP_ASM
-extern int D_00519C40[];
+extern int CDVD_state[];
 extern int D_004A3ED4;
 extern "C" int sceCdTrayReq(int cmd, int* out);
 extern "C" void CDVD_recoverRead(void);
@@ -1417,14 +1417,14 @@ extern "C" void CDVD_recoverRead(void);
  *
  * systemInit installs it with SYNCTASK_add in place of the CD file system's CDVD_checkFailedRead, which does the same
  * recovery. When D_004A3ED4 is set, clears it and calls sceCdTrayReq(2, ...) (command 2, the result is discarded).
- * When both bits 2 and 4 (mask 6) of the CD file system flags (D_00519C40) are set, calls sceCdTrayReq(2, ...) again
- * and sets D_004A3ED0 when it reports a nonzero count, clears the two bits and re-runs the read with CDVD_recoverRead.
+ * When both bits 2 and 4 (mask 6) of the CD file system flags (CDVD_state) are set, calls sceCdTrayReq(2, ...) again
+ * and sets cd_discTrayOpenedFlag when it reports a nonzero count, clears the two bits and re-runs the read with CDVD_recoverRead.
  *
  * @return 0
  */
 extern "C" int cd_recoverReadError(void)
 {
-    int flags = D_00519C40[0];
+    int flags = CDVD_state[0];
     if (D_004A3ED4 != 0) {
         int trayStatus;
         D_004A3ED4 = 0;
@@ -1435,8 +1435,8 @@ extern "C" int cd_recoverReadError(void)
         int trayChanged = 0;
         sceCdTrayReq(2, &trayChanged);
         if (trayChanged != 0)
-            D_004A3ED0 = 1;
-        D_00519C40[0] &= ~6;
+            cd_discTrayOpenedFlag = 1;
+        CDVD_state[0] &= ~6;
         CDVD_recoverRead();
     }
     return 0;

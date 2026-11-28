@@ -705,7 +705,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask_4728(void* p, int a1) __asm
 extern "C" int cBEStatInterface_getStatFromProfile_4728(void* iface, int a1, int stat) __asm__("cBEStatInterface_getStatFromProfile");
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* cFEStateBuyAttrib_vtbl[];
-extern const int D_004780B0[];
+extern const int cFEStateBuyAttrib_attributeOrder[];
 
 
 /**
@@ -714,7 +714,7 @@ extern const int D_004780B0[];
  *
  * Runs the cUIState constructor cUIState_cUIState() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
  * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (cFECustom_getPlayerCtrlMask()), and clears the 0x1C bytes at +0x84. For
- * each of the seven attributes listed in D_004780B0 it stores cBEStatInterface_getStatFromProfile() (player interface, rider 0) at +0x4C[i]
+ * each of the seven attributes listed in cFEStateBuyAttrib_attributeOrder it stores cBEStatInterface_getStatFromProfile() (player interface, rider 0) at +0x4C[i]
  * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
  *
  * @param stateMemory  the memory for the state
@@ -732,8 +732,8 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMem
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     MEM_fill(&stateMemory->mPotentialExperience[0], 0, 0x1C);
     for (int i = 0; i < 7; i++) {
-        self->mExperience[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
-        self->mExperienceLevel[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);
+        self->mExperience[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, cFEStateBuyAttrib_attributeOrder[i]);
+        self->mExperienceLevel[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, cFEStateBuyAttrib_attributeOrder[i]) / 5);
     }
     return ((void*)stateMemory);
 }

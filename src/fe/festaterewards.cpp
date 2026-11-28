@@ -1454,21 +1454,21 @@ extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(cFESt
 }
 #endif
 
-extern char D_00467070[];
+extern char str_data_char_rwrdps2_big_poster_icon_ssh[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the posters gallery's icon file name, "data/char/rwrdps2.big|poster_icon.ssh" (D_00467070).
+ * Returns the posters gallery's icon file name, "data/char/rwrdps2.big|poster_icon.ssh" (str_data_char_rwrdps2_big_poster_icon_ssh).
  *
  * Vtable slot 25 of the posters vtable cFEStateRewardGalleryPosters_vtbl.
  *
- * @return D_00467070
+ * @return str_data_char_rwrdps2_big_poster_icon_ssh
  */
 const char* cFEStateRewardGalleryPosters::getIconsFileName()
 {
-    return D_00467070;
+    return str_data_char_rwrdps2_big_poster_icon_ssh;
 }
 #endif
 
@@ -1576,21 +1576,21 @@ extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingC
 }
 #endif
 
-extern char D_00467098[];
+extern char str_data_char_rwrdps2_big_tradingcard_icon_s[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the trading-card gallery's icon file name, "data/char/rwrdps2.big|tradingcard_icon.ssh" (D_00467098).
+ * Returns the trading-card gallery's icon file name, "data/char/rwrdps2.big|tradingcard_icon.ssh" (str_data_char_rwrdps2_big_tradingcard_icon_s).
  *
  * Vtable slot 25 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl.
  *
- * @return D_00467098
+ * @return str_data_char_rwrdps2_big_tradingcard_icon_s
  */
 const char* cFEStateRewardGalleryTradingCards::getIconsFileName()
 {
-    return D_00467098;
+    return str_data_char_rwrdps2_big_tradingcard_icon_s;
 }
 #endif
 
@@ -1699,21 +1699,21 @@ extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptAr
 }
 #endif
 
-extern char D_004670C8[];
+extern char str_data_char_rwrdps2_big_gallery_icon_ssh[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the art gallery's icon file name, "data/char/rwrdps2.big|gallery_icon.ssh" (D_004670C8).
+ * Returns the art gallery's icon file name, "data/char/rwrdps2.big|gallery_icon.ssh" (str_data_char_rwrdps2_big_gallery_icon_ssh).
  *
  * Vtable slot 25 of the art vtable cFEStateRewardGalleryConceptArts_vtbl.
  *
- * @return D_004670C8
+ * @return str_data_char_rwrdps2_big_gallery_icon_ssh
  */
 const char* cFEStateRewardGalleryConceptArts::getIconsFileName()
 {
-    return D_004670C8;
+    return str_data_char_rwrdps2_big_gallery_icon_ssh;
 }
 #endif
 
@@ -1821,21 +1821,21 @@ extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(cFEStat
 }
 #endif
 
-extern char D_004670F0[];
+extern char str_data_char_rwrdps2_big_video_icon_ssh[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the video gallery's icon file name, "data/char/rwrdps2.big|video_icon.ssh" (D_004670F0).
+ * Returns the video gallery's icon file name, "data/char/rwrdps2.big|video_icon.ssh" (str_data_char_rwrdps2_big_video_icon_ssh).
  *
  * Vtable slot 25 of the video vtable cFEStateRewardGalleryVideos_vtbl.
  *
- * @return D_004670F0
+ * @return str_data_char_rwrdps2_big_video_icon_ssh
  */
 const char* cFEStateRewardGalleryVideos::getIconsFileName()
 {
-    return D_004670F0;
+    return str_data_char_rwrdps2_big_video_icon_ssh;
 }
 #endif
 
@@ -1943,21 +1943,21 @@ extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(cFEStateRew
 }
 #endif
 
-extern char D_00467118[];
+extern char str_data_char_rwrdps2_big_toy_icon_ssh[];
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the toy gallery's icon file name, "data/char/rwrdps2.big|toy_icon.ssh" (D_00467118).
+ * Returns the toy gallery's icon file name, "data/char/rwrdps2.big|toy_icon.ssh" (str_data_char_rwrdps2_big_toy_icon_ssh).
  *
  * Vtable slot 25 of the toy vtable cFEStateRewardGalleryToys_vtbl.
  *
- * @return D_00467118
+ * @return str_data_char_rwrdps2_big_toy_icon_ssh
  */
 const char* cFEStateRewardGalleryToys::getIconsFileName()
 {
-    return D_00467118;
+    return str_data_char_rwrdps2_big_toy_icon_ssh;
 }
 #endif
 

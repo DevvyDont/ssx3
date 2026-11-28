@@ -553,7 +553,7 @@ struct cRider : public cRiderState, public cBeing {
                                     //   changes (cSSXAudio_HandleAIGlide / HandleGlide), [1] written with it (cSSXAudio_BeginRiderSound)
     /* 0x768 */ int LastSnowType[2]; // [O]; [U] [0] the surface sound id from cSSXAudio_Surface (HandleAIGlide / HandleGlide),
                                     //   [1] HandleCarve's (9 on one cSSXAudio_GetSurfaceProgramType result)
-    /* 0x770 */ float LastLandSpeed; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
+    /* 0x770 */ float LastLandSpeed; // fed to curve cSSXAudio_landVolumeCurve for the sound volume (cSSXAudio_Land)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle
     /* 0x77C */ cRiderHandler* mRiderHandler; // [P] getRiderHandler (bracketed +0x40)

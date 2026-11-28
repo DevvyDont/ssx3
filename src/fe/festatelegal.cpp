@@ -87,7 +87,7 @@ int cBEBoltDB_getNumCharBolts(void* db, int type);
 extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern "C" int cBEBoltDB_isBoltAncestor(void* db, char* item, int id);
 extern "C" void cBECharProfileDB_setBoltBought(void* prof, int id, int on);
-extern int D_004A11E0;
+extern int kBolt_boardGroup;
 
 static inline int ItemType_7D38(char* item)
 {
@@ -106,7 +106,7 @@ static inline int ItemType_7D38(char* item)
  * cBERewardInterface_setPlayList(); 0x5B65653, 0xA0CF7C4, 0xB5D8914, 0x717257D and 0x74F6CF4 do every index below the matching count
  * (cBERewardInterface_getTotalNumPosters, cBERewardInterface_getTotalNumTradingCards, cBERewardInterface_getTotalNumConceptArts, cBERewardInterface_getTotalNumVideos, cBERewardInterface_getTotalNumToys) with cBERewardInterface_buyPoster, cBERewardInterface_buyTradingCard,
  * cBERewardInterface_buyConceptArt, cBERewardInterface_buyVideo and cBERewardInterface_buyToy. 0xBCF3974 marks every library item of types 1-3 that passes
- * cBEBoltDB_isBoltAncestor() against D_004A11E0 as owned (cBECharProfileDB_setBoltBought()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
+ * cBEBoltDB_isBoltAncestor() against kBolt_boardGroup as owned (cBECharProfileDB_setBoltBought()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
  * same for every type-1 item without the check. cFEStateOptions_onWidgetEvent() calls it with the text typed into its
  * popup.
  *
@@ -245,7 +245,7 @@ extern "C" bool applyCheatCode(char* code)
                 void* prof = cBEBoltInterface_getCharProfile(profiles, team, type);
                 for (int k = 0; k < count; k++, item += 0x38) {
                     if (ItemType_7D38(item) == 1 || ItemType_7D38(item) == 2 || ItemType_7D38(item) == 3) {
-                        if (cBEBoltDB_isBoltAncestor(db, item, D_004A11E0))
+                        if (cBEBoltDB_isBoltAncestor(db, item, kBolt_boardGroup))
                             cBECharProfileDB_setBoltBought(prof, *(short*)(item + 4), 1);
                     }
                 }

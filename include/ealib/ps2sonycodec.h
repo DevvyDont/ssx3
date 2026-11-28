@@ -159,7 +159,7 @@ struct PS2_SONY_CODEC_INTERNAL {
 
 // layer_data: mpeg2decode's per-layer state (the MSSG reference decoder's struct layer_data, EA's memory-buffer
 // variant: no file, read buffer or end pointer before the bit reader). The unit's copy of the mpeg2decode header parser
-// reads through the global ld (D_0050A088), which PS2_SONY_CODEC_INTERNAL_Init points at the base layer D_00509648.
+// reads through the global ld (D_0050A088), which PS2_SONY_CODEC_INTERNAL_Init points at the base layer mpeg2_base.
 // Member names are mpeg2decode's (global.h), in its order; tags: [U] retail use. Size not known (block[] etc. unused).
 struct layer_data {
     unsigned char* Rdptr;                       // 0x000 [U] Initialize_Buffer sets it to the data; Flush_Buffer /

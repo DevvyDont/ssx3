@@ -1308,7 +1308,7 @@ int sizerefpack(unsigned char *packed, int *outlen) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_getopts);
 #ifdef SKIP_ASM
 extern int gotcaps;
-extern int D_0044C460;
+extern int SNDSYS_getopts_ret;
 extern int SNDPLATFORM_outputcaps_4DD8() __asm__("SNDPLATFORM_outputcaps");
 
 int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) __asm__("SNDSYS_getopts");
@@ -1316,7 +1316,7 @@ int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) __asm__("SNDSYS_getopts");
 /**
  * Copies the sound system's options into a caller's buffer, setting the defaults on first use.
  *
- * The first call stores SNDPLATFORM_outputcaps's result (D_0044C460) and sets 16 bank slots (+0x08 of the options at
+ * The first call stores SNDPLATFORM_outputcaps's result (SNDSYS_getopts_ret) and sets 16 bank slots (+0x08 of the options at
  * D_0050A908), +0x2B to 90, +0x1C to 1, +0x14 to -1.0f, and saves a copy (sndgs +0xD4). Every call copies the
  * 0xD4-byte block at sndgs out. Called by SNDSYSI_init and the game's sound setup (System_SetRandomSeed ...
  * System_Init), which change fields and pass them to SNDSYS_setopts.
@@ -1326,7 +1326,7 @@ int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) __asm__("SNDSYS_getopts");
  */
 int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) {
     if (gotcaps == 0) {
-        D_0044C460 = SNDPLATFORM_outputcaps_4DD8();
+        SNDSYS_getopts_ret = SNDPLATFORM_outputcaps_4DD8();
         gotcaps = 1;
         sndgs.sso.set.maxbanks = 0x10;
         sndgs.sso.set.sndheapthreshold = 90;
@@ -1335,7 +1335,7 @@ int SNDSYS_getopts_4DD8(SNDSYSOPTS *out) {
         sndgs.prevset = sndgs.sso.set;
     }
     *out = sndgs.sso;
-    return D_0044C460;
+    return SNDSYS_getopts_ret;
 }
 #endif
 
@@ -6024,7 +6024,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_alloc);
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
 extern short sndvoicereserved_A0B0[] __asm__("sndvoicereserved");
-extern int D_0044C478;
+extern int SNDVOICEI_alloc_lasthandle;
 extern int f_A078_A0B0(int, int) __asm__("SNDVOICEI_isreserved");
 extern void f_89E0_A0B0(int) __asm__("SNDstop");
 
@@ -6033,7 +6033,7 @@ extern void f_89E0_A0B0(int) __asm__("SNDstop");
  *
  * Within the channel range, takes free channels oldest first (timestamp +0x2C); the rest are stolen from busy channels
  * with a lower priority (+0x2A, at most 100), equal priority only when the steal option (options +0x1C) is set. With
- * enough channels it sorts them, builds the handle from a counter (D_0044C478, steps of 0x100) and the first channel,
+ * enough channels it sorts them, builds the handle from a counter (SNDVOICEI_alloc_lasthandle, steps of 0x100) and the first channel,
  * stops stolen sounds (SNDstop), marks each busy (state 1, tick, priority) and makes the first the master (voice
  * list, handle) with the others pointing to it.
  *
@@ -6057,9 +6057,9 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
     for (i = 0; i < n; i++) {
         sndvoicereserved_A0B0[i] = -1;
     }
-    D_0044C478 += 0x100;
-    if (D_0044C478 < 0) {
-        D_0044C478 = 0;
+    SNDVOICEI_alloc_lasthandle += 0x100;
+    if (SNDVOICEI_alloc_lasthandle < 0) {
+        SNDVOICEI_alloc_lasthandle = 0;
     }
     for (i = 0; i < n; i++) {
         best = -1;
@@ -6115,7 +6115,7 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
                 }
             }
         } while (!sorted);
-        *out = D_0044C478 | sndvoicereserved_A0B0[0];
+        *out = SNDVOICEI_alloc_lasthandle | sndvoicereserved_A0B0[0];
         result = sndvoicereserved_A0B0[0];
         for (i = 0; i < sel; i++) {
             int w;
@@ -7519,12 +7519,12 @@ INCLUDE_ASM("ealib/seg_2B4578", DTSENC_writeBits);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char p0[6]; unsigned short pos; unsigned char *buf; } BW_CAE8;
-extern BW_CAE8 *D_0050AC68_CAE8[] __asm__("D_0050AC68");
+extern BW_CAE8 *DTSENC_state_CAE8[] __asm__("DTSENC_state");
 
 /**
  * Appends the low @p n bits of a value, most significant first, to the DTS encoder's output frame.
  *
- * Writes at the bit position +0x06 of the encoder state D_0050AC68 into its output buffer (+0x08), byte index XOR 1
+ * Writes at the bit position +0x06 of the encoder state DTSENC_state into its output buffer (+0x08), byte index XOR 1
  * (the frame is stored as byte-swapped 16-bit words, as IEC 61937 carries it); each byte is cleared when first written,
  * and the position advances by @p n. Used by the frame-header writer DTSENC_writeFrameHeader.
  *
@@ -7539,19 +7539,19 @@ void DTSENC_writeBits(int value, int n) {
     int rem;
     fieldBits = fieldBits >> (0x20 - n);
     while (n > 0) {
-        byte = D_0050AC68_CAE8[0]->pos >> 3;
+        byte = DTSENC_state_CAE8[0]->pos >> 3;
         if (byte & 1)
             byte = byte - 1;
         else
             byte = byte + 1;
-        room = 8 - (D_0050AC68_CAE8[0]->pos & 7);
+        room = 8 - (DTSENC_state_CAE8[0]->pos & 7);
         if (room == 8)
-            D_0050AC68_CAE8[0]->buf[byte] = 0;
+            DTSENC_state_CAE8[0]->buf[byte] = 0;
         take = (room >= n) ? n : room;
         rem = n - take;
-        D_0050AC68_CAE8[0]->buf[byte] |= (fieldBits >> rem) << (room - take);
+        DTSENC_state_CAE8[0]->buf[byte] |= (fieldBits >> rem) << (room - take);
         n = rem;
-        D_0050AC68_CAE8[0]->pos += take;
+        DTSENC_state_CAE8[0]->pos += take;
     }
 }
 #endif
@@ -7568,13 +7568,13 @@ typedef struct sBitWriter_CBA0 {
     unsigned char *unk8;
 } sBitWriter;
 
-extern sBitWriter *D_0050AC68_CBA0 __asm__("D_0050AC68");
+extern sBitWriter *DTSENC_state_CBA0 __asm__("DTSENC_state");
 void DTSENC_writeBits(int value, int nbits);
 
 /**
  * Writes the fixed header of a DTS frame into the encoder's output buffer.
  *
- * Resets the bit position (+0x06 of D_0050AC68) and emits with DTSENC_writeBits: the IEC 61937 burst preamble (F872 4E1F,
+ * Resets the bit position (+0x06 of DTSENC_state) and emits with DTSENC_writeBits: the IEC 61937 burst preamble (F872 4E1F,
  * data type 0x000B, length 0x3EE8 bits), the DTS sync word 7FFE8001, the frame header (normal frame, 16 blocks of 32
  * samples, 2013-byte frame), channel arrangement 8 (2/2, four channels) when mode +0x00 is 1 or 9 (3/2) otherwise, 48
  * kHz at 1536 kbit/s, the LFE / version field with the channel count (+0x01) minus 1, then per channel the fixed side
@@ -7586,36 +7586,36 @@ void DTSENC_writeFrameHeader(void) {
     int i;
     int j;
 
-    D_0050AC68_CBA0->unk6 = 0;
+    DTSENC_state_CBA0->unk6 = 0;
     DTSENC_writeBits(0xF8724E1F, 0x20);
     DTSENC_writeBits(0xB3EE8, 0x20);
     DTSENC_writeBits(0x7FFE8001, 0x20);
     DTSENC_writeBits(0x0FC3C7DC, 0x1C);
-    if (D_0050AC68_CBA0->unk0 == 1) {
+    if (DTSENC_state_CBA0->unk0 == 1) {
         DTSENC_writeBits(8, 6);
     } else {
         DTSENC_writeBits(9, 6);
     }
     DTSENC_writeBits(0x6E000, 19);
-    DTSENC_writeBits((D_0050AC68_CBA0->unk1 - 1) | 0x021C0000, 26);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(22, 5);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(23, 5);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(0, 3);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(3, 2);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(6, 3);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(6, 3);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(1, 1);
+    DTSENC_writeBits((DTSENC_state_CBA0->unk1 - 1) | 0x021C0000, 26);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(22, 5);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(23, 5);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(0, 3);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(3, 2);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(6, 3);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(6, 3);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(1, 1);
     for (j = 0; j < 4; j++) {
-        for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(3, 2);
+        for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(3, 2);
     }
     for (j = 6; j < 11; j++) {
-        for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(7, 3);
+        for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(7, 3);
     }
     DTSENC_writeBits(8, 5);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) DTSENC_writeBits(0, 0x18);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) {
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) DTSENC_writeBits(0, 0x18);
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) {
         j = 0;
-        switch (D_0050AC68_CBA0->unk0) {
+        switch (DTSENC_state_CBA0->unk0) {
         case 1:
             for (; j < 14; j++) DTSENC_writeBits(13, 5);
             for (; j < 24; j++) DTSENC_writeBits(11, 5);
@@ -7628,18 +7628,18 @@ void DTSENC_writeFrameHeader(void) {
             break;
         }
     }
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) {
+    for (i = 0; i < DTSENC_state_CBA0->unk1; i++) {
         DTSENC_writeBits(0, 0x18);
         DTSENC_writeBits(0, 0x18);
     }
-    if (D_0050AC68_CBA0->unk0 == 1) {
-        D_0050AC68_CBA0->unk8[0xE8] = 0;
-        D_0050AC68_CBA0->unk8[0x7CB] = 0xFF;
-        D_0050AC68_CBA0->unk8[0x7CA] = 0xFF;
+    if (DTSENC_state_CBA0->unk0 == 1) {
+        DTSENC_state_CBA0->unk8[0xE8] = 0;
+        DTSENC_state_CBA0->unk8[0x7CB] = 0xFF;
+        DTSENC_state_CBA0->unk8[0x7CA] = 0xFF;
     } else {
-        D_0050AC68_CBA0->unk8[0x7D5] |= 7;
-        D_0050AC68_CBA0->unk8[0x7D4] = 0xFF;
-        D_0050AC68_CBA0->unk8[0x7D7] = 0xF8;
+        DTSENC_state_CBA0->unk8[0x7D5] |= 7;
+        DTSENC_state_CBA0->unk8[0x7D4] = 0xFF;
+        DTSENC_state_CBA0->unk8[0x7D7] = 0xF8;
     }
 }
 #endif
@@ -7652,12 +7652,12 @@ extern void DTSENC_decimateLfe_D078(int a0, float *buf, void *p, signed char *tb
 extern signed char D_0044DD00_D078[] __asm__("D_0044DD00");
 extern int D_0044C760_D078[] __asm__("D_0044C760");
 extern signed char D_0044DD38_D078[] __asm__("D_0044DD38");
-extern void *D_0050AC68;
+extern void *DTSENC_state;
 
 /**
  * Encodes a frame of the LFE channel: 8 decimated samples as 8-bit codes plus their scale-factor index.
  *
- * DTSENC_decimateLfe filters and decimates the input into 8 floats (filter state at +0x6C of the encoder state D_0050AC68,
+ * DTSENC_decimateLfe filters and decimates the input into 8 floats (filter state at +0x6C of the encoder state DTSENC_state,
  * coefficients D_0044DD00). The peak magnitude picks the scale index: through the small table D_0044DD38 below 4,
  * otherwise from a log2 estimate taken from the float's bits, corrected against the scale-factor table D_0044C760. Each
  * sample is then scaled by 28.57 / D_0044C760[index] and truncated to a signed byte. Called by DTSENC_packScaleFactors51.
@@ -7677,7 +7677,7 @@ void DTSENC_encodeLfe(int lfeInput, signed char *out, signed char *out8) {
 
     max = 0.0f;
     min = 0.0f;
-    DTSENC_decimateLfe_D078(lfeInput, buf, (char *)D_0050AC68 + 0x6C, D_0044DD00_D078);
+    DTSENC_decimateLfe_D078(lfeInput, buf, (char *)DTSENC_state + 0x6C, D_0044DD00_D078);
     for (i = 0; i < 8; i++) {
         if (max < buf[i]) {
             max = buf[i];
@@ -7711,7 +7711,7 @@ INCLUDE_ASM("ealib/seg_2B4578", DTSENC_analyzeChannel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AC68_D220 / D_0050AC6C_D220: the ADPCM encoder's state and its work area (DTSENC_encodeFrame sets them up). Layout from
+/* DTSENC_state_D220 / D_0050AC6C_D220: the ADPCM encoder's state and its work area (DTSENC_encodeFrame sets them up). Layout from
    every use in this unit; field names are their offsets. */
 struct sAC68Blk {                   /* one per channel */
     int f00;                        /* input */
@@ -7742,7 +7742,7 @@ struct sAC6C {
     char *fA38;
     unsigned char fA3C;             /* the work area is in scratchpad memory */
 };
-extern struct sAC68 *D_0050AC68_D220 __asm__("D_0050AC68");
+extern struct sAC68 *DTSENC_state_D220 __asm__("DTSENC_state");
 extern struct sAC6C *D_0050AC6C_D220 __asm__("D_0050AC6C");
 extern void DTSENC_dmaToScratchpad(int, int, int, int);
 extern void DTSENC_dmaFromScratchpad(int, int, int, int);
@@ -7765,7 +7765,7 @@ extern void f01A0_D220(void *, int, int, int) __asm__("DTSENC_transformStage10")
  * Runs one channel's 512 input samples through the DTS encoder's subband analysis filterbank.
  *
  * When the work area D_0050AC6C is in the scratchpad (+0xA3C) and neither @p pcmInput nor @p history is, the filter history (+0x04
- * words of the encoder state D_0050AC68) is DMA'd in with DTSENC_dmaToScratchpad and all 512 16-bit samples are converted to
+ * words of the encoder state DTSENC_state) is DMA'd in with DTSENC_dmaToScratchpad and all 512 16-bit samples are converted to
  * floats behind it at once (DTSENC_convertPcmToFloat); otherwise the history is copied with DTSENC_copyBlock and each 128-sample
  * block is converted on its own and the history shifted afterwards. For each of the 4 blocks the window stage
  * (DTSENC_windowBlock4Tap, DTSENC_windowBlock6Tap or DTSENC_windowBlock8Tap for a filter length of 0xE0, 0x160 or 0x1E0) and the transform chain
@@ -7788,35 +7788,35 @@ void DTSENC_analyzeChannel(unsigned int pcmInput, int bandSamples, unsigned int 
         useSprDma = 0;
     }
     if (useSprDma) {
-        DTSENC_dmaToScratchpad(history, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04 >> 2, 0);
-        fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x200);
+        DTSENC_dmaToScratchpad(history, (int)D_0050AC6C_D220->fA20, DTSENC_state_D220->f04 >> 2, 0);
+        fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + DTSENC_state_D220->f04 * 4, 0x200);
         if (*(volatile int *)0x1000D400 & 0x100) {
             do {
             } while (*(volatile int *)0x1000D400 & 0x100);
         }
     } else {
-        fF3E0_D220(history, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04);
+        fF3E0_D220(history, (int)D_0050AC6C_D220->fA20, DTSENC_state_D220->f04);
     }
     i = 0;
     do {
         if (useSprDma) {
-            if (D_0050AC68_D220->f04 == 0xE0) {
+            if (DTSENC_state_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
-            } else if (D_0050AC68_D220->f04 == 352) {
+            } else if (DTSENC_state_D220->f04 == 352) {
                 fF5A0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else {
                 fF6B0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             }
         } else {
-            fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x80);
-            if (D_0050AC68_D220->f04 == 0xE0) {
+            fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + DTSENC_state_D220->f04 * 4, 0x80);
+            if (DTSENC_state_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
-            } else if (D_0050AC68_D220->f04 == 352) {
+            } else if (DTSENC_state_D220->f04 == 352) {
                 fF5A0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else {
                 fF6B0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             }
-            fF3E0_D220((int)D_0050AC6C_D220->fA20 + 0x200, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04);
+            fF3E0_D220((int)D_0050AC6C_D220->fA20 + 0x200, (int)D_0050AC6C_D220->fA20, DTSENC_state_D220->f04);
         }
         i++;
         pcmInput += 0x100;
@@ -7833,9 +7833,9 @@ void DTSENC_analyzeChannel(unsigned int pcmInput, int bandSamples, unsigned int 
         bandSamples += 0x10;
     } while (i < 4);
     if (useSprDma) {
-        DTSENC_dmaFromScratchpad((int)D_0050AC6C_D220->fA20 + 0x800, history, D_0050AC68_D220->f04 >> 2, 0x10000);
+        DTSENC_dmaFromScratchpad((int)D_0050AC6C_D220->fA20 + 0x800, history, DTSENC_state_D220->f04 >> 2, 0x10000);
     } else {
-        fF3E0_D220((int)D_0050AC6C_D220->fA20, history, D_0050AC68_D220->f04);
+        fF3E0_D220((int)D_0050AC6C_D220->fA20, history, DTSENC_state_D220->f04);
     }
 }
 #endif
@@ -7863,7 +7863,7 @@ struct C_D5B8 {
     char padA20[0xA20 - 0xA20];
     float *pA20;
 };
-extern struct S_D5B8 *D_0050AC68_D5B8 __asm__("D_0050AC68");
+extern struct S_D5B8 *DTSENC_state_D5B8 __asm__("DTSENC_state");
 extern struct C_D5B8 *D_0050AC6C_D5B8 __asm__("D_0050AC6C");
 extern int D_0044C760_D5B8[] __asm__("D_0044C760");
 extern signed char D_0044DD38_D5B8[] __asm__("D_0044DD38");
@@ -7875,7 +7875,7 @@ extern void f05E0_D5B8(void *, void *, float) __asm__("DTSENC_quantize8Bit");
  * Quantizes and packs one channel's subband samples for a DTS 4.0 frame (mode 1).
  *
  * DTSENC_findBandPeaks finds each band's peak into +0xA20 of the work area D_0050AC6C; peak times the band weight (+0x0C of
- * D_0050AC68) gives the band's scale-factor index (D_0044DD38 below 4, else the log2 estimate checked against
+ * DTSENC_state) gives the band's scale-factor index (D_0044DD38 below 4, else the log2 estimate checked against
  * D_0044C760), stored in the channel block's +0x04 array. Bands 0-13 are quantized to 10-bit codes (DTSENC_quantize10Bit) and
  * bands 14-23 to 8-bit codes (DTSENC_quantize8Bit), each scaled by 1 / D_0044C760[index], and written byte-swapped into the
  * output frame at ch * 220 + 234, the second 8 samples of each band 0x370 bytes further on.
@@ -7893,11 +7893,11 @@ void DTSENC_quantizeChannel40(int ch) {
     int n;
     int idx;
 
-    blk = D_0050AC68_D5B8->ptrs[ch];
+    blk = DTSENC_state_D5B8->ptrs[ch];
     f03E0_D5B8(D_0050AC6C_D5B8, D_0050AC6C_D5B8->pA20);
     sf = blk->sf;
     for (i = 0; i < 24; i++) {
-        x = D_0050AC6C_D5B8->pA20[i] * D_0050AC68_D5B8->fC[i];
+        x = D_0050AC6C_D5B8->pA20[i] * DTSENC_state_D5B8->fC[i];
         if (x < 4.0f) {
             idx = D_0044DD38_D5B8[(int)x];
         } else {
@@ -7909,7 +7909,7 @@ void DTSENC_quantizeChannel40(int ch) {
         }
         blk->sf[i] = idx;
     }
-    out = D_0050AC68_D5B8->out + (ch * 220 + 234);
+    out = DTSENC_state_D5B8->out + (ch * 220 + 234);
     quantized = D_0050AC6C_D5B8->q;
     for (i = 0; i < 14; i++) {
         f0564_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, quantized, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
@@ -7962,12 +7962,12 @@ void DTSENC_quantizeChannel40(int ch) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", DTSENC_packScaleFactors40);
 #ifdef SKIP_ASM
-extern void *D_0050AC68;
+extern void *DTSENC_state;
 
 /**
  * Packs every channel's 24 scale-factor indices (7 bits each) into a DTS 4.0 frame.
  *
- * Starting at +0x8C of the output frame (+0x08 of the encoder state D_0050AC68), two channels per pass (42 bytes, as
+ * Starting at +0x8C of the output frame (+0x08 of the encoder state DTSENC_state), two channels per pass (42 bytes, as
  * byte-swapped 16-bit words), for as many channels as +0x01 says, rounded up to an even count. Called by DTSENC_encodeFrame
  * in mode 1.
  */
@@ -7982,13 +7982,13 @@ void DTSENC_packScaleFactors40(void) {
     void *var_6;
 
     var_7 = 0;
-    var_6 = (*(int *)((char*)(D_0050AC68) + 8)) + 141;
-    if ((*(unsigned char *)((char*)(D_0050AC68) + 1)) != 0) {
+    var_6 = (*(int *)((char*)(DTSENC_state) + 8)) + 141;
+    if ((*(unsigned char *)((char*)(DTSENC_state) + 1)) != 0) {
         var_8 = 4;
         do {
             temp_3 = var_7 * 4;
             var_7 += 2;
-            temp_4 = (*(void **)((char*)((D_0050AC68 + temp_3)) + 0x84));
+            temp_4 = (*(void **)((char*)((DTSENC_state + temp_3)) + 0x84));
             temp_5 = temp_4 + 4;
             (*(signed char *)((char*)(var_6) + (-1))) = (signed char) (((*(unsigned char *)((char*)(temp_4) + 4)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 1)) >> 6));
             (*(signed char *)((char*)(var_6) + 2)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 1)) * 4) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 2)) >> 5));
@@ -8011,7 +8011,7 @@ void DTSENC_packScaleFactors40(void) {
             (*(signed char *)((char*)(var_6) + 0x11)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x14)) << 5) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x15)) >> 2));
             (*(signed char *)((char*)(var_6) + 0x14)) = (signed char) (((*(unsigned char *)((char*)(temp_5) + 0x15)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5) + 0x16)) >> 1));
             (*(signed char *)((char*)(var_6) + 0x13)) = (signed char) ((*(unsigned char *)((char*)(temp_5) + 0x17)) | ((*(unsigned char *)((char*)(temp_5) + 0x16)) << 7));
-            temp_4_2 = (*(void **)((char*)((D_0050AC68 + var_8)) + 0x84));
+            temp_4_2 = (*(void **)((char*)((DTSENC_state + var_8)) + 0x84));
             var_8 += 8;
             temp_5_2 = temp_4_2 + 4;
             (*(signed char *)((char*)(var_6) + 0x16)) = (signed char) (((*(unsigned char *)((char*)(temp_4_2) + 4)) * 2) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 1)) >> 6));
@@ -8036,7 +8036,7 @@ void DTSENC_packScaleFactors40(void) {
             (*(signed char *)((char*)(var_6) + 0x27)) = (signed char) (((*(unsigned char *)((char*)(temp_5_2) + 0x15)) << 6) | ((unsigned char) (*(unsigned char *)((char*)(temp_5_2) + 0x16)) >> 1));
             (*(signed char *)((char*)(var_6) + 0x2A)) = (signed char) ((*(unsigned char *)((char*)(temp_5_2) + 0x17)) | ((*(unsigned char *)((char*)(temp_5_2) + 0x16)) << 7));
             var_6 += 0x2A;
-        } while (var_7 < (int) (*(unsigned char *)((char*)(D_0050AC68) + 1)));
+        } while (var_7 < (int) (*(unsigned char *)((char*)(DTSENC_state) + 1)));
     }
 }
 #endif
@@ -8063,7 +8063,7 @@ struct C_DE08 {
     unsigned short q[16];
     float *pA20;
 };
-extern struct S_DE08 *D_0050AC68_DE08 __asm__("D_0050AC68");
+extern struct S_DE08 *DTSENC_state_DE08 __asm__("DTSENC_state");
 extern struct C_DE08 *D_0050AC6C_DE08 __asm__("D_0050AC6C");
 extern int D_0044C760_DE08[] __asm__("D_0044C760");
 extern signed char D_0044DD38_DE08[] __asm__("D_0044DD38");
@@ -8092,11 +8092,11 @@ void DTSENC_quantizeChannel51(int ch) {
     int n;
     int idx;
 
-    blk = D_0050AC68_DE08->ptrs[ch];
+    blk = DTSENC_state_DE08->ptrs[ch];
     f03E0_DE08(D_0050AC6C_DE08, D_0050AC6C_DE08->pA20);
     sf = blk->sf;
     for (i = 0; i < 24; i++) {
-        x = D_0050AC6C_DE08->pA20[i] * D_0050AC68_DE08->fC[i];
+        x = D_0050AC6C_DE08->pA20[i] * DTSENC_state_DE08->fC[i];
         if (x < 4.0f) {
             idx = D_0044DD38_DE08[(int)x];
         } else {
@@ -8108,7 +8108,7 @@ void DTSENC_quantizeChannel51(int ch) {
         }
         blk->sf[i] = idx;
     }
-    out = D_0050AC68_DE08->out + (ch * 172 + 284);
+    out = DTSENC_state_DE08->out + (ch * 172 + 284);
     quantized = D_0050AC6C_DE08->q;
     for (i = 0; i < 5; i++) {
         f0564_DE08((char *)D_0050AC6C_DE08 + i * 0x40, quantized, 1.0f / (float)D_0044C760_DE08[sf[i]]);
@@ -8207,7 +8207,7 @@ struct S_E6E0 {
     char padC[0x84 - 0xC];
     struct Blk_E6E0 *ptrs[5];
 };
-extern struct S_E6E0 *D_0050AC68_E6E0 __asm__("D_0050AC68");
+extern struct S_E6E0 *DTSENC_state_E6E0 __asm__("DTSENC_state");
 
 /**
  * Packs the scale factors and the LFE channel into a DTS 5.1 frame (mode 2).
@@ -8226,9 +8226,9 @@ void DTSENC_packScaleFactors51(char *channelInputs) {
     struct Blk_E6E0 *blk;
     int i;
 
-    outCursor = D_0050AC68_E6E0->out + 0xAA;
-    for (i = 0; i < D_0050AC68_E6E0->n; i++) {
-        blk = D_0050AC68_E6E0->ptrs[i];
+    outCursor = DTSENC_state_E6E0->out + 0xAA;
+    for (i = 0; i < DTSENC_state_E6E0->n; i++) {
+        blk = DTSENC_state_E6E0->ptrs[i];
         sf = blk->sf;
         if (i & 1) {
             outCursor[-1] = (outCursor[-1] & 0xF8) | (sf[0] >> 4);
@@ -8279,7 +8279,7 @@ void DTSENC_packScaleFactors51(char *channelInputs) {
         }
         outCursor += 21;
     }
-    outCursor = D_0050AC68_E6E0->out + 0x113;
+    outCursor = DTSENC_state_E6E0->out + 0x113;
     DTSENC_encodeLfe(*(int *)(channelInputs + 0x14), &idx, vals);
     outCursor[-1] = (outCursor[-1] & 0xF8) | (vals[0] >> 5);
     outCursor[2] = (vals[0] << 5) | (vals[1] >> 5);
@@ -8331,7 +8331,7 @@ INCLUDE_ASM("ealib/seg_2B4578", DTSENC_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern struct sAC68 *D_0050AC68_ED30 __asm__("D_0050AC68");
+extern struct sAC68 *DTSENC_state_ED30 __asm__("DTSENC_state");
 
 extern float D_0044CA40_ED30[] __asm__("D_0044CA40");
 extern float D_0044C700_ED30[] __asm__("D_0044C700");
@@ -8339,7 +8339,7 @@ extern float D_0044C700_ED30[] __asm__("D_0044C700");
 /**
  * Sets up the DTS encoder state in a buffer for a mode and quality.
  *
- * Aligns @p buf to 16 and places the state D_0050AC68 there (0x98 bytes): filter length +0x04 from the quality (0xE0,
+ * Aligns @p buf to 16 and places the state DTSENC_state there (0x98 bytes): filter length +0x04 from the quality (0xE0,
  * 0x160 or 0x1E0, as DTSENC_getBufferSizes), channel count +0x01 (4 for mode 1, 5 for mode 2), no output buffer (+0x08), mode
  * +0x00; then a block per channel (+0x84 array) with a zeroed filter history of +0x04 words, and the LFE state +0x6C
  * cleared. The band weights +0x0C are 1/511 (10-bit bands), 1/127 (8-bit) and 1/15 (5-bit) per the mode's band split,
@@ -8356,68 +8356,68 @@ int DTSENC_init(int mode, int rate, char *buf) {
     int j;
 
     buf = (char *)((((int)buf - 1) | 0xF) + 1);
-    D_0050AC68_ED30 = (struct sAC68 *)buf;
+    DTSENC_state_ED30 = (struct sAC68 *)buf;
     buf += 0x98;
     if (rate < 0) {
         return -2;
     }
     if (rate < 34) {
-        D_0050AC68_ED30->f04 = 0xE0;
+        DTSENC_state_ED30->f04 = 0xE0;
     } else if (rate < 67) {
-        D_0050AC68_ED30->f04 = 352;
+        DTSENC_state_ED30->f04 = 352;
     } else if (rate < 101) {
-        D_0050AC68_ED30->f04 = 0x1E0;
+        DTSENC_state_ED30->f04 = 0x1E0;
     } else {
         return -2;
     }
     if (mode == 1) {
-        D_0050AC68_ED30->f01 = 4;
+        DTSENC_state_ED30->f01 = 4;
     } else if (mode == 2) {
-        D_0050AC68_ED30->f01 = 5;
+        DTSENC_state_ED30->f01 = 5;
     } else {
         return -1;
     }
-    D_0050AC68_ED30->f08 = 0;
-    D_0050AC68_ED30->f00 = mode;
-    for (i = 0; i < D_0050AC68_ED30->f01; i++) {
+    DTSENC_state_ED30->f08 = 0;
+    DTSENC_state_ED30->f00 = mode;
+    for (i = 0; i < DTSENC_state_ED30->f01; i++) {
         struct sAC68Blk *blk;
         buf = (char *)((((int)buf - 1) | 0xF) + 1);
         blk = (struct sAC68Blk *)buf;
-        D_0050AC68_ED30->f84[i] = blk;
+        DTSENC_state_ED30->f84[i] = blk;
         buf = (char *)((((int)buf + 0x1C - 1) | 0xF) + 1);
         blk->f00 = (int)buf;
-        buf += D_0050AC68_ED30->f04 * 4;
-        for (j = 0; j < D_0050AC68_ED30->f04; j++) {
-            ((int *)D_0050AC68_ED30->f84[i]->f00)[j] = 0;
+        buf += DTSENC_state_ED30->f04 * 4;
+        for (j = 0; j < DTSENC_state_ED30->f04; j++) {
+            ((int *)DTSENC_state_ED30->f84[i]->f00)[j] = 0;
         }
     }
     for (i = 0; i < 6; i++) {
-        D_0050AC68_ED30->f6C[i] = 0;
+        DTSENC_state_ED30->f6C[i] = 0;
     }
     i = 0;
     switch (mode) {
     case 1:
         for (; i < 14; i++) {
-            D_0050AC68_ED30->f0C[i] = 0.00195694715f;
+            DTSENC_state_ED30->f0C[i] = 0.00195694715f;
             D_0044CA40_ED30[i] = D_0044C700_ED30[i] / 0.010999918f;
         }
         for (; i < 24; i++) {
-            D_0050AC68_ED30->f0C[i] = 0.00787401572f;
+            DTSENC_state_ED30->f0C[i] = 0.00787401572f;
             D_0044CA40_ED30[i] = D_0044C700_ED30[i] / 0.0350000858f;
         }
         break;
     case 2:
     default:
         for (; i < 5; i++) {
-            D_0050AC68_ED30->f0C[i] = 0.00195694715f;
+            DTSENC_state_ED30->f0C[i] = 0.00195694715f;
             D_0044CA40_ED30[i] = D_0044C700_ED30[i] / 0.010999918f;
         }
         for (; i < 14; i++) {
-            D_0050AC68_ED30->f0C[i] = 0.00787401572f;
+            DTSENC_state_ED30->f0C[i] = 0.00787401572f;
             D_0044CA40_ED30[i] = D_0044C700_ED30[i] / 0.0350000858f;
         }
         for (; i < 24; i++) {
-            D_0050AC68_ED30->f0C[i] = 0.0666666701f;
+            DTSENC_state_ED30->f0C[i] = 0.0666666701f;
             D_0044CA40_ED30[i] = D_0044C700_ED30[i] / 0.190000057f;
         }
         break;
@@ -8451,7 +8451,7 @@ struct S_F0F0 {
     char padC[0x84 - 0xC];
     int *ptrs[1];
 };
-extern struct S_F0F0 *D_0050AC68_F0F0 __asm__("D_0050AC68");
+extern struct S_F0F0 *DTSENC_state_F0F0 __asm__("DTSENC_state");
 extern struct C_F0F0 *D_0050AC6C_F0F0 __asm__("D_0050AC6C");
 extern char D_0044C980_F0F0[] __asm__("D_0044C980");
 extern char D_0044C990_F0F0[] __asm__("D_0044C990");
@@ -8475,7 +8475,7 @@ extern void f_E6E0_F0F0(int *) __asm__("DTSENC_packScaleFactors51");
  * Fails with -3 for an odd @p key or an input not 16-byte aligned. Places the work area D_0050AC6C in @p buf (aligned
  * to 16): in the scratchpad (+0xA3C set) it DMAs the window table for the filter length (D_0044CB00, D_0044CF00 or
  * D_0044D500) and the transform tables (D_0044C980) in with DTSENC_dmaToScratchpad, otherwise it points at them in place. When
- * @p key differs from the state's output buffer (+0x08 of D_0050AC68) it stores it, resets the bit position and writes
+ * @p key differs from the state's output buffer (+0x08 of DTSENC_state) it stores it, resets the bit position and writes
  * the frame header (DTSENC_writeFrameHeader). Each channel then goes through DTSENC_analyzeChannel and is packed by DTSENC_quantizeChannel40 (mode
  * 1) or DTSENC_quantizeChannel51 (mode 2), and the scale factors by DTSENC_packScaleFactors40 or DTSENC_packScaleFactors51. Installed by DTSENC_install as
  * the encode hook D_0050C848.
@@ -8497,10 +8497,10 @@ int DTSENC_encodeFrame(int *data, int key, char *buf) {
     if (D_0050AC6C_F0F0->flagA3C) {
         buf += 0xA40;
         D_0050AC6C_F0F0->pA24 = buf;
-        if (D_0050AC68_F0F0->n4 == 0xE0) {
+        if (DTSENC_state_F0F0->n4 == 0xE0) {
             f_C968_F0F0(D_0044CB00_F0F0, buf, 0x40, 0);
             buf += 0x400;
-        } else if (D_0050AC68_F0F0->n4 == 352) {
+        } else if (DTSENC_state_F0F0->n4 == 352) {
             f_C968_F0F0(D_0044CF00_F0F0, buf, 0x60, 0);
             buf += 0x600;
         } else {
@@ -8508,7 +8508,7 @@ int DTSENC_encodeFrame(int *data, int key, char *buf) {
             buf += 0x800;
         }
         D_0050AC6C_F0F0->pA20 = buf;
-        buf += (D_0050AC68_F0F0->n4 + 0x200) * 4;
+        buf += (DTSENC_state_F0F0->n4 + 0x200) * 4;
         D_0050AC6C_F0F0->pA28 = buf;
         D_0050AC6C_F0F0->pA2C = buf + 0x10;
         D_0050AC6C_F0F0->pA30 = buf + 0x30;
@@ -8517,11 +8517,11 @@ int DTSENC_encodeFrame(int *data, int key, char *buf) {
         f_C968_F0F0(D_0044C980_F0F0, buf, 18, 0x10000);
     } else {
         D_0050AC6C_F0F0->pA20 = buf + 0xA40;
-        if (D_0050AC68_F0F0->n4 == 0xE0) {
+        if (DTSENC_state_F0F0->n4 == 0xE0) {
             D_0050AC6C_F0F0->pA24 = D_0044CB00_F0F0;
-        } else if (D_0050AC68_F0F0->n4 == 352) {
+        } else if (DTSENC_state_F0F0->n4 == 352) {
             D_0050AC6C_F0F0->pA24 = D_0044CF00_F0F0;
-        } else if (D_0050AC68_F0F0->n4 == 0x1E0) {
+        } else if (DTSENC_state_F0F0->n4 == 0x1E0) {
             D_0050AC6C_F0F0->pA24 = D_0044D500_F0F0;
         }
         D_0050AC6C_F0F0->pA28 = D_0044C980_F0F0;
@@ -8530,23 +8530,23 @@ int DTSENC_encodeFrame(int *data, int key, char *buf) {
         D_0050AC6C_F0F0->pA34 = D_0044C9E0_F0F0;
         D_0050AC6C_F0F0->pA38 = D_0044CA40_F0F0;
     }
-    if (D_0050AC68_F0F0->key != key) {
-        D_0050AC68_F0F0->key = key;
-        D_0050AC68_F0F0->h6 = 0;
+    if (DTSENC_state_F0F0->key != key) {
+        DTSENC_state_F0F0->key = key;
+        DTSENC_state_F0F0->h6 = 0;
         f_CBA0_F0F0();
     }
-    for (i = 0; i < D_0050AC68_F0F0->n; i++) {
+    for (i = 0; i < DTSENC_state_F0F0->n; i++) {
         if (data[i] & 0xF) {
             return -3;
         }
-        f_D220_F0F0(data[i], D_0050AC6C_F0F0, *D_0050AC68_F0F0->ptrs[i]);
-        if (D_0050AC68_F0F0->mode == 1) {
+        f_D220_F0F0(data[i], D_0050AC6C_F0F0, *DTSENC_state_F0F0->ptrs[i]);
+        if (DTSENC_state_F0F0->mode == 1) {
             f_D5B8_F0F0(i);
         } else {
             f_DE08_F0F0(i);
         }
     }
-    if (D_0050AC68_F0F0->mode == 1) {
+    if (DTSENC_state_F0F0->mode == 1) {
         f_D9C0_F0F0();
     } else {
         f_E6E0_F0F0(data);
@@ -10946,26 +10946,26 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_saveScratchpad);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Saves seven DMA channel registers (0x1000D010..D420) into the block, then calls SNDDRV_dmaFromScratchpad.
 struct G_09B8 { char p[0x1AAE]; unsigned short rate; char p2[0x1B1C - 0x1AB0]; int save[7]; int h; };
-extern struct G_09B8 D_0050AD00_09B8 __asm__("D_0050AD00");
+extern struct G_09B8 SNDDRV_state_09B8 __asm__("SNDDRV_state");
 extern int D_0050A94C_09B8[] __asm__("D_0050A94C");
 extern void SNDDRV_dmaFromScratchpad_09B8(int, int, int, int) __asm__("SNDDRV_dmaFromScratchpad");
 /**
  * Saves the scratchpad DMA registers and copies the scratchpad area the DTS encoder will use out to main memory.
  *
  * Keeps the seven registers 0x1000D010, D080, D020 (channel 8) and D410, D430, D480, D420 (channel 9) in +0x1B1C of the
- * IOP sound state D_0050AD00, then has SNDDRV_dmaFromScratchpad copy (+0x1AAE >> 4) quadwords from D_0050A94C to the save buffer
+ * IOP sound state SNDDRV_state, then has SNDDRV_dmaFromScratchpad copy (+0x1AAE >> 4) quadwords from D_0050A94C to the save buffer
  * +0x1B38, waiting for it. The sound thread SNDDRV_thread calls it before encoding when +0x1AAE is set; SNDDRV_restoreScratchpad
  * undoes it.
  */
 void SNDDRV_saveScratchpad(void) {
-    D_0050AD00_09B8.save[0] = *(volatile int *)0x1000D010;
-    D_0050AD00_09B8.save[1] = *(volatile int *)0x1000D080;
-    D_0050AD00_09B8.save[2] = *(volatile int *)0x1000D020;
-    D_0050AD00_09B8.save[3] = *(volatile int *)0x1000D410;
-    D_0050AD00_09B8.save[4] = *(volatile int *)0x1000D430;
-    D_0050AD00_09B8.save[5] = *(volatile int *)0x1000D480;
-    D_0050AD00_09B8.save[6] = *(volatile int *)0x1000D420;
-    SNDDRV_dmaFromScratchpad_09B8(D_0050A94C_09B8[0], D_0050AD00_09B8.h, D_0050AD00_09B8.rate >> 4, 0x10000);
+    SNDDRV_state_09B8.save[0] = *(volatile int *)0x1000D010;
+    SNDDRV_state_09B8.save[1] = *(volatile int *)0x1000D080;
+    SNDDRV_state_09B8.save[2] = *(volatile int *)0x1000D020;
+    SNDDRV_state_09B8.save[3] = *(volatile int *)0x1000D410;
+    SNDDRV_state_09B8.save[4] = *(volatile int *)0x1000D430;
+    SNDDRV_state_09B8.save[5] = *(volatile int *)0x1000D480;
+    SNDDRV_state_09B8.save[6] = *(volatile int *)0x1000D420;
+    SNDDRV_dmaFromScratchpad_09B8(D_0050A94C_09B8[0], SNDDRV_state_09B8.h, SNDDRV_state_09B8.rate >> 4, 0x10000);
 }
 #endif
 
@@ -10975,17 +10975,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_restoreScratchpad);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDDRV_dmaToScratchpad_0A60(int, int, unsigned int, int) __asm__("SNDDRV_dmaToScratchpad");
 extern int D_0050A94C_0A60[] __asm__("D_0050A94C");
-extern char D_0050AD00_0A60[] __asm__("D_0050AD00");
+extern char SNDDRV_state_0A60[] __asm__("SNDDRV_state");
 
 /**
  * Copies the saved scratchpad area back and restores the scratchpad DMA registers SNDDRV_saveScratchpad saved.
  *
- * SNDDRV_dmaToScratchpad copies (+0x1AAE >> 4) quadwords from the save buffer +0x1B38 of D_0050AD00 back to D_0050A94C, waiting
+ * SNDDRV_dmaToScratchpad copies (+0x1AAE >> 4) quadwords from the save buffer +0x1B38 of SNDDRV_state back to D_0050A94C, waiting
  * for it; then the seven channel 8 / 9 registers are rewritten from +0x1B1C. Called by the sound thread SNDDRV_thread
  * after encoding.
  */
 void SNDDRV_restoreScratchpad(void) {
-    char *soundState = D_0050AD00_0A60;
+    char *soundState = SNDDRV_state_0A60;
     SNDDRV_dmaToScratchpad_0A60(*(int *)(soundState + 0x1B38), D_0050A94C_0A60[0], *(unsigned short *)(soundState + 0x1AAE) >> 4, 0x10000);
     *(volatile int *)0x1000D010 = *(int *)(soundState + 0x1B1C);
     *(volatile int *)0x1000D080 = *(int *)(soundState + 0x1B20);
@@ -11005,7 +11005,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_callIopRpc);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: the per-function sAD00 view with volatile fields (the unit's other accessors read them plain); the `volatile int i` busy-wait counter itself is honest (without it the delay loop is deleted, 66.64%). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-/* D_0050AD00_0B10: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state_0B10: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
 struct sAD00Voice_0B10 { int key; int val; };
@@ -11024,7 +11024,7 @@ struct sAD00SpuChan_0B10 {               /* 16 bytes, sAD00Spu_0B10.f1A0[] */
     signed char f0C[4];
 };
 
-struct sAD00Spu_0B10 {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00_0B10.fCB0) */
+struct sAD00Spu_0B10 {                   /* 0x2A0, block 3 of the shared buffer (SNDDRV_state_0B10.fCB0) */
     long f00;                       /* voice on bits */
     unsigned long f08;
     char f10;
@@ -11038,7 +11038,7 @@ struct sAD00Spu_0B10 {                   /* 0x2A0, block 3 of the shared buffer 
     struct sAD00SpuChan_0B10 f1A0[16];
 };
 
-struct sAD00Xfer_0B10 {                  /* 16 bytes, D_0050AD00_0B10.fCC8[] (also D_0050B9C8) */
+struct sAD00Xfer_0B10 {                  /* 16 bytes, SNDDRV_state_0B10.fCC8[] (also D_0050B9C8) */
     unsigned int key;
     int f04;
     int f08;
@@ -11047,7 +11047,7 @@ struct sAD00Xfer_0B10 {                  /* 16 bytes, D_0050AD00_0B10.fCC8[] (al
     char pad0F;
 };
 
-struct sAD00Spk_0B10 {                   /* 0x20, D_0050AD00_0B10.fE98[] (also D_0050BB98) */
+struct sAD00Spk_0B10 {                   /* 0x20, SNDDRV_state_0B10.fE98[] (also D_0050BB98) */
     float f00[6];
     unsigned int f18;
     short f1C;
@@ -11056,7 +11056,7 @@ struct sAD00Spk_0B10 {                   /* 0x20, D_0050AD00_0B10.fE98[] (also D
 
 struct sAD00Seg_0B10 { unsigned short a; unsigned short b; };
 
-struct sAD00Port_0B10 { int f00; int f04; int pad08[2]; };   /* 16 bytes, D_0050AD00_0B10.fE88[] */
+struct sAD00Port_0B10 { int f00; int f04; int pad08[2]; };   /* 16 bytes, SNDDRV_state_0B10.fE88[] */
 
 struct sAD00_0B10 {
     char f000[0x83C];               /* RPC send buffer */
@@ -11108,7 +11108,7 @@ struct sAD00_0B10 {
     int f1B38;
 };
 
-extern struct sAD00_0B10 D_0050AD00_0B10 __asm__("D_0050AD00");
+extern struct sAD00_0B10 SNDDRV_state_0B10 __asm__("SNDDRV_state");
 
 extern void Util_MemCpy(void *, void *, int);
 extern int sceSifCheckStatRpc(void *);
@@ -11117,7 +11117,7 @@ extern void sceSifCallRpc(void *, int, int, void *, int, int, int, int, int);
 /**
  * Sends a command to the IOP sound driver over SIF RPC.
  *
- * Copies @p sendSize bytes of @p sendData into the RPC send buffer (+0x000 of D_0050AD00, Util_MemCpy) when the size is non-zero,
+ * Copies @p sendSize bytes of @p sendData into the RPC send buffer (+0x000 of SNDDRV_state, Util_MemCpy) when the size is non-zero,
  * waits (10000-iteration delay loops) while the client +0xC80 is busy (sceSifCheckStatRpc), then calls the function with
  * sceSifCallRpc (sceSifCallRpc), no-wait mode for function 2. Used by the platform init SNDPLATFORM_init (function 0),
  * SNDPLATFORM_restore and SNDDRV_setupIopEffect.
@@ -11130,13 +11130,13 @@ void SNDDRV_callIopRpc(int rpcFunction, void *sendData, int sendSize) {
     volatile int i;
     int two = rpcFunction == 2;
     if (sendSize) {
-        Util_MemCpy(D_0050AD00_0B10.f000, sendData, sendSize);
+        Util_MemCpy(SNDDRV_state_0B10.f000, sendData, sendSize);
     }
-    while (sceSifCheckStatRpc(D_0050AD00_0B10.fC80)) {
+    while (sceSifCheckStatRpc(SNDDRV_state_0B10.fC80)) {
         for (i = 0; i < 10000; i++) {
         }
     }
-    sceSifCallRpc(D_0050AD00_0B10.fC80, rpcFunction, two, D_0050AD00_0B10.f000, sendSize, 0, 0, 0, 0);
+    sceSifCallRpc(SNDDRV_state_0B10.fC80, rpcFunction, two, SNDDRV_state_0B10.f000, sendSize, 0, 0, 0, 0);
 }
 #endif
 
@@ -11418,13 +11418,13 @@ struct G_1298 {
     char pad4A[0x1F0 - 0x4A];
     struct CHANPUB *ents;
 };
-extern struct H_1298 D_0050AD00_1298 __asm__("D_0050AD00");
+extern struct H_1298 SNDDRV_state_1298 __asm__("SNDDRV_state");
 extern void f_A550_1298(int) __asm__("SNDVOICEI_free");
 
 /**
  * Frees the driver voices whose sound has ended on the IOP.
  *
- * For each SPU voice (< +0x30 of sndgs) whose entry in the IOP voice block (+0xCB0 of D_0050AD00, +0x20 table) is
+ * For each SPU voice (< +0x30 of sndgs) whose entry in the IOP voice block (+0xCB0 of SNDDRV_state, +0x20 table) is
  * keyed and whose channel is a group master (+0x28 == -1): a key different from the EE copy (+0x83C) resets the copy's
  * remaining count to key & 0x7FFFFF, and a count of 0 clears every grouped voice's key (and the +0x18 twin in mode 2,
  * +0x49) and frees it with SNDVOICEI_free. The +0x2F mixer voices (table +0x1A0, copies +0x9BC) end on a count of -1.
@@ -11436,31 +11436,31 @@ void SNDDRV_getEndedVoices(void) {
     int groupVoice;
 
     for (i = 0; i < sndgs.sso.set.voicesspu; i++) {
-        if (D_0050AD00_1298.tbl->e[i].key != 0 && sndgs.chan[i].masterchan == -1) {
-            if (D_0050AD00_1298.k[i].key != D_0050AD00_1298.tbl->e[i].key) {
-                D_0050AD00_1298.k[i].val = D_0050AD00_1298.tbl->e[i].key & 0x7FFFFF;
+        if (SNDDRV_state_1298.tbl->e[i].key != 0 && sndgs.chan[i].masterchan == -1) {
+            if (SNDDRV_state_1298.k[i].key != SNDDRV_state_1298.tbl->e[i].key) {
+                SNDDRV_state_1298.k[i].val = SNDDRV_state_1298.tbl->e[i].key & 0x7FFFFF;
             }
-            if (D_0050AD00_1298.k[i].val == 0) {
+            if (SNDDRV_state_1298.k[i].val == 0) {
                 for (j = 0; j < sndgs.chan[i].numchan; j++) {
                     groupVoice = sndgs.chan[i].voices[j];
-                    D_0050AD00_1298.tbl->e[groupVoice].key = 0;
+                    SNDDRV_state_1298.tbl->e[groupVoice].key = 0;
                     f_A550_1298(groupVoice);
                     if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
-                        D_0050AD00_1298.tbl->e[groupVoice + 0x18].key = 0;
+                        SNDDRV_state_1298.tbl->e[groupVoice + 0x18].key = 0;
                     }
                 }
             }
         }
     }
     for (i = 0; i < sndgs.sso.set.voicesiopcpu; i++) {
-        if (D_0050AD00_1298.tbl->f[i].a != 0 && sndgs.chan[i + sndgs.sso.set.voicesspu].masterchan == -1) {
-            if (D_0050AD00_1298.k2[i].key != D_0050AD00_1298.tbl->f[i].a) {
-                D_0050AD00_1298.k2[i].val = 0;
+        if (SNDDRV_state_1298.tbl->f[i].a != 0 && sndgs.chan[i + sndgs.sso.set.voicesspu].masterchan == -1) {
+            if (SNDDRV_state_1298.k2[i].key != SNDDRV_state_1298.tbl->f[i].a) {
+                SNDDRV_state_1298.k2[i].val = 0;
             }
-            if (D_0050AD00_1298.k2[i].val == -1) {
+            if (SNDDRV_state_1298.k2[i].val == -1) {
                 for (j = 0; j < sndgs.chan[i + sndgs.sso.set.voicesspu].numchan; j++) {
                     groupVoice = sndgs.chan[i + sndgs.sso.set.voicesspu].voices[j];
-                    D_0050AD00_1298.tbl->f[groupVoice - sndgs.sso.set.voicesspu].a = 0;
+                    SNDDRV_state_1298.tbl->f[groupVoice - sndgs.sso.set.voicesspu].a = 0;
                     f_A550_1298(groupVoice);
                 }
             }
@@ -11477,12 +11477,12 @@ typedef struct { char pad[0xC]; int v; int mode; } A_1578;
 typedef struct { char pad[0x1AA4]; int a; char pad2[0x5C]; int b; } G_1578;
 extern void SNDDRV_completeTransfer_1578(int) __asm__("SNDDRV_completeTransfer");
 extern void iSignalSema(int);
-extern G_1578 D_0050AD00_AD00 __asm__("D_0050AD00");
+extern G_1578 SNDDRV_state_AD00 __asm__("SNDDRV_state");
 
 /**
  * Handles a SIF command from the IOP sound driver.
  *
- * Mode (+0x10) 2 passes the value (+0x0C) to SNDDRV_completeTransfer, mode 0 stores it in +0x1B04 of D_0050AD00 and signals the
+ * Mode (+0x10) 2 passes the value (+0x0C) to SNDDRV_completeTransfer, mode 0 stores it in +0x1B04 of SNDDRV_state and signals the
  * sound thread's semaphore (+0x1AA4) with iSignalSema; mode 3 and others are ignored. The platform init SNDPLATFORM_init
  * registers it as SIF command handler 1.
  *
@@ -11496,8 +11496,8 @@ void SNDDRV_handleSifCommand(A_1578 *command) {
     case 3:
         break;
     case 0:
-        D_0050AD00_AD00.b = command->v;
-        iSignalSema(D_0050AD00_AD00.a);
+        SNDDRV_state_AD00.b = command->v;
+        iSignalSema(SNDDRV_state_AD00.a);
         break;
     }
 }
@@ -11557,7 +11557,7 @@ struct G_1638 {
     unsigned char b48;
     unsigned char b49;
 };
-extern struct H_1638 D_0050AD00_1638 __asm__("D_0050AD00");
+extern struct H_1638 SNDDRV_state_1638 __asm__("SNDDRV_state");
 extern char D_00512B80_1638[] __asm__("D_00512B80");
 extern void *memset_1638(void *, int, int) __asm__("memset");
 extern void f_BC00_1638(char *) __asm__("MIX_setFxSendOutput");
@@ -11565,7 +11565,7 @@ extern void f_BC00_1638(char *) __asm__("MIX_setFxSendOutput");
 /**
  * Lays out the shared EE-to-IOP command buffer the sound thread sends each tick.
  *
- * Uses D_00512B80 through its uncached mirror (+0x1AB4 of D_0050AD00), clears 11264 bytes and appends tagged blocks
+ * Uses D_00512B80 through its uncached mirror (+0x1AB4 of SNDDRV_state), clears 11264 bytes and appends tagged blocks
  * (offset +0x1AB2): tag 0 with a 0xC-byte header (+0xCB4), tag 3 with the 672-byte voice block (+0xCB0, padded to 16),
  * tag 2 when +0x42 of sndgs is set (initialised by MIX_setFxSendOutput, rate * 4 bytes), tag 1 with one PCM buffer of
  * (rate * 512 / 48000) samples per output channel (+0x47 + +0x48; a second buffer for mono) in +0x1ABC, tag 4 with a
@@ -11580,63 +11580,63 @@ void SNDDRV_buildIopCommandBuffer(void) {
     int n;
     int i;
 
-    D_0050AD00_1638.buf = (char *)((int)D_00512B80_1638 | 0x20000000);
-    memset_1638(D_0050AD00_1638.buf, 0, 11264);
+    SNDDRV_state_1638.buf = (char *)((int)D_00512B80_1638 | 0x20000000);
+    memset_1638(SNDDRV_state_1638.buf, 0, 11264);
     len = rate = (sndgs.sso.set.outputrate << 9) / 48000;
-    D_0050AD00_1638.pos = 0;
-    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 0;
-    D_0050AD00_1638.pos += 4;
-    D_0050AD00_1638.cb4 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
-    D_0050AD00_1638.pos += 0xC;
-    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 3;
-    D_0050AD00_1638.pos += 4;
-    sizeField = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
-    D_0050AD00_1638.pos += 4;
-    D_0050AD00_1638.cb0 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
+    SNDDRV_state_1638.pos = 0;
+    *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 0;
+    SNDDRV_state_1638.pos += 4;
+    SNDDRV_state_1638.cb4 = SNDDRV_state_1638.buf + SNDDRV_state_1638.pos;
+    SNDDRV_state_1638.pos += 0xC;
+    *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 3;
+    SNDDRV_state_1638.pos += 4;
+    sizeField = (int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos);
+    SNDDRV_state_1638.pos += 4;
+    SNDDRV_state_1638.cb0 = SNDDRV_state_1638.buf + SNDDRV_state_1638.pos;
     *sizeField = 672;
-    D_0050AD00_1638.pos += 672;
-    while (D_0050AD00_1638.pos & 0xF) {
-        D_0050AD00_1638.pos++;
+    SNDDRV_state_1638.pos += 672;
+    while (SNDDRV_state_1638.pos & 0xF) {
+        SNDDRV_state_1638.pos++;
         (*sizeField)++;
     }
     if (sndgs.sso.set.routemaincpufxtoiopcpu) {
-        *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 2;
-        D_0050AD00_1638.pos += 0x10;
-        f_BC00_1638(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
-        D_0050AD00_1638.pos += rate * 4;
+        *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 2;
+        SNDDRV_state_1638.pos += 0x10;
+        f_BC00_1638(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos);
+        SNDDRV_state_1638.pos += rate * 4;
     }
-    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 1;
-    D_0050AD00_1638.pos += 4;
-    pcmSize = (unsigned short *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
-    D_0050AD00_1638.pos += 0xC;
+    *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 1;
+    SNDDRV_state_1638.pos += 4;
+    pcmSize = (unsigned short *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos);
+    SNDDRV_state_1638.pos += 0xC;
     n = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
     for (i = 0; i < n; i++) {
-        D_0050AD00_1638.chan[i] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + i * len * 2);
+        SNDDRV_state_1638.chan[i] = SNDDRV_state_1638.buf + (SNDDRV_state_1638.pos + i * len * 2);
     }
     *pcmSize = len * ((sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe) << 1);
     if (sndgs.sso.set.outputchannels == 1) {
-        D_0050AD00_1638.chan[1] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + rate * 2);
+        SNDDRV_state_1638.chan[1] = SNDDRV_state_1638.buf + (SNDDRV_state_1638.pos + rate * 2);
         *pcmSize += rate * 2;
     }
-    D_0050AD00_1638.pos += *pcmSize;
+    SNDDRV_state_1638.pos += *pcmSize;
     if (sndgs.sso.set.outputspdifmode & 2) {
-        *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 4;
-        D_0050AD00_1638.pos += 4;
-        sizeField = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
-        D_0050AD00_1638.pos += 0xC;
-        D_0050AD00_1638.x1AF4 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
-        D_0050AD00_1638.pos += 0x800;
+        *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 4;
+        SNDDRV_state_1638.pos += 4;
+        sizeField = (int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos);
+        SNDDRV_state_1638.pos += 0xC;
+        SNDDRV_state_1638.x1AF4 = SNDDRV_state_1638.buf + SNDDRV_state_1638.pos;
+        SNDDRV_state_1638.pos += 0x800;
     }
-    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 5;
-    D_0050AD00_1638.pos += 4;
-    D_0050AD00_1638.cb8 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
-    D_0050AD00_1638.pos += 0xC;
-    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 6;
-    D_0050AD00_1638.pos += 0x10;
-    *(int *)(D_0050AD00_1638.cb4 + 4) = D_0050AD00_1638.pos;
-    D_0050AD00_1638.x1B00 = D_00512B80_1638;
-    D_0050AD00_1638.x1B0C = 0;
-    D_0050AD00_1638.x1B08 = D_0050AD00_1638.pos;
+    *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 5;
+    SNDDRV_state_1638.pos += 4;
+    SNDDRV_state_1638.cb8 = SNDDRV_state_1638.buf + SNDDRV_state_1638.pos;
+    SNDDRV_state_1638.pos += 0xC;
+    *(int *)(SNDDRV_state_1638.buf + SNDDRV_state_1638.pos) = 6;
+    SNDDRV_state_1638.pos += 0x10;
+    *(int *)(SNDDRV_state_1638.cb4 + 4) = SNDDRV_state_1638.pos;
+    SNDDRV_state_1638.x1B00 = D_00512B80_1638;
+    SNDDRV_state_1638.x1B0C = 0;
+    SNDDRV_state_1638.x1B08 = SNDDRV_state_1638.pos;
 }
 #endif
 
@@ -11673,7 +11673,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_thread);
 #define MFC0_STATUS_2B45_19A8(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
 
 
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
 struct sAD00Voice_19A8 { int key; int val; };
@@ -11692,7 +11692,7 @@ struct sAD00SpuChan_19A8 {               /* 16 bytes, sAD00Spu_19A8.f1A0[] */
     signed char f0C[4];
 };
 
-struct sAD00Spu_19A8 {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00.fCB0) */
+struct sAD00Spu_19A8 {                   /* 0x2A0, block 3 of the shared buffer (SNDDRV_state.fCB0) */
     long f00;                       /* voice on bits */
     unsigned long f08;
     char f10;
@@ -11706,7 +11706,7 @@ struct sAD00Spu_19A8 {                   /* 0x2A0, block 3 of the shared buffer 
     struct sAD00SpuChan_19A8 f1A0[16];
 };
 
-struct sAD00Xfer_19A8 {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B9C8) */
+struct sAD00Xfer_19A8 {                  /* 16 bytes, SNDDRV_state.fCC8[] (also D_0050B9C8) */
     unsigned int key;
     int f04;
     int f08;
@@ -11715,7 +11715,7 @@ struct sAD00Xfer_19A8 {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_
     char pad0F;
 };
 
-struct sAD00Spk_19A8 {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98) */
+struct sAD00Spk_19A8 {                   /* 0x20, SNDDRV_state.fE98[] (also D_0050BB98) */
     float f00[6];
     unsigned int f18;
     short f1C;
@@ -11726,7 +11726,7 @@ struct sAD00Seg_19A8 { unsigned short a; unsigned short b; };
 
 struct sAD00Port_19A8 { int f00; int f04; int pad08[2]; };
 
-   /* 16 bytes, D_0050AD00.fE88[] */
+   /* 16 bytes, SNDDRV_state.fE88[] */
 struct sAD00_19A8 {
     char f000[0x83C];               /* RPC send buffer */
     struct sAD00Voice_19A8 f83C[48];
@@ -11777,7 +11777,7 @@ struct sAD00_19A8 {
     int f1B38;
 };
 
-extern struct sAD00_19A8 D_0050AD00_19A8 __asm__("D_0050AD00");
+extern struct sAD00_19A8 SNDDRV_state_19A8 __asm__("SNDDRV_state");
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*gMutexLockFn_19A8)(void) __asm__("gMutexLockFn");
@@ -11822,7 +11822,7 @@ extern char D_0050C800[];
 /**
  * The sound thread: mixes, encodes and sends one buffer to the IOP every time its semaphore is signalled.
  *
- * Waits on +0x1AA4 of D_0050AD00 and skips until started (+0x1AAD). Each pass: lock hook gMutexLockFn, pre-tick hook
+ * Waits on +0x1AA4 of SNDDRV_state and skips until started (+0x1AAD). Each pass: lock hook gMutexLockFn, pre-tick hook
  * +0x328 of sndgs, SNDSYSI_timerservice(94), +0x1C0 bumped when there is no VBlank handler, SNDSYSI_variabletimerservice (notify
  * callbacks), copies the IOP's 576-byte reply (+0x800) to +0xA40, frees ended voices (SNDDRV_getEndedVoices), saves VU0
  * (SNDDRV_saveVu0) and the scratchpad (SNDDRV_saveScratchpad, when +0x1AAE), mixes into the PCM buffers (MIX_audio), runs
@@ -11835,28 +11835,28 @@ void SNDDRV_thread(void) {
     int s;
 
     for (;;) {
-        WaitSema_19A8(D_0050AD00_19A8.f1AA4);
-        if (D_0050AD00_19A8.f1AAD == 0) continue;
+        WaitSema_19A8(SNDDRV_state_19A8.f1AA4);
+        if (SNDDRV_state_19A8.f1AAD == 0) continue;
         gMutexLockFn_19A8();
         if ((void (*)(void))sndgs.profileenter != 0) ((void (*)(void))sndgs.profileenter)();
         SNDSYSI_timerservice_19A8(94);
-        if (D_0050AD00_19A8.f1AA8 < 0) sndgs.updatetick++;
+        if (SNDDRV_state_19A8.f1AA8 < 0) sndgs.updatetick++;
         SNDSYSI_variabletimerservice_19A8();
-        Util_MemCpy(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 576);
+        Util_MemCpy(SNDDRV_state_19A8.f000 + 0x800, (char *)&SNDDRV_state_19A8 + 0xA40, 576);
         SNDDRV_getEndedVoices_19A8();
         SNDDRV_saveVu0_19A8(D_0050C910);
-        if (D_0050AD00_19A8.f1AAE != 0) SNDDRV_saveScratchpad_19A8();
-        MIX_audio_19A8((int *)D_0050AD00_19A8.f1ABC, D_0050AD00_19A8.f1AB0);
+        if (SNDDRV_state_19A8.f1AAE != 0) SNDDRV_saveScratchpad_19A8();
+        MIX_audio_19A8((int *)SNDDRV_state_19A8.f1ABC, SNDDRV_state_19A8.f1AB0);
         if (sndgs.sso.set.outputspdifmode & 2) {
-            ((void (*)(void *, void *, int))D_0050C848_19A8)(D_0050AD00_19A8.f1ADC, D_0050AD00_19A8.f1AF4, D_0050AD00_19A8.f1AFC);
+            ((void (*)(void *, void *, int))D_0050C848_19A8)(SNDDRV_state_19A8.f1ADC, SNDDRV_state_19A8.f1AF4, SNDDRV_state_19A8.f1AFC);
         } else if (sndgs.sso.set.outputchannels == 1) {
-            Util_MemCpy(D_0050AD00_19A8.f1ABC[1], D_0050AD00_19A8.f1ABC[0], D_0050AD00_19A8.f1AB0 << 1);
+            Util_MemCpy(SNDDRV_state_19A8.f1ABC[1], SNDDRV_state_19A8.f1ABC[0], SNDDRV_state_19A8.f1AB0 << 1);
         }
-        if (D_0050AD00_19A8.f1AAE != 0) SNDDRV_restoreScratchpad_19A8();
+        if (SNDDRV_state_19A8.f1AAE != 0) SNDDRV_restoreScratchpad_19A8();
         SNDDRV_restoreVu0_19A8(D_0050C910);
         SNDPKTPLAYI_flushcallbackdata_19A8();
-        *D_0050AD00_19A8.fCB4 = sndgs.servertick;
-        *(int *)D_0050AD00_19A8.fCB8 = sndgs.servertick;
+        *SNDDRV_state_19A8.fCB4 = sndgs.servertick;
+        *(int *)SNDDRV_state_19A8.fCB8 = sndgs.servertick;
         FlushCache(0);
         do {
             DI_2B45_19A8();
@@ -11969,7 +11969,7 @@ typedef struct {
     void *f8;
 } L_1B80;
 
-extern S_1B80 D_0050AD00_1B80 __asm__("D_0050AD00");
+extern S_1B80 SNDDRV_state_1B80 __asm__("SNDDRV_state");
 extern R_1B80 D_0050ACB0_1B80 __asm__("D_0050ACB0");
 extern T_1B80 D_0050AC80_1B80 __asm__("D_0050AC80");
 extern K_1B80 D_0050ACC8_1B80 __asm__("D_0050ACC8");
@@ -12048,19 +12048,19 @@ int SNDPLATFORM_init(void) {
     unsigned int i;
     int stat;
 
-    D_0050AD00_1B80.f1AAE = 0;
+    SNDDRV_state_1B80.f1AAE = 0;
     SNDSYS_entercritical_1B80();
-    D_0050AD00_1B80.f1AA0 = SNDMEMI_alloc_1B80(sndgs_1B80.f28 * 4);
+    SNDDRV_state_1B80.f1AA0 = SNDMEMI_alloc_1B80(sndgs_1B80.f28 * 4);
     hz = sndgs_1B80.f2A;
     if (hz == 24000) {
-        D_0050AD00_1B80.f1AB0 = 0x100;
+        SNDDRV_state_1B80.f1AB0 = 0x100;
     } else if (hz == 36000) {
-        D_0050AD00_1B80.f1AB0 = 0x180;
+        SNDDRV_state_1B80.f1AB0 = 0x180;
     } else {
-        D_0050AD00_1B80.f1AB0 = 0x200;
+        SNDDRV_state_1B80.f1AB0 = 0x200;
     }
     SNDDRV_buildIopCommandBuffer_1B80(hz);
-    D_0050AD00_1B80.fCB0->f8 = 0xFFFFFFFFFFFFUL;
+    SNDDRV_state_1B80.fCB0->f8 = 0xFFFFFFFFFFFFUL;
     if (sndgs_1B80.f49 & 2) {
         if (sndgs_1B80.f47 == 5) {
             D_0050C840_1B80(2, sndgs_1B80.f4A, &size0, &size1);
@@ -12069,45 +12069,45 @@ int SNDPLATFORM_init(void) {
         }
         if (sndgs_1B80.f64 != 0 && size1 < (int)sndgs_1B80.f68) {
             encoderState = SNDMEMI_alloc_1B80(size0);
-            D_0050AD00_1B80.f1AF8 = encoderState;
-            D_0050AD00_1B80.f1AFC = sndgs_1B80.f64;
-            D_0050AD00_1B80.f1AAE = size1;
+            SNDDRV_state_1B80.f1AF8 = encoderState;
+            SNDDRV_state_1B80.f1AFC = sndgs_1B80.f64;
+            SNDDRV_state_1B80.f1AAE = size1;
         } else {
-            D_0050AD00_1B80.f1AF8 = SNDMEMI_alloc_1B80(size0 + size1);
-            D_0050AD00_1B80.f1AFC = D_0050AD00_1B80.f1AF8 + size0;
+            SNDDRV_state_1B80.f1AF8 = SNDMEMI_alloc_1B80(size0 + size1);
+            SNDDRV_state_1B80.f1AFC = SNDDRV_state_1B80.f1AF8 + size0;
         }
         if (sndgs_1B80.f47 == 5) {
-            D_0050C844_1B80(2, sndgs_1B80.f4A, D_0050AD00_1B80.f1AF8);
+            D_0050C844_1B80(2, sndgs_1B80.f4A, SNDDRV_state_1B80.f1AF8);
         } else {
-            D_0050C844_1B80(1, sndgs_1B80.f4A, D_0050AD00_1B80.f1AF8);
+            D_0050C844_1B80(1, sndgs_1B80.f4A, SNDDRV_state_1B80.f1AF8);
         }
         size = ((sndgs_1B80.f47 + sndgs_1B80.f48) << 10) + 0x40;
-        D_0050AD00_1B80.f1AD4 = SNDMEMI_alloc_1B80(size);
-        memset_1B80(D_0050AD00_1B80.f1AD4, 0, size);
-        base = ((unsigned int)(D_0050AD00_1B80.f1AD4 + 0x3F) >> 6) << 6;
-        D_0050AD00_1B80.f1AD8 = base;
+        SNDDRV_state_1B80.f1AD4 = SNDMEMI_alloc_1B80(size);
+        memset_1B80(SNDDRV_state_1B80.f1AD4, 0, size);
+        base = ((unsigned int)(SNDDRV_state_1B80.f1AD4 + 0x3F) >> 6) << 6;
+        SNDDRV_state_1B80.f1AD8 = base;
         if (sndgs_1B80.f47 == 4) {
-            D_0050AD00_1B80.f1AE0 = base;
-            D_0050AD00_1B80.f1ADC = base + 0xC00;
-            D_0050AD00_1B80.f1AE4 = base + 0x800;
-            D_0050AD00_1B80.f1AE8 = base + 0x400;
+            SNDDRV_state_1B80.f1AE0 = base;
+            SNDDRV_state_1B80.f1ADC = base + 0xC00;
+            SNDDRV_state_1B80.f1AE4 = base + 0x800;
+            SNDDRV_state_1B80.f1AE8 = base + 0x400;
         } else {
-            D_0050AD00_1B80.f1ADC = base;
-            D_0050AD00_1B80.f1AE0 = base + 0x1000;
-            D_0050AD00_1B80.f1AE4 = base + 0x400;
-            D_0050AD00_1B80.f1AE8 = base + 0xC00;
-            D_0050AD00_1B80.f1AEC = base + 0x800;
-            D_0050AD00_1B80.f1AF0 = base + 5120;
+            SNDDRV_state_1B80.f1ADC = base;
+            SNDDRV_state_1B80.f1AE0 = base + 0x1000;
+            SNDDRV_state_1B80.f1AE4 = base + 0x400;
+            SNDDRV_state_1B80.f1AE8 = base + 0xC00;
+            SNDDRV_state_1B80.f1AEC = base + 0x800;
+            SNDDRV_state_1B80.f1AF0 = base + 5120;
         }
     }
     SNDDRV_setSpuReverbLevels_1B80(0, 8);
-    D_0050AD00_1B80.fCB0->f13 = sndgs_1B80.f41;
-    D_0050AD00_1B80.f1A9A = 321;
-    D_0050AD00_1B80.f1A9C = 0x8000;
+    SNDDRV_state_1B80.fCB0->f13 = sndgs_1B80.f41;
+    SNDDRV_state_1B80.f1A9A = 321;
+    SNDDRV_state_1B80.f1A9C = 0x8000;
     SNDSYS_leavecritical_1B80();
     D_0050ACB0_1B80.f4 = 1;
     D_0050ACB0_1B80.f8 = 0;
-    D_0050AD00_1B80.f1AA4 = CreateSema_1B80(&D_0050ACB0_1B80);
+    SNDDRV_state_1B80.f1AA4 = CreateSema_1B80(&D_0050ACB0_1B80);
     if (D_0044DD40_1B80 == 0) {
         func_00426408_1B80(0);
         sceSifInitIopHeap_1B80();
@@ -12127,8 +12127,8 @@ int SNDPLATFORM_init(void) {
         }
     }
     for (i = 0; i < 1; i++) {
-        D_0050AD00_1B80.v[i].h = sceSifAllocIopHeap_1B80(0x1000);
-        D_0050AD00_1B80.v[i].f8 = 0;
+        SNDDRV_state_1B80.v[i].h = sceSifAllocIopHeap_1B80(0x1000);
+        SNDDRV_state_1B80.v[i].f8 = 0;
     }
     D_0050AC80_1B80.f4 = SNDDRV_thread_1B80;
     D_0050AC80_1B80.f8 = D_0050CB20_1B80;
@@ -12152,12 +12152,12 @@ int SNDPLATFORM_init(void) {
             break;
         }
     }
-    if (sndgs_1B80.f64 != 0 && sndgs_1B80.f68 - D_00515D24_1B80 > D_0050AD00_1B80.f1AAE) {
-        D_0050AD00_1B80.f1AAE = sndgs_1B80.f68 - D_00515D24_1B80;
+    if (sndgs_1B80.f64 != 0 && sndgs_1B80.f68 - D_00515D24_1B80 > SNDDRV_state_1B80.f1AAE) {
+        SNDDRV_state_1B80.f1AAE = sndgs_1B80.f68 - D_00515D24_1B80;
     }
-    if (D_0050AD00_1B80.f1AAE != 0) {
+    if (SNDDRV_state_1B80.f1AAE != 0) {
         SNDSYS_entercritical_1B80();
-        D_0050AD00_1B80.f1B38 = SNDMEMI_alloc_1B80(D_0050AD00_1B80.f1AAE + 0x10);
+        SNDDRV_state_1B80.f1B38 = SNDMEMI_alloc_1B80(SNDDRV_state_1B80.f1AAE + 0x10);
         SNDSYS_leavecritical_1B80();
     }
     if (D_0044DD40_1B80 == 0) {
@@ -12168,19 +12168,19 @@ int SNDPLATFORM_init(void) {
         sceSifAddCmdHandler_1B80(1, SNDDRV_handleSifCommand_1B80, D_0050C900_1B80);
         __asm__ volatile("ei");
         do {
-            if (sceSifBindRpc_1B80(D_0050AD00_1B80.fC80, 0x534E44, 0) < 0) {
+            if (sceSifBindRpc_1B80(SNDDRV_state_1B80.fC80, 0x534E44, 0) < 0) {
                 return -1;
             }
-        } while (D_0050AD00_1B80.fCA4 == 0);
+        } while (SNDDRV_state_1B80.fCA4 == 0);
     }
     if (sndgs_1B80.f34 == -1.0f) {
         sndgs_1B80.f1C4 = (sceGsGetGParam_1B80()->f2 == 2) ? 16.683349609375f : 20.0f;
         DisableIntc_1B80(2);
-        D_0050AD00_1B80.f1AA8 = AddIntcHandler_1B80(2, SNDDRV_vblankHandler_1B80, 0);
+        SNDDRV_state_1B80.f1AA8 = AddIntcHandler_1B80(2, SNDDRV_vblankHandler_1B80, 0);
         EnableIntc_1B80(2);
     } else {
         sndgs_1B80.f1C4 = 10.666666984558105f;
-        D_0050AD00_1B80.f1AA8 = -1;
+        SNDDRV_state_1B80.f1AA8 = -1;
     }
     D_0050ACC8_1B80.f0 = 0x80303;
     D_0050ACC8_1B80.f4 = &D_0050B740_1B80;
@@ -12196,7 +12196,7 @@ int SNDPLATFORM_init(void) {
         D_0050ACC8_1B80.f13 = 0;
     }
     SNDDRV_callIopRpc_1B80(0, &D_0050ACC8_1B80, 20);
-    D_0050AD00_1B80.f1AAD = D_0044DD40_1B80 = 1;
+    SNDDRV_state_1B80.f1AAD = D_0044DD40_1B80 = 1;
     SNDI_setDefaultSpeakerLayouts_1B80();
     return 0;
 }
@@ -12230,7 +12230,7 @@ typedef struct {
     char pad1AFC[0x1B38 - 0x1AFC];
     int f1B38;
 } H_2268;
-extern H_2268 D_0050AD00_2268 __asm__("D_0050AD00");
+extern H_2268 SNDDRV_state_2268 __asm__("SNDDRV_state");
 extern int D_00512B20_2268[] __asm__("D_00512B20");
 extern void SNDSYS_leavecritical_2268(void) __asm__("SNDSYS_leavecritical");
 extern void SNDSYS_entercritical_2268(void) __asm__("SNDSYS_entercritical");
@@ -12252,7 +12252,7 @@ extern void func_0042AD08_2268(int) __asm__("func_0042AD08");
  * Shuts the PS2 sound platform down: everything SNDPLATFORM_init set up.
  *
  * Leaves any critical sections still held (+0x176 of sndgs), lets 10 ticks pass (SNDSYS_service until +0x180 has
- * advanced), removes the VBlank handler (+0x1AA8 of D_0050AD00) with INTC 2 masked around it, sends RPC function 1
+ * advanced), removes the VBlank handler (+0x1AA8 of SNDDRV_state) with INTC 2 masked around it, sends RPC function 1
  * (SNDDRV_callIopRpc), deletes the sound thread (terminating it unless it is dormant, status 0x10) and the semaphore
  * +0x1AA4, frees the IOP heap block (func_0042AD08), resets MIX_setFxSendOutput, clears the started flag +0x1AAD and, in a
  * critical section, frees the DTS buffers (+0x1AD4, +0x1AF8), the scratchpad save buffer (+0x1B38), the mixer
@@ -12273,9 +12273,9 @@ int SNDPLATFORM_restore(void) {
     while (sndgs.audiotick < targetTick) {
         SNDSYS_service_2268();
     }
-    if (D_0050AD00_2268.f1AA8 >= 0) {
+    if (SNDDRV_state_2268.f1AA8 >= 0) {
         DisableIntc_2268(2);
-        if (RemoveIntcHandler_2268(2, D_0050AD00_2268.f1AA8) > 0) {
+        if (RemoveIntcHandler_2268(2, SNDDRV_state_2268.f1AA8) > 0) {
             EnableIntc_2268(2);
         }
     }
@@ -12287,28 +12287,28 @@ int SNDPLATFORM_restore(void) {
         TerminateThread_2268(D_00512B20_2268[0]);
         DeleteThread_2268(D_00512B20_2268[0]);
     }
-    DeleteSema_2268(D_0050AD00_2268.f1AA4);
+    DeleteSema_2268(SNDDRV_state_2268.f1AA4);
     for (i = 0; i < 1; i++) {
-        func_0042AD08_2268(D_0050AD00_2268.v[i].h);
+        func_0042AD08_2268(SNDDRV_state_2268.v[i].h);
     }
     MIX_setFxSendOutput_2268(0);
-    D_0050AD00_2268.f1AAD = 0;
+    SNDDRV_state_2268.f1AAD = 0;
     SNDSYS_entercritical_2268();
-    if (D_0050AD00_2268.f1AD4 != 0) {
-        SNDMEMI_free_2268(D_0050AD00_2268.f1AD4);
-        D_0050AD00_2268.f1AD4 = 0;
-        D_0050AD00_2268.f1AD8 = 0;
+    if (SNDDRV_state_2268.f1AD4 != 0) {
+        SNDMEMI_free_2268(SNDDRV_state_2268.f1AD4);
+        SNDDRV_state_2268.f1AD4 = 0;
+        SNDDRV_state_2268.f1AD8 = 0;
     }
-    if (D_0050AD00_2268.f1AF8 != 0) {
-        SNDMEMI_free_2268(D_0050AD00_2268.f1AF8);
-        D_0050AD00_2268.f1AF8 = 0;
+    if (SNDDRV_state_2268.f1AF8 != 0) {
+        SNDMEMI_free_2268(SNDDRV_state_2268.f1AF8);
+        SNDDRV_state_2268.f1AF8 = 0;
     }
-    if (D_0050AD00_2268.f1B38 != 0) {
-        SNDMEMI_free_2268(D_0050AD00_2268.f1B38);
-        D_0050AD00_2268.f1B38 = 0;
+    if (SNDDRV_state_2268.f1B38 != 0) {
+        SNDMEMI_free_2268(SNDDRV_state_2268.f1B38);
+        SNDDRV_state_2268.f1B38 = 0;
     }
     MIX_destroy_2268();
-    SNDMEMI_free_2268(D_0050AD00_2268.f1AA0);
+    SNDMEMI_free_2268(SNDDRV_state_2268.f1AA0);
     SNDSYS_leavecritical_2268();
     return 0;
 }
@@ -12332,7 +12332,7 @@ struct V_2440 { char pad[0x20]; struct P_2440 a[0x30]; };
 struct V2_2440 { char pad[0x1A0]; struct Q_2440 a[0x30]; };
 
 struct H_2440 { char pad[0xCB0]; struct V_2440 *m; };
-extern struct H_2440 D_0050AD00_2440 __asm__("D_0050AD00");
+extern struct H_2440 SNDDRV_state_2440 __asm__("SNDDRV_state");
 extern void f_A550_2440(int) __asm__("SNDVOICEI_free");
 extern void f_8468_2440(int) __asm__("MIX_stop");
 
@@ -12340,7 +12340,7 @@ extern void f_8468_2440(int) __asm__("MIX_stop");
  * Stops all voices of a channel and frees them.
  *
  * For each voice in the channel's list (+0x04, count +0x23 of the sndgs channel table): render kind 8 (SPU voices,
- * +0x24) clears its key in the IOP voice block (+0xCB0 of D_0050AD00, and the +0x18 twin when +0x49 is 2), kind 0x100
+ * +0x24) clears its key in the IOP voice block (+0xCB0 of SNDDRV_state, and the +0x18 twin when +0x49 is 2), kind 0x100
  * clears its key in the block's +0x1A0 table, and mixer voices are stopped with MIX_stop; every voice is then
  * freed with SNDVOICEI_free. Called by SNDstop and SNDrelease.
  *
@@ -12352,14 +12352,14 @@ int SNDPLATFORM_stop(int idx) {
     int i;
     if (channel->rendermode & 8) {
         for (i = 0; i < channel->numchan; i++) {
-            D_0050AD00_2440.m->a[channel->voices[i]].v = 0;
+            SNDDRV_state_2440.m->a[channel->voices[i]].v = 0;
             f_A550_2440(channel->voices[i]);
             if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts)
-                D_0050AD00_2440.m->a[channel->voices[i] + 0x18].v = 0;
+                SNDDRV_state_2440.m->a[channel->voices[i] + 0x18].v = 0;
         }
     } else if (channel->rendermode & 0x100) {
         for (i = 0; i < channel->numchan; i++) {
-            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->voices[i] - sndgs.sso.set.voicesspu].v = 0;
+            ((struct V2_2440 *)SNDDRV_state_2440.m)->a[channel->voices[i] - sndgs.sso.set.voicesspu].v = 0;
             f_A550_2440(channel->voices[i]);
         }
     } else {
@@ -12406,7 +12406,7 @@ struct H_25E0 {
     char pad[0xCB0];
     struct T_25E0 *tbl;
 };
-extern struct H_25E0 D_0050AD00_25E0 __asm__("D_0050AD00");
+extern struct H_25E0 SNDDRV_state_25E0 __asm__("SNDDRV_state");
 extern void MIX_setpitch_25E0(int a, unsigned int v) __asm__("MIX_setpitch");
 
 /**
@@ -12414,7 +12414,7 @@ extern void MIX_setpitch_25E0(int a, unsigned int v) __asm__("MIX_setpitch");
  *
  * The pitch is the channel's sample rate (+0x20) << 12 divided by the output rate, times the 4.12 pitch +0x8A. Render
  * kind 8 (SPU) uses 48000, shifts back by 12 and caps it at 0x3FFF, storing it in each voice's entry of the IOP voice
- * block (+0xCB0 of D_0050AD00, plus the +0x18 twin when +0x49 is 2); kind 0x100 divides by +0x2C into the block's
+ * block (+0xCB0 of SNDDRV_state, plus the +0x18 twin when +0x49 is 2); kind 0x100 divides by +0x2C into the block's
  * +0x1A0 table; mixer voices divide by +0x2A, shift by 8 and go through MIX_setpitch. Called by SNDSYSI_100hzserver,
  * SNDpitchbend, SNDpitchmult, SNDPLATFORM_playtimbre and SNDPLATFORM_packetplay.
  *
@@ -12432,15 +12432,15 @@ int SNDPLATFORM_setpitch(int idx) {
             hwPitch = 0x3FFF;
         }
         for (i = 0; i < channel->numchan; i++) {
-            D_0050AD00_25E0.tbl->a[channel->voices[i]].v = hwPitch;
+            SNDDRV_state_25E0.tbl->a[channel->voices[i]].v = hwPitch;
             if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
-                D_0050AD00_25E0.tbl->a[channel->voices[i] + 0x18].v = hwPitch;
+                SNDDRV_state_25E0.tbl->a[channel->voices[i] + 0x18].v = hwPitch;
             }
         }
     } else if (channel->rendermode & 0x100) {
         hwPitch = (unsigned int)((channel->samplerate << 12) / sndgs.sso.set.outputrateiopcpu * channel->finalpitch) >> 12;
         for (i = 0; i < channel->numchan; i++) {
-            D_0050AD00_25E0.tbl->b[channel->voices[i] - sndgs.sso.set.voicesspu].v = hwPitch;
+            SNDDRV_state_25E0.tbl->b[channel->voices[i] - sndgs.sso.set.voicesspu].v = hwPitch;
         }
     } else {
         hwPitch = (unsigned int)((channel->samplerate << 12) / sndgs.sso.set.outputrate * channel->finalpitch) >> 8;
@@ -12458,14 +12458,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_setfxlevel);
 struct V_27E0 { char pad[0x1AC]; char v[1][16]; };
 struct G_27E0 { char pad[0x2F]; unsigned char base2; unsigned char base; char pad31[0x49 - 0x31]; unsigned char mode; char pad4A[0x1F0 - 0x4A]; struct CHANPUB *chans; };
 struct A_27E0 { char pad[0xCB0]; long *mask; };
-extern struct A_27E0 D_0050AD00_27E0 __asm__("D_0050AD00");
+extern struct A_27E0 SNDDRV_state_27E0 __asm__("SNDDRV_state");
 extern void f_8598_27E0(int, int, float) __asm__("SNDMIX_setwetgain");
 
 /**
  * Applies a channel's effect-send level for bus @p k to its voices.
  *
  * Render kind 8 (SPU): sets or clears each voice's bit (and its +0x18 twin when +0x49 is 2) in the effect mask at the
- * start of the IOP voice block (+0xCB0 of D_0050AD00), on when the bus-0 send (+0x62) is non-zero. Kind 0x100: stores
+ * start of the IOP voice block (+0xCB0 of SNDDRV_state), on when the bus-0 send (+0x62) is non-zero. Kind 0x100: stores
  * volume * send * 0.003876 into byte @p k of the voice's entry at +0x1AC. Mixer voices: SNDMIX_setwetgain with volume *
  * send / 32767. Called by SNDvol, SND_setFxLevel (send level), SNDPLATFORM_playtimbre and SNDPLATFORM_packetplay.
  *
@@ -12482,22 +12482,22 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
     if (ch->rendermode & 8) {
         for (i = 0; i < ch->numchan; i++) {
             if (ch->fxsend[0] != 0) {
-                *D_0050AD00_27E0.mask |= 1L << ch->voices[i];
+                *SNDDRV_state_27E0.mask |= 1L << ch->voices[i];
             } else {
-                *D_0050AD00_27E0.mask &= ~(1L << ch->voices[i]);
+                *SNDDRV_state_27E0.mask &= ~(1L << ch->voices[i]);
             }
             if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
                 if (ch->fxsend[0] != 0) {
-                    *D_0050AD00_27E0.mask |= 1L << (ch->voices[i] + 0x18);
+                    *SNDDRV_state_27E0.mask |= 1L << (ch->voices[i] + 0x18);
                 } else {
-                    *D_0050AD00_27E0.mask &= ~(1L << (ch->voices[i] + 0x18));
+                    *SNDDRV_state_27E0.mask &= ~(1L << (ch->voices[i] + 0x18));
                 }
             }
         }
     } else if (ch->rendermode & 0x100) {
         sendLevel = ch->finalvol * ch->fxsend[k] * 0.003875850699841976f;
         for (i = 0; i < ch->numchan; i++) {
-            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->voices[i] - sndgs.sso.set.voicesspu][k] = sendLevel;
+            ((struct V_27E0 *)SNDDRV_state_27E0.mask)->v[ch->voices[i] - sndgs.sso.set.voicesspu][k] = sendLevel;
         }
     } else {
         sendGain = ch->finalvol * ch->fxsend[k] / 32767.0f;
@@ -12537,14 +12537,14 @@ struct A_2A50 {
     char padCB4[0xE98 - 0xCB4];
     struct Spk_2A50 spk[1];
 };
-extern struct A_2A50 D_0050AD00_2A50 __asm__("D_0050AD00");
+extern struct A_2A50 SNDDRV_state_2A50 __asm__("SNDDRV_state");
 extern struct Spk_2A50 D_0050BB98_2A50[] __asm__("D_0050BB98");
 extern void f8560_2A50(int, int, float) __asm__("SNDMIX_setdrygain");
 
 /**
  * Applies a channel's volume and speaker gains to each of its voices.
  *
- * Uses the voice's speaker gains (+0xE98 of D_0050AD00, D_0050BB98, six floats) and the channel volume (float). Render
+ * Uses the voice's speaker gains (+0xE98 of SNDDRV_state, D_0050BB98, six floats) and the channel volume (float). Render
  * kind 8 (SPU): left/right = gain[1] / gain[0] * volume * 127 in the IOP voice block; with +0x49 == 2 each voice and
  * its +0x18 twin carry two speaker pairs (gains 3,0 and 2,1 for four outputs, 4,1 and 3,2 otherwise). Kind 0x100 writes
  * volume * dry level (+0x5F / 127) * gain[j] * 127 for every output j (+0x47 + +0x48) to the +0x1A0 table; mixer voices
@@ -12564,19 +12564,19 @@ void SNDDRV_applyVolume(int id) {
     if (ch->rendermode & 8) {
         for (i = 0; i < ch->numchan; i++) {
             if (sndgs.sso.set.outputspdifmode != kSNDSPDIF_Dts) {
-                D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
-                D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
+                SNDDRV_state_2A50.tbl->a[ch->voices[i]].l = SNDDRV_state_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
+                SNDDRV_state_2A50.tbl->a[ch->voices[i]].r = SNDDRV_state_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
             } else {
                 if (sndgs.sso.set.outputchannels == 4) {
-                    D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].l = D_0050AD00_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].r = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i]].l = SNDDRV_state_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i]].r = SNDDRV_state_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i] + 0x18].l = SNDDRV_state_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i] + 0x18].r = SNDDRV_state_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
                 } else {
-                    D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[4] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].l = D_0050AD00_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].r = D_0050AD00_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i]].l = SNDDRV_state_2A50.spk[ch->voices[i]].p[4] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i]].r = SNDDRV_state_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i] + 0x18].l = SNDDRV_state_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
+                    SNDDRV_state_2A50.tbl->a[ch->voices[i] + 0x18].r = SNDDRV_state_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
                 }
             }
         }
@@ -12585,7 +12585,7 @@ void SNDDRV_applyVolume(int id) {
         sc = ch->finalvol * (float)ch->drylevel * 0.0078740157186985016f;
         for (i = 0; i < ch->numchan; i++) {
             for (j = 0; j < outputCount; j++) {
-                D_0050AD00_2A50.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].c[j] = sc * D_0050AD00_2A50.spk[ch->voices[i]].p[j] * 127.0f;
+                SNDDRV_state_2A50.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].c[j] = sc * SNDDRV_state_2A50.spk[ch->voices[i]].p[j] * 127.0f;
             }
         }
     } else {
@@ -12606,7 +12606,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_applyDryLevel);
 struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct CHANPUB *ents; };
 struct M_2EC8 { char pad[8]; long mask; };
 struct H_2EC8 { char pad[0xCB0]; struct M_2EC8 *m; };
-extern struct H_2EC8 D_0050AD00_2EC8 __asm__("D_0050AD00");
+extern struct H_2EC8 SNDDRV_state_2EC8 __asm__("SNDDRV_state");
 extern void f_2A50_2EC8(int) __asm__("SNDDRV_applyVolume");
 
 /**
@@ -12623,11 +12623,11 @@ void SNDDRV_applyDryLevel(int idx) {
     int i;
     if (channel->rendermode & 8) {
         for (i = 0; i < channel->numchan; i++) {
-            if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << channel->voices[i];
-            else D_0050AD00_2EC8.m->mask &= ~(1L << channel->voices[i]);
+            if (channel->drylevel) SNDDRV_state_2EC8.m->mask |= 1L << channel->voices[i];
+            else SNDDRV_state_2EC8.m->mask &= ~(1L << channel->voices[i]);
             if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
-                if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << (channel->voices[i] + 0x18);
-                else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->voices[i] + 0x18));
+                if (channel->drylevel) SNDDRV_state_2EC8.m->mask |= 1L << (channel->voices[i] + 0x18);
+                else SNDDRV_state_2EC8.m->mask &= ~(1L << (channel->voices[i] + 0x18));
             }
         }
     } else if (channel->rendermode & 0x100) {
@@ -12762,7 +12762,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_mutexalloc);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
 struct sAD00Voice { int key; int val; };
@@ -12781,7 +12781,7 @@ struct sAD00SpuChan {               /* 16 bytes, sAD00Spu.f1A0[] */
     signed char f0C[4];
 };
 
-struct sAD00Spu {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00.fCB0) */
+struct sAD00Spu {                   /* 0x2A0, block 3 of the shared buffer (SNDDRV_state.fCB0) */
     long f00;                       /* voice on bits */
     unsigned long f08;
     char f10;
@@ -12795,7 +12795,7 @@ struct sAD00Spu {                   /* 0x2A0, block 3 of the shared buffer (D_00
     struct sAD00SpuChan f1A0[16];
 };
 
-struct sAD00Xfer {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B9C8) */
+struct sAD00Xfer {                  /* 16 bytes, SNDDRV_state.fCC8[] (also D_0050B9C8) */
     unsigned int key;
     int f04;
     int f08;
@@ -12804,7 +12804,7 @@ struct sAD00Xfer {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B
     char pad0F;
 };
 
-struct sAD00Spk {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98) */
+struct sAD00Spk {                   /* 0x20, SNDDRV_state.fE98[] (also D_0050BB98) */
     float f00[6];
     unsigned int f18;
     short f1C;
@@ -12813,7 +12813,7 @@ struct sAD00Spk {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98)
 
 struct sAD00Seg { unsigned short a; unsigned short b; };
 
-struct sAD00Port { int f00; int f04; int pad08[2]; };   /* 16 bytes, D_0050AD00.fE88[] */
+struct sAD00Port { int f00; int f04; int pad08[2]; };   /* 16 bytes, SNDDRV_state.fE88[] */
 
 struct sAD00 {
     char f000[0x83C];               /* RPC send buffer */
@@ -12865,23 +12865,23 @@ struct sAD00 {
     int f1B38;
 };
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern int D_0050ACE0_3300[] __asm__("D_0050ACE0");
 extern int CreateSema_3300(int *) __asm__("CreateSema");
 
 /**
- * Creates the sound driver's recursive lock: a semaphore (D_0050ACE0 parameters) in +0x1B10 of D_0050AD00.
+ * Creates the sound driver's recursive lock: a semaphore (D_0050ACE0 parameters) in +0x1B10 of SNDDRV_state.
  *
  * The owner (+0x1B14) starts at -1 and the depth (+0x1B18) at 0. Called by SNDSYSI_init at start-up; SNDI_mutexfree
  * deletes it.
  */
 void SNDI_mutexalloc(void) {
     D_0050ACE0_3300[1] = 20;
-    D_0050AD00.f1B14 = -1;
+    SNDDRV_state.f1B14 = -1;
     D_0050ACE0_3300[2] = 1;
-    D_0050AD00.f1B18 = 0;
-    D_0050AD00.f1B10 = CreateSema_3300(D_0050ACE0_3300);
+    SNDDRV_state.f1B18 = 0;
+    SNDDRV_state.f1B10 = CreateSema_3300(D_0050ACE0_3300);
 }
 #endif
 
@@ -12889,22 +12889,22 @@ void SNDI_mutexalloc(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_mutexfree);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern void DeleteSema(int);
 
 /**
- * Deletes the sound driver's lock semaphore (+0x1B10 of D_0050AD00).
+ * Deletes the sound driver's lock semaphore (+0x1B10 of SNDDRV_state).
  *
  * Called by SNDSYS_restore and by SNDSYSI_init when the start fails.
  */
 void SNDI_mutexfree(void) {
-    DeleteSema(D_0050AD00.f1B10);
+    DeleteSema(SNDDRV_state.f1B10);
 }
 #endif
 
@@ -12912,18 +12912,18 @@ void SNDI_mutexfree(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_mutexlock);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern int GetThreadId(void);
 extern void WaitSema(int);
 
 /**
- * Takes the sound driver's recursive lock: the semaphore at +0x1B10 of D_0050AD00, owner thread +0x1B14, depth +0x1B18.
+ * Takes the sound driver's recursive lock: the semaphore at +0x1B10 of SNDDRV_state, owner thread +0x1B14, depth +0x1B18.
  *
  * Recursive lock (pairs with SNDI_mutexunlock). The owner's re-entry bumps the count and returns early; jump2
  * cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
@@ -12932,13 +12932,13 @@ extern void WaitSema(int);
  */
 void SNDI_mutexlock(void) {
     int threadId = GetThreadId();
-    if (D_0050AD00.f1B14 == threadId) {
-        D_0050AD00.f1B18++;
+    if (SNDDRV_state.f1B14 == threadId) {
+        SNDDRV_state.f1B18++;
         return;
     }
-    WaitSema(D_0050AD00.f1B10);
-    D_0050AD00.f1B14 = threadId;
-    D_0050AD00.f1B18++;
+    WaitSema(SNDDRV_state.f1B10);
+    SNDDRV_state.f1B14 = threadId;
+    SNDDRV_state.f1B18++;
 }
 #endif
 
@@ -12946,12 +12946,12 @@ void SNDI_mutexlock(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_mutexunlock);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern int GetThreadId(void);
 extern void SignalSema(int);
@@ -12959,20 +12959,20 @@ extern void SignalSema(int);
 /**
  * Releases the sound driver's recursive lock.
  *
- * For the owning thread it drops the depth (+0x1B18 of D_0050AD00) and clears the owner at 0. Whenever the depth is 0
+ * For the owning thread it drops the depth (+0x1B18 of SNDDRV_state) and clears the owner at 0. Whenever the depth is 0
  * or less it signals the semaphore +0x1B10, also when called by a thread that does not own the lock. Called through
  * DefaultMutexUnlockFn.
  */
 void SNDI_mutexunlock(void) {
     int threadId = GetThreadId();
-    if (D_0050AD00.f1B14 == threadId) {
-        D_0050AD00.f1B18--;
-        if (D_0050AD00.f1B18 == 0) {
-            D_0050AD00.f1B14 = -1;
+    if (SNDDRV_state.f1B14 == threadId) {
+        SNDDRV_state.f1B18--;
+        if (SNDDRV_state.f1B18 == 0) {
+            SNDDRV_state.f1B14 = -1;
         }
     }
-    if (D_0050AD00.f1B18 <= 0) {
-        SignalSema(D_0050AD00.f1B10);
+    if (SNDDRV_state.f1B18 <= 0) {
+        SignalSema(SNDDRV_state.f1B10);
     }
 }
 #endif
@@ -13037,7 +13037,7 @@ struct B_3500 {
     char pad1[3];
     unsigned char b;
 };
-extern struct A_3500 D_0050AD00_3500 __asm__("D_0050AD00");
+extern struct A_3500 SNDDRV_state_3500 __asm__("SNDDRV_state");
 
 extern struct B_3500 sndgs_3500 __asm__("sndgs");
 /**
@@ -13045,7 +13045,7 @@ extern struct B_3500 sndgs_3500 __asm__("sndgs");
  *
  * Maps the type to the hardware reverb mode: below 2 off, 5 room, 10 / 20 / 30 studio A/B/C, 40 hall, 50 space, 100
  * pipe, 110 delay, 120 echo (other values pass through). Stores the work-area start ((0x200000 - D_0044DD48[mode]) >>
- * 6) in +0x1A9E of D_0050AD00 and the mode, then the bus record's +0x04 and +0x08 bytes (depth / delay), in
+ * 6) in +0x1A9E of SNDDRV_state and the mode, then the bus record's +0x04 and +0x08 bytes (depth / delay), in
  * +0x10..+0x12 of the IOP voice block. Called by SNDDRV_applyFxBus.
  *
  * @param busType  the bus type
@@ -13073,10 +13073,10 @@ void SNDDRV_setupSpuReverb(unsigned busType) {
     } else if (busType == 120) {
         reverbMode = 7;
     }
-    D_0050AD00_3500.s = (0x200000 - D_0044DD48_3500[reverbMode]) >> 6;
-    D_0050AD00_3500.p[0x10] = reverbMode;
-    D_0050AD00_3500.p[0x11] = sndgs_3500.a;
-    D_0050AD00_3500.p[0x12] = sndgs_3500.b;
+    SNDDRV_state_3500.s = (0x200000 - D_0044DD48_3500[reverbMode]) >> 6;
+    SNDDRV_state_3500.p[0x10] = reverbMode;
+    SNDDRV_state_3500.p[0x11] = sndgs_3500.a;
+    SNDDRV_state_3500.p[0x12] = sndgs_3500.b;
 }
 #endif
 
@@ -13156,7 +13156,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_setSpuReverbLevels);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct O_36C8 { char pad[0x14]; short x; short y; };
 struct G_36C8 { char pad[0xCB0]; struct O_36C8 *o; };
-extern struct G_36C8 D_0050AD00_36C8[] __asm__("D_0050AD00");
+extern struct G_36C8 SNDDRV_state_36C8[] __asm__("SNDDRV_state");
 extern float D_0050AB08_36C8[] __asm__("D_0050AB08");
 
 /**
@@ -13169,7 +13169,7 @@ extern float D_0050AB08_36C8[] __asm__("D_0050AB08");
  * @param flags  render-kind flags (8 applies)
  */
 void SNDDRV_setSpuReverbLevels(int busIndex, int flags) {
-    struct G_36C8 *soundState = &D_0050AD00_36C8[0];
+    struct G_36C8 *soundState = &SNDDRV_state_36C8[0];
     if (soundState->o != 0 && (flags & 8)) {
         soundState->o->x = (int)(D_0050AB08_36C8[3] * 32767.0f);
         soundState->o->y = (int)(D_0050AB08_36C8[4] * 32767.0f);
@@ -13183,10 +13183,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_lookupPanGains);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct S2_3728 { short v[2]; };
-extern struct S2_3728 D_0044DD78_3728[] __asm__("D_0044DD78");
+extern struct S2_3728 SNDDRV_panGainTable_3728[] __asm__("SNDDRV_panGainTable");
 
 /**
- * Looks up a pair of pan gains for an azimuth from the 256-entry table D_0044DD78.
+ * Looks up a pair of pan gains for an azimuth from the 256-entry table SNDDRV_panGainTable.
  *
  * Bits 8-15 of the azimuth pick the entry; both of its shorts are divided by 32767. Used by func_003C38E0.
  *
@@ -13196,7 +13196,7 @@ extern struct S2_3728 D_0044DD78_3728[] __asm__("D_0044DD78");
 void SNDDRV_lookupPanGains(unsigned int azimuth, float *out) {
     int i;
     for (i = 0; i < 2; i++) {
-        out[i] = (float)D_0044DD78_3728[(azimuth >> 8) & 0xFF].v[i] / 32767.0f;
+        out[i] = (float)SNDDRV_panGainTable_3728[(azimuth >> 8) & 0xFF].v[i] / 32767.0f;
     }
 }
 #endif
@@ -13303,7 +13303,7 @@ struct A_3EE0 {
     char pad1AB0[0x1AB8 - 0x1AB0];
     int x1AB8;
 };
-extern struct A_3EE0 D_0050AD00_3EE0 __asm__("D_0050AD00");
+extern struct A_3EE0 SNDDRV_state_3EE0 __asm__("SNDDRV_state");
 extern void f2EC8_3EE0(int) __asm__("SNDDRV_applyDryLevel");
 extern void f38E0_3EE0(int) __asm__("func_003C38E0");
 extern void f3178_3EE0(int, int) __asm__("SNDPLATFORM_lowpass");
@@ -13315,7 +13315,7 @@ extern void f8158_3EE0(int, int, int, int, int, int, int, int, int, int, int, in
  *
  * Render kind 8 (SPU): pitch (SNDPLATFORM_setpitch), pan (func_003C38E0), dry (SNDDRV_applyDryLevel) and send (SNDPLATFORM_setfxlevel), then
  * per voice the sample address (the header's +0x64 pointer plus the voice's offset +0x68[i]) goes to the +0xEB0 table
- * of D_0050AD00 and, tagged with a new sequence number (+0x1AB8 += 0x800000), as the key in the IOP voice block (with
+ * of SNDDRV_state and, tagged with a new sequence number (+0x1AB8 += 0x800000), as the key in the IOP voice block (with
  * the +0x18 twin when +0x49 is 2) and the EE copy +0x840. Kind 0x100 does the same into the +0x1A0 table without the
  * dry step. Mixer voices are set up one by one with MIX_playinit (sample data, loop points, format), get pitch, pan
  * and send on the first voice, then SNDPLATFORM_timemult, SNDDRV_setClipLevel, SNDPLATFORM_lowpass and SNDPLATFORM_highpass, and are started with
@@ -13341,13 +13341,13 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
         f2EC8_3EE0(id);
         SNDPLATFORM_setfxlevel(id, 0);
         for (i = 0; i < ch->numchan; i++) {
-            D_0050AD00_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
-            D_0050AD00_3EE0.x1AB8 += 0x800000;
-            D_0050AD00_3EE0.tbl->a[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
-            D_0050AD00_3EE0.x840[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
+            SNDDRV_state_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
+            SNDDRV_state_3EE0.x1AB8 += 0x800000;
+            SNDDRV_state_3EE0.tbl->a[ch->voices[i]].w = SNDDRV_state_3EE0.e[ch->voices[i]].w | SNDDRV_state_3EE0.x1AB8;
+            SNDDRV_state_3EE0.x840[ch->voices[i]].w = SNDDRV_state_3EE0.e[ch->voices[i]].w;
             if (sndgs.sso.set.outputspdifmode == kSNDSPDIF_Dts) {
-                D_0050AD00_3EE0.tbl->a[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
-                D_0050AD00_3EE0.x840[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
+                SNDDRV_state_3EE0.tbl->a[ch->voices[i] + 0x18].w = SNDDRV_state_3EE0.e[ch->voices[i]].w | SNDDRV_state_3EE0.x1AB8;
+                SNDDRV_state_3EE0.x840[ch->voices[i] + 0x18].w = SNDDRV_state_3EE0.e[ch->voices[i]].w;
             }
         }
     } else if (ch->rendermode & 0x100) {
@@ -13355,10 +13355,10 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
         f38E0_3EE0(id);
         SNDPLATFORM_setfxlevel(id, 0);
         for (i = 0; i < ch->numchan; i++) {
-            D_0050AD00_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
-            D_0050AD00_3EE0.x1AB8 += 0x800000;
-            D_0050AD00_3EE0.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
-            D_0050AD00_3EE0.x9C0[ch->voices[i] - sndgs.sso.set.voicesspu].w = 0;
+            SNDDRV_state_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
+            SNDDRV_state_3EE0.x1AB8 += 0x800000;
+            SNDDRV_state_3EE0.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].w = SNDDRV_state_3EE0.e[ch->voices[i]].w | SNDDRV_state_3EE0.x1AB8;
+            SNDDRV_state_3EE0.x9C0[ch->voices[i] - sndgs.sso.set.voicesspu].w = 0;
         }
     } else {
         for (i = 0; i < ch->numchan; i++) {
@@ -13430,7 +13430,7 @@ extern unsigned int MIX_getframe_4318(int) __asm__("MIX_getframe");
 /**
  * Returns a channel's current play position.
  *
- * Render kind 8 (SPU): the voice's current address (+0x840 table of D_0050AD00) minus its sample start (+0x18 of its
+ * Render kind 8 (SPU): the voice's current address (+0x840 table of SNDDRV_state) minus its sample start (+0x18 of its
  * D_0050BB98 record), * 0x1C >> 4 (SPU-ADPCM bytes to samples); kind 0x100: the voice's word in the +0x9C0 table; mixer
  * voices: MIX_getframe. Called by SNDtimeremaining.
  *
@@ -13461,12 +13461,12 @@ extern int sceSifDmaStat(int);
 extern int isceSifDmaStat(int);
 extern int sceSifSetDma(void *, int);
 extern int isceSifSetDma(void *, int);
-extern int D_0044E178_43C0[] __asm__("D_0044E178");
+extern int SNDDRV_lastIopTransfer_43C0[] __asm__("SNDDRV_lastIopTransfer");
 
 /**
  * Copies a block from EE memory to IOP memory with one SIF DMA, waiting for the previous one first.
  *
- * Flushes the data cache, waits until the last transfer (D_0044E178) is done and starts the new one, remembering its
+ * Flushes the data cache, waits until the last transfer (SNDDRV_lastIopTransfer) is done and starts the new one, remembering its
  * id; the interrupt-safe variants (iFlushCache, isceSifDmaStat, isceSifSetDma) are used when @p inInterrupt is set. Used by
  * the sound-memory transfer queue (SNDDRV_startNextTransfer, SNDDRV_queueTransfer).
  *
@@ -13483,12 +13483,12 @@ void SNDDRV_copyToIop(int srcAddr, int iopAddr, int byteCount, int inInterrupt) 
     dmaDesc.d = 0;
     if (inInterrupt != 0) {
         iFlushCache(0);
-        while (isceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = isceSifSetDma(&dmaDesc, 1);
+        while (isceSifDmaStat(SNDDRV_lastIopTransfer_43C0[0]) >= 0) {}
+        SNDDRV_lastIopTransfer_43C0[0] = isceSifSetDma(&dmaDesc, 1);
     } else {
         FlushCache(0);
-        while (sceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = sceSifSetDma(&dmaDesc, 1);
+        while (sceSifDmaStat(SNDDRV_lastIopTransfer_43C0[0]) >= 0) {}
+        SNDDRV_lastIopTransfer_43C0[0] = sceSifSetDma(&dmaDesc, 1);
     }
 }
 #endif
@@ -13499,7 +13499,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_startNextTransfer);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3); loop rewritten without the D_0050B9C8 inner label (cfg_1).
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 struct Dst_4450 { char b0; char pad1[0xF]; int f10; int f14; int f18; int f1C; unsigned short h20; short h22; };
 extern struct Dst_4450 D_00515780_4450 __asm__("D_00515780");
@@ -13510,7 +13510,7 @@ extern void f61F0_4450(int, void *, int, int, int, int) __asm__("isceSifSendCmd"
 /**
  * Starts the next queued sound-memory transfer.
  *
- * Picks among the queued entries (+0xCC8 of D_0050AD00, 28 slots) the one with the highest priority (+0x0E), the oldest
+ * Picks among the queued entries (+0xCC8 of SNDDRV_state, 28 slots) the one with the highest priority (+0x0E), the oldest
  * (lowest id) among equals, as +0xCC1; stamps the tick (+0xCC4), DMAs its data to the IOP staging block (+0xE88 port,
  * SNDDRV_copyToIop), marks a transfer running (+0xCC2) and sends the IOP a 0x30-byte request (D_00515780: id, staging
  * address, destination, size, priority) with isceSifSendCmd (from an interrupt) or sceSifSendCmd.
@@ -13524,28 +13524,28 @@ void SNDDRV_startNextTransfer(int inInterrupt) {
     int i;
     struct sAD00Xfer *chosen;
     for (i = 0; i < 0x1C; i++) {
-        struct sAD00Xfer *e = &D_0050AD00.fCC8[i];
+        struct sAD00Xfer *e = &SNDDRV_state.fCC8[i];
         if (e->key != 0) {
             cnt++;
             if (pri < e->f0E) {
-                D_0050AD00.fCC1 = i;
+                SNDDRV_state.fCC1 = i;
                 best = e->key;
                 pri = e->f0E;
             } else if (e->f0E == pri && e->key < best) {
-                D_0050AD00.fCC1 = i;
+                SNDDRV_state.fCC1 = i;
                 best = e->key;
             }
-            if (cnt >= (signed char)D_0050AD00.fCC0) break;
+            if (cnt >= (signed char)SNDDRV_state.fCC0) break;
         }
     }
-    chosen = &D_0050AD00.fCC8[(signed char)D_0050AD00.fCC1];
-    D_0050AD00.fCC4 = sndgs.audiotick;
-    SNDDRV_copyToIop(chosen->f04, D_0050AD00.fE88[0].f04, chosen->f0C, inInterrupt);
-    D_0050AD00.fCC2 = 1;
+    chosen = &SNDDRV_state.fCC8[(signed char)SNDDRV_state.fCC1];
+    SNDDRV_state.fCC4 = sndgs.audiotick;
+    SNDDRV_copyToIop(chosen->f04, SNDDRV_state.fE88[0].f04, chosen->f0C, inInterrupt);
+    SNDDRV_state.fCC2 = 1;
     D_00515780_4450.b0 = 0x30;
     D_00515780_4450.f10 = 1;
     D_00515780_4450.f14 = chosen->key;
-    D_00515780_4450.f18 = D_0050AD00.fE88[0].f04;
+    D_00515780_4450.f18 = SNDDRV_state.fE88[0].f04;
     D_00515780_4450.f1C = chosen->f08;
     D_00515780_4450.h20 = chosen->f0C;
     D_00515780_4450.h22 = chosen->f0E;
@@ -13570,12 +13570,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_kickTransfers);
 
 #define MFC0_STATUS_2B45(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
 
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern void SNDDRV_startNextTransfer(int);
 
@@ -13596,7 +13596,7 @@ void SNDDRV_kickTransfers(int inInterrupt) {
             MFC0_STATUS_2B45(s);
         } while (s & 0x10000);
     }
-    if (D_0050AD00.fCC2 == 0 && (signed char)D_0050AD00.fCC0 > 0) {
+    if (SNDDRV_state.fCC2 == 0 && (signed char)SNDDRV_state.fCC0 > 0) {
         SNDDRV_startNextTransfer(inInterrupt);
     }
     if (inInterrupt == 0) {
@@ -13618,19 +13618,19 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_queueTransfer);
 
 #define MFC0_STATUS_2B45(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
 
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern void SNDDRV_kickTransfers_4668(int) __asm__("SNDDRV_kickTransfers");
 extern void SNDDRV_copyToIop_4668(int, int, int, int) __asm__("SNDDRV_copyToIop");
 /**
  * Queues one transfer to sound memory and returns its id.
  *
- * Rounds the size up to 64 bytes and, with interrupts disabled, takes the next transfer id (+0xCBC of D_0050AD00, never
+ * Rounds the size up to 64 bytes and, with interrupts disabled, takes the next transfer id (+0xCBC of SNDDRV_state, never
  * 0). Play location 0x100 copies straight to IOP memory (SNDDRV_copyToIop) and returns. Otherwise the first free slot of
  * +0xCC8 gets {id, source, destination, size, priority}, the queue count +0xCC0 grows and SNDDRV_kickTransfers starts it if
  * idle. Called by SNDDRV_queueUpload.
@@ -13653,27 +13653,27 @@ int SNDDRV_queueTransfer(int op, int srcAddr, int dstAddr, int size, int priorit
         SYNCP_2B45();
         MFC0_STATUS_2B45(s);
     } while (s & 0x10000);
-    D_0050AD00.fCBC++;
-    if (D_0050AD00.fCBC == 0) {
-        D_0050AD00.fCBC = 1;
+    SNDDRV_state.fCBC++;
+    if (SNDDRV_state.fCBC == 0) {
+        SNDDRV_state.fCBC = 1;
     }
     if (op == 0x100) {
         SNDDRV_copyToIop_4668(srcAddr, dstAddr, size, 0);
         EI_2B45();
-        return D_0050AD00.fCBC;
+        return SNDDRV_state.fCBC;
     }
     for (i = 0; i < 28; i++) {
-        struct sAD00Xfer *slot = &D_0050AD00.fCC8[i];
+        struct sAD00Xfer *slot = &SNDDRV_state.fCC8[i];
         if (slot->key == 0) {
-            D_0050AD00.fCC0++;
-            slot->key = D_0050AD00.fCBC;
+            SNDDRV_state.fCC0++;
+            slot->key = SNDDRV_state.fCBC;
             slot->f04 = srcAddr;
             slot->f08 = dstAddr;
             slot->f0C = size;
             slot->f0E = priority;
             EI_2B45();
             SNDDRV_kickTransfers_4668(0);
-            return D_0050AD00.fCBC;
+            return SNDDRV_state.fCBC;
         }
     }
     EI_2B45();
@@ -13687,7 +13687,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_queueUpload);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDDRV_kickTransfers_4788(int) __asm__("SNDDRV_kickTransfers");
 extern int SNDDRV_queueTransfer_4788(int, int, int, int, int) __asm__("SNDDRV_queueTransfer");
-extern volatile unsigned char D_0050AD00_4788[] __asm__("D_0050AD00");
+extern volatile unsigned char SNDDRV_state_4788[] __asm__("SNDDRV_state");
 int SNDDRV_queueUpload_4788(int, int, int, int, int) __asm__("SNDDRV_queueUpload");
 
 /**
@@ -13710,10 +13710,10 @@ int SNDDRV_queueUpload_4788(int playLoc, int srcAddr, int dstAddr, int byteCount
     while (byteCount > 0) {
         chunkSize = 0x1000;
         if (!(byteCount > 0xFFF)) chunkSize = byteCount;
-        queuedCount = D_0050AD00_4788[0xCC0];
+        queuedCount = SNDDRV_state_4788[0xCC0];
         while (0x1C - (signed char)queuedCount < 5) {
             SNDDRV_kickTransfers_4788(0);
-            queuedCount = D_0050AD00_4788[0xCC0];
+            queuedCount = SNDDRV_state_4788[0xCC0];
         }
         transferId = SNDDRV_queueTransfer_4788(playLoc, srcAddr, dstAddr, chunkSize, priority);
         srcAddr += chunkSize;
@@ -13731,12 +13731,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_isTransferDone);
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 extern void SNDDRV_startNextTransfer(int);
 
@@ -13752,10 +13752,10 @@ int SNDDRV_isTransferDone_4898(int) __asm__("SNDDRV_isTransferDone");
  */
 int SNDDRV_isTransferDone_4898(int key) {
     int i;
-    if ((signed char)D_0050AD00.fCC0 <= 0) return 1;
+    if ((signed char)SNDDRV_state.fCC0 <= 0) return 1;
     for (i = 0; i < 28; i++) {
-        if (D_0050AD00.fCC8[i].key == key) {
-            if (D_0050AD00.fCC4 + 500 < sndgs.audiotick) {
+        if (SNDDRV_state.fCC8[i].key == key) {
+            if (SNDDRV_state.fCC4 + 500 < sndgs.audiotick) {
                 SNDDRV_startNextTransfer(0);
             }
             return 0;
@@ -13769,12 +13769,12 @@ int SNDDRV_isTransferDone_4898(int key) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_completeTransfer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDDRV_kickTransfers(int);
@@ -13782,7 +13782,7 @@ extern void SNDDRV_kickTransfers(int);
 /**
  * Completes a sound-memory transfer the IOP reports done and starts the next one.
  *
- * Frees the queue slot with that id, clears the running flag (+0xCC2 of D_0050AD00), drops the queue count and calls
+ * Frees the queue slot with that id, clears the running flag (+0xCC2 of SNDDRV_state), drops the queue count and calls
  * SNDDRV_kickTransfers in interrupt mode. Called from the SIF command handler SNDDRV_handleSifCommand (mode 2).
  *
  * @param key  the finished transfer's id
@@ -13790,10 +13790,10 @@ extern void SNDDRV_kickTransfers(int);
 void SNDDRV_completeTransfer(int key) {
     int i;
     for (i = 0; i < 28; i++) {
-        if (D_0050AD00.fCC8[i].key == key) {
-            D_0050AD00.fCC2 = 0;
-            D_0050AD00.fCC0--;
-            D_0050AD00.fCC8[i].key = 0;
+        if (SNDDRV_state.fCC8[i].key == key) {
+            SNDDRV_state.fCC2 = 0;
+            SNDDRV_state.fCC0--;
+            SNDDRV_state.fCC8[i].key = 0;
             SNDDRV_kickTransfers(1);
             return;
         }
@@ -13866,19 +13866,19 @@ void SNDDRV_dmaFromScratchpad(int sprAddr, int memAddr, int qwordCount, int flag
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_clipFreeGap);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_0050AD00_4AF8[] __asm__("D_0050AD00");
+extern char SNDDRV_state_4AF8[] __asm__("SNDDRV_state");
 
 /**
  * Clips a free sound-RAM gap to the usable range (in 64-byte units).
  *
- * Raises @p start to the low limit (+0x1A9A of D_0050AD00, shrinking the length to match) and cuts the length so the gap
+ * Raises @p start to the low limit (+0x1A9A of SNDDRV_state, shrinking the length to match) and cuts the length so the gap
  * ends by the high limit (+0x1A9C) and by the reverb work area (+0x1A9E). Used by SNDPLATFORM_memalloc and SNDPLATFORM_memlargestunused.
  *
  * @param start  in/out: the gap's start
  * @param length  in/out: the gap's length
  */
 void SNDDRV_clipFreeGap(int *start, int *length) {
-    char *soundState = D_0050AD00_4AF8;
+    char *soundState = SNDDRV_state_4AF8;
     int temp_4;
     int temp_6;
     int lo = *(unsigned short *)(soundState + 0x1A9A);
@@ -13915,7 +13915,7 @@ struct G_4B70 {
     char pad1A9E[2];
     struct Blk_4B70 *list;
 };
-extern struct G_4B70 D_0050AD00_4B70 __asm__("D_0050AD00");
+extern struct G_4B70 SNDDRV_state_4B70 __asm__("SNDDRV_state");
 extern unsigned short D_0050A910_4B70 __asm__("D_0050A910");
 extern void SNDDRV_clipFreeGap_4B70(int *start, int *len) __asm__("SNDDRV_clipFreeGap");
 extern int sceSifAllocIopHeap_4B70(int size) __asm__("sceSifAllocIopHeap");
@@ -13923,7 +13923,7 @@ extern int sceSifAllocIopHeap_4B70(int size) __asm__("sceSifAllocIopHeap");
  * Allocates sound memory for a play location and returns its address.
  *
  * Play location 0x100 takes @p size + 0x40 bytes of IOP heap (sceSifAllocIopHeap). Otherwise, while fewer than D_0050A910
- * segments are in use, it finds the first gap of the sorted segment table (+0x1AA0 of D_0050AD00, count +0x1A98)
+ * segments are in use, it finds the first gap of the sorted segment table (+0x1AA0 of SNDDRV_state, count +0x1A98)
  * between the low and high limits, clipped by SNDDRV_clipFreeGap, that holds the size in 64-byte units, inserts the segment
  * there and returns its byte address. Called by SNDbankadd.
  *
@@ -13933,8 +13933,8 @@ extern int sceSifAllocIopHeap_4B70(int size) __asm__("sceSifAllocIopHeap");
  */
 // FAKEMATCH: an empty `do {} while (0);` before the in-loop call (its loop notes act as a sched barrier: retail's unscheduled
 // join block, probably a disabled debug macro), a `do { ... } while (0)` around the insert block (doubles its refs of the
-// GCSE-hoisted %hi(D_0050AD00), so that pseudo outranks its loop copy: retail s5 / s6, ours swapped), and two fakematch.h
-// pins: `register int s FM_REG("$3")` (slot start in the loop) and `register struct G_4B70 *g FM_REG("$4") = &D_0050AD00_4B70;`
+// GCSE-hoisted %hi(SNDDRV_state), so that pseudo outranks its loop copy: retail s5 / s6, ours swapped), and two fakematch.h
+// pins: `register int s FM_REG("$3")` (slot start in the loop) and `register struct G_4B70 *g FM_REG("$4") = &SNDDRV_state_4B70;`
 // for the insert block's list access (retail a0, ours v1/a1); plain form 94.61%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int SNDPLATFORM_memalloc(int type, int size) {
@@ -13948,21 +13948,21 @@ int SNDPLATFORM_memalloc(int type, int size) {
 
     i = 0;
     if (type == 0x100) return sceSifAllocIopHeap_4B70(size + 0x40);
-    if (D_0050AD00_4B70.count >= D_0050A910_4B70) return 0;
+    if (SNDDRV_state_4B70.count >= D_0050A910_4B70) return 0;
     size += 0x3F;
     size >>= 6;
-    if (D_0050AD00_4B70.count == 0) {
-        start = D_0050AD00_4B70.base;
-        len = D_0050AD00_4B70.end - D_0050AD00_4B70.base;
+    if (SNDDRV_state_4B70.count == 0) {
+        start = SNDDRV_state_4B70.base;
+        len = SNDDRV_state_4B70.end - SNDDRV_state_4B70.base;
         SNDDRV_clipFreeGap_4B70(&start, &len);
         if (len < size) return 0;
     } else {
-        for (i = 0; i < D_0050AD00_4B70.count; i++) {
-            segment = &D_0050AD00_4B70.list[i];
+        for (i = 0; i < SNDDRV_state_4B70.count; i++) {
+            segment = &SNDDRV_state_4B70.list[i];
             if (i == 0) {
-                gapStart = D_0050AD00_4B70.base;
+                gapStart = SNDDRV_state_4B70.base;
             } else {
-                prevSegment = &D_0050AD00_4B70.list[i - 1];
+                prevSegment = &SNDDRV_state_4B70.list[i - 1];
                 gapStart = prevSegment->start;
                 gapStart += prevSegment->size;
             }
@@ -13971,24 +13971,24 @@ int SNDPLATFORM_memalloc(int type, int size) {
             do {} while (0);
             SNDDRV_clipFreeGap_4B70(&start, &len);
             if (len >= size) {
-                for (j = D_0050AD00_4B70.count; i < j; j--) D_0050AD00_4B70.list[j] = D_0050AD00_4B70.list[j - 1];
+                for (j = SNDDRV_state_4B70.count; i < j; j--) SNDDRV_state_4B70.list[j] = SNDDRV_state_4B70.list[j - 1];
                 goto insert;
             }
         }
-        prevSegment = &D_0050AD00_4B70.list[i - 1];
+        prevSegment = &SNDDRV_state_4B70.list[i - 1];
         start = prevSegment->start + prevSegment->size;
-        len = D_0050AD00_4B70.end - start;
+        len = SNDDRV_state_4B70.end - start;
         SNDDRV_clipFreeGap_4B70(&start, &len);
         if (len >= size) goto insert;
         return 0;
     }
 insert:
     do {
-        register struct G_4B70 *soundState FM_REG("$4") = &D_0050AD00_4B70;
+        register struct G_4B70 *soundState FM_REG("$4") = &SNDDRV_state_4B70;
         segment = &soundState->list[i];
         segment->start = start;
         segment->size = size;
-        D_0050AD00_4B70.count++;
+        SNDDRV_state_4B70.count++;
         return start << 6;
     } while (0);
 }
@@ -14001,14 +14001,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_memfree);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct K_4D78 { unsigned short key; unsigned short v; };
 struct G_4D78 { char pad[0x1A98]; unsigned short cnt; char pad2[6]; struct K_4D78 *list; };
-extern struct G_4D78 D_0050AD00_4D78 __asm__("D_0050AD00");
+extern struct G_4D78 SNDDRV_state_4D78 __asm__("SNDDRV_state");
 extern int func_0042AD08_4D78(unsigned int) __asm__("func_0042AD08");
 
 /**
  * Frees sound memory a play location's allocation took.
  *
  * Play location 0x100 frees the IOP heap block (func_0042AD08). Otherwise it removes the segment starting at that
- * address (in 64-byte units) from the sorted table +0x1AA0 of D_0050AD00, closing the gap. Called by SNDbankremove.
+ * address (in 64-byte units) from the sorted table +0x1AA0 of SNDDRV_state, closing the gap. Called by SNDbankremove.
  *
  * @param playLoc  the play location
  * @param address  the address SNDPLATFORM_memalloc returned
@@ -14018,12 +14018,12 @@ int SNDPLATFORM_memfree(int playLoc, unsigned int address) {
     int i;
     if (playLoc == 0x100) return func_0042AD08_4D78(address);
     address >>= 6;
-    for (i = 0; i < D_0050AD00_4D78.cnt; i++) {
-        struct K_4D78 *segment = &D_0050AD00_4D78.list[i];
+    for (i = 0; i < SNDDRV_state_4D78.cnt; i++) {
+        struct K_4D78 *segment = &SNDDRV_state_4D78.list[i];
         if (segment->key == address) {
-            D_0050AD00_4D78.cnt--;
-            for (; i < D_0050AD00_4D78.cnt; i++) {
-                D_0050AD00_4D78.list[i] = D_0050AD00_4D78.list[i + 1];
+            SNDDRV_state_4D78.cnt--;
+            for (; i < SNDDRV_state_4D78.cnt; i++) {
+                SNDDRV_state_4D78.list[i] = SNDDRV_state_4D78.list[i + 1];
             }
             return 0;
         }
@@ -14037,17 +14037,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_memlimits);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
+/* SNDDRV_state: the IOP sound side's state (RPC buffers, the shared voice block SNDDRV_buildIopCommandBuffer lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-/* 16 bytes, D_0050AD00.fE88[] */
+/* 16 bytes, SNDDRV_state.fE88[] */
 
-extern struct sAD00 D_0050AD00;
+extern struct sAD00 SNDDRV_state;
 
 /**
  * Sets the range of SPU RAM the allocator may use.
  *
- * Both limits are rounded up to 64-byte units: the start (+0x1A9A of D_0050AD00) must be at least 321 units (0x5040,
+ * Both limits are rounded up to 64-byte units: the start (+0x1A9A of SNDDRV_state) must be at least 321 units (0x5040,
  * past the reserved area), the end (+0x1A9C) at most 0x8000 units (2 MB); -1 selects those defaults. Called by
  * SNDSYS_setMemLimits.
  *
@@ -14057,18 +14057,18 @@ extern struct sAD00 D_0050AD00;
  */
 int SNDPLATFORM_memlimits(int startAddr, int endAddr) {
     if (startAddr == -1) {
-        D_0050AD00.f1A9A = 321;
+        SNDDRV_state.f1A9A = 321;
     } else {
         startAddr = (startAddr + 0x3F) >> 6;
         if (startAddr < 321) return -8;
-        D_0050AD00.f1A9A = startAddr;
+        SNDDRV_state.f1A9A = startAddr;
     }
     if (endAddr == -1) {
-        D_0050AD00.f1A9C = 0x8000;
+        SNDDRV_state.f1A9C = 0x8000;
     } else {
         endAddr = (endAddr + 0x3F) >> 6;
         if (endAddr > 0x8000) return -8;
-        D_0050AD00.f1A9C = endAddr;
+        SNDDRV_state.f1A9C = endAddr;
     }
     return 0;
 }
@@ -14080,12 +14080,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_memlargestunused);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_4EC8 { unsigned short a; unsigned short b; };
 struct G_4EC8 { char pad[0x1A98]; unsigned short n; unsigned short lo; unsigned short hi; unsigned short max; struct S_4EC8 *segs; };
-extern struct G_4EC8 D_0050AD00_4EC8 __asm__("D_0050AD00");
+extern struct G_4EC8 SNDDRV_state_4EC8 __asm__("SNDDRV_state");
 int f_4EC8(int *out) __asm__("SNDPLATFORM_memlargestunused");
 /**
  * Finds the largest free block of SPU RAM and returns its size.
  *
- * Checks every gap of the segment table (+0x1AA0 of D_0050AD00) clipped by SNDDRV_clipFreeGap: the whole low-to-high range
+ * Checks every gap of the segment table (+0x1AA0 of SNDDRV_state) clipped by SNDDRV_clipFreeGap: the whole low-to-high range
  * when nothing is allocated, else before, between and after the segments (up to +0x1A9E). Likely bug: the gap before
  * the first segment is measured from the segment's own start with the fixed 321 as low limit (len = start - 321), not
  * from +0x1A9A. Called by SNDSYS_getLargestUnusedMem.
@@ -14101,15 +14101,15 @@ int f_4EC8(int *out) {
     struct S_4EC8 *seg;
     struct S_4EC8 *prev;
 
-    if (D_0050AD00_4EC8.n == 0) {
-        start = D_0050AD00_4EC8.lo;
-        len = D_0050AD00_4EC8.hi - D_0050AD00_4EC8.lo;
+    if (SNDDRV_state_4EC8.n == 0) {
+        start = SNDDRV_state_4EC8.lo;
+        len = SNDDRV_state_4EC8.hi - SNDDRV_state_4EC8.lo;
         SNDDRV_clipFreeGap(&start, &len);
         best = len;
         *out = start;
     } else {
-        for (i = 0; i < D_0050AD00_4EC8.n; i++) {
-            seg = &D_0050AD00_4EC8.segs[i];
+        for (i = 0; i < SNDDRV_state_4EC8.n; i++) {
+            seg = &SNDDRV_state_4EC8.segs[i];
             if (i == 0) {
                 start = seg->a;
                 len = seg->a - 321;
@@ -14119,7 +14119,7 @@ int f_4EC8(int *out) {
                     *out = start;
                 }
             } else {
-                prev = &D_0050AD00_4EC8.segs[i - 1];
+                prev = &SNDDRV_state_4EC8.segs[i - 1];
                 start = prev->a + prev->b;
                 len = seg->a - start;
                 SNDDRV_clipFreeGap(&start, &len);
@@ -14129,9 +14129,9 @@ int f_4EC8(int *out) {
                 }
             }
         }
-        prev = &D_0050AD00_4EC8.segs[i - 1];
+        prev = &SNDDRV_state_4EC8.segs[i - 1];
         start = prev->a + prev->b;
-        len = D_0050AD00_4EC8.max - start;
+        len = SNDDRV_state_4EC8.max - start;
         SNDDRV_clipFreeGap(&start, &len);
         if (best < len) {
             best = len;
@@ -16747,7 +16747,7 @@ struct S_7AB0 {
     float f3C;
     struct Obj_7AB0 *obj;
 };
-extern char D_00515D80_7AB0[] __asm__("D_00515D80");
+extern char MIX_fxSendBuffer_7AB0[] __asm__("MIX_fxSendBuffer");
 extern void MIXI_interpolatemix_7AB0(struct Snd_7AB0 *snd, void *name, float from, float to) __asm__("MIXI_interpolatemix");
 
 /**
@@ -16777,10 +16777,10 @@ int SNDMIXI_volramp(struct S_7AB0 *mixVoice) {
     for (i = 0; i < 1; i++) {
         if (sndmix.unk_0F[i] != 0) {
             if (mixVoice->a[i] != mixVoice->b[i]) {
-                MIXI_interpolatemix_7AB0(((struct Snd_7AB0*)sndmix.ptempbuf[1]), D_00515D80_7AB0, mixVoice->a[i], mixVoice->b[i]);
+                MIXI_interpolatemix_7AB0(((struct Snd_7AB0*)sndmix.ptempbuf[1]), MIX_fxSendBuffer_7AB0, mixVoice->a[i], mixVoice->b[i]);
                 mixVoice->a[i] = mixVoice->b[i];
             } else if (mixVoice->b[i] != 0.0f) {
-                ((void (*)(int, struct Snd_7AB0*, void*, float))sndmix.mix)(0x10, ((struct Snd_7AB0*)sndmix.ptempbuf[1]), D_00515D80_7AB0, mixVoice->b[i]);
+                ((void (*)(int, struct Snd_7AB0*, void*, float))sndmix.mix)(0x10, ((struct Snd_7AB0*)sndmix.ptempbuf[1]), MIX_fxSendBuffer_7AB0, mixVoice->b[i]);
             }
         }
     }
@@ -17307,7 +17307,7 @@ struct G_85D0 {
     struct SNDMIXVOICE *tab;
     void (*set)(int a, float *snd, float *name, float v);
 };
-extern float D_00515D80_85D0[] __asm__("D_00515D80");
+extern float MIX_fxSendBuffer_85D0[] __asm__("MIX_fxSendBuffer");
 extern void f6210_85D0(void *, int, int) __asm__("memset");
 extern int f7AB0_85D0(struct SNDMIXVOICE *) __asm__("SNDMIXI_volramp");
 extern void f8430_85D0(int) __asm__("MIXI_stop");
@@ -17335,7 +17335,7 @@ void MIX_audioslice(int *outs, int n) {
 
     for (i = 0; i < 1; i++) {
         if (sndmix_85D0.on[i] != 0 && sndmix_85D0.g[i] != 0.0f) {
-            MIXI_interpolateto0(&sndmix_85D0.g[i], D_00515D80_85D0);
+            MIXI_interpolateto0(&sndmix_85D0.g[i], MIX_fxSendBuffer_85D0);
         }
     }
     for (i = 0; i < sndmix_85D0.n; i++) {
@@ -17368,8 +17368,8 @@ void MIX_audioslice(int *outs, int n) {
                     }
                     for (i = 0; i < 1; i++) {
                         if (sndmix_85D0.on[i] != 0 && voiceState->wetbusgain[i] != 0.0f) {
-                            sndmix_85D0.set(framesMixed, sndmix_85D0.snd, D_00515D80_85D0 + k, voiceState->wetbusgain[i]);
-                            *(int *)((char *)D_00515D80_85D0 + 0x1800) = 0;
+                            sndmix_85D0.set(framesMixed, sndmix_85D0.snd, MIX_fxSendBuffer_85D0 + k, voiceState->wetbusgain[i]);
+                            *(int *)((char *)MIX_fxSendBuffer_85D0 + 0x1800) = 0;
                         }
                     }
                 }
@@ -20069,15 +20069,15 @@ void MIX_setFxSendOutput(int sendOutput) {
 INCLUDE_ASM("ealib/seg_2B4578", MIX_getFxSendBuffer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00515D80_BC10[4] __asm__("D_00515D80");
+extern int MIX_fxSendBuffer_BC10[4] __asm__("MIX_fxSendBuffer");
 
 /**
- * Returns the mixer's effect send buffer (D_00515D80). No callers.
+ * Returns the mixer's effect send buffer (MIX_fxSendBuffer). No callers.
  *
  * @return the buffer
  */
 int *MIX_getFxSendBuffer(void) {
-    return D_00515D80_BC10;
+    return MIX_fxSendBuffer_BC10;
 }
 #endif
 
@@ -20085,11 +20085,11 @@ int *MIX_getFxSendBuffer(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDMIXI_getFxOutputSlot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char D_0044E770_BC20[][6][6] __asm__("D_0044E770");
+extern unsigned char SNDMIXI_fxOutputSlotTable_BC20[][6][6] __asm__("SNDMIXI_fxOutputSlotTable");
 
 /**
  * Looks up which effect output feeds a speaker: entry [effect layout - 1][mixer outputs - 1][code - 1] of the 6 x 6 x 6
- * table D_0044E770.
+ * table SNDMIXI_fxOutputSlotTable.
  *
  * Called by SNDMIXI_buildFxGraph when it wires an effect's output nodes.
  *
@@ -20099,7 +20099,7 @@ extern unsigned char D_0044E770_BC20[][6][6] __asm__("D_0044E770");
  * @return the output slot
  */
 unsigned char SNDMIXI_getFxOutputSlot(int effectChannels, int mixerChannels, int channelCode) {
-    return D_0044E770_BC20[effectChannels - 1][mixerChannels - 1][channelCode - 1];
+    return SNDMIXI_fxOutputSlotTable_BC20[effectChannels - 1][mixerChannels - 1][channelCode - 1];
 }
 #endif
 
@@ -20109,7 +20109,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIXI_runFx);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Q_BC58 { int x; int arr[1]; };
 struct Obj_BC58 { int (*fn)(struct Obj_BC58 *, int, int, int, int); };
-extern char D_00515D80_BC58[] __asm__("D_00515D80");
+extern char MIX_fxSendBuffer_BC58[] __asm__("MIX_fxSendBuffer");
 extern int D_00515D40_BC58 __asm__("D_00515D40");
 extern int *D_00515D44_BC58 __asm__("D_00515D44");
 extern struct Obj_BC58 **D_00515D48_BC58 __asm__("D_00515D48");
@@ -20142,11 +20142,11 @@ void SNDMIXI_runFx(int n) {
 
     f_6210_BC58(done, 0, 0x18);
     if ((sndmix.wetbusactive) != 0) {
-        f_51E8_BC58(((int)sndmix.wetbusactive), D_00515D80_BC58, n * 4);
-        f_6210_BC58(D_00515D80_BC58, 0, n * 4);
+        f_51E8_BC58(((int)sndmix.wetbusactive), MIX_fxSendBuffer_BC58, n * 4);
+        f_6210_BC58(MIX_fxSendBuffer_BC58, 0, n * 4);
         return;
     }
-    buf = D_00515D80_BC58;
+    buf = MIX_fxSendBuffer_BC58;
     scratchBuffer = ((int)sndmix.ptempbuf[0]);
     wetBuffer = ((int)sndmix.ptempbuf[1]);
     if (++*(int *)(buf + 0x1800) >= 3000) {
@@ -20171,7 +20171,7 @@ void SNDMIXI_runFx(int n) {
             }
         }
     }
-    f_6210_BC58(D_00515D80_BC58, 0, n * 4);
+    f_6210_BC58(MIX_fxSendBuffer_BC58, 0, n * 4);
 }
 #endif
 
@@ -20196,7 +20196,7 @@ extern void **D_00515D48;
 extern unsigned char *D_00515D4C;
 extern unsigned char *D_00515D50;
 extern int D_00515D58;
-extern int D_00515D80_C070[] __asm__("D_00515D80");
+extern int MIX_fxSendBuffer_C070[] __asm__("MIX_fxSendBuffer");
 extern struct Hdr_C070 D_005175C0_C070 __asm__("D_005175C0");
 extern unsigned char *D_005175F8;
 extern unsigned char *D_005175FC;
@@ -20334,8 +20334,8 @@ void SNDMIXI_buildFxGraph(int rate) {
         SFILTER_connect((SFILTERNODE*)D_00515D44[f_72F8_C070(link, 4)], (SFILTERNODE*)D_00515D44[f_72F8_C070(link + 4, 4)], link[8], link[9]);
         link += 12;
     }
-    D_00515D80_C070[0x1800 / 4] = 3000;
-    memset_C070(D_00515D80_C070, 0, 0x800);
+    MIX_fxSendBuffer_C070[0x1800 / 4] = 3000;
+    memset_C070(MIX_fxSendBuffer_C070, 0, 0x800);
     nodeRecord = D_00515D4C;
     D_00517600 = 0;
     while (*nodeRecord != 0) {
@@ -20454,12 +20454,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMIXI_sendFxToIop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-struct s5D80 {                      /* D_00515D80: the effect send buffer */
+struct s5D80 {                      /* MIX_fxSendBuffer: the effect send buffer */
     float f0000[0x600];
     int f1800;
 };
 
-extern struct s5D80 D_00515D80;
+extern struct s5D80 MIX_fxSendBuffer;
 
 /**
  * Delivers the effect send to the IOP instead of running it here (an output hook installed by SNDDRV_setupIopEffect).
@@ -20514,7 +20514,7 @@ void SNDMIXI_sendFxToIop(int n) {
             "bne $4, $5, 1b\n\t"
             "sqc2 $vf5, -0x10($6)\n\t"
             ".set pop\n"
-            : : "r"(n), "r"(D_00515D80.f0000), "r"(dst)
+            : : "r"(n), "r"(MIX_fxSendBuffer.f0000), "r"(dst)
             : "$4", "$5", "$6", "$8", "memory");
     }
 }
@@ -23655,14 +23655,14 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_computeVoiceState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int PATHI_getVoiceSegment_0CC8(char *, int *) __asm__("PATHI_getVoiceSegment");
-extern int D_0044F438_0CC8[] __asm__("D_0044F438");
-extern char *D_0044F420_0CC8[] __asm__("D_0044F420");
+extern int PATHI_tick_0CC8[] __asm__("PATHI_tick");
+extern char *PATHI_selectedPlayer_0CC8[] __asm__("PATHI_selectedPlayer");
 int PATHI_computeVoiceState_0CC8(char *arg0) __asm__("PATHI_computeVoiceState");
 
 /**
  * Works out and stores a path voice's play state (+0x100): 2 idle, 3 waiting, 4 due, 7 playing, 5 near the end.
  *
- * A voice with a pending start tick (+0x4C) is 4 once the path tick D_0044F438 has reached it and 3 before. Otherwise a
+ * A voice with a pending start tick (+0x4C) is 4 once the path tick PATHI_tick has reached it and 3 before. Otherwise a
  * voice with a current node (+0x36 >= 0) is 7, or 5 when PATHI_getVoiceSegment fills its timing and the voice's position
  * (+0x24) plus the selected player's +0xC has reached the node's end (field 6 of that result). Everything else is 2.
  *
@@ -23680,7 +23680,7 @@ int PATHI_computeVoiceState_0CC8(char *pathVoice) {
         startTick = *(unsigned int *)(pathVoice + 0x4C);
         *(int *)(pathVoice + 0x100) = 2;
         if (startTick != 0) {
-            if ((unsigned int)D_0044F438_0CC8[0] >= startTick) {
+            if ((unsigned int)PATHI_tick_0CC8[0] >= startTick) {
                 *(int *)(pathVoice + 0x100) = 4;
             } else {
                 *(int *)(pathVoice + 0x100) = 3;
@@ -23690,7 +23690,7 @@ int PATHI_computeVoiceState_0CC8(char *pathVoice) {
         if (*(short *)(pathVoice + 0x36) >= 0) {
             *(int *)(pathVoice + 0x100) = 7;
             if (PATHI_getVoiceSegment_0CC8(pathVoice, buf) >= 0
-                && (unsigned int)(*(int *)(pathVoice + 0x24) + *(int *)(D_0044F420_0CC8[0] + 0xC)) >= (unsigned int)buf[6]) {
+                && (unsigned int)(*(int *)(pathVoice + 0x24) + *(int *)(PATHI_selectedPlayer_0CC8[0] + 0xC)) >= (unsigned int)buf[6]) {
                 *(int *)(pathVoice + 0x100) = 5;
             }
         }
@@ -23710,9 +23710,9 @@ struct E_0D70 { char b0; unsigned char b1; unsigned char b2; };
 struct G_0D70 { char pad[0x58]; struct E_0D70 *list[24]; };
 struct T_0D70 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_0D70 __asm__("D_0044F42C");
-extern int D_0044F430_0D70 __asm__("D_0044F430");
-extern struct G_0D70 *D_0044F420_0D70 __asm__("D_0044F420");
-extern struct T_0D70 D_00517610_0D70[] __asm__("D_00517610");
+extern int PATHI_selectedId_0D70 __asm__("PATHI_selectedId");
+extern struct G_0D70 *PATHI_selectedPlayer_0D70 __asm__("PATHI_selectedPlayer");
+extern struct T_0D70 PATHI_players_0D70[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_0D70(int) __asm__("PATHI_selectPlayer");
 
 static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a & b; }
@@ -23721,10 +23721,10 @@ static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a &
  * Sets a value on every voice of the path players a mask selects, keeping the previous one: +0x1 = @p val, old +0x1 to
  * +0x2.
  *
- * Returns -18 unless the path system is up (D_0044F42C) and idle (D_0044F430 clear, PATHI_selectPlayer(-1) non-zero). Only
- * values below 0x80 are applied; each of the 4 players (D_00517610) that is in use (+0x34) and shares a class bit
+ * Returns -18 unless the path system is up (D_0044F42C) and idle (PATHI_selectedId clear, PATHI_selectPlayer(-1) non-zero). Only
+ * values below 0x80 are applied; each of the 4 players (PATHI_players) that is in use (+0x34) and shares a class bit
  * (0xF0000000) and a group bit (0x0F000000) with @p mask is selected with PATHI_selectPlayer and all 24 of its voices
- * (+0x58) are updated, whatever the low mask bits say. Clears the selection (D_0044F430, D_0044F420) at the end.
+ * (+0x58) are updated, whatever the low mask bits say. Clears the selection (PATHI_selectedId, PATHI_selectedPlayer) at the end.
  * cSongInstance_SetVolume calls it for 0x11000001, passing its own second argument through.
  *
  * @param mask  the path id mask (class, group and voice bits)
@@ -23733,19 +23733,19 @@ static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a &
  */
 int PATH_setVolume(unsigned int mask, unsigned int val) {
     int i, j;
-    if (D_0044F42C_0D70 == 0 || D_0044F430_0D70 != 0 || PATHI_selectPlayer_0D70(-1) == 0) {
+    if (D_0044F42C_0D70 == 0 || PATHI_selectedId_0D70 != 0 || PATHI_selectPlayer_0D70(-1) == 0) {
         return -18;
     }
     if (val < 0x80) {
         for (i = 0; i < 4; i++) {
             unsigned int playerMask;
-            if (D_00517610_0D70[i].pathData == 0) continue;
-            playerMask = D_00517610_0D70[i].pathId;
+            if (PATHI_players_0D70[i].pathData == 0) continue;
+            playerMask = PATHI_players_0D70[i].pathId;
             if (has_0D70(playerMask & 0xF0000000, mask) == 0) continue;
             if (has_0D70(playerMask & 0x0F000000, mask) == 0) continue;
             if (PATHI_selectPlayer_0D70(i & 0xFF) == 0) continue;
             for (j = 0; j < 24; j++) {
-                struct E_0D70 *pathVoice = D_0044F420_0D70->list[j];
+                struct E_0D70 *pathVoice = PATHI_selectedPlayer_0D70->list[j];
                 if (pathVoice != 0) {
                     unsigned char oldValue = pathVoice->b1;
                     pathVoice->b1 = val;
@@ -23754,8 +23754,8 @@ int PATH_setVolume(unsigned int mask, unsigned int val) {
             }
         }
     }
-    D_0044F430_0D70 = 0;
-    D_0044F420_0D70 = 0;
+    PATHI_selectedId_0D70 = 0;
+    PATHI_selectedPlayer_0D70 = 0;
     return 0;
 }
 #endif
@@ -23769,9 +23769,9 @@ struct A_0ED0 { int v[4]; };
 struct B_0ED0 { unsigned int f0; char pad4[4]; char b8; char b9; char padA[2]; short hC; char bE; char padF; };
 struct T_0ED0 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_0ED0 __asm__("D_0044F42C");
-extern int D_0044F430_0ED0 __asm__("D_0044F430");
-extern void *D_0044F420_0ED0 __asm__("D_0044F420");
-extern struct T_0ED0 D_00517610_0ED0[] __asm__("D_00517610");
+extern int PATHI_selectedId_0ED0 __asm__("PATHI_selectedId");
+extern void *PATHI_selectedPlayer_0ED0 __asm__("PATHI_selectedPlayer");
+extern struct T_0ED0 PATHI_players_0ED0[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_0ED0(int) __asm__("PATHI_selectPlayer");
 extern void memset_0ED0(void *, int, int) __asm__("memset");
 extern void PATHI_appendItem_0ED0(struct A_0ED0 *, struct B_0ED0 *) __asm__("PATHI_appendItem");
@@ -23783,7 +23783,7 @@ static inline unsigned int has_0ED0(unsigned int a, unsigned int b) { return a &
 /**
  * Queues a type-4 item for the path players a mask selects: builds a one-item event and posts a copy to each.
  *
- * Returns -18 unless the path system is up and idle (D_0044F42C, D_0044F430, PATHI_selectPlayer(-1)). The item gets
+ * Returns -18 unless the path system is up and idle (D_0044F42C, PATHI_selectedId, PATHI_selectPlayer(-1)). The item gets
  * @p mask at +0x0, type 4 (+0x9), -1 at +0x8 and +0xE and @p val at +0xC; PATHI_appendItem appends it to a cleared 16-byte
  * event header. For each player in use whose class and group bits overlap @p mask, PATHI_selectPlayer selects it,
  * PATHI_copyevent copies the event into the player's buffer and PATHI_queueEvent schedules the copy. Clears the selection
@@ -23797,7 +23797,7 @@ int PATH_postPauseEvent(unsigned int mask, int val) {
     struct B_0ED0 item;
     struct A_0ED0 eventHeader;
     unsigned int i;
-    if (D_0044F42C_0ED0 == 0 || D_0044F430_0ED0 != 0 || PATHI_selectPlayer_0ED0(-1) == 0) {
+    if (D_0044F42C_0ED0 == 0 || PATHI_selectedId_0ED0 != 0 || PATHI_selectPlayer_0ED0(-1) == 0) {
         return -18;
     }
     memset_0ED0(&eventHeader, 0, 16);
@@ -23810,15 +23810,15 @@ int PATH_postPauseEvent(unsigned int mask, int val) {
     PATHI_appendItem_0ED0(&eventHeader, &item);
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_0ED0[i].pathData == 0) continue;
-        playerMask = D_00517610_0ED0[i].pathId;
+        if (PATHI_players_0ED0[i].pathData == 0) continue;
+        playerMask = PATHI_players_0ED0[i].pathId;
         if (has_0ED0(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_0ED0(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_0ED0(i & 0xFF) == 0) continue;
         PATHI_queueEvent_0ED0(mask, func_003D2068_0ED0(&eventHeader));
     }
-    D_0044F430_0ED0 = 0;
-    D_0044F420_0ED0 = 0;
+    PATHI_selectedId_0ED0 = 0;
+    PATHI_selectedPlayer_0ED0 = 0;
     return 0;
 }
 #endif
@@ -23833,9 +23833,9 @@ struct G_1038 { char pad[0x58]; struct E_1038 *list[24]; };
 struct T_1038 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_1038 __asm__("D_0044F42C");
 extern unsigned char D_0044F42D_1038 __asm__("D_0044F42D");
-extern int D_0044F430_1038 __asm__("D_0044F430");
-extern struct G_1038 *D_0044F420_1038 __asm__("D_0044F420");
-extern struct T_1038 D_00517610_1038[] __asm__("D_00517610");
+extern int PATHI_selectedId_1038 __asm__("PATHI_selectedId");
+extern struct G_1038 *PATHI_selectedPlayer_1038 __asm__("PATHI_selectedPlayer");
+extern struct T_1038 PATHI_players_1038[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_1038(int) __asm__("PATHI_selectPlayer");
 extern void pathxSND_setPaused_1038(int, int) __asm__("pathxSND_setPaused");
 
@@ -23855,26 +23855,26 @@ static inline unsigned int has_1038(unsigned int a, unsigned int b) { return a &
 void PATH_setPaused(unsigned int mask, unsigned char val) {
     int i, j;
     if (D_0044F42C_1038 == 0) return;
-    if (D_0044F430_1038 != 0) return;
+    if (PATHI_selectedId_1038 != 0) return;
     if (PATHI_selectPlayer_1038(-1) == 0) return;
     if (mask == 0xFFFFFFFF) D_0044F42D_1038 = val;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_1038[i].pathData == 0) continue;
-        playerMask = D_00517610_1038[i].pathId;
+        if (PATHI_players_1038[i].pathData == 0) continue;
+        playerMask = PATHI_players_1038[i].pathId;
         if (has_1038(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_1038(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_1038(i & 0xFF) == 0) continue;
         for (j = 0; j < 24; j++) {
-            struct E_1038 *pathVoice = D_0044F420_1038->list[j];
+            struct E_1038 *pathVoice = PATHI_selectedPlayer_1038->list[j];
             if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
                 pathxSND_setPaused_1038(pathVoice->f54, val);
                 pathVoice->b3 = val;
             }
         }
     }
-    D_0044F430_1038 = 0;
-    D_0044F420_1038 = 0;
+    PATHI_selectedId_1038 = 0;
+    PATHI_selectedPlayer_1038 = 0;
 }
 #endif
 
@@ -23922,9 +23922,9 @@ struct G_11B8 {
     short *a;
 };
 extern unsigned char D_0044F42C_11B8 __asm__("D_0044F42C");
-extern int D_0044F430_11B8 __asm__("D_0044F430");
-extern int D_0044F43C_11B8 __asm__("D_0044F43C");
-extern struct G_11B8 *D_0044F420_11B8 __asm__("D_0044F420");
+extern int PATHI_selectedId_11B8 __asm__("PATHI_selectedId");
+extern int PATHI_debugFlags_11B8 __asm__("PATHI_debugFlags");
+extern struct G_11B8 *PATHI_selectedPlayer_11B8 __asm__("PATHI_selectedPlayer");
 extern char D_00495B10_11B8[] __asm__("D_00495B10");
 extern int f_5450_11B8(int) __asm__("PATHI_selectPlayer");
 extern struct S_11B8 *f_5290_11B8(unsigned int) __asm__("PATHI_findVoice");
@@ -23943,7 +23943,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) __asm__("PATH_stat
  * +0x20 bits 14-18 entries) for the node (+0x0) and part (+0x8); the node's format word gives a channel divisor (bits
  * 20-23) and multiplier (bits 24-27) for the per-channel totals (+0x10, +0x14) and the remainders of the length (+0x1C,
  * +0x20). When the request is not in the table it prints "( %.8s ) PATH_status - currentrequest %d not found"
- * (PATHI_debugPrintf, if D_0044F43C has 0x100) with the voice's name.
+ * (PATHI_debugPrintf, if PATHI_debugFlags has 0x100) with the voice's name.
  *
  * @param id  the path id
  * @param info  the status block to fill
@@ -23962,7 +23962,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) {
     int len;
 
     ret = -8;
-    if (D_0044F42C_11B8 == 0 || D_0044F430_11B8 != 0 || f_5450_11B8(-1) == 0) {
+    if (D_0044F42C_11B8 == 0 || PATHI_selectedId_11B8 != 0 || f_5450_11B8(-1) == 0) {
         return -18;
     }
     info->a = -1;
@@ -23988,7 +23988,7 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) {
             info->f24 = pathVoice->f36;
             for (i = 0; i < pathVoice->n; i++) {
                 if (pathVoice->tbl[i].key == ret) {
-                    pathPlayer = D_0044F420_11B8;
+                    pathPlayer = PATHI_selectedPlayer_11B8;
                     info->a = pathVoice->tbl[i].a;
                     total = info->total;
                     info->c = pathVoice->tbl[i].c;
@@ -24015,14 +24015,14 @@ int PATH_status_impl(unsigned int id, struct Info_11B8 *info) {
                     goto done;
                 }
             }
-            if (D_0044F43C_11B8 & 0x100) {
+            if (PATHI_debugFlags_11B8 & 0x100) {
                 f_1658_11B8(D_00495B10_11B8, pathVoice->name, ret);
             }
         }
     }
 done:
-    D_0044F430_11B8 = 0;
-    D_0044F420_11B8 = 0;
+    PATHI_selectedId_11B8 = 0;
+    PATHI_selectedPlayer_11B8 = 0;
     return ret;
 }
 #endif
@@ -24035,10 +24035,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_stopVoices);
 struct E_1470 { char pad[0x36]; short h36; char pad2[0x1C]; int f54; };
 struct G_1470 { char pad[0x58]; struct E_1470 *list[24]; };
 extern unsigned char D_0044F42C_1470 __asm__("D_0044F42C");
-extern int D_0044F430_1470 __asm__("D_0044F430");
-extern struct G_1470 *D_0044F420_1470 __asm__("D_0044F420");
+extern int PATHI_selectedId_1470 __asm__("PATHI_selectedId");
+extern struct G_1470 *PATHI_selectedPlayer_1470 __asm__("PATHI_selectedPlayer");
 struct T_1470 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern struct T_1470 D_00517610_1470[] __asm__("D_00517610");
+extern struct T_1470 PATHI_players_1470[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_1470(int) __asm__("PATHI_selectPlayer");
 extern void pathxSND_stop_1470(int) __asm__("pathxSND_stop");
 
@@ -24049,32 +24049,32 @@ static inline unsigned int has_1470(unsigned int a, unsigned int b) { return a &
  * -1.
  *
  * Does nothing unless the path system is up and idle. Players are matched by class and group bits only; all 24 voices
- * of each are stopped. Clears the selection (D_0044F420, D_0044F430) at the end.
+ * of each are stopped. Clears the selection (PATHI_selectedPlayer, PATHI_selectedId) at the end.
  *
  * @param mask  the path id mask
  */
 void PATH_stopVoices(unsigned int mask) {
     int i, j;
     if (D_0044F42C_1470 == 0) return;
-    if (D_0044F430_1470 != 0) return;
+    if (PATHI_selectedId_1470 != 0) return;
     if (PATHI_selectPlayer_1470(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_1470[i].pathData == 0) continue;
-        playerMask = D_00517610_1470[i].pathId;
+        if (PATHI_players_1470[i].pathData == 0) continue;
+        playerMask = PATHI_players_1470[i].pathId;
         if (has_1470(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_1470(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_1470(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            struct E_1470 *pathVoice = D_0044F420_1470->list[j];
+            struct E_1470 *pathVoice = PATHI_selectedPlayer_1470->list[j];
             if (pathVoice != 0) {
                 pathxSND_stop_1470(pathVoice->f54);
                 pathVoice->h36 = -1;
             }
         }
     }
-    D_0044F420_1470 = 0;
-    D_0044F430_1470 = 0;
+    PATHI_selectedPlayer_1470 = 0;
+    PATHI_selectedId_1470 = 0;
 }
 #endif
 
@@ -24105,17 +24105,17 @@ int PATH_setVoicePosition(int mask, int value) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_fatalError);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned int D_0044F430_1608[] __asm__("D_0044F430");
+extern unsigned int PATHI_selectedId_1608[] __asm__("PATHI_selectedId");
 extern void exit_1608(int, ...) __asm__("exit") __attribute__((noreturn));
 
 /**
- * Fatal-error handler of the path library: sets D_0044F430 to -1 (busy, so every entry point refuses) and calls
+ * Fatal-error handler of the path library: sets PATHI_selectedId to -1 (busy, so every entry point refuses) and calls
  * exit(0), which exits. The printf-style arguments are ignored.
  *
  * @param format  the format string (ignored)
  */
 void PATHI_fatalError(int format, ...) {
-    D_0044F430_1608[0] = 0xFFFFFFFF;
+    PATHI_selectedId_1608[0] = 0xFFFFFFFF;
     exit_1608(0);
 }
 #endif
@@ -24126,7 +24126,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_debugPrintf);
 /**
  * Does nothing: the path library's debug print, compiled out (the format and arguments are ignored).
  *
- * Called with messages such as "PATHI_copyevent : can't add new event..." when D_0044F43C enables them.
+ * Called with messages such as "PATHI_copyevent : can't add new event..." when PATHI_debugFlags enables them.
  *
  * @param fmt  the printf format (ignored)
  */
@@ -24156,17 +24156,17 @@ void func_003D16C8(void) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_getDebugFlags);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044F43C_16D0[4] __asm__("D_0044F43C");
+extern int PATHI_debugFlags_16D0[4] __asm__("PATHI_debugFlags");
 
 int PATHI_getDebugFlags_16D0(void) __asm__("PATHI_getDebugFlags");
 /**
- * Returns the path library's debug-message flags (D_0044F43C; 0x100 after PATH_init, 0x120 enables the
+ * Returns the path library's debug-message flags (PATHI_debugFlags; 0x100 after PATH_init, 0x120 enables the
  * PATHI_copyevent message).
  *
  * @return the flags
  */
 int PATHI_getDebugFlags_16D0(void) {
-    return D_0044F43C_16D0[0];
+    return PATHI_debugFlags_16D0[0];
 }
 #endif
 
@@ -24204,9 +24204,9 @@ struct T_16F0 {
     char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920];
 };
 extern unsigned char D_0044F42C_16F0 __asm__("D_0044F42C");
-extern int D_0044F430_16F0 __asm__("D_0044F430");
-extern struct G_16F0 *D_0044F420_16F0 __asm__("D_0044F420");
-extern struct T_16F0 D_00517610_16F0[] __asm__("D_00517610");
+extern int PATHI_selectedId_16F0 __asm__("PATHI_selectedId");
+extern struct G_16F0 *PATHI_selectedPlayer_16F0 __asm__("PATHI_selectedPlayer");
+extern struct T_16F0 PATHI_players_16F0[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_16F0(int) __asm__("PATHI_selectPlayer");
 extern struct H_16F0 *func_003D2068_16F0(struct E_16F0 *) __asm__("PATHI_copyevent");
 extern int pathxSND_getTimeMs_16F0(void) __asm__("pathxSND_getTimeMs");
@@ -24233,7 +24233,7 @@ int PATH_postEvent(unsigned int mask, short prog) {
     int result = 0;
     unsigned int bit;
     unsigned int i;
-    if (D_0044F42C_16F0 == 0 || D_0044F430_16F0 != 0 || PATHI_selectPlayer_16F0(-1) == 0) {
+    if (D_0044F42C_16F0 == 0 || PATHI_selectedId_16F0 != 0 || PATHI_selectPlayer_16F0(-1) == 0) {
         return -18;
     }
     bit = 0x1000000 << ((prog & 0xF00) >> 8);
@@ -24245,38 +24245,38 @@ int PATH_postEvent(unsigned int mask, short prog) {
         struct H_16F0 *pending;
         unsigned int top;
         int k, err;
-        if (D_00517610_16F0[i].pathData == 0) continue;
-        playerMask = D_00517610_16F0[i].pathId;
+        if (PATHI_players_16F0[i].pathData == 0) continue;
+        playerMask = PATHI_players_16F0[i].pathId;
         if (has_16F0(playerMask, bit) == 0) continue;
         if (has_16F0(playerMask & 0x0F000000, mask) == 0) continue;
         if (has_16F0(playerMask & 0xF0000000, mask) == 0) continue;
         if (PATHI_selectPlayer_16F0(i & 0xFF) == 0) continue;
-        hdr = D_0044F420_16F0->hdr;
+        hdr = PATHI_selectedPlayer_16F0->hdr;
         if (prog >= hdr->bF) { result = -13; break; }
-        event = (struct E_16F0 *)((char *)hdr + D_0044F420_16F0->idx[prog] * 4);
+        event = (struct E_16F0 *)((char *)hdr + PATHI_selectedPlayer_16F0->idx[prog] * 4);
         if (event->wC & 0x20000000) continue;
         err = -8;
         event = (struct E_16F0 *)func_003D2068_16F0(event);
-        top = D_00517610_16F0[i].pathId;
+        top = PATHI_players_16F0[i].pathId;
         top &= 0xFF000000;
         for (k = 0; k < 4; k++) {
             int n;
-            if (D_00517610_16F0[k].pathData == 0) continue;
-            if ((D_00517610_16F0[k].pathId & top) != top) continue;
-            n = D_00517610_16F0[k].n;
+            if (PATHI_players_16F0[k].pathData == 0) continue;
+            if ((PATHI_players_16F0[k].pathId & top) != top) continue;
+            n = PATHI_players_16F0[k].n;
             if (n >= 16) { result = -13; goto next; }
             err = 0;
             pending = (struct H_16F0 *)event;
             pending->f0 = pending->f8 = pathxSND_getTimeMs_16F0();
-            D_00517610_16F0[k].list[n] = pending;
+            PATHI_players_16F0[k].list[n] = pending;
             n++;
-            D_00517610_16F0[k].n = n;
+            PATHI_players_16F0[k].n = n;
         }
         result = err;
     next:;
     }
-    D_0044F430_16F0 = 0;
-    D_0044F420_16F0 = 0;
+    PATHI_selectedId_16F0 = 0;
+    PATHI_selectedPlayer_16F0 = 0;
     return result;
 }
 #endif
@@ -24287,10 +24287,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_cancelEvents);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void PATHI_removeEvent_1940(int, int) __asm__("PATHI_removeEvent");
 extern int PATHI_selectPlayer_1940(int) __asm__("PATHI_selectPlayer");
-extern int D_0044F420_1940[] __asm__("D_0044F420");
+extern int PATHI_selectedPlayer_1940[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F42C_1940[] __asm__("D_0044F42C");
-extern int D_0044F430_1940[] __asm__("D_0044F430");
-extern char D_00517610_1940[] __asm__("D_00517610");
+extern int PATHI_selectedId_1940[] __asm__("PATHI_selectedId");
+extern char PATHI_players_1940[] __asm__("PATHI_players");
 
 struct P_1940 { char pad[0xDC]; int a[16]; };
 
@@ -24307,16 +24307,16 @@ void PATH_cancelEvents(unsigned int mask) {
     int i, j;
     unsigned int fl, classBits, groupBits;
     if (D_0044F42C_1940[0] != 0) {
-        if (D_0044F430_1940[0] == 0) {
+        if (PATHI_selectedId_1940[0] == 0) {
             if (PATHI_selectPlayer_1940(-1) != 0) {
                 for (i = 0; i < 4; i++) {
-                    if (*(int *)(D_00517610_1940 + 0x34 + i * 0x928) != 0) {
-                        fl = *(unsigned int *)(D_00517610_1940 + 0x30 + i * 0x928);
+                    if (*(int *)(PATHI_players_1940 + 0x34 + i * 0x928) != 0) {
+                        fl = *(unsigned int *)(PATHI_players_1940 + 0x30 + i * 0x928);
                         classBits = fl & 0xF0000000;
                         if ((classBits & mask) != 0 && (groupBits = fl & 0x0F000000, (groupBits & mask) != 0)) {
                             if (PATHI_selectPlayer_1940(i & 0xFF) != 0) {
                                 for (j = 0; j < 0x10; j++) {
-                                    if (((struct P_1940 *)D_0044F420_1940[0])->a[j] != 0) {
+                                    if (((struct P_1940 *)PATHI_selectedPlayer_1940[0])->a[j] != 0) {
                                         PATHI_removeEvent_1940(j, 2);
                                     }
                                 }
@@ -24324,8 +24324,8 @@ void PATH_cancelEvents(unsigned int mask) {
                         }
                     }
                 }
-                D_0044F420_1940[0] = 0;
-                D_0044F430_1940[0] = 0;
+                PATHI_selectedPlayer_1940[0] = 0;
+                PATHI_selectedId_1940[0] = 0;
             }
         }
     }
@@ -24340,9 +24340,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_countPendingEvents);
 struct E_1A88 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 struct G_1A88 { char pad[0xDC]; void *arr[16]; };
 extern unsigned char D_0044F42C_1A88 __asm__("D_0044F42C");
-extern int D_0044F430_1A88 __asm__("D_0044F430");
-extern struct G_1A88 *D_0044F420_1A88 __asm__("D_0044F420");
-extern struct E_1A88 D_00517610_1A88[] __asm__("D_00517610");
+extern int PATHI_selectedId_1A88 __asm__("PATHI_selectedId");
+extern struct G_1A88 *PATHI_selectedPlayer_1A88 __asm__("PATHI_selectedPlayer");
+extern struct E_1A88 PATHI_players_1A88[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_1A88(int) __asm__("PATHI_selectPlayer");
 
 /**
@@ -24357,22 +24357,22 @@ extern int PATHI_selectPlayer_1A88(int) __asm__("PATHI_selectPlayer");
 int PATH_countPendingEvents(unsigned int mask) {
     int cnt = 0;
     int i, j;
-    if (D_0044F42C_1A88 == 0 || D_0044F430_1A88 != 0 || PATHI_selectPlayer_1A88(-1) == 0) {
+    if (D_0044F42C_1A88 == 0 || PATHI_selectedId_1A88 != 0 || PATHI_selectPlayer_1A88(-1) == 0) {
         return -18;
     }
     mask &= 0x0F000000;
     for (i = 0; i < 4; i++) {
-        if (D_00517610_1A88[i].pathData == 0) continue;
-        if ((D_00517610_1A88[i].pathId & mask) == 0) continue;
+        if (PATHI_players_1A88[i].pathData == 0) continue;
+        if ((PATHI_players_1A88[i].pathId & mask) == 0) continue;
         if (PATHI_selectPlayer_1A88(i & 0xFF)) {
             for (j = 0; j < 16; j++) {
-                if (D_0044F420_1A88->arr[j]) cnt++;
+                if (PATHI_selectedPlayer_1A88->arr[j]) cnt++;
             }
             break;
         }
     }
-    D_0044F430_1A88 = 0;
-    D_0044F420_1A88 = 0;
+    PATHI_selectedId_1A88 = 0;
+    PATHI_selectedPlayer_1A88 = 0;
     return cnt;
 }
 #endif
@@ -24386,12 +24386,12 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_removeEvent);
 // slot pointers) or hands it to the release hook, then shifts the slot list down.
 struct H_1BA8 { short h0; short h2; short h4; short h6; short h8; short hA; short hC; unsigned short hE; };
 struct G_1BA8 { char pad[0xDC]; struct H_1BA8 *slots[17]; char data[0x91C - 0x120]; int n91C; };
-extern struct G_1BA8 *D_0044F420_1BA8 __asm__("D_0044F420");
+extern struct G_1BA8 *PATHI_selectedPlayer_1BA8 __asm__("PATHI_selectedPlayer");
 extern void (*D_0044F428_1BA8)(struct H_1BA8 *, int) __asm__("D_0044F428");
 extern void func_0041605C_1BA8(void *, void *, int) __asm__("func_0041605C");
 
 /**
- * Removes pending event @p idx from the selected path player (D_0044F420), freeing its storage.
+ * Removes pending event @p idx from the selected path player (PATHI_selectedPlayer), freeing its storage.
  *
  * An event stored in the player's own event buffer (+0x11C..+0x91C) is removed by moving the rest of the buffer down
  * over it (func_0041605C) and adjusting the other 17 slot pointers that lay above it; any other event goes to the
@@ -24402,28 +24402,28 @@ extern void func_0041605C_1BA8(void *, void *, int) __asm__("func_0041605C");
  * @param mode  why it ends, passed to the release hook (1 timed out, 2 cancelled, 3 finished)
  */
 void PATHI_removeEvent(int idx, int mode) {
-    struct H_1BA8 *event = D_0044F420_1BA8->slots[idx];
+    struct H_1BA8 *event = PATHI_selectedPlayer_1BA8->slots[idx];
     int size = (event->hE & 0x3F) * 16 + 16;
     struct H_1BA8 save;
     char *end;
     struct G_1BA8 *pathPlayer;
     unsigned int i;
     save = *event; /* dead copy, kept: retail copies the header to the stack */
-    end = (char *)D_0044F420_1BA8 + 0x91C;
-    if ((char *)event >= (char *)D_0044F420_1BA8 + 0x11C && (char *)event < end) {
+    end = (char *)PATHI_selectedPlayer_1BA8 + 0x91C;
+    if ((char *)event >= (char *)PATHI_selectedPlayer_1BA8 + 0x11C && (char *)event < end) {
         func_0041605C_1BA8(event, (char *)event + size, end - (char *)event);
         for (i = 0; i < 17; i++) {
-            struct H_1BA8 *slotEvent = D_0044F420_1BA8->slots[i];
+            struct H_1BA8 *slotEvent = PATHI_selectedPlayer_1BA8->slots[i];
             if (slotEvent > event && (char *)slotEvent < end)
-                D_0044F420_1BA8->slots[i] = (struct H_1BA8 *)((char *)slotEvent - size);
+                PATHI_selectedPlayer_1BA8->slots[i] = (struct H_1BA8 *)((char *)slotEvent - size);
         }
     } else if (D_0044F428_1BA8) {
         D_0044F428_1BA8(event, mode);
     }
-    pathPlayer = D_0044F420_1BA8;
+    pathPlayer = PATHI_selectedPlayer_1BA8;
     pathPlayer->slots[idx] = 0;
     for (idx++; idx < 16; idx++) pathPlayer->slots[idx - 1] = pathPlayer->slots[idx];
-    D_0044F420_1BA8->n91C--;
+    PATHI_selectedPlayer_1BA8->n91C--;
 }
 #endif
 
@@ -24439,15 +24439,15 @@ struct E_1D28 {
     struct P_1D28 p[1];
 };
 struct G_1D28 { char pad[0xDC]; struct E_1D28 *arr[16]; };
-extern struct G_1D28 *D_0044F420_1D28 __asm__("D_0044F420");
-extern unsigned int D_0044F438_1D28 __asm__("D_0044F438");
+extern struct G_1D28 *PATHI_selectedPlayer_1D28 __asm__("PATHI_selectedPlayer");
+extern unsigned int PATHI_tick_1D28 __asm__("PATHI_tick");
 extern int func_003CFC30_1D28(struct E_1D28 *, struct P_1D28 *) __asm__("func_003CFC30");
 
 /**
  * Runs the due items of pending event @p n of the selected path player; returns how many it got through.
  *
  * From the event's current item (+0xC bits 22-27) to its item count (bits 16-21): an item time (+0x4) earlier than the
- * event's start (+0x0) is made absolute by adding the path tick D_0044F438, and an item whose time has passed is
+ * event's start (+0x0) is made absolute by adding the path tick PATHI_tick, and an item whose time has passed is
  * flagged skipped (0x4000000 in +0x8). Items not skipped are executed by func_003CFC30; the first that returns 0 (not
  * ready yet) stops the walk. Each item passed advances the current index and stamps the event's +0x8 with the tick.
  *
@@ -24455,7 +24455,7 @@ extern int func_003CFC30_1D28(struct E_1D28 *, struct P_1D28 *) __asm__("func_00
  * @return the number of items executed or skipped
  */
 int PATHI_runEventItems(int n) {
-    struct E_1D28 *event = D_0044F420_1D28->arr[n];
+    struct E_1D28 *event = PATHI_selectedPlayer_1D28->arr[n];
     unsigned int i = event->idx;
     int ret = 0;
     struct P_1D28 *item;
@@ -24463,15 +24463,15 @@ int PATHI_runEventItems(int n) {
         do {
             item = &event->p[i];
             if (item->f4 != 0) {
-                if (item->f4 < event->f0) item->f4 += D_0044F438_1D28;
-                if (item->f4 < D_0044F438_1D28) item->f8 |= 0x4000000;
+                if (item->f4 < event->f0) item->f4 += PATHI_tick_1D28;
+                if (item->f4 < PATHI_tick_1D28) item->f8 |= 0x4000000;
             }
             if (!(item->f8 & 0x4000000)) {
                 if (!func_003CFC30_1D28(event, item)) break;
             }
             ret++;
             i++;
-            event->f8 = D_0044F438_1D28;
+            event->f8 = PATHI_tick_1D28;
             event->idx++;
         } while (i < event->cnt);
     }
@@ -24484,7 +24484,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_serviceEvents);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
 struct sPathVoice {                 /* 0x110, sPath.f58[] */
     char pad00;
@@ -24555,7 +24555,7 @@ struct sPath {                      /* 0x928 */
     char pad2C[0x30 - 0x2C];
     unsigned int pathId;            /* (name ours) the player's id, class and group bits: PATHI_selectPlayerById finds the
                                        player whose pathId equals an id, the others test it against a mask; the
-                                       per-function views of D_00517610 below use the same two names */
+                                       per-function views of PATHI_players below use the same two names */
     unsigned int *pathData;         /* (name ours) the loaded path data (32-bit words); nonzero = player in use */
     short *f38;                     /* word offsets of its nodes */
     short *f3C;
@@ -24575,9 +24575,9 @@ struct sPath {                      /* 0x928 */
     int *f924;
 };
 
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern unsigned int D_0044F438;         /* tick */
+extern unsigned int PATHI_tick;         /* tick */
 
 extern void f_1BA8_1E80(int, int) __asm__("PATHI_removeEvent");
 extern int f_1D28_1E80(int) __asm__("PATHI_runEventItems");
@@ -24587,7 +24587,7 @@ int PATHI_serviceEvents_impl(void) __asm__("PATHI_serviceEvents");
  * Services the selected path player's pending events: drops finished and timed-out ones and runs the rest.
  *
  * Slots at or past the count (+0x91C) are cleared. An event whose current item reached its item count is removed with
- * mode 3 (PATHI_removeEvent), one with a timeout (+0x4) whose start (+0x0) plus timeout is before the tick D_0044F438 with
+ * mode 3 (PATHI_removeEvent), one with a timeout (+0x4) whose start (+0x0) plus timeout is before the tick PATHI_tick with
  * mode 1, and the loop steps back to re-check the slot; others run through PATHI_runEventItems.
  *
  * @return the total number of items processed
@@ -24599,16 +24599,16 @@ int PATHI_serviceEvents_impl(void) {
     int st;
     unsigned int itemCounts;
     for (i = 0; i < 16; i++) {
-        if (i >= D_0044F420->f91C) {
-            D_0044F420->f0DC[i] = 0;
+        if (i >= PATHI_selectedPlayer->f91C) {
+            PATHI_selectedPlayer->f0DC[i] = 0;
             continue;
         }
-        event = D_0044F420->f0DC[i];
+        event = PATHI_selectedPlayer->f0DC[i];
         if (event == 0) break;
         itemCounts = event->f0C.w;
         st = ((itemCounts >> 22) & 0x3F) < ((itemCounts >> 16) & 0x3F) ? 0 : 3;
         if (event->f04 != 0) {
-            if (event->f00 + event->f04 < D_0044F438) st = 1;
+            if (event->f00 + event->f04 < PATHI_tick) st = 1;
         }
         if (st != 0) {
             f_1BA8_1E80(i, st);
@@ -24627,7 +24627,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_queueEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_1F80 { char pad[0x30]; unsigned int m_a; int m_b; char pad2[0xDC - 0x38]; char *ptrs[16]; char pad3[0x91C - 0x11C]; int count; char pad4[0x928 - 0x920]; };
 extern int f2AF370_1F80(void) __asm__("pathxSND_getTimeMs");
-extern struct P_1F80 D_7610_1F80[4] __asm__("D_00517610");
+extern struct P_1F80 D_7610_1F80[4] __asm__("PATHI_players");
 
 /**
  * Queues an already copied path event on every player in use whose class and group bits include @p mask's top byte.
@@ -24665,8 +24665,8 @@ int PATHI_queueEvent(unsigned int mask, char *entry) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_copyevent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044F420_2068[] __asm__("D_0044F420");
-extern int D_0044F43C_2068[] __asm__("D_0044F43C");
+extern int PATHI_selectedPlayer_2068[] __asm__("PATHI_selectedPlayer");
+extern int PATHI_debugFlags_2068[] __asm__("PATHI_debugFlags");
 extern char str_PATHI_copyevent_can_t_add_new_event_size_2068[] __asm__("str_PATHI_copyevent_can_t_add_new_event_size");
 extern void func_0041605C_2068(unsigned int, void *, int) __asm__("func_0041605C");
 
@@ -24687,9 +24687,9 @@ unsigned int PATHI_copyevent(void *event) {
     unsigned int cur;
     unsigned int i;
 
-    temp_6 = D_0044F420_2068[0] + 2332;
-    cur = D_0044F420_2068[0] + 284;
-    eventSlot = (unsigned int*)(D_0044F420_2068[0] + 0xDC);
+    temp_6 = PATHI_selectedPlayer_2068[0] + 2332;
+    cur = PATHI_selectedPlayer_2068[0] + 284;
+    eventSlot = (unsigned int*)(PATHI_selectedPlayer_2068[0] + 0xDC);
     temp_9 = (((*(unsigned short*)((char*)event + 0xE)) & 0x3F) * 0x10) + 0x10;
     for (i = 0; i < 0x10; i++, eventSlot++) {
         temp_3 = *eventSlot;
@@ -24704,7 +24704,7 @@ unsigned int PATHI_copyevent(void *event) {
         func_0041605C_2068(cur, event, temp_9);
         return cur;
     }
-    if (D_0044F43C_2068[0] & 0x120) {
+    if (PATHI_debugFlags_2068[0] & 0x120) {
         PATHI_debugPrintf(str_PATHI_copyevent_can_t_add_new_event_size_2068, temp_9, temp_6 - cur);
     }
     return 0;
@@ -24717,7 +24717,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_isPendingItemSkipped);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct I2138 { int w0; int w4; unsigned int w8; int wC; };
 struct E2138 { char pad[0xC]; unsigned char b; char padd; unsigned short h; struct I2138 items[1]; };
-extern struct E2138 **D_0044F420_2138[] __asm__("D_0044F420");
+extern struct E2138 **PATHI_selectedPlayer_2138[] __asm__("PATHI_selectedPlayer");
 
 /**
  * Returns the skip bit of the first item of a given type in the selected player's pending events of the same number.
@@ -24735,7 +24735,7 @@ int PATHI_isPendingItemSkipped(char *event, int itemType) {
     struct E2138 *pending;
     struct I2138 *it;
     for (i = 0; i < 16; i++) {
-        pending = *(struct E2138 **)((char *)D_0044F420_2138[0] + 0xDC + i * 4);
+        pending = *(struct E2138 **)((char *)PATHI_selectedPlayer_2138[0] + 0xDC + i * 4);
         if (pending != 0 && pending->b == *(unsigned char *)(event + 0xC)) {
             for (j = 0; j < (pending->h & 0x3F); j++) {
                 it = &pending->items[j];
@@ -24753,7 +24753,7 @@ int PATHI_isPendingItemSkipped(char *event, int itemType) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_setEventDisabled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_0044F420_f420[] __asm__("D_0044F420");
+extern char *PATHI_selectedPlayer_f420[] __asm__("PATHI_selectedPlayer");
 
 /**
  * Enables or disables an event definition in the selected player's path data: sets bit 29 (0x20000000) of its +0xC to
@@ -24766,7 +24766,7 @@ extern char *D_0044F420_f420[] __asm__("D_0044F420");
  * @param disable  1 to disable, 0 to enable
  */
 void PATHI_setEventDisabled(char *event, int disable) {
-    char *pathPlayer = D_0044F420_f420[0];
+    char *pathPlayer = PATHI_selectedPlayer_f420[0];
     char *eventDef = *(char **)(pathPlayer + 0x34) + (*(short *)(*(char **)(pathPlayer + 0x40) + *(unsigned char *)(event + 0xC) * 2) * 4);
     if (eventDef != 0) {
         *(unsigned *)(eventDef + 0xC) = (*(unsigned *)(eventDef + 0xC) & 0xDFFFFFFF) | ((disable & 1) << 29);
@@ -24778,9 +24778,9 @@ void PATHI_setEventDisabled(char *event, int disable) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_enableAllEvents);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
 struct E_2218 { int w0; int w4; int w8; unsigned int wC; };
 
@@ -24790,8 +24790,8 @@ struct E_2218 { int w0; int w4; int w8; unsigned int wC; };
  */
 void PATHI_enableAllEvents(void) {
     int i;
-    for (i = 0; i < ((unsigned char *)D_0044F420->pathData)[0xF]; i++) {
-        struct E_2218 *eventDef = (struct E_2218 *)(D_0044F420->pathData + D_0044F420->f40[i]);
+    for (i = 0; i < ((unsigned char *)PATHI_selectedPlayer->pathData)[0xF]; i++) {
+        struct E_2218 *eventDef = (struct E_2218 *)(PATHI_selectedPlayer->pathData + PATHI_selectedPlayer->f40[i]);
         if (eventDef != 0) {
             eventDef->wC &= 0xDFFFFFFF;
         }
@@ -24803,43 +24803,43 @@ void PATHI_enableAllEvents(void) {
 INCLUDE_ASM("ealib/seg_2B4578", PATH_init);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern struct sPath D_00517610[4];
+extern struct sPath PATHI_players[4];
 
 extern unsigned char D_0044F42C;
 
 extern unsigned char D_0044F42D;
 
-extern unsigned int D_0044F430;
+extern unsigned int PATHI_selectedId;
 
-extern int D_0044F43C;                  /* flags */
+extern int PATHI_debugFlags;                  /* flags */
 
 
 /**
  * Initialises the path library: clears the 4 players and marks the system ready.
  *
- * Returns -18 while a selection is active (D_0044F430). Each player (D_00517610, 0x928 bytes) gets its in-use flag
+ * Returns -18 while a selection is active (PATHI_selectedId). Each player (PATHI_players, 0x928 bytes) gets its in-use flag
  * (+0x34), +0x924 and its 24 voice pointers (+0x58) cleared; then D_0044F42C = 1 (initialised), the debug flags
- * D_0044F43C = 0x100, the selection D_0044F420 and the global pause D_0044F42D are reset.
+ * PATHI_debugFlags = 0x100, the selection PATHI_selectedPlayer and the global pause D_0044F42D are reset.
  *
  * @return 0, or -18
  */
 int PATH_init(void) {
     int i, j;
-    if (D_0044F430 != 0) return -18;
+    if (PATHI_selectedId != 0) return -18;
     for (i = 0; i < 4; i++) {
-        D_00517610[i].pathData = 0;
-        D_00517610[i].f924 = 0;
+        PATHI_players[i].pathData = 0;
+        PATHI_players[i].f924 = 0;
         for (j = 0; j < 24; j++) {
-            D_00517610[i].f58[j] = 0;
+            PATHI_players[i].f58[j] = 0;
         }
     }
     D_0044F42C = 1;
-    D_0044F43C = 0x100;
-    D_0044F420 = 0;
+    PATHI_debugFlags = 0x100;
+    PATHI_selectedPlayer = 0;
     D_0044F42D = 0;
     return 0;
 }
@@ -24854,15 +24854,15 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_closeVoice);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern struct sPath D_00517610[4];
+extern struct sPath PATHI_players[4];
 
 extern unsigned char D_0044F42C;
 
-extern unsigned int D_0044F430;
+extern unsigned int PATHI_selectedId;
 
 extern int f5450_2A68(int) __asm__("PATHI_selectPlayer");
 extern int PATHI_countVoices(unsigned int mask);
@@ -24880,7 +24880,7 @@ struct sPathVoice *PATH_closeVoice_impl(unsigned int mask) __asm__("PATH_closeVo
  * releases the voice's sound (+0x54). When that player has no voices left (PATHI_countVoices) its in-use flag (+0x34) and
  * +0xB8 are cleared and PATHI_sortPlayers re-sorts the players; when no group has voices any more and a voice was closed,
  * pathxSND_shutdown stops the bank monitor's service and D_0044F42C is cleared. Likely bug: when nothing matches, the
- * "player empty" step still runs on the stale selection D_0044F420 (the loop index is 4, so PATHI_countVoices finds no
+ * "player empty" step still runs on the stale selection PATHI_selectedPlayer (the loop index is 4, so PATHI_countVoices finds no
  * voices). The music monitor closes 0x11000001 and 0x11000002 on destruction.
  *
  * @param mask  the path id mask
@@ -24892,21 +24892,21 @@ struct sPathVoice *PATH_closeVoice_impl(unsigned int mask) {
     unsigned int fl, classBits, groupBits;
     int st;
     if (D_0044F42C == 0) return 0;
-    if (D_0044F430 != 0) return 0;
+    if (PATHI_selectedId != 0) return 0;
     if (f5450_2A68(-1) == 0) return 0;
     for (i = 0; i < 4; i++) {
-        if (D_00517610[i].pathData != 0) {
-            fl = D_00517610[i].pathId;
+        if (PATHI_players[i].pathData != 0) {
+            fl = PATHI_players[i].pathId;
             classBits = fl & 0xF0000000;
             if ((classBits & mask) != 0) {
                 groupBits = fl & 0x0F000000;
                 if ((groupBits & mask) != 0 && f5450_2A68(i & 0xFF) != 0) {
                     for (j = 0; j < 24; j++) {
                         int handle;
-                        pathVoice = D_0044F420->f58[j];
+                        pathVoice = PATHI_selectedPlayer->f58[j];
                         if (pathVoice == 0 || isOff_2A68(mask, j)) continue;
                         handle = pathVoice->f54;
-                        D_0044F420->f58[j] = 0;
+                        PATHI_selectedPlayer->f58[j] = 0;
                         fAE690_2A68(handle);
                         goto done;
                     }
@@ -24916,8 +24916,8 @@ struct sPathVoice *PATH_closeVoice_impl(unsigned int mask) {
     }
 done:
     if (PATHI_countVoices(0x1000000 << i) == 0) {
-        D_0044F420->pathData = 0;
-        D_0044F420->fB8 = 0;
+        PATHI_selectedPlayer->pathData = 0;
+        PATHI_selectedPlayer->fB8 = 0;
         PATHI_sortPlayers();
     }
     st = PATHI_countVoices(0x0F000000);
@@ -24925,8 +24925,8 @@ done:
         fAE100_2A68();
         D_0044F42C = 0;
     }
-    D_0044F430 = 0;
-    D_0044F420 = 0;
+    PATHI_selectedId = 0;
+    PATHI_selectedPlayer = 0;
     return pathVoice;
 }
 #endif
@@ -24941,9 +24941,9 @@ extern int PATHI_selectPlayerById_2C20(int) __asm__("PATHI_selectPlayerById");
 extern double func_00413AF8_2C20(float) __asm__("fptodp");
 extern double func_00411F18_2C20(double, double) __asm__("dpadd");
 extern int func_004126A0_2C20(double) __asm__("dptoul");
-extern char *D_0044F420_2C20[] __asm__("D_0044F420");
+extern char *PATHI_selectedPlayer_2C20[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F42C_2C20[] __asm__("D_0044F42C");
-extern int D_0044F430_2C20[] __asm__("D_0044F430");
+extern int PATHI_selectedId_2C20[] __asm__("PATHI_selectedId");
 
 static inline int bitclear_2C20(int x) {
     return !(x & 1);
@@ -24956,7 +24956,7 @@ static inline int bitclear_2C20(int x) {
  * (else 0). The voice is the lowest set bit of @p pathId's low 24 bits; past the data's voice count (byte +0xD of the path
  * data +0x34) it returns 0. For each entry pair of the voice's table (player +0x4C) the ratio is ((e[2] - e[0]) << 7) /
  * e[1]. Likely bug: the largest ratio is tracked but the last one is scaled; also both early returns of 0 leave the
- * busy flag D_0044F430 set, so later calls get -18.
+ * busy flag PATHI_selectedId set, so later calls get -18.
  *
  * @param pathId  the path id
  * @param multiplier  the multiplier
@@ -24973,7 +24973,7 @@ int PATH_getScaledSegmentRatio(int pathId, int multiplier) {
 
     ratio = 0.0f;
     max = 0.0f;
-    if (D_0044F42C_2C20[0] == 0 || D_0044F430_2C20[0] != 0 || PATHI_selectPlayer_2C20(-1) == 0) {
+    if (D_0044F42C_2C20[0] == 0 || PATHI_selectedId_2C20[0] != 0 || PATHI_selectPlayer_2C20(-1) == 0) {
         return -18;
     }
     if (PATHI_selectPlayerById_2C20(pathId & 0xFF000000) == 0) {
@@ -24983,7 +24983,7 @@ int PATH_getScaledSegmentRatio(int pathId, int multiplier) {
     while (i < 24 && bitclear_2C20((long)pathId >> i)) {
         i++;
     }
-    pathPlayer = D_0044F420_2C20[0];
+    pathPlayer = PATHI_selectedPlayer_2C20[0];
     base = *(int **)(pathPlayer + 0x34);
     if (*((unsigned char *)base + 0xD) < i) {
         return 0;
@@ -24996,8 +24996,8 @@ int PATH_getScaledSegmentRatio(int pathId, int multiplier) {
         }
     }
     rounded = func_004126A0_2C20(func_00411F18_2C20(func_00413AF8_2C20(ratio * multiplier), 0.5));
-    D_0044F430_2C20[0] = 0;
-    D_0044F420_2C20[0] = 0;
+    PATHI_selectedId_2C20[0] = 0;
+    PATHI_selectedPlayer_2C20[0] = 0;
     return rounded;
 }
 #endif
@@ -25015,9 +25015,9 @@ extern struct R_2DF8 *PATHI_getRequestTable_2DF8(int) __asm__("PATHI_getRequestT
 extern int PATH_releaseRequest_2DF8(int, int) __asm__("PATH_releaseRequest");
 extern int pathxSND_evictOldestBank_2DF8(int) __asm__("pathxSND_evictOldestBank");
 extern int pathxSND_addBank_2DF8(int, char *, int, int) __asm__("pathxSND_addBank");
-extern int D_0044F420_2DF8[] __asm__("D_0044F420");
+extern int PATHI_selectedPlayer_2DF8[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F42C_2DF8[] __asm__("D_0044F42C");
-extern int D_0044F430_2DF8[] __asm__("D_0044F430");
+extern int PATHI_selectedId_2DF8[] __asm__("PATHI_selectedId");
 
 /**
  * Requests part @p idx on a path voice, first evicting a buffered part when the voice's limits would be exceeded.
@@ -25027,7 +25027,7 @@ extern int D_0044F430_2DF8[] __asm__("D_0044F430");
  * the voice's totals (+0x104, +0x108) plus the part's sizes against the limits: policy 1 releases the entry with the
  * smallest first word (PATH_releaseRequest) unless that is @p idx itself (then it returns 0), policy 0 lets pathxSND_evictOldestBank
  * free the oldest. Then pathxSND_addBank records the request on the voice's sound (+0x54) with +0x5C, @p idx and
- * @p userHandle. Likely bug: the early return for a self-eviction leaves the busy flag D_0044F430 set.
+ * @p userHandle. Likely bug: the early return for a self-eviction leaves the busy flag PATHI_selectedId set.
  *
  * @param pathId  the path id
  * @param idx  the part to request
@@ -25041,7 +25041,7 @@ int PATH_requestPart(int pathId, int idx, int userHandle) {
     struct E_2DF8 *reqEntry;
 
     if (D_0044F42C_2DF8[0] != 0) {
-        if (D_0044F430_2DF8[0] != 0) {
+        if (PATHI_selectedId_2DF8[0] != 0) {
             return -18;
         }
         if (PATHI_selectPlayer_2DF8(-1) != 0) {
@@ -25079,8 +25079,8 @@ ok:
         }
         ret = pathxSND_addBank_2DF8(pathVoice->f54, pathVoice->f5C, idx, userHandle);
     }
-    D_0044F430_2DF8[0] = 0;
-    D_0044F420_2DF8[0] = 0;
+    PATHI_selectedId_2DF8[0] = 0;
+    PATHI_selectedPlayer_2DF8[0] = 0;
     return ret;
 }
 #endif
@@ -25102,7 +25102,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
 extern void PATHI_getDebugFlags();
 
 /**
- * Calls PATHI_getDebugFlags (which reads the debug flags D_0044F43C) and discards the value.
+ * Calls PATHI_getDebugFlags (which reads the debug flags PATHI_debugFlags) and discards the value.
  */
 void func_003D2FC0(void) {
     PATHI_getDebugFlags();
@@ -25114,10 +25114,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_shutdown);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044F42C_2FE0 __asm__("D_0044F42C");
-extern int D_0044F430_2FE0 __asm__("D_0044F430");
+extern int PATHI_selectedId_2FE0 __asm__("PATHI_selectedId");
 int PATH_closeVoice(int);
 /**
- * Shuts the path system down: PATH_closeVoice(-1), then clears the initialised (D_0044F42C) and busy (D_0044F430) flags.
+ * Shuts the path system down: PATH_closeVoice(-1), then clears the initialised (D_0044F42C) and busy (PATHI_selectedId) flags.
  * Quirk: PATH_closeVoice closes only the first voice it finds.
  *
  * @return 0
@@ -25125,7 +25125,7 @@ int PATH_closeVoice(int);
 int PATH_shutdown(void) {
     PATH_closeVoice(-1);
     D_0044F42C_2FE0 = 0;
-    D_0044F430_2FE0 = 0;
+    PATHI_selectedId_2FE0 = 0;
     return 0;
 }
 #endif
@@ -25209,9 +25209,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setPreload);
 extern void pathxSND_setPreload_30A8(int, int, int) __asm__("pathxSND_setPreload");
 extern void *PATHI_findVoice_30A8(int) __asm__("PATHI_findVoice");
 extern int PATHI_selectPlayer_30A8(int) __asm__("PATHI_selectPlayer");
-extern int D_0044F420_30A8[] __asm__("D_0044F420");
+extern int PATHI_selectedPlayer_30A8[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F42C_30A8[] __asm__("D_0044F42C");
-extern int D_0044F430_30A8[] __asm__("D_0044F430");
+extern int PATHI_selectedId_30A8[] __asm__("PATHI_selectedId");
 
 /**
  * Gives a path voice's sound monitor a memory-resident copy of its data: pathxSND_setPreload(monitor index, @p memBuffer,
@@ -25229,15 +25229,15 @@ void PATH_setPreload(int pathId, int memBuffer, int memLimit) {
     int var_4;
     void *temp_2;
 
-    if ((D_0044F42C_30A8[0] != 0) && (D_0044F430_30A8[0] == 0) && (PATHI_selectPlayer_30A8(-1) != 0)) {
+    if ((D_0044F42C_30A8[0] != 0) && (PATHI_selectedId_30A8[0] == 0) && (PATHI_selectPlayer_30A8(-1) != 0)) {
         temp_2 = PATHI_findVoice_30A8(pathId);
         var_4 = -8;
         if (temp_2 != 0) {
             var_4 = (*(int *)((char*)(temp_2) + 0x54));
         }
         pathxSND_setPreload_30A8(var_4, memBuffer, memLimit);
-        D_0044F430_30A8[0] = 0;
-        D_0044F420_30A8[0] = 0;
+        PATHI_selectedId_30A8[0] = 0;
+        PATHI_selectedPlayer_30A8[0] = 0;
     }
 }
 #endif
@@ -25249,9 +25249,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_releaseRequest);
 extern int pathxSND_removeBank_3140(int, int) __asm__("pathxSND_removeBank");
 extern char *PATHI_findVoice_3140(int) __asm__("PATHI_findVoice");
 extern int PATHI_selectPlayer_3140(int) __asm__("PATHI_selectPlayer");
-extern int D_0044F420_3140[] __asm__("D_0044F420");
+extern int PATHI_selectedPlayer_3140[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F42C_3140[] __asm__("D_0044F42C");
-extern int D_0044F430_3140[] __asm__("D_0044F430");
+extern int PATHI_selectedId_3140[] __asm__("PATHI_selectedId");
 int PATH_releaseRequest_3140(int arg0, int arg1) __asm__("PATH_releaseRequest");
 
 /**
@@ -25268,7 +25268,7 @@ int PATH_releaseRequest_3140(int pathId, int requestIndex) {
     char *pathVoice;
     result = 0;
     if (D_0044F42C_3140[0] != 0) {
-        if (D_0044F430_3140[0] != 0) {
+        if (PATHI_selectedId_3140[0] != 0) {
             return -18;
         }
         if (PATHI_selectPlayer_3140(-1) != 0) {
@@ -25281,8 +25281,8 @@ ok:
     if (pathVoice != 0) {
         result = pathxSND_removeBank_3140(*(int *)(pathVoice + 0x54), requestIndex);
     }
-    D_0044F430_3140[0] = 0;
-    D_0044F420_3140[0] = 0;
+    PATHI_selectedId_3140[0] = 0;
+    PATHI_selectedPlayer_3140[0] = 0;
     return result;
 }
 #endif
@@ -25294,10 +25294,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setLookAhead);
 struct S_31E8 {
     char p0[0xC]; int f0c; int f10; char p1[0x1C]; unsigned int pathId; int pathData; char p2[0x928 - 0x38];
 };
-extern struct S_31E8 D_00517610_31E8[] __asm__("D_00517610");
+extern struct S_31E8 PATHI_players_31E8[] __asm__("PATHI_players");
 extern unsigned char D_0044F42C_31E8[] __asm__("D_0044F42C");
-extern int D_0044F430_31E8[] __asm__("D_0044F430");
-extern int D_0044F420_31E8[] __asm__("D_0044F420");
+extern int PATHI_selectedId_31E8[] __asm__("PATHI_selectedId");
+extern int PATHI_selectedPlayer_31E8[] __asm__("PATHI_selectedPlayer");
 
 /**
  * Sets the two look-ahead times of every path player in use whose group bits overlap @p pathMask: +0xC (used by the normal
@@ -25311,17 +25311,17 @@ extern int D_0044F420_31E8[] __asm__("D_0044F420");
  */
 void PATH_setLookAhead(unsigned int pathMask, int lookAhead, int lookAheadB) {
     int i;
-    if (D_0044F42C_31E8[0] != 0 && D_0044F430_31E8[0] == 0) {
+    if (D_0044F42C_31E8[0] != 0 && PATHI_selectedId_31E8[0] == 0) {
         if (PATHI_selectPlayer(-1)) {
             pathMask &= 0x0F000000;
             for (i = 0; i < 4; i++) {
-                if (D_00517610_31E8[i].pathData != 0 && (D_00517610_31E8[i].pathId & pathMask) != 0) {
-                    D_00517610_31E8[i].f0c = lookAhead;
-                    D_00517610_31E8[i].f10 = lookAheadB;
+                if (PATHI_players_31E8[i].pathData != 0 && (PATHI_players_31E8[i].pathId & pathMask) != 0) {
+                    PATHI_players_31E8[i].f0c = lookAhead;
+                    PATHI_players_31E8[i].f10 = lookAheadB;
                 }
             }
-            D_0044F430_31E8[0] = 0;
-            D_0044F420_31E8[0] = 0;
+            PATHI_selectedId_31E8[0] = 0;
+            PATHI_selectedPlayer_31E8[0] = 0;
         }
     }
 }
@@ -25331,15 +25331,15 @@ void PATH_setLookAhead(unsigned int pathMask, int lookAhead, int lookAheadB) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D32A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044ED48_32A8[4] __asm__("D_0044ED48");
+extern int str_AUTHOR_Bjaques_Thursday_06_18PM_Sep_04_2_32A8[4] __asm__("str_AUTHOR_Bjaques_Thursday_06_18PM_Sep_04_2");
 
 /**
- * Returns the address of D_0044ED48 (a 16-byte block of the path library).
+ * Returns the address of str_AUTHOR_Bjaques_Thursday_06_18PM_Sep_04_2 (a 16-byte block of the path library).
  *
- * @return D_0044ED48
+ * @return str_AUTHOR_Bjaques_Thursday_06_18PM_Sep_04_2
  */
 int *func_003D32A8(void) {
-    return D_0044ED48_32A8;
+    return str_AUTHOR_Bjaques_Thursday_06_18PM_Sep_04_2_32A8;
 }
 #endif
 
@@ -25386,7 +25386,7 @@ struct G_32B8 {
     char pad3C[0x50 - 0x3C];
     struct T_32B8 *tab;
 };
-extern struct G_32B8 *D_0044F420_32B8 __asm__("D_0044F420");
+extern struct G_32B8 *PATHI_selectedPlayer_32B8 __asm__("PATHI_selectedPlayer");
 extern int fAEC58_32B8(int, unsigned int *, unsigned int *) __asm__("pathxSND_refreshPlayer");
 
 int PATHI_getVoiceSegment_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("PATHI_getVoiceSegment");
@@ -25422,8 +25422,8 @@ int PATHI_getVoiceSegment_32B8(struct V_32B8 *pathVoice, struct O_32B8 *timing) 
     float toNextSeg;
     int n;
 
-    nodeRec = (struct E_32B8 *)(D_0044F420_32B8->hdr + D_0044F420_32B8->a[pathVoice->h36] * 4);
-    lenEntry = D_0044F420_32B8->tab[nodeRec->h0 - 1];
+    nodeRec = (struct E_32B8 *)(PATHI_selectedPlayer_32B8->hdr + PATHI_selectedPlayer_32B8->a[pathVoice->h36] * 4);
+    lenEntry = PATHI_selectedPlayer_32B8->tab[nodeRec->h0 - 1];
     len = lenEntry.len;
     if (nodeRec->w4 & 0x0F000000) {
         len /= (unsigned int)(((nodeRec->w4 >> 24) & 0xF) * ((nodeRec->w4 >> 20) & 0xF));
@@ -25463,9 +25463,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3658);
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_pickBranch);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
 struct R_37A0 { signed char lo; signed char hi; short v; };
 /**
@@ -25482,7 +25482,7 @@ struct R_37A0 { signed char lo; signed char hi; short v; };
  * @return the next node, or -1 when the node has no branches
  */
 int PATHI_pickBranch(int node, int selector) {
-    struct sPath *pathPlayer = D_0044F420;
+    struct sPath *pathPlayer = PATHI_selectedPlayer;
     int nextNode = -1;
     unsigned int *nodeRec = pathPlayer->pathData + pathPlayer->f38[node];
     unsigned int w0 = nodeRec[0];
@@ -25583,11 +25583,11 @@ struct Q_3900 {
     unsigned long hi : 10;
 };
 struct P_3900 { char pad[0x30]; unsigned int x30; char pad2[0x928 - 0x34]; };
-extern struct G_3900 *D_0044F420_3900 __asm__("D_0044F420");
+extern struct G_3900 *PATHI_selectedPlayer_3900 __asm__("PATHI_selectedPlayer");
 extern void (*D_0044F424_3900)(int, int) __asm__("D_0044F424");
-extern int D_0044F430_3900 __asm__("D_0044F430");
-extern unsigned int D_0044F438_3900 __asm__("D_0044F438");
-extern struct P_3900 D_00517610_3900[4] __asm__("D_00517610");
+extern int PATHI_selectedId_3900 __asm__("PATHI_selectedId");
+extern unsigned int PATHI_tick_3900 __asm__("PATHI_tick");
+extern struct P_3900 PATHI_players_3900[4] __asm__("PATHI_players");
 extern int f3C90_3900(int, int) __asm__("PATHI_remapNode");
 extern int f37A0_3900(int, int) __asm__("PATHI_pickBranch");
 extern void f6210_3900(void *, int, int) __asm__("memset");
@@ -25624,8 +25624,8 @@ int PATHI_followPath(int id, int start, int vel) {
 
     save = vel;
     k = f3C90_3900(id, start);
-    nodeRec = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
-    pathVoice = D_0044F420_3900->voices[nodeRec->h2 & 0x1F];
+    nodeRec = (struct E_3900 *)(PATHI_selectedPlayer_3900->hdr + PATHI_selectedPlayer_3900->a[k] * 4);
+    pathVoice = PATHI_selectedPlayer_3900->voices[nodeRec->h2 & 0x1F];
     while (nodeRec->type <= 0) {
         type = nodeRec->type;
         if (type == 0) {
@@ -25633,7 +25633,7 @@ int PATHI_followPath(int id, int start, int vel) {
             if (nodeRec->w8 & 0x7C00) {
                 f6210_3900(&eventHeader, 0, 0x10);
                 f6210_3900(&ev, 0, 0x10);
-                t = D_0044F420_3900->tab54[((nodeRec->w8 >> 10) & 0x1F) - 1];
+                t = PATHI_selectedPlayer_3900->tab54[((nodeRec->w8 >> 10) & 0x1F) - 1];
                 if (t & 0x80) {
                     ev.bC = 100;
                 } else {
@@ -25645,17 +25645,17 @@ int PATHI_followPath(int id, int start, int vel) {
                 ev.f7 = ((nodeRec->w8 >> 10) & 0x1F) - 1;
                 ev.b8 = -1;
                 eventHeader.p1 = ev.hE;
-                ev.w4 = D_0044F438_3900 + ev.hE;
+                ev.w4 = PATHI_tick_3900 + ev.hE;
                 ev.w0 = 0x1F000001;
                 eventHeader.b = 0;
                 f0B18_3900(&eventHeader, &ev);
-                f1F80_3900(D_00517610_3900[0].x30, fcopy_3900(&eventHeader));
+                f1F80_3900(PATHI_players_3900[0].x30, fcopy_3900(&eventHeader));
             }
             if ((nodeRec->w4 & 0xE0000) == 0x20000) {
-                vel = (D_0044F438_3900 / 23) & 0x7F;
+                vel = (PATHI_tick_3900 / 23) & 0x7F;
             }
             if (D_0044F424_3900 != 0) {
-                D_0044F424_3900(D_0044F430_3900, k);
+                D_0044F424_3900(PATHI_selectedId_3900, k);
             }
         } else if (type == -1) {
             w = *(unsigned int *)nodeRec;
@@ -25666,14 +25666,14 @@ int PATHI_followPath(int id, int start, int vel) {
                 }
             }
         } else if (type == -2) {
-            vel = (D_0044F438_3900 / 23) & 0x7F;
+            vel = (PATHI_tick_3900 / 23) & 0x7F;
         } else if (type == -3) {
-            f1F80_3900(D_0044F420_3900->x30, (D_0044F420_3900->hdr + D_0044F420_3900->b[(nodeRec->wC >> 2) & 0xFFF] * 4));
+            f1F80_3900(PATHI_selectedPlayer_3900->x30, (PATHI_selectedPlayer_3900->hdr + PATHI_selectedPlayer_3900->b[(nodeRec->wC >> 2) & 0xFFF] * 4));
         }
         t = f37A0_3900(k, vel);
         vel = save;
         k = f3C90_3900(id, t);
-        nodeRec = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
+        nodeRec = (struct E_3900 *)(PATHI_selectedPlayer_3900->hdr + PATHI_selectedPlayer_3900->a[k] * 4);
     }
     return (short)f3C90_3900(id, k);
 }
@@ -25684,9 +25684,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_remapNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Looks up id's remap list in the table at D_0044F420 and returns what value maps to, or value.
+// Looks up id's remap list in the table at PATHI_selectedPlayer and returns what value maps to, or value.
 struct T_3C90 { char pad[0x34]; int *words; short *index; char pad2[0xC]; int *ranges; };
-extern struct T_3C90 *D_0044F420_3C90 __asm__("D_0044F420");
+extern struct T_3C90 *PATHI_selectedPlayer_3C90 __asm__("PATHI_selectedPlayer");
 /**
  * Remaps a node number through node @p id's remap list; returns @p value unchanged when there is none.
  *
@@ -25706,7 +25706,7 @@ int PATHI_remapNode(int id, int value) {
     int mapped = value;
     if (id < 0)
         return mapped;
-    pathPlayer = D_0044F420_3C90;
+    pathPlayer = PATHI_selectedPlayer_3C90;
     words = pathPlayer->words;
     k = *((unsigned char *)&words[pathPlayer->index[id]] + 4);
     if (k == 0)
@@ -25750,7 +25750,7 @@ struct G_3D20 {
     char padD8[0x91C - 0xD8];
     int x91C;
 };
-extern struct G_3D20 *D_0044F420_3D20 __asm__("D_0044F420");
+extern struct G_3D20 *PATHI_selectedPlayer_3D20 __asm__("PATHI_selectedPlayer");
 extern int f_37A0_3D20(int, int) __asm__("PATHI_pickBranch");
 extern int f_3900_3D20(int, int, int) __asm__("PATHI_followPath");
 extern void f_4050_3D20(int) __asm__("PATHI_postNodeStart");
@@ -25780,12 +25780,12 @@ void PATHI_advanceVoice(int idx) {
     int queueResult;
 
     sel = -1;
-    old = D_0044F420_3D20->x91C;
-    pathVoice = D_0044F420_3D20->voices[idx];
+    old = PATHI_selectedPlayer_3D20->x91C;
+    pathVoice = PATHI_selectedPlayer_3D20->voices[idx];
     save = *pathVoice;
     ch = -1;
     k = pathVoice->h36;
-    nodeRec = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[k] * 4);
+    nodeRec = (struct E_3D20 *)(PATHI_selectedPlayer_3D20->hdr + PATHI_selectedPlayer_3D20->a[k] * 4);
     n = pathVoice->ch;
     if (pathVoice->b2F) {
         ch = 1;
@@ -25799,8 +25799,8 @@ void PATHI_advanceVoice(int idx) {
     if (sel >= 0) {
         sel = f_3900_3D20(pathVoice->h36, sel, pathVoice->b1);
     }
-    nodeRec = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[sel] * 4);
-    w = D_0044F420_3D20->voices[nodeRec->h2 & 0x1F];
+    nodeRec = (struct E_3D20 *)(PATHI_selectedPlayer_3D20->hdr + PATHI_selectedPlayer_3D20->a[sel] * 4);
+    w = PATHI_selectedPlayer_3D20->voices[nodeRec->h2 & 0x1F];
     if (w != 0 && w != pathVoice) {
         pathVoice->h36 = -1;
         pathVoice->ch = ch;
@@ -25813,7 +25813,7 @@ void PATHI_advanceVoice(int idx) {
     if (queueResult >= 0 || queueResult == -9999) {
         return;
     }
-    D_0044F420_3D20->x91C = old;
+    PATHI_selectedPlayer_3D20->x91C = old;
     *pathVoice = save;
 }
 #endif
@@ -25827,7 +25827,7 @@ extern void PATHI_queueEvent_4050(int, int) __asm__("PATHI_queueEvent");
 extern int func_003D2068_4050(void *) __asm__("PATHI_copyevent");
 extern void PATHI_getVoiceSegment_4050(int, void *) __asm__("PATHI_getVoiceSegment");
 extern void *memset_4050(void *, int, int) __asm__("memset");
-extern char *D_0044F420_4050[] __asm__("D_0044F420");
+extern char *PATHI_selectedPlayer_4050[] __asm__("PATHI_selectedPlayer");
 struct M_4050 {
     int w0;
     int w4;
@@ -25856,7 +25856,7 @@ int PATHI_postNodeStart(int idx) {
     struct M_4050 item;
     struct M_4050 eventHeader;
     struct B_4050 buf;
-    char *pathPlayer = D_0044F420_4050[0];
+    char *pathPlayer = PATHI_selectedPlayer_4050[0];
     char *nodeRec = *(char **)(pathPlayer + 0x34) + *(short *)(*(char **)(pathPlayer + 0x38) + idx * 2) * 4;
     int eventCopy = 0;
     int k, voiceMask;
@@ -25866,8 +25866,8 @@ int PATHI_postNodeStart(int idx) {
             voiceMask = (int)((1L << k) | 0x11000000);
             memset_4050(&eventHeader, 0, 0x10);
             memset_4050(&item, 0, 0x10);
-            if (*(int *)D_0044F420_4050[0] >= 0) {
-                PATHI_getVoiceSegment_4050(((struct G_4050 *)D_0044F420_4050[0])->a[*(int *)D_0044F420_4050[0]], &buf);
+            if (*(int *)PATHI_selectedPlayer_4050[0] >= 0) {
+                PATHI_getVoiceSegment_4050(((struct G_4050 *)PATHI_selectedPlayer_4050[0])->a[*(int *)PATHI_selectedPlayer_4050[0]], &buf);
                 item.b9 = 2;
                 item.w0 = voiceMask;
                 *(int *)&item.sc = buf.w18 - 10;
@@ -25896,7 +25896,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_getNodeLength);
 typedef struct E_4898 { short v; short w; } E_4898;
 typedef struct B_4898 { E_4898 ent[0x40]; } B_4898;
 typedef struct A_4898 { char pad0[0x34]; B_4898 *b; short *idx; char pad1[0x50 - 0x3C]; char *arr; } A_4898;
-extern A_4898 *D_0044F420_F420[] __asm__("D_0044F420");
+extern A_4898 *PATHI_selectedPlayer_F420[] __asm__("PATHI_selectedPlayer");
 
 static inline int get_4898(char *arr, int i) {
     return *(int *)(arr + i * 8);
@@ -25919,7 +25919,7 @@ int PATHI_getNodeLength(int node) {
 
     var_7 = 0;
     if (node < 0) return 0;
-    pathPlayer = D_0044F420_F420[0];
+    pathPlayer = PATHI_selectedPlayer_F420[0];
     pathData = pathPlayer->b;
     if (node >= *(unsigned short *)((char *)pathData + 0x12)) return 0;
     lenIndex = pathData->ent[pathPlayer->idx[node]].v;
@@ -26040,7 +26040,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_getRequestTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_4A50 { char pad[0x30]; unsigned mask; int pathData; char pad2[0x8EC]; int *tab; };
-extern struct E_4A50 D_00517610_4A50[] __asm__("D_00517610");
+extern struct E_4A50 PATHI_players_4A50[] __asm__("PATHI_players");
 
 /**
  * Returns the request table of the path voice an id names: player +0x924 [voice] for the lowest voice bit of
@@ -26055,12 +26055,12 @@ int PATHI_getRequestTable(unsigned pathId) {
     unsigned mid = pathId & 0x0F000000;
     unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
-        unsigned mk = D_00517610_4A50[i].mask;
-        if (D_00517610_4A50[i].tab != 0 && D_00517610_4A50[i].pathData != 0 &&
+        unsigned mk = PATHI_players_4A50[i].mask;
+        if (PATHI_players_4A50[i].tab != 0 && PATHI_players_4A50[i].pathData != 0 &&
             (mk & hi) && (mk & mid)) {
             for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
                 if ((voiceBits >> voiceBit) & 1)
-                    return D_00517610_4A50[i].tab[voiceBit];
+                    return PATHI_players_4A50[i].tab[voiceBit];
             }
         }
     }
@@ -26072,9 +26072,9 @@ int PATHI_getRequestTable(unsigned pathId) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_findLeadingVoice);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
 
 static inline int valid_4B00(struct sPathVoice *e) { return e->f36 >= 0 && e->f30 != 0; }
@@ -26087,15 +26087,15 @@ static inline int valid_4B00(struct sPathVoice *e) { return e->f36 >= 0 && e->f3
  */
 void PATHI_findLeadingVoice(void) {
     int i;
-    D_0044F420->f00 = -1;
-    D_0044F420->f04 = 0;
-    D_0044F420->f08 = 0;
+    PATHI_selectedPlayer->f00 = -1;
+    PATHI_selectedPlayer->f04 = 0;
+    PATHI_selectedPlayer->f08 = 0;
     for (i = 0; i < 24; i++) {
-        struct sPathVoice *pathVoice = D_0044F420->f58[i];
-        if (pathVoice != 0 && pathVoice->f03 == 0 && valid_4B00(pathVoice) && D_0044F420->f04 < pathVoice->f24) {
-            D_0044F420->f04 = pathVoice->f24;
-            D_0044F420->f00 = i;
-            D_0044F420->f08 = (*pathVoice->f30 >> 21) & 0x3F;
+        struct sPathVoice *pathVoice = PATHI_selectedPlayer->f58[i];
+        if (pathVoice != 0 && pathVoice->f03 == 0 && valid_4B00(pathVoice) && PATHI_selectedPlayer->f04 < pathVoice->f24) {
+            PATHI_selectedPlayer->f04 = pathVoice->f24;
+            PATHI_selectedPlayer->f00 = i;
+            PATHI_selectedPlayer->f08 = (*pathVoice->f30 >> 21) & 0x3F;
         }
     }
 }
@@ -26108,18 +26108,18 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_selectPlayerById);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Finds the active entry whose id (f30) matches and selects it through the inlined PATHI_selectPlayer body.
 struct E_4BB0 { char pad[0x30]; int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern struct E_4BB0 D_00517610_4BB0[] __asm__("D_00517610");
-extern unsigned int D_0044F430_4BB0 __asm__("D_0044F430");
-extern struct E_4BB0 *D_0044F420_4BB0 __asm__("D_0044F420");
+extern struct E_4BB0 PATHI_players_4BB0[] __asm__("PATHI_players");
+extern unsigned int PATHI_selectedId_4BB0 __asm__("PATHI_selectedId");
+extern struct E_4BB0 *PATHI_selectedPlayer_4BB0 __asm__("PATHI_selectedPlayer");
 static inline int select_4BB0(int i) {
-    if (D_0044F430_4BB0 == 0) D_0044F430_4BB0 = 0xFFFFFFFF;
-    if ((unsigned int)i < 4 && D_00517610_4BB0[i].pathData != 0) {
-        D_0044F430_4BB0 = D_00517610_4BB0[i].pathId;
-        D_0044F420_4BB0 = &D_00517610_4BB0[i];
-        return D_0044F430_4BB0;
+    if (PATHI_selectedId_4BB0 == 0) PATHI_selectedId_4BB0 = 0xFFFFFFFF;
+    if ((unsigned int)i < 4 && PATHI_players_4BB0[i].pathData != 0) {
+        PATHI_selectedId_4BB0 = PATHI_players_4BB0[i].pathId;
+        PATHI_selectedPlayer_4BB0 = &PATHI_players_4BB0[i];
+        return PATHI_selectedId_4BB0;
     }
-    if (i != -1) D_0044F430_4BB0 = 0;
-    return D_0044F430_4BB0;
+    if (i != -1) PATHI_selectedId_4BB0 = 0;
+    return PATHI_selectedId_4BB0;
 }
 /**
  * Selects the path player in use whose id (+0x30) equals @p id exactly (the inlined PATHI_selectPlayer).
@@ -26130,7 +26130,7 @@ static inline int select_4BB0(int i) {
 int PATHI_selectPlayerById(int id) {
     int i;
     for (i = 0; i < 4; i++) {
-        if (D_00517610_4BB0[i].pathData != 0 && D_00517610_4BB0[i].pathId == id) {
+        if (PATHI_players_4BB0[i].pathData != 0 && PATHI_players_4BB0[i].pathId == id) {
             return select_4BB0(i);
         }
     }
@@ -26148,10 +26148,10 @@ struct E_4C40 {
     void *hdr;
     char pad38[0x928 - 0x38];
 };
-extern struct E_4C40 D_00517610_4C40[4] __asm__("D_00517610");
+extern struct E_4C40 PATHI_players_4C40[4] __asm__("PATHI_players");
 
 /**
- * Sorts the path players (D_00517610, 0x928 bytes each) that have path data (+0x34) by id (+0x30), lowest first, by
+ * Sorts the path players (PATHI_players, 0x928 bytes each) that have path data (+0x34) by id (+0x30), lowest first, by
  * swapping whole records. Players without data stay where they are. Called by PATH_closeVoice when a player empties.
  */
 void PATHI_sortPlayers(void) {
@@ -26160,12 +26160,12 @@ void PATHI_sortPlayers(void) {
     int j;
 
     for (i = 0; i < 4; i++) {
-        if (D_00517610_4C40[i].hdr != 0) {
+        if (PATHI_players_4C40[i].hdr != 0) {
             for (j = i + 1; j < 4; j++) {
-                if (D_00517610_4C40[j].hdr != 0 && D_00517610_4C40[j].mask < D_00517610_4C40[i].mask) {
-                    swapRec = D_00517610_4C40[i];
-                    D_00517610_4C40[i] = D_00517610_4C40[j];
-                    D_00517610_4C40[j] = swapRec;
+                if (PATHI_players_4C40[j].hdr != 0 && PATHI_players_4C40[j].mask < PATHI_players_4C40[i].mask) {
+                    swapRec = PATHI_players_4C40[i];
+                    PATHI_players_4C40[i] = PATHI_players_4C40[j];
+                    PATHI_players_4C40[j] = swapRec;
                 }
             }
         }
@@ -26207,9 +26207,9 @@ struct Mgr_4F10 {
     char pad14[0x58 - 0x14];
     struct Str_4F10 *slot[24];
 };
-extern struct Mgr_4F10 *D_0044F420_4F10 __asm__("D_0044F420");
+extern struct Mgr_4F10 *PATHI_selectedPlayer_4F10 __asm__("PATHI_selectedPlayer");
 extern unsigned char D_0044F434_4F10 __asm__("D_0044F434");
-extern unsigned int D_0044F438_4F10 __asm__("D_0044F438");
+extern unsigned int PATHI_tick_4F10 __asm__("PATHI_tick");
 extern void pathxSND_releaseHold_4F10(int h, int a) __asm__("pathxSND_releaseHold");
 extern int pathxSND_isBusy_4F10(int h) __asm__("pathxSND_isBusy");
 extern int pathxSND_getVolume_4F10(int h) __asm__("pathxSND_getVolume");
@@ -26244,20 +26244,20 @@ void PATHI_serviceVoices(void) {
     int skip;
 
     if (isB) {
-        step = D_0044F420_4F10->f10;
+        step = PATHI_selectedPlayer_4F10->f10;
     } else {
-        step = D_0044F420_4F10->fC;
+        step = PATHI_selectedPlayer_4F10->fC;
     }
     if (!isB) {
         PATHI_serviceEvents_4F10();
     }
     for (i = 0; i < 24; i++) {
-        pathVoice = D_0044F420_4F10->slot[i];
+        pathVoice = PATHI_selectedPlayer_4F10->slot[i];
         if (pathVoice == 0 || pathVoice->f3 != 0) {
             continue;
         }
         ok = 0;
-        end = D_0044F438_4F10 + pathVoice->f24;
+        end = PATHI_tick_4F10 + pathVoice->f24;
         if (pathVoice->f36 >= 0) {
             ok = pathVoice->f30 != 0;
         }
@@ -26276,7 +26276,7 @@ void PATHI_serviceVoices(void) {
             continue;
         }
         if (pathVoice->f4C != 0) {
-            if (D_0044F438_4F10 + (step >> 1) >= pathVoice->f4C) {
+            if (PATHI_tick_4F10 + (step >> 1) >= pathVoice->f4C) {
                 pathxSND_releaseHold_4F10(pathVoice->f54, 0);
                 pathVoice->f4C = 0;
             }
@@ -26310,10 +26310,10 @@ struct T_5128 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x9
 extern unsigned char D_0044F42C_5128 __asm__("D_0044F42C");
 extern unsigned char D_0044F42D_5128 __asm__("D_0044F42D");
 extern unsigned char D_0044F434_5128 __asm__("D_0044F434");
-extern unsigned int D_0044F430_5128 __asm__("D_0044F430");
-extern int D_0044F438_5128 __asm__("D_0044F438");
-extern struct T_5128 *D_0044F420_5128 __asm__("D_0044F420");
-extern struct T_5128 D_00517610_5128[] __asm__("D_00517610");
+extern unsigned int PATHI_selectedId_5128 __asm__("PATHI_selectedId");
+extern int PATHI_tick_5128 __asm__("PATHI_tick");
+extern struct T_5128 *PATHI_selectedPlayer_5128 __asm__("PATHI_selectedPlayer");
+extern struct T_5128 PATHI_players_5128[] __asm__("PATHI_players");
 extern int pathxSND_getTimeMs_5128(void) __asm__("pathxSND_getTimeMs");
 extern void pathxSND_refreshAll_5128(int) __asm__("pathxSND_refreshAll");
 extern void PATHI_findLeadingVoice_5128(void) __asm__("PATHI_findLeadingVoice");
@@ -26321,12 +26321,12 @@ extern void PATHI_serviceVoices_5128(void) __asm__("PATHI_serviceVoices");
 
 static inline unsigned int select_5128(int i) {
     if ((unsigned int)i < 4) {
-        D_0044F420_5128 = &D_00517610_5128[i];
-        return D_0044F430_5128 = D_00517610_5128[i].pathId;
+        PATHI_selectedPlayer_5128 = &PATHI_players_5128[i];
+        return PATHI_selectedId_5128 = PATHI_players_5128[i].pathId;
     } else if (i != -1) {
-        D_0044F430_5128 = 0;
+        PATHI_selectedId_5128 = 0;
     }
-    return D_0044F430_5128;
+    return PATHI_selectedId_5128;
 }
 
 void PATHI_serviceTick_5128(unsigned char) __asm__("PATHI_serviceTick");
@@ -26335,7 +26335,7 @@ void PATHI_serviceTick_impl(unsigned char k) __asm__("PATHI_serviceTick");
  * Runs one service tick of the path system over every player in use, unless it is paused, down or busy.
  *
  * Does nothing when the global pause (D_0044F42D) is set, the system is not initialised (D_0044F42C) or a selection is
- * active (D_0044F430). Stores the pass kind @p k in D_0044F434, marks the system busy, reads the tick D_0044F438 from
+ * active (PATHI_selectedId). Stores the pass kind @p k in D_0044F434, marks the system busy, reads the tick PATHI_tick from
  * pathxSND_getTimeMs and brackets the work with pathxSND_refreshAll(0) / (1). Each player in use is selected and gets
  * PATHI_findLeadingVoice (leading voice) and PATHI_serviceVoices (voice service). Clears the selection at the end.
  *
@@ -26345,22 +26345,22 @@ void PATHI_serviceTick_impl(unsigned char k) {
     unsigned char i;
     if (D_0044F42D_5128 != 0) return;
     if (D_0044F42C_5128 == 0) return;
-    if (D_0044F430_5128 != 0) return;
+    if (PATHI_selectedId_5128 != 0) return;
     D_0044F434_5128 = k;
-    D_0044F430_5128 = 0xFFFFFFFF;
-    D_0044F438_5128 = pathxSND_getTimeMs_5128();
+    PATHI_selectedId_5128 = 0xFFFFFFFF;
+    PATHI_tick_5128 = pathxSND_getTimeMs_5128();
     pathxSND_refreshAll_5128(0);
     for (i = 0; i < 4; i++) {
-        if (D_00517610_5128[i].pathData == 0) continue;
-        if (D_0044F430_5128 == 0) D_0044F430_5128 = 0xFFFFFFFF;
+        if (PATHI_players_5128[i].pathData == 0) continue;
+        if (PATHI_selectedId_5128 == 0) PATHI_selectedId_5128 = 0xFFFFFFFF;
         if (select_5128(i) != 0) {
             PATHI_findLeadingVoice_5128();
             PATHI_serviceVoices_5128();
         }
     }
     pathxSND_refreshAll_5128(1);
-    D_0044F430_5128 = 0;
-    D_0044F420_5128 = 0;
+    PATHI_selectedId_5128 = 0;
+    PATHI_selectedPlayer_5128 = 0;
 }
 #endif
 
@@ -26368,9 +26368,9 @@ void PATHI_serviceTick_impl(unsigned char k) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_findVoice);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath D_00517610[4];
+extern struct sPath PATHI_players[4];
 
 /**
  * Returns the path voice an id names: in the first player in use whose id shares a class bit (0xF0000000) and a group
@@ -26387,12 +26387,12 @@ int PATHI_findVoice(unsigned pathId) {
     unsigned mid = pathId & 0x0F000000;
     unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
-        unsigned mk = D_00517610[i].pathId;
-        if (D_00517610[i].pathData != 0 &&
+        unsigned mk = PATHI_players[i].pathId;
+        if (PATHI_players[i].pathData != 0 &&
             (mk & hi) && (mk & mid)) {
             for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
                 if ((voiceBits >> voiceBit) & 1)
-                    return (int)D_00517610[i].f58[voiceBit];
+                    return (int)PATHI_players[i].f58[voiceBit];
             }
         }
     }
@@ -26405,11 +26405,11 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_countVoices);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// D_00517610: an array of 0x928-byte records (the unit's other views read f30/f34 too).
+// PATHI_players: an array of 0x928-byte records (the unit's other views read f30/f34 too).
 struct E_5330 {
     char pad00[0x30]; unsigned int pathId; int pathData; char pad38[0x20]; int w[24]; char padB8[0x928 - 0xB8];
 };
-extern struct E_5330 D_00517610_5330[] __asm__("D_00517610");
+extern struct E_5330 PATHI_players_5330[] __asm__("PATHI_players");
 
 /**
  * Counts the voices in use (+0x58, 24 slots) of the path players in use whose group bit (0x1000000 << player index) is
@@ -26424,9 +26424,9 @@ int PATHI_countVoices(unsigned int mask) {
     int j;
     for (i = 0; i < 4; i++) {
         if (mask & (0x1000000 << i)) {
-            if (D_00517610_5330[i].pathData != 0) {
+            if (PATHI_players_5330[i].pathData != 0) {
                 for (j = 0; j < 24; j++) {
-                    if (D_00517610_5330[i].w[j] != 0) {
+                    if (PATHI_players_5330[i].w[j] != 0) {
                         n++;
                     }
                 }
@@ -26476,30 +26476,30 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_selectPlayer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Selects entry i (0..3) of D_00517610 as current; any other i except -1 clears the current id.
+// Selects entry i (0..3) of PATHI_players as current; any other i except -1 clears the current id.
 struct E_5450 { char pad[0x30]; int pathId; int pathData; char pad2[0x928 - 0x38]; };
-extern struct E_5450 D_00517610_5450[] __asm__("D_00517610");
-extern unsigned int D_0044F430_5450 __asm__("D_0044F430");
-extern struct E_5450 *D_0044F420_5450 __asm__("D_0044F420");
+extern struct E_5450 PATHI_players_5450[] __asm__("PATHI_players");
+extern unsigned int PATHI_selectedId_5450 __asm__("PATHI_selectedId");
+extern struct E_5450 *PATHI_selectedPlayer_5450 __asm__("PATHI_selectedPlayer");
 /**
- * Selects path player @p i (D_0044F420 and its id in D_0044F430), or with -1 just marks the system busy.
+ * Selects path player @p i (PATHI_selectedPlayer and its id in PATHI_selectedId), or with -1 just marks the system busy.
  *
- * A clear D_0044F430 becomes -1 first. A player index below 4 that is in use (+0x34) is selected and its id returned;
- * -1 leaves the busy mark; any other value clears D_0044F430. Every path entry point calls it with -1 first and fails
+ * A clear PATHI_selectedId becomes -1 first. A player index below 4 that is in use (+0x34) is selected and its id returned;
+ * -1 leaves the busy mark; any other value clears PATHI_selectedId. Every path entry point calls it with -1 first and fails
  * with -18 when it returns 0 or the system was already busy.
  *
  * @param i  the player (0..3), or -1
  * @return the selected id, -1 for busy, 0 when the player is not in use
  */
 int PATHI_selectPlayer(int i) {
-    if (D_0044F430_5450 == 0) D_0044F430_5450 = 0xFFFFFFFF;
-    if ((unsigned int)i < 4 && D_00517610_5450[i].pathData != 0) {
-        D_0044F430_5450 = D_00517610_5450[i].pathId;
-        D_0044F420_5450 = &D_00517610_5450[i];
-        return D_0044F430_5450;
+    if (PATHI_selectedId_5450 == 0) PATHI_selectedId_5450 = 0xFFFFFFFF;
+    if ((unsigned int)i < 4 && PATHI_players_5450[i].pathData != 0) {
+        PATHI_selectedId_5450 = PATHI_players_5450[i].pathId;
+        PATHI_selectedPlayer_5450 = &PATHI_players_5450[i];
+        return PATHI_selectedId_5450;
     }
-    if (i != -1) D_0044F430_5450 = 0;
-    return D_0044F430_5450;
+    if (i != -1) PATHI_selectedId_5450 = 0;
+    return PATHI_selectedId_5450;
 }
 #endif
 
@@ -26540,9 +26540,9 @@ struct G_5508 { char pad[0x58]; void *list[24]; };
 struct T_5508 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5508 __asm__("D_0044F42C");
 extern signed char D_0044F42E_5508 __asm__("D_0044F42E");
-extern int D_0044F430_5508 __asm__("D_0044F430");
-extern struct G_5508 *D_0044F420_5508 __asm__("D_0044F420");
-extern struct T_5508 D_00517610_5508[] __asm__("D_00517610");
+extern int PATHI_selectedId_5508 __asm__("PATHI_selectedId");
+extern struct G_5508 *PATHI_selectedPlayer_5508 __asm__("PATHI_selectedPlayer");
+extern struct T_5508 PATHI_players_5508[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_5508(int) __asm__("PATHI_selectPlayer");
 extern void PATHI_setVoiceLevel_5508(void *, int) __asm__("PATHI_setVoiceLevel");
 
@@ -26561,27 +26561,27 @@ static inline unsigned int has_5508(unsigned int a, unsigned int b) { return a &
 void PATH_setLevel(unsigned int mask, signed char val) {
     int i, j;
     if (D_0044F42C_5508 == 0) return;
-    if (D_0044F430_5508 != 0) return;
+    if (PATHI_selectedId_5508 != 0) return;
     if (PATHI_selectPlayer_5508(-1) == 0) return;
     if (val > 100) val = 100;
     if (val < 0) val = 0;
     if (mask == 0xFFFFFFFF) D_0044F42E_5508 = val;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5508[i].pathData == 0) continue;
-        playerMask = D_00517610_5508[i].pathId;
+        if (PATHI_players_5508[i].pathData == 0) continue;
+        playerMask = PATHI_players_5508[i].pathId;
         if (has_5508(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5508(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_5508(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *pathVoice = D_0044F420_5508->list[j];
+            void *pathVoice = PATHI_selectedPlayer_5508->list[j];
             if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
                 PATHI_setVoiceLevel_5508(pathVoice, val);
             }
         }
     }
-    D_0044F430_5508 = 0;
-    D_0044F420_5508 = 0;
+    PATHI_selectedId_5508 = 0;
+    PATHI_selectedPlayer_5508 = 0;
 }
 #endif
 
@@ -26593,9 +26593,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_fadeVolume);
 struct G_5698 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
 struct T_5698 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5698 __asm__("D_0044F42C");
-extern int D_0044F430_5698 __asm__("D_0044F430");
-extern struct G_5698 *D_0044F420_5698 __asm__("D_0044F420");
-extern struct T_5698 D_00517610_5698[] __asm__("D_00517610");
+extern int PATHI_selectedId_5698 __asm__("PATHI_selectedId");
+extern struct G_5698 *PATHI_selectedPlayer_5698 __asm__("PATHI_selectedPlayer");
+extern struct T_5698 PATHI_players_5698[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_5698(int) __asm__("PATHI_selectPlayer");
 extern void PATHI_startVolumeFade_5698(void *, int, int, int) __asm__("PATHI_startVolumeFade");
 
@@ -26615,24 +26615,24 @@ static inline unsigned int has_5698(unsigned int a, unsigned int b) { return a &
 void PATH_fadeVolume(unsigned int mask, int targetVol, int fadeMs) {
     int i, j;
     if (D_0044F42C_5698 == 0) return;
-    if (D_0044F430_5698 != 0) return;
+    if (PATHI_selectedId_5698 != 0) return;
     if (PATHI_selectPlayer_5698(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5698[i].pathData == 0) continue;
-        playerMask = D_00517610_5698[i].pathId;
+        if (PATHI_players_5698[i].pathData == 0) continue;
+        playerMask = PATHI_players_5698[i].pathId;
         if (has_5698(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5698(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_5698(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *pathVoice = D_0044F420_5698->list[j];
+            void *pathVoice = PATHI_selectedPlayer_5698->list[j];
             if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                PATHI_startVolumeFade_5698(pathVoice, targetVol, fadeMs, D_0044F420_5698->f18);
+                PATHI_startVolumeFade_5698(pathVoice, targetVol, fadeMs, PATHI_selectedPlayer_5698->f18);
             }
         }
     }
-    D_0044F430_5698 = 0;
-    D_0044F420_5698 = 0;
+    PATHI_selectedId_5698 = 0;
+    PATHI_selectedPlayer_5698 = 0;
 }
 #endif
 
@@ -26644,9 +26644,9 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setSendTarget);
 struct G_5800 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
 struct T_5800 { char pad[0x30]; unsigned int pathId; int pathData; char pad2[0x928 - 0x38]; };
 extern unsigned char D_0044F42C_5800 __asm__("D_0044F42C");
-extern int D_0044F430_5800 __asm__("D_0044F430");
-extern struct G_5800 *D_0044F420_5800 __asm__("D_0044F420");
-extern struct T_5800 D_00517610_5800[] __asm__("D_00517610");
+extern int PATHI_selectedId_5800 __asm__("PATHI_selectedId");
+extern struct G_5800 *PATHI_selectedPlayer_5800 __asm__("PATHI_selectedPlayer");
+extern struct T_5800 PATHI_players_5800[] __asm__("PATHI_players");
 extern int PATHI_selectPlayer_5800(int) __asm__("PATHI_selectPlayer");
 extern void PATHI_setVoiceSendTarget_5800(void *, int, int, int) __asm__("PATHI_setVoiceSendTarget");
 
@@ -26666,24 +26666,24 @@ static inline unsigned int has_5800(unsigned int a, unsigned int b) { return a &
 void PATH_setSendTarget(unsigned int mask, int sendTarget, int b) {
     int i, j;
     if (D_0044F42C_5800 == 0) return;
-    if (D_0044F430_5800 != 0) return;
+    if (PATHI_selectedId_5800 != 0) return;
     if (PATHI_selectPlayer_5800(-1) == 0) return;
     for (i = 0; i < 4; i++) {
         unsigned int playerMask;
-        if (D_00517610_5800[i].pathData == 0) continue;
-        playerMask = D_00517610_5800[i].pathId;
+        if (PATHI_players_5800[i].pathData == 0) continue;
+        playerMask = PATHI_players_5800[i].pathId;
         if (has_5800(playerMask & 0xF0000000, mask) == 0) continue;
         if (has_5800(playerMask & 0x0F000000, mask) == 0) continue;
         if (PATHI_selectPlayer_5800(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *pathVoice = D_0044F420_5800->list[j];
+            void *pathVoice = PATHI_selectedPlayer_5800->list[j];
             if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                PATHI_setVoiceSendTarget_5800(pathVoice, sendTarget, b, D_0044F420_5800->f18);
+                PATHI_setVoiceSendTarget_5800(pathVoice, sendTarget, b, PATHI_selectedPlayer_5800->f18);
             }
         }
     }
-    D_0044F430_5800 = 0;
-    D_0044F420_5800 = 0;
+    PATHI_selectedId_5800 = 0;
+    PATHI_selectedPlayer_5800 = 0;
 }
 #endif
 
@@ -26694,7 +26694,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_settleFades);
 extern int pathxSND_getVolume_5968(int) __asm__("pathxSND_getVolume");
 extern void pathxSND_setVolume_5968(int, int) __asm__("pathxSND_setVolume");
 extern void pathxSND_stop_5968(int) __asm__("pathxSND_stop");
-extern int D_0044F420_5968[] __asm__("D_0044F420");
+extern int PATHI_selectedPlayer_5968[] __asm__("PATHI_selectedPlayer");
 
 /**
  * Settles the volume fades of the selected path player's voices in a mask, stopping voices that faded to silence.
@@ -26710,7 +26710,7 @@ extern int D_0044F420_5968[] __asm__("D_0044F420");
 void PATHI_settleFades(unsigned int mask) {
     int i;
     for (i = 0; i < 0x18; i++) {
-        char *pathVoice = *(char **)((char *)D_0044F420_5968[0] + (i << 2) + 0x58);
+        char *pathVoice = *(char **)((char *)PATHI_selectedPlayer_5968[0] + (i << 2) + 0x58);
         if (pathVoice != 0 && !(((mask >> i) ^ 1) & 1) && *(short *)(pathVoice + 0x36) >= 0) {
             int nodeVol = *(signed char *)(pathVoice + 0x34) * *(signed char *)(pathVoice + 4) / 100;
             signed char fadeTarget = *(signed char *)(pathVoice + 0xE);
@@ -26743,11 +26743,11 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_stepVolumeRamp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern unsigned int D_0044F438;         /* tick */
+extern unsigned int PATHI_tick;         /* tick */
 
 extern int pathxSND_setVolume_5A98(int, int) __asm__("pathxSND_setVolume");
 
@@ -26778,14 +26778,14 @@ void PATHI_stepVolumeRamp_impl(struct sPathVoice *pathVoice) {
     int none;
     unsigned sel;
     diff = (float)pathVoice->f0E - (float)pathVoice->f0C;
-    rampSetting.dur = D_0044F420->f14[0].dur;
-    rampSetting.mode = D_0044F420->f14[0].mode;
+    rampSetting.dur = PATHI_selectedPlayer->f14[0].dur;
+    rampSetting.mode = PATHI_selectedPlayer->f14[0].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
     rampSetting.neg = pos;
-    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f08) / (float)rampSetting.dur;
+    elapsed = (float)(unsigned)(PATHI_tick - pathVoice->f08) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
         pathxSND_setVolume_5A98(pathVoice->f54, pathVoice->f34);
         none = -1;
@@ -26830,11 +26830,11 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_stepSendRamp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern unsigned int D_0044F438;         /* tick */
+extern unsigned int PATHI_tick;         /* tick */
 
 extern int pathxSND_setFxLevel(int, int, int);
 
@@ -26862,14 +26862,14 @@ void PATHI_stepSendRamp_impl(struct sPathVoice *pathVoice) {
     int none;
     unsigned sel;
     diff = (float)pathVoice->f16 - (float)pathVoice->f14;
-    rampSetting.dur = D_0044F420->f14[1].dur;
-    rampSetting.mode = D_0044F420->f14[1].mode;
+    rampSetting.dur = PATHI_selectedPlayer->f14[1].dur;
+    rampSetting.mode = PATHI_selectedPlayer->f14[1].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
     rampSetting.neg = pos;
-    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f10) / (float)rampSetting.dur;
+    elapsed = (float)(unsigned)(PATHI_tick - pathVoice->f10) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
         pathxSND_setFxLevel(pathVoice->f54, 0, pathVoice->f16);
         none = -1;
@@ -26912,11 +26912,11 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_stepDryRamp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* PATHI players: D_00517610[4] (0x928 each), D_0044F420 points at the one selected by PATHI_selectPlayer. Layout
+/* PATHI players: PATHI_players[4] (0x928 each), PATHI_selectedPlayer points at the one selected by PATHI_selectPlayer. Layout
    from every use in this unit; field names are their offsets. */
-extern struct sPath *D_0044F420;
+extern struct sPath *PATHI_selectedPlayer;
 
-extern unsigned int D_0044F438;         /* tick */
+extern unsigned int PATHI_tick;         /* tick */
 
 extern int pathxSND_setDryLevel(int, int);
 
@@ -26944,14 +26944,14 @@ void PATHI_stepDryRamp_impl(struct sPathVoice *pathVoice) {
     int none;
     unsigned sel;
     diff = (float)pathVoice->f1E - (float)pathVoice->f1C;
-    rampSetting.dur = D_0044F420->f14[2].dur;
-    rampSetting.mode = D_0044F420->f14[2].mode;
+    rampSetting.dur = PATHI_selectedPlayer->f14[2].dur;
+    rampSetting.mode = PATHI_selectedPlayer->f14[2].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
     rampSetting.neg = pos;
-    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f18) / (float)rampSetting.dur;
+    elapsed = (float)(unsigned)(PATHI_tick - pathVoice->f18) / (float)rampSetting.dur;
     if (elapsed >= 1.0f) {
         pathxSND_setDryLevel(pathVoice->f54, pathVoice->f1E);
         none = -1;
@@ -26995,10 +26995,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setRampDuration);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_6108 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_6108(int) __asm__("PATHI_selectPlayer");
-extern int D_f420_6108[] __asm__("D_0044F420");
+extern int D_f420_6108[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_f42C_6108[] __asm__("D_0044F42C");
-extern int D_f430_6108[] __asm__("D_0044F430");
-extern struct P_6108 D_7610_6108[4] __asm__("D_00517610");
+extern int D_f430_6108[] __asm__("PATHI_selectedId");
+extern struct P_6108 D_7610_6108[4] __asm__("PATHI_players");
 
 /**
  * Sets the volume-ramp duration (+0x14) of every path player in use whose group bits overlap @p mask.
@@ -27029,10 +27029,10 @@ INCLUDE_ASM("ealib/seg_2B4578", PATH_setRampCurve);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_61E8 { char pad[0x30]; int m_a; int m_b; char pad2[0x928 - 0x38]; };
 extern int f5450_61E8(int) __asm__("PATHI_selectPlayer");
-extern int D_f420_61E8[] __asm__("D_0044F420");
+extern int D_f420_61E8[] __asm__("PATHI_selectedPlayer");
 extern unsigned char D_f42C_61E8[] __asm__("D_0044F42C");
-extern int D_f430_61E8[] __asm__("D_0044F430");
-extern struct P_61E8 D_7610_61E8[4] __asm__("D_00517610");
+extern int D_f430_61E8[] __asm__("PATHI_selectedId");
+extern struct P_61E8 D_7610_61E8[4] __asm__("PATHI_players");
 
 /**
  * Sets the volume-ramp curve mode (+0x18) of every path player in use whose group bits overlap @p mask.
@@ -27129,7 +27129,7 @@ extern int pathxSND_getVolume(int);
 /**
  * Starts a volume ramp on a path voice from its current volume to @p targetVol.
  *
- * Stamps the start tick (+0x8 = D_0044F438), stores @p rampFlag at +0xD, the current volume (pathxSND_getVolume) at +0xC and
+ * Stamps the start tick (+0x8 = PATHI_tick), stores @p rampFlag at +0xD, the current volume (pathxSND_getVolume) at +0xC and
  * @p targetVol as the target (+0xE) and node volume (+0x34). PATHI_stepVolumeRamp then steps it.
  *
  * @param targetVol  the target volume
@@ -27138,7 +27138,7 @@ extern int pathxSND_getVolume(int);
 void PATHI_startVolumeRamp(char *self, int targetVol, int rampFlag) {
     int curVol;
     int q;
-    *(int *)(self + 8) = D_0044F438;
+    *(int *)(self + 8) = PATHI_tick;
     self[0xD] = rampFlag;
     curVol = pathxSND_getVolume(*(int *)(self + 0x54));
     self[0xC] = (int)(float)curVol;
@@ -27152,7 +27152,7 @@ void PATHI_startVolumeRamp(char *self, int targetVol, int rampFlag) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_startSendRamp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044F438_63F8[] __asm__("D_0044F438");
+extern int PATHI_tick_63F8[] __asm__("PATHI_tick");
 extern signed char f_63F8_cb(int) __asm__("pathxSND_getFxLevel");
 
 /**
@@ -27166,7 +27166,7 @@ extern signed char f_63F8_cb(int) __asm__("pathxSND_getFxLevel");
  */
 void PATHI_startSendRamp(char *self, int targetLevel, int rampFlag) {
     signed char curLevel;
-    *(int *)(self + 0x10) = D_0044F438_63F8[0];
+    *(int *)(self + 0x10) = PATHI_tick_63F8[0];
     self[0x15] = rampFlag;
     curLevel = f_63F8_cb(*(int *)(self + 0x54));
     self[0x16] = targetLevel;
@@ -27178,7 +27178,7 @@ void PATHI_startSendRamp(char *self, int targetLevel, int rampFlag) {
 INCLUDE_ASM("ealib/seg_2B4578", PATHI_startDryRamp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044F438_6448[] __asm__("D_0044F438");
+extern int PATHI_tick_6448[] __asm__("PATHI_tick");
 extern signed char f_6448_cb(int) __asm__("pathxSND_getDryLevel");
 
 /**
@@ -27192,7 +27192,7 @@ extern signed char f_6448_cb(int) __asm__("pathxSND_getDryLevel");
  */
 void PATHI_startDryRamp(char *self, int targetLevel, int rampFlag) {
     signed char curLevel;
-    *(int *)(self + 0x18) = D_0044F438_6448[0];
+    *(int *)(self + 0x18) = PATHI_tick_6448[0];
     self[0x1D] = rampFlag;
     curLevel = f_6448_cb(*(int *)(self + 0x54));
     self[0x1E] = targetLevel;

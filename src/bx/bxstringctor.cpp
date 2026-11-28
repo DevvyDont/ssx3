@@ -1315,7 +1315,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481150[];
+extern void* online_SetupRowEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269478;
 
@@ -1341,7 +1341,7 @@ static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_002694
 /**
  * Handles the client's highlighted bragging-rights row on the host: posts it as a lobby event.
  *
- * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * Pushes a 0x10-byte event of kind 251 (vtable online_SetupRowEvent_vtbl, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post the same event with flag 0.
  * cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase
  * (state 7 or more).
@@ -1352,7 +1352,7 @@ void cSetupMan::handleClientBragRow(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
-    netEvent->mVtbl = D_00481150;
+    netEvent->mVtbl = online_SetupRowEvent_vtbl;
     netEvent->mFlag = 1;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
@@ -1369,7 +1369,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481130[];
+extern void* online_SetupRuleEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269538;
 
@@ -1395,7 +1395,7 @@ static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_002695
 /**
  * Handles a bragging-rights rule change from the client on the host: posts it as a lobby event.
  *
- * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * Pushes a 0x14-byte event of kind 252 (vtable online_SetupRuleEvent_vtbl, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post
  * the same event with flag 0. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-9 message in
  * the bragging-rights phase (state 7 or more).
@@ -1407,7 +1407,7 @@ void cSetupMan::handleClientBragRule(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
-    netEvent->mVtbl = D_00481130;
+    netEvent->mVtbl = online_SetupRuleEvent_vtbl;
     netEvent->mFlag = 1;
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
@@ -1426,7 +1426,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
-extern void* D_004813E0[];
+extern void* online_SetupLockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269608;
 
@@ -1453,7 +1453,7 @@ static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_002696
  * Handles the client locking its bragging-rights panel on the host: advances the state, answers and posts an event.
  *
  * Moves the state word from 6 or 7 to 8, or from 9 to 10, sends a type-11 message carrying the new state
- * (cSetupMan_sendCharacterMessage) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag "cSetupMan::Update") with flag +0x8 =
+ * (cSetupMan_sendCharacterMessage) and pushes a 0xC-byte event of kind 253 (vtable online_SetupLockEvent_vtbl, tag "cSetupMan::Update") with flag +0x8 =
  * 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
@@ -1472,7 +1472,7 @@ void cSetupMan::handleClientBragLock()
     cSetupMan_sendCharacterMessage(this, 11, mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
-    netEvent->mVtbl = D_004813E0;
+    netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269608_insert(((sMsgListNode_00269608*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1489,7 +1489,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char str_cSetupMan_Update[];
 extern "C" void cSetupMan_sendCharacterMessage(void* self, int event, int a2, int state);
 extern const char str_StlBlock_b[];
-extern void* D_004813C0[];
+extern void* online_SetupUnlockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_002696F8;
 
@@ -1516,7 +1516,7 @@ static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696
  * Handles the client unlocking its bragging-rights panel on the host: steps the state back, answers and posts an event.
  *
  * Moves the state word from 8 back to 7, sends a type-12 message carrying the state (cSetupMan_sendCharacterMessage) and pushes a
- * 0xC-byte event of kind 254 (vtable D_004813C0, tag "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's
+ * 0xC-byte event of kind 254 (vtable online_SetupUnlockEvent_vtbl, tag "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's
  * mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
@@ -1527,7 +1527,7 @@ void cSetupMan::handleClientBragUnlock()
     cSetupMan_sendCharacterMessage(this, 0xC, mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
-    netEvent->mVtbl = D_004813C0;
+    netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_002696F8_insert(((sMsgListNode_002696F8*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1543,7 +1543,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481150[];
+extern void* online_SetupRowEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_002697D0;
 
@@ -1569,7 +1569,7 @@ static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697
 /**
  * Handles the host's highlighted bragging-rights row on the client: posts it as a lobby event.
  *
- * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * Pushes a 0x10-byte event of kind 251 (vtable online_SetupRowEvent_vtbl, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post the same event with flag 0.
  * cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-6 message in the bragging-rights phase
  * (state 7 or more).
@@ -1580,7 +1580,7 @@ void cSetupMan::handleHostBragRow(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
-    netEvent->mVtbl = D_00481150;
+    netEvent->mVtbl = online_SetupRowEvent_vtbl;
     netEvent->mFlag = 1;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
@@ -1597,7 +1597,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481150[];
+extern void* online_SetupRowEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269890;
 
@@ -1623,7 +1623,7 @@ static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_002698
 /**
  * Handles a type-7 highlighted-row message on the client: posts it as a lobby event with flag 0.
  *
- * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * Pushes a 0x10-byte event of kind 251 (vtable online_SetupRowEvent_vtbl, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 0 onto LobbyMan's mEventList, like the local sender cSetupMan_sendBraggingSelection. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase (state 7 or more).
  *
@@ -1633,7 +1633,7 @@ void cSetupMan::handleBragRowMessage(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
-    netEvent->mVtbl = D_00481150;
+    netEvent->mVtbl = online_SetupRowEvent_vtbl;
     netEvent->mFlag = 0;
     netEvent->mRow = rowIndex;
     online_Event* mp = (online_Event*)netEvent;
@@ -1650,7 +1650,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481130[];
+extern void* online_SetupRuleEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269948;
 
@@ -1676,7 +1676,7 @@ static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_002699
 /**
  * Handles a bragging-rights rule change from the host on the client: posts it as a lobby event.
  *
- * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * Pushes a 0x14-byte event of kind 252 (vtable online_SetupRuleEvent_vtbl, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (cSetupMan_sendBraggingSelection, cSetupMan_sendBraggingRule) post
  * the same event with flag 0. cSetupMan_update calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-8 message in
  * the bragging-rights phase (state 7 or more).
@@ -1688,7 +1688,7 @@ void cSetupMan::handleHostBragRule(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
-    netEvent->mVtbl = D_00481130;
+    netEvent->mVtbl = online_SetupRuleEvent_vtbl;
     netEvent->mFlag = 1;
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
@@ -1706,7 +1706,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_00481130[];
+extern void* online_SetupRuleEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269A18;
 
@@ -1732,7 +1732,7 @@ static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A
 /**
  * Handles a type-9 rule-change message on the client: posts it as a lobby event with flag 0.
  *
- * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * Pushes a 0x14-byte event of kind 252 (vtable online_SetupRuleEvent_vtbl, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 0 onto LobbyMan's mEventList, like the local sender cSetupMan_sendBraggingRule. cSetupMan_update
  * calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-9 message in the bragging-rights phase (state 7 or
  * more).
@@ -1744,7 +1744,7 @@ void cSetupMan::handleBragRuleMessage(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
-    netEvent->mVtbl = D_00481130;
+    netEvent->mVtbl = online_SetupRuleEvent_vtbl;
     netEvent->mFlag = 0;
     netEvent->mRuleSlot = ruleSlot;
     netEvent->mRuleValue = ruleValue;
@@ -1762,7 +1762,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_004813E0[];
+extern void* online_SetupLockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269AE0;
 
@@ -1788,7 +1788,7 @@ static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269A
 /**
  * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
  *
- * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable online_SetupLockEvent_vtbl, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-10 message in the bragging-rights phase (state 7 or more).
  *
@@ -1799,7 +1799,7 @@ void cSetupMan::handleHostBragLock(int hostState)
     mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
-    netEvent->mVtbl = D_004813E0;
+    netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269AE0_insert(((sMsgListNode_00269AE0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1815,7 +1815,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_004813E0[];
+extern void* online_SetupLockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269B90;
 
@@ -1842,7 +1842,7 @@ static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B
  * Handles the host's answer to the client's lock (type 11, sent by cSetupMan_handleClientBragLock): takes the host's state and posts an
  * event.
  *
- * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable online_SetupLockEvent_vtbl, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-11 message in the bragging-rights phase (state 7 or more).
  *
@@ -1853,7 +1853,7 @@ void cSetupMan::handleBragLockAnswer(int hostState)
     mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
-    netEvent->mVtbl = D_004813E0;
+    netEvent->mVtbl = online_SetupLockEvent_vtbl;
     netEvent->mFlag = 0;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269B90_insert(((sMsgListNode_00269B90*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1869,7 +1869,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_004813C0[];
+extern void* online_SetupUnlockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269C40;
 
@@ -1896,7 +1896,7 @@ static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
  *
  * Type 12 comes from the host unlocking its own panel (cSetupMan_unlockBragging) or answering the client's unlock (cSetupMan_handleClientBragUnlock).
- * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable online_SetupUnlockEvent_vtbl, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-12 message in the bragging-rights phase (state 7 or more).
  *
@@ -1907,7 +1907,7 @@ void cSetupMan::handleHostBragUnlock(int hostState)
     mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
-    netEvent->mVtbl = D_004813C0;
+    netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 1;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269C40_insert(((sMsgListNode_00269C40*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1923,7 +1923,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_cSetupMan_Update[];
 extern const char str_StlBlock_b[];
-extern void* D_004813C0[];
+extern void* online_SetupUnlockEvent_vtbl[];
 
 typedef _List_node<online_Event*> sMsgListNode_00269CF0;
 
@@ -1949,7 +1949,7 @@ static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269C
 /**
  * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
  *
- * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable online_SetupUnlockEvent_vtbl, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. cSetupMan_update calls it on the client's setup
  * manager (cSetupMan_mSetupMan) for a type-13 message in the bragging-rights phase (state 7 or more).
  *
@@ -1960,7 +1960,7 @@ void cSetupMan::handleBragUnlockMessage(int hostState)
     mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
-    netEvent->mVtbl = D_004813C0;
+    netEvent->mVtbl = online_SetupUnlockEvent_vtbl;
     netEvent->mFlag = 0;
     online_Event* mp = (online_Event*)netEvent;
     sMsgList_00269CF0_insert(((sMsgListNode_00269CF0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
@@ -1975,7 +1975,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00269DA0__FPv);
 /**
  * Destroys a bragging-rights lock event (kind 253) through the base online event destructor online_Event__Event.
  *
- * Slot 1 of D_004813E0. The destructor flags pass through untouched in the second argument register.
+ * Slot 1 of online_SetupLockEvent_vtbl. The destructor flags pass through untouched in the second argument register.
  *
  * @return no meaningful value (online_Event__Event returns nothing)
  */
@@ -1990,12 +1990,12 @@ INCLUDE_ASM("bx/bxstringctor", func_00269DC0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_NetEvent[];
-extern void* D_004813E0[];
+extern void* online_SetupLockEvent_vtbl[];
 
 /**
- * Returns a heap copy of a bragging-rights lock event (kind 253, vtable D_004813E0).
+ * Returns a heap copy of a bragging-rights lock event (kind 253, vtable online_SetupLockEvent_vtbl).
  *
- * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of D_004813E0.
+ * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of online_SetupLockEvent_vtbl.
  *
  * @return the new event
  */
@@ -2004,7 +2004,7 @@ extern "C" online_SetupEvent* func_00269DC0(online_SetupEvent* self)
     online_SetupEvent* n = (online_SetupEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int flagWord = self->mFlag;
     n->mType = 253;
-    n->mVtbl = D_004813E0;
+    n->mVtbl = online_SetupLockEvent_vtbl;
     n->mFlag = flagWord;
     return n;
 }
@@ -2016,7 +2016,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00269E20__FPv);
 /**
  * Destroys a bragging-rights unlock event (kind 254) through the base online event destructor online_Event__Event.
  *
- * Slot 1 of D_004813C0. The destructor flags pass through untouched in the second argument register.
+ * Slot 1 of online_SetupUnlockEvent_vtbl. The destructor flags pass through untouched in the second argument register.
  *
  * @return no meaningful value (online_Event__Event returns nothing)
  */
@@ -2031,12 +2031,12 @@ INCLUDE_ASM("bx/bxstringctor", func_00269E40);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_NetEvent[];
-extern void* D_004813C0[];
+extern void* online_SetupUnlockEvent_vtbl[];
 
 /**
- * Returns a heap copy of a bragging-rights unlock event (kind 254, vtable D_004813C0).
+ * Returns a heap copy of a bragging-rights unlock event (kind 254, vtable online_SetupUnlockEvent_vtbl).
  *
- * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of D_004813C0.
+ * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of online_SetupUnlockEvent_vtbl.
  *
  * @return the new event
  */
@@ -2045,7 +2045,7 @@ extern "C" online_SetupEvent* func_00269E40(online_SetupEvent* self)
     online_SetupEvent* n = (online_SetupEvent*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int flagWord = self->mFlag;
     n->mType = 0xFE;
-    n->mVtbl = D_004813C0;
+    n->mVtbl = online_SetupUnlockEvent_vtbl;
     n->mFlag = flagWord;
     return n;
 }

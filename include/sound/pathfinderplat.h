@@ -5,9 +5,9 @@
 // pathxSND_stop): the library (in ealib/seg_2B4578, func_003D25F0 ..) opens up to 24 players and drives them through
 // these functions by player index. A player is either a stream player (an EA SNDSTRM stream that queues sections of a
 // file) or a bank player (plays patches from loaded sound banks with SNDBANK_play).
-//   D_004D3E98[24]  the players (tPathPlayer*; 0 = unused). pathxSND_openPlayer claims a free entry (pathxSND_findFreePlayer) and
+//   pathxSND_players[24]  the players (tPathPlayer*; 0 = unused). pathxSND_openPlayer claims a free entry (pathxSND_findFreePlayer) and
 //                   points it at the caller's memory, pathxSND_closePlayer / pathxSND_forgetPlayer clear it; pathxSND_init clears all.
-//   D_004D3EF8[24]  the bank records (tPathBank) of the bank players: which player and bank index a loaded bank
+//   pathxSND_banks[24]  the bank records (tPathBank) of the bank players: which player and bank index a loaded bank
 //                   belongs to. pathxSND_findBank searches them, pathxSND_addBank fills one, pathxSND_removeBank / pathxSND_clearBank
 //                   clear one.
 // The type and member names are ours, derived from what the code does (no EA symbols or assert strings survive for
@@ -143,7 +143,7 @@ CHECK_OFFSET(tPathBank, unk_20, 0x20);
 CHECK_OFFSET(tPathBank, mLastPlayTime, 0x24);
 CHECK_SIZE(tPathBank, 0x28);
 
-extern tPathPlayer* D_004D3E98[24];
-extern tPathBank D_004D3EF8[24];
+extern tPathPlayer* pathxSND_players[24];
+extern tPathBank pathxSND_banks[24];
 
 #endif /* SOUND_PATHFINDERPLAT_H */

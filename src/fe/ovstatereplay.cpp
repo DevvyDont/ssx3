@@ -368,7 +368,7 @@ extern long D_004A2738[];
 extern long D_00471C90[];
 extern long D_004A2740[];
 extern long D_004A2748[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 /**
  * Shows the name of the current replay camera in the "camera" text.
@@ -396,7 +396,7 @@ void cOVState_REPLAY::setupCameraName()
     case 7: __builtin_memcpy(buf, D_004A2740, 8); break;
     case 8: __builtin_memcpy(buf, D_004A2748, 8); break;
     default:
-        sprintf((char*)buf, D_004A2138, cam + 1);
+        sprintf((char*)buf, str_pct_d_j, cam + 1);
         break;
     }
     cUIText_setAsciiString(text, (char*)buf);

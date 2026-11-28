@@ -192,12 +192,12 @@ INCLUDE_ASM("seg/seg_1D3510", get_string);
 void* operator_new_tag_27B0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int get_char_27B0(unsigned char **, unsigned char *) __asm__("get_char");
 extern "C" char *strcpy(char *, const char *);
-extern char D_004D49B8[];
+extern char get_string_buffer[];
 extern char str_Comm_String[];
 /**
  * Reads a null-terminated string from a byte stream into a newly allocated copy.
  *
- * Copies bytes into the static buffer D_004D49B8 until a 0 or 1000 bytes (a string cut at 1000 is terminated at
+ * Copies bytes into the static buffer get_string_buffer until a 0 or 1000 bytes (a string cut at 1000 is terminated at
  * byte 999), allocates that many bytes named "Comm String" (type 0x100) and copies the text there.
  *
  * @param src  pointer to the read cursor, advanced past the bytes read
@@ -209,12 +209,12 @@ extern "C" int get_string(unsigned char **src, char **out) {
     char curChar = 1;
     do {
         n += get_char_27B0(src, (unsigned char*)&curChar);
-        D_004D49B8[n - 1] = curChar;
+        get_string_buffer[n - 1] = curChar;
     } while (curChar != 0 && n < 1000);
-    if (n == 1000) D_004D49B8[999] = 0;
+    if (n == 1000) get_string_buffer[999] = 0;
     char *copy = (char*)operator_new_tag_27B0(n, str_Comm_String, 0x100, 0);
     *out = copy;
-    strcpy(copy, D_004D49B8);
+    strcpy(copy, get_string_buffer);
     return n;
 }
 #endif
@@ -629,17 +629,17 @@ int cPS2MemCard::GetNumDirTable()
 //100%
 INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetResult);
 #ifdef SKIP_ASM
-extern int D_004A3940;
+extern int cPS2MemCard_mcResult;
 
 /**
- * Returns D_004A3940, the static word where the memory-card code keeps the last libmc result.
+ * Returns cPS2MemCard_mcResult, the static word where the memory-card code keeps the last libmc result.
  *
  * Nothing in the build calls it.
  *
- * @return D_004A3940
+ * @return cPS2MemCard_mcResult
  */
 extern "C" int cPS2MemCard_GetResult(void) {
-    return D_004A3940;
+    return cPS2MemCard_mcResult;
 }
 #endif
 
@@ -1738,19 +1738,19 @@ extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(cPS2ConsoleConfig* self, in
 //100%
 INCLUDE_ASM("seg/seg_1D3510", cMenu_compareSortItems);
 #ifdef SKIP_ASM
-extern int (*D_004A54BC)(int, int);
+extern int (*cMenu_sortCompareFunc)(int, int);
 
 /**
- * Compares two menu-item pointers for cMenu_sortItems: calls the comparison function in D_004A54BC with the two items.
+ * Compares two menu-item pointers for cMenu_sortItems: calls the comparison function in cMenu_sortCompareFunc with the two items.
  *
- * cMenu_sortItems stores its comparison function in D_004A54BC and passes this function to the qsort qsort. The
+ * cMenu_sortItems stores its comparison function in cMenu_sortCompareFunc and passes this function to the qsort qsort. The
  * C declares no return value; the comparison's result is left in the return register.
  *
  * @param lhsItem  points to the first item pointer
  * @param rhsItem  points to the second item pointer
  */
 extern "C" void cMenu_compareSortItems(int *lhsItem, int *rhsItem) {
-    D_004A54BC(*lhsItem, *rhsItem);
+    cMenu_sortCompareFunc(*lhsItem, *rhsItem);
 }
 #endif
 

@@ -2200,10 +2200,10 @@ extern "C" void cRider_verifyRailslideModeDEBUG(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", gGetGrabName);
 #ifdef SKIP_ASM
-extern int D_0043D160[];
+extern int gGrabNameTable[];
 
 /**
- * Returns a grab's name text: entry @p grabIndex of the table D_0043D160 ("", "Combo Grab ", "", "Indy ", "Method ", ...),
+ * Returns a grab's name text: entry @p grabIndex of the table gGrabNameTable ("", "Combo Grab ", "", "Indy ", "Method ", ...),
  * the table gGenTrickName builds trick names from.
  *
  * cFEStateUberTrick_onWidgetEvent and cFEStateUberTrick_updateTrickMenu use it.
@@ -2212,7 +2212,7 @@ extern int D_0043D160[];
  * @return the name (as an int)
  */
 extern "C" int gGetGrabName(int grabIndex) {
-    return D_0043D160[grabIndex];
+    return gGrabNameTable[grabIndex];
 }
 #endif
 
@@ -2221,7 +2221,7 @@ INCLUDE_ASM("seg/seg_14B10", gGenTrickName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_0043D160[];
+extern int gGrabNameTable[];
 
 struct sTrickDesc {
     unsigned int f0 : 3;
@@ -2291,11 +2291,11 @@ extern "C" void gGenTrickName_desc(char* out, sTrickDesc* nameDef, int)
     while (*part) *out++ = *part++;
     part = D_0043D0C0[nameDef->f28];
     while (*part) *out++ = *part++;
-    part = ((char**)D_0043D160)[nameDef->f35];
+    part = ((char**)gGrabNameTable)[nameDef->f35];
     while (*part) *out++ = *part++;
     part = D_004A0FF0[nameDef->f42];
     while (*part) *out++ = *part++;
-    part = ((char**)D_0043D160)[nameDef->f43];
+    part = ((char**)gGrabNameTable)[nameDef->f43];
     while (*part) *out++ = *part++;
     part = D_0043D2B8[nameDef->f32];
     while (*part) *out++ = *part++;

@@ -433,7 +433,7 @@ extern char str_Peakpct_dFreestyleGoal[];
 extern char str_Peakpct_dFreerideGoal[];
 extern char str_Peakpct_dEarningsGoal[];
 extern char str_empty_e[];
-extern char D_004A2590[];
+extern char str_pct_S_b[];
 extern char str_ConfirmMenu_Yes[];
 extern tARGB kMAPCOLOR_REGULAR;
 
@@ -547,7 +547,7 @@ void cUITemplate_MAP::setupMenus()
                     } else if (goal.kind == kGAMEEVENT_RIVALTIME) {
                         unsigned short text[200];
                         unsigned short wfmt[24];
-                        strcpy3_enus(wfmt, D_004A2590);
+                        strcpy3_enus(wfmt, str_pct_S_b);
                         sprintf1(text, wfmt, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
                         cUIText_setUnicodeString_enus(menuObj, text);
                     } else {
@@ -2503,7 +2503,7 @@ extern char str_kT_CMNHELPStations[];
 extern char str_kT_HELPChalAvail[];
 extern char str_kT_HELPLockCompRace[];
 extern char str_kT_HELPLockCompFree[];
-extern char D_004A2590[];
+extern char str_pct_S_b[];
 extern char str_kT_HELPLockCompEvent[];
 extern char str_pct_S_Jam_b[];
 extern char str_kT_cmnRaceCaps_b[];
@@ -2528,7 +2528,7 @@ extern char str_kT_CMNNoMedal[];
 extern char str_kT_CMNTopTime[];
 extern char str_kT_CMNTopScore[];
 extern char str_dash[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 static inline void* getObj_207430(cUITemplate_MAP* self, char* name)
 {
@@ -2689,7 +2689,7 @@ void cUITemplate_MAP::setupLocationInfo()
                 short part[304];
                 short pre[304];
                 short line[304];
-                strcpy3(fmt, D_004A2590);
+                strcpy3(fmt, str_pct_S_b);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
                 cFELocale* loc = SSXApp->FELocale;
                 sLocVEntry_207430* vt = (sLocVEntry_207430*)VPTR_OF(cUILocaleInterface, loc);
@@ -2796,7 +2796,7 @@ void cUITemplate_MAP::setupLocationInfo()
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_CMNTopScore));
             int best = cBEScoreInterface_getHighScore(score, 0, desc.w[0], desc.w[2]);
             char num[32];
-            sprintf(num, D_004A2138, best);
+            sprintf(num, str_pct_d_j, best);
             cUIText_setAsciiString(value, num);
             if (best == 0)
                 cUIText_setAsciiString(value, str_dash);

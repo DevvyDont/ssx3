@@ -4,7 +4,7 @@
 // cFEBoltFileManager: the front end's file cache for the riders' bolt-on (equipment) files - icons, previews and the
 // rider manager's model / texture files - kept per character in ten banks of 256 file slots, loaded synchronously or
 // through ASYNCFILE, unpacked, reference counted and evicted least-recently-used under a 9,999,999-byte budget. It is
-// embedded in the front end: cFE::mBoltFileManager (fe/fereal.h, cRealFE + 0x1A70); D_004A196C points at the one
+// embedded in the front end: cFE::mBoltFileManager (fe/fereal.h, cRealFE + 0x1A70); cFEBoltFileManager_instance points at the one
 // instance (set by the constructor, read by the qsort comparators).
 // EA's source: d:/ssx/code/source/fe/feboltfilemanager.cpp (the July 2003 preview's assert path; its asserts name the
 // members mFiles[charID][fileIndex] (.flags / .refCount), pFile->dataPtr / ->async, mMemUsed, mNumLoadThreads and the
@@ -138,7 +138,7 @@ CHECK_OFFSET(cFEBoltFileManager, unk_B4008, 0xB4008);
 CHECK_SIZE(cFEBoltFileManager, 0xB4030);
 
 // The file-index hash table beside the cache (names ours: [R] cFEBoltFileManager_init allocates it as cMemMan_alloc(8004,
-// "BoltFileIndexManager") into D_004A1968, so the class is cBoltFileIndexManager). The rider manager keeps, per
+// "BoltFileIndexManager") into cBoltFileIndexManager_instance, so the class is cBoltFileIndexManager). The rider manager keeps, per
 // profile index and item id, the cache slots of the item's model-part and part-texture files in it (cBoltFileIndexManager_getModelPartFile /
 // cBoltFileIndexManager_setModelPartFile and cBoltFileIndexManager_getPartTextureFile / cBoltFileIndexManager_setPartTextureFile). Retail code: fe/festatecharequipdetail cBoltFileIndexManager_allocNode ...
 // cBoltFileIndexManager_setPartTextureFile; no vtable. [R] cBoltFileIndexManager_reset (reset) / cBoltFileIndexManager_findNode (lookup) / cBoltFileIndexManager_freeNode (release).

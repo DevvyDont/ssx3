@@ -35,14 +35,14 @@ struct Groups_15E0 {
     int v[0x1D8];
 };
 
-extern Groups_15E0 D_00489D60;
+extern Groups_15E0 cAIAnimEventMap_groupOfEntry;
 
 // PORT: the unit declares this as void(int); defined under an asm label with its real type
 extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t) __asm__("cAIAnimEventMap_initMaps");
 /**
  * Builds the AI animation event map's group ranges from the static group table.
  *
- * Clears the counts of the 437 groups, then walks the 472 entries of D_00489D60 (a group number per entry)
+ * Clears the counts of the 437 groups, then walks the 472 entries of cAIAnimEventMap_groupOfEntry (a group number per entry)
  * and records, for each group, the index where its run starts and how many entries it has. A group is
  * expected to occupy one contiguous run; the start of a group with no entries is left as it was.
  *
@@ -50,7 +50,7 @@ extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t) __asm__("cAIAn
  */
 extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* rangeTable)
 {
-    Groups_15E0 tab = D_00489D60;
+    Groups_15E0 tab = cAIAnimEventMap_groupOfEntry;
     int prev;
     int i, j;
     for (j = 436; j >= 0; j--) rangeTable->r[j].count = 0;
@@ -75,14 +75,14 @@ struct sWeighted_1710 {
     int weight;
     int flags;
 };
-extern sWeighted_1710 D_00449960[];
+extern sWeighted_1710 cAIAnimEventMap_weightedVariants[];
 unsigned int AIrand();
 
 /**
  * Picks the game animation for an AI animation id: a weighted random choice among the id's variants that pass a filter.
  *
  * The id's run of variants (start, count) comes from @p eventMap's range table, built by cAIAnimEventMap_initMaps; the
- * variants are 12-byte entries of D_00449960 (value, weight, flags). An id with one variant returns its value without
+ * variants are 12-byte entries of cAIAnimEventMap_weightedVariants (value, weight, flags). An id with one variant returns its value without
  * checking the filter. Otherwise the weights of the variants whose flags contain every bit of @p mask are summed,
  * AIrand() % total is drawn and reduced by each eligible weight in turn, and the first variant that brings it to 0 or
  * below wins; the run's last variant is the fallback.
@@ -100,20 +100,20 @@ extern "C" int cAIAnimEventMap_mapAIDToGAD(RangeTable_15E0* eventMap, int idx, i
 {
     int start = eventMap->r[idx].start;
     int i, end, total;
-    if (eventMap->r[idx].count == 1) return D_00449960[start].value;
+    if (eventMap->r[idx].count == 1) return cAIAnimEventMap_weightedVariants[start].value;
     end = start + eventMap->r[idx].count;
     total = 0;
     for (int j = start; j < end; j++) {
-        if ((D_00449960[j].flags & mask) == mask) total += D_00449960[j].weight;
+        if ((cAIAnimEventMap_weightedVariants[j].flags & mask) == mask) total += cAIAnimEventMap_weightedVariants[j].weight;
     }
     int roll = AIrand() % total;
     for (i = start; i < end; i++) {
-        if ((D_00449960[i].flags & mask) == mask) {
-            roll -= D_00449960[i].weight;
-            if (roll <= 0) return D_00449960[i].value;
+        if ((cAIAnimEventMap_weightedVariants[i].flags & mask) == mask) {
+            roll -= cAIAnimEventMap_weightedVariants[i].weight;
+            if (roll <= 0) return cAIAnimEventMap_weightedVariants[i].value;
         }
     }
-    return D_00449960[end - 1].value;
+    return cAIAnimEventMap_weightedVariants[end - 1].value;
 }
 #endif
 

@@ -32,7 +32,7 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern signed char D_004A4A70;
+extern signed char cDirtysock_tag_divider;
 extern unsigned char D_004964C0[];
 // D_004964C0's class for the name / value dividers ':' and '=' (name ours). [R] the table maps letters to upper case
 // and digits and '_' to themselves, these two to 1 and every other byte to 0.
@@ -46,7 +46,7 @@ extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
  *
  * Names compare case-insensitively up to their '=' or ':'. A new term goes at the end of the record, or before
  * a term that starts with '=' or ':'; a name starting with '~' is always appended without a search. Each term
- * ends with the divider character (D_004A4A70, '\n'); the record's later terms are moved to make room.
+ * ends with the divider character (cDirtysock_tag_divider, '\n'); the record's later terms are moved to make room.
  *
  * @param record  the tag record to edit (NUL-terminated)
  * @param len     size of the record buffer in bytes
@@ -71,8 +71,8 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* fi
     if (*field == '~') {
         cursor = rec;
         while (*cursor != 0) cursor++;
-        if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != D_004A4A70 && cursor < rec + len - 1) {
-            *cursor++ = D_004A4A70;
+        if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != cDirtysock_tag_divider && cursor < rec + len - 1) {
+            *cursor++ = cDirtysock_tag_divider;
             *cursor = 0;
         }
         end = cursor;
@@ -81,8 +81,8 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* fi
         cursor = rec;
         for (;;) {
             if (*cursor == 0) {
-                if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != D_004A4A70 && cursor < rec + len - 1) {
-                    *cursor++ = D_004A4A70;
+                if (cursor != rec && cursor[-1] >= 0x20 && cursor[-1] != cDirtysock_tag_divider && cursor < rec + len - 1) {
+                    *cursor++ = cDirtysock_tag_divider;
                     *cursor = 0;
                 }
                 end = cursor;
@@ -131,10 +131,10 @@ found:
     if (sizeDelta > 0) func_0041610C(end + sizeDelta, end, cursor - end);
     if (sizeDelta < 0) func_0041610C(start, start - sizeDelta, cursor - (start - sizeDelta));
     func_0041605C(start, field, n);
-    if (start[n] == 0 && D_004A4A70 != '\n')
+    if (start[n] == 0 && cDirtysock_tag_divider != '\n')
         start[n - 1] = 0;
     else
-        start[n - 1] = D_004A4A70;
+        start[n - 1] = cDirtysock_tag_divider;
     return n - 1;
 }
 #endif
@@ -142,12 +142,12 @@ found:
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetDivider);
 #ifdef SKIP_ASM
-extern signed char D_004A4A70;
+extern signed char cDirtysock_tag_divider;
 
 /**
- * Sets the tag-record divider character D_004A4A70 and returns the previous one.
+ * Sets the tag-record divider character cDirtysock_tag_divider and returns the previous one.
  *
- * D_004A4A70 starts as '\n'; cDirtysock_tag_TagFieldAppendBlockMarker() and cDirtysock_tag_TagFieldPrintf() write it between fields.
+ * cDirtysock_tag_divider starts as '\n'; cDirtysock_tag_TagFieldAppendBlockMarker() and cDirtysock_tag_TagFieldPrintf() write it between fields.
  *
  * @param divider  the new divider character
  * @return the divider character it replaced
@@ -155,8 +155,8 @@ extern signed char D_004A4A70;
 extern "C" signed char cDirtysock_tag_TagFieldSetDivider(signed char divider) {
     signed char temp_2;
 
-    temp_2 = D_004A4A70;
-    D_004A4A70 = divider;
+    temp_2 = cDirtysock_tag_divider;
+    cDirtysock_tag_divider = divider;
     return temp_2;
 }
 #endif
@@ -216,7 +216,7 @@ extern "C" void cDirtysock_tag_TagFieldNormalizeSeparators(unsigned char* dst, u
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char D_004963C0[];
+extern unsigned char cDirtysock_tag_upperTable[];
 
 extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned char* pRecord, const unsigned char* pName) __asm__("cDirtysock_tag_TagFieldFind");
 /**
@@ -259,7 +259,7 @@ extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned 
             }
             pRec = pData - 1;
             pNam = pTerm;
-            while ((pRec >= pRecord) && (D_004963C0[*pRec] == D_004963C0[*pNam])) {
+            while ((pRec >= pRecord) && (cDirtysock_tag_upperTable[*pRec] == cDirtysock_tag_upperTable[*pNam])) {
                 if (pNam == pName) {
                     if ((pRec == pRecord) || (pRec[-1] <= ' ')) {
                         return pData + ((pData[1] == ' ') ? 2 : 1);
@@ -585,13 +585,13 @@ extern "C" int cDirtysock_tag_TagFieldSetTextBlock(char* record, int len, const 
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldAppendBlockMarker);
 #ifdef SKIP_ASM
-extern signed char D_004A4A70;
+extern signed char cDirtysock_tag_divider;
 extern signed char D_004A4A80[];
 
 /**
  * Appends the "~~=\n" block marker to a tag record.
  *
- * When the record's last character is printable and not already the divider D_004A4A70, it first appends the divider
+ * When the record's last character is printable and not already the divider cDirtysock_tag_divider, it first appends the divider
  * (if there is room). The marker string is D_004A4A80; cDirtysock_tag_TagFieldFindTextBlock() finds the text after it.
  *
  * @param buf  the tag record, terminated
@@ -610,9 +610,9 @@ extern "C" int cDirtysock_tag_TagFieldAppendBlockMarker(unsigned char* buf, int 
     }
     if (n > 0) {
         if (buf[n - 1] >= 0x20) {
-            if (buf[n - 1] != D_004A4A70) {
+            if (buf[n - 1] != cDirtysock_tag_divider) {
                 if (n < len - 1) {
-                    buf[n] = (unsigned char)D_004A4A70;
+                    buf[n] = (unsigned char)cDirtysock_tag_divider;
                     n++;
                     buf[n] = 0;
                 }
@@ -1314,7 +1314,7 @@ extern char D_004A4A90[];
 /**
  * Formats a tag record from a printf-like template.
  *
- * Copies @p fmt into @p buf; each whitespace run becomes the divider D_004A4A70. A '%' conversion first drops an '='
+ * Copies @p fmt into @p buf; each whitespace run becomes the divider cDirtysock_tag_divider. A '%' conversion first drops an '='
  * just written before it, then stores the next argument as a field with an empty name (D_004A4A90, which writes
  * "=value"): %s cDirtysock_tag_TagFieldSetString(), %d cDirtysock_tag_TagFieldSetNumber(), %a
  * cDirtysock_tag_TagFieldSetAddress(), %f cDirtysock_tag_TagFieldSetFlags(), %e cDirtysock_tag_TagFieldSetEpoch(); %r
@@ -1337,7 +1337,7 @@ extern "C" int cDirtysock_tag_TagFieldPrintf(char* buf, int len, const char* fmt
     unsigned char fmtChar = *fmt++;
     while (fmtChar != 0 && len >= 2) {
         if (fmtChar <= ' ') {
-            *buf++ = D_004A4A70;
+            *buf++ = cDirtysock_tag_divider;
             len--;
             while (*fmt != 0 && *fmt <= ' ')
                 fmt++;
@@ -1466,12 +1466,12 @@ extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFlags);
 #ifdef SKIP_ASM
-extern int D_004965E0[];
+extern int cDirtysock_tag_flagBitTable[];
 
 /**
  * Parses a string of flag letters from a tag field value back into a bit set.
  *
- * ORs together the bit of each letter (the D_004965E0 table, the inverse of TagFieldSetFlags()'s letters) up to
+ * ORs together the bit of each letter (the cDirtysock_tag_flagBitTable table, the inverse of TagFieldSetFlags()'s letters) up to
  * the first character that is not one. A non-null @p data with no flag letters gives 0, not @p defval.
  *
  * @param data    field text, or 0
@@ -1483,7 +1483,7 @@ extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
     if (data != 0) {
         int flags = 0;
         int flagBit;
-        while ((flagBit = D_004965E0[*data]) != 0) {
+        while ((flagBit = cDirtysock_tag_flagBitTable[*data]) != 0) {
             flags |= flagBit;
             data++;
         }
@@ -1557,16 +1557,16 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetDelimItem);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int strlen_D0F8(const char* s) __asm__("strlen");
-extern unsigned char D_004961C0[];
-extern unsigned char D_004962C0[];
+extern unsigned char cDirtysock_tag_hexHighTable[];
+extern unsigned char cDirtysock_tag_hexLowTable[];
 
 /**
  * Copies one item of a delimited tag field value into a buffer, removing quotes and decoding %xx escapes.
  *
  * An opening '"' or '\'' makes that character the closing quote. It skips @p iIndex items separated by @p iDelim; when
  * an item is missing (the scan hits the quote, a control character or the end first) it falls back to @p pDefval.
- * Copying stops at the quote, a control character or @p iDelim, and decodes %xx through the hex tables D_004961C0 (high
- * nibble) and D_004962C0 (low nibble); "%%" gives one '%'. Quirk: the length-only pass (null @p pBuffer) has no "%%"
+ * Copying stops at the quote, a control character or @p iDelim, and decodes %xx through the hex tables cDirtysock_tag_hexHighTable (high
+ * nibble) and cDirtysock_tag_hexLowTable (low nibble); "%%" gives one '%'. Quirk: the length-only pass (null @p pBuffer) has no "%%"
  * case, so it counts "%%x" as one character where the copy gives two.
  *
  * @param pData     the field value, or 0
@@ -1639,7 +1639,7 @@ extern "C" int cDirtysock_tag_TagFieldGetDelimItem(const char* pData, char* pBuf
             ++iSize;
         } else if ((scan[0] == '%') && (scan[1] >= ' ') && (scan[2] >= ' ')) {
             ++iSize;
-            *pBuffer++ = D_004961C0[scan[1]] | D_004962C0[scan[2]];
+            *pBuffer++ = cDirtysock_tag_hexHighTable[scan[1]] | cDirtysock_tag_hexLowTable[scan[2]];
             scan += 3;
         } else {
             ++iSize;
@@ -1715,7 +1715,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer
             ++iSize;
         } else if ((cursor[0] == '%') && (cursor[1] >= ' ') && (cursor[2] >= ' ')) {
             ++iSize;
-            *pBuffer++ = D_004961C0[cursor[1]] | D_004962C0[cursor[2]];
+            *pBuffer++ = cDirtysock_tag_hexHighTable[cursor[1]] | cDirtysock_tag_hexLowTable[cursor[2]];
             cursor += 3;
         } else {
             ++iSize;
@@ -1730,8 +1730,8 @@ extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetBinary);
 #ifdef SKIP_ASM
-extern unsigned char D_004961C0[];
-extern unsigned char D_004962C0[];
+extern unsigned char cDirtysock_tag_hexHighTable[];
+extern unsigned char cDirtysock_tag_hexLowTable[];
 
 /**
  * Decodes a '$'-prefixed hex tag field value into bytes.
@@ -1764,7 +1764,7 @@ extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, 
         return -1;
     }
     for (count = 0; (count < len) && ((unsigned char)cursor[0] >= '0') && ((unsigned char)cursor[1] >= '0'); count++) {
-        *buf++ = D_004961C0[(unsigned char)cursor[0]] | D_004962C0[(unsigned char)cursor[1]];
+        *buf++ = cDirtysock_tag_hexHighTable[(unsigned char)cursor[0]] | cDirtysock_tag_hexLowTable[(unsigned char)cursor[1]];
         cursor += 2;
     }
     return count;
@@ -1842,7 +1842,7 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
                 ++data;
             }
             for (value = 0; (size > 0) && (*data >= '0'); --size) {
-                value = (value << 4) | D_004962C0[*data++];
+                value = (value << 4) | cDirtysock_tag_hexLowTable[*data++];
             }
             if ((size > 0) && (*data == ',')) {
                 ++data;
@@ -1865,7 +1865,7 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
         if ((*tmpl == 's') && (count > 0)) {
             for (size = 0; ((*data >= '0') || (*data == '%')) && (size + 1 < count); ++size) {
                 if (*data == '%') {
-                    buf[size] = D_004961C0[data[1]] | D_004962C0[data[2]];
+                    buf[size] = cDirtysock_tag_hexHighTable[data[1]] | cDirtysock_tag_hexLowTable[data[2]];
                     data += 3;
                 } else {
                     buf[size] = *data++;
@@ -1894,8 +1894,8 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetCrypt);
 #ifdef SKIP_ASM
-extern unsigned char D_004961C0[];
-extern unsigned char D_004962C0[];
+extern unsigned char cDirtysock_tag_hexHighTable[];
+extern unsigned char cDirtysock_tag_hexLowTable[];
 extern char str_GS[];
 extern "C" int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 
@@ -1943,13 +1943,13 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
     k = kbase;
     prev = 0;
     for (; count < len && (unsigned char)cursor[0] >= '0' && (unsigned char)cursor[1] >= '0'; count++) {
-        unsigned int decoded = *k ^ (D_004961C0[(unsigned char)cursor[0]] | D_004962C0[(unsigned char)cursor[1]]);
+        unsigned int decoded = *k ^ (cDirtysock_tag_hexHighTable[(unsigned char)cursor[0]] | cDirtysock_tag_hexLowTable[(unsigned char)cursor[1]]);
         if (*++k == 0) {
             k = kbase;
         }
         *buf++ = ((decoded << 5) | (decoded >> 3)) ^ prev;
-        int hi = D_004961C0[(unsigned char)cursor[0]];
-        int lo = D_004962C0[(unsigned char)cursor[1]];
+        int hi = cDirtysock_tag_hexHighTable[(unsigned char)cursor[0]];
+        int lo = cDirtysock_tag_hexLowTable[(unsigned char)cursor[1]];
         prev = lo | hi;
         cursor += 2;
     }
@@ -1987,7 +1987,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
     if (data != 0) {
         if (*data == '$') {
             for (++data; *data >= '0'; ++data) {
-                result = (result << 4) | D_004962C0[*data];
+                result = (result << 4) | cDirtysock_tag_hexLowTable[*data];
             }
         } else if ((*data >= '0') && (*data <= '9')) {
             const char* parseEnd = LobbyApi_parseDecimal(data, &value);

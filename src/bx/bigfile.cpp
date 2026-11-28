@@ -89,7 +89,7 @@ int cBigFile::close()
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile_open);
 #ifdef SKIP_ASM
-extern int D_004A2E78;
+extern int MEM_defaultClass;
 extern "C" int FILESYS_existssync(const char* name, int a1);
 extern "C" int FILESYS_addbigsync(const char* name, int memtype, int a2, cBigFile* out);
 
@@ -99,7 +99,7 @@ extern "C" int FILESYS_addbigsync(const char* name, int memtype, int a2, cBigFil
 /**
  * Opens a big (archive) file in a memory class, if it exists.
  *
- * The memory class is set in D_004A2E78 for the duration of the open (FILESYS_addbigsync) and then restored.
+ * The memory class is set in MEM_defaultClass for the duration of the open (FILESYS_addbigsync) and then restored.
  *
  * @param name  the big file's path (On Tour bigname)
  * @param memtype  memory class for its data
@@ -110,12 +110,12 @@ int cBigFile::open(const char* name, int memtype)
     if (FILESYS_existssync(name, 100) == 0) {
         return 0;
     }
-    int saved = D_004A2E78;
-    D_004A2E78 = memtype;
+    int saved = MEM_defaultClass;
+    MEM_defaultClass = memtype;
     if (FILESYS_addbigsync(name, memtype, 100, this) != 0) {
         Mounted = 1;
     }
-    D_004A2E78 = saved;
+    MEM_defaultClass = saved;
     return Mounted;
 }
 #endif

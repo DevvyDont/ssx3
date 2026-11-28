@@ -125,9 +125,9 @@ FLO_union_type;
 
 /* IEEE "special" number predicates */
 
-/* nan()'s `static fp_number_type thenan;' is the bss object D_0052ADD8, which is not split into this unit, so the
+/* nan()'s `static fp_number_type thenan;' is the bss object fpbit_thenan, which is not split into this unit, so the
    object is declared here and nan () returns its address. */
-extern fp_number_type thenan __asm__("D_0052ADD8");
+extern fp_number_type thenan __asm__("fpbit_thenan");
 
 INLINE
 static fp_number_type *
@@ -550,7 +550,7 @@ _fpadd_parts (fp_number_type * a,
 /**
  * Adds two unpacked single-precision numbers and returns a pointer to the unpacked sum.
  *
- * A NaN operand is returned as is (lhs first). Infinities of opposite sign give the shared NaN D_0052ADD8; otherwise an
+ * A NaN operand is returned as is (lhs first). Infinities of opposite sign give the shared NaN fpbit_thenan; otherwise an
  * infinite operand is returned. Zero plus zero is written to tmp with the AND of both signs; a single zero operand
  * returns the other one. Otherwise the fraction with the smaller exponent is shifted right one bit at a time (keeping a
  * sticky bit) until the exponents agree, or dropped when they differ by 32 or more; the fractions are added or
@@ -874,7 +874,7 @@ multiply (FLO_type arg_a, FLO_type arg_b) __asm__("fpmul");
  * Multiplies two floats in software.
  *
  * Unpacks both operands and multiplies the parts inline: a NaN operand is returned with the XOR of the signs; infinity
- * times zero gives the shared NaN D_0052ADD8; an infinite or zero operand is returned with the XOR sign. Otherwise the
+ * times zero gives the shared NaN fpbit_thenan; an infinite or zero operand is returned with the XOR sign. Otherwise the
  * 32-bit fractions are multiplied into 64 bits, the exponent is the sum plus 2, the high word is normalised into [1 <<
  * 30, 1 << 31) (low bits carried along) and rounded to nearest even with the low word as sticky bits. The result is
  * packed with __pack_f.
@@ -905,13 +905,13 @@ INCLUDE_ASM("seg/seg_313F58", fpdiv);
 #ifdef SKIP_ASM
 extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
 extern float func_00412F58_f(int *) __asm__("__pack_f");
-extern int D_0052ADD8[];
+extern int fpbit_thenan[];
 
 /**
  * Divides one float by another in software.
  *
  * Unpacks both operands (__unpack_f). A NaN dividend, else a NaN divisor, is returned as is. The sign is the XOR of
- * both. Infinity / infinity and zero / zero give the shared NaN D_0052ADD8; an infinite or zero dividend is returned; a
+ * both. Infinity / infinity and zero / zero give the shared NaN fpbit_thenan; an infinite or zero dividend is returned; a
  * finite value over infinity becomes zero (fraction and exponent cleared); a finite value over zero becomes infinity.
  * Otherwise the exponents are subtracted (one less when the dividend's fraction is the smaller, which is then doubled),
  * 31 quotient bits are produced by shift-and-subtract from bit 30 down, and the quotient is rounded to nearest even
@@ -941,7 +941,7 @@ float fpdiv(float x, float y) {
         if ((dividend[0] ^ 4) == 0 || (dividend[0] ^ 2) == 0) {
             result = dividend;
             if (dividend[0] == divisor[0])
-                result = D_0052ADD8;
+                result = fpbit_thenan;
         } else if ((divisor[0] ^ 4) == 0) {
             dividend[3] = 0;
             dividend[2] = 0;
@@ -1890,7 +1890,7 @@ INCLUDE_ASM("seg/seg_313F58", __register_frame_info_table);
  * Registers a null-terminated table of .eh_frame sections for unwinding, using an object record the caller supplies.
  *
  * Like __register_frame_info but also stores the table in fde_array (+0xC), so frame_init walks every listed section. crt0
- * (func_001001D0) calls it at startup with D_0043CE00 and the object D_004A5D48.
+ * (func_001001D0) calls it at startup with crt_ehFrameTable and the object D_004A5D48.
  *
  * @param begin  the table of section pointers
  * @param frameObject  the 0x18-byte object record to fill and link
@@ -1931,7 +1931,7 @@ extern void abort_a() __asm__("abort");
  *
  * Unlinks the object whose fde_begin (+8) equals key from the list D_0052ADE8 and frees its sorted FDE array
  * (free) when the object was initialised (pc_begin nonzero). Aborts (abort) when no object matches.
- * The crt teardown crt_deregisterFrameInfo calls it with D_0043CE00.
+ * The crt teardown crt_deregisterFrameInfo calls it with crt_ehFrameTable.
  *
  * @param key  the section (or table) the object was registered with
  * @return the unlinked object record

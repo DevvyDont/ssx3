@@ -3598,7 +3598,7 @@ void cKeyboardPopup::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern char str_HelpGroup[];
 extern char str_back_com[];
 extern char str_back_exp[];
@@ -3607,7 +3607,7 @@ extern char str_back_reg[];
 
 static inline int isOnK1CB2C8()
 {
-    return D_004A1A70 == 1;
+    return cFEStateNet_fePath == 1;
 }
 
 static inline int IsK1CB2C8(int id, char* s)
@@ -3618,7 +3618,7 @@ static inline int IsK1CB2C8(int id, char* s)
 /**
  * Sets up the keyboard's widgets as they are created: the help group and the three backgrounds.
  *
- * "HelpGroup" is shown only online (D_004A1A70 == 1) and outside a game (SSXApp->Game == 0); "back_com",
+ * "HelpGroup" is shown only online (cFEStateNet_fePath == 1) and outside a game (SSXApp->Game == 0); "back_com",
  * "back_exp" and "back_reg" are kept in mpBackCompact, mpBackExpand and mpBackRegular.
  *
  * @param widget  the widget being created
@@ -5131,7 +5131,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_getObjName);
 struct sName8_1CD0E8 { char s[8]; };
 struct sName10_1CD0E8 { char s[10]; };
 extern char str_cursor[];
-extern sName10_1CD0E8 D_0045D550_1CD0E8 __asm__("D_0045D550");
+extern sName10_1CD0E8 str_keyboard_1CD0E8 __asm__("str_keyboard");
 extern char str_back[];
 extern char str_caps[];
 extern char str_Lshift[];
@@ -5165,7 +5165,7 @@ bool cKeyboardPopup::getObjName(int key, char* out, int shifted)
     if (shifted != 0) {
         *(sName8_1CD0E8*)out = *(sName8_1CD0E8*)str_cursor;
     } else {
-        *(sName10_1CD0E8*)out = D_0045D550_1CD0E8;
+        *(sName10_1CD0E8*)out = str_keyboard_1CD0E8;
     }
     switch (key) {
     case eKeyboard_BACKSPACE: strcat(out, str_back); break;
@@ -5580,7 +5580,7 @@ void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
 void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern char str_cFEStateNetHelpPopup[];
 extern char str_kT_HELPKeyboard[];
 extern char str_kT_HELPKeyboardMessage[];
@@ -5614,7 +5614,7 @@ static inline int InputK1CDB98(char* ev, int slot)
 
 static inline int isOnK1CDB98()
 {
-    return D_004A1A70 == 1;
+    return cFEStateNet_fePath == 1;
 }
 
 /**

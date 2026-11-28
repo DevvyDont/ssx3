@@ -1184,7 +1184,7 @@ extern int cBoardTrail_m_NumFadeSegments;
 struct sShadowOpt_cBoardTrailMenu {
     int fba;
 };
-extern sShadowOpt_cBoardTrailMenu D_004A45CC;
+extern sShadowOpt_cBoardTrailMenu cBoardTrail_m_DrawFixupLayer;
 extern int cBoardTrail_m_UseSliceCaps;
 extern float cBoardTrail_m_InnerWidthScale;
 extern float cBoardTrail_m_OuterWidthScale;
@@ -1237,7 +1237,7 @@ extern "C" void* cBoardTrailMenu_cBoardTrailMenu(cBoardTrailMenu* self)
     cFloatMenuItem_ctor(&self->InnerNormalOffsetItem, 17, &cBoardTrail_m_InnerNormalOffset, -10.0f, 10.0f, str_Inner_Normal_Offset);
     cFloatMenuItem_ctor(&self->BaseNormalOffsetItem, 18, &cBoardTrail_m_BaseNormalOffset, -10.0f, 10.0f, str_Base_Normal_Offset);
     cIntMenuItem_cIntMenuItem(&self->NumFadeSegmentsItem, 19, &cBoardTrail_m_NumFadeSegments, 0, 0x40, str_Num_Fade_Segments);
-    cIntMenuItem_cIntMenuItem(&self->DrawFixupLayerItem, 20, &D_004A45CC.fba, 0, 0x1, str_Draw_Fixup_Layer);
+    cIntMenuItem_cIntMenuItem(&self->DrawFixupLayerItem, 20, &cBoardTrail_m_DrawFixupLayer.fba, 0, 0x1, str_Draw_Fixup_Layer);
     cIntMenuItem_cIntMenuItem(&self->UseSliceCapsItem, 21, &cBoardTrail_m_UseSliceCaps, 0, 0x1, str_Use_Slice_Caps);
     cMenu_addItem(self, &self->TitleItem, -1);
     cMenu_addItem(self, &self->SpaceItem, -1);

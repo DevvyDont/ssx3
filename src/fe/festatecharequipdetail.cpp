@@ -809,8 +809,8 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
-extern int D_004A11E0;
-extern int D_004A18D8;
+extern int kBolt_boardGroup;
+extern int cFEStateCharEquip_polyLimit;
 
 static inline int isMode1_9C28(cFEStateCharEquip* self)
 {
@@ -851,7 +851,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
             mCategoryStack[mCurrentStackPos] = id;
             cFEStateCharEquip_buildItemList(this, id);
             this->redrawRows(1, 1);
-            if (id == D_004A11E0)
+            if (id == kBolt_boardGroup)
                 mCameraState = kCameraToBoard;
             return;
         }
@@ -867,7 +867,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
             return;
         }
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        if (D_004A18D8 < mRowPoints[w->mMiscData] + mCurrentPolyCount)
+        if (cFEStateCharEquip_polyLimit < mRowPoints[w->mMiscData] + mCurrentPolyCount)
             return;
         if (!this->toggleSelectedItem())
             return;
@@ -880,7 +880,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
     }
     case cUIState::kONPREV: {
         if (mCurrentStackPos > 0) {
-            if (mCategoryStack[mCurrentStackPos] == D_004A11E0)
+            if (mCategoryStack[mCurrentStackPos] == kBolt_boardGroup)
                 mCameraState = kCameraToRider;
             updateHeading(mCategoryStack[mCurrentStackPos - 1]);
             cFEStateCharEquip_buildItemList(this, mCategoryStack[mCurrentStackPos - 1]);
@@ -909,7 +909,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self);
-extern int D_004A18D8;
+extern int cFEStateCharEquip_polyLimit;
 
 static inline bool isMode_9F20(int m, int v)
 {
@@ -964,7 +964,7 @@ int cFEStateCharEquip::onWidgetMenu(cUIMenu* pMenu, unsigned int kind, unsigned 
                 if (cost >= mMoneyAvailable) break;
                 return 257;
             } else {
-                if (D_004A18D8 >= mRowPoints[selIndex - selected->mScrollItemOffset] + mCurrentPolyCount)
+                if (cFEStateCharEquip_polyLimit >= mRowPoints[selIndex - selected->mScrollItemOffset] + mCurrentPolyCount)
                     break;
             }
         }
@@ -1354,7 +1354,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
-extern int D_004A18D8;
+extern int cFEStateCharEquip_polyLimit;
 extern char str_kT_HELPNoItemsCTM[];
 extern char str_kT_HELPBuyItemInCTM[];
 extern char str_kT_HELPBoughtMaxItems[];
@@ -1389,7 +1389,7 @@ static inline void setText_A798(cFEStateCharEquip* self, char* s)
  * Hides the help text (mpHelpText), then: with no item selected, kT_HELPBoughtMaxItems in the store, else
  * kT_HELPNoItemsCTM (when +0xAE4 is set) or kT_HELPBuyItemInCTM; on a category (flag 0x20) kT_FEHELPChooseCatContinue;
  * in the store kT_FEHELPItemAvailBuy when the money (+0xC0) covers the price x 10, else kT_129HELPSaveCashItem; in the
- * inventory kT_FEHELPRemoveItems when the row's points would pass the limit D_004A18D8, else kT_FEYourCurrentOutfit.
+ * inventory kT_FEHELPRemoveItems when the row's points would pass the limit cFEStateCharEquip_polyLimit, else kT_FEYourCurrentOutfit.
  * Shows the help text again. Likely bug: both outcomes of the item's equipped test (entry flag 4) choose
  * kT_FEYourCurrentOutfit.
  */
@@ -1426,7 +1426,7 @@ void cFEStateCharEquip::updateHelpText()
         cBECharProfileDB* db = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(cBE_getInterface(cBE_getBE(), 9), mUserNum, mCharID);
         tBEProfileBolt* equipEntry = getEntry_A798(db, item->id);
         int idx = sel - mpMenu->mScrollItemOffset;
-        if (D_004A18D8 >= mCurrentPolyCount + mRowPoints[idx]) {
+        if (cFEStateCharEquip_polyLimit >= mCurrentPolyCount + mRowPoints[idx]) {
             if (equipEntry->flags & 4)
                 setText_A798(this, str_kT_FEYourCurrentOutfit);
             else
@@ -2274,21 +2274,21 @@ void cFEStateCharEquip::updateHeading(int id)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyBar);
 #ifdef SKIP_ASM
-extern int D_004A18D8;
+extern int cFEStateCharEquip_polyLimit;
 
 
 
 /**
  * Shows the equip points bar (+0x70) scaled to the current points (+0xC4).
  *
- * The bar's scale (+0x50) becomes (1, -t, 1) with t = (points - 1500) / (D_004A18D8 - 1500), not below 0 (there is no
+ * The bar's scale (+0x50) becomes (1, -t, 1) with t = (points - 1500) / (cFEStateCharEquip_polyLimit - 1500), not below 0 (there is no
  * upper clamp).
  */
 void cFEStateCharEquip::updatePolyBar()
 {
     cUIThing* pointsBar = mpPointsBar;
     if (((char*)pointsBar) != 0) {
-        float fillRatio = (float)(mCurrentPolyCount - 1500) / (float)(D_004A18D8 - 1500);
+        float fillRatio = (float)(mCurrentPolyCount - 1500) / (float)(cFEStateCharEquip_polyLimit - 1500);
         if (fillRatio < 0.0f) {
             fillRatio = 0.0f;
         }
@@ -2305,7 +2305,7 @@ void cFEStateCharEquip::updatePolyBar()
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyEquipPreviewBar);
 #ifdef SKIP_ASM
-extern int D_004A18D8;
+extern int cFEStateCharEquip_polyLimit;
 extern char kInvalidColour[];
 extern char kOriginalColour[];
 
@@ -2315,8 +2315,8 @@ extern char kOriginalColour[];
 /**
  * Shows the equip points preview bar (+0x74) for the current points plus @p delta.
  *
- * Scales it (+0x50) to (1, -t, 1) with t = (points + delta - 1500) / (D_004A18D8 - 1500) clamped to 0-1, and colours it
- * (vtable entry 11) kInvalidColour when the total would pass D_004A18D8, else kOriginalColour.
+ * Scales it (+0x50) to (1, -t, 1) with t = (points + delta - 1500) / (cFEStateCharEquip_polyLimit - 1500) clamped to 0-1, and colours it
+ * (vtable entry 11) kInvalidColour when the total would pass cFEStateCharEquip_polyLimit, else kOriginalColour.
  *
  * @param delta  the selected item's points
  */
@@ -2324,12 +2324,12 @@ void cFEStateCharEquip::updatePolyEquipPreviewBar(int delta)
 {
     if (mpPointsEquipBar == 0)
         return;
-    float fillRatio = (float)(mCurrentPolyCount + delta - 1500) / (float)(D_004A18D8 - 1500);
+    float fillRatio = (float)(mCurrentPolyCount + delta - 1500) / (float)(cFEStateCharEquip_polyLimit - 1500);
     if (fillRatio > 1.0f)
         fillRatio = 1.0f;
     else if (fillRatio < 0.0f)
         fillRatio = 0.0f;
-    if (D_004A18D8 < mCurrentPolyCount + delta) {
+    if (cFEStateCharEquip_polyLimit < mCurrentPolyCount + delta) {
         cUIThing* equipBar = mpPointsEquipBar;
         equipBar->setColour((const tARGB*)kInvalidColour);
     } else {
@@ -2808,7 +2808,7 @@ extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, t
 /**
  * Finds the node for a two-part key in the file-index hash table, optionally creating it.
  *
- * The table (allocated as "BoltFileIndexManager", 8004 bytes; D_004A1968) holds 400 16-byte nodes at +0x0, 400 bucket
+ * The table (allocated as "BoltFileIndexManager", 8004 bytes; cBoltFileIndexManager_instance) holds 400 16-byte nodes at +0x0, 400 bucket
  * head pointers at +0x1900 and the free-list head at +0x1F40. The key is (@p hi << 16) | @p lo and its bucket is key %
  * 400. Walks the bucket's chain (next index at node +0xE, via cBoltFileIndexManager_getNextNode) for a node with that key. When the chain
  * ends and @p create is set, takes a node from the free list (cBoltFileIndexManager_allocNode) and appends it: its prev index (+0xC) is
@@ -3075,18 +3075,18 @@ void cBoltFileIndexManager::setPartTextureFile(int bit, int lowKey, int val)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", __18cFEBoltFileManager);
 #ifdef SKIP_ASM
-extern cFEBoltFileManager* D_004A196C;
+extern cFEBoltFileManager* cFEBoltFileManager_instance;
 extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self);
 
 /**
- * Constructs the FE file cache: records it in D_004A196C and initialises it with cFEBoltFileManager_init.
+ * Constructs the FE file cache: records it in cFEBoltFileManager_instance and initialises it with cFEBoltFileManager_init.
  *
- * cFE_cFE builds it at the front end's +0x1A70. D_004A196C is what the sort comparators compareDeferredModelPartFiles and compareDeferredPartTextureFiles
+ * cFE_cFE builds it at the front end's +0x1A70. cFEBoltFileManager_instance is what the sort comparators compareDeferredModelPartFiles and compareDeferredPartTextureFiles
  * read.
  */
 cFEBoltFileManager::cFEBoltFileManager()
 {
-    D_004A196C = this;
+    cFEBoltFileManager_instance = this;
     init();
 }
 #endif
@@ -3094,17 +3094,17 @@ cFEBoltFileManager::cFEBoltFileManager()
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", _$_18cFEBoltFileManager);
 #ifdef SKIP_ASM
-extern cFEBoltFileManager* D_004A196C;
+extern cFEBoltFileManager* cFEBoltFileManager_instance;
 extern "C" void cFEBoltFileManager_purge(cFEBoltFileManager* self);
 void operator_delete(int* p);
 
 /**
- * Destroys the FE file cache: clears D_004A196C, purges every slot (cFEBoltFileManager_purge) and frees the object when bit 0 of
+ * Destroys the FE file cache: clears cFEBoltFileManager_instance, purges every slot (cFEBoltFileManager_purge) and frees the object when bit 0 of
  * g++'s delete flag is set.
  */
 cFEBoltFileManager::~cFEBoltFileManager()
 {
-    D_004A196C = 0;
+    cFEBoltFileManager_instance = 0;
     purge();
 }
 #endif
@@ -3112,14 +3112,14 @@ cFEBoltFileManager::~cFEBoltFileManager()
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_init);
 #ifdef SKIP_ASM
-extern cBoltFileIndexManager* D_004A1968;
+extern cBoltFileIndexManager* cBoltFileIndexManager_instance;
 extern char str_BoltFileIndexManager[];
 
 /**
  * Initialises the FE file cache and its file-index hash table.
  *
  * For each of the 10 banks it clears all 256 slots (state, name, data, handle, size and use count `timer` to 0, type
- * -1) and sets the bank's stamp counter (counts) to 1; then clears used and nPending. The file-index table D_004A1968
+ * -1) and sets the bank's stamp counter (counts) to 1; then clears used and nPending. The file-index table cBoltFileIndexManager_instance
  * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by cBoltFileIndexManager::cBoltFileIndexManager), otherwise
  * reset with cBoltFileIndexManager_reset. cRealFE_load calls it on the front end's +0x1A70.
  */
@@ -3142,10 +3142,10 @@ void cFEBoltFileManager::init()
     }
     mNumLoadThreads = 0;
     mMemUsed = 0;
-    if (D_004A1968 == 0) {
-        D_004A1968 = new (str_BoltFileIndexManager, 0, 0) cBoltFileIndexManager;
+    if (cBoltFileIndexManager_instance == 0) {
+        cBoltFileIndexManager_instance = new (str_BoltFileIndexManager, 0, 0) cBoltFileIndexManager;
     } else {
-        D_004A1968->reset();
+        cBoltFileIndexManager_instance->reset();
     }
 }
 #endif
@@ -3155,14 +3155,14 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_purge);
 #ifdef SKIP_ASM
 extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i);
 void operator_delete(int* p);
-extern cBoltFileIndexManager* D_004A1968;
+extern cBoltFileIndexManager* cBoltFileIndexManager_instance;
 
 
 /**
  * Empties the FE file cache and frees its file-index hash table.
  *
  * Releases every slot of the 10 banks with cFEBoltFileManager_freeFile and resets each bank's stamp counter to 1, then deletes
- * D_004A1968 (operator_delete, no destructor call) and clears it. nPending is not reset here. Called by the cache's
+ * cBoltFileIndexManager_instance (operator_delete, no destructor call) and clears it. nPending is not reset here. Called by the cache's
  * destructor and by cRealFE_purge.
  */
 void cFEBoltFileManager::purge()
@@ -3175,10 +3175,10 @@ void cFEBoltFileManager::purge()
         }
         unk_B4008[i] = 1;
     }
-    if (D_004A1968 != 0) {
-        operator_delete((int*)D_004A1968);
+    if (cBoltFileIndexManager_instance != 0) {
+        operator_delete((int*)cBoltFileIndexManager_instance);
     }
-    D_004A1968 = 0;
+    cBoltFileIndexManager_instance = 0;
 }
 #endif
 
@@ -3726,13 +3726,13 @@ void cFEBoltFileManager::releaseFile(int bank, int i)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", compareDeferredModelPartFiles);
 #ifdef SKIP_ASM
-extern cFEBoltFileManager* D_004A196C;
+extern cFEBoltFileManager* cFEBoltFileManager_instance;
 extern "C" int strcasecmp(const char* a, const char* b);
 
 /**
  * Compares two FE file cache slots to sort the deferred kBoltFileType_ModelPart (8) loads by name (qsort comparator).
  *
- * Each argument is a packed key (bank << 16 | slot) into the cache D_004A196C; both use the first key's bank. A slot
+ * Each argument is a packed key (bank << 16 | slot) into the cache cFEBoltFileManager_instance; both use the first key's bank. A slot
  * counts when it is queued (kBoltFileFlag_Queued), has type kBoltFileType_ModelPart and stamp 0. Two counted slots
  * compare by name with strcasecmp; a counted slot sorts before any other; two others compare equal.
  *
@@ -3743,7 +3743,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int compareDeferredModelPartFiles(const int* firstKey, const int* secondKey)
 {
     int ka = *firstKey;
-    tBoltFile* bank = D_004A196C->mFiles[ka >> 16];
+    tBoltFile* bank = cFEBoltFileManager_instance->mFiles[ka >> 16];
     tBoltFile* sa = &bank[ka & 0xFFFF];
     tBoltFile* sb = &bank[*secondKey & 0xFFFF];
     if (sa->flags == kBoltFileFlag_Queued && sa->fileType == kBoltFileType_ModelPart && sa->stamp == 0) {
@@ -3763,7 +3763,7 @@ extern "C" int compareDeferredModelPartFiles(const int* firstKey, const int* sec
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", compareDeferredPartTextureFiles);
 #ifdef SKIP_ASM
-extern cFEBoltFileManager* D_004A196C;
+extern cFEBoltFileManager* cFEBoltFileManager_instance;
 extern "C" int strcasecmp(const char* a, const char* b);
 
 /**
@@ -3780,7 +3780,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int compareDeferredPartTextureFiles(const int* firstKey, const int* secondKey)
 {
     int ka = *firstKey;
-    tBoltFile* bank = D_004A196C->mFiles[ka >> 16];
+    tBoltFile* bank = cFEBoltFileManager_instance->mFiles[ka >> 16];
     tBoltFile* sa = &bank[ka & 0xFFFF];
     tBoltFile* sb = &bank[*secondKey & 0xFFFF];
     if (sa->flags == kBoltFileFlag_Queued && sa->fileType == kBoltFileType_PartTexture && sa->stamp == 0) {
@@ -3802,7 +3802,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_startDeferredModelPa
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, D_004A196C points at
+// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, cFEBoltFileManager_instance points at
 // it). state: 0 idle, 1 loaded, 2 async load in flight, 3 queued.
 struct sFileSlot {
     int state;              // 0x0
@@ -3868,7 +3868,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_startDeferredPartTex
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, D_004A196C points at
+// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, cFEBoltFileManager_instance points at
 // it). state: 0 idle, 1 loaded, 2 async load in flight, 3 queued.
 // 256 slots per bank (0x12000 bytes).
 // The FE file cache: ten banks, the loaded byte count, the number of loads in flight and per-bank stamp counters.

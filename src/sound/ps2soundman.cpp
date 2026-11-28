@@ -32,8 +32,8 @@ struct sSmVEntry9350 {
 struct sSmVtbl9350 {
     sSmVEntry9350 e[4];
 } __attribute__((aligned(8)));
-// PORT: the unit declares D_00483BE0 later with its own struct type; view bound by asm label
-extern const sSmVtbl9350 D_00483BE0_9350 __asm__("D_00483BE0");
+// PORT: the unit declares cSndPlayOpts_cSoundSys_vtbl later with its own struct type; view bound by asm label
+extern const sSmVtbl9350 cSndPlayOpts_cSoundSys_vtbl_9350 __asm__("cSndPlayOpts_cSoundSys_vtbl");
 
 struct sSndDesc9350 {
     char c[0x18];
@@ -87,13 +87,13 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
         self->vbase = (char*)self + 0x88;
         cSoundSys_cSoundSys((char*)self + 0x88, heap);
     }
-    *(const sSmVtbl9350**)(self->vbase + 4) = &D_00483BE0_9350;
+    *(const sSmVtbl9350**)(self->vbase + 4) = &cSndPlayOpts_cSoundSys_vtbl_9350;
     if (inchrg == 0) {
-        sSmVtbl9350 vtCopy = D_00483BE0_9350;
+        sSmVtbl9350 vtCopy = cSndPlayOpts_cSoundSys_vtbl_9350;
         *(sSmVtbl9350**)(self->vbase + 4) = &vtCopy;
         char* base = self->vbase - 0x88;
         int thisAdjust = (char*)self - base;
-        vtCopy.e[1].delta = D_00483BE0_9350.e[1].delta + thisAdjust;
+        vtCopy.e[1].delta = cSndPlayOpts_cSoundSys_vtbl_9350.e[1].delta + thisAdjust;
     }
     self->depth = -1;
     self->descs = (sSndDesc9350*)operator_new_9350(0x60, str_mCurrent, 0, 0);
@@ -152,12 +152,12 @@ struct sSmVEntry97C0 {
 struct sSmVtbl97C0 {
     sSmVEntry97C0 e[4];
 } __attribute__((aligned(8)));
-extern const sSmVtbl97C0 D_00483BE0;
+extern const sSmVtbl97C0 cSndPlayOpts_cSoundSys_vtbl;
 
 /**
  * Destroys a sound play-option set: frees its per-level option arrays, then its virtual base and memory if asked.
  *
- * Points the virtual base's vtable (+4 of the base at *this) at D_00483BE0. When @p flags is 0 (a not-in-charge call)
+ * Points the virtual base's vtable (+4 of the base at *this) at cSndPlayOpts_cSoundSys_vtbl. When @p flags is 0 (a not-in-charge call)
  * it installs a stack copy instead, whose entry 1 has its this-delta adjusted by this object's distance from where a
  * complete object would start (the virtual base minus 0x88). Frees (cMemMan_free) each non-null array at +0x20, +0x34,
  * +0x38, +0x3C and +0x60 to +0x84. Bit 1 of @p flags runs cSoundSys__cSoundSys(0) on the virtual base and bit 0 frees
@@ -168,13 +168,13 @@ extern const sSmVtbl97C0 D_00483BE0;
 // PORT: g++ 2.95 virtual-base destruction with a stack vtable this-adjust fix-up, written out by hand.
 extern "C" void cSndPlayOpts__cSndPlayOpts(cSndPlayOpts* self, int flags)
 {
-    *(const sSmVtbl97C0**)(*(char**)self + 4) = &D_00483BE0;
+    *(const sSmVtbl97C0**)(*(char**)self + 4) = &cSndPlayOpts_cSoundSys_vtbl;
     if (flags == 0) {
-        sSmVtbl97C0 vtableCopy = D_00483BE0;
+        sSmVtbl97C0 vtableCopy = cSndPlayOpts_cSoundSys_vtbl;
         *(sSmVtbl97C0**)(*(char**)self + 4) = &vtableCopy;
         char* base = *(char**)self - 0x88;
         int thisDelta = ((char*)self) - base;
-        vtableCopy.e[1].delta = D_00483BE0.e[1].delta + thisDelta;
+        vtableCopy.e[1].delta = cSndPlayOpts_cSoundSys_vtbl.e[1].delta + thisDelta;
     }
     if (self->mCurrent != 0) {
         cMemMan_free(self->mCurrent);

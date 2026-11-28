@@ -577,7 +577,7 @@ extern char str_ps2x_b[];
 extern char str_name0pct_d[];
 extern char str_with0pct_d[];
 extern char str_time0pct_d[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 struct sVEntry_1F7958 {
     short delta;
@@ -693,7 +693,7 @@ void cOVState_TOPTIMES::onCreateScreen()
         if (full == true) {
             sprintf(line, formatMinutesSeconds(cBEScoreInterface_getCurrentHighScore(stats, i - 1)));
         } else {
-            sprintf(line, D_004A2138, cBEScoreInterface_getCurrentHighScore(stats, i - 1));
+            sprintf(line, str_pct_d_j, cBEScoreInterface_getCurrentHighScore(stats, i - 1));
         }
         cUIText_setAsciiString_i(timeText, line);
     }

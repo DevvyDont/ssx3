@@ -1326,24 +1326,24 @@ void cMenu::remAllItems()
 //100%
 INCLUDE_ASM("util/menu", cMenu_sortItems);
 #ifdef SKIP_ASM
-extern int (*D_004A54BC)(int, int);
+extern int (*cMenu_sortCompareFunc)(int, int);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cMenu_compareSortItems(const void*, const void*);
 
 /**
  * Sorts a menu's items with @p cmp, then re-checks the focus.
  *
- * Stores @p cmp in D_004A54BC for the trampoline cMenu_compareSortItems, sorts the NumItems pointers of Items (+0xC) with
- * qsort (a qsort: base, count, element size 4, compare), clears D_004A54BC and calls cMenu_checkFocus.
+ * Stores @p cmp in cMenu_sortCompareFunc for the trampoline cMenu_compareSortItems, sorts the NumItems pointers of Items (+0xC) with
+ * qsort (a qsort: base, count, element size 4, compare), clears cMenu_sortCompareFunc and calls cMenu_checkFocus.
  * FocusItem keeps its index, so the focus moves to whichever item lands there.
  *
  * @param cmp  compares two items; called through cMenu_compareSortItems
  */
 void cMenu::sortItems(int (*cmp)(int, int))
 {
-    D_004A54BC = cmp;
+    cMenu_sortCompareFunc = cmp;
     qsort(&Items[0], *(int*)this, 4, cMenu_compareSortItems);
-    D_004A54BC = 0;
+    cMenu_sortCompareFunc = 0;
     checkFocus();
 }
 #endif
@@ -2775,10 +2775,10 @@ int cCallbackMenuItem::input()
 INCLUDE_ASM("util/menu", cCallbackMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
-extern void* D_004866C8[];
+extern void* str_Callback_on_Select[];
 
 /**
- * Measures a callback item: its caption on the left and "[Callback on Select]" (D_004866C8) on the right
+ * Measures a callback item: its caption on the left and "[Callback on Select]" (str_Callback_on_Select) on the right
  * (cMenuItem_textPreRender).
  *
  * @param item  the callback item
@@ -2786,12 +2786,12 @@ extern void* D_004866C8[];
  */
 void* cCallbackMenuItem::preRender(cCallbackMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866C8);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, str_Callback_on_Select);
     return ((void*)this);
 }
 #endif
 
-extern void* D_004866C8[];
+extern void* str_Callback_on_Select[];
 extern "C" void* cMenuItem_textRender1(void*, int, int, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2802,14 +2802,14 @@ INCLUDE_ASM("util/menu", cCallbackMenuItem_render__FPvi);
 void* cMenuItem_textRender1_5(void*, int, const char*, const char*, void*) __asm__("cMenuItem_textRender1");
 
 /**
- * Draws a callback item: its caption on the left and "[Callback on Select]" (D_004866C8) on the right (cMenuItem_textRender1).
+ * Draws a callback item: its caption on the left and "[Callback on Select]" (str_Callback_on_Select) on the right (cMenuItem_textRender1).
  *
  * @param rect  the row's rect
  * @return cMenuItem_textRender1's return value
  */
 void* cCallbackMenuItem::render(int rect)
 {
-    return cMenuItem_textRender1_5(this, rect, Caption, 0, D_004866C8);
+    return cMenuItem_textRender1_5(this, rect, Caption, 0, str_Callback_on_Select);
 }
 #endif
 
@@ -3202,10 +3202,10 @@ int cCharMenuItem::input()
 INCLUDE_ASM("util/menu", cCharMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
-extern void* D_004866E0[];
+extern void* str_99999999[];
 
 /**
- * Measures a signed-byte item: its caption on the left with room for "-99999999" (D_004866E0) on the right
+ * Measures a signed-byte item: its caption on the left with room for "-99999999" (str_99999999) on the right
  * (cMenuItem_textPreRender).
  *
  * @param item  the item
@@ -3213,7 +3213,7 @@ extern void* D_004866E0[];
  */
 void* cCharMenuItem::preRender(cCharMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866E0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, str_99999999);
     return ((void*)this);
 }
 #endif
@@ -3482,7 +3482,7 @@ int cIntMenuItem::input()
 INCLUDE_ASM("util/menu", cIntMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
-extern void* D_004866E0[];
+extern void* str_99999999[];
 
 /**
  * Computes an int item's row rectangle: its label on the left and room for "-99999999" on the right.
@@ -3496,7 +3496,7 @@ extern void* D_004866E0[];
  */
 void* cIntMenuItem::preRender(cIntMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866E0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, str_99999999);
     return ((void*)this);
 }
 #endif
@@ -3708,7 +3708,7 @@ void cFloatMenuItem::zeroValue()
 INCLUDE_ASM("util/menu", cFloatMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
-extern void* D_004866F0[];
+extern void* str_9999999999_999[];
 
 /**
  * Computes a float item's row rectangle: its label on the left and room for "-9999999999.999" on the right.
@@ -3722,7 +3722,7 @@ extern void* D_004866F0[];
  */
 void* cFloatMenuItem::preRender(cFloatMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866F0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, str_9999999999_999);
     return ((void*)this);
 }
 #endif
@@ -3927,7 +3927,7 @@ int cAngleMenuItem::input()
 INCLUDE_ASM("util/menu", cAngleMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, const char*, const char*, void*);
-extern void* D_004866F0[];
+extern void* str_9999999999_999[];
 
 /**
  * Computes an angle item's row rectangle: its label on the left and room for "-9999999999.999" on the right.
@@ -3941,7 +3941,7 @@ extern void* D_004866F0[];
  */
 void* cAngleMenuItem::preRender(cAngleMenuItem* item)
 {
-    cMenuItem_textPreRender(this, item, item->Caption, 0, D_004866F0);
+    cMenuItem_textPreRender(this, item, item->Caption, 0, str_9999999999_999);
     return ((void*)this);
 }
 #endif
@@ -5507,13 +5507,13 @@ INCLUDE_ASM("util/menu", cGraphMenuItem_cGraphMenuItem);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 extern void* cGraphMenuItem_vtbl[];
-extern void* D_00486738[];
+extern void* str_Hello_there[];
 
 
 /**
  * Constructs a graph item: an editable curve of @p numPoints points with per-point axis locks, a slope rule and a range.
  *
- * ID -1, caption (+0x14) "Hello there!" (D_00486738), point count (+0x18) = @p numPoints, x-lock bits (+0x1C) = @p xLockBits, y-lock
+ * ID -1, caption (+0x14) "Hello there!" (str_Hello_there), point count (+0x18) = @p numPoints, x-lock bits (+0x1C) = @p xLockBits, y-lock
  * bits (+0x20) = @p yLockBits, slope rule (+0x3C) = @p slope, points (+0x28) = @p points, minimum point (+0x2C) = *@p minPoint, maximum
  * point (+0x34) = *@p maxPoint, current point (+0x24) and edit mode (+0x40) 0; vtable cGraphMenuItem_vtbl (input cGraphMenuItem_input,
  * preRender cGraphMenuItem_preRender, render cGraphMenuItem_render, gainFocus cGraphMenuItem_gainFocus).
@@ -5539,7 +5539,7 @@ extern "C" void* cGraphMenuItem_cGraphMenuItem(cGraphMenuItem* self, int numPoin
     self->Slope = slope;
     *(t2Vector*)&self->MinPoint[0] = *minPoint;
     *(t2Vector*)&self->MaxPoint[0] = *maxPoint;
-    self->Caption = (const char*)D_00486738;
+    self->Caption = (const char*)str_Hello_there;
     self->OnPoint = 0;
     self->IsEditMode = 0;
     return ((void*)self);

@@ -2827,14 +2827,14 @@ struct sVtbl9_13C650 { sVEntry_13C650 e[9]; } __attribute__((aligned(8)));
 struct sVtbl22_13C650 { sVEntry_13C650 e[22]; } __attribute__((aligned(8)));
 
 extern const sVtbl9_13C650 D_00459A98;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtbl22_13C650 D_00459AE0;
 
 /**
  * Constructs the ground-motion part: sets up its virtual cRider base and clears the AI ticks.
  *
  * When in charge it points mRider at self + 0x20 and constructs the cRider there. It then stores
- * cGroundMotion's vtables in the cRider (D_00459A98 at +0x6E8, D_00459B90 at +0x6D0, D_00459AE0 at +0x6C0),
+ * cGroundMotion's vtables in the cRider (D_00459A98 at +0x6E8, cRider_cScriptObjRider_vtbl at +0x6D0, D_00459AE0 at +0x6C0),
  * using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code), and zeroes
  * AITickOnGainFocus, AITickOnLoseFocus and rider +0x31C (the board chatter value).
  *
@@ -2854,7 +2854,7 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
         cRider_cRider(vb);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00459A98;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00459AE0;
     if (!inChrg)
     {
@@ -4778,7 +4778,7 @@ struct sIdx { unsigned int id:8; int val:24; };
 static inline void SetCol4(float* c, float r, float g, float b, float a) { c[0] = r; c[1] = g; c[2] = b; c[3] = a; }
 static inline void SetKeys8(float* c, float a0, float a1, float a2, float a3, float a4, float a5, float a6, float a7) { c[0] = a0; c[1] = a1; c[2] = a2; c[3] = a3; c[4] = a4; c[5] = a5; c[6] = a6; c[7] = a7; }
 static inline void InitIdx(sIdx* e, int n) { e->id = n; e->val = n; }
-extern sIdx D_004A4C08;
+extern sIdx kAnimIDInvalid_2;
 extern int D_004A4C10;
 extern int D_004A4C14;
 extern float kHighSpeedCollideThresh;
@@ -4878,7 +4878,7 @@ void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
  * table.
  *
  * Runs only when @p init is set and @p prio is 0xFFFF. It writes dozens of 4-float colour/curve constants (D_004A5E60
- * ... kRiderBoxOffset), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), kHighSpeedCollideThresh =
+ * ... kRiderBoxOffset), the packed anim-id words kAnimIDInvalid_2 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), kHighSpeedCollideThresh =
  * 2222.22 (80 kph in cm/s), nFinishLineControl_kFinishStopThreshCPS = 277.78 (10 kph), angle limits in radians (45, 5,
  * 100, 20 and 360 degrees) and seven 4-key (x, y) curves, and calls InitTerminalVelocityTable (On Tour InitTerminalVelocityTable).
  *
@@ -5115,7 +5115,7 @@ void sti_0013FB20(int init, int prio)
         D_004A61D0[2] = 0.0f;
         D_004A61D0[3] = 0.0f;
         SetCol4(kRiderBoxOffset, 15000.0f, 15000.0f, 15000.0f, 0.0f);
-        InitIdx(&D_004A4C08, -1);
+        InitIdx(&kAnimIDInvalid_2, -1);
         D_004A4C14 = 0;
         D_004A4C10 = 0;
         InitIdx(&D_004A4C18, 0);
@@ -6856,7 +6856,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion__cGroundMotion);
  * Destroys a cGroundMotion part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cGroundMotion's (D_00459A98 at +0x6E8, D_00459AE0 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -6870,8 +6870,8 @@ __asm__(".globl cGroundMotion__cGroundMotion\n.type cGroundMotion__cGroundMotion
 // PORT: cRiderVb_hpc's dtor is cRider's (cRider__cRider).
 __asm__("_$_12cRiderVb_hpc = cRider__cRider\n");
 
-// PORT: cRiderVbB0_hpc's vtable is not emitted here (key function b01 elsewhere): retail D_00459B90.
-__asm__("_vt$14cRiderVbB0_hpc = D_00459B90\n");
+// PORT: cRiderVbB0_hpc's vtable is not emitted here (key function b01 elsewhere): retail cRider_cScriptObjRider_vtbl.
+__asm__("_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00140D80$13cRiderVbC_hpc = D_00459A98\n"
@@ -6888,7 +6888,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion__cAirMotion);
  * Destroys a cAirMotion part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cAirMotion's (D_004599A0 at +0x6E8, D_004599E8 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -6901,7 +6901,7 @@ __asm__(".globl cAirMotion__cAirMotion\n.type cAirMotion__cAirMotion,@function\n
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00140EE0$13cRiderVbC_hpc = D_004599A0\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00140EE0$12cRiderVb_hpc = D_004599E8\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -6916,7 +6916,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion__cRailslideMotion);
  * Destroys a cRailslideMotion part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cRailslideMotion's (D_004598A8 at +0x6E8, D_004598F0
- * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -6929,7 +6929,7 @@ __asm__(".globl cRailslideMotion__cRailslideMotion\n.type cRailslideMotion__cRai
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141040$12cRiderVb_hpc = D_004598F0\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -6996,7 +6996,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cStaticMotion__cStaticMotion);
  * Destroys a cStaticMotion part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cStaticMotion's (D_004596B8 at +0x6E8, D_00459700 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7009,7 +7009,7 @@ __asm__(".globl cStaticMotion__cStaticMotion\n.type cStaticMotion__cStaticMotion
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$14cHandPlant11C0$13cRiderVbC_hpc = D_004596B8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$14cHandPlant11C0$12cRiderVb_hpc = D_00459700\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7024,7 +7024,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion__cHandplantMotion);
  * Destroys a cHandplantMotion part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cHandplantMotion's (D_004595C0 at +0x6E8, D_00459608
- * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7037,7 +7037,7 @@ __asm__(".globl cHandplantMotion__cHandplantMotion\n.type cHandplantMotion__cHan
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141320$13cRiderVbC_hpc = D_004595C0\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141320$12cRiderVb_hpc = D_00459608\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7052,14 +7052,14 @@ struct sVtblA_00141480 { sVEntry_00141480 e[9]; } __attribute__((aligned(8)));
 struct sVtblB_00141480 { sVEntry_00141480 e[22]; } __attribute__((aligned(8)));
 
 extern const sVtblA_00141480 D_004595C0_00141480 __asm__("D_004595C0");
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtblB_00141480 D_00459608_00141480 __asm__("D_00459608");
 
 /**
  * Constructs the handplant-motion part: sets up its virtual cRider base.
  *
  * When in charge it points mRider at self + 0xB0 and constructs the cRider there. It then stores
- * cHandplantMotion's vtables in the cRider (D_004595C0 at +0x6E8, D_00459B90 at +0x6D0, D_00459608 at
+ * cHandplantMotion's vtables in the cRider (D_004595C0 at +0x6E8, cRider_cScriptObjRider_vtbl at +0x6D0, D_00459608 at
  * +0x6C0), using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code). No
  * state member is initialised here.
  *
@@ -7079,7 +7079,7 @@ extern "C" void* cHandplantMotion_cHandplantMotion(cHandplantMotion* self, int i
         cRider_cRider(vb);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_004595C0_00141480;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00459608_00141480;
     if (!inChrg)
     {
@@ -7106,7 +7106,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cCruiseControl__cCruiseControl);
  * Destroys a cCruiseControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cCruiseControl's (D_004594C8 at +0x6E8, D_00459510
- * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7119,7 +7119,7 @@ __asm__(".globl cCruiseControl__cCruiseControl\n.type cCruiseControl__cCruiseCon
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001415C8$13cRiderVbC_hpc = D_004594C8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor001415C8$12cRiderVb_hpc = D_00459510\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7134,7 +7134,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBoardPressControl__cBoardPressContro
  * Destroys a cBoardPressControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cBoardPressControl's (D_004593D0 at +0x6E8,
- * D_00459418 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00459418 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7147,7 +7147,7 @@ __asm__(".globl cBoardPressControl__cBoardPressControl\n.type cBoardPressControl
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141728$13cRiderVbC_hpc = D_004593D0\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141728$12cRiderVb_hpc = D_00459418\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7162,7 +7162,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPrewindControl__cPrewindControl);
  * Destroys a cPrewindControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cPrewindControl's (D_004592D8 at +0x6E8, D_00459320
- * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7175,7 +7175,7 @@ __asm__(".globl cPrewindControl__cPrewindControl\n.type cPrewindControl__cPrewin
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141888$13cRiderVbC_hpc = D_004592D8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141888$12cRiderVb_hpc = D_00459320\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7190,7 +7190,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBumpControl__cBumpControl);
  * Destroys a cBumpControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cBumpControl's (D_004591E0 at +0x6E8, D_00459228 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7203,7 +7203,7 @@ __asm__(".globl cBumpControl__cBumpControl\n.type cBumpControl__cBumpControl,@fu
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001419E8$13cRiderVbC_hpc = D_004591E0\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor001419E8$12cRiderVb_hpc = D_00459228\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7218,7 +7218,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cNaturalAirControl__cNaturalAirContro
  * Destroys a cNaturalAirControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cNaturalAirControl's (D_004590E8 at +0x6E8,
- * D_00459130 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00459130 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7231,7 +7231,7 @@ __asm__(".globl cNaturalAirControl__cNaturalAirControl\n.type cNaturalAirControl
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141B48$13cRiderVbC_hpc = D_004590E8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141B48$12cRiderVb_hpc = D_00459130\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7246,7 +7246,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cSpinControl__cSpinControl);
  * Destroys a cSpinControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cSpinControl's (D_00458FF0 at +0x6E8, D_00459038 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7259,7 +7259,7 @@ __asm__(".globl cSpinControl__cSpinControl\n.type cSpinControl__cSpinControl,@fu
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141CA8$12cRiderVb_hpc = D_00459038\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7274,7 +7274,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGateControl__cGateControl);
  * Destroys a cGateControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cGateControl's (D_00458EF8 at +0x6E8, D_00458F40 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7287,7 +7287,7 @@ __asm__(".globl cGateControl__cGateControl\n.type cGateControl__cGateControl,@fu
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141E08$13cRiderVbC_hpc = D_00458EF8\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141E08$12cRiderVb_hpc = D_00458F40\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7302,7 +7302,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideControl__cRailslideControl)
  * Destroys a cRailslideControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cRailslideControl's (D_00458E00 at +0x6E8,
- * D_00458E48 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00458E48 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7315,7 +7315,7 @@ __asm__(".globl cRailslideControl__cRailslideControl\n.type cRailslideControl__c
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00141F68$13cRiderVbC_hpc = D_00458E00\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00141F68$12cRiderVb_hpc = D_00458E48\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7330,7 +7330,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cUberGrindControl__cUberGrindControl)
  * Destroys a cUberGrindControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cUberGrindControl's (D_00458D08 at +0x6E8,
- * D_00458D50 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00458D50 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7343,7 +7343,7 @@ __asm__(".globl cUberGrindControl__cUberGrindControl\n.type cUberGrindControl__c
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001420C8$13cRiderVbC_hpc = D_00458D08\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor001420C8$12cRiderVb_hpc = D_00458D50\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7358,7 +7358,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutControl__cWipeoutControl);
  * Destroys a cWipeoutControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cWipeoutControl's (D_00458C10 at +0x6E8, D_00458C58
- * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7371,7 +7371,7 @@ __asm__(".globl cWipeoutControl__cWipeoutControl\n.type cWipeoutControl__cWipeou
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142228$13cRiderVbC_hpc = D_00458C10\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00142228$12cRiderVb_hpc = D_00458C58\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7386,14 +7386,14 @@ struct sVtblA_00142388 { sVEntry_00142388 e[9]; } __attribute__((aligned(8)));
 struct sVtblB_00142388 { sVEntry_00142388 e[22]; } __attribute__((aligned(8)));
 
 extern const sVtblA_00142388 D_00458C10_00142388 __asm__("D_00458C10");
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern const sVtblB_00142388 D_00458C58_00142388 __asm__("D_00458C58");
 
 /**
  * Constructs the wipeout-control part: sets up its virtual cRider base.
  *
  * When in charge it points mRider at self + 0x90 and constructs the cRider there. It then stores
- * cWipeoutControl's vtables in the cRider (D_00458C10 at +0x6E8, D_00459B90 at +0x6D0, D_00458C58 at +0x6C0),
+ * cWipeoutControl's vtables in the cRider (D_00458C10 at +0x6E8, cRider_cScriptObjRider_vtbl at +0x6D0, D_00458C58 at +0x6C0),
  * using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code). No state
  * member is initialised here.
  *
@@ -7413,7 +7413,7 @@ extern "C" void* cWipeoutControl_cWipeoutControl(cWipeoutControl* self, int inCh
         cRider_cRider(vb);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00458C10_00142388;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00458C58_00142388;
     if (!inChrg)
     {
@@ -7440,7 +7440,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cFinishLineControl__cFinishLineContro
  * Destroys a cFinishLineControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cFinishLineControl's (D_00458B18 at +0x6E8,
- * D_00458B60 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00458B60 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7453,7 +7453,7 @@ __asm__(".globl cFinishLineControl__cFinishLineControl\n.type cFinishLineControl
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001424D0$13cRiderVbC_hpc = D_00458B18\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor001424D0$12cRiderVb_hpc = D_00458B60\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7468,7 +7468,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cResetControl__cResetControl);
  * Destroys a cResetControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cResetControl's (D_00458A20 at +0x6E8, D_00458A68 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7481,7 +7481,7 @@ __asm__(".globl cResetControl__cResetControl\n.type cResetControl__cResetControl
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142630$13cRiderVbC_hpc = D_00458A20\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00142630$12cRiderVb_hpc = D_00458A68\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7496,7 +7496,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cVoidControl__cVoidControl);
  * Destroys a cVoidControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cVoidControl's (D_00458928 at +0x6E8, D_00458970 at
- * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
  * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
  * the object when bit 0 is set.
  */
@@ -7509,7 +7509,7 @@ __asm__(".globl cVoidControl__cVoidControl\n.type cVoidControl__cVoidControl,@fu
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor00142790$13cRiderVbC_hpc = D_00458928\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor00142790$12cRiderVb_hpc = D_00458970\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7524,7 +7524,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantControl__cHandplantControl)
  * Destroys a cHandplantControl part; the source body is empty, so all the work is compiler-generated.
  *
  * The generated code points the cRider's vtables back at cHandplantControl's (D_00458830 at +0x6E8,
- * D_00458878 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * D_00458878 at +0x6C0, the shared cRider_cScriptObjRider_vtbl at +0x6D0; stack copies with adjusted this-deltas when the
  * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
  * set, and frees the object when bit 0 is set.
  */
@@ -7537,7 +7537,7 @@ __asm__(".globl cHandplantControl__cHandplantControl\n.type cHandplantControl__c
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor001428F0$13cRiderVbC_hpc = D_00458830\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor001428F0$12cRiderVb_hpc = D_00458878\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
@@ -7568,7 +7568,7 @@ __asm__(".globl cRiderHandler__cRiderHandler\n.type cRiderHandler__cRiderHandler
 __asm__("_vt$15cVbDtor00142A50 = cRiderHandler_vtbl\n"
         "_vt$15cVbDtor00142A50$13cRiderVbC_hpc = D_00458738\n"
         "_vt$15cVbDtor00142A50$12cRiderVb_hpc = D_00458780\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_$_15cVbDtor002F6388 = cCheatFX__cCheatFX\n"
         "_$_15cVbDtor002F0FE8 = cPunchFX__cPunchFX\n"
         "_$_15cVbDtor002DF1C8 = cDynamicSprayFX__cDynamicSprayFX\n"
@@ -8421,7 +8421,7 @@ __asm__(".globl cMissionRider__cMissionRider\n.type cMissionRider__cMissionRider
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$12cHpD1_1446F8 = cPlayer_vtbl\n"
         "_vt$11cHpD_1446F8$13cRiderVbC_hpc = D_00458240\n"
-        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cRiderVbB0_hpc = cRider_cScriptObjRider_vtbl\n"
         "_vt$11cHpD_1446F8$12cRiderVb_hpc = D_00458288\n"
         "_$_12cHpD1_1446F8 = cPlayer__cPlayer\n"
         "_$_12cRiderVb_hpc = cRider__cRider\n");

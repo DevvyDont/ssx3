@@ -3,7 +3,7 @@
 
 // cVoipMan: the voice-chat manager for online races (the headset). It connects the voice module to the peer's address
 // (cVoipMan_connect, from cGameConnMan's cGameConnMan_connect), turns the voice on / off / toggles it, and sets the voice level
-// from the options (D_004A33F8, cOVState_PAUSE_OPTIONS).
+// from the options (cVoipMan_voiceLevel, cOVState_PAUSE_OPTIONS).
 // EA's source: d:/ssx/code/source/online/voipman.cpp (the July 2003 preview's assert strings, with "!VoipMan" and the
 // allocation tag "cVoipMan"). Retail code: dirtysock/tagsunk 0x00266CA0..0x00266F90. One instance, VoipMan:
 // cVoipMan_createInstance creates it, cVoipMan_destroyInstance destroys it. No On Tour counterpart.

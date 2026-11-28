@@ -32,15 +32,15 @@ typedef struct {
 extern int sceSifBindRpc(sSifClient *cd, unsigned int rpc_number, int mode);
 extern int sceSifCallRpc(sSifClient *cd, int fno, int mode, void *send, int ssize, void *recv, int rsize,
                          void (*end_function)(void *), void *end_param);
-extern sSifClient D_0052EE00;   /* fileio */
-extern sSifClient D_0052EEC0;
-extern sSifClient D_0052F280;
+extern sSifClient fileio_client;   /* fileio */
+extern sSifClient libkernl_iopHeapClient;
+extern sSifClient sifload_client;
 
 
 /* 4-byte server version tags returned by the fileio and loadfile RPC servers */
 typedef struct { char b[4]; } sRpcVer;
-extern sRpcVer D_0052EE28;      /* fileio (follows D_0052EE00) */
-extern sRpcVer D_0052F2A8;      /* loadfile (follows D_0052F280) */
+extern sRpcVer D_0052EE28;      /* fileio (follows fileio_client) */
+extern sRpcVer sifload_serverVersion;      /* loadfile (follows sifload_client) */
 
 
 /* The size of the name and argument buffers of a loadfile or IOP heap request ([U] the senders strncpy a name into
@@ -48,7 +48,7 @@ extern sRpcVer D_0052F2A8;      /* loadfile (follows D_0052F280) */
    Name ours. */
 #define IOP_NAME_SIZE 0xFC
 
-/* loadfile RPC (0x80000006) command block D_0052F080, 0x200 bytes, sent to D_0052F280; each request's reply is read
+/* loadfile RPC (0x80000006) command block sifload_cmd, 0x200 bytes, sent to sifload_client; each request's reply is read
    back into it. One view per request kind; field names ours, from the senders. */
 typedef struct { char b[IOP_NAME_SIZE]; } sLfData;
 /* The module requests: a module id or IOP address, the argument length, a name and the arguments. */
@@ -76,12 +76,12 @@ typedef union {
     sLfSetCmd set;
     sRpcVer ver;                /* 0xFF reply */
 } uLfCmd;
-extern uLfCmd D_0052F080;
+extern uLfCmd sifload_cmd;
 
 
 /* fileio descriptor table: 32 entries of {IOP fd, open flags (0 = free), ...} */
 typedef struct { int f0; int f4; int f8; int fC; } sFioFile;
-extern sFioFile D_0052EC00[32];
+extern sFioFile fileio_descriptors[32];
 extern sFioFile *fileio_allocDescriptor(void);
 extern sFioFile *fileio_getDescriptor(unsigned fd);
 
@@ -89,7 +89,7 @@ extern sFioFile *fileio_getDescriptor(unsigned fd);
 /* fileio RPC buffers */
 typedef struct { void (*fn)(int); int arg; } sFioCb;
 extern sFioCb D_0052EE80;      /* user callback run by fileio_onCallbackCmd (set by fileio_setCallback) */
-extern char D_0052E340[];      /* RPC receive buffer */
+extern char fileio_recvBuffer[];      /* RPC receive buffer */
 extern char D_0052E380[];      /* 0x440-byte read-ahead buffers */
 extern char D_0052EE40[];
 extern int D_0052D6C0[];
@@ -108,13 +108,13 @@ typedef struct {
     unsigned char *buf;
     sRing *ring;
 } sTty;
-extern sTty D_0052B8D0;
-extern sRing *D_0052B8E8;      /* D_0052B8D0.ring (own splat symbol) */
-extern int D_0052B7C0[];       /* storage of the console ring (libkernl_initTtyRing) */
+extern sTty libkernl_ttyState;
+extern sRing *D_0052B8E8;      /* libkernl_ttyState.ring (own splat symbol) */
+extern int libkernl_ttyRingStorage[];       /* storage of the console ring (libkernl_initTtyRing) */
 extern sRing *libkernl_initTtyRing(int size);
 
 
-/* SIF RPC library state D_0052D680 (implementation side) */
+/* SIF RPC library state sifrpc_state (implementation side) */
 /* 0x40-byte packet: the SIF command header, then slot (table index << 16 | state bits, bit 0 in use), pkt (its own
    address) and rpc_id (the packet id). Names ours, as in sceSifCallRpc's view. */
 typedef struct { char header[0x10]; int slot; int pkt; int rpc_id; char rest[0x24]; } sSifRpcPkt;
@@ -137,7 +137,7 @@ typedef struct {
     int rbuf_idx;
     sSifQueue *queues;          /* +0x28 */
 } sSifRpcState;
-extern sSifRpcState D_0052D680;
+extern sSifRpcState sifrpc_state;
 
 
 /* wake-up request queue of the helper thread started by InitThread (512 {type, thread id} entries) */
@@ -149,7 +149,7 @@ typedef struct {
     unsigned idx;               /* the write index */
     struct { char a; char b; } e[512];
 } sWakeQueue;
-extern sWakeQueue D_0052B3A8;
+extern sWakeQueue libkernl_requestQueue;
 
 
 /* SIF DMA transfer descriptor (as passed to sceSifSetDma / isceSifSetDma) */
@@ -158,7 +158,7 @@ extern int sceSifSetDma(sSifDmaData *sdd, int n);
 extern int isceSifSetDma(sSifDmaData *sdd, int n);
 
 
-/* A semaphore id before CreateSema has made one ([U] the call lock D_00455214 and the table lock D_00455218 start as
+/* A semaphore id before CreateSema has made one ([U] the call lock fileio_callLock and the table lock fileio_tableSema start as
    -1; fileio_createCallLock and fileio_createSemas create them then). Name ours. */
 #define NO_SEMAPHORE (-1)
 /* A free entry of the pending no-wait call table D_00455188 ([U] sceRead, sceWrite, sceLseek and sceLseek64 claim an
@@ -166,25 +166,25 @@ extern int isceSifSetDma(sSifDmaData *sdd, int n);
 #define FIO_NOWAIT_FREE (-1)
 
 /* library state used by more than one function */
-extern int D_00455168;
-extern int D_00455170;          /* helper thread id (InitThread) */
-extern int D_0052B3A0;          /* its wake-up semaphore */
-extern int D_0052BCD8[];
+extern int libkernl_ttyOpenFlag;
+extern int libkernl_helperThreadId;          /* helper thread id (InitThread) */
+extern int libkernl_requestSema;          /* its wake-up semaphore */
+extern int sifcmd_data[];
 extern int *D_0052BCE4;
 extern int *D_0052BCEC;
-extern int D_0052BE00[];
+extern int sifcmd_sregs[];
 extern volatile int D_00455188[];
-extern int D_0045520C;          /* fileio initialised (fileio_init) */
+extern int fileio_initFlag;          /* fileio initialised (fileio_init) */
 extern int D_00455210;
-extern int D_00455214;
-extern int D_00455218;          /* fileio descriptor table semaphore */
-extern int D_0045521C;
-extern int D_00455224;
-extern int D_0052EF00;          /* RPC result for D_0052EEC0 */
-extern int D_0052EF40;          /* RPC argument for D_0052EEC0 */
+extern int fileio_callLock;
+extern int fileio_tableSema;          /* fileio descriptor table semaphore */
+extern int fileio_noWaitSema;
+extern int libkernl_iopHeapBindState;
+extern int libkernl_iopHeapResult;          /* RPC result for libkernl_iopHeapClient */
+extern int libkernl_iopHeapArgs;          /* RPC argument for libkernl_iopHeapClient */
 extern int D_00455228;          /* loadfile bound (< 0 = not yet) */
-extern int D_00455230;
-extern int D_00456538;
+extern int sysTable_base;
+extern int execArgs_kernelArea;
 
 
 /* The size of every name and data buffer in a fileio request packet ([U] the sce* calls copy a name up to
@@ -192,7 +192,7 @@ extern int D_00456538;
    longer data; fileio_onCompletionCmd caps a reply's data there). Name ours. */
 #define FIO_BUFFER_SIZE 0x400
 
-/* The fileio RPC function numbers, named after the sce* call that sends each ([U] its sceSifCallRpc to D_0052EE00, or
+/* The fileio RPC function numbers, named after the sce* call that sends each ([U] its sceSifCallRpc to fileio_client, or
    the number it passes to fileio_callPathRequest). 15 and 16 come from func_00429420 and func_00429540, which have no retail
    names. Names ours. */
 enum eFioRpcFunc {
@@ -203,10 +203,10 @@ enum eFioRpcFunc {
     FIO_RPC_DEVCTL = 23, FIO_RPC_SYMLINK = 24, FIO_RPC_READLINK = 25, FIO_RPC_IOCTL2 = 26
 };
 
-/* fileio RPC send block D_0052D700: one packet layout per RPC function number (sent to D_0052EE00). Every packet
+/* fileio RPC send block fileio_cmd: one packet layout per RPC function number (sent to fileio_client). Every packet
    starts with the same three words: the caller's semaphore (negated for a no-wait call once its D_00455188 entry is
    taken), the address of its result word and the result size; fileio_onCompletionCmd reads them back from the reply. iopFd is
-   the IOP's descriptor from the slot, slot the slot's index in D_0052EC00. Field names ours, from the senders. */
+   the IOP's descriptor from the slot, slot the slot's index in fileio_descriptors. Field names ours, from the senders. */
 typedef struct { int sema; int resultAddr; int resultSize; int driverArg; } sFioCmd4;                     /* 15 */
 typedef struct { int sema; int resultAddr; int resultSize; int iopFd; int slot; } sFioFdCmd;              /* 1, 10 */
 typedef struct { int sema; int resultAddr; int resultSize; int iopFd; int direntBuf; } sFioDreadCmd;      /* 11 */
@@ -296,7 +296,7 @@ typedef union {
     sFioReadlinkCmd readlink;   /* 25 */
     sFioIoctl2Cmd ioctl2;       /* 26 */
 } uFioCmd;
-extern uFioCmd D_0052D700;
+extern uFioCmd fileio_cmd;
 
 //100%
 INCLUDE_ASM("seg/seg_325220", libkernl_closeTtyChannel);
@@ -304,11 +304,11 @@ INCLUDE_ASM("seg/seg_325220", libkernl_closeTtyChannel);
 /**
  * Marks the DECI2 console channel as closed so the next console read or write reopens it.
  *
- * Clears D_00455168, the flag _write and _read set after libkernl_openTtyChannel opened the channel. sceSifSyncIop
+ * Clears libkernl_ttyOpenFlag, the flag _write and _read set after libkernl_openTtyChannel opened the channel. sceSifSyncIop
  * calls it after the IOP has been rebooted.
  */
 void libkernl_closeTtyChannel(void) {
-    D_00455168 = 0;
+    libkernl_ttyOpenFlag = 0;
 }
 #endif
 
@@ -379,7 +379,7 @@ extern int libkernl_ttySend(int, int);
  * Writes bytes to the console: descriptors 1 and 2 (STDOUT_FILENO, STDERR_FILENO) go to the DECI2 TTY channel; returns
  * the count or -1.
  *
- * Opens the channel with libkernl_openTtyChannel on first use (flag D_00455168) and sends with libkernl_ttySend. Other descriptors,
+ * Opens the channel with libkernl_openTtyChannel on first use (flag libkernl_ttyOpenFlag) and sends with libkernl_ttySend. Other descriptors,
  * or a channel that cannot be opened, return -1 without setting errno. _write_r and the console buffers
  * func_0041B550 and func_0041C938 call it.
  *
@@ -390,11 +390,11 @@ extern int libkernl_ttySend(int, int);
  */
 int _write(int fileDesc, int buffer, int byteCount) {
     if (fileDesc == STDOUT_FILENO || fileDesc == STDERR_FILENO) {
-        if (D_00455168 == 0) {
+        if (libkernl_ttyOpenFlag == 0) {
             if (libkernl_openTtyChannel() == 0) {
                 return -1;
             }
-            D_00455168 = 1;
+            libkernl_ttyOpenFlag = 1;
         }
         return libkernl_ttySend(buffer, byteCount);
     }
@@ -410,7 +410,7 @@ extern int libkernl_ttyReadLine(int, int);
 /**
  * Reads console input for descriptor 0 from the DECI2 TTY channel and returns the count or -1.
  *
- * Opens the channel with libkernl_openTtyChannel on first use (flag D_00455168) and reads with libkernl_ttyReadLine, which waits for
+ * Opens the channel with libkernl_openTtyChannel on first use (flag libkernl_ttyOpenFlag) and reads with libkernl_ttyReadLine, which waits for
  * input and stops after a newline. Other descriptors return -1. _read_r calls it.
  *
  * @param fileDesc  the descriptor
@@ -420,11 +420,11 @@ extern int libkernl_ttyReadLine(int, int);
  */
 int _read(int fileDesc, int buffer, int byteCount) {
     if (fileDesc == 0) {
-        if (D_00455168 == 0) {
+        if (libkernl_ttyOpenFlag == 0) {
             if (libkernl_openTtyChannel() == 0) {
                 return -1;
             }
-            D_00455168 = 1;
+            libkernl_ttyOpenFlag = 1;
         }
         return libkernl_ttyReadLine(buffer, byteCount);
     }
@@ -498,13 +498,13 @@ int _lseek(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", _sbrk);
 #ifdef SKIP_ASM
-extern unsigned D_0045516C;
+extern unsigned libkernl_heapBreak;
 extern unsigned EndOfHeap(void);
 extern int *__errno(void);
 /**
  * Moves the C heap break by n bytes and returns the old break, or all ones when it would pass the end of the heap.
  *
- * The break is D_0045516C; the limit comes from EndOfHeap. When interrupts are enabled (Status bit 16) they are
+ * The break is libkernl_heapBreak; the limit comes from EndOfHeap. When interrupts are enabled (Status bit 16) they are
  * disabled for the update (di until the bit reads clear) and enabled again afterwards. Failure sets errno 12 (ENOMEM)
  * through __errno. _sbrk_r calls it.
  *
@@ -523,15 +523,15 @@ unsigned _sbrk(unsigned n) {
             MFC0_STATUS_4248(status);
         } while (status & 0x10000);
     }
-    end = D_0045516C + n;
+    end = libkernl_heapBreak + n;
     if (EndOfHeap() < end) {
         *__errno() = 12;
         if (intsOn) EI_4248();
         return 0xFFFFFFFF;
     }
     {
-        unsigned old = D_0045516C;
-        D_0045516C = end;
+        unsigned old = libkernl_heapBreak;
+        libkernl_heapBreak = end;
         if (intsOn) EI_4248();
         return old;
     }
@@ -978,11 +978,11 @@ extern void SuspendThread(int);
 /**
  * Runs forever as the helper thread that carries out thread requests queued from interrupt handlers.
  *
- * Each time the semaphore D_0052B3A0 is signalled it takes the next 2-byte entry {type, thread id} from the 512-entry
+ * Each time the semaphore libkernl_requestSema is signalled it takes the next 2-byte entry {type, thread id} from the 512-entry
  * ring (read index in the first word, entries from +8) and calls WakeupThread (WAKE_REQUEST_WAKEUP),
  * RotateThreadReadyQueue (WAKE_REQUEST_ROTATE_READY_QUEUE, the id being a priority) or SuspendThread
  * (WAKE_REQUEST_SUSPEND). Any other type prints "## internel error in libkernl.a!" (sic) with kprintf. InitThread
- * starts it with D_0052B3A8.
+ * starts it with libkernl_requestQueue.
  *
  * @param wakeQueue  the request queue
  */
@@ -992,7 +992,7 @@ void libkernl_requestThread(sWakeQueue *wakeQueue) {
     unsigned char *entryTypes = (unsigned char *)&wakeQueue->e[0].a;
     unsigned char *entryThreads = (unsigned char *)&wakeQueue->e[0].b;
     for (;;) {
-        WaitSema_i(D_0052B3A0);
+        WaitSema_i(libkernl_requestSema);
         i = wakeQueue->readIdx & 0x1FF;
         j = i << 1;
         wakeQueue->readIdx = i + 1;
@@ -1030,9 +1030,9 @@ int InitThread_i(void) __asm__("InitThread");
 /**
  * Creates and starts the helper thread for interrupt-context thread requests and returns its id, or -1.
  *
- * Returns -1 when the thread already exists (D_00455170 > 0). Creates the semaphore D_0052B3A0 (max 0xFF), then the
+ * Returns -1 when the thread already exists (libkernl_helperThreadId > 0). Creates the semaphore libkernl_requestSema (max 0xFF), then the
  * thread running libkernl_requestThread with the 0x400-byte stack D_0052AFA0, gp D_004A30F0 and priority 0; a failed thread
- * deletes the semaphore again. It clears the queue D_0052B3A8, starts the thread with it as the argument and drops the
+ * deletes the semaphore again. It clears the queue libkernl_requestQueue, starts the thread with it as the argument and drops the
  * calling thread to priority 1. _InitSys calls it.
  *
  * @return the helper thread id, or -1
@@ -1040,13 +1040,13 @@ int InitThread_i(void) __asm__("InitThread");
 int InitThread_i(void) {
     int cfg[12];
     int buf[8];
-    if (D_00455170 > 0) {
+    if (libkernl_helperThreadId > 0) {
         return -1;
     }
     buf[2] = 0;
     buf[1] = 0xFF;
-    D_0052B3A0 = CreateSema(buf);
-    if (D_0052B3A0 < 0) {
+    libkernl_requestSema = CreateSema(buf);
+    if (libkernl_requestSema < 0) {
         return -1;
     }
     cfg[1] = (int)libkernl_requestThread;
@@ -1054,16 +1054,16 @@ int InitThread_i(void) {
     cfg[3] = 0x400;
     cfg[4] = (int)D_004A30F0;
     cfg[5] = 0;
-    D_00455170 = CreateThread(cfg);
-    if (D_00455170 < 0) {
-        DeleteSema(D_0052B3A0);
+    libkernl_helperThreadId = CreateThread(cfg);
+    if (libkernl_helperThreadId < 0) {
+        DeleteSema(libkernl_requestSema);
         return -1;
     }
-    D_0052B3A8.readIdx = 0;
-    D_0052B3A8.idx = 0;
-    StartThread(D_00455170, &D_0052B3A8);
+    libkernl_requestQueue.readIdx = 0;
+    libkernl_requestQueue.idx = 0;
+    StartThread(libkernl_helperThreadId, &libkernl_requestQueue);
     ChangeThreadPriority(GetThreadId(), 1);
-    return D_00455170;
+    return libkernl_helperThreadId;
 }
 #endif
 
@@ -1079,7 +1079,7 @@ int iWakeupThread_r(int a0) __asm__("iWakeupThread");
  * Wakes a thread from interrupt context; waking the interrupted thread itself is passed to the helper thread.
  *
  * Gets the current thread id with system call -47. Any other thread goes straight to _iWakeupThread. For the current
- * thread (id below 0x100, helper running) it queues a type-0 entry in D_0052B3A8 and signals D_0052B3A0 with
+ * thread (id below 0x100, helper running) it queues a type-0 entry in libkernl_requestQueue and signals libkernl_requestSema with
  * iSignalSema. sifrpc_onCallCmd calls it to wake an RPC server thread.
  *
  * @param threadId  the thread id
@@ -1090,12 +1090,12 @@ int iWakeupThread_r(int threadId) {
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
     if (id != threadId) return _iWakeupThread();
-    if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
-    i = D_0052B3A8.idx & 0x1FF;
-    D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = WAKE_REQUEST_WAKEUP;
-    D_0052B3A8.e[i].b = id;
-    iSignalSema(D_0052B3A0);
+    if ((unsigned)id >= 0x100 || libkernl_helperThreadId == 0) return -1;
+    i = libkernl_requestQueue.idx & 0x1FF;
+    libkernl_requestQueue.idx = i + 1;
+    libkernl_requestQueue.e[i].a = WAKE_REQUEST_WAKEUP;
+    libkernl_requestQueue.e[i].b = id;
+    iSignalSema(libkernl_requestSema);
     return id;
 }
 #endif
@@ -1108,21 +1108,21 @@ extern void iSignalSema(int);
  * Queues a ready-queue rotation for a priority level from interrupt context, done later by the helper thread.
  *
  * Priorities from 0x80 up, or a missing helper thread, return -1. Otherwise it queues a type-1 entry and signals
- * D_0052B3A0 with iSignalSema. THREAD_yield and THREAD_yieldticks call it.
+ * libkernl_requestSema with iSignalSema. THREAD_yield and THREAD_yieldticks call it.
  *
  * @param priority  the priority
  * @return the priority, or -1
  */
 int iRotateThreadReadyQueue(unsigned priority) {
     unsigned i;
-    if (priority >= 0x80 || D_00455170 == 0) {
+    if (priority >= 0x80 || libkernl_helperThreadId == 0) {
         return -1;
     }
-    i = D_0052B3A8.idx & 0x1FF;
-    D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = WAKE_REQUEST_ROTATE_READY_QUEUE;
-    D_0052B3A8.e[i].b = priority;
-    iSignalSema(D_0052B3A0);
+    i = libkernl_requestQueue.idx & 0x1FF;
+    libkernl_requestQueue.idx = i + 1;
+    libkernl_requestQueue.e[i].a = WAKE_REQUEST_ROTATE_READY_QUEUE;
+    libkernl_requestQueue.e[i].b = priority;
+    iSignalSema(libkernl_requestSema);
     return priority;
 }
 #endif
@@ -1145,12 +1145,12 @@ int iSuspendThread_r(int threadId) {
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
     if (id != threadId) return _iSuspendThread();
-    if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
-    i = D_0052B3A8.idx & 0x1FF;
-    D_0052B3A8.idx = i + 1;
-    D_0052B3A8.e[i].a = WAKE_REQUEST_SUSPEND;
-    D_0052B3A8.e[i].b = id;
-    iSignalSema(D_0052B3A0);
+    if ((unsigned)id >= 0x100 || libkernl_helperThreadId == 0) return -1;
+    i = libkernl_requestQueue.idx & 0x1FF;
+    libkernl_requestQueue.idx = i + 1;
+    libkernl_requestQueue.e[i].a = WAKE_REQUEST_SUSPEND;
+    libkernl_requestQueue.e[i].b = id;
+    iSignalSema(libkernl_requestSema);
     return id;
 }
 #endif
@@ -1159,7 +1159,7 @@ int iSuspendThread_r(int threadId) {
 INCLUDE_ASM("seg/seg_325220", libkernl_initTtyRing);
 #ifdef SKIP_ASM
 /**
- * Initialises the console input ring buffer in D_0052B7C0 and returns it.
+ * Initialises the console input ring buffer in libkernl_ttyRingStorage and returns it.
  *
  * Stores the data size, a zero count and read and write pointers at the start of the data (+0x10). The storage is
  * fixed, so every call returns the same ring. libkernl_openTtyChannel calls it with 0x100.
@@ -1168,11 +1168,11 @@ INCLUDE_ASM("seg/seg_325220", libkernl_initTtyRing);
  * @return the ring
  */
 sRing *libkernl_initTtyRing(int dataSize) {
-    D_0052B7C0[0] = dataSize;
-    D_0052B7C0[1] = 0;
-    D_0052B7C0[3] = (int)&D_0052B7C0[4];
-    D_0052B7C0[2] = (int)&D_0052B7C0[4];
-    return (sRing *)D_0052B7C0;
+    libkernl_ttyRingStorage[0] = dataSize;
+    libkernl_ttyRingStorage[1] = 0;
+    libkernl_ttyRingStorage[3] = (int)&libkernl_ttyRingStorage[4];
+    libkernl_ttyRingStorage[2] = (int)&libkernl_ttyRingStorage[4];
+    return (sRing *)libkernl_ttyRingStorage;
 }
 #endif
 
@@ -1231,7 +1231,7 @@ extern char D_0049AB08[], D_0049AB30[], D_0049AB48[], D_0049AB60[];
  *
  * @param cmd  the event code
  * @param n    the bytes pending (events 1 and 2)
- * @param ttyState    the console state D_0052B8D0
+ * @param ttyState    the console state libkernl_ttyState
  */
 void libkernl_onTtyDeci2Event(int cmd, int n, sTty *ttyState) {
     switch (cmd) {
@@ -1304,12 +1304,12 @@ int libkernl_ttySend_d(char *buf, int len) {
     char *payloadCursor;
     int i = 0;
     int n = 0;
-    if (D_0052B8D0.fC != 0)
+    if (libkernl_ttyState.fC != 0)
         return -1;
     DIntr();
     pkt = (struct Pkt_5040 *)((int)D_0052B900 | 0x20000000);
-    D_0052B8D0.fC = 1;
-    D_0052B8D0.wp = (char *)pkt;
+    libkernl_ttyState.fC = 1;
+    libkernl_ttyState.wp = (char *)pkt;
     payloadCursor = (char *)pkt + 12;
     while (len-- != 0) {
         if (*buf == '\n') {
@@ -1322,15 +1322,15 @@ int libkernl_ttySend_d(char *buf, int len) {
         if (++i >= 256)
             break;
     }
-    D_0052B8D0.wlen = i + 12;
-    pkt->length = D_0052B8D0.wlen;
-    if (f5040_send(D_0052B8D0.fd, pkt->destination) < 0) {
-        D_0052B8D0.fC = 0;
+    libkernl_ttyState.wlen = i + 12;
+    pkt->length = libkernl_ttyState.wlen;
+    if (f5040_send(libkernl_ttyState.fd, pkt->destination) < 0) {
+        libkernl_ttyState.fC = 0;
         EIntr();
         return -1;
     }
-    while (D_0052B8D0.fC != 0)
-        f5040_poll(D_0052B8D0.fd);
+    while (libkernl_ttyState.fC != 0)
+        f5040_poll(libkernl_ttyState.fd);
     EIntr();
     return n;
 }
@@ -1359,8 +1359,8 @@ int libkernl_ttyReadLine(int bufAddr, int n) {
         j = i + 1;
         while (D_0052B8E8->count == 0) {
         }
-        *charSlot = *D_0052B8D0.ring->rd;
-        libkernl_ringAdvanceRead(D_0052B8D0.ring);
+        *charSlot = *libkernl_ttyState.ring->rd;
+        libkernl_ringAdvanceRead(libkernl_ttyState.ring);
         if (*charSlot == '\n' || *charSlot == '\r') {
             return j;
         }
@@ -1382,7 +1382,7 @@ extern int f5260_open(int, void *, void *) __asm__("sceDeci2Open");
 /**
  * Opens the DECI2 console channel and returns 1, or 0 when it cannot.
  *
- * Flushes the caches (FlushCache(0)) and opens protocol 0x210 with sceDeci2Open, registering D_0052B8D0 and the
+ * Flushes the caches (FlushCache(0)) and opens protocol 0x210 with sceDeci2Open, registering libkernl_ttyState and the
  * callback libkernl_onTtyDeci2Event. Then it clears the state, points the receive buffer at the uncached D_0052BA40, prepares the
  * send packet header in the uncached D_0052B900 (protocol 0x210, source 'E', destination 'H') and creates the
  * 0x100-byte input ring with libkernl_initTtyRing.
@@ -1392,20 +1392,20 @@ extern int f5260_open(int, void *, void *) __asm__("sceDeci2Open");
 int libkernl_openTtyChannel(void) {
     struct Pkt_5260 *sendPacket;
     FlushCache(0);
-    D_0052B8D0.fd = f5260_open(528, &D_0052B8D0, libkernl_onTtyDeci2Event);
-    if (D_0052B8D0.fd < 0) return 0;
-    D_0052B8D0.fC = 0;
-    D_0052B8D0.wlen = 0;
-    D_0052B8D0.pos = 0;
-    D_0052B8D0.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
+    libkernl_ttyState.fd = f5260_open(528, &libkernl_ttyState, libkernl_onTtyDeci2Event);
+    if (libkernl_ttyState.fd < 0) return 0;
+    libkernl_ttyState.fC = 0;
+    libkernl_ttyState.wlen = 0;
+    libkernl_ttyState.pos = 0;
+    libkernl_ttyState.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
     sendPacket = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
-    D_0052B8D0.wp = (char *)sendPacket;
+    libkernl_ttyState.wp = (char *)sendPacket;
     sendPacket->protocol = 528;
     sendPacket->source = 69;
     sendPacket->destination = 72;
     sendPacket->reserved = 0;
     sendPacket->textHeader = 0;
-    D_0052B8D0.ring = libkernl_initTtyRing(0x100);
+    libkernl_ttyState.ring = libkernl_initTtyRing(0x100);
     return 1;
 }
 #endif
@@ -1474,7 +1474,7 @@ extern void libkernl_sioPutc(int c);
 /**
  * Writes a character to the SIO serial port, sending "\r\n" for a newline.
  *
- * It is the initial value of the output routine pointer D_00455178. Uses libkernl_sioPutc.
+ * It is the initial value of the output routine pointer libkernl_putcHook. Uses libkernl_sioPutc.
  *
  * @param outChar  the character
  */
@@ -1542,12 +1542,12 @@ extern double dpmul(double, double);
 extern double dpdiv(double, double);
 extern double __fixunsdfdi_d(double) __asm__("__fixunsdfdi");
 extern double libkernl_doubleBitsToInt_d(double) __asm__("libkernl_doubleBitsToInt");
-extern void (*D_00455178)(int);
+extern void (*libkernl_putcHook)(int);
 extern char D_0049AB80[];
 extern char D_0049AB88[];
 extern char D_0049AB90[];
 /**
- * Prints a double in "0.dddddd" plus exponent form through the output routine D_00455178.
+ * Prints a double in "0.dddddd" plus exponent form through the output routine libkernl_putcHook.
  *
  * A negative value prints '-' and is negated. The value is scaled by powers of 10 into [0.1, 1) with dpmul / dpdiv,
  * counting the exponent, multiplied by 1e6 and converted with __fixunsdfdi and libkernl_doubleBitsToInt; then kprintf prints
@@ -1562,7 +1562,7 @@ void libkernl_printDouble(double x) {
     int n = 0;
     if (dpcmp(x, 0.0) < 0) {
         x = dpsub(0.0, x);
-        D_00455178(45);
+        libkernl_putcHook(45);
     }
     if (dpcmp(x, 0.1) < 0) {
         while (dpcmp(x, 0.1) < 0) {
@@ -1590,7 +1590,7 @@ void libkernl_printDouble(double x) {
 //100%
 INCLUDE_ASM("seg/seg_325220", libkernl_formatOutput);
 #ifdef SKIP_ASM
-extern void (*D_00455178)(int);
+extern void (*libkernl_putcHook)(int);
 extern int DIntr_p(void) __asm__("DIntr");
 extern void EIntr(void);
 extern long __moddi3(long, long);
@@ -1602,7 +1602,7 @@ extern void libkernl_printDouble(double x);
 // printf core: fmt + va_list (8-byte argument slots); 64-bit div/mod go through the soft helpers.
 void libkernl_formatOutput_f(char *fmt, char *ap) __asm__("libkernl_formatOutput");
 /**
- * Formats text from a format string and argument list, sending each character to the output routine D_00455178.
+ * Formats text from a format string and argument list, sending each character to the output routine libkernl_putcHook.
  *
  * Supports %d, %u, %x, %o with h or l sizes and a 0-prefixed width of up to 31 digits, %c, %s and %e / %f (printed by
  * libkernl_printDouble). Arguments take 8-byte slots; 64-bit division uses __moddi3, __divdi3, __umoddi3 and
@@ -1681,7 +1681,7 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 if (zeroFill && zeroFill < printCursor)
                     printCursor = zeroFill;
                 while (*printCursor)
-                    D_00455178(*printCursor++);
+                    libkernl_putcHook(*printCursor++);
                 break;
             case 'x':
                 if (lmod == 'l') {
@@ -1711,7 +1711,7 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 if (zeroFill && zeroFill < printCursor)
                     printCursor = zeroFill;
                 while (*printCursor)
-                    D_00455178(*printCursor++);
+                    libkernl_putcHook(*printCursor++);
                 break;
             case 'd':
                 if (lmod == 'l') {
@@ -1731,7 +1731,7 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 } else {
                     if (signedValue < 0) {
                         signedValue = -signedValue;
-                        D_00455178('-');
+                        libkernl_putcHook('-');
                     }
                     while (signedValue) {
                         *--printCursor = __moddi3(signedValue, 10) + '0';
@@ -1741,7 +1741,7 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 if (zeroFill && zeroFill < printCursor)
                     printCursor = zeroFill;
                 while (*printCursor)
-                    D_00455178(*printCursor++);
+                    libkernl_putcHook(*printCursor++);
                 break;
             case 'u':
                 if (lmod == 'l') {
@@ -1767,14 +1767,14 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 if (zeroFill && zeroFill < printCursor)
                     printCursor = zeroFill;
                 while (*printCursor)
-                    D_00455178(*printCursor++);
+                    libkernl_putcHook(*printCursor++);
                 break;
             case 'e':
             case 'f':
                 ap += 8;
                 floatValue = *(float *)(ap - 8);
                 if (floatValue == 0.0f)
-                    D_00455178('0');
+                    libkernl_putcHook('0');
                 else
                     libkernl_printDouble(fptodp(floatValue));
                 break;
@@ -1782,25 +1782,25 @@ void libkernl_formatOutput_f(char *fmt, char *ap) {
                 ap += 8;
                 str = *(char **)(ap - 8);
                 if (*str == 0) {
-                    D_00455178('(');
-                    D_00455178('n');
-                    D_00455178('u');
-                    D_00455178('l');
-                    D_00455178('l');
-                    D_00455178(')');
+                    libkernl_putcHook('(');
+                    libkernl_putcHook('n');
+                    libkernl_putcHook('u');
+                    libkernl_putcHook('l');
+                    libkernl_putcHook('l');
+                    libkernl_putcHook(')');
                 } else {
                     for (printCursor = str; *printCursor; printCursor++)
-                        D_00455178(*printCursor);
+                        libkernl_putcHook(*printCursor);
                 }
                 break;
             case 'c':
                 ap += 8;
                 signedValue = *(char *)(ap - 8);
-                D_00455178(signedValue);
+                libkernl_putcHook(signedValue);
                 break;
             }
         } else {
-            D_00455178(*fmt);
+            libkernl_putcHook(*fmt);
         }
         fmt++;
     }
@@ -1816,7 +1816,7 @@ INCLUDE_ASM("seg/seg_325220", kprintf);
 // but also emits swc1 $f12..$f18 saves (target has none) -> size mismatch (18 vs 14 insns).
 extern void libkernl_formatOutput(int fmt, char *ap);
 /**
- * Prints formatted text through the current output routine D_00455178 (the serial port by default).
+ * Prints formatted text through the current output routine libkernl_putcHook (the serial port by default).
  *
  * Builds the argument pointer and calls libkernl_formatOutput. The library's own diagnostics use it: libkernl_requestThread,
  * libkernl_onTtyDeci2Event and libkernl_printDouble.
@@ -1833,24 +1833,24 @@ void kprintf(int fmt, ...) {
 //100%
 INCLUDE_ASM("seg/seg_325220", scePrintf);
 #ifdef SKIP_ASM
-extern void (*D_00455178)(int);
+extern void (*libkernl_putcHook)(int);
 extern void libkernl_bufferPrintChar(int c);
 extern void libkernl_formatOutput(int a0, char *ap);
 /**
  * Prints formatted text through the console line buffer.
  *
- * Swaps the output routine D_00455178 for libkernl_bufferPrintChar while libkernl_formatOutput runs, then restores the old one. Callers
+ * Swaps the output routine libkernl_putcHook for libkernl_bufferPrintChar while libkernl_formatOutput runs, then restores the old one. Callers
  * include sceGsSyncPath, sceUsbKbGetLocation and other Sony library code.
  *
  * @param format  the format
  */
 void scePrintf(int format, ...) {
     char *ap;
-    void (*old)(int) = D_00455178;
-    D_00455178 = libkernl_bufferPrintChar;
+    void (*old)(int) = libkernl_putcHook;
+    libkernl_putcHook = libkernl_bufferPrintChar;
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
     libkernl_formatOutput(format, ap);
-    D_00455178 = old;
+    libkernl_putcHook = old;
 }
 #endif
 
@@ -1864,7 +1864,7 @@ INCLUDE_ASM("seg/seg_325220", sifcmd_onSetSregCmd);
  * installs it as system command 1.
  *
  * @param packet   the command packet
- * @param cmdData  the command layer data D_0052BCD8
+ * @param cmdData  the command layer data sifcmd_data
  */
 void sifcmd_onSetSregCmd(int *packet, int *cmdData) {
     ((int *)cmdData[7])[packet[4]] = packet[5];
@@ -1880,7 +1880,7 @@ INCLUDE_ASM("seg/seg_325220", sifcmd_onChangeAddrCmd);
  * Stores packet word 4 as the IOP buffer address (command data +8). sceSifInitCmd installs it as system command 0.
  *
  * @param packet   the command packet
- * @param cmdData  the command layer data D_0052BCD8
+ * @param cmdData  the command layer data sifcmd_data
  */
 void sifcmd_onChangeAddrCmd(int *packet, int *cmdData) {
     cmdData[2] = packet[4];
@@ -1891,7 +1891,7 @@ void sifcmd_onChangeAddrCmd(int *packet, int *cmdData) {
 INCLUDE_ASM("seg/seg_325220", sceSifGetSreg);
 #ifdef SKIP_ASM
 /**
- * Returns one of the 32 SIF software registers (D_0052BE00).
+ * Returns one of the 32 SIF software registers (sifcmd_sregs).
  *
  * No bounds check. func_0040B130 and the RPC set-up func_00426408 call it.
  *
@@ -1899,7 +1899,7 @@ INCLUDE_ASM("seg/seg_325220", sceSifGetSreg);
  * @return the register value
  */
 int sceSifGetSreg(int regIndex) {
-    return D_0052BE00[regIndex];
+    return sifcmd_sregs[regIndex];
 }
 #endif
 
@@ -1916,7 +1916,7 @@ INCLUDE_ASM("seg/seg_325220", sceSifSetSreg);
  * @return the value
  */
 int sceSifSetSreg(int regIndex, int regValue) {
-    D_0052BE00[regIndex] = regValue;
+    sifcmd_sregs[regIndex] = regValue;
     return regValue;
 }
 #endif
@@ -1925,14 +1925,14 @@ int sceSifSetSreg(int regIndex, int regValue) {
 INCLUDE_ASM("seg/seg_325220", sceSifGetDataTable);
 #ifdef SKIP_ASM
 /**
- * Returns the SIF command layer data D_0052BCD8.
+ * Returns the SIF command layer data sifcmd_data.
  *
  * No code calls it.
  *
  * @return the command layer data
  */
 int *sceSifGetDataTable(void) {
-    return D_0052BCD8;
+    return sifcmd_data;
 }
 #endif
 
@@ -1951,8 +1951,8 @@ typedef struct {
     int nusr;
     int *sregs;
 } sCmdData_5D38;
-/* D_0052BCD8 is declared int[] in this unit; this is its real layout */
-extern sCmdData_5D38 cmd_5D38 __asm__("D_0052BCD8");
+/* sifcmd_data is declared int[] in this unit; this is its real layout */
+extern sCmdData_5D38 cmd_5D38 __asm__("sifcmd_data");
 extern int D_0045517C;          /* SIF command layer initialised */
 extern char D_0052BC00[];       /* receive packet buffer */
 extern char D_0052BC80[];
@@ -1970,9 +1970,9 @@ extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("sceSifSend
  * Initialises the SIF command layer once and starts the handshake with the IOP.
  *
  * With interrupts off it returns at once when D_0045517C is set; otherwise it sets the flag and fills the command data
- * D_0052BCD8: the uncached receive buffer D_0052BC00, the 32-entry system handler table D_0052BD00 (cleared, then
+ * sifcmd_data: the uncached receive buffer D_0052BC00, the 32-entry system handler table D_0052BD00 (cleared, then
  * entries 0 and 1 set to sifcmd_onChangeAddrCmd and sifcmd_onSetSregCmd), no user table, and the 32 cleared software registers
- * D_0052BE00.
+ * sifcmd_sregs.
  *
  * After FlushCache(0) it acknowledges DMA status bit 5 (0x1000E010), sets the SIF DMA chain up with sceSifSetDChain
  * when 0x1000C000 bit 8 is clear, installs func_00426230 as the DMA channel 5 handler (AddDmacHandler) and enables it
@@ -1996,13 +1996,13 @@ void sceSifInitCmd(void) {
     cmd_5D38.nsys = 32;
     cmd_5D38.usr = 0;
     cmd_5D38.nusr = 0;
-    cmd_5D38.sregs = D_0052BE00;
+    cmd_5D38.sregs = sifcmd_sregs;
     for (i = 0; i < 32; i++) {
         D_0052BD00[i].func = 0;
         D_0052BD00[i].data = 0;
     }
     for (i = 0; i < 32; i++)
-        D_0052BE00[i] = 0;
+        sifcmd_sregs[i] = 0;
     D_0052BD00[0].func = sifcmd_onChangeAddrCmd;
     D_0052BD00[0].data = &cmd_5D38;
     D_0052BD00[1].func = sifcmd_onSetSregCmd;
@@ -2066,9 +2066,9 @@ INCLUDE_ASM("seg/seg_325220", sceSifSetCmdBuffer);
  * @return the previous table
  */
 int sceSifSetCmdBuffer(int handlerTable, int handlerCount) {
-    int old = D_0052BCD8[5];
-    D_0052BCD8[5] = handlerTable;
-    D_0052BCD8[6] = handlerCount;
+    int old = sifcmd_data[5];
+    sifcmd_data[5] = handlerTable;
+    sifcmd_data[6] = handlerCount;
     return old;
 }
 #endif
@@ -2086,9 +2086,9 @@ INCLUDE_ASM("seg/seg_325220", sceSifSetSysCmdBuffer);
  * @return the previous table
  */
 int sceSifSetSysCmdBuffer(int handlerTable, int handlerCount) {
-    int old = D_0052BCD8[3];
-    D_0052BCD8[3] = handlerTable;
-    D_0052BCD8[4] = handlerCount;
+    int old = sifcmd_data[3];
+    sifcmd_data[3] = handlerTable;
+    sifcmd_data[4] = handlerCount;
     return old;
 }
 #endif
@@ -2147,7 +2147,7 @@ void sceSifRemoveCmdHandler(int cmdId) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sifcmd_sendPacket);
 #ifdef SKIP_ASM
-extern int D_0052BCE0;
+extern int sifcmd_iopRecvAddr;
 extern void func_00426358(int, int);
 int sifcmd_sendPacket_d(int, int, int *, unsigned, int, int, int) __asm__("sifcmd_sendPacket");
 /**
@@ -2157,7 +2157,7 @@ int sifcmd_sendPacket_d(int, int, int *, unsigned, int, int, int) __asm__("sifcm
  * The packet size must be 0x10..0x70. With extra data it first queues a DMA of a6 bytes from a4 to a5 and records the
  * destination and size in the packet header; flag 4 writes the extra data back from the data cache first
  * (func_00426358). The packet itself (size byte and command id at +8 filled in, written back with func_00426358) goes
- * to the IOP receive address D_0052BCE0 with attribute 0x44. Flag 1 queues both with isceSifSetDma (interrupt context),
+ * to the IOP receive address sifcmd_iopRecvAddr with attribute 0x44. Flag 1 queues both with isceSifSetDma (interrupt context),
  * otherwise sceSifSetDma.
  *
  * @param cmdId  the command id
@@ -2192,7 +2192,7 @@ int sifcmd_sendPacket_d(int cmdId, int sendFlags, int *packet, unsigned packetSi
         packet[0] = *(unsigned char *)packet;
     }
     ent[n].data = (int)packet;
-    ent[n].addr = D_0052BCE0;
+    ent[n].addr = sifcmd_iopRecvAddr;
     ent[n].size = packetSize;
     packet[2] = cmdId;
     *(unsigned char *)packet = packetSize;
@@ -2343,15 +2343,15 @@ INCLUDE_ASM("seg/seg_325220", func_00426408);
 INCLUDE_ASM("seg/seg_325220", sceSifExitRpc);
 #ifdef SKIP_ASM
 extern void sceSifExitCmd(void);
-extern int D_00455180;
+extern int sifrpc_initFlag;
 /**
  * Shuts the SIF RPC layer down.
  *
- * Calls sceSifExitCmd and clears the RPC initialised flag D_00455180. sceSifRebootIop calls it.
+ * Calls sceSifExitCmd and clears the RPC initialised flag sifrpc_initFlag. sceSifRebootIop calls it.
  */
 void sceSifExitRpc(void) {
     sceSifExitCmd();
-    D_00455180 = 0;
+    sifrpc_initFlag = 0;
 }
 #endif
 
@@ -2369,7 +2369,7 @@ sSifRpcPkt *f65D0(sSifRpcState *s) __asm__("sifrpc_takePacket");
  * hands out 1 and leaves the counter at 2, so id 2 is never used. sceSifCallRpc, sceSifBindRpc and sceSifGetOtherData call
  * it.
  *
- * @param rpcState  the RPC state D_0052D680
+ * @param rpcState  the RPC state sifrpc_state
  * @return the packet, or null when all are in use
  */
 sSifRpcPkt *f65D0(sSifRpcState *rpcState) {
@@ -2610,7 +2610,7 @@ int sceSifGetOtherData_d(struct S68F0 *, int, int, int, int) __asm__("sceSifGetO
 int sceSifGetOtherData_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int byteCount, int mode) {
     int buf[8];
     struct S68F0 *packet;
-    packet = sifrpc_takePacket_p(&D_0052D680);
+    packet = sifrpc_takePacket_p(&sifrpc_state);
     if (packet == 0) {
         return -1;
     }
@@ -2745,7 +2745,7 @@ int sceSifBindRpc_d(struct S6B48 *client, int rpcNumber, int mode) {
     struct S6B48 *packet;
     client->command = 0;
     client->server = 0;
-    packet = sifrpc_takePacket(&D_0052D680);
+    packet = sifrpc_takePacket(&sifrpc_state);
     if (packet == 0) {
         return -1;
     }
@@ -2906,7 +2906,7 @@ extern int f6D18_wsema(int) __asm__("WaitSema");
 /**
  * Sends a SIF RPC call to the IOP server a bound client points at and, unless asked not to, waits for the reply.
  *
- * Takes a free 0x40-byte call packet from the RPC state D_0052D680 (sifrpc_takePacket; -1 when none is free) and fills it:
+ * Takes a free 0x40-byte call packet from the RPC state sifrpc_state (sifrpc_takePacket; -1 when none is free) and fills it:
  * the function number, send size, receive buffer and size, the packet's own address, the client's bound server and the
  * client. The client records the packet, its id, the end function and its argument. Unless mode bit 1 is set, it writes
  * the send and receive buffers back from the data cache first (func_00426358; once with the larger size when they are
@@ -2932,7 +2932,7 @@ int sceSifCallRpc(sSifClient *client, int fno, int mode, void *send, int ssize, 
     struct SifClient6D18 *cd = (struct SifClient6D18 *)client;
     struct Sema6D18 sema;
     struct Call6D18 *call;
-    call = f6D18_get(&D_0052D680);
+    call = f6D18_get(&sifrpc_state);
     if (call == 0)
         return -1;
     cd->rpcd.pid = call->rpc_id;
@@ -3018,7 +3018,7 @@ extern void EIntr(void);
  *
  * With interrupts disabled (DIntr ... EIntr) it sets the queue's thread id (f0) to @p threadId, clears its
  * active flag (f4), its server list, the request start and end pointers (fC, f10) and its link, then appends it to the
- * end of D_0052D680.queues (the list sifrpc_findServer searches when a bind request names a server). No caller in this
+ * end of sifrpc_state.queues (the list sifrpc_findServer searches when a bind request names a server). No caller in this
  * build.
  *
  * @param n  the queue to set up
@@ -3033,10 +3033,10 @@ void sceSifSetRpcQueue(sSifQueue *n, int threadId) {
     n->servers = 0;
     n->head = 0;
     n->tail = 0;
-    firstQueue = D_0052D680.queues;
+    firstQueue = sifrpc_state.queues;
     n->next = 0;
     if (firstQueue == 0) {
-        D_0052D680.queues = n;
+        sifrpc_state.queues = n;
     } else {
         lastQueue = firstQueue;
         for (; lastQueue->next != 0; lastQueue = lastQueue->next)
@@ -3146,7 +3146,7 @@ sSifQueue *f7148(sSifQueue *x) __asm__("sceSifRemoveRpcQueue");
 /**
  * Unlinks a server queue from the RPC state's queue list.
  *
- * With interrupts disabled it walks D_0052D680.queues: a head match is replaced by its successor; otherwise the
+ * With interrupts disabled it walks sifrpc_state.queues: a head match is replaced by its successor; otherwise the
  * predecessor of @p x is relinked past it. No caller in this build.
  *
  * @param x  the queue to remove
@@ -3155,9 +3155,9 @@ sSifQueue *f7148(sSifQueue *x) __asm__("sceSifRemoveRpcQueue");
 sSifQueue *f7148(sSifQueue *x) {
     sSifQueue *queueCursor;
     f7148a();
-    queueCursor = D_0052D680.queues;
+    queueCursor = sifrpc_state.queues;
     if (queueCursor == x) {
-        D_0052D680.queues = queueCursor->next;
+        sifrpc_state.queues = queueCursor->next;
     } else {
         for (; queueCursor != 0; queueCursor = queueCursor->next) {
             if (queueCursor->next == x) {
@@ -3263,9 +3263,9 @@ void sceSifExecRequest_d(struct W7230 *serveData) {
     x4 = fl & 4;
     fl = (unsigned)fl >> 16;
     if (x4) {
-        e = sifrpc_getDataPacket_w(&D_0052D680, fl);
+        e = sifrpc_getDataPacket_w(&sifrpc_state, fl);
     } else {
-        e = sifrpc_nextRecvPacket_w(&D_0052D680, fl);
+        e = sifrpc_nextRecvPacket_w(&sifrpc_state, fl);
     }
     EIntr_w();
     ASSERT_7230(e != 0);
@@ -3338,18 +3338,18 @@ extern int CreateSema(int *p);
 /**
  * Creates the file library's two semaphores the first time it is called.
  *
- * When D_00455218 is still -1, creates two semaphores (initial and max count 1, option 0): D_00455218 guards the
- * 32-entry descriptor table D_0052EC00 and D_0045521C guards the pending no-wait table D_00455188. Called by
+ * When fileio_tableSema is still -1, creates two semaphores (initial and max count 1, option 0): fileio_tableSema guards the
+ * 32-entry descriptor table fileio_descriptors and fileio_noWaitSema guards the pending no-wait table D_00455188. Called by
  * fileio_allocDescriptor, fileio_getDescriptor and fileio_init.
  */
 void fileio_createSemas(void) {
     int buf[8];
-    if (D_00455218 == NO_SEMAPHORE) {
+    if (fileio_tableSema == NO_SEMAPHORE) {
         buf[5] = 0;
         buf[2] = 1;
         buf[1] = 1;
-        D_00455218 = CreateSema(buf);
-        D_0045521C = CreateSema(buf);
+        fileio_tableSema = CreateSema(buf);
+        fileio_noWaitSema = CreateSema(buf);
     }
 }
 #endif
@@ -3363,8 +3363,8 @@ extern void SignalSema(int);
 /**
  * Allocates a free slot in the file library's descriptor table.
  *
- * Makes sure the semaphores exist (fileio_createSemas), then under D_00455218 finds the first of the 32 entries of
- * D_0052EC00 whose flags (f4) are 0 and marks it in use with 0x10000000. Called by sceOpen and sceDopen.
+ * Makes sure the semaphores exist (fileio_createSemas), then under fileio_tableSema finds the first of the 32 entries of
+ * fileio_descriptors whose flags (f4) are 0 and marks it in use with 0x10000000. Called by sceOpen and sceDopen.
  *
  * @return the slot, or 0 when all 32 are taken
  */
@@ -3372,18 +3372,18 @@ sFioFile *fileio_allocDescriptor(void) {
     sFioFile *fileSlot;
     sFioFile *end;
     fileio_createSemas();
-    WaitSema_i(D_00455218);
-    fileSlot = D_0052EC00;
+    WaitSema_i(fileio_tableSema);
+    fileSlot = fileio_descriptors;
     end = fileSlot + 32;
     while (fileSlot < end) {
         if (fileSlot->f4 == 0) {
             fileSlot->f4 = 0x10000000;
-            SignalSema(D_00455218);
+            SignalSema(fileio_tableSema);
             return fileSlot;
         }
         fileSlot++;
     }
-    SignalSema(D_00455218);
+    SignalSema(fileio_tableSema);
     return 0;
 }
 #endif
@@ -3397,22 +3397,22 @@ extern void SignalSema(int);
 /**
  * Returns the descriptor-table slot for a file descriptor number.
  *
- * Makes sure the semaphores exist (fileio_createSemas) and takes D_00455218 around the bounds check. The slot is returned
+ * Makes sure the semaphores exist (fileio_createSemas) and takes fileio_tableSema around the bounds check. The slot is returned
  * whether or not it is open; callers check its flags (f4).
  *
- * @param fdIndex  descriptor number (index into D_0052EC00)
- * @return &D_0052EC00[@p fdIndex], or 0 when it is 32 or more
+ * @param fdIndex  descriptor number (index into fileio_descriptors)
+ * @return &fileio_descriptors[@p fdIndex], or 0 when it is 32 or more
  */
 sFioFile *fileio_getDescriptor(unsigned fdIndex) {
     sFioFile *fileSlot;
     fileio_createSemas();
-    WaitSema_i(D_00455218);
+    WaitSema_i(fileio_tableSema);
     if (fdIndex >= 0x20) {
-        SignalSema(D_00455218);
+        SignalSema(fileio_tableSema);
         return 0;
     }
-    fileSlot = &D_0052EC00[fdIndex];
-    SignalSema(D_00455218);
+    fileSlot = &fileio_descriptors[fdIndex];
+    SignalSema(fileio_tableSema);
     return fileSlot;
 }
 #endif
@@ -3526,15 +3526,15 @@ INCLUDE_ASM("seg/seg_325220", fileio_createCallLock);
 #ifdef SKIP_ASM
 extern int CreateSema(int *p);
 /**
- * Creates the file library's call lock D_00455214 (a semaphore, initial and max count 1) the first time it is called.
+ * Creates the file library's call lock fileio_callLock (a semaphore, initial and max count 1) the first time it is called.
  */
 void fileio_createCallLock(void) {
     int buf[8];
-    if (D_00455214 == NO_SEMAPHORE) {
+    if (fileio_callLock == NO_SEMAPHORE) {
         buf[5] = 0;
         buf[2] = 1;
         buf[1] = 1;
-        D_00455214 = CreateSema(buf);
+        fileio_callLock = CreateSema(buf);
     }
 }
 #endif
@@ -3545,7 +3545,7 @@ INCLUDE_ASM("seg/seg_325220", fileio_lockCall);
 extern void fileio_createCallLock(void);
 extern void WaitSema(int a0);
 /**
- * Takes the file library's call lock (WaitSema on D_00455214), creating it first if needed (fileio_createCallLock).
+ * Takes the file library's call lock (WaitSema on fileio_callLock), creating it first if needed (fileio_createCallLock).
  *
  * Every file call wraps its RPC in this and fileio_unlockCall; callers pass their RPC number, which this definition does
  * not use.
@@ -3554,7 +3554,7 @@ extern void WaitSema(int a0);
  */
 int fileio_lockCall(void) {
     fileio_createCallLock();
-    WaitSema(D_00455214);
+    WaitSema(fileio_callLock);
     return 0;
 }
 #endif
@@ -3564,10 +3564,10 @@ INCLUDE_ASM("seg/seg_325220", fileio_unlockCall);
 #ifdef SKIP_ASM
 extern void SignalSema(int);
 /**
- * Releases the file library's call lock (SignalSema on D_00455214) taken by fileio_lockCall.
+ * Releases the file library's call lock (SignalSema on fileio_callLock) taken by fileio_lockCall.
  */
 void fileio_unlockCall(void) {
-    SignalSema(D_00455214);
+    SignalSema(fileio_callLock);
 }
 #endif
 
@@ -3582,7 +3582,7 @@ extern void fileio_unlockCall(void);
 /**
  * Installs the callback run when the IOP file server sends SIF command 0x80000013, returning the previous one.
  *
- * Under the call lock (fileio_lockCall ... fileio_unlockCall), initialising the library first when D_0045520C is 0
+ * Under the call lock (fileio_lockCall ... fileio_unlockCall), initialising the library first when fileio_initFlag is 0
  * (fileio_init), it stores @p callbackFn and @p callbackArg in D_0052EE80 with interrupts disabled (re-enabled only when they were
  * on). fileio_onCallbackCmd runs the callback. No caller in this build.
  *
@@ -3595,7 +3595,7 @@ void (*fileio_setCallback(void (*callbackFn)(int), int callbackArg))(int) {
     void (*old)(int);
     sFioCb *callbackSlot = &D_0052EE80;
     fileio_lockCall_a(27);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     intrWasOn = DIntr_i();
@@ -3647,11 +3647,11 @@ int fileio_init_d(void) __asm__("fileio_init");
  *
  * Calls func_00426408(0), clears the user callback D_0052EE80 and, with interrupts disabled, installs fileio_onCompletionCmd
  * (SIF command 0x80000011, reply buffer D_0052EE40) and fileio_onCallbackCmd (0x80000013, the callback) with sceSifAddCmdHandler.
- * Then binds D_0052EE00 to server 0x80000001 (sceSifBindRpc), retrying after a 0x100000-iteration spin until the server
- * is bound. It frees all 32 descriptor slots of D_0052EC00 under D_00455218, sends the addresses of the two 0x440-byte
+ * Then binds fileio_client to server 0x80000001 (sceSifBindRpc), retrying after a 0x100000-iteration spin until the server
+ * is bound. It frees all 32 descriptor slots of fileio_descriptors under fileio_tableSema, sends the addresses of the two 0x440-byte
  * reply buffers D_0052E380 (in D_0052D6C0) with RPC function 0xFF and copies the 4-byte server version to D_0052EE28;
  * D_00455210 becomes 1 when the second reply word is 2 (the server then names a reply buffer per request). Sets the
- * initialised flag D_0045520C. The file calls in this unit call it when the flag is 0.
+ * initialised flag fileio_initFlag. The file calls in this unit call it when the flag is 0.
  *
  * @return 0; -1 when the bind fails; 0xFFFEFFFF when the version call fails
  */
@@ -3670,9 +3670,9 @@ int fileio_init_d(void) {
     if (old != 0)
         EIntr_z();
     for (;;) {
-        if (sceSifBindRpc(&D_0052EE00, 0x80000001, 0) < 0)
+        if (sceSifBindRpc(&fileio_client, 0x80000001, 0) < 0)
             return -1;
-        if (D_0052EE00.server != 0)
+        if (fileio_client.server != 0)
             break;
         spinCount = 0x100000;
         do {
@@ -3680,18 +3680,18 @@ int fileio_init_d(void) {
         } while (spinCount != -1);
     }
     fileio_createSemas_z();
-    WaitSema_z(D_00455218);
-    for (fileSlot = D_0052EC00; fileSlot < &D_0052EC00[32]; fileSlot++)
+    WaitSema_z(fileio_tableSema);
+    for (fileSlot = fileio_descriptors; fileSlot < &fileio_descriptors[32]; fileSlot++)
         fileSlot->f4 = 0;
-    SignalSema_z(D_00455218);
+    SignalSema_z(fileio_tableSema);
     D_0052D6C0[0] = (int)D_0052E380;
     D_0052D6C0[1] = D_0052D6C0[0] + 1088;
-    if (sceSifCallRpc(&D_0052EE00, 0xFF, 0, D_0052D6C0, 8, D_0052E340, 8, 0, 0) < 0)
+    if (sceSifCallRpc(&fileio_client, 0xFF, 0, D_0052D6C0, 8, fileio_recvBuffer, 8, 0, 0) < 0)
         return 0xFFFEFFFF;
-    D_0052EE28 = *(sRpcVer *)((int)D_0052E340 | 0x20000000);
-    w = *(sRpcVer *)((int)(D_0052E340 + 4) | 0x20000000);
+    D_0052EE28 = *(sRpcVer *)((int)fileio_recvBuffer | 0x20000000);
+    w = *(sRpcVer *)((int)(fileio_recvBuffer + 4) | 0x20000000);
     D_00455210 = *(int *)&w == 2;
-    D_0045520C = 1;
+    fileio_initFlag = 1;
     return 0;
 }
 #endif
@@ -3730,13 +3730,13 @@ extern void memset(void *a0, int a1, int a2);
 /**
  * Marks the file library as uninitialised so the next file call rebinds the server.
  *
- * Clears D_0045520C and zeroes the 4-byte server version D_0052EE28 (memset, memset). bxIop_initIop calls it
+ * Clears fileio_initFlag and zeroes the 4-byte server version D_0052EE28 (memset, memset). bxIop_initIop calls it
  * after rebooting the IOP.
  *
  * @return 0
  */
 int sceFsReset(void) {
-    D_0045520C = 0;
+    fileio_initFlag = 0;
     memset(&D_0052EE28, 0, 4);
     return 0;
 }
@@ -3759,10 +3759,10 @@ int sceOpen_d(unsigned char *, unsigned, ...) __asm__("sceOpen");
  *
  * Under the call lock (fileio_lockCall ... fileio_unlockCall), initialising the library when needed (fileio_init), it fails
  * with 0xFFFEFFFC when the server's version is not accepted (fileio_isServerRejected) and with -19 when no descriptor slot is
- * free (fileio_allocDescriptor). The RPC function 0 request in D_0052D700.open holds a new semaphore, the address of a stack
+ * free (fileio_allocDescriptor). The RPC function 0 request in fileio_cmd.open holds a new semaphore, the address of a stack
  * result word and its size 4, @p flags without bit 31, the mode (the first variadic argument), the name (up to 0x3FF
  * characters, truncated) and the slot index; it is sent with sceSifCallRpc (0x418 bytes) and the server's first reply
- * word (D_0052E340, read uncached) says whether it was accepted. The lock is released before waiting on the semaphore
+ * word (fileio_recvBuffer, read uncached) says whether it was accepted. The lock is released before waiting on the semaphore
  * for the result (fileio_onCompletionCmd posts it). A negative result frees the slot and is returned; otherwise the IOP's
  * descriptor goes to the slot's f0 and @p flags are or-ed into its f4. Likely bug: when the RPC fails or is refused
  * (-11) the slot taken by fileio_allocDescriptor is never freed. Called by FILEDEV_open.
@@ -3782,9 +3782,9 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
     int mode;
     char *ap;
     sFioFile *fileSlot;
-    sFioOpenCmd *openCmd = &D_0052D700.open;
+    sFioOpenCmd *openCmd = &fileio_cmd.open;
     fileio_lockCall_b(0);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     if (fileio_isServerRejected_z() != 0) {
@@ -3811,7 +3811,7 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
     if (n == FIO_BUFFER_SIZE) {
         openCmd->name[FIO_BUFFER_SIZE - 1] = 0;
     }
-    idx = fileSlot - D_0052EC00;
+    idx = fileSlot - fileio_descriptors;
     openCmd->flags = flags & 0x7FFFFFFF;
     openCmd->mode = mode;
     buf[1] = 1;
@@ -3822,12 +3822,12 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
     openCmd->sema = sem;
     openCmd->resultAddr = (int)&buf[8];
     openCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 0, 0, &D_0052D700.open, 1048, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 0, 0, &fileio_cmd.open, 1048, fileio_recvBuffer, 4, 0, 0) < 0) {
         db0i(sem);
         fileio_unlockCall();
         return -11;
     }
-    result = *(int *)((int)D_0052E340 | 0x20000000);
+    result = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (result == 0) {
         db0i(sem);
@@ -3836,16 +3836,16 @@ int sceOpen_d(unsigned char *filePath, unsigned flags, ...) {
     WaitSema_i(sem);
     db0i(sem);
     if (buf[8] < 0) {
-        WaitSema_i(D_00455218);
+        WaitSema_i(fileio_tableSema);
         fileSlot->f4 = 0;
-        SignalSema(D_00455218);
+        SignalSema(fileio_tableSema);
         return buf[8];
     }
     result = idx;
-    WaitSema_i(D_00455218);
+    WaitSema_i(fileio_tableSema);
     fileSlot->f0 = buf[8];
     fileSlot->f4 |= flags;
-    SignalSema(D_00455218);
+    SignalSema(fileio_tableSema);
     return result;
 }
 #endif
@@ -3862,9 +3862,9 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * Closes a file descriptor through the IOP file server.
  *
  * Takes the call lock (fileio_lockCall; released by fileio_unlockCall), but unlike sceOpen does not initialise the
- * library: returns -1 when D_0045520C is 0 and -9 when the descriptor's slot (fileio_getDescriptor) is not open. Sends RPC
+ * library: returns -1 when fileio_initFlag is 0 and -9 when the descriptor's slot (fileio_getDescriptor) is not open. Sends RPC
  * function 1 with a new semaphore, the address and size (4) of a stack result word, the IOP descriptor and the slot
- * index (20 bytes); after a successful call it frees the slot (f4 = 0, without taking D_00455218). It waits on the
+ * index (20 bytes); after a successful call it frees the slot (f4 = 0, without taking fileio_tableSema). It waits on the
  * semaphore for the result even when the descriptor was opened no-wait. Called by FILEDEV_close.
  *
  * @param fileDesc  descriptor number from sceOpen
@@ -3876,10 +3876,10 @@ int sceClose(int fileDesc) {
     int sem;
     int accepted;
     sFioFile *fileSlot;
-    sFioFdCmd *closeCmd = &D_0052D700.close;
+    sFioFdCmd *closeCmd = &fileio_cmd.close;
     fileSlot = fileio_getDescriptor(fileDesc);
     fileio_lockCall_b(1);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_unlockCall();
         return -1;
     }
@@ -3889,20 +3889,20 @@ int sceClose(int fileDesc) {
     }
     closeCmd->iopFd = fileSlot->f0;
     buf[1] = 1;
-    closeCmd->slot = fileSlot - D_0052EC00;
+    closeCmd->slot = fileSlot - fileio_descriptors;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
     closeCmd->sema = sem;
     closeCmd->resultAddr = (int)&buf[8];
     closeCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 1, 0, closeCmd, 20, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 1, 0, closeCmd, 20, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
     fileSlot->f4 = 0;
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -3935,7 +3935,7 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * when the slot (fileio_getDescriptor) is not open. Sends RPC function 4 with a new semaphore, the address and size (4) of a
  * stack result word, the IOP descriptor, @p offset, @p whence and the slot index (0x1C bytes). For a descriptor opened with
  * flag 0x8000 (no wait) the semaphore is parked, negated in the request, in a free entry of D_00455188 (under
- * D_0045521C) and the call returns 0 without waiting; fileio_onCompletionCmd clears that entry when the IOP is done. Called by
+ * fileio_noWaitSema) and the call returns 0 without waiting; fileio_onCompletionCmd clears that entry when the IOP is done. Called by
  * FILEDEV_getsize, FILEDEV_readexec and FILEDEV_write.
  *
  * @param fileDesc  descriptor number
@@ -3954,10 +3954,10 @@ int sceLseek(int fileDesc, int offset, int whence)
   sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioLseekCmd *lseekCmd = &D_0052D700.lseek;
+  sFioLseekCmd *lseekCmd = &fileio_cmd.lseek;
   fileSlot = fileio_getDescriptor(fileDesc);
   fileio_lockCall_b(4);
-  if (D_0045520C == 0)
+  if (fileio_initFlag == 0)
   {
     fileio_unlockCall();
     return -1;
@@ -3970,7 +3970,7 @@ int sceLseek(int fileDesc, int offset, int whence)
   lseekCmd->iopFd = fileSlot->f0;
   lseekCmd->offset = offset;
   lseekCmd->whence = whence;
-  lseekCmd->slot = fileSlot - D_0052EC00;
+  lseekCmd->slot = fileSlot - fileio_descriptors;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
@@ -3979,10 +3979,10 @@ int sceLseek(int fileDesc, int offset, int whence)
   lseekCmd->resultSize = 4;
   lseekCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.lseek.sema = sem;
+  fileio_cmd.lseek.sema = sem;
   if (flags & 0x8000)
   {
-    WaitSema_i(D_0045521C);
+    WaitSema_i(fileio_noWaitSema);
     for (i = 0; i < 0x20; i++)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
@@ -3993,15 +3993,15 @@ int sceLseek(int fileDesc, int offset, int whence)
       }
     }
 
-    SignalSema(D_0045521C);
+    SignalSema(fileio_noWaitSema);
   }
-  if (sceSifCallRpc(&D_0052EE00, 4, 0, &D_0052D700.lseek, 0x1C, D_0052E340, 4, 0, 0) < 0)
+  if (sceSifCallRpc(&fileio_client, 4, 0, &fileio_cmd.lseek, 0x1C, fileio_recvBuffer, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     fileio_unlockCall();
     return -11;
   }
-  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) fileio_recvBuffer) | 0x20000000));
   fileio_unlockCall();
   if (accepted == 0)
   {
@@ -4054,10 +4054,10 @@ int sceRead(int fileDesc, int readBuf, int readSize)
   sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioReadCmd *readCmd = &D_0052D700.read;
+  sFioReadCmd *readCmd = &fileio_cmd.read;
   fileSlot = fileio_getDescriptor(fileDesc);
   fileio_lockCall_b(2);
-  if (D_0045520C == 0)
+  if (fileio_initFlag == 0)
   {
     fileio_unlockCall();
     return -1;
@@ -4070,7 +4070,7 @@ int sceRead(int fileDesc, int readBuf, int readSize)
   readCmd->iopFd = fileSlot->f0;
   readCmd->buf = readBuf;
   readCmd->size = readSize;
-  readCmd->slot = fileSlot - D_0052EC00;
+  readCmd->slot = fileSlot - fileio_descriptors;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
@@ -4079,10 +4079,10 @@ int sceRead(int fileDesc, int readBuf, int readSize)
   readCmd->resultSize = 4;
   readCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.read.sema = sem;
+  fileio_cmd.read.sema = sem;
   if (flags & 0x8000)
   {
-    WaitSema_i(D_0045521C);
+    WaitSema_i(fileio_noWaitSema);
     for (i = 0; i < 0x20; i++)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
@@ -4093,18 +4093,18 @@ int sceRead(int fileDesc, int readBuf, int readSize)
       }
     }
 
-    SignalSema(D_0045521C);
+    SignalSema(fileio_noWaitSema);
   }
   if (!(fl & 0x20000000))
     func_00426358(readBuf, readSize);
   func_00426358((int) readCmd, 0x20);
-  if (sceSifCallRpc(&D_0052EE00, 2, 0, &D_0052D700.read, 0x20, D_0052E340, 4, 0, 0) < 0)
+  if (sceSifCallRpc(&fileio_client, 2, 0, &fileio_cmd.read, 0x20, fileio_recvBuffer, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     fileio_unlockCall();
     return -11;
   }
-  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) fileio_recvBuffer) | 0x20000000));
   fileio_unlockCall();
   if (accepted == 0)
   {
@@ -4159,10 +4159,10 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
   sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioWriteCmd *writeCmd = &D_0052D700.write;
+  sFioWriteCmd *writeCmd = &fileio_cmd.write;
   fileSlot = fileio_getDescriptor(fileDesc);
   fileio_lockCall_b(3);
-  if (D_0045520C == 0)
+  if (fileio_initFlag == 0)
   {
     fileio_unlockCall();
     return -1;
@@ -4175,7 +4175,7 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
   writeCmd->iopFd = fileSlot->f0;
   writeCmd->size = writeSize;
   writeCmd->buf = writeBuf;
-  writeCmd->slot = fileSlot - D_0052EC00;
+  writeCmd->slot = fileSlot - fileio_descriptors;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
@@ -4184,10 +4184,10 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
   writeCmd->resultSize = 4;
   writeCmd->resultAddr = (int) out;
   flags = fl;
-  D_0052D700.write.sema = sem;
+  fileio_cmd.write.sema = sem;
   if (flags & 0x8000)
   {
-    WaitSema_i(D_0045521C);
+    WaitSema_i(fileio_noWaitSema);
     for (i = 0; i < 0x20; i++)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
@@ -4198,7 +4198,7 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
       }
     }
 
-    SignalSema(D_0045521C);
+    SignalSema(fileio_noWaitSema);
   }
   if ((writeBuf & 0xF) == 0)
     n = 0;
@@ -4215,13 +4215,13 @@ int sceWrite(int fileDesc, unsigned writeBuf, int writeSize)
   writeCmd->dataLen = n;
   for (j = 0; j < n; j++)
     writeCmd->data[j] = ((char *) writeBuf)[j];
-  if (sceSifCallRpc(&D_0052EE00, 3, 0, &D_0052D700.write, 0x30, D_0052E340, 4, 0, 0) < 0)
+  if (sceSifCallRpc(&fileio_client, 3, 0, &fileio_cmd.write, 0x30, fileio_recvBuffer, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     fileio_unlockCall();
     return -11;
   }
-  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) fileio_recvBuffer) | 0x20000000));
   fileio_unlockCall();
   if (accepted == 0)
   {
@@ -4260,7 +4260,7 @@ struct Blk88C0 { char b[0x400]; };
  *
  * Takes the call lock (fileio_lockCall; released by fileio_unlockCall), stores @p ioctlArg in D_0052D6C8 and initialises the
  * library when needed (fileio_init); -9 when the slot (fileio_getDescriptor) is not open. Request 1 sets *@p ioctlArg to 1 when
- * any no-wait call is still pending in D_00455188 (under D_0045521C), else 0. Requests 2 and 3 copy the 32-bit or
+ * any no-wait call is still pending in D_00455188 (under fileio_noWaitSema), else 0. Requests 2 and 3 copy the 32-bit or
  * 64-bit result word of the last completed reply buffer (D_0052E390 + D_00455208 * 0x440, uncached) to *@p ioctlArg. Any
  * other request is sent as RPC function 5 (1056 bytes, written back first) with a new semaphore, the IOP descriptor,
  * the request number and 0x400 bytes copied from @p ioctlArg (length 0 when @p ioctlArg is 0); it waits for the result even on a
@@ -4279,12 +4279,12 @@ int sceIoctl(int fd, int req, void *ioctlArg) {
     int accepted;
     int i;
     sFioFile *fileSlot;
-    sFioIoctl2Cmd *ioctlCmd = &D_0052D700.ioctl2;
+    sFioIoctl2Cmd *ioctlCmd = &fileio_cmd.ioctl2;
     int one = 1; /* FAKEMATCH: stand-in for the case-1 constant */
     fileSlot = fileio_getDescriptor(fd);
     fileio_lockCall_b(5);
     D_0052D6C8 = ioctlArg;
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     if (fileSlot == 0 || fileSlot->f4 == 0) {
@@ -4295,7 +4295,7 @@ int sceIoctl(int fd, int req, void *ioctlArg) {
     ioctlCmd->f418 = 0;
     switch (req) {
     case 1:
-        WaitSema_i(D_0045521C);
+        WaitSema_i(fileio_noWaitSema);
         for (i = 0; i < 32; i++) {
             if (D_00455188[i] != -1)
                 break;
@@ -4305,7 +4305,7 @@ int sceIoctl(int fd, int req, void *ioctlArg) {
         else
             *D_0052D6C8 = 1;
         one = 0; /* FAKEMATCH: dead store, keeps `one` a variable */
-        SignalSema(D_0045521C);
+        SignalSema(fileio_noWaitSema);
         fileio_unlockCall();
         return 0;
     case 2:
@@ -4332,13 +4332,13 @@ int sceIoctl(int fd, int req, void *ioctlArg) {
         ioctlCmd->f0 = sem;
         ioctlCmd->f4 = (int)&buf[8];
         ioctlCmd->f8 = 4;
-        func_00426358((int)&D_0052D700.ioctl2, 1056);
-        if (sceSifCallRpc(&D_0052EE00, 5, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
+        func_00426358((int)&fileio_cmd.ioctl2, 1056);
+        if (sceSifCallRpc(&fileio_client, 5, 0, &fileio_cmd.ioctl2, 1056, fileio_recvBuffer, 4, 0, 0) < 0) {
             DeleteSema(sem);
             fileio_unlockCall();
             return -11;
         }
-        accepted = *(int *)((int)D_0052E340 | 0x20000000);
+        accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
         fileio_unlockCall();
         if (accepted == 0) {
             DeleteSema(sem);
@@ -4386,10 +4386,10 @@ int sceIoctl2_d(int fileDesc, int request, void *data, unsigned len, int outBuf,
     int sem;
     int accepted;
     sFioFile *fileSlot;
-    sFioIoctl2Cmd *ioctl2Cmd = &D_0052D700.ioctl2;
+    sFioIoctl2Cmd *ioctl2Cmd = &fileio_cmd.ioctl2;
     fileSlot = fileio_getDescriptor(fileDesc);
     fileio_lockCall_b(26);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     if (fileSlot == 0 || fileSlot->f4 == 0) {
@@ -4417,13 +4417,13 @@ int sceIoctl2_d(int fileDesc, int request, void *data, unsigned len, int outBuf,
     ioctl2Cmd->f8 = 4;
     ioctl2Cmd->f414 = outBuf;
     ioctl2Cmd->f0 = sem;
-    func_00426358((int)&D_0052D700.ioctl2, 1056);
-    if (sceSifCallRpc(&D_0052EE00, 26, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.ioctl2, 1056);
+    if (sceSifCallRpc(&fileio_client, 26, 0, &fileio_cmd.ioctl2, 1056, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4449,7 +4449,7 @@ int fileio_callPathRequest_d(char *, int) __asm__("fileio_callPathRequest");
  * Sends a file-server request that takes only a path, and waits for its result.
  *
  * Takes the call lock (fileio_lockCall with @p rpcFunc; released by fileio_unlockCall) and initialises the library when needed
- * (fileio_init). Copies @p pathName (up to 0x3FF characters, truncated) into D_0052D700.path and sends RPC function @p rpcFunc
+ * (fileio_init). Copies @p pathName (up to 0x3FF characters, truncated) into fileio_cmd.path and sends RPC function @p rpcFunc
  * with a new semaphore and the address and size (4) of a stack result word; the request is the 12-byte header plus the
  * name and its NUL. Used for requests 6, 8, 9, 16, 18 and 21 (sceRemove, sceRmdir, sceDopen,
  * func_00429540, sceChdir, sceUmount).
@@ -4463,9 +4463,9 @@ int fileio_callPathRequest_d(char *pathName, int rpcFunc) {
     int sem;
     int accepted;
     int n;
-    sFioPathCmd *pathCmd = &D_0052D700.path;
+    sFioPathCmd *pathCmd = &fileio_cmd.path;
     fileio_lockCall_b(rpcFunc);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -4487,12 +4487,12 @@ int fileio_callPathRequest_d(char *pathName, int rpcFunc) {
     pathCmd->resultAddr = (int)&buf[8];
     pathCmd->sema = sem;
     pathCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, rpcFunc, 0, &D_0052D700.path, n + 13, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, rpcFunc, 0, &fileio_cmd.path, n + 13, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4533,7 +4533,7 @@ int sceMkdir_d(char *, int) __asm__("sceMkdir");
  * Creates a directory through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies @p dirPath (up to 0x3FF characters) and
- * @p dirMode into D_0052D700.mkdir and sends RPC function 7 (the 16-byte header plus the name and its NUL) with a new
+ * @p dirMode into fileio_cmd.mkdir and sends RPC function 7 (the 16-byte header plus the name and its NUL) with a new
  * semaphore and a stack result word, then waits for the result.
  *
  * @param dirPath  the directory's path
@@ -4545,9 +4545,9 @@ int sceMkdir_d(char *dirPath, int dirMode) {
     int sem;
     int accepted;
     int n;
-    sFioPathModeCmd *mkdirCmd = &D_0052D700.mkdir;
+    sFioPathModeCmd *mkdirCmd = &fileio_cmd.mkdir;
     fileio_lockCall_b(7);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -4570,12 +4570,12 @@ int sceMkdir_d(char *dirPath, int dirMode) {
     mkdirCmd->resultAddr = (int)&buf[8];
     mkdirCmd->sema = sem;
     mkdirCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 7, 0, &D_0052D700.mkdir, n + 17, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 7, 0, &fileio_cmd.mkdir, n + 17, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4617,7 +4617,7 @@ int sceFormat_d(char *, char *, char *, int) __asm__("sceFormat");
  * Formats a device through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies @p devName and @p blockDev (each up to 0x3FF
- * characters; an empty second name when @p blockDev is 0) and @p len bytes of @p data into D_0052D700.format; -7 when @p len
+ * characters; an empty second name when @p blockDev is 0) and @p len bytes of @p data into fileio_cmd.format; -7 when @p len
  * exceeds 0x400 (checked after the names are copied). Sends RPC function 14 (3088 bytes, written back first) with a new
  * semaphore and a stack result word and waits for the result.
  *
@@ -4633,9 +4633,9 @@ int sceFormat_d(char *devName, char *blockDev, char *data, int len) {
     int accepted;
     int n;
     int i;
-    sFioFormatCmd *formatCmd = &D_0052D700.format;
+    sFioFormatCmd *formatCmd = &fileio_cmd.format;
     fileio_lockCall_b(0xE);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -4679,13 +4679,13 @@ int sceFormat_d(char *devName, char *blockDev, char *data, int len) {
     formatCmd->resultAddr = (int)&buf[8];
     formatCmd->sema = sem;
     formatCmd->resultSize = 4;
-    func_00426358((int)&D_0052D700.format, 3088);
-    if (sceSifCallRpc(&D_0052EE00, 0xE, 0, &D_0052D700.format, 3088, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.format, 3088);
+    if (sceSifCallRpc(&fileio_client, 0xE, 0, &fileio_cmd.format, 3088, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4720,9 +4720,9 @@ int func_00429420(int driverArg) {
     int buf[12];
     int sem;
     int accepted;
-    sFioCmd4 *adddrvCmd = &D_0052D700.adddrv;
+    sFioCmd4 *adddrvCmd = &fileio_cmd.adddrv;
     fileio_lockCall_b(0xF);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     adddrvCmd->driverArg = driverArg;
@@ -4730,15 +4730,15 @@ int func_00429420(int driverArg) {
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    D_0052D700.adddrv.sema = sem;
+    fileio_cmd.adddrv.sema = sem;
     adddrvCmd->resultAddr = (int)&buf[8];
     adddrvCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 0xF, 0, &D_0052D700.adddrv, 0x10, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 0xF, 0, &fileio_cmd.adddrv, 0x10, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -1;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4779,7 +4779,7 @@ extern void SignalSema(int);
  *
  * Takes and releases the call lock, initialising the library when needed (fileio_init), then allocates a descriptor
  * slot (fileio_allocDescriptor; -19 when none is free) and sends request 9 with the path through fileio_callPathRequest. A negative
- * result frees the slot and is returned; otherwise the IOP's descriptor goes to the slot's f0 (under D_00455218). The
+ * result frees the slot and is returned; otherwise the IOP's descriptor goes to the slot's f0 (under fileio_tableSema). The
  * slot keeps only its in-use flag 0x10000000.
  *
  * @param dirPath  the directory's path
@@ -4789,7 +4789,7 @@ int sceDopen(int dirPath) {
     int result;
     sFioFile *dirSlot;
     fileio_lockCall_b(9);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     fileio_unlockCall();
@@ -4799,15 +4799,15 @@ int sceDopen(int dirPath) {
     }
     result = fileio_callPathRequest(dirPath, FIO_RPC_DOPEN);
     if (result < 0) {
-        WaitSema_i(D_00455218);
+        WaitSema_i(fileio_tableSema);
         dirSlot->f4 = 0;
-        SignalSema(D_00455218);
+        SignalSema(fileio_tableSema);
         return result;
     } else {
-        WaitSema_i(D_00455218);
+        WaitSema_i(fileio_tableSema);
         dirSlot->f0 = result;
-        result = dirSlot - D_0052EC00;
-        SignalSema(D_00455218);
+        result = dirSlot - fileio_descriptors;
+        SignalSema(fileio_tableSema);
         return result;
     }
 }
@@ -4836,10 +4836,10 @@ int sceDclose(int dirDesc) {
     int sem;
     int accepted;
     sFioFile *dirSlot;
-    sFioFdCmd *dcloseCmd = &D_0052D700.dclose;
+    sFioFdCmd *dcloseCmd = &fileio_cmd.dclose;
     dirSlot = fileio_getDescriptor(dirDesc);
     fileio_lockCall_b(10);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_unlockCall();
         return -1;
     }
@@ -4855,13 +4855,13 @@ int sceDclose(int dirDesc) {
     dcloseCmd->sema = sem;
     dcloseCmd->resultAddr = (int)&buf[8];
     dcloseCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 10, 0, dcloseCmd, 20, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 10, 0, dcloseCmd, 20, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
     dirSlot->f4 = 0;
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4904,10 +4904,10 @@ int sceDread_d(int dirDesc, int direntBuf) {
     int sem;
     int accepted;
     sFioFile *dirSlot;
-    sFioDreadCmd *dreadCmd = &D_0052D700.dread;
+    sFioDreadCmd *dreadCmd = &fileio_cmd.dread;
     dirSlot = fileio_getDescriptor(dirDesc);
     fileio_lockCall_b(11);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_unlockCall();
         return -1;
     }
@@ -4924,12 +4924,12 @@ int sceDread_d(int dirDesc, int direntBuf) {
     dreadCmd->sema = sem;
     dreadCmd->resultAddr = (int)&buf[8];
     dreadCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 11, 0, dreadCmd, 0x20, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 11, 0, dreadCmd, 0x20, fileio_recvBuffer, 4, 0, 0) < 0) {
         WaitSema_i(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -4954,7 +4954,7 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * Reads a file's status block through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies @p filePath (up to 0x3FF characters)
- * and @p statBuf into D_0052D700.getstat and sends RPC function 12 (the 16-byte header plus the name and its NUL) with a new
+ * and @p statBuf into fileio_cmd.getstat and sends RPC function 12 (the 16-byte header plus the name and its NUL) with a new
  * semaphore and a stack result word; fileio_onCompletionCmd copies the 0x40-byte status block to @p statBuf.
  *
  * @param filePath  the file's path
@@ -4967,9 +4967,9 @@ int sceGetstat(char *filePath, int statBuf) {
     int accepted;
     int i;
     unsigned char nameChar;
-    sFioGetstatCmd *getstatCmd = &D_0052D700.getstat;
+    sFioGetstatCmd *getstatCmd = &fileio_cmd.getstat;
     fileio_lockCall_b(0xC);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     nameChar = (getstatCmd->name[0] = filePath[0]);
@@ -4994,12 +4994,12 @@ int sceGetstat(char *filePath, int statBuf) {
     getstatCmd->resultAddr = (int)&buf[8];
     getstatCmd->sema = sem;
     getstatCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 0xC, 0, &D_0052D700.getstat, i + 17, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 0xC, 0, &fileio_cmd.getstat, i + 17, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5026,7 +5026,7 @@ int sceChstat_d(char *, sFioStat *, int) __asm__("sceChstat");
  * Changes a file's status through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies @p filePath (up to 0x3FF characters),
- * the 0x40-byte status block @p src and @p changeMask into D_0052D700.chstat, writes the block back from the data cache (1104
+ * the 0x40-byte status block @p src and @p changeMask into fileio_cmd.chstat, writes the block back from the data cache (1104
  * bytes) and sends RPC function 13 (the 0x50-byte header plus the name and its NUL) with a new semaphore and a stack
  * result word.
  *
@@ -5041,9 +5041,9 @@ int sceChstat_d(char *filePath, sFioStat *src, int changeMask) {
     int accepted;
     int n;
     unsigned char nameChar;
-    sFioChstatCmd *chstatCmd = &D_0052D700.chstat;
+    sFioChstatCmd *chstatCmd = &fileio_cmd.chstat;
     fileio_lockCall_b(13);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     nameChar = (chstatCmd->name[0] = filePath[0]);
@@ -5069,13 +5069,13 @@ int sceChstat_d(char *filePath, sFioStat *src, int changeMask) {
     chstatCmd->sema = sem;
     chstatCmd->resultAddr = (int)&buf[8];
     chstatCmd->resultSize = 4;
-    func_00426358((int)&D_0052D700.chstat, 1104);
-    if (sceSifCallRpc(&D_0052EE00, 13, 0, &D_0052D700.chstat, n + 81, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.chstat, 1104);
+    if (sceSifCallRpc(&fileio_client, 13, 0, &fileio_cmd.chstat, n + 81, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5102,7 +5102,7 @@ int sceRename_d(char *, char *) __asm__("sceRename");
  * Renames a file through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies both names (each up to 0x3FF
- * characters) into D_0052D700.rename, writes the 2060-byte request back and sends RPC function 17 with a new semaphore
+ * characters) into fileio_cmd.rename, writes the 2060-byte request back and sends RPC function 17 with a new semaphore
  * and a stack result word.
  *
  * @param oldPath  the current path
@@ -5114,9 +5114,9 @@ int sceRename_d(char *oldPath, char *newPath) {
     int sem;
     int accepted;
     int n;
-    sFioPath2Cmd *renameCmd = &D_0052D700.rename;
+    sFioPath2Cmd *renameCmd = &fileio_cmd.rename;
     fileio_lockCall_b(17);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5148,13 +5148,13 @@ int sceRename_d(char *oldPath, char *newPath) {
     renameCmd->resultAddr = (int)&buf[8];
     renameCmd->sema = sem;
     renameCmd->resultSize = 4;
-    func_00426358((int)&D_0052D700.rename, 2060);
-    if (sceSifCallRpc(&D_0052EE00, 17, 0, &D_0052D700.rename, 2060, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.rename, 2060);
+    if (sceSifCallRpc(&fileio_client, 17, 0, &fileio_cmd.rename, 2060, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5195,7 +5195,7 @@ int sceSync_d(char *, int) __asm__("sceSync");
  * Flushes a device through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies @p devPath (up to 0x3FF characters) and
- * @p syncFlag into D_0052D700.sync and sends RPC function 19 (1044 bytes) with a new semaphore and a stack result word.
+ * @p syncFlag into fileio_cmd.sync and sends RPC function 19 (1044 bytes) with a new semaphore and a stack result word.
  *
  * @param devPath  the device or path
  * @param syncFlag  flag passed to the IOP
@@ -5206,9 +5206,9 @@ int sceSync_d(char *devPath, int syncFlag) {
     int sem;
     int accepted;
     int n;
-    sFioSyncCmd *syncCmd = &D_0052D700.sync;
+    sFioSyncCmd *syncCmd = &fileio_cmd.sync;
     fileio_lockCall_b(19);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5231,12 +5231,12 @@ int sceSync_d(char *devPath, int syncFlag) {
     syncCmd->resultAddr = (int)&buf[8];
     syncCmd->sema = sem;
     syncCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 19, 0, &D_0052D700.sync, 1044, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 19, 0, &fileio_cmd.sync, 1044, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5263,7 +5263,7 @@ int sceMount_d(char *, char *, int, char *, int) __asm__("sceMount");
  * Mounts a file system through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies both names (each up to 0x3FF
- * characters), @p mountFlag and @p len bytes of @p data into D_0052D700.mount; -7 when @p len exceeds 0x400. Writes the
+ * characters), @p mountFlag and @p len bytes of @p data into fileio_cmd.mount; -7 when @p len exceeds 0x400. Writes the
  * 3092-byte request back and sends RPC function 20 with a new semaphore and a stack result word.
  *
  * @param fsDevice  the file-system device to mount as
@@ -5279,9 +5279,9 @@ int sceMount_d(char *fsDevice, char *blockDev, int mountFlag, char *data, int le
     int accepted;
     int n;
     int i;
-    sFioMountCmd *mountCmd = &D_0052D700.mount;
+    sFioMountCmd *mountCmd = &fileio_cmd.mount;
     fileio_lockCall_b(20);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5322,13 +5322,13 @@ int sceMount_d(char *fsDevice, char *blockDev, int mountFlag, char *data, int le
     mountCmd->resultAddr = (int)&buf[8];
     mountCmd->sema = sem;
     mountCmd->resultSize = 4;
-    func_00426358((int)&D_0052D700.mount, 3092);
-    if (sceSifCallRpc(&D_0052EE00, 20, 0, &D_0052D700.mount, 3092, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.mount, 3092);
+    if (sceSifCallRpc(&fileio_client, 20, 0, &fileio_cmd.mount, 3092, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5385,10 +5385,10 @@ long sceLseek64(int fileDesc, long offset, int whence)
   short flags;
   sFioFile *fileSlot;
   unsigned fl;
-  sFioLseek64Cmd *lseek64Cmd = &D_0052D700.lseek64;
+  sFioLseek64Cmd *lseek64Cmd = &fileio_cmd.lseek64;
   fileSlot = fileio_getDescriptor(fileDesc);
   fileio_lockCall_b(22);
-  if (D_0045520C == 0)
+  if (fileio_initFlag == 0)
   {
     fileio_unlockCall();
     return -1;
@@ -5401,7 +5401,7 @@ long sceLseek64(int fileDesc, long offset, int whence)
   lseek64Cmd->iopFd = fileSlot->f0;
   lseek64Cmd->offset = offset;
   lseek64Cmd->whence = whence;
-  lseek64Cmd->slot = fileSlot - D_0052EC00;
+  lseek64Cmd->slot = fileSlot - fileio_descriptors;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
@@ -5409,10 +5409,10 @@ long sceLseek64(int fileDesc, long offset, int whence)
   lseek64Cmd->resultAddr = (int) &res;
   lseek64Cmd->resultSize = 8;
   flags = fl;
-  D_0052D700.lseek64.sema = sem;
+  fileio_cmd.lseek64.sema = sem;
   if (flags & 0x8000)
   {
-    WaitSema_i(D_0045521C);
+    WaitSema_i(fileio_noWaitSema);
     for (i = 0; i < 0x20; i++)
     {
       if (D_00455188[i] == FIO_NOWAIT_FREE)
@@ -5423,15 +5423,15 @@ long sceLseek64(int fileDesc, long offset, int whence)
       }
     }
 
-    SignalSema(D_0045521C);
+    SignalSema(fileio_noWaitSema);
   }
-  if (sceSifCallRpc(&D_0052EE00, 22, 0, &D_0052D700.lseek64, 0x20, D_0052E340, 4, 0, 0) < 0)
+  if (sceSifCallRpc(&fileio_client, 22, 0, &fileio_cmd.lseek64, 0x20, fileio_recvBuffer, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     fileio_unlockCall();
     return -11;
   }
-  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) fileio_recvBuffer) | 0x20000000));
   fileio_unlockCall();
   if (accepted == 0)
   {
@@ -5465,7 +5465,7 @@ int sceDevctl_d(char *, int, char *, unsigned, int, unsigned) __asm__("sceDevctl
  *
  * Takes the call lock and initialises the library when needed (fileio_init). Copies the device name (up to 0x3FF
  * characters); -22 when @p len or @p outLen exceeds 0x400. Copies @p len bytes of @p data, the request number, the lengths
- * and @p outBuf into D_0052D700.devctl, writes the 2076-byte request back and sends RPC function 23 with a new semaphore
+ * and @p outBuf into fileio_cmd.devctl, writes the 2076-byte request back and sends RPC function 23 with a new semaphore
  * and a stack result word; fileio_onCompletionCmd copies the reply data to @p outBuf. bxIop_powerOffThread (the power-off thread) sends
  * request 0x4402 to "dev9x" through it.
  *
@@ -5483,9 +5483,9 @@ int sceDevctl_d(char *devName, int devCmd, char *data, unsigned len, int outBuf,
     int accepted;
     int n;
     unsigned i;
-    sFioDevctlCmd *devctlCmd = &D_0052D700.devctl;
+    sFioDevctlCmd *devctlCmd = &fileio_cmd.devctl;
     fileio_lockCall_b(23);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5517,13 +5517,13 @@ int sceDevctl_d(char *devName, int devCmd, char *data, unsigned len, int outBuf,
     devctlCmd->resultSize = 4;
     devctlCmd->outBuf = outBuf;
     devctlCmd->sema = sem;
-    func_00426358((int)&D_0052D700.devctl, 2076);
-    if (sceSifCallRpc(&D_0052EE00, 23, 0, &D_0052D700.devctl, 2076, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&fileio_cmd.devctl, 2076);
+    if (sceSifCallRpc(&fileio_client, 23, 0, &fileio_cmd.devctl, 2076, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5549,7 +5549,7 @@ int sceSymlink_d(char *, char *) __asm__("sceSymlink");
  * Creates a symbolic link through the IOP file server.
  *
  * Takes the call lock (passing 17, which fileio_lockCall ignores) and initialises the library when needed
- * (fileio_init). Copies both names (each up to 0x3FF characters) into D_0052D700.symlink and sends RPC function 24
+ * (fileio_init). Copies both names (each up to 0x3FF characters) into fileio_cmd.symlink and sends RPC function 24
  * (2060 bytes) with a new semaphore and a stack result word.
  *
  * @param oldPath  the existing path
@@ -5561,9 +5561,9 @@ int sceSymlink_d(char *oldPath, char *linkPath) {
     int sem;
     int accepted;
     int n;
-    sFioPath2Cmd *symlinkCmd = &D_0052D700.symlink;
+    sFioPath2Cmd *symlinkCmd = &fileio_cmd.symlink;
     fileio_lockCall_b(17);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5595,12 +5595,12 @@ int sceSymlink_d(char *oldPath, char *linkPath) {
     symlinkCmd->resultAddr = (int)&buf[8];
     symlinkCmd->sema = sem;
     symlinkCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 0x18, 0, &D_0052D700.symlink, 2060, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 0x18, 0, &fileio_cmd.symlink, 2060, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5629,7 +5629,7 @@ int sceReadlink_d(char *, int, unsigned) __asm__("sceReadlink");
  * Takes the call lock (passing 17, ignored) and initialises the library when needed (fileio_init). Copies the path
  * (up to 0x3FF characters), caps @p len at 0x3FF, stores @p targetBuf and the length, writes @p targetBuf back from the data cache
  * and sends RPC function 25 with a new semaphore and a stack result word; fileio_onCompletionCmd copies the returned text to
- * @p targetBuf. The send size (2060 bytes) is larger than this request's 1044-byte layout, so stale bytes of D_0052D700 go
+ * @p targetBuf. The send size (2060 bytes) is larger than this request's 1044-byte layout, so stale bytes of fileio_cmd go
  * along.
  *
  * @param linkPath  the link's path
@@ -5642,9 +5642,9 @@ int sceReadlink_d(char *linkPath, int targetBuf, unsigned len) {
     int sem;
     int accepted;
     int n;
-    sFioReadlinkCmd *readlinkCmd = &D_0052D700.readlink;
+    sFioReadlinkCmd *readlinkCmd = &fileio_cmd.readlink;
     fileio_lockCall_b(17);
-    if (D_0045520C == 0) {
+    if (fileio_initFlag == 0) {
         fileio_init();
     }
     n = 0;
@@ -5671,12 +5671,12 @@ int sceReadlink_d(char *linkPath, int targetBuf, unsigned len) {
     readlinkCmd->resultAddr = (int)&buf[8];
     readlinkCmd->sema = sem;
     readlinkCmd->resultSize = 4;
-    if (sceSifCallRpc(&D_0052EE00, 25, 0, &D_0052D700.readlink, 2060, D_0052E340, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&fileio_client, 25, 0, &fileio_cmd.readlink, 2060, fileio_recvBuffer, 4, 0, 0) < 0) {
         DeleteSema(sem);
         fileio_unlockCall();
         return -11;
     }
-    accepted = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)fileio_recvBuffer | 0x20000000);
     fileio_unlockCall();
     if (accepted == 0) {
         DeleteSema(sem);
@@ -5694,8 +5694,8 @@ INCLUDE_ASM("seg/seg_325220", sceSifInitIopHeap);
 /**
  * Binds the IOP heap RPC server, retrying until it answers.
  *
- * Binds D_0052EEC0 to server 0x80000003 (sceSifBindRpc); while the client has no server yet it spins 0x100000
- * iterations and binds again. Once bound it sets D_00455224 to 0, which the heap calls (sceSifAllocIopHeap ...
+ * Binds libkernl_iopHeapClient to server 0x80000003 (sceSifBindRpc); while the client has no server yet it spins 0x100000
+ * iterations and binds again. Once bound it sets libkernl_iopHeapBindState to 0, which the heap calls (sceSifAllocIopHeap ...
  * func_0042AFE8) check. Called by the IOP boot code (bxIop_initIop, bxIop_rebootWithDnasImage) and SNDPLATFORM_init.
  *
  * @return 0, or -1 when a bind fails
@@ -5703,12 +5703,12 @@ INCLUDE_ASM("seg/seg_325220", sceSifInitIopHeap);
 int sceSifInitIopHeap(void) {
     int i;
     for (;;) {
-        i = sceSifBindRpc(&D_0052EEC0, 0x80000003, 0);
+        i = sceSifBindRpc(&libkernl_iopHeapClient, 0x80000003, 0);
         if (i < 0) {
             return -1;
         }
-        if (D_0052EEC0.server != 0) {
-            D_00455224 = 0;
+        if (libkernl_iopHeapClient.server != 0) {
+            libkernl_iopHeapBindState = 0;
             break;
         }
         i = 0x100000;
@@ -5726,17 +5726,17 @@ INCLUDE_ASM("seg/seg_325220", sceSifAllocIopHeap);
 /**
  * Allocates a block of IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 1 with @p allocSize (D_0052EF40) and returns the reply word
- * D_0052EF00.
+ * When the heap server is bound (libkernl_iopHeapBindState >= 0) it sends request 1 with @p allocSize (libkernl_iopHeapArgs) and returns the reply word
+ * libkernl_iopHeapResult.
  *
  * @param allocSize  bytes to allocate
  * @return the IOP address of the block, or 0 when unbound or the RPC fails
  */
 int sceSifAllocIopHeap(int allocSize) {
-    if (D_00455224 >= 0) {
-        D_0052EF40 = allocSize;
-        if (sceSifCallRpc(&D_0052EEC0, 1, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) >= 0) {
-            return D_0052EF00;
+    if (libkernl_iopHeapBindState >= 0) {
+        libkernl_iopHeapArgs = allocSize;
+        if (sceSifCallRpc(&libkernl_iopHeapClient, 1, 0, &libkernl_iopHeapArgs, 4, &libkernl_iopHeapResult, 4, 0, 0) >= 0) {
+            return libkernl_iopHeapResult;
         }
     }
     return 0;
@@ -5749,8 +5749,8 @@ INCLUDE_ASM("seg/seg_325220", func_0042AC10);
 /**
  * Sends heap-server request 4 with three words and returns the reply.
  *
- * When the heap server is bound (D_00455224 >= 0) it stores @p firstWord, @p secondWord and @p thirdWord, in that
- * order, in D_0052EF40, sends them (12 bytes) and returns the reply word D_0052EF00. No caller in this build.
+ * When the heap server is bound (libkernl_iopHeapBindState >= 0) it stores @p firstWord, @p secondWord and @p thirdWord, in that
+ * order, in libkernl_iopHeapArgs, sends them (12 bytes) and returns the reply word libkernl_iopHeapResult. No caller in this build.
  *
  * @param secondWord  second word of the request
  * @param firstWord  first word of the request
@@ -5759,15 +5759,15 @@ INCLUDE_ASM("seg/seg_325220", func_0042AC10);
  */
 int func_0042AC10(int secondWord, int firstWord, int thirdWord) {
     int *rpcArgs;
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    rpcArgs = &D_0052EF40;
+    rpcArgs = &libkernl_iopHeapArgs;
     rpcArgs[0] = firstWord;
     rpcArgs[1] = secondWord;
     rpcArgs[2] = thirdWord;
-    if (sceSifCallRpc(&D_0052EEC0, 4, 0, rpcArgs, 0xC, &D_0052EF00, 4, 0, 0) >= 0) {
-        return D_0052EF00;
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 4, 0, rpcArgs, 0xC, &libkernl_iopHeapResult, 4, 0, 0) >= 0) {
+        return libkernl_iopHeapResult;
     }
     return 0;
 }
@@ -5780,21 +5780,21 @@ int func_0042AC90_impl(int a0) __asm__("func_0042AC90");
 /**
  * Frees a block of IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 2 with @p blockAddr and returns the reply word D_0052EF00.
+ * When the heap server is bound (libkernl_iopHeapBindState >= 0) it sends request 2 with @p blockAddr and returns the reply word libkernl_iopHeapResult.
  * func_0042AD08 forwards to it.
  *
  * @param blockAddr  IOP address of the block
  * @return the server's result; 0 when unbound, -1 when the RPC fails
  */
 int func_0042AC90_impl(int blockAddr) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    D_0052EF40 = blockAddr;
-    if (sceSifCallRpc(&D_0052EEC0, 2, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
+    libkernl_iopHeapArgs = blockAddr;
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 2, 0, &libkernl_iopHeapArgs, 4, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return -1;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5823,8 +5823,8 @@ extern struct S2AD28 D_0052EF80;
 /**
  * Loads a file into IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 3 with @p iopAddr and the path (copied into D_0052EF80,
- * up to 0xFB characters; the request is 4 bytes plus the name and its NUL) and returns the reply word D_0052EF00. No
+ * When the heap server is bound (libkernl_iopHeapBindState >= 0) it sends request 3 with @p iopAddr and the path (copied into D_0052EF80,
+ * up to 0xFB characters; the request is 4 bytes plus the name and its NUL) and returns the reply word libkernl_iopHeapResult. No
  * caller in this build.
  *
  * @param filePath  the file's path
@@ -5833,7 +5833,7 @@ extern struct S2AD28 D_0052EF80;
  */
 int sceSifLoadIopHeap(char *filePath, int iopAddr) {
     int i;
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
     i = 0;
@@ -5851,10 +5851,10 @@ int sceSifLoadIopHeap(char *filePath, int iopAddr) {
     }
     D_0052EF80.cmd = iopAddr;
     D_0052EF80.name[IOP_NAME_SIZE - 1] = 0;
-    if (sceSifCallRpc(&D_0052EEC0, 3, 0, &D_0052EF80, i + 5, &D_0052EF00, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 3, 0, &D_0052EF80, i + 5, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return -1;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5862,20 +5862,20 @@ int sceSifLoadIopHeap(char *filePath, int iopAddr) {
 INCLUDE_ASM("seg/seg_325220", func_0042AE18);
 #ifdef SKIP_ASM
 /**
- * Sends heap-server request 5 (no arguments) and returns the reply word D_0052EF00.
+ * Sends heap-server request 5 (no arguments) and returns the reply word libkernl_iopHeapResult.
  *
  * No caller in this build.
  *
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
 unsigned int func_0042AE18(void) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052EEC0, 5, 0, 0, 0, &D_0052EF00, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 5, 0, 0, 0, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5883,20 +5883,20 @@ unsigned int func_0042AE18(void) {
 INCLUDE_ASM("seg/seg_325220", func_0042AE88);
 #ifdef SKIP_ASM
 /**
- * Sends heap-server request 6 (no arguments) and returns the reply word D_0052EF00.
+ * Sends heap-server request 6 (no arguments) and returns the reply word libkernl_iopHeapResult.
  *
  * No caller in this build.
  *
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
 unsigned int func_0042AE88(void) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052EEC0, 6, 0, 0, 0, &D_0052EF00, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 6, 0, 0, 0, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5904,20 +5904,20 @@ unsigned int func_0042AE88(void) {
 INCLUDE_ASM("seg/seg_325220", func_0042AEF8);
 #ifdef SKIP_ASM
 /**
- * Sends heap-server request 7 (no arguments) and returns the reply word D_0052EF00.
+ * Sends heap-server request 7 (no arguments) and returns the reply word libkernl_iopHeapResult.
  *
  * No caller in this build.
  *
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
 unsigned int func_0042AEF8(void) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    if (sceSifCallRpc(&D_0052EEC0, 7, 0, 0, 0, &D_0052EF00, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 7, 0, 0, 0, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5925,7 +5925,7 @@ unsigned int func_0042AEF8(void) {
 INCLUDE_ASM("seg/seg_325220", func_0042AF68);
 #ifdef SKIP_ASM
 /**
- * Sends heap-server request 8 with an IOP address and returns the reply word D_0052EF00.
+ * Sends heap-server request 8 with an IOP address and returns the reply word libkernl_iopHeapResult.
  *
  * No caller in this build.
  *
@@ -5933,14 +5933,14 @@ INCLUDE_ASM("seg/seg_325220", func_0042AF68);
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
 unsigned int func_0042AF68(int blockAddr) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    D_0052EF40 = blockAddr;
-    if (sceSifCallRpc(&D_0052EEC0, 8, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
+    libkernl_iopHeapArgs = blockAddr;
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 8, 0, &libkernl_iopHeapArgs, 4, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5948,7 +5948,7 @@ unsigned int func_0042AF68(int blockAddr) {
 INCLUDE_ASM("seg/seg_325220", func_0042AFE8);
 #ifdef SKIP_ASM
 /**
- * Sends heap-server request 9 with an IOP address and returns the reply word D_0052EF00.
+ * Sends heap-server request 9 with an IOP address and returns the reply word libkernl_iopHeapResult.
  *
  * No caller in this build.
  *
@@ -5956,14 +5956,14 @@ INCLUDE_ASM("seg/seg_325220", func_0042AFE8);
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
 unsigned int func_0042AFE8(int blockAddr) {
-    if (D_00455224 < 0) {
+    if (libkernl_iopHeapBindState < 0) {
         return 0;
     }
-    D_0052EF40 = blockAddr;
-    if (sceSifCallRpc(&D_0052EEC0, 9, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
+    libkernl_iopHeapArgs = blockAddr;
+    if (sceSifCallRpc(&libkernl_iopHeapClient, 9, 0, &libkernl_iopHeapArgs, 4, &libkernl_iopHeapResult, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
-    return D_0052EF00;
+    return libkernl_iopHeapResult;
 }
 #endif
 
@@ -5973,9 +5973,9 @@ INCLUDE_ASM("seg/seg_325220", sifload_bindLoader);
 /**
  * Binds the IOP module-loader RPC server once and reads its version.
  *
- * Does nothing when D_00455228 is already >= 0. Otherwise binds D_0052F280 to server 0x80000006 (sceSifBindRpc),
+ * Does nothing when D_00455228 is already >= 0. Otherwise binds sifload_client to server 0x80000006 (sceSifBindRpc),
  * spinning 0x100000 iterations between attempts until the client has a server, sets D_00455228 to 0 and fetches the
- * 4-byte version with request 0xFF into D_0052F2A8. Every module-loader call in this unit calls it first.
+ * 4-byte version with request 0xFF into sifload_serverVersion. Every module-loader call in this unit calls it first.
  *
  * @return 0; -1 when a bind fails; 0xFFFEFFFF when the version call fails
  */
@@ -5983,15 +5983,15 @@ int sifload_bindLoader(void) {
     int i;
     if (D_00455228 < 0) {
         for (;;) {
-            if (sceSifBindRpc(&D_0052F280, 0x80000006, 0) < 0) {
+            if (sceSifBindRpc(&sifload_client, 0x80000006, 0) < 0) {
                 return -1;
             }
-            if (D_0052F280.server != 0) {
+            if (sifload_client.server != 0) {
                 D_00455228 = 0;
-                if (sceSifCallRpc(&D_0052F280, 0xFF, 0, 0, 0, &D_0052F080.ver, 4, 0, 0) < 0) {
+                if (sceSifCallRpc(&sifload_client, 0xFF, 0, 0, 0, &sifload_cmd.ver, 4, 0, 0) < 0) {
                     return 0xFFFEFFFF;
                 }
-                D_0052F2A8 = D_0052F080.ver;
+                sifload_serverVersion = sifload_cmd.ver;
                 return 0;
             }
             i = 0x100000;
@@ -6013,14 +6013,14 @@ extern int memcmp(char *, char *, int);
 /**
  * Returns whether the bound module-loader server's version tag is one the library does not accept.
  *
- * Same test as fileio_isServerRejected on D_0052F2A8: 0 when it equals the library's "2710" (D_00455164) or the tag D_0045522C
+ * Same test as fileio_isServerRejected on sifload_serverVersion: 0 when it equals the library's "2710" (D_00455164) or the tag D_0045522C
  * points at (memcmp, memcmp), else 1 (the final compare of the two accepted tags always differs).
  *
  * @return 1 when the tag matches neither accepted tag, else 0
  */
 int sifload_isServerRejected(void) {
     char *libVersion = D_00455164;
-    char *serverVersion = D_0052F2A8.b;
+    char *serverVersion = sifload_serverVersion.b;
     int mismatch = 0;
     if (memcmp(serverVersion, libVersion, 4) != 0 &&
         memcmp(serverVersion, D_0045522C, 4) != 0) {
@@ -6035,7 +6035,7 @@ INCLUDE_ASM("seg/seg_325220", sceSifLoadFileReset);
 #ifdef SKIP_ASM
 extern void memset(void *a0, int a1, int a2);
 /**
- * Marks the module-loader server as unbound (D_00455228 = -1) and zeroes its version D_0052F2A8 (memset).
+ * Marks the module-loader server as unbound (D_00455228 = -1) and zeroes its version sifload_serverVersion (memset).
  *
  * The next module-loader call rebinds it (sifload_bindLoader). No caller in this build.
  *
@@ -6043,7 +6043,7 @@ extern void memset(void *a0, int a1, int a2);
  */
 int sceSifLoadFileReset(void) {
     D_00455228 = -1;
-    memset(&D_0052F2A8, 0, 4);
+    memset(&sifload_serverVersion, 0, 4);
     return 0;
 }
 #endif
@@ -6059,7 +6059,7 @@ int sifload_callBufferRequest_i(int a0, int a1, sLfData *a2, int *a3) __asm__("s
  * Sends a module-loader request that names an IOP memory address plus an argument block, and returns its results.
  *
  * Binds the loader when needed (sifload_bindLoader; 0xFFFF0000 on failure) and refuses an unaccepted server version
- * (sifload_isServerRejected; 0xFFFEFFFC). D_0052F080 gets @p modAddr, the argument length and the arguments (at most 0xFC bytes; a
+ * (sifload_isServerRejected; 0xFFFEFFFC). sifload_cmd gets @p modAddr, the argument length and the arguments (at most 0xFC bytes; a
  * length of 253 or more copies a full 0xFC block); request 6 is sent (0x200 bytes) and the 8-byte reply read back in
  * place. Called by sceSifLoadModuleBuffer and sceSifLoadStartModuleBuffer.
  *
@@ -6077,23 +6077,23 @@ int sifload_callBufferRequest_i(int modAddr, int argLen, sLfData *argBlock, int 
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.id = modAddr;
+    sifload_cmd.cmd.id = modAddr;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.cmd.args = *argBlock;
-            D_0052F080.cmd.argLen = 0xFC;
+            *(sLfData *)sifload_cmd.cmd.args = *argBlock;
+            sifload_cmd.cmd.argLen = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.args, argBlock, argLen);
-            D_0052F080.cmd.argLen = argLen;
+            func_0041605C(sifload_cmd.cmd.args, argBlock, argLen);
+            sifload_cmd.cmd.argLen = argLen;
         }
     } else {
-        D_0052F080.cmd.argLen = 0;
+        sifload_cmd.cmd.argLen = 0;
     }
-    if (sceSifCallRpc(&D_0052F280, 6, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&sifload_client, 6, 0, &sifload_cmd, 0x200, &sifload_cmd, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    modId = D_0052F080.reply.id;
-    *resultOut = D_0052F080.reply.result;
+    modId = sifload_cmd.reply.id;
+    *resultOut = sifload_cmd.reply.result;
     return modId;
 }
 #endif
@@ -6125,23 +6125,23 @@ int sceSifStopModule_i(int modId, int argLen, sLfData *argBlock, int *resultOut)
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.id = modId;
+    sifload_cmd.cmd.id = modId;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.cmd.args = *argBlock;
-            D_0052F080.cmd.argLen = 0xFC;
+            *(sLfData *)sifload_cmd.cmd.args = *argBlock;
+            sifload_cmd.cmd.argLen = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.args, argBlock, argLen);
-            D_0052F080.cmd.argLen = argLen;
+            func_0041605C(sifload_cmd.cmd.args, argBlock, argLen);
+            sifload_cmd.cmd.argLen = argLen;
         }
     } else {
-        D_0052F080.cmd.argLen = 0;
+        sifload_cmd.cmd.argLen = 0;
     }
-    if (sceSifCallRpc(&D_0052F280, 7, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&sifload_client, 7, 0, &sifload_cmd, 0x200, &sifload_cmd, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    replyId = D_0052F080.reply.id;
-    *resultOut = D_0052F080.reply.result;
+    replyId = sifload_cmd.reply.id;
+    *resultOut = sifload_cmd.reply.result;
     return replyId;
 }
 #endif
@@ -6167,11 +6167,11 @@ int sceSifUnloadModule(int modId) {
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.id = modId;
-    if (sceSifCallRpc(&D_0052F280, 8, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
+    sifload_cmd.cmd.id = modId;
+    if (sceSifCallRpc(&sifload_client, 8, 0, &sifload_cmd, 4, &sifload_cmd, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.reply.id;
+    return sifload_cmd.reply.id;
 }
 #endif
 
@@ -6198,12 +6198,12 @@ int sceSifSearchModuleByName(char *modName) {
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.name, modName, IOP_NAME_SIZE);
-    D_0052F080.cmd.name[IOP_NAME_SIZE - 1] = 0;
-    if (sceSifCallRpc(&D_0052F280, 9, 0, &D_0052F080, 0x200, &D_0052F080, 4, 0, 0) < 0) {
+    strncpy(sifload_cmd.cmd.name, modName, IOP_NAME_SIZE);
+    sifload_cmd.cmd.name[IOP_NAME_SIZE - 1] = 0;
+    if (sceSifCallRpc(&sifload_client, 9, 0, &sifload_cmd, 0x200, &sifload_cmd, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.reply.id;
+    return sifload_cmd.reply.id;
 }
 #endif
 
@@ -6227,11 +6227,11 @@ int func_0042B770(int iopAddr) {
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.id = iopAddr;
-    if (sceSifCallRpc(&D_0052F280, 10, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
+    sifload_cmd.cmd.id = iopAddr;
+    if (sceSifCallRpc(&sifload_client, 10, 0, &sifload_cmd, 4, &sifload_cmd, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    return D_0052F080.reply.id;
+    return sifload_cmd.reply.id;
 }
 #endif
 
@@ -6287,7 +6287,7 @@ int sifload_callFileRequest_i(char *a0, int a1, sLfData *a2, int *a3, int a4) __
  * Sends a module-loader request that names a file plus an argument block, and returns its results.
  *
  * Binds the loader when needed (sifload_bindLoader; 0xFFFF0000 on failure) and refuses an unaccepted server version
- * (sifload_isServerRejected; 0xFFFEFFFC). D_0052F080 gets the path (strncpy, 0xFC bytes, last forced to NUL), the argument length
+ * (sifload_isServerRejected; 0xFFFEFFFC). sifload_cmd gets the path (strncpy, 0xFC bytes, last forced to NUL), the argument length
  * and the arguments (at most 0xFC bytes; a length of 253 or more copies a full block; no arguments leave an empty
  * string). Request @p rpcFunc is sent (0x200 bytes) and the 8-byte reply read back in place. Called by sceSifLoadModule and
  * sceSifLoadStartModule with request 0.
@@ -6307,25 +6307,25 @@ int sifload_callFileRequest_i(char *modPath, int argLen, sLfData *argBlock, int 
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.load.path, modPath, IOP_NAME_SIZE);
-    D_0052F080.load.path[IOP_NAME_SIZE - 1] = 0;
+    strncpy(sifload_cmd.load.path, modPath, IOP_NAME_SIZE);
+    sifload_cmd.load.path[IOP_NAME_SIZE - 1] = 0;
     if (argBlock != 0) {
         if (argLen >= 253) {
-            *(sLfData *)D_0052F080.load.args = *argBlock;
-            D_0052F080.load.argLen = IOP_NAME_SIZE;
+            *(sLfData *)sifload_cmd.load.args = *argBlock;
+            sifload_cmd.load.argLen = IOP_NAME_SIZE;
         } else {
-            func_0041605C(D_0052F080.load.args, argBlock, argLen);
-            D_0052F080.load.argLen = argLen;
+            func_0041605C(sifload_cmd.load.args, argBlock, argLen);
+            sifload_cmd.load.argLen = argLen;
         }
     } else {
-        D_0052F080.load.args[0] = 0;
-        D_0052F080.load.argLen = 0;
+        sifload_cmd.load.args[0] = 0;
+        sifload_cmd.load.argLen = 0;
     }
-    if (sceSifCallRpc(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&sifload_client, rpcFunc, 0, &sifload_cmd, 0x200, &sifload_cmd, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    modId = D_0052F080.reply.id;
-    *resultOut = D_0052F080.reply.result;
+    modId = sifload_cmd.reply.id;
+    *resultOut = sifload_cmd.reply.result;
     return modId;
 }
 #endif
@@ -6382,7 +6382,7 @@ int sifload_callElfRequest_i(char *, char *, int *, int) __asm__("sifload_callEl
  * Loads (part of) an ELF file into EE memory through the IOP module loader and returns its entry point and gp.
  *
  * Binds the loader when needed (sifload_bindLoader; 0xFFFF0000) and checks its version (sifload_isServerRejected; 0xFFFEFFFC). Copies
- * the path and the section name (strncpy, 0xFC bytes each, last forced to NUL) into D_0052F080 and sends request
+ * the path and the section name (strncpy, 0xFC bytes each, last forced to NUL) into sifload_cmd and sends request
  * @p rpcFunc, reading a 16-byte reply back in place. A zero first reply word gives 0xFFFEFFFD; otherwise the first two words
  * go to @p execData[0] and @p execData[1]. Called by sceSifLoadElfPart and sceSifLoadElf with request 1.
  *
@@ -6399,18 +6399,18 @@ int sifload_callElfRequest_i(char *elfPath, char *sectionName, int *execData, in
     if (sifload_isServerRejected() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.elf.path, elfPath, IOP_NAME_SIZE);
-    D_0052F080.elf.path[IOP_NAME_SIZE - 1] = 0;
-    strncpy(D_0052F080.elf.section, sectionName, IOP_NAME_SIZE);
-    D_0052F080.elf.section[IOP_NAME_SIZE - 1] = 0;
-    if (sceSifCallRpc(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
+    strncpy(sifload_cmd.elf.path, elfPath, IOP_NAME_SIZE);
+    sifload_cmd.elf.path[IOP_NAME_SIZE - 1] = 0;
+    strncpy(sifload_cmd.elf.section, sectionName, IOP_NAME_SIZE);
+    sifload_cmd.elf.section[IOP_NAME_SIZE - 1] = 0;
+    if (sceSifCallRpc(&sifload_client, rpcFunc, 0, &sifload_cmd, 0x200, &sifload_cmd, 0x10, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    if (D_0052F080.elf.entry == 0) {
+    if (sifload_cmd.elf.entry == 0) {
         return 0xFFFEFFFD;
     }
-    execData[0] = D_0052F080.elf.entry;
-    execData[1] = D_0052F080.elf.gp;
+    execData[0] = sifload_cmd.elf.entry;
+    execData[1] = sifload_cmd.elf.gp;
     return 0;
 }
 #endif
@@ -6435,17 +6435,17 @@ int sceSifLoadElfPart(int path, char *secName, int execData) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifLoadElf);
 #ifdef SKIP_ASM
-extern char D_0049AD58[];
+extern char str_all[];
 extern int sifload_callElfRequest(int a0, char *a1, int a2, int a3);
 /**
- * Loads a whole ELF file into EE memory: sifload_callElfRequest with the section name "all" (D_0049AD58) and request 1.
+ * Loads a whole ELF file into EE memory: sifload_callElfRequest with the section name "all" (str_all) and request 1.
  *
  * @param elfPath  the ELF's path
  * @param execData  receives the entry point and gp
  * @return the result of sifload_callElfRequest
  */
 int sceSifLoadElf(int elfPath, int execData) {
-    return sifload_callElfRequest(elfPath, D_0049AD58, execData, 1);
+    return sifload_callElfRequest(elfPath, str_all, execData, 1);
 }
 #endif
 
@@ -6472,17 +6472,17 @@ int func_0042BBF8(int iopAddr, void *valueOut, unsigned valueType) {
     if (valueType > IOP_VALUE_WORD) {
         return 0xFFFEFFFE;
     }
-    D_0052F080.get.data.w = iopAddr;
-    D_0052F080.get.size = valueType;
-    if (sceSifCallRpc(&D_0052F280, 3, 0, &D_0052F080, 0x20, &D_0052F080, 0x20, 0, 0) < 0) {
+    sifload_cmd.get.data.w = iopAddr;
+    sifload_cmd.get.size = valueType;
+    if (sceSifCallRpc(&sifload_client, 3, 0, &sifload_cmd, 0x20, &sifload_cmd, 0x20, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
     if (valueType == IOP_VALUE_BYTE) {
-        *(unsigned char *)valueOut = D_0052F080.get.data.b;
+        *(unsigned char *)valueOut = sifload_cmd.get.data.b;
     } else if (valueType == IOP_VALUE_HALFWORD) {
-        *(unsigned short *)valueOut = D_0052F080.get.data.h;
+        *(unsigned short *)valueOut = sifload_cmd.get.data.h;
     } else if (valueType == IOP_VALUE_WORD) {
-        *(int *)valueOut = D_0052F080.get.data.w;
+        *(int *)valueOut = sifload_cmd.get.data.w;
     } else {
         return 0xFFFEFFFE;
     }
@@ -6510,18 +6510,18 @@ int func_0042BCE8(int iopAddr, void *valueIn, int valueType) {
     if (sifload_bindLoader() < 0) {
         return 0xFFFF0000;
     }
-    D_0052F080.set.addr = iopAddr;
-    D_0052F080.set.size = valueType;
+    sifload_cmd.set.addr = iopAddr;
+    sifload_cmd.set.size = valueType;
     if (valueType == IOP_VALUE_BYTE) {
-        D_0052F080.set.value.b = *(unsigned char *)valueIn;
+        sifload_cmd.set.value.b = *(unsigned char *)valueIn;
     } else if (valueType == IOP_VALUE_HALFWORD) {
-        D_0052F080.set.value.h = *(unsigned short *)valueIn;
+        sifload_cmd.set.value.h = *(unsigned short *)valueIn;
     } else if (valueType == IOP_VALUE_WORD) {
-        D_0052F080.set.value.w = *(unsigned *)valueIn;
+        sifload_cmd.set.value.w = *(unsigned *)valueIn;
     } else {
         return 0xFFFEFFFE;
     }
-    if (sceSifCallRpc(&D_0052F280, 2, 0, &D_0052F080.set, 0x20, &D_0052F080.set, 0x10, 0, 0) < 0) {
+    if (sceSifCallRpc(&sifload_client, 2, 0, &sifload_cmd.set, 0x20, &sifload_cmd.set, 0x10, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
     return 0;
@@ -6541,7 +6541,7 @@ struct HdrBDC8 {
     int mode;
     char arg[0x50];
 };
-extern struct HdrBDC8 D_0052F2C0;
+extern struct HdrBDC8 libkernl_iopResetCmd;
 extern void fBDC8_stop(void) __asm__("sceSifStopDma");
 extern int fBDC8_getreg(unsigned int) __asm__("sceSifGetReg");
 extern unsigned int fBDC8_setreg(unsigned int, unsigned int) __asm__("sceSifSetReg");
@@ -6550,7 +6550,7 @@ extern void func_00426358(int, int);
  * Sends the IOP a reset command with a boot argument string over SIF DMA.
  *
  * Stops SIF DMA (sceSifStopDma) and reads the IOP's command buffer address (sceSifGetReg(0x80000000)). Builds the
- * 0x68-byte command D_0052F2C0: id 0x80000003, the argument string @p bootArg (copied without its NUL, unchecked against the
+ * 0x68-byte command libkernl_iopResetCmd: id 0x80000003, the argument string @p bootArg (copied without its NUL, unchecked against the
  * 0x50-byte field), its length and @p mode. Writes it back from the data cache, sets SIF register 4 to 0x40000 and DMAs
  * it (attribute 0x44) with sceSifSetDma. When the transfer is queued it sets register 4 to 0x10000 and 0x20000 and
  * clears registers 0x80000002 and 0x80000000. Called by sceSifRebootIop.
@@ -6565,18 +6565,18 @@ int sceSifResetIop(char *bootArg, int mode) {
     int n;
     fBDC8_stop();
     reg = fBDC8_getreg(0x80000000);
-    D_0052F2C0.mode = mode;
-    for (n = 0; bootArg[n] != 0; n++) D_0052F2C0.arg[n] = bootArg[n];
-    D_0052F2C0.dest = 0;
-    D_0052F2C0.size = n;
-    D_0052F2C0.cid = 0x80000003;
-    D_0052F2C0.dsize = 0;
-    D_0052F2C0.psize = 104;
-    dma.data = (int)&D_0052F2C0;
+    libkernl_iopResetCmd.mode = mode;
+    for (n = 0; bootArg[n] != 0; n++) libkernl_iopResetCmd.arg[n] = bootArg[n];
+    libkernl_iopResetCmd.dest = 0;
+    libkernl_iopResetCmd.size = n;
+    libkernl_iopResetCmd.cid = 0x80000003;
+    libkernl_iopResetCmd.dsize = 0;
+    libkernl_iopResetCmd.psize = 104;
+    dma.data = (int)&libkernl_iopResetCmd;
     dma.addr = reg;
     dma.size = 104;
     dma.attr = 68;
-    func_00426358((int)&D_0052F2C0, 104);
+    func_00426358((int)&libkernl_iopResetCmd, 104);
     fBDC8_setreg(4, 0x40000);
     if (sceSifSetDma(&dma, 1) != 0) {
         fBDC8_setreg(4, 0x10000);
@@ -6609,7 +6609,7 @@ extern void libkernl_closeTtyChannel(void);
 /**
  * Returns whether the IOP has finished rebooting.
  *
- * When bit 0x40000 of SIF register 4 (sceSifGetReg) is set it clears D_00455168 (libkernl_closeTtyChannel) and returns 1.
+ * When bit 0x40000 of SIF register 4 (sceSifGetReg) is set it clears libkernl_ttyOpenFlag (libkernl_closeTtyChannel) and returns 1.
  * bxIop_rebootWithDnasImage polls it after rebooting the IOP with sceSifRebootIop.
  *
  * @return 1 when the reboot is done, else 0
@@ -6712,13 +6712,13 @@ int EIntr_r(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", libkernl_createMallocSemas);
 #ifdef SKIP_ASM
-extern int D_00455248;
+extern int __sce_sema_id;
 extern int D_0045524C;
 extern int CreateSema(int *a0);
 /**
- * Creates two semaphores (max and initial count 1) and stores their ids in D_00455248 and D_0045524C.
+ * Creates two semaphores (max and initial count 1) and stores their ids in __sce_sema_id and D_0045524C.
  *
- * D_00455248 is the one the recursive lock __malloc_lock / __malloc_unlock waits on and signals. Called by _InitSys
+ * __sce_sema_id is the one the recursive lock __malloc_lock / __malloc_unlock waits on and signals. Called by _InitSys
  * at start-up.
  */
 void libkernl_createMallocSemas(void) {
@@ -6728,7 +6728,7 @@ void libkernl_createMallocSemas(void) {
     firstSemaParam[2] = 1;
     secondSemaParam[1] = 1;
     secondSemaParam[2] = 1;
-    D_00455248 = CreateSema(firstSemaParam);
+    __sce_sema_id = CreateSema(firstSemaParam);
     D_0045524C = CreateSema(secondSemaParam);
 }
 #endif
@@ -6806,17 +6806,17 @@ INCLUDE_ASM("seg/seg_325220", sysTable_getEntry);
 #ifdef SKIP_ASM
 extern void func_0042C120(void *a0, int a1, int a2);
 /**
- * Returns entry @p syscallNum of the kernel's syscall table: copies the word at D_00455230 + 4 * @p syscallNum with syscall 90
+ * Returns entry @p syscallNum of the kernel's syscall table: copies the word at sysTable_base + 4 * @p syscallNum with syscall 90
  * (func_0042C120).
  *
- * D_00455230 is the table base sysTable_init found. No caller in this build.
+ * sysTable_base is the table base sysTable_init found. No caller in this build.
  *
  * @param syscallNum  syscall number
  * @return the handler address in that slot
  */
 int sysTable_getEntry(int syscallNum) {
     int handlerAddr;
-    func_0042C120(&handlerAddr, D_00455230 + syscallNum * 4, 4);
+    func_0042C120(&handlerAddr, sysTable_base + syscallNum * 4, 4);
     return handlerAddr;
 }
 #endif
@@ -6828,7 +6828,7 @@ extern int D_00455238[];
 extern int FindAddress(int, int, void *);
 extern void func_0042C2F0(int, int);
 /**
- * Installs two helper syscalls and locates the kernel's syscall table, storing its base in D_00455230.
+ * Installs two helper syscalls and locates the kernel's syscall table, storing its base in sysTable_base.
  *
  * Installs the pairs of D_00455238 with syscall 116 (func_0042C2F0): sysTable_kernelFindWord as syscall 131 (word search) and
  * sysTable_kernelCopyWords as syscall 90 (word copy). Then searches kernel memory 0x80000000-0x80080000 with FindAddress for words
@@ -6856,7 +6856,7 @@ void sysTable_init(void) {
             y = copyHit - 360;
         }
     }
-    D_00455230 = x;
+    sysTable_base = x;
 }
 #endif
 
@@ -7073,18 +7073,18 @@ int execArgs_copyToKernel_d(char *, int, char **) __asm__("execArgs_copyToKernel
  * Copies a program name and its arguments into the kernel's argument area for the exec calls.
  *
  * Installs the byte-copy routine execArgs_kernelCopyBytes as syscall 90 (D_00455A10) and caps @p argc at 15. The area at
- * D_00456538 holds a table of string addresses followed, from +0x40, by the strings: first @p progName, then each argv
+ * execArgs_kernelArea holds a table of string addresses followed, from +0x40, by the strings: first @p progName, then each argv
  * string, each with its NUL; the addresses and strings are written with syscall 90 (func_0042C4C0). Called by
  * ExecPS2, LoadExecPS2 and ExecOSD.
  *
  * @param progName  program name (first string)
  * @param argc  number of argument strings
  * @param argv  the argument strings
- * @return the kernel address of the copied name (D_00456538 + 0x40)
+ * @return the kernel address of the copied name (execArgs_kernelArea + 0x40)
  */
 int execArgs_copyToKernel_d(char *progName, int argc, char **argv) {
     int pos;
-    int ptrSlot = D_00456538;
+    int ptrSlot = execArgs_kernelArea;
     int ret;
     int len;
     char **argvCursor;
@@ -7141,7 +7141,7 @@ extern int _ExecPS2(int, int, int, int);
  *
  * Copies an empty name plus @p argVector's @p argCount strings into the kernel argument area (execArgs_copyToKernel), restores the TLB
  * layout (func_0042C628) and calls the syscall 7 stub (seg_3249A0) with the entry point, gp, the argument count and the
- * kernel copy of the argument table (D_00456538 + 4). No caller in this build.
+ * kernel copy of the argument table (execArgs_kernelArea + 4). No caller in this build.
  *
  * @param entryAddr  entry point
  * @param gpValue  gp value
@@ -7152,7 +7152,7 @@ extern int _ExecPS2(int, int, int, int);
 int ExecPS2(int entryAddr, int gpValue, int argCount, int argVector) {
     execArgs_copyToKernel_v(str_empty_c, argCount, argVector);
     func_0042C628();
-    return _ExecPS2(entryAddr, gpValue, argCount, D_00456538 + 4);
+    return _ExecPS2(entryAddr, gpValue, argCount, execArgs_kernelArea + 4);
 }
 #endif
 
@@ -7166,7 +7166,7 @@ extern void _LoadExecPS2(int a0, int a1, int a2);
  *
  * The argument strings arrive in the third argument register, which this definition passes on unnamed to
  * execArgs_copyToKernel. Restores the TLB layout (func_0042C628) and calls the syscall 6 stub (seg_3249A0) with the kernel copy
- * of the name, the count and the kernel argument table (D_00456538 + 4). Called by shutdownAndLoadExec.
+ * of the name, the count and the kernel argument table (execArgs_kernelArea + 4). Called by shutdownAndLoadExec.
  *
  * @param progPath  path of the program
  * @param argCount  argument count
@@ -7174,7 +7174,7 @@ extern void _LoadExecPS2(int a0, int a1, int a2);
 void LoadExecPS2(int progPath, int argCount) {
     int kernelPath = execArgs_copyToKernel(progPath, argCount);
     func_0042C628();
-    _LoadExecPS2(kernelPath, argCount, D_00456538 + 4);
+    _LoadExecPS2(kernelPath, argCount, execArgs_kernelArea + 4);
 }
 #endif
 
@@ -7207,7 +7207,7 @@ extern void _ExecOSD(int a0, int a1);
  *
  * Copies an empty name plus the argument strings into the kernel argument area (execArgs_copyToKernel), restores the TLB
  * layout (func_0042C628) and calls the syscall 123 stub (seg_3249A0) with the count and the kernel argument table
- * (D_00456538 + 4). No caller in this build.
+ * (execArgs_kernelArea + 4). No caller in this build.
  *
  * @param argCount  argument count
  * @param argVector  argument strings
@@ -7215,7 +7215,7 @@ extern void _ExecOSD(int a0, int a1);
 void ExecOSD(int argCount, int argVector) {
     execArgs_copyToKernel_3(str_empty_c, argCount, argVector);
     func_0042C628();
-    _ExecOSD(argCount, D_00456538 + 4);
+    _ExecOSD(argCount, execArgs_kernelArea + 4);
 }
 #endif
 
@@ -7317,13 +7317,13 @@ void alarmPatch_install(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceDeci2Open);
 #ifdef SKIP_ASM
-extern char D_0052F328[];
+extern char libkernl_deci2WorkArea[];
 extern int Deci2Call(int a0, int *a1);
 int f8A0(unsigned short a0, int a1, int a2) __asm__("sceDeci2Open");
 /**
  * Opens a DECI2 socket for a protocol (DECI2 kernel call 1).
  *
- * Passes the protocol, @p handlerArg, the event handler and the uncached address of the work area D_0052F328 to Deci2Call(1).
+ * Passes the protocol, @p handlerArg, the event handler and the uncached address of the work area libkernl_deci2WorkArea to Deci2Call(1).
  * The serial console set-up libkernl_openTtyChannel calls it.
  *
  * @param protocol  DECI2 protocol number
@@ -7336,7 +7336,7 @@ int f8A0(unsigned short protocol, int handlerArg, int eventHandler) {
     buf[0] = protocol;
     buf[1] = handlerArg;
     buf[2] = eventHandler;
-    buf[3] = (int)D_0052F328 | 0x20000000;
+    buf[3] = (int)libkernl_deci2WorkArea | 0x20000000;
     return Deci2Call(1, buf);
 }
 #endif
@@ -7511,13 +7511,13 @@ int libkernl_deci2Puts(int str) {
 //100%
 INCLUDE_ASM("seg/seg_325220", libkernl_setTlbExceptionHandler);
 #ifdef SKIP_ASM
-extern int D_004564F0;
+extern int libkernl_tlbExceptionHandler;
 extern void libkernl_tlbExceptionEntry(void);
 extern void SetVTLBRefillHandler(int, void (*)(void));
 /**
  * Installs a user handler for TLB exceptions (codes 1-3).
  *
- * Stores @p excHandler in D_004564F0 and points the TLB-refill vectors for exception codes 1, 2 and 3 at the handler stub
+ * Stores @p excHandler in libkernl_tlbExceptionHandler and points the TLB-refill vectors for exception codes 1, 2 and 3 at the handler stub
  * libkernl_tlbExceptionEntry (SetVTLBRefillHandler), which saves the registers and calls the stored function. No caller in this
  * build.
  *
@@ -7525,7 +7525,7 @@ extern void SetVTLBRefillHandler(int, void (*)(void));
  * @return @p excHandler
  */
 int libkernl_setTlbExceptionHandler(int excHandler) {
-    D_004564F0 = excHandler;
+    libkernl_tlbExceptionHandler = excHandler;
     SetVTLBRefillHandler(1, libkernl_tlbExceptionEntry);
     SetVTLBRefillHandler(2, libkernl_tlbExceptionEntry);
     SetVTLBRefillHandler(3, libkernl_tlbExceptionEntry);
@@ -7640,7 +7640,7 @@ extern void func_0042CB68(int, char *, int);
  * kernel address 0x80075000, flushes the data and instruction caches (FlushCache 0 and 2), installs the patch's entry
  * as syscall 91 and the handler at 0x0042D100 as syscall 84, then installs, for each of the syscalls 85-89 (the TLB
  * entry and scratchpad calls), the handler address syscall 91 returns for it. Finally stores syscall 91's answer for 3
- * in D_00456538, the kernel area execArgs_copyToKernel writes exec arguments to. _InitSys jumps to it last.
+ * in execArgs_kernelArea, the kernel area execArgs_copyToKernel writes exec arguments to. _InitSys jumps to it last.
  */
 void tlbPatch_install(void) {
     unsigned i;
@@ -7656,7 +7656,7 @@ void tlbPatch_install(void) {
         func_0042CBC0(syscallPair[0], func_0042CBB0(syscallPair[0]));
         syscallPair += 2;
     }
-    D_00456538 = func_0042CBB0(3);
+    execArgs_kernelArea = func_0042CBB0(3);
 }
 #endif
 
@@ -7896,7 +7896,7 @@ INCLUDE_ASM("seg/seg_325220", libkernl_tlbExceptionEntry);
  *
  * Saves every GPR, HI/LO, HI1/LO1 and SA in the frame D_00530380, loads Status, Cause, EPC and BadVAddr into $4-$7
  * (the frame in $8), keeps EPC in D_005305A8 and erets with IE cleared to D_0042D0C0. That calls the user handler
- * D_004564F0 on the frame as stack, makes syscall -0x54, restores the saved registers and EPC and returns from the
+ * libkernl_tlbExceptionHandler on the frame as stack, makes syscall -0x54, restores the saved registers and EPC and returns from the
  * exception with eret. The second entry D_0042D200, the stub libkernl_setExceptionHandler installs for codes 1-13, saves the same
  * way (COP0 register 23 also in $8, the frame in $9), erets to D_0042D2FC and calls the handler D_004564F8[ExcCode];
  * if that returns it stops at a break.
@@ -7972,8 +7972,8 @@ __asm__(
     "eret\n"
     ".globl D_0042D0C0\n"
     "D_0042D0C0:\n"
-    "lui $1, %hi(D_004564F0)\n"
-    "lw $1, %lo(D_004564F0)($1)\n"
+    "lui $1, %hi(libkernl_tlbExceptionHandler)\n"
+    "lw $1, %lo(libkernl_tlbExceptionHandler)($1)\n"
     "lui $29, %hi(D_00530380)\n"
     "jalr $1\n"
     "addiu $29, $29, %lo(D_00530380)\n"

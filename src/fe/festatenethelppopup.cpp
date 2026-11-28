@@ -945,7 +945,7 @@ extern void* ChatMenu_vtbl[];
 extern char str_Chat_Menu[];
 extern char str_Enter_Chat[];
 extern char str_empty_d[];
-extern int D_00467D70[];
+extern int ChatMenu_cannedLines[];
 
 /**
  * Constructs the debug "Chat Menu": a title, a spacer, an "Enter Chat" entry and fourteen canned chat lines.
@@ -953,7 +953,7 @@ extern int D_00467D70[];
  * Runs cMenu_cMenu(), stores vtable ChatMenu_vtbl (onCommand ChatMenu_onCommand, which sends the chosen line as a lobby chat
  * message) and the owner from @p info at +0x130, builds the "Chat Menu" title, a spacer of 14 and a text entry labelled
  * "Enter Chat" (cTextMenuItem_cTextMenuItem(), +0x168), then fourteen command items (cCommandMenuItem_cCommandMenuItem()) at +0x194, each with id j
- * (+0x8) and the label D_00467D70[j] (canned lines such as "Assassins!"). Adds the title, the spacer and the fourteen
+ * (+0x8) and the label ChatMenu_cannedLines[j] (canned lines such as "Assassins!"). Adds the title, the spacer and the fourteen
  * lines; likely bug: the "Enter Chat" entry is built but never added to the menu.
  *
  * @param info  a holder whose first word (the debug front end) is stored at +0x130
@@ -979,7 +979,7 @@ extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
     for (j = 0; j < 0xE; j++) {
         cCommandMenuItem* item = &self->mMessageItems[j];
         item->ID = j;
-        item->Caption = (const char*)D_00467D70[j];
+        item->Caption = (const char*)ChatMenu_cannedLines[j];
         cMenu_addItem(self, item, -1);
     }
     return ((void*)self);

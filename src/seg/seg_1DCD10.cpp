@@ -692,7 +692,7 @@ struct sSort_C7B0 { int idx; int key; };
 
 // PORT: asm-label aliases; these globals and calls are declared with other types elsewhere.
 // GS packet words are 64-bit `unsigned long`, and uncached (0x30000000) pointers are held in int.
-extern sDma_C7B0* D_004A4474_C7B0 __asm__("D_004A4474");
+extern sDma_C7B0* SPRMan_C7B0 __asm__("SPRMan");
 extern sGfx_C7B0* cGraphicsMan_TheGraphicsMan_C7B0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer_C7B0(sDma_C7B0* dma, unsigned int buf, int a2, int a3) __asm__("cPS2ScratchPad_claimBuffer");
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo_C7B0(sDma_C7B0* dma, unsigned long* p, int a2) __asm__("cPS2ScratchPad_flushBufferTo");
@@ -703,7 +703,7 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
  * Draws the queued fog sprites as GS sprite primitives, far to near, in DMA chunks.
  *
  * Called through slot 3 of the cPS2FogParticleMan vtable (cPS2FogParticleMan_vtbl) by cFogParticleMan_render after it has sorted the
- * sort keys in cFogParticleMan_mSortKey. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
+ * sort keys in cFogParticleMan_mSortKey. Each chunk holds at most (SPRMan buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
  * opens a packet at the graphics manager's current buffer address (+0x5A00) with cPS2ScratchPad_claimBuffer, writes a DMA cnt tag, a
  * VIF DIRECT code, a GIF tag that sets PRIM to 0x56 (textured, alpha-blended sprite) and a REGLIST GIF tag of 5
  * registers (ST, RGBAQ, XYZ2, ST, XYZ2) looped once per sprite, then five words per sprite taken in mSortKey order from
@@ -721,7 +721,7 @@ void cPS2FogParticleMan::platformrender()
 {
     int left = miNumSphere;
     int start = 0;
-    int max = (D_004A4474_C7B0->size - 4) * 2 / 5 - 1;
+    int max = (SPRMan_C7B0->size - 4) * 2 / 5 - 1;
     sGfx_C7B0* graphicsMan = cGraphicsMan_TheGraphicsMan_C7B0;
     if (left <= 0) return;
     float one = 1.0f;
@@ -729,7 +729,7 @@ void cPS2FogParticleMan::platformrender()
         int n = max;
         unsigned int buf = graphicsMan->bufAddr;
         if (left < n) n = left;
-        unsigned long* packet = cPS2ScratchPad_claimBuffer_C7B0(D_004A4474_C7B0, buf, -1, 0);
+        unsigned long* packet = cPS2ScratchPad_claimBuffer_C7B0(SPRMan_C7B0, buf, -1, 0);
         int oddCount;
         int qwc;
         float st0[2];
@@ -768,7 +768,7 @@ void cPS2FogParticleMan::platformrender()
             packet += 5;
         }
         if (oddCount) *packet++ = 0;
-        unsigned int next = cPS2ScratchPad_flushBufferTo_C7B0(D_004A4474_C7B0, packet, 4);
+        unsigned int next = cPS2ScratchPad_flushBufferTo_C7B0(SPRMan_C7B0, packet, 4);
         sRing_C7B0* ring = graphicsMan->ring;
         sRS_C7B0* rs = graphicsMan->top;
         if (ring->count < 2600) {

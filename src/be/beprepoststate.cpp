@@ -409,18 +409,18 @@ extern "C" void cBEProfileLib_copy(char* dst, char* src)
 INCLUDE_ASM("be/beprepoststate", cBEProfileLib_backupCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
-extern signed char D_004A125C;
+extern signed char cBEProfileLib_backupCharIndex;
 extern char cBEProfileLib_BackupCharProfile[];
 
 /**
  * Saves one character record of a profile into the backup buffer cBEProfileLib_BackupCharProfile and remembers its character index in
- * D_004A125C.
+ * cBEProfileLib_backupCharIndex.
  *
  * @param idx  the character whose record is saved
  */
 void cBEProfileLib::backupCharProfile(int idx)
 {
-    D_004A125C = idx;
+    cBEProfileLib_backupCharIndex = idx;
     MEM_copy(cBEProfileLib_BackupCharProfile, &charProfile[idx], 3976);
 }
 #endif
@@ -429,17 +429,17 @@ void cBEProfileLib::backupCharProfile(int idx)
 INCLUDE_ASM("be/beprepoststate", cBEProfileLib_restoreCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
-extern signed char D_004A125C;
+extern signed char cBEProfileLib_backupCharIndex;
 extern char cBEProfileLib_BackupCharProfile[];
 
 /**
  * Copies the backup buffer cBEProfileLib_BackupCharProfile back into the profile's character record that cBEProfileLib_backupCharProfile saved (index
- * D_004A125C).
+ * cBEProfileLib_backupCharIndex).
  *
  */
 void cBEProfileLib::restoreCharProfile()
 {
-    MEM_copy(&charProfile[D_004A125C], cBEProfileLib_BackupCharProfile, 3976);
+    MEM_copy(&charProfile[cBEProfileLib_backupCharIndex], cBEProfileLib_BackupCharProfile, 3976);
 }
 #endif
 

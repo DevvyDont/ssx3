@@ -1018,7 +1018,7 @@ extern "C" void cCrowdSys_Init(void* self, char* name, char* ext, int mode, int 
 extern "C" void cSSXAudio_LoadGruntBanks(void* self, int a1);
 extern char* str_H;
 // Default stream-group extension string (gcc inlines strcpy of the literal as an aligned block copy).
-extern char D_004A35A0[] __attribute__((aligned(8)));
+extern char str_WORLD[] __attribute__((aligned(8)));
 extern char str_empty_j[];
 extern char str_BOARD[];
 extern char str_CROWD[];
@@ -1048,7 +1048,7 @@ void cSSXAudio::InGameLoad()
     char name[0x80];
     char val[0x60];
     char msg[0x70];
-    __builtin_memcpy(ext, D_004A35A0, 6);
+    __builtin_memcpy(ext, str_WORLD, 6);
     InitSoundLevels(eGameAudioState_Mountain);
     cAsyncSys_Init3((cAsyncSys*)MusicSys.mpVStreamSys->mpVBankManager, 0, 0);
     mUsedBank[0] = str_empty_j[0];

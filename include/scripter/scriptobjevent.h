@@ -19,7 +19,7 @@
 //   cScriptEntity (scripter/scriptentity.h, 0xC) at 0x00: vptr 0x00 = cScriptObjEvent_vtbl (0x00482260, 5 slots:
 //                 1/2 cScriptEntity_OnInSeqLock / OnInSeqRelease, 3 cScriptObjEvent_OnInSeqKeyEvent,
 //                 4 cScriptEntity_OnInSeqUpdate, 5 cScriptObjEvent_IsMatchingEntity);
-//   cScriptObject (scripter/scriptobj.h, 0x10) at 0x0C: vptr 0x18 = D_00482298 (_vt$15cScriptObjEvent$13cScriptObject:
+//   cScriptObject (scripter/scriptobj.h, 0x10) at 0x0C: vptr 0x18 = cScriptObjEvent_cScriptObject_vtbl (_vt$15cScriptObjEvent$13cScriptObject:
 //                 1 dtor, 2/3 cScriptObject_Pause/ResumeObjScript, 4 OnStartObjectUse, 5 OnEndObjectUse,
 //                 6 GetNumScriptEntities, 7 GetScriptEntity; slots 1 and 4-7 carry delta -0xC, so they get the whole object).
 //
@@ -175,7 +175,7 @@ struct cScriptObjEvent {
     int mObjID;                                  // 0x10 [O]; [R] cScriptObject ctor -1
     int mInUse;                                  // 0x14 [O]; [R] cScriptObject ctor 0; [U] cScriptObject_OnStart/
                                                  //      OnEndObjectUse__FPv (called on self + 0xC)
-    void** mScriptObjectVtbl;                    // 0x18 [R] D_00482298 (ctor and dtor); [P] the paired dtor stores it at
+    void** mScriptObjectVtbl;                    // 0x18 [R] cScriptObjEvent_cScriptObject_vtbl (ctor and dtor); [P] the paired dtor stores it at
                                                  //      0x18 in both builds; the dtor runs cScriptObject__cScriptObject on +0xC
     // --- cScriptObjEvent
     tScriptObjEventWSAbort mAbortWorldScripts[20]; // 0x1C [O]; [U] OnInSeqKeyEvent appends (no bound check against 20),

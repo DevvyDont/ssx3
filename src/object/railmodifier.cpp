@@ -7383,7 +7383,7 @@ struct tIntcCounter {
     int reserved;                   // 0x4 [R] tIntcHandlerTable_clearCounters zeroes it; nothing else reads or writes it
 };
 
-// The renderer's interrupt handler table (D_005059D8; struct name ours, the id tables' names are the preview build's
+// The renderer's interrupt handler table (cPS2GraphicsMan_intcHandlerTable; struct name ours, the id tables' names are the preview build's
 // bxps2intc.cpp asserts): the INTC handler ids by cause and the DMAC handler ids by channel, -1 when none, and three
 // interrupt counters.
 struct tIntcHandlerTable {
@@ -7443,7 +7443,7 @@ static inline void tIntcHandlerTable_init_fill(int* p, int v)
 }
 
 /**
- * Sets up the renderer's interrupt handler table (D_005059D8 in cPS2GraphicsMan_Init).
+ * Sets up the renderer's interrupt handler table (cPS2GraphicsMan_intcHandlerTable in cPS2GraphicsMan_Init).
  *
  * Fills the 16 INTC handler ids (+0x0) and the 16 DMAC handler ids (+0x40) with -1 (the preview build's bxps2intc.cpp
  * asserts call these mIntCID and mDMACID), clears the counters at +0x80 (tIntcHandlerTable_clearCounters) and installs the VIF1/VU1
@@ -7466,7 +7466,7 @@ INCLUDE_ASM("object/railmodifier", tIntcHandlerTable_shutdown__FPv);
 /**
  * Tears down the renderer's interrupt handlers by removing the VIF1/VU1 ones (tIntcHandlerTable_removeRenderHandlers).
  *
- * cPS2GraphicsMan_Purge calls it on D_005059D8.
+ * cPS2GraphicsMan_Purge calls it on cPS2GraphicsMan_intcHandlerTable.
  *
  * @return tIntcHandlerTable_removeRenderHandlers's result
  */
@@ -7501,7 +7501,7 @@ extern "C" void tIntcHandlerTable_clearCounters(tIntcHandlerTable* self)
 INCLUDE_ASM("object/railmodifier", func_00361F90__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing; cPS2GraphicsMan_DrawFrame calls it on the interrupt handler table (D_005059D8) at the end of a frame.
+ * Does nothing; cPS2GraphicsMan_DrawFrame calls it on the interrupt handler table (cPS2GraphicsMan_intcHandlerTable) at the end of a frame.
  */
 void func_00361F90(void* self)
 {
@@ -7784,13 +7784,13 @@ INCLUDE_ASM("object/railmodifier", intc_handleVif1);
 extern "C" void saveFpuRegisters(void*);
 extern "C" void restoreFpuRegisters(void*);
 
-extern tIntcHandlerTable D_005059D8;
+extern tIntcHandlerTable cPS2GraphicsMan_intcHandlerTable;
 
 /**
  * Handles the VIF1 interrupt: cancels a VIF1 interrupt stall and counts it.
  *
  * Saves the FPU registers (saveFpuRegisters). When VIF1_STAT (0x10003C00) has bit 10 set (stalled on an interrupt) it
- * writes 8 (STC, stall cancel) to VIF1_FBRST (0x10003C10). It counts the interrupt at D_005059D8 +0x80, restores the
+ * writes 8 (STC, stall cancel) to VIF1_FBRST (0x10003C10). It counts the interrupt at cPS2GraphicsMan_intcHandlerTable +0x80, restores the
  * FPU registers (restoreFpuRegisters) and re-enables interrupts.
  *
  * @return 1 (handled)
@@ -7799,7 +7799,7 @@ extern "C" int intc_handleVif1(void)
 {
     char buf[0x100];
     saveFpuRegisters(buf);
-    tIntcHandlerTable* table = &D_005059D8;
+    tIntcHandlerTable* table = &cPS2GraphicsMan_intcHandlerTable;
     if (*(int*)0x10003C00 & 0x400) {
         *(volatile int*)0x10003C10 = 8;
     }
@@ -8114,7 +8114,7 @@ extern "C" void gsPacket_addTest(sRmGsPacket* pkt, int ztest, int atest, unsigne
 //100%
 INCLUDE_ASM("object/railmodifier", gsPacket_writeHeader);
 #ifdef SKIP_ASM
-extern ulong D_00505A80[];
+extern ulong gsPacket_headerBuffer[];
 
 struct sRmPkt27A8 {
     int count;      // 0x0
@@ -8127,7 +8127,7 @@ struct sRmPkt27A8 {
  *
  * The header is six 64-bit words: a DMA tag for count + 2 quadwords, a VIF NOP, a VIF DIRECT of count + 1 quadwords
  * (mode 2: an UNPACK V4-32 to VU1 address 0x3F2 instead) and a GIF tag (NLOOP count, EOP, one A+D register). Mode 0
- * builds it at D_00505A80 with a RET tag and appends a CALL to D_00505A80 at *pp; modes 1 and 2 write it at the packet
+ * builds it at gsPacket_headerBuffer with a RET tag and appends a CALL to gsPacket_headerBuffer at *pp; modes 1 and 2 write it at the packet
  * base with a CNT tag after handing the packet's current end back through *pp.
  *
  * @param pp  the caller's DMA chain cursor
@@ -8141,7 +8141,7 @@ extern "C" void gsPacket_writeHeader(sRmPkt27A8* self, ulong** pp, int mode)
     }
     switch (mode) {
     case 0:
-        self->cur = D_00505A80;
+        self->cur = gsPacket_headerBuffer;
         self->cur[0] = (self->count + 2) | 0x60000000;
         self->cur[1] = 0;
         self->cur[2] = 0;
@@ -8149,7 +8149,7 @@ extern "C" void gsPacket_writeHeader(sRmPkt27A8* self, ulong** pp, int mode)
         self->cur[4] = (ulong)(self->count | 0x8000) | ((ulong)1 << 60);
         self->cur[5] = 0xE;
         self->cur += 6;
-        (*pp)[0] = ((ulong)(unsigned int)D_00505A80 << 32) | 0x50000000;
+        (*pp)[0] = ((ulong)(unsigned int)gsPacket_headerBuffer << 32) | 0x50000000;
         (*pp)[1] = 0;
         *pp += 2;
         break;
@@ -8286,7 +8286,7 @@ INCLUDE_ASM("object/railmodifier", cPS2DeferManager_resetFrame);
 extern "C" void InvalidDCache(void* begin, void* end);
 extern "C" void scratchpad_storeSpareArea(void* base, int size, int mode);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern void* D_004A5B84;
+extern void* cPS2ScratchPad_freeSpace;
 
 struct sRail20_2CC8 {
     int v[5];
@@ -8299,7 +8299,7 @@ extern sRail20_2CC8 sDrawState_s_defaultDrawState;
  *
  * Zeroes the record count (+0x0) and the bucket count (+0x57494), drops the draw states saved after the presets
  * (+0x51480 = +0x57484), clears the two 0x400-byte hash tables at +0x674A0 and +0x678A0 by DMA from the zero-filled
- * scratchpad (D_004A5B84), zeroes the sort-item count (+0x67CA4) and the scissor count (+0x6AED0), sets the current
+ * scratchpad (cPS2ScratchPad_freeSpace), zeroes the sort-item count (+0x67CA4) and the scissor count (+0x6AED0), sets the current
  * draw state (+0x69CA8) to sDrawState_s_defaultDrawState, and the current matrix (+0x69CC0) and scissor (+0x69CC4) to
  * -1 with no cached matrices (+0x69CC8).
  */
@@ -8312,7 +8312,7 @@ void cPS2DeferManager::resetFrame()
     InvalidDCache(stateHashTable, ((char*)this) + 0x6789F);
     char* nodeHashTable = (char*)&mBucketHash[0];
     InvalidDCache(nodeHashTable, ((char*)this) + 0x67C9F);
-    MEM_fill(D_004A5B84, 0, 0x400);
+    MEM_fill(cPS2ScratchPad_freeSpace, 0, 0x400);
     scratchpad_storeSpareArea(stateHashTable, 0x400, 2);
     scratchpad_storeSpareArea(nodeHashTable, 0x400, 2);
     mNumSortItems = 0;
@@ -8328,7 +8328,7 @@ void cPS2DeferManager::resetFrame()
 //100%
 INCLUDE_ASM("object/railmodifier", cPS2DeferManager_bucketRecords);
 #ifdef SKIP_ASM
-extern void* D_004A4474;
+extern void* SPRMan;
 extern "C" void SyncDCache(void* begin, void* end);
 extern "C" void* cPS2ScratchPad_claimAndLoadBuffer(void* ring, void* src, int size, int flags);
 extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
@@ -8449,7 +8449,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
 /**
  * Files the frame's deferred draw records into buckets by draw state, textures and matrix.
  *
- * Streams the 0x80-byte records (+0x80, count +0x0) through the scratchpad ring D_004A4474 in chunks. For each it finds
+ * Streams the 0x80-byte records (+0x80, count +0x0) through the scratchpad ring SPRMan in chunks. For each it finds
  * the shared state (cPS2DeferManager_Find) and, unless it continues the previous record, the bucket with the same state,
  * texture pair and matrix index (cPS2DeferManager_Find1). A new bucket is added to the hash and gets a sort item with the key
  * from sDrawState_makeSortKey; continuation records are chained to the previous bucket. The record's packet is appended to the
@@ -8463,7 +8463,7 @@ void cPS2DeferManager::bucketRecords()
     sRmBatch_2DE8* self = (sRmBatch_2DE8*)this;
     self->last = 0;
     SyncDCache(self->entries, (char*)&self->entries[self->count] - 1);
-    void* ring = D_004A4474;
+    void* ring = SPRMan;
     int bytes = *(int*)((char*)ring + 0x10) << 4;
     int chunk = bytes / sizeof(tDeferSubmit);
     int nChunks = self->count / chunk;
@@ -8497,7 +8497,7 @@ void cPS2DeferManager::bucketRecords()
 //100%
 INCLUDE_ASM("object/railmodifier", cPS2DeferManager_buildDmaChains);
 #ifdef SKIP_ASM
-extern void* D_004A4474;
+extern void* SPRMan;
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 extern const int D_004A4058[];
 extern "C" void cPS2DeferManager_bucketRecords(cPS2DeferManager* self);
@@ -8538,7 +8538,7 @@ struct sRmPassTypes_3490 {
     int v[2];
 };
 
-extern sRmTexUse_3490 D_0053AB80_3490[] __asm__("D_0053AB80");
+extern sRmTexUse_3490 cPS2DeferManager_textureUseTable_3490[] __asm__("cPS2DeferManager_textureUseTable");
 
 static inline void resetState_3490(sRail20_2CC8* d)
 {
@@ -8550,7 +8550,7 @@ static inline void resetState_3490(sRail20_2CC8* d)
  *
  * Buckets the records (cPS2DeferManager_bucketRecords), writes the default state (cPS2DeferManager_writeDefaultState), sorts the buckets (cPS2DeferManager_sortItems),
  * resets the texture use table (resetTextureUseTable) and prepares the texture manager (cGraphicsMan_TheGraphicsMan +0x18F4:
- * cTextureMan_resetBoundTextures and vramHeap_moveLinksToScratchpad on +0x1F60). It records each texture's last use and use count in D_0053AB80, then
+ * cTextureMan_resetBoundTextures and vramHeap_moveLinksToScratchpad on +0x1F60). It records each texture's last use and use count in cPS2DeferManager_textureUseTable, then
  * splits the sorted list into three passes at the pass types in D_004A4058 (state word 2 bits 5-9). For every bucket it
  * writes the state change (cPS2DeferManager_writeStateChange) when the state differs, the texture setup (cTextureMan_ensureContextTextures) and a CALL to the
  * bucket's chain, whose tail becomes a RET. After a type-6 pass it runs cPS2GraphicsMan_queueDepthFogPass per entry and resets the state;
@@ -8579,7 +8579,7 @@ extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAdd
     ((cPS2DeferManager*)self)->writeDefaultState(&pkt);
     ((cPS2DeferManager*)self)->sortItems();
     resetTextureUseTable();
-    void* ring = D_004A4474;
+    void* ring = SPRMan;
     int saved = *(int*)ring;
     cPS2ScratchPad_setLayout(ring, 5);
     cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
@@ -8593,13 +8593,13 @@ extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAdd
             for (tDeferBucket* n = self->items[i].node; n != 0; n = n->mpLink) {
                 short primaryTex = ((short*)&n->mTexKey)[0];
                 if (primaryTex >= 0) {
-                    D_0053AB80_3490[primaryTex].first = idx;
-                    D_0053AB80_3490[primaryTex].count++;
+                    cPS2DeferManager_textureUseTable_3490[primaryTex].first = idx;
+                    cPS2DeferManager_textureUseTable_3490[primaryTex].count++;
                 }
                 short secondaryTex = ((short*)&n->mTexKey)[1];
                 if (secondaryTex >= 0) {
-                    D_0053AB80_3490[secondaryTex].first = idx;
-                    D_0053AB80_3490[secondaryTex].count++;
+                    cPS2DeferManager_textureUseTable_3490[secondaryTex].first = idx;
+                    cPS2DeferManager_textureUseTable_3490[secondaryTex].count++;
                 }
                 idx++;
             }
@@ -8850,7 +8850,7 @@ INCLUDE_ASM("object/railmodifier", cPS2DeferManager_sortItems);
 #ifdef SKIP_ASM
 
 extern tDeferSortItem D_00505B70[];
-extern void* D_004A4474;
+extern void* SPRMan;
 extern "C" void* cPS2ScratchPad_claimBuffer(void* ring, unsigned int addr, int size, int flags);
 extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
 
@@ -8862,7 +8862,7 @@ extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
  */
 void cPS2DeferManager::sortItems()
 {
-    void* ring = D_004A4474;
+    void* ring = SPRMan;
     tDeferSortItem* dst = D_00505B70;
     int n = mNumSortItems;
     tDeferSortItem* src = ((&mSortItems[0]));
@@ -10199,8 +10199,8 @@ extern "C" void vramHeap_freeAllBlocks(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", resetTextureUseTable);
 #ifdef SKIP_ASM
-extern void* D_004A5B84;
-extern char D_0053AB80[];
+extern void* cPS2ScratchPad_freeSpace;
+extern char cPS2DeferManager_textureUseTable[];
 extern char D_0053E9FF[];
 
 struct sRailPair66F8 {
@@ -10223,21 +10223,21 @@ static inline cQuad128 makeFill66F8(ulong lo, ulong hi)
 // PORT: scratchpad (0x70000000..0x70004000) free space, pointer held in int.
 static inline unsigned int spadFree66F8()
 {
-    char* p = (char*)D_004A5B84;
+    char* p = (char*)cPS2ScratchPad_freeSpace;
     return p ? 0x70004000 - (int)p : 0;
 }
 
 /**
- * Resets the 2000-entry texture use table D_0053AB80 to all-ones (-1).
+ * Resets the 2000-entry texture use table cPS2DeferManager_textureUseTable to all-ones (-1).
  *
- * Invalidates the table's cache lines (InvalidDCache), fills the free scratchpad above D_004A5B84 with 0xFF bytes and
+ * Invalidates the table's cache lines (InvalidDCache), fills the free scratchpad above cPS2ScratchPad_freeSpace with 0xFF bytes and
  * copies that into the table in chunks with scratchpad_storeSpareArea.
  */
 extern "C" void resetTextureUseTable()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
-    InvalidDCache(D_0053AB80, D_0053E9FF);
-    cQuad128* spadCursor = (cQuad128*)D_004A5B84;
+    InvalidDCache(cPS2DeferManager_textureUseTable, D_0053E9FF);
+    cQuad128* spadCursor = (cQuad128*)cPS2ScratchPad_freeSpace;
     unsigned int n = spadFree66F8() >> 4;
     for (; n != 0; n--) {
         *spadCursor++ = fill;
@@ -10248,7 +10248,7 @@ extern "C" void resetTextureUseTable()
         if (left < chunk) {
             chunk = left;
         }
-        scratchpad_storeSpareArea(&((sRailPair66F8*)D_0053AB80)[i], chunk * 8, 2);
+        scratchpad_storeSpareArea(&((sRailPair66F8*)cPS2DeferManager_textureUseTable)[i], chunk * 8, 2);
     }
 }
 #endif
@@ -10343,7 +10343,7 @@ static inline int railFloorLog2v(int x)
  * Evicts the cheapest used block of size's size class that is large enough.
  *
  * Walks list A of that class, skipping blocks smaller than size, locked ones (flag bit 1) and those owned by skipA or
- * skipB. A block whose owner texture is used again later this frame (its last use in D_0053AB80 is after age) costs
+ * skipB. A block whose owner texture is used again later this frame (its last use in cPS2DeferManager_textureUseTable is after age) costs
  * size times its use count, any other costs 0; the cheapest is freed with vramHeap_freeBlock.
  *
  * @param size  units needed
@@ -10370,7 +10370,7 @@ extern "C" bool vramHeap_evictCheapestBlock(sRailNodeMan* self, int size, int sk
         if (owner == skipA || owner == skipB) {
             continue;
         }
-        sRailPair66F8* pr = &((sRailPair66F8*)D_0053AB80)[owner];
+        sRailPair66F8* pr = &((sRailPair66F8*)cPS2DeferManager_textureUseTable)[owner];
         int cost = age < pr->a ? sz * pr->b : 0;
         if (cost < best) {
             best = cost;
@@ -10396,7 +10396,7 @@ extern "C" void vramHeap_freeBlock(void* selfp, int idx);
  *
  * Despite the unit, this is part of the GS memory block heap that cTextureMan keeps at +0x1F60 and +0x4350. It slides a
  * window along the address-ordered block list (headed at headsB[17].next): a used block that is locked (flag bit 1) or
- * owned by @p skipA or @p skipB breaks the window. A used block whose owner's entry in the 2000-pair table D_0053AB80
+ * owned by @p skipA or @p skipB breaks the window. A used block whose owner's entry in the 2000-pair table cPS2DeferManager_textureUseTable
  * has a > @p level adds size * b to the window's cost; free blocks cost nothing. The search stops early at cost 0.
  * Every used block in the winning window is then freed with vramHeap_freeBlock (which also merges free neighbours).
  * vramHeap_allocBlock calls it when freeing a single block (vramHeap_evictCheapestBlock) was not enough.
@@ -10406,7 +10406,7 @@ extern "C" void vramHeap_freeBlock(void* selfp, int idx);
  * @param size  the number of bytes the freed run must hold
  * @param skipA  an owner (texture index) whose blocks must be kept
  * @param skipB  a second owner whose blocks must be kept
- * @param level  the threshold compared with each owner's D_0053AB80 a value to decide whether its block costs anything
+ * @param level  the threshold compared with each owner's cPS2DeferManager_textureUseTable a value to decide whether its block costs anything
  */
 // Frees the cheapest run of neighbouring blocks (in address order) that together hold at least 'size' bytes;
 // locked blocks and blocks of the two given owners break a run, owners above 'level' cost size*weight.
@@ -10439,7 +10439,7 @@ extern "C" void vramHeap_evictCheapestRun(sRailNodeMan* self, int size, int skip
                 best = cost;
                 bestIdx = Start;
             }
-            sRailPair* pr = &((sRailPair*)D_0053AB80)[StartPtr->mOwner];
+            sRailPair* pr = &((sRailPair*)cPS2DeferManager_textureUseTable)[StartPtr->mOwner];
             sum -= StartPtr->mBlockSize;
             if ((StartPtr->mBlockAddr & 1) && level < pr->a) {
                 cost -= StartPtr->mBlockSize * pr->b;
@@ -10465,7 +10465,7 @@ extern "C" void vramHeap_evictCheapestRun(sRailNodeMan* self, int size, int skip
                 sum = 0;
                 cost = 0;
             } else {
-                sRailPair* pr = &((sRailPair*)D_0053AB80)[EndPtr->mOwner];
+                sRailPair* pr = &((sRailPair*)cPS2DeferManager_textureUseTable)[EndPtr->mOwner];
                 sum += EndPtr->mBlockSize;
                 if ((EndPtr->mBlockAddr & 1) && level < pr->a) {
                     cost += EndPtr->mBlockSize * pr->b;

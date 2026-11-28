@@ -616,7 +616,7 @@ INCLUDE_ASM("seg/seg_313800_exception", __tf13bad_exception);
 #ifdef SKIP_ASM
 extern int D_0053EA10[];
 extern char D_004998D0[];
-extern int D_004A5BA8[];
+extern int __ti9exception[];
 extern int *__tf9exception_a(void) __asm__("__tf9exception");
 extern void __rtti_si(void *, const char *, const void *);
 int *__tf13bad_exception_a(void) __asm__("__tf13bad_exception");
@@ -625,14 +625,14 @@ int *__tf13bad_exception_a(void) __asm__("__tf13bad_exception");
  *
  * When D_0053EA10 is still zero, builds the base's type_info first (__tf9exception) and then constructs a
  * single-inheritance type_info in D_0053EA10 with __rtti_si, name "13bad_exception" (D_004998D0) and base
- * D_004A5BA8 (exception's).
+ * __ti9exception (exception's).
  *
  * @return the type_info object D_0053EA10
  */
 int *__tf13bad_exception_a(void) {
     if (D_0053EA10[0] == 0) {
         __tf9exception_a();
-        __rtti_si(D_0053EA10, D_004998D0, D_004A5BA8);
+        __rtti_si(D_0053EA10, D_004998D0, __ti9exception);
     }
     return D_0053EA10;
 }
@@ -679,21 +679,21 @@ int *exception_exception(int **excObject) {
 INCLUDE_ASM("seg/seg_313800_exception", __tf9exception);
 #ifdef SKIP_ASM
 extern char D_004998E0[];
-extern int D_004A5BA8[];
+extern int __ti9exception[];
 extern void __rtti_user(void *, const char *);
 int *__tf9exception_a(void) __asm__("__tf9exception");
 /**
  * Returns the type_info object of class exception, building it on first use.
  *
- * When D_004A5BA8 is still zero, constructs a user type_info (no bases) there with __rtti_user and the name
+ * When __ti9exception is still zero, constructs a user type_info (no bases) there with __rtti_user and the name
  * "9exception" (D_004998E0). The bad_exception, bad_cast and bad_typeid type_info functions call it for their base.
  *
- * @return the type_info object D_004A5BA8
+ * @return the type_info object __ti9exception
  */
 int *__tf9exception_a(void) {
-    if (D_004A5BA8[0] == 0)
-        __rtti_user(D_004A5BA8, D_004998E0);
-    return D_004A5BA8;
+    if (__ti9exception[0] == 0)
+        __rtti_user(__ti9exception, D_004998E0);
+    return __ti9exception;
 }
 #endif
 

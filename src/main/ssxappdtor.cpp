@@ -3025,7 +3025,7 @@ int GetHashValue32(char* str);
 extern void* PadCache;
 extern void* cWScriptMan_TheWScriptMan;
 // Pending script pause request; 0xFFFFFFFF = none (the store is lui/ori, so the global is unsigned).
-extern unsigned int D_004A20CC_4B48 __asm__("D_004A20CC");
+extern unsigned int cOVState_MESSAGECENTER_openRequest_4B48 __asm__("cOVState_MESSAGECENTER_openRequest");
 extern int D_004428F8[];
 extern int D_004428FC[];
 extern int D_00442920[];
@@ -3071,7 +3071,7 @@ static inline bool racing_4B48(int s)
 
 static inline bool pending_4B48()
 {
-    return D_004A20CC_4B48 != 0xFFFFFFFF;
+    return cOVState_MESSAGECENTER_openRequest_4B48 != 0xFFFFFFFF;
 }
 
 static inline bool playing_4B48(char* pb)
@@ -3086,7 +3086,7 @@ static inline bool playing_4B48(char* pb)
  * queue is handled: kMissionCmd_MenuStart opens overlay 29 and pushes pause owner 3 (its flags from D_004428FC) with an
  * icon sound; kMissionCmd_MenuFail runs cWScriptMan_doMissionCmd(..., kMissionCmd_Fail, ...) and either opens overlay
  * 0x1E with pause owner 3 (when the UI has no "fail" state) or pops the message. A pending script pause request
- * (D_004A20CC not 0xFFFFFFFF) opens overlay 34 with pause owner 0xC and clears the request. An active MenuSys is
+ * (cOVState_MESSAGECENTER_openRequest not 0xFFFFFFFF) opens overlay 34 with pause owner 0xC and clears the request. An active MenuSys is
  * updated (cMenuSys_input). When cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is
  * running, cOVStateManager_allowPauseMenu opens the pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner
  * (+0x228), audio paused. Otherwise cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update
@@ -3130,7 +3130,7 @@ bool cGame::updateUI()
         cOVStateManager_triggerOverlay(34);
         cPauseState_Stack[++cPauseState_StackIdx] = 0xC;
         cPauseState_Flags = D_00442920[0];
-        D_004A20CC_4B48 = 0xFFFFFFFF;
+        cOVState_MESSAGECENTER_openRequest_4B48 = 0xFFFFFFFF;
         cSSXAudio_StopRiderLoops(cAudioInterface_bxAudio());
         return false;
     }
@@ -3362,7 +3362,7 @@ void cGame::updateVibration()
 INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive__cFEStateProgressive__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the progressive-scan popup state (vtable D_0047CA18) through the UI-state base destructor cUIState__cUIState.
+ * Destroys the progressive-scan popup state (vtable cFEStateProgressive_vtbl) through the UI-state base destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register; unlike the other states here it does not reset its
  * own vtable first.
@@ -3393,7 +3393,7 @@ extern char str_Do_you_want_to_display_the_game_in_Progr[];
  *
  * Adds the "supopup" screen to the UI engine (+0x10) with this state as owner, keeps it at +0x40 and plays its first
  * frame, then sets its "Title" text to "Do you want to display the game in Progr..." (the progressive-scan question).
- * Slot +0x24 (onCreateScreen) of D_0047CA18.
+ * Slot +0x24 (onCreateScreen) of cFEStateProgressive_vtbl.
  */
 extern "C" void cFEStateProgressive_onCreateScreen(cUIState* self)
 {
@@ -3460,7 +3460,7 @@ static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
  * Only widget events of type cUIState::kONNEXT with a message count. A new 0x50-byte UI state (cUIState_cUIState on the
  * UI engine, vtable D_0047DA58) is pushed on the UI state stack (engine + 0x18) with its flag at +0x48 cleared for
  * "yes" (the message hash at +0x38) or set otherwise; "yes" also calls cGraphicsMan_TheGraphicsMan's vtable slot 8 with
- * 1. Slot +0x9C (onWidgetEvent) of D_0047CA18.
+ * 1. Slot +0x9C (onWidgetEvent) of cFEStateProgressive_vtbl.
  *
  * @param msg  the widget event message (ignored when null)
  * @param type  the event type (only cUIState::kONNEXT is handled)
@@ -3489,7 +3489,7 @@ INCLUDE_ASM("main/ssxappdtor", cFEStateProgressive_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the progressive-scan popup's menu query: 257 for cUIMenu::kONNEXT, else 0. Slot +0xA4 (onWidgetMenu) of
- * D_0047CA18.
+ * cFEStateProgressive_vtbl.
  *
  * @param menu  the menu widget (unused)
  * @param event  the menu event
@@ -3716,11 +3716,11 @@ bool cGameLoadStateOutLodge::onGainTransition(int)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer__cGameLoadStateConquer);
 #ifdef SKIP_ASM
-extern void* D_0047C7A8[];
+extern void* cGameLoadStateConquer_vtbl[];
 extern "C" void* cUIState__cUIState(void* self);
 
 /**
- * Destroys the controller-layout loading state: installs its vtable D_0047C7A8 at +0x8 and runs the UI-state base
+ * Destroys the controller-layout loading state: installs its vtable cGameLoadStateConquer_vtbl at +0x8 and runs the UI-state base
  * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
@@ -3729,7 +3729,7 @@ extern "C" void* cUIState__cUIState(void* self);
  */
 extern "C" void* cGameLoadStateConquer__cGameLoadStateConquer(cGameLoadStateConquer* self)
 {
-    VPTR_OF(cListNode, self) = (void**)D_0047C7A8;
+    VPTR_OF(cListNode, self) = (void**)cGameLoadStateConquer_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3768,7 +3768,7 @@ public:
  * Adds the screen to the UI engine (+0x10) with this state as owner, keeps it at +0x40 and plays its first frame. Reads
  * the controller mapping of the BE player interface (cBENewPlayerInterface_getControllerMapping(interface 1, 0)) and
  * makes "CtrlPS2_default" and "default_text" visible for mapping 0, "CtrlPS2_pro" and "pro_text" otherwise (widget
- * virtual slot 9). Slot +0x24 (onCreateScreen) of D_0047C7A8.
+ * virtual slot 9). Slot +0x24 (onCreateScreen) of cGameLoadStateConquer_vtbl.
  */
 extern "C" void cGameLoadStateConquer_onCreateScreen(cUIState* self)
 {
@@ -3806,7 +3806,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the controller-layout loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
- * D_0047C7A8.
+ * cGameLoadStateConquer_vtbl.
  */
 void cGameLoadStateConquer::onWidgetCreate(cUIThing*)
 {
@@ -3825,7 +3825,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the controller-layout loading screen.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C7A8.
+ * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of cGameLoadStateConquer_vtbl.
  *
  * @return 0
  */

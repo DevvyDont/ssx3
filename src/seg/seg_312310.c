@@ -608,9 +608,9 @@ FLO_union_type;
 
 /* IEEE "special" number predicates */
 
-/* nan()'s function-local `static fp_number_type thenan;` is retail's D_0052ADC0 (.bss): declared here at file
+/* nan()'s function-local `static fp_number_type thenan;` is retail's dpbit_thenan (.bss): declared here at file
    scope under that symbol so every reference (here and in the landed dpdiv) names the same object. */
-extern fp_number_type thenan __asm__("D_0052ADC0");
+extern fp_number_type thenan __asm__("dpbit_thenan");
 
 INLINE
 static fp_number_type *
@@ -1220,11 +1220,11 @@ INCLUDE_ASM("seg/seg_312310", dpdiv);
 struct S412280 { unsigned cls; int sign; int exp; int pad; unsigned long frac; long pad2; };
 extern void unp_80(long *, struct S412280 *) __asm__("__unpack_d");
 extern void pk_80(struct S412280 *) __asm__("__pack_d");
-extern struct S412280 D_0052ADC0;
+extern struct S412280 dpbit_thenan;
 /**
  * Divides two doubles in software (fp-bit.c's divide, exported as GOFAST dpdiv).
  *
- * NaN operands come back unchanged; inf / inf and 0 / 0 give the NaN D_0052ADC0, x / inf gives 0 and x / 0
+ * NaN operands come back unchanged; inf / inf and 0 / 0 give the NaN dpbit_thenan, x / inf gives 0 and x / 0
  * gives infinity. The quotient is left in the return register by pack_d (__pack_d) although the C
  * declaration returns void.
  *
@@ -1249,7 +1249,7 @@ void dpdiv(long x, long y) {
         if ((numer.cls ^ 4) == 0 || (numer.cls ^ 2) == 0) {
             result = &numer;
             if (numer.cls == denom.cls)
-                result = &D_0052ADC0;
+                result = &dpbit_thenan;
         } else if ((denom.cls ^ 4) == 0) {
             numer.frac = 0;
             numer.exp = 0;

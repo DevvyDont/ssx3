@@ -2957,12 +2957,12 @@ extern int GetThreadId(void);
 extern void WaitSema(int);
 extern int D_00454CA8;
 extern int D_00454CAC;
-extern int D_00455248;
+extern int __sce_sema_id;
 /**
  * Takes the recursive C heap lock for the calling thread.
  *
  * When the current thread (GetThreadId) already owns it (D_00454CA8) the count D_00454CAC goes up; otherwise it waits
- * on the semaphore D_00455248, records the owner and counts 1.
+ * on the semaphore __sce_sema_id, records the owner and counts 1.
  *
  * @param reent  the reentrancy struct (ignored)
  */
@@ -2971,7 +2971,7 @@ void __malloc_lock(struct _reent *reent) {
     if (D_00454CA8 == id) {
         D_00454CAC++;
     } else {
-        WaitSema(D_00455248);
+        WaitSema(__sce_sema_id);
         D_00454CA8 = id;
         D_00454CAC++;
     }
@@ -2984,19 +2984,19 @@ INCLUDE_ASM("seg/seg_316FB8", __malloc_unlock);
 extern void SignalSema(int);
 extern int D_00454CA8;
 extern int D_00454CAC;
-extern int D_00455248;
+extern int __sce_sema_id;
 /**
  * Releases the recursive C heap lock taken by __malloc_lock.
  *
  * Decrements the count D_00454CAC; when it reaches 0 it clears the owner D_00454CA8 to -1 and signals the semaphore
- * D_00455248.
+ * __sce_sema_id.
  *
  * @param reent  the reentrancy struct (ignored)
  */
 void __malloc_unlock(struct _reent *reent) {
     if (--D_00454CAC == 0) {
         D_00454CA8 = -1;
-        SignalSema(D_00455248);
+        SignalSema(__sce_sema_id);
     }
 }
 #endif
@@ -4276,13 +4276,13 @@ INCLUDE_ASM("seg/seg_316FB8", itoa);
 #ifdef SKIP_ASM
 /* Sony's libc addition itoa (not in newlib 1.9.0): digits from the .data table, then reversed in place by
    strrev (strrev). */
-extern char D_00454CB0[];
+extern char itoa_digits[];
 extern char *strrev(char *s);
 
 /**
  * Writes an int as text in the given base and returns the buffer.
  *
- * Digits come from the table D_00454CB0, low digit first, then a - for a negative value, and strrev reverses the
+ * Digits come from the table itoa_digits, low digit first, then a - for a negative value, and strrev reverses the
  * result.
  *
  * Likely bug: only base 10 negates the value, so a negative value in another base prints its 32-bit two's complement
@@ -4304,7 +4304,7 @@ char *itoa(int value, char *buf, unsigned int base)
         remainingValue = -value;
     i = 0;
     do {
-        buf[i++] = D_00454CB0[remainingValue % base];
+        buf[i++] = itoa_digits[remainingValue % base];
         remainingValue /= base;
     } while (remainingValue != 0);
     if (neg)
@@ -4572,10 +4572,10 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041CA70);
 //100%
 INCLUDE_ASM("seg/seg_316FB8", malloc_extend_top);
 #ifdef SKIP_ASM
-extern unsigned D_00454CE8[];
+extern unsigned __malloc_av_[];
 extern unsigned long D_004550F0;
 extern unsigned long D_004550F8;
-#define bin_at(i) ((mchunkptr)((char *)&D_00454CE8[2 * (i) + 2] - 8))
+#define bin_at(i) ((mchunkptr)((char *)&__malloc_av_[2 * (i) + 2] - 8))
 #define top (bin_at(0)->fd)
 #define last_remainder (bin_at(1))
 #define binblocks (bin_at(0)->size)
@@ -4668,7 +4668,7 @@ void malloc_extend_top_(int ptr, unsigned nb) {
     if (D_00455100 != (char *)-1)
         sbrk_size = (sbrk_size + (pagesz - 1)) & ~(pagesz - 1);
     brk = _sbrk_r_sbrk(ptr, sbrk_size);
-    if (brk == (char *)-1 || (brk < old_end && old_top != (mchunkptr)D_00454CE8))
+    if (brk == (char *)-1 || (brk < old_end && old_top != (mchunkptr)__malloc_av_))
         return;
     D_00455118 += sbrk_size;
     if (brk == old_end) {
@@ -4693,7 +4693,7 @@ void malloc_extend_top_(int ptr, unsigned nb) {
         top = (mchunkptr)brk;
         top_size = new_brk - brk + correction;
         set_head(top, top_size | 1);
-        if (old_top != (mchunkptr)D_00454CE8) {
+        if (old_top != (mchunkptr)__malloc_av_) {
             if (old_top_size < 16) {
                 set_head(top, 1);
                 return;
@@ -4726,7 +4726,7 @@ INCLUDE_ASM("seg/seg_316FB8", _malloc_r);
  * VERSION 2.6.4  Thu Nov 28 07:54:55 1996  Doug Lea  (dl at gee)
  *
  * Configuration as the retail code shows: MALLOC_ALIGNMENT 16, SIZE_T_SMALLER_THAN_LONG (EE long is 64-bit),
- * no HAVE_MMAP. av_ (__malloc_av_) is D_00454CE8, one 0x408-byte object (config/symbol_addrs.txt).
+ * no HAVE_MMAP. av_ (__malloc_av_) is __malloc_av_, one 0x408-byte object (config/symbol_addrs.txt).
  */
 #define SIZE_SZ_0041DBF8                (sizeof(unsigned int))
 #define MALLOC_ALIGNMENT_0041DBF8       16
@@ -4746,7 +4746,7 @@ INCLUDE_ASM("seg/seg_316FB8", _malloc_r);
 #define chunksize_0041DBF8(p)          ((p)->size & ~(SIZE_BITS_0041DBF8))
 #define set_head_0041DBF8(p, s)        ((p)->size = (s))
 #define set_foot_0041DBF8(p, s)   (((mchunkptr)((char*)(p) + (s)))->prev_size = (s))
-#define av__0041DBF8 D_00454CE8
+#define av__0041DBF8 __malloc_av_
 #define bin_at_0041DBF8(i)      ((mbinptr)((char*)&(av__0041DBF8[2*(i) + 2]) - 2*SIZE_SZ_0041DBF8))
 #define next_bin_0041DBF8(b)    ((mbinptr)((char*)(b) + 2 * sizeof(mbinptr)))
 #define prev_bin_0041DBF8(b)    ((mbinptr)((char*)(b) - 2 * sizeof(mbinptr)))
@@ -4824,7 +4824,7 @@ extern void g41DBF8_extend_top(struct _reent *, unsigned int) __asm__("malloc_ex
  * Doug Lea's allocator 2.6.4 as built into newlib: pads the request to a 16-byte-aligned chunk size, tries the exact
  * small bin, the last remainder, then the bin blocks (best fit, splitting and relinking remainders through frontlink),
  * and finally the top chunk, growing it with malloc_extend_top. Requests whose padding overflows set errno 12. Bins start
- * at D_00454CE8.
+ * at __malloc_av_.
  *
  * @param reent_ptr  the reentrancy struct
  * @param bytes      bytes wanted
@@ -7086,11 +7086,11 @@ extern struct Bigint *_multadd(struct _reent *, struct Bigint *, int, int);
 extern struct Bigint *_multiply(struct _reent *, struct Bigint *, struct Bigint *);
 extern struct _Bigint *_i2b(struct _reent *, int);
 extern void _Bfree(struct _reent *, struct _Bigint *);
-extern int D_0049A8E8[];
+extern int pow5mult_p05[];
 /**
  * Multiplies a Bigint by 5^k and returns the result.
  *
- * k mod 4 is applied with _multadd and the table D_0049A8E8 (5, 25, 125). The rest uses the powers 5^4, 5^8,
+ * k mod 4 is applied with _multadd and the table pow5mult_p05 (5, 25, 125). The rest uses the powers 5^4, 5^8,
  * 5^16... cached as a linked list in the reentrancy struct (+0x48, created with _i2b(625) and extended by
  * squaring with _multiply); each partial product frees the previous one with _Bfree.
  *
@@ -7103,7 +7103,7 @@ struct Bigint *_pow5mult(struct _reent *ptr, struct Bigint *number, int k) {
     struct Bigint *product, *fivePower, *nextFivePower;
     int i;
     if ((i = k & 3))
-        number = _multadd(ptr, number, D_0049A8E8[i - 1], 0);
+        number = _multadd(ptr, number, pow5mult_p05[i - 1], 0);
     if (!(k >>= 2))
         return number;
     if (!(fivePower = (struct Bigint *)ptr->_p5s)) {

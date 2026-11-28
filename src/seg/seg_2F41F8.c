@@ -7,7 +7,7 @@ INCLUDE_ASM("seg/seg_2F41F8", LobbyMd5_final);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char *D_004A4B98;
+extern char *LobbyMd5_hexDigits;
 extern void f2220(void *) __asm__("LobbyMd5_transform");
 typedef struct { unsigned count; unsigned st[4]; unsigned char buf[64]; } sMd5;
 /**
@@ -16,7 +16,7 @@ typedef struct { unsigned count; unsigned st[4]; unsigned char buf[64]; } sMd5;
  * Pads the buffered block with 0x80 and zeros up to byte 56 (hashing a full block with LobbyMd5_transform on the way),
  * stores the message length in bits (byte count << 3) little-endian in bytes 56..63 and hashes the last block. Then
  * walks the 16 digest bytes of the state words: @p n == 16 writes them raw; @p n > 32 writes two hex digits each
- * (digits from D_004A4B98) and a NUL. Likely bug: for any other positive @p n the zero-fill loop never decrements
+ * (digits from LobbyMd5_hexDigits) and a NUL. Likely bug: for any other positive @p n the zero-fill loop never decrements
  * @p n, so it writes zeros forever.
  *
  * @param ctx  the MD5 context
@@ -52,9 +52,9 @@ void LobbyMd5_final(sMd5 *ctx, unsigned char *out, int n) {
             *out = w;
             out++;
         } else if (n > 32) {
-            *out = D_004A4B98[(w >> 4) & 0xF];
+            *out = LobbyMd5_hexDigits[(w >> 4) & 0xF];
             out++;
-            *out = D_004A4B98[w & 0xF];
+            *out = LobbyMd5_hexDigits[w & 0xF];
             out++;
         }
         w >>= 8;
@@ -71,8 +71,8 @@ void LobbyMd5_final(sMd5 *ctx, unsigned char *out, int n) {
 #endif
 
 /* The state of the CRC-mixed byte-permutation stream cipher (LobbyCrypt_setKey keys it, LobbyCrypt_apply runs it): [U] both
-   read the permutation at +0x0, the index byte at +0x100 and the CRC word at +0x104; [R] the shared state D_0051EEF8
-   is 0x108 bytes (D_0051F000 follows it). */
+   read the permutation at +0x0, the index byte at +0x100 and the CRC word at +0x104; [R] the shared state LobbyCrypt_sharedState
+   is 0x108 bytes (DirtyNet_lookupDoneService follows it). */
 struct sCipherState {
     unsigned char perm[256];            /* 0x000: byte permutation */
     unsigned char index;                /* 0x100: keystream position */
@@ -84,9 +84,9 @@ INCLUDE_ASM("seg/seg_2F41F8", LobbyCrypt_setKey);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* Globals used by several functions. */
-extern unsigned D_00496C08[];
+extern unsigned LobbyCrypt_crcTable[];
 
-extern struct sCipherState D_0051EEF8;
+extern struct sCipherState LobbyCrypt_sharedState;
 
 extern int D_004A4B9C;
 extern unsigned char str_hello_world[];
@@ -94,10 +94,10 @@ extern unsigned char str_hello_world[];
  * Keys a CRC-mixed byte-permutation stream cipher state (0x108 bytes: 256-byte permutation, index byte at +0x100, CRC
  * word at +0x104).
  *
- * On first use it also keys the shared state D_0051EEF8 with "hello world", 10 rounds. A non-negative @p rounds resets
+ * On first use it also keys the shared state LobbyCrypt_sharedState with "hello world", 10 rounds. A non-negative @p rounds resets
  * the state to the identity permutation with index and CRC 0; a negative one keeps the current state and uses -@p
  * rounds. Then, for rounds * 256 steps, it mixes the next key byte and the current permutation byte into a CRC-32
- * (table D_00496C08) and swaps the current slot with the slot the CRC's low byte names. A negative @p klen means
+ * (table LobbyCrypt_crcTable) and swaps the current slot with the slot the CRC's low byte names. A negative @p klen means
  * @p key is NUL-terminated; an empty key leaves the permutation as it is.
  *
  * @param cipherState  the cipher state
@@ -112,7 +112,7 @@ void LobbyCrypt_setKey(struct sCipherState *cipherState, unsigned char *key, int
 
     if (D_004A4B9C == 0) {
         D_004A4B9C = 1;
-        LobbyCrypt_setKey(&D_0051EEF8, str_hello_world, -1, 10);
+        LobbyCrypt_setKey(&LobbyCrypt_sharedState, str_hello_world, -1, 10);
     }
     i = 0xFF;
     if (rounds < 0) {
@@ -140,8 +140,8 @@ void LobbyCrypt_setKey(struct sCipherState *cipherState, unsigned char *key, int
                 permSlot = &cipherState->perm[i & 0xFF];
                 swapByte = *permSlot;
                 i++;
-                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ key[keyIndex]];
-                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ swapByte];
+                crc = (crc >> 8) ^ LobbyCrypt_crcTable[(crc & 0xFF) ^ key[keyIndex]];
+                crc = (crc >> 8) ^ LobbyCrypt_crcTable[(crc & 0xFF) ^ swapByte];
                 swapSlot = &cipherState->perm[crc & 0xFF];
                 *permSlot = *swapSlot;
                 *swapSlot = swapByte;
@@ -156,13 +156,13 @@ INCLUDE_ASM("seg/seg_2F41F8", LobbyCrypt_apply);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* Globals used by several functions. */
-extern unsigned D_00496C08[];
+extern unsigned LobbyCrypt_crcTable[];
 
 /**
  * XORs @p n bytes of a buffer with the keystream of the cipher state keyed by LobbyCrypt_setKey.
  *
  * Per byte: advances the index (+0x100), folds the permutation byte there into the CRC word (+0x104) with the CRC-32
- * table D_00496C08, swaps the permutation bytes at the index and at the CRC's low byte, and XORs the buffer byte with
+ * table LobbyCrypt_crcTable, swaps the permutation bytes at the index and at the CRC's low byte, and XORs the buffer byte with
  * the permutation byte at the difference of the two swapped values. Saves the index and CRC back.
  *
  * @param cipherState  the cipher state
@@ -174,7 +174,7 @@ void LobbyCrypt_apply(struct sCipherState *cipherState, unsigned char *buf, int 
     unsigned j = cipherState->crc;
     for (; n > 0; n--) {
         unsigned char valueAtIndex, valueAtCrc;
-        j = (j >> 8) ^ D_00496C08[(j & 0xFF) ^ cipherState->perm[i++]];
+        j = (j >> 8) ^ LobbyCrypt_crcTable[(j & 0xFF) ^ cipherState->perm[i++]];
         valueAtIndex = cipherState->perm[i];
         valueAtCrc = cipherState->perm[j & 0xFF];
         cipherState->perm[i] = valueAtCrc;
@@ -191,7 +191,7 @@ INCLUDE_ASM("seg/seg_2F41F8", LobbyCrypt_encodeText);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern struct sCipherState D_0051EEF8;
+extern struct sCipherState LobbyCrypt_sharedState;
 
 extern void f33B0w(struct sCipherState *, unsigned char *, int, int) __asm__("LobbyCrypt_setKey");
 extern void f3530w(struct sCipherState *, unsigned char *, int) __asm__("LobbyCrypt_apply");
@@ -200,7 +200,7 @@ extern unsigned char str_ru_paranoid[];
  * Encrypts a text into a fixed-length printable string (the inverse of LobbyCrypt_decodeText).
  *
  * Keys a local cipher state with the key (LobbyCrypt_setKey), and also stirs the key and "ru paranoid?" into the shared
- * state D_0051EEF8. Writes @p n - 1 characters and a NUL: each input character (anything outside 0x20..0x7E becomes
+ * state LobbyCrypt_sharedState. Writes @p n - 1 characters and a NUL: each input character (anything outside 0x20..0x7E becomes
  * 0x7F, which also marks the end of the input) is shifted by a keystream byte mod 96 into the range 0x20..0x7F; after
  * the input's NUL the rest is random padding drawn from the shared state, so the output length does not reveal the
  * text's. LobbyApi_sendCommand uses it to send the PASS field as "~" + this encoding under the 16-byte session key.
@@ -219,11 +219,11 @@ int LobbyCrypt_encodeText(char *out, int n, unsigned char *in, unsigned char *ci
     unsigned char k;
     k = 0;
     f33B0w(&ctx, cipherKey, cipherKeyLen, cipherRounds);
-    f33B0w(&D_0051EEF8, cipherKey, cipherKeyLen, -cipherRounds);
-    f33B0w(&D_0051EEF8, str_ru_paranoid, -1, -1);
+    f33B0w(&LobbyCrypt_sharedState, cipherKey, cipherKeyLen, -cipherRounds);
+    f33B0w(&LobbyCrypt_sharedState, str_ru_paranoid, -1, -1);
     for (; n > 1; n--) {
         if (in == 0) {
-            f3530w(&D_0051EEF8, &ch, 1);
+            f3530w(&LobbyCrypt_sharedState, &ch, 1);
             ch = (ch & 0x3F) + 0x20;
         } else {
             ch = *in;
@@ -293,7 +293,7 @@ INCLUDE_ASM("seg/seg_2F41F8", _SocketLookupDone);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0051F000[];
+extern char DirtyNet_lookupDoneService[];
 extern int NetLib_resolveService(char *, int, int);
 extern int f4C68g(char *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
 /**
@@ -306,11 +306,11 @@ extern int f4C68g(char *, int, int, int, int, int, int, int, int, int *) __asm__
  */
 int _SocketLookupDone(int *self) {
     int id = self[88 / 4];
-    NetLib_resolveService(D_0051F000, 'name', 'done');
-    f4C68g(D_0051F000, 1, id, 0, 0, 0, 0, 0, 1, self);
+    NetLib_resolveService(DirtyNet_lookupDoneService, 'name', 'done');
+    f4C68g(DirtyNet_lookupDoneService, 1, id, 0, 0, 0, 0, 0, 1, self);
     if (self[0] > 0) {
-        NetLib_resolveService(D_0051F000, 'name', 'addr');
-        f4C68g(D_0051F000, 1, id, 0, 0, 0, 0, 0, 1, self + 1);
+        NetLib_resolveService(DirtyNet_lookupDoneService, 'name', 'addr');
+        f4C68g(DirtyNet_lookupDoneService, 1, id, 0, 0, 0, 0, 0, 1, self + 1);
     }
     return self[0];
 }
@@ -320,7 +320,7 @@ int _SocketLookupDone(int *self) {
 INCLUDE_ASM("seg/seg_2F41F8", _SocketLookupFree);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0051F010[];
+extern char DirtyNet_lookupFreeService[];
 extern int NetLib_resolveService(char *, int, int);
 extern void RpcFree(void *);
 /**
@@ -330,8 +330,8 @@ extern void RpcFree(void *);
  */
 void _SocketLookupFree(int *self) {
     int lookupId = self[88 / 4];
-    NetLib_resolveService(D_0051F010, 'name', 'free');
-    NetLib_callService(D_0051F010, 1, lookupId, 0, 0, 0, 0, 0, 0, 0);
+    NetLib_resolveService(DirtyNet_lookupFreeService, 'name', 'free');
+    NetLib_callService(DirtyNet_lookupFreeService, 1, lookupId, 0, 0, 0, 0, 0, 0, 0);
     RpcFree(self);
 }
 #endif
@@ -341,7 +341,7 @@ INCLUDE_ASM("seg/seg_2F41F8", DirtyNet_startHostLookup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_0051F020[];
+extern char DirtyNet_lookupService[];
 extern void *RpcAlloc(int);
 extern void f6210k(int *, int, int) __asm__("memset");
 extern int NetLib_resolveService(char *, int, int);
@@ -369,9 +369,9 @@ int *f39C8impl(int hostName, int timeout) {
         word = (int)_SocketLookupDone;
         lookup[3] = (int)_SocketLookupFree;
         lookup[2] = word;
-        NetLib_resolveService(D_0051F020, 'name', 'look');
+        NetLib_resolveService(DirtyNet_lookupService, 'name', 'look');
         word = 1;
-        f4C68k(D_0051F020, word, 0, timeout, hostName, -word, 0, 0, word, lookup + 88 / 4);
+        f4C68k(DirtyNet_lookupService, word, 0, timeout, hostName, -word, 0, 0, word, lookup + 88 / 4);
     }
     return lookup;
 }
@@ -427,9 +427,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnStartup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BA0;
+extern int NetConn_startedFlag;
 
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetLib_isQueueStarted(void);
 extern void f5000(int) __asm__("NetLib_startQueue");
@@ -439,9 +439,9 @@ extern int f4C68e(char *, int, int, int, int, int, int, int, int, int *) __asm__
 /**
  * Starts the IOP network module ('netw'/'crea') once.
  *
- * Returns -1 when it is already open (D_004A4BA0). If the IOP request queue is not running (NetLib_isQueueStarted) it starts it
+ * Returns -1 when it is already open (NetConn_startedFlag). If the IOP request queue is not running (NetLib_isQueueStarted) it starts it
  * (NetLib_startQueue) and fetches the IOP's service directory (NetLib_fetchServiceDirectory). Then sends 'netw'/'crea' with the parameter
- * text and the argument '1731', waits for the module handle into D_004A4BA4 and sets D_004A4BA0. The cCommSystem
+ * text and the argument '1731', waits for the module handle into NetConn_moduleId and sets NetConn_startedFlag. The cCommSystem
  * constructor calls it with "www.ea.com".
  *
  * @param startupParams  startup parameter text
@@ -449,14 +449,14 @@ extern int f4C68e(char *, int, int, int, int, int, int, int, int, int *) __asm__
  */
 int NetConnStartup(int startupParams) {
     char buf[16];
-    if (D_004A4BA0 != 0) return -1;
+    if (NetConn_startedFlag != 0) return -1;
     if (NetLib_isQueueStarted() <= 0) {
         f5000(0);
         NetLib_fetchServiceDirectory();
     }
     NetLib_resolveService(buf, 'netw', 'crea');
-    f4C68e(buf, 1, 0, '1731', startupParams, -1, 0, 0, 1, &D_004A4BA4);
-    D_004A4BA0 = 1;
+    f4C68e(buf, 1, 0, '1731', startupParams, -1, 0, 0, 1, &NetConn_moduleId);
+    NetConn_startedFlag = 1;
     return 0;
 }
 #endif
@@ -466,7 +466,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetLib_resolveService(char *, int, int);
 extern int func_003F4C68b(char *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
@@ -484,7 +484,7 @@ int NetConnQuery(int self, int configList, int maxConfigs) {
     char buf[16];
     int out;
     NetLib_resolveService(buf, 'netw', 'list');
-    func_003F4C68b(buf, 5, D_004A4BA4, 0, self, -1, configList, maxConfigs << 8, 1, &out);
+    func_003F4C68b(buf, 5, NetConn_moduleId, 0, self, -1, configList, maxConfigs << 8, 1, &out);
     return out;
 }
 #endif
@@ -495,7 +495,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnConnect);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // FAKEMATCH: `if (a > 0)` around an identical copy of the body: the target has no compare; jump2 merges the arms and the leftover block boundary holds sched2 back; straight-line form 78.57%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetLib_resolveService(char *, int, int);
 extern int f4C68s(char *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
@@ -517,11 +517,11 @@ int NetConnConnect(int configName) {
     int out;
     if (configName > 0) {
         NetLib_resolveService(buf, 'netw', 'star');
-        f4C68s(buf, 1, D_004A4BA4, 0, configName, -1, 0, 0, 1, &out);
+        f4C68s(buf, 1, NetConn_moduleId, 0, configName, -1, 0, 0, 1, &out);
         return out;
     }
     NetLib_resolveService(buf, 'netw', 'star');
-    f4C68s(buf, 1, D_004A4BA4, 0, configName, -1, 0, 0, 1, &out);
+    f4C68s(buf, 1, NetConn_moduleId, 0, configName, -1, 0, 0, 1, &out);
     return out;
 }
 #endif
@@ -531,16 +531,16 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BA0;
+extern int NetConn_startedFlag;
 
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetLib_resolveService(char *, int, int);
 extern int f4C68m(char *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
 /**
  * Answers a network-status query by its four-character selector.
  *
- * 'open' returns the started flag D_004A4BA0 without asking the IOP. The others send 'netw'/'stat' with a selector and
+ * 'open' returns the started flag NetConn_startedFlag without asking the IOP. The others send 'netw'/'stat' with a selector and
  * wait for the answer: 'onln' is whether 'host' is nonzero; 'conn' (flags 5, with @p statusBuf / @p statusBufSize as a reply buffer)
  * returns the connection state; 'host' and 'addr' return those words; 'macx' copies the MAC address into @p statusBuf and
  * returns 0; 'type' returns the interface type word and 'bbnd' its bit 2 (broadband). Any other selector returns -1.
@@ -555,36 +555,36 @@ int NetConnStatus(int tag, int statusBuf, int statusBufSize) {
     int statusReply;
     int addrReply;
     if (tag == 'open') {
-        return D_004A4BA0;
+        return NetConn_startedFlag;
     }
     if (tag == 'onln') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &statusReply);
+        f4C68m(buf, 1, NetConn_moduleId, 'host', 0, 0, 0, 0, 1, &statusReply);
         return statusReply != 0;
     }
     if (tag == 'conn') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        f4C68m(buf, 5, D_004A4BA4, 'conn', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
+        f4C68m(buf, 5, NetConn_moduleId, 'conn', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
         return statusReply;
     }
     if (tag == 'host') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &addrReply);
+        f4C68m(buf, 1, NetConn_moduleId, 'host', 0, 0, 0, 0, 1, &addrReply);
         return addrReply;
     }
     if (tag == 'addr') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'addr', 0, 0, 0, 0, 1, &addrReply);
+        f4C68m(buf, 1, NetConn_moduleId, 'addr', 0, 0, 0, 0, 1, &addrReply);
         return addrReply;
     }
     if (tag == 'macx') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        NetLib_callService(buf, 5, D_004A4BA4, 'macx', 0, 0, statusBuf, statusBufSize, 1, 0);
+        NetLib_callService(buf, 5, NetConn_moduleId, 'macx', 0, 0, statusBuf, statusBufSize, 1, 0);
         return 0;
     }
     if (tag == 'bbnd' || tag == 'type') {
         NetLib_resolveService(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'type', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
+        f4C68m(buf, 1, NetConn_moduleId, 'type', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
         if (tag == 'bbnd') {
             statusReply = (statusReply >> 2) & 1;
         }
@@ -599,37 +599,37 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnMAC);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004512E8[];
+extern char NetConn_macText[];
 extern const char str_0123456789abcdefUSBD_IRX[];
 extern void f3CC0(int, unsigned char *, int) __asm__("NetConnStatus");
 /**
  * Returns the console's MAC address as text: "$" followed by twelve lower-case hex digits.
  *
- * Built once into the static buffer D_004512E8 from NetConnStatus('macx'); later calls return the cached text. LobbyMan
+ * Built once into the static buffer NetConn_macText from NetConnStatus('macx'); later calls return the cached text. LobbyMan
  * sends it as the MID tag and cCommSystem copies it.
  *
  * @return the static MAC text
  */
 char *NetConnMAC(void) {
     unsigned char macBytes[16];
-    if (D_004512E8[0] == 0) {
+    if (NetConn_macText[0] == 0) {
         f3CC0('macx', macBytes, 0x10);
-        D_004512E8[1] = str_0123456789abcdefUSBD_IRX[macBytes[0] >> 4];
-        D_004512E8[2] = str_0123456789abcdefUSBD_IRX[macBytes[0] & 0xF];
-        D_004512E8[3] = str_0123456789abcdefUSBD_IRX[macBytes[1] >> 4];
-        D_004512E8[4] = str_0123456789abcdefUSBD_IRX[macBytes[1] & 0xF];
-        D_004512E8[5] = str_0123456789abcdefUSBD_IRX[macBytes[2] >> 4];
-        D_004512E8[6] = str_0123456789abcdefUSBD_IRX[macBytes[2] & 0xF];
-        D_004512E8[7] = str_0123456789abcdefUSBD_IRX[macBytes[3] >> 4];
-        D_004512E8[8] = str_0123456789abcdefUSBD_IRX[macBytes[3] & 0xF];
-        D_004512E8[9] = str_0123456789abcdefUSBD_IRX[macBytes[4] >> 4];
-        D_004512E8[10] = str_0123456789abcdefUSBD_IRX[macBytes[4] & 0xF];
-        D_004512E8[11] = str_0123456789abcdefUSBD_IRX[macBytes[5] >> 4];
-        D_004512E8[12] = str_0123456789abcdefUSBD_IRX[macBytes[5] & 0xF];
-        D_004512E8[0] = '$';
-        D_004512E8[13] = 0;
+        NetConn_macText[1] = str_0123456789abcdefUSBD_IRX[macBytes[0] >> 4];
+        NetConn_macText[2] = str_0123456789abcdefUSBD_IRX[macBytes[0] & 0xF];
+        NetConn_macText[3] = str_0123456789abcdefUSBD_IRX[macBytes[1] >> 4];
+        NetConn_macText[4] = str_0123456789abcdefUSBD_IRX[macBytes[1] & 0xF];
+        NetConn_macText[5] = str_0123456789abcdefUSBD_IRX[macBytes[2] >> 4];
+        NetConn_macText[6] = str_0123456789abcdefUSBD_IRX[macBytes[2] & 0xF];
+        NetConn_macText[7] = str_0123456789abcdefUSBD_IRX[macBytes[3] >> 4];
+        NetConn_macText[8] = str_0123456789abcdefUSBD_IRX[macBytes[3] & 0xF];
+        NetConn_macText[9] = str_0123456789abcdefUSBD_IRX[macBytes[4] >> 4];
+        NetConn_macText[10] = str_0123456789abcdefUSBD_IRX[macBytes[4] & 0xF];
+        NetConn_macText[11] = str_0123456789abcdefUSBD_IRX[macBytes[5] >> 4];
+        NetConn_macText[12] = str_0123456789abcdefUSBD_IRX[macBytes[5] & 0xF];
+        NetConn_macText[0] = '$';
+        NetConn_macText[13] = 0;
     }
-    return D_004512E8;
+    return NetConn_macText;
 }
 #endif
 
@@ -637,7 +637,7 @@ char *NetConnMAC(void) {
 INCLUDE_ASM("seg/seg_2F41F8", NetConnDisconnect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetLib_resolveService(char *, int, int);
 extern int NetLib_callService(char *, int, int, int, int, int, int, int, int, int);
@@ -651,7 +651,7 @@ extern int NetLib_callService(char *, int, int, int, int, int, int, int, int, in
 int NetConnDisconnect(void) {
     char buf[16];
     NetLib_resolveService(buf, 'netw', 'shut');
-    NetLib_callService(buf, 1, D_004A4BA4, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_callService(buf, 1, NetConn_moduleId, 0, 0, 0, 0, 0, 1, 0);
     return 0;
 }
 #endif
@@ -660,16 +660,16 @@ int NetConnDisconnect(void) {
 INCLUDE_ASM("seg/seg_2F41F8", NetConnShutdown);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BA0;
+extern int NetConn_startedFlag;
 
-extern int D_004A4BA4;
+extern int NetConn_moduleId;
 
 extern int NetConnDisconnect(void);
 extern int NetLib_resolveService(char *, int, int);
 extern int NetLib_callService(char *, int, int, int, int, int, int, int, int, int);
 /**
  * Shuts the IOP network module down: disconnects (NetConnDisconnect), sends 'netw'/'dest' and clears the started flag
- * D_004A4BA0.
+ * NetConn_startedFlag.
  *
  * Nothing in retail calls it.
  *
@@ -677,11 +677,11 @@ extern int NetLib_callService(char *, int, int, int, int, int, int, int, int, in
  */
 int NetConnShutdown(void) {
     char buf[16];
-    if (D_004A4BA0 == 0) return -1;
+    if (NetConn_startedFlag == 0) return -1;
     NetConnDisconnect();
     NetLib_resolveService(buf, 'netw', 'dest');
-    NetLib_callService(buf, 1, D_004A4BA4, 0, 0, 0, 0, 0, 1, 0);
-    D_004A4BA0 = 0;
+    NetLib_callService(buf, 1, NetConn_moduleId, 0, 0, 0, 0, 0, 1, 0);
+    NetConn_startedFlag = 0;
     return 0;
 }
 #endif
@@ -792,7 +792,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnIdle);
 /* _NETidle: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 extern struct sTick _NETidle[16];
 
-extern int D_004A4BA0;
+extern int NetConn_startedFlag;
 
 extern int NetTick(void);
 
@@ -801,7 +801,7 @@ extern int NetLib_completeReplies(void);
 /**
  * Runs DirtySock's idle processing, at most every 5 ticks while the network connection is up.
  *
- * When D_004A4BA0 is set it returns early until NetTick (the tick) reaches _NetConn_uNextIdleTick and then sets that to tick
+ * When NetConn_startedFlag is set it returns early until NetTick (the tick) reaches _NetConn_uNextIdleTick and then sets that to tick
  * + 5. Then NetLib_completeReplies runs and each of the 16 idle callbacks in _NETidle with a function is called with its
  * argument and the current tick. On Tour checks NetConnStatus('open') instead of the flag and runs the callbacks in
  * NetConnIdleProcs.
@@ -809,7 +809,7 @@ extern int NetLib_completeReplies(void);
 void NetConnIdle(void) {
     int i;
     struct sTick *idleProc;
-    if (D_004A4BA0 != 0) {
+    if (NetConn_startedFlag != 0) {
         if (NetTick() < _NetConn_uNextIdleTick) return;
         _NetConn_uNextIdleTick = NetTick() + 5;
     }
@@ -880,7 +880,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetPrintfCode);
 int NetPrintfCode(int format, ...) { return 1; }
 #endif
 
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
 struct sSifReq {                        /* one request record (0x20 bytes, DMAed to the IOP); names ours,
         [U] NetLib_queueRequest
@@ -967,7 +967,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_onCountInterrupt);
 /**
  * Interrupt handler that extends the COP0 Count register into the IOP queue's 64-bit cycle total.
  *
- * Installed by NetLib_startQueue for interrupt cause 2 with the queue D_0051F0C0 as its argument: adds the Count cycles
+ * Installed by NetLib_startQueue for interrupt cause 2 with the queue NetLib_queue as its argument: adds the Count cycles
  * since the last update (+0x4DF8) to the total (+0x4E00), stores the new Count, then syncs and re-enables interrupts.
  * NetTick turns the total into milliseconds.
  *
@@ -1014,7 +1014,7 @@ void NetLib_onPollAlarm(int a, int b, struct sSifQueue *s);
  *
  * @param alarmId  id of the alarm that fired
  * @param alarmTime  alarm time (unused)
- * @param queue  the queue (D_0051F0C0)
+ * @param queue  the queue (NetLib_queue)
  */
 void NetLib_onPollAlarm(int alarmId, int alarmTime, struct sSifQueue *queue) {
     if (alarmId == queue->sendAlarmId) queue->sendAlarmId = -1;
@@ -1033,17 +1033,17 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_queueThread);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int NetLib_completeReplies(void);
 extern int SleepThread(void);
-extern volatile int D_004A5B04;
+extern volatile int NetLib_queueSleepingFlag;
 /**
  * Entry point of the IOP queue thread (created by NetLib_startQueue): forever processes arrived replies (NetLib_completeReplies) and
- * sleeps, with D_004A5B04 set while it sleeps.
+ * sleeps, with NetLib_queueSleepingFlag set while it sleeps.
  */
 void NetLib_queueThread(void) {
     while (1) {
         NetLib_completeReplies();
-        D_004A5B04 = 1;
+        NetLib_queueSleepingFlag = 1;
         SleepThread();
-        D_004A5B04 = 0;
+        NetLib_queueSleepingFlag = 0;
     }
 }
 #endif
@@ -1051,8 +1051,8 @@ void NetLib_queueThread(void) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", NetLib_queueRequest);
 #ifdef SKIP_ASM
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). */
-extern struct sSifQueue D_0051F0C0;
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). */
+extern struct sSifQueue NetLib_queue;
 
 /* One piece of a gathered SIF payload (flag 2 of NetLib_queueRequest): a list of these ends with a 0 length. */
 struct sSifSeg { int len; void *ptr; };
@@ -1104,7 +1104,7 @@ static __inline__ void f4528_wb(int a, int n) { SyncDCache(a, a + n); }
  */
 int NetLib_queueRequest(struct sSifEnt *cl, int flags, int fno, int callArg, char *data, int size, int dst, int dstsize,
                   SifDoneFn fn, int *out) {
-    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifQueue *queue = &NetLib_queue;
     sceSifDmaData dma[2];
     struct sSifSeg *seg;
     int i;
@@ -1215,9 +1215,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_completeReplies);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #define SYNC_2F41() __asm__ volatile("sync")
 
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
 extern volatile int D_004A5B00;
 extern int WaitSema(int);
@@ -1235,7 +1235,7 @@ extern int WakeupThread(int);
  * @return the number of requests completed
  */
 int NetLib_completeReplies(void) {
-    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifQueue *queue = &NetLib_queue;
     int n = 0;
     while (queue->tail != queue->head && queue->b[queue->tail].key == queue->a[queue->tail].key) {
         int th, key, reqFlags, replyWord10, replyResult, len, replyWord8, pC;
@@ -1316,9 +1316,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_resolveService);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
 int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("NetLib_resolveService");
 /**
@@ -1326,7 +1326,7 @@ int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("NetLib_resolveService"
  *
  * When the handle already holds the same tags and its cached index still names a directory entry (index < 129) with the
  * same id and module tag, returns 0. Otherwise stores the tags and searches the service directory (+0x4D88 .. +0x4D8C
- * of D_0051F0C0, fetched by NetLib_fetchServiceDirectory) for the pair: found, it copies the entry's index and IOP id and returns 1;
+ * of NetLib_queue, fetched by NetLib_fetchServiceDirectory) for the pair: found, it copies the entry's index and IOP id and returns 1;
  * not found, it clears both and returns -1.
  *
  * @param handle  the handle: index, module tag, function tag, IOP id
@@ -1335,7 +1335,7 @@ int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("NetLib_resolveService"
  * @return 0 cached, 1 found, -1 unknown service
  */
 int f4C98impl(struct sSifEnt *handle, int moduleTag, int funcTag) {
-    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifQueue *queue = &NetLib_queue;
     struct sSifEnt *dirEntry;
     if (moduleTag == handle->moduleTag && funcTag == handle->funcTag) {
         int i = handle->idx;
@@ -1366,9 +1366,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_fetchServiceDirectory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
 extern int func_003F4C68d(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
 extern int NetLib_completeReplies(void);
@@ -1376,7 +1376,7 @@ extern int NetLib_completeReplies(void);
  * Fetches the IOP's service directory into the queue and waits until every queued request has completed.
  *
  * Sends a blocking request to the fixed directory service (a handle whose IOP id is 1) with the directory area of
- * D_0051F0C0 (+0x4D88 .. +0x4D8C, 0x800 bytes) as the reply buffer, then pumps replies (NetLib_completeReplies) until the ring
+ * NetLib_queue (+0x4D88 .. +0x4D8C, 0x800 bytes) as the reply buffer, then pumps replies (NetLib_completeReplies) until the ring
  * is empty. NetLib_resolveService searches that directory. Called by NetConnStartup right after starting the queue.
  *
  * @return 0
@@ -1384,8 +1384,8 @@ extern int NetLib_completeReplies(void);
 int NetLib_fetchServiceDirectory(void) {
     int dirHandle[4];
     dirHandle[3] = 1;
-    func_003F4C68d(dirHandle, 1, 0, 0, 0, 0, (int)D_0051F0C0.beg, (char *)D_0051F0C0.end - (char *)D_0051F0C0.beg, 1, 0);
-    while (D_0051F0C0.head != D_0051F0C0.tail) NetLib_completeReplies();
+    func_003F4C68d(dirHandle, 1, 0, 0, 0, 0, (int)NetLib_queue.beg, (char *)NetLib_queue.end - (char *)NetLib_queue.beg, 1, 0);
+    while (NetLib_queue.head != NetLib_queue.tail) NetLib_completeReplies();
     return 0;
 }
 #endif
@@ -1418,13 +1418,13 @@ int NetTick(void) {
     volatile unsigned long sum;
     unsigned c, lastSeen;
     do {
-        last = D_0051F0C0.last;
-        total = D_0051F0C0.total;
+        last = NetLib_queue.last;
+        total = NetLib_queue.total;
         MFC0_COUNT_2F41(c);
         cnt = c;
         lastSeen = cnt;
         lastSeen = last;
-    } while (lastSeen != D_0051F0C0.last || total != D_0051F0C0.total);
+    } while (lastSeen != NetLib_queue.last || total != NetLib_queue.total);
     sum = total + (unsigned)(cnt - last);
     return (int)__udivdi3_4DE8(sum, 0x48000);
 }
@@ -1489,9 +1489,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetLib_pingIop);
 // PORT: PS2-only COP0 (read the Count register).
 #define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
 
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
 extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
 extern void FlushCache(int);
@@ -1499,7 +1499,7 @@ extern void sceSifSendCmd(int, void *, int, int, int, int);
 /**
  * Checks that the IOP side of the request queue answers.
  *
- * Clears the flag byte at the start of D_0051F0C0, sends SIF command 1 (sceSifSendCmd) carrying the flag's address + 1,
+ * Clears the flag byte at the start of NetLib_queue, sends SIF command 1 (sceSifSendCmd) carrying the flag's address + 1,
  * and spins (flushing the cache) until the IOP sets the flag or 50,000,000 Count cycles (about 170 ms) pass.
  *
  * @return 1 when the IOP answered, 0 on timeout
@@ -1508,7 +1508,7 @@ int NetLib_pingIop(void) {
     int answered;
     unsigned start;
     unsigned now;
-    char *flag = D_0051F0C0.buf;
+    char *flag = NetLib_queue.buf;
     unsigned limit = 0x2FAF080;
     // ORIGINAL-PTR: the IOP gets the flag's EE address as a word of the SIF command packet (Sony SDK sceSifCmdHdr's
     // opt word is an unsigned int) and writes the flag there
@@ -1534,11 +1534,11 @@ int NetLib_pingIop(void) {
 INCLUDE_ASM("seg/seg_2F41F8", NetLib_startQueue);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
-extern int D_004A4BB0;
+extern int NetLib_queueStartedFlag;
 extern char D_00523F00[];   /* the queue thread's stack (0x2000 bytes) */
 extern int _gp;   /* the linker-script $gp value (0x4A30F0, D_004A30F0); gas never addresses _gp off $gp */
 
@@ -1581,7 +1581,7 @@ extern void StartThread(int, void *);
 extern int NetLib_onCountInterrupt(int, void *);
 
 /**
- * Starts the EE-IOP request queue D_0051F0C0.
+ * Starts the EE-IOP request queue NetLib_queue.
  *
  * Fails (-1) when the IOP does not answer (NetLib_pingIop). Zeroes the queue and lays out its uncached areas: service
  * directory (0x800 bytes), request ring and reply ring (0x200 each), payload area (0x4000), DMA-id words and the
@@ -1589,12 +1589,12 @@ extern int NetLib_onCountInterrupt(int, void *);
  * areas and then the request ring (sceSifSetDma, -3 / -4 on failure), initialises SIF commands (sceSifInitCmd) and
  * sends command 1 with the IOP address. Creates the queue semaphore and the queue thread (NetLib_queueThread, priority 10,
  * 0x2000-byte stack D_00523F00; -5 on failure), installs the Count handler NetLib_onCountInterrupt on interrupt 2 and enables it,
- * starts the thread and sets the started flag D_004A4BB0.
+ * starts the thread and sets the started flag NetLib_queueStartedFlag.
  *
  * @return 0, or -1 .. -5 on failure
  */
 int NetLib_startQueue(void) {
-    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifQueue *queue = &NetLib_queue;
     struct sSifQueueHdr hdr;
     sceSifDmaData dma;
     struct sSemaParam sema;
@@ -1696,7 +1696,7 @@ int NetLib_startQueue(void) {
     queue->intcHandlerId = AddIntcHandler2(2, NetLib_onCountInterrupt, -1, queue);
     EnableIntc(2);
     StartThread(queue->threadId, queue);
-    D_004A4BB0 = 1;
+    NetLib_queueStartedFlag = 1;
     return 0;
 }
 #endif
@@ -1705,11 +1705,11 @@ int NetLib_startQueue(void) {
 INCLUDE_ASM("seg/seg_2F41F8", NetLib_stopQueue);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+/* NetLib_queue: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
    back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store result and wake th). */
-extern struct sSifQueue D_0051F0C0;
+extern struct sSifQueue NetLib_queue;
 
-extern int D_004A4BB0;
+extern int NetLib_queueStartedFlag;
 
 extern void ReleaseAlarm(int);
 extern void RemoveIntcHandler(int, int);
@@ -1718,21 +1718,21 @@ extern void DeleteThread(int);
 extern void DeleteSema(int);
 /**
  * Stops the EE-IOP request queue: releases its alarms, removes the interrupt handler, terminates and deletes the queue
- * thread, deletes the semaphore and clears the started flag D_004A4BB0.
+ * thread, deletes the semaphore and clears the started flag NetLib_queueStartedFlag.
  *
  * Nothing in retail calls it.
  *
  * @return 0
  */
 int NetLib_stopQueue(void) {
-    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifQueue *queue = &NetLib_queue;
     if (queue->sendAlarmId >= 0) ReleaseAlarm(queue->sendAlarmId);
     if (queue->pollAlarmId >= 0) ReleaseAlarm(queue->pollAlarmId);
     RemoveIntcHandler(2, queue->intcHandlerId);
     TerminateThread(queue->threadId);
     DeleteThread(queue->threadId);
     DeleteSema(queue->sema);
-    D_004A4BB0 = 0;
+    NetLib_queueStartedFlag = 0;
     return 0;
 }
 #endif
@@ -1741,15 +1741,15 @@ int NetLib_stopQueue(void) {
 INCLUDE_ASM("seg/seg_2F41F8", NetLib_isQueueStarted);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BB0;
+extern int NetLib_queueStartedFlag;
 
 /**
- * Returns whether the EE-IOP request queue has been started (D_004A4BB0, set by NetLib_startQueue).
+ * Returns whether the EE-IOP request queue has been started (NetLib_queueStartedFlag, set by NetLib_startQueue).
  *
  * @return the started flag
  */
 int NetLib_isQueueStarted(void) {
-    return D_004A4BB0;
+    return NetLib_queueStartedFlag;
 }
 #endif
 
@@ -1790,7 +1790,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00525F00[];
+extern char NetSession_createService[];
 extern void *RpcAlloc(int);
 extern void *f6210h(void *, int, int) __asm__("memset");
 extern int f5478_SyncDCache(void *, void *) __asm__("SyncDCache");
@@ -1826,8 +1826,8 @@ struct sSess *NetSession_create(int size) {
     f5478_SyncDCache(session->addr, session->addr + 1);
     f5478_SyncDCache(session->recvBuf, session->recvBuf + session->recvSize);
     FlushCache(0);
-    NetLib_resolveService(D_00525F00, 'sess', 'crea');
-    f5478_4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, session);
+    NetLib_resolveService(NetSession_createService, 'sess', 'crea');
+    f5478_4C68(NetSession_createService, 1, 0, size, 0, 0, 0, 0, 1, session);
     if (session->id == 0) {
         RpcFree(session);
         session = 0;
@@ -1840,7 +1840,7 @@ struct sSess *NetSession_create(int size) {
 INCLUDE_ASM("seg/seg_2F41F8", NetSession_destroy);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00525F10[];
+extern char NetSession_destroyService[];
 extern int NetLib_resolveService(char *, int, int);
 extern void RpcFree(void *);
 /**
@@ -1849,8 +1849,8 @@ extern void RpcFree(void *);
  * @param session  the session
  */
 void NetSession_destroy(int *session) {
-    NetLib_resolveService(D_00525F10, 'sess', 'dest');
-    NetLib_callService(D_00525F10, 1, *session, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService(NetSession_destroyService, 'sess', 'dest');
+    NetLib_callService(NetSession_destroyService, 1, *session, 0, 0, 0, 0, 0, 1, 0);
     RpcFree(session);
 }
 #endif
@@ -1859,7 +1859,7 @@ void NetSession_destroy(int *session) {
 INCLUDE_ASM("seg/seg_2F41F8", NetSession_connect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00525F20[];
+extern char NetSession_connectService[];
 extern int NetLib_resolveService(char *, int, int);
 extern int f5638_4C68(char *, int, int, int, struct sSessAddr *, int, int, int, int, int) __asm__("NetLib_callService");
 extern int f5638_SyncDCache(void *, void *) __asm__("SyncDCache");
@@ -1895,8 +1895,8 @@ int NetSession_connect(struct sSess *self, unsigned addr, int port) {
     addrShift >>= 8;
     self->addr->peer.sa_data[2] = addrShift;
     f5638_SyncDCache(self->addr, self->addr + 1);
-    NetLib_resolveService(D_00525F20, 'sess', 'conn');
-    f5638_4C68(D_00525F20, 0, self->id, 0, self->addr, 0x10, 0, 0, 0, 0);
+    NetLib_resolveService(NetSession_connectService, 'sess', 'conn');
+    f5638_4C68(NetSession_connectService, 0, self->id, 0, self->addr, 0x10, 0, 0, 0, 0);
     self->recvLength = 0;
     return 0;
 }
@@ -1907,7 +1907,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_disconnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00525F30[];
+extern char NetSession_disconnectService[];
 extern int NetLib_resolveService(char *, int, int);
 extern void func_00416210b(void *, int, int) __asm__("memset");
 /**
@@ -1917,8 +1917,8 @@ extern void func_00416210b(void *, int, int) __asm__("memset");
  * @return 0
  */
 int NetSession_disconnect(struct sSess *self) {
-    NetLib_resolveService(D_00525F30, 'sess', 'disc');
-    NetLib_callService(D_00525F30, 0, self->id, 0, 0, 0, 0, 0, 0, 0);
+    NetLib_resolveService(NetSession_disconnectService, 'sess', 'disc');
+    NetLib_callService(NetSession_disconnectService, 0, self->id, 0, 0, 0, 0, 0, 0, 0);
     func_00416210b(self->addr, 0, 0x20);
     self->recvLength = 0;
     return 0;
@@ -1930,7 +1930,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_getStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00525F40[];
+extern char NetSession_statusService[];
 extern int NetLib_resolveService(char *, int, int);
 extern int c57_4C68(char *, int, int, int, int, int, struct sSessAddr *, int, int, int) __asm__("NetLib_callService");
 int NetSession_getStatus_impl(struct sSess *self, int key) __asm__("NetSession_getStatus");
@@ -1946,8 +1946,8 @@ int NetSession_getStatus_impl(struct sSess *self, int key) __asm__("NetSession_g
  * @return the selected value
  */
 int NetSession_getStatus_impl(struct sSess *self, int key) {
-    NetLib_resolveService(D_00525F40, 'sess', 'stat');
-    c57_4C68(D_00525F40, 0, self->id, 0, 0, 0, self->addr, 0x20, 1, 0);
+    NetLib_resolveService(NetSession_statusService, 'sess', 'stat');
+    c57_4C68(NetSession_statusService, 0, self->id, 0, 0, 0, self->addr, 0x20, 1, 0);
     if (key == 'port') {
         return (self->addr->peer.sa_data[0] << 8) | self->addr->peer.sa_data[1];
     }
@@ -1983,7 +1983,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_send);
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* The gathered payload NetSession_send sends: the 12-byte header, the data and the 0-length end of the list. */
 typedef struct { struct sSifSeg header; struct sSifSeg data; int end; } sSessSendList;
-extern char D_00525F50[];
+extern char NetSession_sendService[];
 extern int NetLib_resolveService(char *, int, int);
 extern int c59_4C68(char *, int, int, int, sSessSendList *, int, int, int, int, int) __asm__("NetLib_callService");
 extern void c59_5908(int *) __asm__("NetSession_update");
@@ -2025,8 +2025,8 @@ int NetSession_send(int *self, int packetKind, int packetArg, char *str, int len
     io.data.len = len - 0xC;
     io.data.ptr = str;
     io.end = 0;
-    NetLib_resolveService(D_00525F50, 'sess', 'send');
-    c59_4C68(D_00525F50, 2, self[0], 0, &io, 0, 0, 0, 0, 0);
+    NetLib_resolveService(NetSession_sendService, 'sess', 'send');
+    c59_4C68(NetSession_sendService, 2, self[0], 0, &io, 0, 0, 0, 0, 0);
     return 0;
 }
 #endif
@@ -2070,7 +2070,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_peek);
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* A network session (NetSession_peek / NetSession_recv read from its receive buffer f18). */
 
-extern char D_00525F60[];
+extern char NetSession_peekService[];
 extern char str_empty_l[];
 extern int NetLib_resolveService(char *, int, int);
 extern void a70_47D8(unsigned char *, unsigned char *) __asm__("InvalidDCache");
@@ -2101,8 +2101,8 @@ int NetSession_peek(struct sSess *self, unsigned *kindOut, unsigned *argOut, cha
                 self->recvLength = 0;
                 self->readOffset = self->recvLength;
             }
-            NetLib_resolveService(D_00525F60, 'sess', 'recv');
-            a70_4C68(D_00525F60, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, NetSession_onRecvDone, self);
+            NetLib_resolveService(NetSession_peekService, 'sess', 'recv');
+            a70_4C68(NetSession_peekService, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, NetSession_onRecvDone, self);
         }
         return -1;
     } else {
@@ -2129,7 +2129,7 @@ INCLUDE_ASM("seg/seg_2F41F8", NetSession_recv);
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* A network session (NetSession_peek / NetSession_recv read from its receive buffer f18). */
 
-extern char D_00525F70[];
+extern char NetSession_recvService[];
 extern int c38_5A70(struct sSess *, int, int, int) __asm__("NetSession_peek");
 extern void c38_605C(char *, void *, int) __asm__("func_0041605C");
 extern void c38_47D8(unsigned char *, unsigned char *) __asm__("InvalidDCache");
@@ -2166,8 +2166,8 @@ int NetSession_recv_impl(struct sSess *self, int kindOut, int argOut, char *buf,
                 self->recvLength = 0;
                 self->readOffset = self->recvLength;
             }
-            NetLib_resolveService(D_00525F70, 'sess', 'recv');
-            c38_4C68(D_00525F70, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, NetSession_onRecvDone, self);
+            NetLib_resolveService(NetSession_recvService, 'sess', 'recv');
+            c38_4C68(NetSession_recvService, 0, self->id, 0, 0, 0, self->recvBuf, self->recvSize, NetSession_onRecvDone, self);
         }
     }
     return n;
@@ -2206,7 +2206,7 @@ struct sKbRead {
     unsigned char ready;                /* 0x88: 1 when the buffer holds unread data */
 };
 
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 struct sKb {
     int fd[2];                          /* 0x00 */
@@ -2226,7 +2226,7 @@ struct sKb {
     int (*idleHook)(int);               /* 0xC0: [U] polled by kbReader_update */
 };
 
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern char *strcpy(char *, const char *);
 extern char* strcat(char *, const char *);
@@ -2235,9 +2235,9 @@ extern char str_USBD_IRX_b[], str_USBKB_IRX_b[];
 /**
  * Loads the USB driver modules USBD.IRX and USBKB.IRX from a directory.
  *
- * With @p name 0 it only marks both module ids in D_00525F80 as -1 and returns 0. Otherwise loads @p name + "USBD.IRX"
+ * With @p name 0 it only marks both module ids in kbReader_state as -1 and returns 0. Otherwise loads @p name + "USBD.IRX"
  * without arguments and @p name + "USBKB.IRX" with @p str as its argument text (sceSifLoadModule, the SIF module loader),
- * keeping the ids in D_00525F80.fd[0] and fd[1]. Called by the USB keyboard setup kbReader_init.
+ * keeping the ids in kbReader_state.fd[0] and fd[1]. Called by the USB keyboard setup kbReader_init.
  *
  * @param name  directory prefix of the IRX files, or 0
  * @param str  argument text for USBKB.IRX
@@ -2246,18 +2246,18 @@ extern char str_USBD_IRX_b[], str_USBKB_IRX_b[];
 int kbReader_loadModules(char *name, char *str) {
     char path[0x100];
     if (name == 0) {
-        D_00525F80.fd[0] = -1;
-        D_00525F80.fd[1] = -1;
+        kbReader_state.fd[0] = -1;
+        kbReader_state.fd[1] = -1;
         return 0;
     }
     if (str == 0) goto fail;
     strcpy(path, name);
     strcat(path, str_USBD_IRX_b);
-    D_00525F80.fd[0] = fBA68(path, 0, 0);
-    if (D_00525F80.fd[0] < 0) goto fail;
+    kbReader_state.fd[0] = fBA68(path, 0, 0);
+    if (kbReader_state.fd[0] < 0) goto fail;
     strcpy(path, name);
     strcat(path, str_USBKB_IRX_b);
-    D_00525F80.fd[1] = fBA68(path, strlen(str) + 1, str); if (D_00525F80.fd[1] < 0) return -1; return 0;
+    kbReader_state.fd[1] = fBA68(path, strlen(str) + 1, str); if (kbReader_state.fd[1] < 0) return -1; return 0;
 fail:
     return -1;
 }
@@ -2291,23 +2291,23 @@ int kbReader_unloadModule(int handle, int errorValue) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_startInfoQuery);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern char D_00525F88[];
 extern int sceUsbKbGetInfo(char *);
 /**
  * Starts an asynchronous USB keyboard connection query.
  *
- * Copies each keyboard's connected flag (D_00525F80 +0x10) to the previous flags (+0x94), then asks for the keyboard
+ * Copies each keyboard's connected flag (kbReader_state +0x10) to the previous flags (+0x94), then asks for the keyboard
  * info (sceUsbKbGetInfo into +0x8); when the request is accepted sets the state (+0x9C) to 1 and the busy flag (+0xA0).
  * kbReader_finishInfoQuery finishes it.
  */
 void kbReader_startInfoQuery(void) {
     int i;
     char *kbState;
-    for (i = 0; i < D_00525F80.cnt; i++) D_00525F80.prev[i] = D_00525F80.v[i];
+    for (i = 0; i < kbReader_state.cnt; i++) kbReader_state.prev[i] = kbReader_state.v[i];
     if (sceUsbKbGetInfo(D_00525F88) == 0) {
         kbState = D_00525F88 - 8;
         *(int *)(kbState + 0x9C) = 1;
@@ -2321,9 +2321,9 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_finishInfoQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int f810(int, int *) __asm__("sceUsbKbSync");
 /**
@@ -2341,11 +2341,11 @@ int kbReader_finishInfoQuery(void) {
     int i;
     syncBusy = f810(1, &syncResult);
     if (syncBusy != 0) return syncBusy;
-    for (i = 0; i < D_00525F80.cnt; i++) {
-        if (D_00525F80.prev[i] != D_00525F80.v[i]) D_00525F80.onConnect(i, D_00525F80.v[i]);
+    for (i = 0; i < kbReader_state.cnt; i++) {
+        if (kbReader_state.prev[i] != kbReader_state.v[i]) kbReader_state.onConnect(i, kbReader_state.v[i]);
     }
-    D_00525F80.flag = 0;
-    D_00525F80.st = 0;
+    kbReader_state.flag = 0;
+    kbReader_state.st = 0;
     return syncBusy;
 }
 #endif
@@ -2354,9 +2354,9 @@ int kbReader_finishInfoQuery(void) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_findFreeKeyboard);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 /**
  * Finds the next connected USB keyboard, starting at @p i and wrapping, whose read buffer is not holding unread data
@@ -2367,10 +2367,10 @@ extern struct sKb D_00525F80;
  */
 int kbReader_findFreeKeyboard(int i) {
     int checked;
-    for (checked = 0; checked < D_00525F80.cnt; checked++) {
-        if (i >= D_00525F80.cnt) i = 0;
-        if (D_00525F80.v[i] != 0) {
-            if (D_00525F80.ents[i].ready == 0) return i;
+    for (checked = 0; checked < kbReader_state.cnt; checked++) {
+        if (i >= kbReader_state.cnt) i = 0;
+        if (kbReader_state.v[i] != 0) {
+            if (kbReader_state.ents[i].ready == 0) return i;
         }
         i++;
     }
@@ -2382,9 +2382,9 @@ int kbReader_findFreeKeyboard(int i) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_startRead);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int kbReader_findFreeKeyboard(int);
 extern int sceUsbKbRead(int, struct sKbRead *);
@@ -2395,16 +2395,16 @@ extern int sceUsbKbRead(int, struct sKbRead *);
  * asynchronous read into the buffer (sceUsbKbRead); when accepted sets the state to 2 and the busy flag.
  */
 void kbReader_startRead(void) {
-    int id = kbReader_findFreeKeyboard(D_00525F80.cur + 1);
+    int id = kbReader_findFreeKeyboard(kbReader_state.cur + 1);
     struct sKbRead *readBuf;
     if (id != -1) {
-        D_00525F80.cur = id;
-        readBuf = &D_00525F80.ents[id];
-        D_00525F80.a = readBuf->led;
-        D_00525F80.b = readBuf->mkey;
+        kbReader_state.cur = id;
+        readBuf = &kbReader_state.ents[id];
+        kbReader_state.a = readBuf->led;
+        kbReader_state.b = readBuf->mkey;
         if (sceUsbKbRead(id, readBuf) == 0) {
-            D_00525F80.st = 2;
-            D_00525F80.flag = 1;
+            kbReader_state.st = 2;
+            kbReader_state.flag = 1;
         }
     }
 }
@@ -2415,9 +2415,9 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_finishRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int f810(int, int *) __asm__("sceUsbKbSync");
 /**
@@ -2435,11 +2435,11 @@ int kbReader_finishRead(void) {
     syncStatus = f810(0, &syncResult);
     if (syncStatus != 0) return syncStatus;
     {
-        struct sKbRead *readBuf = &D_00525F80.ents[D_00525F80.cur];
-        if (readBuf->len > 0 || readBuf->mkey != D_00525F80.b || readBuf->led != D_00525F80.a) readBuf->ready = 1;
+        struct sKbRead *readBuf = &kbReader_state.ents[kbReader_state.cur];
+        if (readBuf->len > 0 || readBuf->mkey != kbReader_state.b || readBuf->led != kbReader_state.a) readBuf->ready = 1;
     }
-    D_00525F80.flag = 0;
-    D_00525F80.st = 0;
+    kbReader_state.flag = 0;
+    kbReader_state.st = 0;
     return syncStatus;
 }
 #endif
@@ -2461,9 +2461,9 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int D_00526010[];
 
@@ -2503,12 +2503,12 @@ int kbReader_init(char *name, char *str, struct sKbRead *ents, void (*onConnect)
         ctl()->prev[i] = 0;
         ents[i].ready = 0;
     }
-    D_00525F80.cur = 0;
-    D_00525F80.period = 0x3C;
-    D_00525F80.tick = 0x3C;
-    D_00525F80.flag = 0;
-    D_00525F80.onConnect = onConnect ? onConnect : f6358;
-    D_00525F80.idleHook = idleHook ? idleHook : f61C8;
+    kbReader_state.cur = 0;
+    kbReader_state.period = 0x3C;
+    kbReader_state.tick = 0x3C;
+    kbReader_state.flag = 0;
+    kbReader_state.onConnect = onConnect ? onConnect : f6358;
+    kbReader_state.idleHook = idleHook ? idleHook : f61C8;
     f5F08();
     while (f5F88()) ;
     return 0;
@@ -2520,9 +2520,9 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_shutdown);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int sceUsbKbEnd(void);
 extern int kbReader_unloadModule_62F8(int, int) __asm__("kbReader_unloadModule");
@@ -2535,8 +2535,8 @@ extern int kbReader_unloadModule_62F8(int, int) __asm__("kbReader_unloadModule")
 int kbReader_shutdown(void) {
     int unloadErrors;
     sceUsbKbEnd();
-    unloadErrors = kbReader_unloadModule_62F8(D_00525F80.fd[1], 1);
-    return unloadErrors | kbReader_unloadModule_62F8(D_00525F80.fd[0], 2);
+    unloadErrors = kbReader_unloadModule_62F8(kbReader_state.fd[1], 1);
+    return unloadErrors | kbReader_unloadModule_62F8(kbReader_state.fd[0], 2);
 }
 #endif
 
@@ -2593,7 +2593,7 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_setQueryPeriod);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00526038[];
 /**
- * Sets how many reader updates pass between USB keyboard connection queries (D_00525F80 +0xB8).
+ * Sets how many reader updates pass between USB keyboard connection queries (kbReader_state +0xB8).
  *
  * @param queryPeriod  the period in updates
  */
@@ -2605,9 +2605,9 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 extern int kbReader_finishInfoQuery(void);
 extern int kbReader_finishRead(void);
@@ -2623,17 +2623,17 @@ void kbReader_update_63F0(void) __asm__("kbReader_update");
  * else it starts reading the next keyboard (kbReader_startRead).
  */
 void kbReader_update_63F0(void) {
-    switch (D_00525F80.st) {
+    switch (kbReader_state.st) {
     case 1: kbReader_finishInfoQuery(); break;
     case 0: break;
     case 2: kbReader_finishRead(); break;
-    case 3: if (D_00525F80.idleHook(1) != 0) D_00525F80.st = 0; break;
+    case 3: if (kbReader_state.idleHook(1) != 0) kbReader_state.st = 0; break;
     }
-    if (D_00525F80.st == 0) {
-        if (D_00525F80.idleHook(0) != 0) D_00525F80.st = 3;
-        if (D_00525F80.st == 0) {
-            D_00525F80.tick = D_00525F80.tick + 1;
-            if (D_00525F80.period < D_00525F80.tick) { D_00525F80.tick = 0; kbReader_startInfoQuery(); } else { kbReader_startRead(); }
+    if (kbReader_state.st == 0) {
+        if (kbReader_state.idleHook(0) != 0) kbReader_state.st = 3;
+        if (kbReader_state.st == 0) {
+            kbReader_state.tick = kbReader_state.tick + 1;
+            if (kbReader_state.period < kbReader_state.tick) { kbReader_state.tick = 0; kbReader_startInfoQuery(); } else { kbReader_startRead(); }
         }
     }
 }
@@ -2643,9 +2643,9 @@ void kbReader_update_63F0(void) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_takeReadBuffer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 /**
  * Takes a USB keyboard's read buffer when it holds unread data.
@@ -2654,9 +2654,9 @@ extern struct sKb D_00525F80;
  * @return the 0x8C-byte buffer (its ready flag is cleared), or 0 when nothing new arrived
  */
 struct sKbRead *kbReader_takeReadBuffer(int n) {
-    if (D_00525F80.ents[n].ready == 1) {
-        D_00525F80.ents[n].ready = 0;
-        return &D_00525F80.ents[n];
+    if (kbReader_state.ents[n].ready == 1) {
+        kbReader_state.ents[n].ready = 0;
+        return &kbReader_state.ents[n];
     }
     return 0;
 }
@@ -2666,17 +2666,17 @@ struct sKbRead *kbReader_takeReadBuffer(int n) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_isConnected);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
+/* kbReader_state: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
-extern struct sKb D_00525F80;
+extern struct sKb kbReader_state;
 
 /**
- * Returns whether a USB keyboard is connected (its flag at D_00525F80 +0x10).
+ * Returns whether a USB keyboard is connected (its flag at kbReader_state +0x10).
  *
  * @param keyboard  keyboard index
  * @return 1 when connected, else 0
  */
-int kbReader_isConnected(int keyboard) { return D_00525F80.v[keyboard] != 0; }
+int kbReader_isConnected(int keyboard) { return kbReader_state.v[keyboard] != 0; }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2758,13 +2758,13 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_getKeyChar);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char D_00451458[];
+extern unsigned char kbReader_keypadCharTable[];
 extern int f268(int, int, int, int) __asm__("sceUsbKbCnvRawCode");
 void kbReader_getKeyChar_impl(unsigned char *self, int *fl, int kb, unsigned code) __asm__("kbReader_getKeyChar");
 /**
  * Translates a USB key code to its character, stored in byte 1 of the output pair @p self.
  *
- * Keypad codes 84..99 come from D_00451458 (its first four are the "/", "*", "-" and "+" keys); the digit and period
+ * Keypad codes 84..99 come from kbReader_keypadCharTable (its first four are the "/", "*", "-" and "+" keys); the digit and period
  * keys (89 and up) give 0 unless Num Lock (bit 0 of @p fl[0]) is on. Other codes go through sceUsbKbCnvRawCode with
  * the layout @p kb, the modifier word @p fl[1] and the LED word; results of 0x100 or more give 0.
  *
@@ -2775,7 +2775,7 @@ void kbReader_getKeyChar_impl(unsigned char *self, int *fl, int kb, unsigned cod
 void kbReader_getKeyChar_impl(unsigned char *self, int *fl, int kb, unsigned code) {
     unsigned keypadIndex = code - 84;
     if (keypadIndex < 0x10) {
-        if (code < 89 || (fl[0] & 1)) self[1] = D_00451458[keypadIndex];
+        if (code < 89 || (fl[0] & 1)) self[1] = kbReader_keypadCharTable[keypadIndex];
         else self[1] = 0;
     } else {
         int converted = f268(kb, fl[1], fl[0], code & 0xFFFF);
@@ -2891,23 +2891,23 @@ int kbReader_isKeyDown(struct sKbRead *kbdState, int mapMode, int idx, int virtK
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_translateKey);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A5B10;
+extern char kbReader_translatedKey;
 extern void kbReader_getVirtualKey(char *, struct sKbRead *, int, int);
 extern void kbReader_getKeyChar(char *, struct sKbRead *, int, int);
 /**
- * Translates one key code of a USB keyboard read buffer into the static pair D_004A5B10: virtual-key byte
+ * Translates one key code of a USB keyboard read buffer into the static pair kbReader_translatedKey: virtual-key byte
  * (kbReader_getVirtualKey) and character (kbReader_getKeyChar).
  *
  * @param readBuf  the read buffer (key codes from +0xC)
  * @param mapMode  key-map mode / layout
  * @param keyIndex  index of the key code
- * @return D_004A5B10 (overwritten by the next call)
+ * @return kbReader_translatedKey (overwritten by the next call)
  */
 char *kbReader_translateKey(struct sKbRead *readBuf, int mapMode, int keyIndex) {
     unsigned int keyCode = readBuf->keycode[keyIndex];
-    kbReader_getVirtualKey(&D_004A5B10, readBuf, mapMode, keyCode);
-    kbReader_getKeyChar(&D_004A5B10, readBuf, mapMode, keyCode);
-    return &D_004A5B10;
+    kbReader_getVirtualKey(&kbReader_translatedKey, readBuf, mapMode, keyCode);
+    kbReader_getKeyChar(&kbReader_translatedKey, readBuf, mapMode, keyCode);
+    return &kbReader_translatedKey;
 }
 #endif
 
@@ -2916,9 +2916,9 @@ INCLUDE_ASM("seg/seg_2F41F8", voipRpc_call);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): D_004A5B14 = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
    send buffer. */
-extern unsigned char D_004A5B14;
+extern unsigned char voipRpc_boundFlag;
 
 extern int D_00526100[];
 
@@ -2932,7 +2932,7 @@ void voipRpc_call_impl(int a, int b, int c, int d, int e) __asm__("voipRpc_call"
 /**
  * Calls the voice-chat IOP module (VOIPF) through its SIF RPC client.
  *
- * Only when bound (D_004A5B14): waits for the previous call to finish (sceSifCheckStatRpc), puts two words in the send
+ * Only when bound (voipRpc_boundFlag): waits for the previous call to finish (sceSifCheckStatRpc), puts two words in the send
  * buffer D_00526080 and calls RPC function @p rpcFunc (sceSifCallRpc on the client D_00526100, 0x80-byte send buffer),
  * retrying until the call is accepted.
  *
@@ -2944,7 +2944,7 @@ void voipRpc_call_impl(int a, int b, int c, int d, int e) __asm__("voipRpc_call"
  */
 void voipRpc_call_impl(int rpcFunc, int argWord0, int argWord1, int recvBuf, int recvSize) {
     struct sRpcSend *sendBuf = D_00526080;
-    if (D_004A5B14) {
+    if (voipRpc_boundFlag) {
         while (f6F08(D_00526100) > 0) ;
         sendBuf->a = argWord0;
         sendBuf->b = argWord1;
@@ -2960,35 +2960,35 @@ INCLUDE_ASM("seg/seg_2F41F8", voipRpc_bind);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): D_004A5B14 = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
    send buffer. */
-extern unsigned char D_004A5B14;
+extern unsigned char voipRpc_boundFlag;
 
 extern int D_00526100[];
 
 extern int D_005261C0[];
 
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
-extern int *D_004A5B18;
+extern int *voipRpc_uncachedStatusWord;
 
 extern int sceSifBindRpc(int *, int, int);
 extern void func_003F6960b(int, int, int, int *, int) __asm__("voipRpc_call");
 /**
  * Binds the voice-chat SIF RPC client (server id 567, sceSifBindRpc) and registers the status word with the module.
  *
- * Marks the client bound first, keeps an uncached pointer to D_005261C0 in D_004A5B18 and sends it with RPC function 0.
+ * Marks the client bound first, keeps an uncached pointer to D_005261C0 in voipRpc_uncachedStatusWord and sends it with RPC function 0.
  * initOnline calls it when VOIPF.IRX loaded. Quirk: the bind result is not checked.
  */
 void voipRpc_bind(void) {
     int *statusWord;
-    D_004A5B14 = 1;
+    voipRpc_boundFlag = 1;
     sceSifBindRpc(D_00526100, 567, 0);
     // ORIGINAL-PTR: the IOP module gets the status word's EE address as an RPC argument word and writes it there, so
     // the EE reads it through the uncached segment (address & 0x0FFFFFFF | 0x20000000, a hardware address segment)
     statusWord = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
-    D_004A5B18 = statusWord;
-    func_003F6960b(0, (int)statusWord, 0, D_00526140, 0x80);
+    voipRpc_uncachedStatusWord = statusWord;
+    func_003F6960b(0, (int)statusWord, 0, voipRpc_recvBuffer, 0x80);
 }
 #endif
 
@@ -2996,21 +2996,21 @@ void voipRpc_bind(void) {
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_unbind);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* SIF RPC client (voipRpc_bind binds it): D_004A5B14 = bound, D_00526100 the client data, D_00526080 the
+/* SIF RPC client (voipRpc_bind binds it): voipRpc_boundFlag = bound, D_00526100 the client data, D_00526080 the
    send buffer. */
-extern unsigned char D_004A5B14;
+extern unsigned char voipRpc_boundFlag;
 
 /**
- * Marks the voice-chat RPC client unbound (D_004A5B14 = 0), which turns every later call into a no-op.
+ * Marks the voice-chat RPC client unbound (voipRpc_boundFlag = 0), which turns every later call into a no-op.
  */
-void voipRpc_unbind(void) { D_004A5B14 = 0; }
+void voipRpc_unbind(void) { voipRpc_boundFlag = 0; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_connect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern int voipRpc_call(int, int, int, int *, int);
 /**
@@ -3023,14 +3023,14 @@ extern int voipRpc_call(int, int, int, int *, int);
  * @param secondPort  second port (high half)
  * @return no meaningful value (voipRpc_call returns nothing)
  */
-int voipRpc_connect(int peerAddr, unsigned short firstPort, int secondPort) { return voipRpc_call(2, peerAddr, firstPort | (secondPort << 16), D_00526140, 0x80); }
+int voipRpc_connect(int peerAddr, unsigned short firstPort, int secondPort) { return voipRpc_call(2, peerAddr, firstPort | (secondPort << 16), voipRpc_recvBuffer, 0x80); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_disconnect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern int voipRpc_call(int, int, int, int *, int);
 /**
@@ -3038,27 +3038,27 @@ extern int voipRpc_call(int, int, int, int *, int);
  *
  * @return no meaningful value (voipRpc_call returns nothing)
  */
-int voipRpc_disconnect(void) { return voipRpc_call(3, 0, 0, D_00526140, 0x80); }
+int voipRpc_disconnect(void) { return voipRpc_call(3, 0, 0, voipRpc_recvBuffer, 0x80); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_turnVoiceOn);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern int voipRpc_call(int, int, int, int *, int);
 /**
  * Turns the voice on: RPC function 4.
  */
-void voipRpc_turnVoiceOn() { voipRpc_call(4, 0, 0, D_00526140, 0x80); }
+void voipRpc_turnVoiceOn() { voipRpc_call(4, 0, 0, voipRpc_recvBuffer, 0x80); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_turnVoiceOff);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern int voipRpc_call(int, int, int, int *, int);
 /**
@@ -3066,7 +3066,7 @@ extern int voipRpc_call(int, int, int, int *, int);
  *
  * @return no meaningful value (voipRpc_call returns nothing)
  */
-int voipRpc_turnVoiceOff(void) { return voipRpc_call(5, 0, 0, D_00526140, 0x80); }
+int voipRpc_turnVoiceOff(void) { return voipRpc_call(5, 0, 0, voipRpc_recvBuffer, 0x80); }
 #endif
 
 //100%
@@ -3087,7 +3087,7 @@ INCLUDE_ASM("seg/seg_2F41F8", voipRpc_getVoiceLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern void func_003F6960b(int, int, int, int *, int) __asm__("voipRpc_call");
 /**
@@ -3097,9 +3097,9 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("voipRpc_call");
  * @param maxOut  receives the maximum
  */
 void voipRpc_getVoiceLevel(int *levelOut, int *maxOut) {
-    func_003F6960b(7, 0, 0, D_00526140, 0x80);
-    *levelOut = D_00526140[0];
-    *maxOut = D_00526140[1];
+    func_003F6960b(7, 0, 0, voipRpc_recvBuffer, 0x80);
+    *levelOut = voipRpc_recvBuffer[0];
+    *maxOut = voipRpc_recvBuffer[1];
 }
 #endif
 
@@ -3107,7 +3107,7 @@ void voipRpc_getVoiceLevel(int *levelOut, int *maxOut) {
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_setVoiceLevel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526140[];
+extern int voipRpc_recvBuffer[];
 
 extern int voipRpc_call(int, int, int, int *, int);
 /**
@@ -3116,50 +3116,50 @@ extern int voipRpc_call(int, int, int, int *, int);
  * @param level  voice level
  * @param maxLevel  maximum level
  */
-void voipRpc_setVoiceLevel(int level, int maxLevel) { voipRpc_call(6, level, maxLevel, D_00526140, 0x80); }
+void voipRpc_setVoiceLevel(int level, int maxLevel) { voipRpc_call(6, level, maxLevel, voipRpc_recvBuffer, 0x80); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", voipRpc_getStatusWord);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int *D_004A5B18;
+extern int *voipRpc_uncachedStatusWord;
 
 /**
  * Returns the voice module's status word, which the IOP writes into D_005261C0 (read through the uncached pointer
- * D_004A5B18).
+ * voipRpc_uncachedStatusWord).
  *
  * @return the status word
  */
-int voipRpc_getStatusWord(void) { return *D_004A5B18; }
+int voipRpc_getStatusWord(void) { return *voipRpc_uncachedStatusWord; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", slogin_setStarted);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4BC0;
+extern char slogin_startedFlag;
 
 /**
- * Sets the network-account library's started flag D_004A4BC0 (slogin_init calls it first).
+ * Sets the network-account library's started flag slogin_startedFlag (slogin_init calls it first).
  *
  * @return 0
  */
-int slogin_setStarted(void) { D_004A4BC0 = 1; return 0; }
+int slogin_setStarted(void) { slogin_startedFlag = 1; return 0; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", slogin_clearStarted);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4BC0;
+extern char slogin_startedFlag;
 
 /**
- * Clears the network-account library's started flag D_004A4BC0 (slogin_shutdown calls it last).
+ * Clears the network-account library's started flag slogin_startedFlag (slogin_shutdown calls it last).
  *
  * @return 0
  */
-int slogin_clearStarted(void) { D_004A4BC0 = 0; return 0; }
+int slogin_clearStarted(void) { slogin_startedFlag = 0; return 0; }
 #endif
 
 //100%
@@ -3175,7 +3175,7 @@ struct sMcParams {
     int crc;                            /* 0x60 */
 };
 
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 struct sNetHdr { int w[17]; };
 
@@ -3229,13 +3229,13 @@ struct sNetAcct {
                                            closes; slogin_reportKeptError hands it back */
 };
 
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern struct sNetAcct *f6728(int, int, int) __asm__("TibExtMemAlloc");
 extern unsigned f6210x(struct sNetAcct *, int, int) __asm__("memset");
 int slogin_createSession_impl(struct sNetInit *initParams) __asm__("slogin_createSession");
 /**
- * Creates the network-account session D_004A4BC4 (0x14C bytes).
+ * Creates the network-account session slogin_session (0x14C bytes).
  *
  * Allocates it from the heap @p initParams->heap with TibExtMemAlloc and zeroes it, keeps the heap (+0x140), copies the
  * 17 memory-card callbacks from the table @p initParams->callbacks into its head, and sets it idle: operation 4 (+0xD0,
@@ -3248,12 +3248,12 @@ int slogin_createSession_impl(struct sNetInit *initParams) __asm__("slogin_creat
 int slogin_createSession_impl(struct sNetInit *initParams) {
     struct sNetAcct *session;
     struct sNetAcct *sessionReload;
-    D_004A4BC4 = f6728(initParams->heap, 332, 4);
-    f6210x(D_004A4BC4, 0, 332);
-    session = D_004A4BC4;
+    slogin_session = f6728(initParams->heap, 332, 4);
+    f6210x(slogin_session, 0, 332);
+    session = slogin_session;
     session->heap = initParams->heap;
     session->hdr = *initParams->callbacks;
-    sessionReload = D_004A4BC4;
+    sessionReload = slogin_session;
     sessionReload->st = 4;
     sessionReload->lastOperation = 4;
     sessionReload->pendingError = 0;
@@ -3269,19 +3269,19 @@ int slogin_createSession_impl(struct sNetInit *initParams) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_freeSession);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int TibExtMemFree(int, char *, int, int);
 /**
- * Frees the network-account session D_004A4BC4 back to its heap (TibExtMemFree) and clears the pointer.
+ * Frees the network-account session slogin_session back to its heap (TibExtMemFree) and clears the pointer.
  *
  * @return 0
  */
 int slogin_freeSession(void) {
-    TibExtMemFree(D_004A4BC4->heap, (char *)D_004A4BC4, 332, 4);
-    D_004A4BC4 = 0;
+    TibExtMemFree(slogin_session->heap, (char *)slogin_session, 332, 4);
+    slogin_session = 0;
     return 0;
 }
 #endif
@@ -3291,9 +3291,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_openSaveRecords);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 typedef struct { char b[0x1A]; } K6DC8;
 extern K6DC8 D_00497060;
@@ -3313,7 +3313,7 @@ typedef struct { int a; int *p; struct sNetAcct *d; K6DC8 *buf; int len; int r; 
 int slogin_openSaveRecords(void) {
     K6DC8 buf;
     R6DC8 req;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     buf = D_00497060;
     req.a = 2;
     req.p = &session->portList;
@@ -3321,7 +3321,7 @@ int slogin_openSaveRecords(void) {
     req.len = 26;
     req.buf = &buf;
     req.r = fB800();
-    req.v = D_004A4BC4->heap;
+    req.v = slogin_session->heap;
     return slogin_mapSaveRecordError_6DC8(fC0E8(&req));
 }
 #endif
@@ -3344,9 +3344,9 @@ int slogin_closeSaveRecords(void) { return slogin_mapSaveRecordError(saveRec_clo
 INCLUDE_ASM("seg/seg_2F41F8", slogin_startOperation);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_beginOperation(int);
 /**
@@ -3359,7 +3359,7 @@ extern int slogin_beginOperation(int);
  */
 int slogin_startOperation(int operation) {
     int errorCode = 0;
-    if (D_004A4BC4->st == 4) {
+    if (slogin_session->st == 4) {
         slogin_beginOperation(operation);
     } else {
         errorCode = 22;
@@ -3372,9 +3372,9 @@ int slogin_startOperation(int operation) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_advanceOperation);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /**
  * Advances the running network-account operation (installed at +0xD4 by slogin_beginOperation, called by slogin_update).
@@ -3390,11 +3390,11 @@ int slogin_advanceOperation(int *out) {
     int err = 0; struct sNetAcct *session;
     *out = 0;
     if (out == 0) err = 7;
-    session = D_004A4BC4;
+    session = slogin_session;
     if (session->st >= 4) err = 0xF;
     if (err == 0) {
-        if (D_004A4BC4->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))session->cur.stepFn)(out, session);
-        else ((void (*)(int *, int *))D_004A4BC4->cur.dispatchFn)(out, &err);
+        if (slogin_session->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))session->cur.stepFn)(out, session);
+        else ((void (*)(int *, int *))slogin_session->cur.dispatchFn)(out, &err);
     }
     return err;
 }
@@ -3403,9 +3403,9 @@ int slogin_advanceOperation(int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", slogin_runModeStep);
 #ifdef SKIP_ASM
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 extern int slogin_finishPhase(void);
 /**
  * Runs one step of the current network-account mode through its phase (+0xEC).
@@ -3427,32 +3427,32 @@ int slogin_runModeStep(int *out) {
     result = 0;
     *out = 0;
     if (out == 0) result = 7;
-    if (D_004A4BC4->cur.mode >= 9) {
-        if (D_004A4BC4->cur.mode == 10) result = 0xC;
+    if (slogin_session->cur.mode >= 9) {
+        if (slogin_session->cur.mode == 10) result = 0xC;
         else result = 13;
     }
     if (result == 0) {
-        switch (D_004A4BC4->cur.step.phase) {
+        switch (slogin_session->cur.step.phase) {
         case 4:
-            D_004A4BC4->saved.step = D_004A4BC4->cur.step;
-            D_004A4BC4->cur.step.phase = 0;
+            slogin_session->saved.step = slogin_session->cur.step;
+            slogin_session->cur.step.phase = 0;
             *out = 1;
             break;
         case 0:
-            result = ((int (*)(void))D_004A4BC4->cur.step.start)();
+            result = ((int (*)(void))slogin_session->cur.step.start)();
             if (result == 0) {
-                D_004A4BC4->saved.step = D_004A4BC4->cur.step;
-                D_004A4BC4->cur.step.phase = 1;
+                slogin_session->saved.step = slogin_session->cur.step;
+                slogin_session->cur.step.phase = 1;
                 *out = 1;
             } else {
-                D_004A4BC4->saved.step = D_004A4BC4->cur.step;
-                D_004A4BC4->cur.step.phase = 2;
-                ((int (*)(int *))D_004A4BC4->cur.stepFn)(&startFailOut);
+                slogin_session->saved.step = slogin_session->cur.step;
+                slogin_session->cur.step.phase = 2;
+                ((int (*)(int *))slogin_session->cur.stepFn)(&startFailOut);
                 slogin_finishPhase();
             }
             break;
         case 1:
-            result = ((int (*)(int *))D_004A4BC4->cur.step.poll)(&st);
+            result = ((int (*)(int *))slogin_session->cur.step.poll)(&st);
             if (result == 0) {
                 *out = 1;
                 if (st == 2) {
@@ -3460,14 +3460,14 @@ int slogin_runModeStep(int *out) {
                     slogin_finishPhase();
                 }
             } else {
-                D_004A4BC4->saved.step = D_004A4BC4->cur.step;
-                D_004A4BC4->cur.step.phase = 2;
-                ((int (*)(int *))D_004A4BC4->cur.stepFn)(&pollFailOut);
+                slogin_session->saved.step = slogin_session->cur.step;
+                slogin_session->cur.step.phase = 2;
+                ((int (*)(int *))slogin_session->cur.stepFn)(&pollFailOut);
                 slogin_finishPhase();
             }
             break;
         case 2:
-            result = ((int (*)(void))D_004A4BC4->cur.step.finish)();
+            result = ((int (*)(void))slogin_session->cur.step.finish)();
             break;
         case 5:
             result = 0x10;
@@ -3478,9 +3478,9 @@ int slogin_runModeStep(int *out) {
         }
     }
     if (result == 0) {
-        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.nextModeFn)(out, &result);
+        if (*out == 2) ((void (*)(int *, int *))slogin_session->cur.nextModeFn)(out, &result);
     } else {
-        ((void (*)(int *, int *))D_004A4BC4->cur.errorFn)(out, &result);
+        ((void (*)(int *, int *))slogin_session->cur.errorFn)(out, &result);
     }
     return result;
 }
@@ -3491,9 +3491,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_onCardModeError);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int f7A60c(int, int) __asm__("slogin_enterCardMode");
 /**
@@ -3506,7 +3506,7 @@ extern int f7A60c(int, int) __asm__("slogin_enterCardMode");
  */
 int slogin_onCardModeError(int *statusOut, int *errorInOut) {
     *statusOut = 1;
-    D_004A4BC4->pendingError = *errorInOut;
+    slogin_session->pendingError = *errorInOut;
     *errorInOut = 0;
     return f7A60c(7, 0);
 }
@@ -3530,9 +3530,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_enterNextCardMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int f7A60c(int, int) __asm__("slogin_enterCardMode");
 int slogin_enterNextCardMode_impl(int *a, int *b) __asm__("slogin_enterNextCardMode");
@@ -3550,9 +3550,9 @@ int slogin_enterNextCardMode_impl(int *a, int *b) __asm__("slogin_enterNextCardM
 int slogin_enterNextCardMode_impl(int *statusOut, int *errorOut) {
     int x; int err = 0xC;
     *statusOut = 1;
-    switch (D_004A4BC4->cur.mode) {
+    switch (slogin_session->cur.mode) {
     case 0: x = 1; break;
-    case 1: { unsigned sel = D_004A4BC4->st;
+    case 1: { unsigned sel = slogin_session->st;
         if (sel >= 2) { if (sel != 2) goto fail; x = 4; } else x = 2; break; }
     case 2: x = 3; break;
     case 4: x = 5; break;
@@ -3582,9 +3582,9 @@ void slogin_onCloseModeDone(int *statusOut) { slogin_returnToIdle(); *statusOut 
 INCLUDE_ASM("seg/seg_2F41F8", slogin_reportKeptError);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_returnToIdle(void);
 /**
@@ -3596,8 +3596,8 @@ extern int slogin_returnToIdle(void);
  * @return slogin_returnToIdle's result (0)
  */
 int slogin_reportKeptError(int statusOut, int *errorOut) {
-    *errorOut = D_004A4BC4->pendingError;
-    D_004A4BC4->pendingError = 0;
+    *errorOut = slogin_session->pendingError;
+    slogin_session->pendingError = 0;
     return slogin_returnToIdle();
 }
 #endif
@@ -3606,9 +3606,9 @@ int slogin_reportKeptError(int statusOut, int *errorOut) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_enterFirstMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int f7A60c(int, int) __asm__("slogin_enterCardMode");
 int slogin_enterFirstMode_impl(int *a, int *b) __asm__("slogin_enterFirstMode");
@@ -3625,9 +3625,9 @@ int slogin_enterFirstMode_impl(int *a, int *b) __asm__("slogin_enterFirstMode");
  */
 int slogin_enterFirstMode_impl(int *statusOut, int *errorOut) {
     int ret;
-    if (D_004A4BC4->cur.mode == 9) {
+    if (slogin_session->cur.mode == 9) {
         *statusOut = 1;
-        switch (D_004A4BC4->st) {
+        switch (slogin_session->st) {
         case 0: ret = f7A60c(0, 1); break;
         case 1: case 2: ret = f7A60c(1, 1); break;
         case 3: ret = f7A60c(8, 1); break;
@@ -3645,9 +3645,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startCreateSave);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char str_slogin[];
 
@@ -3661,7 +3661,7 @@ extern int slogin_mapSaveRecordError_73A8(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_startCreateSave(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = slogin_onSaveCreated;
     session->cur.step.cleanup = 0;
     return slogin_mapSaveRecordError_73A8(saveRec_startCreate(str_slogin, -1, 0));
@@ -3673,9 +3673,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startOpenSave);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char str_slogin[];
 
@@ -3689,7 +3689,7 @@ extern int slogin_mapSaveRecordError_73F0(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_startOpenSave(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = slogin_onSaveOpened_73F0;
     session->cur.step.cleanup = 0;
     return slogin_mapSaveRecordError_73F0(saveRec_startOpen_73F0(str_slogin, -1, 0));
@@ -3701,9 +3701,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startDeleteSave);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char str_slogin[];
 
@@ -3716,7 +3716,7 @@ extern int slogin_mapSaveRecordError_7438(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_startDeleteSave(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = 0;
     session->cur.step.cleanup = 0;
     return slogin_mapSaveRecordError_7438(saveRec_startDelete(str_slogin, -1, 0));
@@ -3728,9 +3728,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startWriteName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /* A 0x11-byte name copied as a block. */
 struct sName17 { char b[17]; };
@@ -3757,15 +3757,15 @@ extern int slogin_mapSaveRecordError_7478(int) __asm__("slogin_mapSaveRecordErro
  */
 int slogin_startWriteName(void) {
     int result;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = fn78E0;
     session->cur.step.cleanup = fn7920;
     result = slogin_mapSaveRecordError_7478(saveRec_allocBuffer((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
-        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sNetAcct *sessionReload = slogin_session;
         struct sName17 *dst = (struct sName17 *)sessionReload->recordBuf;
         *dst = *(struct sName17 *)sessionReload->name;
-        result = slogin_mapSaveRecordError_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, D_004A4BC4->recordBuf, 17));
+        result = slogin_mapSaveRecordError_7478(fC548(&slogin_session->params, 0x41434354, 0, slogin_session->recordBuf, 17));
     }
     return result;
 }
@@ -3776,9 +3776,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startWritePassword);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /* A 0x11-byte name copied as a block. */
 extern char fn7958[] __asm__("slogin_freePasswordBuffer");
@@ -3795,15 +3795,15 @@ extern int slogin_mapSaveRecordError_7528(int) __asm__("slogin_mapSaveRecordErro
  */
 int slogin_startWritePassword(void) {
     int result;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = fn7900;
     session->cur.step.cleanup = fn7958;
     result = slogin_mapSaveRecordError_7528(saveRec_allocBuffer((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
-        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sNetAcct *sessionReload = slogin_session;
         struct sName17 *dst = (struct sName17 *)sessionReload->recordBuf;
         *dst = *(struct sName17 *)sessionReload->pass;
-        result = slogin_mapSaveRecordError_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, D_004A4BC4->recordBuf, 17));
+        result = slogin_mapSaveRecordError_7528(fC548(&slogin_session->params, 0x50415353, 0, slogin_session->recordBuf, 17));
     }
     return result;
 }
@@ -3814,9 +3814,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startReadName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char fn7920[] __asm__("slogin_freeNameBuffer");
 extern char fn7840[] __asm__("slogin_onNameRead");
@@ -3833,12 +3833,12 @@ extern int slogin_mapSaveRecordError_75D8(int) __asm__("slogin_mapSaveRecordErro
  */
 int slogin_startReadName(void) {
     int result;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = fn7840;
     session->cur.step.cleanup = fn7920;
     result = slogin_mapSaveRecordError_75D8(saveRec_allocBuffer((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
-        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sNetAcct *sessionReload = slogin_session;
         result = slogin_mapSaveRecordError_75D8(saveRec_startReadRecord(&sessionReload->params, 0x41434354, 0, sessionReload->recordBuf, 17));
     }
     return result;
@@ -3850,9 +3850,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startReadPassword);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char fn7958[] __asm__("slogin_freePasswordBuffer");
 extern char fn7890[] __asm__("slogin_onPasswordRead");
@@ -3869,12 +3869,12 @@ extern int slogin_mapSaveRecordError_7658(int) __asm__("slogin_mapSaveRecordErro
  */
 int slogin_startReadPassword(void) {
     int result;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = fn7890;
     session->cur.step.cleanup = fn7958;
     result = slogin_mapSaveRecordError_7658(saveRec_allocBuffer((char *)&session->recordBuf, session->heap, 17, 0));
     if (result == 0) {
-        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sNetAcct *sessionReload = slogin_session;
         result = slogin_mapSaveRecordError_7658(saveRec_startReadRecord(&sessionReload->params, 0x50415353, 0, sessionReload->recordBuf, 17));
     }
     return result;
@@ -3886,9 +3886,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startCloseSave);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int saveRec_startClose(struct sMcParams *);
 extern int slogin_mapSaveRecordError_76D8(int) __asm__("slogin_mapSaveRecordError");
@@ -3898,7 +3898,7 @@ extern int slogin_mapSaveRecordError_76D8(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_startCloseSave(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.step.completion = 0;
     session->cur.step.cleanup = 0;
     return slogin_mapSaveRecordError_76D8(saveRec_startClose(&session->params));
@@ -3910,9 +3910,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_pollCardMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int saveRec_update(int *, int *);
 extern int slogin_mapSaveRecordError_7708(int) __asm__("slogin_mapSaveRecordError");
@@ -3941,9 +3941,9 @@ int slogin_pollCardMode(int *out) {
             err = 23;
             break;
         case 2:
-            if (D_004A4BC4->cur.step.completion) {
-                err = ((int (*)(void))D_004A4BC4->cur.step.completion)();
-                D_004A4BC4->cur.step.completion = 0;
+            if (slogin_session->cur.step.completion) {
+                err = ((int (*)(void))slogin_session->cur.step.completion)();
+                slogin_session->cur.step.completion = 0;
             }
             if (err != 0)
                 break;
@@ -3955,9 +3955,9 @@ int slogin_pollCardMode(int *out) {
             break;
         }
     } else {
-        if (D_004A4BC4->cur.step.cleanup) {
-            err = ((int (*)(void))D_004A4BC4->cur.step.cleanup)();
-            D_004A4BC4->cur.step.cleanup = 0;
+        if (slogin_session->cur.step.cleanup) {
+            err = ((int (*)(void))slogin_session->cur.step.cleanup)();
+            slogin_session->cur.step.cleanup = 0;
         }
     }
     return err;
@@ -3981,9 +3981,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_onSaveCreated);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int saveRec_copySaveParams(struct sMcParams *);
 extern int slogin_mapSaveRecordError_77F8(int) __asm__("slogin_mapSaveRecordError");
@@ -3993,7 +3993,7 @@ extern int slogin_mapSaveRecordError_77F8(int) __asm__("slogin_mapSaveRecordErro
  *
  * @return the error mapped by slogin_mapSaveRecordError
  */
-int slogin_onSaveCreated(void) { return slogin_mapSaveRecordError_77F8(saveRec_copySaveParams(&D_004A4BC4->params)); }
+int slogin_onSaveCreated(void) { return slogin_mapSaveRecordError_77F8(saveRec_copySaveParams(&slogin_session->params)); }
 #endif
 
 //100%
@@ -4013,9 +4013,9 @@ int slogin_onSaveOpened(void) { return slogin_onSaveCreated(); }
 INCLUDE_ASM("seg/seg_2F41F8", slogin_onNameRead);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /* A 0x11-byte name copied as a block. */
 extern int slogin_freeNameBuffer(int);
@@ -4024,7 +4024,7 @@ extern int slogin_freeNameBuffer(int);
  * the record buffer (slogin_freeNameBuffer).
  */
 void slogin_onNameRead(void) {
-    D_004A4BC4->out->name = *(struct sName17 *)D_004A4BC4->recordBuf;
+    slogin_session->out->name = *(struct sName17 *)slogin_session->recordBuf;
     slogin_freeNameBuffer(0);
 }
 #endif
@@ -4033,9 +4033,9 @@ void slogin_onNameRead(void) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_onPasswordRead);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /* A 0x11-byte name copied as a block. */
 extern int slogin_freePasswordBuffer(int);
@@ -4044,7 +4044,7 @@ extern int slogin_freePasswordBuffer(int);
  * record buffer (slogin_freePasswordBuffer).
  */
 void slogin_onPasswordRead(void) {
-    D_004A4BC4->out->pass = *(struct sName17 *)D_004A4BC4->recordBuf;
+    slogin_session->out->pass = *(struct sName17 *)slogin_session->recordBuf;
     slogin_freePasswordBuffer(0);
 }
 #endif
@@ -4080,9 +4080,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_freeNameBuffer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int saveRec_freeBuffer_7920(char *, int, int, int) __asm__("saveRec_freeBuffer");
 extern int slogin_mapSaveRecordError_7920(int) __asm__("slogin_mapSaveRecordError");
@@ -4093,7 +4093,7 @@ extern int slogin_mapSaveRecordError_7920(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_freeNameBuffer(int ignored) {
-    return slogin_mapSaveRecordError_7920(saveRec_freeBuffer_7920(D_004A4BC4->recordBuf, D_004A4BC4->heap, 17, 0));
+    return slogin_mapSaveRecordError_7920(saveRec_freeBuffer_7920(slogin_session->recordBuf, slogin_session->heap, 17, 0));
 }
 #endif
 
@@ -4102,9 +4102,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_freePasswordBuffer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int saveRec_freeBuffer_7958(char *, int, int, int) __asm__("saveRec_freeBuffer");
 extern int slogin_mapSaveRecordError_7958(int) __asm__("slogin_mapSaveRecordError");
@@ -4116,7 +4116,7 @@ extern int slogin_mapSaveRecordError_7958(int) __asm__("slogin_mapSaveRecordErro
  * @return the error mapped by slogin_mapSaveRecordError
  */
 int slogin_freePasswordBuffer(int ignored) {
-    return slogin_mapSaveRecordError_7958(saveRec_freeBuffer_7958(D_004A4BC4->recordBuf, D_004A4BC4->heap, 17, 0));
+    return slogin_mapSaveRecordError_7958(saveRec_freeBuffer_7958(slogin_session->recordBuf, slogin_session->heap, 17, 0));
 }
 #endif
 
@@ -4125,9 +4125,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_beginOperation);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char fn6EE0[] __asm__("slogin_advanceOperation");
 extern char fn7328[] __asm__("slogin_enterFirstMode");
@@ -4145,26 +4145,26 @@ int f7990(unsigned a) __asm__("slogin_beginOperation");
 int f7990(unsigned operation) {
     int errorCode = 0;
     unsigned i;
-    D_004A4BC4->st = operation;
-    D_004A4BC4->lastOperation = operation;
+    slogin_session->st = operation;
+    slogin_session->lastOperation = operation;
     if (operation < 4) {
-        D_004A4BC4->operationPoll = fn6EE0;
+        slogin_session->operationPoll = fn6EE0;
     } else {
         errorCode = 0xF;
     }
-    D_004A4BC4->cur.mode = 9;
-    D_004A4BC4->cur.step.phase = 4;
-    D_004A4BC4->cur.dispatchFn = fn7328;
-    D_004A4BC4->cur.nextModeFn = 0;
-    D_004A4BC4->cur.errorFn = 0;
-    D_004A4BC4->cur.stepFn = 0;
+    slogin_session->cur.mode = 9;
+    slogin_session->cur.step.phase = 4;
+    slogin_session->cur.dispatchFn = fn7328;
+    slogin_session->cur.nextModeFn = 0;
+    slogin_session->cur.errorFn = 0;
+    slogin_session->cur.stepFn = 0;
     for (i = 0; i < 3; i++)
         ;
-    D_004A4BC4->cur.step.start = 0;
-    D_004A4BC4->cur.step.poll = 0;
-    D_004A4BC4->cur.step.finish = 0;
-    D_004A4BC4->cur.step.completion = 0;
-    D_004A4BC4->cur.step.cleanup = 0;
+    slogin_session->cur.step.start = 0;
+    slogin_session->cur.step.poll = 0;
+    slogin_session->cur.step.finish = 0;
+    slogin_session->cur.step.completion = 0;
+    slogin_session->cur.step.cleanup = 0;
     return errorCode;
 }
 #endif
@@ -4173,9 +4173,9 @@ int f7990(unsigned operation) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_endOperation);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_returnToIdle(void);
 /**
@@ -4185,7 +4185,7 @@ extern int slogin_returnToIdle(void);
  * @return 0
  */
 int slogin_endOperation(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->st = 4;
     session->operationPoll = 0;
     session->cur.dispatchFn = 0;
@@ -4198,9 +4198,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_enterCardMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 // (prototype from their definition at line 1929)
 int slogin_onCloseModeError_7A60(void) __asm__("slogin_onCloseModeError");
@@ -4231,23 +4231,23 @@ extern int slogin_installCardFunctions(void);
  */
 int slogin_enterCardMode(int mode, unsigned char copy) {
     int err = 0;
-    D_004A4BC4->cur.mode = mode;
+    slogin_session->cur.mode = mode;
     if (copy)
-        D_004A4BC4->saved = D_004A4BC4->cur;
-    if (D_004A4BC4->cur.mode < 9)
-        D_004A4BC4->cur.stepFn = (void *)slogin_runModeStep;
+        slogin_session->saved = slogin_session->cur;
+    if (slogin_session->cur.mode < 9)
+        slogin_session->cur.stepFn = (void *)slogin_runModeStep;
     else
         err = 13;
     if (err == 0) {
-        switch (D_004A4BC4->cur.mode) {
+        switch (slogin_session->cur.mode) {
         case 0: case 1: case 2: case 3: case 4: case 5:
-            D_004A4BC4->cur.nextModeFn = (void *)slogin_enterNextCardMode;
+            slogin_session->cur.nextModeFn = (void *)slogin_enterNextCardMode;
             break;
         case 6: case 8:
-            D_004A4BC4->cur.nextModeFn = (void *)slogin_onCloseModeDone_7A60;
+            slogin_session->cur.nextModeFn = (void *)slogin_onCloseModeDone_7A60;
             break;
         case 7:
-            D_004A4BC4->cur.nextModeFn = (void *)slogin_reportKeptError;
+            slogin_session->cur.nextModeFn = (void *)slogin_reportKeptError;
             break;
         default:
             err = 13;
@@ -4255,15 +4255,15 @@ int slogin_enterCardMode(int mode, unsigned char copy) {
         }
     }
     if (err == 0) {
-        switch (D_004A4BC4->cur.mode) {
+        switch (slogin_session->cur.mode) {
         case 0: case 1: case 2: case 3: case 4: case 5:
-            D_004A4BC4->cur.errorFn = (void *)slogin_onCardModeError;
+            slogin_session->cur.errorFn = (void *)slogin_onCardModeError;
             break;
         case 6: case 8:
-            D_004A4BC4->cur.errorFn = (void *)slogin_onCloseModeError_7A60;
+            slogin_session->cur.errorFn = (void *)slogin_onCloseModeError_7A60;
             break;
         case 7:
-            D_004A4BC4->cur.errorFn = (void *)slogin_reportKeptError;
+            slogin_session->cur.errorFn = (void *)slogin_reportKeptError;
             break;
         }
     }
@@ -4275,9 +4275,9 @@ int slogin_enterCardMode(int mode, unsigned char copy) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_returnToIdle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_finishPhase(void);
 /**
@@ -4287,7 +4287,7 @@ extern int slogin_finishPhase(void);
  * @return 0
  */
 int slogin_returnToIdle(void) {
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     session->cur.mode = 10;
     session->cur.stepFn = 0;
     session->cur.nextModeFn = 0;
@@ -4301,9 +4301,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_installCardFunctions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 // (prototype from their definition at line 2049)
 int slogin_startWritePassword(void);
@@ -4348,31 +4348,31 @@ int slogin_installCardFunctions(void) {
     int errorCode;
     unsigned i;
     i = errorCode = 0;
-    D_004A4BC4->cur.step.phase = 4;
-    D_004A4BC4->saved.step = D_004A4BC4->cur.step;
+    slogin_session->cur.step.phase = 4;
+    slogin_session->saved.step = slogin_session->cur.step;
     for (i = 0; i < 3; i++) ;
-    switch (D_004A4BC4->cur.mode) {
-    case 0: D_004A4BC4->cur.step.start = (void *)slogin_startCreateSave; break;
-    case 1: D_004A4BC4->cur.step.start = (void *)slogin_startOpenSave; break;
-    case 2: D_004A4BC4->cur.step.start = (void *)slogin_startWriteName; break;
-    case 3: D_004A4BC4->cur.step.start = (void *)slogin_startWritePassword; break;
-    case 4: D_004A4BC4->cur.step.start = (void *)slogin_startReadName; break;
-    case 5: D_004A4BC4->cur.step.start = (void *)slogin_startReadPassword; break;
+    switch (slogin_session->cur.mode) {
+    case 0: slogin_session->cur.step.start = (void *)slogin_startCreateSave; break;
+    case 1: slogin_session->cur.step.start = (void *)slogin_startOpenSave; break;
+    case 2: slogin_session->cur.step.start = (void *)slogin_startWriteName; break;
+    case 3: slogin_session->cur.step.start = (void *)slogin_startWritePassword; break;
+    case 4: slogin_session->cur.step.start = (void *)slogin_startReadName; break;
+    case 5: slogin_session->cur.step.start = (void *)slogin_startReadPassword; break;
     case 6:
-    case 7: D_004A4BC4->cur.step.start = (void *)slogin_startCloseSave; break;
-    case 8: D_004A4BC4->cur.step.start = (void *)slogin_startDeleteSave; break;
+    case 7: slogin_session->cur.step.start = (void *)slogin_startCloseSave; break;
+    case 8: slogin_session->cur.step.start = (void *)slogin_startDeleteSave; break;
     default: errorCode = 13;
     }
     if (errorCode == 0) {
-        if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.step.poll = (void *)slogin_pollCardMode;
+        if (slogin_session->cur.mode < 9) slogin_session->cur.step.poll = (void *)slogin_pollCardMode;
         else errorCode = 13;
         if (errorCode == 0) {
-            if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.step.finish = (void *)slogin_defaultPhase2_7C00;
+            if (slogin_session->cur.mode < 9) slogin_session->cur.step.finish = (void *)slogin_defaultPhase2_7C00;
             else errorCode = 13;
         }
     }
-    D_004A4BC4->cur.step.completion = 0;
-    D_004A4BC4->cur.step.cleanup = 0;
+    slogin_session->cur.step.completion = 0;
+    slogin_session->cur.step.cleanup = 0;
     return errorCode;
 }
 #endif
@@ -4381,9 +4381,9 @@ int slogin_installCardFunctions(void) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_finishPhase);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /**
  * Finishes the current network-account mode's phase: phase 5, with the start, poll and phase-2 functions, the
@@ -4394,14 +4394,14 @@ extern struct sNetAcct *D_004A4BC4;
 int slogin_finishPhase(void) {
     unsigned int i;
     int *handlerSlot;
-    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *session = slogin_session;
     struct sNetAcct *sessionReload;
     session->cur.step.phase = 5;
     handlerSlot = (int *)&session->cur.step.start;
     for (i = 0; i < 3; i++) {
         *handlerSlot++ = 0;
     }
-    sessionReload = D_004A4BC4;
+    sessionReload = slogin_session;
     sessionReload->cur.step.completion = 0;
     sessionReload->cur.step.cleanup = 0;
     return 0;
@@ -4413,7 +4413,7 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_checkIconCrc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* The output block a digest interface's finish slot hands back (the CRC one: crcIface_finish, +0x4 of D_00451518). */
+/* The output block a digest interface's finish slot hands back (the CRC one: crcIface_finish, +0x4 of crcIface_state). */
 typedef struct { int size; unsigned *digest; } sDigestBlock;
 /* The CRC interface's reset / update / finish slots (as sMcIfB, names ours) */
 typedef struct { char pad[0xC]; int (*reset)(void); int (*update)(int,
@@ -4522,9 +4522,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startCreateAccount);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 // (prototype from their definition at line 1882)
 int slogin_startOperation_7F48(int a) __asm__("slogin_startOperation");
@@ -4548,8 +4548,8 @@ int slogin_startCreateAccount(int iconData, int accountBuf) {
     if (iconData == 0 && accountBuf == 0) {
         err = 7;
     } else {
-        f7E90(D_004A4BC4->name, accountBuf, 17);
-        f7E90(D_004A4BC4->pass, accountBuf + 17, 17);
+        f7E90(slogin_session->name, accountBuf, 17);
+        f7E90(slogin_session->pass, accountBuf + 17, 17);
     }
     if (err == 0) {
         err = slogin_checkIconCrc_7F48(iconData);
@@ -4566,9 +4566,9 @@ int slogin_startCreateAccount(int iconData, int accountBuf) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_startReadAccount);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_startOperation(int);
 /**
@@ -4582,7 +4582,7 @@ int slogin_startReadAccount(struct sAcctOut *accountBuf) {
     if (accountBuf == 0) {
         errorCode = 7;
     } else {
-        D_004A4BC4->out = accountBuf;
+        slogin_session->out = accountBuf;
     }
     if (errorCode == 0) {
         errorCode = slogin_startOperation(2);
@@ -4596,9 +4596,9 @@ INCLUDE_ASM("seg/seg_2F41F8", slogin_startSaveAccount);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern char *slogin_copyStringBounded_8048(char *, char *, int) __asm__("slogin_copyStringBounded");
 extern int slogin_startOperation(int);
@@ -4615,8 +4615,8 @@ int slogin_startSaveAccount(char *name) {
     if (name == 0) {
         errorCode = 7;
     } else {
-        slogin_copyStringBounded_8048(D_004A4BC4->name, name, 17);
-        slogin_copyStringBounded_8048(D_004A4BC4->pass, name + 0x11, 17);
+        slogin_copyStringBounded_8048(slogin_session->name, name, 17);
+        slogin_copyStringBounded_8048(slogin_session->pass, name + 0x11, 17);
     }
     if (errorCode == 0) errorCode = slogin_startOperation(1);
     return errorCode;
@@ -4640,9 +4640,9 @@ int slogin_startDeleteAccount(void) { return slogin_startOperation(3); }
 INCLUDE_ASM("seg/seg_2F41F8", slogin_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 extern int slogin_endOperation(void);
 /**
@@ -4661,8 +4661,8 @@ int slogin_update(int *out) {
         err = 7;
     } else {
         *out = 0;
-        if (D_004A4BC4->st != 4) {
-            err = ((int (*)(int *))D_004A4BC4->operationPoll)(out);
+        if (slogin_session->st != 4) {
+            err = ((int (*)(int *))slogin_session->operationPoll)(out);
             if (err == 0) {
                 status = *out;
                 if (status == 2) {
@@ -4717,9 +4717,9 @@ int slogin_mapSaveRecordError(int sysError) {
 INCLUDE_ASM("seg/seg_2F41F8", slogin_getLastOperation);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /**
  * Stores the last network-account operation started (+0x104) in *@p operationOut.
@@ -4727,16 +4727,16 @@ extern struct sNetAcct *D_004A4BC4;
  * @param operationOut  output
  * @return 0
  */
-int slogin_getLastOperation(int *operationOut) { *operationOut = D_004A4BC4->lastOperation; return 0; }
+int slogin_getLastOperation(int *operationOut) { *operationOut = slogin_session->lastOperation; return 0; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", slogin_getSavedMode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BC4: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
+/* slogin_session: the network account session (0x14C bytes, slogin_createSession). cur / saved are the current and the saved
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
-extern struct sNetAcct *D_004A4BC4;
+extern struct sNetAcct *slogin_session;
 
 /**
  * Stores the mode kept in the saved phase block (+0x10C) in *@p modeOut.
@@ -4744,7 +4744,7 @@ extern struct sNetAcct *D_004A4BC4;
  * @param modeOut  output
  * @return 0
  */
-int slogin_getSavedMode(int *modeOut) { *modeOut = D_004A4BC4->saved.mode; return 0; }
+int slogin_getSavedMode(int *modeOut) { *modeOut = slogin_session->saved.mode; return 0; }
 #endif
 
 //100%
@@ -4901,7 +4901,7 @@ int mcReq_findHighestSlot(unsigned mask) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_findNextSlot);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 struct sMcReqBody { int port; int slot; char dir[32]; char file[32]; char name[0x18]; };
 
 struct sMcReq {
@@ -4916,17 +4916,17 @@ struct sMcReq {
                                            the card call's result */
 };
 
-extern struct sMcReq *D_004A4BD8;
+extern struct sMcReq *mcReq_current;
 
 /**
- * Returns the next usable memory-card slot after the request's current one (+0x10 of D_004A4BD8).
+ * Returns the next usable memory-card slot after the request's current one (+0x10 of mcReq_current).
  *
  * @param slotMask  usable-slot bit mask
  * @param dir  0 to search upward, 1 downward
  * @return the slot, -1 when there is none, or 18 for another @p dir
  */
 int mcReq_findNextSlot(unsigned short slotMask, int dir) {
-    short i = D_004A4BD8->body.slot;
+    short i = mcReq_current->body.slot;
     int nextSlot;
     if (dir == 0) {
         i++;
@@ -4966,18 +4966,18 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_setError);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 void mcReq_setError_impl(int a) __asm__("mcReq_setError");
 /**
- * Records the memory-card request's error (D_004A4BD8 +0x8), unless the request is already one of the cleanup
+ * Records the memory-card request's error (mcReq_current +0x8), unless the request is already one of the cleanup
  * operations 11..13, which keep the error that caused them.
  *
  * @param errorCode  the error (0 clears it)
  */
 void mcReq_setError_impl(int errorCode) {
-    struct sMcReq *request = D_004A4BD8;
+    struct sMcReq *request = mcReq_current;
     if ((unsigned)(request->op - 11) >= 3) request->error = errorCode;
 }
 #endif
@@ -4986,25 +4986,25 @@ void mcReq_setError_impl(int errorCode) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_getError);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
- * Returns the error recorded for the memory-card request (D_004A4BD8 +0x8, set by mcReq_setError).
+ * Returns the error recorded for the memory-card request (mcReq_current +0x8, set by mcReq_setError).
  *
  * @return the recorded error
  */
-int mcReq_getError(void) { return D_004A4BD8->error; }
+int mcReq_getError(void) { return mcReq_current->error; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_startFlushCleanup);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. The callback
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. The callback
    names are ours, from [U] the step handlers (mcReq_stepCreate create, mcReq_stepDelete delete, the cleanups mcReq_startFlushCleanup /
    mcReq_startCloseCleanup / mcReq_startReleaseCleanup, the read / write / seek / close starters and the poll mcReq_update). */
 struct sMcDrv {
@@ -5035,7 +5035,7 @@ struct sMcDrv {
     int h;                              /* 0x428: heap */
 };
 
-extern struct sMcDrv *D_004A4BDC;
+extern struct sMcDrv *mcReq_driver;
 
 /**
  * Starts the cleanup of a failed memory-card request that has a file open: operation 11, state 24, flushing the file
@@ -5051,8 +5051,8 @@ int mcReq_startFlushCleanup(struct sMcReqBody *reqBody, int *out) {
     struct sMcReq *request;
     struct sMcDrv *driver;
     *out = 1;
-    request = D_004A4BD8;
-    driver = D_004A4BDC;
+    request = mcReq_current;
+    driver = mcReq_driver;
     request->op = 11;
     request->st = 0x18;
     driver->flush(request->body.port);
@@ -5064,11 +5064,11 @@ int mcReq_startFlushCleanup(struct sMcReqBody *reqBody, int *out) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_startCloseCleanup);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 /**
  * Starts the cleanup of a failed memory-card request at the close step: operation 12, state 25, closing the file
@@ -5082,8 +5082,8 @@ int mcReq_startCloseCleanup(struct sMcReqBody *reqBody, int *out) {
     struct sMcReq *request;
     struct sMcDrv *driver;
     *out = 1;
-    request = D_004A4BD8;
-    driver = D_004A4BDC;
+    request = mcReq_current;
+    driver = mcReq_driver;
     request->op = 0xC;
     request->st = 25;
     driver->close(request->body.port);
@@ -5095,11 +5095,11 @@ int mcReq_startCloseCleanup(struct sMcReqBody *reqBody, int *out) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_startReleaseCleanup);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 /**
  * Starts the cleanup of a failed memory-card request at the last step: operation 13, state 26, releasing the card unit
@@ -5113,8 +5113,8 @@ int mcReq_startReleaseCleanup(int unitCode, int *out) {
     struct sMcReq *request;
     struct sMcDrv *driver;
     *out = 1;
-    request = D_004A4BD8;
-    driver = D_004A4BDC;
+    request = mcReq_current;
+    driver = mcReq_driver;
     request->op = 13;
     request->st = 26;
     driver->releaseUnit(unitCode);
@@ -5139,8 +5139,8 @@ int mcReq_acceptAnyResult(int cardResult) { return cardResult; }
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkUnitResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 1 (unit check): accepts results 0, 3 and 17.
@@ -5149,7 +5149,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 when the request is not in state 1, or 0x10 for any other result
  */
 int mcReq_checkUnitResult(int cardResult) {
-    if (D_004A4BD8->st != 1) return 18;
+    if (mcReq_current->st != 1) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5159,8 +5159,8 @@ int mcReq_checkUnitResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkSearchResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 2 (directory search): accepts results 0, 3, 4, 9 and 17.
@@ -5169,7 +5169,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 when the request is not in state 2, or 0x10 for any other result
  */
 int mcReq_checkSearchResult(int cardResult) {
-    if (D_004A4BD8->st != 2) return 18;
+    if (mcReq_current->st != 2) return 18;
     if (cardResult != 0 && cardResult != 4 && cardResult != 3 && cardResult != 9 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5179,8 +5179,8 @@ int mcReq_checkSearchResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkTransferResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of the memory-card read, write and seek states (27, 28, 29 and the create steps 7 and 11): accepts
@@ -5193,7 +5193,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkTransferResult(int cardResult) {
-    int state = D_004A4BD8->st;
+    int state = mcReq_current->st;
     if (state != 27 && state != 29 && state != 0x1C && state != 7 && state != 11 && state != 0x18) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 0xE && cardResult != 13 && cardResult != 17 && cardResult != 10) return 0x10;
     return cardResult;
@@ -5204,8 +5204,8 @@ int mcReq_checkTransferResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkFlushResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of the memory-card flush states (8, 12, 16 and 24): accepts results 0, 3, 4, 9 and 17.
@@ -5214,7 +5214,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkFlushResult(int cardResult) {
-    int state = D_004A4BD8->st;
+    int state = mcReq_current->st;
     if (state != 0x18 && state != 8 && state != 0xC && state != 0x10) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
     return cardResult;
@@ -5225,8 +5225,8 @@ int mcReq_checkFlushResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkCloseResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of the memory-card close states (9, 13, 17 and 25): accepts results 0, 3, 4, 9 and 17.
@@ -5235,7 +5235,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkCloseResult(int cardResult) {
-    int state = D_004A4BD8->st;
+    int state = mcReq_current->st;
     if (state != 25 && state != 9 && state != 13 && state != 17) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
     return cardResult;
@@ -5246,8 +5246,8 @@ int mcReq_checkCloseResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkReleaseResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 26 (unit released): accepts results 0, 3, 9 and 17.
@@ -5256,7 +5256,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkReleaseResult(int cardResult) {
-    if (D_004A4BD8->st != 26) return 18;
+    if (mcReq_current->st != 26) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 9 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5266,8 +5266,8 @@ int mcReq_checkReleaseResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkMkdirResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 5 (directory created): accepts results 0, 3, 8, 9, 14 and 17.
@@ -5276,7 +5276,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkMkdirResult(int cardResult) {
-    if (D_004A4BD8->st != 5) return 18;
+    if (mcReq_current->st != 5) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 9 && cardResult != 0xE && cardResult != 8 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5286,8 +5286,8 @@ int mcReq_checkMkdirResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkOpenResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of the memory-card file-open states (6, 10, 14 and 22): accepts results 0, 3, 4, 9, 13 and 17.
@@ -5296,7 +5296,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkOpenResult(int cardResult) {
-    int state = D_004A4BD8->st;
+    int state = mcReq_current->st;
     if (state != 22 && state != 6 && state != 0xE && state != 10) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 17) return 0x10;
     return cardResult;
@@ -5307,8 +5307,8 @@ int mcReq_checkOpenResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkDeleteResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of the memory-card file-delete states (19..21): accepts results 0, 3, 4, 5, 6, 9, 13 and 17.
@@ -5317,7 +5317,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkDeleteResult(int cardResult) {
-    if ((unsigned)(D_004A4BD8->st - 19) >= 3) return 18;
+    if ((unsigned)(mcReq_current->st - 19) >= 3) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 6 && cardResult != 5 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5327,8 +5327,8 @@ int mcReq_checkDeleteResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkRmdirResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 18 (directory deleted): accepts results 0, 3, 4, 9, 13 and 17.
@@ -5337,7 +5337,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkRmdirResult(int cardResult) {
-    if (D_004A4BD8->st != 18) return 18;
+    if (mcReq_current->st != 18) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5347,8 +5347,8 @@ int mcReq_checkRmdirResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkFreeSpaceResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 3 (free space read): accepts results 0, 3 and 17.
@@ -5357,7 +5357,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkFreeSpaceResult(int cardResult) {
-    int state = D_004A4BD8->st;
+    int state = mcReq_current->st;
     if (state != 3) return 18;
     if (cardResult != 0 && cardResult != state && cardResult != 17) return 0x10;
     return cardResult;
@@ -5368,8 +5368,8 @@ int mcReq_checkFreeSpaceResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkSpaceQueryResult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 4 (second space query): accepts results 0, 3 and 17.
@@ -5378,7 +5378,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkSpaceQueryResult(int cardResult) {
-    if (D_004A4BD8->st != 4) return 18;
+    if (mcReq_current->st != 4) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5388,8 +5388,8 @@ int mcReq_checkSpaceQueryResult(int cardResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_checkState23Result);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Result check of memory-card request state 23: accepts results 0, 3, 4, 9 and 17. No request step enters state 23.
@@ -5398,7 +5398,7 @@ extern struct sMcReq *D_004A4BD8;
  * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
 int mcReq_checkState23Result(int cardResult) {
-    if (D_004A4BD8->st != 23) return 18;
+    if (mcReq_current->st != 23) return 18;
     if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
     return cardResult;
 }
@@ -5422,10 +5422,10 @@ int mcReq_stepNoOperation(int cardResult) { return cardResult; }
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepOpen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 extern void f86F0(int) __asm__("mcReq_setError");
 extern int mcReq_findNextSlot(unsigned short v, int dir);
 extern int mcReq_getError(void);
@@ -5453,27 +5453,27 @@ int mcReq_stepOpen(int callResult, int *out, int *pollResult) {
     char buf[80];
     if (out == 0) return 18;
     if (pollResult == 0) return 18;
-    op = D_004A4BD8->op;
+    op = mcReq_current->op;
     if (op != 3 && op != 6) return 18;
     *out = 1;
-    switch ((unsigned)D_004A4BD8->st) {
+    switch ((unsigned)mcReq_current->st) {
     case 1:
         if (callResult == 0) {
-            mcReq_buildSearchPattern(buf, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
-            D_004A4BD8->st = 2;
-            D_004A4BDC->getDir(buf, D_004A4BD8->body.slot);
+            mcReq_buildSearchPattern(buf, &mcReq_driver->saveDesc, mcReq_current->body.name);
+            mcReq_current->st = 2;
+            mcReq_driver->getDir(buf, mcReq_current->body.slot);
             break;
         }
         if (callResult != 3) {
             *out = 2;
             return callResult;
         }
-        if (D_004A4BD8->op == 3) {
-            slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-            D_004A4BD8->body.slot = slot;
+        if (mcReq_current->op == 3) {
+            slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+            mcReq_current->body.slot = slot;
             if (slot != -1) {
-                D_004A4BD8->st = 1;
-                D_004A4BDC->checkUnit(slot);
+                mcReq_current->st = 1;
+                mcReq_driver->checkUnit(slot);
                 return 0;
             }
         }
@@ -5482,38 +5482,38 @@ int mcReq_stepOpen(int callResult, int *out, int *pollResult) {
     case 2:
         if (callResult == 0) {
             if (*pollResult == 1) {
-                fA818(D_004A4BD8->body.dir, D_004A4BD8->body.file, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
-                D_004A4BD8->st = 22;
-                D_004A4BDC->open(D_004A4BD8->body.dir, D_004A4BD8->body.file, D_004A4BD8->body.slot, 3);
+                fA818(mcReq_current->body.dir, mcReq_current->body.file, &mcReq_driver->saveDesc, mcReq_current->body.name);
+                mcReq_current->st = 22;
+                mcReq_driver->open(mcReq_current->body.dir, mcReq_current->body.file, mcReq_current->body.slot, 3);
                 break;
             }
             if (*pollResult == 0) {
                 f86F0(4);
-                D_004A4BD8->st = 26;
-                D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+                mcReq_current->st = 26;
+                mcReq_driver->releaseUnit(mcReq_current->body.slot);
                 break;
             }
             *out = 2;
             return 10;
         }
         f86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, out);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, out);
     case 22:
         if (callResult == 0) {
             if (*pollResult >= 0) {
-                D_004A4BD8->body.port = *pollResult;
+                mcReq_current->body.port = *pollResult;
                 *out = 2;
                 return 0;
             }
-            D_004A4BD8->body.port = *pollResult;
+            mcReq_current->body.port = *pollResult;
             *out = 2;
             return 10;
         }
         f86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, out);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, out);
     case 26:
         if (callResult == 0) {
-            if (D_004A4BD8->op == 4 || D_004A4BD8->op == 6) {
+            if (mcReq_current->op == 4 || mcReq_current->op == 6) {
                 *out = 2;
                 return mcReq_getError();
             }
@@ -5521,11 +5521,11 @@ int mcReq_stepOpen(int callResult, int *out, int *pollResult) {
                 *out = 2;
                 break;
             }
-            slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-            D_004A4BD8->body.slot = slot;
+            slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+            mcReq_current->body.slot = slot;
             if (slot != -1) {
-                D_004A4BD8->st = 1;
-                D_004A4BDC->checkUnit(slot);
+                mcReq_current->st = 1;
+                mcReq_driver->checkUnit(slot);
                 return 0;
             }
             *out = 2;
@@ -5545,8 +5545,8 @@ int mcReq_stepOpen(int callResult, int *out, int *pollResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepTransfer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 extern void f86F0(int) __asm__("mcReq_setError");
 /**
@@ -5565,21 +5565,21 @@ int mcReq_stepTransfer(int callResult, int *out, int *pollResult) {
     int op;
     if (out == 0) return 18;
     if (pollResult == 0) return 18;
-    op = D_004A4BD8->op;
+    op = mcReq_current->op;
     if (op != 8 && op != 10 && op != 9) return 18;
     *out = 1;
-    switch ((unsigned)D_004A4BD8->st) {
+    switch ((unsigned)mcReq_current->st) {
     case 27:
         if (callResult == 0) {
             *out = 2;
             return 0;
         }
         f86F0(callResult);
-        return mcReq_startFlushCleanup(&D_004A4BD8->body, out);
+        return mcReq_startFlushCleanup(&mcReq_current->body, out);
     case 0x1C:
     case 29:
         if (callResult == 0) {
-            if (D_004A4BD8->expected == *pollResult) {
+            if (mcReq_current->expected == *pollResult) {
                 *out = 2;
                 return 0;
             }
@@ -5587,7 +5587,7 @@ int mcReq_stepTransfer(int callResult, int *out, int *pollResult) {
             return 10;
         }
         f86F0(callResult);
-        return mcReq_startFlushCleanup(&D_004A4BD8->body, out);
+        return mcReq_startFlushCleanup(&mcReq_current->body, out);
     }
     *out = 2;
     return 18;
@@ -5598,10 +5598,10 @@ int mcReq_stepTransfer(int callResult, int *out, int *pollResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepClose);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern void f86F0(int) __asm__("mcReq_setError");
 /**
@@ -5617,25 +5617,25 @@ extern void f86F0(int) __asm__("mcReq_setError");
 int mcReq_stepClose(int callResult, int *out, int pollResult) {
     if (out == 0) return 18;
     if (pollResult == 0) return 18;
-    if (D_004A4BD8->op != 7) return 18;
+    if (mcReq_current->op != 7) return 18;
     *out = 1;
-    switch ((unsigned)D_004A4BD8->st) {
+    switch ((unsigned)mcReq_current->st) {
     case 0x18:
         if (callResult == 0) {
-            D_004A4BD8->st = 25;
-            D_004A4BDC->close(D_004A4BD8->body.port);
+            mcReq_current->st = 25;
+            mcReq_driver->close(mcReq_current->body.port);
             break;
         }
         f86F0(callResult);
-        return mcReq_startCloseCleanup(&D_004A4BD8->body, out);
+        return mcReq_startCloseCleanup(&mcReq_current->body, out);
     case 25:
         if (callResult == 0) {
-            D_004A4BD8->st = 26;
-            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+            mcReq_current->st = 26;
+            mcReq_driver->releaseUnit(mcReq_current->body.slot);
             break;
         }
         f86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, out);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, out);
     case 26:
         if (callResult == 0) {
             *out = 2;
@@ -5654,11 +5654,11 @@ int mcReq_stepClose(int callResult, int *out, int pollResult) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepCleanup);
 #ifdef SKIP_ASM
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_getError(void);
 /**
@@ -5671,16 +5671,16 @@ extern int mcReq_getError(void);
  * @return 0 while running, the recorded error when finished, or 18 for a bad state
  */
 int mcReq_stepCleanup(int callResult, int *out, int pollResult) {
-    if (out == 0 || pollResult == 0 || (unsigned)(D_004A4BD8->op - 11) > 2) return 18;
+    if (out == 0 || pollResult == 0 || (unsigned)(mcReq_current->op - 11) > 2) return 18;
     *out = 1;
-    switch ((unsigned)D_004A4BD8->st) {
+    switch ((unsigned)mcReq_current->st) {
     case 0x18:
-        D_004A4BD8->st = 25;
-        D_004A4BDC->close(D_004A4BD8->body.port);
+        mcReq_current->st = 25;
+        mcReq_driver->close(mcReq_current->body.port);
         break;
     case 25:
-        D_004A4BD8->st = 26;
-        D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+        mcReq_current->st = 26;
+        mcReq_driver->releaseUnit(mcReq_current->body.slot);
         break;
     case 26:
         *out = 2;
@@ -5697,26 +5697,26 @@ int mcReq_stepCleanup(int callResult, int *out, int pollResult) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_isOpen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 /**
- * Returns whether the memory-card request layer is open (its driver block D_004A4BDC exists).
+ * Returns whether the memory-card request layer is open (its driver block mcReq_driver exists).
  *
  * @return 1 when open, else 0
  */
-int mcReq_isOpen(void) { return D_004A4BDC != 0; }
+int mcReq_isOpen(void) { return mcReq_driver != 0; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_open);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 /* The caller's callback table (17 entries, copied slot by slot to sMcDrv 0x04..0x44, so each slot has the type and the
    name of the sMcDrv slot it fills); every entry is required. */
@@ -5750,8 +5750,8 @@ int mcReq_open_impl(int *ports, struct sMcCallbacks *cb, int heap) __asm__("mcRe
 /**
  * Opens the memory-card request layer.
  *
- * Checks the arguments (every one of the 17 callbacks must be set), allocates the 1068-byte driver block D_004A4BDC and
- * the 116-byte request D_004A4BD8 from @p heap, builds the usable-unit mask from @p ports (a -1-terminated list of unit
+ * Checks the arguments (every one of the 17 callbacks must be set), allocates the 1068-byte driver block mcReq_driver and
+ * the 116-byte request mcReq_current from @p heap, builds the usable-unit mask from @p ports (a -1-terminated list of unit
  * codes 0..7, or 9 for all eight; at most 8 entries), copies the callbacks to driver +0x4..+0x44 and installs the
  * per-operation and per-state tables D_00451468 / D_004514A0. Quirk: on the second allocation failure the driver block
  * stays allocated and set.
@@ -5775,43 +5775,43 @@ int mcReq_open_impl(int *ports, struct sMcCallbacks *cb, int heap) {
         cb->deleteDir == 0 || cb->read == 0 || cb->write == 0 || cb->seek == 0 || cb->flush == 0 || cb->reserved == 0 ||
         cb->sync == 0 || cb->getFoundName == 0)
         return 0xC;
-    if (D_004A4BDC != 0 || D_004A4BD8 != 0) return 1;
-    D_004A4BDC = TibExtMemAlloc(heap, 1068, 4);
-    if (D_004A4BDC == 0) return 7;
-    D_004A4BD8 = TibExtMemAlloc(heap, 116, 4);
-    if (D_004A4BD8 == 0) return 7;
-    D_004A4BDC->h = heap;
-    D_004A4BDC->ports = 0;
+    if (mcReq_driver != 0 || mcReq_current != 0) return 1;
+    mcReq_driver = TibExtMemAlloc(heap, 1068, 4);
+    if (mcReq_driver == 0) return 7;
+    mcReq_current = TibExtMemAlloc(heap, 116, 4);
+    if (mcReq_current == 0) return 7;
+    mcReq_driver->h = heap;
+    mcReq_driver->ports = 0;
     for (unitEntry = ports; *unitEntry != -1; unitEntry++, n++) {
         if ((unsigned)*unitEntry >= 8 && *unitEntry != 9) return 9;
         if (n == 8) return 0xC;
         if (*unitEntry == 9) {
-            for (i = 0; i < 8; i++) D_004A4BDC->ports |= 1 << i;
+            for (i = 0; i < 8; i++) mcReq_driver->ports |= 1 << i;
         } else {
-            D_004A4BDC->ports |= 1 << (unsigned short)*unitEntry;
+            mcReq_driver->ports |= 1 << (unsigned short)*unitEntry;
         }
     }
-    D_004A4BDC->getDir = cb->getDir;
-    D_004A4BDC->queryFreeSpace = cb->queryFreeSpace;
-    D_004A4BDC->queryFreeEntries = cb->queryFreeEntries;
-    D_004A4BDC->checkUnit = cb->checkUnit;
-    D_004A4BDC->releaseUnit = cb->releaseUnit;
-    D_004A4BDC->open = cb->open;
-    D_004A4BDC->close = cb->close;
-    D_004A4BDC->makeDir = cb->makeDir;
-    D_004A4BDC->deleteFile = cb->deleteFile;
-    D_004A4BDC->deleteDir = cb->deleteDir;
-    D_004A4BDC->read = cb->read;
-    D_004A4BDC->write = cb->write;
-    D_004A4BDC->seek = cb->seek;
-    D_004A4BDC->flush = cb->flush;
-    D_004A4BDC->reserved = cb->reserved;
-    D_004A4BDC->sync = cb->sync;
-    D_004A4BDC->getFoundName = cb->getFoundName;
-    D_004A4BDC->opHandlers = D_00451468;
-    D_004A4BDC->stateHandlers = D_004514A0;
-    D_004A4BD8->op = 0;
-    D_004A4BD8->st = 0;
+    mcReq_driver->getDir = cb->getDir;
+    mcReq_driver->queryFreeSpace = cb->queryFreeSpace;
+    mcReq_driver->queryFreeEntries = cb->queryFreeEntries;
+    mcReq_driver->checkUnit = cb->checkUnit;
+    mcReq_driver->releaseUnit = cb->releaseUnit;
+    mcReq_driver->open = cb->open;
+    mcReq_driver->close = cb->close;
+    mcReq_driver->makeDir = cb->makeDir;
+    mcReq_driver->deleteFile = cb->deleteFile;
+    mcReq_driver->deleteDir = cb->deleteDir;
+    mcReq_driver->read = cb->read;
+    mcReq_driver->write = cb->write;
+    mcReq_driver->seek = cb->seek;
+    mcReq_driver->flush = cb->flush;
+    mcReq_driver->reserved = cb->reserved;
+    mcReq_driver->sync = cb->sync;
+    mcReq_driver->getFoundName = cb->getFoundName;
+    mcReq_driver->opHandlers = D_00451468;
+    mcReq_driver->stateHandlers = D_004514A0;
+    mcReq_current->op = 0;
+    mcReq_current->st = 0;
     return 0;
 }
 #endif
@@ -5820,11 +5820,11 @@ int mcReq_open_impl(int *ports, struct sMcCallbacks *cb, int heap) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_close);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 extern int TibExtMemFree(int, char *, int, int);
@@ -5838,8 +5838,8 @@ int mcReq_close(void) {
     struct sMcDrv *driver;
     struct sMcReq *request;
     if (mcReq_isOpen() == 0) return 2;
-    driver = D_004A4BDC;
-    request = D_004A4BD8;
+    driver = mcReq_driver;
+    request = mcReq_current;
     if (driver == 0 || request == 0) return 2;
     driver->getDir = 0;
     driver->queryFreeSpace = 0;
@@ -5861,9 +5861,9 @@ int mcReq_close(void) {
     request->op = 0;
     request->st = 0;
     TibExtMemFree(driver->h, (char *)request, 116, 4);
-    D_004A4BD8 = 0;
-    TibExtMemFree(D_004A4BDC->h, (char *)D_004A4BDC, 1068, 4);
-    D_004A4BDC = 0;
+    mcReq_current = 0;
+    TibExtMemFree(mcReq_driver->h, (char *)mcReq_driver, 1068, 4);
+    mcReq_driver = 0;
     return 0;
 }
 #endif
@@ -5872,8 +5872,8 @@ int mcReq_close(void) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_copyRequestBody);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
 /**
  * Copies the current memory-card request body (0x60 bytes: file descriptor, unit code, directory and file names, save
@@ -5884,7 +5884,7 @@ extern struct sMcReq *D_004A4BD8;
  */
 int mcReq_copyRequestBody(char *dst) {
     if (dst == 0) return 0xC;
-    __builtin_memcpy(dst, &D_004A4BD8->body, 0x60);
+    __builtin_memcpy(dst, &mcReq_current->body, 0x60);
     return 0;
 }
 #endif
@@ -5894,11 +5894,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startDelete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -5934,40 +5934,40 @@ int mcReq_startDelete(char *str, int unitCode, int searchDir) {
     if ((unsigned)(unitCode + 1) >= 9) return 9;
     if (unitCode != -1) {
         unitBit = 1 << unitCode;
-        if (!(D_004A4BDC->ports & unitBit)) return 11;
+        if (!(mcReq_driver->ports & unitBit)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 13;
-    c9698_6210(&D_004A4BD8->body, 0, 0x60);
+    if (mcReq_current->op != 0) return 13;
+    c9698_6210(&mcReq_current->body, 0, 0x60);
     if (unitCode == -1) {
-        if (c9698_86B8(D_004A4BDC->ports) == 1) {
-            firstUnit = c9698_8550(D_004A4BDC->ports);
-            request = D_004A4BD8;
+        if (c9698_86B8(mcReq_driver->ports) == 1) {
+            firstUnit = c9698_8550(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 5;
         } else if (searchDir == 0) {
-            firstUnit = c9698_8550(D_004A4BDC->ports);
-            request = D_004A4BD8;
+            firstUnit = c9698_8550(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 2;
         } else if (searchDir == 1) {
-            firstUnit = c9698_8588(D_004A4BDC->ports);
-            request = D_004A4BD8;
+            firstUnit = c9698_8588(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 2;
         } else {
             return 0xC;
         }
     } else {
-        request2 = D_004A4BD8;
+        request2 = mcReq_current;
         request2->body.slot = unitCode;
         request2->op = 5;
     }
     c9698_86F0(0);
-    strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->searchDir = searchDir;
+    strcpy(mcReq_current->body.name, str);
+    mcReq_current->searchDir = searchDir;
     c9698_B2F8(1);
-    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
-    D_004A4BD8->st = 1;
+    mcReq_driver->checkUnit(mcReq_current->body.slot);
+    mcReq_current->st = 1;
     return 0;
 }
 #endif
@@ -5979,11 +5979,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startCreate);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned int strlen(const char *);
 
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -6016,40 +6016,40 @@ int mcReq_startCreate(char *str, int unitCode, int searchDir) {
     if ((unsigned)(unitCode + 1) >= 9) return 9;
     if (unitCode != -1) {
         unitBit = 1 << unitCode;
-        if (!(D_004A4BDC->ports & unitBit)) return 11;
+        if (!(mcReq_driver->ports & unitBit)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 13;
-    c9818_6210(&D_004A4BD8->body, 0, 0x60);
+    if (mcReq_current->op != 0) return 13;
+    c9818_6210(&mcReq_current->body, 0, 0x60);
     if (unitCode == -1) {
-        if (c9818_86B8(D_004A4BDC->ports) == 1) {
-            firstUnit = c9818_8550(D_004A4BDC->ports);
-            request = D_004A4BD8;
+        if (c9818_86B8(mcReq_driver->ports) == 1) {
+            firstUnit = c9818_8550(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 4;
         } else if (searchDir == 0) {
-            firstUnit = c9818_8550(D_004A4BDC->ports);
-            request2 = D_004A4BD8;
+            firstUnit = c9818_8550(mcReq_driver->ports);
+            request2 = mcReq_current;
             request2->body.slot = firstUnit;
             request2->op = 1;
         } else if (searchDir == 1) {
-            firstUnit = c9818_8588(D_004A4BDC->ports);
-            request2 = D_004A4BD8;
+            firstUnit = c9818_8588(mcReq_driver->ports);
+            request2 = mcReq_current;
             request2->body.slot = firstUnit;
             request2->op = searchDir;
         } else {
             return 0xC;
         }
     } else {
-        request2 = D_004A4BD8;
+        request2 = mcReq_current;
         request2->body.slot = unitCode;
         request2->op = 4;
     }
     c9818_86F0(0);
-    strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->searchDir = searchDir;
+    strcpy(mcReq_current->body.name, str);
+    mcReq_current->searchDir = searchDir;
     c9818_B2F8(1);
-    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
-    D_004A4BD8->st = 1;
+    mcReq_driver->checkUnit(mcReq_current->body.slot);
+    mcReq_current->st = 1;
     return 0;
 }
 #endif
@@ -6059,11 +6059,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startOpen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -6095,40 +6095,40 @@ int mcReq_startOpen_impl(char *str, int unitCode, int searchDir) {
     if ((unsigned)(unitCode + 1) >= 9) return 9;
     if (unitCode != -1) {
         unitBit = 1 << unitCode;
-        if (!(D_004A4BDC->ports & unitBit)) return 11;
+        if (!(mcReq_driver->ports & unitBit)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 13;
-    c99b8_6210(&D_004A4BD8->body, 0, 0x60);
+    if (mcReq_current->op != 0) return 13;
+    c99b8_6210(&mcReq_current->body, 0, 0x60);
     if (unitCode == -1) {
-        if (c99b8_86B8(D_004A4BDC->ports) == 1) {
-            firstUnit = c99b8_8550(D_004A4BDC->ports);
-            request = D_004A4BD8;
+        if (c99b8_86B8(mcReq_driver->ports) == 1) {
+            firstUnit = c99b8_8550(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 6;
         } else if (searchDir == 0) {
-            firstUnit = c99b8_8550(D_004A4BDC->ports);
-            request = D_004A4BD8;
+            firstUnit = c99b8_8550(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 3;
         } else if (searchDir == 1) {
-            firstUnit = c99b8_8588(D_004A4BDC->ports);
-            request = D_004A4BD8;
+            firstUnit = c99b8_8588(mcReq_driver->ports);
+            request = mcReq_current;
             request->body.slot = firstUnit;
             request->op = 3;
         } else {
             return 0xC;
         }
     } else {
-        request2 = D_004A4BD8;
+        request2 = mcReq_current;
         request2->body.slot = unitCode;
         request2->op = 6;
     }
     c99b8_86F0(0);
-    strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->searchDir = searchDir;
+    strcpy(mcReq_current->body.name, str);
+    mcReq_current->searchDir = searchDir;
     c99b8_B2F8(1);
-    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
-    D_004A4BD8->st = 1;
+    mcReq_driver->checkUnit(mcReq_current->body.slot);
+    mcReq_current->st = 1;
     return 0;
 }
 #endif
@@ -6138,11 +6138,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startClose);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int f9208(void) __asm__("mcReq_isOpen");
 int mcReq_startClose_impl(int *src) __asm__("mcReq_startClose");
@@ -6156,11 +6156,11 @@ int mcReq_startClose_impl(int *src) __asm__("mcReq_startClose");
 int mcReq_startClose_impl(int *src) {
     if (f9208() == 0) return 2;
     if (src == 0) return 0xC;
-    if (D_004A4BD8->op != 0) return 13;
-    __builtin_memcpy(&D_004A4BD8->body, src, 0x60);
-    D_004A4BD8->op = 7;
-    D_004A4BD8->st = 0x18;
-    D_004A4BDC->flush(src[0]);
+    if (mcReq_current->op != 0) return 13;
+    __builtin_memcpy(&mcReq_current->body, src, 0x60);
+    mcReq_current->op = 7;
+    mcReq_current->st = 0x18;
+    mcReq_driver->flush(src[0]);
     return 0;
 }
 #endif
@@ -6170,11 +6170,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startSeek);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -6199,21 +6199,21 @@ int mcReq_startSeek_impl(int *src, int offset, int origin) {
     struct sMcDrv *driver;
     if (mcReq_isOpen() == 0) return 2;
     if (src == 0) return 0xC;
-    request = D_004A4BD8;
+    request = mcReq_current;
     if (request->op != 0) return 13;
     request->op = 8;
     request->st = 27;
     c9c48_86F0(0);
-    __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
+    __builtin_memcpy(&mcReq_current->body, (char *)src, 0x60);
     if (origin == 0) {
         target = offset + mcReq_getSeekBase_9C48();
-        requestAgain = D_004A4BD8;
-        driver = D_004A4BDC;
+        requestAgain = mcReq_current;
+        driver = mcReq_driver;
         requestAgain->expected = target;
         driver->seek(requestAgain->body.port, offset + mcReq_getSeekBase_9C48(), 0);
     } else {
-        struct sMcReq *requestInner = D_004A4BD8;
-        struct sMcDrv *driverInner = D_004A4BDC;
+        struct sMcReq *requestInner = mcReq_current;
+        struct sMcDrv *driverInner = mcReq_driver;
         requestInner->expected = offset;
         driverInner->seek(requestInner->body.port, offset, origin);
     }
@@ -6226,11 +6226,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startRead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -6251,14 +6251,14 @@ int mcReq_startRead_impl(int *src, int buffer, int byteCount) {
     struct sMcDrv *driver;
     if (mcReq_isOpen() == 0) return 2;
     if (src == 0) return 0xC;
-    request = D_004A4BD8;
+    request = mcReq_current;
     if (request->op != 0) return 13;
     request->op = 10;
     request->st = 29;
     f86F0(0);
-    __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
-    requestAgain = D_004A4BD8;
-    driver = D_004A4BDC;
+    __builtin_memcpy(&mcReq_current->body, (char *)src, 0x60);
+    requestAgain = mcReq_current;
+    driver = mcReq_driver;
     requestAgain->expected = byteCount;
     driver->read(src[0], buffer, byteCount);
     return 0;
@@ -6270,11 +6270,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_startWrite);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 extern void f86F0(int) __asm__("mcReq_setError");
@@ -6294,14 +6294,14 @@ int mcReq_startWrite_impl(int *src, void *buffer, int byteCount) {
     struct sMcDrv *driver;
     if (mcReq_isOpen() == 0) return 2;
     if (src == 0) return 0xC;
-    request = D_004A4BD8;
+    request = mcReq_current;
     if (request->op != 0) return 13;
     request->op = 9;
     request->st = 0x1C;
     f86F0(0);
-    __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
-    requestAgain = D_004A4BD8;
-    driver = D_004A4BDC;
+    __builtin_memcpy(&mcReq_current->body, (char *)src, 0x60);
+    requestAgain = mcReq_current;
+    driver = mcReq_driver;
     requestAgain->expected = byteCount;
     driver->write(src[0], buffer, byteCount);
     return 0;
@@ -6313,11 +6313,11 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 
@@ -6338,28 +6338,28 @@ extern void fB2F8w(int) __asm__("mcHook_notifyBusy");
 int mcReq_update(int *statusOut, int *resultOut) {
     int result;
     if (mcReq_isOpen() == 0) return 2;
-    if (D_004A4BDC->sync == 0) return 13;
+    if (mcReq_driver->sync == 0) return 13;
     if (statusOut == 0) return 0xC;
     if (resultOut == 0) return 0xC;
-    result = D_004A4BDC->sync(statusOut, resultOut);
+    result = mcReq_driver->sync(statusOut, resultOut);
     if (statusOut[0] == 0) {
-        if (D_004A4BD8->op != 0) return 0xF;
+        if (mcReq_current->op != 0) return 0xF;
     }
     if (statusOut[0] != 2) return result;
-    result = D_004A4BDC->stateHandlers[D_004A4BD8->st](result, 2, resultOut[0]);
+    result = mcReq_driver->stateHandlers[mcReq_current->st](result, 2, resultOut[0]);
     if (result == 10) {
-        struct sMcReq *request = D_004A4BD8;
+        struct sMcReq *request = mcReq_current;
         request->op = 0;
         request->st = 0;
         return 10;
     }
     if (result == 0x10) return 0x10;
-    result = D_004A4BDC->opHandlers[D_004A4BD8->op](result, statusOut, resultOut);
+    result = mcReq_driver->opHandlers[mcReq_current->op](result, statusOut, resultOut);
     if (statusOut[0] == 2) {
-        int finishedOp = D_004A4BD8->op;
+        int finishedOp = mcReq_current->op;
         struct sMcReq *request;
         if (finishedOp == 5 || finishedOp == 2 || finishedOp == 7 || finishedOp == 11 || finishedOp == 0xC || finishedOp == 13) fB2F8w(0);
-        request = D_004A4BD8;
+        request = mcReq_current;
         request->op = 0;
         request->st = 0;
     }
@@ -6394,8 +6394,8 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_setSaveDescription);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern int mcReq_isOpen(void);
 extern void fA6A8(char *, int *, int *) __asm__("mcReq_computeNewSaveSize");
@@ -6411,8 +6411,8 @@ int mcReq_setSaveDescription_impl(char *src) __asm__("mcReq_setSaveDescription")
 int mcReq_setSaveDescription_impl(char *src) {
     if (src == 0) return 0xC;
     if (mcReq_isOpen() == 0) return 2;
-    __builtin_memcpy(&D_004A4BDC->saveDesc, src, 976);
-    fA6A8(src, &D_004A4BDC->saveSize, &D_004A4BDC->entriesNeeded);
+    __builtin_memcpy(&mcReq_driver->saveDesc, src, 976);
+    fA6A8(src, &mcReq_driver->saveSize, &mcReq_driver->entriesNeeded);
     return fB308(src);
 }
 #endif
@@ -6436,19 +6436,19 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_asciiToSjis);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned char b[33]; } sSjisSymbols;
-extern sSjisSymbols D_004973B0;
+extern sSjisSymbols mcReq_sjisSymbolTable;
 /**
  * Converts an ASCII string to full-width Shift-JIS, as icon.sys titles need.
  *
  * Letters and digits map to 0x8260.. / 0x8281.. / 0x824F..; other printable characters to 0x81xx through the table
- * D_004973B0; Shift-JIS lead bytes 0x81..0x98 copy their two-byte character through. Each character is stored
+ * mcReq_sjisSymbolTable; Shift-JIS lead bytes 0x81..0x98 copy their two-byte character through. Each character is stored
  * byte-swapped (big-endian in memory). Quirk: no terminator is written; slogin_buildSaveDescription converts into a zeroed buffer.
  *
  * @param src  ASCII text
  * @param dst  Shift-JIS output
  */
 void mcReq_asciiToSjis(char *src, unsigned short *dst) {
-    sSjisSymbols tbl = D_004973B0;
+    sSjisSymbols tbl = mcReq_sjisSymbolTable;
     unsigned char i = 0;
     unsigned short sjisChar = *src++;
     while (sjisChar != 0) {
@@ -6487,7 +6487,7 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_sjisToAscii);
  * @param dst  ASCII output
  */
 void mcReq_sjisToAscii(unsigned short *src, char *dst) {
-    sSjisSymbols tbl = D_004973B0;
+    sSjisSymbols tbl = mcReq_sjisSymbolTable;
     unsigned char i = 0;
     unsigned short sjisChar = *src++;
     while (sjisChar != 0) {
@@ -6597,7 +6597,7 @@ void mcReq_splitUnitCode_impl(unsigned unitCode, unsigned char *portSlotOut) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_buildSearchPattern);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char D_004A4BE0[];
+extern unsigned char str_star_b[];
 extern void memset(char *, int, int);
 extern void func_0041605C(char *, char *, int);
 /**
@@ -6611,7 +6611,7 @@ extern void func_0041605C(char *, char *, int);
 char *mcReq_buildSearchPattern(char *dst, sMcSaveParam *saveDesc, char *src) {
     char *nameDst = dst + 1;
     memset(dst, 0, 0x20);
-    *dst = D_004A4BE0[0];
+    *dst = str_star_b[0];
     func_0041605C(nameDst, src, strlen(src));
     return nameDst + strlen(src);
 }
@@ -6623,7 +6623,7 @@ INCLUDE_ASM("seg/seg_2F41F8", mcReq_buildSaveNames);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { char b[9]; } K9;
-extern K9 D_00497400;
+extern K9 str_PSCD10088;
 extern void f6210(char *, int, int) __asm__("memset");
 extern void f605C(char *, char *, int) __asm__("func_0041605C");
 void mcReq_buildSaveNames_impl(char *a, char *b, sMcSaveParam *unused, char *str) __asm__("mcReq_buildSaveNames");
@@ -6639,13 +6639,13 @@ void mcReq_buildSaveNames_impl(char *a, char *b, sMcSaveParam *unused, char *str
 void mcReq_buildSaveNames_impl(char *dirName, char *fileName, sMcSaveParam *saveDesc, char *str) {
     char *nameDst;
     f6210(dirName, 0, 0x20);
-    *(K9 *)dirName = D_00497400;
+    *(K9 *)dirName = str_PSCD10088;
     nameDst = dirName + 9;
     f605C(nameDst, str, strlen(str));
     nameDst = fileName + 9;
     strlen(str);
     f6210(fileName, 0, 0x20);
-    *(K9 *)fileName = D_00497400;
+    *(K9 *)fileName = str_PSCD10088;
     f605C(nameDst, str, strlen(str));
     strlen(str);
 }
@@ -6655,11 +6655,11 @@ void mcReq_buildSaveNames_impl(char *dirName, char *fileName, sMcSaveParam *save
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern char str_view_ico_b[];   /* "view.ico" */
 extern char str_icon_sys_b[];   /* "icon.sys" */
@@ -6688,22 +6688,22 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
 
     if (st == 0) return 18;
     if (res == 0) return 18;
-    if (D_004A4BD8->op != 1 && D_004A4BD8->op != 4) return 18;
+    if (mcReq_current->op != 1 && mcReq_current->op != 4) return 18;
     *st = 1;
-    switch (D_004A4BD8->st) {
+    switch (mcReq_current->st) {
     case 1:
         if (callResult == 0) {
-            fA8F8_A7A0(path, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
-            D_004A4BD8->st = 2;
-            D_004A4BDC->getDir(path, D_004A4BD8->body.slot);
+            fA8F8_A7A0(path, &mcReq_driver->saveDesc, mcReq_current->body.name);
+            mcReq_current->st = 2;
+            mcReq_driver->getDir(path, mcReq_current->body.slot);
             break;
         }
         if (callResult == 3) {
-            if (D_004A4BD8->op == 1) {
-                D_004A4BD8->body.slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-                if (D_004A4BD8->body.slot != -1) {
-                    D_004A4BD8->st = 1;
-                    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
+            if (mcReq_current->op == 1) {
+                mcReq_current->body.slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+                if (mcReq_current->body.slot != -1) {
+                    mcReq_current->st = 1;
+                    mcReq_driver->checkUnit(mcReq_current->body.slot);
                     return 0;
                 }
                 *st = 2;
@@ -6718,21 +6718,21 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
         if (callResult == 0) {
             pollValue = *res;
             if (pollValue == 0) {
-                D_004A4BD8->st = 3;
-                D_004A4BDC->queryFreeSpace(D_004A4BD8->body.slot);
+                mcReq_current->st = 3;
+                mcReq_driver->queryFreeSpace(mcReq_current->body.slot);
                 break;
             }
             if (pollValue == 1) {
                 fA8F8_86F0(8);
-                D_004A4BD8->st = 26;
-                D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+                mcReq_current->st = 26;
+                mcReq_driver->releaseUnit(mcReq_current->body.slot);
                 break;
             }
             *st = 2;
             return 10;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 3:
         if (callResult == 0) {
             pollValue = *res;
@@ -6740,18 +6740,18 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->saveSize) {
-                D_004A4BD8->st = 4;
-                D_004A4BDC->queryFreeEntries(D_004A4BD8->body.slot);
+            if ((unsigned)pollValue >= (unsigned)mcReq_driver->saveSize) {
+                mcReq_current->st = 4;
+                mcReq_driver->queryFreeEntries(mcReq_current->body.slot);
                 break;
             }
             fA8F8_86F0(0xE);
-            D_004A4BD8->st = 26;
-            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+            mcReq_current->st = 26;
+            mcReq_driver->releaseUnit(mcReq_current->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 4:
         if (callResult == 0) {
             pollValue = *res;
@@ -6759,133 +6759,133 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->entriesNeeded) {
-                mcReq_buildSaveNames_impl(D_004A4BD8->body.dir, D_004A4BD8->body.file, &D_004A4BDC->saveDesc,
-                                   D_004A4BD8->body.name);
-                D_004A4BD8->st = 5;
-                D_004A4BDC->makeDir(D_004A4BD8->body.dir, D_004A4BDC->saveSize,
-                                                              D_004A4BD8->body.slot);
+            if ((unsigned)pollValue >= (unsigned)mcReq_driver->entriesNeeded) {
+                mcReq_buildSaveNames_impl(mcReq_current->body.dir, mcReq_current->body.file, &mcReq_driver->saveDesc,
+                                   mcReq_current->body.name);
+                mcReq_current->st = 5;
+                mcReq_driver->makeDir(mcReq_current->body.dir, mcReq_driver->saveSize,
+                                                              mcReq_current->body.slot);
                 break;
             }
             fA8F8_86F0(0xE);
-            D_004A4BD8->st = 26;
-            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+            mcReq_current->st = 26;
+            mcReq_driver->releaseUnit(mcReq_current->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 5:
         if (callResult == 0) {
-            D_004A4BD8->st = 0xE;
-            D_004A4BDC->open(D_004A4BD8->body.dir,
-                                                                  D_004A4BD8->body.dir, D_004A4BD8->body.slot, 515);
+            mcReq_current->st = 0xE;
+            mcReq_driver->open(mcReq_current->body.dir,
+                                                                  mcReq_current->body.dir, mcReq_current->body.slot, 515);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 0xE:
         if (callResult == 0) {
             int openResult = *res;
             if (openResult >= 0) {
-                D_004A4BD8->st = 0x10;
-                D_004A4BD8->body.port = openResult;
-                D_004A4BDC->flush(openResult);
+                mcReq_current->st = 0x10;
+                mcReq_current->body.port = openResult;
+                mcReq_driver->flush(openResult);
                 break;
             }
             fA8F8_86F0(0);
-            return mcReq_startFlushCleanup(&D_004A4BD8->body, st);
+            return mcReq_startFlushCleanup(&mcReq_current->body, st);
         }
         fA8F8_86F0(callResult);
-        return mcReq_startFlushCleanup(&D_004A4BD8->body, st);
+        return mcReq_startFlushCleanup(&mcReq_current->body, st);
     case 0x10:
         if (callResult == 0) {
-            D_004A4BD8->st = 17;
-            D_004A4BDC->close(D_004A4BD8->body.port);
+            mcReq_current->st = 17;
+            mcReq_driver->close(mcReq_current->body.port);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startCloseCleanup(&D_004A4BD8->body, st);
+        return mcReq_startCloseCleanup(&mcReq_current->body, st);
     case 17:
         if (callResult == 0) {
-            D_004A4BD8->st = 6;
-            D_004A4BDC->open(D_004A4BD8->body.dir, str_view_ico_b,
-                                                                  D_004A4BD8->body.slot, 515);
+            mcReq_current->st = 6;
+            mcReq_driver->open(mcReq_current->body.dir, str_view_ico_b,
+                                                                  mcReq_current->body.slot, 515);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 6:
         if (callResult == 0) {
                 int openResult = *res;
-            D_004A4BD8->st = 7;
-            D_004A4BD8->body.port = openResult;
-            D_004A4BDC->write(openResult, D_004A4BDC->saveDesc.port, D_004A4BDC->saveDesc.id);
+            mcReq_current->st = 7;
+            mcReq_current->body.port = openResult;
+            mcReq_driver->write(openResult, mcReq_driver->saveDesc.port, mcReq_driver->saveDesc.id);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 7:
         if (callResult == 0) {
-            D_004A4BD8->st = 8;
-            D_004A4BDC->flush(D_004A4BD8->body.port);
+            mcReq_current->st = 8;
+            mcReq_driver->flush(mcReq_current->body.port);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startFlushCleanup(&D_004A4BD8->body, st);
+        return mcReq_startFlushCleanup(&mcReq_current->body, st);
     case 8:
         if (callResult == 0) {
-            D_004A4BD8->st = 9;
-            D_004A4BDC->close(D_004A4BD8->body.port);
+            mcReq_current->st = 9;
+            mcReq_driver->close(mcReq_current->body.port);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startCloseCleanup(&D_004A4BD8->body, st);
+        return mcReq_startCloseCleanup(&mcReq_current->body, st);
     case 9:
         if (callResult == 0) {
-            D_004A4BD8->st = 10;
-            D_004A4BDC->open(D_004A4BD8->body.dir, str_icon_sys_b,
-                                                                  D_004A4BD8->body.slot, 515);
+            mcReq_current->st = 10;
+            mcReq_driver->open(mcReq_current->body.dir, str_icon_sys_b,
+                                                                  mcReq_current->body.slot, 515);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 10:
         if (callResult == 0) {
                 int openResult = *res;
-            D_004A4BD8->body.port = openResult;
-            D_004A4BD8->st = 11;
-            D_004A4BDC->write(openResult, &D_004A4BDC->saveDesc.icon, 964);
+            mcReq_current->body.port = openResult;
+            mcReq_current->st = 11;
+            mcReq_driver->write(openResult, &mcReq_driver->saveDesc.icon, 964);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 11:
         if (callResult == 0) {
-            D_004A4BD8->st = 0xC;
-            D_004A4BDC->flush(D_004A4BD8->body.port);
+            mcReq_current->st = 0xC;
+            mcReq_driver->flush(mcReq_current->body.port);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startFlushCleanup(&D_004A4BD8->body, st);
+        return mcReq_startFlushCleanup(&mcReq_current->body, st);
     case 0xC:
         if (callResult == 0) {
-            D_004A4BD8->st = 13;
-            D_004A4BDC->close(D_004A4BD8->body.port);
+            mcReq_current->st = 13;
+            mcReq_driver->close(mcReq_current->body.port);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startCloseCleanup(&D_004A4BD8->body, st);
+        return mcReq_startCloseCleanup(&mcReq_current->body, st);
     case 13:
         if (callResult == 0) {
-            D_004A4BD8->st = 26;
-            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+            mcReq_current->st = 26;
+            mcReq_driver->releaseUnit(mcReq_current->body.slot);
             break;
         }
         fA8F8_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 26:
         if (callResult == 0) {
-            if (D_004A4BD8->op == 4) {
+            if (mcReq_current->op == 4) {
                 *st = 2;
                 return mcReq_getError();
             }
@@ -6893,10 +6893,10 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
                 *st = 2;
                 return 0;
             }
-            D_004A4BD8->body.slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-            if (D_004A4BD8->body.slot != -1) {
-                D_004A4BD8->st = 1;
-                D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
+            mcReq_current->body.slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+            if (mcReq_current->body.slot != -1) {
+                mcReq_current->st = 1;
+                mcReq_driver->checkUnit(mcReq_current->body.slot);
                 return 0;
             }
             *st = 2;
@@ -6916,11 +6916,11 @@ int mcReq_stepCreate(int callResult, int *st, int *res) {
 INCLUDE_ASM("seg/seg_2F41F8", mcReq_stepDelete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
-extern struct sMcReq *D_004A4BD8;
+/* mcReq_current: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *mcReq_current;
 
-/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
-extern struct sMcDrv *D_004A4BDC;
+/* mcReq_driver: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *mcReq_driver;
 
 extern char str_view_ico_b[];   /* "view.ico" */
 extern char str_icon_sys_b[];   /* "icon.sys" */
@@ -6946,23 +6946,23 @@ int mcReq_stepDelete(int callResult, int *st, int *res) {
 
     if (st == 0) return 18;
     if (res == 0) return 18;
-    if (D_004A4BD8->op != 2 && D_004A4BD8->op != 5) return 18;
+    if (mcReq_current->op != 2 && mcReq_current->op != 5) return 18;
     *st = 1;
-    switch (D_004A4BD8->st) {
+    switch (mcReq_current->st) {
     case 1:
         fAE50_86F0(0);
         if (callResult == 0) {
-            fAE50_A7A0(path, &D_004A4BDC->saveDesc, D_004A4BD8->body.name);
-            D_004A4BD8->st = 2;
-            D_004A4BDC->getDir(path, D_004A4BD8->body.slot);
+            fAE50_A7A0(path, &mcReq_driver->saveDesc, mcReq_current->body.name);
+            mcReq_current->st = 2;
+            mcReq_driver->getDir(path, mcReq_current->body.slot);
             break;
         }
         if (callResult == 3) {
-            if (D_004A4BD8->op == 2) {
-                D_004A4BD8->body.slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-                if (D_004A4BD8->body.slot != -1) {
-                    D_004A4BD8->st = 1;
-                    D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
+            if (mcReq_current->op == 2) {
+                mcReq_current->body.slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+                if (mcReq_current->body.slot != -1) {
+                    mcReq_current->st = 1;
+                    mcReq_driver->checkUnit(mcReq_current->body.slot);
                     return 0;
                 }
                 *st = 2;
@@ -6976,68 +6976,68 @@ int mcReq_stepDelete(int callResult, int *st, int *res) {
     case 2:
         if (callResult == 0) {
             if (*res == 1) {
-                D_004A4BDC->getFoundName(D_004A4BD8->body.dir);
-                D_004A4BD8->st = 19;
-                D_004A4BDC->deleteFile(D_004A4BD8->body.dir, str_icon_sys_b,
-                                                                D_004A4BD8->body.slot);
+                mcReq_driver->getFoundName(mcReq_current->body.dir);
+                mcReq_current->st = 19;
+                mcReq_driver->deleteFile(mcReq_current->body.dir, str_icon_sys_b,
+                                                                mcReq_current->body.slot);
                 break;
             }
             if (*res == 0) {
                 fAE50_86F0(4);
-                return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+                return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
             }
             *st = 2;
             return 10;
         }
         fAE50_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 19:
         if (callResult == 3) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
-            return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+            return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
         }
         if (callResult != 4) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
         }
-        D_004A4BD8->st = 20;
-        D_004A4BDC->deleteFile(D_004A4BD8->body.dir, str_view_ico_b,
-                                                        D_004A4BD8->body.slot);
+        mcReq_current->st = 20;
+        mcReq_driver->deleteFile(mcReq_current->body.dir, str_view_ico_b,
+                                                        mcReq_current->body.slot);
         break;
     case 20:
         if (callResult == 3) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
-            return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+            return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
         }
         if (callResult != 4) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
         }
-        D_004A4BD8->st = 21;
-        D_004A4BDC->deleteFile(D_004A4BD8->body.dir,
-                                                        D_004A4BD8->body.dir, D_004A4BD8->body.slot);
+        mcReq_current->st = 21;
+        mcReq_driver->deleteFile(mcReq_current->body.dir,
+                                                        mcReq_current->body.dir, mcReq_current->body.slot);
         break;
     case 21:
         if (callResult == 3) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
-            return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+            return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
         }
         if (callResult != 4) {
             if (mcReq_getError() == 0) fAE50_86F0(callResult);
         }
-        D_004A4BD8->st = 18;
-        D_004A4BDC->deleteDir(D_004A4BD8->body.dir, D_004A4BD8->body.slot);
+        mcReq_current->st = 18;
+        mcReq_driver->deleteDir(mcReq_current->body.dir, mcReq_current->body.slot);
         break;
     case 18:
         if (callResult == 0) {
             if (mcReq_getError() == 0) fAE50_86F0(0);
-            D_004A4BD8->st = 26;
-            D_004A4BDC->releaseUnit(D_004A4BD8->body.slot);
+            mcReq_current->st = 26;
+            mcReq_driver->releaseUnit(mcReq_current->body.slot);
             break;
         }
         if (mcReq_getError() == 0) fAE50_86F0(callResult);
-        return mcReq_startReleaseCleanup(D_004A4BD8->body.slot, st);
+        return mcReq_startReleaseCleanup(mcReq_current->body.slot, st);
     case 26:
         if (callResult == 0) {
-            if (D_004A4BD8->op == 5) {
+            if (mcReq_current->op == 5) {
                 *st = 2;
                 return mcReq_getError();
             }
@@ -7045,10 +7045,10 @@ int mcReq_stepDelete(int callResult, int *st, int *res) {
                 *st = 2;
                 return 0;
             }
-            D_004A4BD8->body.slot = mcReq_findNextSlot(D_004A4BDC->ports, D_004A4BD8->searchDir);
-            if (D_004A4BD8->body.slot != -1) {
-                D_004A4BD8->st = 1;
-                D_004A4BDC->checkUnit(D_004A4BD8->body.slot);
+            mcReq_current->body.slot = mcReq_findNextSlot(mcReq_driver->ports, mcReq_current->searchDir);
+            if (mcReq_current->body.slot != -1) {
+                mcReq_current->st = 1;
+                mcReq_driver->checkUnit(mcReq_current->body.slot);
                 return 0;
             }
             *st = 2;
@@ -7103,7 +7103,7 @@ INCLUDE_ASM("seg/seg_2F41F8", mcHook_getCrcInterface);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char *crcIface_get(void);
 /**
- * Stores the CRC interface (crcIface_get, D_00497508) through @p out when it is not 0.
+ * Stores the CRC interface (crcIface_get, crcIface_funcTable) through @p out when it is not 0.
  *
  * @param out  output pointer
  */
@@ -7190,15 +7190,15 @@ INCLUDE_ASM("seg/seg_2F41F8", crcIface_start);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
 /* outSize / outDigest are the output block (sDigestBlock: size, digest pointer) its finish slot hands back */
 struct sCrc { unsigned *table; int outSize; int *outDigest; unsigned crc; int heap; };
 
-extern struct sCrc D_00451518;
+extern struct sCrc crcIface_state;
 
 extern void *TibExtMemAlloc(int, int, int);
 /**
- * Starts the CRC interface D_00451518: allocates its 1 KB table from @p heapId, fills it, and resets the digest (all ones)
+ * Starts the CRC interface crcIface_state: allocates its 1 KB table from @p heapId, fills it, and resets the digest (all ones)
  * and the output block.
  *
  * @param heapId  heap
@@ -7206,15 +7206,15 @@ extern void *TibExtMemAlloc(int, int, int);
  */
 int crcIface_start(unsigned heapId) {
     unsigned *table;
-    if (D_00451518.table != 0) return 5;
+    if (crcIface_state.table != 0) return 5;
     table = TibExtMemAlloc(heapId, 0x400, 4);
-    D_00451518.table = table;
+    crcIface_state.table = table;
     if (table == 0) return 1;
-    D_00451518.heap = heapId;
+    crcIface_state.heap = heapId;
     crcIface_fillTable(table);
-    D_00451518.outSize = 4;
-    D_00451518.crc = 0xFFFFFFFF;
-    D_00451518.outDigest = 0;
+    crcIface_state.outSize = 4;
+    crcIface_state.crc = 0xFFFFFFFF;
+    crcIface_state.outDigest = 0;
     return 0;
 }
 #endif
@@ -7223,8 +7223,8 @@ int crcIface_start(unsigned heapId) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_stop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 extern int TibExtMemFree(int, char *, int, int);
 /**
@@ -7233,10 +7233,10 @@ extern int TibExtMemFree(int, char *, int, int);
  * @return 0, or 6 when not started
  */
 int crcIface_stop(void) {
-    struct sCrc *crcState = &D_00451518;
-    if (D_00451518.table == 0) return 6;
+    struct sCrc *crcState = &crcIface_state;
+    if (crcIface_state.table == 0) return 6;
     TibExtMemFree(crcState->heap, (char *)crcState->table, 0x400, 4);
-    D_00451518.table = 0;
+    crcIface_state.table = 0;
     return 0;
 }
 #endif
@@ -7245,15 +7245,15 @@ int crcIface_stop(void) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_isStarted);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 /**
- * Returns whether the CRC interface is started (its table exists). Slot 2 of the CRC interface D_00497508.
+ * Returns whether the CRC interface is started (its table exists). Slot 2 of the CRC interface crcIface_funcTable.
  *
  * @return 1 when started, else 0
  */
-int crcIface_isStarted(void) { return D_00451518.table != 0; }
+int crcIface_isStarted(void) { return crcIface_state.table != 0; }
 #endif
 
 //100%
@@ -7261,8 +7261,8 @@ INCLUDE_ASM("seg/seg_2F41F8", crcIface_reset);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 /**
  * Resets the CRC-32 digest to all ones. Slot 3 of the CRC interface.
@@ -7271,8 +7271,8 @@ extern struct sCrc D_00451518;
  */
 int crcIface_reset(void) {
     unsigned long long initialCrc = 0xFFFFFFFF;
-    if (D_00451518.table == 0) return 6;
-    D_00451518.crc = initialCrc;
+    if (crcIface_state.table == 0) return 6;
+    crcIface_state.crc = initialCrc;
     return 0;
 }
 #endif
@@ -7281,8 +7281,8 @@ int crcIface_reset(void) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 /**
  * Adds @p n bytes to the CRC-32 digest (table-driven, reflected). Slot 4 of the CRC interface.
@@ -7292,13 +7292,13 @@ extern struct sCrc D_00451518;
  * @return 0; 6 when not started, 2 when @p buf is 0
  */
 int crcIface_update(unsigned char *buf, unsigned n) {
-    unsigned crc = D_00451518.crc;
+    unsigned crc = crcIface_state.crc;
     unsigned i;
-    if (D_00451518.table == 0) return 6;
+    if (crcIface_state.table == 0) return 6;
     if (buf == 0) return 2;
     for (i = 0; i < n; i++)
-        crc = ((crc >> 8) & 0xFFFFFF) ^ D_00451518.table[(crc ^ buf[i]) & 0xFF];
-    D_00451518.crc = crc;
+        crc = ((crc >> 8) & 0xFFFFFF) ^ crcIface_state.table[(crc ^ buf[i]) & 0xFF];
+    crcIface_state.crc = crc;
     return 0;
 }
 #endif
@@ -7307,22 +7307,22 @@ int crcIface_update(unsigned char *buf, unsigned n) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_finish);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 extern int D_004A5B1C;
 /**
  * Finishes the CRC-32 digest. Slot 5 of the CRC interface.
  *
  * Stores the inverted digest in D_004A5B1C and points the output block (size 4, then that pointer, at +0x4 of
- * D_00451518) at it.
+ * crcIface_state) at it.
  *
  * @param out  receives the output block
  * @return 0; 6 when not started, 2 when @p out is 0
  */
 int crcIface_finish(int **out) {
-    struct sCrc *crcState = &D_00451518;
-    if (D_00451518.table == 0) return 6;
+    struct sCrc *crcState = &crcIface_state;
+    if (crcIface_state.table == 0) return 6;
     if (out == 0) return 2;
     crcState->outDigest = &D_004A5B1C;
     crcState->outSize = 4;
@@ -7336,8 +7336,8 @@ int crcIface_finish(int **out) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_getDigestSize);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00451518: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
-extern struct sCrc D_00451518;
+/* crcIface_state: the CRC-32 state (crcIface_start allocates the 0x400-byte table). */
+extern struct sCrc crcIface_state;
 
 /**
  * Returns the digest size of the CRC interface (4 bytes). Slot 6 of the CRC interface.
@@ -7346,7 +7346,7 @@ extern struct sCrc D_00451518;
  * @return 0; 6 when not started, 2 when @p out is 0
  */
 int crcIface_getDigestSize(int *out) {
-    if (D_00451518.table == 0) return 6;
+    if (crcIface_state.table == 0) return 6;
     if (out == 0) return 2;
     *out = 4;
     return 0;
@@ -7357,29 +7357,29 @@ int crcIface_getDigestSize(int *out) {
 INCLUDE_ASM("seg/seg_2F41F8", crcIface_get);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00497508[];
+extern char crcIface_funcTable[];
 /**
- * Returns the CRC interface D_00497508: start (crcIface_start), stop, started, reset, update, finish, digest size.
+ * Returns the CRC interface crcIface_funcTable: start (crcIface_start), stop, started, reset, update, finish, digest size.
  *
  * @return the interface table
  */
-char *crcIface_get(void) { return D_00497508; }
+char *crcIface_get(void) { return crcIface_funcTable; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_start);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
- * Starts the XOR cipher interface (slot 0 of D_00497528): moves it from stopped (state 4) to started without a key (6).
+ * Starts the XOR cipher interface (slot 0 of xorIface_funcTable): moves it from stopped (state 4) to started without a key (6).
  *
  * @return 0, or 3 when it is not stopped
  */
 int xorIface_start(void) {
-    if (D_004A4BF0 != 4) return 3;
-    D_004A4BF0 = 6;
+    if (xorIface_cipherState != 4) return 3;
+    xorIface_cipherState = 6;
     return 0;
 }
 #endif
@@ -7388,15 +7388,15 @@ int xorIface_start(void) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_stop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* XOR key window (xorIface_setKey): D_004A4BE4 .. D_004A4BE8 is the key, D_004A4BEC the next key byte, D_004A4BF0
+/* XOR key window (xorIface_setKey): xorIface_keyStart .. xorIface_keyEnd is the key, xorIface_keyCursor the next key byte, xorIface_cipherState
    the cipher state (4 = idle). */
-extern unsigned char *D_004A4BE4;
+extern unsigned char *xorIface_keyStart;
 
-extern unsigned char *D_004A4BE8;
+extern unsigned char *xorIface_keyEnd;
 
-extern unsigned char *D_004A4BEC;
+extern unsigned char *xorIface_keyCursor;
 
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Stops the XOR cipher interface (slot 1): forgets the key and returns to state 4.
@@ -7404,10 +7404,10 @@ extern int D_004A4BF0;
  * @return 0
  */
 int xorIface_stop(void) {
-    D_004A4BE4 = 0;
-    D_004A4BE8 = 0;
-    D_004A4BEC = 0;
-    D_004A4BF0 = 4;
+    xorIface_keyStart = 0;
+    xorIface_keyEnd = 0;
+    xorIface_keyCursor = 0;
+    xorIface_cipherState = 4;
     return 0;
 }
 #endif
@@ -7416,29 +7416,29 @@ int xorIface_stop(void) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_isStarted);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Returns whether the XOR cipher interface is started (state not 4). Slot 2.
  *
  * @return 1 when started
  */
-int xorIface_isStarted(void) { return D_004A4BF0 != 4; }
+int xorIface_isStarted(void) { return xorIface_cipherState != 4; }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_setKey);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* XOR key window (xorIface_setKey): D_004A4BE4 .. D_004A4BE8 is the key, D_004A4BEC the next key byte, D_004A4BF0
+/* XOR key window (xorIface_setKey): xorIface_keyStart .. xorIface_keyEnd is the key, xorIface_keyCursor the next key byte, xorIface_cipherState
    the cipher state (4 = idle). */
-extern unsigned char *D_004A4BE4;
+extern unsigned char *xorIface_keyStart;
 
-extern unsigned char *D_004A4BE8;
+extern unsigned char *xorIface_keyEnd;
 
-extern unsigned char *D_004A4BEC;
+extern unsigned char *xorIface_keyCursor;
 
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Sets the XOR cipher key (slot 3): the key runs from @p keyBytes for @p keyLen bytes and the position restarts at its first byte
@@ -7450,11 +7450,11 @@ extern int D_004A4BF0;
  */
 int xorIface_setKey(unsigned char *keyBytes, int keyLen) {
     if (keyBytes == 0 || keyLen == 0) return 2;
-    if (D_004A4BF0 == 4) return 4;
-    D_004A4BE4 = keyBytes;
-    D_004A4BE8 = keyBytes + keyLen - 1;
-    D_004A4BEC = keyBytes;
-    D_004A4BF0 = 5;
+    if (xorIface_cipherState == 4) return 4;
+    xorIface_keyStart = keyBytes;
+    xorIface_keyEnd = keyBytes + keyLen - 1;
+    xorIface_keyCursor = keyBytes;
+    xorIface_cipherState = 5;
     return 0;
 }
 #endif
@@ -7463,15 +7463,15 @@ int xorIface_setKey(unsigned char *keyBytes, int keyLen) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_encrypt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* XOR key window (xorIface_setKey): D_004A4BE4 .. D_004A4BE8 is the key, D_004A4BEC the next key byte, D_004A4BF0
+/* XOR key window (xorIface_setKey): xorIface_keyStart .. xorIface_keyEnd is the key, xorIface_keyCursor the next key byte, xorIface_cipherState
    the cipher state (4 = idle). */
-extern unsigned char *D_004A4BE4;
+extern unsigned char *xorIface_keyStart;
 
-extern unsigned char *D_004A4BE8;
+extern unsigned char *xorIface_keyEnd;
 
-extern unsigned char *D_004A4BEC;
+extern unsigned char *xorIface_keyCursor;
 
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Encrypts @p n bytes in place (slot 4): XORs each with the next key byte, wrapping to the key's start, and continues
@@ -7484,13 +7484,13 @@ extern int D_004A4BF0;
 int xorIface_encrypt(unsigned char *buf, unsigned n) {
     unsigned i;
     if (buf == 0 || n == 0) return 2;
-    if (D_004A4BF0 != 5 && D_004A4BF0 != 7) return D_004A4BF0;
+    if (xorIface_cipherState != 5 && xorIface_cipherState != 7) return xorIface_cipherState;
     for (i = 0; i < n; i++) {
-        buf[i] ^= *D_004A4BEC;
-        if (D_004A4BEC == D_004A4BE8) D_004A4BEC = D_004A4BE4;
-        else D_004A4BEC = D_004A4BEC + 1;
+        buf[i] ^= *xorIface_keyCursor;
+        if (xorIface_keyCursor == xorIface_keyEnd) xorIface_keyCursor = xorIface_keyStart;
+        else xorIface_keyCursor = xorIface_keyCursor + 1;
     }
-    D_004A4BF0 = 7;
+    xorIface_cipherState = 7;
     return 0;
 }
 #endif
@@ -7499,15 +7499,15 @@ int xorIface_encrypt(unsigned char *buf, unsigned n) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_decrypt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* XOR key window (xorIface_setKey): D_004A4BE4 .. D_004A4BE8 is the key, D_004A4BEC the next key byte, D_004A4BF0
+/* XOR key window (xorIface_setKey): xorIface_keyStart .. xorIface_keyEnd is the key, xorIface_keyCursor the next key byte, xorIface_cipherState
    the cipher state (4 = idle). */
-extern unsigned char *D_004A4BE4;
+extern unsigned char *xorIface_keyStart;
 
-extern unsigned char *D_004A4BE8;
+extern unsigned char *xorIface_keyEnd;
 
-extern unsigned char *D_004A4BEC;
+extern unsigned char *xorIface_keyCursor;
 
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Decrypts @p n bytes in place (slot 5): the same XOR as xorIface_encrypt, allowed when keyed (5) or decrypting (8), and
@@ -7520,13 +7520,13 @@ extern int D_004A4BF0;
 int xorIface_decrypt(unsigned char *buf, unsigned n) {
     unsigned i;
     if (buf == 0 || n == 0) return 2;
-    if (D_004A4BF0 != 5 && D_004A4BF0 != 8) return D_004A4BF0;
+    if (xorIface_cipherState != 5 && xorIface_cipherState != 8) return xorIface_cipherState;
     for (i = 0; i < n; i++) {
-        buf[i] ^= *D_004A4BEC;
-        if (D_004A4BEC == D_004A4BE8) D_004A4BEC = D_004A4BE4;
-        else D_004A4BEC = D_004A4BEC + 1;
+        buf[i] ^= *xorIface_keyCursor;
+        if (xorIface_keyCursor == xorIface_keyEnd) xorIface_keyCursor = xorIface_keyStart;
+        else xorIface_keyCursor = xorIface_keyCursor + 1;
     }
-    D_004A4BF0 = 8;
+    xorIface_cipherState = 8;
     return 0;
 }
 #endif
@@ -7535,13 +7535,13 @@ int xorIface_decrypt(unsigned char *buf, unsigned n) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_rewind);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* XOR key window (xorIface_setKey): D_004A4BE4 .. D_004A4BE8 is the key, D_004A4BEC the next key byte, D_004A4BF0
+/* XOR key window (xorIface_setKey): xorIface_keyStart .. xorIface_keyEnd is the key, xorIface_keyCursor the next key byte, xorIface_cipherState
    the cipher state (4 = idle). */
-extern unsigned char *D_004A4BE4;
+extern unsigned char *xorIface_keyStart;
 
-extern unsigned char *D_004A4BEC;
+extern unsigned char *xorIface_keyCursor;
 
-extern int D_004A4BF0;
+extern int xorIface_cipherState;
 
 /**
  * Rewinds the XOR cipher to the key's first byte and back to state 5 (slot 6); does nothing unless a key is set.
@@ -7549,9 +7549,9 @@ extern int D_004A4BF0;
  * @return 0
  */
 int xorIface_rewind(void) {
-    if (D_004A4BF0 == 5 || D_004A4BF0 == 7 || D_004A4BF0 == 8) {
-        D_004A4BF0 = 5;
-        D_004A4BEC = D_004A4BE4;
+    if (xorIface_cipherState == 5 || xorIface_cipherState == 7 || xorIface_cipherState == 8) {
+        xorIface_cipherState = 5;
+        xorIface_keyCursor = xorIface_keyStart;
     }
     return 0;
 }
@@ -7561,13 +7561,13 @@ int xorIface_rewind(void) {
 INCLUDE_ASM("seg/seg_2F41F8", xorIface_get);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_00497528[];
+extern char xorIface_funcTable[];
 /**
- * Returns the XOR cipher interface D_00497528: start, stop, started, set key, encrypt, decrypt, rewind.
+ * Returns the XOR cipher interface xorIface_funcTable: start, stop, started, set key, encrypt, decrypt, rewind.
  *
  * @return the interface table
  */
-char *xorIface_get(void) { return D_00497528; }
+char *xorIface_get(void) { return xorIface_funcTable; }
 #endif
 
 //100%
@@ -7764,7 +7764,7 @@ void saveRec_splitHeader(char *src, char *outWord0, char *outWord1, char *outWor
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_findTableEntry);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 struct sMcEnt { int key; int a; int b; int c; };
 
@@ -7818,17 +7818,17 @@ struct sMcState {
                                            first seek (a just-created save has no records) */
 };
 
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 /**
- * Finds the @p n-th entry with key @p key in the open save's record table (D_004A5B20 +0x9C, +0x94 entries).
+ * Finds the @p n-th entry with key @p key in the open save's record table (saveRec_session +0x9C, +0x94 entries).
  *
  * @param key  record key
  * @param n  index among the entries with that key
  * @return the entry (key, offset, size, CRC), or 0
  */
 struct sMcEnt *saveRec_findTableEntry(int key, int n) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     struct sMcEnt *end = state->f9C + state->f94;
     struct sMcEnt *entry = state->f9C;
     int cnt = 0;
@@ -7846,9 +7846,9 @@ struct sMcEnt *saveRec_findTableEntry(int key, int n) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_setEntryCrc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 /**
  * Sets the CRC of the @p n-th record-table entry with key @p key.
@@ -7858,7 +7858,7 @@ extern struct sMcState *D_004A5B20;
  * @param val  the CRC
  */
 void saveRec_setEntryCrc(int key, int n, int *val) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     struct sMcEnt *end = state->f9C + state->f94;
     struct sMcEnt *entry = state->f9C;
     int cnt = 0;
@@ -7874,10 +7874,10 @@ void saveRec_setEntryCrc(int key, int n, int *val) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_appendTableEntry);
 #ifdef SKIP_ASM
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
 #include "fakematch.h"
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 /**
  * Appends an entry to the open save's record table.
@@ -7890,15 +7890,15 @@ extern struct sMcState *D_004A5B20;
  * @param val  record CRC
  * @return the entry's file offset, or the unchanged next offset when the table is full
  */
-// FAKEMATCH: FM_OPAQUE(e) after the e->c store hides that e == t, so the pre-if `t = &f9C[f94]` (v0) is copied into e (a3) at the join as in retail; e->c is stored through an int view (retail reloads D_004A5B20 after that store, which a struct-field store lets sched hoist); plain form 67.84% (91.38% with the struct-field store).
+// FAKEMATCH: FM_OPAQUE(e) after the e->c store hides that e == t, so the pre-if `t = &f9C[f94]` (v0) is copied into e (a3) at the join as in retail; e->c is stored through an int view (retail reloads saveRec_session after that store, which a struct-field store lets sched hoist); plain form 67.84% (91.38% with the struct-field store).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int saveRec_appendTableEntry(int key, int size, int *val) {
     struct sMcEnt *e, *newEntry;
     int len;
     int end;
-    if (D_004A5B20->f94 == D_004A5B20->f90) return D_004A5B20->f98;
-    newEntry = D_004A5B20->f9C + D_004A5B20->f94;
-    if (D_004A5B20->f94 == 0) D_004A5B20->f9C->a = 0;
+    if (saveRec_session->f94 == saveRec_session->f90) return saveRec_session->f98;
+    newEntry = saveRec_session->f9C + saveRec_session->f94;
+    if (saveRec_session->f94 == 0) saveRec_session->f9C->a = 0;
     e = newEntry;
     e->key = key;
     e->b = size;
@@ -7906,10 +7906,10 @@ int saveRec_appendTableEntry(int key, int size, int *val) {
     if (len == 0) len = 1;
     *(int *)&e->c = *val;
     FM_OPAQUE(e);
-    D_004A5B20->f94++;
+    saveRec_session->f94++;
     end = e->a + len;
-    D_004A5B20->f98 = end;
-    if (D_004A5B20->f94 != D_004A5B20->f90) e[1].a = end;
+    saveRec_session->f98 = end;
+    if (saveRec_session->f94 != saveRec_session->f90) e[1].a = end;
     return e->a;
 }
 #endif
@@ -7919,9 +7919,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_computeCrc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int func_003FB840c(int) __asm__("saveRec_offsetCrcError");
 int saveRec_computeCrc_impl(int a, int b, int c) __asm__("saveRec_computeCrc");
@@ -7934,7 +7934,7 @@ int saveRec_computeCrc_impl(int a, int b, int c) __asm__("saveRec_computeCrc");
  * @return 0, or the CRC error + 300
  */
 int saveRec_computeCrc_impl(int data, int byteCount, int digestOut) {
-    struct sMcIfB *vt = D_004A5B20->crcIface;
+    struct sMcIfB *vt = saveRec_session->crcIface;
     int result = vt->reset(data, byteCount, digestOut);
     if (result == 0) {
         result = vt->update(data, byteCount);
@@ -7951,9 +7951,9 @@ int saveRec_computeCrc_impl(int data, int byteCount, int digestOut) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_computeTableCrc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_computeCrc(void *, int, sDigestBlock **);
 /**
@@ -7962,7 +7962,7 @@ extern int saveRec_computeCrc(void *, int, sDigestBlock **);
  * @param out  receives the 4 digest bytes
  */
 void saveRec_computeTableCrc(struct sMcKey *out) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     sDigestBlock *digestBlock;
     int sz = state->f94 << 4;
     if (sz == 0) {
@@ -7979,9 +7979,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_encrypt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int fB828b(int) __asm__("saveRec_offsetCipherError");
 int saveRec_encrypt_impl(int x, int y) __asm__("saveRec_encrypt");
@@ -7995,12 +7995,12 @@ int saveRec_encrypt_impl(int x, int y) __asm__("saveRec_encrypt");
  */
 int saveRec_encrypt_impl(int x, int y) {
     int result;
-    if (D_004A5B20->cipher == 0) return 0;
-    result = D_004A5B20->cipher->setKey(D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen);
+    if (saveRec_session->cipher == 0) return 0;
+    result = saveRec_session->cipher->setKey(saveRec_session->cipherKey, saveRec_session->cipherKeyLen);
     if (result == 0) {
-        result = D_004A5B20->cipher->encrypt(x, y);
+        result = saveRec_session->cipher->encrypt(x, y);
         if (result == 0) {
-            result = D_004A5B20->cipher->rewind();
+            result = saveRec_session->cipher->rewind();
             if (result == 0) return 0;
         }
     }
@@ -8013,9 +8013,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_decrypt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int fB828(int) __asm__("saveRec_offsetCipherError");
 int saveRec_decrypt_impl(int x, int y) __asm__("saveRec_decrypt");
@@ -8028,12 +8028,12 @@ int saveRec_decrypt_impl(int x, int y) __asm__("saveRec_decrypt");
  */
 int saveRec_decrypt_impl(int x, int y) {
     int result;
-    if (D_004A5B20->cipher == 0) return 0;
-    result = D_004A5B20->cipher->setKey(D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen);
+    if (saveRec_session->cipher == 0) return 0;
+    result = saveRec_session->cipher->setKey(saveRec_session->cipherKey, saveRec_session->cipherKeyLen);
     if (result == 0) {
-        result = D_004A5B20->cipher->decrypt(x, y);
+        result = saveRec_session->cipher->decrypt(x, y);
         if (result == 0) {
-            result = D_004A5B20->cipher->rewind();
+            result = saveRec_session->cipher->rewind();
             if (result == 0) return 0;
         }
     }
@@ -8045,9 +8045,9 @@ int saveRec_decrypt_impl(int x, int y) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_beginOpen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int mcReq_startOpen(int, int, int);
 /**
@@ -8061,7 +8061,7 @@ extern int mcReq_startOpen(int, int, int);
  */
 int saveRec_beginOpen(int saveName, int unitCode, int searchDir, int operation) {
     int result = mcReq_startOpen(saveName, unitCode, searchDir);
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     state->f74 = operation;
     state->f78 = 4;
     state->f94 = 0;
@@ -8074,9 +8074,9 @@ int saveRec_beginOpen(int saveName, int unitCode, int searchDir, int operation) 
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_seekToStart);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int mcReq_startSeek(struct sMcState *, int, int);
 extern int saveRec_offsetCardError(int);
@@ -8086,7 +8086,7 @@ extern int saveRec_offsetCardError(int);
  * @return 0, or the request error + 100
  */
 int saveRec_seekToStart(void) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     state->f78 = 9;
     return saveRec_offsetCardError(mcReq_startSeek(state, 0, 0));
 }
@@ -8097,9 +8097,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_readNextHeader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_getBlockSize_BDF0(int, int) __asm__("saveRec_getBlockSize");
 extern int mcReq_startRead(struct sMcState *, int, int);
@@ -8110,9 +8110,9 @@ extern int saveRec_offsetCardError(int);
  * @return 0, or the request error + 100
  */
 int saveRec_readNextHeader(void) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     state->f78 = 7;
-    return saveRec_offsetCardError(mcReq_startRead(D_004A5B20, state->headerBuf, saveRec_getBlockSize_BDF0(0, 1)));
+    return saveRec_offsetCardError(mcReq_startRead(saveRec_session, state->headerBuf, saveRec_getBlockSize_BDF0(0, 1)));
 }
 #endif
 
@@ -8121,9 +8121,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_addReadHeader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_offsetCardError(int);
 
@@ -8142,15 +8142,15 @@ int saveRec_addReadHeader(void) {
     int result;
     int recordKey, recordSize;
     x[1] = 0;
-    D_004A5B20->f78 = 11;
-    result = fBCD8(D_004A5B20->headerBuf, 0xC);
+    saveRec_session->f78 = 11;
+    result = fBCD8(saveRec_session->headerBuf, 0xC);
     if (result != 0) return result;
-    fB9D0(D_004A5B20->headerBuf, &x[0], &x[1], D_004A5B20->recordCrc.b);
+    fB9D0(saveRec_session->headerBuf, &x[0], &x[1], saveRec_session->recordCrc.b);
     recordSize = x[1];
     recordKey = x[0];
-    result = fBAD0(recordKey, recordSize, D_004A5B20->recordCrc.b);
-    if (D_004A5B20->f98 == result) return 5;
-    return saveRec_offsetCardError(f9C48(D_004A5B20, D_004A5B20->f98, 0));
+    result = fBAD0(recordKey, recordSize, saveRec_session->recordCrc.b);
+    if (saveRec_session->f98 == result) return 5;
+    return saveRec_offsetCardError(f9C48(saveRec_session, saveRec_session->f98, 0));
 }
 #endif
 
@@ -8159,9 +8159,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_writeRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_getBlockSize_BED0(int, int) __asm__("saveRec_getBlockSize");
 
@@ -8182,16 +8182,16 @@ extern int f9F00(struct sMcState *, int, int) __asm__("mcReq_startWrite");
 int saveRec_writeRecord(void) {
     int header;
     int result;
-    D_004A5B20->f78 = 6;
-    header = saveRec_getHeader(D_004A5B20->recordBuf, 1);
+    saveRec_session->f78 = 6;
+    header = saveRec_getHeader(saveRec_session->recordBuf, 1);
     if (header == 0) return 4;
-    fB958(header, D_004A5B20->recordKey, D_004A5B20->recordSize, D_004A5B20->recordCrc.b);
+    fB958(header, saveRec_session->recordKey, saveRec_session->recordSize, saveRec_session->recordCrc.b);
     result = fBC40(header, 0xC);
     if (result != 0) return result;
-    result = fBC40(D_004A5B20->recordBuf, D_004A5B20->recordSize);
+    result = fBC40(saveRec_session->recordBuf, saveRec_session->recordSize);
     if (result != 0) return result;
-    result = saveRec_getBlockSize_BED0(D_004A5B20->recordSize, 2);
-    return saveRec_offsetCardError(f9F00(D_004A5B20, header, result));
+    result = saveRec_getBlockSize_BED0(saveRec_session->recordSize, 2);
+    return saveRec_offsetCardError(f9F00(saveRec_session, header, result));
 }
 #endif
 
@@ -8200,9 +8200,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_readRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_getHeader(int, int);
 
@@ -8215,11 +8215,11 @@ extern int saveRec_offsetCardError(int);
  * @return 0, or the request error + 100
  */
 int saveRec_readRecord(void) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     int header;
     state->f78 = 10;
     header = saveRec_getHeader(state->recordBuf, 0);
-    return saveRec_offsetCardError(mcReq_startRead(D_004A5B20, header, saveRec_getBlockSize_BF80(D_004A5B20->recordSize, 1)));
+    return saveRec_offsetCardError(mcReq_startRead(saveRec_session, header, saveRec_getBlockSize_BF80(saveRec_session->recordSize, 1)));
 }
 #endif
 
@@ -8228,9 +8228,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_verifyRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 typedef struct { int tag; int p; } P3FBFE0;
 typedef struct { int a; int b; P3FBFE0 *p; } L3FBFE0;
@@ -8247,20 +8247,20 @@ extern int f5FC8(int, char *, int) __asm__("memcmp");
  */
 int saveRec_verifyRecord(void) {
     L3FBFE0 x; int header; int result; int err = 10; int hh;
-    x.p = 0; hh = D_004A5B20->recordBuf; x.b = 0;
-    D_004A5B20->f78 = err;
+    x.p = 0; hh = saveRec_session->recordBuf; x.b = 0;
+    saveRec_session->f78 = err;
     header = saveRec_getHeader(hh, 0);
     result = fBCD8(header, 0xC);
     if (result != 0) return result;
-    fB9D0(header, &x.a, &x.b, D_004A5B20->recordCrc.b);
-    if (x.a != D_004A5B20->recordKey) return 11;
-    if (x.b != D_004A5B20->recordSize) return 110;
-    result = fBCD8(D_004A5B20->recordBuf, x.b);
+    fB9D0(header, &x.a, &x.b, saveRec_session->recordCrc.b);
+    if (x.a != saveRec_session->recordKey) return 11;
+    if (x.b != saveRec_session->recordSize) return 110;
+    result = fBCD8(saveRec_session->recordBuf, x.b);
     if (result != 0) return result;
-    result = fBB50(D_004A5B20->recordBuf, D_004A5B20->recordSize, &x.p);
+    result = fBB50(saveRec_session->recordBuf, saveRec_session->recordSize, &x.p);
     if (result != 0) return result;
     if (x.p->tag != 4) return 11;
-    if (f5FC8(x.p->p, D_004A5B20->recordCrc.b, 4) == 0) err = 0;
+    if (f5FC8(x.p->p, saveRec_session->recordCrc.b, 4) == 0) err = 0;
     return err;
 }
 #endif
@@ -8269,16 +8269,16 @@ int saveRec_verifyRecord(void) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_isOpen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 /**
- * Returns whether the save-record manager D_004A5B20 is open.
+ * Returns whether the save-record manager saveRec_session is open.
  *
  * @return 1 when open
  */
-int saveRec_isOpen(void) { return D_004A5B20 != 0; }
+int saveRec_isOpen(void) { return saveRec_session != 0; }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -8286,9 +8286,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_open);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 /* the open parameters (names ours, from [U] below) */
 typedef struct {
@@ -8327,32 +8327,32 @@ int saveRec_open(P0E8 *openParams) {
     if (saveRec_isOpen() != 0) return 1;
     result = mcReq_open(openParams->units, openParams->callbacks, openParams->heap);
     if (result != 0) return saveRec_offsetCardError(result);
-    D_004A5B20 = c0e8_6728(openParams->heap, 172, 4);
-    if (D_004A5B20 == 0) return 6;
-    c0e8_A6C8(&D_004A5B20->crcIface);
-    result = D_004A5B20->crcIface->start(openParams->heap);
+    saveRec_session = c0e8_6728(openParams->heap, 172, 4);
+    if (saveRec_session == 0) return 6;
+    c0e8_A6C8(&saveRec_session->crcIface);
+    result = saveRec_session->crcIface->start(openParams->heap);
     if (result != 0) return func_003FB840c(result);
-    D_004A5B20->cipher = cb = openParams->cipher;
+    saveRec_session->cipher = cb = openParams->cipher;
     if (cb != 0) {
         int n;
         result = cb->start(openParams->heap);
         if (result != 0) return fB828(result);
         n = openParams->cipherKeyLen;
-        D_004A5B20->cipherKeyLen = n;
-        D_004A5B20->cipherKey = c0e8_6728(openParams->heap, n, 4);
-        if (D_004A5B20->cipherKey == 0) return 6;
-        func_0041605C(D_004A5B20->cipherKey, openParams->cipherKey, D_004A5B20->cipherKeyLen);
+        saveRec_session->cipherKeyLen = n;
+        saveRec_session->cipherKey = c0e8_6728(openParams->heap, n, 4);
+        if (saveRec_session->cipherKey == 0) return 6;
+        func_0041605C(saveRec_session->cipherKey, openParams->cipherKey, saveRec_session->cipherKeyLen);
     }
-    D_004A5B20->f90 = openParams->maxRecords;
-    D_004A5B20->f94 = 0;
-    D_004A5B20->f98 = 0;
-    D_004A5B20->f9C = c0e8_6728(openParams->heap, openParams->maxRecords << 4, 4);
-    if (D_004A5B20->f9C == 0) return 6;
-    result = saveRec_allocBuffer((char *)&D_004A5B20->headerBuf, D_004A5B20->heap, 0, 1);
+    saveRec_session->f90 = openParams->maxRecords;
+    saveRec_session->f94 = 0;
+    saveRec_session->f98 = 0;
+    saveRec_session->f9C = c0e8_6728(openParams->heap, openParams->maxRecords << 4, 4);
+    if (saveRec_session->f9C == 0) return 6;
+    result = saveRec_allocBuffer((char *)&saveRec_session->headerBuf, saveRec_session->heap, 0, 1);
     if (result != 0) return result;
-    D_004A5B20->headerBuf -= 0xC;
-    D_004A5B20->heap = openParams->heap;
-    D_004A5B20->justCreated = 0;
+    saveRec_session->headerBuf -= 0xC;
+    saveRec_session->heap = openParams->heap;
+    saveRec_session->justCreated = 0;
     return 0;
 }
 #endif
@@ -8362,9 +8362,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_close);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_freeBuffer(int, int, int, int);
 
@@ -8387,28 +8387,28 @@ int saveRec_close(void) {
     int userBuf;
     struct sMcIfA *cipher;
     if (saveRec_isOpen() == 0) return 2;
-    c260_B9A0(D_004A5B20->headerBuf);
-    userBuf = D_004A5B20->headerBuf + 0xC;
-    D_004A5B20->headerBuf = userBuf;
-    result = saveRec_freeBuffer(userBuf, D_004A5B20->heap, 0, 1);
+    c260_B9A0(saveRec_session->headerBuf);
+    userBuf = saveRec_session->headerBuf + 0xC;
+    saveRec_session->headerBuf = userBuf;
+    result = saveRec_freeBuffer(userBuf, saveRec_session->heap, 0, 1);
     if (result != 0) return result;
-    c260_6760(D_004A5B20->heap, D_004A5B20->f9C, D_004A5B20->f90 * 16, 4);
-    cipher = D_004A5B20->cipher;
-    D_004A5B20->f9C = 0;
+    c260_6760(saveRec_session->heap, saveRec_session->f9C, saveRec_session->f90 * 16, 4);
+    cipher = saveRec_session->cipher;
+    saveRec_session->f9C = 0;
     if (cipher != 0) {
         result = cipher->stop();
         if (result != 0) return c260_B828(result);
-        c260_6760(D_004A5B20->heap, D_004A5B20->cipherKey, D_004A5B20->cipherKeyLen, 4);
-        D_004A5B20->cipherKey = 0;
+        c260_6760(saveRec_session->heap, saveRec_session->cipherKey, saveRec_session->cipherKeyLen, 4);
+        saveRec_session->cipherKey = 0;
     }
-    D_004A5B20->cipher = 0;
-    result = D_004A5B20->crcIface->stop();
+    saveRec_session->cipher = 0;
+    result = saveRec_session->crcIface->stop();
     if (result != 0) return c260_B840(result);
-    D_004A5B20->crcIface = 0;
+    saveRec_session->crcIface = 0;
     result = c260_9530();
-    if (result != 0) return c260_B810(result, D_004A5B20);
-    c260_6760(D_004A5B20->heap, D_004A5B20, 172, 4);
-    D_004A5B20 = 0;
+    if (result != 0) return c260_B810(result, saveRec_session);
+    c260_6760(saveRec_session->heap, saveRec_session, 172, 4);
+    saveRec_session = 0;
     return 0;
 }
 #endif
@@ -8417,9 +8417,9 @@ int saveRec_close(void) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_startCreate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int mcReq_startCreate(char *str, int a, int b);
 extern int saveRec_offsetCardError(int);
@@ -8432,7 +8432,7 @@ extern int saveRec_offsetCardError(int);
  * @return 0, or the request error + 100
  */
 int saveRec_startCreate(char *str, int unitCode, int searchDir) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     state->f74 = 1;
     state->f78 = 1;
     return saveRec_offsetCardError(mcReq_startCreate(str, unitCode, searchDir));
@@ -8443,9 +8443,9 @@ int saveRec_startCreate(char *str, int unitCode, int searchDir) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_startDelete);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int mcReq_startDelete(char *str, int a, int b);
 extern int saveRec_offsetCardError(int);
@@ -8458,7 +8458,7 @@ extern int saveRec_offsetCardError(int);
  * @return 0, or the request error + 100
  */
 int saveRec_startDelete(char *str, int unitCode, int searchDir) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     state->f74 = 2;
     state->f78 = 2;
     return saveRec_offsetCardError(mcReq_startDelete(str, unitCode, searchDir));
@@ -8470,9 +8470,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_startReopen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int fBD70(char *, int, int, int) __asm__("saveRec_beginOpen");
 int saveRec_startReopen_impl(struct sMcParams *a) __asm__("saveRec_startReopen");
@@ -8485,7 +8485,7 @@ int saveRec_startReopen_impl(struct sMcParams *a) __asm__("saveRec_startReopen")
  * @return 0, or the request error + 100
  */
 int saveRec_startReopen_impl(struct sMcParams *savedParams) {
-    D_004A5B20->params = *savedParams;
+    saveRec_session->params = *savedParams;
     return fBD70(savedParams->name, savedParams->w[1], -1, 5);
 }
 #endif
@@ -8509,14 +8509,14 @@ int saveRec_startOpen(int saveName, int unitCode, int searchDir) { return saveRe
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_startClose);
 #ifdef SKIP_ASM
-// FAKEMATCH: `*&` store of params.crc through its address (the target reloads D_004A5B20); plain form 94.26%.
+// FAKEMATCH: `*&` store of params.crc through its address (the target reloads saveRec_session); plain form 94.26%.
 // Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
 // behaviour-preserving steering only); replace it when an honest spelling matches.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int mcReq_startClose(struct sMcParams *);
 extern int saveRec_offsetCardError(int);
@@ -8531,9 +8531,9 @@ extern void func_003FBBE0b(int *) __asm__("saveRec_computeTableCrc");
 int saveRec_startClose(struct sMcParams *x) {
     struct sMcState *state;
     func_003FBBE0b(&x->crc);
-    /* stored through a pointer (*&), not as a plain field store: the target reloads D_004A5B20 after this store */
-    *&D_004A5B20->params.crc = x->crc;
-    state = D_004A5B20;
+    /* stored through a pointer (*&), not as a plain field store: the target reloads saveRec_session after this store */
+    *&saveRec_session->params.crc = x->crc;
+    state = saveRec_session;
     state->f74 = 3;
     state->f78 = 3;
     state->f98 = 0;
@@ -8547,9 +8547,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_startWriteRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_offsetCardError(int);
 
@@ -8586,21 +8586,21 @@ int saveRec_startWriteRecord(sMcParamsAligned *saveParams, int recordKey, int re
     int writeOffset;
     struct sMcEnt *k;
     digestBlock[0] = 0;
-    D_004A5B20->f74 = 6;
-    D_004A5B20->f78 = 5;
-    __builtin_memcpy(D_004A5B20, saveParams, 100);
-    D_004A5B20->recordSize = recordSize;
-    D_004A5B20->recordBuf = recordBuf;
-    D_004A5B20->recordKey = recordKey;
+    saveRec_session->f74 = 6;
+    saveRec_session->f78 = 5;
+    __builtin_memcpy(saveRec_session, saveParams, 100);
+    saveRec_session->recordSize = recordSize;
+    saveRec_session->recordBuf = recordBuf;
+    saveRec_session->recordKey = recordKey;
     k = saveRec_findTableEntry(recordKey, recordIndex);
-    if (fBB50w(D_004A5B20->recordBuf, D_004A5B20->recordSize, digestBlock) == 0) {
-        D_004A5B20->recordCrc = *(struct sMcKey *)digestBlock[0]->digest;
+    if (fBB50w(saveRec_session->recordBuf, saveRec_session->recordSize, digestBlock) == 0) {
+        saveRec_session->recordCrc = *(struct sMcKey *)digestBlock[0]->digest;
         if (k == 0) {
-            writeOffset = D_004A5B20->f98;
-            fBAD0w(recordKey, D_004A5B20->recordSize, &D_004A5B20->recordCrc);
+            writeOffset = saveRec_session->f98;
+            fBAD0w(recordKey, saveRec_session->recordSize, &saveRec_session->recordCrc);
         } else {
             writeOffset = k->a;
-            fBA78w(recordKey, recordIndex, &D_004A5B20->recordCrc);
+            fBA78w(recordKey, recordIndex, &saveRec_session->recordCrc);
         }
         fBBE0w(&saveParams->crc);
         return saveRec_offsetCardError(f9C48w(saveParams, writeOffset, 0));
@@ -8613,9 +8613,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_startReadRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_offsetCardError(int);
 
@@ -8636,20 +8636,20 @@ int saveRec_startReadRecord_impl(struct sMcParams *src, int a, int b, int c, int
  * @return 0; 7 when there is no such record, 110 when its size differs, or the request error + 100
  */
 int saveRec_startReadRecord_impl(struct sMcParams *src, int recordKey, int recordIndex, int recordBuf, int recordSize) {
-    struct sMcState *state = D_004A5B20;
+    struct sMcState *state = saveRec_session;
     struct sMcEnt *entry;
     int readOffset;
     state->f74 = 8;
     state->f78 = 5;
     state->params = *src;
-    D_004A5B20->recordBuf = recordBuf;
-    D_004A5B20->recordKey = recordKey;
-    D_004A5B20->recordSize = recordSize;
+    saveRec_session->recordBuf = recordBuf;
+    saveRec_session->recordKey = recordKey;
+    saveRec_session->recordSize = recordSize;
     entry = saveRec_findTableEntry(recordKey, recordIndex);
     if (entry == 0) return 7;
     if (recordSize != entry->b) return 110;
     readOffset = entry->a;
-    D_004A5B20->readOffset = readOffset;
+    saveRec_session->readOffset = readOffset;
     return saveRec_offsetCardError(c708_9C48(src, readOffset, 0));
 }
 #endif
@@ -8659,9 +8659,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_countRecords);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_isOpen(void);
 int saveRec_countRecords_impl(int a, int key, int *out) __asm__("saveRec_countRecords");
@@ -8680,7 +8680,7 @@ int saveRec_countRecords_impl(int saveParams, int key, int *out) {
     if (saveParams == 0) return 4;
     if (out == 0) return 4;
     *out = 0;
-    state = D_004A5B20;
+    state = saveRec_session;
     end = state->f9C + state->f94;
     entry = state->f9C;
     for (; entry < end; entry++) {
@@ -8695,7 +8695,7 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_getRecordSize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
 // (prototype from their definition at line 3805)
 struct sMcEnt *saveRec_findTableEntry(int key, int n);
@@ -8730,9 +8730,9 @@ INCLUDE_ASM("seg/seg_2F41F8", saveRec_copySaveParams);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 int saveRec_copySaveParams_impl(struct sMcParams *dst) __asm__("saveRec_copySaveParams");
 /**
@@ -8743,7 +8743,7 @@ int saveRec_copySaveParams_impl(struct sMcParams *dst) __asm__("saveRec_copySave
  */
 int saveRec_copySaveParams_impl(struct sMcParams *dst) {
     if (dst == 0) return 4;
-    *dst = D_004A5B20->params;
+    *dst = saveRec_session->params;
     return 0;
 }
 #endif
@@ -8752,9 +8752,9 @@ int saveRec_copySaveParams_impl(struct sMcParams *dst) {
 INCLUDE_ASM("seg/seg_2F41F8", saveRec_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-/* D_004A5B20: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
+/* saveRec_session: the memory-card session (0xAC bytes, allocated by saveRec_open). params is the caller's 0x64-byte
    block; f9C points to f94 entries; cipher / crcIface are the two driver interfaces. */
-extern struct sMcState *D_004A5B20;
+extern struct sMcState *saveRec_session;
 
 extern int saveRec_offsetCardError(int);
 extern int saveRec_offsetCipherError(int);
@@ -8785,38 +8785,38 @@ int saveRec_update(int *st, int *res) {
     if (res == 0) return 4;
     cardResult = mcReq_update(st, res);
     if (st[0] == 0) {
-        if (D_004A5B20->f74 != 0) return 8;
+        if (saveRec_session->f74 != 0) return 8;
     }
     if (st[0] != 2) return saveRec_offsetCardError(cardResult);
-    if (cardResult != 0 && D_004A5B20->f74 != 4 && D_004A5B20->f74 != 5) return saveRec_offsetCardError(cardResult);
-    if (D_004A5B20->f74 == 1 && cardResult == 0) D_004A5B20->justCreated = 1;
-    if (D_004A5B20->f74 != 1 && D_004A5B20->f74 != 4) D_004A5B20->justCreated = 0;
-    if (D_004A5B20->f74 == 6) {
-        if (D_004A5B20->f78 == 5) {
+    if (cardResult != 0 && saveRec_session->f74 != 4 && saveRec_session->f74 != 5) return saveRec_offsetCardError(cardResult);
+    if (saveRec_session->f74 == 1 && cardResult == 0) saveRec_session->justCreated = 1;
+    if (saveRec_session->f74 != 1 && saveRec_session->f74 != 4) saveRec_session->justCreated = 0;
+    if (saveRec_session->f74 == 6) {
+        if (saveRec_session->f78 == 5) {
             *st = 1;
             return saveRec_writeRecord();
         }
-        if (D_004A5B20->f78 == 6) {
-            int header = saveRec_getHeader(D_004A5B20->recordBuf, 0);
+        if (saveRec_session->f78 == 6) {
+            int header = saveRec_getHeader(saveRec_session->recordBuf, 0);
             int stepError;
             fCA40_B9A0(header);
-            if (saveRec_getBlockSize(D_004A5B20->recordSize, 2) != *res) return 110;
-            *res = D_004A5B20->recordSize;
-            stepError = saveRec_decrypt(D_004A5B20->recordBuf, D_004A5B20->recordSize);
+            if (saveRec_getBlockSize(saveRec_session->recordSize, 2) != *res) return 110;
+            *res = saveRec_session->recordSize;
+            stepError = saveRec_decrypt(saveRec_session->recordBuf, saveRec_session->recordSize);
             if (stepError != 0) return saveRec_offsetCipherError(stepError);
-            if (cardResult == 0) saveRec_computeTableCrc((struct sMcKey *)&D_004A5B20->params.crc);
+            if (cardResult == 0) saveRec_computeTableCrc((struct sMcKey *)&saveRec_session->params.crc);
         }
     }
-    if (D_004A5B20->f74 == 8) {
-        if (D_004A5B20->f78 == 5) {
+    if (saveRec_session->f74 == 8) {
+        if (saveRec_session->f78 == 5) {
             *st = 1;
             return saveRec_readRecord();
         }
-        if (D_004A5B20->f78 == 10) {
-            int header = saveRec_getHeader(D_004A5B20->recordBuf, 0);
+        if (saveRec_session->f78 == 10) {
+            int header = saveRec_getHeader(saveRec_session->recordBuf, 0);
             int stepError;
-            if (saveRec_getBlockSize(D_004A5B20->recordSize, 1) == *res) {
-                *res = D_004A5B20->recordSize;
+            if (saveRec_getBlockSize(saveRec_session->recordSize, 1) == *res) {
+                *res = saveRec_session->recordSize;
                 stepError = saveRec_verifyRecord();
             } else {
                 stepError = 110;
@@ -8825,41 +8825,41 @@ int saveRec_update(int *st, int *res) {
             return stepError;
         }
     }
-    if (D_004A5B20->f74 == 4 || D_004A5B20->f74 == 5) {
-        if (D_004A5B20->f78 == 4) {
+    if (saveRec_session->f74 == 4 || saveRec_session->f74 == 5) {
+        if (saveRec_session->f78 == 4) {
             if (cardResult != 0) {
-                D_004A5B20->justCreated = 0;
+                saveRec_session->justCreated = 0;
                 return saveRec_offsetCardError(cardResult);
             }
-            mcReq_copyRequestBody((char *)D_004A5B20);
+            mcReq_copyRequestBody((char *)saveRec_session);
             *st = 1;
             return saveRec_seekToStart();
         }
-        if (D_004A5B20->f78 == 9) {
+        if (saveRec_session->f78 == 9) {
             if (cardResult != 0) {
-                D_004A5B20->justCreated = 0;
+                saveRec_session->justCreated = 0;
                 return saveRec_offsetCardError(cardResult);
             }
-            if ((unsigned char)D_004A5B20->justCreated != 0) {
-                D_004A5B20->justCreated = 0;
+            if ((unsigned char)saveRec_session->justCreated != 0) {
+                saveRec_session->justCreated = 0;
                 *st = 2;
                 return 0;
             }
-            D_004A5B20->justCreated = 0;
+            saveRec_session->justCreated = 0;
             *st = 1;
             return saveRec_readNextHeader();
         }
-        if (D_004A5B20->f78 == 7) {
+        if (saveRec_session->f78 == 7) {
             if (cardResult != 0 && cardResult != 10) {
-                D_004A5B20->justCreated = 0;
+                saveRec_session->justCreated = 0;
                 return saveRec_offsetCardError(cardResult);
             }
-            if (cardResult == 10 || D_004A5B20->f94 == D_004A5B20->f90) {
+            if (cardResult == 10 || saveRec_session->f94 == saveRec_session->f90) {
                 *st = 2;
-                fCA40_B9A0(D_004A5B20->headerBuf);
+                fCA40_B9A0(saveRec_session->headerBuf);
                 saveRec_computeTableCrc((struct sMcKey *)&key);
-                if (D_004A5B20->f74 == 5) return fCA40_5FC8(&key, &D_004A5B20->params.crc, 4) != 0 ? 9 : 0;
-                D_004A5B20->params.crc = key;
+                if (saveRec_session->f74 == 5) return fCA40_5FC8(&key, &saveRec_session->params.crc, 4) != 0 ? 9 : 0;
+                saveRec_session->params.crc = key;
                 return 0;
             }
             *st = 1;
@@ -8870,8 +8870,8 @@ int saveRec_update(int *st, int *res) {
             return saveRec_readNextHeader();
         }
     } else if (*st == 2) {
-        D_004A5B20->f74 = 0;
-        D_004A5B20->f78 = 0;
+        saveRec_session->f74 = 0;
+        saveRec_session->f78 = 0;
     }
     return saveRec_offsetCardError(cardResult);
 }

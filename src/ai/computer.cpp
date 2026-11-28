@@ -1741,7 +1741,7 @@ extern "C" void cSSXAudio_Wipeout(void* mgr, cRider* rider, float v);
 void cRider_setControlState_EB30(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_EB30(void* self, int v) __asm__("cRider_setMotionState__FPv");
 struct sCfg_EB30 { int a; int b; };
-extern sCfg_EB30 D_004A4C08;
+extern sCfg_EB30 kAnimIDInvalid_2;
 
 struct sQuat_EB30
 {
@@ -1958,7 +1958,7 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     mSlewed[8].rate = 0.0f;
     PressMode = kPM_None;
     char buf[80];
-    cRiderAnimBase_getAIAnimFrame(buf, mRiderAnim, anim, D_004A4C08.a, mSlewed[0].target);
+    cRiderAnimBase_getAIAnimFrame(buf, mRiderAnim, anim, kAnimIDInvalid_2.a, mSlewed[0].target);
     sXf_EB30 animPose;
     func_0030ECD8(&animPose, mAnimModel, buf, 0);
     cAnimModel* trk = mAnimModel;
@@ -2511,7 +2511,7 @@ __asm__("__12cRiderVb_cmp = cRider_cRider\n"
         "__15cCompPart30_cmpi = __8cCheatFXi\n");
 
 // PORT: vtables this TU does not emit (their key functions are elsewhere), under their retail names.
-__asm__("_vt$14cRiderVbB0_cmp = D_00459B90\n"
+__asm__("_vt$14cRiderVbB0_cmp = cRider_cScriptObjRider_vtbl\n"
         "_vt$9cComp_cmp = cRiderHandler_vtbl\n"
         "_vt$9cComp_cmp$12cRiderVb_cmp = D_00458780\n"
         "_vt$9cComp_cmp$13cRiderVbC_cmp = D_00458738\n");
@@ -2972,13 +2972,13 @@ void cRiderHandler::updateControl(tControlCmd* cmd)
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler__getMotionStateName);
 #ifdef SKIP_ASM
-extern const char* D_00459D70[];
+extern const char* cRiderHandler_motionStateNames[];
 extern char str_Invalid[];
 
 /**
  * Returns the name of the current motion state, "Ground" to "Handplant", for debug display.
  *
- * The bound check accepts 0-6 but the table D_00459D70 has six entries, so MS_Num (6, the constructor's
+ * The bound check accepts 0-6 but the table cRiderHandler_motionStateNames has six entries, so MS_Num (6, the constructor's
  * initial value) reads the next data word as a string pointer.
  *
  * @return the state's name, or " -- Invalid -- " for a state above 6
@@ -2989,7 +2989,7 @@ extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
     if (state >= 7U) {
         return str_Invalid;
     }
-    return D_00459D70[state];
+    return cRiderHandler_motionStateNames[state];
 }
 #endif
 //100%

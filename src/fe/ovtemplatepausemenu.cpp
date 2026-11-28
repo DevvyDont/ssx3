@@ -178,7 +178,7 @@ int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char D_004C8AE8[];
 extern char D_004C8AF8[];
 extern char D_004C8B08[];
@@ -203,7 +203,7 @@ void cOVTemplate_PauseMenu::onGainFocus(cUIState* pPrevState)
     int* sel = (int*)&mPauseMenuOptions;
     char* flags = (char*)&mPauseOptionUnlocked;
     int i = 0;
-    while (i < 8 && (sprintf(buf, D_004A2138, i),
+    while (i < 8 && (sprintf(buf, str_pct_d_j, i),
                      obj = cUIScreen_getObjectByHashName(mpPauseScreen, GetHashValue32(buf)),
                      i < mPauseMenuNumOptions)) {
         if (obj != 0) {

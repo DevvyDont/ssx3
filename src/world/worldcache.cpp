@@ -304,18 +304,18 @@ struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
     int count;     // blocks in the pool (e.g. 53)
     int blockSize; // bytes per block (e.g. 128 KB)
 };
-extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
+extern cWorldMemoryMan_cWorldMemoryMan_sCfg cWorldMemoryMan_m_BlockMemType[];
 extern "C" void cWorldBlockAllocator_init(cWorldBlockAllocator* self, int count, int blockSize);
 
 /**
- * Constructs the world memory manager: three block allocators sized from D_0044C1E0 and 64 empty section
+ * Constructs the world memory manager: three block allocators sized from cWorldMemoryMan_m_BlockMemType and 64 empty section
  * allocators.
  */
 cWorldMemoryMan::cWorldMemoryMan()
 {
-    ((cWorldBlockAllocator*)this)->init(D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
-    m_BlockAllocator[1].init(D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
-    m_BlockAllocator[2].init(D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
+    ((cWorldBlockAllocator*)this)->init(cWorldMemoryMan_m_BlockMemType[0].count, cWorldMemoryMan_m_BlockMemType[0].blockSize);
+    m_BlockAllocator[1].init(cWorldMemoryMan_m_BlockMemType[1].count, cWorldMemoryMan_m_BlockMemType[1].blockSize);
+    m_BlockAllocator[2].init(cWorldMemoryMan_m_BlockMemType[2].count, cWorldMemoryMan_m_BlockMemType[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
         ((int*)&m_pSectionAllocator)[i] = 0;

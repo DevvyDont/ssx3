@@ -1219,7 +1219,7 @@ extern "C" int cWorldView_unloadSection(cWorldView* view, int section);
 extern "C" void cWorldView_activateSection(cWorldView* view, int section);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int cSectionMan_mStreamBandWidthRates[];
-extern float D_0044C208[];
+extern float cWorldCache_m_SectionLoadPriority[];
 extern char str_data_worlds_b[];
 extern char str_data_worlds_c[];
 extern char str_pct_spct_s_b[];
@@ -1333,13 +1333,13 @@ void cSectionMan::update()
             int* state = &cSectionMan_mSectionMap[idx].State;
             if (*state == kSectionMap_LoadQueue) {
                 if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
-                        D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
+                        cWorldCache_m_SectionLoadPriority[cSectionMan_mSectionMap[idx].Priority])) {
                     changed = 1;
                     *state = kSectionMap_Loading;
                 }
             } else if (*state == kSectionMap_LoadActivateQueue) {
                 if (cWorldView_loadSection(gameWorldView_22D8D8(this), section,
-                        D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
+                        cWorldCache_m_SectionLoadPriority[cSectionMan_mSectionMap[idx].Priority])) {
                     *state = kSectionMap_LoadingActivate;
                     changed = 1;
                     forceOff = 1;

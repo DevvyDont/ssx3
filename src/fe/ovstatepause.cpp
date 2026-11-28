@@ -355,7 +355,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
-extern char D_004A24E0[];
+extern char str_2_b[];
 extern char str_camera_2_select[];
 extern char str_2lb_b[];
 extern char str_save[];
@@ -377,7 +377,7 @@ void cOVState_PAUSE_OPTIONS::onPreRender2D()
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || !isField_FA100((signed char*)&cBENewRaceInterface_newRace, 73, 2)) {
-        cUIThing* pair2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A24E0));
+        cUIThing* pair2 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_2_b));
         if (pair2 != 0) {
             pair2->setStatic(1);
         }
@@ -1290,7 +1290,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 
 extern char str_OV_darkblue[];
 
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 extern "C" void cOVTemplate_Simple_onCreateScreen(void* self);
 extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
@@ -1304,9 +1304,9 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(void* self, int index);
 extern "C" void* cBEScoreInterface_getCurrentHighScore(void* iface, int idx);
 extern int cGameModeMan_iCharRank[];
-// The "%d" format D_004A2138, reached gp-relative here: a sized declaration of the same string.
-extern char D_004A2138_n[3] __asm__("D_004A2138");
-extern unsigned short D_004A2140[];
+// The "%d" format str_pct_d_j, reached gp-relative here: a sized declaration of the same string.
+extern char str_pct_d_j_n[3] __asm__("str_pct_d_j");
+extern unsigned short str_pct_s_pct_s_k[];
 extern char str_41freestyle_pre[];
 extern char str_track_event[];
 extern char str_kT_cmnSlopeCaps[];
@@ -1419,7 +1419,7 @@ void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
         str = lookupString_1FBD20(str_kT_cmnPipeCaps);
         break;
     }
-    sprintf2(line, D_004A2140, title, str);
+    sprintf2(line, str_pct_s_pct_s_k, title, str);
     cUIText_setUnicodeString(textObj, line);
     void* text = getObj_1FBD20(overlay, str_objText1);
     cUIThing* sub = (cUIThing*)getObj_1FBD20(overlay, str_objText2);
@@ -1509,7 +1509,7 @@ void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
             sprintf(name, str_run_1_pct_d, i);
             cell = getObj_1FBD20(overlay, name);
             if (cell != 0) {
-                sprintf(num, D_004A2138,
+                sprintf(num, str_pct_d_j,
                         cGameModeMan_getHeatScore(stats, id, mode == cGameModeMan::kFinalHeat ? 2 : 0));
                 cUIText_setAsciiString((cUIText*)cell, num);
             }
@@ -1518,13 +1518,13 @@ void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
             if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == cGameModeMan::kHeat2) {
                 char name2[0x20];
                 char total[0x10];
-                sprintf(num, D_004A2138_n, cGameModeMan_getHeatScore(stats, id, 1));
+                sprintf(num, str_pct_d_j_n, cGameModeMan_getHeatScore(stats, id, 1));
                 cUIText_setAsciiString((cUIText*)cell, num);
                 sprintf(name2, str_total_pct_d, i);
                 cell = getObj_1FBD20(overlay, name2);
                 int run1Score = cGameModeMan_getHeatScore(stats, id, 0);
                 int run2Score = cGameModeMan_getHeatScore(stats, id, 1);
-                sprintf(total, D_004A2138_n, run1Score + run2Score);
+                sprintf(total, str_pct_d_j_n, run1Score + run2Score);
                 cUIText_setAsciiString((cUIText*)cell, total);
             } else {
                 cUIText_setAsciiString((cUIText*)cell, str_dash_sp_dash_sp_dash);
@@ -1538,7 +1538,7 @@ void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
     if (cBENewRaceInterface_newRace.cGamePath == 0 && mode == cGameModeMan::kHeat2) {
         char buf[0x10];
         int score = cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
-        sprintf(buf, D_004A2138, score);
+        sprintf(buf, str_pct_d_j, score);
         cUIText_setAsciiString((cUIText*)textObj, buf);
     } else {
         cUIText_setAsciiString((cUIText*)textObj, str_dash_sp_dash_sp_dash);
@@ -1555,7 +1555,7 @@ void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
     {
         char buf[0x10];
         void* recordScore = cBEScoreInterface_getCurrentHighScore(iface8, 0);
-        sprintf(buf, D_004A2138, recordScore);
+        sprintf(buf, str_pct_d_j, recordScore);
         cUIText_setAsciiString((cUIText*)textObj, buf);
     }
 }
@@ -1646,8 +1646,8 @@ extern char str_kT_cmnSlopeCaps[];
 extern char str_kT_cmnBigAirCaps[];
 extern char str_kT_cmnPipeCaps[];
 extern char str_kT_cmnRaceCaps_b[];
-extern unsigned short D_0046E558[];
-extern unsigned short D_004A2140[];
+extern unsigned short str_pct_s_Jam_b[];
+extern unsigned short str_pct_s_pct_s_k[];
 extern char str_name[];
 extern char str_obj1[];
 extern char str_obj2[];
@@ -1664,7 +1664,7 @@ extern char str_topScoreLabel[];
 extern char str_kT_OVRCMNRecordTime[];
 extern char str_kT_OVRCMNRecordScore[];
 extern char str_topScore[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 struct sVE_1FC878 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
@@ -1756,9 +1756,9 @@ void cOVState::MULTI_PREEVENT_onCreateScreen()
         str = lookupString_1FC878(str_kT_cmnPipeCaps);
         break;
     }
-    unsigned short* lineFmt = D_004A2140;
+    unsigned short* lineFmt = str_pct_s_pct_s_k;
     if (mode48 == kGAMEMODE_PNTSCHALLENGE)
-        sprintf2(line, D_0046E558, title, str);
+        sprintf2(line, str_pct_s_Jam_b, title, str);
     else
         sprintf2(line, lineFmt, title);
     cUIText_setUnicodeString(widget, line);
@@ -1818,7 +1818,7 @@ void cOVState::MULTI_PREEVENT_onCreateScreen()
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNRecordScore));
         void* record = cBEScoreInterface_getCurrentHighScore(iface8, 0);
         widget = getObj_1FC878(overlay, str_topScore);
-        sprintf(num, D_004A2138, record);
+        sprintf(num, str_pct_d_j, record);
         cUIText_setAsciiString((cUIText*)widget, num);
     }
 }
@@ -2134,13 +2134,13 @@ extern "C" int cOVState_CHALLENGE_PREEVENT_onGainTransition(cUIState* self, void
         switch (mode) {
         case kGAMEEVENT_RIVALTIME:
             strcpy3_r(title, cBENewRaceInterface_getLocationName1(iface0));
-            strcpy3_r(fmt, (char*)D_004A2140);
+            strcpy3_r(fmt, (char*)str_pct_s_pct_s_k);
             sprintf1(out, fmt, title, lookupString_1FD320(str_kT_cmnRaceCaps_b));
             cUIText_setUnicodeString(widget, out);
             break;
         case kGAMEEVENT_RIVALPOINTS:
             strcpy3_r(title, cBENewRaceInterface_getLocationName1(iface0));
-            strcpy3_r(fmt, (char*)D_0046E558);
+            strcpy3_r(fmt, (char*)str_pct_s_Jam_b);
             sprintf1(out, fmt, title);
             cUIText_setUnicodeString(widget, out);
             break;
@@ -2868,7 +2868,7 @@ extern char str_title_Save_Replay[];
 extern char str_title_Save_Records[];
 extern char str_Memory_card_info[];
 extern char str_pct_dmemory_card_b[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_empty_e[];
 
 // The engine is read through this inline: reading self->mpEngine in the call reorders the prologue against retail.
@@ -2911,7 +2911,7 @@ void cOVState_SAVEOPTIONS::onCreateScreen()
                 widget->setStatic(1);
                 widget->setVisible(0);
             }
-            sprintf(buf, D_004A2138, i);
+            sprintf(buf, str_pct_d_j, i);
             widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
             if (i >= 2)
                 widget->setVisible(0);
@@ -3449,7 +3449,7 @@ extern "C" void cOVState_REWARDS_checkRewardList_1FFD08(char* self, unsigned sho
 struct sName_1FFD08 {
     char c[2];
 };
-extern char D_004A2580[];
+extern char str_0_b[];
 
 /**
  * Fills the nine visible reward rows starting at reward @p base and shows the scroll arrows that apply.
@@ -3463,7 +3463,7 @@ extern char D_004A2580[];
  */
 void cOVState_REWARDS::updateMenu(int base)
 {
-    sName_1FFD08 name = *(sName_1FFD08*)D_004A2580;
+    sName_1FFD08 name = *(sName_1FFD08*)str_0_b;
     unsigned short text[200];
     int i;
     for (i = 0; i < 9; i++) {
@@ -3532,7 +3532,7 @@ extern char str_pct_S_Jam[];
 extern char str_pct_S_pct_s[];
 extern char str_title_rewardlisting[];
 extern char str_1text[];
-extern unsigned short D_004A2590[];
+extern unsigned short str_pct_S_b[];
 extern char str_kT_OVRCMNCongratUser[];
 extern char str_kT_cmnSlopeCaps[];
 extern char str_kT_cmnBigAirCaps[];
@@ -3607,7 +3607,7 @@ bool cOVState_REWARDS::onGainTransition(int)
                 result);
         int id = cBENewPlayerInterface_getHumanRider(player, 0);
         void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_1text));
-        sprintf2_void(name, D_004A2590, cBECharacterInterface_getShortName(board, id));
+        sprintf2_void(name, str_pct_S_b, cBECharacterInterface_getShortName(board, id));
         unsigned short* text = lookupString_1FFF78(str_kT_OVRCMNCongratUser);
         sprintf1(reward, text, name);
         cUIText_setUnicodeString(obj, reward);

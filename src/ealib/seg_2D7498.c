@@ -4,7 +4,7 @@
 /* EA's speech driver (names ours, from use: the library's own names are not known). Its banks and tables are
    little-endian blobs that the code reads byte by byte, except for the halfword fields the headers below name. */
 
-/* The marker D_004A4820 holds while the driver is initialised (name ours): [U] SPCH_initDriver stores it last; the
+/* The marker SPCHI_initMagic holds while the driver is initialised (name ours): [U] SPCH_initDriver stores it last; the
    shutdown, the hook installers and the per-frame update test it. 0x01789A34 is 24681012 in decimal. */
 #define SPEECH_INITIALISED_MARKER 24681012
 
@@ -31,7 +31,7 @@ typedef struct SPCHBANKHDR {
     unsigned short entryOffsets[1]; /* 0x18 */
 } SPCHBANKHDR;
 
-/* One of the 8 bank slots D_0044FFB8 (SPCHI_registerBank fills them, SPCHI_clearBanks clears them). */
+/* One of the 8 bank slots SPCHI_bankSlots (SPCHI_registerBank fills them, SPCHI_clearBanks clears them). */
 typedef struct SPCHBANKSLOT {
     unsigned char *data;            /* the bank (SPCHBANKHDR first), 0 when the slot is free */
     unsigned int key;               /* the key (channel) it was registered under */
@@ -92,7 +92,7 @@ typedef union SPCHARGS {
     int words[20];
 } SPCHARGS;
 
-/* A queued speech request, one of 16 in the request state D_0044FFF8 (from +0x64). A request can chain continuation
+/* A queued speech request, one of 16 in the request state SPCHI_requestState (from +0x64). A request can chain continuation
    records (next), which carry continuation != 0. */
 typedef struct SPCHREQUEST {
     unsigned int time;              /* 0x00 the tick it was queued */
@@ -105,7 +105,7 @@ typedef struct SPCHREQUEST {
     SPCHARGS args;                  /* 0x10 */
 } SPCHREQUEST;
 
-/* The request state D_0044FFF8 (SPCHI_resetRequests resets it). */
+/* The request state SPCHI_requestState (SPCHI_resetRequests resets it). */
 typedef struct SPCHREQSTATE {
     int queued[8];                  /* 0x000 the chain heads queued per channel */
     int head[8];                    /* 0x020 per channel: a request index, -1 for none (SPCH_playLatestRequest) */
@@ -114,7 +114,7 @@ typedef struct SPCHREQSTATE {
     SPCHREQUEST requests[16];       /* 0x064 */
 } SPCHREQSTATE;
 
-/* A speech channel's current line, D_00450660 [8] (SPCHI_resetChannelLines resets it: entry id 0xFFFF, count 0). */
+/* A speech channel's current line, SPCHI_channelLines [8] (SPCHI_resetChannelLines resets it: entry id 0xFFFF, count 0). */
 typedef struct SPCHCHANNEL {
     SPCHKEY line;                   /* 0x0 the line playing (entryId 0xFFFF: none) */
     int repeatCount;                /* 0x4 how many times in a row it played (SPCHI_playList; SPCHI_canRepeatEntry limits it) */
@@ -145,7 +145,7 @@ struct sCond {
     unsigned char a[8]; unsigned char b[4]; unsigned int m[4];
 };
 
-/* A speech table's header (the tables in the slot list D_004A4824; SPCH_addTable adds them). */
+/* A speech table's header (the tables in the slot list SPCHI_tableSlots; SPCH_addTable adds them). */
 typedef struct SPCHTABLEHDR {
     unsigned short id;              /* 0x0 SPCHI_findTableById / SPCHI_findTableBySubId match it */
     unsigned short subId;           /* 0x2 SPCHI_findTableBySubId */
@@ -163,16 +163,16 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_registerBank);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_6498 { unsigned char *p; unsigned int x; };
-extern struct E_6498 D_0044FFB8_6498[] __asm__("D_0044FFB8");
+extern struct E_6498 SPCHI_bankSlots_6498[] __asm__("SPCHI_bankSlots");
 void SPCHI_getBankIds(void *arg0, int *arg1, int *arg2);
 
 static __inline__ void clear_6498(unsigned long key) {
     int i, j;
     for (i = 0; i < 8; i++) {
-        unsigned char *p = D_0044FFB8_6498[i].p;
-        if (p != 0 && D_0044FFB8_6498[i].x == key) {
+        unsigned char *p = SPCHI_bankSlots_6498[i].p;
+        if (p != 0 && SPCHI_bankSlots_6498[i].x == key) {
             unsigned char *q = p + (((*(unsigned short *)(p + 0x10) * 2 + 3) & 0xFFFFFFFC) + 0x18);
-            for (j = 0; j < D_0044FFB8_6498[i].p[0x12]; j++) {
+            for (j = 0; j < SPCHI_bankSlots_6498[i].p[0x12]; j++) {
                 q[j] = 0xFF;
             }
         }
@@ -181,7 +181,7 @@ static __inline__ void clear_6498(unsigned long key) {
 
 int SPCHI_registerBank_6498(unsigned short *arg0, unsigned int arg1) __asm__("SPCHI_registerBank");
 /**
- * Registers a speech bank in the first free of the 8 bank slots (D_0044FFB8) under a key, unless one with the same ids
+ * Registers a speech bank in the first free of the 8 bank slots (SPCHI_bankSlots) under a key, unless one with the same ids
  * is already registered.
  *
  * Only data whose first halfword is 3075 (0xC03) is taken. Its two ids (bytes +0x8 and +0x9, read by SPCHI_getBankIds)
@@ -199,15 +199,15 @@ int SPCHI_registerBank_6498(unsigned short *bankData, unsigned int bankKey) {
     if (*bankData == 3075) {
         SPCHI_getBankIds(bankData, &bankId, &subId);
         for (i = 0; i < 8; i++) {
-            unsigned char *slotData = D_0044FFB8_6498[i].p;
+            unsigned char *slotData = SPCHI_bankSlots_6498[i].p;
             if (slotData != 0 && slotData[9] == subId && slotData[8] == bankId) {
                 goto out;
             }
         }
         for (i = 0; i < 8; i++) {
-            if (D_0044FFB8_6498[i].p == 0) {
-                D_0044FFB8_6498[i].p = (unsigned char *)bankData;
-                D_0044FFB8_6498[i].x = bankKey;
+            if (SPCHI_bankSlots_6498[i].p == 0) {
+                SPCHI_bankSlots_6498[i].p = (unsigned char *)bankData;
+                SPCHI_bankSlots_6498[i].x = bankKey;
                 ok = 1;
                 break;
             }
@@ -224,7 +224,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_resetBankUsage);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_6618[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_6618[] __asm__("SPCHI_bankSlots");
 
 /**
  * Resets the usage bytes of every registered speech bank with a key: sets the +0x12 bytes that follow the bank's header
@@ -235,10 +235,10 @@ extern SPCHBANKSLOT D_0044FFB8_6618[] __asm__("D_0044FFB8");
 void SPCHI_resetBankUsage(unsigned long key) {
     int i, j;
     for (i = 0; i < 8; i++) {
-        unsigned char *bankData = D_0044FFB8_6618[i].data;
-        if (bankData != 0 && D_0044FFB8_6618[i].key == key) {
+        unsigned char *bankData = SPCHI_bankSlots_6618[i].data;
+        if (bankData != 0 && SPCHI_bankSlots_6618[i].key == key) {
             unsigned char *usage = bankData + (((((SPCHBANKHDR *)bankData)->entryCount * 2 + 3) & 0xFFFFFFFC) + 0x18);
-            for (j = 0; j < D_0044FFB8_6618[i].data[0x12]; j++) {
+            for (j = 0; j < SPCHI_bankSlots_6618[i].data[0x12]; j++) {
                 usage[j] = 0xFF;
             }
         }
@@ -272,10 +272,10 @@ int SPCH_registerBank(void *data, unsigned int key) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_unregisterBank);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044FFB8_FFB8[] __asm__("D_0044FFB8");
+extern int SPCHI_bankSlots_FFB8[] __asm__("SPCHI_bankSlots");
 
 /**
- * Unregisters the speech bank registered with this data and key: clears its slot in D_0044FFB8.
+ * Unregisters the speech bank registered with this data and key: clears its slot in SPCHI_bankSlots.
  *
  * @param bankData  the speech bank data (0 does nothing)
  * @param bankKey  the key it was registered under
@@ -287,8 +287,8 @@ int SPCH_unregisterBank(int bankData, int bankKey) {
         return 0;
     }
     for (i = 0; i < 8; i++) {
-        if (D_0044FFB8_FFB8[i * 2] == bankData && D_0044FFB8_FFB8[i * 2 + 1] == bankKey) {
-            D_0044FFB8_FFB8[i * 2] = 0;
+        if (SPCHI_bankSlots_FFB8[i * 2] == bankData && SPCHI_bankSlots_FFB8[i * 2 + 1] == bankKey) {
+            SPCHI_bankSlots_FFB8[i * 2] = 0;
             return 1;
         }
     }
@@ -315,16 +315,16 @@ void SPCH_registerBankKey0(int data) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_getCallbackBlock);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044FFA8_6768[4] __asm__("D_0044FFA8");
+extern int SPCHI_callbackBlock_6768[4] __asm__("SPCHI_callbackBlock");
 
 /**
- * Returns the speech driver's callback block D_0044FFA8 (+0x8 is the time source; SPCH_Init stores TIMER_gettick
+ * Returns the speech driver's callback block SPCHI_callbackBlock (+0x8 is the time source; SPCH_Init stores TIMER_gettick
  * there).
  *
- * @return D_0044FFA8
+ * @return SPCHI_callbackBlock
  */
 int *SPCH_getCallbackBlock(void) {
-    return D_0044FFA8_6768;
+    return SPCHI_callbackBlock_6768;
 }
 #endif
 
@@ -361,21 +361,21 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_shutdown);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_67F8 { int a; int b; int c; };
-extern struct S_67F8 D_0044FF90_67F8 __asm__("D_0044FF90");
-extern int D_004A4820;
+extern struct S_67F8 SPCHI_hooks_67F8 __asm__("SPCHI_hooks");
+extern int SPCHI_initMagic;
 void SPCHI_clearTableList(void);
 void SPCHI_clearBanks(void);
 
 /**
- * Shuts the speech driver down when it is initialised (D_004A4820 == 0x01789A34): clears the marker and the callback
- * block D_0044FF90, then SPCHI_clearTableList and SPCHI_clearBanks (clears the bank slots).
+ * Shuts the speech driver down when it is initialised (SPCHI_initMagic == 0x01789A34): clears the marker and the callback
+ * block SPCHI_hooks, then SPCHI_clearTableList and SPCHI_clearBanks (clears the bank slots).
  */
 void SPCH_shutdown(void) {
-    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
-        D_004A4820 = 0;
-        D_0044FF90_67F8.a = 0;
-        D_0044FF90_67F8.b = 0;
-        D_0044FF90_67F8.c = 0;
+    if (SPCHI_initMagic == SPEECH_INITIALISED_MARKER) {
+        SPCHI_initMagic = 0;
+        SPCHI_hooks_67F8.a = 0;
+        SPCHI_hooks_67F8.b = 0;
+        SPCHI_hooks_67F8.c = 0;
         SPCHI_clearTableList();
         SPCHI_clearBanks();
     }
@@ -389,14 +389,14 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_initDriver);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_6840 { int a; int b; int c; };
 struct E_6840 { unsigned short h; int w; };
-extern struct S_6840 D_0044FF90_6840 __asm__("D_0044FF90");
-extern struct S_6840 D_0044FFA8_6840 __asm__("D_0044FFA8");
-extern struct E_6840 D_00450660_6840[] __asm__("D_00450660");
-extern int D_004506A0_6840[] __asm__("D_004506A0");
-extern int D_004A4820;
-extern void *D_004A482C_6840 __asm__("D_004A482C");
-extern int D_004A4834_6840 __asm__("D_004A4834");
-extern int D_004A4838_6840 __asm__("D_004A4838");
+extern struct S_6840 SPCHI_hooks_6840 __asm__("SPCHI_hooks");
+extern struct S_6840 SPCHI_callbackBlock_6840 __asm__("SPCHI_callbackBlock");
+extern struct E_6840 SPCHI_channelLines_6840[] __asm__("SPCHI_channelLines");
+extern int SPCHI_channelModes_6840[] __asm__("SPCHI_channelModes");
+extern int SPCHI_initMagic;
+extern void *SPCH_postRequestHook_6840 __asm__("SPCH_postRequestHook");
+extern int SPCHI_seed_6840 __asm__("SPCHI_seed");
+extern int SPCHI_bufferSize_6840 __asm__("SPCHI_bufferSize");
 void SPCH_postRequest(int, int, ...);
 void SPCHI_seedRandom(int);
 void SPCHI_resetPlayList(void);
@@ -409,10 +409,10 @@ void SPCHI_resetRequests(void);
  * Initialises the speech driver: installs the play callback and buffers, resets every table and sets the initialised
  * marker.
  *
- * D_0044FF90 gets @p playCallback as its first word (the rest cleared) and D_0044FFA8 is cleared; D_004A482C = SPCH_postRequest,
- * D_004A4834 = @p seed, D_004A4838 = @p workBuf. SPCHI_seedRandom seeds its tables with @p seed, then SPCHI_resetPlayList,
- * SPCH_setClockOffset(0), the 8 words at D_004506A0, SPCHI_clearBanks (bank slots), the 8 entries of D_00450660 (0xFFFF, 0),
- * SPCHI_resetTableList and SPCHI_resetRequests are reset. Finally D_004A4820 = 0x01789A34.
+ * SPCHI_hooks gets @p playCallback as its first word (the rest cleared) and SPCHI_callbackBlock is cleared; SPCH_postRequestHook = SPCH_postRequest,
+ * SPCHI_seed = @p seed, SPCHI_bufferSize = @p workBuf. SPCHI_seedRandom seeds its tables with @p seed, then SPCHI_resetPlayList,
+ * SPCH_setClockOffset(0), the 8 words at SPCHI_channelModes, SPCHI_clearBanks (bank slots), the 8 entries of SPCHI_channelLines (0xFFFF, 0),
+ * SPCHI_resetTableList and SPCHI_resetRequests are reset. Finally SPCHI_initMagic = 0x01789A34.
  *
  * @param playCallback  the play callback (SPCH_Init passes SPCH_StartSpeechCallback)
  * @param seed  the seed (SPCH_Init's "rNum")
@@ -422,29 +422,29 @@ void SPCHI_resetRequests(void);
 int SPCH_initDriver(int playCallback, int seed, int workBuf) {
     int i;
     long j;
-    D_0044FF90_6840.a = playCallback;
-    D_0044FF90_6840.b = 0;
-    D_0044FF90_6840.c = 0;
-    D_0044FFA8_6840.a = 0;
-    D_0044FFA8_6840.b = 0;
-    D_0044FFA8_6840.c = 0;
-    D_004A482C_6840 = (void *)SPCH_postRequest;
-    D_004A4834_6840 = seed;
-    D_004A4838_6840 = workBuf;
+    SPCHI_hooks_6840.a = playCallback;
+    SPCHI_hooks_6840.b = 0;
+    SPCHI_hooks_6840.c = 0;
+    SPCHI_callbackBlock_6840.a = 0;
+    SPCHI_callbackBlock_6840.b = 0;
+    SPCHI_callbackBlock_6840.c = 0;
+    SPCH_postRequestHook_6840 = (void *)SPCH_postRequest;
+    SPCHI_seed_6840 = seed;
+    SPCHI_bufferSize_6840 = workBuf;
     SPCHI_seedRandom(seed);
     SPCHI_resetPlayList();
     SPCH_setClockOffset(0);
     for (i = 7; i >= 0; i--) {
-        D_004506A0_6840[i] = 0;
+        SPCHI_channelModes_6840[i] = 0;
     }
     SPCHI_clearBanks();
     for (j = 0; j < 8; j++) {
-        D_00450660_6840[(int)j].h = 0xFFFF;
-        D_00450660_6840[(int)j].w = 0;
+        SPCHI_channelLines_6840[(int)j].h = 0xFFFF;
+        SPCHI_channelLines_6840[(int)j].w = 0;
     }
     SPCHI_resetTableList();
     SPCHI_resetRequests();
-    D_004A4820 = SPEECH_INITIALISED_MARKER;
+    SPCHI_initMagic = SPEECH_INITIALISED_MARKER;
     return 1;
 }
 #endif
@@ -454,19 +454,19 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_setTagHooks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_6940 { int pad0; int a; int b; };
-extern struct S_6940 D_0044FF90_6940 __asm__("D_0044FF90");
-extern int D_004A4820;
+extern struct S_6940 SPCHI_hooks_6940 __asm__("SPCHI_hooks");
+extern int SPCHI_initMagic;
 /**
- * Installs the speech driver's two hooks, when it is initialised (D_004A4820 == 0x01789A34): D_0044FF90 +0x4, the
+ * Installs the speech driver's two hooks, when it is initialised (SPCHI_initMagic == 0x01789A34): SPCHI_hooks +0x4, the
  * condition hook SPCHI_askTagConditions asks, and +0x8, the tag event hook SPCHI_reportEventTags and SPCHI_reportSlotTags call. No callers.
  *
  * @param x  the condition hook (+0x4)
  * @param y  the tag event hook (+0x8)
  */
 void SPCH_setTagHooks(int x, int y) {
-    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
-        D_0044FF90_6940.a = x;
-        D_0044FF90_6940.b = y;
+    if (SPCHI_initMagic == SPEECH_INITIALISED_MARKER) {
+        SPCHI_hooks_6940.a = x;
+        SPCHI_hooks_6940.b = y;
     }
 }
 #endif
@@ -475,16 +475,16 @@ void SPCH_setTagHooks(int x, int y) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_setRetryHook);
 #ifdef SKIP_ASM
 extern int D_0044FFA0[];
-extern int D_004A4820;
+extern int SPCHI_initMagic;
 
 /**
- * Installs the speech driver's retry hook D_0044FFA0 (D_0044FF90 +0x10, called by SPCHI_buildRequest when a request builds
+ * Installs the speech driver's retry hook D_0044FFA0 (SPCHI_hooks +0x10, called by SPCHI_buildRequest when a request builds
  * nothing) when the driver is initialised. No callers.
  *
  * @param hookFunc  the hook
  */
 void SPCH_setRetryHook(int hookFunc) {
-    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
+    if (SPCHI_initMagic == SPEECH_INITIALISED_MARKER) {
         D_0044FFA0[0] = hookFunc;
     }
 }
@@ -494,16 +494,16 @@ void SPCH_setRetryHook(int hookFunc) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_setApproveHook);
 #ifdef SKIP_ASM
 extern int D_0044FF9C[];
-extern int D_004A4820;
+extern int SPCHI_initMagic;
 
 /**
- * Installs the speech driver's approve hook D_0044FF9C (D_0044FF90 +0xC, asked by SPCH_startNextRequest before a request plays)
+ * Installs the speech driver's approve hook D_0044FF9C (SPCHI_hooks +0xC, asked by SPCH_startNextRequest before a request plays)
  * when the driver is initialised. No callers.
  *
  * @param hookFunc  the hook
  */
 void SPCH_setApproveHook(int hookFunc) {
-    if (D_004A4820 == SPEECH_INITIALISED_MARKER) {
+    if (SPCHI_initMagic == SPEECH_INITIALISED_MARKER) {
         D_0044FF9C[0] = hookFunc;
     }
 }
@@ -515,16 +515,16 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_resetChannelLines);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_69A8 { unsigned short h; int w; };
-extern struct E_69A8 D_00450660_69A8[] __asm__("D_00450660");
+extern struct E_69A8 SPCHI_channelLines_69A8[] __asm__("SPCHI_channelLines");
 
 /**
- * Resets the 8 speech channel entries of D_00450660: id 0xFFFF and word 0.
+ * Resets the 8 speech channel entries of SPCHI_channelLines: id 0xFFFF and word 0.
  */
 void SPCHI_resetChannelLines(void) {
     long i;
     for (i = 0; i < 8; i++) {
-        D_00450660_69A8[(int)i].h = 0xFFFF;
-        D_00450660_69A8[(int)i].w = 0;
+        SPCHI_channelLines_69A8[(int)i].h = 0xFFFF;
+        SPCHI_channelLines_69A8[(int)i].w = 0;
     }
 }
 #endif
@@ -533,16 +533,16 @@ void SPCHI_resetChannelLines(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_addTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char **D_004A4824_69F0 __asm__("D_004A4824");
+extern unsigned char **SPCHI_tableSlots_69F0 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_69F0 __asm__("D_004A4828");
-extern unsigned int D_004A4834_69F0 __asm__("D_004A4834");
+extern unsigned int SPCHI_seed_69F0 __asm__("SPCHI_seed");
 
 static inline int findfree_69F0(void) {
     int i, idx;
 
     idx = -1;
     for (i = 0; i < D_004A4828_69F0; i++) {
-        if (D_004A4824_69F0[i] == 0) {
+        if (SPCHI_tableSlots_69F0[i] == 0) {
             idx = i;
             break;
         }
@@ -556,11 +556,11 @@ static inline unsigned char *tail_69F0(unsigned char *s) {
 }
 
 /**
- * Adds a speech table (bank) to the driver's table list (D_004A4824, D_004A4828 slots); returns its slot or -1.
+ * Adds a speech table (bank) to the driver's table list (SPCHI_tableSlots, D_004A4828 slots); returns its slot or -1.
  *
  * A table with a history (byte +0x6) is refused while its history area is in use (position byte not 0 or an entry not
  * 0xFF). It goes into the first free slot; a table with the random-subset flag (0x80 in +0x4) first gets the rows of
- * subset (seed D_004A4834 % subset count) marked in its row bitmask (the inlined SPCHI_markRandomSubset). The table layout: +0x4
+ * subset (seed SPCHI_seed % subset count) marked in its row bitmask (the inlined SPCHI_markRandomSubset). The table layout: +0x4
  * low nibble column count, +0x5 row count, rows of count + 2 bytes and 4 bytes per column, then the subset count and
  * bitmask, then the history.
  *
@@ -574,7 +574,7 @@ int SPCH_addTable(unsigned char *shp) {
     unsigned int subsetIndex, start, end, byte;
 
     ret = -1;
-    if (D_004A4824_69F0 != 0) {
+    if (SPCHI_tableSlots_69F0 != 0) {
         if (shp[6] != 0) {
             extra = 0;
             history = tail_69F0(shp);
@@ -598,7 +598,7 @@ int SPCH_addTable(unsigned char *shp) {
                 w = shp[5];
                 subsetCount = *subsetArea;
                 if (subsetCount > 0) {
-                    subsetIndex = D_004A4834_69F0 % subsetCount;
+                    subsetIndex = SPCHI_seed_69F0 % subsetCount;
                     start = subsetIndex * w / subsetCount;
                     end = (subsetIndex + 1) * w / subsetCount;
                     bit = start & 7;
@@ -614,7 +614,7 @@ int SPCH_addTable(unsigned char *shp) {
                     }
                 }
             }
-            D_004A4824_69F0[ret] = shp;
+            SPCHI_tableSlots_69F0[ret] = shp;
         }
     }
 out:
@@ -626,29 +626,29 @@ out:
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_setSeed);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A4820;
-extern unsigned char **D_004A4824_6BC0 __asm__("D_004A4824");
+extern int SPCHI_initMagic;
+extern unsigned char **SPCHI_tableSlots_6BC0 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_6BC0 __asm__("D_004A4828");
-extern int D_004A4834_6BC0 __asm__("D_004A4834");
+extern int SPCHI_seed_6BC0 __asm__("SPCHI_seed");
 void SPCHI_clearRandomSubset(unsigned char *p);
 void SPCHI_markRandomSubset(unsigned char *p);
 
 /**
- * Sets the speech driver's seed (D_004A4834) and re-draws the random subset of every registered random-subset table.
+ * Sets the speech driver's seed (SPCHI_seed) and re-draws the random subset of every registered random-subset table.
  *
  * For tables with flag 0x80 (+0x4) SPCHI_clearRandomSubset clears the row bitmask and SPCHI_markRandomSubset marks the new subset. Does
- * nothing when the driver is not initialised (D_004A4820 == 0).
+ * nothing when the driver is not initialised (SPCHI_initMagic == 0).
  *
  * @param seed  the new seed
  */
 void SPCH_setSeed(int seed) {
     int i;
     unsigned char *table;
-    if (D_004A4820 != 0) {
-        D_004A4834_6BC0 = seed;
-        if (D_004A4824_6BC0 != 0) {
+    if (SPCHI_initMagic != 0) {
+        SPCHI_seed_6BC0 = seed;
+        if (SPCHI_tableSlots_6BC0 != 0) {
             for (i = 0; i < D_004A4828_6BC0; i++) {
-                table = D_004A4824_6BC0[i];
+                table = SPCHI_tableSlots_6BC0[i];
                 if (table != 0 && (table[4] & 0x80)) {
                     SPCHI_clearRandomSubset(table);
                     SPCHI_markRandomSubset(table);
@@ -677,11 +677,11 @@ int SPCH_getTableListSize(int slotCount) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_initTableList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *D_004A4824_6C60 __asm__("D_004A4824");
+extern int *SPCHI_tableSlots_6C60 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_6C60 __asm__("D_004A4828");
 
 /**
- * Sets up the speech table list: D_004A4828 = @p slotCount slots at @p slotMem (D_004A4824), all cleared.
+ * Sets up the speech table list: D_004A4828 = @p slotCount slots at @p slotMem (SPCHI_tableSlots), all cleared.
  *
  * @param slotCount  the number of slots
  * @param slotMem  the slot memory (SPCH_getTableListSize bytes), or 0
@@ -690,10 +690,10 @@ void SPCH_initTableList(int slotCount, int *slotMem) {
     int i;
 
     D_004A4828_6C60 = slotCount;
-    D_004A4824_6C60 = slotMem;
+    SPCHI_tableSlots_6C60 = slotMem;
     if (slotMem != 0) {
         for (i = 0; i < D_004A4828_6C60; i++) {
-            D_004A4824_6C60[i] = 0;
+            SPCHI_tableSlots_6C60[i] = 0;
         }
     }
 }
@@ -703,7 +703,7 @@ void SPCH_initTableList(int slotCount, int *slotMem) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_removeTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *D_004A4824_6CA0 __asm__("D_004A4824");
+extern int *SPCHI_tableSlots_6CA0 __asm__("SPCHI_tableSlots");
 
 /**
  * Clears slot @p slot of the speech table list (the cSpeechBank destructor's release). No range check.
@@ -711,8 +711,8 @@ extern int *D_004A4824_6CA0 __asm__("D_004A4824");
  * @param slot  the slot
  */
 void SPCH_removeTable(int slot) {
-    if (D_004A4824_6CA0 != 0) {
-        D_004A4824_6CA0[slot] = 0;
+    if (SPCHI_tableSlots_6CA0 != 0) {
+        SPCHI_tableSlots_6CA0[slot] = 0;
     }
 }
 #endif
@@ -721,8 +721,8 @@ void SPCH_removeTable(int slot) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_getTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A4820;
-extern int *D_004A4824_6CC0 __asm__("D_004A4824");
+extern int SPCHI_initMagic;
+extern int *SPCHI_tableSlots_6CC0 __asm__("SPCHI_tableSlots");
 
 /**
  * Returns the speech table in slot @p slot, or 0 when the driver is not initialised or has no list. No range check.
@@ -732,8 +732,8 @@ extern int *D_004A4824_6CC0 __asm__("D_004A4824");
  */
 int SPCH_getTable(int slot) {
     int table = 0;
-    if (D_004A4820 == SPEECH_INITIALISED_MARKER && D_004A4824_6CC0 != 0) {
-        table = D_004A4824_6CC0[slot];
+    if (SPCHI_initMagic == SPEECH_INITIALISED_MARKER && SPCHI_tableSlots_6CC0 != 0) {
+        table = SPCHI_tableSlots_6CC0[slot];
     }
     return table;
 }
@@ -743,7 +743,7 @@ int SPCH_getTable(int slot) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_isTableEntryInRange);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHTABLEHDR **D_004A4824_6CF8 __asm__("D_004A4824");
+extern SPCHTABLEHDR **SPCHI_tableSlots_6CF8 __asm__("SPCHI_tableSlots");
 
 /**
  * Returns whether @p entryIndex is below the entry count (halfword +0xA) of the speech table in slot @p slot; 0 when the
@@ -757,8 +757,8 @@ int SPCHI_isTableEntryInRange(int slot, unsigned int entryIndex) {
     int inRange = 0;
     unsigned short *countPtr;
 
-    if (D_004A4824_6CF8 != 0 && slot >= 0) {
-        countPtr = &D_004A4824_6CF8[slot]->entryCount;
+    if (SPCHI_tableSlots_6CF8 != 0 && slot >= 0) {
+        countPtr = &SPCHI_tableSlots_6CF8[slot]->entryCount;
         if (*countPtr != 0xFFFF) {
             inRange = entryIndex < *countPtr;
         }
@@ -770,14 +770,14 @@ int SPCHI_isTableEntryInRange(int slot, unsigned int entryIndex) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_clearTableList);
 #ifdef SKIP_ASM
-extern int D_004A4824;
+extern int SPCHI_tableSlots;
 extern int D_004A4828;
 
 /**
- * Forgets the speech table list (D_004A4824 and its count D_004A4828 cleared). Used by SPCH_shutdown at shutdown.
+ * Forgets the speech table list (SPCHI_tableSlots and its count D_004A4828 cleared). Used by SPCH_shutdown at shutdown.
  */
 void SPCHI_clearTableList(void) {
-    D_004A4824 = 0;
+    SPCHI_tableSlots = 0;
     D_004A4828 = 0;
 }
 #endif
@@ -785,15 +785,15 @@ void SPCHI_clearTableList(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_resetTableList);
 #ifdef SKIP_ASM
-extern int D_004A4824;
+extern int SPCHI_tableSlots;
 extern int D_004A4828;
 
 /**
- * Forgets the speech table list (D_004A4824 and its count D_004A4828 cleared); the same body as SPCHI_clearTableList, used by
+ * Forgets the speech table list (SPCHI_tableSlots and its count D_004A4828 cleared); the same body as SPCHI_clearTableList, used by
  * SPCH_initDriver at init.
  */
 void SPCHI_resetTableList(void) {
-    D_004A4824 = 0;
+    SPCHI_tableSlots = 0;
     D_004A4828 = 0;
 }
 #endif
@@ -802,7 +802,7 @@ void SPCHI_resetTableList(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findTableById);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned short **D_004A4824_6D50 __asm__("D_004A4824");
+extern unsigned short **SPCHI_tableSlots_6D50 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_6D50 __asm__("D_004A4828");
 
 /**
@@ -815,7 +815,7 @@ int SPCHI_findTableById(unsigned short tableId) {
     unsigned short **slotPtr;
     short i;
 
-    slotPtr = D_004A4824_6D50;
+    slotPtr = SPCHI_tableSlots_6D50;
     if (slotPtr != 0) {
         for (i = 0; i < D_004A4828_6D50; i++) {
             if (*slotPtr != 0 && **slotPtr == tableId) {
@@ -832,7 +832,7 @@ int SPCHI_findTableById(unsigned short tableId) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findTableBySubId);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned short **D_004A4824_6DB8 __asm__("D_004A4824");
+extern unsigned short **SPCHI_tableSlots_6DB8 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_6DB8 __asm__("D_004A4828");
 
 /**
@@ -846,9 +846,9 @@ int SPCHI_findTableBySubId(unsigned short tableId, unsigned short subId) {
     short i;
     unsigned short *table;
 
-    if (D_004A4824_6DB8 != 0) {
+    if (SPCHI_tableSlots_6DB8 != 0) {
         for (i = 0; i < D_004A4828_6DB8; i++) {
-            table = D_004A4824_6DB8[i];
+            table = SPCHI_tableSlots_6DB8[i];
             if (table != 0 && table[0] == tableId && table[1] == subId) {
                 return i;
             }
@@ -948,12 +948,12 @@ void SPCHI_recordHistory(unsigned char *node, int key) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_markRandomSubset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned int D_004A4834_6F80 __asm__("D_004A4834");
+extern unsigned int SPCHI_seed_6F80 __asm__("SPCHI_seed");
 
 /**
  * Marks a random-subset speech table's current subset in its row bitmask.
  *
- * With c the subset count (first byte after the rows), subset r = seed D_004A4834 % c covers rows r * rows / c up to (r
+ * With c the subset count (first byte after the rows), subset r = seed SPCHI_seed % c covers rows r * rows / c up to (r
  * + 1) * rows / c, whose bits are set. Nothing when c is 0.
  *
  * @param shp  the speech table
@@ -968,7 +968,7 @@ void SPCHI_markRandomSubset(unsigned char *shp) {
     w = shp[5];
     subsetCount = *subsetArea;
     if (subsetCount > 0) {
-        subsetIndex = D_004A4834_6F80 % subsetCount;
+        subsetIndex = SPCHI_seed_6F80 % subsetCount;
         start = subsetIndex * w / subsetCount;
         end = (subsetIndex + 1) * w / subsetCount;
         bit = start & 7;
@@ -1015,7 +1015,7 @@ void SPCHI_clearRandomSubset(unsigned char *node) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findFreeTableSlot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *D_004A4824_4824 __asm__("D_004A4824");
+extern int *SPCHI_tableSlots_4824 __asm__("SPCHI_tableSlots");
 extern int D_004A4828_4828 __asm__("D_004A4828");
 
 /**
@@ -1028,7 +1028,7 @@ int SPCHI_findFreeTableSlot(void) {
     int freeSlot = -1;
 
     for (i = 0; i < D_004A4828_4828; i++) {
-        if (D_004A4824_4824[i] == 0) {
+        if (SPCHI_tableSlots_4824[i] == 0) {
             freeSlot = i;
             break;
         }
@@ -1041,7 +1041,7 @@ int SPCHI_findFreeTableSlot(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findBankEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_7110[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_7110[] __asm__("SPCHI_bankSlots");
 
 static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned short id) {
     unsigned short n = *(unsigned short *)(base + 0x10);
@@ -1059,7 +1059,7 @@ static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned shor
  * Finds a speech event's entry in the speech bank registered for its ids: returns the entry or 0.
  *
  * @p eventKey holds the entry id (halfword +0x0) and the bank ids (+0x2 and +0x3, compared with bank bytes +0x9 and +0x8).
- * The first of the 8 bank slots (D_0044FFB8) that matches is searched: its entries (count +0x10, word offsets at +0x18)
+ * The first of the 8 bank slots (SPCHI_bankSlots) that matches is searched: its entries (count +0x10, word offsets at +0x18)
  * are compared on their first halfword.
  *
  * @param eventKey  the 4-byte key {entry id, bank ids}
@@ -1067,7 +1067,7 @@ static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned shor
  */
 unsigned short *SPCHI_findBankEntry(SPCHKEY *eventKey) {
     SPCHBANKSLOT *res;
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_7110;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_7110;
     unsigned short *ret = 0;
     SPCHBANKSLOT **pres = &res;
     int found = 0;
@@ -1096,30 +1096,30 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_resetRequests);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct R_71D8 { int time; short h; char c; unsigned char d; int pad8; int fc; int arr[20]; };
 struct G_71D8 { int z[8]; int a[8]; int b[8]; int n; struct R_71D8 r[16]; };
-extern struct G_71D8 D_0044FFF8_71D8 __asm__("D_0044FFF8");
+extern struct G_71D8 SPCHI_requestState_71D8 __asm__("SPCHI_requestState");
 extern int D_004A4840;
 extern short D_004A4844;
 
 /**
- * Resets the speech driver's request state (D_0044FFF8): the 8 channel words (0, -1, -1), the count, and 16 request
+ * Resets the speech driver's request state (SPCHI_requestState): the 8 channel words (0, -1, -1), the count, and 16 request
  * records (cleared, +0x7 = 0xFF, 20 data words zeroed); D_004A4840 and D_004A4844 are cleared too.
  */
 void SPCHI_resetRequests(void) {
     int i, j;
     for (i = 0; i < 8; i++) {
-        D_0044FFF8_71D8.z[i] = 0;
-        D_0044FFF8_71D8.a[i] = -1;
-        D_0044FFF8_71D8.b[i] = -1;
+        SPCHI_requestState_71D8.z[i] = 0;
+        SPCHI_requestState_71D8.a[i] = -1;
+        SPCHI_requestState_71D8.b[i] = -1;
     }
-    D_0044FFF8_71D8.n = 0;
+    SPCHI_requestState_71D8.n = 0;
     for (i = 0; i < 16; i++) {
-        D_0044FFF8_71D8.r[i].c = 0;
-        D_0044FFF8_71D8.r[i].h = 0;
-        D_0044FFF8_71D8.r[i].time = 0;
-        D_0044FFF8_71D8.r[i].fc = 0;
-        D_0044FFF8_71D8.r[i].d = 0xFF;
+        SPCHI_requestState_71D8.r[i].c = 0;
+        SPCHI_requestState_71D8.r[i].h = 0;
+        SPCHI_requestState_71D8.r[i].time = 0;
+        SPCHI_requestState_71D8.r[i].fc = 0;
+        SPCHI_requestState_71D8.r[i].d = 0xFF;
         for (j = 19; j >= 0; j--) {
-            D_0044FFF8_71D8.r[i].arr[j] = 0;
+            SPCHI_requestState_71D8.r[i].arr[j] = 0;
         }
     }
     D_004A4840 = 0;
@@ -1142,12 +1142,12 @@ struct R_72A0 {
     int arr[20];
 };
 struct G_72A0 { int z[8]; int a[8]; int b[8]; int n; struct R_72A0 r[16]; };
-extern struct G_72A0 D_0044FFF8_72A0 __asm__("D_0044FFF8");
+extern struct G_72A0 SPCHI_requestState_72A0 __asm__("SPCHI_requestState");
 int SPCHI_getClock(void);
 void SPCHI_freeRequest(unsigned int);
 
 /**
- * Finds a speech request record (D_0044FFF8, 16 of 0x60 bytes from +0x64) for a new request: returns its index or -1.
+ * Finds a speech request record (SPCHI_requestState, 16 of 0x60 bytes from +0x64) for a new request: returns its index or -1.
  *
  * Takes a free record first. Otherwise it evicts (SPCHI_freeRequest) a chain-head record whose lifetime (header +0x2, when
  * not 0) has passed, then any chain-head record on channel @p channel whose priority (header +0x4) is not above
@@ -1167,30 +1167,30 @@ int SPCHI_allocRequest(unsigned int priority, int channel, int keepLatest) {
     unsigned int lifetime;
 
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_72A0.r[i].c == 0) {
+        if (SPCHI_requestState_72A0.r[i].c == 0) {
             ret = i;
             goto out;
         }
     }
     if (keepLatest != 0) {
-        skip = D_0044FFF8_72A0.b[channel];
+        skip = SPCHI_requestState_72A0.b[channel];
     }
     i = 0;
     now = SPCHI_getClock();
     for (; i < 16; i++) {
-        if (D_0044FFF8_72A0.r[i].isContinuation == 0 && (lifetime = D_0044FFF8_72A0.r[i].p->lifetime) != 0 &&
-            lifetime < now - D_0044FFF8_72A0.r[i].time && skip != i) {
+        if (SPCHI_requestState_72A0.r[i].isContinuation == 0 && (lifetime = SPCHI_requestState_72A0.r[i].p->lifetime) != 0 &&
+            lifetime < now - SPCHI_requestState_72A0.r[i].time && skip != i) {
             SPCHI_freeRequest(i);
             ret = i;
             goto out;
         }
     }
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_72A0.r[i].isContinuation == 0) {
-            reqChannel = D_0044FFF8_72A0.r[i].d;
-            if (priority >= D_0044FFF8_72A0.r[i].p->priority && reqChannel == channel && i != skip) {
-                D_0044FFF8_72A0.r[i].c = 0;
-                D_0044FFF8_72A0.z[reqChannel]--;
+        if (SPCHI_requestState_72A0.r[i].isContinuation == 0) {
+            reqChannel = SPCHI_requestState_72A0.r[i].d;
+            if (priority >= SPCHI_requestState_72A0.r[i].p->priority && reqChannel == channel && i != skip) {
+                SPCHI_requestState_72A0.r[i].c = 0;
+                SPCHI_requestState_72A0.z[reqChannel]--;
                 ret = i;
                 break;
             }
@@ -1216,7 +1216,7 @@ int func_003D7418(unsigned char *arg0);
 
 /**
  * Posts a speech request: copies the packed key @p speechKey (SPCH_makeKey) and @p n further int arguments into a 20-word
- * buffer and hands it to func_003D7418, the request queue. SPCH_initDriver installs it as D_004A482C, the game's speech
+ * buffer and hands it to func_003D7418, the request queue. SPCH_initDriver installs it as SPCH_postRequestHook, the game's speech
  * post function.
  *
  * @param speechKey  the packed speech key
@@ -1245,10 +1245,10 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_pickRequest);
 // Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
 // behaviour-preserving steering only); replace it when an honest spelling matches.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHREQSTATE D_0044FFF8_7760 __asm__("D_0044FFF8");
-extern SPCHBANKSLOT D_0044FFB8_7760[] __asm__("D_0044FFB8");
-extern int D_004506A0_7760[] __asm__("D_004506A0");
-extern int D_004A483C;
+extern SPCHREQSTATE SPCHI_requestState_7760 __asm__("SPCHI_requestState");
+extern SPCHBANKSLOT SPCHI_bankSlots_7760[] __asm__("SPCHI_bankSlots");
+extern int SPCHI_channelModes_7760[] __asm__("SPCHI_channelModes");
+extern int SPCHI_clockOffset;
 int SPCHI_getClock(void);
 void SPCHI_freeRequest(unsigned int);
 
@@ -1256,9 +1256,9 @@ static __inline__ int find_7760(SPCHKEY *key, SPCHBANKSLOT **pres) {
     int found = 0;
     int i = 0;
     do {
-        unsigned char *q = D_0044FFB8_7760[i].data;
+        unsigned char *q = SPCHI_bankSlots_7760[i].data;
         if (q != 0 && q[9] == key->subId && q[8] == key->bankId) {
-            *pres = &D_0044FFB8_7760[i];
+            *pres = &SPCHI_bankSlots_7760[i];
             found = 1;
             goto done;
         }
@@ -1272,8 +1272,8 @@ done:
  * Picks the queued speech request to play next on a channel: returns its record index or -1.
  *
  * Looks at the chain-head records (+0x6C == 0) in use on @p channel. Expired ones (age past the header's lifetime +0x2,
- * age measured from SPCHI_getClock + D_004A483C) are dropped with SPCHI_freeRequest. With @p list only ids (header +0x0) in
- * it count. When the channel's mode (D_004506A0) is 1, a request with header flag 1 (+0xA) is skipped while its
+ * age measured from SPCHI_getClock + SPCHI_clockOffset) are dropped with SPCHI_freeRequest. With @p list only ids (header +0x0) in
+ * it count. When the channel's mode (SPCHI_channelModes) is 1, a request with header flag 1 (+0xA) is skipped while its
  * priority is below its bank's threshold (+0x16). The best has the highest priority (+0x4), then the smallest age, then
  * the highest sequence number (+0x68).
  *
@@ -1292,15 +1292,15 @@ int SPCHI_pickRequest(SPCHIDLIST *list, int channel) {
     int expired, inList, blocked;
     unsigned int age;
 
-    now = SPCHI_getClock() + D_004A483C;
+    now = SPCHI_getClock() + SPCHI_clockOffset;
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_7760.requests[i].active == 0) continue;
-        if (D_0044FFF8_7760.requests[i].channel != channel) continue;
-        if (D_0044FFF8_7760.requests[i].continuation != 0) continue;
+        if (SPCHI_requestState_7760.requests[i].active == 0) continue;
+        if (SPCHI_requestState_7760.requests[i].channel != channel) continue;
+        if (SPCHI_requestState_7760.requests[i].continuation != 0) continue;
         expired = 0;
         blocked = 0;
         inList = 1;
-        reqHeader = D_0044FFF8_7760.requests[i].event;
+        reqHeader = SPCHI_requestState_7760.requests[i].event;
         if (list != 0) {
             unsigned short id = reqHeader->id;
             int idFound = 0;
@@ -1312,15 +1312,15 @@ int SPCHI_pickRequest(SPCHIDLIST *list, int channel) {
             }
             inList = idFound;
         }
-        age = now - D_0044FFF8_7760.requests[i].time;
+        age = now - SPCHI_requestState_7760.requests[i].time;
         if (reqHeader->lifetime != 0 && reqHeader->lifetime < age) {
             expired = 1;
         }
-        if (D_004506A0_7760[channel] == 1 && (reqHeader->flags & 1)) {
+        if (SPCHI_channelModes_7760[channel] == 1 && (reqHeader->flags & 1)) {
             SPCHKEY k;
             SPCHBANKSLOT *res;
             int belowMin = 0;
-            k = *&D_0044FFF8_7760.requests[i].args.key; /* read through its address: retail forms it first */
+            k = *&SPCHI_requestState_7760.requests[i].args.key; /* read through its address: retail forms it first */
             if (find_7760(&k, &res) && reqHeader->priority < ((SPCHBANKHDR *)res->data)->minPriority) {
                 belowMin = 1;
             }
@@ -1336,12 +1336,12 @@ int SPCHI_pickRequest(SPCHIDLIST *list, int channel) {
             best = i;
             bestAge = age;
             maxPri = reqHeader->priority;
-            bestH = D_0044FFF8_7760.requests[best].seq;
+            bestH = SPCHI_requestState_7760.requests[best].seq;
         } else if (reqHeader->priority == maxPri &&
-                   (age < bestAge || (age == bestAge && bestH < D_0044FFF8_7760.requests[i].seq))) {
+                   (age < bestAge || (age == bestAge && bestH < SPCHI_requestState_7760.requests[i].seq))) {
             best = i;
             bestAge = age;
-            bestH = D_0044FFF8_7760.requests[best].seq;
+            bestH = SPCHI_requestState_7760.requests[best].seq;
         }
     }
     return best;
@@ -1352,14 +1352,14 @@ int SPCHI_pickRequest(SPCHIDLIST *list, int channel) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_pickNextRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHCHANNEL D_00450660_7A50[] __asm__("D_00450660");
+extern SPCHCHANNEL SPCHI_channelLines_7A50[] __asm__("SPCHI_channelLines");
 unsigned short *SPCHI_findBankEntry(SPCHKEY *arg0);
 int SPCHI_pickRequest_7A50(SPCHIDLIST *list, int arg1) __asm__("SPCHI_pickRequest");
 
 /**
  * Picks the next speech request for a channel, preferring the follow-ups the channel's current line allows.
  *
- * When the channel's current line (D_00450660 [@p idx]) is set and its bank entry (SPCHI_findBankEntry) has flag 0x10 at
+ * When the channel's current line (SPCHI_channelLines [@p idx]) is set and its bank entry (SPCHI_findBankEntry) has flag 0x10 at
  * +0xA, the entry carries a follow-up id list (after its tables) and SPCHI_pickRequest is asked with that list first; with
  * no list, or when the list gives nothing, any request is taken.
  *
@@ -1376,8 +1376,8 @@ int SPCHI_pickNextRequest(int idx) {
 
     list.count = 0;
     list.ids = 0;
-    if (D_00450660_7A50[idx].line.entryId != 0xFFFF) {
-        entryData = (unsigned char *)SPCHI_findBankEntry(&D_00450660_7A50[idx].line);
+    if (SPCHI_channelLines_7A50[idx].line.entryId != 0xFFFF) {
+        entryData = (unsigned char *)SPCHI_findBankEntry(&SPCHI_channelLines_7A50[idx].line);
         bankEntry = (SPCHEVENT *)entryData;
         if (bankEntry != 0) {
             int hasList = 0;
@@ -1413,7 +1413,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_cancelAllRequests);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct R_7B98 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; void *p; int arr[20]; };
 struct G_7B98 { int z[8]; int a[8]; int b[8]; int n; struct R_7B98 r[16]; };
-extern struct G_7B98 D_0044FFF8_7B98 __asm__("D_0044FFF8");
+extern struct G_7B98 SPCHI_requestState_7B98 __asm__("SPCHI_requestState");
 void SPCHI_resetChannelLines(void);
 
 /**
@@ -1423,16 +1423,16 @@ void SPCHI_resetChannelLines(void);
 void SPCH_cancelAllRequests(void) {
     int i;
     for (i = 0; i < 16; i++) {
-        if (D_0044FFF8_7B98.r[i].c != 0) {
-            D_0044FFF8_7B98.r[i].c = 0;
-            D_0044FFF8_7B98.z[D_0044FFF8_7B98.r[i].d]--;
+        if (SPCHI_requestState_7B98.r[i].c != 0) {
+            SPCHI_requestState_7B98.r[i].c = 0;
+            SPCHI_requestState_7B98.z[SPCHI_requestState_7B98.r[i].d]--;
         }
     }
     for (i = 0; i < 8; i++) {
-        D_0044FFF8_7B98.b[i] = -1;
-        D_0044FFF8_7B98.a[i] = -1;
-        if (D_0044FFF8_7B98.z[i] != 0) {
-            D_0044FFF8_7B98.z[i] = 0;
+        SPCHI_requestState_7B98.b[i] = -1;
+        SPCHI_requestState_7B98.a[i] = -1;
+        if (SPCHI_requestState_7B98.z[i] != 0) {
+            SPCHI_requestState_7B98.z[i] = 0;
         }
     }
     SPCHI_resetChannelLines();
@@ -1455,7 +1455,7 @@ struct R_7C38 {
     int arr[20];
 };
 struct G_7C38 { int z[8]; int a[8]; int b[8]; int n; struct R_7C38 r[16]; };
-extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
+extern struct G_7C38 SPCHI_requestState_7C38 __asm__("SPCHI_requestState");
 
 /**
  * Frees speech request @p reqIndex and the continuation records chained after it (+0x6E links, +0x6C set).
@@ -1468,35 +1468,35 @@ extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
 void SPCHI_freeRequest(unsigned int reqIndex) {
     int channel;
     int j = -1;
-    if (reqIndex < 16 && D_0044FFF8_7C38.r[reqIndex].isContinuation == 0) {
-        channel = D_0044FFF8_7C38.r[reqIndex].d;
-        D_0044FFF8_7C38.r[reqIndex].c = 0;
-        if (reqIndex == D_0044FFF8_7C38.b[channel]) {
-            D_0044FFF8_7C38.b[channel] = j;
+    if (reqIndex < 16 && SPCHI_requestState_7C38.r[reqIndex].isContinuation == 0) {
+        channel = SPCHI_requestState_7C38.r[reqIndex].d;
+        SPCHI_requestState_7C38.r[reqIndex].c = 0;
+        if (reqIndex == SPCHI_requestState_7C38.b[channel]) {
+            SPCHI_requestState_7C38.b[channel] = j;
         }
-        if (reqIndex == D_0044FFF8_7C38.a[channel]) {
-            D_0044FFF8_7C38.a[channel] = j;
+        if (reqIndex == SPCHI_requestState_7C38.a[channel]) {
+            SPCHI_requestState_7C38.a[channel] = j;
         }
-        j = D_0044FFF8_7C38.r[reqIndex].next;
+        j = SPCHI_requestState_7C38.r[reqIndex].next;
         while (j != -1) {
             if ((unsigned int)j >= 16) {
                 break;
             }
-            if (D_0044FFF8_7C38.r[j].isContinuation != 0 && D_0044FFF8_7C38.r[j].c != 0) {
-                if (j == D_0044FFF8_7C38.a[channel]) {
-                    D_0044FFF8_7C38.a[channel] = -1;
+            if (SPCHI_requestState_7C38.r[j].isContinuation != 0 && SPCHI_requestState_7C38.r[j].c != 0) {
+                if (j == SPCHI_requestState_7C38.a[channel]) {
+                    SPCHI_requestState_7C38.a[channel] = -1;
                 }
-                D_0044FFF8_7C38.r[j].c = 0;
-                j = D_0044FFF8_7C38.r[j].next;
+                SPCHI_requestState_7C38.r[j].c = 0;
+                j = SPCHI_requestState_7C38.r[j].next;
             } else {
                 j = -1;
             }
         }
-        if (D_0044FFF8_7C38.r[reqIndex].isContinuation == 0) {
-            D_0044FFF8_7C38.z[channel]--;
+        if (SPCHI_requestState_7C38.r[reqIndex].isContinuation == 0) {
+            SPCHI_requestState_7C38.z[channel]--;
         }
-        if (D_0044FFF8_7C38.z[channel] < 0) {
-            D_0044FFF8_7C38.z[channel] = 0;
+        if (SPCHI_requestState_7C38.z[channel] < 0) {
+            SPCHI_requestState_7C38.z[channel] = 0;
         }
     }
 }
@@ -1519,13 +1519,13 @@ struct R_7D58 {
     int arr[20];
 };
 struct G_7D58 { int z[8]; int a[8]; int b[8]; int n; struct R_7D58 r[16]; };
-extern struct G_7D58 D_0044FFF8_7D58 __asm__("D_0044FFF8");
+extern struct G_7D58 SPCHI_requestState_7D58 __asm__("SPCHI_requestState");
 void SPCHI_freeRequest(unsigned int);
 
 /**
  * Prunes a channel's queue before speech request @p idx plays.
  *
- * Clears the flag D_0044FFF8 +0x60, then looks at the other chain-head requests on the same channel. Older ones
+ * Clears the flag SPCHI_requestState +0x60, then looks at the other chain-head requests on the same channel. Older ones
  * (earlier time +0x64, or the same time and a lower sequence number) are dropped (SPCHI_freeRequest) unless their header
  * has flag 4 (+0xA); a newer one whose header +0x9 is 100 sets the flag.
  *
@@ -1538,26 +1538,26 @@ void SPCHI_pruneChannelQueue(int idx) {
     int channel;
     unsigned int reqTime;
     unsigned short reqSeq;
-    reqTime = D_0044FFF8_7D58.r[idx].time;
-    channel = D_0044FFF8_7D58.r[idx].d;
-    reqSeq = D_0044FFF8_7D58.r[idx].h;
-    D_0044FFF8_7D58.n = 0;
+    reqTime = SPCHI_requestState_7D58.r[idx].time;
+    channel = SPCHI_requestState_7D58.r[idx].d;
+    reqSeq = SPCHI_requestState_7D58.r[idx].h;
+    SPCHI_requestState_7D58.n = 0;
     for (i = 0; i < 16; i++) {
         if (i == idx) {
             continue;
         }
-        if (D_0044FFF8_7D58.r[i].c == 0 || D_0044FFF8_7D58.r[i].d != channel ||
-            D_0044FFF8_7D58.r[i].isContinuation != 0) {
+        if (SPCHI_requestState_7D58.r[i].c == 0 || SPCHI_requestState_7D58.r[i].d != channel ||
+            SPCHI_requestState_7D58.r[i].isContinuation != 0) {
             continue;
         }
-        otherTime = D_0044FFF8_7D58.r[i].time;
-        otherSeq = D_0044FFF8_7D58.r[i].h;
+        otherTime = SPCHI_requestState_7D58.r[i].time;
+        otherSeq = SPCHI_requestState_7D58.r[i].h;
         if (otherTime < reqTime || (otherTime == reqTime && otherSeq < reqSeq)) {
-            if (((D_0044FFF8_7D58.r[i].p->ba >> 2) & 1) == 0) {
+            if (((SPCHI_requestState_7D58.r[i].p->ba >> 2) & 1) == 0) {
                 SPCHI_freeRequest(i);
             }
-        } else if (D_0044FFF8_7D58.r[i].p->b9 == 100 && D_0044FFF8_7D58.r[i].d == channel) {
-            D_0044FFF8_7D58.n = 1;
+        } else if (SPCHI_requestState_7D58.r[i].p->b9 == 100 && SPCHI_requestState_7D58.r[i].d == channel) {
+            SPCHI_requestState_7D58.n = 1;
         }
     }
 }
@@ -1570,9 +1570,9 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_startNextRequest);
 struct K_7EC8 { unsigned char b[4]; };
 struct R_7EC8 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; void *p; int arr[20]; };
 struct G_7EC8 { int z[8]; int a[8]; int b[8]; int n; struct R_7EC8 r[16]; };
-extern struct G_7EC8 D_0044FFF8_7EC8 __asm__("D_0044FFF8");
+extern struct G_7EC8 SPCHI_requestState_7EC8 __asm__("SPCHI_requestState");
 struct S_7EC8 { int a; int b; int c; int (*fn)(struct K_7EC8 *); };
-extern struct S_7EC8 D_0044FF90_7EC8 __asm__("D_0044FF90");
+extern struct S_7EC8 SPCHI_hooks_7EC8 __asm__("SPCHI_hooks");
 int SPCHI_pickNextRequest(int idx);
 void SPCHI_freeRequest(unsigned int);
 void SPCHI_pruneChannelQueue(int idx);
@@ -1584,7 +1584,7 @@ int SPCH_startNextRequest_7EC8(int a) __asm__("SPCH_startNextRequest");
  * Starts the next queued speech on channel @p channel; returns the build result (0 when nothing started).
  *
  * Does nothing when the channel has no requests. Requests are picked with SPCHI_pickNextRequest and offered to the approve hook
- * (D_0044FF90 +0xC, given the packed key); a refused one is dropped and the next tried. The chosen request prunes the
+ * (SPCHI_hooks +0xC, given the packed key); a refused one is dropped and the next tried. The chosen request prunes the
  * queue (SPCHI_pruneChannelQueue), the play list is reset (SPCHI_resetPlayList) and SPCHI_buildRequest adds the request and its chained
  * continuations until one fails. The request is then freed.
  *
@@ -1596,14 +1596,14 @@ int SPCH_startNextRequest_7EC8(int channel) {
     int done = 0;
     int idx, approved, chainIdx;
     struct K_7EC8 k;
-    if (D_0044FFF8_7EC8.z[channel] != 0) {
+    if (SPCHI_requestState_7EC8.z[channel] != 0) {
         do {
             idx = SPCHI_pickNextRequest(channel);
             if (idx < 0) goto out;
-            k = *(struct K_7EC8 *)D_0044FFF8_7EC8.r[idx].arr;
+            k = *(struct K_7EC8 *)SPCHI_requestState_7EC8.r[idx].arr;
             approved = 1;
-            if (D_0044FF90_7EC8.fn != 0) {
-                approved = D_0044FF90_7EC8.fn(&k);
+            if (SPCHI_hooks_7EC8.fn != 0) {
+                approved = SPCHI_hooks_7EC8.fn(&k);
             }
             if (approved == 1) {
                 done = 1;
@@ -1616,7 +1616,7 @@ int SPCH_startNextRequest_7EC8(int channel) {
         SPCHI_resetPlayList();
         do {
             result = SPCHI_buildRequest(chainIdx);
-            chainIdx = D_0044FFF8_7EC8.r[chainIdx].next;
+            chainIdx = SPCHI_requestState_7EC8.r[chainIdx].next;
         } while (chainIdx != -1 && result != 0);
         SPCHI_freeRequest(idx);
     }
@@ -1651,16 +1651,16 @@ int SPCH_makeKey(int bankId, int subId, int entryId) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_getQueuedCount);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044FFF8_8028[128] __asm__("D_0044FFF8");
+extern int SPCHI_requestState_8028[128] __asm__("SPCHI_requestState");
 
 /**
- * Returns the number of speech requests queued on a channel (D_0044FFF8 [@p channel]).
+ * Returns the number of speech requests queued on a channel (SPCHI_requestState [@p channel]).
  *
  * @param channel  the channel
  * @return the count
  */
 int SPCH_getQueuedCount(int channel) {
-    return D_0044FFF8_8028[channel];
+    return SPCHI_requestState_8028[channel];
 }
 #endif
 
@@ -1668,27 +1668,27 @@ int SPCH_getQueuedCount(int channel) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_updateChannel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A484C_8040 __asm__("D_004A484C");
+extern int SPCHI_inUpdateFlag_8040 __asm__("SPCHI_inUpdateFlag");
 int SPCHI_hasPlayList_8040(void) __asm__("SPCHI_hasPlayList");
 int SPCH_startNextRequest_8040(int) __asm__("SPCH_startNextRequest");
 int SPCHI_playList_8040(int) __asm__("SPCHI_playList");
 
 /**
  * Updates speech channel @p channel: when its play list still has lines (SPCHI_hasPlayList) or a new request starts
- * (SPCH_startNextRequest), plays the list (SPCHI_playList). Guarded against re-entry by D_004A484C.
+ * (SPCH_startNextRequest), plays the list (SPCHI_playList). Guarded against re-entry by SPCHI_inUpdateFlag.
  *
  * @param channel  the channel
  * @return SPCHI_playList's result, 0 when nothing played or re-entered
  */
 int SPCH_updateChannel(int channel) {
     int result = 0;
-    if (D_004A484C_8040 == 0) {
-        D_004A484C_8040 = 1;
+    if (SPCHI_inUpdateFlag_8040 == 0) {
+        SPCHI_inUpdateFlag_8040 = 1;
         if (SPCHI_hasPlayList_8040() != 0 || SPCH_startNextRequest_8040(channel) != 0) {
             result = SPCHI_playList_8040(channel);
         }
     }
-    D_004A484C_8040 = 0;
+    SPCHI_inUpdateFlag_8040 = 0;
     return result;
 }
 #endif
@@ -1698,8 +1698,8 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_playLatestRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_80B0 { int z[8]; unsigned int a[8]; unsigned int b[8]; };
-extern struct G_80B0 D_0044FFF8_80B0 __asm__("D_0044FFF8");
-extern int D_004A484C_80B0 __asm__("D_004A484C");
+extern struct G_80B0 SPCHI_requestState_80B0 __asm__("SPCHI_requestState");
+extern int SPCHI_inUpdateFlag_80B0 __asm__("SPCHI_inUpdateFlag");
 void SPCHI_resetPlayList(void);
 int SPCHI_buildRequest(int);
 void SPCHI_freeRequest(unsigned int);
@@ -1708,16 +1708,16 @@ void SPCHI_playList(int);
 /**
  * Plays channel @p x's latest speech request at once: when both of its request words (+0x20, +0x40) are valid, the play
  * list is reset (SPCHI_resetPlayList), filled from the latest request (SPCHI_buildRequest), the request freed, and the list played
- * (SPCHI_playList) when it was filled. Guarded against re-entry by D_004A484C.
+ * (SPCHI_playList) when it was filled. Guarded against re-entry by SPCHI_inUpdateFlag.
  *
  * @param x  the channel
  */
 void SPCH_playLatestRequest(int x) {
-    if (D_004A484C_80B0 == 0) {
-        unsigned int headReq = D_0044FFF8_80B0.a[x];
-        unsigned int latestReq = D_0044FFF8_80B0.b[x];
+    if (SPCHI_inUpdateFlag_80B0 == 0) {
+        unsigned int headReq = SPCHI_requestState_80B0.a[x];
+        unsigned int latestReq = SPCHI_requestState_80B0.b[x];
         int ok;
-        D_004A484C_80B0 = 1;
+        SPCHI_inUpdateFlag_80B0 = 1;
         ok = 1;
         if (headReq >= 16) ok = 0;
         if (latestReq >= 16) ok = 0;
@@ -1731,7 +1731,7 @@ void SPCH_playLatestRequest(int x) {
             }
         }
     }
-    D_004A484C_80B0 = 0;
+    SPCHI_inUpdateFlag_80B0 = 0;
 }
 #endif
 
@@ -1739,17 +1739,17 @@ void SPCH_playLatestRequest(int x) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_setChannelMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004506A0_8158[128] __asm__("D_004506A0");
+extern int SPCHI_channelModes_8158[128] __asm__("SPCHI_channelModes");
 
 /**
- * Sets a speech channel's mode (D_004506A0 [@p channel]); mode 1 makes SPCHI_pickRequest enforce the bank's priority threshold
+ * Sets a speech channel's mode (SPCHI_channelModes [@p channel]); mode 1 makes SPCHI_pickRequest enforce the bank's priority threshold
  * for flagged requests.
  *
  * @param mode  the mode
  * @param channel  the channel
  */
 void SPCH_setChannelMode(int mode, int channel) {
-    D_004506A0_8158[channel] = mode;
+    SPCHI_channelModes_8158[channel] = mode;
 }
 #endif
 
@@ -1773,21 +1773,21 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCH_updateChannel0);
 extern int SPCH_startNextRequest_8190(int) __asm__("SPCH_startNextRequest");
 extern void SPCHI_playList(int);
 extern int SPCHI_hasPlayList(int);
-extern int D_004A484C_484C __asm__("D_004A484C");
+extern int SPCHI_inUpdateFlag_484C __asm__("SPCHI_inUpdateFlag");
 
 /**
  * Updates speech channel 0 (the body of SPCH_updateChannel for channel 0, without a result).
  */
 void SPCH_updateChannel0(void) {
-    if (D_004A484C_484C == 0) {
-        D_004A484C_484C = 1;
+    if (SPCHI_inUpdateFlag_484C == 0) {
+        SPCHI_inUpdateFlag_484C = 1;
         if (SPCHI_hasPlayList(0) != 0) {
             SPCHI_playList(0);
         } else if (SPCH_startNextRequest_8190(0) != 0) {
             SPCHI_playList(0);
         }
     }
-    D_004A484C_484C = 0;
+    SPCHI_inUpdateFlag_484C = 0;
 }
 #endif
 
@@ -1795,12 +1795,12 @@ void SPCH_updateChannel0(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getBankRegKey);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_82B0[] __asm__("SPCHI_bankSlots");
 
 /**
  * Looks up the key the speech bank for a speech key was registered under (SPCHI_registerBank's key).
  *
- * The bank is the first of the 8 bank slots (D_0044FFB8) whose ids (+0x9, +0x8) match key bytes 2 and 3.
+ * The bank is the first of the 8 bank slots (SPCHI_bankSlots) whose ids (+0x9, +0x8) match key bytes 2 and 3.
  *
  * @param speechKey  the 4-byte speech key
  * @param regKeyOut  receives the bank's registration key when found
@@ -1808,7 +1808,7 @@ extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  */
 int SPCHI_getBankRegKey(SPCHKEY *speechKey, int *regKeyOut) {
     SPCHBANKSLOT *res;
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_82B0;
     int ret = 0;
     SPCHBANKSLOT **pres = &res;
     int found = 0;
@@ -1836,17 +1836,17 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_clearBanks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044FFB8_8278[] __asm__("D_0044FFB8");
+extern int SPCHI_bankSlots_8278[] __asm__("SPCHI_bankSlots");
 
 /**
- * Clears the 8 speech bank slots (D_0044FFB8: data and key).
+ * Clears the 8 speech bank slots (SPCHI_bankSlots: data and key).
  */
 void SPCHI_clearBanks(void) {
     int *var_2;
     int var_3;
 
     var_3 = 7;
-    var_2 = D_0044FFB8_8278;
+    var_2 = SPCHI_bankSlots_8278;
     do {
         var_2[0] = 0;
         var_3 -= 1;
@@ -1860,7 +1860,7 @@ void SPCHI_clearBanks(void) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getBankLengthLimit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_82B0[] __asm__("SPCHI_bankSlots");
 
 /**
  * Returns halfword +0x14 of the speech bank registered for a speech key (matched as in SPCHI_getBankRegKey), or 0.
@@ -1870,7 +1870,7 @@ extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  */
 unsigned short SPCHI_getBankLengthLimit(SPCHKEY *speechKey) {
     SPCHBANKSLOT *res;
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_82B0;
     unsigned short ret = 0;
     SPCHBANKSLOT **pres = &res;
     int found = 0;
@@ -1897,7 +1897,7 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getBankSubId);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_82B0[] __asm__("SPCHI_bankSlots");
 
 /**
  * Looks up the sub id (+0x9) of the speech bank registered for a speech key (matched as in SPCHI_getBankRegKey).
@@ -1908,7 +1908,7 @@ extern SPCHBANKSLOT D_0044FFB8_82B0[] __asm__("D_0044FFB8");
  */
 int SPCHI_getBankSubId(SPCHKEY *speechKey, int *subIdOut) {
     SPCHBANKSLOT *res;
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_82B0;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_82B0;
     int ret = 0;
     SPCHBANKSLOT **pres = &res;
     int found = 0;
@@ -1936,7 +1936,7 @@ done:
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getBankUsage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_83B8[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_83B8[] __asm__("SPCHI_bankSlots");
 
 /**
  * Looks up the usage bytes of the speech bank registered for a speech key (the area SPCHI_resetBankUsage resets).
@@ -1947,7 +1947,7 @@ extern SPCHBANKSLOT D_0044FFB8_83B8[] __asm__("D_0044FFB8");
  */
 int SPCHI_getBankUsage(SPCHKEY *speechKey, unsigned char **usageOut) {
     SPCHBANKSLOT *res;
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_83B8;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_83B8;
     int ret = 0;
     SPCHBANKSLOT **pres = &res;
     int found = 0;
@@ -2015,10 +2015,10 @@ block_4:
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findBankSlot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern SPCHBANKSLOT D_0044FFB8_84A0[] __asm__("D_0044FFB8");
+extern SPCHBANKSLOT SPCHI_bankSlots_84A0[] __asm__("SPCHI_bankSlots");
 
 /**
- * Finds the speech bank slot (D_0044FFB8) for a speech key: the first whose ids (+0x9, +0x8) match key bytes 2 and 3.
+ * Finds the speech bank slot (SPCHI_bankSlots) for a speech key: the first whose ids (+0x9, +0x8) match key bytes 2 and 3.
  * The same search is inlined in SPCHI_findBankEntry and its siblings.
  *
  * @param speechKey  the 4-byte speech key
@@ -2026,7 +2026,7 @@ extern SPCHBANKSLOT D_0044FFB8_84A0[] __asm__("D_0044FFB8");
  * @return 1 when found, else 0
  */
 int SPCHI_findBankSlot(SPCHKEY *speechKey, SPCHBANKSLOT **pres) {
-    SPCHBANKSLOT *bankSlot = D_0044FFB8_84A0;
+    SPCHBANKSLOT *bankSlot = SPCHI_bankSlots_84A0;
     int found = 0;
     int i = 0;
     do {
@@ -2049,7 +2049,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_hasLatestRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_8500 { unsigned int z[8]; unsigned int a[8]; unsigned int b[8]; };
-extern struct S_8500 D_0044FFF8_8500 __asm__("D_0044FFF8");
+extern struct S_8500 SPCHI_requestState_8500 __asm__("SPCHI_requestState");
 /**
  * Returns whether speech channel @p i has both request words (+0x20 and +0x40 [channel]) set, the test SPCH_playLatestRequest
  * makes before it plays the latest request.
@@ -2058,8 +2058,8 @@ extern struct S_8500 D_0044FFF8_8500 __asm__("D_0044FFF8");
  * @return 1 when both are valid indices (below 16), else 0
  */
 int SPCHI_hasLatestRequest(int i) {
-    int valid = D_0044FFF8_8500.a[i] < 0x10;
-    if (D_0044FFF8_8500.b[i] >= 0x10) valid = 0;
+    int valid = SPCHI_requestState_8500.a[i] < 0x10;
+    if (SPCHI_requestState_8500.b[i] >= 0x10) valid = 0;
     return valid;
 }
 #endif
@@ -2245,15 +2245,15 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D88C8);
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_orderOptionsByWeight);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned int D_004506E0_8CB0[] __asm__("D_004506E0");
+extern unsigned int SPCHI_weightScaleTable_8CB0[] __asm__("SPCHI_weightScaleTable");
 
-#define WEIGHT_8CB0(p) ((*(p) & 0x1F) * D_004506E0_8CB0[*(p) >> 5])
+#define WEIGHT_8CB0(p) ((*(p) & 0x1F) * SPCHI_weightScaleTable_8CB0[*(p) >> 5])
 
 /**
  * Orders the options of a set by weighted random draw, without repeats, into @p out.
  *
  * The set has +0x6 options reached through the halfword word-offsets at +0xC; an option's weight is its first byte's
- * low 5 bits times the scale D_004506E0 [its top 3 bits]. Options are drawn with SPCHI_random(total, -1) and removed
+ * low 5 bits times the scale SPCHI_weightScaleTable [its top 3 bits]. Options are drawn with SPCHI_random(total, -1) and removed
  * from the pool; the zero-weight options follow at the end.
  *
  * @param optionSet  the option set
@@ -2300,7 +2300,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_checkVariables);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **D_004A4824_8E58 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+extern unsigned char **SPCHI_tableSlots_8E58 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 
 /**
@@ -2351,7 +2351,7 @@ int SPCHI_checkVariables(struct sSelSet *selSet, struct sLayer *phrase) {
                     selSet->ent[i].flag = 1;
                     slotCond = (struct sCond *)((int *)phrase + lp[i]);
                     n = slotCond->n;
-                    if (!SPCHI_readRow(D_004A4824_8E58[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur], &rowInfo)) {
+                    if (!SPCHI_readRow(SPCHI_tableSlots_8E58[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur], &rowInfo)) {
                         ok = 0;
                         goto out;
                     }
@@ -2552,8 +2552,8 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_findFittingCombination);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **D_004A4824_93C0 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
-extern int D_004A4838_93C0 __asm__("D_004A4838");
+extern unsigned char **SPCHI_tableSlots_93C0 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
+extern int SPCHI_bufferSize_93C0 __asm__("SPCHI_bufferSize");
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 /* Combination search: reset every entry, then advance the odometer until the usage
    percentage fits under `thr` and the constraints (SPCHI_checkVariables) hold, or the odometer
@@ -2570,13 +2570,13 @@ static inline int usage_93C0(unsigned char *a0, struct sSelSet *h) {
     int cnt = a0[4] >> 2;
 
     for (i = 0; i < cnt; i++) {
-        if (SPCHI_readRow(D_004A4824_93C0[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
+        if (SPCHI_readRow(SPCHI_tableSlots_93C0[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
             total += o.len;
         }
     }
     r = 0;
-    if (D_004A4838_93C0 != 0) {
-        r = total * 100 / D_004A4838_93C0;
+    if (SPCHI_bufferSize_93C0 != 0) {
+        r = total * 100 / SPCHI_bufferSize_93C0;
     }
     return r;
 }
@@ -2610,7 +2610,7 @@ static inline int next_93C0(unsigned char *h, struct sSel *e) {
  * Searches the slots' candidate combinations for one that fits: returns 1 when found, 0 when all were tried.
  *
  * Starts each slot at its first candidate and steps through the combinations, last slot fastest (the inlined
- * SPCHI_nextCombination). A combination fits when its total length is at most @p thr percent of the buffer (D_004A4838; the
+ * SPCHI_nextCombination). A combination fits when its total length is at most @p thr percent of the buffer (SPCHI_bufferSize; the
  * inlined SPCHI_getSelectionPercent, skipped when @p thr is 0) and, for a template with variables, SPCHI_checkVariables accepts it.
  *
  * @param phrase  the phrase template
@@ -2656,7 +2656,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_chooseRows);
 extern int SPCHI_getBankUsage_95B8(SPCHKEY *, unsigned char **) __asm__("SPCHI_getBankUsage");
 extern int SPCHI_readRow_95B8(unsigned char *, int, struct sShapeInfo *) __asm__("SPCHI_readRow");
 extern int SPCHI_findFittingCombination_95B8(struct sLayer *, struct sSelSet *, int) __asm__("SPCHI_findFittingCombination");
-extern unsigned char **D_004A4824_95B8 __asm__("D_004A4824");
+extern unsigned char **SPCHI_tableSlots_95B8 __asm__("SPCHI_tableSlots");
 extern int SPCHI_random(int, int);
 
 static __inline__ void shuffle_95B8(struct sLayer *l, struct sSelSet *h) {
@@ -2695,7 +2695,7 @@ static __inline__ void apply_95B8(SPCHKEY *a0, struct sSelSet *h, struct sLayer 
             c = (struct sCond *)((int *)l + l->list[i]);
             for (j = 0; j < c->n; j++) {
                 if (c->a[j] == 0xFE && !(c->b[j] & 0x80)) {
-                    if (SPCHI_readRow_95B8(D_004A4824_95B8[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
+                    if (SPCHI_readRow_95B8(SPCHI_tableSlots_95B8[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
                         out[c->b[j]] = o.col[j];
                     }
                 }
@@ -2749,9 +2749,9 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_sendPhraseLines);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **D_004A4824_9830 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+extern unsigned char **SPCHI_tableSlots_9830 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
 extern int D_004A4830_9830 __asm__("D_004A4830");
-extern int D_004A4838_9830 __asm__("D_004A4838");
+extern int SPCHI_bufferSize_9830 __asm__("SPCHI_bufferSize");
 /* regKey (SPCHI_getBankRegKey), tableSubId (the table's subId) and bankSubId (SPCHI_getBankSubId): names ours, from use */
 struct sFF90Msg { int id; int start; int len; SPCHKEY k; int regKey; int tableSubId; int bankSubId; };
 struct sFF90 {
@@ -2763,11 +2763,11 @@ struct sFF90 {
     int f14;
 };
 struct sFFA8 { int f00; int f04; int (*f08)(); int f0C; };
-extern struct sFF90 D_0044FF90_9830 __asm__("D_0044FF90");
-/* A play list line (D_00450700 +0xC, 0x30 of them): its speech table slot, repeat index and row. */
+extern struct sFF90 SPCHI_hooks_9830 __asm__("SPCHI_hooks");
+/* A play list line (SPCHI_playListState +0xC, 0x30 of them): its speech table slot, repeat index and row. */
 struct sPlayLine { short x; short idx; unsigned short y; short d; };
 struct G_9830 { int f0, f4, f8; struct sPlayLine q[0x30]; };
-extern struct G_9830 D_00450700_9830 __asm__("D_00450700");
+extern struct G_9830 SPCHI_playListState_9830 __asm__("SPCHI_playListState");
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 
 static __inline__ void clearBit_9830(unsigned char *s, int bit) {
@@ -2780,8 +2780,8 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
 /**
  * Sends a phrase's lines to the speech play callback and returns their total length as a percentage of the buffer.
  *
- * Does nothing without a play callback (D_0044FF90 +0x0, SPCH_StartSpeechCallback). Each of the template's slots takes a play list
- * entry from @p firstEntry (D_00450700): table and row. A random-subset table drops the row from its subset when D_004A4830 is
+ * Does nothing without a play callback (SPCHI_hooks +0x0, SPCH_StartSpeechCallback). Each of the template's slots takes a play list
+ * entry from @p firstEntry (SPCHI_playListState): table and row. A random-subset table drops the row from its subset when D_004A4830 is
  * set. The message holds the table slot, the row's start (plus the repeat index times the table length when set), its
  * length, the key, the bank's sub id (SPCHI_getBankSubId) and registration key (SPCHI_getBankRegKey) and the table's +0x2
  * halfword. The row is then recorded in the table's history (SPCHI_recordHistory).
@@ -2789,7 +2789,7 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
  * @param phrase  the phrase template
  * @param k  the speech key
  * @param firstEntry  the first play list entry
- * @return the total length * 100 / D_004A4838 (0 without a buffer size)
+ * @return the total length * 100 / SPCHI_bufferSize (0 without a buffer size)
  */
 int SPCHI_sendPhraseLines(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
     struct sShapeInfo rowInfo;
@@ -2810,16 +2810,16 @@ int SPCHI_sendPhraseLines(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
     sum = 0;
     pct = 0;
     w34 = 0;
-    if (D_0044FF90_9830.play != 0) {
+    if (SPCHI_hooks_9830.play != 0) {
         SPCHI_getBankSubId(k, &w30);
         SPCHI_getBankRegKey(k, &w34);
         n = phrase[4] >> 2;
         if (n != 0) {
             cnt = n;
-            listEntry = D_00450700_9830.q + firstEntry;
+            listEntry = SPCHI_playListState_9830.q + firstEntry;
             do {
                 x = listEntry->x;
-                table = D_004A4824_9830[x];
+                table = SPCHI_tableSlots_9830[x];
                 y = listEntry->y;
                 if ((table[4] & 0x80) && D_004A4830_9830 != 0) {
                     clearBit_9830(table, y);
@@ -2838,7 +2838,7 @@ int SPCHI_sendPhraseLines(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
                     playMsg.bankSubId = w30;
                     playMsg.regKey = w34;
                     playMsg.tableSubId = ((SPCHTABLEHDR *)table)->subId;
-                    D_0044FF90_9830.play(&playMsg);
+                    SPCHI_hooks_9830.play(&playMsg);
                     SPCHI_recordHistory(table, y);
                 }
                 cnt--;
@@ -2846,8 +2846,8 @@ int SPCHI_sendPhraseLines(unsigned char *phrase, SPCHKEY *k, int firstEntry) {
             } while (cnt != 0);
         }
         pct = 0;
-        if (D_004A4838_9830 != 0) {
-            pct = sum * 100 / D_004A4838_9830;
+        if (SPCHI_bufferSize_9830 != 0) {
+            pct = sum * 100 / SPCHI_bufferSize_9830;
         }
     }
     return pct;
@@ -2874,29 +2874,29 @@ struct G9A40 {
     struct Q9A40 q[0x30];
     struct R9A40 r[8];
 };
-extern struct G9A40 D_00450700_9A40 __asm__("D_00450700");
+extern struct G9A40 SPCHI_playListState_9A40 __asm__("SPCHI_playListState");
 
 /**
- * Resets the speech play list (D_00450700): channel -1, both counts 0, the 8 phrase records cleared and the 0x30 line
+ * Resets the speech play list (SPCHI_playListState): channel -1, both counts 0, the 8 phrase records cleared and the 0x30 line
  * entries set to (-1, -1, 0, 0).
  */
 void SPCHI_resetPlayList(void) {
     int i;
-    D_00450700_9A40.channel = -1;
-    D_00450700_9A40.phraseCount = 0;
-    D_00450700_9A40.lineCount = 0;
+    SPCHI_playListState_9A40.channel = -1;
+    SPCHI_playListState_9A40.phraseCount = 0;
+    SPCHI_playListState_9A40.lineCount = 0;
     for (i = 0; i < 8; i++) {
-        D_00450700_9A40.r[i].eventEntry = 0;
-        D_00450700_9A40.r[i].phrase = 0;
-        D_00450700_9A40.r[i].variantIdx = 0;
-        D_00450700_9A40.r[i].used = 0;
-        D_00450700_9A40.r[i].bb = 0;
+        SPCHI_playListState_9A40.r[i].eventEntry = 0;
+        SPCHI_playListState_9A40.r[i].phrase = 0;
+        SPCHI_playListState_9A40.r[i].variantIdx = 0;
+        SPCHI_playListState_9A40.r[i].used = 0;
+        SPCHI_playListState_9A40.r[i].bb = 0;
     }
     for (i = 0; i < 0x30; i++) {
-        D_00450700_9A40.q[i].a = -1;
-        D_00450700_9A40.q[i].b = -1;
-        D_00450700_9A40.q[i].c = 0;
-        D_00450700_9A40.q[i].d = 0;
+        SPCHI_playListState_9A40.q[i].a = -1;
+        SPCHI_playListState_9A40.q[i].b = -1;
+        SPCHI_playListState_9A40.q[i].c = 0;
+        SPCHI_playListState_9A40.q[i].d = 0;
     }
 }
 #endif
@@ -2923,10 +2923,10 @@ struct G_9AC8 {
 };
 struct E_9AC8 { unsigned short x; unsigned short y; unsigned short z; unsigned char idx; unsigned char pad; };
 struct H_9AC8 { struct E_9AC8 ent[12]; char pad[2]; unsigned char tbl[1]; };
-extern struct G_9AC8 D_00450700_9AC8 __asm__("D_00450700");
+extern struct G_9AC8 SPCHI_playListState_9AC8 __asm__("SPCHI_playListState");
 
 /**
- * Appends a built phrase to the speech play list (D_00450700) for channel @p id, when the list is free or already that
+ * Appends a built phrase to the speech play list (SPCHI_playListState) for channel @p id, when the list is free or already that
  * channel's.
  *
  * Takes phrase record n (count +0x4, at most 8): the channel, the bank event entry, the template, the variant index and
@@ -2946,25 +2946,25 @@ void SPCHI_appendPhrase(struct H_9AC8 *selSet, int id, int eventEntry, unsigned 
     int cnt;
     int j;
 
-    if (D_00450700_9AC8.channel < 0 || D_00450700_9AC8.channel == id) {
-        n = D_00450700_9AC8.phraseCount++;
+    if (SPCHI_playListState_9AC8.channel < 0 || SPCHI_playListState_9AC8.channel == id) {
+        n = SPCHI_playListState_9AC8.phraseCount++;
         if (n < 8) {
-            D_00450700_9AC8.channel = id;
-            D_00450700_9AC8.r[n].eventEntry = eventEntry;
-            D_00450700_9AC8.r[n].phrase = phrase;
-            D_00450700_9AC8.r[n].variantIdx = variantIdx;
+            SPCHI_playListState_9AC8.channel = id;
+            SPCHI_playListState_9AC8.r[n].eventEntry = eventEntry;
+            SPCHI_playListState_9AC8.r[n].phrase = phrase;
+            SPCHI_playListState_9AC8.r[n].variantIdx = variantIdx;
             for (i = 0; i < 20; i++) {
-                D_00450700_9AC8.r[n].data[i] = reqArgs[i];
+                SPCHI_playListState_9AC8.r[n].data[i] = reqArgs[i];
             }
-            D_00450700_9AC8.r[n].used = 1;
+            SPCHI_playListState_9AC8.r[n].used = 1;
             cnt = phrase[4] >> 2;
-            j = D_00450700_9AC8.lineCount;
+            j = SPCHI_playListState_9AC8.lineCount;
             for (i = 0; i < cnt; i++) {
-                D_00450700_9AC8.q[j + i].a = selSet->ent[i].x;
-                D_00450700_9AC8.q[j + i].b = selSet->ent[i].y;
-                D_00450700_9AC8.q[j + i].c = selSet->tbl[selSet->ent[i].idx];
+                SPCHI_playListState_9AC8.q[j + i].a = selSet->ent[i].x;
+                SPCHI_playListState_9AC8.q[j + i].b = selSet->ent[i].y;
+                SPCHI_playListState_9AC8.q[j + i].c = selSet->tbl[selSet->ent[i].idx];
             }
-            D_00450700_9AC8.lineCount += cnt;
+            SPCHI_playListState_9AC8.lineCount += cnt;
         }
     }
 }
@@ -2978,11 +2978,11 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_playList);
 // behaviour-preserving steering only); replace it when an honest spelling matches.
 // From peak3project's fork (github.com/peak3project/ssx3).
                   /* 0x01789A34 while initialised (SPCH_initDriver) */
-extern unsigned char **D_004A4824_9BD8 __asm__("D_004A4824");
+extern unsigned char **SPCHI_tableSlots_9BD8 __asm__("SPCHI_tableSlots");
 
-extern struct sFF90 D_0044FF90;
+extern struct sFF90 SPCHI_hooks;
 
-extern SPCHCHANNEL D_00450660[8];
+extern SPCHCHANNEL SPCHI_channelLines[8];
 
 struct s0700Req {
     int f0; unsigned char *f4; unsigned char b8; unsigned char b9; unsigned char ba; unsigned char bb; SPCHARGS data;
@@ -2990,7 +2990,7 @@ struct s0700Req {
 
 struct s0700 { int f0; int f4; int f8; struct sPlayLine q[0x30]; struct s0700Req r[8]; };
 
-extern struct s0700 D_00450700;
+extern struct s0700 SPCHI_playListState;
 
 // (prototype from their definition at line 1338)
 int SPCHI_getBankSubId_9BD8(unsigned char *arg0, int *arg1) __asm__("SPCHI_getBankSubId");
@@ -3016,7 +3016,7 @@ static __inline__ void layerHits_9BD8(void *a0, int a1, struct sLayer *l, int a3
     unsigned yy;
     long m;
 
-    if (D_0044FF90.f08 != 0) {
+    if (SPCHI_hooks.f08 != 0) {
         SPCHI_getBankSubId_9BD8(a0, &out);
         cnt = l->cnt >> 2;
         for (i = 0; i < cnt; i++) {
@@ -3024,11 +3024,11 @@ static __inline__ void layerHits_9BD8(void *a0, int a1, struct sLayer *l, int a3
             for (j = 0; j < 4; j++) {
                 if ((b = tbl[j]) != 0xFF) {
                     h = SPCHI_getTagId_9BD8(a1, b);
-                    yy = D_00450700.q[i + a3].y;
-                    shp = D_004A4824_9BD8[D_00450700.q[i + a3].x];
+                    yy = SPCHI_playListState.q[i + a3].y;
+                    shp = SPCHI_tableSlots_9BD8[SPCHI_playListState.q[i + a3].x];
                     if (SPCHI_readRow(shp, yy, &o)) {
                         m = 1 << o.col[j];
-                        D_0044FF90.f08(a0, h, (int)m, out);
+                        SPCHI_hooks.f08(a0, h, (int)m, out);
                     }
                 }
             }
@@ -3039,8 +3039,8 @@ static __inline__ void layerHits_9BD8(void *a0, int a1, struct sLayer *l, int a3
 /* SPCHI_hasPlayList, inlined. */
 static __inline__ int reqOwned_9BD8(int x) {
     int r = 0;
-    if (D_00450700.f0 == x)
-        r = D_00450700.f4 > 0;
+    if (SPCHI_playListState.f0 == x)
+        r = SPCHI_playListState.f4 > 0;
     return r;
 }
 
@@ -3050,8 +3050,8 @@ int SPCHI_playList_impl(int id) __asm__("SPCHI_playList");
  * lines sent.
  *
  * For each phrase record: the event hooks run for the event's tags (SPCHI_reportEventTags) and for each slot's chosen tags (the
- * inlined SPCHI_reportSlotTags), both through D_0044FF90 +0x8, and SPCHI_sendPhraseLines sends the lines to the play callback. The
- * first phrase updates the channel's current line (D_00450660): the same entry id counts a repeat, another one replaces
+ * inlined SPCHI_reportSlotTags), both through SPCHI_hooks +0x8, and SPCHI_sendPhraseLines sends the lines to the play callback. The
+ * first phrase updates the channel's current line (SPCHI_channelLines): the same entry id counts a repeat, another one replaces
  * it with count 1.
  *
  * @param id  the channel
@@ -3064,19 +3064,19 @@ int SPCHI_playList_impl(int id) {
     int k;
 
     if (reqOwned_9BD8(id)) {
-        n = D_00450700.f4;
+        n = SPCHI_playListState.f4;
         for (k = 0; k < n; k++) {
-            key = *&D_00450700.r[k].data.key; /* read through its address: retail forms it first */
-            SPCHI_reportEventTags_9BD8(&key, D_00450700.r[k].f0, D_00450700.r[k].b8, D_00450700.r[k].data.words);
-            layerHits_9BD8(&key, D_00450700.r[k].f0, (struct sLayer *)D_00450700.r[k].f4, ret);
-            SPCHI_sendPhraseLines_9BD8(D_00450700.r[k].f4, &key, ret);
-            ret += D_00450700.r[k].f4[4] >> 2;
+            key = *&SPCHI_playListState.r[k].data.key; /* read through its address: retail forms it first */
+            SPCHI_reportEventTags_9BD8(&key, SPCHI_playListState.r[k].f0, SPCHI_playListState.r[k].b8, SPCHI_playListState.r[k].data.words);
+            layerHits_9BD8(&key, SPCHI_playListState.r[k].f0, (struct sLayer *)SPCHI_playListState.r[k].f4, ret);
+            SPCHI_sendPhraseLines_9BD8(SPCHI_playListState.r[k].f4, &key, ret);
+            ret += SPCHI_playListState.r[k].f4[4] >> 2;
             if (k == 0) {
-                if (key.entryId == D_00450660[id].line.entryId) {
-                    D_00450660[id].repeatCount++;
+                if (key.entryId == SPCHI_channelLines[id].line.entryId) {
+                    SPCHI_channelLines[id].repeatCount++;
                 } else {
-                    D_00450660[id].line = key;
-                    D_00450660[id].repeatCount = 1;
+                    SPCHI_channelLines[id].line = key;
+                    SPCHI_channelLines[id].repeatCount = 1;
                 }
             }
         }
@@ -3149,15 +3149,15 @@ void SPCHI_getBankIds(void *data, int *bankIdOut, int *subIdOut) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", SPCH_setClockOffset);
 #ifdef SKIP_ASM
-extern int D_004A483C;
+extern int SPCHI_clockOffset;
 
 /**
- * Sets the speech clock offset D_004A483C, added to the time source when SPCHI_pickRequest ages requests.
+ * Sets the speech clock offset SPCHI_clockOffset, added to the time source when SPCHI_pickRequest ages requests.
  *
  * @param timeOffset  the offset
  */
 void SPCH_setClockOffset(int timeOffset) {
-    D_004A483C = timeOffset;
+    SPCHI_clockOffset = timeOffset;
 }
 #endif
 
@@ -3165,9 +3165,9 @@ void SPCH_setClockOffset(int timeOffset) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getOptionWeight);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned int D_004506E0_A3C8[] __asm__("D_004506E0");
+extern unsigned int SPCHI_weightScaleTable_A3C8[] __asm__("SPCHI_weightScaleTable");
 /**
- * Returns an option's weight from its first byte: the low 5 bits times the scale D_004506E0 [top 3 bits] (as in
+ * Returns an option's weight from its first byte: the low 5 bits times the scale SPCHI_weightScaleTable [top 3 bits] (as in
  * SPCHI_orderOptionsByWeight).
  *
  * @param weightByte  the option's first byte
@@ -3175,7 +3175,7 @@ extern unsigned int D_004506E0_A3C8[] __asm__("D_004506E0");
  */
 unsigned int SPCHI_getOptionWeight(unsigned int weightByte) {
     weightByte &= 0xFF;
-    return (weightByte & 0x1F) * D_004506E0_A3C8[weightByte >> 5];
+    return (weightByte & 0x1F) * SPCHI_weightScaleTable_A3C8[weightByte >> 5];
 }
 #endif
 
@@ -3184,7 +3184,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_hasPlayList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_A3F0 { int a; int b; int c; };
-extern struct S_A3F0 D_00450700_A3F0 __asm__("D_00450700");
+extern struct S_A3F0 SPCHI_playListState_A3F0 __asm__("SPCHI_playListState");
 /**
  * Returns whether the speech play list belongs to channel @p x and holds phrases.
  *
@@ -3193,8 +3193,8 @@ extern struct S_A3F0 D_00450700_A3F0 __asm__("D_00450700");
  */
 int SPCHI_hasPlayList(int x) {
     int pending = 0;
-    if (D_00450700_A3F0.a == x)
-        pending = D_00450700_A3F0.b > 0;
+    if (SPCHI_playListState_A3F0.a == x)
+        pending = SPCHI_playListState_A3F0.b > 0;
     return pending;
 }
 #endif
@@ -3204,14 +3204,14 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_buildRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_A418 { int pad[4]; int (*cb)(int, void *); };
-extern struct G_A418 D_0044FF90_A418 __asm__("D_0044FF90");
-extern SPCHREQSTATE D_0044FFF8_A418 __asm__("D_0044FFF8");
+extern struct G_A418 SPCHI_hooks_A418 __asm__("SPCHI_hooks");
+extern SPCHREQSTATE SPCHI_requestState_A418 __asm__("SPCHI_requestState");
 extern int func_003D9FB0_A418(SPCHARGS *) __asm__("func_003D9FB0");
 
 /**
  * Builds speech request @p idx into the play list (func_003D9FB0); returns the result, negative results as 0.
  *
- * When nothing gets built and the retry hook (D_0044FF90 +0x10, installed by SPCH_setRetryHook) is set, the hook is called
+ * When nothing gets built and the retry hook (SPCHI_hooks +0x10, installed by SPCH_setRetryHook) is set, the hook is called
  * with attempt 0, 1, ... and the request's argument words, and each non-negative answer is followed by another build,
  * while nothing is built and the hook returns more than 0.
  *
@@ -3219,16 +3219,16 @@ extern int func_003D9FB0_A418(SPCHARGS *) __asm__("func_003D9FB0");
  * @return the build result, at least 0
  */
 int SPCHI_buildRequest(int idx) {
-    SPCHARGS *reqArgs = &D_0044FFF8_A418.requests[idx].args;
+    SPCHARGS *reqArgs = &SPCHI_requestState_A418.requests[idx].args;
     int result;
     int i;
     int k;
 
     result = func_003D9FB0_A418(reqArgs);
-    if (result == 0 && D_0044FF90_A418.cb != 0) {
+    if (result == 0 && SPCHI_hooks_A418.cb != 0) {
         i = 0;
         do {
-            k = D_0044FF90_A418.cb(i, reqArgs);
+            k = SPCHI_hooks_A418.cb(i, reqArgs);
             if (k >= 0) {
                 result = func_003D9FB0_A418(reqArgs);
             }
@@ -3501,10 +3501,10 @@ int SPCHI_isTableSuitable(struct sCond *sel, unsigned char *node, int *masks) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_lengthToPercent);
 #ifdef SKIP_ASM
-extern int D_004A4838;
+extern int SPCHI_bufferSize;
 
 /**
- * Returns a length as a percentage of the speech buffer size D_004A4838 (0 when the size is 0).
+ * Returns a length as a percentage of the speech buffer size SPCHI_bufferSize (0 when the size is 0).
  *
  * @param len  the length
  * @return the percentage
@@ -3513,8 +3513,8 @@ int SPCHI_lengthToPercent(int len) {
     int var_2;
 
     var_2 = 0;
-    if (D_004A4838 != 0) {
-        var_2 = (int) (len * 100) / (int) D_004A4838;
+    if (SPCHI_bufferSize != 0) {
+        var_2 = (int) (len * 100) / (int) SPCHI_bufferSize;
     }
     return var_2;
 }
@@ -3525,11 +3525,11 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getSelectionPercent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SPCHI_readRow_A910(unsigned char *, int, struct sShapeInfo *) __asm__("SPCHI_readRow");
-extern unsigned char **D_004A4824_A910 __asm__("D_004A4824");
-extern int D_004A4838;
+extern unsigned char **SPCHI_tableSlots_A910 __asm__("SPCHI_tableSlots");
+extern int SPCHI_bufferSize;
 
 /**
- * Returns the total length of a selection's current rows as a percentage of the speech buffer size D_004A4838; the
+ * Returns the total length of a selection's current rows as a percentage of the speech buffer size SPCHI_bufferSize; the
  * out-of-line copy of the helper SPCHI_findFittingCombination inlines.
  *
  * @param phrase  the phrase template
@@ -3544,13 +3544,13 @@ int SPCHI_getSelectionPercent(unsigned char *phrase, struct sSelSet *selSet) {
     int cnt = phrase[4] >> 2;
 
     for (i = 0; i < cnt; i++) {
-        if (SPCHI_readRow_A910(D_004A4824_A910[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur], &rowInfo)) {
+        if (SPCHI_readRow_A910(SPCHI_tableSlots_A910[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur], &rowInfo)) {
             total += rowInfo.len;
         }
     }
     pct = 0;
-    if (D_004A4838 != 0) {
-        pct = total * 100 / D_004A4838;
+    if (SPCHI_bufferSize != 0) {
+        pct = total * 100 / SPCHI_bufferSize;
     }
     return pct;
 }
@@ -3561,10 +3561,10 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_canRepeatEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_A9C8 { unsigned short h; int w; };
-extern struct E_A9C8 D_00450660_A9C8[] __asm__("D_00450660");
+extern struct E_A9C8 SPCHI_channelLines_A9C8[] __asm__("SPCHI_channelLines");
 
 /**
- * Returns whether a bank entry may play again on a channel: 0 when it is the channel's current line (D_00450660) and
+ * Returns whether a bank entry may play again on a channel: 0 when it is the channel's current line (SPCHI_channelLines) and
  * its repeat limit (+0x8, when above 0) has been reached.
  *
  * @param eventEntry  the bank event entry
@@ -3573,10 +3573,10 @@ extern struct E_A9C8 D_00450660_A9C8[] __asm__("D_00450660");
  */
 int SPCHI_canRepeatEntry(char *eventEntry, int idx) {
     int allowed = 1;
-    if (*(unsigned short *)eventEntry == D_00450660_A9C8[idx].h) {
+    if (*(unsigned short *)eventEntry == SPCHI_channelLines_A9C8[idx].h) {
         int maxRepeat = eventEntry[8];
         if (maxRepeat > 0) {
-            if (!(D_00450660_A9C8[idx].w < maxRepeat)) {
+            if (!(SPCHI_channelLines_A9C8[idx].w < maxRepeat)) {
                 allowed = 0;
             }
         }
@@ -3769,7 +3769,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_storeBoundTags);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SPCHI_getBankUsage_ACE8(SPCHKEY *, unsigned char **) __asm__("SPCHI_getBankUsage");
 extern int SPCHI_readRow_ACE8(unsigned char *, int, struct sShapeInfo *) __asm__("SPCHI_readRow");
-extern unsigned char **D_004A4824_ACE8 __asm__("D_004A4824");
+extern unsigned char **SPCHI_tableSlots_ACE8 __asm__("SPCHI_tableSlots");
 
 /**
  * Stores the chosen rows' tags for a phrase's bind columns (kind 0xFE without a variable) in the usage area of the bank
@@ -3796,7 +3796,7 @@ void SPCHI_storeBoundTags(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLa
             slotCond = (struct sCond *)((int *)phrase + phrase->list[i]);
             for (j = 0; j < slotCond->n; j++) {
                 if (slotCond->a[j] == 0xFE && !(slotCond->b[j] & 0x80)) {
-                    if (SPCHI_readRow_ACE8(D_004A4824_ACE8[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur],
+                    if (SPCHI_readRow_ACE8(SPCHI_tableSlots_ACE8[selSet->ent[i].x], selSet->tbl[selSet->ent[i].cur],
                                            &rowInfo)) {
                         out[slotCond->b[j]] = rowInfo.col[j];
                     }
@@ -3811,17 +3811,17 @@ void SPCHI_storeBoundTags(SPCHKEY *speechKey, struct sSelSet *selSet, struct sLa
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_reportSlotTags);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char **D_004A4824_AE48 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
-extern struct sFF90 D_0044FF90_AE48 __asm__("D_0044FF90");
+extern unsigned char **SPCHI_tableSlots_AE48 __asm__("SPCHI_tableSlots");      /* shape table, D_004A4828 entries */
+extern struct sFF90 SPCHI_hooks_AE48 __asm__("SPCHI_hooks");
 struct G_AE48 { int f0, f4, f8; struct sPlayLine q[0x30]; };
-extern struct G_AE48 D_00450700_AE48 __asm__("D_00450700");
+extern struct G_AE48 SPCHI_playListState_AE48 __asm__("SPCHI_playListState");
 int SPCHI_readRow(unsigned char *shp, int idx, struct sShapeInfo *out);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SPCHI_getTagId_AE48(int, int) __asm__("SPCHI_getTagId");
 
 /**
- * Reports a phrase's tag hits to the event hook D_0044FF90 +0x8 (installed by SPCH_setTagHooks); SPCHI_playList inlines it.
+ * Reports a phrase's tag hits to the event hook SPCHI_hooks +0x8 (installed by SPCH_setTagHooks); SPCHI_playList inlines it.
  *
  * For each slot of @p phrase and each of the 4 tag bytes at its condition's +0xC that is not 0xFF, the event entry's tag
  * (SPCHI_getTagId) is reported with the bit of the matching column of the slot's chosen row (the play list entry
@@ -3845,7 +3845,7 @@ void SPCHI_reportSlotTags(void *speechKey, int eventEntry, struct sLayer *phrase
     unsigned yy;
     long tagBit;
 
-    if (D_0044FF90_AE48.f08 != 0) {
+    if (SPCHI_hooks_AE48.f08 != 0) {
         SPCHI_getBankSubId(speechKey, &out);
         cnt = phrase->cnt >> 2;
         for (i = 0; i < cnt; i++) {
@@ -3856,11 +3856,11 @@ void SPCHI_reportSlotTags(void *speechKey, int eventEntry, struct sLayer *phrase
                 tagRef = tbl[j];
                 if (tagRef != 0xFF) {
                     tagId = SPCHI_getTagId_AE48(eventEntry, tagRef);
-                    yy = D_00450700_AE48.q[i + firstEntry].y;
-                    shp = D_004A4824_AE48[D_00450700_AE48.q[i + firstEntry].x];
+                    yy = SPCHI_playListState_AE48.q[i + firstEntry].y;
+                    shp = SPCHI_tableSlots_AE48[SPCHI_playListState_AE48.q[i + firstEntry].x];
                     if (SPCHI_readRow(shp, yy, &rowInfo)) {
                         tagBit = 1 << rowInfo.col[j];
-                        D_0044FF90_AE48.f08(speechKey, tagId, (int)tagBit, out);
+                        SPCHI_hooks_AE48.f08(speechKey, tagId, (int)tagBit, out);
                     }
                 }
             }
@@ -3912,11 +3912,11 @@ struct S_B040 {
     int b;
     void (*cb)(SPCHKEY *, int, int, int);
 };
-extern struct S_B040 D_0044FF90_B040 __asm__("D_0044FF90");
+extern struct S_B040 SPCHI_hooks_B040 __asm__("SPCHI_hooks");
 
 
 /**
- * Reports a bank event's tag events to the event hook D_0044FF90 +0x8 (installed by SPCH_setTagHooks).
+ * Reports a bank event's tag events to the event hook SPCHI_hooks +0x8 (installed by SPCH_setTagHooks).
  *
  * Does nothing without the hook. The event's tag entries (3 bytes: tag id, argument index, type; count in the low
  * nibble of +0x7, after the +0x6 variant offsets) of type 0 or 3 are reported when variant @p idx's template uses that
@@ -3934,7 +3934,7 @@ void SPCHI_reportEventTags(SPCHKEY *ctx, unsigned char *data, int idx, int *tbl)
     int i;
     unsigned char *track;
     unsigned char *events;
-    if (D_0044FF90_B040.cb != 0) {
+    if (SPCHI_hooks_B040.cb != 0) {
         SPCHI_getBankSubId(ctx, &time);
         count = data[7] & 0xF;
         track = data + ((SPCHEVENT *)data)->variantOffsets[idx] * 4;
@@ -3971,7 +3971,7 @@ void SPCHI_reportEventTags(SPCHKEY *ctx, unsigned char *data, int idx, int *tbl)
                     }
                 }
                 if (found)
-                    D_0044FF90_B040.cb(ctx, tagId, tbl[argIndex], time);
+                    SPCHI_hooks_B040.cb(ctx, tagId, tbl[argIndex], time);
                 break;
             }
             case 1:
@@ -3990,10 +3990,10 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_askTagConditions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct F_B208 { int pad; int (*cb)(SPCHKEY *, int, int, int); int pad2[3]; };
-extern struct F_B208 D_0044FF90_B208 __asm__("D_0044FF90");
+extern struct F_B208 SPCHI_hooks_B208 __asm__("SPCHI_hooks");
 
 /**
- * Asks the condition hook (D_0044FF90 +0x4) about each of a bank event's tags; returns the bits of those that hold.
+ * Asks the condition hook (SPCHI_hooks +0x4) about each of a bank event's tags; returns the bits of those that hold.
  *
  * Tags are taken by argument index 1 to 19 (the hook gets that argument word), then those with index 0 (value 0). Tag j
  * answers in bit 7 - j: a positive answer sets it in the result; a negative one, or no hook, sets it in
@@ -4039,8 +4039,8 @@ int SPCHI_askTagConditions(SPCHKEY *speechKey, SPCHEVENT *eventEntry, int *vals,
             }
             mask = 1 << (7 - j);
             tagId = tagEnt.id;
-            if (D_0044FF90_B208.cb != 0) {
-                hookResult = D_0044FF90_B208.cb(speechKey, tagId, argValue, out);
+            if (SPCHI_hooks_B208.cb != 0) {
+                hookResult = SPCHI_hooks_B208.cb(speechKey, tagId, argValue, out);
             } else {
                 hookResult = -1;
             }
@@ -4141,12 +4141,12 @@ int SPCHI_templateUsesArg(unsigned char *node, int wantedId) {
 INCLUDE_ASM("ealib/seg_2D7498", SPCHI_nextRandom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned int D_00450B70_B4D0[6] __asm__("D_00450B70");
+extern unsigned int SPCHI_randomState_B4D0[6] __asm__("SPCHI_randomState");
 
 /**
  * Advances the speech random generator and returns its top word.
  *
- * The state is six words at D_00450B70: the last one is incremented every call and added, with carries, into the words
+ * The state is six words at SPCHI_randomState: the last one is incremented every call and added, with carries, into the words
  * above it.
  *
  * @return the new top word
@@ -4154,30 +4154,30 @@ extern unsigned int D_00450B70_B4D0[6] __asm__("D_00450B70");
 unsigned int SPCHI_nextRandom(void) {
     unsigned int sum, carry, n;
 
-    sum = D_00450B70_B4D0[5] + D_00450B70_B4D0[4];
+    sum = SPCHI_randomState_B4D0[5] + SPCHI_randomState_B4D0[4];
     carry = 0;
-    if (sum < D_00450B70_B4D0[5] || sum < D_00450B70_B4D0[4]) {
+    if (sum < SPCHI_randomState_B4D0[5] || sum < SPCHI_randomState_B4D0[4]) {
         carry = 1;
     }
-    D_00450B70_B4D0[4] = sum;
-    sum = sum + D_00450B70_B4D0[3] + carry;
-    carry = sum < D_00450B70_B4D0[3];
-    D_00450B70_B4D0[3] = sum;
-    sum = sum + D_00450B70_B4D0[2] + carry;
-    carry = sum < D_00450B70_B4D0[2];
-    D_00450B70_B4D0[2] = sum;
-    n = ++D_00450B70_B4D0[5];
-    sum = sum + D_00450B70_B4D0[1] + carry;
-    carry = sum < D_00450B70_B4D0[1];
-    D_00450B70_B4D0[1] = sum;
-    sum = sum + D_00450B70_B4D0[0] + carry;
-    D_00450B70_B4D0[0] = sum;
+    SPCHI_randomState_B4D0[4] = sum;
+    sum = sum + SPCHI_randomState_B4D0[3] + carry;
+    carry = sum < SPCHI_randomState_B4D0[3];
+    SPCHI_randomState_B4D0[3] = sum;
+    sum = sum + SPCHI_randomState_B4D0[2] + carry;
+    carry = sum < SPCHI_randomState_B4D0[2];
+    SPCHI_randomState_B4D0[2] = sum;
+    n = ++SPCHI_randomState_B4D0[5];
+    sum = sum + SPCHI_randomState_B4D0[1] + carry;
+    carry = sum < SPCHI_randomState_B4D0[1];
+    SPCHI_randomState_B4D0[1] = sum;
+    sum = sum + SPCHI_randomState_B4D0[0] + carry;
+    SPCHI_randomState_B4D0[0] = sum;
     if (n == 0) {
-        if (++D_00450B70_B4D0[4] == 0) {
-            if (++D_00450B70_B4D0[3] == 0) {
-                if (++D_00450B70_B4D0[2] == 0) {
-                    if (++D_00450B70_B4D0[1] == 0) {
-                        sum = ++D_00450B70_B4D0[0];
+        if (++SPCHI_randomState_B4D0[4] == 0) {
+            if (++SPCHI_randomState_B4D0[3] == 0) {
+                if (++SPCHI_randomState_B4D0[2] == 0) {
+                    if (++SPCHI_randomState_B4D0[1] == 0) {
+                        sum = ++SPCHI_randomState_B4D0[0];
                     }
                 }
             }
@@ -4281,11 +4281,11 @@ struct P_B790 {
     unsigned short b;
 };
 extern struct P_B790 D_00450B88_B790[32] __asm__("D_00450B88");
-extern unsigned int D_00450B70_B790[6] __asm__("D_00450B70");
+extern unsigned int SPCHI_randomState_B790[6] __asm__("SPCHI_randomState");
 extern int D_004A4858;
 
 /**
- * Seeds the speech random generator from @p seed (D_00450B70, six words from seed + (seed << 16) and fixed constants)
+ * Seeds the speech random generator from @p seed (SPCHI_randomState, six words from seed + (seed << 16) and fixed constants)
  * and clears its 32-entry history (D_00450B88, 0xFFFF) and position (D_004A4858).
  *
  * @param seed  the seed (SPCH_Init's "rNum")
@@ -4300,18 +4300,18 @@ void SPCHI_seedRandom(int seed) {
     }
     seed += seed << 16;
     state = seed + 0xF22D0E56;
-    D_00450B70_B790[0] = state;
+    SPCHI_randomState_B790[0] = state;
     state += 0x96041893;
-    D_00450B70_B790[1] = state;
+    SPCHI_randomState_B790[1] = state;
     state += 0x3DF3B646;
-    D_00450B70_B790[2] = state;
+    SPCHI_randomState_B790[2] = state;
     state += 0x40DDE76D;
-    D_00450B70_B790[3] = state;
+    SPCHI_randomState_B790[3] = state;
     state += 0x97327AE1;
-    D_00450B70_B790[4] = state;
+    SPCHI_randomState_B790[4] = state;
     state += 0xD1A9FBE7;
     D_004A4858 = 0;
-    D_00450B70_B790[5] = state;
+    SPCHI_randomState_B790[5] = state;
 }
 #endif
 
@@ -4412,7 +4412,7 @@ INCLUDE_ASM("ealib/seg_2D7498", SPCHI_getClock);
 extern int (*D_0044FFB0[])();
 
 /**
- * Returns the speech clock: the time source D_0044FFB0 (D_0044FFA8 +0x8, TIMER_gettick from SPCH_Init), or 0 when none
+ * Returns the speech clock: the time source D_0044FFB0 (SPCHI_callbackBlock +0x8, TIMER_gettick from SPCH_Init), or 0 when none
  * is set.
  *
  * @return the time

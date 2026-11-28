@@ -1529,7 +1529,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_PauseObjScript);
  *
  * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity::PauseEntityScript on each
  * virtual GetScriptEntity(i) (slot 7). It is the base implementation that classes without their own PauseObjScript
- * inherit (cScriptObjRider's vtable D_00482018). On Tour asserts each entity is non-null; retail does not.
+ * inherit (cScriptObjRider's vtable cScriptObjRider_cScriptObject_vtbl). On Tour asserts each entity is non-null; retail does not.
  */
 void cScriptObject::PauseObjScript()
 {
@@ -1552,7 +1552,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_ResumeObjScript);
  * Resumes the scripts of every script entity the object owns.
  *
  * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls cScriptEntity::ResumeEntityScript on each
- * virtual GetScriptEntity(i) (slot 7); the base implementation that cScriptObjRider (vtable D_00482018) inherits. The
+ * virtual GetScriptEntity(i) (slot 7); the base implementation that cScriptObjRider (vtable cScriptObjRider_cScriptObject_vtbl) inherits. The
  * counterpart of PauseObjScript.
  */
 void cScriptObject::ResumeObjScript()

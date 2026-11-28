@@ -285,7 +285,7 @@ CHECK_SIZE(cDebugMenuScreen, 0x8C48);
 // regions follow from the sub-object ctors' addresses and the dtor's item loops; the last words (0x1C10, 0x1C14) are
 // used by cDebugLobbyScreen_startOnlineRace / cDebugLobbyScreen_showLobbyError.
 // Base: cDebugScreen (the vptr only). Vtable cDebugLobbyScreen_vtbl (0x0046D350, 3 slots: 1 dtor, 2 update, 3 draw);
-// the dtor clears the screen pointer D_004A4E90 (the ctor sets it; dispatchLobbyEvent sends lobby events through it),
+// the dtor clears the screen pointer cDebugLobbyScreen_instance (the ctor sets it; dispatchLobbyEvent sends lobby events through it),
 // destroys the strings, menus and menu system and stores cDebugScreen_vtbl. The menus are raw regions: their classes
 // (cMenu / cMenuItem subclasses built by AccountMenu_AccountMenu ... AbortMenu_AbortMenu) are not laid out here.
 // A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the

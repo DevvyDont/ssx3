@@ -761,7 +761,7 @@ struct cGraphMenuItem {
     int ID;                          // 0x08 [O] cMenuItem::ID; [R] = -1
     void* Arg;                       // 0x0C [O] cMenuItem::Arg; [R] = 0
     void** mVtbl;                    // 0x10 [R] cGraphMenuItem_vtbl (ctor)
-    const char* Caption;             // 0x14 [O]; [R] ctor = "Hello there!" (D_00486738); [P] setCaption (sw 0x14; retail
+    const char* Caption;             // 0x14 [O]; [R] ctor = "Hello there!" (str_Hello_there); [P] setCaption (sw 0x14; retail
                                      //       cGraphMenuItem_setCaption); [U] preRender/render
     int NumPoints;                   // 0x18 [O]; [R] ctor; [U] input/render loop bound
     unsigned int XLock;              // 0x1C [O]; [R] ctor; [U] input: bit i set = point i's x is fixed

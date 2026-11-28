@@ -96,9 +96,9 @@ struct cFEStateChallengePopup : public cFEStateNet {
                                     //       onCreateScreen cFEStateChallengePopup_onCreateScreen clears it on the first
                                     //       screen, and selects
                                     //       "MenuChallenge" row 6 when it is already 0
-    int* mpEventOptions;            // 0x6D8 [R] D_00441268 (both ctors); [U] onGainFocus
+    int* mpEventOptions;            // 0x6D8 [R] cFEStateChallengePopup_defaultEventOptions (both ctors); [U] onGainFocus
                                     //       cFEStateChallengePopup_onGainFocus points it at
-                                    //       one of six 4-word tables (D_00441268 .. D_004412B8) by the event kind
+                                    //       one of six 4-word tables (cFEStateChallengePopup_defaultEventOptions .. D_004412B8) by the event kind
                                     //       newRace.cGameEvent: [0] CPU riders, [1] power-ups, [2] point icons, [3]
                                     //       multipliers allowed (cFEStateChallengePopup_setOptionsLocked, cFEStateChallengePopup_setOptionListBoxes)
     cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (cFEStateChallengePopup_cFEStateChallengePopup); [U] onWidgetCreate

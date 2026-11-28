@@ -4,7 +4,7 @@
 // cMemCard: the abstract memory-card interface (views group D: cMovieDecoder_241540, _241400, _240D90, _240860,
 // _23FD40, _23F578 in movie/mcoverlaymanager). cMemCard::CreateInstance (cMemCard_CreateInstance) returns a new
 // cPS2MemCard (util/bxps2memcard.h, which writes the base out inline); callers hold a cMemCard* and call the
-// virtuals: cMCOverlayManager::mpMemCard (movie/mcoverlaymanager.h, [P] getMemCard), D_004A33D8 (dirtysock).
+// virtuals: cMCOverlayManager::mpMemCard (movie/mcoverlaymanager.h, [P] getMemCard), sharedlogin_memCard (dirtysock).
 // EA's source: util/bxmemcard.cpp (bxps2memcard.h's comment; [P] the preview's assert paths).
 //
 // Size 0x4: [O] On Tour class cMemCard (0x4: the vptr only, no data members). Vtable: [R] cMemCard_vtbl 0x004871E8

@@ -52,10 +52,10 @@ extern char str_3s[];
 extern char str_3s_b[];
 extern char str_5s_b[];
 extern char str_10s_b[];
-extern char D_004A13A0[];
-extern char D_004A14F8[];
-extern char D_004A1500[];
-extern char D_004A1508[];
+extern char str_0[];
+extern char str_1_c[];
+extern char str_2[];
+extern char str_3[];
 extern char D_004A1510[];
 extern char D_004A1518[];
 extern signed char D_00441008[];
@@ -135,10 +135,10 @@ void cFEStateRuleSelect::setupMenu(signed char first)
                 cUIListBox_addEntryByAsciiString(lb, str_10s_b, -10);
                 break;
             case 5:
-                cUIListBox_addEntryByAsciiString(lb, D_004A13A0, 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A14F8, 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A1500, 0);
-                cUIListBox_addEntryByAsciiString(lb, D_004A1508, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_0, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_1_c, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_2, 0);
+                cUIListBox_addEntryByAsciiString(lb, str_3, 0);
                 cUIListBox_addEntryByAsciiString(lb, D_004A1510, 0);
                 cUIListBox_addEntryByAsciiString(lb, D_004A1518, 0);
                 break;
@@ -210,12 +210,12 @@ extern signed char D_004410B8[11];
 extern signed char D_004A1690[8];
 extern signed char D_004A1698[8];
 extern signed char D_004A16A0[8];
-extern char* D_00441058[];
+extern char* cFEStateRuleSelect_ruleHelpTextIDs[];
 struct sStr3_19188 { char c[3]; };
 struct sStr2_19188 { char c[2]; };
 // PORT: the local name templates "0b" and "0" are splat-named sdata literals; copied from the symbols.
 extern char str_0b[];
-extern char D_004A13A0[];
+extern char str_0[];
 
 
 struct sRuleSel_19188 {
@@ -298,10 +298,10 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         cUIText* help = (cUIText*)find_19188(self, str_rule_help);
         int rule = self->rules[0];
         if (help != 0)
-            cUIText_setUnicodeStringByID(help, GetHashValue32(D_00441058[rule]));
+            cUIText_setUnicodeStringByID(help, GetHashValue32(cFEStateRuleSelect_ruleHelpTextIDs[rule]));
     }
     name = *(sStr3_19188*)str_0b;
-    label = *(sStr2_19188*)D_004A13A0;
+    label = *(sStr2_19188*)str_0;
     for (signed char i = 0; i < 11; i++) {
         cUIThing* rowListBox = (cUIThing*)find_19188(self, name.c);
         rowListBox->mAttr &= ~1;
@@ -404,7 +404,7 @@ void cFEStateRuleSelect::onWidgetEvent(cUIThing* msg, unsigned int type)
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetPair);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A13A0[];
+extern char str_0[];
 
 /**
  * Decides a widget pair event on the rule screen by the pair's name.
@@ -415,7 +415,7 @@ extern char D_004A13A0[];
 int cFEStateRuleSelect::onWidgetPair(cUIPair* msg, unsigned int)
 {
     int id = msg->mHashName;
-    return (id == GetHashValue32(D_004A13A0)) ? 257 : 0x100;
+    return (id == GetHashValue32(str_0)) ? 257 : 0x100;
 }
 #endif
 
@@ -433,7 +433,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_arrw_left[];
 extern char str_arrw_right[];
 extern char str_rule_help[];
-extern char* D_00441058[];
+extern char* cFEStateRuleSelect_ruleHelpTextIDs[];
 
 // PORT: the frame labels are copied with the builtin block move (the original likely used
 // strcpy on string literals); the two strings live at these symbols.
@@ -464,7 +464,7 @@ int cFEStateRuleSelect::onWidgetMenu(cUIMenu* pMenu, unsigned int type, unsigned
         int locked = *(signed char*)(((char*)this) + sel + 0x51) < 1;
         cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_rule_help));
         if (locked && textHelp) {
-            cUIText_setUnicodeStringByID(textHelp, GetHashValue32(D_00441058[sel]));
+            cUIText_setUnicodeStringByID(textHelp, GetHashValue32(cFEStateRuleSelect_ruleHelpTextIDs[sel]));
         }
         char label[32];
         if (sel) {
@@ -626,12 +626,12 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_checkConflictForMenu);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
 extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* self);
-extern int D_004410C8[];
+extern int cFEStateRuleSelect_ruleCompatMasks[];
 
 /**
  * Updates the rule conflict counters after a rule's list box changed, and turns conflicting rules off.
  *
- * The rule is the list box's mMiscData; D_004410C8[rule] << 1 has a bit for each rule (1-14) that may stay on with
+ * The rule is the list box's mMiscData; cFEStateRuleSelect_ruleCompatMasks[rule] << 1 has a bit for each rule (1-14) that may stay on with
  * it, so every rule whose bit is clear conflicts. When the list box's current entry data
  * (cUIListBox_getCurrentEntryData) is 0 each conflicting rule's counter in mcRuleConflictRefTable is decremented, not
  * below 0; otherwise each is incremented and that rule's setting is cleared (cFEStateRuleSelect_updateBE with 0).
@@ -641,7 +641,7 @@ extern int D_004410C8[];
  */
 void cFEStateRuleSelect::checkConflictForMenu(cUIListBox* item)
 {
-    int mask = D_004410C8[item->mMiscData] << 1;
+    int mask = cFEStateRuleSelect_ruleCompatMasks[item->mMiscData] << 1;
     if (cUIListBox_getCurrentEntryData(item) == 0) {
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
@@ -905,7 +905,7 @@ extern char str_0arrw_left1[];
 extern char str_0arrw_right1[];
 extern char str_w11[];
 extern char str_w21[];
-extern char D_004A14F8[];
+extern char str_1_c[];
 extern char str_box1[];
 
 static inline void Hide_00192970(void* screen, char* name)
@@ -941,7 +941,7 @@ extern "C" void cBraggingRightsMenu_setEnableItem(sOwner_00192970* self, cUIScre
     sName13_00192970 rightArrow1Name = *(sName13_00192970*)str_0arrw_right1;
     sName4_00192970 w1Name = *(sName4_00192970*)str_w11;
     sName4_00192970 w2Name = *(sName4_00192970*)str_w21;
-    sName2_00192970 rowLabelName = *(sName2_00192970*)D_004A14F8;
+    sName2_00192970 rowLabelName = *(sName2_00192970*)str_1_c;
     sName5_00192970 boxName = *(sName5_00192970*)str_box1;
     for (int i = 0; i < 8; i++) {
         if (((self->mask >> i) & 1) == 0) {

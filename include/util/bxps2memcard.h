@@ -5,7 +5,7 @@
 // cMemCard::CreateInstance cMemCard_CreateInstance = new cPS2MemCard, DeleteInstance cMemCard_DeleteInstance). It wraps libmc as an
 // asynchronous state machine: the public calls store their arguments and call SetState (cPS2MemCard_enterState), which
 // issues the sceMc* request; Update (vtable slot 3, cPS2MemCard_Update) polls sceMcSync and moves to the next state.
-// Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
+// Holders: sharedlogin_memCard (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
 //
 // Size 0x1500 [R]: cMemCard_CreateInstance cMemMan_alloc(0x1500, str_cPS2MemCard, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
@@ -53,13 +53,13 @@ struct tPS2MemCardDevice {
     // kMcResNotPS2Card for a card whose type is not a PS2 card's (IsInvalid tests it).
     enum { kMcResChangedCard = -1, kMcResUnknown = -10, kMcResFileExists = -11, kMcResNotPS2Card = -10002 };
 
-    int mType;                      // 0x00 [U] Update stores sceMcGetInfo's type (D_004A3938)
-    int mFreeClusters;              // 0x04 [U] Update stores sceMcGetInfo's free clusters (D_004A393C);
+    int mType;                      // 0x00 [U] Update stores sceMcGetInfo's type (cPS2MemCard_mcInfoType)
+    int mFreeClusters;              // 0x04 [U] Update stores sceMcGetInfo's free clusters (cPS2MemCard_mcInfoFree);
                                     //       cPS2MemCard_GetFreeSpace1 returns it (slot 20 for the current device)
-    int mLastError;                 // 0x08 [U] last sceMcSync result (D_004A3940); SetState(1) stores it; GetLastError
+    int mLastError;                 // 0x08 [U] last sceMcSync result (cPS2MemCard_mcResult); SetState(1) stores it; GetLastError
                                     //       cPS2MemCard_GetLastError ([P] preview GetLastError reads the same word) and
                                     //       slots 9, 48, 52, 74 classify it; slot 47 resets -1 to 0
-    int mFormat;                    // 0x0C [U] sceMcGetInfo's format word (D_004A3944); slot 56 tests > 0
+    int mFormat;                    // 0x0C [U] sceMcGetInfo's format word (cPS2MemCard_mcInfoFormat); slot 56 tests > 0
     int mCardChanged;               // 0x10 [U] card-changed flag: Update sets it, cPS2MemCard_CardChanged tests it ([P]
                                     //       preview CardChanged reads the same word), slot 47 clears it
 };

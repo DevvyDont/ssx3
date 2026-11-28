@@ -46,7 +46,7 @@ struct tWorldPainterQuery; // worldpainter/worldpainterquery.h
 // AudioTable (0x28, all_in_one_sound.cpp) with TABLE_Scale(AudioTable* table, float input) and TABLE_Scale(int
 // tableIndex, float input) over AudioTable gAudioTables[4]; [R] retail's pair has the same shapes: AudioTable_evaluate walks
 // x[0..4] and interpolates y (TABLE_Scale(AudioTable*, float)), AudioTable_evaluateByIndex(i, v) = AudioTable_evaluate(&gAudioTables[i], v)
-// (gAudioTables = 0x00445898); [U] the cSSXAudio *Program methods pass their curves (D_00482AF8..D_00482DA0) to it.
+// (gAudioTables = 0x00445898); [U] the cSSXAudio *Program methods pass their curves (D_00482AF8..cSSXAudio_wipeoutVolumeCurve) to it.
 struct AudioTable {
     float x[5];                     // 0x00 [O]; [U] the keys, ascending
     float y[5];                     // 0x14 [O]; [U] the value at each key
@@ -255,7 +255,7 @@ struct cSSXAudio {
     tCrowdData mCrowdData[3];           // 0x01C [R] ctor constructs 3 (tCrowdEventData::tCrowdEventData x3 each); [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54
     // --- cMusicSys (preview: cMusicSys__cMusicSys = cMusicSys's dtor; ctor cMusicSys_cMusicSys(this + 0x118); non-virtual part 0x5448, its methods in sound/bankmonitor.cpp take this + 0x118)
     cMusicSys MusicSys;                 // 0x118 cMusicSys base (sound/musicsys.h; non-virtual part 0x5448)
-    // --- cSpeechSys (preview: cSpeechSys__cSpeechSys = cSpeechSys's dtor; ctor cSpeechSys_cSpeechSys(this + 0x5560) stores the instance in D_004A37B4; non-virtual part 0x1C0)
+    // --- cSpeechSys (preview: cSpeechSys__cSpeechSys = cSpeechSys's dtor; ctor cSpeechSys_cSpeechSys(this + 0x5560) stores the instance in cSpeechSys_instance; non-virtual part 0x1C0)
     cSpeechSys SpeechSys;               // 0x5560 cSpeechSys base (sound/speechsys.h; non-virtual part 0x1C0)
     // --- cController (preview: cController__cController = cController's virtual slot 1; ctor cController_cController = cCrowdSys + cMusicSys + cSpeechSys)
     int unk_5720;                       // 0x5720 [R] cController ctor 0

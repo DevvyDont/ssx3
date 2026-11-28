@@ -566,7 +566,7 @@ struct t4Vector;
 
 struct cSSXScriptEngine {
     // FillOrientationFromObjectOrientationInfo's section for "the current location's" (one past mpAnchorTableDB's 50
-    // sections; name ours). [U] it then looks the section up from the new-race location (D_00482660); On Tour calls
+    // sections; name ours). [U] it then looks the section up from the new-race location (cSSXScriptEngine_locationSectionTable); On Tour calls
     // the parameter overrideSectionID, and GetAnchorOrientation passes this for every object anchor but two.
     enum { kAnchorSection_CurrentLocation = 50 };
 

@@ -36,7 +36,7 @@ struct sBmVEntryCD08 {
 struct sBmVtblCD08 {
     sBmVEntryCD08 e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtblCD08 D_00483B88;
+extern const sBmVtblCD08 cBankMonitor_cSoundSys_vtbl;
 
 struct sBmVoiceCD08 {
     char pad_0x0[0xC0];
@@ -75,14 +75,14 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
         cSoundSys_cSoundSys((cSoundSys*)self->vb, heap);
     }
     cMonitor_cMonitor((sSndPlayerD9C8*)self, 0, heap);
-    ((cSoundSys*)self->vbase)->mVtbl = (void**)&D_00483B88;
+    ((cSoundSys*)self->vbase)->mVtbl = (void**)&cBankMonitor_cSoundSys_vtbl;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtblCD08 vt = D_00483B88;
+        sBmVtblCD08 vt = cBankMonitor_cSoundSys_vtbl;
         ((cSoundSys*)self->vbase)->mVtbl = (void**)&vt;
         char* base = self->vbase - 0x8F0;
         int thisAdjust = (char*)self - base;
-        vt.e[1].delta = D_00483B88.e[1].delta + thisAdjust;
+        vt.e[1].delta = cBankMonitor_cSoundSys_vtbl.e[1].delta + thisAdjust;
     }
     self->vtbl = cBankMonitor_vtbl;
     self->mReEntry = 0;
@@ -113,7 +113,7 @@ struct sBmVEntryE40 {
 struct sBmVtblE40 {
     sBmVEntryE40 e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtblE40 D_00483B88_E40 __asm__("D_00483B88");
+extern const sBmVtblE40 cBankMonitor_cSoundSys_vtbl_E40 __asm__("cBankMonitor_cSoundSys_vtbl");
 
 
 struct sBankMonitorE40 {
@@ -134,14 +134,14 @@ struct sBankMonitorE40 {
 extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
 {
     self->mVtbl = cBankMonitor_vtbl;
-    self->mpVSoundSys->mVtbl = (void**)(&D_00483B88_E40);
+    self->mpVSoundSys->mVtbl = (void**)(&cBankMonitor_cSoundSys_vtbl_E40);
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtblE40 vt = D_00483B88_E40;
+        sBmVtblE40 vt = cBankMonitor_cSoundSys_vtbl_E40;
         self->mpVSoundSys->mVtbl = (void**)(&vt);
         char* base = (char*)self->mpVSoundSys - 0x8F0;
         int thisAdjust = (char*)self - base;
-        vt.e[1].delta = D_00483B88_E40.e[1].delta + thisAdjust;
+        vt.e[1].delta = cBankMonitor_cSoundSys_vtbl_E40.e[1].delta + thisAdjust;
     }
     if (self->mBankMonitorInstance != 0) {
         cBankMonitorInstance* bankInstance = self->mBankMonitorInstance + ((int*)self->mBankMonitorInstance)[-4];
@@ -315,7 +315,7 @@ extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n);
 extern "C" void cBankMonitorInstance_SetLastDistance(void* voice, void* mon);
 extern "C" void SNDstop(int h);
 extern "C" int SNDseqstop(int h);
-extern char D_00483250[];
+extern char str_WARNING_Out_of_BankMonitor_instances[];
 
 // cSndPlayOpts::OPTS_GetCallback (prototype name; out-of-line copy in bx is cSndPlayOpts_OPTS_GetCallback)
 static inline sSndCallback OPTS_GetCallback_Create(sBankMonitorView* s)
@@ -375,7 +375,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
             cBankMonitorInstance_SetLastDistance(instance, self);
         instance->valid = id >= 0;
     } else {
-        bxLogPrint(D_00483250);
+        bxLogPrint(str_WARNING_Out_of_BankMonitor_instances);
         switch (kind) {
         case MONITOR_BANK:
             SNDstop(id);
@@ -890,7 +890,7 @@ struct sBmVEntryD9C8 {
 struct sBmVtblD9C8 {
     sBmVEntryD9C8 e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtblD9C8 D_00483BC0;
+extern const sBmVtblD9C8 cMonitor_cSoundSys_vtbl;
 
 struct sBmSlotD9C8 {
     char pad_0x0[0x2C];
@@ -925,14 +925,14 @@ extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, i
         cSoundSys_cSoundSys((cSoundSys*)self->vb, heap);
     }
     cSndPlayOpts_cSndPlayOpts(self, 0, heap);
-    *(const sBmVtblD9C8**)(self->vbase + 4) = &D_00483BC0;
+    *(const sBmVtblD9C8**)(self->vbase + 4) = &cMonitor_cSoundSys_vtbl;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtblD9C8 vt = D_00483BC0;
+        sBmVtblD9C8 vt = cMonitor_cSoundSys_vtbl;
         *(sBmVtblD9C8**)(self->vbase + 4) = &vt;
         char* base = self->vbase - 0x8DC;
         int thisAdjust = (char*)self - base;
-        vt.e[1].delta = D_00483BC0.e[1].delta + thisAdjust;
+        vt.e[1].delta = cMonitor_cSoundSys_vtbl.e[1].delta + thisAdjust;
     }
     self->f88 = 0;
     self->f8C = 0;
@@ -964,7 +964,7 @@ struct sBmVEntryDAC8 {
 struct sBmVtblDAC8 {
     sBmVEntryDAC8 e[4];
 } __attribute__((aligned(8)));
-extern const sBmVtblDAC8 D_00483BC0_DAC8 __asm__("D_00483BC0");
+extern const sBmVtblDAC8 cMonitor_cSoundSys_vtbl_DAC8 __asm__("cMonitor_cSoundSys_vtbl");
 
 
 
@@ -980,14 +980,14 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
 {
     cMonitorInstance* end = ((&self->mMonitorInstance[0])) + 48;
     self->mVtbl = cMonitor_vtbl;
-    self->mpVSoundSys->mVtbl = (void**)(&D_00483BC0_DAC8);
+    self->mpVSoundSys->mVtbl = (void**)(&cMonitor_cSoundSys_vtbl_DAC8);
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
-        sBmVtblDAC8 vt = D_00483BC0_DAC8;
+        sBmVtblDAC8 vt = cMonitor_cSoundSys_vtbl_DAC8;
         self->mpVSoundSys->mVtbl = (void**)(&vt);
         char* base = (char*)self->mpVSoundSys - 0x8DC;
         int thisAdjust = (char*)self - base;
-        vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + thisAdjust;
+        vt.e[1].delta = cMonitor_cSoundSys_vtbl_DAC8.e[1].delta + thisAdjust;
     }
     // PORT: function pointer passed as int
     SNDSYS_remove100hzclient((int)cMonitor_Tick100Hz);
@@ -1324,7 +1324,7 @@ int cSoundSys::SetMode(int mode)
 INCLUDE_ASM("sound/bankmonitor", pathxSND_getPlayer__Fi);
 #ifdef SKIP_ASM
 /**
- * Returns the Pathfinder sound back end's player-slot pointer D_004D3E98[slot] (24 slots).
+ * Returns the Pathfinder sound back end's player-slot pointer pathxSND_players[slot] (24 slots).
  *
  * cSongInstance_GetStreamHandle reads its mHandle (the stream handle).
  *
@@ -1333,7 +1333,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_getPlayer__Fi);
  */
 tPathPlayer* pathxSND_getPlayer(int slot)
 {
-    return D_004D3E98[slot];
+    return pathxSND_players[slot];
 }
 #endif
 
@@ -1342,11 +1342,11 @@ extern "C" void* MEM_free(void* self);
 //100%
 INCLUDE_ASM("sound/bankmonitor", pathxSND_alloc);
 #ifdef SKIP_ASM
-extern void* (*D_004A378C)(void*, int, int);
+extern void* (*pathxSND_allocHook)(void*, int, int);
 extern char str_pathxSND[];
 
 /**
- * Allocates memory through the Pathfinder back end's allocation hook: D_004A378C("pathxSND", size, 0).
+ * Allocates memory through the Pathfinder back end's allocation hook: pathxSND_allocHook("pathxSND", size, 0).
  *
  * pathxSND_init installs MEM_alloc as the hook.
  *
@@ -1356,8 +1356,8 @@ extern char str_pathxSND[];
 extern "C" void* pathxSND_alloc(int size)
 {
     void* block = 0;
-    if (D_004A378C != 0) {
-        block = D_004A378C(str_pathxSND, size, 0);
+    if (pathxSND_allocHook != 0) {
+        block = pathxSND_allocHook(str_pathxSND, size, 0);
     }
     return block;
 }
@@ -1380,10 +1380,10 @@ void* pathxSND_free(void* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", pathxSND_syncTask);
 #ifdef SKIP_ASM
-extern void (*D_004A3798)();
+extern void (*pathxSND_syncCallback)();
 
 /**
- * Sync task of the Pathfinder sound back end: calls the client callback D_004A3798 when one is set.
+ * Sync task of the Pathfinder sound back end: calls the client callback pathxSND_syncCallback when one is set.
  *
  * pathxSND_init adds it with SYNCTASK_add(pathxSND_syncTask, 5, 100); pathxSND_shutdown removes it.
  *
@@ -1391,8 +1391,8 @@ extern void (*D_004A3798)();
  */
 extern "C" int pathxSND_syncTask()
 {
-    if (D_004A3798 != 0) {
-        D_004A3798();
+    if (pathxSND_syncCallback != 0) {
+        pathxSND_syncCallback();
     }
     return 0;
 }
@@ -1409,17 +1409,17 @@ extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
 extern int D_004A379C;
 extern void (*D_004A3780)();
 extern void (*D_004A3784)();
-extern void* (*D_004A378C)(void*, int, int);
+extern void* (*pathxSND_allocHook)(void*, int, int);
 extern void* (*D_004A3790)(void*, int);
 extern void* (*D_004A3794)(void*);
 
 /**
  * Starts the Pathfinder sound back end ("pathxSND"): clears its slot tables and installs its hooks and clients.
  *
- * Clears the 24 player-slot pointers D_004D3E98 and resets the 24 bank records D_004D3EF8 (words 0, 1, 2 = -1, word 6 =
- * 0). Stores cb in D_004A3798 and id in D_004A379C, registers id as a 100 Hz sound-system client
+ * Clears the 24 player-slot pointers pathxSND_players and resets the 24 bank records pathxSND_banks (words 0, 1, 2 = -1, word 6 =
+ * 0). Stores cb in pathxSND_syncCallback and id in D_004A379C, registers id as a 100 Hz sound-system client
  * (SNDSYS_add100hzclient) and pathxSND_syncTask as a sync task (SYNCTASK_add(.., 5, 100)), and installs the hooks
- * D_004A3780 = REAL_abortmessage, D_004A3784 = printf, D_004A378C = MEM_alloc, D_004A3790 = resizeBlock,
+ * D_004A3780 = REAL_abortmessage, D_004A3784 = printf, pathxSND_allocHook = MEM_alloc, D_004A3790 = resizeBlock,
  * D_004A3794 = pathxSND_free. Called by the Pathfinder library (func_003D25F0) when it opens its first player.
  *
  * @param cb  the callback the sync task pathxSND_syncTask calls
@@ -1428,19 +1428,19 @@ extern void* (*D_004A3794)(void*);
 extern "C" void pathxSND_init(void (*cb)(), int id)
 {
     for (int i = 0; i < 24; i++) {
-        D_004D3E98[i] = 0;
-        D_004D3EF8[i].mPlayer = -1;
-        D_004D3EF8[i].mHandle = -1;
-        D_004D3EF8[i].mBankIndex = -1;
-        D_004D3EF8[i].unk_18 = 0;
+        pathxSND_players[i] = 0;
+        pathxSND_banks[i].mPlayer = -1;
+        pathxSND_banks[i].mHandle = -1;
+        pathxSND_banks[i].mBankIndex = -1;
+        pathxSND_banks[i].unk_18 = 0;
     }
-    D_004A3798 = cb;
+    pathxSND_syncCallback = cb;
     D_004A379C = id;
     SNDSYS_add100hzclient((void*)id);
     SYNCTASK_add(pathxSND_syncTask, 5, 100);
     D_004A3780 = REAL_abortmessage;
     D_004A3784 = printf;
-    D_004A378C = MEM_alloc;
+    pathxSND_allocHook = MEM_alloc;
     D_004A3790 = resizeBlock;
     D_004A3794 = pathxSND_free;
 }
@@ -1452,21 +1452,21 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_shutdown);
 extern "C" int pathxSND_syncTask();
 extern "C" void SYNCTASK_del(int (*fn)());
 extern "C" void SNDSYS_remove100hzclient(int id);
-extern void (*D_004A3798)();
+extern void (*pathxSND_syncCallback)();
 extern int D_004A379C;
 
 /**
  * Stops the Pathfinder sound back end: unregisters its 100 Hz client and sync task when a callback is installed.
  *
- * Calls SNDSYS_remove100hzclient(D_004A379C) and SYNCTASK_del(pathxSND_syncTask), then clears D_004A3798 and D_004A379C.
+ * Calls SNDSYS_remove100hzclient(D_004A379C) and SYNCTASK_del(pathxSND_syncTask), then clears pathxSND_syncCallback and D_004A379C.
  * Called by the Pathfinder library (PATH_closeVoice) when its last player closes.
  */
 extern "C" void pathxSND_shutdown()
 {
-    if (D_004A3798 != 0) {
+    if (pathxSND_syncCallback != 0) {
         SNDSYS_remove100hzclient(D_004A379C);
         SYNCTASK_del(pathxSND_syncTask);
-        D_004A3798 = 0;
+        pathxSND_syncCallback = 0;
         D_004A379C = 0;
     }
 }
@@ -1499,7 +1499,7 @@ extern "C" void pathxSND_initPlayer(tPathPlayer* self)
 INCLUDE_ASM("sound/bankmonitor", pathxSND_forgetPlayer);
 #ifdef SKIP_ASM
 /**
- * Clears every entry of the 24 player-slot pointers D_004D3E98 that points at the given slot.
+ * Clears every entry of the 24 player-slot pointers pathxSND_players that points at the given slot.
  *
  * pathxSND_closePlayer calls it when it closes a slot.
  *
@@ -1508,8 +1508,8 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_forgetPlayer);
 extern "C" void pathxSND_forgetPlayer(tPathPlayer* player)
 {
     for (int i = 0; i < 24; i++) {
-        if (D_004D3E98[i] == player) {
-            D_004D3E98[i] = 0;
+        if (pathxSND_players[i] == player) {
+            pathxSND_players[i] = 0;
         }
     }
 }
@@ -1519,14 +1519,14 @@ extern "C" void pathxSND_forgetPlayer(tPathPlayer* player)
 INCLUDE_ASM("sound/bankmonitor", pathxSND_findFreePlayer);
 #ifdef SKIP_ASM
 /**
- * Returns the index of the first unused Pathfinder player slot (D_004D3E98 entry 0), or -1 when all 24 are used.
+ * Returns the index of the first unused Pathfinder player slot (pathxSND_players entry 0), or -1 when all 24 are used.
  *
  * @return the slot index, or -1
  */
 extern "C" int pathxSND_findFreePlayer(void)
 {
     for (int i = 0; i < 24; i++) {
-        if (D_004D3E98[i] == 0) {
+        if (pathxSND_players[i] == 0) {
             return i;
         }
     }
@@ -1540,7 +1540,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_clearBank);
 extern "C" void* memset(void* dst, int c, int n);
 
 /**
- * Clears a Pathfinder bank record (40 bytes of D_004D3EF8) and sets its first three words (bank, handle, slot) to -1.
+ * Clears a Pathfinder bank record (40 bytes of pathxSND_banks) and sets its first three words (bank, handle, slot) to -1.
  *
  * pathxSND_closePlayer calls it for each bank of a closed player slot.
  */
@@ -1557,7 +1557,7 @@ extern "C" void pathxSND_clearBank(tPathBank* self)
 INCLUDE_ASM("sound/bankmonitor", pathxSND_findBank);
 #ifdef SKIP_ASM
 /**
- * Finds a Pathfinder bank record (D_004D3EF8, 24 records of 0x28 bytes).
+ * Finds a Pathfinder bank record (pathxSND_banks, 24 records of 0x28 bytes).
  *
  * With bank < 0 it returns the first free record (word +0x8 < 0). Otherwise it returns the first record whose
  * player-slot word (+0x8) equals bank and, unless id < 0, whose bank-index word (+0x0) equals id.
@@ -1568,7 +1568,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_findBank);
  */
 extern "C" int pathxSND_findBank(int bank, int id)
 {
-    tPathBank* record = D_004D3EF8;
+    tPathBank* record = pathxSND_banks;
     for (int i = 0; i < 24; i++, record++) {
         if (bank < 0) {
             if (record->mPlayer < 0) {
@@ -1621,7 +1621,7 @@ extern "C" int pathxSND_addBank(int slotIndex, int bankName, int bankIndex, int 
 {
     int i = pathxSND_findBank(slotIndex, bankIndex);
     if (i >= 0 || (i = pathxSND_findBank(-1, -1)) >= 0) {
-        tPathBank* record = &D_004D3EF8[i];
+        tPathBank* record = &pathxSND_banks[i];
         record->mUsed = 1;
         record->mPlayer = slotIndex;
         record->mBankIndex = bankIndex;
@@ -1639,7 +1639,7 @@ extern "C" int pathxSND_findBank(int a, int b);
 extern "C" int SNDbankremove(int id);
 
 /**
- * Unregisters a bank of a Pathfinder player slot: clears its record (D_004D3EF8) when it holds a bank handle.
+ * Unregisters a bank of a Pathfinder player slot: clears its record (pathxSND_banks) when it holds a bank handle.
  *
  * When the record's handle (+0x4) is set it calls SNDbankremove(-1) and resets the record (+0x14 = 0, +0x4, +0x8, +0x0,
  * +0x24 = -1, +0x1C = 0). Quirk: it passes -1 to SNDbankremove, not the record's handle. Called by pathxSND_evictOldestBank and
@@ -1656,7 +1656,7 @@ extern "C" int pathxSND_removeBank(int slotIndex, int bankIndex)
     if (i < 0) {
         return -1;
     }
-    tPathBank* record = &D_004D3EF8[i];
+    tPathBank* record = &pathxSND_banks[i];
     if (record->mHandle >= 0) {
         SNDbankremove(-1);
         record->mMemory = 0;
@@ -1694,7 +1694,7 @@ extern "C" int pathxSND_evictOldestBank(int slotIndex)
     int best = 0x7FFFFFF;
     int bestIdx = kNoBankFound;
     int i = 0;
-    tPathBank* tbl = D_004D3EF8;
+    tPathBank* tbl = pathxSND_banks;
     int id;
     while (i < 24 && (id = pathxSND_findBank(slotIndex, i)) >= 0) {
         int playTime = tbl[id].mLastPlayTime;
@@ -1750,7 +1750,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 /**
  * Opens a Pathfinder player slot in the given memory: a sound stream, or a bank player when m is 0.
  *
- * Claims a free slot (pathxSND_findFreePlayer; -13 when none), points D_004D3E98[slot] at mem, initialises the 0x70-byte header
+ * Claims a free slot (pathxSND_findFreePlayer; -13 when none), points pathxSND_players[slot] at mem, initialises the 0x70-byte header
  * (pathxSND_initPlayer) and places the request table (count x 12, handles -1) after it, 16-aligned. Copies desc (24 bytes of
  * play options) to +0x30, or SNDplaysetdef's defaults, clears byte +0x35 and stores "%s" of name (11 chars) at +0x1C.
  * For m > 0 it creates the stream with SNDSTRM_create(+0x30, count, m, rest of mem) into +0x0; otherwise it sets byte
@@ -1770,10 +1770,10 @@ extern "C" int pathxSND_openPlayer(char* name, SNDPLAYOPTS* desc, int count, int
     int slot = pathxSND_findFreePlayer();
     if (slot < 0)
         return -13;
-    D_004D3E98[slot] = (tPathPlayer*)mem;
+    pathxSND_players[slot] = (tPathPlayer*)mem;
     mem += sizeof(tPathPlayer);
-    pathxSND_initPlayer(D_004D3E98[slot]);
-    tPathPlayer* player = D_004D3E98[slot];
+    pathxSND_initPlayer(pathxSND_players[slot]);
+    tPathPlayer* player = pathxSND_players[slot];
     player->mRequests = (tPathRequest*)mem;
     mem = count * sizeof(tPathRequest) + mem;
     int off = mem - (char*)player;
@@ -1818,11 +1818,11 @@ extern "C" void SNDSTRM_destroy(int id);
  */
 extern "C" void pathxSND_closePlayer(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player->mIsBankPlayer != 0) {
         int id = pathxSND_findBank(idx, -1);
         while (id >= 0) {
-            tPathBank* record = &D_004D3EF8[id];
+            tPathBank* record = &pathxSND_banks[id];
             if (D_004A3794 != 0 && record->mMemory != 0) {
                 D_004A3794(record->mMemory);
             }
@@ -1852,7 +1852,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_setPreload);
 extern "C" void pathxSND_setPreload(unsigned int idx, int preloadData, int preloadSize)
 {
     if (idx < 24) {
-        tPathPlayer* player = D_004D3E98[idx];
+        tPathPlayer* player = pathxSND_players[idx];
         if (player != 0 && player->mIsBankPlayer == 0) {
             player->mPreloadData = preloadData;
             player->mPreloadSize = preloadSize;
@@ -1906,7 +1906,7 @@ extern "C" int pathxSND_play(int idx, int holdTime, int fileName, unsigned int k
     // a function-scope local set early whose pseudo gets no callee-saved register (all nine are taken),
     // so reload re-creates the constant at each use.
     signed char dirty = 1;
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (vol >= 0)
     {
         player->mPlayOpts.vol = vol;
@@ -1919,14 +1919,14 @@ extern "C" int pathxSND_play(int idx, int holdTime, int fileName, unsigned int k
             patchOffset = 0;
         int bankRecord = pathxSND_findBank(idx, key >> 16);
         if (bankRecord >= 0)
-            bankHandle = D_004D3EF8[bankRecord].mHandle;
+            bankHandle = pathxSND_banks[bankRecord].mHandle;
         if (bankHandle < 0)
             return -1;
         player->mPatch = (key & 0xFFFF) + patchOffset - 1;
         SNDSYS_entercritical();
         playHandle = SNDBANK_play(bankHandle, player->mPatch, &player->mPlayOpts);
         SNDSYS_leavecritical();
-        D_004D3EF8[bankRecord].mLastPlayTime = pathxSND_getTimeMs_r();
+        pathxSND_banks[bankRecord].mLastPlayTime = pathxSND_getTimeMs_r();
         player->mHandle = bankHandle;
         player->mRequests[0].mHandle = playHandle;
         player->mRequests[0].mLength = requestLength;
@@ -1977,7 +1977,7 @@ extern "C" void SNDSTRM_modifyhold(int requestHandle);
  */
 extern "C" void pathxSND_releaseHold(int i)
 {
-    tPathPlayer* player = D_004D3E98[i];
+    tPathPlayer* player = pathxSND_players[i];
     if (player->mIsBankPlayer == 0) {
         SNDSTRM_modifyhold(player->mRequests[0].mHandle);
     }
@@ -1999,13 +1999,13 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_getPlayed(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player != 0) {
         if (player->mDirty != 0) {
             pathxSND_refreshAll(0);
         }
     }
-    return D_004D3E98[idx]->mBuffered;
+    return pathxSND_players[idx]->mBuffered;
 }
 #endif
 
@@ -2026,7 +2026,7 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_getRequestPosition(int idx, int sub)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player != 0 && player->mDirty != 0) {
         pathxSND_refreshAll(0);
     }
@@ -2060,7 +2060,7 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_getHandlePosition(int idx, int key)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player != 0 && player->mDirty != 0) {
         pathxSND_refreshAll(0);
     }
@@ -2089,11 +2089,11 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_isBusy(int idx)
 {
-    if (D_004D3E98[idx] != 0) {
-        if (D_004D3E98[idx]->mDirty != 0) {
+    if (pathxSND_players[idx] != 0) {
+        if (pathxSND_players[idx]->mDirty != 0) {
             pathxSND_refreshAll(0);
         }
-        return D_004D3E98[idx]->mBusy;
+        return pathxSND_players[idx]->mBusy;
     }
     return -8;
 }
@@ -2112,7 +2112,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_markDirty);
  */
 extern "C" int pathxSND_markDirty(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player == 0) {
         return -8;
     }
@@ -2176,7 +2176,7 @@ struct sStrmHdr_EC58 {
 // PORT: the end of this function stores the out-pointers themselves into the slot (as in the original)
 extern "C" int pathxSND_refreshPlayer(int idx, int* outA, int* outB)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     *outA = 0;
     *outB = 0;
     if (player == 0) {
@@ -2319,7 +2319,7 @@ extern "C" void pathxSND_refreshAll(int reset)
 {
     SNDSYS_entercritical();
     for (int i = 0; i < 24; i++) {
-        tPathPlayer* player = D_004D3E98[i];
+        tPathPlayer* player = pathxSND_players[i];
         if (player == 0) {
             continue;
         }
@@ -2427,7 +2427,7 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_getStatus(int idx, int* elapsedOut, int* remainingOut)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player == 0) {
         return -8;
     }
@@ -2472,7 +2472,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_getBankHandle);
  * @return the handle, or -1
  */
 extern "C" int pathxSND_getBankHandle(int slotIndex) {
-    tPathPlayer* player = D_004D3E98[slotIndex];
+    tPathPlayer* player = pathxSND_players[slotIndex];
     if (player != 0 && player->mIsBankPlayer != 0) {
         return player->mHandle;
     }
@@ -2489,7 +2489,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_getStreamHandle);
  * @return the handle, or -1
  */
 extern "C" int pathxSND_getStreamHandle(int slotIndex) {
-    tPathPlayer* player = D_004D3E98[slotIndex];
+    tPathPlayer* player = pathxSND_players[slotIndex];
     if (player != 0 && player->mIsBankPlayer == 0) {
         return player->mHandle;
     }
@@ -2512,11 +2512,11 @@ extern "C" void pathxSND_refreshAll(int a0);
  */
 extern "C" int pathxSND_getVolume(int idx)
 {
-    if (D_004D3E98[idx] != 0) {
-        if (D_004D3E98[idx]->mDirty != 0) {
+    if (pathxSND_players[idx] != 0) {
+        if (pathxSND_players[idx]->mDirty != 0) {
             pathxSND_refreshAll(0);
         }
-        return D_004D3E98[idx]->mVolume;
+        return pathxSND_players[idx]->mVolume;
     }
     return -8;
 }
@@ -2533,7 +2533,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_getDryLevel);
  */
 extern "C" int pathxSND_getDryLevel(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player != 0) {
         return player->mDryLevel;
     }
@@ -2552,7 +2552,7 @@ INCLUDE_ASM("sound/bankmonitor", pathxSND_getFxLevel);
  */
 extern "C" int pathxSND_getFxLevel(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     if (player != 0) {
         return player->mFxLevel;
     }
@@ -2581,7 +2581,7 @@ extern "C" int SND_setFxLevel(int h, int a, int b);
  */
 extern "C" int pathxSND_setFxLevel(int idx, int effectBus, int sendLevel)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     int result = -8;
     if (player != 0) {
         SNDSYS_entercritical();
@@ -2617,7 +2617,7 @@ extern "C" int SND_setDryLevel(int h, int a);
  */
 extern "C" int pathxSND_setDryLevel(int idx, int dryLevel)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     int result = -8;
     if (player != 0) {
         SNDSYS_entercritical();
@@ -2657,7 +2657,7 @@ int SNDSTRM_fadeVolume_r(int h, int v, int c) __asm__("SNDSTRM_fadeVolume");
  */
 extern "C" int pathxSND_fadeVolume(int idx, int targetVolume, int fadeMs, char busy)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     int driverResult = 0;
     if (busy == 0) {
         SNDSYS_entercritical();
@@ -2699,7 +2699,7 @@ extern "C" void SNDSTRM_setVolume(int h, int v);
  */
 extern "C" int pathxSND_setVolume(int idx, int volume)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     int result = 0;
     if (cAudioInterface_bxAudio()->mPathfinderCanChangeVolume == 0) return 0;
     if (player->mDirty != 0) {
@@ -2746,7 +2746,7 @@ extern "C" void SNDpitchmult(int h, int v);
  */
 extern "C" int pathxSND_setPaused(int idx, int reset)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     unsigned short pitchMult;
     if (reset != 0) {
         pitchMult = 0;
@@ -2785,7 +2785,7 @@ extern "C" void SNDstop(int);
  */
 extern "C" int pathxSND_stop(int idx)
 {
-    tPathPlayer* player = D_004D3E98[idx];
+    tPathPlayer* player = pathxSND_players[idx];
     SNDSYS_entercritical();
     if (player->mIsBankPlayer != 0) {
         SNDstop(player->mRequests[0].mHandle);
@@ -2802,14 +2802,14 @@ extern "C" int pathxSND_stop(int idx)
 INCLUDE_ASM("sound/bankmonitor", SPCH_StartSpeechCallback);
 #ifdef SKIP_ASM
 extern "C" int cSpeechSys_PlayEvent(cSpeechSys* self, int a1);
-extern int D_004A37BC;
+extern int cSpeechSys_flushingFlag;
 
 // PORT: real signature is int(int); the unit later declares SPCH_StartSpeechCallback as void() for its callback use.
 extern "C" int SPCH_StartSpeechCallback_impl(int a) __asm__("SPCH_StartSpeechCallback");
 /**
- * The speech driver's start callback: plays a speech event through cSpeechSys (cSpeechSys_PlayEvent on D_004A37B4).
+ * The speech driver's start callback: plays a speech event through cSpeechSys (cSpeechSys_PlayEvent on cSpeechSys_instance).
  *
- * Returns -1 without playing while D_004A37BC is set (cSpeechSys_FlushChannel sets it while it flushes a channel). SPCH_Init
+ * Returns -1 without playing while cSpeechSys_flushingFlag is set (cSpeechSys_FlushChannel sets it while it flushes a channel). SPCH_Init
  * registers it with the speech driver (SPCH_initDriver).
  *
  * @param speechEvent  the speech event, passed on to cSpeechSys_PlayEvent
@@ -2817,10 +2817,10 @@ extern "C" int SPCH_StartSpeechCallback_impl(int a) __asm__("SPCH_StartSpeechCal
  */
 extern "C" int SPCH_StartSpeechCallback_impl(int speechEvent)
 {
-    if (D_004A37BC != 0) {
+    if (cSpeechSys_flushingFlag != 0) {
         return -1;
     }
-    return D_004A37B4->PlayEvent(speechEvent);
+    return cSpeechSys_instance->PlayEvent(speechEvent);
 }
 #endif
 
@@ -2976,7 +2976,7 @@ cSpeechInstance::cSpeechInstance(int instanceIndex, int streamId, int section, i
         self->mEventFile[i].mpData = 0;
         self->mEventFile[i].mOwned = 0;
     }
-    cStreamSys_STREAM_Create(D_004A37B4->mpVStreamSys, self->mStreamId, memType, 0, 0x20000);
+    cStreamSys_STREAM_Create(cSpeechSys_instance->mpVStreamSys, self->mStreamId, memType, 0, 0x20000);
     self->ReadConfig(instanceIndex, section, loadLangHead);
 }
 #endif
@@ -3015,7 +3015,7 @@ cSpeechInstance::~cSpeechInstance()
             mEventFile[i].mpData = 0;
         }
     }
-    cStreamSys_STREAM_Destroy(D_004A37B4->mpVStreamSys, mStreamId);
+    cStreamSys_STREAM_Destroy(cSpeechSys_instance->mpVStreamSys, mStreamId);
 }
 #endif
 
@@ -3040,7 +3040,7 @@ public:
  * Per-frame update of one speech instance: lets the speech driver start or advance speech on channel i.
  *
  * When the stream can take speech (cSpeechInstance_CanTakeSpeech): with mReadyForSpeech set it calls cSpeechSys's virtual slot 4 (on
- * D_004A37B4) and then the driver's SPCH_startNextRequest(i), clearing mReadyForSpeech when that returns nonzero; with
+ * cSpeechSys_instance) and then the driver's SPCH_startNextRequest(i), clearing mReadyForSpeech when that returns nonzero; with
  * mReadyForSpeech clear it calls SPCH_updateChannel(i) and sets mReadyForSpeech. When the stream is busy it sets
  * mReadyForSpeech. Called by cSpeechSys_Update for both instances.
  *
@@ -3050,7 +3050,7 @@ void cSpeechInstance::Update(int i)
 {
     if (CanTakeSpeech() != 0) {
         if (mReadyForSpeech != 0) {
-            ((cSpeechInstance_Update_cObj*)D_004A37B4)->OnReadyForSpeech();
+            ((cSpeechInstance_Update_cObj*)cSpeechSys_instance)->OnReadyForSpeech();
             if (SPCH_startNextRequest(i) != 0) {
                 mReadyForSpeech = 0;
             }
@@ -3244,7 +3244,7 @@ void cSpeechInstance::ReadConfig(int instanceIndex, int section, int loadLangHea
             if (strcasecmp(str_BIGFILE, key) == 0)
             {
                 FileParser_AssignString(parser, str_BIGFILE, bigFileName);
-                cStreamSys_STREAM_SetBigFile_2B0088(D_004A37B4->mpVStreamSys, mStreamId, bigFileName);
+                cStreamSys_STREAM_SetBigFile_2B0088(cSpeechSys_instance->mpVStreamSys, mStreamId, bigFileName);
             }
             if (strcasecmp(str_BASEPATH, key) == 0)
             {
@@ -3288,17 +3288,17 @@ extern "C" int cStreamSys_STREAM_Playing(void* self, int i);
  */
 int cSpeechInstance::CanTakeSpeech()
 {
-    int state = cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, mStreamId);
+    int state = cStreamSys_STREAM_Requests(cSpeechSys_instance->mpVStreamSys, mStreamId);
     if (state == 0) {
         return 1;
     }
     if (state != 1) {
         return 0;
     }
-    if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, mStreamId) == 0) {
+    if (cStreamSys_STREAM_Playing(cSpeechSys_instance->mpVStreamSys, mStreamId) == 0) {
         return 0;
     }
-    int ok = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, mStreamId) < 500;
+    int ok = (int)cStreamSys_STREAM_TimeRemaining(cSpeechSys_instance->mpVStreamSys, mStreamId) < 500;
     int canPlay = 0;
     if (ok) {
         canPlay = state;
@@ -3320,7 +3320,7 @@ extern "C" void cStreamSys_STREAM_Purge(void* self, int i);
  */
 void cSpeechInstance::Purge()
 {
-    cStreamSys_STREAM_Purge(D_004A37B4->mpVStreamSys, mStreamId);
+    cStreamSys_STREAM_Purge(cSpeechSys_instance->mpVStreamSys, mStreamId);
 }
 #endif
 
@@ -3444,53 +3444,53 @@ extern "C" int cSpeechInstance_PlayEvent_impl(cSpeechInstance* self, sBmArgs_04D
             }
         }
     }
-    if (idx >= 0 && cSpeechSys_ApplyRequest_c((char*)D_004A37B4, self->mIndex, speechEvent->requestKey)) {
+    if (idx >= 0 && cSpeechSys_ApplyRequest_c((char*)cSpeechSys_instance, self->mIndex, speechEvent->requestKey)) {
         cSpeechBank** slot = at_04D8(self->mBanks, idx);
         int lang = SPCH_GetBankLanguage((*slot)->mName);
         char buf[0x100];
-        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)&D_004A37B4->mBigFileName[0] + lang * 20,
+        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)&cSpeechSys_instance->mBigFileName[0] + lang * 20,
                 (*slot)->mName);
-        cSpeechSys* speechSys = D_004A37B4;
+        cSpeechSys* speechSys = cSpeechSys_instance;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
         int volumeId = ((int (*)(void*, int, int))vt0[2].fn)(vthis(speechSys, vt0[2]), self->mIndex,
                                                              (int)(*slot)->mShortName);
         cSpeechSys* speechBase;
         sSndVtSlot* vt;
-        int remainingMs = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, self->mStreamId);
+        int remainingMs = (int)cStreamSys_STREAM_TimeRemaining(cSpeechSys_instance->mpVStreamSys, self->mStreamId);
         int playHandle;
-        if (cStreamSys_STREAM_Requests(D_004A37B4->mpVStreamSys, self->mStreamId) != 0) {
-            if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->mStreamId) != 0) {
-                speechBase = D_004A37B4;
+        if (cStreamSys_STREAM_Requests(cSpeechSys_instance->mpVStreamSys, self->mStreamId) != 0) {
+            if (cStreamSys_STREAM_Playing(cSpeechSys_instance->mpVStreamSys, self->mStreamId) != 0) {
+                speechBase = cSpeechSys_instance;
                 vt = (sSndVtSlot*)speechBase->mVtbl;
                 playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->mStreamId, buf,
                         speechEvent->fileOffset,
                                                   self->mPosition, -1, self->mUserInfo, self->mRadius, self->mIsHuman,
                                                   self->mViewport);
                 if (playHandle >= 0) {
-                    cMonitor_MONITOR_Create_c(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, remainingMs,
+                    cMonitor_MONITOR_Create_c(&cSpeechSys_instance->mpVStreamSys->mpVBankManager->BankMonitor, remainingMs,
                                               D_004A37D8[0], (int)self, playHandle, volumeId, 0, 0);
                 }
                 return playHandle;
             }
-            speechBase = D_004A37B4;
+            speechBase = cSpeechSys_instance;
             vt = (sSndVtSlot*)speechBase->mVtbl;
             playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->mStreamId, buf, speechEvent->fileOffset,
                                               self->mPosition, -1, self->mUserInfo, self->mRadius, self->mIsHuman,
                                               self->mViewport);
             if (playHandle >= 0) {
-                cMonitor_MONITOR_Create_c(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, 200, D_004A37E0[0],
+                cMonitor_MONITOR_Create_c(&cSpeechSys_instance->mpVStreamSys->mpVBankManager->BankMonitor, 200, D_004A37E0[0],
                                           (int)self, playHandle, volumeId, 0, 0);
             }
             return playHandle;
         }
-        speechBase = D_004A37B4;
+        speechBase = cSpeechSys_instance;
         vt = (sSndVtSlot*)speechBase->mVtbl;
         int w = ((int (*)(void*, int, int, int))vt[3].fn)(vthis(speechBase, vt[3]), self->mIndex, volumeId,
                                                           self->mUserInfo);
         if (w != 0) {
-            cStreamSys_STREAM_SetVolControl(D_004A37B4->mpVStreamSys, self->mStreamId, w);
+            cStreamSys_STREAM_SetVolControl(cSpeechSys_instance->mpVStreamSys, self->mStreamId, w);
         }
-        cSpeechSys* speechSystem = D_004A37B4;
+        cSpeechSys* speechSystem = cSpeechSys_instance;
         sSndVtSlot* vt2 = (sSndVtSlot*)speechSystem->mVtbl;
         return ((Fn1_04D8)vt2[1].fn)(vthis(speechSystem, vt2[1]), self->mStreamId, buf, speechEvent->fileOffset,
                 self->mPosition,
@@ -3511,7 +3511,7 @@ INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_IsPlaying);
  */
 void cSpeechInstance::IsPlaying()
 {
-    cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, mStreamId);
+    cStreamSys_STREAM_Playing(cSpeechSys_instance->mpVStreamSys, mStreamId);
 }
 #endif
 //100%
@@ -3585,7 +3585,7 @@ extern const sBmonVtblB07F8 D_004838C0_07F8 __asm__("D_004838C0");
  * When @p inchrg is set it builds the virtual bases first (cSpeechSysComplete): cSoundSys at +0x1C0, cBankManager at
  * +0x1C8 and cStreamSys at +0xC98. Installs the cSpeechSys vtables (cSpeechSys_vtbl at mVtbl, D_004838A0 / D_004838C0
  * in the virtual bases, adjusted on the stack when not in charge), sets mCallbackInstance -1, clears mpBankMem and
- * mCallback, stores itself in D_004A37B4, allocates the two-entry mSpeechInstance array (both empty), clears the
+ * mCallback, stores itself in cSpeechSys_instance, allocates the two-entry mSpeechInstance array (both empty), clears the
  * request table (cSpeechSys_ClearRequests) and copies the five speech .big file names into mBigFileName.
  *
  * @param inchrg  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
@@ -3627,7 +3627,7 @@ extern "C" char* cSpeechSys_cSpeechSys(cSpeechSys* self, int inchrg, int maxBank
     self->mCallbackInstance = -1;
     self->mpBankMem = 0;
     self->mCallback = 0;
-    D_004A37B4 = (cSpeechSys*)(self);
+    cSpeechSys_instance = (cSpeechSys*)(self);
     self->mSpeechInstance = new (str_mSpeechInstance, 0, 0) cSpeechInstance*[2];
     for (int i = 0; i < 2; i++)
         (self->mSpeechInstance)[i] = 0;
@@ -3670,7 +3670,7 @@ extern const sBmonVtblB0AE8 D_004838C0;
  * Destroys the speech system.
  *
  * Re-installs the cSpeechSys vtables, frees the mSpeechInstance array (the instances themselves are destroyed by
- * cSpeechSys_Shutdown), clears D_004A37B4, destroys the virtual bases (cStreamSys via cStreamSys__cStreamSys, cBankManager, cSoundSys)
+ * cSpeechSys_Shutdown), clears cSpeechSys_instance, destroys the virtual bases (cStreamSys via cStreamSys__cStreamSys, cBankManager, cSoundSys)
  * when bit 1 of @p flags is set and frees the object when bit 0 is set.
  *
  * @param flags  destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
@@ -3697,7 +3697,7 @@ extern "C" void cSpeechSys__cSpeechSys(cSpeechSys* self, int flags)
     if (self->mSpeechInstance != 0) {
         cMemMan_free(self->mSpeechInstance);
     }
-    D_004A37B4 = 0;
+    cSpeechSys_instance = 0;
     if (flags & 2) {
         cStreamSys__cStreamSys(self->mpVStreamSys, 0);
         cBankManager__cBankManager(self->mpVStreamSys->mpVBankManager, 0);
@@ -3747,7 +3747,7 @@ extern "C" void SPCH_initTableList(int n, void* p);
 extern "C" void* SPCH_getCallbackBlock();
 extern "C" void SPCH_StartSpeechCallback();
 extern "C" int TIMER_gettick();
-extern char D_00483390[];
+extern char str_SPCH_Init_rNum_pct_d[];
 extern char str_bank_mem[];
 
 /**
@@ -3762,7 +3762,7 @@ extern "C" void SPCH_Init(cSpeechSys* self)
 {
     int buf = SPCH_getBufferSize(22050, 0x10, 1);
     int seed = cSoundSys_SndRand_a(self->mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys);
-    bxLogPrint(D_00483390, seed);
+    bxLogPrint(str_SPCH_Init_rNum_pct_d, seed);
     SPCH_initDriver((void*)SPCH_StartSpeechCallback, seed, buf);
     int n = SPCH_getTableListSize(500);
     void* workMem = MEM_alloc(str_bank_mem, n, 0);
@@ -3977,12 +3977,12 @@ void cSpeechSys::TriggerSpeech(int idx, int playArg, void (*callback)(int), int 
 INCLUDE_ASM("sound/bankmonitor", cSpeechSys_FlushChannel);
 #ifdef SKIP_ASM
 extern "C" void cSpeechSys_TriggerSpeech(cSpeechSys* self, int idx, int a2, void (*a3)(int), int a4, float v);
-extern int D_004A37BC;
+extern int cSpeechSys_flushingFlag;
 
 /**
- * Flushes speech channel idx: triggers the driver four times (cSpeechSys_TriggerSpeech with zeros) while D_004A37BC is set.
+ * Flushes speech channel idx: triggers the driver four times (cSpeechSys_TriggerSpeech with zeros) while cSpeechSys_flushingFlag is set.
  *
- * With D_004A37BC set the start callback SPCH_StartSpeechCallback refuses to play, so queued events are consumed without sound.
+ * With cSpeechSys_flushingFlag set the start callback SPCH_StartSpeechCallback refuses to play, so queued events are consumed without sound.
  *
  * @param idx  the instance index
  */
@@ -3990,12 +3990,12 @@ void cSpeechSys::FlushChannel(int idx)
 {
     if (mSpeechInstance[idx] != 0) {
         int i = 3;
-        D_004A37BC = 1;
+        cSpeechSys_flushingFlag = 1;
         do {
             TriggerSpeech(idx, 0, 0, 0, 0.0f);
             i--;
         } while (i >= 0);
-        D_004A37BC = 0;
+        cSpeechSys_flushingFlag = 0;
     }
 }
 #endif
@@ -4105,9 +4105,9 @@ struct sVE1268 { short delta; short index; int (*fn)(void*, int, int, int); };
 int cSpeechSys::ApplyVolumeCallback(cMonitorInstance* msg)
 {
     cSpeechInstance* ent = (cSpeechInstance*)msg->mPtr;
-    int channel = D_004A37B4->GetStreamId(ent->mIndex);
+    int channel = cSpeechSys_instance->GetStreamId(ent->mIndex);
     if (cStreamSys_STREAM_GetCurrActiveSampleHandle(mpVStreamSys, channel) != msg->mData1) {
-        cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, 200,
+        cMonitor_MONITOR_Create(&cSpeechSys_instance->mpVStreamSys->mpVBankManager->BankMonitor, 200,
                                 D_004A37E0_2B1268[0].v, msg->mPtr, msg->mData1, msg->mData2, 0, 0);
         return 1;
     }
@@ -4150,11 +4150,11 @@ int cSpeechSys::PollStreamCallback(cMonitorInstance* msg)
     if (cStreamSys_STREAM_Requests(mpVStreamSys, ent->mStreamId) - 1 > 0) {
         if (cStreamSys_STREAM_Playing(mpVStreamSys, ent->mStreamId) != 0) {
             float remainingMs = cStreamSys_STREAM_TimeRemaining(mpVStreamSys, ent->mStreamId);
-            cMonitor_MONITOR_Create(&D_004A37B4->mpVStreamSys->mpVBankManager->BankMonitor, (int)remainingMs,
+            cMonitor_MONITOR_Create(&cSpeechSys_instance->mpVStreamSys->mpVBankManager->BankMonitor, (int)remainingMs,
                                     D_004A37D8_2B1348[0].v, ent, msg->mData1, msg->mData2, 0, 0);
             return 1;
         }
-        int channel = D_004A37B4->GetStreamId(ent->mIndex);
+        int channel = cSpeechSys_instance->GetStreamId(ent->mIndex);
         if (cStreamSys_STREAM_GetCurrActiveSampleHandle(mpVStreamSys, channel) != msg->mData1) {
             return 0;
         }

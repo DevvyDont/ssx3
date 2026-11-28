@@ -102,7 +102,7 @@ struct cGameComm {
     int mCheating[2];            // 0x024 [O] (On Tour [4]); [U] checkErrors (cGameComm_checkErrors) sets 2 (6+ pauses) or 3
                                  //       (3+ unplugs) for this machine / the peer; "CHEAT0/1"
     // mCheating's reasons (names ours). [U] cGameComm_checkActive sets kCheatDiscTrayOpened when the disc tray was
-    // opened (D_004A3ED0); checkErrors sets kCheatTooManyPauses (6+ pauses) and kCheatTooManyUnplugs (3+ controller
+    // opened (cd_discTrayOpenedFlag); checkErrors sets kCheatTooManyPauses (6+ pauses) and kCheatTooManyUnplugs (3+ controller
     // unplugs); displayError sets kCheatControllerUnplugged for an unplugged controller mid-race. The online error
     // overlay (cOVState_PAUSE_ONLINE_ERROR_onCreateScreen) reads them.
     enum {

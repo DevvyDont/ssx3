@@ -736,7 +736,7 @@ struct sVt22_6238 {
 
 extern const sVt9_6238 D_004886E0;
 extern const sVt22_6238 D_00488728;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 
 extern "C" void cRider_cRider(void* self);
 void* cCheatFX_resetStates(void* self);
@@ -761,7 +761,7 @@ cCheatFX::cCheatFX(int inChrg)
         cRider_cRider((char*)this + 0x10);
     }
     *(void**)(*(char**)this + 0x6E8) = (void*)&D_004886E0;
-    *(void**)(*(char**)this + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)this + 0x6D0) = cRider_cScriptObjRider_vtbl;
     *(void**)(*(char**)this + 0x6C0) = (void*)&D_00488728;
     if (inChrg == 0) {
         int vc;
@@ -800,7 +800,7 @@ __asm__(".globl cCheatFX__cCheatFX\n.type cCheatFX__cCheatFX,@function\ncCheatFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
-        "_vt$15cVbDtor002F6388$14cRiderVbBC_wlm = D_00459B90\n"
+        "_vt$15cVbDtor002F6388$14cRiderVbBC_wlm = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002F6388$12cRiderVb_wlm = D_00488728\n"
         "_$_12cRiderVb_wlm = cRider__cRider\n");
 #endif

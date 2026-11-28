@@ -7,7 +7,7 @@
 // live here, both cFEStateNet states (fe/festatenet.h, 0x6D0):
 //
 // cFEStateNetConfig: screen "200net_config": picks a network adapter and a saved network configuration, connects
-// (a state machine over the memory card object D_004A1B78 = cMemCard_CreateInstance(), cMemCard::CreateInstance) and runs DNAS authentication. Size 0x91C:
+// (a state machine over the memory card object cFEStateNetConfig_memCard = cMemCard_CreateInstance(), cMemCard::CreateInstance) and runs DNAS authentication. Size 0x91C:
 // cMemMan_alloc(0x91C, "cFEStateNetConfig") + cFEStateNetConfig_cFEStateNetConfig(mem, pEngine) (cFEStateNet_onNetInterruptedPopupEvent, cFEStateLogin_onNetConfigPopupEvent); its
 // unicode popup buffer at 0x71C runs to the end. Constructors cFEStateNetConfig_cFEStateNetConfig and cFEStateNetConfig_cFEStateNetConfig1 (fe/fepopupmisc, the
 // default one: zeroes the same fields), destructor cFEStateNetConfig__cFEStateNetConfig (frees the heap texts). Retail vtable cFEStateNetConfig_vtbl

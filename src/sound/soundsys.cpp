@@ -443,7 +443,7 @@ extern "C" float AudioTable_evaluate_impl(AudioTable* c, float x) __asm__("Audio
  *
  * The curve holds 5 ascending keys at +0x0 and their values at +0x14. Between two keys it interpolates linearly; below
  * the first key it returns the first value and from the last key on the last value. It returns 0 only when no case
- * applies (a NaN input or unsorted keys). The audio code keeps its volume and pitch curves in D_00482AF8..D_00482DA0
+ * applies (a NaN input or unsorted keys). The audio code keeps its volume and pitch curves in D_00482AF8..cSSXAudio_wipeoutVolumeCurve
  * and gAudioTables (AudioTable_evaluateByIndex).
  *
  * @param x  the input value
@@ -2031,13 +2031,13 @@ void cSSXAudio::SoftCarveProgram(cRider* rider, int* volume, int* pitch)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_RailCarveProgram);
 #ifdef SKIP_ASM
-extern const AudioTable D_00482D08;
+extern const AudioTable cSSXAudio_railCarveBendCurve;
 
 /**
  * Computes a rider's carve volume and bend for surface program 2: full volume, with the bend from its pressure.
  *
  * Smooths and stores the edging + braking level in mLastCarveEdging as cSSXAudio_HardCarveProgram does, but does not use it: the
- * volume is 127 and the bend is curve D_00482D08 at mAudioPressure times 4096. Below mAudioSpeed 0.1 the volume is
+ * volume is 127 and the bend is curve cSSXAudio_railCarveBendCurve at mAudioPressure times 4096. Below mAudioSpeed 0.1 the volume is
  * scaled by speed * 10. cSSXAudio_CarveProgram runs it for program type 2.
  *
  * @param rider  the rider
@@ -2060,7 +2060,7 @@ void cSSXAudio::RailCarveProgram(cRider* rider, int* volume, int* pitch)
     }
     mLastCarveEdging[idx] = level;
     *volume = 0x7F;
-    AudioTable bendCurve = D_00482D08;
+    AudioTable bendCurve = cSSXAudio_railCarveBendCurve;
     *pitch = (int)(AudioTable_evaluate(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
@@ -2397,7 +2397,7 @@ extern "C" int SNDover(int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 // cSSXAudio_Surface takes the rider here (the unit declares (void*, int)).
 int cSSXAudio_Surface_p(void* self, cRider* rider) __asm__("cSSXAudio_Surface");
-extern const AudioTable D_00482D30;
+extern const AudioTable cSSXAudio_landVolumeCurve;
 
 /**
  * Plays a rider's landing sound and the crowd's reaction to it.
@@ -2405,7 +2405,7 @@ extern const AudioTable D_00482D30;
  * When the rider is the focus rider of its view (cSSXAudio_GetFocusRider with view 0 when replaying, mViewIndex for a
  * local human, else -1) the crowd reacts through cCrowdSys_CancelAnticipation (nothing gained) or cCrowdSys_PlayTrickCheer at level 0, 1 or 2
  * (gain below 0.25, below 0.65, above). Computer and non-local riders farther than 100 units from the camera
- * (cSSXAudio_CameraInRange) play nothing more. The volume comes from the landing curve D_00482D30 (AudioTable_evaluate)
+ * (cSSXAudio_CameraInRange) play nothing more. The volume comes from the landing curve cSSXAudio_landVolumeCurve (AudioTable_evaluate)
  * applied to the rider's +0x770, clamped to 0..127.
  *
  * A previous landing still playing (handle at +0x5FB8) is stopped. Then a play-option level is pushed with defaults
@@ -2446,7 +2446,7 @@ void cSSXAudio::Land(cRider* rider, float powerupGained)
             return;
         }
     }
-    AudioTable landCurve = D_00482D30;
+    AudioTable landCurve = cSSXAudio_landVolumeCurve;
     int vol = (int)AudioTable_evaluate(&landCurve, rider->LastLandSpeed);
     if (vol > 127) {
         vol = 127;
@@ -3132,12 +3132,12 @@ static inline void sfxBegin_6310(struct sSSXAudioView* self, int a, int b)
     self->mPatch[self->mpVBankManager->BankMonitor.mInst] = b;
 }
 
-extern AudioTable D_00482DA0;
+extern AudioTable cSSXAudio_wipeoutVolumeCurve;
 /**
  * Plays a rider's wipeout impact sound: bank 10 patch 9 in states 2 and 3, else a random bank-0 patch from 48.
  *
  * Computer and non-local riders (isComputer, or mIsLocal clear) farther than 100 units from every camera
- * (cSSXAudio_CameraInRange) play nothing. The volume is curve D_00482DA0 at the rider's LastLandSpeed, clamped to
+ * (cSSXAudio_CameraInRange) play nothing. The volume is curve cSSXAudio_wipeoutVolumeCurve at the rider's LastLandSpeed, clamped to
  * 0..127. When the rider's mSurfaceType is eST_Snow_Powder or eST_Snow_DeepPowder the sound is bank 10, patch 9;
  * otherwise bank 0, patch 48 + (cSoundSys_SndRand & 0x7FFF) * 3 / 0x7FFF. Opens a play-option level (the inlined
  * SFX_Begin) with that volume, volume control cSSXAudio_GetCurrAppliedVolumePtr(5, 0), the rider's mPosition to follow
@@ -3157,7 +3157,7 @@ void cSSXAudio::WipeoutHit(cRider* obj)
             return;
         }
     }
-    struct AudioTable curve = D_00482DA0;
+    struct AudioTable curve = cSSXAudio_wipeoutVolumeCurve;
     int vol = (int)AudioTable_evaluate(&curve, obj->LastLandSpeed);
     int bankNum = 0;
     int patchNum;
@@ -3236,13 +3236,13 @@ extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
 
 extern sSndCallback D_004A36B0_cb[] __asm__("D_004A36B0");
-extern AudioTable D_00482DA0;
+extern AudioTable cSSXAudio_wipeoutVolumeCurve;
 /**
  * Starts a wiping-out rider's slide loop (bank 0, patch 51) unless it is already playing.
  *
  * Does nothing while the slide handle (mWipeoutSlideHandle of @p wipeoutControl's mRider) is 0 or more. Computer and
  * non-local riders farther than 100 units from every camera (cSSXAudio_CameraInRange) get nothing. The volume is curve
- * D_00482DA0 at the rider's LastLandSpeed, clamped to 0..127. The play-option level (the inlined SFX_Begin) gets that
+ * cSSXAudio_wipeoutVolumeCurve at the rider's LastLandSpeed, clamped to 0..127. The play-option level (the inlined SFX_Begin) gets that
  * volume, volume control cSSXAudio_GetCurrAppliedVolumePtr(5, 0), the rider's mPosition to follow, the listening view
  * (cSSXAudio_GetClosestCamera1), @p wipeoutControl as user data, callback key D_004A36B0 (cSSXAudio_HandleWipeoutSlide,
  * empty), the +0x7C option cleared and, for a local human when the byte at newRace.cGamePath is kGAMEPATH_MULTIPLAYER
@@ -3264,7 +3264,7 @@ void cSSXAudio::WipeoutSlideStart(cWipeoutControl* wipeoutControl)
             return;
         }
     }
-    AudioTable curve = D_00482DA0;
+    AudioTable curve = cSSXAudio_wipeoutVolumeCurve;
     int vol = (int)AudioTable_evaluate(&curve, wipeoutControl->mRider->LastLandSpeed);
     int patchNum = 51;
     if (vol > 0x7F) {
@@ -3407,13 +3407,13 @@ extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
 
 extern sSndCallback D_004A36B8_cb[] __asm__("D_004A36B8");
-extern AudioTable D_00482DA0;
+extern AudioTable cSSXAudio_wipeoutVolumeCurve;
 /**
  * Starts the wipeout tumble sound of the rider a wipeout control drives, unless one is already playing.
  *
  * Does nothing while the rider's mWipeoutTumbleHandle is set (>= 0). Computer and non-local riders more than 100 units
  * from every camera (cSSXAudio_CameraInRange on the position from cRider vtable slot 5) are skipped. The volume is the
- * curve D_00482DA0 (AudioTable_evaluate) of the rider's LastLandSpeed, clamped to 0..127. A play-option level is pushed with
+ * curve cSSXAudio_wipeoutVolumeCurve (AudioTable_evaluate) of the rider's LastLandSpeed, clamped to 0..127. A play-option level is pushed with
  * defaults (the inlined SFX_Begin) for bank 0, patch 52 and gets that volume, the volume control
  * cSSXAudio_GetCurrAppliedVolumePtr(vself, 5, 0), the rider's mPosition to follow, the view from
  * cSSXAudio_GetClosestCamera1, @p wipeoutControl as its pointer, the empty callback cSSXAudio_HandleWipeoutTumble
@@ -3434,7 +3434,7 @@ void cSSXAudio::WipeoutTumbleStart(cWipeoutControl* wipeoutControl)
             return;
         }
     }
-    AudioTable curve = D_00482DA0;
+    AudioTable curve = cSSXAudio_wipeoutVolumeCurve;
     int vol = (int)AudioTable_evaluate(&curve, wipeoutControl->mRider->LastLandSpeed);
     int patchNum = 52;
     if (vol > 0x7F) {
@@ -7488,9 +7488,9 @@ extern "C" int cRider_getIdentity(void*);
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-// PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 4 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 
 
 /**
@@ -7499,9 +7499,9 @@ extern float D_004A36D8;
  * Needs the Character volume on (cSSXAudio_IsCharacterSpeechOn), a location outside the back-country 14..16 (cSSXAudio_IsInBackCountry), no replay,
  * a rider not past the finish line, the air predictor's +0x98 (mAirPredictor) of at least 4.000256, and for a computer
  * or non-local rider that it is the focus rider. Then speech instance 0 must be ready (cSpeechSys_CanTakeSpeech) and the rider
- * within 30 units of a camera (D_004A36D8). Speech 8324, 8323 or 8337 (peak 1, 2 or 3 of the location, from
+ * within 30 units of a camera (cSSXAudio_speechCameraRange). Speech 8324, 8323 or 8337 (peak 1, 2 or 3 of the location, from
  * cSSXAudio_GetLocationPeakBit) is requested for the rider on speech instance 0 (cSpeechSys_AddRequest); when queued, the speech hook
- * D_004A482C gets its packed id (SPCH_makeKey(1, 0, id)), 2 arguments, the rider's speech bit (cSSXAudio_GetRiderSpeechBit) and 3.
+ * SPCH_postRequestHook gets its packed id (SPCH_makeKey(1, 0, id)), 2 arguments, the rider's speech bit (cSSXAudio_GetRiderSpeechBit) and 3.
  * cSSXAudio_LiftWithAirTime calls it.
  *
  * @param rider  the rider
@@ -7524,19 +7524,19 @@ void cSSXAudio::SpeakBigAir(cRider* rider)
     char* snd = (char*)&SpeechSys;
     if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     int sel = GetLocationPeakBit(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (cSpeechSys_AddRequest(snd, 0, 8324, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8324), 2, speakerBit, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8324), 2, speakerBit, 3);
         }
     } else if (sel == 2) {
         if (cSpeechSys_AddRequest(snd, 0, 8323, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8323), 2, speakerBit, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8323), 2, speakerBit, 3);
         }
     } else {
         if (cSpeechSys_AddRequest(snd, 0, 8337, rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8337), 2, speakerBit, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8337), 2, speakerBit, 3);
         }
     }
 }
@@ -7558,8 +7558,8 @@ extern "C" int cRider_getIdentity(void*);
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-extern void (*D_004A482C)(void*, int, int);
-extern float D_004A36D8;
+extern void (*SPCH_postRequestHook)(void*, int, int);
+extern float cSSXAudio_speechCameraRange;
 
 
 /**
@@ -7569,7 +7569,7 @@ extern float D_004A36D8;
  * non-local rider that it is the focus rider; the rider must be within 30 units of a camera. By the location's peak
  * (cSSXAudio_GetLocationPeakBit: 1, 2, other) it requests speech 8336/8347/8349 with @p alt set, else 8322/8346/8348, for the rider on
  * speech instance 0 (cSpeechSys_AddRequest) and, when queued, passes the packed id and the rider's speech bit (cSSXAudio_GetRiderSpeechBit)
- * to the speech hook D_004A482C. cRider_checkForReaction calls it for reaction types 1 (alt 0) and 2 (alt 1).
+ * to the speech hook SPCH_postRequestHook. cRider_checkForReaction calls it for reaction types 1 (alt 0) and 2 (alt 1).
  *
  * @param rider  the rider (cRider)
  * @param alt  nonzero for the uber reaction (type 2)
@@ -7584,35 +7584,35 @@ void cSSXAudio::SpeakCheer(cRider* rider, int alt)
     if (rider->isComputer() != 0 || rider->mIsLocal == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(this, -1) != rider) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     if (alt != 0) {
         int sel = GetLocationPeakBit(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8336, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8336), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8336), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8347, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8347), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8347), 1, speakerBit);
             }
         } else {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8349, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8349), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8349), 1, speakerBit);
             }
         }
     } else {
         int sel = GetLocationPeakBit(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8322, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8322), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8322), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8346, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8346), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8346), 1, speakerBit);
             }
         } else {
             if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8348, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(SPCH_makeKey(1, 0, 8348), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8348), 1, speakerBit);
             }
         }
     }
@@ -7636,9 +7636,9 @@ extern "C" int cRider_getIdentity(void*);
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-// PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 4 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 
 
 /**
@@ -7647,7 +7647,7 @@ extern float D_004A36D8;
  * Needs the Character volume on (cSSXAudio_IsCharacterSpeechOn), no replay, a rider not past the finish line, for a computer or
  * non-local rider that it is the focus rider, speech instance 0 ready (cSpeechSys_CanTakeSpeech) and the rider within 30 units of
  * a camera. By the location's peak (cSSXAudio_GetLocationPeakBit: 1, 2, other) it requests speech 8328, 8352 or 8353 for the rider
- * and, when queued, passes the packed id, the rider's speech bit and a mode to the speech hook D_004A482C: 1 at the
+ * and, when queued, passes the packed id, the rider's speech bit and a mode to the speech hook SPCH_postRequestHook: 1 at the
  * locations 17..21 (cSSXAudio_IsAtHub) or in game mode 4 (cSSXAudio_IsFreeride), else 3. cWipeoutControl_loseFocus calls it.
  *
  * @param rider  the rider (cRider)
@@ -7669,19 +7669,19 @@ void cSSXAudio::SpeakWipeout(cRider* rider)
     } else {
         mode = 3;
     }
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     int sel = GetLocationPeakBit(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8328, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8328), 2, speakerBit, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8328), 2, speakerBit, mode);
         }
     } else if (sel == 2) {
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8352, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8352), 2, speakerBit, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8352), 2, speakerBit, mode);
         }
     } else {
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8353, rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8353), 2, speakerBit, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8353), 2, speakerBit, mode);
         }
     }
 }
@@ -7706,10 +7706,10 @@ int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_Get
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 unsigned cSSXAudio_GetRiderRelation_0560(void* self, void* a, void* b) __asm__("cSSXAudio_GetRiderRelation");
 void fSinCos_0560(float a, float* x, float* y) __asm__("fSinCos");
-// PORT: D_004A482C is called with 4 and 5 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 4 and 5 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 static inline int sndA30Mode0560(int m)
 {
     return ScriptEngine->mPlayingNISList == m;
@@ -7748,7 +7748,7 @@ void cSSXAudio_SpeakOvertake_0560(cSSXAudio* self, cRider* a, cRider* b) __asm__
  * fSinCos); it must lie between 670.56 and 1788.16 (15 and 40 mph in cm/s), and from 1341.12 (30 mph) the mode is 2,
  * else 1. With the relation cSSXAudio_GetRiderRelation == 2, speech 8321 is requested for @p passer and 8319 for @p passed; with 0 or 1, 8320
  * for @p passer (its event also gets @p passed's character bit cSSXAudio_GetRiderSubjectBit ORed with 0x1000) and 8317 for @p passed. Each queued
- * request goes to the speech hook D_004A482C with the speaker's bit and the mode.
+ * request goes to the speech hook SPCH_postRequestHook with the speaker's bit and the mode.
  *
  * @param passer  the rider that passes
  * @param passed  the rider being passed
@@ -7773,9 +7773,9 @@ void cSSXAudio::SpeakOvertake(cRider* passer, cRider* passed)
     if (chkA && chkB && passer != pl && passed != pl) return;
     cSpeechSys* snd = &SpeechSys;
     if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
-    int okA = cSSXAudio_CameraInRange(this, passer->getPosition(), D_004A36D8);
+    int okA = cSSXAudio_CameraInRange(this, passer->getPosition(), cSSXAudio_speechCameraRange);
     if (okA < 0) return;
-    int okB = cSSXAudio_CameraInRange(this, passed->getPosition(), D_004A36D8);
+    int okB = cSSXAudio_CameraInRange(this, passed->getPosition(), cSSXAudio_speechCameraRange);
     if (okA != okB) return;
     float headingSin, headingCos;
     fSinCos_0560(passed->PathHeading, &headingSin, &headingCos);
@@ -7797,19 +7797,19 @@ void cSSXAudio::SpeakOvertake(cRider* passer, cRider* passed)
     if (sel == 2) {
         closingSpeed = 0.0f;
         if (cSpeechSys_AddRequest_f(snd, 0, 8321, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8321), 2, rA, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8321), 2, rA, mode);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8319, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8319), 2, rB, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8319), 2, rB, mode);
         }
     } else if (sel < 2) {
         closingSpeed = 0.0f;
         if (cSpeechSys_AddRequest_f(snd, 0, 8320, passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
             passedBit |= 0x1000;
-            D_004A482C_5(SPCH_makeKey(1, 0, 8320), 3, rA, mode, passedBit);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8320), 3, rA, mode, passedBit);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8317, passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8317), 2, rB, mode);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8317), 2, rB, mode);
         }
     }
 }
@@ -7832,9 +7832,9 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-// PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 4 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 static inline int sndA30Mode(int m)
 {
     return ScriptEngine->mPlayingNISList == m;
@@ -7849,7 +7849,7 @@ extern "C" int cSSXAudio_GetRiderRelation(cSSXAudio* self, cRider* a, cRider* b)
  * line and one of them the focus rider or a local human. Then @p victim grunts (cSSXAudio_PlayGrunt(self, b, 0, 1)). The
  * speech needs speech instance 0 ready, either rider within 30 units of a camera, and @p isBump and @p isHardHit both 0. By the
  * riders' relation (cSSXAudio_GetRiderRelation) it requests 8335 for @p victim and 8330 for @p attacker (2), 8318 and 8330 (1), or 8312 and 8334
- * (0); each queued request goes to the speech hook D_004A482C with the speaker's bit and 3. cComputer's bump, knockdown
+ * (0); each queued request goes to the speech hook SPCH_postRequestHook with the speaker's bit and 3. cComputer's bump, knockdown
  * and punch reactions call it.
  *
  * @param attacker  the attacking rider
@@ -7877,8 +7877,8 @@ void cSSXAudio::SpeakRiderHit(cRider* attacker, cRider* victim, int isBump, int 
     PlayGrunt((cRider*)victim, 0, 1);
     char* snd = (char*)&SpeechSys;
     if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
-    int okB = cSSXAudio_CameraInRange(this, victim->getPosition(), D_004A36D8) >= 0;
-    int okA = cSSXAudio_CameraInRange(this, attacker->getPosition(), D_004A36D8) >= 0;
+    int okB = cSSXAudio_CameraInRange(this, victim->getPosition(), cSSXAudio_speechCameraRange) >= 0;
+    int okA = cSSXAudio_CameraInRange(this, attacker->getPosition(), cSSXAudio_speechCameraRange) >= 0;
     if (!okB && !okA) return;
     int rA = cSSXAudio_GetRiderSpeechBit_i(attacker);
     int rB = cSSXAudio_GetRiderSpeechBit_i(victim);
@@ -7887,24 +7887,24 @@ void cSSXAudio::SpeakRiderHit(cRider* attacker, cRider* victim, int isBump, int 
     int sel = GetRiderRelation(attacker, victim);
     if (sel == 2) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8335, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8335), 2, rB, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8335), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 1) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8318, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8318), 2, rB, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8318), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8330, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 0) {
         if (cSpeechSys_AddRequest_f(snd, 0, 8312, victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8312), 2, rB, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8312), 2, rB, 3);
         }
         if (cSpeechSys_AddRequest_f(snd, 0, 8334, attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(SPCH_makeKey(1, 0, 8334), 2, rA, 3);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8334), 2, rA, 3);
         }
     }
 }
@@ -7922,8 +7922,8 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit as void; it returns its tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-extern void (*D_004A482C)(void*, int, int);
-extern float D_004A36D8;
+extern void (*SPCH_postRequestHook)(void*, int, int);
+extern float cSSXAudio_speechCameraRange;
 
 
 /**
@@ -7932,7 +7932,7 @@ extern float D_004A36D8;
  * Needs the Character volume on, no replay, for a computer or non-local rider that it is the focus rider, a rider not
  * past the finish line, speech instance 0 ready and the rider within 30 units of a camera. Plays
  * cSSXAudio_PlayGrunt(self, rider, 2, 0); with @p play set and a local human rider it then requests speech 8311 and,
- * when queued, passes its packed id and the rider's speech bit to the speech hook D_004A482C.
+ * when queued, passes its packed id and the rider's speech bit to the speech hook SPCH_postRequestHook.
  *
  * @param rider  the rider (cRider)
  * @param play  nonzero to also request the speech line
@@ -7950,14 +7950,14 @@ void cSSXAudio::SpeakBump(cRider* rider, int play)
     if (pos) return;
     char* snd = (char*)&SpeechSys;
     if (cSpeechSys_CanTakeSpeech(snd, 0) == 0) return;
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     PlayGrunt((cRider*)rider, 2, 0);
     if (play == 0) return;
     int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (!ok) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     if (cSpeechSys_AddRequest(snd, 0, 8311, rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
-    D_004A482C(SPCH_makeKey(1, 0, 8311), 1, speakerBit);
+    SPCH_postRequestHook(SPCH_makeKey(1, 0, 8311), 1, speakerBit);
 }
 #endif
 
@@ -8040,9 +8040,9 @@ extern "C" void* SPCH_makeKey(int a, int b, int c);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
-// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 5 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 
 // PORT: callers declare cSSXAudio_SpeakScriptEventType0 as (void*, int, int); the body takes (self, rider, obj).
 void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("cSSXAudio_SpeakScriptEventType0");
@@ -8052,7 +8052,7 @@ void cSSXAudio_SpeakScriptEventType0_impl(cSSXAudio* self, cRider* rider, void* 
  *
  * Needs the Character volume on and no replay; @p rider defaults to the cAI's rider 1 and @p obj to rider 0. The rider
  * must be within 30 units of a camera (position from getPosition). When the request is queued on speech
- * instance 0 (cSpeechSys_AddRequest), the speech hook D_004A482C gets its packed id, 3 arguments, the rider's speech bit
+ * instance 0 (cSpeechSys_AddRequest), the speech hook SPCH_postRequestHook gets its packed id, 3 arguments, the rider's speech bit
  * (cSSXAudio_GetRiderSpeechBit), @p obj's character bit (cSSXAudio_GetRiderSubjectBit) and 4. cSSXAudio_HandleSubjectSpeechEvent and cSSXAudio_PlayPendingDJLine call it.
  *
  * @param rider  the speaking rider, or 0 for rider 1
@@ -8065,11 +8065,11 @@ void cSSXAudio::SpeakScriptEventType0(cRider* rider, void* obj)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (rider == 0) rider = ((cAI*)cAudioInterface_getAI())->Riders[1];
     if (obj == 0) obj = ((cAI*)cAudioInterface_getAI())->Riders[0];
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     if (cSpeechSys_AddRequest(&SpeechSys, 0, 8403, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int subjectBit = cSSXAudio_GetRiderSubjectBit_i(this, obj);
-    D_004A482C_5(SPCH_makeKey(1, 0, 8403), 3, speakerBit, subjectBit, 4);
+    SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8403), 3, speakerBit, subjectBit, 4);
 }
 #endif
 
@@ -8082,9 +8082,9 @@ extern "C" int cSSXAudio_CameraInRange(void* self, t4Vector* pos, float radius);
 // PORT: the unit defines cSSXAudio_GetRiderSpeechBit/cSSXAudio_GetRiderSubjectBit as void; they return their tail call's result.
 int cSSXAudio_GetRiderSpeechBit_i(void* self) __asm__("cSSXAudio_GetRiderSpeechBit");
 int cSSXAudio_GetRiderSubjectBit_i(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
-// PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
-extern float D_004A36D8;
+// PORT: SPCH_postRequestHook is called with 4 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
+extern float cSSXAudio_speechCameraRange;
 
 // PORT: callers declare cSSXAudio_SpeakScriptEventType1 as (void*, int, int); the body takes (self, rider, obj).
 void cSSXAudio_SpeakScriptEventType1_impl(cSSXAudio* self, cRider* rider, void* obj) __asm__("cSSXAudio_SpeakScriptEventType1");
@@ -8093,7 +8093,7 @@ void cSSXAudio_SpeakScriptEventType1_impl(cSSXAudio* self, cRider* rider, void* 
  * Requests speech line 8404 for a rider, about another rider (script speech event type 1).
  *
  * Needs the Character volume on, no replay and @p rider within 30 units of a camera. When the request is queued on
- * speech instance 0 (cSpeechSys_AddRequest), the speech hook D_004A482C gets its packed id, the rider's speech bit
+ * speech instance 0 (cSpeechSys_AddRequest), the speech hook SPCH_postRequestHook gets its packed id, the rider's speech bit
  * (cSSXAudio_GetRiderSpeechBit) and @p obj's character bit (cSSXAudio_GetRiderSubjectBit). cSSXAudio_HandleSubjectSpeechEvent calls it.
  *
  * @param rider  the speaking rider
@@ -8103,11 +8103,11 @@ void cSSXAudio::SpeakScriptEventType1(cRider* rider, void* obj)
 {
     if (IsCharacterSpeechOn() == 0) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     if (cSpeechSys_AddRequest(&SpeechSys, 0, 8404, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int subjectBit = cSSXAudio_GetRiderSubjectBit_i(this, obj);
-    D_004A482C_4(SPCH_makeKey(1, 0, 8404), 2, speakerBit, subjectBit);
+    SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8404), 2, speakerBit, subjectBit);
 }
 #endif
 
@@ -8154,7 +8154,7 @@ void cSSXAudio_SpeakPlace_impl(cSSXAudio* self, cRider* rider) __asm__("cSSXAudi
  * Requests a rider's place speech line (8377) with the place class from cSSXAudio_GetRiderPlaceBit.
  *
  * Needs the Character volume on, no replay and the rider within 30 units of a camera. When the request is queued on
- * speech instance 0, the speech hook D_004A482C gets its packed id, the rider's speech bit and a mode: 1 when the place
+ * speech instance 0, the speech hook SPCH_postRequestHook gets its packed id, the rider's speech bit and a mode: 1 when the place
  * bit is 1 (first), 2 when cSSXAudio_IsRivalEvent is nonzero or in the game path kGAMEPATH_MULTIPLAYER (newRace.cGamePath), 4
  * for the bits 2 and 4, else 2. cSSXAudio_SpeakPlaceCallback, cSSXAudio_HandleRiderSpeechMessage and cSSXAudio_PlayPendingDJLine call it.
  *
@@ -8164,7 +8164,7 @@ void cSSXAudio::SpeakPlace(cRider* rider)
 {
     if (IsCharacterSpeechOn() == 0) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     if (cSpeechSys_AddRequest(&SpeechSys, 0, 8377, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
     int k = GetRiderPlaceBit(rider);
@@ -8181,7 +8181,7 @@ void cSSXAudio::SpeakPlace(cRider* rider)
     } else {
         placeMode = 2;
     }
-    D_004A482C_4(SPCH_makeKey(1, 0, 8377), 2, speakerBit, placeMode);
+    SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8377), 2, speakerBit, placeMode);
 }
 #endif
 
@@ -8189,13 +8189,13 @@ void cSSXAudio::SpeakPlace(cRider* rider)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakOffBalance);
 #ifdef SKIP_ASM
 extern "C" int cSpeechSys_CanTakeSpeech(void* self, int i);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Requests a rider's off-balance speech line (8376) during a press.
  *
  * Needs the Character volume on, no replay, for a computer or non-local rider that it is the focus rider, speech
- * instance 0 ready and the rider within 30 units of a camera. When queued, the speech hook D_004A482C gets its packed
+ * instance 0 ready and the rider within 30 units of a camera. When queued, the speech hook SPCH_postRequestHook gets its packed
  * id and the rider's speech bit. The press-balance handler in ai/ai.cpp calls it while the press depth (mSlewed[11]) is
  * above 0.8 (its doc calls it the Whooh speech).
  *
@@ -8210,10 +8210,10 @@ void cSSXAudio::SpeakOffBalance(cRider* rider)
     if (check && cSSXAudio_GetFocusRider_p(this, -1) != rider) return;
     char* bm = (char*)&SpeechSys;
     if (cSpeechSys_CanTakeSpeech(bm, 0) == 0) return;
-    if (cSSXAudio_CameraInRange(this, rider->getPosition(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(this, rider->getPosition(), cSSXAudio_speechCameraRange) < 0) return;
     if (cSpeechSys_AddRequest(bm, 0, 8376, rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int speakerBit = cSSXAudio_GetRiderSpeechBit_i(rider);
-    D_004A482C(SPCH_makeKey(1, 0, 8376), 1, speakerBit);
+    SPCH_postRequestHook(SPCH_makeKey(1, 0, 8376), 1, speakerBit);
 }
 #endif
 
@@ -8229,13 +8229,13 @@ extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, in
 // cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
 int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Requests the character-select speech line (8380) for a character identity, outside the world-circuit game path.
  *
  * Needs the Character volume on, speech instance 0 ready and a game path (newRace.cGamePath) other than 0. The request has no
- * rider, the identity and refresh 1; when queued, the speech hook D_004A482C gets its packed id and the identity's
+ * rider, the identity and refresh 1; when queued, the speech hook SPCH_postRequestHook gets its packed id and the identity's
  * speech bit (cSSXAudio_GetCharacterSpeechBit(identity, 0)). The front-end rider manager calls it.
  *
  * @param identity  the character identity
@@ -8249,7 +8249,7 @@ void cSSXAudio::SpeakCharacterSelect(int identity)
             if (cBENewRaceInterface_newRace.cGamePath != 0) {
                 if (cSpeechSys_AddRequest(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
                     int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
-                    D_004A482C(SPCH_makeKey(1, 0, 8380), 1, speakerBit);
+                    SPCH_postRequestHook(SPCH_makeKey(1, 0, 8380), 1, speakerBit);
                 }
             }
         }
@@ -8267,13 +8267,13 @@ extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, in
 // cSSXAudio_GetCharacterSpeechBit returns a value (the unit's earlier declaration says void).
 int cSSXAudio_GetCharacterSpeechBit_r(int a, int b) __asm__("cSSXAudio_GetCharacterSpeechBit");
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Requests the customize speech line (8381) for a character identity.
  *
  * Needs the Character volume on and speech instance 0 ready. The request has no rider, the identity and refresh 1; when
- * queued, the speech hook D_004A482C gets its packed id and the identity's speech bit (cSSXAudio_GetCharacterSpeechBit(identity, 0)). The
+ * queued, the speech hook SPCH_postRequestHook gets its packed id and the identity's speech bit (cSSXAudio_GetCharacterSpeechBit(identity, 0)). The
  * front-end rider manager calls it for the equip screen's customize request.
  *
  * @param identity  the character identity
@@ -8285,7 +8285,7 @@ void cSSXAudio::SpeakCustomize(int identity)
         if (cSpeechSys_CanTakeSpeech(bm, 0) != 0) {
             if (cSpeechSys_AddRequest(bm, 0, 8381, 0, identity, 0, 1, 0.0f) != 0) {
                 int speakerBit = cSSXAudio_GetCharacterSpeechBit_r(identity, 0);
-                D_004A482C(SPCH_makeKey(1, 0, 8381), 1, speakerBit);
+                SPCH_postRequestHook(SPCH_makeKey(1, 0, 8381), 1, speakerBit);
             }
         }
     }
@@ -8748,14 +8748,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8392 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn). The request goes to speech instance 0 with identity 10 (the DJ,
- * cSpeechSys_AddRequest); when queued, the speech hook D_004A482C gets its packed id (SPCH_makeKey(1, 0, 8392)), the language
+ * cSpeechSys_AddRequest); when queued, the speech hook SPCH_postRequestHook gets its packed id (SPCH_makeKey(1, 0, 8392)), the language
  * bit (cSSXAudio_GetSpeechLanguage) and the peak bit of the location (cSSXAudio_GetLocationPeakBit). cSSXAudio_PlayScriptSpeechEvent (event 8) and cSSXAudio_SpeakDJBetweenEvents (pick
  * 2) call it.
  */
@@ -8766,7 +8766,7 @@ void cSSXAudio::SpeakDJLine8392()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8392), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8392), 2, languageBit, peakBit);
         }
     }
 }
@@ -8784,14 +8784,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8393 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit (cSSXAudio_GetSpeechLanguage) and the peak bit (cSSXAudio_GetLocationPeakBit).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit (cSSXAudio_GetSpeechLanguage) and the peak bit (cSSXAudio_GetLocationPeakBit).
  * cSSXAudio_SpeakDJBetweenEvents calls it (pick 7).
  */
 void cSSXAudio::SpeakDJLine8393()
@@ -8801,7 +8801,7 @@ void cSSXAudio::SpeakDJLine8393()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8393), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8393), 2, languageBit, peakBit);
         }
     }
 }
@@ -8822,14 +8822,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// 5-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8394 about rider 0's character, with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
  * bit. cSSXAudio_PlayScriptSpeechEvent (event 10) and cSSXAudio_SpeakDJBetweenEvents (pick 0) call it.
  */
 void cSSXAudio::SpeakDJLine8394()
@@ -8840,7 +8840,7 @@ void cSSXAudio::SpeakDJLine8394()
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(this, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(SPCH_makeKey(1, 0, 8394), 3, languageBit, riderBit, peakBit);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8394), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -8858,14 +8858,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8423 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 5).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 5).
  */
 void cSSXAudio::SpeakDJLine8423()
 {
@@ -8874,7 +8874,7 @@ void cSSXAudio::SpeakDJLine8423()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8423), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8423), 2, languageBit, peakBit);
         }
     }
 }
@@ -8892,14 +8892,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8424 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 6).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the peak bit. cSSXAudio_SpeakDJBetweenEvents calls it (pick 6).
  */
 void cSSXAudio::SpeakDJLine8424()
 {
@@ -8908,7 +8908,7 @@ void cSSXAudio::SpeakDJLine8424()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8424), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8424), 2, languageBit, peakBit);
         }
     }
 }
@@ -8926,8 +8926,8 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 // cSSXAudio_SpeakDJLine8425's location argument for the current location (name ours). [U] it then reads the location from the
 // new-race interface (cBENewRaceInterface_getLocation).
@@ -8937,7 +8937,7 @@ enum { kCurrentLocation = -1 };
  * Requests DJ speech line 8425 with the language and the peak of a location (the current one for kCurrentLocation).
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit (cSSXAudio_GetLocationPeakBit) of @p mode, or of the
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the peak bit (cSSXAudio_GetLocationPeakBit) of @p mode, or of the
  * current location when @p mode is -1. cSSXAudio_SpeakDJBetweenEvents (pick 1) and cSSXAudio_SpeakDJEventResult (a back-country location) call it.
  *
  * @param mode  a location id, or -1 for the current location
@@ -8954,7 +8954,7 @@ void cSSXAudio::SpeakDJLine8425(int mode)
             } else {
                 peakBit = GetLocationPeakBit(mode);
             }
-            D_004A482C_4(SPCH_makeKey(1, 0, 8425), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8425), 2, languageBit, peakBit);
         }
     }
 }
@@ -8969,14 +8969,14 @@ extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, in
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// 5-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8396 about a location, with mode 3.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1) and 3.
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit, the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1) and 3.
  * cSSXAudio_SpeakDJEventResult calls it.
  *
  * @param location  the location id
@@ -8987,7 +8987,7 @@ void cSSXAudio::SpeakDJLocation(int location)
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(location, -1);
-            D_004A482C_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -9005,14 +9005,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// 5-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8396 about the current location (or a part of a combined location), with mode 3.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the bit cSSXAudio_GetLocationSpeechBit(current location, @p subLocation) and 3.
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit, the bit cSSXAudio_GetLocationSpeechBit(current location, @p subLocation) and 3.
  * cSSXAudio_PlayScriptSpeechEvent (event 12, with -1) and cSSXAudio_PlayPendingDJLine (with mPendingLocationPart) call it.
  *
  * @param subLocation  the part of a combined location (cSSXAudio_GetLocationSpeechBit), or -1
@@ -9024,7 +9024,7 @@ void cSSXAudio::SpeakDJCurrentLocation(int subLocation)
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), subLocation);
-            D_004A482C_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -9042,14 +9042,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8378 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_PlayScriptSpeechEvent (event 14) and
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the peak bit. cSSXAudio_PlayScriptSpeechEvent (event 14) and
  * cSSXAudio_PlayPendingDJLine (pending flag mPendingPeakLine8378) call it.
  */
 void cSSXAudio::SpeakDJLine8378()
@@ -9059,7 +9059,7 @@ void cSSXAudio::SpeakDJLine8378()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8378), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8378), 2, languageBit, peakBit);
         }
     }
 }
@@ -9074,14 +9074,14 @@ extern "C" void cSpeechSys_PurgeInstance(void*, int);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// 5-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Interrupts speech instance 0 and requests DJ speech line 8421 with two yes/no choices.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn). Stops speech instance 0 (cSpeechSys_PurgeInstance), then requests 8421 with identity
- * 10; when queued, clears mChoiceLineFirstTime and the speech hook D_004A482C gets its packed id, the language bit, 1
+ * 10; when queued, clears mChoiceLineFirstTime and the speech hook SPCH_postRequestHook gets its packed id, the language bit, 1
  * when @p firstChoice is set (else 2) and 2 when @p secondChoice is set (else 1). The music code
  * (cSSXAudio_StartEventWithNoStartGate, cSSXAudio_HandleMusicRequest, cSSXAudio_HandleMusicEvent), cSSXAudio_StartDJIntro and cSSXAudio_PlayPendingDJLine call it, mostly
  * with (0, 0).
@@ -9103,7 +9103,7 @@ void cSSXAudio::SpeakDJChoiceLine(int firstChoice, int secondChoice)
             }
             int y = 2;
             if (!secondChoice) y = 1;
-            D_004A482C_5(SPCH_makeKey(1, 0, 8421), 3, languageBit, x, y);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8421), 3, languageBit, x, y);
         }
     }
 }
@@ -9116,13 +9116,13 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Requests DJ speech line 8422 with the language.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id and the language bit. cSSXAudio_PlayPendingDJLine calls it for the pending flag
+ * speech hook SPCH_postRequestHook gets its packed id and the language bit. cSSXAudio_PlayPendingDJLine calls it for the pending flag
  * mPendingLine8422.
  */
 void cSSXAudio::SpeakDJLine8422()
@@ -9130,7 +9130,7 @@ void cSSXAudio::SpeakDJLine8422()
     if (IsDJSpeechOn() != 0) {
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
-            D_004A482C(SPCH_makeKey(1, 0, 8422), 1, languageBit);
+            SPCH_postRequestHook(SPCH_makeKey(1, 0, 8422), 1, languageBit);
         }
     }
 }
@@ -9144,14 +9144,14 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
+// 6-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_6)(void*, int, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests the DJ's song announcement (speech 8399) for a song number.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, 4 arguments: the language bit, 3, and the song as one bit in two words: 1
+ * speech hook SPCH_postRequestHook gets its packed id, 4 arguments: the language bit, 3, and the song as one bit in two words: 1
  * << n in the first for n below 100, 1 << (n - 100) in the second from 100 on, none for a negative n or 999.
  * cSSXAudio_PlayPendingDJLine calls it with mSongAnnounceNum (the song value cSSXAudio_CountdownGateDrop and cSSXAudio_StartDJIntro store from
  * cMusicSys_GetCurrentSongSedValue).
@@ -9173,7 +9173,7 @@ void cSSXAudio::SpeakDJSongAnnouncement(int n)
                     hi = 1 << n;
                 }
             }
-            D_004A482C_6(SPCH_makeKey(1, 0, 8399), 4, languageBit, 3, lo, hi);
+            SPCH_postRequestHook_6(SPCH_makeKey(1, 0, 8399), 4, languageBit, 3, lo, hi);
         }
     }
 }
@@ -9194,14 +9194,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// 5-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8450 about rider 0's character, with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit, rider 0's character bit (cSSXAudio_GetRiderSubjectBit) and the peak
  * bit. cSSXAudio_SpeakDJEventResult calls it when rider 0 finished first.
  */
 void cSSXAudio::SpeakDJWinner()
@@ -9212,7 +9212,7 @@ void cSSXAudio::SpeakDJWinner()
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(this, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(SPCH_makeKey(1, 0, 8450), 3, languageBit, riderBit, peakBit);
+            SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8450), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -9231,14 +9231,14 @@ extern "C" int cBENewRaceInterface_getRival(void*);
 // cSSXAudio_GetSubjectCharacterBit returns a value (the unit declares it void).
 int cSSXAudio_GetSubjectCharacterBit_r(void* self, int a, int b) __asm__("cSSXAudio_GetSubjectCharacterBit");
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8459 about the race's rival character.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the character bit (cSSXAudio_GetSubjectCharacterBit) of
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the character bit (cSSXAudio_GetSubjectCharacterBit) of
  * cBENewRaceInterface_getRival. cSSXAudio_SpeakDJBetweenEvents calls it (pick 3).
  */
 void cSSXAudio::SpeakDJRival()
@@ -9247,7 +9247,7 @@ void cSSXAudio::SpeakDJRival()
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int rivalBit = cSSXAudio_GetSubjectCharacterBit_r(this, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8459), 2, languageBit, rivalBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8459), 2, languageBit, rivalBit);
         }
     }
 }
@@ -9265,14 +9265,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationPeakBit(cSSXAudio* self, unsigned int a1);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8491 with the language and the location's peak.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the peak bit. cSSXAudio_PlayPendingDJLine calls it for the pending
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the peak bit. cSSXAudio_PlayPendingDJLine calls it for the pending
  * flag mPendingPeakLine8491.
  */
 void cSSXAudio::SpeakDJLine8491()
@@ -9282,7 +9282,7 @@ void cSSXAudio::SpeakDJLine8491()
             int languageBit = GetSpeechLanguage();
             int peakBit = GetLocationPeakBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(SPCH_makeKey(1, 0, 8491), 2, languageBit, peakBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8491), 2, languageBit, peakBit);
         }
     }
 }
@@ -9296,14 +9296,14 @@ extern "C" bool cSSXAudio_IsDJSpeechOn(cSSXAudio* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8492, telling it whether it was played before (mLine8492Played), and marks it played.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and mLine8492Played. mLine8492Played is then set to 1
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and mLine8492Played. mLine8492Played is then set to 1
  * even when the request was not queued. cSSXAudio_SpeakDJBetweenEvents (pick 4) and cSSXAudio_PlayPendingDJLine (pending flag mPendingLine8492) call
  * it.
  */
@@ -9313,7 +9313,7 @@ void cSSXAudio::SpeakDJLine8492()
         if (cSpeechSys_AddRequest(&SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int playedBefore = mLine8492Played;
-            D_004A482C_4(SPCH_makeKey(1, 0, 8492), 2, languageBit, playedBefore);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8492), 2, languageBit, playedBefore);
         }
         mLine8492Played = 1;
     }
@@ -9332,14 +9332,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8493 about the current location.
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
  * cSSXAudio_PlayPendingDJLine calls it for the pending flag mPendingLocationLine.
  */
 void cSSXAudio::SpeakDJLine8493()
@@ -9349,7 +9349,7 @@ void cSSXAudio::SpeakDJLine8493()
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8493), 2, languageBit, locationBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8493), 2, languageBit, locationBit);
         }
     }
 }
@@ -9364,14 +9364,14 @@ extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, in
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8494 about a location (rider 0's frags after an event).
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
  * cSSXAudio_SpeakDJEventResult calls it for the frag result (5 or more frags).
  *
  * @param location  the location id
@@ -9382,7 +9382,7 @@ void cSSXAudio::SpeakDJFragsResult(int location)
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(location, -1);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8494), 2, languageBit, locationBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8494), 2, languageBit, locationBit);
         }
     }
 }
@@ -9397,14 +9397,14 @@ extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, in
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests DJ speech line 8495 about a location (rider 0's uber tricks after an event).
  *
  * Needs DJ speech allowed (cSSXAudio_IsDJSpeechOn); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(@p location, -1).
  * cSSXAudio_SpeakDJEventResult calls it for the uber-trick result.
  *
  * @param location  the location id
@@ -9415,7 +9415,7 @@ void cSSXAudio::SpeakDJUberTricksResult(int location)
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(location, -1);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8495), 2, languageBit, locationBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8495), 2, languageBit, locationBit);
         }
     }
 }
@@ -9576,15 +9576,15 @@ extern "C" bool cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests PA speech line 8384 at the start of a single-player event's first heat.
  *
  * Needs PA speech audible (cSSXAudio_IsPASpeechOn), a game mode other than 4 (cSSXAudio_IsFreeride), game path 0 (newRace.cGamePath) and a
  * cGameModeMan iHeatNum below 2, with play-history event 0 not live. The request goes to speech instance 0 with
- * identity 11 (the PA); when queued, the speech hook D_004A482C gets its packed id, the language bit and 1.
+ * identity 11 (the PA); when queued, the speech hook SPCH_postRequestHook gets its packed id, the language bit and 1.
  * cSSXAudio_PlayScriptSpeechEvent (event 0) and two front-end functions call it.
  */
 void cSSXAudio::SpeakPAEventStart()
@@ -9597,7 +9597,7 @@ void cSSXAudio::SpeakPAEventStart()
         if (PlayHistoryExists(0, 0) != 0) return;
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
         int languageBit = GetSpeechLanguage();
-        D_004A482C_4(SPCH_makeKey(1, 0, 8384), 2, languageBit, 1);
+        SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8384), 2, languageBit, 1);
     }
 }
 #endif
@@ -9613,14 +9613,14 @@ extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
 int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests PA speech line 8385 about rider 0's character.
  *
  * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
  * cSSXAudio_PlayScriptSpeechEvent calls it (event 1).
  */
 void cSSXAudio::SpeakPALine8385()
@@ -9629,7 +9629,7 @@ void cSSXAudio::SpeakPALine8385()
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(this, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8385), 2, languageBit, riderBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8385), 2, languageBit, riderBit);
         }
     }
 }
@@ -9646,14 +9646,14 @@ extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetRiderSubjectBit returns its tail call's value (the unit defines it as void).
 int cSSXAudio_GetRiderSubjectBit_r(void* self, void* obj) __asm__("cSSXAudio_GetRiderSubjectBit");
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests PA speech line 8386 about rider 0's character.
  *
  * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and rider 0's character bit (cSSXAudio_GetRiderSubjectBit).
  * cSSXAudio_PlayScriptSpeechEvent calls it (event 2).
  */
 void cSSXAudio::SpeakPALine8386()
@@ -9662,7 +9662,7 @@ void cSSXAudio::SpeakPALine8386()
         if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
             int languageBit = GetSpeechLanguage();
             int riderBit = cSSXAudio_GetRiderSubjectBit_r(this, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8386), 2, languageBit, riderBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8386), 2, languageBit, riderBit);
         }
     }
 }
@@ -9681,14 +9681,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests PA speech line 8387 about the current location.
  *
  * Needs PA speech audible (cSSXAudio_IsPASpeechOn) and no replay; the request goes to speech instance 0 with identity 11 and,
- * when queued, the speech hook D_004A482C gets its packed id, the language bit and the location bit
+ * when queued, the speech hook SPCH_postRequestHook gets its packed id, the language bit and the location bit
  * cSSXAudio_GetLocationSpeechBit(location, -1). cSSXAudio_PlayScriptSpeechEvent (event 3) and cSSXAudio_CountdownGateDrop (the last heat) call it.
  */
 void cSSXAudio::SpeakPALine8387()
@@ -9699,7 +9699,7 @@ void cSSXAudio::SpeakPALine8387()
     int languageBit = GetSpeechLanguage();
     int locationBit = GetLocationSpeechBit(
             *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-    D_004A482C_4(SPCH_makeKey(1, 0, 8387), 2, languageBit, locationBit);
+    SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8387), 2, languageBit, locationBit);
 }
 #endif
 
@@ -9723,7 +9723,7 @@ extern "C" int cSSXAudio_IsPeakChallengeEvent_p(void *) __asm__("cSSXAudio_IsPea
  * true. With @p flag set, speech instance 0 must be ready (cSpeechSys_CanTakeSpeech), else false is returned. Without a rider, the
  * location must pass cSSXAudio_IsRaceEvent and the game mode must not be kGAMEMODE_FREERIDE, and the focus rider of view @p
  * which is used, its place bit coming from RaceRanking (0..4: 1..0x10, 5: 0x200). Riders with a cheat identity give
- * true. When request 8388 (identity 11) is queued, the speech hook D_004A482C gets its packed id, the language bit, the
+ * true. When request 8388 (identity 11) is queued, the speech hook SPCH_postRequestHook gets its packed id, the language bit, the
  * rider's character bit (cSSXAudio_GetRiderSubjectBit) and the place bit (cSSXAudio_GetRiderPlaceBit for a given rider).
  *
  * @param rider  the rider, or 0 for the focus rider of @p which
@@ -9806,7 +9806,7 @@ bool cSSXAudio::SpeakPAPlace(cRider *rider, int flag, int which)
             break;
         }
     }
-    D_004A482C_5(SPCH_makeKey(1, 0, 8388), 3, languageBit, riderBit, placeBit);
+    SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8388), 3, languageBit, riderBit, placeBit);
     return true;
 }
 #endif
@@ -9820,8 +9820,8 @@ extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
 extern "C" int cSSXAudio_GetRiderPlaceBit(void* self, cRider* rider);
 // PORT: callers pass self to cSSXAudio_IsRivalEvent (the unit's later definition takes no args).
 bool cSSXAudio_IsRivalEvent_s(void* self) __asm__("cSSXAudio_IsRivalEvent");
-// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// PORT: SPCH_postRequestHook is called with 5 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 extern sSndKey8 D_004A36E8[];
 
 /**
@@ -9829,7 +9829,7 @@ extern sSndKey8 D_004A36E8[];
  *
  * Needs PA speech audible, no replay and no cheat identity. In game events 4 and 5 (cSSXAudio_IsRivalEvent) it only creates a
  * 1000 ms monitor (cMonitor_MONITOR_Create) with the callback D_004A36E8 (cSSXAudio_SpeakPlaceCallback) and the rider's AI index
- * (getAIIndex). Otherwise, when request 8389 (identity 11) is queued, the speech hook D_004A482C gets its packed id,
+ * (getAIIndex). Otherwise, when request 8389 (identity 11) is queued, the speech hook SPCH_postRequestHook gets its packed id,
  * the language bit, the rider's character bit (cSSXAudio_GetRiderSubjectBit) and its place bit (cSSXAudio_GetRiderPlaceBit).
  *
  * @param rider  the rider (cRider)
@@ -9852,7 +9852,7 @@ void cSSXAudio::SpeakPARiderPlace(cRider* rider)
     int languageBit = GetSpeechLanguage();
     int riderBit = cSSXAudio_GetRiderSubjectBit_i(this, rider);
     int placeBit = GetRiderPlaceBit(rider);
-    D_004A482C_5(SPCH_makeKey(1, 0, 8389), 3, languageBit, riderBit, placeBit);
+    SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8389), 3, languageBit, riderBit, placeBit);
 }
 #endif
 
@@ -9863,8 +9863,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakPAResult);
 #include "object/being.h"
 extern "C" bool cSSXAudio_IsPASpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_GetSpeechLanguage(cSSXAudio* self);
-// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
-extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+// PORT: SPCH_postRequestHook is called with 5 args here (the unit's later declaration has 3).
+extern void (*SPCH_postRequestHook_5)(void*, int, int, int, int) __asm__("SPCH_postRequestHook");
 extern int cGameModeMan_iRanking[];
 
 struct sSndRiderList3860 {
@@ -9875,7 +9875,7 @@ struct sSndRiderList3860 {
  * Requests PA speech line 8391 announcing a result: the leading human rider's character and its place.
  *
  * Needs PA speech audible and no replay. In the multiplayer game path the second human is used when it ranks ahead
- * (cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook D_004A482C
+ * (cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook SPCH_postRequestHook
  * gets its packed id, the language bit, that rider's character bit (cSSXAudio_GetRiderSubjectBit, from the cAI's rider list at +0x28)
  * and a place value: 8 outside the multiplayer path when the reward interface's +0x14 is 0, else 1, 2 or 4 for rank 0,
  * 1 or 2 and 0 for any other rank. cSSXAudio_PlayScriptSpeechEvent calls it (event 7).
@@ -9913,7 +9913,7 @@ extern "C" void cSSXAudio_SpeakPAResult(cSSXAudio* self)
             if (z) n = 0;
         }
     }
-    D_004A482C_5(SPCH_makeKey(1, 0, 8391), 3, languageBit, riderBit, n);
+    SPCH_postRequestHook_5(SPCH_makeKey(1, 0, 8391), 3, languageBit, riderBit, n);
 }
 #endif
 
@@ -9929,14 +9929,14 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetLocationSpeechBit(cSSXAudio* self, int a, int b);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-// 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
-extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
+// 4-argument view of the SPCH_postRequestHook callback (the unit declares a 3-argument one).
+extern void (*SPCH_postRequestHook_4)(void*, int, int, int) __asm__("SPCH_postRequestHook");
 
 /**
  * Requests PA speech line 8379 about the current location.
  *
  * Needs PA speech audible (cSSXAudio_IsPASpeechOn); the request goes to speech instance 0 with identity 11 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
+ * speech hook SPCH_postRequestHook gets its packed id, the language bit and the location bit cSSXAudio_GetLocationSpeechBit(location, -1).
  * cSSXAudio_PlayScriptSpeechEvent (event 15) and cSSXAudio_StartEvent call it.
  */
 void cSSXAudio::SpeakPALine8379()
@@ -9946,7 +9946,7 @@ void cSSXAudio::SpeakPALine8379()
             int languageBit = GetSpeechLanguage();
             int locationBit = GetLocationSpeechBit(
                     *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(SPCH_makeKey(1, 0, 8379), 2, languageBit, locationBit);
+            SPCH_postRequestHook_4(SPCH_makeKey(1, 0, 8379), 2, languageBit, locationBit);
         }
     }
 }
@@ -9995,13 +9995,13 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8359 with a value, for the focus rider before the finish line.
  *
  * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider that is the focus rider and not past the finish line, and no
- * replay. When request 8359 (speech instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id
+ * replay. When request 8359 (speech instance 0, identity 12) is queued, the speech hook SPCH_postRequestHook gets its packed id
  * and @p eventValue. cRider_flagEventSpeedBoost and cRider_flagEventTrickBoost call it.
  *
  * @param obj  the rider (cRider)
@@ -10016,7 +10016,7 @@ void cSSXAudio::SpeakArcadeBoost(cRider* obj, int eventValue)
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(this, -1)) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
     if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(SPCH_makeKey(1, 0, 8359), 1, eventValue);
+        SPCH_postRequestHook(SPCH_makeKey(1, 0, 8359), 1, eventValue);
     }
 }
 #endif
@@ -10031,14 +10031,14 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8360 (an event result) for the focus rider.
  *
  * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider that is the focus rider and no replay; unless @p resultBit is 2 the
  * rider must not be past the finish line. When request 8360 (speech instance 0, identity 12) is queued, the speech hook
- * D_004A482C gets its packed id and @p resultBit. Values seen: 1 big challenge complete (cSSXAudio_BigChallengeComplete, rider 0), 2 time ran
+ * SPCH_postRequestHook gets its packed id and @p resultBit. Values seen: 1 big challenge complete (cSSXAudio_BigChallengeComplete, rider 0), 2 time ran
  * out (cRider_updateFinishTest, after the did-not-finish finish), 4 / 8 / 0x10 max power at an uber level below 5, 5..9
  * or 10 (cSSXAudio_MaxPowerEvent).
  *
@@ -10056,7 +10056,7 @@ void cSSXAudio::SpeakArcadeResult(cRider* obj, int resultBit)
     if (((void*)obj) != cSSXAudio_GetFocusRider_p(this, -1)) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
     if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(SPCH_makeKey(1, 0, 8360), 1, resultBit);
+        SPCH_postRequestHook(SPCH_makeKey(1, 0, 8360), 1, resultBit);
     }
 }
 #endif
@@ -10065,7 +10065,7 @@ void cSSXAudio::SpeakArcadeResult(cRider* obj, int resultBit)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_SpeakArcadeCheckpoint);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
@@ -10074,7 +10074,7 @@ cRider* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetF
  *
  * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line, no replay and @p n nonzero; with
  * @p n other than 1 the rider must also be the focus rider. When request 8361 (speech instance 0, identity 12) is
- * queued, the speech hook D_004A482C gets its packed id and @p n. cRiderMetrix_evCheckpoint calls it with 1 when a
+ * queued, the speech hook SPCH_postRequestHook gets its packed id and @p n. cRiderMetrix_evCheckpoint calls it with 1 when a
  * checkpoint adds time (cGameModeMan_riderCheckpointHit).
  *
  * @param rider  the rider (cRider)
@@ -10093,7 +10093,7 @@ void cSSXAudio::SpeakArcadeCheckpoint(cRider* rider, int n)
     if (cSSXAudio_ReplayMode(this) != 0) return;
     if (n == 0) return;
     if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8361, 0, 0xC, 0, 0, zero) != 0) {
-        D_004A482C(SPCH_makeKey(1, 0, 8361), 1, n);
+        SPCH_postRequestHook(SPCH_makeKey(1, 0, 8361), 1, n);
     }
 }
 #endif
@@ -10105,13 +10105,13 @@ extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8499 (an uber trick milestone) for a rider before the finish line.
  *
  * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line and no replay. When request 8499 (speech
- * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev: 1 when the landed uber
+ * instance 0, identity 12) is queued, the speech hook SPCH_postRequestHook gets its packed id and @p ev: 1 when the landed uber
  * tricks pass 4 (cSSXAudio_LandedUberTrick), 2 when the focus rider's uber level reaches 10 (cSSXAudio_UpdateLandedUber), 8 for a
  * monster combo (cSSXAudio_LandedMonsterCombo).
  *
@@ -10126,7 +10126,7 @@ void cSSXAudio::SpeakArcadeUberMilestone(cRider* obj, int ev)
     if (done) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
     if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8499, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(SPCH_makeKey(1, 0, 8499), 1, ev);
+        SPCH_postRequestHook(SPCH_makeKey(1, 0, 8499), 1, ev);
     }
 }
 #endif
@@ -10138,13 +10138,13 @@ extern "C" bool cSSXAudio_IsArcadeSpeechOn(cSSXAudio* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSpeechSys_AddRequest(void* self, int a, int b, cRider* rider, int d, int e, int refresh, float f);
 extern "C" void* SPCH_makeKey(int a, int b, int c);
-extern void (*D_004A482C)(void*, int, int);
+extern void (*SPCH_postRequestHook)(void*, int, int);
 
 /**
  * Raises arcade announcer event 8517 (a multiplier icon collected) for a rider before the finish line.
  *
  * Needs ArcadeSpeech audible (cSSXAudio_IsArcadeSpeechOn), a rider not past the finish line and no replay. When request 8517 (speech
- * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev. cSSXAudio_PlayIconSound
+ * instance 0, identity 12) is queued, the speech hook SPCH_postRequestHook gets its packed id and @p ev. cSSXAudio_PlayIconSound
  * passes 1, 2, 4 or 8 for a multiplier icon of 2, 3, 5 or 10.
  *
  * @param obj  the rider (cRider)
@@ -10158,7 +10158,7 @@ void cSSXAudio::SpeakArcadeMultiplier(cRider* obj, int ev)
     if (done) return;
     if (cSSXAudio_ReplayMode(this) != 0) return;
     if (cSpeechSys_AddRequest((char*)&SpeechSys, 0, 8517, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(SPCH_makeKey(1, 0, 8517), 1, ev);
+        SPCH_postRequestHook(SPCH_makeKey(1, 0, 8517), 1, ev);
     }
 }
 #endif
@@ -13273,7 +13273,7 @@ struct cMidiSysComplete {
  * Constructs a cMidiSys, the MIDI part of the audio system.
  *
  * Builds cBankSys first (and, with @p embedded, the shared virtual bases), fixes up the base vtables, then
- * allocates the 0x20-byte "MIDIBANKS" table and records the instance in D_004A3744.
+ * allocates the 0x20-byte "MIDIBANKS" table and records the instance in cMidiSys_instance.
  *
  * @param embedded  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
  * @param count  maximum number of banks
@@ -13310,7 +13310,7 @@ extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int 
     self->mVtbl = (void**)cBankSys_vtbl;
     SNDmidiinit();
     self->mMidiBanks = (tMidiBank*)(new (str_MIDIBANKS, 0, 0) char[0x20]) ;
-    D_004A3744 = (cMidiSys*)((int)self);
+    cMidiSys_instance = (cMidiSys*)((int)self);
     return ((char*)self);
 }
 #endif
@@ -13346,7 +13346,7 @@ extern char cBankMonitor_vtbl[];
  * Destroys the MIDI sound system.
  *
  * Re-installs the cMidiSys vtables (cBankSys_vtbl at mVtbl, D_004839F0 / D_00483A10 in the virtual bases, adjusted on the
- * stack when not in charge), frees mMidiBanks, clears D_004A3744 (the instance the ctor stored), calls SNDmidirestore,
+ * stack when not in charge), frees mMidiBanks, clears cMidiSys_instance (the instance the ctor stored), calls SNDmidirestore,
  * runs the cBankSys base destructor, destroys the virtual bases when bit 1 of @p flags is set and frees the object when
  * bit 0 is set. The matching constructor is cMidiSys_cMidiSys.
  *
@@ -13372,7 +13372,7 @@ extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
         bankMgrVtbl.e[1].delta = D_00483A10.e[1].delta + adj2;
     }
     if (self->mMidiBanks) cMemMan_free(self->mMidiBanks);
-    D_004A3744 = 0;
+    cMidiSys_instance = 0;
     SNDmidirestore();
     cBankSys__cBankSys((cBankSys*)self, 0);
     if (flags & 2) {
@@ -13404,7 +13404,7 @@ struct sSnd8450Sys {
  * Same push as cCrowdSys_OpenObjectOpts (default channel, delay {100, 0, 90, 50}, mMapToMaxVol 0x7F, mCloseOnEnd 1); then
  * mMidiBanks[level] gets (@p bankIndex, @p midiData). cMidiSys_PlayMidi plays it. The crowd cheers and loops and cMidiSys_EchoCallback use it.
  *
- * @param sys  the MIDI system (cMidiSys; the crowd system or D_004A3744)
+ * @param sys  the MIDI system (cMidiSys; the crowd system or cMidiSys_instance)
  * @param bankIndex  the bank (cBankManager bank index)
  * @param midiData  the MIDI sequence data in that bank
  */
@@ -13565,7 +13565,7 @@ INCLUDE_ASM("sound/soundsys", cMidiSys_EchoCallback);
 extern "C" int cMidiSys_PlayMidi(char** sys);
 
 /**
- * Monitor callback for a MIDI echo: plays the monitor's sequence again at its volume through D_004A3744.
+ * Monitor callback for a MIDI echo: plays the monitor's sequence again at its volume through cMidiSys_instance.
  *
  * Opens a level (cMidiSys_OpenMidiOpts) with the bank (+0x1C) and sequence (+0x20) of the monitor instance, sets the vol
  * control (+0x18) and the volume (+0x24, clamped to 0x7F and 0) and plays it (cMidiSys_PlayMidi). Its pointer to member is
@@ -13576,16 +13576,16 @@ extern "C" int cMidiSys_PlayMidi(char** sys);
  */
 int cMidiSys::EchoCallback(cMonitorInstance* obj)
 {
-    cMidiSys_OpenMidiOpts((char**)D_004A3744, obj->mData1, obj->mData2);
-    cBankManager* ctlMgr = (cBankManager*)D_004A3744->mpVBankManager;
+    cMidiSys_OpenMidiOpts((char**)cMidiSys_instance, obj->mData1, obj->mData2);
+    cBankManager* ctlMgr = (cBankManager*)cMidiSys_instance->mpVBankManager;
     ctlMgr->BankMonitor.mVolControl[ctlMgr->BankMonitor.mInst] = (float*)obj->mPtr;
-    cBankManager* volMgr = (cBankManager*)D_004A3744->mpVBankManager;
+    cBankManager* volMgr = (cBankManager*)cMidiSys_instance->mpVBankManager;
     cBankMonitor* playOpts = &volMgr->BankMonitor;
     playOpts->mBaseVol[volMgr->BankMonitor.mInst] = obj->mData3;
 #define SND_X (playOpts->mBaseVol[playOpts->mInst])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
     playOpts->mCurrent[volMgr->BankMonitor.mInst].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
-    cMidiSys_PlayMidi((char**)D_004A3744);
+    cMidiSys_PlayMidi((char**)cMidiSys_instance);
     return 1;
 }
 #endif

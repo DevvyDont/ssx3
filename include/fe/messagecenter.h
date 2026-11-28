@@ -42,7 +42,7 @@ struct cUIThing;
 struct cUIText;
 struct cUIMenu;
 
-// The message group type (+0x0 of a D_00441630 group) of the FAQ folders (names ours). [U] the message center counts
+// The message group type (+0x0 of a messageCenter_groupTable group) of the FAQ folders (names ours). [U] the message center counts
 // the FAQ rows with countMessageRows / getMessageForRow for it, cOVState_ViewPopup never deletes such a message, and its
 // next-message step (cOVState_ViewPopup_showNextMessage) walks the folder instead of the queue.
 enum { kMessageGroupFAQ = 4 };
@@ -56,7 +56,7 @@ struct cOVState_MESSAGECENTER : public cOVState {
     //       (cOVState_MESSAGECENTER_onCreateScreen), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the
     //       ctor
     //   miMiscData: [U] here the opening mode: the ctor stores 0/1 (hint 7 not yet / already seen, isMessageFlagSet(7))
-    //       or 2 (D_004A20CC set); onCreateScreen/onDestroyScreen/onGainFocus switch on it
+    //       or 2 (cOVState_MESSAGECENTER_openRequest set); onCreateScreen/onDestroyScreen/onGainFocus switch on it
     // cOVState (fe/ovstate.h, 0x9C)
     // --- cOVState_MESSAGECENTER
     cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (cOVState_MESSAGECENTER_onWidgetCreate): widgets "UnreadMail%d";
@@ -75,7 +75,7 @@ struct cOVState_MESSAGECENTER : public cOVState {
                                     //       cOVState_MESSAGECENTER_fillRows), cUIMenu_setSelectedByIndex (cOVState_MESSAGECENTER_onGainFocus); its byte 0x95 is
                                     //       read/written as the selected row (cOVState_MESSAGECENTER_updateButtons, cOVState_MESSAGECENTER_deleteMessage, cOVState_MESSAGECENTER_onWidgetEvent)
     cUIThing* mpNoMessage;          // 0x148 [U] widget "NoMessage" (hidden on creation, vt slot 9); not zeroed by the ctor
-    cUIThing* mpButtonSquare;       // 0x14C [R] zeroed; [U] widget named by D_004A20A8 ("ps2sq"); cOVState_MESSAGECENTER_updateButtons /
+    cUIThing* mpButtonSquare;       // 0x14C [R] zeroed; [U] widget named by cOVState_MESSAGECENTER_squareButtonName ("ps2sq"); cOVState_MESSAGECENTER_updateButtons /
                                     //       cOVState_MESSAGECENTER_fillRows show or hide it
     cUIThing* mpButtonText3;        // 0x150 [R] zeroed; [U] widget "btext3"; shown/hidden with mpButtonSquare
     cUIThing* mpButtonCross;        // 0x154 [R] zeroed; [U] widget named by D_004A2098 ("ps2x"); cOVState_MESSAGECENTER_fillRows
@@ -163,13 +163,13 @@ struct cOVState_ViewPopup : public cUIState {
     cUIText* mpFrom;                // 0x050 [R] zeroed; [U] widget "From"; cOVState_ViewPopup_fillMessage cUIText_setUnicodeStringByID
     cUIText* mpSubject;             // 0x054 [R] zeroed; [U] widget "Subject"; cOVState_ViewPopup_setSubject / cOVState_ViewPopup_setVariantSubject set it
     cUIText* mpMessageLine0;        // 0x058 [R] zeroed; [U] widget "MessageLine0"; cOVState_ViewPopup_setBody sets the body text
-    cUIThing* mpButtonSquare;       // 0x05C [R] zeroed; [U] widget named by D_004A20A8 ("ps2sq"); cOVState_ViewPopup_fillMessage shows/hides it
+    cUIThing* mpButtonSquare;       // 0x05C [R] zeroed; [U] widget named by cOVState_MESSAGECENTER_squareButtonName ("ps2sq"); cOVState_ViewPopup_fillMessage shows/hides it
     cUIThing* mpDeleteMessage;      // 0x060 [R] zeroed; [U] widget "MV_DeleteMessage"; cOVState_ViewPopup_fillMessage shows/hides it
     cUIText* mpKeepMessage;         // 0x064 [R] zeroed; [U] widget "MV_KeepMessage"; cOVState_ViewPopup_fillMessage sets kT_BTNKeepMsg
-    int miMessage;                  // 0x068 [R] the ctor's 4th argument; [U] index into the message list D_004C6C08
+    int miMessage;                  // 0x068 [R] the ctor's 4th argument; [U] index into the message list messageCenter_messageTable
                                     //       (cOVState_ViewPopup_fillMessage, cOVState_ViewPopup_onWidgetMenu); cOVState_ViewPopup_showNextMessage steps it to the next message
     int miNumber;                   // 0x06C [R] the ctor's 5th argument; [U] cOVState_ViewPopup_fillMessage prints it with "%d"
-                                    //       (D_004A2138); cOVState_ViewPopup_showNextMessage increments / recomputes it
+                                    //       (str_pct_d_j); cOVState_ViewPopup_showNextMessage increments / recomputes it
 
     // Methods bound to their retail symbols by asm labels.
     // retail's destructor cOVState_ViewPopup__cOVState_ViewPopup stays a C function (g++ 2.95 takes no asm label on a

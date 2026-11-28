@@ -46,7 +46,7 @@ struct sVt22_BW {
 
 extern const sVt9_BW D_00488DA8;
 extern const sVt22_BW D_00488DF0;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 extern char str_WakeLines_cBoardWakeFX[];
 extern char str_WakeVerts_cBoardWakeFX[];
 extern "C" void cRider_cRider(void* self);
@@ -94,7 +94,7 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         cRider_cRider((char*)self + 0xC0);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00488DA8;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488DF0;
     if (inChrg == 0) {
         int vc;
@@ -142,7 +142,7 @@ __asm__(".globl cBoardWakeFX__cBoardWakeFX\n.type cBoardWakeFX__cBoardWakeFX,@fu
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
-        "_vt$15cVbDtor002DCDA0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002DCDA0$14cRiderVbBC_bwf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002DCDA0$12cRiderVb_bwf = D_00488DF0\n"
         "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
@@ -1127,7 +1127,7 @@ extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
         cRider_cRider((char*)self + 0x130);
     }
     *(void**)(self->vbase + 0x6E8) = (void*)&D_00488360;
-    *(void**)(self->vbase + 0x6D0) = D_00459B90;
+    *(void**)(self->vbase + 0x6D0) = cRider_cScriptObjRider_vtbl;
     *(void**)(self->vbase + 0x6C0) = (void*)&D_004883A8;
     sEmitterE4A8*& em = self->em;
     if (inChrg == 0) {
@@ -1765,7 +1765,7 @@ __asm__(".globl cDynamicSprayFX__cDynamicSprayFX\n.type cDynamicSprayFX__cDynami
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
-        "_vt$15cVbDtor002DF1C8$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002DF1C8$14cRiderVbBC_bwf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002DF1C8$12cRiderVb_bwf = D_004883A8\n"
         "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
@@ -4336,7 +4336,7 @@ struct sVt22_3680 {
 
 extern const sVt9_3680 D_004889C8;
 extern const sVt22_3680 D_00488A10;
-extern char D_00459B90[];
+extern char cRider_cScriptObjRider_vtbl[];
 
 struct sWakeFade_3930;
 extern "C" void cRider_cRider(void* self);
@@ -4362,7 +4362,7 @@ extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self,
         cRider_cRider((char*)self + 0x40);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_004889C8;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488A10;
     if (inChrg == 0) {
         int vc;
@@ -4400,7 +4400,7 @@ __asm__(".globl cPlayerIndicatorFX__cPlayerIndicatorFX\n.type cPlayerIndicatorFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
-        "_vt$15cVbDtor002E37D0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002E37D0$14cRiderVbBC_bwf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002E37D0$12cRiderVb_bwf = D_00488A10\n"
         "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
@@ -6405,7 +6405,7 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
         cRider_cRider((char*)self + 0x3B0);
     }
     self->mRider->mScriptObjectVtbl = (void*)&D_00488550;
-    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mScriptObjRiderVtbl = cRider_cScriptObjRider_vtbl;
     VPTR_AT(self->mRider, sizeof(cRiderState)) = (void**)&D_00488598;
     if (inChrg == 0) {
         int vc;
@@ -6449,7 +6449,7 @@ __asm__(".globl cSpeedBoostFX__cSpeedBoostFX\n.type cSpeedBoostFX__cSpeedBoostFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
-        "_vt$15cVbDtor002E64C0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002E64C0$14cRiderVbBC_bwf = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002E64C0$12cRiderVb_bwf = D_00488598\n"
         "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif

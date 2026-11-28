@@ -625,7 +625,7 @@ struct sCharSrc_149BB8
     unsigned char v[7];
 };
 
-extern char D_004A6750[];
+extern char cBELibrary_boltDB[];
 extern char cBELibrary_rewardDB[];
 extern cBERaceDB cBELibrary_raceDB;
 extern const char str_data_be_charDB_dbl[];
@@ -651,7 +651,7 @@ extern "C" void cBELibrary_loadData(void)
     void* buf;
     int* grabPoints;
 
-    cBEBoltDB_load(D_004A6750);
+    cBEBoltDB_load(cBELibrary_boltDB);
     cBERewardDB_init(cBELibrary_rewardDB, 0);
     memset(&cBELibrary_raceDB, 0, 76);
     for (i = 0; i < 6; i++) {

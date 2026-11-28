@@ -156,10 +156,10 @@ extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self,
 extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, void* owner, int a, int b);
 extern char gFlowState;
 extern int gInLodge;
-extern int D_004A19D4;
+extern int cFEPopupSelectMultiplayerMode_selectedMode;
 extern int D_004A19DC;
 extern int cBENewRaceInterface_bIsBamLocation;
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern int cUITemplate_MAP_mMapStyle;
 extern int cUITemplate_MAP_mMapFEStart;
 extern int cUITemplate_MAP_mPeak;
@@ -280,14 +280,14 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             return cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *self);
         }
     case 22:
-        D_004A19D4 = pData != 0;
+        cFEPopupSelectMultiplayerMode_selectedMode = pData != 0;
         return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
     case 23:
         cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         return 0;
     case 9:
     case 11:
-        if (isOneGNS(D_004A1A70))
+        if (isOneGNS(cFEStateNet_fePath))
             return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
         {
             int one = 1;
@@ -322,9 +322,9 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
     case 12:
         switch (pData) {
         case 0:
-            if (isOneGNS(D_004A1A70))
+            if (isOneGNS(cFEStateNet_fePath))
                 return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
-            if (D_004A19D4 != 0 && st->x44 == 1)
+            if (cFEPopupSelectMultiplayerMode_selectedMode != 0 && st->x44 == 1)
                 return cFEStateMPCircuit_cFEStateMPCircuit(cMemMan_alloc(72, str_cFEStateMPCircuit, 0, 0), *self);
             cBE_getInterface_Fv(cBE_getBE(), 0);
             switch (cBENewRaceInterface_newRace.cGamePath) {
@@ -340,7 +340,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             case 2:
                 if (st->x44 == 0)
                     return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 1);
-                if (D_004A19D4 != 0)
+                if (cFEPopupSelectMultiplayerMode_selectedMode != 0)
                     return cFEStateMPCircuit_cFEStateMPCircuit(cMemMan_alloc(72, str_cFEStateMPCircuit, 0, 0), *self);
                 cUITemplate_MAP_mPeak = 1;
                 cUITemplate_MAP_mMapStyle = 0;
@@ -525,7 +525,7 @@ extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(void* mem, void* owner,
 extern "C" void* cFEStateLodge_cFEStateLodge(void* self, void* owner);
 extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(void* mem, void* owner);
 extern int gInLodge;
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 extern int cUITemplate_MAP_mMapStyle;
 extern int cUITemplate_MAP_mMapFEStart;
 extern char str_cPreGameLoadScreen[];
@@ -548,7 +548,7 @@ extern char str_cFEStateNetSSXWorld[];
 
 static inline bool IsMode1_1A16C0()
 {
-    return D_004A1A70 == 1;
+    return cFEStateNet_fePath == 1;
 }
 
 /**
@@ -558,7 +558,7 @@ static inline bool IsMode1_1A16C0()
  * main menu, character select or character setup by the new race's cGamePath (newRace.cGamePath) and the user number (+0x44);
  * the lodge or lodge rider detail instead of character setup / rider detail while gInLodge is set; audio options;
  * event select (clearing cUITemplate_MAP_mMapStyle, setting cUITemplate_MAP_mMapFEStart); options; options save/load; title; mountain,
- * peak and rewards rooms; the online main menu or SSX world when D_004A1A70 is 1. For state 35 and out-of-range paths
+ * peak and rewards rooms; the online main menu or SSX world when cFEStateNet_fePath is 1. For state 35 and out-of-range paths
  * it goes by the custom interface's +0xC (24 options save/load, 9 character select, 39 lodge). State 33 with @p stateData 1
  * sets the next app module to a new cPreGameLoadScreen and returns 0.
  *
@@ -1444,7 +1444,7 @@ extern "C" void cGameAnimMap_addSource(void* self, int kind, void* list);
 void cGameAnimMap_testResolve_p(void* map) __asm__("cGameAnimMap_testResolve__Fv");
 extern char str_data_char_anm_big_b[];
 extern char str_AdfDataSourceFE[];
-extern void* D_004A19C0[1];
+extern void* cRealFE_charAnimFiles[1];
 struct sAnimTableK1A2B00 {
     void* anims[1];
 };
@@ -1454,7 +1454,7 @@ extern void* cGameAnimMap_TheGameAnimMap;
 /**
  * Loads the front end's character animation data from "data/char/anm.big" into the game animation map.
  *
- * Opens the big file, creates one "AdfDataSourceFE" data source (cAdfDataSource_cAdfDataSource) from D_004A19C0[0], stores it
+ * Opens the big file, creates one "AdfDataSourceFE" data source (cAdfDataSource_cAdfDataSource) from cRealFE_charAnimFiles[0], stores it
  * in the animation table cAnimDataBase_TheAnimDataBase and registers it in the map cGameAnimMap_TheGameAnimMap (cGameAnimMap_addSource), resolves the map
  * and closes the file.
  */
@@ -1464,7 +1464,7 @@ extern "C" void cRealFE_loadCharAnimations(void)
     int i;
     FILESYS_addbigsync(str_data_char_anm_big_b, 0, 100, &handle);
     for (i = 0; i < 1; i++) {
-        void* anim = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
+        void* anim = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), cRealFE_charAnimFiles[i]);
         cAnimDataBase_TheAnimDataBase_K1A2B00->anims[(unsigned char)i] = anim;
         cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, anim);
     }

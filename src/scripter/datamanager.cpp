@@ -2341,9 +2341,9 @@ extern "C" cSSXScriptEngine* cSSXScriptEngine_cSSXScriptEngine(cSSXScriptEngine*
 INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine__cSSXScriptEngine);
 #ifdef SKIP_ASM
 extern void* cScriptObjEvent_vtbl[];
-extern void* D_00482298[];
+extern void* cScriptObjEvent_cScriptObject_vtbl[];
 extern void* cScriptObjGS_vtbl[];
-extern void* D_00482318[];
+extern void* cScriptObjGS_cScriptObject_vtbl[];
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags);
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags);
@@ -2372,10 +2372,10 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     D_004A34B0 = 0;
     cScriptSoundBankManager__cScriptSoundBankManager(self->mSoundBankManager, 2);
     cScriptAnimBankManager__cScriptAnimBankManager(&self->mAnimationBankManager, 2);
-    self->mObjectEvent.mScriptObjectVtbl = D_00482298;
+    self->mObjectEvent.mScriptObjectVtbl = cScriptObjEvent_cScriptObject_vtbl;
     self->mObjectEvent.mVtbl = cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject(&self->mObjectEvent.mObjType, 0);
-    self->mObjectGameState.mScriptObjectVtbl = D_00482318;
+    self->mObjectGameState.mScriptObjectVtbl = cScriptObjGS_cScriptObject_vtbl;
     self->mObjectGameState.mVtbl = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject(&self->mObjectGameState.mObjType, 0);
     cScriptObjCameraManager* cameraManager = (cScriptObjCameraManager*)(&self->mObjectGameState);

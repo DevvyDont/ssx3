@@ -3432,20 +3432,20 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
 #endif
 
 struct sPad16 { char x; int pad[3]; };
-extern sPad16 D_0047C3A8;
+extern sPad16 str_BASLUS_20772;
 extern "C" void strcpy3(void*, void*);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getProductCode);
 #ifdef SKIP_ASM
 /**
- * Writes the game's product code "BASLUS-20772" (D_0047C3A8), widened to 16 bits (strcpy3), into @p self.
+ * Writes the game's product code "BASLUS-20772" (str_BASLUS_20772), widened to 16 bits (strcpy3), into @p self.
  *
  * Callers pass a buffer size as well, which is ignored.
  */
 void cMCOverlayManager::getProductCode()
 {
-    strcpy3(this, &D_0047C3A8);
+    strcpy3(this, &str_BASLUS_20772);
 }
 #endif
 
@@ -3619,7 +3619,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GetMessage);
 int GetHashValue32(char* str);
 extern "C" void cMCOverlayManager_getDeviceNumberString(cMCOverlayManager* self, void* dst, int n);
 extern "C" void* strcpy1(void* dst, void* src);
-extern char D_004A29E8[];
+extern char str_empty_t[];
 extern char str_kT_MEMFECheckingCardPS2_b[];
 extern char str_kT_MEMOVNotDetectedPS2_b[];
 extern char str_kT_MEMFormattingPS2_b[];
@@ -3659,7 +3659,7 @@ void cMCOverlayManager::GetMessage(void* out)
 {
     unsigned short num[256];
     unsigned short num2[256];
-    strcpy3(out, D_004A29E8);
+    strcpy3(out, str_empty_t);
     getDeviceNumberString(num, mSelectedDevice);
     switch (mState) {
     case kMCOverlay_Idle: case kMCOverlay_CheckCardsWait: case kMCOverlay_CheckCards: case kMCOverlay_ReadingCard:

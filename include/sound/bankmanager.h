@@ -23,7 +23,7 @@
 // 0xAD4 is the complete object too; its members sit 4 bytes earlier (mMaxBanks 0xAC4: its cBankMonitor's two bools are
 // bytes). The preview had mBank at 0xAC0 (+0xC in retail; tools/layout_xlate.py).
 // Vtables [R]: cBankManager_vtbl (0x483AD8) in the cAsyncSys vptr slot (0x1D4; slot 1 dtor, slots 2..5 the
-// ASYNCSYS_On* overrides), cBankMonitor_vtbl (0x483B48) at 0xAB0 (the cBankMonitor's vptr), and D_00483AB8 (the
+// ASYNCSYS_On* overrides), cBankMonitor_vtbl (0x483B48) at 0xAB0 (the cBankMonitor's vptr), and cBankManager_cSoundSys_vtbl (the
 // cSoundSys-in-cBankManager table, stored at cSoundSys + 0x4).
 //
 // The struct below is the NON-VIRTUAL part, so it can be embedded where the object lives (cSSXAudio + 0x6C98). The

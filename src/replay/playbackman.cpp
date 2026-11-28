@@ -308,7 +308,7 @@ extern int kPlaybackPath;
 extern "C" int cPlaybackMan_findFileById_C9F0(cPlaybackMan* self, int key) __asm__("cPlaybackMan_findFileById");
 
 extern "C" int ASYNCFILE_load(char* path, int flags);
-extern char* D_004A3414;
+extern char* cPlaybackMan_fileNameFormat;
 extern char str_bar_c[];
 
 /**
@@ -316,7 +316,7 @@ extern char str_bar_c[];
  *
  * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (PackData) is set needs nothing.
  * Otherwise the entry index becomes the current async file (AsyncFileNum), the path is built with sprintf from the
- * format at D_004A3414, str_bar_c, kPlaybackPath, the location name (Location) and the file id, and
+ * format at cPlaybackMan_fileNameFormat, str_bar_c, kPlaybackPath, the location name (Location) and the file id, and
  * ASYNCFILE_load(path, 0x100) is started; its handle is kept in AsyncHandle (-1 on failure). cPlaybackMan_update
  * copies the finished file into the entry.
  *
@@ -333,7 +333,7 @@ bool cPlaybackMan::load(int key)
         AsyncFileNum = idx;
         AsyncHandle = kNoAsyncHandle;
         int num = kPlaybackPath;
-        sprintf(path, D_004A3414, str_bar_c, num, Location, PlaybackFiles[idx].Id);
+        sprintf(path, cPlaybackMan_fileNameFormat, str_bar_c, num, Location, PlaybackFiles[idx].Id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
         AsyncHandle = asyncHandle;
         if (asyncHandle >= 0)

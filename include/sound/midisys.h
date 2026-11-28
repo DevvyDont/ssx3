@@ -11,7 +11,7 @@
 // this + 0x1C in a complete cMidiSys, calls cBankSys_cBankSys(this, 0, ...) and stores cBankSys_vtbl at 0xC (cBankSys's
 // vtable; cMidiSys's own dtor sits in its virtual-base tables D_004839F0 / D_00483A10). The struct below is the
 // NON-VIRTUAL part: cCrowdSys (sound/crowdsys.h) and so cSSXAudio start with it. The ctor stores the instance in
-// D_004A3744 (EA name unknown).
+// cMidiSys_instance (EA name unknown).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline. Evidence tags:
 //   [R] the constructor (0x2A8140) and destructor cMidiSys__cMidiSys; [O] SSX On Tour's DWARF (cBankSys members; On Tour has
@@ -55,6 +55,6 @@ CHECK_OFFSET(cMidiSys, mMidiBanks, 0x010);
 CHECK_SIZE(cMidiSys, 0x14);
 
 // The MIDI system: its constructor stores itself here (the cMidiSys base of the one cSSXAudio). EA name unknown.
-extern cMidiSys* D_004A3744;        // [R] the cMidiSys ctor stores self, its dtor cMidiSys__cMidiSys clears it
+extern cMidiSys* cMidiSys_instance;        // [R] the cMidiSys ctor stores self, its dtor cMidiSys__cMidiSys clears it
 
 #endif /* SOUND_MIDISYS_H */

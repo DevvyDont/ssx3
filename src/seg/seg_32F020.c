@@ -14,7 +14,7 @@ struct RCMP_RCMP_SYSTEM {
     void** mVtbl;                                                                  /* 0xC */
 };
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
-extern char D_004953E8[];
+extern char str_empty_m[];
 extern int *PS2_SONY_FRAME_PS2_SONY_FRAME_x(void* a0, int a1, int a2) __asm__("PS2_SONY_FRAME_PS2_SONY_FRAME");
 /**
  * Creates a video frame for the Sony codec and links it at the front of the codec's frame list.
@@ -28,7 +28,7 @@ extern int *PS2_SONY_FRAME_PS2_SONY_FRAME_x(void* a0, int a1, int a2) __asm__("P
  * @param frameHeight  frame height in pixels
  */
 void PS2_SONY_CODEC_INTERNAL_CreateFrame(int *sonyCodec, int frameWidth, int frameHeight) {
-    int *n = PS2_SONY_FRAME_PS2_SONY_FRAME_x(RCMP_rcmp_sys.AllocMemFunc(D_004953E8, 20, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir),
+    int *n = PS2_SONY_FRAME_PS2_SONY_FRAME_x(RCMP_rcmp_sys.AllocMemFunc(str_empty_m, 20, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir),
                              frameWidth, frameHeight);
     int *node = n ? n + 2 : 0;
     int *head = (int *)sonyCodec[8];
@@ -167,15 +167,15 @@ INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
-extern char D_004953E8[];
+extern char str_empty_m[];
 /**
- * Allocates a Sony codec array with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953E8), @p allocSize, alignment
+ * Allocates a Sony codec array with the movie allocator: RCMP_rcmp_sys with an empty name (str_empty_m), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new_array2(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004953E8, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_m, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 
@@ -184,15 +184,15 @@ INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
-extern char D_004953E8[];
+extern char str_empty_m[];
 /**
- * Allocates a Sony codec object with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953E8), @p allocSize, alignment
+ * Allocates a Sony codec object with the movie allocator: RCMP_rcmp_sys with an empty name (str_empty_m), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new2(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004953E8, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_m, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 
@@ -426,15 +426,15 @@ INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
-extern char D_004953B8[];
+extern char str_empty_o[];
 /**
- * Allocates an RCMP::DECODER array with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953B8), @p allocSize,
+ * Allocates an RCMP::DECODER array with the movie allocator: RCMP_rcmp_sys with an empty name (str_empty_o), @p allocSize,
  * alignment 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void RCMP_DECODER_operator_new_array2(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004953B8, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_o, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 
@@ -443,15 +443,15 @@ INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
-extern char D_004953B8[];
+extern char str_empty_o[];
 /**
- * Allocates an RCMP::DECODER with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953B8), @p allocSize, alignment 0,
+ * Allocates an RCMP::DECODER with the movie allocator: RCMP_rcmp_sys with an empty name (str_empty_o), @p allocSize, alignment 0,
  * header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void RCMP_DECODER_operator_new2(int allocSize) {
-    RCMP_rcmp_sys.AllocMemFunc(D_004953B8, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
+    RCMP_rcmp_sys.AllocMemFunc(str_empty_o, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 

@@ -363,18 +363,18 @@ INCLUDE_ASM("seg/seg_21A1C0", bxIop_loadMsifrpc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int bxIop_loadModule(void* self, const char* name, int retry, int argLen, const char* args);
-extern void* D_004A3E94;
+extern void* bxIop_instance;
 extern char str_MSIFRPC_IRX[];
 
 /**
  * Loads the IOP module MSIFRPC.IRX.
  *
- * Calls bxIop_loadModule(D_004A3E94, "MSIFRPC.IRX", retry 1, no arguments). initOnline calls it; @p self is not used.
+ * Calls bxIop_loadModule(bxIop_instance, "MSIFRPC.IRX", retry 1, no arguments). initOnline calls it; @p self is not used.
  */
 // Loads MSIFRPC.IRX.
 extern "C" void bxIop_loadMsifrpc(void* self)
 {
-    bxIop_loadModule(D_004A3E94, str_MSIFRPC_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_MSIFRPC_IRX, 1, 0, 0);
 }
 #endif
 

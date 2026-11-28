@@ -821,7 +821,7 @@ extern "C" int cBEBoltInterface_countBoltsWithFlags(void* self, int profileIndex
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B2F8);
 #ifdef SKIP_ASM
-extern void* D_004A6750[];
+extern void* cBELibrary_boltDB[];
 struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
 extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
@@ -835,7 +835,7 @@ struct sBEEntry38_B2F8 {
 /**
  * Counts a character's bolt definitions whose byte +0x1 is zero.
  *
- * Walks the character's 0x38-byte definitions in the bolt database D_004A6750 (cBEBoltDB_getCharBolts, count cBEBoltDB_getNumCharBolts).
+ * Walks the character's 0x38-byte definitions in the bolt database cBELibrary_boltDB (cBEBoltDB_getCharBolts, count cBEBoltDB_getNumCharBolts).
  * Nothing calls it.
  *
  * @param characterId  character ID (the bolt database group)
@@ -843,8 +843,8 @@ struct sBEEntry38_B2F8 {
  */
 extern "C" int func_0014B2F8(void* self, int characterId)
 {
-    int count = cBEBoltDB_getNumCharBolts(D_004A6750, characterId);
-    sBEEntry38_B2F8* boltDef = (sBEEntry38_B2F8*)cBEBoltDB_getCharBolts((sBELibTables*)D_004A6750, characterId);
+    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
+    sBEEntry38_B2F8* boltDef = (sBEEntry38_B2F8*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
     int n = 0;
     int i;
     for (i = 0; i < count; i++, boltDef++) {
@@ -857,7 +857,7 @@ extern "C" int func_0014B2F8(void* self, int characterId)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B378);
 #ifdef SKIP_ASM
-extern void* D_004A6750[];
+extern void* cBELibrary_boltDB[];
 struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
 extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
@@ -871,7 +871,7 @@ struct sBEEntry38_B378 {
 /**
  * Copies a character's bolt definitions whose byte +0x1 is zero to @p out and returns how many.
  *
- * Walks the character's 0x38-byte definitions in the bolt database D_004A6750 (cBEBoltDB_getCharBolts, count cBEBoltDB_getNumCharBolts).
+ * Walks the character's 0x38-byte definitions in the bolt database cBELibrary_boltDB (cBEBoltDB_getCharBolts, count cBEBoltDB_getNumCharBolts).
  * Nothing calls it.
  *
  * @param characterId  character ID (the bolt database group)
@@ -880,8 +880,8 @@ struct sBEEntry38_B378 {
  */
 extern "C" int func_0014B378(void* self, int characterId, sBEEntry38_B378* out)
 {
-    int count = cBEBoltDB_getNumCharBolts(D_004A6750, characterId);
-    sBEEntry38_B378* boltDef = (sBEEntry38_B378*)cBEBoltDB_getCharBolts((sBELibTables*)D_004A6750, characterId);
+    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
+    sBEEntry38_B378* boltDef = (sBEEntry38_B378*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
     int n = 0;
     int i;
     for (i = 0; i < count; i++, boltDef++) {
@@ -898,7 +898,7 @@ extern "C" int func_0014B378(void* self, int characterId, sBEEntry38_B378* out)
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getUsedEquipPoints);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
-extern void* D_004A6750[];
+extern void* cBELibrary_boltDB[];
 struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
 extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
@@ -922,7 +922,7 @@ struct sBEEntry38B {
  * Returns the equip points a character's equipped bolts use: the sum of the short at +0xC of each bolt definition whose
  * entry has flag 0x10.
  *
- * Walks the character's definitions in the bolt database D_004A6750 and finds each one's entry through the lookup table
+ * Walks the character's definitions in the bolt database cBELibrary_boltDB and finds each one's entry through the lookup table
  * at +0x288 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88) (no null check). The
  * equip screen shows it as the points spent.
  *
@@ -934,8 +934,8 @@ extern "C" int cBEBoltInterface_getUsedEquipPoints(void* self, int profileIndex,
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int sum = 0;
-    int count = cBEBoltDB_getNumCharBolts(D_004A6750, characterId);
-    sBEEntry38B* boltDef = (sBEEntry38B*)cBEBoltDB_getCharBolts((sBELibTables*)D_004A6750, characterId);
+    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
+    sBEEntry38B* boltDef = (sBEEntry38B*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
     int i;
     for (i = 0; i < count; i++, boltDef++) {
         short entryIndex = (charRecord->mpBoltsMap)[boltDef->id];
@@ -1187,7 +1187,7 @@ extern "C" bool cBEBoltInterface_buildBoltModelFileName(void* self, int profileI
         *out = 0;
         return false;
     }
-    sBELibTables* tbl = (sBELibTables*)D_004A6750;
+    sBELibTables* tbl = (sBELibTables*)cBELibrary_boltDB;
     cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(cBE_getInterface_Fv(cBE_getBE(), 9), profileIndex, characterId);
     strcpy(out, boltDef->name);
     char* wildcard = strchr(out, '$');
@@ -1214,7 +1214,7 @@ extern "C" bool cBEBoltInterface_buildBoltModelFileName(void* self, int profileI
 }
 #endif
 
-extern void* D_004A6750[];
+extern void* cBELibrary_boltDB[];
 extern "C" void* cBEBoltDB_load(void*);
 
 //100%
@@ -1294,7 +1294,7 @@ extern "C" int func_0014BC18(void* self, int profile, int ch, char* out)
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_loadBoltDB__FPv);
 #ifdef SKIP_ASM
 /**
- * Loads the bolt database (D_004A6750) unless it is already loaded and rebuilds its indexes (cBEBoltDB_load).
+ * Loads the bolt database (cBELibrary_boltDB) unless it is already loaded and rebuilds its indexes (cBEBoltDB_load).
  *
  * The front end's load sequence (fereal) calls it on the bolt interface before cBEBoltInterface_restoreVisibleFlags.
  *
@@ -1302,7 +1302,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_loadBoltDB__FPv);
  */
 void* cBEBoltInterface_loadBoltDB(void* self)
 {
-    return cBEBoltDB_load((void*)D_004A6750);
+    return cBEBoltDB_load((void*)cBELibrary_boltDB);
 }
 #endif
 
@@ -1313,7 +1313,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_refreshVisibleBolts__FPv);
 #ifdef SKIP_ASM
 /**
  * Re-derives every character's equipped bolt flags and rebuilds the bolt database's indexes (cBEBoltDB_refreshVisibleBolts on
- * D_004A6750).
+ * cBELibrary_boltDB).
  *
  * Called from the game loader (gameload).
  *
@@ -1321,7 +1321,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_refreshVisibleBolts__FPv);
  */
 void* cBEBoltInterface_refreshVisibleBolts(void* self)
 {
-    return cBEBoltDB_refreshVisibleBolts((void*)D_004A6750);
+    return cBEBoltDB_refreshVisibleBolts((void*)cBELibrary_boltDB);
 }
 #endif
 
@@ -1329,7 +1329,7 @@ void* cBEBoltInterface_refreshVisibleBolts(void* self)
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getBoltDB__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the bolt (equipment item) database, D_004A6750.
+ * Returns the bolt (equipment item) database, cBELibrary_boltDB.
  *
  * Its 0x38-byte bolt definitions are grouped by character (cBEBoltDB_getNumCharBolts count, cBEBoltDB_getCharBolts first). The argument is
  * not read.
@@ -1338,7 +1338,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getBoltDB__FPv);
  */
 void* cBEBoltInterface_getBoltDB(void* self)
 {
-    return (void*)D_004A6750;
+    return (void*)cBELibrary_boltDB;
 }
 #endif
 
@@ -1348,7 +1348,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_setBoltModelPart);
 extern "C" void cBEBoltDB_setBoltModelPart(void **, int, int, int);
 
 /**
- * Sets byte +0x10 of a bolt definition in the bolt database D_004A6750 (cBEBoltDB_setBoltModelPart).
+ * Sets byte +0x10 of a bolt definition in the bolt database cBELibrary_boltDB (cBEBoltDB_setBoltModelPart).
  *
  * Nothing calls it.
  *
@@ -1357,7 +1357,7 @@ extern "C" void cBEBoltDB_setBoltModelPart(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void cBEBoltInterface_setBoltModelPart(int groupId, int boltId, int value) {
-    cBEBoltDB_setBoltModelPart(D_004A6750, groupId, boltId, value);
+    cBEBoltDB_setBoltModelPart(cBELibrary_boltDB, groupId, boltId, value);
 }
 #endif
 //100%
@@ -1366,7 +1366,7 @@ INCLUDE_ASM("be/belibrary", func_0014BE00);
 extern "C" void func_0014C590(void **, int, int, int);
 
 /**
- * Sets byte +0x1 of a bolt definition in the bolt database D_004A6750 (func_0014C590).
+ * Sets byte +0x1 of a bolt definition in the bolt database cBELibrary_boltDB (func_0014C590).
  *
  * Nothing calls it.
  *
@@ -1375,7 +1375,7 @@ extern "C" void func_0014C590(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void func_0014BE00(int groupId, int boltId, int value) {
-    func_0014C590(D_004A6750, groupId, boltId, value);
+    func_0014C590(cBELibrary_boltDB, groupId, boltId, value);
 }
 #endif
 //100%
@@ -1384,7 +1384,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_setBoltEquipPoints);
 extern "C" void cBEBoltDB_setBoltEquipPoints(void **, int, int, int);
 
 /**
- * Sets short +0xC (equip points) of a bolt definition in the bolt database D_004A6750 (cBEBoltDB_setBoltEquipPoints).
+ * Sets short +0xC (equip points) of a bolt definition in the bolt database cBELibrary_boltDB (cBEBoltDB_setBoltEquipPoints).
  *
  * Nothing calls it.
  *
@@ -1393,7 +1393,7 @@ extern "C" void cBEBoltDB_setBoltEquipPoints(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void cBEBoltInterface_setBoltEquipPoints(int groupId, int boltId, int value) {
-    cBEBoltDB_setBoltEquipPoints(D_004A6750, groupId, boltId, value);
+    cBEBoltDB_setBoltEquipPoints(cBELibrary_boltDB, groupId, boltId, value);
 }
 #endif
 
@@ -1404,7 +1404,7 @@ extern "C" int BXFILE_sizez(const char* name);
 extern "C" int FILE_loadatz(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern const char* D_004A11CC;
+extern const char* cBEBoltDB_fileName;
 extern int kBolt_Num;
 extern const char str_BoltsFile[];
 
@@ -1436,7 +1436,7 @@ struct sBELib_14BE70 {
 /**
  * Loads the bolts file and sets up the bolt database's tables and string pointers.
  *
- * Reads the whole file named by D_004A11CC (BXFILE_sizez, FILE_loadatz) into a "BoltsFile" block kept at +0x0. The file
+ * Reads the whole file named by cBEBoltDB_fileName (BXFILE_sizez, FILE_loadatz) into a "BoltsFile" block kept at +0x0. The file
  * holds the id count (stored in kBolt_Num, rounded up to even), then four counted tables: the 0x38-byte bolt
  * definitions (+0x4, count +0x1C), 12-byte records (+0x8, +0x20), 8-byte records (+0xC, +0x24) and 8-byte records
  * (+0x10, +0x28), then one word and the string pool (+0x14).
@@ -1449,10 +1449,10 @@ struct sBELib_14BE70 {
 extern "C" void cBEBoltDB_loadFile(void* vself)
 {
     sBELib_14BE70* self = (sBELib_14BE70*)vself;
-    int size = BXFILE_sizez(D_004A11CC);
+    int size = BXFILE_sizez(cBEBoltDB_fileName);
     char* buf = new (str_BoltsFile, 0, 0) char[size];
     self->buf = buf;
-    FILE_loadatz(D_004A11CC, buf, size);
+    FILE_loadatz(cBEBoltDB_fileName, buf, size);
     char* fileData = self->buf;
     kBolt_Num = *(int*)fileData;
     int numBolts = *(int*)(fileData + 4);
@@ -2316,7 +2316,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_isBoltAncestor);
  * Returns whether bolt @p key is an ancestor of a bolt definition by the parent links (short +0x6).
  *
  * Walks up from @p boltDef: its parent is found with cBEBoltDB_findBoltIndex in the definition's group (byte +0x0); the walk stops at
- * parent kNoBoltID or a missing definition. The cheat codes use it to find the items under D_004A11E0.
+ * parent kNoBoltID or a missing definition. The cheat codes use it to find the items under kBolt_boardGroup.
  *
  * @param boltDef  the bolt definition to start from, or null
  * @param key  the bolt id to look for

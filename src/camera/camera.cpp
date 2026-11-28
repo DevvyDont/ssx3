@@ -5692,29 +5692,29 @@ extern "C" int doRenderAirTargetGraph(void) {
 //100%
 INCLUDE_ASM("camera/camera", getAirPositionCamCSI);
 #ifdef SKIP_ASM
-extern int D_004A4DD8;
+extern int cLookAtChaseAlgorithm_curAirPositionSpline;
 
 /**
- * Returns D_004A4DD8: the AirPositionSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
+ * Returns cLookAtChaseAlgorithm_curAirPositionSpline: the AirPositionSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
  *
  * @return the spline's address (0 when no air curve is running; D_004A1288 is the matching flag)
  */
 extern "C" int getAirPositionCamCSI(void) {
-    return D_004A4DD8;
+    return cLookAtChaseAlgorithm_curAirPositionSpline;
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", getAirTargetCamCSI);
 #ifdef SKIP_ASM
-extern int D_004A4DDC;
+extern int cLookAtChaseAlgorithm_curAirTargetSpline;
 
 /**
- * Returns D_004A4DDC: the AirTargetSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
+ * Returns cLookAtChaseAlgorithm_curAirTargetSpline: the AirTargetSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
  *
  * @return the spline's address (0 when no air curve is running)
  */
 extern "C" int getAirTargetCamCSI(void) {
-    return D_004A4DDC;
+    return cLookAtChaseAlgorithm_curAirTargetSpline;
 }
 #endif
 
@@ -5861,7 +5861,7 @@ static inline void AddEq_1635F8(t4Vector& v, const t4Vector& b)
  * and sets ApplyingFullAirFunc. At 0 it builds AirTargetSpline and AirPositionSpline with the same keys stretched to
  * the total air time (slot 12) and scaled by amplitude * VerticalJumpFactor * a smoothstep of the air time over
  * 1.7..2.8 s, and sets ApplyingAirFunc. Running curves are evaluated (cCubicSplineInterpolant_evaluate,
- * cCubicSplineInterpolant::evaluate) into the Last*Delta fields; D_004A1288, D_004A4DD8 and D_004A4DDC publish the
+ * cCubicSplineInterpolant::evaluate) into the Last*Delta fields; D_004A1288, cLookAtChaseAlgorithm_curAirPositionSpline and cLookAtChaseAlgorithm_curAirTargetSpline publish the
  * active air splines. On landing AirExitSmoothness is set (0.93 toward @p exitSmoothness over 1.2..2.2 s of full-air
  * time, then halfway toward 1 for landing angles 1.05..1.4, slot 23), the curves stop, and from then on the deltas
  * decay by it each frame. The deltas, blended by AirCamTimeInAir / @p blendTime and scaled by eye distance / 300,
@@ -6010,12 +6010,12 @@ void cLookAtChaseAlgorithm::updateAirCam(cChaseSetup* info, float fullScalar, fl
         LastAirTargetDelta = yc;
         D_004A1288 = 1;
         // PORT: spline pointers kept in int globals.
-        D_004A4DD8 = (int)(&AirPositionSpline);
-        D_004A4DDC = (int)(&AirTargetSpline);
+        cLookAtChaseAlgorithm_curAirPositionSpline = (int)(&AirPositionSpline);
+        cLookAtChaseAlgorithm_curAirTargetSpline = (int)(&AirTargetSpline);
     } else {
         D_004A1288 = 0;
-        D_004A4DD8 = 0;
-        D_004A4DDC = 0;
+        cLookAtChaseAlgorithm_curAirPositionSpline = 0;
+        cLookAtChaseAlgorithm_curAirTargetSpline = 0;
     }
     if (info->Airborne == 0) {
         if (HitGroundSinceStartingAirFunc == 0) {
@@ -6624,15 +6624,15 @@ extern "C" int doRenderHalfPipeAngleGraph(void) {
 //100%
 INCLUDE_ASM("camera/camera", getHalfPipeAngleCSI);
 #ifdef SKIP_ASM
-extern int D_004A4DE0;
+extern int cLookAtChaseAlgorithm_curHalfPipeAngleSpline;
 
 /**
- * Returns D_004A4DE0: the HalfPipeAngleSpline that cLookAtChaseAlgorithm_updateHalfPipeCam last evaluated.
+ * Returns cLookAtChaseAlgorithm_curHalfPipeAngleSpline: the HalfPipeAngleSpline that cLookAtChaseAlgorithm_updateHalfPipeCam last evaluated.
  *
  * @return the spline's address (0 until one is evaluated; never cleared afterwards, D_004A128C is the activity flag)
  */
 extern "C" int getHalfPipeAngleCSI(void) {
-    return D_004A4DE0;
+    return cLookAtChaseAlgorithm_curHalfPipeAngleSpline;
 }
 #endif
 
@@ -6949,7 +6949,7 @@ static inline sVec_164878* CallV_164878(char* self, int slot)
  * ease curve goes into HalfPipeAngleSpline. Then HalfPipeCamInitialized is set.
  *
  * During the swing the spline value at HalfPipeTimeInAir / HalfPipeTimeToLand rotates the inbound look about the axis
- * (HalfPipeNewLook) and scales FullOut (HalfPipeOut); D_004A128C and D_004A4DE0 publish the spline. CamTargetPos
+ * (HalfPipeNewLook) and scales FullOut (HalfPipeOut); D_004A128C and cLookAtChaseAlgorithm_curHalfPipeAngleSpline publish the spline. CamTargetPos
  * eases toward the setup's position over the first 30 % and Position = CamTargetPos - NewLook + Out. After the swing,
  * while HalfPipeBlendOutTimeLeft lasts, both points blend back toward the chase pose, saving
  * HalfPipeBlendOutLastLook, HalfPipeBlendOutLastTargetDelta and the cross-blend times, which a following half-pipe
@@ -7038,7 +7038,7 @@ void cLookAtChaseAlgorithm::updateHalfPipeCam(cChaseSetup* info, float blendOut)
                 float timeFraction = F_164878(564) / F_164878(560);
                 D_004A128C = 1;
                 // PORT: spline pointer kept in an int global.
-                D_004A4DE0 = (int)(S_164878 + 0x334);
+                cLookAtChaseAlgorithm_curHalfPipeAngleSpline = (int)(S_164878 + 0x334);
                 float fraction = cCubicSplineInterpolant_evaluate(S_164878 + 0x334, timeFraction);
                 float sn, cs;
                 fSinCos(&sn, &cs, fraction * F_164878(568) * 0.5f);

@@ -137,7 +137,7 @@ CHECK_SIZE(cScriptPlayerMain, 0x48);
 // cInSeqComm: the interface the script player calls back on (On Tour class cInSeqComm: pure virtuals only, in this
 // slot order: OnInSeqPlay 1, OnInSeqUpdate 2, OnInSeqPlayStopping 3, OnInSeqStop 4, OnInSeqLoop 5,
 // OnInSeqRequestEntityCommInterface 6, ...; the vptr is its only data, at 0x0). cBXScriptEngine implements it at
-// +0x2AC (retail tables D_00482450 / D_00482100: 11 slots). [U] cScriptPlayerMain_Stop calls slot 4,
+// +0x2AC (retail tables cBXScriptEngine_cInSeqComm_vtbl / D_00482100: 11 slots). [U] cScriptPlayerMain_Stop calls slot 4,
 // cScriptPlayerMain_DoUpdate slot 2, cScriptPlayerEntity_SetupPlay slot 6. Parameters [O] (On Tour's
 // cSSXScriptEngine / cBXScriptEngine overrides); slots 7.. are not declared (no retail caller seen).
 struct cInSeqComm {

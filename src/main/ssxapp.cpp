@@ -1044,7 +1044,7 @@ extern char str_data_fonts_fefont_sfn[];
 extern char str_data_fonts_hudfont_sfn[];
 extern char str_GameAnimMap[];
 extern char str_AnimDataBase[];
-extern char D_004A29E8[];
+extern char str_empty_t[];
 extern int cBENewRaceInterface_commandLineTrack;
 
 struct sSndCfg_82D0 {
@@ -1168,7 +1168,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_82D0().iUseDJSpeech != 0);
     cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().iUseArcadeSFX != 0);
     WORLDTRIGGERMANAGER_Init();
-    if (strcmp(self->fCC, D_004A29E8)) {
+    if (strcmp(self->fCC, str_empty_t)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         cBXString_operatorE1(&cBENewRaceInterface_commandLineTrack, self->fCC);
     }
@@ -1292,7 +1292,7 @@ extern "C" void cSSXApp_activateBEOptions()
 //100%
 INCLUDE_ASM("main/ssxapp", initOnline);
 #ifdef SKIP_ASM
-extern int D_004A3E94;
+extern int bxIop_instance;
 extern int EnableOnline;
 extern char str_cdrom0[];
 extern char str_1[];
@@ -1340,36 +1340,36 @@ extern "C" void cUsbKeyboard_createInstance();
 extern "C" void initOnline()
 {
     char buf[0x100];
-    bxIop_loadModule(D_004A3E94, str_USBD_IRX, 0, 43, str_hub_1);
+    bxIop_loadModule(bxIop_instance, str_USBD_IRX, 0, 43, str_hub_1);
     int ok = 0;
-    bxIop_loadModule(D_004A3E94, str_USBKB_IRX, 0, 0x10, str_keybd_2);
-    bxIop_loadModule(D_004A3E94, str_DEV9_IRX, 0, 0, 0);
-    bxIop_installPowerOffHandler(D_004A3E94);
-    bxIop_loadModule(D_004A3E94, str_INET_IRX, 1, 18, str_mem_96KB);
+    bxIop_loadModule(bxIop_instance, str_USBKB_IRX, 0, 0x10, str_keybd_2);
+    bxIop_loadModule(bxIop_instance, str_DEV9_IRX, 0, 0, 0);
+    bxIop_installPowerOffHandler(bxIop_instance);
+    bxIop_loadModule(bxIop_instance, str_INET_IRX, 1, 18, str_mem_96KB);
     int n = sprintf(buf, str_icon_pct_sCNF_SYS_NET_ICOpct_spct_cicons, str_cdrom0, str_1, 0, str_cdrom0, str_1);
-    bxIop_loadModule(D_004A3E94, str_NETCNF_IRX, 1, n + 1, buf);
-    bxIop_loadModule(D_004A3E94, str_INETCTL_IRX, 1, 20, str_no_auto);
+    bxIop_loadModule(bxIop_instance, str_NETCNF_IRX, 1, n + 1, buf);
+    bxIop_loadModule(bxIop_instance, str_INETCTL_IRX, 1, 20, str_no_auto);
     EnableOnline = 0;
-    if (bxIop_loadModule(D_004A3E94, str_SMAP_IRX, 0, 0, 0) >= 0) {
+    if (bxIop_loadModule(bxIop_instance, str_SMAP_IRX, 0, 0, 0) >= 0) {
         EnableOnline = 1;
         ok = 1;
     }
-    bxIop_loadModule(D_004A3E94, str_PPP_IRX, 1, 0, 0);
+    bxIop_loadModule(bxIop_instance, str_PPP_IRX, 1, 0, 0);
     n = sprintf(buf, str_dial_pct_sCNF_DIAL_SPD_CNFpct_spct_c_nog, str_cdrom0, str_1, 0);
-    if (bxIop_loadModule(D_004A3E94, str_SPDUART_IRX, 0, n + 1, buf) >= 0) {
+    if (bxIop_loadModule(bxIop_instance, str_SPDUART_IRX, 0, n + 1, buf) >= 0) {
         EnableOnline = 1;
     }
     if (EnableOnline && ok) {
-        bxIop_loadModule(D_004A3E94, str_PPPOE_IRX, 1, 0, 0);
+        bxIop_loadModule(bxIop_instance, str_PPPOE_IRX, 1, 0, 0);
     }
     THREAD_yieldticks(10);
     if (EnableOnline) {
-        bxIop_loadMsifrpc(D_004A3E94);
-        bxIop_loadModule(D_004A3E94, str_LIBNET_IRX, 1, 0, 0);
+        bxIop_loadMsifrpc(bxIop_instance);
+        bxIop_loadModule(bxIop_instance, str_LIBNET_IRX, 1, 0, 0);
         func_0040B130(0);
-        bxIop_loadModule(D_004A3E94, str_DRTYSCKF_IRX, 1, 0, 0);
-        bxIop_loadModule(D_004A3E94, str_LGAUD_IRX, 0, 18, str_rpc_0);
-        if (bxIop_loadModule(D_004A3E94, str_VOIPF_IRX, 0, 0, 0) >= 0) {
+        bxIop_loadModule(bxIop_instance, str_DRTYSCKF_IRX, 1, 0, 0);
+        bxIop_loadModule(bxIop_instance, str_LGAUD_IRX, 0, 18, str_rpc_0);
+        if (bxIop_loadModule(bxIop_instance, str_VOIPF_IRX, 0, 0, 0) >= 0) {
             voipRpc_bind();
         } else {
             voipRpc_unbind();
@@ -1400,7 +1400,7 @@ struct sCrowdCfg_229180 {
     int fC;
     int f10;
 };
-extern sCrowdCfg_229180 D_00536690_229180[] __asm__("D_00536690");
+extern sCrowdCfg_229180 cCrowdMan2d_sharedPose_229180[] __asm__("cCrowdMan2d_sharedPose");
 
 struct sCrowdId_229180 {
     unsigned int id;
@@ -1428,7 +1428,7 @@ static inline int AnimCount_229180(char* anim)
  *
  * Builds 128 resource ids (+0x8) set to 0xFFFFFFFF, 128 0x40-byte quad slots (+0x210) and the 40 0x20-byte marker ring
  * entries (+0x2220); makes itself the singleton TheCrowdMan2d. Creates a cCrowdRender2D (0x10 bytes, tag "cCrowdRender2D")
- * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record D_00536690: the
+ * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record cCrowdMan2d_sharedPose: the
  * first short takes the animation's current frame texture id (+0x10), +0xC 0x20000, the shorts at +0x2, +0x4 and +0x6
  * -1, +0x8 and +0x10 0. Then resets the slots (cCrowdMan2d_resetSlots). cGame_load builds it as CrowdMan2d (10016 bytes).
  */
@@ -1442,13 +1442,13 @@ cCrowdMan2d::cCrowdMan2d()
     mpRender = (cCrowdRender2D*)cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
     char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(mpRender);
     mpAnim = (cCrowdAnim2D*)anim;
-    D_00536690_229180[0].f0 = AnimCount_229180(anim);
-    D_00536690_229180[0].fC = 0x20000;
-    D_00536690_229180[0].f10 = 0;
-    D_00536690_229180[0].f2 = -1;
-    D_00536690_229180[0].f4 = -1;
-    D_00536690_229180[0].f8 = 0;
-    D_00536690_229180[0].f6 = -1;
+    cCrowdMan2d_sharedPose_229180[0].f0 = AnimCount_229180(anim);
+    cCrowdMan2d_sharedPose_229180[0].fC = 0x20000;
+    cCrowdMan2d_sharedPose_229180[0].f10 = 0;
+    cCrowdMan2d_sharedPose_229180[0].f2 = -1;
+    cCrowdMan2d_sharedPose_229180[0].f4 = -1;
+    cCrowdMan2d_sharedPose_229180[0].f8 = 0;
+    cCrowdMan2d_sharedPose_229180[0].f6 = -1;
     resetSlots();
 }
 #endif
@@ -1580,14 +1580,14 @@ INCLUDE_ASM("main/ssxapp", cCrowdMan2d_update);
 #ifdef SKIP_ASM
 extern "C" void cCrowdAnim2D_update(void* p);
 extern "C" void cCrowdMan2d_spawnMarkers(cCrowdMan2d* self);
-extern short D_00536690[];
+extern short cCrowdMan2d_sharedPose[];
 
 /**
  * Updates the 2D crowd manager once per frame: the crowd animation, the shared frame, the marker lifetimes, then the
  * marker spawns.
  *
  * Calls cCrowdAnim2D_update on the animation (+0x4) and copies its current frame texture id (+0x10) into the first
- * short of D_00536690; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
+ * short of cCrowdMan2d_sharedPose; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
  * cCrowdMan2d_spawnMarkers. cGame_update calls it.
  */
 void cCrowdMan2d::update()
@@ -1597,7 +1597,7 @@ void cCrowdMan2d::update()
     int frameTexId;
     cCrowdAnim2D_update(mpAnim);
     frameTexId = *(int*)((char*)mpAnim + 0x10);
-    D_00536690[0] = frameTexId;
+    cCrowdMan2d_sharedPose[0] = frameTexId;
     marker = (char*)this;
     for (i = 39; i >= 0; i--) {
         if (*(int*)(marker + 0x2230) > 0) {
@@ -1832,7 +1832,7 @@ struct sModel_229820 {
     }* pose;                    // 0x94
 };
 
-extern char D_00536690_229820[] __asm__("D_00536690");
+extern char cCrowdMan2d_sharedPose_229820[] __asm__("cCrowdMan2d_sharedPose");
 
 static inline sModel_229820* refToPtr_229820(unsigned int p)
 {
@@ -1858,10 +1858,10 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
 }
 
 /**
- * Points one bone of a model's pose at the shared crowd record D_00536690.
+ * Points one bone of a model's pose at the shared crowd record cCrowdMan2d_sharedPose.
  *
  * Finds the model behind @p handle in the world cache (cObjectInterface_getWorld: table by the low byte, entry by the
- * rest); when part @p partIndex exists in its skeleton (+0x80) and has a bone @p boneIndex, stores D_00536690 in the pose (+0x94) entry
+ * rest); when part @p partIndex exists in its skeleton (+0x80) and has a bone @p boneIndex, stores cCrowdMan2d_sharedPose in the pose (+0x94) entry
  * of that bone. @p self is not used. Crowd2dFunc (a script command) calls it for its command 0.
  *
  * @param handle  the model's resource handle
@@ -1879,7 +1879,7 @@ void cCrowdMan2d::attachBoneToCrowdPose(unsigned int handle, int partIndex, int 
         if (partIndex < skeleton->m_iNumMeshes) {
             tMeshRecord* skelPart = (parts[partIndex].m_Mesh);
             if (boneIndex < skelPart->m_iNumContexts)
-                dst[*((short*)skelPart->m_pContexts[boneIndex])] = D_00536690_229820;
+                dst[*((short*)skelPart->m_pContexts[boneIndex])] = cCrowdMan2d_sharedPose_229820;
         }
     }
 }
@@ -2982,7 +2982,7 @@ void FrustumIntersector::AddAllTypedInside(CellClipT* list, int count)
 INCLUDE_ASM("main/ssxapp", FrustumCallback_operatorCall);
 #ifdef SKIP_ASM
 extern char D_948[];
-extern char D_00442130[];
+extern char FrustumCallback_cellBoxExtents[];
 
 
 
@@ -3066,7 +3066,7 @@ static inline void boxResult_A830(int* r)
  * The context @p vctx holds the world view being built (+0x0), the clip-plane source (+0x4: plane count at +0x10C,
  * planes at +0x8 in 8-byte steps), the mask of planes still to test (+0x8) and an inside flag (+0xC). A cell's size is
  * 2^level (built from the float exponent). Unless the parent was fully inside, the cell box goes through the VU0
- * box-vs-frustum microprogram at 0x570 (matrices at D_00442130 and the view's +0x10; GMClipCodes): GM_CLIPCODE_OUTSIDE
+ * box-vs-frustum microprogram at 0x570 (matrices at FrustumCallback_cellBoxExtents and the view's +0x10; GMClipCodes): GM_CLIPCODE_OUTSIDE
  * returns, GM_CLIPCODE_CROSSING is partly inside, GM_CLIPCODE_INSIDE is inside. With a non-zero mask the cell's
  * bounding sphere (center at the cell middle, radius 1.2124 * size) is then tested against each masked plane by the
  * microprogram at D_948: 0 culls the cell, and planes the sphere is wholly in front of are cleared from the mask. A
@@ -3113,7 +3113,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             "vmaddw.xyz $vf16, $vf3, $vf1w\n"
             "vcallms   0x570\n"
             :
-            : "r"(vec), "r"(D_00442130), "r"((char*)&ctx->intersector->VFIntersect)
+            : "r"(vec), "r"(FrustumCallback_cellBoxExtents), "r"((char*)&ctx->intersector->VFIntersect)
             : "memory");
         if (mask != 0)
             { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }

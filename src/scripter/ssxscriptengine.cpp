@@ -54,7 +54,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void cSSXScriptEngine_SyncLoadScriptBank_7(void* self, int i, const char* name, int flags, int key, int* buf, int x)
     __asm__("cSSXScriptEngine_SyncLoadScriptBank");
 extern "C" void cScriptObject_InitScriptObject(void* rig);
-extern const char* D_004A349C;
+extern const char* kScriptMainDataBankFilename;
 extern char str_SetupInfoHeap[];
 extern char str_NISLists[];
 extern char str_IdleLists[];
@@ -93,7 +93,7 @@ void cSSXScriptEngine::Load()
     }
     mpSetupInfoHeap[9].pNext = 0;
     mpSetupInfoUnused = mpSetupInfoHeap;
-    cSSXScriptEngine_SyncLoadScriptBank_7(this, 0, D_004A349C, 0, -1, 0, 0);
+    cSSXScriptEngine_SyncLoadScriptBank_7(this, 0, kScriptMainDataBankFilename, 0, -1, 0, 0);
     for (int i = 0; i < 2; i++)
         cScriptObject_InitScriptObject(&mObjectCameraManager[i]);
     cScriptObject_InitScriptObject(((char*)&mObjectGameState.mObjType));
@@ -3036,7 +3036,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_FillOrientationFromObje
 #ifdef SKIP_ASM
 extern "C" float func_0031C128(float x);
 extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
-extern int D_00482660[];
+extern int cSSXScriptEngine_locationSectionTable[];
 
 struct sVec_27BB08 {
     float x, y, z, w;
@@ -3158,7 +3158,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
 {
     if (cat == cSSXScriptEngine::kAnchorSection_CurrentLocation) {
         int k = cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))->locationID;
-        cat = D_00482660[k];
+        cat = cSSXScriptEngine_locationSectionTable[k];
     }
     int* tbl = (int*)self->mpAnchorTableDB[cat];
     if (tbl == 0)
@@ -3372,7 +3372,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_cScriptObjGS);
 #ifdef SKIP_ASM
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
-extern void* D_00482318[];
+extern void* cScriptObjGS_cScriptObject_vtbl[];
 extern void* cScriptObjGS_vtbl[];
 
 /**
@@ -3384,7 +3384,7 @@ extern "C" void* cScriptObjGS_cScriptObjGS(cScriptObjGS* self)
 {
     cScriptEntity_cScriptEntity(self);
     cScriptObject_cScriptObject(&self->mObjType, keScriptObjectType_GameState);
-    self->mScriptObjectVtbl = D_00482318;
+    self->mScriptObjectVtbl = cScriptObjGS_cScriptObject_vtbl;
     *(void***)self = cScriptObjGS_vtbl;
     return ((void*)self);
 }
@@ -5202,14 +5202,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_cScriptObjRider);
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
 extern char cScriptObjRider_vtbl[];
-extern char D_00482018[];
+extern char cScriptObjRider_cScriptObject_vtbl[];
 extern t4Matrix t4mat_Identity;
 
 /**
  * Constructs a rider's script object: a script entity plus a cScriptObject of type 3 with an identity base transform.
  *
  * Builds the cScriptEntity part (cScriptEntity_cScriptEntity) at +0x0 and the cScriptObject part at +0xC (mObjType)
- * with type 3, installs the vtables cScriptObjRider_vtbl (mVtbl) and D_00482018 (mScriptObjectVtbl), clears
+ * with type 3, installs the vtables cScriptObjRider_vtbl (mVtbl) and cScriptObjRider_cScriptObject_vtbl (mScriptObjectVtbl), clears
  * mpAnimBankInfo and mpSoundBankInfo, copies t4mat_Identity into mBaseTransform and zeroes mBaseRotX/Y/Z.
  * cRider_cRider builds the rider's embedded one with it.
  *
@@ -5221,7 +5221,7 @@ extern "C" void* cScriptObjRider_cScriptObjRider(cScriptObjRider* self)
 {
     cScriptEntity_cScriptEntity(self);
     cScriptObject_cScriptObject(&self->mObjType, keScriptObjectType_Rider);
-    self->mScriptObjectVtbl = (void**)D_00482018;
+    self->mScriptObjectVtbl = (void**)cScriptObjRider_cScriptObject_vtbl;
     self->mVtbl = (void**)cScriptObjRider_vtbl;
     self->mpAnimBankInfo = 0;
     self->mpSoundBankInfo = 0;
@@ -5646,7 +5646,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_cScriptObjEvent);
 #ifdef SKIP_ASM
 void cScriptEntity_cScriptEntity(void*);
 void* cScriptObject_cScriptObject(void*, int);
-extern void* D_00482298[];
+extern void* cScriptObjEvent_cScriptObject_vtbl[];
 extern void* cScriptObjEvent_vtbl[];
 
 
@@ -5662,7 +5662,7 @@ extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
 {
     cScriptEntity_cScriptEntity((self));
     cScriptObject_cScriptObject(&self->mObjType, keScriptObjectType_Event);
-    self->mScriptObjectVtbl = D_00482298;
+    self->mScriptObjectVtbl = cScriptObjEvent_cScriptObject_vtbl;
     *(void***)self = cScriptObjEvent_vtbl;
     self->mNumAbortWorldScripts = 0;
     self->mHasTriggeredSpeechEvents = 0;
@@ -6878,7 +6878,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine_cBXScriptEngine);
 #ifdef SKIP_ASM
 extern "C" void* cScriptDatabaseObject_cScriptDatabaseObject(cScriptDatabaseObject* self);
 extern "C" void cBXScriptEngine_ResetInstVars(void* self);
-extern char D_00482450[];
+extern char cBXScriptEngine_cInSeqComm_vtbl[];
 extern char cBXScriptEngine_vtbl[];
 extern void* cBXScriptEngine_mpScriptEngine;
 
@@ -6890,7 +6890,7 @@ extern void* cBXScriptEngine_mpScriptEngine;
 extern "C" void* cBXScriptEngine_cBXScriptEngine(cBXScriptEngine* self)
 {
     cScriptDatabaseObject_cScriptDatabaseObject((cScriptDatabaseObject*)self);
-    self->mInSeqCommVtbl = (void**)D_00482450;
+    self->mInSeqCommVtbl = (void**)cBXScriptEngine_cInSeqComm_vtbl;
     self->mVtbl = (void**)cBXScriptEngine_vtbl;
     cBXScriptEngine_mpScriptEngine = ((void*)self);
     self->mpScriptDatabase = 0;
@@ -6905,7 +6905,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine__cBXScriptEngine);
 #ifdef SKIP_ASM
 extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(cScriptDatabaseObject* self, int flags);
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
-extern char D_00482450[];
+extern char cBXScriptEngine_cInSeqComm_vtbl[];
 extern char cBXScriptEngine_vtbl[];
 extern void* cBXScriptEngine_mpScriptEngine;
 
@@ -6919,7 +6919,7 @@ extern void* cBXScriptEngine_mpScriptEngine;
  */
 extern "C" void cBXScriptEngine__cBXScriptEngine(cBXScriptEngine* self, int flags)
 {
-    self->mInSeqCommVtbl = (void**)D_00482450;
+    self->mInSeqCommVtbl = (void**)cBXScriptEngine_cInSeqComm_vtbl;
     self->mVtbl = (void**)cBXScriptEngine_vtbl;
     cBXScriptEngine_PurgeBXEngine(self);
     cBXScriptEngine_mpScriptEngine = 0;

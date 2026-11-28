@@ -68,8 +68,8 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
                                     //       keyboard id 1); cFEStateNetCreateRoomPopup_checkRoomName refuses an empty name
                                     //       ("kT_POPUP231UniqueRoom")
     char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] cBXString_EmptyString, destroyed by
-                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned D_004A1A6C by onWidgetCreate and
-                                    //       one of D_004A1A60/64/6C/68 per list entry by onWidgetEvent
+                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned cFEStateLobbyMenu_beginnerChannelName by onWidgetCreate and
+                                    //       one of cFEStateLobbyMenu_eliteChannelName/64/6C/68 per list entry by onWidgetEvent
     char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] cBXString_EmptyString, destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 2)

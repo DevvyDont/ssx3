@@ -129,9 +129,9 @@ extern char str_reloctable[];
 extern char str_DirtyDnasRelInit[];
 extern char str_DirtyDnasRelUpdt[];
 extern char str_DirtyDnasRelExit[];
-extern int D_0045152C_i[] __asm__("D_0045152C");
-extern int D_00451530_i[] __asm__("D_00451530");
-extern int D_00451534_i[] __asm__("D_00451534");
+extern int DirtyDnas_relInitEntry_i[] __asm__("DirtyDnas_relInitEntry");
+extern int DirtyDnas_relUpdtEntry_i[] __asm__("DirtyDnas_relUpdtEntry");
+extern int DirtyDnas_relExitEntry_i[] __asm__("DirtyDnas_relExitEntry");
 extern char DirtyDnas_importTable[];
 extern char DirtyDnas_importTableEnd[];
 struct sSym;
@@ -165,8 +165,8 @@ extern void FlushCache(int);
  *
  * Checks the image (elfModule_open, -1), finds its "reloctable" symbol (-2), and relocates .text, .data and .rodata with
  * the context {size of the import table DirtyDnas_importTable, that symbol, DirtyDnas_importTable}, so the module's references into its
- * own reloctable resolve to the game's functions. Then looks up DirtyDnasRelInit / Updt / Exit into D_0045152C /
- * D_00451530 / D_00451534 (-3 .. -5) and flushes the data and instruction caches. The DNAS manager (DNASMan_updateLoadProgram)
+ * own reloctable resolve to the game's functions. Then looks up DirtyDnasRelInit / Updt / Exit into DirtyDnas_relInitEntry /
+ * DirtyDnas_relUpdtEntry / DirtyDnas_relExitEntry (-3 .. -5) and flushes the data and instruction caches. The DNAS manager (DNASMan_updateLoadProgram)
  * calls it with the file it loaded.
  *
  * @param image  the image
@@ -191,17 +191,17 @@ int DirtyDnas_loadModule(char* image, int imageSize) {
     // that function's register allocation
     hdr.table = (int)DirtyDnas_importTable;
     elfModule_relocate(&obj, &hdr);
-    entrySlot = D_0045152C_i;
+    entrySlot = DirtyDnas_relInitEntry_i;
     *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelInit);
     if (*entrySlot == 0) {
         return -3;
     }
-    entrySlot = D_00451530_i;
+    entrySlot = DirtyDnas_relUpdtEntry_i;
     *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelUpdt);
     if (*entrySlot == 0) {
         return -4;
     }
-    entrySlot = D_00451534_i;
+    entrySlot = DirtyDnas_relExitEntry_i;
     *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelExit);
     if (*entrySlot == 0) {
         return -5;
@@ -216,14 +216,14 @@ int DirtyDnas_loadModule(char* image, int imageSize) {
 INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_init);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void (*D_0045152C[])(int, int);
+extern void (*DirtyDnas_relInitEntry[])(int, int);
 /**
  * Calls the DNAS module's DirtyDnasRelInit with @p initParams and 0x1020000.
  *
  * @param initParams  the DNAS parameters (DNASMan_startCheck passes its block at +0x24)
  */
 void DirtyDnas_init(int initParams) {
-    D_0045152C[0](initParams, 0x1020000);
+    DirtyDnas_relInitEntry[0](initParams, 0x1020000);
 }
 #endif
 
@@ -231,14 +231,14 @@ void DirtyDnas_init(int initParams) {
 INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00451530[])(void);
+extern int (*DirtyDnas_relUpdtEntry[])(void);
 /**
  * Calls the DNAS module's DirtyDnasRelUpdt (the caller's argument passes through) and returns its result.
  *
  * @return the module's result (DNASMan_updateResult goes on to Exit once it is 0)
  */
 int DirtyDnas_update(void) {
-    return D_00451530[0]();
+    return DirtyDnas_relUpdtEntry[0]();
 }
 #endif
 
@@ -246,7 +246,7 @@ int DirtyDnas_update(void) {
 INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_exit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00451534[])(void);
+extern int (*DirtyDnas_relExitEntry[])(void);
 /**
  * Calls the DNAS module's DirtyDnasRelExit (the caller's argument, an info buffer, passes through) and returns its
  * result.
@@ -254,7 +254,7 @@ extern int (*D_00451534[])(void);
  * @return the module's result
  */
 int DirtyDnas_exit(void) {
-    return D_00451534[0]();
+    return DirtyDnas_relExitEntry[0]();
 }
 #endif
 
@@ -263,9 +263,9 @@ INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_run);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void (*D_0045152C[])(int, int);
-extern int (*D_00451530_a[])(int) __asm__("D_00451530");
-extern int (*D_00451534_a[])(int) __asm__("D_00451534");
+extern void (*DirtyDnas_relInitEntry[])(int, int);
+extern int (*DirtyDnas_relUpdtEntry_a[])(int) __asm__("DirtyDnas_relUpdtEntry");
+extern int (*DirtyDnas_relExitEntry_a[])(int) __asm__("DirtyDnas_relExitEntry");
 /**
  * Runs the DNAS module to completion: Init with @p initParams and 0x1020000, Updt repeatedly with (@p fn(@p fnArg) == 0) until it
  * returns something other than 1, then Exit with @p exitArg. Nothing in retail calls it.
@@ -277,11 +277,11 @@ extern int (*D_00451534_a[])(int) __asm__("D_00451534");
  */
 void DirtyDnas_run(int initParams, int exitArg, int (*fn)(int), int fnArg) {
     int none;
-    D_0045152C[0](initParams, 0x1020000);
+    DirtyDnas_relInitEntry[0](initParams, 0x1020000);
     none = 0;
     do {
-    } while (D_00451530_a[0](fn(fnArg) == none) == 1);
-    D_00451534_a[0](exitArg);
+    } while (DirtyDnas_relUpdtEntry_a[0](fn(fnArg) == none) == 1);
+    DirtyDnas_relExitEntry_a[0](exitArg);
 }
 #endif
 

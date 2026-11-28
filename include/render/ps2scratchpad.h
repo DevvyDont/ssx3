@@ -3,7 +3,7 @@
 
 // cPS2ScratchPad: the scratchpad (SPR, 0x70000000) manager: it splits the 16 KB scratchpad into up to three DMA blocks
 // and moves them to and from main memory in turn. EA's source: d:/ssx/code/source/render/ps2scratchpad.cpp (preview
-// assert strings). The game's instance is the global D_004A4474 (SPRMan in EA's asserts), which points at the 0x38-byte
+// assert strings). The game's instance is the global SPRMan (SPRMan in EA's asserts), which points at the 0x38-byte
 // object D_00504F80 (the next symbol, cSinCosTable_gSinCosTable, is at 0x00504FB8).
 //
 // Retail code (render/lightman unit): cPS2ScratchPad_setLayout (set the block layout for a mode 1..7), cPS2ScratchPad_claimBuffer (open the next

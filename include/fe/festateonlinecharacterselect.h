@@ -55,7 +55,7 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     // cFEStateNet (fe/festatenet.h, 0x6D0)
     // --- cFEStateOnlineCharacterSelect
     cUIListBox* mpLBChallengerSelect; // 0x6D0 [U] onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate: widget "LBChallengerSelect" (10 rider
-                                    //       names from D_00440F68), preset to the current rider; its value
+                                    //       names from cFEStateCharSelect_characterOrder), preset to the current rider; its value
                                     //       (cUIListBox_getCurrentEntryData) is the picked rider in cFEStateOnlineCharacterSelect_onGainTransition / onWidgetEvent
                                     //       cFEStateOnlineCharacterSelect_onWidgetEvent
     int unk_6D4;                    // 0x6D4 no access seen

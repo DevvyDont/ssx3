@@ -121,9 +121,9 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" int cUITemplate_MAP_onWidgetEvent(void* tmpl, void* obj, int msg);
 extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 
-static inline int IsQuick1867A8() { return D_004A1A70 == 1; }
+static inline int IsQuick1867A8() { return cFEStateNet_fePath == 1; }
 extern char str_TransitionOut[];
 
 class cMgr1867A8 {
@@ -193,7 +193,7 @@ static inline void Opened1867A8(void* vself, void* item)
  * Handles widget events for the event-select map screen, moving to the next or previous state on accept or back.
  *
  * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For kONNEXT
- * (accept) or 6 (back) that the template answers with 1: online (D_004A1A70 == 1) it plays the screen's "TransitionOut"
+ * (accept) or 6 (back) that the template answers with 1: online (cFEStateNet_fePath == 1) it plays the screen's "TransitionOut"
  * frame and pops this state (cUIStateStack_pop() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
  * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; cFECustom_getPrevState(), slot 5, for
  * 6) with the widget's id (+0x18) and, when one comes back, calls handleEvent (slot 24) with (1, 0) on the state at the

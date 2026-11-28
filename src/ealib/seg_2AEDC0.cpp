@@ -369,7 +369,7 @@ extern "C" void RCMP_AV_PLAYER__AV_PLAYER(RCMP_AV_PLAYER* self, int flags)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_GetFirstFrame);
 #ifdef SKIP_ASM
-extern char D_00495210[];
+extern char str_empty_p[];
 
 typedef void (*RCMP_GetDataFn)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK** out);
 typedef void (*RCMP_ReleaseDataFn)(RCMP_DECODER* decoder, RCMP_STREAMER* streamer, RCMP_CHUNK* chunk);
@@ -392,7 +392,7 @@ extern "C" void* RCMP_AV_PLAYER_SetSpeed(RCMP_AV_PLAYER*, int);
 
 static inline void* wsAlloc_AE450(RCMP_RCMP_SYSTEM* a, int size)
 {
-    return a->AllocMemFunc(D_00495210, size, 0, 0, a->m_DefaultMemDir);
+    return a->AllocMemFunc(str_empty_p, size, 0, 0, a->m_DefaultMemDir);
 }
 
 static inline bool wsCanAlloc_AE450(RCMP_RCMP_SYSTEM* a)
@@ -733,7 +733,7 @@ unsigned int RCMP_AV_PLAYER::SyncedAudioTime()
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_getVideoChunk);
 #ifdef SKIP_ASM
-extern char D_00495210[];
+extern char str_empty_p[];
 
 extern "C" unsigned char* STREAM_get(int handle);
 extern "C" void SYNCTASK_run(int a);
@@ -785,7 +785,7 @@ void RCMP_AV_PLAYER::getVideoChunk(RCMP_DECODER* decoder, RCMP_CHUNK** out)
                 kind = 3;
             if (kind != 0) {
                 RCMP_CHUNK* newChunk = (RCMP_CHUNK*)RCMP_CHUNK_CHUNK(
-                    RCMP_rcmp_sys.AllocMemFunc(D_00495210, sizeof(RCMP_CHUNK), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
+                    RCMP_rcmp_sys.AllocMemFunc(str_empty_p, sizeof(RCMP_CHUNK), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
                 *out = newChunk;
                 newChunk->m_UserChunkData = blockData;
                 if (kind == 2) {
@@ -1125,7 +1125,7 @@ extern "C" void f03B8_F0C8(void*, int) __asm__("RCMP_AV_SUBTITLE_SetWidth");
 extern "C" void f03C0_F0C8(void*, int) __asm__("RCMP_AV_SUBTITLE_SetHeight");
 extern "C" void f03C8_F0C8(void*, unsigned int) __asm__("RCMP_AV_SUBTITLE_SetStrID");
 extern "C" void f03D0_F0C8(void*, int) __asm__("RCMP_AV_SUBTITLE_SetFrameNumber");
-extern char D_00495260[];
+extern char str_empty_q[];
 // g++ 2.95's array-new block for the subtitles: the element count in a 0x10-byte header, then the elements (the
 // operator delete[] of RCMP_AV_SUBTITLE reads the count back).
 struct RCMP_AV_SUBTITLE_NEWBLOCK {
@@ -1137,7 +1137,7 @@ struct RCMP_AV_SUBTITLE_NEWBLOCK {
 /**
  * Fills a subtitle array with a number of default subtitles at one position and size.
  *
- * Allocates count AV_SUBTITLEs (array new with a 0x10-byte count header, tag D_00495260) and constructs each with
+ * Allocates count AV_SUBTITLEs (array new with a 0x10-byte count header, tag str_empty_q) and constructs each with
  * RCMP_AV_SUBTITLE_AV_SUBTITLE, sets the first one's frame number to 0 (RCMP_AV_SUBTITLE_SetFrameNumber), then gives each the position (RCMP_AV_SUBTITLE_SetPosX,
  * RCMP_AV_SUBTITLE_SetPosY), size (RCMP_AV_SUBTITLE_SetWidth, RCMP_AV_SUBTITLE_SetHeight) and its index as string id (RCMP_AV_SUBTITLE_SetStrID). It does not free
  * earlier entries. Nothing in the code or data calls it.
@@ -1157,7 +1157,7 @@ void RCMP_AV_SUBTITLE_ARRAY::Init(unsigned int count, int posX, int posY, int wi
     unsigned int k;
 
     i = count - 1;
-    raw = (RCMP_AV_SUBTITLE_NEWBLOCK*)RCMP_rcmp_sys.AllocMemFunc(D_00495260, count * sizeof(RCMP_AV_SUBTITLE) + 0x10,
+    raw = (RCMP_AV_SUBTITLE_NEWBLOCK*)RCMP_rcmp_sys.AllocMemFunc(str_empty_q, count * sizeof(RCMP_AV_SUBTITLE) + 0x10,
                                                                  0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
     arr = raw->elements;
     raw->count = count;
@@ -2362,7 +2362,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_Init);
 // mpeg2decode: struct layer_data *ld (current layer), outside small data like the other MPEG globals
 struct layer_data;
 extern layer_data* ld __asm__("D_0050A088") __attribute__((section(".bss")));
-extern layer_data D_00509648;
+extern layer_data mpeg2_base;
 // MPEG decoder globals: plain scalars outside small data (the original TU kept them out of $gp)
 #define BSS_B0C58 __attribute__((section(".bss")))
 extern int D_005094F4_s __asm__("D_005094F4") BSS_B0C58;
@@ -2378,7 +2378,7 @@ extern int D_005094D4_s __asm__("D_005094D4") BSS_B0C58;
 extern int D_005094D8_s __asm__("D_005094D8") BSS_B0C58;
 extern int D_005094DC_s __asm__("D_005094DC") BSS_B0C58;
 extern int D_005094E0_s __asm__("D_005094E0") BSS_B0C58;
-extern char D_004953E8[];
+extern char str_empty_m[];
 extern char str_RCMP_mpegbuff[];
 extern char str_RCMP_chunkbuff[];
 extern "C" void Initialize_Buffer(void* data);
@@ -2394,7 +2394,7 @@ extern "C" int RCMP_mpegNoDataCallback(void* self, void* a1, PS2_SONY_CODEC_INTE
  * Initialises the Sony MPEG codec from the first chunk: reads the headers, sizes and allocates frames.
  *
  * Stores the DECODER (+0x28), clears the counters, frees old buffers, sets the state to 1 and reads the stream headers
- * from the chunk's data (Initialize_Buffer, Get_Hdr) with ld pointing at the base layer D_00509648. For MPEG-1
+ * from the chunk's data (Initialize_Buffer, Get_Hdr) with ld pointing at the base layer mpeg2_base. For MPEG-1
  * streams (base +0x420 clear) it presets the MPEG-2 picture globals to progressive frame values. It computes the
  * macroblock counts and coded sizes (D_005094FC/D_00509500, D_005094D4/D_005094D8, chroma halves) into +0x8 and +0xC.
  *
@@ -2422,10 +2422,10 @@ int PS2_SONY_CODEC_INTERNAL::Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
     }
     unk_04 = 1;
     void* data = firstChunk->m_DataToDecode;
-    ld = &D_00509648;
+    ld = &mpeg2_base;
     Initialize_Buffer(data);
     Get_Hdr();
-    int mode = D_00509648.MPEG2_Flag;
+    int mode = mpeg2_base.MPEG2_Flag;
     if (mode == 0) {
         D_00509524_s = 1;
         D_005095A0_s = 1;
@@ -2448,7 +2448,7 @@ int PS2_SONY_CODEC_INTERNAL::Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk)
         int cw = mWidth;
         int ch = mHeight;
         PS2_SONY_FRAME* newFrame = PS2_SONY_FRAME_PS2_SONY_FRAME(
-            (PS2_SONY_FRAME*)RCMP_rcmp_sys.AllocMemFunc(D_004953E8, sizeof(PS2_SONY_FRAME), 0, 0,
+            (PS2_SONY_FRAME*)RCMP_rcmp_sys.AllocMemFunc(str_empty_m, sizeof(PS2_SONY_FRAME), 0, 0,
                                                          RCMP_rcmp_sys.m_DefaultMemDir),
             cw, ch);
         mFreeFrames.AddHead(newFrame);
@@ -2486,13 +2486,13 @@ int PS2_SONY_CODEC_INTERNAL::GetCurrentFrameNumber()
 // padded past the 8-byte gp-relative threshold so the compiler emits
 // absolute lui/lo addressing like the target, instead of assuming small data
 struct sD_00509508 { float value; int pad[2]; };
-extern sD_00509508 D_00509508;
+extern sD_00509508 frame_rate;
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetFrameRate);
 #ifdef SKIP_ASM
 /**
- * Returns the frame rate the last MPEG sequence extension set (D_00509508).
+ * Returns the frame rate the last MPEG sequence extension set (frame_rate).
  *
  * Slot 5 of PS2_SONY_CODEC_INTERNAL_vtbl. The value is global, not per codec object, and only the sequence-extension parser sequence_extension
  * writes it, so an MPEG-1 stream keeps whatever was there before.
@@ -2501,7 +2501,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetFrameRate);
  */
 extern "C" float PS2_SONY_CODEC_INTERNAL_GetFrameRate()
 {
-    return D_00509508.value;
+    return frame_rate.value;
 }
 #endif
 
@@ -2633,7 +2633,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_createSonyCodec);
 /**
  * Allocates and constructs a Sony MPEG codec object (0x80 bytes).
  *
- * Allocates through RCMP_rcmp_sys with an empty tag (D_004953E8) and runs PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL. RCMP_AV_PLAYER_getVideoChunk offers the result
+ * Allocates through RCMP_rcmp_sys with an empty tag (str_empty_m) and runs PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL. RCMP_AV_PLAYER_getVideoChunk offers the result
  * to the DECODER with RCMP_DECODER_ChooseCodec.
  *
  * @return the new codec
@@ -2641,7 +2641,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_createSonyCodec);
 extern "C" void* RCMP_createSonyCodec(void)
 {
     return PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL((PS2_SONY_CODEC_INTERNAL*)RCMP_rcmp_sys.AllocMemFunc(
-        D_004953E8, sizeof(PS2_SONY_CODEC_INTERNAL), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
+        str_empty_m, sizeof(PS2_SONY_CODEC_INTERNAL), 0, 0, RCMP_rcmp_sys.m_DefaultMemDir));
 }
 #endif
 
@@ -2662,12 +2662,12 @@ void Error(void* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_isMpegChunkTag);
 #ifdef SKIP_ASM
-extern int D_00495448[];
+extern int RCMP_mpegChunkTags[];
 
 /**
  * Tells whether a chunk tag belongs to the MPEG codec ("MPCh" or "MPCd").
  *
- * Compares with the two tags in D_00495448. Called by RCMP_AV_PLAYER_getVideoChunk on each stream block's big-endian tag.
+ * Compares with the two tags in RCMP_mpegChunkTags. Called by RCMP_AV_PLAYER_getVideoChunk on each stream block's big-endian tag.
  *
  * @param chunkTag  the four-character tag as a big-endian word
  * @return true for an MPEG chunk
@@ -2676,7 +2676,7 @@ extern "C" bool RCMP_isMpegChunkTag(int chunkTag)
 {
     unsigned int i;
     for (i = 0; i < 2; i++) {
-        if (D_00495448[i] == chunkTag) {
+        if (RCMP_mpegChunkTags[i] == chunkTag) {
             return true;
         }
     }
@@ -2922,7 +2922,7 @@ extern int D_00509510[];
 extern int D_00509514[];
 extern int D_00509518[];
 extern int D_0050951C[];
-extern unsigned char D_0044C218[];
+extern unsigned char mpeg2_scan[];
 extern unsigned char D_0044C298[];
 extern char str_sequence_header[];
 unsigned int marker_bit(void* self);
@@ -2936,7 +2936,7 @@ extern "C" void extension_and_user_data(void);
  * Part of the unit's copy of the MSSG mpeg2decode header parser, reading from the bit reader at ld (D_0050A088). Reads
  * horizontal and vertical size (12 bits each, D_005094F4, D_005094F8), aspect ratio and frame-rate codes (4 each),
  * bit-rate value (18), a marker bit (marker_bit with "sequence_header"), VBV buffer size (10) and the constrained
- * flag. The intra matrix is read in zigzag order (D_0044C218) when its load flag is set, else copied from the default
+ * flag. The intra matrix is read in zigzag order (mpeg2_scan) when its load flag is set, else copied from the default
  * D_0044C298; the non-intra matrix is read or set to 16; chroma matrices copy the luma ones. Ends with extension_and_user_data
  * for extensions and user data.
  */
@@ -2957,14 +2957,14 @@ extern "C" void sequence_header(void)
     D_0050951C[0] = Get_Bits(1);
     if ((ld->load_intra_quantizer_matrix = Get_Bits(1)) != 0) {
         for (i = 0; i < 64; i++)
-            ld->intra_quantizer_matrix[D_0044C218[i]] = Get_Bits(8);
+            ld->intra_quantizer_matrix[mpeg2_scan[i]] = Get_Bits(8);
     } else {
         for (i = 0; i < 64; i++)
             ld->intra_quantizer_matrix[i] = D_0044C298[i];
     }
     if ((ld->load_non_intra_quantizer_matrix = Get_Bits(1)) != 0) {
         for (i = 0; i < 64; i++)
-            ld->non_intra_quantizer_matrix[D_0044C218[i]] = Get_Bits(8);
+            ld->non_intra_quantizer_matrix[mpeg2_scan[i]] = Get_Bits(8);
     } else {
         for (i = 0; i < 64; i++)
             ld->non_intra_quantizer_matrix[i] = 16;
@@ -2980,7 +2980,7 @@ extern "C" void sequence_header(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", group_of_pictures_header);
 #ifdef SKIP_ASM
-extern layer_data D_00509648;
+extern layer_data mpeg2_base;
 extern int D_0044C378[];
 extern int D_0044C37C[];
 extern int D_0044C380[];
@@ -3004,7 +3004,7 @@ extern "C" void extension_and_user_data(void);
  */
 extern "C" void group_of_pictures_header(void)
 {
-    if (ld == &D_00509648) {
+    if (ld == &mpeg2_base) {
         D_0044C378[0] = D_0044C37C[0] + 1;
         D_0044C380[0] = 1;
     }
@@ -3204,7 +3204,7 @@ unsigned int marker_bit(void* self);
  * Part of the unit's copy of the MSSG mpeg2decode header parser, reading from the bit reader at ld (D_0050A088). Sets
  * MPEG2_Flag (ld +0x420) and clears scalable mode, reads profile and level (8 bits), progressive sequence, chroma
  * format, size and bit-rate extensions, a marker bit ("sequence_extension"), VBV extension, low delay and the
- * frame-rate extension n/d. Stores the frame rate D_00509508 = D_0044C388[frame rate code] * (n + 1) / (d + 1) as
+ * frame-rate extension n/d. Stores the frame rate frame_rate = D_0044C388[frame rate code] * (n + 1) / (d + 1) as
  * floats, splits profile and level (an escape value with low nibble 5 gives profile 133, level 8), and merges the
  * extensions into the size, bit-rate (also kept * 400.0f) and VBV globals.
  */
@@ -3226,7 +3226,7 @@ extern "C" void sequence_extension(void)
     D_0050952C[0] = Get_Bits(1);
     D_00509530[0] = Get_Bits(2);
     D_00509534[0] = Get_Bits(5);
-    D_00509508.value = D_0044C388[D_00509510[0]] * ((float)(D_00509530[0] + 1) / (float)(D_00509534[0] + 1));
+    frame_rate.value = D_0044C388[D_00509510[0]] * ((float)(D_00509530[0] + 1) / (float)(D_00509534[0] + 1));
     if ((D_00509520[0] >> 7) & 1) {
         if ((D_00509520[0] & 0xF) == 5) {
             D_005094EC[0] = 133;
@@ -3283,7 +3283,7 @@ extern "C" void sequence_display_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", quant_matrix_extension);
 #ifdef SKIP_ASM
-extern unsigned char D_0044C218[];
+extern unsigned char mpeg2_scan[];
 
 
 /**
@@ -3291,7 +3291,7 @@ extern unsigned char D_0044C218[];
  *
  * Part of the unit's copy of the MSSG mpeg2decode header parser, reading from the bit reader at ld (D_0050A088). For
  * each of the four load flags (intra, non-intra, chroma intra, chroma non-intra; ld +0x410..+0x41C) that is set it
- * reads 64 8-bit values in zigzag order (D_0044C218); a luma matrix also replaces its chroma matrix.
+ * reads 64 8-bit values in zigzag order (mpeg2_scan); a luma matrix also replaces its chroma matrix.
  */
 extern "C" void quant_matrix_extension(void)
 {
@@ -3303,7 +3303,7 @@ extern "C" void quant_matrix_extension(void)
             int i;
             for (i = 0; i < 64; i++) {
                 unsigned int quantValue = Get_Bits(8);
-                int k = D_0044C218[i];
+                int k = mpeg2_scan[i];
                 layer_data* layer = ld;
                 layer->intra_quantizer_matrix[k] = quantValue;
                 layer->chroma_intra_quantizer_matrix[k] = quantValue;
@@ -3317,7 +3317,7 @@ extern "C" void quant_matrix_extension(void)
             int i;
             for (i = 0; i < 64; i++) {
                 unsigned int quantValue = Get_Bits(8);
-                int k = D_0044C218[i];
+                int k = mpeg2_scan[i];
                 layer_data* layer = ld;
                 layer->non_intra_quantizer_matrix[k] = quantValue;
                 layer->chroma_non_intra_quantizer_matrix[k] = quantValue;
@@ -3331,7 +3331,7 @@ extern "C" void quant_matrix_extension(void)
             int i;
             for (i = 0; i < 64; i++) {
                 unsigned int quantValue = Get_Bits(8);
-                int k = D_0044C218[i];
+                int k = mpeg2_scan[i];
                 layer_data* layer = ld;
                 layer->chroma_intra_quantizer_matrix[k] = quantValue;
             }
@@ -3344,7 +3344,7 @@ extern "C" void quant_matrix_extension(void)
             int i;
             for (i = 0; i < 64; i++) {
                 unsigned int quantValue = Get_Bits(8);
-                int k = D_0044C218[i];
+                int k = mpeg2_scan[i];
                 layer_data* layer = ld;
                 layer->chroma_non_intra_quantizer_matrix[k] = quantValue;
             }
@@ -3552,17 +3552,17 @@ extern "C" void picture_spatial_scalable_extension(void)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2AEDC0", picture_temporal_scalable_extension);
 #ifdef SKIP_ASM
-extern int D_00495608[];
+extern int str_temporal_scalability_not_supported[];
 
 /**
  * Reports that temporal scalability is unsupported (does nothing else).
  *
- * Calls Error__FPv with "temporal scalability not supported\n" (D_00495608). Called for extension id 10 by
+ * Calls Error__FPv with "temporal scalability not supported\n" (str_temporal_scalability_not_supported). Called for extension id 10 by
  * extension_and_user_data.
  */
 extern "C" void picture_temporal_scalable_extension(void)
 {
-    Error(D_00495608);
+    Error(str_temporal_scalability_not_supported);
 }
 #endif
 
@@ -3663,7 +3663,7 @@ extern "C" void copyright_extension(void)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", Update_Temporal_Reference_Tacking_Data);
 #ifdef SKIP_ASM
-extern layer_data D_00509648;
+extern layer_data mpeg2_base;
 extern int D_00509554[];
 extern int D_00509558[];
 extern int D_0044C378[];
@@ -3676,14 +3676,14 @@ extern int D_0050A098[];
 /**
  * Updates the true frame number from the picture's temporal reference, handling wraps.
  *
- * Only for the base layer (ld == D_00509648). For a new non-B picture: a pending wrap (D_0044C3C8) adds 1024 to the
+ * Only for the base layer (ld == mpeg2_base). For a new non-B picture: a pending wrap (D_0044C3C8) adds 1024 to the
  * base (D_0044C378); a temporal reference below the last one (D_0044C3CC) without a GOP reset (D_0044C380) marks a
  * wrap. Then the true frame number D_0050A098 = base + temporal reference (+1024 while a wrap is pending and the
  * reference has not passed the old one), and D_0044C37C keeps the maximum. Called by picture_header.
  */
 extern "C" void Update_Temporal_Reference_Tacking_Data(void)
 {
-    if (ld != &D_00509648) {
+    if (ld != &mpeg2_base) {
         return;
     }
     int last;

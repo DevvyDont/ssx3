@@ -4,7 +4,7 @@
 // cCrowdMan2d: the 2D crowd manager. Crowds at the race courses are flat quads in the world models; scripts
 // (Crowd2dFunc) attach up to 64 of them by world resource id, and the manager animates them with one shared 2D crowd
 // animation (a cCrowdRender2D sprite sheet + cCrowdAnim2D, visualfx/crowdanim2d.h) whose current frame goes into the
-// shared record D_00536690 that the crowd models' bones point at (cCrowdMan2d_attachBoneToCrowdPose). It also spawns short-lived markers
+// shared record cCrowdMan2d_sharedPose that the crowd models' bones point at (cCrowdMan2d_attachBoneToCrowdPose). It also spawns short-lived markers
 // (camera flashes) over the quads at a rate that follows the crowd's cheer level from the audio (cCrowdMan2d_spawnMarkers),
 // draws them as sprites (cCrowdMan2d_renderMarkers), drops the quads of an unloading world section (cCrowdMan2d_releaseSectionQuads) and saves /
 // restores the quad ids in replays (cCrowdMan2d_writeToReplayFrame / cCrowdMan2d_readFromReplayFrame).

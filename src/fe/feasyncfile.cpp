@@ -3581,10 +3581,10 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 
 /**
- * Sets the "front-end path is online" flag D_004A1A70; leaving the online path logs out of the buddy server.
+ * Sets the "front-end path is online" flag cFEStateNet_fePath; leaving the online path logs out of the buddy server.
  *
  * When @p on is 0 and BuddyMan_mBuddyMan exists and is connected (BuddyMan_isLoggedIn), it disconnects it (BuddyMan_disconnect,
  * after the usual create-or-reconnect guard). The preview reads this global through
@@ -3594,7 +3594,7 @@ extern int D_004A1A70;
  */
 extern "C" void cFEStateNet_setFEPath(int on)
 {
-    D_004A1A70 = on;
+    cFEStateNet_fePath = on;
     if (on == 0 && BuddyMan_mBuddyMan != 0 && BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) != 0) {
         if (BuddyMan_mBuddyMan == 0) {
             BuddyMan_createInstance();
@@ -4540,7 +4540,7 @@ extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom*
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, cUIEngine* a1);
 extern "C" void cFEStateNet_pushState(void* self, void* obj);
 extern "C" int LobbyMan_getRoomName(void* self);
-extern int D_004A4E88;
+extern int cFEStateChallengePopup_raceSetup;
 extern const char str_cFEStateChatRoom[];
 extern const char str_cFEStateOnlineMainMenu[];
 
@@ -4548,7 +4548,7 @@ extern const char str_cFEStateOnlineMainMenu[];
  * Handles popup id 2103 (cFEStateNet_showChallengeLostPopup's errors): on OK or back returns to the chat room or the online main menu.
  *
  * On kONSCREENPOPUPOPTION0 or kONSCREENPOPUPPREV, after cFEStateNet_handleDefaultPopupEvent, pushes a new cFEStateChatRoom when the player is
- * in a room (LobbyMan_getRoomName) and D_004A4E88 is 0, else a new cFEStateOnlineMainMenu, through cFEStateNet_pushState.
+ * in a room (LobbyMan_getRoomName) and cFEStateChallengePopup_raceSetup is 0, else a new cFEStateOnlineMainMenu, through cFEStateNet_pushState.
  *
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
@@ -4559,7 +4559,7 @@ void cFEStateNet::onChallengeLostPopupEvent(cUIState* popup, int event)
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
         cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
         void* obj;
-        if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
+        if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && cFEStateChallengePopup_raceSetup == 0) {
             obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0),
                     mpEngine);
         } else {
@@ -6295,7 +6295,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern int D_004A4E88_v[2] __asm__("D_004A4E88");
+extern int cFEStateChallengePopup_raceSetup_v[2] __asm__("cFEStateChallengePopup_raceSetup");
 extern char str_cFEStateChallengeReceivedPopup[];
 extern char str_cFEStateChallengePopup[];
 
@@ -6304,7 +6304,7 @@ extern char str_cFEStateChallengePopup[];
  *
  * Clears mUserPopupOpen and closes the popup (cFEStateNet_onPopupEvent). With a pending challenge from @p playerName
  * (BuddyMan_hasChallengeFrom) it pushes a cFEStateChallengeReceivedPopup for him; otherwise it clears cBERules_mRules (0x20 bytes),
- * sets D_004A4E88[1] to 4, stores the name in LobbyMan_mLobbyMan->mOpponent and pushes a cFEStateChallengePopup. The
+ * sets cFEStateChallengePopup_raceSetup[1] to 4, stores the name in LobbyMan_mLobbyMan->mOpponent and pushes a cFEStateChallengePopup. The
  * pushed popup's id is 2100 when @p a4 is set, else 2049 (received) or 2048 (setup).
  *
  * @param playerName  the player's name
@@ -6338,7 +6338,7 @@ void cFEStateNet::challengePlayer(const char* playerName, void* popup, int event
     } else {
         MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        D_004A4E88_v[1] = 4;
+        cFEStateChallengePopup_raceSetup_v[1] = 4;
         char opponentName[4];
         cBXString_cBXString2(opponentName, playerName);
         cBXString_operatorE((char*)&lobbyMan->mOpponent, opponentName);
@@ -7925,9 +7925,9 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
-extern int D_004A4E88;
+extern int cFEStateChallengePopup_raceSetup;
 extern int cBENewRaceInterface_bIsBamLocation;
-extern char D_00441268[];
+extern char cFEStateChallengePopup_defaultEventOptions[];
 extern void* cFEStateChallengePopup_vtbl[];
 
 class cRace_DDD0 {
@@ -7940,7 +7940,7 @@ public:
  * Constructs the "send a challenge" popup state and resets the new-race interface for it.
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with @p engine and @p owner, stores cFEStateChallengePopup_vtbl,
- * points mpEventOptions at D_00441268, sets mHashName 0x3F, clears mbChallengeSent, mpLBRankedGame and D_004A4E88. On
+ * points mpEventOptions at cFEStateChallengePopup_defaultEventOptions, sets mHashName 0x3F, clears mbChallengeSent, mpLBRankedGame and cFEStateChallengePopup_raceSetup. On
  * the new-race interface (cBE interface 0) it sets cBENewRaceInterface_bIsBamLocation to 1, clears cBENewRaceInterface_newRace.iLocationIdx, sets game mode 0 and event
  * 0 and resets it; finally sets mbFirstCreate.
  *
@@ -7952,11 +7952,11 @@ extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallenge
 {
     cFEStateNet_cFEStateNet_DDD0(self, engine, owner);
     VPTR_OF(cListNode, self) = cFEStateChallengePopup_vtbl;
-    self->mpEventOptions = (int*)D_00441268;
+    self->mpEventOptions = (int*)cFEStateChallengePopup_defaultEventOptions;
     self->mHashName = 0x3F;
     self->mbChallengeSent = 0;
     self->mpLBRankedGame = 0;
-    D_004A4E88 = 0;
+    cFEStateChallengePopup_raceSetup = 0;
     cRace_DDD0* race = (cRace_DDD0*)cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_newRace.iLocationIdx = 0;
@@ -7986,8 +7986,8 @@ extern "C" void cFEStateChallengePopup_clearChallengeSent(cFEStateChallengePopup
 extern "C" void clearOpponentStats(cUIScreen* screen);
 extern "C" void LobbyMan_findPlayer(void* self, const char* str);
 extern "C" void cFEStateNet_showDisconnectPopup(cFEStateNet* self);
-// D_004A4E88 is 8 bytes (config/symbol_addrs.txt); its second word was the separate symbol D_004A4E8C.
-extern int D_004A4E88_w[2] __asm__("D_004A4E88");
+// cFEStateChallengePopup_raceSetup is 8 bytes (config/symbol_addrs.txt); its second word was the separate symbol D_004A4E8C.
+extern int cFEStateChallengePopup_raceSetup_w[2] __asm__("cFEStateChallengePopup_raceSetup");
 extern char str_240challenge_popup[];
 extern char str_MenuChallenge[];
 
@@ -7997,7 +7997,7 @@ extern char str_MenuChallenge[];
  * Creates the "240challenge_popup" screen and fills it from the current race setup.
  *
  * Calls its slot 32 (cFEStateChallengePopup_publishPresence) first. When the screen is created: plays it, sets the new-race interface's AI
- * count to D_004A4E88's second word and calls that interface's slot 1, fills the race texts (cFEStateChallengePopup_fillRaceTexts), resets
+ * count to cFEStateChallengePopup_raceSetup's second word and calls that interface's slot 1, fills the race texts (cFEStateChallengePopup_fillRaceTexts), resets
  * the challenge state (cFEStateChallengePopup_clearChallengeSent), asks LobbyMan about mOpponent (LobbyMan_findPlayer) and runs clearOpponentStats on the
  * screen. Re-selects "MenuChallenge" row 6 except on the first creation (mbFirstCreate, then cleared). Opens the
  * disconnected popup (cFEStateNet_showDisconnectPopup) when LobbyMan's mState is 0.
@@ -8012,7 +8012,7 @@ void cFEStateChallengePopup::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
         cBENewRaceInterface* iface = (cBENewRaceInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 0));
-        cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
+        cBENewRaceInterface_setNumberAI(iface, cFEStateChallengePopup_raceSetup_w[1]);
         sVEntry<int(void*)>* ivt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, iface);
         ivt[1].fn(vthis(iface, ivt[1]));
         this->fillRaceTexts(iface, mpScreen);
@@ -8058,7 +8058,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void cFEStateChallengePopup_setOptionListBoxes(cFEStateChallengePopup* self, int a1);
 extern "C" void cFEStateChallengePopup_setOptionsLocked(cFEStateChallengePopup* self, int a1);
-extern char D_00441268[];
+extern char cFEStateChallengePopup_defaultEventOptions[];
 extern char D_00441278[];
 extern char D_00441288[];
 extern char D_00441298[];
@@ -8070,7 +8070,7 @@ extern char D_004412B8[];
  *
  * Runs the cFEStateNet onGainFocus (cFEStateNet_onGainFocus), shows the network interface's bIsRankedGame in
  * "ListBoxRankedGame" (row ranked ^ 1), picks the event's allowed-options table for mpEventOptions by the event kind
- * newRace.cGameEvent (1 D_00441278, 2 D_00441298, 3 D_00441288, 4 D_004412B8, 5 D_004412A8, else D_00441268), then updates
+ * newRace.cGameEvent (1 D_00441278, 2 D_00441298, 3 D_00441288, 4 D_004412B8, 5 D_004412A8, else cFEStateChallengePopup_defaultEventOptions), then updates
  * the option widgets for ranked play (cFEStateChallengePopup_setOptionListBoxes) and locks them while mbChallengeSent (cFEStateChallengePopup_setOptionsLocked). The
  * comment above it ("picks the mode title") does not match the code.
  *
@@ -8100,7 +8100,7 @@ void cFEStateChallengePopup::onGainFocus(cUIState* pPrevState)
         break;
     case 0:
     default:
-        mpEventOptions = (int*)D_00441268;
+        mpEventOptions = (int*)cFEStateChallengePopup_defaultEventOptions;
         break;
     }
     setOptionListBoxes(cBENetworkInterface_networkOpt.bIsRankedGame);
@@ -8155,7 +8155,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
-extern unsigned char D_004A4E88_E128[8] __asm__("D_004A4E88");
+extern unsigned char cFEStateChallengePopup_raceSetup_E128[8] __asm__("cFEStateChallengePopup_raceSetup");
 extern char str_TextTitle[];
 extern char str_TextPlayerName[];
 extern char str_TextSelectPeakEvent[];
@@ -8176,9 +8176,9 @@ extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
 extern char str_ListBoxCPURiders[];
 extern char str_kT_CMNHUDNone[];
-extern char D_004A14F8[];
-extern char D_004A1500[];
-extern char D_004A1508[];
+extern char str_1_c[];
+extern char str_2[];
+extern char str_3[];
 extern char D_004A1510[];
 extern char str_ListBoxPowerUps[];
 extern char str_ListBoxMultipliers[];
@@ -8225,7 +8225,7 @@ static inline int IsHash1AE128(int id, char* name) { return id == GetHashValue32
  * shows LobbyMan's mOpponent; "Textselectevent" gets id 7 (setUseStaticColour(1)); the peak, course and event labels
  * get their "kT_OVRCMN..." texts. "TextSubmit" ("kT_CMNSubmit") gets id 9 and "TextCancel" ("kT_BTNCancel") id 10.
  * The list boxes are filled and kept: "ListBoxRankedGame" (yes 1 / no 0) mpLBRankedGame, "ListBoxCPURiders" (none,
- * 1-4, set to D_004A4E88's fifth byte) mpLBCPURiders, "ListBoxPowerUps", "ListBoxMultipliers" and "ListBoxPointicons"
+ * 1-4, set to cFEStateChallengePopup_raceSetup's fifth byte) mpLBCPURiders, "ListBoxPowerUps", "ListBoxMultipliers" and "ListBoxPointicons"
  * (yes 0 / no 1) in their members. "MenuChallenge" gets attribute bit 7.
  *
  * @param pWidget  the widget being created (On Tour pWidget)
@@ -8273,14 +8273,14 @@ void cFEStateChallengePopup::onWidgetCreate(cUIThing* pWidget)
         mpLBRankedGame = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxCPURiders)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNHUDNone), 0);
-        cUIListBox_addEntryByAsciiString(item, D_004A14F8, 1);
-        cUIListBox_addEntryByAsciiString(item, D_004A1500, 2);
-        cUIListBox_addEntryByAsciiString(item, D_004A1508, 3);
+        cUIListBox_addEntryByAsciiString(item, str_1_c, 1);
+        cUIListBox_addEntryByAsciiString(item, str_2, 2);
+        cUIListBox_addEntryByAsciiString(item, str_3, 3);
         cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
         obj->setVisible(1);
         obj->setUseStaticColourListBox(1);
         mpLBCPURiders = (cUIListBox*)item;
-        cUIListBox_setCurrentEntryByIndex(item, D_004A4E88_E128[4]);
+        cUIListBox_setCurrentEntryByIndex(item, cFEStateChallengePopup_raceSetup_E128[4]);
     } else if (IsHash1AE128(item->mHashName, str_ListBoxPowerUps)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
@@ -8489,7 +8489,7 @@ void cFEStateChallengePopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         } else if (((void*)pWidget) == (void*)mpLBCPURiders) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI_E7A0(race, cUIListBox_getCurrentEntryData_E7A0(mpLBCPURiders));
-            D_004A4E88_w[1] = cUIListBox_getCurrentEntryData_E7A0(mpLBCPURiders);
+            cFEStateChallengePopup_raceSetup_w[1] = cUIListBox_getCurrentEntryData_E7A0(mpLBCPURiders);
             commit_E7A0(race);
         }
         break;
@@ -8659,8 +8659,8 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_setOptionListBoxes);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int D_005308D0[];
-// D_004A4E88 is 8 bytes; the byte read is its second word's low byte (+4).
-extern unsigned char D_004A4E88_AF098[8] __asm__("D_004A4E88");
+// cFEStateChallengePopup_raceSetup is 8 bytes; the byte read is its second word's low byte (+4).
+extern unsigned char cFEStateChallengePopup_raceSetup_AF098[8] __asm__("cFEStateChallengePopup_raceSetup");
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 
 /**
@@ -8670,7 +8670,7 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
  * power-ups, multipliers and point icons shows its bit (8, 6, 7) of the race-option word D_005308D0 when mpEventOptions
  * allows it ([1], [3], [2]), else entry 1. CPU riders: when an event is set (newRace.cGameEvent) the new-race AI
  * count is set to 0 (then the interface's vtable entry 1) and the list shows 0; otherwise it shows the count saved in
- * D_004A4E88's second word (its low byte).
+ * cFEStateChallengePopup_raceSetup's second word (its low byte).
  *
  * @param all  non-zero to reset to the defaults
  */
@@ -8706,7 +8706,7 @@ void cFEStateChallengePopup::setOptionListBoxes(int all)
         ivt[1].fn(vthis(iface, ivt[1]));
         cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, 0);
     } else {
-        cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, D_004A4E88_AF098[4]);
+        cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, cFEStateChallengePopup_raceSetup_AF098[4]);
     }
 }
 #endif
@@ -8984,9 +8984,9 @@ extern char str_TextPeak[];
 extern char str_TextEvent[];
 extern char str_TextCourse[];
 extern char str_sp[];
-extern char D_004A14F8[];
-extern char D_004A1500[];
-extern char D_004A1508[];
+extern char str_1_c[];
+extern char str_2[];
+extern char str_3[];
 
 class cRaceIface_001AF728 {
 public:
@@ -9020,13 +9020,13 @@ void cFEStateChallengePopup::fillRaceTexts(cBENewRaceInterface* iface, cUIScreen
     } else {
         switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
-            cUIText_setAsciiString(uiText, D_004A14F8);
+            cUIText_setAsciiString(uiText, str_1_c);
             break;
         case 1:
-            cUIText_setAsciiString(uiText, D_004A1500);
+            cUIText_setAsciiString(uiText, str_2);
             break;
         case 2:
-            cUIText_setAsciiString(uiText, D_004A1508);
+            cUIText_setAsciiString(uiText, str_3);
             break;
         }
     }
@@ -9231,7 +9231,7 @@ extern "C" void showOpponentConnection(cUIScreen* self, online_PingEvent* msg)
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup);
 #ifdef SKIP_ASM
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
-extern int D_004A4E88;
+extern int cFEStateChallengePopup_raceSetup;
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
 void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
@@ -9241,7 +9241,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with the engine and parent, stores
  * cFEStateChallengeReceivedPopup_vtbl, builds mszChallenger from @p name, clears mbAccepted, sets mHashName 0x40 and
- * clears D_004A4E88.
+ * clears cFEStateChallengePopup_raceSetup.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state (On Tour pParentState)
@@ -9256,7 +9256,7 @@ extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(c
     cBXString_cBXString2((char*)&self->mszChallenger, name);
     self->mbAccepted = 0;
     self->mHashName = 0x40;
-    D_004A4E88 = 0;
+    cFEStateChallengePopup_raceSetup = 0;
     return ((void*)self);
 }
 #endif
@@ -10010,12 +10010,12 @@ void cFEStateChallengeReceivedPopup::declineChallenge()
 //100%
 INCLUDE_ASM("fe/feasyncfile", findOnlineCharacterRow);
 #ifdef SKIP_ASM
-extern signed char D_00440F68[];
+extern signed char cFEStateCharSelect_characterOrder[];
 
 /**
- * Returns the row of a character id in the online rider list (the 10-entry table D_00440F68).
+ * Returns the row of a character id in the online rider list (the 10-entry table cFEStateCharSelect_characterOrder).
  *
- * D_00440F68 holds the character ids in list order: 4, 0, 8, 5, 9, 6, 7, 3, 2, 1.
+ * cFEStateCharSelect_characterOrder holds the character ids in list order: 4, 0, 8, 5, 9, 6, 7, 3, 2, 1.
  * cFEStateOnlineCharacterSelect_onWidgetCreate uses it to select the player's rider in "LBChallengerSelect".
  *
  * @param characterId  the character id
@@ -10025,7 +10025,7 @@ extern "C" int findOnlineCharacterRow(int characterId)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        if (characterId == D_00440F68[i]) {
+        if (characterId == cFEStateCharSelect_characterOrder[i]) {
             return i;
         }
     }
@@ -10152,7 +10152,7 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" int findOnlineCharacterRow(int c);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
-extern signed char D_00440F68[];
+extern signed char cFEStateCharSelect_characterOrder[];
 extern char str_LBChallengerSelect[];
 extern char str_TextOpponentSelect[];
 extern char str_sp[];
@@ -10198,7 +10198,7 @@ static inline int IsHash_001B10F8(int id, char* name) { return id == GetHashValu
  * Sets up the rider-select widgets as the screen creates them.
  *
  * "LBChallengerSelect" loses attribute bit 0, gets the ten riders' names (cBECharacterInterface_getShortNameByCharacter on the character interface
- * for each id in D_00440F68), becomes visible, is preset to the player's current rider (stored in miCharID) and is
+ * for each id in cFEStateCharSelect_characterOrder), becomes visible, is preset to the player's current rider (stored in miCharID) and is
  * kept in mpLBChallengerSelect (then slot 24 with 1). "TextOpponentSelect" gets the str_sp text and colour (1, 0,
  * 0, 0).
  *
@@ -10212,7 +10212,7 @@ void cFEStateOnlineCharacterSelect::onWidgetCreate(cUIThing* pWidget)
         text->mAttr &= ~1;
         int i;
         for (i = 0; i < 10; i++) {
-            cUIListBox_addEntryByAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0), D_00440F68[i]);
+            cUIListBox_addEntryByAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cFEStateCharSelect_characterOrder[i], 0), cFEStateCharSelect_characterOrder[i]);
         }
         text->mAttr &= ~1;
         box->setVisible(1);
@@ -10399,7 +10399,7 @@ extern "C" void cFEStateOnlineCharacterSelect_showOpponentRiderName(cFEStateOnli
 extern "C" void cFEStateOnlineCharacterSelect_showOnlyRiderStats(cFEStateOnlineCharacterSelect* self, int sel, int flag);
 extern "C" void cFEStateOnlineCharacterSelect_moveFrameLayer(cFEStateOnlineCharacterSelect* self, int on, int a2);
 extern "C" void cFEStateNet_showChallengeLostPopup(cFEStateNet* self, int err);
-extern int D_004A4E88;
+extern int cFEStateChallengePopup_raceSetup;
 extern const char str_cFEStateChatRoom[];
 extern const char str_cFEStateOnlineMainMenu[];
 extern const char str_cFEStateBraggingRights[];
@@ -10411,7 +10411,7 @@ extern const char str_cFEStateBraggingRights[];
  * (cFEStateOnlineCharacterSelect_showOpponentRiderName) and stats panel (cFEStateOnlineCharacterSelect_showOnlyRiderStats(.., 1)). 245 raises and 247 lowers the challenger's frame
  * (cFEStateOnlineCharacterSelect_moveFrameLayer(.., 1 / 0, 1)). 238, 241, 248, 250, 274 and 275 show cFEStateNet_showChallengeLostPopup's error popup. 246 pushes a new
  * cFEStateBraggingRights (cFEStateBraggingRights_cFEStateBraggingRights). 268 pushes a new cFEStateChatRoom when in a room (LobbyMan_getRoomName) and
- * D_004A4E88 is 0, else a cFEStateOnlineMainMenu. 224 is ignored; anything else goes to cFEStateNet_onNetEvent. The existing
+ * cFEStateChallengePopup_raceSetup is 0, else a cFEStateOnlineMainMenu. 224 is ignored; anything else goes to cFEStateNet_onNetEvent. The existing
  * comment's "profile list" does not match the body.
  *
  * @param eventType  event type
@@ -10443,7 +10443,7 @@ void* cFEStateOnlineCharacterSelect::onNetEvent(int eventType, void* eventData)
                 str_cFEStateBraggingRights, 0, 0), mpEngine));
         break;
     case 268:
-        if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
+        if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && cFEStateChallengePopup_raceSetup == 0) {
             obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0),
                     mpEngine);
         } else {
@@ -11073,7 +11073,7 @@ extern char str_PlayerListItempct_02d[];
 extern char str_cFEStateLobbyMenu[];
 extern char str_sp[];
 struct sName_001B2378 { char c[17]; };
-extern sName_001B2378 D_00463A48;
+extern sName_001B2378 str_PlayerListItem00;
 
 struct sBXString_001B2378 {
     char* p;
@@ -11131,7 +11131,7 @@ void cFEStateChatRoom::refreshPlayerList(int reselect)
     if (n < 7) {
         miMenuScroll[0] = 0;
     }
-    sName_001B2378 name = D_00463A48;
+    sName_001B2378 name = str_PlayerListItem00;
     sBXString_001B2378 rowText;
     int flag = 0;
     for (int i = 5; i >= 0; i--) {
@@ -11175,10 +11175,10 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void strcpy3(void* str, const char* s);
 extern "C" void strcat1(void* str, unsigned short* s);
 extern "C" int strcmp(const char* a, const char* b);
-extern const char* D_004A1A60;
-extern const char* D_004A1A64;
-extern const char* D_004A1A68;
-extern const char* D_004A1A6C;
+extern const char* cFEStateLobbyMenu_eliteChannelName;
+extern const char* cFEStateLobbyMenu_advancedChannelName;
+extern const char* cFEStateLobbyMenu_intermediateChannelName;
+extern const char* cFEStateLobbyMenu_beginnerChannelName;
 extern char str_kT_POPUP232Elite[];
 extern char str_kT_POPUP232Advanced[];
 extern char str_kT_POPUP232Voice[];
@@ -11227,13 +11227,13 @@ extern "C" void buildRoomDisplayName(const char* src, void* out)
         ext[j] = src[i];
     }
     ext[j] = 0;
-    if (strcmp(name, D_004A1A60) == 0) {
+    if (strcmp(name, cFEStateLobbyMenu_eliteChannelName) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Elite));
-    } else if (strcmp(name, D_004A1A64) == 0) {
+    } else if (strcmp(name, cFEStateLobbyMenu_advancedChannelName) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Advanced));
-    } else if (strcmp(name, D_004A1A68) == 0) {
+    } else if (strcmp(name, cFEStateLobbyMenu_intermediateChannelName) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Voice));
-    } else if (strcmp(name, D_004A1A6C) == 0) {
+    } else if (strcmp(name, cFEStateLobbyMenu_beginnerChannelName) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Beginner));
     } else {
         strcpy3(out, name);
@@ -12312,7 +12312,7 @@ public:
 };
 
 extern void* cFEStateNetConfig_vtbl[];
-extern cFEVObj_001B3F78* D_004A1B78;
+extern cFEVObj_001B3F78* cFEStateNetConfig_memCard;
 extern "C" cFEVObj_001B3F78* cMemCard_CreateInstance();
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
 void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
@@ -12322,7 +12322,7 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet, no parent state), zeroes the selection, setting count, list
  * boxes, menu, widgets, popup text, auth-error texts and state, clears mNeedsLobby, stores cFEStateNetConfig_vtbl and
- * mHashName 0x31, then stores cMemCard_CreateInstance()'s object in D_004A1B78 (the object the connect state machine drives;
+ * mHashName 0x31, then stores cMemCard_CreateInstance()'s object in cFEStateNetConfig_memCard (the object the connect state machine drives;
  * its delete, cMemCard_DeleteInstance, matches On Tour's cMemCard::DeleteInstance) and calls its slot 2. miWaitFrames starts
  * at -1.
  *
@@ -12351,7 +12351,7 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, cUI
     VPTR_OF(cListNode, mem) = cFEStateNetConfig_vtbl;
     mem->mHashName = 49;
     cFEVObj_001B3F78* memCard = cMemCard_CreateInstance();
-    D_004A1B78 = memCard;
+    cFEStateNetConfig_memCard = memCard;
     memCard->Init();
     mem->miWaitFrames = -1;
     return ((void*)mem);
@@ -12366,13 +12366,13 @@ void cMemMan_free(void* p);
 extern "C" void cMemCard_DeleteInstance(void* p);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
 extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
-// D_004A1B78 is declared earlier in the unit (cFEVObj_001B3F78*, see cFEStateNetConfig_cFEStateNetConfig)
+// cFEStateNetConfig_memCard is declared earlier in the unit (cFEVObj_001B3F78*, see cFEStateNetConfig_cFEStateNetConfig)
 
 /**
  * Destroys the network-configuration screen state: frees its heap texts and the network configuration object.
  *
  * Restores cFEStateNetConfig_vtbl, frees the three mpustrAuthError texts and mpustrPopupText (cMemMan_free) and
- * deletes D_004A1B78 with cMemCard_DeleteInstance, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet) with @p flags.
+ * deletes cFEStateNetConfig_memCard with cMemCard_DeleteInstance, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet) with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
  */
@@ -12395,9 +12395,9 @@ extern "C" void cFEStateNetConfig__cFEStateNetConfig(cFEStateNetConfig* self, in
         cMemMan_free(self->mpustrPopupText);
         self->mpustrPopupText = 0;
     }
-    if (D_004A1B78 != 0) {
-        cMemCard_DeleteInstance(D_004A1B78);
-        D_004A1B78 = 0;
+    if (cFEStateNetConfig_memCard != 0) {
+        cMemCard_DeleteInstance(cFEStateNetConfig_memCard);
+        cFEStateNetConfig_memCard = 0;
     }
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -12419,7 +12419,7 @@ extern char str_200net_config[];
  * Opens the "200net_config" screen, shuts down any game comm session and resets the configuration menu.
  *
  * Adds the screen by hash (cUIEngine_addScreenByHashName) into mpScreen and plays its frame 0; calls cGameComm_destroy
- * (cGameComm destroy) when cGameComm_mGameComm is set; cFEStateNetConfig_rescanConfigs selects menu row 0, clears D_004A1B80 and
+ * (cGameComm destroy) when cGameComm_mGameComm is set; cFEStateNetConfig_rescanConfigs selects menu row 0, clears cFEStateNetConfig_cardDevice and
  * calls cSSXAudio_PlayCharSelSong(gSSXAudio); finally cSSXAudio_StopSong(gSSXAudio).
  */
 void cFEStateNetConfig::onCreateScreen()
@@ -12483,8 +12483,8 @@ extern "C" void cFEStateNetConfig_checkCardSlot(cFEStateNetConfig* self);
 extern "C" void cFEStateNetConfig_connectWithSelectedConfig(cFEStateNetConfig* self);
 extern "C" int cUIStateStack_popToState(void* p);
 void cPS2MemCard_selectDevice(void* self, int a1);
-extern char* D_004A1B78_p __asm__("D_004A1B78");
-extern int D_004A1B80;
+extern char* cFEStateNetConfig_memCard_p __asm__("cFEStateNetConfig_memCard");
+extern int cFEStateNetConfig_cardDevice;
 
 
 struct sVE1B41A8 {
@@ -12495,7 +12495,7 @@ struct sVE1B41A8 {
 
 static inline int VCall1B41A8(int slot)
 {
-    char* obj = D_004A1B78_p;
+    char* obj = cFEStateNetConfig_memCard_p;
     sVE1B41A8* vt = *(sVE1B41A8**)obj;
     return vt[slot].fn(vthis(obj, vt[slot]));
 }
@@ -12504,17 +12504,17 @@ static inline int VCall1B41A8(int slot)
  * Runs one frame of the network-configuration state: updates the network object and steps the connect state
  * machine.
  *
- * Calls D_004A1B78's slot 3 each frame, then by miState: 1 -> 2; 2 (slot 11 idle) cPS2MemCard_selectDevice(obj, D_004A1B80),
+ * Calls cFEStateNetConfig_memCard's slot 3 each frame, then by miState: 1 -> 2; 2 (slot 11 idle) cPS2MemCard_selectDevice(obj, cFEStateNetConfig_cardDevice),
  * -> 3; 3 (idle) cFEStateNetConfig_checkCardSlot; 4 cFEStateNetConfig_checkCardAndLoadConfigs; 5 counts miWaitFrames down and, when it runs out, either reports
- * error popup 0x842 (slot 53 returns 0: cFEStateNetConfig_showConfigLists(self, -1), cFEStateNetConfig_showCardErrorPopup(self, 0x842, 0x18, D_004A1B80)) or
+ * error popup 0x842 (slot 53 returns 0: cFEStateNetConfig_showConfigLists(self, -1), cFEStateNetConfig_showCardErrorPopup(self, 0x842, 0x18, cFEStateNetConfig_cardDevice)) or
  * pops the state stack (cUIStateStack_popToState on mpEngine + 0x18), then returns to 0; while still waiting it falls through
- * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) cPS2MemCard_selectDevice, -> 8,
+ * to state 0, which (idle) calls the object's slot 5 with cFEStateNetConfig_cardDevice. States 6 -> 7, 7 (idle) cPS2MemCard_selectDevice, -> 8,
  * 8 (idle) cFEStateNetConfig_connectWithSelectedConfig (connect with the chosen setting). Ends with the cFEStateNet update (cFEStateNet_onUpdate).
  */
 void cFEStateNetConfig::onUpdate()
 {
-    if (D_004A1B78_p != 0) {
-        char* obj = D_004A1B78_p;
+    if (cFEStateNetConfig_memCard_p != 0) {
+        char* obj = cFEStateNetConfig_memCard_p;
         sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)obj;
         vt[3].fn(vthis(obj, vt[3]));
     }
@@ -12524,7 +12524,7 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 2:
         if (VCall1B41A8(11) == 0) {
-            cPS2MemCard_selectDevice(D_004A1B78_p, D_004A1B80);
+            cPS2MemCard_selectDevice(cFEStateNetConfig_memCard_p, cFEStateNetConfig_cardDevice);
             miState = 3;
         }
         break;
@@ -12540,7 +12540,7 @@ void cFEStateNetConfig::onUpdate()
         if ((miWaitFrames)-- < 0) {
             if (VCall1B41A8(53) == 0) {
                 this->showConfigLists(-1);
-                this->showCardErrorPopup(2114, 0x18, D_004A1B80);
+                this->showCardErrorPopup(2114, 0x18, cFEStateNetConfig_cardDevice);
             } else {
                 cUIStateStack_popToState(&mpEngine->mStateStack);
             }
@@ -12549,9 +12549,9 @@ void cFEStateNetConfig::onUpdate()
         }
     case 0:
         if (VCall1B41A8(11) == 0) {
-            char* obj = D_004A1B78_p;
+            char* obj = cFEStateNetConfig_memCard_p;
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)obj;
-            vt[5].fn(vthis(obj, vt[5]), D_004A1B80);
+            vt[5].fn(vthis(obj, vt[5]), cFEStateNetConfig_cardDevice);
         }
         break;
     case 6:
@@ -12559,7 +12559,7 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 7:
         if (VCall1B41A8(11) == 0) {
-            cPS2MemCard_selectDevice(D_004A1B78_p, D_004A1B80);
+            cPS2MemCard_selectDevice(cFEStateNetConfig_memCard_p, cFEStateNetConfig_cardDevice);
             miState = 8;
         }
         break;
@@ -12576,7 +12576,7 @@ void cFEStateNetConfig::onUpdate()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_checkCardAndLoadConfigs);
 #ifdef SKIP_ASM
-// D_004A1B78 is declared earlier in the unit (cFEVObj_001B3F78*, see cFEStateNetConfig_cFEStateNetConfig)
+// cFEStateNetConfig_memCard is declared earlier in the unit (cFEVObj_001B3F78*, see cFEStateNetConfig_cFEStateNetConfig)
 extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, int a1, int a2, int a3);
 extern "C" void cFEStateNetConfig_loadConfigs(cFEStateNetConfig* self);
 extern "C" void cFEStateNetConfig_showConfigLists(cFEStateNetConfig* self, int a1);
@@ -12643,7 +12643,7 @@ public:
 /**
  * Runs miState 4 of the network-configuration screen: loads the configurations once the card is ready.
  *
- * Asks the memory card object D_004A1B78 (cMemCard_CreateInstance, cMemCard::CreateInstance) whether the card is formatted
+ * Asks the memory card object cFEStateNetConfig_memCard (cMemCard_CreateInstance, cMemCard::CreateInstance) whether the card is formatted
  * (vtable entry 55) and available (entry 53). Unformatted: miState 0, the no-configuration view (cFEStateNetConfig_showConfigLists(.., -1))
  * and popup 2112 "not formatted" (cFEStateNetConfig_showCardErrorPopup with error 20 and slot -1, so the text shows slot "0"; likely bug).
  * Available: loads the configurations (cFEStateNetConfig_loadConfigs). Otherwise miState 0, the no-configuration view and popup 2112
@@ -12651,8 +12651,8 @@ public:
  */
 void cFEStateNetConfig::checkCardAndLoadConfigs()
 {
-    int cardAvailable = ((cFEVObj_001B43A8*)D_004A1B78)->IsAvailable1();
-    if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
+    int cardAvailable = ((cFEVObj_001B43A8*)cFEStateNetConfig_memCard)->IsAvailable1();
+    if (((cFEVObj_001B43A8*)cFEStateNetConfig_memCard)->IsFormatted1() == 0) {
         miState = 0;
         showConfigLists(-1);
         showCardErrorPopup(2112, 20, -1);
@@ -12671,19 +12671,19 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_checkCardSlot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A1B80;
+extern int cFEStateNetConfig_cardDevice;
 
 extern "C" void cFEStateNetConfig_showCheckingCardPopup_4470(void* self, int a1) __asm__("cFEStateNetConfig_showCheckingCardPopup");
 
-extern cFEVObj_001B3F78* D_004A1B78;
+extern cFEVObj_001B3F78* cFEStateNetConfig_memCard;
 
 extern "C" void cFEStateNetConfig_reportLoadResult_4470(void* self, int err) __asm__("cFEStateNetConfig_reportLoadResult");
 
 /**
  * Runs miState 3 of the network-configuration screen: checks the card in the current slot, trying slot 2 next.
  *
- * D_004A1B80 is the memory-card slot (0 or 1). When the card (the memory card object D_004A1B78 (cMemCard_CreateInstance,
- * cMemCard::CreateInstance)) is not available or not formatted on slot 1 the check moves to slot 2 (D_004A1B80 = 1, the
+ * cFEStateNetConfig_cardDevice is the memory-card slot (0 or 1). When the card (the memory card object cFEStateNetConfig_memCard (cMemCard_CreateInstance,
+ * cMemCard::CreateInstance)) is not available or not formatted on slot 1 the check moves to slot 2 (cFEStateNetConfig_cardDevice = 1, the
  * "checking" popup cFEStateNetConfig_showCheckingCardPopup(.., 2), miState 2; an unformatted card also sets miResult to -200). When slot 2 fails
  * as well miState becomes 0 and, unless miResult is 1, the slot goes back to 0 and cFEStateNetConfig_reportLoadResult reports miResult; with
  * miResult 1 it shows popup 2112 "not detected" (missing card) or 2113 "not formatted" for slot 2. A usable card sets
@@ -12694,17 +12694,17 @@ void cFEStateNetConfig::checkCardSlot()
 {
     int k;
     int result;
-    if (((cFEVObj_001B43A8*)D_004A1B78)->IsAvailable1() == 0) {
-        k = D_004A1B80;
+    if (((cFEVObj_001B43A8*)cFEStateNetConfig_memCard)->IsAvailable1() == 0) {
+        k = cFEStateNetConfig_cardDevice;
         if (k == 0) {
-            D_004A1B80 = 1;
+            cFEStateNetConfig_cardDevice = 1;
             cFEStateNetConfig_showCheckingCardPopup_4470(((char*)this), 2);
             miState = 2;
         } else {
             result = miResult;
             miState = 0;
             if (result != 1) {
-                D_004A1B80 = (k + 1) % 2;
+                cFEStateNetConfig_cardDevice = (k + 1) % 2;
                 cFEStateNetConfig_reportLoadResult_4470(((char*)this), result);
             } else {
                 showConfigLists(-1);
@@ -12712,18 +12712,18 @@ void cFEStateNetConfig::checkCardSlot()
             }
         }
     } else {
-        if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
-            k = D_004A1B80;
+        if (((cFEVObj_001B43A8*)cFEStateNetConfig_memCard)->IsFormatted1() == 0) {
+            k = cFEStateNetConfig_cardDevice;
                 if (k == 0) {
                 miResult = -200;
-                D_004A1B80 = 1;
+                cFEStateNetConfig_cardDevice = 1;
                 cFEStateNetConfig_showCheckingCardPopup_4470(((char*)this), 2);
                 miState = 2;
             } else {
                 result = miResult;
                 miState = 0;
                 if (result != 1) {
-                    D_004A1B80 = (k + 1) % 2;
+                    cFEStateNetConfig_cardDevice = (k + 1) % 2;
                     cFEStateNetConfig_reportLoadResult_4470(((char*)this), result);
                 } else {
                     showCardErrorPopup(2113, 20, 1);
@@ -12750,8 +12750,8 @@ extern "C" void cConnMan_connect(void* self, int a1);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1B45E8(void* str, int fmt, ...) __asm__("sprintf1");
 class cFEVObj_001B3F78;
-extern cFEVObj_001B3F78* D_004A1B78;
-extern int D_004A1B80;
+extern cFEVObj_001B3F78* cFEStateNetConfig_memCard;
+extern int cFEStateNetConfig_cardDevice;
 extern char str_kT_POPUPCMNYourNetwork[];
 extern char str_kT_MEMFENotDetectedFile[];
 extern char str_kT_POPUP200ConnectingISP[];
@@ -12833,21 +12833,21 @@ public:
  * Runs miState 8 of the network-configuration screen: connects with the chosen configuration, or reports a missing
  * card.
  *
- * No card available (the memory card object D_004A1B78 (cMemCard_CreateInstance, cMemCard::CreateInstance), vtable entry 53):
+ * No card available (the memory card object cFEStateNetConfig_memCard (cMemCard_CreateInstance, cMemCard::CreateInstance), vtable entry 53):
  * miState 0, the no-configuration view (cFEStateNetConfig_showConfigLists(.., -1)) and a one-option popup ("kT_CMNContinue", id 2115, no
- * back) with "kT_MEMFENotDetectedFile" for slot D_004A1B80 + 1. Otherwise shows "kT_POPUP200ConnectingISP" with Cancel
+ * back) with "kT_MEMFENotDetectedFile" for slot cFEStateNetConfig_cardDevice + 1. Otherwise shows "kT_POPUP200ConnectingISP" with Cancel
  * (id 2062), starts the connection with configuration miSelectedSetting (cConnMan_connect on lobbyman_getConnMan()) and sets
  * miState 0.
  */
 void cFEStateNetConfig::connectWithSelectedConfig()
 {
-    if (((cFEVObj_001B45E8*)D_004A1B78)->IsAvailable1() == 0) {
+    if (((cFEVObj_001B45E8*)cFEStateNetConfig_memCard)->IsAvailable1() == 0) {
         miState = 0;
         showConfigLists(-1);
         char* buf = (char*)&mustrPopupText[0];
         cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         int name = Loc1B45E8(str_kT_POPUPCMNYourNetwork);
-        sprintf1_1B45E8(buf, Loc1B45E8(str_kT_MEMFENotDetectedFile), D_004A1B80 + 1, name);
+        sprintf1_1B45E8(buf, Loc1B45E8(str_kT_MEMFENotDetectedFile), cFEStateNetConfig_cardDevice + 1, name);
         popup->info.mtMessage.pustr = (const unsigned short*)buf;
         popup->info.mtMessage.eType = 1;
         popup->info.meType = 1;
@@ -13045,14 +13045,14 @@ int cFEStateNetConfig::onNoConfigPopupEvent(cUIState* popup, int event)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onCardErrorPopupEvent);
 #ifdef SKIP_ASM
-extern int D_004A1B80;
+extern int cFEStateNetConfig_cardDevice;
 extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self, int a1);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 /**
  * Handles the memory-card error popups (ids 2112-2114): Retry restarts the card check from slot 1.
  *
- * On kONSCREENPOPUPOPTION0 sets D_004A1B80 to 0 and miResult to 1, shows the "checking" popup for slot 1
+ * On kONSCREENPOPUPOPTION0 sets cFEStateNetConfig_cardDevice to 0 and miResult to 1, shows the "checking" popup for slot 1
  * (cFEStateNetConfig_showCheckingCardPopup) and sets miState 1. Other events, including Continue / Cancel (kONSCREENPOPUPOPTION1) and back, go to
  * cFEStateNet_onPopupEvent.
  *
@@ -13063,7 +13063,7 @@ void cFEStateNetConfig::onCardErrorPopupEvent(cUIState* popup, unsigned int even
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        D_004A1B80 = 0;
+        cFEStateNetConfig_cardDevice = 0;
         miResult = 1;
         this->showCheckingCardPopup(1);
         miState = 1;
@@ -13097,7 +13097,7 @@ extern "C" void* cUIListBox_getFont(void* box);
 extern "C" void cUIListBox_addEntryByUnicodeString(void* box, unsigned short* str, int id);
 extern "C" void _Utf8DecodeStringToUCS2(unsigned short* dst, int n, const char* src);
 extern "C" int strcmp(const char* a, const char* b);
-extern int D_004A1B80;
+extern int cFEStateNetConfig_cardDevice;
 extern int D_004A1B90[2];
 extern int cCommSystem_mNumNetConn;
 extern char* D_004A1B7C;
@@ -13112,7 +13112,7 @@ extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 /**
  * Loads the network configurations from the memory card in the current slot and lists them.
  *
- * Reads "mc0:" or "mc1:" (D_004A1B90[D_004A1B80]) with cCommSystem_netConnQuery into cCommSystem_mNetConns; miNumSettings is the
+ * Reads "mc0:" or "mc1:" (D_004A1B90[cFEStateNetConfig_cardDevice]) with cCommSystem_netConnQuery into cCommSystem_mNetConns; miNumSettings is the
  * count, at most 4. None or an error on slot 1: tries slot 2 ("checking" popup, miState 1, miResult = the count). On
  * slot 2 an error goes to cFEStateNetConfig_reportLoadResult (miState 0), or, when slot 1 found none (miResult 0), the slot is reset to 0.
  * With configurations each one gets a row in mpLBSettings ("%d: " plus its name fitted to the box width when there are
@@ -13127,14 +13127,14 @@ void cFEStateNetConfig::loadConfigs()
     tRect size;
     t3Vector scale;
     tRect pos;
-    cCommSystem_netConnQuery(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
+    cCommSystem_netConnQuery(cCommSystem_mCommSystem, D_004A1B90[cFEStateNetConfig_cardDevice]);
     miNumSettings = cCommSystem_mNumNetConn;
     if (miNumSettings > 4) {
         miNumSettings = 4;
     }
     if (miNumSettings <= 0) {
-        if (D_004A1B80 == 0) {
-            D_004A1B80 = 1;
+        if (cFEStateNetConfig_cardDevice == 0) {
+            cFEStateNetConfig_cardDevice = 1;
             this->showCheckingCardPopup(2);
             miState = 1;
             miResult = miNumSettings;
@@ -13142,7 +13142,7 @@ void cFEStateNetConfig::loadConfigs()
         }
         if (miNumSettings != 0) {
             if (miResult == 0) {
-                D_004A1B80 = 0;
+                cFEStateNetConfig_cardDevice = 0;
                 miState = 5;
                 miWaitFrames = 15;
                 return;
@@ -13194,13 +13194,13 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_reportLoadResult);
 extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, int a1, int a2, int a3);
 extern "C" void cFEStateNetConfig_showConfigLists(cFEStateNetConfig* self, int a1);
 extern "C" int cUIStateStack_popToState(void* p);
-extern int D_004A1B80;
+extern int cFEStateNetConfig_cardDevice;
 
 /**
  * Reports the result of loading the network configurations, then shows the no-configuration view.
  *
  * 0 closes the popups on the state stack (cUIStateStack_popToState); -21..-16 and -14..-1 show popup 2114 "corrupt" (error 24) for
- * slot D_004A1B80; -15 popup 2113 "different PS2" (error 6); -200 popup 2113 "not formatted" (error 20, slot 1). Always
+ * slot cFEStateNetConfig_cardDevice; -15 popup 2113 "different PS2" (error 6); -200 popup 2113 "not formatted" (error 20, slot 1). Always
  * ends with cFEStateNetConfig_showConfigLists(.., -1).
  *
  * @param err  the load result
@@ -13214,7 +13214,7 @@ void cFEStateNetConfig::reportLoadResult(int err)
     // PORT: GNU case ranges
     case -21 ... -16:
     case -14 ... -1:
-        showCardErrorPopup(2114, 0x18, D_004A1B80);
+        showCardErrorPopup(2114, 0x18, cFEStateNetConfig_cardDevice);
         break;
     case -15:
         showCardErrorPopup(2113, 6, -1);
@@ -13294,7 +13294,7 @@ void cFEStateNetConfig::showConfigLists(int configCount)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_rescanConfigs);
 #ifdef SKIP_ASM
-extern int D_004A1B80;
+extern int cFEStateNetConfig_cardDevice;
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self, int a1);
@@ -13303,7 +13303,7 @@ extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self,
 /**
  * Restarts the network-configuration scan: clears the lists and checks the card in slot 1 again.
  *
- * Selects row 0 of mpMenuConfig, sets D_004A1B80 to 0 and miResult to 1, clears mpLBAdapters and mpLBSettings
+ * Selects row 0 of mpMenuConfig, sets cFEStateNetConfig_cardDevice to 0 and miResult to 1, clears mpLBAdapters and mpLBSettings
  * (cUIListBox_deleteAllEntries), shows the "checking" popup for slot 1 (cFEStateNetConfig_showCheckingCardPopup) and sets miState 1.
  *
  * @param ignored  unused
@@ -13312,7 +13312,7 @@ void cFEStateNetConfig::rescanConfigs(int ignored)
 {
     cFEStateNetConfig* self = this;
     cUIMenu_setSelectedByIndex(((void*)self->mpMenuConfig), 0);
-    D_004A1B80 = 0;
+    cFEStateNetConfig_cardDevice = 0;
     self->miResult = 1;
     cUIListBox_deleteAllEntries(((void*)self->mpLBAdapters));
     cUIListBox_deleteAllEntries(((void*)self->mpLBSettings));
@@ -20568,10 +20568,10 @@ extern "C" void cBXString_right(void* ret, void* src, int n);
 extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" int strcmp(const char* a, const char* b);
 extern char* cBXString_EmptyString_p __asm__("cBXString_EmptyString");
-extern const char* D_004A1A60;
-extern const char* D_004A1A64;
-extern const char* D_004A1A68;
-extern const char* D_004A1A6C;
+extern const char* cFEStateLobbyMenu_eliteChannelName;
+extern const char* cFEStateLobbyMenu_advancedChannelName;
+extern const char* cFEStateLobbyMenu_intermediateChannelName;
+extern const char* cFEStateLobbyMenu_beginnerChannelName;
 extern char str_kT_231NoAvailableRooms[];
 
 struct sBXStr_001BE0A8 {
@@ -20591,7 +20591,7 @@ struct sBXTmp_001BE0A8 {
  *
  * Clears the four mpChannelList boxes (cUIListBox_deleteAllEntries). For each of LobbyMan's rooms (count LobbyMan_getnumrooms, name
  * LobbyMan_getRoomNameAt) the name is split at its last '.': the part before it picks the channel by comparing (strcmp)
- * with D_004A1A6C (list 0, beginner), D_004A1A68 (1, voice), D_004A1A64 (2, advanced) and D_004A1A60 (3, expert); rooms
+ * with cFEStateLobbyMenu_beginnerChannelName (list 0, beginner), cFEStateLobbyMenu_intermediateChannelName (1, voice), cFEStateLobbyMenu_advancedChannelName (2, advanced) and cFEStateLobbyMenu_eliteChannelName (3, expert); rooms
  * matching none are skipped. The part after the dot is added to that list with the room index as data, and the list's
  * virtual slot 8 is called with 0. A channel with no rooms gets one "kT_231NoAvailableRooms" entry (data -1) and slot 8
  * with 1. Finally cFEStateLobbyMenu_restoreChannelSelections restores the selections. Likely bug (retail too): the per-channel counters are never
@@ -20628,19 +20628,19 @@ void cFEStateLobbyMenu::rebuildChannelLists()
         }
         cUIThing* list;
         int type;
-        if (strcmp(base.p, D_004A1A6C) == 0) {
+        if (strcmp(base.p, cFEStateLobbyMenu_beginnerChannelName) == 0) {
             type = 0;
             list = (cUIThing*)mpChannelList[0];
             counts[0]++;
-        } else if (strcmp(base.p, D_004A1A68) == 0) {
+        } else if (strcmp(base.p, cFEStateLobbyMenu_intermediateChannelName) == 0) {
             type = 1;
             list = (cUIThing*)mpChannelList[1];
             counts[1]++;
-        } else if (strcmp(base.p, D_004A1A64) == 0) {
+        } else if (strcmp(base.p, cFEStateLobbyMenu_advancedChannelName) == 0) {
             type = 2;
             list = (cUIThing*)mpChannelList[2];
             counts[2]++;
-        } else if (strcmp(base.p, D_004A1A60) == 0) {
+        } else if (strcmp(base.p, cFEStateLobbyMenu_eliteChannelName) == 0) {
             type = 3;
             list = (cUIThing*)mpChannelList[3];
             counts[3]++;
@@ -20918,7 +20918,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern const char* D_004A1A6C;
+extern const char* cFEStateLobbyMenu_beginnerChannelName;
 extern char str_LBChannelName[];
 extern char str_EnterRoomName[];
 extern char str_EnterPassword[];
@@ -20950,7 +20950,7 @@ void cFEStateNetCreateRoomPopup::onWidgetCreate(cUIThing* pWidget)
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Advanced), 1);
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Elite), 0);
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Voice), 3);
-        cBXString_operatorE1((char*)&mszChannelName, D_004A1A6C);
+        cBXString_operatorE1((char*)&mszChannelName, cFEStateLobbyMenu_beginnerChannelName);
         mpLBChannelName = (cUIListBox*)text;
     } else if (id == GetHashValue32(str_EnterRoomName)) {
         cUIText_setAsciiString(text, str_empty_d);
@@ -20996,10 +20996,10 @@ extern "C" void cFEStateNet_openKeyboardWithLabelID(cFEStateNet* self, void* a1,
 extern "C" bool cFEStateNetCreateRoomPopup_checkRoomName(cFEStateNetCreateRoomPopup* self);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-extern const char* D_004A1A60;
-extern const char* D_004A1A64;
-extern const char* D_004A1A68;
-extern const char* D_004A1A6C;
+extern const char* cFEStateLobbyMenu_eliteChannelName;
+extern const char* cFEStateLobbyMenu_advancedChannelName;
+extern const char* cFEStateLobbyMenu_intermediateChannelName;
+extern const char* cFEStateLobbyMenu_beginnerChannelName;
 extern char str_kT_POPUP231NewRoom[];
 extern char str_kT_POPUP231AddPassword[];
 
@@ -21046,16 +21046,16 @@ void cFEStateNetCreateRoomPopup::onWidgetEvent(cUIThing* pWidget, unsigned int m
         if (obj == mpLBChannelName) {
             switch (cUIListBox_getCurrentEntryData(obj)) {
             case 0:
-                cBXString_operatorE1((char*)&mszChannelName, D_004A1A60);
+                cBXString_operatorE1((char*)&mszChannelName, cFEStateLobbyMenu_eliteChannelName);
                 break;
             case 1:
-                cBXString_operatorE1((char*)&mszChannelName, D_004A1A64);
+                cBXString_operatorE1((char*)&mszChannelName, cFEStateLobbyMenu_advancedChannelName);
                 break;
             case 2:
-                cBXString_operatorE1((char*)&mszChannelName, D_004A1A6C);
+                cBXString_operatorE1((char*)&mszChannelName, cFEStateLobbyMenu_beginnerChannelName);
                 break;
             case 3:
-                cBXString_operatorE1((char*)&mszChannelName, D_004A1A68);
+                cBXString_operatorE1((char*)&mszChannelName, cFEStateLobbyMenu_intermediateChannelName);
                 break;
             }
         }
@@ -22004,7 +22004,7 @@ public:
 /**
  * Handles the online main menu: opens the chosen online screen, or asks before logging off or disconnecting.
  *
- * A null widget is ignored. kONNEXT by id: 1 sets D_004A4E88 and pushes a cFEStateNetQuickPlayPopup (miMiscData
+ * A null widget is ignored. kONNEXT by id: 1 sets cFEStateChallengePopup_raceSetup and pushes a cFEStateNetQuickPlayPopup (miMiscData
  * 0x82E); 2, 3 and 4 switch (cFEStateNet_pushState) to a new cFEStateLobbyMenu, cFEStateStats or cFEStateNetSSXWorld (the
  * last from "TextOnlineAgreement"); 0 switches to the state the engine's factory creates for id 0, when any; 5 asks
  * "kT_POPUP230WarningLeaving" (OK / Cancel, id 0x82D). kONPREV asks "kT_POPUPCMNDisconnectServer" (yes / no, id
@@ -22023,7 +22023,7 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, cUIThing
     case cUIState::kONNEXT:
         switch ((unsigned int)pWidget->mMiscData) {
         case 1: {
-            D_004A4E88 = 1;
+            cFEStateChallengePopup_raceSetup = 1;
             cScreenPopup* popup = (cScreenPopup*)cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup_FE70(cMemMan_alloc(1844, str_cFEStateNetQuickPlayPopup, 0, 0), self->mpEngine, self);
             popup->miMiscData = 2094;
             cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, popup);
@@ -25107,14 +25107,14 @@ struct sEntry1C49C8 {
     int key;
     int mode;
 };
-extern sEntry1C49C8 D_0046D9B8[];
+extern sEntry1C49C8 cFEStateStats_courseTable[];
 
 /**
  * Refills the high-score screen's "CourseList" with the courses of the selected event and asks for the first one's
  * results.
  *
  * Reads the selected "EventList" entry's data (the event key), clears "CourseList" (cUIListBox_deleteAllEntries) and walks the 29
- * entries {data, name, key, mode} of D_0046D9B8: each with that key and miMode is added with its location name
+ * entries {data, name, key, mode} of cFEStateStats_courseTable: each with that key and miMode is added with its location name
  * (cBENewRaceInterface_getLocationName on cBE_getInterface kind 0) and its data. When the first match's data is in
  * 0..28 it requests those results (cFEStateStats_requestResults), selects course 0 and row 0 of "ResultsMenu". Finally redraws the
  * rows (cFEStateStats_fillResultRows). Likely bug: with no matching entry the first-match copy is never written, so the range test
@@ -25137,7 +25137,7 @@ void cFEStateStats::fillCourseList()
     sEntry1C49C8 first;
     int i;
     for (i = 0; i < 29; i++) {
-        sEntry1C49C8 courseEntry = D_0046D9B8[i];
+        sEntry1C49C8 courseEntry = cFEStateStats_courseTable[i];
         if (courseEntry.key == key && courseEntry.mode == miMode) {
             cUIListBox_addEntryByAsciiString(box, cBENewRaceInterface_getLocationName(iface, courseEntry.name), courseEntry.data);
             if (!found) {

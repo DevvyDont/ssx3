@@ -55,10 +55,10 @@ struct sBagtSlot {
 };
 
 extern sBagtSlot D_004A788E[3][10];
-extern sBagtRec D_00530EC0[3][10];
+extern sBagtRec cBEBAGTInterface_stagedTricks[3][10];
 
 /**
- * Commits the staged trick choices: copies each 0x1FE-byte record of D_00530EC0 (3 profiles x 10 characters) into the
+ * Commits the staged trick choices: copies each 0x1FE-byte record of cBEBAGTInterface_stagedTricks (3 profiles x 10 characters) into the
  * matching character profile (D_004A788E, +0xBE6 of each 0xF88-byte entry of cBELibrary_profileLib).
  *
  * A record is 85 six-byte entries, one per grab: two chosen-variant bytes and two 16-bit variant masks (see
@@ -68,7 +68,7 @@ extern "C" void cBEBAGTInterface_submit(void)
 {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 10; j++) {
-            D_004A788E[i][j].rec = D_00530EC0[i][j];
+            D_004A788E[i][j].rec = cBEBAGTInterface_stagedTricks[i][j];
         }
     }
 }
@@ -78,17 +78,17 @@ extern "C" void cBEBAGTInterface_submit(void)
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_discard);
 #ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
-extern sBagtRec D_00530EC0[3][10];
+extern sBagtRec cBEBAGTInterface_stagedTricks[3][10];
 
 /**
  * Drops staged trick changes: copies each character profile's 0x1FE-byte trick record (D_004A788E, +0xBE6 of each
- * 0xF88-byte profile entry) back into D_00530EC0 (3 profiles x 10 characters).
+ * 0xF88-byte profile entry) back into cBEBAGTInterface_stagedTricks (3 profiles x 10 characters).
  */
 extern "C" void cBEBAGTInterface_discard(void)
 {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 10; j++) {
-            D_00530EC0[i][j] = D_004A788E[i][j].rec;
+            cBEBAGTInterface_stagedTricks[i][j] = D_004A788E[i][j].rec;
         }
     }
 }
@@ -98,11 +98,11 @@ extern "C" void cBEBAGTInterface_discard(void)
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_reloadProfileTricks);
 #ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
-extern sBagtRec D_00530EC0[3][10];
+extern sBagtRec cBEBAGTInterface_stagedTricks[3][10];
 
 /**
  * Reloads the staged trick records of one profile slot: copies the 10 characters' 0x1FE-byte records of profile @p i
- * (D_004A788E) into D_00530EC0[@p i].
+ * (D_004A788E) into cBEBAGTInterface_stagedTricks[@p i].
  *
  * cBE_newProfile calls it with the profile index.
  *
@@ -111,7 +111,7 @@ extern sBagtRec D_00530EC0[3][10];
 extern "C" void cBEBAGTInterface_reloadProfileTricks(int i)
 {
     for (int j = 0; j < 10; j++) {
-        D_00530EC0[i][j] = D_004A788E[i][j].rec;
+        cBEBAGTInterface_stagedTricks[i][j] = D_004A788E[i][j].rec;
     }
 }
 #endif
@@ -122,11 +122,11 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_setSuperUberVar);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern char D_00530EC0_raw[] __asm__("D_00530EC0");
+extern char cBEBAGTInterface_stagedTricks_raw[] __asm__("cBEBAGTInterface_stagedTricks");
 
 /**
  * Stores @p value as the second chosen-variant byte (+1) of grab @p idx in the staged trick record of @p rider's
- * profile and character (D_00530EC0).
+ * profile and character (cBEBAGTInterface_stagedTricks).
  *
  * This is the uber variant cBEBAGTInterface_chooseUberVar returns with its last argument set; the uber-trick store calls this to equip
  * an owned trick and then submits (vtable slot 1).
@@ -141,7 +141,7 @@ int cBEBAGTInterface::setSuperUberVar(int rider, int idx, int value)
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
     int off = idx * 6 + characterId * 0x1FE + profile * 5100;
-    char* entry = D_00530EC0_raw + off;
+    char* entry = cBEBAGTInterface_stagedTricks_raw + off;
     entry[1] = value;
     return 1;
 }
@@ -165,10 +165,10 @@ struct sBagtEntries {
     sBagtEntry e[85];
 };
 
-extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+extern sBagtEntries cBEBAGTInterface_stagedTricks_e[3][10] __asm__("cBEBAGTInterface_stagedTricks");
 
 /**
- * Clears bit @p bit of the first variant mask (+2) of grab @p idx in @p rider's staged trick record (D_00530EC0).
+ * Clears bit @p bit of the first variant mask (+2) of grab @p idx in @p rider's staged trick record (cBEBAGTInterface_stagedTricks).
  *
  * A set bit marks a variant still for sale (cBEBAGTInterface_isUberForSale); the uber-trick store clears it when the trick is bought.
  *
@@ -181,7 +181,7 @@ int cBEBAGTInterface::clearUberForSale(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    D_00530EC0_e[profile][characterId].e[idx].flags &= ~(1 << bit);
+    cBEBAGTInterface_stagedTricks_e[profile][characterId].e[idx].flags &= ~(1 << bit);
     return 1;
 }
 #endif
@@ -192,13 +192,13 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_chooseUberVar);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern char D_00530EC0_raw[] __asm__("D_00530EC0");
+extern char cBEBAGTInterface_stagedTricks_raw[] __asm__("cBEBAGTInterface_stagedTricks");
 
 /**
  * Returns the uber variant chosen for grab @p idx by @p rider: the second variant byte of the staged record when
  * @p second is set, else the first; -1 when the grab has no uber variants.
  *
- * The grab's record in kGrabDB (tBEGrabDB) holds the variant count in numUbers. The staged record is D_00530EC0 for the
+ * The grab's record in kGrabDB (tBEGrabDB) holds the variant count in numUbers. The staged record is cBEBAGTInterface_stagedTricks for the
  * rider's profile and character. The uber anim, cycle anim and name getters (cBEBAGTInterface_getUberAnim, cBEBAGTInterface_getUberCycleAnim,
  * cBEBAGTInterface_getUberName) pass @p second = uber level >= 5.
  *
@@ -216,12 +216,12 @@ int cBEBAGTInterface::chooseUberVar(int rider, int idx, int second)
     int variant;
     if (second)
     {
-        char* entry = D_00530EC0_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
+        char* entry = cBEBAGTInterface_stagedTricks_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
         variant = (unsigned char)entry[1];
     }
     else
     {
-        char* entry = D_00530EC0_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
+        char* entry = cBEBAGTInterface_stagedTricks_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
         variant = (unsigned char)entry[0];
     }
     return variant;
@@ -272,7 +272,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_isUberForSale);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+extern sBagtEntries cBEBAGTInterface_stagedTricks_e[3][10] __asm__("cBEBAGTInterface_stagedTricks");
 
 /**
  * Tests bit @p bit of the first variant mask (+2) of grab @p idx in @p rider's staged trick record: whether uber
@@ -289,7 +289,7 @@ int cBEBAGTInterface::isUberForSale(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    return (D_00530EC0_e[profile][characterId].e[idx].flags >> bit) & 1;
+    return (cBEBAGTInterface_stagedTricks_e[profile][characterId].e[idx].flags >> bit) & 1;
 }
 #endif
 
@@ -300,7 +300,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_isUberOffered);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
+extern sBagtEntries cBEBAGTInterface_stagedTricks_e[3][10] __asm__("cBEBAGTInterface_stagedTricks");
 
 /**
  * Tests bit @p bit of the second variant mask (+4) of grab @p idx in @p rider's staged trick record: whether uber
@@ -317,7 +317,7 @@ int cBEBAGTInterface::isUberOffered(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    return (D_00530EC0_e[profile][characterId].e[idx].flags2 >> bit) & 1;
+    return (cBEBAGTInterface_stagedTricks_e[profile][characterId].e[idx].flags2 >> bit) & 1;
 }
 #endif
 

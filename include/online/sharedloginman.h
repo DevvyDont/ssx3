@@ -4,8 +4,8 @@
 // cSharedLoginMan: the shared-login manager. It keeps the online account (user name + password, the network-account
 // library's "shared login" record) on the memory card: read, save, create, delete and format, as a small state machine
 // driven every frame by cSharedLoginMan_update from the account-on-memory-card front-end state (cFEStateNetAccountMem). The card
-// object and the account buffers are statics (D_004A33D8 the cPS2MemCard, D_004A33D4 the current card operation,
-// MemCardDevice the port, D_004A33E0 / D_004A33E4, AccountData the 36-byte account record), not members.
+// object and the account buffers are statics (sharedlogin_memCard the cPS2MemCard, sharedlogin_cardOp the current card operation,
+// MemCardDevice the port, sharedlogin_cardCheckedFlag / sharedlogin_cardCheckRetryCount, AccountData the 36-byte account record), not members.
 // EA's source: d:/ssx/code/source/online/sharedloginman.cpp (the July 2003 preview's assert strings, with
 // "!SharedLoginMan" and the allocation tag "cSharedLoginMan"). Retail code: dirtysock/tagsunk 0x00265880..0x00265F00.
 // One instance, SharedLoginMan: cSharedLoginMan_createInstance creates it, cSharedLoginMan_destroyInstance destroys it. No On Tour counterpart.

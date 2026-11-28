@@ -174,10 +174,10 @@ INCLUDE_ASM("sce/crt0", func_001001D0);
 /**
  * Sony crt0.s `_root`, the root-thread entry SetupThread installs: ends the thread with ExitThread (syscall 0x23).
  *
- * The frame-pointer code after the syscall calls __register_frame_info_table(D_0043CE00, D_004A5D48).
+ * The frame-pointer code after the syscall calls __register_frame_info_table(crt_ehFrameTable, D_004A5D48).
  */
 // PORT: PS2-only. Sony crt0.s `_root`, the thread SetupThread installs as root: ExitThread (syscall 0x23), then a
-// frame-pointer call __register_frame_info_table(D_0043CE00, D_004A5D48) (hand-written: raw syscall, `daddu $fp, $sp` frame).
+// frame-pointer call __register_frame_info_table(crt_ehFrameTable, D_004A5D48) (hand-written: raw syscall, `daddu $fp, $sp` frame).
 // A port drops it.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -188,8 +188,8 @@ __asm__(
     "sq $30, 0x10($29)\n"
     "sd $31, 0x0($29)\n"
     "daddu $30, $29, $0\n"
-    "lui $4, %hi(D_0043CE00)\n"
-    "addiu $4, $4, %lo(D_0043CE00)\n"
+    "lui $4, %hi(crt_ehFrameTable)\n"
+    "addiu $4, $4, %lo(crt_ehFrameTable)\n"
     "lui $5, %hi(D_004A5D48)\n"
     "addiu $5, $5, %lo(D_004A5D48)\n"
     "jal __register_frame_info_table\n"

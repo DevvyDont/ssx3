@@ -131,7 +131,7 @@ INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_deliverChatMessage);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_USER_b[];
-extern int D_004A4AE8[];
+extern int str_empty_n[];
 extern char str_DOMN[];
 extern char str_RSRC[];
 extern char* strchr(const char* s, int c);
@@ -159,7 +159,7 @@ void BuddyApi_deliverChatMessage(char* self, int* ev) {
     char* domainSep;
     char* resourceSep;
     cDirtysock_tag_TagFieldDupl(tag, 0x800, (char*)ev[3]);
-    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_USER_b), (char*)name, 0x100, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_USER_b), (char*)name, 0x100, (char*)str_empty_n);
     nm = (char*)name;
     cDirtysock_tag_TagFieldDelete(tag, str_USER_b);
     domainSep = strchr(nm, '@');
@@ -185,12 +185,12 @@ INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_parsePresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Fills the output record from the event tag fields.
-extern int D_004512C0[];
-extern int D_004A4AE8[];
+extern int BuddyApi_showNameTable[];
+extern int str_empty_n[];
 extern char str_SHOW[];
 extern char str_PROD_b[];
 extern char str_STAT_b[];
-extern char D_004A4B18[];
+extern char str_P[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 extern int cDirtysock_tag_TagFieldGetFourCC(const char* data, int def);
@@ -200,7 +200,7 @@ extern int LobbyUtil_findCodeName(char*, int, short*, int, char*, int);
  * Fills a roster entry's presence (show state, product, presence text, language) from a 'PGET' presence packet.
  *
  * Entry layout used here: +0x40 product name (20 bytes), +0x54 presence text (80), +0xA4 two-letter language code plus
- * NUL, +0xA7 show index, +0xA8 flags. The show index is the position of the packet's SHOW text in D_004512C0 ("DISC",
+ * NUL, +0xA7 show index, +0xA8 flags. The show index is the position of the packet's SHOW text in BuddyApi_showNameTable ("DISC",
  * "CHAT", "AWAY", "XA", "DND", "PASS"; 0 when none matches, via strcmp strcmp). A PROD field sets flag 0x2000
  * and its text is the presence text; then the product name comes from LobbyUtil_findCodeName (the product-key/language string
  * table, empty in retail) and the language is our own first language (+0x30C). Without PROD, it reads the STAT field,
@@ -224,9 +224,9 @@ void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
     out[0xA4] = 0;
     out[0x54] = 0;
     out[0x40] = 0;
-    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_SHOW), buf, 0x100, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_SHOW), buf, 0x100, (char*)str_empty_n);
     while (i < 6) {
-        if (strcmp_a((const char*)D_004512C0[i], buf) == 0) {
+        if (strcmp_a((const char*)BuddyApi_showNameTable[i], buf) == 0) {
             out[0xA7] = i;
             break;
         }
@@ -236,7 +236,7 @@ void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
     if (foundField) {
         *(int*)(out + 0xA8) |= 0x2000;
     }
-    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)str_empty_n);
     if (out[0x54] != 0) {
         LobbyUtil_findCodeName(((char*)self), self->mProductKey, (short*)(&self->mLangs[0]), 1, out + 0x40, 20);
         out[0xA4] = *(unsigned short*)&self->mLangs[0] >> 8;
@@ -245,8 +245,8 @@ void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
         out[0xA5] = w;
     } else {
         i = 0;
-        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_STAT_b), buf, 0x100, (char*)D_004A4AE8);
-        fourcc = cDirtysock_tag_TagFieldGetFourCC(cDirtysock_tag_TagFieldFind(buf, D_004A4B18), 0);
+        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_STAT_b), buf, 0x100, (char*)str_empty_n);
+        fourcc = cDirtysock_tag_TagFieldGetFourCC(cDirtysock_tag_TagFieldFind(buf, str_P), 0);
         if (self->mNumLangs > 0) {
             langSlot = (char*)&self->mLangs[0];
             for (; i < self->mNumLangs; i++, langSlot += 2) {
@@ -257,7 +257,7 @@ void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
                 foundField = cDirtysock_tag_TagFieldFind(buf, key);
                 if (foundField) {
                     unsigned char langHigh, langLow;
-                    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)D_004A4AE8);
+                    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)str_empty_n);
                     langLow = key[1];
                     langHigh = key[0];
                     out[0xA4] = langHigh;
@@ -285,7 +285,7 @@ void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
 INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_sendPresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_004A4B18[];
+extern char str_P[];
 extern char str_STAT_b[];
 extern char str_PROD_b[];
 extern int cDirtysock_tag_TagFieldSetFourCC(char* dst, int len, const char* key, int val);
@@ -302,7 +302,7 @@ extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key,
 void BuddyApi_sendPresence(BuddyApiRefT* buddyRef) {
     char buf[0x200];
     if (buddyRef->mProductKey) {
-        cDirtysock_tag_TagFieldSetFourCC(buddyRef->mStatText, 0x100, D_004A4B18, buddyRef->mProductKey);
+        cDirtysock_tag_TagFieldSetFourCC(buddyRef->mStatText, 0x100, str_P, buddyRef->mProductKey);
     }
     cDirtysock_tag_TagFieldDupl(buf, 0x200, buddyRef->mPresence);
     if (buddyRef->mStatText[0]) {
@@ -619,7 +619,7 @@ void BuddyApi_setState_0B50(int* p, int a) __asm__("BuddyApi_setState");
 // (prototype from their definition at line 70)
 void BuddyApi_sendCommand_0B50(int* p, int a, int b) __asm__("BuddyApi_sendCommand");
 
-extern int D_004A4AE8[];
+extern int str_empty_n[];
 extern int NetSession_disconnect(int);
 /**
  * Disconnects the buddy client.
@@ -636,7 +636,7 @@ int BuddyApi_disconnect(struct BuddyApiRefT* buddyRef) {
         ((void (*)(struct S07A0Obj*))((struct HostentT*)buddyRef->mpHostLookup)->Free)(((struct HostentT*)buddyRef->mpHostLookup));
         (*(struct HostentT**)&buddyRef->mpHostLookup) = 0;
     }
-    BuddyApi_sendCommand_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
+    BuddyApi_sendCommand_0B50((int*)buddyRef, 0x44495343, (int)str_empty_n);
     NetSession_disconnect(((int)buddyRef->mpSession));
     if (buddyRef->mState == 5) {
         BuddyApi_setState_0B50((int*)buddyRef, 6);
@@ -699,10 +699,10 @@ INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_requestRoster);
 extern char str_PRES[];
 extern char str_LRSC[];
 extern char str_LIST[];
-extern char D_004A4B48[];
-extern char D_004A4B50[];
+extern char str_B[];
+extern char str_Y[];
 extern char str_ID[];
-extern char D_004A4B60[];
+extern char str_I_b[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
 extern int HashTable_create(int, int);
@@ -730,14 +730,14 @@ void* BuddyApi_requestRoster(BuddyApiRefT* self, int rosterCallback, int rosterU
         self->mpRoster = (void*)SortList_create(100, 100, 0);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_B);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, str_Y);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 1);
         BuddyApi_sendCommand((int*)self, 0x52474554, (int)buf);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_I_b);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, str_Y);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 2);
         BuddyApi_sendCommand((int*)self, 0x52474554, (int)buf);
         SortList_bumpChanged((int)self->mpRoster, 1);
@@ -775,10 +775,10 @@ extern char str_USER_b[];
 extern char str_PRES[];
 extern char str_LRSC[];
 extern char str_LIST[];
-extern char D_004A4B48[];
-extern char D_004A4B50[];
+extern char str_B[];
+extern char str_Y[];
 extern char str_ID[];
-extern char D_004A4B60[];
+extern char str_I_b[];
 extern char str_GROUP[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
@@ -828,8 +828,8 @@ int BuddyApi_addUser(BuddyApiRefT* self, char* buddyRecord, int callback, int us
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, self->mRequests[0][1]);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_B);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, str_Y);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, buddyRecord + 0x20);
         BuddyApi_sendCommand((int*)self, 0x52414444, (int)buf);
@@ -840,7 +840,7 @@ int BuddyApi_addUser(BuddyApiRefT* self, char* buddyRecord, int callback, int us
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, self->mRequests[0][1]);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_I_b);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
         BuddyApi_sendCommand((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
@@ -863,10 +863,10 @@ extern char str_USER_b[];
 extern char str_PRES[];
 extern char str_LRSC[];
 extern char str_LIST[];
-extern char D_004A4B48[];
-extern char D_004A4B50[];
+extern char str_B[];
+extern char str_Y[];
 extern char str_ID[];
-extern char D_004A4B60[];
+extern char str_I_b[];
 extern char str_GROUP[];
 extern char* strchr(const char* s, int c);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
@@ -913,8 +913,8 @@ int BuddyApi_removeUser(BuddyApiRefT* self, char* name, int callback, int userDa
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, self->mRequests[1][1]);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_B);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, str_Y);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, name + 0x20);
                     BuddyApi_sendCommand((int*)self, 0x5244454C, (int)buf);
@@ -923,7 +923,7 @@ int BuddyApi_removeUser(BuddyApiRefT* self, char* name, int callback, int userDa
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, self->mRequests[1][1]);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
-                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
+                    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, str_I_b);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     BuddyApi_sendCommand((int*)self, 0x5244454C, (int)buf);
                 }
@@ -1028,7 +1028,7 @@ void BuddyApi_setStatusText(char* buddyApi, const char* val, const char* key) {
 INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setPresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004512C0[];
+extern int BuddyApi_showNameTable[];
 extern char str_RSRC[];
 extern char str_SHOW[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
@@ -1037,7 +1037,7 @@ extern void BuddyApi_sendPresence(BuddyApiRefT*);
 /**
  * Sets the buddy client's resource and show state and sends the presence now or after a delay.
  *
- * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p resourceText and SHOW = D_004512C0[@p st] ("CHAT", "AWAY", "XA",
+ * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p resourceText and SHOW = BuddyApi_showNameTable[@p st] ("CHAT", "AWAY", "XA",
  * "DND", "PASS" for 1..5, else "DISC"). With no send pending (+0x2C0 == 0) schedules one at now + @p sendDelay; a show state
  * different from the last one (+0x2C4) is recorded and sent at once. Sends with BuddyApi_sendPresence when the time has come;
  * otherwise BuddyApi_update sends it later.
@@ -1053,9 +1053,9 @@ int BuddyApi_setPresence(BuddyApiRefT* buddyRef, char* resourceText, int st, int
     int showName;
     char* buf;
     if ((unsigned int)(st - 1) < 5) {
-        showName = D_004512C0[st];
+        showName = BuddyApi_showNameTable[st];
     } else {
-        showName = D_004512C0[0];
+        showName = BuddyApi_showNameTable[0];
     }
     buf = buddyRef->mPresence;
     *buf = 0;
@@ -1081,7 +1081,7 @@ INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_sendMessage);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_BODY_b[];
 extern char str_SUBJ_b[];
-extern int D_004A4AE8[];
+extern int str_empty_n[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 /**
@@ -1098,8 +1098,8 @@ extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len
  * @return 0, or -3 when refused
  */
 int BuddyApi_sendMessage(int* buddyRef, char* tag, int callback, int userData, int timeoutSecs) {
-    if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)D_004A4AE8) < 0x40) {
-        if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)D_004A4AE8) <= 0) {
+    if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)str_empty_n) < 0x40) {
+        if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)str_empty_n) <= 0) {
             BuddyApi_armRequest(buddyRef, 2, callback, userData, timeoutSecs);
             BuddyApi_sendCommand(buddyRef, 0x53454E44, (int)tag);
             return 0;
@@ -1139,7 +1139,7 @@ extern char str_recv[];
 extern char str_ID[];
 extern char str_SIZE[];
 extern char str_USER_b[];
-extern int D_004A4AE8[];
+extern int str_empty_n[];
 extern char str_GROUP[];
 extern char str_FUSR[];
 extern int NetSession_getTick(int);
@@ -1333,7 +1333,7 @@ void BuddyApi_update(struct Conn_17D8* self) {
             if (flags == 0x200) {
                 if (--self->rostCount == 0) done = 1;
             }
-            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
+            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)str_empty_n);
             BuddyApi_stripNameSuffix(name);
             if (self->f18 != 0 || strchr(name, '.') == 0) {
                 id = HashTable_findString(self->names, (int)name);
@@ -1349,7 +1349,7 @@ void BuddyApi_update(struct Conn_17D8* self) {
                 if (id != 0) {
                     ent = (char*)SortList_getValue(self->roster, id);
                     if (ent != 0) {
-                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_GROUP), ent + 0x20, 0x20, (char*)D_004A4AE8);
+                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_GROUP), ent + 0x20, 0x20, (char*)str_empty_n);
                         if (flags != 0) {
                             *(int*)(ent + 0xA8) = (*(int*)(ent + 0xA8) | flags) & ~0x100000;
                         }
@@ -1358,7 +1358,7 @@ void BuddyApi_update(struct Conn_17D8* self) {
             }
         }
         if (ev.type == 0x50474554 && self->roster != 0) {
-            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
+            cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)str_empty_n);
             BuddyApi_stripNameSuffix(name);
             id = HashTable_findString(self->names, (int)name);
             if (id != 0) {
@@ -1385,7 +1385,7 @@ void BuddyApi_update(struct Conn_17D8* self) {
                         SortList_remove(self->roster, f17_EED08(self->names, ent));
                         lobbyman_free(ent);
                     } else {
-                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_FUSR), name, 0x20, (char*)D_004A4AE8);
+                        cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_FUSR), name, 0x20, (char*)str_empty_n);
                         BuddyApi_stripNameSuffix(name);
                         if (name[0] != 0 && (unsigned int)strlen(name) < 0x20) {
                             int k = f17_EED08(self->names, ent);

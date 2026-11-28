@@ -84,7 +84,7 @@ struct tSectionMap {
                                     //     the row's; [U] passed to cWorldView loadSection / activateSection / unloadSection
     int State;                      // 0x8 [O] eSectionState; [R] cSectionMan_init stores 0; [U] cSectionMan_update
                                     //     switches on it (the section's load / activate state machine)
-    int Priority;                   // 0xC [O] eSectionLoadPriority; [U] indexes D_0044C208, which becomes
+    int Priority;                   // 0xC [O] eSectionLoadPriority; [U] indexes cWorldCache_m_SectionLoadPriority, which becomes
                                     //     cWorldView_loadSection's priority argument
 };
 

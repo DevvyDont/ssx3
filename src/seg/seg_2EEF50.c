@@ -71,12 +71,12 @@ typedef struct Utf8RangeT {
 INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_compareTagText);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char D_004963C0[];
+extern unsigned char cDirtysock_tag_upperTable[];
 /**
  * Compares two tag strings without regard to case; either may be quoted.
  *
  * A string that starts with " or ' ends at the matching quote, an unquoted one at the first control character (below
- * 0x20). Characters are compared through the upper-case table D_004963C0. No retail code calls it.
+ * 0x20). Characters are compared through the upper-case table cDirtysock_tag_upperTable. No retail code calls it.
  *
  * @param leftText  the first string
  * @param rightText  the second string (not checked for null)
@@ -99,10 +99,10 @@ int LobbyUtil_compareTagText(char *leftText, char *rightText) {
         qb = 0;
     }
     do {
-        ca = D_004963C0[(int)*leftText];
+        ca = cDirtysock_tag_upperTable[(int)*leftText];
         leftText++;
         if (ca == qa || (ca < 0x20 && qa == 0)) ca = 0;
-        cb = D_004963C0[(int)*rightText];
+        cb = cDirtysock_tag_upperTable[(int)*rightText];
         rightText++;
         if (cb == qb || (cb < 0x20 && qb == 0)) cb = 0;
     } while (ca == cb && ca != 0);
@@ -861,11 +861,11 @@ int HashTable_hashString(HashTableT* table, char* key) {
 INCLUDE_ASM("seg/seg_2EEF50", HashTable_compareKeys);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned char D_00496A58[];
+extern unsigned char HashTable_keyFoldTable[];
 /**
  * Compares two strings without regard to case, ignoring spaces and control characters.
  *
- * Both strings go through D_00496A58, which upper-cases letters and maps characters 1 to 0x20 to 1; those are skipped.
+ * Both strings go through HashTable_keyFoldTable, which upper-cases letters and maps characters 1 to 0x20 to 1; those are skipped.
  * Used as the hash tables' default key compare.
  *
  * @param leftText  the first string
@@ -876,10 +876,10 @@ int HashTable_compareKeys(unsigned char* leftText, unsigned char* rightText) {
     int leftChar, rightChar, charDiff;
     do {
         do {
-            leftChar = D_00496A58[*leftText++];
+            leftChar = HashTable_keyFoldTable[*leftText++];
         } while (leftChar == 1);
         do {
-            rightChar = D_00496A58[*rightText++];
+            rightChar = HashTable_keyFoldTable[*rightText++];
         } while (rightChar == 1);
         charDiff = leftChar - rightChar;
         if (charDiff != 0) {
@@ -1743,12 +1743,12 @@ INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_findCodeName);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sE { int key; short code; short pad; char* name; };
-extern struct sE D_004512D8[];
+extern struct sE LobbyUtil_codeNameTable[];
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 /**
  * Finds the first table entry for a key whose code is in a list, and copies its name.
  *
- * Scans D_004512D8 (12-byte entries: key, code, name; ended by key 0) for entries with @p key; for the first whose code
+ * Scans LobbyUtil_codeNameTable (12-byte entries: key, code, name; ended by key 0) for entries with @p key; for the first whose code
  * is among the @p n codes of @p list, copies its name into @p x with cDirtysock_tag_TagFieldDupl. BuddyApi_parsePresence calls
  * it; @p self is not used.
  *
@@ -1761,13 +1761,13 @@ extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
  */
 short LobbyUtil_findCodeName(void* self, int key, short* list, int n, char* x, int y) {
     int i, j;
-    if (D_004512D8[0].key) {
-        for (i = 0; D_004512D8[i].key; i++) {
-            if (D_004512D8[i].key == key) {
+    if (LobbyUtil_codeNameTable[0].key) {
+        for (i = 0; LobbyUtil_codeNameTable[i].key; i++) {
+            if (LobbyUtil_codeNameTable[i].key == key) {
                 for (j = 0; j < n; j++) {
-                    if (list[j] == D_004512D8[i].code) {
-                        cDirtysock_tag_TagFieldDupl(x, y, D_004512D8[i].name);
-                        return D_004512D8[i].code;
+                    if (list[j] == LobbyUtil_codeNameTable[i].code) {
+                        cDirtysock_tag_TagFieldDupl(x, y, LobbyUtil_codeNameTable[i].name);
+                        return LobbyUtil_codeNameTable[i].code;
                     }
                 }
             }

@@ -25,18 +25,18 @@ extern int sceSifCallRpc(sSifClient *cd, int fno, int mode, void *send, int ssiz
                          void (*end_function)(void *), void *end_param);
 extern int sceSifCheckStatRpc(sSifClient *cd);
 
-extern sSifClient D_00526200[2]; /* libpad */
+extern sSifClient libpad_clients[2]; /* libpad */
 extern sSifClient D_005266C0;
-extern sSifClient D_004527D0;
-extern sSifClient D_00453180;
+extern sSifClient _sceCd_cd_ncmd;
+extern sSifClient _sceCd_cd_scmd;
 extern sSifClient D_00526710;
-extern sSifClient D_005271C0; /* libmc */
-extern sSifClient D_005290A0; /* usb keyboard */
+extern sSifClient libmc_client; /* libmc */
+extern sSifClient libusbkb_client; /* usb keyboard */
 
 /* libmc state */
-extern int D_004533C0;  /* RPC function number of the pending asynchronous call, 0 when idle */
-extern int D_004533C4;  /* semaphore serialising the libmc RPCs */
-extern int D_004533C8;  /* semaphore for the RPC wait sleep */
+extern int libmc_pendingCall;  /* RPC function number of the pending asynchronous call, 0 when idle */
+extern int libmc_lockSema;  /* semaphore serialising the libmc RPCs */
+extern int libmc_sleepSema;  /* semaphore for the RPC wait sleep */
 extern int *D_005271E8; /* getInfo result pointers (filled by libmc_onGetInfoDone) */
 extern int *D_005271EC;
 extern int *D_005271F0;
@@ -53,7 +53,7 @@ typedef struct {
     int param;
     unsigned char data[16];
 } sMcCmd;
-extern sMcCmd D_00527240;
+extern sMcCmd libmc_cmd;
 
 /* libmc RPC command block for the calls that pass a file name (0x414 bytes) */
 typedef struct {
@@ -69,20 +69,20 @@ typedef struct {
     char info[0x20];
     char name[0x20];
 } sMcDirEntry;
-extern sMcFileCmd D_00527270;
+extern sMcFileCmd libmc_fileCmd;
 extern sMcDirEntry D_00527200;  /* entry sent with RPC 14 */
 extern char D_00527220[];       /* D_00527200.name (its own splat symbol) */
 extern int D_005276C0[];        /* uncached receive buffer for the read / getInfo callbacks */
-extern char D_00527780[];       /* receive buffer for RPC 12 (libmc_onChdirDone) */
-extern int D_00528780[];        /* RPC result buffer */
+extern char libmc_chdirRecvBuffer[];       /* receive buffer for RPC 12 (libmc_onChdirDone) */
+extern int libmc_rpcResult[];        /* RPC result buffer */
 
 /* USB keyboard library state */
-extern int D_00453438;            /* semaphore serialising the keyboard RPCs (-1 = not initialised) */
-extern unsigned char D_00529100[]; /* RPC send buffer (16 bytes) */
-extern unsigned char D_00529140[]; /* RPC receive buffer */
+extern int libusbkb_rpcSema;            /* semaphore serialising the keyboard RPCs (-1 = not initialised) */
+extern unsigned char libusbkb_sendBuffer[]; /* RPC send buffer (16 bytes) */
+extern unsigned char libusbkb_recvBuffer[]; /* RPC receive buffer */
 extern char D_004982F8[];
-extern unsigned char D_00529101[]; /* D_00529100[1] (own splat symbol) */
-extern unsigned char D_00529141[]; /* D_00529140[1] (own splat symbol) */
+extern unsigned char D_00529101[]; /* libusbkb_sendBuffer[1] (own splat symbol) */
+extern unsigned char D_00529141[]; /* libusbkb_recvBuffer[1] (own splat symbol) */
 
 /* key repeat state and 4-entry key ring of one keyboard (sKbPort + 0x10) */
 typedef struct {
@@ -120,11 +120,11 @@ typedef struct {
     void *out;              /* its result buffer */
     int thread;
 } sUsbKb;
-extern sUsbKb D_00529000;
-extern sKbPort *D_00529004; /* D_00529000.port (own splat symbol) */
-extern sKbData D_00529008;  /* D_00529000.prev (own splat symbol) */
-extern void *D_00529098;    /* D_00529000.out (own splat symbol) */
-extern int D_0052909C;      /* D_00529000.thread (own splat symbol) */
+extern sUsbKb libusbkb_state;
+extern sKbPort *D_00529004; /* libusbkb_state.port (own splat symbol) */
+extern sKbData D_00529008;  /* libusbkb_state.prev (own splat symbol) */
+extern void *D_00529098;    /* libusbkb_state.out (own splat symbol) */
+extern int D_0052909C;      /* libusbkb_state.thread (own splat symbol) */
 extern sKbPort D_005291D0[];
 
 /* libcdvd state */
@@ -142,25 +142,25 @@ typedef struct {
     int waitId;
     int wakeupCount;
 } sThreadParam;                 /* 0x30 bytes, as passed to CreateThread / ReferThreadStatus */
-extern int D_00451610;          /* debug print level */
-extern int D_00451614;          /* callback thread id (0 = none) */
+extern int libcdvd_debugLevel;          /* debug print level */
+extern int libcdvd_callbackThreadId;          /* callback thread id (0 = none) */
 extern int D_00451618;
 extern int D_0045161C;
 /* libcdvd state shared with its RPC callback thread: volatile in every user
    (retail re-reads each one; tools/gen/phaseb_import.py VOL_DECL_OK) */
-extern volatile int D_00451620;          /* callback thread semaphore */
-extern volatile int D_00451624;  /* callback-entry flag: read by the SIF callback libcdvd_onPowerOffCmd */
-extern volatile int D_00451628;          /* semaphores */
-extern volatile int D_0045162C;
-extern volatile int D_00451630;
-extern volatile int D_00451634;          /* busy flag */
+extern volatile int libcdvd_callbackSema;          /* callback thread semaphore */
+extern volatile int libcdvd_setupFlag;  /* callback-entry flag: read by the SIF callback libcdvd_onPowerOffCmd */
+extern volatile int _sceCd_ncmd_semid;          /* semaphores */
+extern volatile int _sceCd_scmd_semid;
+extern volatile int libcdvd_diskReadySema;
+extern volatile int libcdvd_busyFlag;          /* busy flag */
 extern volatile int D_00451638;
 extern int D_0045163C;
 extern int D_00451640;
 extern int D_00451644;          /* RPC bind state (< 0 = unbound) */
-extern int D_00451648;
+extern int libcdvd_diskReadyBindState;
 extern int D_0045164C;
-extern volatile int D_00451658;  /* asynchronous command result */
+extern volatile int libcdvd_pendingCmd;  /* asynchronous command result */
 extern volatile int D_0045165C;
 extern void (*D_005264C0)(int); /* user callback */
 extern int D_005264C4;          /* its $gp */
@@ -168,8 +168,8 @@ extern void (*D_005264C8)(int); /* interrupt callback */
 extern int D_005264CC;          /* its $gp */
 extern int D_005264D0;          /* its argument */
 extern volatile int D_005264D4;
-extern int D_005264D8;          /* id of the thread that initialised the library */
-extern sThreadParam D_005264E0;
+extern int libcdvd_initThreadId;          /* id of the thread that initialised the library */
+extern sThreadParam libcdvd_initThreadParam;
 extern sThreadParam D_00526510;
 
 /* libcdvd RPC parameter blocks and buffers */
@@ -182,7 +182,7 @@ typedef struct {
     unsigned char datapattern;
     char *ebuf;
     int *res;
-} sCdReadCmd;                   /* RPC 1 parameters, sent from D_00451700 */
+} sCdReadCmd;                   /* RPC 1 parameters, sent from libcdvd_ncmdSendBuffer */
 typedef struct sCdSearchCmd {
     char hdr[0x24];             /* file record returned to the caller */
     char name[0x100];
@@ -190,11 +190,11 @@ typedef struct sCdSearchCmd {
     int arg;
 } sCdSearchCmd;
 extern int D_00451680[];        /* RPC result buffer */
-extern int D_00451700[];        /* RPC send buffer */
+extern int libcdvd_ncmdSendBuffer[];        /* RPC send buffer */
 extern char D_00452700[];
 extern int D_004527C0[];
-extern int D_00452800[];        /* RPC result buffer */
-extern int D_00452C40[];        /* RPC send buffer */
+extern int _sceCd_scmdrdata[];        /* RPC result buffer */
+extern int libcdvd_scmdSendBuffer[];        /* RPC send buffer */
 extern int D_004531A8;          /* RPC function, send and receive size used by sceCdMmode */
 extern int D_004531AC;
 extern int D_004531B0;
@@ -215,8 +215,8 @@ typedef struct {
     int f14;
     int f18;
 } sPadSlot;                     /* 0x1C bytes */
-extern sPadSlot D_00526250[2][4];
-extern int D_00526440[];        /* RPC send / receive block (128 bytes) */
+extern sPadSlot libpad_slots[2][4];
+extern int libpad_rpcBuffer[];        /* RPC send / receive block (128 bytes) */
 extern int D_004515C8;
 extern int D_004515CC;
 /* one 0x80-byte pad data frame in the DMA area (libpad_getNewestFrame returns the newer one) */
@@ -251,15 +251,15 @@ extern sPadFrame *libpad_getNewestFrame(int port, int slot);
 
 /* DMA controller environment (D_CTRL / PCR / SQWC / RBOR / RBSR settings, 20 bytes) */
 typedef struct { unsigned char sts, std, mfd, rcyc; unsigned short h4, h6, h8, hA; void *w0C; unsigned w10; } sDmaEnv;
-extern sDmaEnv D_005261D0;     /* copy of the last environment set by sceDmaPutEnv */
+extern sDmaEnv libdma_lastEnv;     /* copy of the last environment set by sceDmaPutEnv */
 
 /* system configuration copy set by func_0040BA48 (8 bytes; each byte has its own splat symbol) */
 typedef struct {
     short f0;
     unsigned char f2[6];
 } sSysConfig;
-extern sSysConfig D_004533F8;
-extern unsigned char D_004533FA[]; /* D_004533F8.f2[0..5] */
+extern sSysConfig libscf_configOverride;
+extern unsigned char D_004533FA[]; /* libscf_configOverride.f2[0..5] */
 extern unsigned char D_004533FB[];
 extern unsigned char D_004533FC[];
 extern unsigned char D_004533FD[];
@@ -267,9 +267,9 @@ extern unsigned char D_004533FE[];
 extern unsigned char D_004533FF[];
 
 /* other shared tables and buffers */
-extern int D_00451590[];        /* DMA channel register block addresses, 10 channels */
-extern int D_004532C0[];        /* table indexed by the top 4 bits of a command word (libmpeg_issueIpuCommand..libmpeg_readBits) */
-extern char D_00453400[];       /* 14 bytes read from the file D_00498220 names (libscf_readRomVersion) */
+extern int libdma_channelRegTable[];        /* DMA channel register block addresses, 10 channels */
+extern int libmpeg_ipuCmdTable[];        /* table indexed by the top 4 bits of a command word (libmpeg_issueIpuCommand..libmpeg_readBits) */
+extern char libscf_romVersion[];       /* 14 bytes read from the file D_00498220 names (libscf_readRomVersion) */
 extern char D_00528FC0[];       /* buffer shared by sceSifMBindRpcParam / sceSifMUnBindRpc / sceSifMCallRpc */
 
 //100%
@@ -302,12 +302,12 @@ void DirtyDnas_importTable(void) {
         ".word sceCdDiskReady\n"
         ".word _sceCd_scmd_prechk\n"
         ".word D_00451680\n"
-        ".word D_00451628\n"
-        ".word D_004527D0\n"
+        ".word _sceCd_ncmd_semid\n"
+        ".word _sceCd_cd_ncmd\n"
         ".word _sceCd_ncmd_prechk\n"
-        ".word D_00452800\n"
-        ".word D_00453180\n"
-        ".word D_0045162C\n"
+        ".word _sceCd_scmdrdata\n"
+        ".word _sceCd_cd_scmd\n"
+        ".word _sceCd_scmd_semid\n"
         ".word CreateThread\n"
         ".word StartThread\n"
         ".word DeleteThread\n"
@@ -347,7 +347,7 @@ void DirtyDnas_importTable(void) {
         ".word _read\n"
         ".word AddIntcHandler\n"
         ".word EnableIntc\n"
-        ".word D_00455248\n"
+        ".word __sce_sema_id\n"
     );
 }
 #endif
@@ -369,7 +369,7 @@ extern void SetGsCrt(int, int, int);
 extern int GsPutIMR(int);
 void *sceGsGetGParam(void);
 /**
- * Resets or re-initialises the GS display (the state block D_00451550, see sceGsGetGParam).
+ * Resets or re-initialises the GS display (the state block libgraph_gsParam, see sceGsGetGParam).
  *
  * Mode 0: resets the GS (CSR 0x200), stores the interlace, video mode and field/frame setting and the GS revision (CSR
  * bits 16..23), masks GS interrupts (GsPutIMR 0xFF00), removes the interrupt handler recorded in the block from INTC
@@ -418,14 +418,14 @@ void sceGsResetGraph(short mode, short interlace, short videoMode, short frameMo
 //100%
 INCLUDE_ASM("seg/seg_2FE810", sceGsGetGParam);
 #ifdef SKIP_ASM
-extern char D_00451550[];
+extern char libgraph_gsParam[];
 /**
- * Returns the GS state block D_00451550 (settings stored by sceGsResetGraph; SNDPLATFORM_init reads it too).
+ * Returns the GS state block libgraph_gsParam (settings stored by sceGsResetGraph; SNDPLATFORM_init reads it too).
  *
  * @return the block
  */
 void *sceGsGetGParam(void) {
-    return D_00451550;
+    return libgraph_gsParam;
 }
 #endif
 
@@ -433,18 +433,18 @@ void *sceGsGetGParam(void) {
 INCLUDE_ASM("seg/seg_2FE810", sceGsResetPath);
 #ifdef SKIP_ASM
 typedef unsigned int u_long128_DAB0 __attribute__((mode(TI))); /* PORT: Sony's u_long128 (eetypes.h) */
-extern u_long128_DAB0 D_00451560[2]; /* VIF1 init codes sent to the VIF1 FIFO */
+extern u_long128_DAB0 libgraph_vif1ResetCodes[2]; /* VIF1 init codes sent to the VIF1 FIFO */
 /**
  * Resets the drawing path to the GS: VIF1 reset with its errors masked, VU1 reset (FBRST bit 9), two quadwords from
- * D_00451560 into the VIF1 FIFO, then a GIF reset. cPS2GraphicsMan_Init calls it. Sony's libgraph sceGsResetPath.
+ * libgraph_vif1ResetCodes into the VIF1 FIFO, then a GIF reset. cPS2GraphicsMan_Init calls it. Sony's libgraph sceGsResetPath.
  */
 void sceGsResetPath(void) {
     *(volatile int *)0x10003C10 = 1;    /* VIF1_FBRST */
     *(volatile int *)0x10003C20 = 2;    /* VIF1_ERR */
     /* PORT: PS2-only barrier and VU0 FBRST ($vi28) write: sync.l, cfc2/ori/ctc2, sync.p. */
     __asm__ volatile("sync.l\n\tcfc2 %0, $vi28\n\tori %0, %0, 0x200\n\tctc2 %0, $vi28\n\tsync.p" : : "r"(0));
-    *(volatile u_long128_DAB0 *)0x10005000 = D_00451560[0];    /* VIF1_FIFO */
-    *(volatile u_long128_DAB0 *)0x10005000 = D_00451560[1];
+    *(volatile u_long128_DAB0 *)0x10005000 = libgraph_vif1ResetCodes[0];    /* VIF1_FIFO */
+    *(volatile u_long128_DAB0 *)0x10005000 = libgraph_vif1ResetCodes[1];
     *(volatile int *)0x10003000 = 1;    /* GIF_CTRL */
 }
 #endif
@@ -563,7 +563,7 @@ int sceGsSyncPath(int mode, unsigned short timeout) {
 INCLUDE_ASM("seg/seg_2FE810", libdma_waitChannel);
 #ifdef SKIP_ASM
 extern void scePrintf();
-extern char D_004977D8[];
+extern char str_libdma_sync_timeout[];
 /**
  * Waits for a DMA channel to finish (its CHCR STR bit to clear). After 0x1000000 polls it prints "libdma: sync timeout"
  * and force-stops the channel (sceDmaPause), which ends the wait.
@@ -579,7 +579,7 @@ void libdma_waitChannel(dmaChan, waitMode)
     if (dmaChan->chcr & 0x100) {
         do {
             if (--n < 0) {
-                scePrintf(D_004977D8);
+                scePrintf(str_libdma_sync_timeout);
                 sceDmaPause(dmaChan);
             }
         } while (dmaChan->chcr & 0x100);
@@ -590,7 +590,7 @@ void libdma_waitChannel(dmaChan, waitMode)
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libdma_waitMadr);
 #ifdef SKIP_ASM
-extern char D_004977D8[];
+extern char str_libdma_sync_timeout[];
 extern void libdma_waitMadr_log(char *) __asm__("scePrintf");
 extern int sceDmaPause();
 /**
@@ -610,7 +610,7 @@ void libdma_waitMadr(sDmaChan *dmaChan, unsigned lim, int tmo) {
         pollsLeft = tmo;
     while (dmaChan->madr < lim) {
         if (--pollsLeft < 0) {
-            libdma_waitMadr_log(D_004977D8);
+            libdma_waitMadr_log(str_libdma_sync_timeout);
             sceDmaPause(dmaChan);
         }
         }
@@ -655,13 +655,13 @@ void libdma_zeroBytes(char *dst, int n) {
 INCLUDE_ASM("seg/seg_2FE810", sceDmaGetChan);
 #ifdef SKIP_ASM
 /**
- * Returns the register block address of DMA channel @p n (table D_00451590), or 0 for a channel above 9.
+ * Returns the register block address of DMA channel @p n (table libdma_channelRegTable), or 0 for a channel above 9.
  *
  * @param n  channel number
  * @return the register address, or 0
  */
 int sceDmaGetChan(unsigned n) {
-    return n < 10 ? D_00451590[n] : 0;
+    return n < 10 ? libdma_channelRegTable[n] : 0;
 }
 #endif
 
@@ -687,7 +687,7 @@ int sceDmaReset(int enableDma) {
     int saved = *(volatile int *)0x1000E000 & 1;
     for (i = 0; i < 10; i++) {
         if (D_004977F0[i] != 0) {
-            int *chanRegs = (int *)D_00451590[i];
+            int *chanRegs = (int *)libdma_channelRegTable[i];
             chanRegs[0] = 0;
             chanRegs[0x30 / 4] = 0;
             chanRegs[0x10 / 4] = 0;
@@ -715,7 +715,7 @@ extern unsigned char D_00497818[];
 extern unsigned char D_00497828[];
 extern unsigned char D_00497838[];
 /**
- * Applies a DMA environment to the controller registers and keeps a copy in D_005261D0.
+ * Applies a DMA environment to the controller registers and keeps a copy in libdma_lastEnv.
  *
  * D_CTRL gets the stall source, stall drain and MFIFO fields from the tables D_00497818 / D_00497828 / D_00497838 and
  * the release cycle (0 turns release off); D_PCR, D_SQWC, D_RBOR and D_RBSR come from the other fields.
@@ -756,7 +756,7 @@ int sceDmaPutEnv(sDmaEnv *dmaEnv) {
     *(volatile unsigned *)0x1000E030 = sqwc;
     *(volatile unsigned *)0x1000E050 = rbor;
     *(volatile unsigned *)0x1000E040 = rbsr;
-    D_005261D0 = *dmaEnv;
+    libdma_lastEnv = *dmaEnv;
     return 0;
 }
 #endif
@@ -765,13 +765,13 @@ int sceDmaPutEnv(sDmaEnv *dmaEnv) {
 INCLUDE_ASM("seg/seg_2FE810", sceDmaGetEnv);
 #ifdef SKIP_ASM
 /**
- * Copies the DMA environment last applied (D_005261D0) into @p envOut.
+ * Copies the DMA environment last applied (libdma_lastEnv) into @p envOut.
  *
  * @param envOut  destination
  * @return @p envOut
  */
 sDmaEnv *sceDmaGetEnv(sDmaEnv *envOut) {
-    *envOut = D_005261D0;
+    *envOut = libdma_lastEnv;
     return envOut;
 }
 #endif
@@ -2106,7 +2106,7 @@ extern void SyncDCache(int *, int *);                /* SyncDCache */
 extern void scePrintf();                            /* printf */
 extern char D_00497888[];
 /**
- * Sends a pad port/slot's 32-byte command block (D_00526250 +0x4) to the IOP pad driver over SIF DMA.
+ * Sends a pad port/slot's 32-byte command block (libpad_slots +0x4) to the IOP pad driver over SIF DMA.
  *
  * Returns 0 while the previous transfer is still pending. Otherwise increments the block's counter (word 0), writes it
  * back from the cache and DMAs it into one of two alternating 32-byte areas at +0x8. Prints "libpad: sceSifSetDma
@@ -2122,14 +2122,14 @@ int libpad_sendCommandBlock(int port, int slot) {
     int dst;
     int id;
     int n;
-    act = (int *)D_00526250[port][slot].actBuf;
-    if (D_00526250[port][slot].f0C != 0 && sceSifDmaStat(D_00526250[port][slot].f0C) >= 0) {
+    act = (int *)libpad_slots[port][slot].actBuf;
+    if (libpad_slots[port][slot].f0C != 0 && sceSifDmaStat(libpad_slots[port][slot].f0C) >= 0) {
         if (D_004515CC != 0)
             scePrintf(D_00497888);
         return 0;
     }
     n = act[0] + 1;
-    dst = D_00526250[port][slot].f08 + ((n & 1) << 5);
+    dst = libpad_slots[port][slot].f08 + ((n & 1) << 5);
     act[0] = n;
     SyncDCache(act, (int *)((char *)act + 0x1F));
     dma[0].addr = dst;
@@ -2142,7 +2142,7 @@ int libpad_sendCommandBlock(int port, int slot) {
             scePrintf(D_00497888);
         return 0;
     }
-    D_00526250[port][slot].f0C = id;
+    libpad_slots[port][slot].f0C = id;
     return 1;
 }
 #endif
@@ -2172,15 +2172,15 @@ int scePadInit(int initArg) {
     int majorVersion;
     D_004515C8 = 1;
     for (;;) {
-        sceSifBindRpc(&D_00526200[0], 0x80000100, 0);
-        if (D_00526200[0].server != 0)
+        sceSifBindRpc(&libpad_clients[0], 0x80000100, 0);
+        if (libpad_clients[0].server != 0)
             break;
         for (i = 0x10000; i--; )
             ;
     }
     for (;;) {
-        sceSifBindRpc(&D_00526200[1], 0x80000101, 0);
-        if (D_00526200[1].server != 0)
+        sceSifBindRpc(&libpad_clients[1], 0x80000101, 0);
+        if (libpad_clients[1].server != 0)
             break;
         for (i = 0x10000; i--; )
             ;
@@ -2209,18 +2209,18 @@ INCLUDE_ASM("seg/seg_2FE810", libpad_initDriver);
 int libpad_initDriver(void) {
     int i;
     for (i = 0; i < 4; i++) {
-        D_00526250[0][i].open = 0;
-        D_00526250[0][i].f18 = 0;
-        D_00526250[0][i].f14 = 0;
-        D_00526250[1][i].open = 0;
-        D_00526250[1][i].f18 = 0;
-        D_00526250[1][i].f14 = 0;
+        libpad_slots[0][i].open = 0;
+        libpad_slots[0][i].f18 = 0;
+        libpad_slots[0][i].f14 = 0;
+        libpad_slots[1][i].open = 0;
+        libpad_slots[1][i].f18 = 0;
+        libpad_slots[1][i].f14 = 0;
     }
-    D_00526440[0] = 16;
-    D_00526440[4] = 0;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[0] = 16;
+    libpad_rpcBuffer[4] = 0;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    return D_00526440[3];
+    return libpad_rpcBuffer[3];
 }
 #endif
 
@@ -2234,10 +2234,10 @@ INCLUDE_ASM("seg/seg_2FE810", scePadEnd);
  */
 int scePadEnd(void) {
     int result;
-    D_00526440[0] = 15;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[0] = 15;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    result = D_00526440[3];
+    result = libpad_rpcBuffer[3];
     if (result == 1)
         D_004515C8 = 0;
     return result;
@@ -2257,16 +2257,16 @@ INCLUDE_ASM("seg/seg_2FE810", scePadPortClose);
  * @return the reply (word 3); 0 when not open or the call fails
  */
 int scePadPortClose(int port, int slot) {
-    if (!D_00526250[port][slot].open)
+    if (!libpad_slots[port][slot].open)
         return 0;
-    D_00526440[0] = 14;
-    D_00526440[1] = port;
-    D_00526440[2] = slot;
-    D_00526440[4] = 1;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[0] = 14;
+    libpad_rpcBuffer[1] = port;
+    libpad_rpcBuffer[2] = slot;
+    libpad_rpcBuffer[4] = 1;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    D_00526250[port][slot].open = 0;
-    return D_00526440[3];
+    libpad_slots[port][slot].open = 0;
+    return libpad_rpcBuffer[3];
 }
 #endif
 
@@ -2285,7 +2285,7 @@ extern void SyncDCache(int *, int *);
 sPadFrame *libpad_getNewestFrame(int port, int slot) {
     sPadFrame *dmaArea;
     int newerOffset;
-    dmaArea = (sPadFrame *)D_00526250[port][slot].dmaBuf;
+    dmaArea = (sPadFrame *)libpad_slots[port][slot].dmaBuf;
     SyncDCache((int *)dmaArea, (int *)((char *)dmaArea + 0xFF));
     newerOffset = (dmaArea[0].frame < dmaArea[1].frame) << 7;
     return (sPadFrame *)((char *)dmaArea + newerOffset);
@@ -2303,7 +2303,7 @@ INCLUDE_ASM("seg/seg_2FE810", libpad_getFrameCount);
  * @return the counter, or 0 when not open
  */
 int libpad_getFrameCount(int port, int slot) {
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     return libpad_getNewestFrame(port, slot)->frame;
 }
 #endif
@@ -2328,7 +2328,7 @@ int scePadRead(int port, int slot, int dataOut) {
     struct B128 frameCopy;
     int *frameWords;
     int intrState;
-    if (!D_00526250[port][slot].open)
+    if (!libpad_slots[port][slot].open)
         return 0;
     intrState = DIntr();
     frameWords = (int *)&frameCopy;
@@ -2353,7 +2353,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetState);
  */
 int scePadGetState(int port, int slot) {
     unsigned char *frameBytes;
-    if (!D_00526250[port][slot].open)
+    if (!libpad_slots[port][slot].open)
         return 99;
     frameBytes = (unsigned char *)libpad_getNewestFrame(port, slot); /* byte reads: a sPadFrame * makes one lhu of state/reqState */
     if (frameBytes[0x70] == 6 && frameBytes[0x71] == 2)
@@ -2365,7 +2365,7 @@ int scePadGetState(int port, int slot) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", scePadStateIntToStr);
 #ifdef SKIP_ASM
-extern char *D_004515D0[];
+extern char *libpad_stateNameTable[];
 extern char str_empty[];
 extern char *strcpy(char *, const char *);
 /**
@@ -2377,7 +2377,7 @@ extern char *strcpy(char *, const char *);
  */
 void scePadStateIntToStr(unsigned i, char *dst) {
     if (i < 8) {
-        strcpy(dst, D_004515D0[i]);
+        strcpy(dst, libpad_stateNameTable[i]);
         return;
     }
     *dst = str_empty[0];
@@ -2396,7 +2396,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadSetReqState);
  * @return 1, or 0 when not open
  */
 int scePadSetReqState(int port, int slot, int newReqState) {
-    if (!D_00526250[port][slot].open)
+    if (!libpad_slots[port][slot].open)
         return 0;
     libpad_getNewestFrame(port, slot)->reqState = newReqState;
     return 1;
@@ -2414,7 +2414,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetReqState);
  * @return the request state, or 0 when not open
  */
 int scePadGetReqState(int port, int slot) {
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     return libpad_getNewestFrame(port, slot)->reqState;
 }
 #endif
@@ -2422,19 +2422,19 @@ int scePadGetReqState(int port, int slot) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", scePadReqIntToStr);
 #ifdef SKIP_ASM
-extern char *D_004515F0[];
+extern char *libpad_reqStateNameTable[];
 extern char str_empty[];
 extern char *strcpy(char *, const char *);
 /**
  * Copies the name of request state @p i: COMPLETE, FAILED, BUSY; empty for 4 or more. Quirk: entry 3 of the table
- * D_004515F0 is a null pointer, so @p i = 3 copies from address 0.
+ * libpad_reqStateNameTable is a null pointer, so @p i = 3 copies from address 0.
  *
  * @param i  the request state
  * @param dst  receives the name
  */
 void scePadReqIntToStr(unsigned i, char *dst) {
     if (i < 4) {
-        strcpy(dst, D_004515F0[i]);
+        strcpy(dst, libpad_reqStateNameTable[i]);
         return;
     }
     *dst = str_empty[0];
@@ -2458,7 +2458,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadInfoAct);
  */
 int scePadInfoAct(int port, int slot, int actIndex, int infoKind) {
     sPadFrame *frame;
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     frame = libpad_getNewestFrame(port, slot);
     if (frame->ok != 1) return 0;
     if (frame->f64 < 2) return 0;
@@ -2493,7 +2493,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadInfoComb);
  */
 int scePadInfoComb(int port, int slot, int combIndex, int infoKind) {
     sPadFrame *frame;
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     frame = libpad_getNewestFrame(port, slot);
     if (frame->ok != 1) return 0;
     if (frame->f64 < 2) return 0;
@@ -2533,7 +2533,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadInfoMode);
 int scePadInfoMode(int port, int slot, int term, int offs) {
     sPadFrame *frame;
     int t;
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     frame = libpad_getNewestFrame(port, slot);
     if (frame->ok != 1) return 0;
     if (frame->reqState == 2) return 0;
@@ -2573,17 +2573,17 @@ extern int scePadSetReqState(int, int, int);
  */
 int scePadSetMainMode(int port, int slot, int modeIndex, int lockMode) {
     int result;
-    D_00526440[3] = modeIndex;
-    D_00526440[4] = lockMode;
-    D_00526440[0] = 6;
-    D_00526440[1] = port;
-    D_00526440[2] = slot;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[3] = modeIndex;
+    libpad_rpcBuffer[4] = lockMode;
+    libpad_rpcBuffer[0] = 6;
+    libpad_rpcBuffer[1] = port;
+    libpad_rpcBuffer[2] = slot;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    result = D_00526440[5];
+    result = libpad_rpcBuffer[5];
     if (result == 1)
         scePadSetReqState(port, slot, 2);
-    return D_00526440[5];
+    return libpad_rpcBuffer[5];
 }
 #endif
 
@@ -2607,7 +2607,7 @@ int scePadSetActDirect(int port, int slot, unsigned char *src) {
     char *cmdBytes;
     if (libpad_getNewestFrame(port, slot)->ok != 1)
         return 0;
-    cmdWords = (int *)D_00526250[port][slot].actBuf;
+    cmdWords = (int *)libpad_slots[port][slot].actBuf;
     cmdBytes = (char *)cmdWords + 0xC;
     for (i = 0; i < 6; i++)
         cmdBytes[i] = src[i];
@@ -2635,14 +2635,14 @@ extern int scePadSetReqState(int, int, int);
 int scePadSetActAlign(int port, int slot, unsigned char *data) {
     int i;
     unsigned char *alignBytes;
-    int *rpcBlock = D_00526440;
+    int *rpcBlock = libpad_rpcBuffer;
     rpcBlock[0] = 8;
     rpcBlock[1] = port;
     rpcBlock[2] = slot;
     alignBytes = (unsigned char *)&rpcBlock[3];
     for (i = 0; i < 6; i++)
         alignBytes[i] = data[i];
-    if (sceSifCallRpc(D_00526200, 1, 0, rpcBlock, 128, rpcBlock, 128, 0, 0) < 0)
+    if (sceSifCallRpc(libpad_clients, 1, 0, rpcBlock, 128, rpcBlock, 128, 0, 0) < 0)
         return 0;
     if (rpcBlock[5] == 1)
         scePadSetReqState(port, slot, 2);
@@ -2663,7 +2663,7 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetButtonMask);
  */
 int scePadGetButtonMask(int port, int slot) {
     sPadFrame *frame;
-    if (!D_00526250[port][slot].open)
+    if (!libpad_slots[port][slot].open)
         return 0;
     frame = libpad_getNewestFrame(port, slot);
     if (frame->ok != 1)
@@ -2690,16 +2690,16 @@ extern int scePadSetReqState(int, int, int);
  */
 int scePadSetButtonInfo(int port, int slot, int buttonMask) {
     int result;
-    D_00526440[3] = buttonMask;
-    D_00526440[0] = 10;
-    D_00526440[1] = port;
-    D_00526440[2] = slot;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[3] = buttonMask;
+    libpad_rpcBuffer[0] = 10;
+    libpad_rpcBuffer[1] = port;
+    libpad_rpcBuffer[2] = slot;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    result = D_00526440[4];
+    result = libpad_rpcBuffer[4];
     if (result == 1)
         scePadSetReqState(port, slot, 2);
-    return D_00526440[4];
+    return libpad_rpcBuffer[4];
 }
 #endif
 
@@ -2715,7 +2715,7 @@ extern int scePadGetButtonMask(int, int);
  * @return 1 or 0
  */
 int scePadInfoPressMode(int port, int slot) {
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     return scePadGetButtonMask(port, slot) == 0x3FFFF;
 }
 #endif
@@ -2732,7 +2732,7 @@ extern int scePadSetButtonInfo(int, int, int);
  * @return scePadSetButtonInfo's result, or 0 when not open
  */
 int scePadEnterPressMode(int port, int slot) {
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     return scePadSetButtonInfo(port, slot, 0xFFF);
 }
 #endif
@@ -2749,7 +2749,7 @@ extern int scePadSetButtonInfo(int, int, int);
  * @return scePadSetButtonInfo's result, or 0 when not open
  */
 int scePadExitPressMode(int port, int slot) {
-    if (!D_00526250[port][slot].open) return 0;
+    if (!libpad_slots[port][slot].open) return 0;
     return scePadSetButtonInfo(port, slot, 0);
 }
 #endif
@@ -2769,15 +2769,15 @@ extern int scePadSetReqState(int, int, int);
  * @return the reply (word 7), or 0 when the call fails
  */
 int scePadSetVrefParam(int port, int slot, struct P12 *cmdBlock) {
-    D_00526440[1] = port;
-    D_00526440[0] = 11;
-    D_00526440[2] = slot;
-    *(struct P12 *)&D_00526440[3] = *cmdBlock;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[1] = port;
+    libpad_rpcBuffer[0] = 11;
+    libpad_rpcBuffer[2] = slot;
+    *(struct P12 *)&libpad_rpcBuffer[3] = *cmdBlock;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    if (D_00526440[7] == 1)
+    if (libpad_rpcBuffer[7] == 1)
         scePadSetReqState(port, slot, 2);
-    return D_00526440[7];
+    return libpad_rpcBuffer[7];
 }
 #endif
 
@@ -2790,10 +2790,10 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetPortMax);
  * @return the reply (word 3), or 0 when the call fails
  */
 int scePadGetPortMax(void) {
-    D_00526440[0] = 12;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[0] = 12;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    return D_00526440[3];
+    return libpad_rpcBuffer[3];
 }
 #endif
 
@@ -2807,11 +2807,11 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetSlotMax);
  * @return the reply (word 3), or 0 when the call fails
  */
 int scePadGetSlotMax(int argWord) {
-    D_00526440[1] = argWord;
-    D_00526440[0] = 13;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[1] = argWord;
+    libpad_rpcBuffer[0] = 13;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    return D_00526440[3];
+    return libpad_rpcBuffer[3];
 }
 #endif
 
@@ -2824,10 +2824,10 @@ INCLUDE_ASM("seg/seg_2FE810", scePadGetModVersion);
  * @return the version, or 0 when the call fails
  */
 int scePadGetModVersion(void) {
-    D_00526440[0] = 18;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[0] = 18;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    return D_00526440[3];
+    return libpad_rpcBuffer[3];
 }
 #endif
 
@@ -2841,11 +2841,11 @@ INCLUDE_ASM("seg/seg_2FE810", libpad_callRpc20);
  * @return the reply (word 2), or 0 when the call fails
  */
 int libpad_callRpc20(int argWord) {
-    D_00526440[1] = argWord;
-    D_00526440[0] = 20;
-    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    libpad_rpcBuffer[1] = argWord;
+    libpad_rpcBuffer[0] = 20;
+    if (sceSifCallRpc(libpad_clients, 1, 0, libpad_rpcBuffer, 128, libpad_rpcBuffer, 128, 0, 0) < 0)
         return 0;
-    return D_00526440[2];
+    return libpad_rpcBuffer[2];
 }
 #endif
 
@@ -2934,28 +2934,28 @@ extern int iSignalSema_i(int) __asm__("iSignalSema");
 /**
  * Finishes a libcdvd asynchronous N-command: releases the command semaphore and wakes the callback thread.
  *
- * Copies the pending command's function code (*@p pendingCode, the global D_00451658: 1 read, 3 get-TOC) to D_0045165C for the
- * callback. Code 11 only clears it and the busy flag D_00451634. Otherwise it signals the N-command semaphore
- * D_00451628 (which the issuing call left held) and, when the callback thread D_00451614 exists and a callback
- * D_005264C0 is set, signals the thread's semaphore D_00451620; with no callback it clears the busy flag itself. Uses
+ * Copies the pending command's function code (*@p pendingCode, the global libcdvd_pendingCmd: 1 read, 3 get-TOC) to D_0045165C for the
+ * callback. Code 11 only clears it and the busy flag libcdvd_busyFlag. Otherwise it signals the N-command semaphore
+ * _sceCd_ncmd_semid (which the issuing call left held) and, when the callback thread libcdvd_callbackThreadId exists and a callback
+ * D_005264C0 is set, signals the thread's semaphore libcdvd_callbackSema; with no callback it clears the busy flag itself. Uses
  * iSignalSema, so it runs in the SIF RPC completion (interrupt) context: libcdvd_onReadDone calls it.
  *
- * @param pendingCode  the pending command's function code (always &D_00451658)
+ * @param pendingCode  the pending command's function code (always &libcdvd_pendingCmd)
  */
 void libcdvd_finishNcmd(int *pendingCode) {
-    D_00451658 = *pendingCode;
-    D_0045165C = D_00451658;
-    if (D_00451658 == 11) {
-        D_00451658 = 0;
-        D_00451634 = 0;
+    libcdvd_pendingCmd = *pendingCode;
+    D_0045165C = libcdvd_pendingCmd;
+    if (libcdvd_pendingCmd == 11) {
+        libcdvd_pendingCmd = 0;
+        libcdvd_busyFlag = 0;
         return;
     }
-    iSignalSema_i(D_00451628);
-    if (D_00451614 != 0 && D_005264C0 != 0)
-        iSignalSema_i(D_00451620);
+    iSignalSema_i(_sceCd_ncmd_semid);
+    if (libcdvd_callbackThreadId != 0 && D_005264C0 != 0)
+        iSignalSema_i(libcdvd_callbackSema);
     else
-        D_00451634 = 0;
-    D_00451658 = 0;
+        libcdvd_busyFlag = 0;
+    libcdvd_pendingCmd = 0;
 }
 #endif
 
@@ -2969,24 +2969,24 @@ extern void scePrintf();
 /**
  * Body of the libcdvd callback thread: runs the user callback each time an asynchronous command ends.
  *
- * Loops forever waiting on D_00451620. When D_00451658 is -1 (the shutdown request from libcdvd_shutdown) it clears the
- * busy flag, the pending code, the thread id D_00451614 and D_005264D4 and exits with ExitDeleteThread. Otherwise, with
- * debug output on (D_00451610 > 0), it prints the callback and the code ("sceCdCbfunc= %d sceCdCbfunc_num= %d"), calls
+ * Loops forever waiting on libcdvd_callbackSema. When libcdvd_pendingCmd is -1 (the shutdown request from libcdvd_shutdown) it clears the
+ * busy flag, the pending code, the thread id libcdvd_callbackThreadId and D_005264D4 and exits with ExitDeleteThread. Otherwise, with
+ * debug output on (libcdvd_debugLevel > 0), it prints the callback and the code ("sceCdCbfunc= %d sceCdCbfunc_num= %d"), calls
  * the callback D_005264C0 with the finished command's code D_0045165C under the $gp saved when it was installed, and
- * clears the busy flag D_00451634. sceCdInitEeCB creates the thread.
+ * clears the busy flag libcdvd_busyFlag. sceCdInitEeCB creates the thread.
  */
 void libcdvd_callbackThread(void) {
     void (*fn)(int);
     for (;;) {
-        WaitSema(D_00451620);
-        if (D_00451658 == -1) {
-            D_00451634 = 0;
-            D_00451658 = 0;
-            D_00451614 = 0;
+        WaitSema(libcdvd_callbackSema);
+        if (libcdvd_pendingCmd == -1) {
+            libcdvd_busyFlag = 0;
+            libcdvd_pendingCmd = 0;
+            libcdvd_callbackThreadId = 0;
             D_005264D4 = 0;
             ExitDeleteThread();
         }
-        if (D_00451610 > 0)
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_004979E0, D_005264C0, D_0045165C);
         fn = D_005264C0;
         if (fn != 0 && D_0045165C != 0) {
@@ -2995,7 +2995,7 @@ void libcdvd_callbackThread(void) {
             fn(D_0045165C);
             __asm__ volatile("move $28,%0" : : "r"(saved));
         }
-        D_00451634 = 0;
+        libcdvd_busyFlag = 0;
     }
 }
 #endif
@@ -3012,9 +3012,9 @@ extern void libcdvd_callbackThread(void);
 /**
  * Creates the libcdvd callback thread, or changes its priority when it already exists.
  *
- * The first time (D_00451614 == 0) it records the current thread id (D_005264D8) and its status (D_005264E0), fills the
+ * The first time (libcdvd_callbackThreadId == 0) it records the current thread id (libcdvd_initThreadId) and its status (libcdvd_initThreadParam), fills the
  * thread parameters D_00526510 (entry libcdvd_callbackThread, stack, size, priority, gp 0), creates the thread and starts it,
- * keeping its id in D_00451614. Later calls only call ChangeThreadPriority.
+ * keeping its id in libcdvd_callbackThreadId. Later calls only call ChangeThreadPriority.
  *
  * @param priority  the thread priority
  * @param stackAddr  the thread's stack
@@ -3024,18 +3024,18 @@ extern void libcdvd_callbackThread(void);
 int sceCdInitEeCB(int priority, int stackAddr, int stackBytes) {
     int ok;
     ok = 1;
-    if (D_00451614 == 0) {
-        D_005264D8 = GetThreadId();
-        ReferThreadStatus_i(D_005264D8, &D_005264E0);
+    if (libcdvd_callbackThreadId == 0) {
+        libcdvd_initThreadId = GetThreadId();
+        ReferThreadStatus_i(libcdvd_initThreadId, &libcdvd_initThreadParam);
         D_00526510.stackSize = stackBytes;
         D_00526510.entry = libcdvd_callbackThread;
         D_00526510.stack = stackAddr;
         D_00526510.initPriority = priority;
         D_00526510.gpReg = 0;
-        D_00451614 = CreateThread(&D_00526510);
-        StartThread(D_00451614, 0);
+        libcdvd_callbackThreadId = CreateThread(&D_00526510);
+        StartThread(libcdvd_callbackThreadId, 0);
     } else {
-        ChangeThreadPriority(D_00451614, priority);
+        ChangeThreadPriority(libcdvd_callbackThreadId, priority);
         ok = 0;
     }
     return ok;
@@ -3052,7 +3052,7 @@ extern void libcdvd_finishNcmd(int *);
  *
  * The IOP returns the bytes of the read that share a 64-byte cache line with other data in a fixup block (@p fixupBlock, read
  * through its uncached alias): n0 bytes for d0 from b0 and n1 bytes for d1 from b1. Each byte is written through both
- * the uncached and the cached address of the destination. Then libcdvd_finishNcmd finishes the command (&D_00451658).
+ * the uncached and the cached address of the destination. Then libcdvd_finishNcmd finishes the command (&libcdvd_pendingCmd).
  * sceCdRead passes it with the fixup buffer D_00452700.
  *
  * @param fixupBlock  the fixup block (the RPC end parameter)
@@ -3080,7 +3080,7 @@ void libcdvd_onReadDone(void *fixupBlock) {
             cachedDst[i] = byteValue;
         }
     }
-    libcdvd_finishNcmd((int *)&D_00451658);
+    libcdvd_finishNcmd((int *)&libcdvd_pendingCmd);
 }
 #endif
 
@@ -3092,22 +3092,22 @@ extern int Q0C00_create(struct QSema *) __asm__("CreateSema");
 /**
  * Creates the libcdvd semaphores the first time they are needed.
  *
- * When any of the N-command, S-command or third semaphore (D_00451628, D_0045162C, D_00451630) is still -1, it creates
- * all three with count 1 and the callback thread's D_00451620 with count 0, and clears the busy flag D_00451634. Every
+ * When any of the N-command, S-command or third semaphore (_sceCd_ncmd_semid, _sceCd_scmd_semid, libcdvd_diskReadySema) is still -1, it creates
+ * all three with count 1 and the callback thread's libcdvd_callbackSema with count 0, and clears the busy flag libcdvd_busyFlag. Every
  * libcdvd entry point that takes a semaphore calls it first.
  */
 void libcdvd_createSemas(void) {
     struct QSema semaParam;
-    if (D_00451628 == -1 || D_0045162C == -1 || D_00451630 == -1) {
+    if (_sceCd_ncmd_semid == -1 || _sceCd_scmd_semid == -1 || libcdvd_diskReadySema == -1) {
         semaParam.option = 0;
         semaParam.init_count = 1;
         semaParam.max_count = 1;
-        D_00451628 = Q0C00_create(&semaParam);
-        D_0045162C = Q0C00_create(&semaParam);
-        D_00451630 = Q0C00_create(&semaParam);
+        _sceCd_ncmd_semid = Q0C00_create(&semaParam);
+        _sceCd_scmd_semid = Q0C00_create(&semaParam);
+        libcdvd_diskReadySema = Q0C00_create(&semaParam);
         semaParam.init_count = 0;
-        D_00451620 = Q0C00_create(&semaParam);
-        D_00451634 = 0;
+        libcdvd_callbackSema = Q0C00_create(&semaParam);
+        libcdvd_busyFlag = 0;
     }
 }
 #endif
@@ -3123,20 +3123,20 @@ extern void EIntr(void);
 /**
  * Tears down libcdvd's threads, semaphores and power-off handler (the exit mode of sceCdInit).
  *
- * When the callback thread exists it sets the pending code D_00451658 to -1 and signals the thread so it exits itself
+ * When the callback thread exists it sets the pending code libcdvd_pendingCmd to -1 and signals the thread so it exits itself
  * (libcdvd_callbackThread). Deletes the four semaphores and, with interrupts off, removes the SIF command handler 0x80000012
  * (sceSifRemoveCmdHandler) that libcdvd_installPowerOffHandler installed.
  */
 void libcdvd_shutdown(void) {
     int intrEnabled;
-    if (D_00451614 != 0) {
-        D_00451658 = -1;
-        cb_DC0(D_00451620);
+    if (libcdvd_callbackThreadId != 0) {
+        libcdvd_pendingCmd = -1;
+        cb_DC0(libcdvd_callbackSema);
     }
-    cb_DB0(D_00451628);
-    cb_DB0(D_0045162C);
-    cb_DB0(D_00451630);
-    cb_DB0(D_00451620);
+    cb_DB0(_sceCd_ncmd_semid);
+    cb_DB0(_sceCd_scmd_semid);
+    cb_DB0(libcdvd_diskReadySema);
+    cb_DB0(libcdvd_callbackSema);
     intrEnabled = cb_078();
     sceSifRemoveCmdHandler(0x80000012);
     if (intrEnabled)
@@ -3184,12 +3184,12 @@ INCLUDE_ASM("seg/seg_2FE810", libcdvd_onPowerOffCmd);
  * SIF command handler for the IOP's power-off notice (command 0x80000012): calls the power-off callback.
  *
  * Calls D_005264C8(D_005264D0) under the $gp saved with it, unless no callback is set or the handler is being installed
- * (D_00451624). libcdvd_installPowerOffHandler installs it.
+ * (libcdvd_setupFlag). libcdvd_installPowerOffHandler installs it.
  */
 void libcdvd_onPowerOffCmd(void) {
     void (*fn)(int) = D_005264C8;
     if (fn) {
-        if (D_00451624 == 0) {
+        if (libcdvd_setupFlag == 0) {
             int saved;
             __asm__ volatile("move %0,$28\n\tlw $28,%1" : "=r"(saved) : "m"(D_005264CC));
             fn(D_005264D0);
@@ -3209,19 +3209,19 @@ extern void sceSifAddCmdHandler(int, void (*)(void), int);
 /**
  * Installs libcdvd's SIF command handler libcdvd_onPowerOffCmd for the power-off notice 0x80000012.
  *
- * Sets the in-progress flag D_00451624 around the install (sceSifAddCmdHandler, interrupts off) and marks the handler
+ * Sets the in-progress flag libcdvd_setupFlag around the install (sceSifAddCmdHandler, interrupts off) and marks the handler
  * installed (D_00451640 = 1). Called by sceCdInit and sceCdPOffCallback.
  *
  * @return 1
  */
 int libcdvd_installPowerOffHandler(void) {
     int intrEnabled;
-    D_00451624 = 1;
+    libcdvd_setupFlag = 1;
     intrEnabled = DIntr();
     sceSifAddCmdHandler(0x80000012, libcdvd_onPowerOffCmd, 0);
     if (intrEnabled)
         EIntr();
-    D_00451624 = 0;
+    libcdvd_setupFlag = 0;
     D_00451640 = 1;
     return 1;
 }
@@ -3248,7 +3248,7 @@ int f0EA8(char *out, char *name, int arg) __asm__("libcdvd_searchFileRpc");
 /**
  * Looks a file up on the disc through libcdvd's search-file RPC server and fills its 0x24-byte file record.
  *
- * Takes the N-command semaphore D_00451628 without blocking (returns 0 when it is held or an N-command runs), binds
+ * Takes the N-command semaphore _sceCd_ncmd_semid without blocking (returns 0 when it is held or an N-command runs), binds
  * server 0x80000597 on first use (retrying, "Libcdvd bind err CdSearchFile"), copies @p name (up to 0xFF characters)
  * into the request D_00526540 with @p searchParam, writes it back from the cache and calls RPC 0. The record (sector, size,
  * name at +8; printed with the debug strings "search name/size/loc lbn") is copied from the request's uncached alias to
@@ -3264,19 +3264,19 @@ int f0EA8(char *out, char *name, int searchParam) {
     int n;
     int searchResult;
     libcdvd_createSemas();
-    if (D_00451628 != PollSema(D_00451628))
+    if (_sceCd_ncmd_semid != PollSema(_sceCd_ncmd_semid))
         return 0;
     D_0045161C = 1;
-    ReferThreadStatus(D_005264D8, &D_005264E0);
+    ReferThreadStatus(libcdvd_initThreadId, &libcdvd_initThreadParam);
     if (sceCdSync(1) != 0) {
-        SignalSema(D_00451628);
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
     func_00426408(0);
     if (D_00451644 < 0) {
         for (;;) {
             if (sceSifBindRpc(&D_005266C0, 0x80000597, 0) < 0) {
-                if (D_00451610 > 0)
+                if (libcdvd_debugLevel > 0)
                     scePrintf(D_00497A08);
                 for (i = 0x100000; i--; )
                     ;
@@ -3296,24 +3296,24 @@ int f0EA8(char *out, char *name, int searchParam) {
     }
     if (n == 0x100)
         D_00526540.name[0xFF] = 0;
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497A28, D_00526564);
     D_00526540.arg = searchParam;
     D_00526540.self = &D_00526540;
     func_00426358((int)&D_00526540, 300);
     if (sceSifCallRpc(&D_005266C0, 0, 0, &D_00526540, 300, D_00526680, 4, 0, 0) < 0) {
-        SignalSema(D_00451628);
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
     *(R0EA8 *)out = *(R0EA8 *)((int)&D_00526540 | 0x20000000);
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497A40, out + 8);
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497A50, ((int *)out)[1]);
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497A60, ((int *)out)[0]);
     searchResult = *(int *)((int)D_00526680 | 0x20000000);
-    SignalSema(D_00451628);
+    SignalSema(_sceCd_ncmd_semid);
     return searchResult;
 }
 #endif
@@ -3349,7 +3349,7 @@ extern void func_00426408(int);
 /**
  * Prepares a libcdvd N-command: takes the N-command semaphore and binds the N-command RPC server.
  *
- * Fails (prints "Ncmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when D_00451628 is already held. Records the command
+ * Fails (prints "Ncmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when _sceCd_ncmd_semid is already held. Records the command
  * in D_0045161C, refreshes the caller's thread status, and fails (releasing the semaphore) while a previous N-command
  * is still running (sceCdSync(1)). Then flushes the cache (func_00426408(0)) and binds server 0x80000595 on first
  * use (D_0045163C), retrying on error ("Libcdvd bind err N CMD"). On success the caller holds the semaphore and must
@@ -3361,29 +3361,29 @@ extern void func_00426408(int);
 int _sceCd_ncmd_prechk(int cmdNumber) {
     int i;
     libcdvd_createSemas();
-    if (D_00451628 != PollSema(D_00451628)) {
-        if (D_00451610 > 0)
+    if (_sceCd_ncmd_semid != PollSema(_sceCd_ncmd_semid)) {
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_00497A78, cmdNumber, D_0045161C);
         return 0;
     }
     D_0045161C = cmdNumber;
-    ReferThreadStatus(D_005264D8, &D_005264E0);
+    ReferThreadStatus(libcdvd_initThreadId, &libcdvd_initThreadParam);
     if (sceCdSync(1) != 0) {
-        SignalSema(D_00451628);
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
     func_00426408(0);
     if (D_0045163C >= 0)
         return 1;
     for (;;) {
-        if (sceSifBindRpc(&D_004527D0, 0x80000595, 0) < 0) {
-            if (D_00451610 > 0)
+        if (sceSifBindRpc(&_sceCd_cd_ncmd, 0x80000595, 0) < 0) {
+            if (libcdvd_debugLevel > 0)
                 scePrintf(D_00497AA0);
             for (i = 0x100000; i--; )
                 ;
             continue;
         }
-        if (D_004527D0.server != 0)
+        if (_sceCd_cd_ncmd.server != 0)
             break;
         for (i = 0x100000; i--; )
             ;
@@ -3410,12 +3410,12 @@ int sceCdNcmdDiskReady(void) {
     int readyState;
     if (_sceCd_ncmd_prechk(2) == 0)
         return 0;
-    if (sceSifCallRpc(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
-        SignalSema(D_00451628);
+    if (sceSifCallRpc(&_sceCd_cd_ncmd, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
     readyState = *(int *)((unsigned)D_00451680 | 0x20000000);
-    SignalSema(D_00451628);
+    SignalSema(_sceCd_ncmd_semid);
     return readyState;
 }
 #endif
@@ -3428,8 +3428,8 @@ extern void scePrintf();
 /**
  * Waits for or polls the end of the running libcdvd N-command.
  *
- * Mode 0 prints "N cmd wait" (debug) and sleeps 60 ticks at a time (libcdvd_sleepTicks) while the busy flag D_00451634 is
- * set or the N-command RPC client D_004527D0 is still busy (sceSifCheckStatRpc), then returns 0. Any other mode returns
+ * Mode 0 prints "N cmd wait" (debug) and sleeps 60 ticks at a time (libcdvd_sleepTicks) while the busy flag libcdvd_busyFlag is
+ * set or the N-command RPC client _sceCd_cd_ncmd is still busy (sceSifCheckStatRpc), then returns 0. Any other mode returns
  * at once.
  *
  * @param mode  0 to block until the command ends, otherwise only poll
@@ -3437,13 +3437,13 @@ extern void scePrintf();
  */
 int sceCdSync(int mode) {
     if (mode == 0) {
-        if (D_00451610 > 0)
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_00497AB8);
-        while (D_00451634 || sceSifCheckStatRpc(&D_004527D0))
+        while (libcdvd_busyFlag || sceSifCheckStatRpc(&_sceCd_cd_ncmd))
             libcdvd_sleepTicks(60);
         return 0;
     }
-    if (D_00451634 || sceSifCheckStatRpc(&D_004527D0))
+    if (libcdvd_busyFlag || sceSifCheckStatRpc(&_sceCd_cd_ncmd))
         return 1;
     return 0;
 }
@@ -3458,20 +3458,20 @@ extern void scePrintf();
  * Waits for or polls the end of the running libcdvd S-command.
  *
  * Mode 0 prints "S cmd wait" (debug) and sleeps 60 ticks at a time (libcdvd_sleepTicks) while the S-command RPC client
- * D_00453180 is busy (sceSifCheckStatRpc), then returns 0. Any other mode returns the busy state at once.
+ * _sceCd_cd_scmd is busy (sceSifCheckStatRpc), then returns 0. Any other mode returns the busy state at once.
  *
  * @param mode  0 to block until the command ends, otherwise only poll
  * @return non-zero while an S-command is still running, else 0
  */
 int sceCdSyncS(int mode) {
     if (mode == 0) {
-        if (D_00451610 > 0)
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_00497AC8);
-        while (sceSifCheckStatRpc(&D_00453180))
+        while (sceSifCheckStatRpc(&_sceCd_cd_scmd))
             libcdvd_sleepTicks(60);
         return 0;
     }
-    return sceSifCheckStatRpc(&D_00453180);
+    return sceSifCheckStatRpc(&_sceCd_cd_scmd);
 }
 #endif
 
@@ -3490,7 +3490,7 @@ extern void func_00426408(int);
 /**
  * Prepares a libcdvd S-command: takes the S-command semaphore and binds the S-command RPC server.
  *
- * Fails (prints "Scmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when D_0045162C is already held. Records the command
+ * Fails (prints "Scmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when _sceCd_scmd_semid is already held. Records the command
  * in D_00451618, refreshes the caller's thread status, and fails (releasing the semaphore) while an S-command still
  * runs (sceCdSyncS(1)). Then flushes the cache (func_00426408(0)) and binds server 0x80000593 on first use
  * (D_0045164C), retrying on error ("Libcdvd bind err S cmd"). On success the caller holds the semaphore and must
@@ -3502,29 +3502,29 @@ extern void func_00426408(int);
 int _sceCd_scmd_prechk(int cmdNumber) {
     int i;
     libcdvd_createSemas();
-    if (D_0045162C != PollSema(D_0045162C)) {
-        if (D_00451610 > 0)
+    if (_sceCd_scmd_semid != PollSema(_sceCd_scmd_semid)) {
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_00497AD8, cmdNumber, D_00451618);
         return 0;
     }
     D_00451618 = cmdNumber;
-    ReferThreadStatus(D_005264D8, &D_005264E0);
+    ReferThreadStatus(libcdvd_initThreadId, &libcdvd_initThreadParam);
     if (sceCdSyncS(1) != 0) {
-        SignalSema(D_0045162C);
+        SignalSema(_sceCd_scmd_semid);
         return 0;
     }
     func_00426408(0);
     if (D_0045164C >= 0)
         return 1;
     for (;;) {
-        if (sceSifBindRpc(&D_00453180, 0x80000593, 0) < 0) {
-            if (D_00451610 > 0)
+        if (sceSifBindRpc(&_sceCd_cd_scmd, 0x80000593, 0) < 0) {
+            if (libcdvd_debugLevel > 0)
                 scePrintf(D_00497B00);
             for (i = 0x100000; i--; )
                 ;
             continue;
         }
-        if (D_00453180.server != 0)
+        if (_sceCd_cd_scmd.server != 0)
             break;
         for (i = 0x100000; i--; )
             ;
@@ -3540,9 +3540,9 @@ INCLUDE_ASM("seg/seg_2FE810", libcdvd_getInternalObject);
 /**
  * Returns the address (or id) of one of libcdvd's internal objects, chosen by a code.
  *
- * 0x8001 gives the N-command semaphore id D_00451628, 0x8002 the N-command send buffer D_00451700, 0x8003 its result
- * buffer D_00451680, 0x8004 the N-command RPC client D_004527D0; 0x8011..0x8014 give the S-command equivalents
- * (D_0045162C, D_00452C40, D_00452800, D_00453180). Other codes give 0. These are the objects the DNAS import table
+ * 0x8001 gives the N-command semaphore id _sceCd_ncmd_semid, 0x8002 the N-command send buffer libcdvd_ncmdSendBuffer, 0x8003 its result
+ * buffer D_00451680, 0x8004 the N-command RPC client _sceCd_cd_ncmd; 0x8011..0x8014 give the S-command equivalents
+ * (_sceCd_scmd_semid, libcdvd_scmdSendBuffer, _sceCd_scmdrdata, _sceCd_cd_scmd). Other codes give 0. These are the objects the DNAS import table
  * DirtyDnas_importTable also exports.
  *
  * @param id  the object code
@@ -3559,29 +3559,29 @@ int libcdvd_getInternalObject(long id, int *out) {
                         if (id != 32787) {
                             if (id != 32786) {
                                 if (id == 32788)
-                                    entry = (int)&D_00453180;
+                                    entry = (int)&_sceCd_cd_scmd;
                                 else
                                     entry = 0;
                             } else {
-                                entry = (int)D_00452C40;
+                                entry = (int)libcdvd_scmdSendBuffer;
                             }
                         } else {
-                            entry = (int)D_00452800;
+                            entry = (int)_sceCd_scmdrdata;
                         }
                     } else {
-                        entry = D_0045162C;
+                        entry = _sceCd_scmd_semid;
                     }
                 } else {
-                    entry = (int)&D_004527D0;
+                    entry = (int)&_sceCd_cd_ncmd;
                 }
             } else {
-                entry = (int)D_00451700;
+                entry = (int)libcdvd_ncmdSendBuffer;
             }
         } else {
             entry = (int)D_00451680;
         }
     } else {
-        entry = D_00451628;
+        entry = _sceCd_ncmd_semid;
     }
     *out = entry;
     return 1;
@@ -3592,7 +3592,7 @@ int libcdvd_getInternalObject(long id, int *out) {
 INCLUDE_ASM("seg/seg_2FE810", sceCdInit);
 #ifdef SKIP_ASM
 // Has the shape of libcdvd's sceCdInit(mode): binds RPC server 0x80000592, sends the mode, reads the status words
-// back uncached; mode 5 (SCECdEXIT) tears the client down. Own match (agent fp401718, 2026-11-15); D_00451624 is
+// back uncached; mode 5 (SCECdEXIT) tears the client down. Own match (agent fp401718, 2026-11-15); libcdvd_setupFlag is
 // volatile at file scope (phaseb_import.py VIEW_SUBS).
 extern int D_00451650;
 extern int D_00451654;
@@ -3610,9 +3610,9 @@ extern void func_00426358(int, int);
  * Initialises (or, in mode 5, shuts down) the CD/DVD library and binds its init RPC server.
  *
  * Fails while an S-command runs (sceCdSyncS(1)). Records the current thread id, resets every RPC bind state
- * (D_00451644, D_0045163C, D_0045164C, D_00451648, D_00451650, D_00451640) to unbound, counts the call in D_00451654,
+ * (D_00451644, D_0045163C, D_0045164C, libcdvd_diskReadyBindState, D_00451650, D_00451640) to unbound, counts the call in D_00451654,
  * and binds server 0x80000592, retrying on error ("Libcdvd bind err %d CD_Init %d"). Sends @p mode (RPC 0, 16-byte
- * reply in D_00452800): a reply status of 0xFE turns debug output on (D_00451610 = 1); otherwise status words 1 or 2
+ * reply in _sceCd_scmdrdata): a reply status of 0xFE turns debug output on (libcdvd_debugLevel = 1); otherwise status words 1 or 2
  * below 0x200 make it return 2. Mode 5 prints "Libcdvd Exit", tears everything down (libcdvd_shutdown) and marks the
  * semaphores gone; other modes create the semaphores (libcdvd_createSemas) and install the power-off handler (libcdvd_installPowerOffHandler).
  * Called by systemInit's boot code (shutdownAndLoadExec) and the EA CD code.
@@ -3631,19 +3631,19 @@ int sceCdInit(int mode)
     if (sceCdSyncS(1) != 0)
         return 0;
     func_00426408(0);
-    D_005264D8 = GetThreadId();
-    D_00451624 = 1;
+    libcdvd_initThreadId = GetThreadId();
+    libcdvd_setupFlag = 1;
     D_00451644 = -1;
     D_0045163C = -1;
     D_0045164C = -1;
-    D_00451648 = -1;
+    libcdvd_diskReadyBindState = -1;
     D_00451650 = -1;
     D_00451640 = -1;
     D_00451638 = 0;
     D_00451654++;
     while (1) {
         if ((bindResult = sceSifBindRpc(&D_005266E8, 0x80000592, 0)) < 0) {
-            if (D_00451610 > 0)
+            if (libcdvd_debugLevel > 0)
                 scePrintf(D_00497B18, bindResult, D_00451654);
             for (i = 0x100000; i--; )
                 ;
@@ -3653,9 +3653,9 @@ int sceCdInit(int mode)
             D_00526740 = mode;
             D_00451650 = 0;
             func_00426358((int)&D_00526740, 4);
-            buf = D_00452800;
+            buf = _sceCd_scmdrdata;
             if (sceSifCallRpc(&D_005266E8, 0, 0, &D_00526740, 4, buf, 0x10, 0, 0) < 0) {
-                D_00451624 = 0;
+                libcdvd_setupFlag = 0;
                 return 0;
             }
             break;
@@ -3669,19 +3669,19 @@ int sceCdInit(int mode)
     st = *(int *)((unsigned)(buf + 3) | 0x20000000);
     if (st != 0xFF) {
         if (st == 0xFE)
-            D_00451610 = 1;
+            libcdvd_debugLevel = 1;
         else if (versionWord1 / 256 < 2 || versionWord2 / 256 < 2)
             ret = 2;
     }
-    D_00451624 = 0;
+    libcdvd_setupFlag = 0;
     switch (mode) {
     case 5:
-        if (D_00451610 > 0)
+        if (libcdvd_debugLevel > 0)
             scePrintf(D_00497B38);
         libcdvd_shutdown();
-        D_00451628 = -1;
-        D_0045162C = -1;
-        D_00451620 = -1;
+        _sceCd_ncmd_semid = -1;
+        _sceCd_scmd_semid = -1;
+        libcdvd_callbackSema = -1;
         break;
     case 0:
     case 1:
@@ -3710,7 +3710,7 @@ extern void func_00426358(int, int);
 /**
  * Older form of the disc-ready check: asks the disk-ready RPC server (0x8000059A) whether a disc is ready.
  *
- * Prints "OLD DiskReady Call" (debug), takes the S-command semaphore D_0045162C without blocking (6 when held), fails
+ * Prints "OLD DiskReady Call" (debug), takes the S-command semaphore _sceCd_scmd_semid without blocking (6 when held), fails
  * while an S-command runs, binds server 0x8000059A on first use ("Libcdvd bind err CdDiskReady"), sends @p mode (RPC 0)
  * and returns the reply word ("DiskReady ended"). sceCdDiskReady falls back to it when the newer server 0x8000059C does
  * not answer.
@@ -3721,27 +3721,27 @@ extern void func_00426358(int, int);
 int libcdvd_oldDiskReady(int mode) {
     int spinCount;
     int readyState;
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497B48);
     libcdvd_createSemas();
-    if (D_0045162C != PollSema(D_0045162C))
+    if (_sceCd_scmd_semid != PollSema(_sceCd_scmd_semid))
         return 6;
     if (sceCdSyncS(1) != 0) {
-        SignalSema(D_0045162C);
+        SignalSema(_sceCd_scmd_semid);
         return mode != 8 ? 6 : -1;
     }
     func_00426408(0);
-    if (D_00451648 < 0) {
+    if (libcdvd_diskReadyBindState < 0) {
         for (;;) {
             if (sceSifBindRpc(&D_00526710, 0x8000059A, 0) < 0) {
-                if (D_00451610 > 0)
+                if (libcdvd_debugLevel > 0)
                     scePrintf(D_00497B60);
                 for (spinCount = 0x100000; spinCount--; )
                     ;
                 continue;
             }
             if (D_00526710.server != 0) {
-                D_00451648 = 0;
+                libcdvd_diskReadyBindState = 0;
                 break;
             }
             for (spinCount = 0x100000; spinCount--; )
@@ -3750,14 +3750,14 @@ int libcdvd_oldDiskReady(int mode) {
     }
     D_00526750[0] = mode;
     func_00426358((int)D_00526750, 4);
-    if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, _sceCd_scmdrdata, 4, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return mode != 8 ? 6 : -1;
     }
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497B80);
-    readyState = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    readyState = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return readyState;
 }
 #endif
@@ -3777,12 +3777,12 @@ extern void b1_6358(int *, int) __asm__("func_00426358");
 extern int b1_19F8(int) __asm__("libcdvd_oldDiskReady");
 /* The sema id passed to the Sema calls is read volatile throughout libcdvd (see the retail delay slots). */
 static inline int semaId1BF0(void) {
-    return D_00451630;
+    return libcdvd_diskReadySema;
 }
 /**
  * Asks the IOP whether a disc is ready to read (the libcdvd disk-ready call).
  *
- * Prints "NEW DiskReady Call" (debug), takes the third semaphore D_00451630 without blocking and binds server
+ * Prints "NEW DiskReady Call" (debug), takes the third semaphore libcdvd_diskReadySema without blocking and binds server
  * 0x8000059C on first use; when that server has not appeared after 17 tries it releases the semaphore and uses the
  * older server through libcdvd_oldDiskReady. Sends @p mode (RPC 0), returns the reply word from D_00453080 ("DiskReady ended")
  * and releases the semaphore.
@@ -3794,24 +3794,24 @@ int sceCdDiskReady(int mode) {
     int i;
     int spinCount;
     int readyState;
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         b1_log(D_00497B98);
     b1_0C00();
-    if (D_00451630 != b1_3DF0(semaId1BF0()))
+    if (libcdvd_diskReadySema != b1_3DF0(semaId1BF0()))
         return mode != 8 ? 6 : -1;
     b1_6408(0);
     i = 0;
-    if (D_00451648 < 0) {
+    if (libcdvd_diskReadyBindState < 0) {
         for (;;) {
             if (sceSifBindRpc(&D_00526710, 0x8000059C, 0) < 0) {
-                if (D_00451610 > 0)
+                if (libcdvd_debugLevel > 0)
                     b1_log(D_00497B60);
                 for (spinCount = 0x100000; spinCount--; )
                     ;
                 continue;
             }
             if (D_00526710.server != 0) {
-                D_00451648 = 0;
+                libcdvd_diskReadyBindState = 0;
                 break;
             }
             if (i >= 17) {
@@ -3829,7 +3829,7 @@ int sceCdDiskReady(int mode) {
         b1_3DC0(semaId1BF0());
         return mode != 8 ? 6 : -1;
     }
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         b1_log(D_00497B80);
     readyState = *(int *)((unsigned)D_00453080 | 0x20000000);
     b1_3DC0(semaId1BF0());
@@ -3851,11 +3851,11 @@ extern void func_00426358(int, int);
  * Starts an asynchronous CD/DVD sector read into memory (libcdvd N-command 1).
  *
  * Unless reads skip the check (bit 0 of D_00451638) it refuses when the drive reports not ready (sceCdNcmdDiskReady() == 6).
- * Takes the N-command channel (_sceCd_ncmd_prechk(4)), fills the read command D_00451700 (sector, count, buffer, the try
+ * Takes the N-command channel (_sceCd_ncmd_prechk(4)), fills the read command libcdvd_ncmdSendBuffer (sector, count, buffer, the try
  * count, spindle control and data pattern from @p mode, the fixup buffer D_00452700 and the result word D_004527C0),
  * writes the destination back from the cache (sectors of 2048, 2328 or 2340 bytes for data pattern 0, 1 or 2; skipped
  * when bit 1 of D_00451638 is set) and sends RPC 1 without waiting, with libcdvd_onReadDone as the completion handler. Sets
- * the pending code D_00451658 to 1 and the busy flag; the N-command semaphore stays held until the read ends. Prints
+ * the pending code libcdvd_pendingCmd to 1 and the busy flag; the N-command semaphore stays held until the read ends. Prints
  * "call cdread cmd" and "cdread end" in debug.
  *
  * @param lsn  the first logical sector
@@ -3866,7 +3866,7 @@ extern void func_00426358(int, int);
  */
 int sceCdRead(int lsn, int sectors, int buf, unsigned char *mode) {
     int size;
-    sCdReadCmd *readCmd = (sCdReadCmd *)D_00451700;
+    sCdReadCmd *readCmd = (sCdReadCmd *)libcdvd_ncmdSendBuffer;
     if ((D_00451638 & 1) == 0) {
         if (sceCdNcmdDiskReady() == 6)
             return 0;
@@ -3899,17 +3899,17 @@ int sceCdRead(int lsn, int sectors, int buf, unsigned char *mode) {
     func_00426358((int)D_00452700, 144);
     func_00426358((int)readCmd, 0x18);
     func_00426358((int)D_004527C0, 4);
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497BB0);
-    D_00451658 = 1;
-    D_00451634 = 1;
-    if (sceSifCallRpc(&D_004527D0, 1, 1, readCmd, 0x18, 0, 0, libcdvd_onReadDone, D_00452700) < 0) {
-        D_00451658 = 0;
-        D_00451634 = 0;
-        SignalSema(D_00451628);
+    libcdvd_pendingCmd = 1;
+    libcdvd_busyFlag = 1;
+    if (sceSifCallRpc(&_sceCd_cd_ncmd, 1, 1, readCmd, 0x18, 0, 0, libcdvd_onReadDone, D_00452700) < 0) {
+        libcdvd_pendingCmd = 0;
+        libcdvd_busyFlag = 0;
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497BC8);
     return 1;
 }
@@ -3925,7 +3925,7 @@ extern void SignalSema(int);
  * Reads the disc's table of contents (libcdvd N-command 4) into @p dst.
  *
  * Takes the N-command channel (_sceCd_ncmd_prechk(8)), sends the address of the work buffer D_00526780 (written back from
- * the cache first) and waits for the 8-byte reply in D_00451680. The pending code D_00451658 is 3 during the call.
+ * the cache first) and waits for the 8-byte reply in D_00451680. The pending code libcdvd_pendingCmd is 3 during the call.
  * Copies 0x400 bytes (CD) or 2064 bytes (when reply word 1 is non-zero, a DVD) from the buffer's uncached alias to @p
  * dst. The EA disc check CDVD_initFileSystem calls it after checking for a PS2 CD or DVD.
  *
@@ -3934,25 +3934,25 @@ extern void SignalSema(int);
  */
 int sceCdGetToc(char *dst) {
     int tocResult;
-    int *sendBuf = D_00451700;
+    int *sendBuf = libcdvd_ncmdSendBuffer;
     if (_sceCd_ncmd_prechk(8) == 0)
         return 0;
     sendBuf[0] = (int)D_00526780;
     func_00426358((int)D_00526780, 2064);
     func_00426358((int)sendBuf, 12);
-    D_00451658 = 3;
-    if (sceSifCallRpc(&D_004527D0, 4, 0, sendBuf, 12, D_00451680, 8, 0, 0) < 0) {
-        D_00451658 = 0;
-        SignalSema(D_00451628);
+    libcdvd_pendingCmd = 3;
+    if (sceSifCallRpc(&_sceCd_cd_ncmd, 4, 0, sendBuf, 12, D_00451680, 8, 0, 0) < 0) {
+        libcdvd_pendingCmd = 0;
+        SignalSema(_sceCd_ncmd_semid);
         return 0;
     }
-    D_00451658 = 0;
+    libcdvd_pendingCmd = 0;
     tocResult = D_00451680[0];
     if (D_00451680[1] == 0)
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x400);
     else
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 2064);
-    SignalSema(D_00451628);
+    SignalSema(_sceCd_ncmd_semid);
     return tocResult;
 }
 #endif
@@ -3965,7 +3965,7 @@ extern void SignalSema(int);
 /**
  * Asks the drive what kind of disc is loaded (libcdvd S-command, RPC function 3).
  *
- * Takes the S-command channel (_sceCd_scmd_prechk(1)), calls the function with a 4-byte reply in D_00452800 and releases the
+ * Takes the S-command channel (_sceCd_scmd_prechk(1)), calls the function with a 4-byte reply in _sceCd_scmdrdata and releases the
  * semaphore. The EA disc check CDVD_initFileSystem compares the result with 18 and 20 (PS2 CD and PS2 DVD).
  *
  * @return the disc type, or 0 on failure
@@ -3974,12 +3974,12 @@ int sceCdGetDiskType(void) {
     int diskType;
     if (_sceCd_scmd_prechk(1) == 0)
         return 0;
-    if (sceSifCallRpc(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, 3, 0, 0, 0, _sceCd_scmdrdata, 4, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return 0;
     }
-    diskType = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    diskType = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return diskType;
 }
 #endif
@@ -3992,7 +3992,7 @@ extern void SignalSema(int);
 /**
  * Returns the drive's error code for the last command (libcdvd S-command, RPC function 4).
  *
- * Takes the S-command channel (_sceCd_scmd_prechk(3)), calls the function with a 4-byte reply in D_00452800 and releases the
+ * Takes the S-command channel (_sceCd_scmd_prechk(3)), calls the function with a 4-byte reply in _sceCd_scmdrdata and releases the
  * semaphore. The EA CD driver retries a read until it returns 0.
  *
  * @return the error code (0 = no error), or -1 on failure
@@ -4001,12 +4001,12 @@ int sceCdGetError(void) {
     int errorCode;
     if (_sceCd_scmd_prechk(3) == 0)
         return -1;
-    if (sceSifCallRpc(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, 4, 0, 0, 0, _sceCd_scmdrdata, 4, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return -1;
     }
-    errorCode = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    errorCode = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return errorCode;
 }
 #endif
@@ -4019,7 +4019,7 @@ extern void SignalSema(int);
 /**
  * Sends libcdvd S-command 33 and returns its status word (the console power-off request).
  *
- * Takes the S-command channel (_sceCd_scmd_prechk(33)), calls RPC function 33 with an 8-byte reply in D_00452800, stores
+ * Takes the S-command channel (_sceCd_scmd_prechk(33)), calls RPC function 33 with an 8-byte reply in _sceCd_scmdrdata, stores
  * reply word 1 in @p out and releases the semaphore. The power-off thread bxIop_powerOffThread repeats it until it returns
  * non-zero with a status of 0, after shutting dev9 down.
  *
@@ -4030,13 +4030,13 @@ int sceCdPowerOff(int *out) {
     int rpcResult;
     if (_sceCd_scmd_prechk(33) == 0)
         return 0;
-    if (sceSifCallRpc(&D_00453180, 33, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, 33, 0, 0, 0, _sceCd_scmdrdata, 8, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return 0;
     }
-    *out = *(int *)((unsigned)(D_00452800 + 1) | 0x20000000);
-    rpcResult = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    *out = *(int *)((unsigned)(_sceCd_scmdrdata + 1) | 0x20000000);
+    rpcResult = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return rpcResult;
 }
 #endif
@@ -4051,7 +4051,7 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
  * Sets the drive's media mode (CD or DVD) with a libcdvd S-command.
  *
  * Takes the S-command channel (_sceCd_scmd_prechk(34)), sends @p media with the function number and send/reply sizes held in
- * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from D_00452800. The boot code shutdownAndLoadExec and
+ * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from _sceCd_scmdrdata. The boot code shutdownAndLoadExec and
  * bxIop_initIop call it with 2; the EA CD code passes its configured media mode.
  *
  * @param media  the media mode (2 = DVD)
@@ -4059,17 +4059,17 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
  */
 int sceCdMmode(int media) {
     int result;
-    int *sendBuf = D_00452C40;
+    int *sendBuf = libcdvd_scmdSendBuffer;
     if (_sceCd_scmd_prechk(34) == 0)
         return 0;
-    D_00452C40[0] = media;
+    libcdvd_scmdSendBuffer[0] = media;
     func_00426358_p(sendBuf, 4);
-    if (sceSifCallRpc(&D_00453180, D_004531A8, 0, sendBuf, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, D_004531A8, 0, sendBuf, D_004531AC, _sceCd_scmdrdata, D_004531B0, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return 0;
     }
-    result = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    result = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return result;
 }
 #endif
@@ -4087,7 +4087,7 @@ extern void scePrintf();
  * Reads the console's real-time clock (libcdvd S-command, RPC function 1) into an 8-byte record.
  *
  * Takes the S-command channel (_sceCd_scmd_prechk(15)), prints "Libcdvd call Clock read 1" and "... 2" around the call
- * (debug), copies the 8 bytes after the result word of the 16-byte reply D_00452800 to @p clockOut and releases the semaphore.
+ * (debug), copies the 8 bytes after the result word of the 16-byte reply _sceCd_scmdrdata to @p clockOut and releases the semaphore.
  * systemInit and cPS2ConsoleConfig_cPS2ConsoleConfig call it.
  *
  * @param clockOut  receives the 8-byte clock record
@@ -4097,17 +4097,17 @@ int sceCdReadClock(struct P8 *clockOut) {
     int result;
     if (_sceCd_scmd_prechk(15) == 0)
         return 0;
-    if (D_00451610 > 0)
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497BD8);
-    if (sceSifCallRpc(&D_00453180, 1, 0, 0, 0, D_00452800, 16, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, 1, 0, 0, 0, _sceCd_scmdrdata, 16, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return 0;
     }
-    *clockOut = *(struct P8 *)((unsigned)&D_00452800[1] | 0x20000000);
-    if (D_00451610 > 0)
+    *clockOut = *(struct P8 *)((unsigned)&_sceCd_scmdrdata[1] | 0x20000000);
+    if (libcdvd_debugLevel > 0)
         scePrintf(D_00497BF8);
-    result = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+    result = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return result;
 }
 #endif
@@ -4130,19 +4130,19 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
  */
 int sceCdTrayReq(int request, int *out) {
     int result;
-    int *sendBuf = D_00452C40;
+    int *sendBuf = libcdvd_scmdSendBuffer;
     if (_sceCd_scmd_prechk(26) == 0)
         return -1;
-    D_00452C40[0] = request;
+    libcdvd_scmdSendBuffer[0] = request;
     func_00426358_p(sendBuf, 4);
-    if (sceSifCallRpc(&D_00453180, 5, 0, sendBuf, 4, D_00452800, 8, 0, 0) < 0) {
-        SignalSema(D_0045162C);
+    if (sceSifCallRpc(&_sceCd_cd_scmd, 5, 0, sendBuf, 4, _sceCd_scmdrdata, 8, 0, 0) < 0) {
+        SignalSema(_sceCd_scmd_semid);
         return -1;
     }
     if (out)
-        *out = *(int *)((unsigned)&D_00452800[1] | 0x20000000);
-    result = *(int *)((unsigned)D_00452800 | 0x20000000);
-    SignalSema(D_0045162C);
+        *out = *(int *)((unsigned)&_sceCd_scmdrdata[1] | 0x20000000);
+    result = *(int *)((unsigned)_sceCd_scmdrdata | 0x20000000);
+    SignalSema(_sceCd_scmd_semid);
     return result;
 }
 #endif
@@ -4181,7 +4181,7 @@ int sceMpegInit(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", sceMpegCreate);
 #ifdef SKIP_ASM
-extern char D_00497C20[];
+extern char str_The_size_of_work_area_is_too_small[];
 extern int i7B8_memset(int, int, int) __asm__("memset");
 extern void i7B8_34A8(int *, char *) __asm__("libmpeg_reportError");
 extern void i7B8_2D50(int *, int, int) __asm__("libmpeg_initPool");
@@ -4218,7 +4218,7 @@ int sceMpegCreate(int *mpeg, int buf, int size) {
     decState = (int *)(((unsigned)(buf + 3) >> 2) << 2);
     rem = size - ((int)decState - buf);
     if ((unsigned)rem < 4288) {
-        i7B8_34A8(decState, D_00497C20);
+        i7B8_34A8(decState, str_The_size_of_work_area_is_too_small);
         return 0;
     }
     pool = decState + 264 / 4;
@@ -4847,7 +4847,7 @@ int libmpeg_rewindPool(int *heap) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_allocFromPool);
 #ifdef SKIP_ASM
-extern char D_00497C48[];
+extern char str_work_area_size_is_too_small[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Allocates an aligned block from a memory pool.
@@ -4868,7 +4868,7 @@ unsigned libmpeg_allocFromPool(int *decState, unsigned *pool, unsigned size, uns
         pool[2] = blockEnd;
         return blockStart;
     }
-    libmpeg_reportError(decState, (int)D_00497C48);
+    libmpeg_reportError(decState, (int)str_work_area_size_is_too_small);
     return 0;
 }
 #endif
@@ -4890,7 +4890,7 @@ int libmpeg_getPoolFree(int *heap) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_decodeUntilPicture);
 #ifdef SKIP_ASM
-extern char D_00497C68[];
+extern char str_image_buffer_needs_to_be_aligned_to_64by[];
 extern void libmpeg_reportErrorf_k() __asm__("libmpeg_reportErrorf");
 extern int libmpeg_flushHeldPicture();
 extern int libmpeg_decodePicture();
@@ -4914,7 +4914,7 @@ int libmpeg_decodeUntilPicture(int *mpeg) {
     int picType = 1;
     decState[0] = 0;
     if ((decState[54] & 0x3F) != 0) {
-        libmpeg_reportErrorf_k(decState, D_00497C68, decState[54]);
+        libmpeg_reportErrorf_k(decState, str_image_buffer_needs_to_be_aligned_to_64by, decState[54]);
         return -1;
     }
     decState[520] = 0;
@@ -5149,7 +5149,7 @@ void libmpeg_resetToMpeg1(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_outputHeldPicture);
 #ifdef SKIP_ASM
 extern void libmpeg_reportError(int *, int);
-extern char D_00497CC8[];
+extern char str_the_second_field_is_missing[];
 extern void libmpeg_outputFramePicture(int *, int, int);
 extern void libmpeg_outputFieldPair(int *, int, int, int);
 /**
@@ -5164,7 +5164,7 @@ extern void libmpeg_outputFieldPair(int *, int, int, int);
 void libmpeg_outputHeldPicture(int *decState) {
     int n = decState[280 / 4];
     if (decState[288 / 4] != 0) {
-        libmpeg_reportError(decState, (int)D_00497CC8);
+        libmpeg_reportError(decState, (int)str_the_second_field_is_missing);
     } else if (decState[372 / 4] == 3) {
         libmpeg_outputFramePicture(decState, decState[444 / 4], n - 1);
     } else {
@@ -5235,7 +5235,7 @@ void libmpeg_stopIpu(int *mpegSys) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_printError);
 #ifdef SKIP_ASM
-extern char D_00497CE8[];
+extern char str_MPEG_ERROR_pct_s[];
 extern void scePrintf(char *, int);
 /**
  * Prints a decoder error message as "[MPEG ERROR]%s".
@@ -5245,7 +5245,7 @@ extern void scePrintf(char *, int);
  * @param message  the message
  */
 void libmpeg_printError(int message) {
-    scePrintf(D_00497CE8, message);
+    scePrintf(str_MPEG_ERROR_pct_s, message);
 }
 #endif
 
@@ -5509,7 +5509,7 @@ extern char D_00497D10[];
 extern char D_00497D38[];
 extern void libmpeg_setIpuMpeg1(unsigned);
 /**
- * Parses an MPEG-2 sequence extension (extension table D_00497FE0, id 1).
+ * Parses an MPEG-2 sequence extension (extension table libmpeg_extensionHandlerTable, id 1).
  *
  * Marks the stream as MPEG-2 (+0x848 = 1, libmpeg_setIpuMpeg1(0)) and reads profile/level, progressive_sequence (+0x13C),
  * chroma_format (+0x140; anything but 1 reports "_chroma_format needs to be 1: 420"), the size, bit-rate and VBV-size
@@ -5553,7 +5553,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_parseSequenceDisplayExtension);
 #ifdef SKIP_ASM
 extern int libmpeg_readBits(int, int);
 /**
- * Parses an MPEG-2 sequence display extension (extension table D_00497FE0, id 2).
+ * Parses an MPEG-2 sequence display extension (extension table libmpeg_extensionHandlerTable, id 2).
  *
  * Skips video_format; with colour_description set skips the primaries and transfer characteristics and keeps the matrix
  * coefficients (+0x144); keeps the display width (+0x148) and height (+0x14C).
@@ -5576,7 +5576,7 @@ void libmpeg_parseSequenceDisplayExtension(int *mpegSys) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", _sequenceScalableExtension);
 #ifdef SKIP_ASM
-extern char D_00497D58[];
+extern char str_sequenceScalableExtension_is_not_impleme[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Reports that MPEG-2 sequence scalable extensions are not supported.
@@ -5587,60 +5587,60 @@ extern void libmpeg_reportError(int *, int);
  * @param self  the MPEG decoder state
  */
 void _sequenceScalableExtension(int *self) {
-    libmpeg_reportError(self, (int)D_00497D58);
+    libmpeg_reportError(self, (int)str_sequenceScalableExtension_is_not_impleme);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_onUnknownExtension);
 #ifdef SKIP_ASM
-extern char D_00497D88[];
+extern char str_Unknown_Extension[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Reports "Unknown Extension" for an MPEG extension id the decoder does not handle.
  *
- * Entries 0 and 6 (reserved ids) of the extension handler table D_00497FE0; reports through libmpeg_reportError.
+ * Entries 0 and 6 (reserved ids) of the extension handler table libmpeg_extensionHandlerTable; reports through libmpeg_reportError.
  *
  * @param decState  the decoder's internal state
  */
 void libmpeg_onUnknownExtension(int *decState) {
-    libmpeg_reportError(decState, (int)D_00497D88);
+    libmpeg_reportError(decState, (int)str_Unknown_Extension);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", _pictureSpatialScalableExtension);
 #ifdef SKIP_ASM
-extern char D_00497DA0[];
+extern char str_pictureSpatialScalableExtension_is_not_s[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Reports that the MPEG picture spatial scalable extension is not supported.
  *
- * Entry 9 of the extension handler table D_00497FE0 (MPEG-2 extension id 9); reports its "not supported" message
- * D_00497DA0 through libmpeg_reportError.
+ * Entry 9 of the extension handler table libmpeg_extensionHandlerTable (MPEG-2 extension id 9); reports its "not supported" message
+ * str_pictureSpatialScalableExtension_is_not_s through libmpeg_reportError.
  *
  * @param decState  the decoder's internal state
  */
 void _pictureSpatialScalableExtension(int *decState) {
-    libmpeg_reportError(decState, (int)D_00497DA0);
+    libmpeg_reportError(decState, (int)str_pictureSpatialScalableExtension_is_not_s);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", _pictureTemporalScalableExtension);
 #ifdef SKIP_ASM
-extern char D_00497DD8[];
+extern char str_pictureTemporalScalableExtension_is_not[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Reports that the MPEG picture temporal scalable extension is not supported.
  *
- * Entry 10 of the extension handler table D_00497FE0 (MPEG-2 extension id 10); reports its "not supported" message
- * D_00497DD8 through libmpeg_reportError.
+ * Entry 10 of the extension handler table libmpeg_extensionHandlerTable (MPEG-2 extension id 10); reports its "not supported" message
+ * str_pictureTemporalScalableExtension_is_not through libmpeg_reportError.
  *
  * @param decState  the decoder's internal state
  */
 void _pictureTemporalScalableExtension(int *decState) {
-    libmpeg_reportError(decState, (int)D_00497DD8);
+    libmpeg_reportError(decState, (int)str_pictureTemporalScalableExtension_is_not);
 }
 #endif
 
@@ -7255,7 +7255,7 @@ void libmpeg_calcDualPrimeVectors(int *mpegSys, int *outVec, int *in, int a, int
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_decodeAddressIncrement);
 #ifdef SKIP_ASM
-extern char D_00497ED0[];
+extern char str_Invalid_macroblock_address_increment_cod[];
 extern int lx5_6F78(int *, int) __asm__("libmpeg_decodeVlc");
 extern int lx5_70F0(int *, int) __asm__("libmpeg_peekBits");
 extern void lx5_71F8(int *, int) __asm__("libmpeg_skipBits");
@@ -7292,7 +7292,7 @@ int libmpeg_decodeAddressIncrement(int *decState) {
                 again = 1;
                 break;
             }
-            lx5_3470(decState, D_00497ED0, vlcCode);
+            lx5_3470(decState, str_Invalid_macroblock_address_increment_cod, vlcCode);
             decState[284 / 4] = 1;
             return 1;
         default:
@@ -7308,7 +7308,7 @@ int libmpeg_decodeAddressIncrement(int *decState) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_decodeSlices);
 #ifdef SKIP_ASM
-extern char D_00497F08[];
+extern char str_Skip_to_the_next_picture[];
 extern int libmpeg_decodeSlice(int *, int);
 extern void libmpeg_waitIpuIdle(int);
 extern int libmpeg_waitMacroblock(int *);
@@ -7350,7 +7350,7 @@ int libmpeg_decodeSlices(int *decState) {
     if (sliceResult == 0)
         libmpeg_finishMacroblock(decState, decState[2064 / 4] == 0);
     if ((unsigned)(sliceResult - 1) < 2)
-        libmpeg_reportError(decState, (int)D_00497F08);
+        libmpeg_reportError(decState, (int)str_Skip_to_the_next_picture);
     return sliceResult == 0;
 }
 #endif
@@ -7417,7 +7417,7 @@ int _sliceA0(int *self, int mbCount, int *mbAddress, int *mbIncrement, int *pred
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_decodeSlice);
 #ifdef SKIP_ASM
-extern char D_00497F70[];
+extern char str_Too_many_macroblocks_in_picture[];
 extern int _sliceA0(int *, int, int *, int *, int *);
 extern int libmpeg_waitMacroblock(int *);
 extern int libmpeg_peekBits(int, int);
@@ -7483,7 +7483,7 @@ int libmpeg_decodeSlice(int *decState, int n) {
             }
         }
         if (mbAddress >= n) {
-            libmpeg_reportError(decState, (int)D_00497F70);
+            libmpeg_reportError(decState, (int)str_Too_many_macroblocks_in_picture);
             return 2;
         }
         if (mbIncrement == 1) {
@@ -7513,7 +7513,7 @@ int libmpeg_decodeSlice(int *decState, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_setupSkippedMacroblock);
 #ifdef SKIP_ASM
-extern char D_00497F90[];
+extern char str_skiped_macroblock_in_I_picure_is_not_all[];
 extern void libmpeg_reportError(int *, int);
 /**
  * Sets up a skipped macroblock (MSSG mpeg2decode's skipped_macroblock).
@@ -7550,7 +7550,7 @@ int libmpeg_setupSkippedMacroblock(int *decState, int *pmv, int *motionType, int
         fieldSelect[0] = bottomField;
     }
     if (decState[336 / 4] == 1) {
-        libmpeg_reportError(decState, (int)D_00497F90);
+        libmpeg_reportError(decState, (int)str_skiped_macroblock_in_I_picure_is_not_all);
         ok = 0;
     }
     *mbType &= ~1;
@@ -7564,7 +7564,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_decodeMacroblock);
 /* MSSG mpeg2decode getpic.c decode_macroblock() with macroblock_modes() folded in (Sony libmpeg): p is the decoder
    state (0x11C Fault_Flag, 0x150 picture_coding_type, 0x174 picture_structure, 0x17C frame_pred_frame_dct,
    0x180 concealment_motion_vectors, 0x848 MPEG2_Flag); the block is decoded by an IPU BDEC command. */
-extern char D_00497FC0[];
+extern char str_Invalid_macroblock_type_code_0[];
 extern void libmpeg_reportError(int *, int);
 extern int m65D0_6F78(int *, int) __asm__("libmpeg_decodeVlc");
 extern int m65D0_72E8(int *, int) __asm__("libmpeg_readBits");
@@ -7599,7 +7599,7 @@ int libmpeg_decodeMacroblock(int *decState, int *mbtype, int *motion_type, int *
     macroblock_type = m65D0_6F78(decState, 1);
     *mbtype = macroblock_type;
     if (macroblock_type == 0) {
-        libmpeg_reportError(decState, (int)D_00497FC0);
+        libmpeg_reportError(decState, (int)str_Invalid_macroblock_type_code_0);
         decState[284 / 4] = 1;
         return 0;
     }
@@ -7813,7 +7813,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_issueIpuCommand);
 /**
  * Issues an IPU command and records its table entry.
  *
- * Writes the command to IPU_CMD and stores D_004532C0[command >> 28] in +0x818, which the bit readers (libmpeg_peekBits
+ * Writes the command to IPU_CMD and stores libmpeg_ipuCmdTable[command >> 28] in +0x818, which the bit readers (libmpeg_peekBits
  * and its neighbours) check to know whether IPU_TOP still holds their bits.
  *
  * @param p  the decoder's internal state
@@ -7822,7 +7822,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_issueIpuCommand);
 void libmpeg_issueIpuCommand(int *p, unsigned a) {
     volatile int *r = (volatile int *)0x10002000;
     *r = a;
-    p[518] = D_004532C0[a >> 28];
+    p[518] = libmpeg_ipuCmdTable[a >> 28];
 }
 #endif
 
@@ -7912,7 +7912,7 @@ int libmpeg_decodeVlc(int decState, int cmd) {
     }
     w = (cmd << 26) | 0x30000000;
     *(volatile int *)0x10002000 = w;
-    *(int *)(decState + 0x818) = D_004532C0[w >> 28];
+    *(int *)(decState + 0x818) = libmpeg_ipuCmdTable[w >> 28];
     vdecResult = *(volatile long *)0x10002000;
     if (vdecResult < 0) {
         do {
@@ -7965,7 +7965,7 @@ int libmpeg_peekBits(int decState, int n) {
             } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
         }
         *(volatile int *)0x10002000 = 0x40000000;
-        *(int *)(decState + 0x818) = D_004532C0[4];
+        *(int *)(decState + 0x818) = libmpeg_ipuCmdTable[4];
         x = (int)libmpeg_waitIpuResult_k(decState);
         *(int *)(decState + 0x838) = x;
         *(int *)(decState + 0x83C) = 32;
@@ -8003,7 +8003,7 @@ void libmpeg_skipBits(int decState, int bitCount) {
     }
     w = bitCount | 0x40000000;
     *(volatile int *)0x10002000 = w;
-    tableEntry = &D_004532C0[(unsigned)w >> 28];
+    tableEntry = &libmpeg_ipuCmdTable[(unsigned)w >> 28];
     *(int *)(decState + 0x818) = *tableEntry;
     x = (int)libmpeg_waitIpuResult_k(decState, tableEntry);
     *(int *)(decState + 0x838) = x;
@@ -8043,7 +8043,7 @@ int libmpeg_readBits(int decState, int n) {
     }
     if (*(int *)(decState + 0x818) || *(int *)(decState + 0x83C) < n) {
         *(volatile int *)0x10002000 = 0x40000000;
-        *(int *)(decState + 0x818) = D_004532C0[4];
+        *(int *)(decState + 0x818) = libmpeg_ipuCmdTable[4];
         x = (int)libmpeg_waitIpuResult_k(decState);
         *(int *)(decState + 0x838) = x;
     }
@@ -8051,7 +8051,7 @@ int libmpeg_readBits(int decState, int n) {
     *(int *)(decState + 0x83C) = 32;
     w = n | 0x40000000;
     *(volatile int *)0x10002000 = w;
-    tableEntry = &D_004532C0[(unsigned)w >> 28];
+    tableEntry = &libmpeg_ipuCmdTable[(unsigned)w >> 28];
     *(int *)(decState + 0x818) = *tableEntry;
     x = (int)libmpeg_waitIpuResult_k(decState);
     *(int *)(decState + 0x838) = x;
@@ -8198,7 +8198,7 @@ void libmpeg_parsePictureHeader(int *mpegSys) {
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_readExtensions);
 #ifdef SKIP_ASM
 struct PT44 { int v[11]; };
-extern char D_00497FE0[];
+extern char libmpeg_extensionHandlerTable[];
 extern int libmpeg_peekBits(int, int);
 extern void libmpeg_skipBits(int, int);
 extern int libmpeg_readBits();
@@ -8206,12 +8206,12 @@ extern int libmpeg_readBits();
  * Reads the extension and user-data blocks that follow a header (MSSG extension_and_user_data).
  *
  * After moving to the next start code, loops while it is 0x1B5 (extension) or 0x1B2 (user data): an extension's 4-bit
- * id selects its handler from a copy of the table D_00497FE0 (ids above 10 use entry 0); user data is skipped.
+ * id selects its handler from a copy of the table libmpeg_extensionHandlerTable (ids above 10 use entry 0); user data is skipped.
  *
  * @param decState  the decoder's internal state
  */
 void libmpeg_readExtensions(int decState) {
-    struct PT44 handlers = *(struct PT44 *)D_00497FE0;
+    struct PT44 handlers = *(struct PT44 *)libmpeg_extensionHandlerTable;
     unsigned i;
     int startCode;
     libmpeg_nextStartCode(decState);
@@ -8235,7 +8235,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_parsePictureCodingExtension);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("libmpeg_readBits");
 /**
- * Parses an MPEG-2 picture coding extension (extension table D_00497FE0, id 8).
+ * Parses an MPEG-2 picture coding extension (extension table libmpeg_extensionHandlerTable, id 8).
  *
  * Reads the four f_codes (+0x164..+0x170), intra_dc_precision into IPU_CTRL bits 16-17, picture_structure (+0x174; the
  * first one is also kept in +0xD4), top_field_first (+0x178), frame_pred_frame_dct (+0x17C), concealment_motion_vectors
@@ -8372,7 +8372,7 @@ extern void libmpeg_reportError(int *, int);
 extern char D_00498010[];
 extern char D_00498038[];
 /**
- * Parses an MPEG-2 quant matrix extension (extension table D_00497FE0, id 3).
+ * Parses an MPEG-2 quant matrix extension (extension table libmpeg_extensionHandlerTable, id 3).
  *
  * For each of the intra and non-intra load flags (stored in +0x840 / +0x844) has the IPU read the matrix from the
  * bitstream (SETIQ 0x50000000 / 0x58000000); a chroma matrix flag reports "load_chroma_intra_quantizer_matrix == 1" or
@@ -8404,7 +8404,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_parsePictureDisplayExtension);
 struct S_7C38 { char pad[0x13C]; int f13C; char pad2[0x34]; int f174; int f178; char pad3[8]; int f184; int pad188; int f18C[3]; int f198[3]; };
 extern int sc_72E8(struct S_7C38 *, int) __asm__("libmpeg_readBits");
 /**
- * Parses an MPEG-2 picture display extension (extension table D_00497FE0, id 7).
+ * Parses an MPEG-2 picture display extension (extension table libmpeg_extensionHandlerTable, id 7).
  *
  * Reads one to three frame centre offsets (horizontal into +0x18C[i], vertical into +0x198[i]); the count follows
  * progressive_sequence, repeat_first_field, top_field_first and the picture structure, as in MSSG mpeg2decode.
@@ -8435,7 +8435,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_skipCopyrightExtension);
 #ifdef SKIP_ASM
 extern int libmpeg_readBits(int, int);
 /**
- * Skips an MPEG-2 copyright extension (extension table D_00497FE0, id 4): all its fields are read and dropped.
+ * Skips an MPEG-2 copyright extension (extension table libmpeg_extensionHandlerTable, id 4): all its fields are read and dropped.
  *
  * @param mpegSys  the decoder's internal state
  */
@@ -8671,7 +8671,7 @@ INCLUDE_ASM("seg/seg_2FE810", libmpeg_checkOutputSize);
 #ifdef SKIP_ASM
 extern int sprintf(char *, const char *, ...);
 extern void libmpeg_reportError(int *, int);
-extern char D_004980A8[];
+extern char str_Too_small_buffer_size_for_pct_dxpct_d_pi[];
 /**
  * Checks that the caller's output buffer is big enough for the decoded picture.
  *
@@ -8691,7 +8691,7 @@ int libmpeg_checkOutputSize(int *decState, int *picSize) {
     else
         fits = decState[228 / 4] >= picSize[3] * picSize[4];
     if (fits == 0) {
-        sprintf(buf, D_004980A8, picSize[1], picSize[2]);
+        sprintf(buf, str_Too_small_buffer_size_for_pct_dxpct_d_pi, picSize[1], picSize[2]);
         libmpeg_reportError(decState, (int)buf);
     }
     return fits;
@@ -9126,7 +9126,7 @@ int libmpeg_onCscChunkDone(int channel, struct S408CA8 *xferState) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", libmpeg_convertLargePicture);
 #ifdef SKIP_ASM
-extern char D_004980D8[];
+extern char str_CSC_handler_error[];
 extern int q8DF0_AddH(int, void *, int, void *) __asm__("AddDmacHandler2");
 extern int q8DF0_RemH(int, int) __asm__("RemoveDmacHandler");
 extern void q8DF0_En(int) __asm__("EnableDmac");
@@ -9180,7 +9180,7 @@ void q8DF0(int *decState, int addr, int size) {
     while (xferState.cnt < xferState.n)
         ;
     if (xferState.stop)
-        q8DF0_34A8(decState, (int)D_004980D8);
+        q8DF0_34A8(decState, (int)str_CSC_handler_error);
     while (*(volatile int *)0x10002010 < 0)
         ;
     q8DF0_Dis(3);
@@ -9540,10 +9540,10 @@ extern void Q_6408(int) __asm__("func_00426408");
 /**
  * Initialises the memory-card RPC client: creates its semaphores, binds the server and checks versions.
  *
- * On the first call creates the lock semaphore D_004533C4 (count 1) and the sleep semaphore D_004533C8 (count 0). Waits
+ * On the first call creates the lock semaphore libmc_lockSema (count 1) and the sleep semaphore libmc_sleepSema (count 0). Waits
  * for any pending call (sceMcSync in mode 0), takes the lock and calls func_00426408(0), then binds SIF RPC server
- * 0x80000400 into D_005271C0, retrying with a 0x100000-step busy wait until the server is set; a bind error prints
- * "bind error libmc" and hangs forever. It runs call 0xFE synchronously (12 result bytes into D_00528780) and releases
+ * 0x80000400 into libmc_client, retrying with a 0x100000-step busy wait until the server is set; a bind error prints
+ * "bind error libmc" and hangs forever. It runs call 0xFE synchronously (12 result bytes into libmc_rpcResult) and releases
  * the lock.
  *
  * A failed call clears the server and returns its error - 100. Result word 1 below 522 prints "libmc: too old release
@@ -9556,49 +9556,49 @@ int sceMcInit(void) {
     int semaParam[6];
     int rpcResult;
     int i;
-    if (D_004533C4 < 0) {
+    if (libmc_lockSema < 0) {
         semaParam[5] = 0;
         semaParam[2] = 1;
         semaParam[1] = 1;
-        D_004533C4 = Q_sema(semaParam);
+        libmc_lockSema = Q_sema(semaParam);
         semaParam[1] = 1;
         semaParam[2] = 0;
         semaParam[5] = 0;
-        D_004533C8 = Q_sema(semaParam);
+        libmc_sleepSema = Q_sema(semaParam);
     }
     Q_A360(0, 0, 0);
-    WaitSema(D_004533C4);
+    WaitSema(libmc_lockSema);
     Q_6408(0);
     for (;;) {
-        if (sceSifBindRpc(&D_005271C0, 0x80000400, 0) < 0) {
+        if (sceSifBindRpc(&libmc_client, 0x80000400, 0) < 0) {
             Q_log(D_004980F0);
             for (;;)
                 ;
         }
-        if (D_005271C0.server != 0)
+        if (libmc_client.server != 0)
             break;
         i = 0x100000;
         do {
             i--;
         } while (i != 0);
     }
-    rpcResult = sceSifCallRpc(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
-    Q_sig(D_004533C4);
+    rpcResult = sceSifCallRpc(&libmc_client, 0xFE, 0, &libmc_cmd, 48, libmc_rpcResult, 12, 0, 0);
+    Q_sig(libmc_lockSema);
     if (rpcResult < 0) {
-        D_005271C0.server = 0;
+        libmc_client.server = 0;
         return rpcResult - 100;
     }
-    if (D_00528780[1] < 522) {
+    if (libmc_rpcResult[1] < 522) {
         Q_log(D_00498108);
-        D_005271C0.server = 0;
+        libmc_client.server = 0;
         return -120;
     }
-    if (D_00528780[2] < 526) {
+    if (libmc_rpcResult[2] < 526) {
         Q_log(D_00498130);
-        D_005271C0.server = 0;
+        libmc_client.server = 0;
         return -121;
     }
-    return D_00528780[0];
+    return libmc_rpcResult[0];
 }
 #endif
 
@@ -9609,16 +9609,16 @@ extern int DeleteSema(int);
 /**
  * Deletes the memory-card client's semaphores.
  *
- * When the lock semaphore D_004533C4 exists it deletes it, sets it to -1 and deletes the sleep semaphore D_004533C8
- * (whose variable is not reset). The server binding in D_005271C0 is left as it is.
+ * When the lock semaphore libmc_lockSema exists it deletes it, sets it to -1 and deletes the sleep semaphore libmc_sleepSema
+ * (whose variable is not reset). The server binding in libmc_client is left as it is.
  *
  * @return 1
  */
 int sceMcEnd(void) {
-    if (D_004533C4 >= 0) {
-        DeleteSema(D_004533C4);
-        D_004533C4 = -1;
-        DeleteSema(D_004533C8);
+    if (libmc_lockSema >= 0) {
+        DeleteSema(libmc_lockSema);
+        libmc_lockSema = -1;
+        DeleteSema(libmc_sleepSema);
     }
     return 1;
 }
@@ -9630,18 +9630,18 @@ INCLUDE_ASM("seg/seg_2FE810", libmc_getClientState);
 /**
  * Returns the memory-card client block and the addresses of its result and pending-call words.
  *
- * Stores the address of the RPC result buffer D_00528780 in *@p recvBufOut and of the pending-call code D_004533C0 in *@p pendingCmdOut, and
- * copies the lock semaphore D_004533C4 into D_00528780[15]. No caller in the source.
+ * Stores the address of the RPC result buffer libmc_rpcResult in *@p recvBufOut and of the pending-call code libmc_pendingCall in *@p pendingCmdOut, and
+ * copies the lock semaphore libmc_lockSema into libmc_rpcResult[15]. No caller in the source.
  *
  * @param recvBufOut  receives the result buffer's address
  * @param pendingCmdOut  receives the pending-call word's address
- * @return &D_005271C0, the client block
+ * @return &libmc_client, the client block
  */
 sSifClient *libmc_getClientState(int *recvBufOut, int *pendingCmdOut) {
-    *recvBufOut = (int)D_00528780;
-    *pendingCmdOut = (int)&D_004533C0;
-    D_00528780[15] = D_004533C4;
-    return &D_005271C0;
+    *recvBufOut = (int)libmc_rpcResult;
+    *pendingCmdOut = (int)&libmc_pendingCall;
+    libmc_rpcResult[15] = libmc_lockSema;
+    return &libmc_client;
 }
 #endif
 
@@ -9653,9 +9653,9 @@ extern void SignalSema(int);
 /**
  * Starts memory-card call 20 with one argument (asynchronous).
  *
- * Puts @p callArg into the origin field of the command block D_00527240. Fails with -100 when the library is not bound
- * (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success
- * it records 20 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when
+ * Puts @p callArg into the origin field of the command block libmc_cmd. Fails with -100 when the library is not bound
+ * (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On success
+ * it records 20 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when
  * sceSifCallRpc fails it releases the lock.
  *
  * @param callArg  the call's argument
@@ -9663,16 +9663,16 @@ extern void SignalSema(int);
  */
 int sceMcChangeThreadPriority(int callArg) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.origin = callArg;
-    rpcResult = sceSifCallRpc(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.origin = callArg;
+    rpcResult = sceSifCallRpc(&libmc_client, 20, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 20;
+        libmc_pendingCall = 20;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -9685,27 +9685,27 @@ extern void SignalSema(int);
 /**
  * Runs memory-card call 21 for a port synchronously and returns the server's result word.
  *
- * Puts @p cardPort into the port field of D_00527240 and waits for the call (mode 0). Fails with -100 when the library is not
- * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema).
+ * Puts @p cardPort into the port field of libmc_cmd and waits for the call (mode 0). Fails with -100 when the library is not
+ * bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema (PollSema).
  * Releases the lock afterwards in both cases.
  *
  * @param cardPort  the memory-card port
- * @return D_00528780[0], or -100 / -200 / sceSifCallRpc's error
+ * @return libmc_rpcResult[0], or -100 / -200 / sceSifCallRpc's error
  */
 int sceMcGetSlotMax(int cardPort) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.port = cardPort;
-    rpcResult = sceSifCallRpc(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.port = cardPort;
+    rpcResult = sceSifCallRpc(&libmc_client, 21, 0, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult != 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return rpcResult;
     }
-    SignalSema(D_004533C4);
-    return D_00528780[0];
+    SignalSema(libmc_lockSema);
+    return libmc_rpcResult[0];
 }
 #endif
 
@@ -9718,10 +9718,10 @@ extern char *strncpy(char *, const char *, int);
 /**
  * Starts opening a file on a memory card (call 2, asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
- * characters, always terminated). Fills port, slot and mode of the name block D_00527270 and sends it (1044 bytes).
- * Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the
- * lock semaphore D_004533C4 (PollSema). On success it records 2 as the pending call (D_004533C0) and keeps the lock
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
+ * characters, always terminated). Fills port, slot and mode of the name block libmc_fileCmd and sends it (1044 bytes).
+ * Fails with -100 when the library is not bound (libmc_client.server is 0) and -200 when another call still holds the
+ * lock semaphore libmc_lockSema (PollSema). On success it records 2 as the pending call (libmc_pendingCall) and keeps the lock
  * until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. The descriptor arrives as
  * sceMcSync's result.
  *
@@ -9736,24 +9736,24 @@ extern char *strncpy(char *, const char *, int);
 int sceMcOpen(int cardPort, int cardSlot, int s_, int openMode) {
     char *fileName = (char *)s_;
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (fileName == 0 || fileName[0] == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    strncpy(D_00527270.name, fileName, 0x3FF);
-    D_00527270.port = cardPort;
-    D_00527270.mode = openMode;
-    D_00527270.slot = cardSlot;
-    D_00527270.name[0x3FF] = 0;
-    rpcResult = sceSifCallRpc(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    strncpy(libmc_fileCmd.name, fileName, 0x3FF);
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.mode = openMode;
+    libmc_fileCmd.slot = cardSlot;
+    libmc_fileCmd.name[0x3FF] = 0;
+    rpcResult = sceSifCallRpc(&libmc_client, 2, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 2;
+        libmc_pendingCall = 2;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -9765,7 +9765,7 @@ extern int sceMcOpen(int, int, int, int);
 /**
  * Starts creating a directory on a memory card.
  *
- * Calls sceMcOpen with mode 0x40 and, when that started, changes the pending-call code D_004533C0 from 2 to 11 so
+ * Calls sceMcOpen with mode 0x40 and, when that started, changes the pending-call code libmc_pendingCall from 2 to 11 so
  * sceMcSync reports it as a directory creation. cPS2MemCard calls it to make the save directory.
  *
  * @param cardPort  the memory-card port
@@ -9776,7 +9776,7 @@ extern int sceMcOpen(int, int, int, int);
 int sceMcMkdir(int cardPort, int cardSlot, int dirPath) {
     int rpcResult = sceMcOpen(cardPort, cardSlot, dirPath, 0x40);
     if (rpcResult == 0) {
-        D_004533C0 = 11;
+        libmc_pendingCall = 11;
     }
     return rpcResult;
 }
@@ -9790,9 +9790,9 @@ extern void SignalSema(int);
 /**
  * Starts closing a memory-card file (call 3, asynchronous).
  *
- * Puts @p fileDesc into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
- * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 3 as the pending
- * call (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
+ * Puts @p fileDesc into the fd field of libmc_cmd. Fails with -100 when the library is not bound (libmc_client.server is 0) and
+ * -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On success it records 3 as the pending
+ * call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
  * @param fileDesc  the file descriptor
@@ -9800,16 +9800,16 @@ extern void SignalSema(int);
  */
 int sceMcClose(int fileDesc) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.fd = fileDesc;
-    rpcResult = sceSifCallRpc(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.fd = fileDesc;
+    rpcResult = sceSifCallRpc(&libmc_client, 3, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 3;
+        libmc_pendingCall = 3;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -9822,9 +9822,9 @@ extern void SignalSema(int);
 /**
  * Starts moving a memory-card file's position (call 4, asynchronous).
  *
- * Fills fd, offset and origin of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
- * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 4 as the pending
- * call (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
+ * Fills fd, offset and origin of libmc_cmd. Fails with -100 when the library is not bound (libmc_client.server is 0) and
+ * -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On success it records 4 as the pending
+ * call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
  * @param fileDesc  the file descriptor
@@ -9834,18 +9834,18 @@ extern void SignalSema(int);
  */
 int sceMcSeek(int fileDesc, int seekOffset, int seekOrigin) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.fd = fileDesc;
-    D_00527240.offset = seekOffset;
-    D_00527240.origin = seekOrigin;
-    rpcResult = sceSifCallRpc(&D_005271C0, 4, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.fd = fileDesc;
+    libmc_cmd.offset = seekOffset;
+    libmc_cmd.origin = seekOrigin;
+    rpcResult = sceSifCallRpc(&libmc_client, 4, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 4;
+        libmc_pendingCall = 4;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -9889,10 +9889,10 @@ extern void func_00426358(int, int);
 /**
  * Starts reading from a memory-card file into a buffer (call 5, asynchronous).
  *
- * Fills fd, buffer, size and param (D_005276C0) of D_00527240 and writes the data cache back over the buffer and the
+ * Fills fd, buffer, size and param (D_005276C0) of libmc_cmd and writes the data cache back over the buffer and the
  * 0xC0-byte block (func_00426358). libmc_onReadDone runs when the call ends and copies the bytes the server returns
- * separately. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still
- * holds the lock semaphore D_004533C4 (PollSema). On success it records 5 as the pending call (D_004533C0) and keeps
+ * separately. Fails with -100 when the library is not bound (libmc_client.server is 0) and -200 when another call still
+ * holds the lock semaphore libmc_lockSema (PollSema). On success it records 5 as the pending call (libmc_pendingCall) and keeps
  * the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. The byte count
  * arrives as sceMcSync's result.
  *
@@ -9903,21 +9903,21 @@ extern void func_00426358(int, int);
  */
 int sceMcRead(int fileDesc, int readBuf, int readSize) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.fd = fileDesc;
-    D_00527240.param = (int)D_005276C0;
-    D_00527240.buffer = readBuf;
-    D_00527240.size = readSize;
+    libmc_cmd.fd = fileDesc;
+    libmc_cmd.param = (int)D_005276C0;
+    libmc_cmd.buffer = readBuf;
+    libmc_cmd.size = readSize;
     func_00426358(readBuf, readSize);
     func_00426358((int)D_005276C0, 0xC0);
-    rpcResult = sceSifCallRpc(&D_005271C0, 5, 1, &D_00527240, 48, D_00528780, 4, libmc_onReadDone, D_005276C0);
+    rpcResult = sceSifCallRpc(&libmc_client, 5, 1, &libmc_cmd, 48, libmc_rpcResult, 4, libmc_onReadDone, D_005276C0);
     if (rpcResult == 0)
-        D_004533C0 = 5;
+        libmc_pendingCall = 5;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -9933,9 +9933,9 @@ extern void FlushCache(int);
  *
  * Up to 16 bytes travel entirely inside the command block (origin = @p n, no DMA). Longer data sends its first bytes up
  * to the next 16-byte boundary in the command block (origin) and the rest from there by DMA (buffer, size). Copies
- * those head bytes into D_00527240.data and flushes the cache (FlushCache(0)). Fails with -100 when the library is not
- * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On
- * success it records 6 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the call finish;
+ * those head bytes into libmc_cmd.data and flushes the cache (FlushCache(0)). Fails with -100 when the library is not
+ * bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On
+ * success it records 6 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish;
  * when sceSifCallRpc fails it releases the lock. The byte count arrives as sceMcSync's result.
  *
  * @param fileDesc  the file descriptor
@@ -9946,29 +9946,29 @@ extern void FlushCache(int);
 int sceMcWrite(int fileDesc, unsigned char *writeData, int n) {
     int rpcResult;
     unsigned i;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.fd = fileDesc;
+    libmc_cmd.fd = fileDesc;
     if (n < 17) {
-        D_00527240.origin = n;
-        D_00527240.buffer = D_00527240.size = 0;
+        libmc_cmd.origin = n;
+        libmc_cmd.buffer = libmc_cmd.size = 0;
     } else {
         int headBase = (int)writeData - 16;
         int headBytes = (((unsigned)writeData - 1) & 0xFFFFFFF0u) - headBase;
-        D_00527240.size = n - headBytes;
-        D_00527240.origin = headBytes;
-        D_00527240.buffer = (int)writeData + headBytes;
+        libmc_cmd.size = n - headBytes;
+        libmc_cmd.origin = headBytes;
+        libmc_cmd.buffer = (int)writeData + headBytes;
     }
-    for (i = 0; i < D_00527240.origin; i++)
-        D_00527240.data[i] = writeData[i];
+    for (i = 0; i < libmc_cmd.origin; i++)
+        libmc_cmd.data[i] = writeData[i];
     FlushCache(0);
-    rpcResult = sceSifCallRpc(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    rpcResult = sceSifCallRpc(&libmc_client, 6, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 6;
+        libmc_pendingCall = 6;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10000,14 +10000,14 @@ extern void WaitSema(int);
 /**
  * Sleeps for a number of horizontal-blank ticks.
  *
- * Sets an alarm (SetAlarm) that runs libmc_onSleepAlarm with the sleep semaphore D_004533C8, then waits on that semaphore.
+ * Sets an alarm (SetAlarm) that runs libmc_onSleepAlarm with the sleep semaphore libmc_sleepSema, then waits on that semaphore.
  * sceMcSync sleeps 60 ticks between polls.
  *
  * @param alarmTicks  the number of ticks
  */
 void libmc_sleepTicks(unsigned short alarmTicks) {
-    SetAlarm(alarmTicks, libmc_onSleepAlarm, D_004533C8);
-    WaitSema(D_004533C8);
+    SetAlarm(alarmTicks, libmc_onSleepAlarm, libmc_sleepSema);
+    WaitSema(libmc_sleepSema);
 }
 #endif
 
@@ -10019,10 +10019,10 @@ extern void sleep_A328(int) __asm__("libmc_sleepTicks");
 /**
  * Waits for or polls the pending memory-card call and hands back its code and result.
  *
- * Returns -1 when no call is pending (D_004533C0 is 0). Otherwise checks the RPC (sceSifCheckStatRpc); in mode 0 it
+ * Returns -1 when no call is pending (libmc_pendingCall is 0). Otherwise checks the RPC (sceSifCheckStatRpc); in mode 0 it
  * polls until the call is done, sleeping 60 ticks between polls (libmc_sleepTicks). Stores the pending call's code in *@p
- * p when @p cmdOut is set. When the call is done it clears D_004533C0, stores the result word D_00528780[0] in *@p resultOut (when
- * set) and releases the lock D_004533C4. Any mode other than 0 only polls.
+ * p when @p cmdOut is set. When the call is done it clears libmc_pendingCall, stores the result word libmc_rpcResult[0] in *@p resultOut (when
+ * set) and releases the lock libmc_lockSema. Any mode other than 0 only polls.
  *
  * cPS2MemCard_Update and cPS2MemCard_CleanUp poll it; sceMcInit waits with it before re-initialising.
  *
@@ -10033,22 +10033,22 @@ extern void sleep_A328(int) __asm__("libmc_sleepTicks");
  */
 int sceMcSync(int syncMode, int *cmdOut, int *resultOut) {
     int callDone;
-    if (D_004533C0 == 0)
+    if (libmc_pendingCall == 0)
         return -1;
-    callDone = sceSifCheckStatRpc(&D_005271C0);
+    callDone = sceSifCheckStatRpc(&libmc_client);
     if (syncMode == 0 && callDone != 0) {
-        while (sceSifCheckStatRpc(&D_005271C0) != 0)
+        while (sceSifCheckStatRpc(&libmc_client) != 0)
             sleep_A328(60);
         callDone = 0;
     }
     callDone = callDone == 0;
     if (cmdOut)
-        *cmdOut = D_004533C0;
+        *cmdOut = libmc_pendingCall;
     if (callDone) {
-        D_004533C0 = 0;
+        libmc_pendingCall = 0;
         if (resultOut)
-            *resultOut = D_00528780[0];
-        SignalSema(D_004533C4);
+            *resultOut = libmc_rpcResult[0];
+        SignalSema(libmc_lockSema);
     }
     return callDone;
 }
@@ -10085,14 +10085,14 @@ extern void func_00426358(int, int);
 /**
  * Starts reading a memory card's type, free space and format state (call 1, asynchronous).
  *
- * Fills port and slot of D_00527240 and sets its origin, offset and size fields to 1 for each output pointer that is
+ * Fills port and slot of libmc_cmd and sets its origin, offset and size fields to 1 for each output pointer that is
  * set, so the server knows which values are wanted. Saves the pointers in D_005271E8 / D_005271EC / D_005271F0 for
  * libmc_onGetInfoDone, which the call runs at its end, and writes the 0xC0-byte block D_005276C0 back from the cache. Fails
- * with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock
- * semaphore D_004533C4 (PollSema). On success it records 1 as the pending call (D_004533C0) and keeps the lock until
+ * with -100 when the library is not bound (libmc_client.server is 0) and -200 when another call still holds the lock
+ * semaphore libmc_lockSema (PollSema). On success it records 1 as the pending call (libmc_pendingCall) and keeps the lock until
  * sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock.
  *
- * cPS2MemCard's cPS2MemCard_startGetInfo passes D_004A3938, D_004A393C and D_004A3944.
+ * cPS2MemCard's cPS2MemCard_startGetInfo passes cPS2MemCard_mcInfoType, cPS2MemCard_mcInfoFree and cPS2MemCard_mcInfoFormat.
  *
  * @param cardPort  the memory-card port
  * @param cardSlot  the slot
@@ -10103,34 +10103,34 @@ extern void func_00426358(int, int);
  */
 int sceMcGetInfo(int cardPort, int cardSlot, int *typeOut, int *freeOut, int *formatOut) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.port = cardPort;
-    D_00527240.slot = cardSlot;
-    D_00527240.param = (int)D_005276C0;
+    libmc_cmd.port = cardPort;
+    libmc_cmd.slot = cardSlot;
+    libmc_cmd.param = (int)D_005276C0;
     if (typeOut != 0)
-        D_00527240.origin = 1;
+        libmc_cmd.origin = 1;
     else
-        D_00527240.origin = 0;
+        libmc_cmd.origin = 0;
     if (freeOut != 0)
-        D_00527240.offset = 1;
+        libmc_cmd.offset = 1;
     else
-        D_00527240.offset = 0;
+        libmc_cmd.offset = 0;
     if (formatOut != 0)
-        D_00527240.size = 1;
+        libmc_cmd.size = 1;
     else
-        D_00527240.size = 0;
+        libmc_cmd.size = 0;
     D_005271E8 = typeOut;
     D_005271EC = freeOut;
     D_005271F0 = formatOut;
     func_00426358((int)D_005276C0, 0xC0);
-    rpcResult = sceSifCallRpc(&D_005271C0, 1, 1, &D_00527240, 48, D_00528780, 4, libmc_onGetInfoDone, D_005276C0);
+    rpcResult = sceSifCallRpc(&libmc_client, 1, 1, &libmc_cmd, 48, libmc_rpcResult, 4, libmc_onGetInfoDone, D_005276C0);
     if (rpcResult == 0)
-        D_004533C0 = 1;
+        libmc_pendingCall = 1;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10143,17 +10143,17 @@ extern char D_00498158[];
 /**
  * Runs memory-card call 53 synchronously and returns the server's result word.
  *
- * Sends the command block D_00527240 without arguments and without taking the lock semaphore or checking that the
+ * Sends the command block libmc_cmd without arguments and without taking the lock semaphore or checking that the
  * server is bound. A failed call prints the message D_00498158 and returns -1. No caller in the source.
  *
- * @return D_00528780[0], or -1 when the call failed
+ * @return libmc_rpcResult[0], or -1 when the call failed
  */
 int sceMcUdCheckNewCard(void) {
-    if (sceSifCallRpc(&D_005271C0, 53, 0, &D_00527240, 48, D_00528780, 4, 0, 0)) {
+    if (sceSifCallRpc(&libmc_client, 53, 0, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0)) {
         sceMcUdCheckNewCard_log(D_00498158);
         return -1;
     }
-    return D_00528780[0];
+    return libmc_rpcResult[0];
 }
 #endif
 
@@ -10167,11 +10167,11 @@ extern void func_00426358(int, int);
 /**
  * Starts listing a memory-card directory into an entry table (call 13, asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
  * characters, always terminated). Fills port, slot, mode, count (the maximum number of entries) and buffer (the table)
- * of D_00527270, and writes the cache back over the table's 64-byte entries when the count is not negative. Fails with
- * -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore
- * D_004533C4 (PollSema). On success it records 13 as the pending call (D_004533C0) and keeps the lock until
+ * of libmc_fileCmd, and writes the cache back over the table's 64-byte entries when the count is not negative. Fails with
+ * -100 when the library is not bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore
+ * libmc_lockSema (PollSema). On success it records 13 as the pending call (libmc_pendingCall) and keeps the lock until
  * sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. The number of entries arrives as
  * sceMcSync's result.
  *
@@ -10187,28 +10187,28 @@ extern void func_00426358(int, int);
  */
 int sceMcGetDir(int cardPort, int cardSlot, char *dirPattern, int listMode, int maxEntries, int entryTable) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (dirPattern == 0 || dirPattern[0] == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    D_00527270.port = cardPort;
-    D_00527270.slot = cardSlot;
-    D_00527270.mode = listMode;
-    D_00527270.count = maxEntries;
-    D_00527270.buffer = entryTable;
-    strncpy(D_00527270.name, dirPattern, 0x3FF);
-    D_00527270.name[0x3FF] = 0;
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.slot = cardSlot;
+    libmc_fileCmd.mode = listMode;
+    libmc_fileCmd.count = maxEntries;
+    libmc_fileCmd.buffer = entryTable;
+    strncpy(libmc_fileCmd.name, dirPattern, 0x3FF);
+    libmc_fileCmd.name[0x3FF] = 0;
     if (maxEntries >= 0)
         func_00426358(entryTable, maxEntries << 6);
-    rpcResult = sceSifCallRpc(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    rpcResult = sceSifCallRpc(&libmc_client, 13, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 13;
+        libmc_pendingCall = 13;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10221,7 +10221,7 @@ extern int func_0041605C(int, int, int);
 /**
  * End callback of sceMcChdir: copies the returned current directory to the caller's buffer.
  *
- * When @p dst is set it copies the string in D_00527780 (read through the uncached mirror; at most 1023 characters)
+ * When @p dst is set it copies the string in libmc_chdirRecvBuffer (read through the uncached mirror; at most 1023 characters)
  * with func_0041605C and terminates it.
  *
  * @param dst  the caller's buffer, or 0
@@ -10230,12 +10230,12 @@ void libmc_onChdirDone(void *dst) {
     char *src;
     int n;
     if (dst) {
-        src = (char *)((unsigned)D_00527780 | 0x20000000);
+        src = (char *)((unsigned)libmc_chdirRecvBuffer | 0x20000000);
         if (strlen(src) < 0x400)
             n = strlen(src);
         else
             n = 0x3FF;
-        func_0041605C((int)dst, (unsigned)D_00527780 | 0x20000000, n);
+        func_0041605C((int)dst, (unsigned)libmc_chdirRecvBuffer | 0x20000000, n);
         ((char *)dst)[n] = 0;
     }
 }
@@ -10251,11 +10251,11 @@ extern void func_00426358(int, int);
 /**
  * Starts changing a memory card's current directory (call 12, asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
- * characters, always terminated). Fills port and slot of D_00527270 and points its buffer at D_00527780 (written back
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
+ * characters, always terminated). Fills port and slot of libmc_fileCmd and points its buffer at libmc_chdirRecvBuffer (written back
  * from the cache, 0x400 bytes), where the server returns the current directory; libmc_onChdirDone copies it to @p curDirOut when
- * the call ends. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call
- * still holds the lock semaphore D_004533C4 (PollSema). On success it records 12 as the pending call (D_004533C0) and
+ * the call ends. Fails with -100 when the library is not bound (libmc_client.server is 0) and -200 when another call
+ * still holds the lock semaphore libmc_lockSema (PollSema). On success it records 12 as the pending call (libmc_pendingCall) and
  * keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. No caller in
  * the source.
  *
@@ -10267,25 +10267,25 @@ extern void func_00426358(int, int);
  */
 int sceMcChdir(int cardPort, int cardSlot, char *newDir, void *curDirOut) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (newDir == 0 || newDir[0] == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    D_00527270.port = cardPort;
-    D_00527270.buffer = (int)D_00527780;
-    D_00527270.slot = cardSlot;
-    strncpy(D_00527270.name, newDir, 0x3FF);
-    D_00527270.name[0x3FF] = 0;
-    func_00426358((int)D_00527780, 0x400);
-    rpcResult = sceSifCallRpc(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, libmc_onChdirDone, curDirOut);
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.buffer = (int)libmc_chdirRecvBuffer;
+    libmc_fileCmd.slot = cardSlot;
+    strncpy(libmc_fileCmd.name, newDir, 0x3FF);
+    libmc_fileCmd.name[0x3FF] = 0;
+    func_00426358((int)libmc_chdirRecvBuffer, 0x400);
+    rpcResult = sceSifCallRpc(&libmc_client, 12, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, libmc_onChdirDone, curDirOut);
     if (rpcResult == 0)
-        D_004533C0 = 12;
+        libmc_pendingCall = 12;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10298,9 +10298,9 @@ extern void SignalSema(int);
 /**
  * Starts formatting a memory card (call 16, asynchronous).
  *
- * Fills port and slot of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200
- * when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 16 as the pending call
- * (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the
+ * Fills port and slot of libmc_cmd. Fails with -100 when the library is not bound (libmc_client.server is 0) and -200
+ * when another call still holds the lock semaphore libmc_lockSema (PollSema). On success it records 16 as the pending call
+ * (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the
  * lock.
  *
  * @param cardPort  the memory-card port
@@ -10309,17 +10309,17 @@ extern void SignalSema(int);
  */
 int sceMcFormat(int cardPort, int cardSlot) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.port = cardPort;
-    D_00527240.slot = cardSlot;
-    rpcResult = sceSifCallRpc(&D_005271C0, 16, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.port = cardPort;
+    libmc_cmd.slot = cardSlot;
+    rpcResult = sceSifCallRpc(&libmc_client, 16, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 16;
+        libmc_pendingCall = 16;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10333,10 +10333,10 @@ extern char *strncpy(char *, const char *, int);
 /**
  * Starts deleting a file or directory on a memory card (call 15, asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
- * characters, always terminated). Fills port and slot of D_00527270 and clears its mode. Fails with -100 when the
- * library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4
- * (PollSema). On success it records 15 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
+ * characters, always terminated). Fills port and slot of libmc_fileCmd and clears its mode. Fails with -100 when the
+ * library is not bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema
+ * (PollSema). On success it records 15 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the
  * call finish; when sceSifCallRpc fails it releases the lock.
  *
  * @param cardPort  the memory-card port
@@ -10346,24 +10346,24 @@ extern char *strncpy(char *, const char *, int);
  */
 int sceMcDelete(int cardPort, int cardSlot, char *filePath) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (filePath == 0 || filePath[0] == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    strncpy(D_00527270.name, filePath, 0x3FF);
-    D_00527270.port = cardPort;
-    D_00527270.slot = cardSlot;
-    D_00527270.name[0x3FF] = 0;
-    D_00527270.mode = 0;
-    rpcResult = sceSifCallRpc(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    strncpy(libmc_fileCmd.name, filePath, 0x3FF);
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.slot = cardSlot;
+    libmc_fileCmd.name[0x3FF] = 0;
+    libmc_fileCmd.mode = 0;
+    rpcResult = sceSifCallRpc(&libmc_client, 15, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 15;
+        libmc_pendingCall = 15;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10376,9 +10376,9 @@ extern void SignalSema(int);
 /**
  * Starts flushing a memory-card file (call 10, asynchronous).
  *
- * Puts @p fileDesc into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
- * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 10 as the pending
- * call (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
+ * Puts @p fileDesc into the fd field of libmc_cmd. Fails with -100 when the library is not bound (libmc_client.server is 0) and
+ * -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On success it records 10 as the pending
+ * call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
  * @param fileDesc  the file descriptor
@@ -10386,16 +10386,16 @@ extern void SignalSema(int);
  */
 int sceMcFlush(int fileDesc) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.fd = fileDesc;
-    rpcResult = sceSifCallRpc(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.fd = fileDesc;
+    rpcResult = sceSifCallRpc(&libmc_client, 10, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 10;
+        libmc_pendingCall = 10;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10410,11 +10410,11 @@ extern char *strncpy(char *, const char *, int);
 /**
  * Starts changing a memory-card file's information record (call 14, asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
  * characters, always terminated). Masks @p validFlags to its low three bits and stores it as the mode, copies the 64-byte record
  * *@p newInfo into D_00527200 and points the buffer at it, then flushes the cache. Fails with -100 when the library is not
- * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On
- * success it records 14 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the call finish;
+ * bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On
+ * success it records 14 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish;
  * when sceSifCallRpc fails it releases the lock. No caller in the source.
  *
  * @param cardPort  the memory-card port
@@ -10426,29 +10426,29 @@ extern char *strncpy(char *, const char *, int);
  */
 int sceMcSetFileInfo(int cardPort, int cardSlot, char *filePath, sMcDirEntry *newInfo, int validFlags) {
     int rpcResult;
-    sSifClient *mcClient = &D_005271C0;
+    sSifClient *mcClient = &libmc_client;
     if (mcClient->server == 0)
         return -100;
-    if (R_3DF0(D_004533C4) < 0)
+    if (R_3DF0(libmc_lockSema) < 0)
         return -200;
     if (filePath == 0 || filePath[0] == 0) {
-        R_3DC0(D_004533C4);
+        R_3DC0(libmc_lockSema);
         return -210;
     }
     validFlags &= 7;
-    D_00527270.port = cardPort;
-    D_00527270.slot = cardSlot;
-    D_00527270.mode = validFlags;
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.slot = cardSlot;
+    libmc_fileCmd.mode = validFlags;
     D_00527200 = *newInfo;
-    D_00527270.buffer = (int)&D_00527200;
-    strncpy(D_00527270.name, filePath, 0x3FF);
-    D_00527270.name[0x3FF] = 0;
+    libmc_fileCmd.buffer = (int)&D_00527200;
+    strncpy(libmc_fileCmd.name, filePath, 0x3FF);
+    libmc_fileCmd.name[0x3FF] = 0;
     R_4020(0);
-    rpcResult = sceSifCallRpc(mcClient, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    rpcResult = sceSifCallRpc(mcClient, 14, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 14;
+        libmc_pendingCall = 14;
     else
-        R_3DC0(D_004533C4);
+        R_3DC0(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10463,11 +10463,11 @@ extern void FlushCache(int);
 /**
  * Starts renaming a file on a memory card (call 14 with the rename flag, asynchronous).
  *
- * An empty or null old name, or a null new name, releases the lock and fails with -210. Sets mode 16 in D_00527270,
+ * An empty or null old name, or a null new name, releases the lock and fails with -210. Sets mode 16 in libmc_fileCmd,
  * copies the old name (at most 1023 characters) and the new name into D_00527220 (32 bytes; byte 31 cleared), the name
  * field of the 64-byte record at D_00527200 that the buffer points at, and flushes the cache. Fails with -100 when the
- * library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4
- * (PollSema). On success it records 19 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the
+ * library is not bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema
+ * (PollSema). On success it records 19 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the
  * call finish; when sceSifCallRpc fails it releases the lock. (19 rather than the call number). No caller in the
  * source.
  *
@@ -10480,29 +10480,29 @@ extern void FlushCache(int);
 int sceMcRename(int cardPort, int cardSlot, char *oldPath, char *newName) {
     int rpcResult;
     char *infoRecord;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (oldPath == 0 || oldPath[0] == 0 || newName == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    D_00527270.port = cardPort;
-    D_00527270.slot = cardSlot;
-    D_00527270.mode = 16;
-    strncpy(D_00527270.name, oldPath, 0x3FF);
-    D_00527270.name[0x3FF] = 0;
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.slot = cardSlot;
+    libmc_fileCmd.mode = 16;
+    strncpy(libmc_fileCmd.name, oldPath, 0x3FF);
+    libmc_fileCmd.name[0x3FF] = 0;
     strncpy(D_00527220, newName, 0x20);
     infoRecord = D_00527220 - 0x20;
     infoRecord[0x3F] = 0;
-    D_00527270.buffer = (int)infoRecord;
+    libmc_fileCmd.buffer = (int)infoRecord;
     FlushCache(0);
-    rpcResult = sceSifCallRpc(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    rpcResult = sceSifCallRpc(&libmc_client, 14, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 19;
+        libmc_pendingCall = 19;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10515,9 +10515,9 @@ extern void SignalSema(int);
 /**
  * Starts memory-card call 17 for a port and slot (asynchronous).
  *
- * Fills port and slot of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200
- * when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 17 as the pending call
- * (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the
+ * Fills port and slot of libmc_cmd. Fails with -100 when the library is not bound (libmc_client.server is 0) and -200
+ * when another call still holds the lock semaphore libmc_lockSema (PollSema). On success it records 17 as the pending call
+ * (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the
  * lock. No caller in the source.
  *
  * @param cardPort  the memory-card port
@@ -10526,17 +10526,17 @@ extern void SignalSema(int);
  */
 int sceMcUnformat(int cardPort, int cardSlot) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
-    D_00527240.port = cardPort;
-    D_00527240.slot = cardSlot;
-    rpcResult = sceSifCallRpc(&D_005271C0, 17, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    libmc_cmd.port = cardPort;
+    libmc_cmd.slot = cardSlot;
+    rpcResult = sceSifCallRpc(&libmc_client, 17, 1, &libmc_cmd, 48, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 17;
+        libmc_pendingCall = 17;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10550,10 +10550,10 @@ extern char *strncpy(char *, const char *, int);
 /**
  * Starts memory-card call 18 for a path on a port and slot (asynchronous).
  *
- * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
- * characters, always terminated). Fills port and slot of D_00527270. Fails with -100 when the library is not bound
- * (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success
- * it records 18 as the pending call (D_004533C0) and keeps the lock until sceMcSync sees the call finish; when
+ * An empty or null name releases the lock and fails with -210. The name is copied into libmc_fileCmd.name (at most 1023
+ * characters, always terminated). Fills port and slot of libmc_fileCmd. Fails with -100 when the library is not bound
+ * (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema (PollSema). On success
+ * it records 18 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the call finish; when
  * sceSifCallRpc fails it releases the lock. No caller in the source.
  *
  * @param cardPort  the memory-card port
@@ -10563,23 +10563,23 @@ extern char *strncpy(char *, const char *, int);
  */
 int sceMcGetEntSpace(int cardPort, int cardSlot, char *dirPath) {
     int rpcResult;
-    if (D_005271C0.server == 0)
+    if (libmc_client.server == 0)
         return -100;
-    if (PollSema(D_004533C4) < 0)
+    if (PollSema(libmc_lockSema) < 0)
         return -200;
     if (dirPath == 0 || dirPath[0] == 0) {
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
         return -210;
     }
-    D_00527270.port = cardPort;
-    D_00527270.slot = cardSlot;
-    strncpy(D_00527270.name, dirPath, 0x3FF);
-    D_00527270.name[0x3FF] = 0;
-    rpcResult = sceSifCallRpc(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    libmc_fileCmd.port = cardPort;
+    libmc_fileCmd.slot = cardSlot;
+    strncpy(libmc_fileCmd.name, dirPath, 0x3FF);
+    libmc_fileCmd.name[0x3FF] = 0;
+    rpcResult = sceSifCallRpc(&libmc_client, 18, 1, &libmc_fileCmd, 1044, libmc_rpcResult, 4, 0, 0);
     if (rpcResult == 0)
-        D_004533C0 = 18;
+        libmc_pendingCall = 18;
     else
-        SignalSema(D_004533C4);
+        SignalSema(libmc_lockSema);
     return rpcResult;
 }
 #endif
@@ -10589,14 +10589,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B130);
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B1F8);
 #ifdef SKIP_ASM
-extern int D_004533E0[];
+extern int libmrpc_initFlag[];
 /**
- * Clears the flag D_004533E0 that func_0040B130 sets when it sets up the multi-client RPC layer.
+ * Clears the flag libmrpc_initFlag that func_0040B130 sets when it sets up the multi-client RPC layer.
  *
  * Only func_00319800, which no retail code calls, calls it.
  */
 void func_0040B1F8(void) {
-    D_004533E0[0] = 0;
+    libmrpc_initFlag[0] = 0;
 }
 #endif
 
@@ -10754,7 +10754,7 @@ extern void lg_B400(char *) __asm__("scePrintf");
 extern struct N_B400 *libmrpc_takePacket(char *);
 extern void rl_B400(struct N_B400 *) __asm__("libmrpc_freePacket");
 extern int sceSifSendCmd(unsigned, struct N_B400 *, int, int, int, int);
-extern char D_00498178[];
+extern char str_mode_must_be_0_in_this_version[];
 /**
  * Binds a multi-client RPC client to an IOP server and waits for the answer.
  *
@@ -10783,7 +10783,7 @@ int sceSifMBindRpcParam(int cc, int rpcNumber, int flag, int bindParam1, int bin
     int waitSema;
     struct N_B400 *n;
     if (flag != 0) {
-        lg_B400(D_00498178);
+        lg_B400(str_mode_must_be_0_in_this_version);
         return -1;
     }
     semaParam[5] = 0;
@@ -10839,7 +10839,7 @@ int sceSifMBindRpcParam(int cc, int rpcNumber, int flag, int bindParam1, int bin
 INCLUDE_ASM("seg/seg_2FE810", sceSifMUnBindRpc);
 #ifdef SKIP_ASM
 struct O_B5B0 { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; };
-extern char D_00498178[];
+extern char str_mode_must_be_0_in_this_version[];
 extern void b5_00425C60(char *, ...) __asm__("scePrintf");
 extern int b5_00423DE0(int) __asm__("WaitSema");
 extern int b5_00423DB0(int) __asm__("DeleteSema");
@@ -10867,7 +10867,7 @@ int sceSifMUnBindRpc(struct O_B5B0 *clientData, int termMode) {
     struct QSema semaParam;
     int waitSema;
     if (termMode) {
-        b5_00425C60(D_00498178);
+        b5_00425C60(str_mode_must_be_0_in_this_version);
         return -1;
     }
     b5_00423DE0(clientData->f28);
@@ -10914,7 +10914,7 @@ extern struct N_B6D0 *al_B6D0(char *) __asm__("libmrpc_takePacket");
 extern void rl_B6D0(struct N_B6D0 *) __asm__("libmrpc_freePacket");
 extern void sz_B6D0(int, int) __asm__("func_00426358");
 extern int st_B6D0(unsigned, struct N_B6D0 *, int, int, int, int) __asm__("sceSifSendCmd");
-extern char D_00498178[];
+extern char str_mode_must_be_0_in_this_version[];
 extern char D_004981A0[];
 extern char D_004981D8[];
 extern char D_004981E8[];
@@ -10948,7 +10948,7 @@ int sceSifMCallRpc(struct N_B6D0 *clientData, int funcNumber, int flag, int send
     int sem;
     struct N_B6D0 *n;
     if (flag != 0) {
-        lg1_B6D0(D_00498178);
+        lg1_B6D0(str_mode_must_be_0_in_this_version);
         return -1;
     }
     wt_B6D0(clientData->f28);
@@ -11025,21 +11025,21 @@ extern char D_00498220[];
 /**
  * Reads the console's ROM version string once and returns its buffer.
  *
- * While D_00453400 is still empty it opens the file D_00498220 ("rom0:ROMVER") with sceOpen (mode 1), reads 14 bytes
- * into D_00453400 (sceRead) and closes it (sceClose). The buffer stays empty when the open fails.
+ * While libscf_romVersion is still empty it opens the file D_00498220 ("rom0:ROMVER") with sceOpen (mode 1), reads 14 bytes
+ * into libscf_romVersion (sceRead) and closes it (sceClose). The buffer stays empty when the open fails.
  *
- * @return the address of D_00453400
+ * @return the address of libscf_romVersion
  */
 int libscf_readRomVersion(void) {
     int romverFd;
-    if (D_00453400[0] == 0) {
+    if (libscf_romVersion[0] == 0) {
         romverFd = sceOpen(D_00498220, 1);
         if (romverFd >= 0) {
-            sceRead(romverFd, D_00453400, 14);
+            sceRead(romverFd, libscf_romVersion, 14);
             sceClose(romverFd);
         }
     }
-    return (int)D_00453400;
+    return (int)libscf_romVersion;
 }
 #endif
 
@@ -11051,15 +11051,15 @@ extern int libscf_readRomVersion(void);
  * Returns whether the console is a T10000 development kit.
  *
  * Reads the ROM version string first when needed (libscf_readRomVersion) and tests its region character (byte 4) for 'T'. The
- * console-setting getters sceScfGetLanguage .. sceScfGetTimeNotation use it to choose the override record D_004533F8 over the OSD
+ * console-setting getters sceScfGetLanguage .. sceScfGetTimeNotation use it to choose the override record libscf_configOverride over the OSD
  * configuration.
  *
  * @return 1 for a T10000 (tool) console, else 0
  */
 int libscf_isT10000(void) {
-    if (D_00453400[0] == 0)
+    if (libscf_romVersion[0] == 0)
         libscf_readRomVersion();
-    return D_00453400[4] == 84;
+    return libscf_romVersion[4] == 84;
 }
 #endif
 
@@ -11101,14 +11101,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BA48);
 /**
  * Sets the 8-byte console-setting record that T10000 development kits use instead of the OSD.
  *
- * Copies *@p consoleConfig into D_004533F8: the time zone in minutes (+0x0, short), then one byte each for the aspect, date format,
+ * Copies *@p consoleConfig into libscf_configOverride: the time zone in minutes (+0x0, short), then one byte each for the aspect, date format,
  * language, S/PDIF, summer time and time notation (read by sceScfGetTimeZone, sceScfGetAspect, sceScfGetDateFormat, sceScfGetLanguage,
  * sceScfGetSpdif, sceScfGetSummerTime and sceScfGetTimeNotation). No caller in the source.
  *
  * @param consoleConfig  the new settings
  */
 void func_0040BA48(sSysConfig *consoleConfig) {
-    D_004533F8 = *consoleConfig;
+    libscf_configOverride = *consoleConfig;
 }
 #endif
 
@@ -11164,7 +11164,7 @@ extern void GetOsdConfigParam(unsigned *);
 /**
  * Returns the console's time zone as minutes from GMT.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override D_004533F8.f0 that func_0040BA48 sets. Consoles
+ * On a T10000 development kit (libscf_isT10000) it returns the override libscf_configOverride.f0 that func_0040BA48 sets. Consoles
  * whose OSD configuration has version 0 (bits 13..15) give 540 (GMT+9, Japan). Newer ones give the signed field in bits
  * 21..31 of the OSD configuration (GetOsdConfigParam).
  *
@@ -11174,7 +11174,7 @@ int sceScfGetTimeZone(void) {
     unsigned buf[1];
     int zoneMinutes;
     if (libscf_isT10000()) {
-        zoneMinutes = D_004533F8.f0;
+        zoneMinutes = libscf_configOverride.f0;
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) zoneMinutes = 540; else zoneMinutes = (int)buf[0] >> 21;
@@ -11363,18 +11363,18 @@ INCLUDE_ASM("seg/seg_2FE810", libscf_clockNextDay);
 #ifdef SKIP_ASM
 typedef struct { char b[12]; } sDaysTbl;
 typedef struct { unsigned char stat, sec, min, hour, pad, day, month, year; } sClk;
-extern sDaysTbl D_00498230;
+extern sDaysTbl libscf_monthDaysTable;
 /**
  * Advances a binary clock record by one day.
  *
- * Uses the month lengths in D_00498230, with February 29 in years divisible by 4 (two-digit year). Past the end of the
+ * Uses the month lengths in libscf_monthDaysTable, with February 29 in years divisible by 4 (two-digit year). Past the end of the
  * month it goes to day 1 of the next month, and after December to January of the next year (99 wraps to 0).
  *
  * @param clockBytes  the clock record (binary fields)
  */
 void libscf_clockNextDay(unsigned char *clockBytes) {
     sClk *clock = (sClk *)clockBytes;
-    sDaysTbl days = D_00498230;
+    sDaysTbl days = libscf_monthDaysTable;
     clock->day++;
     if ((clock->year % 4) == 0)
         days.b[1] = 29;
@@ -11398,14 +11398,14 @@ INCLUDE_ASM("seg/seg_2FE810", libscf_clockPrevDay);
 /**
  * Moves a binary clock record back by one day.
  *
- * Before day 1 it goes to the last day of the previous month (month lengths in D_00498230, February 29 in years
+ * Before day 1 it goes to the last day of the previous month (month lengths in libscf_monthDaysTable, February 29 in years
  * divisible by 4), and before January to December of the previous year (0 wraps to 99).
  *
  * @param clockBytes  the clock record (binary fields)
  */
 void libscf_clockPrevDay(unsigned char *clockBytes) {
     sClk *clock = (sClk *)clockBytes;
-    sDaysTbl days = D_00498230;
+    sDaysTbl days = libscf_monthDaysTable;
     clock->day--;
     if ((clock->year % 4) == 0)
         days.b[1] = 29;
@@ -11556,15 +11556,15 @@ extern int libusbkb_onVblank(void);
 /**
  * Initialises the USB keyboard client: binds its server, checks the connection count and sets up every keyboard.
  *
- * Calls func_00426408(0) and binds SIF RPC server 0x80000211 into D_005290A0, retrying with a busy wait until the
- * server is set; a bind error prints "libusbkb : bind errr". Creates the semaphore D_00453438 ("libusbkb : CreateSema
+ * Calls func_00426408(0) and binds SIF RPC server 0x80000211 into libusbkb_client, retrying with a busy wait until the
+ * server is set; a bind error prints "libusbkb : bind errr". Creates the semaphore libusbkb_rpcSema ("libusbkb : CreateSema
  * Error" on failure), reads the information block with sceUsbKbGetInfo and waits for it (sceUsbKbSync). The maximum
- * number of keyboards must be 1..127; it goes to D_00529000.n and *@p out. Takes the keyboard array from D_005291D0 and
+ * number of keyboards must be 1..127; it goes to libusbkb_state.n and *@p out. Takes the keyboard array from D_005291D0 and
  * sets every keyboard to LED mode 1, code type 1, arrangement 1, raw mode off and an idle repeat. Clears the previous
- * report, installs libusbkb_onVblank as INTC 3 (vertical blank) handler (AddIntcHandler; id in D_00529000.thread) and
+ * report, installs libusbkb_onVblank as INTC 3 (vertical blank) handler (AddIntcHandler; id in libusbkb_state.thread) and
  * enables that line (EnableIntc).
  *
- * Every failure after the semaphore deletes it again and sets D_00453438 to -1.
+ * Every failure after the semaphore deletes it again and sets libusbkb_rpcSema to -1.
  *
  * @param out  receives the maximum number of keyboards
  * @return 0 on success, -1 on any failure
@@ -11576,70 +11576,70 @@ int sceUsbKbInit(int *out) {
     unsigned i;
     k_6408(0);
     for (;;) {
-        if (sceSifBindRpc(&D_005290A0, 0x80000211, 0) < 0) {
+        if (sceSifBindRpc(&libusbkb_client, 0x80000211, 0) < 0) {
             k_log(D_00498240);
             return -1;
         }
-        if (D_005290A0.server != 0)
+        if (libusbkb_client.server != 0)
             break;
         i = 0x10000;
         while (i--);
     }
     semaParam.init_count = 1;
     semaParam.max_count = 1;
-    D_00453438 = k_sema(&semaParam);
-    if (D_00453438 == -1) {
+    libusbkb_rpcSema = k_sema(&semaParam);
+    if (libusbkb_rpcSema == -1) {
         k_log(D_00498258);
         return -1;
     }
     if (sceUsbKbGetInfo(&info) != 0) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
     k_C810(0, &st);
     if (st != 0) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
     if (info.n <= 0) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
     if (info.n >= 0x80) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
-    D_00529000.n = info.n;
+    libusbkb_state.n = info.n;
     *out = info.n;
-    D_00529000.port = D_005291D0;
-    if (D_00529000.port == 0) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+    libusbkb_state.port = D_005291D0;
+    if (libusbkb_state.port == 0) {
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
     for (i = 0; i < info.n; i++) {
-        D_00529000.port[i].rep.n = 0;
-        D_00529000.port[i].ledMode = 1;
-        D_00529000.port[i].f04 = 1;
-        D_00529000.port[i].f08 = 1;
-        D_00529000.port[i].f0C = 0;
-        D_00529000.port[i].rep.state = 0;
-        D_00529000.port[i].rep.count = 0;
-        D_00529000.port[i].rep.delay = 0;
-        D_00529000.port[i].rep.rate = 0;
-        D_00529000.port[i].rep.wr = 0;
-        D_00529000.port[i].rep.rd = 0;
-        D_00529000.port[i].rep.last = 0;
+        libusbkb_state.port[i].rep.n = 0;
+        libusbkb_state.port[i].ledMode = 1;
+        libusbkb_state.port[i].f04 = 1;
+        libusbkb_state.port[i].f08 = 1;
+        libusbkb_state.port[i].f0C = 0;
+        libusbkb_state.port[i].rep.state = 0;
+        libusbkb_state.port[i].rep.count = 0;
+        libusbkb_state.port[i].rep.delay = 0;
+        libusbkb_state.port[i].rep.rate = 0;
+        libusbkb_state.port[i].rep.wr = 0;
+        libusbkb_state.port[i].rep.rd = 0;
+        libusbkb_state.port[i].rep.last = 0;
     }
-    D_00529000.prev.n = 0;
-    D_00529000.thread = k_3A80(3, libusbkb_onVblank, -1);
-    if (D_00529000.thread < 0) {
-        k_dsema(D_00453438);
-        D_00453438 = -1;
+    libusbkb_state.prev.n = 0;
+    libusbkb_state.thread = k_3A80(3, libusbkb_onVblank, -1);
+    if (libusbkb_state.thread < 0) {
+        k_dsema(libusbkb_rpcSema);
+        libusbkb_rpcSema = -1;
         return -1;
     }
     k_48E8(3);
@@ -11662,7 +11662,7 @@ extern char D_004982A8[];
  *
  * With interrupts off (DIntr; restored with EIntr when they were on) it removes the INTC 3 handler D_0052909C and, when
  * that worked, disables the line (DisableIntc). A failed removal prints "libusbkb.a : RemoveIntcHandler() --> error".
- * Deletes the semaphore D_00453438 when it exists and sets it to -1; a failure prints "libusbkb.a : DeleteSema() -->
+ * Deletes the semaphore libusbkb_rpcSema when it exists and sets it to -1; a failure prints "libusbkb.a : DeleteSema() -->
  * error" and keeps the value. The server binding stays. kbReader_shutdown calls it.
  *
  * @return 0 when both steps worked, else -1
@@ -11680,12 +11680,12 @@ int sceUsbKbEnd(void) {
         n = 1;
         sceMcUdCheckNewCard_log(D_00498278);
     }
-    if (D_00453438 != -1) {
-        if (DeleteSema(D_00453438) < 0) {
+    if (libusbkb_rpcSema != -1) {
+        if (DeleteSema(libusbkb_rpcSema) < 0) {
             n++;
             sceMcUdCheckNewCard_log(D_004982A8);
         } else {
-            D_00453438 = -1;
+            libusbkb_rpcSema = -1;
         }
     }
     return n == 0 ? 0 : -1;
@@ -11710,16 +11710,16 @@ extern void scePrintf(char *, int);
  */
 int sceUsbKbGetInfo(void *info) {
     int result;
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
-    WaitSema(D_00453438);
-    result = sceSifCallRpc(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 144, libusbkb_onRpcDone, 0);
+    WaitSema(libusbkb_rpcSema);
+    result = sceSifCallRpc(&libusbkb_client, 1, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 144, libusbkb_onRpcDone, 0);
     if (result != 0) {
         scePrintf(D_004982D0, result);
         return -2;
     }
-    D_00529000.cmd = 1;
-    D_00529000.out = info;
+    libusbkb_state.cmd = 1;
+    libusbkb_state.out = info;
     return 0;
 }
 #endif
@@ -11742,22 +11742,22 @@ extern void scePrintf(char *, int);
  *         below the driver's keyboard count, -2 if sceSifCallRpc failed
  */
 int sceUsbKbRead(unsigned kbdNo, void *data) {
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
-    if (kbdNo >= D_00529000.n)
+    if (kbdNo >= libusbkb_state.n)
         return -11;
-    D_00529100[0] = kbdNo;
-    WaitSema(D_00453438);
+    libusbkb_sendBuffer[0] = kbdNo;
+    WaitSema(libusbkb_rpcSema);
     {
-        int result = sceSifCallRpc(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 80, libusbkb_onRpcDone, 0);
+        int result = sceSifCallRpc(&libusbkb_client, 2, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 80, libusbkb_onRpcDone, 0);
         if (result != 0) {
             scePrintf(D_004982F8, result);
             return -2;
         }
     }
-    D_00529000.cmd = 2;
-    D_00529000.arg = kbdNo;
-    D_00529000.out = data;
+    libusbkb_state.cmd = 2;
+    libusbkb_state.arg = kbdNo;
+    libusbkb_state.out = data;
     return 0;
 }
 #endif
@@ -11781,22 +11781,22 @@ extern void scePrintf(char *, int);
  *         -2 if the RPC call failed
  */
 int sceUsbKbGetLocation(int kbdNo, void *location) {
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
-    if (kbdNo >= D_00529000.n)
+    if (kbdNo >= libusbkb_state.n)
         return -11;
-    D_00529100[0] = kbdNo;
-    WaitSema(D_00453438);
+    libusbkb_sendBuffer[0] = kbdNo;
+    WaitSema(libusbkb_rpcSema);
     {
-        int result = sceSifCallRpc(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, libusbkb_onRpcDone, 0);
+        int result = sceSifCallRpc(&libusbkb_client, 3, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 0x10, libusbkb_onRpcDone, 0);
         if (result != 0) {
             scePrintf(D_00498320, result);
             return -2;
         }
     }
-    D_00529000.cmd = 3;
-    D_00529000.arg = kbdNo;
-    D_00529000.out = location;
+    libusbkb_state.cmd = 3;
+    libusbkb_state.arg = kbdNo;
+    libusbkb_state.out = location;
     return 0;
 }
 #endif
@@ -11819,23 +11819,23 @@ extern void scePrintf(char *, int);
  *         -2 if the RPC call failed
  */
 int sceUsbKbSetLEDStatus(int kbdNo, unsigned char ledStatus) {
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
-    if (kbdNo >= D_00529000.n)
+    if (kbdNo >= libusbkb_state.n)
         return -11;
-    D_00529100[0] = kbdNo;
-    D_00529100[1] = ledStatus;
-    WaitSema(D_00453438);
+    libusbkb_sendBuffer[0] = kbdNo;
+    libusbkb_sendBuffer[1] = ledStatus;
+    WaitSema(libusbkb_rpcSema);
     {
-        int result = sceSifCallRpc(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, libusbkb_onRpcDone, 0);
+        int result = sceSifCallRpc(&libusbkb_client, 4, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 0x10, libusbkb_onRpcDone, 0);
         if (result != 0) {
             scePrintf(D_00498350, result);
             return -2;
         }
     }
-    D_00529000.cmd = 4;
-    D_00529000.out = 0;
-    D_00529000.arg = kbdNo;
+    libusbkb_state.cmd = 4;
+    libusbkb_state.out = 0;
+    libusbkb_state.arg = kbdNo;
     return 0;
 }
 
@@ -11859,27 +11859,27 @@ extern void scePrintf(char *, int);
  *         -12 for a mode above 2, -2 if the RPC call failed
  */
 int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
-    int semaId = D_00453438;
+    int semaId = libusbkb_rpcSema;
     if (semaId == -1)
         return -1;
-    if (kbdNo >= D_00529000.n)
+    if (kbdNo >= libusbkb_state.n)
         return -11;
     if (mode > 2)
         return -12;
-    D_00529000.port[kbdNo].ledMode = mode;
-    D_00529100[0] = kbdNo;
-    D_00529100[1] = mode;
+    libusbkb_state.port[kbdNo].ledMode = mode;
+    libusbkb_sendBuffer[0] = kbdNo;
+    libusbkb_sendBuffer[1] = mode;
     WaitSema(semaId);
     {
-        int rpcResult = sceSifCallRpc(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, libusbkb_onRpcDone, 0);
+        int rpcResult = sceSifCallRpc(&libusbkb_client, 5, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 0x10, libusbkb_onRpcDone, 0);
         if (rpcResult != 0) {
             scePrintf(D_00498380, rpcResult);
             return -2;
         }
     }
-    D_00529000.cmd = 5;
-    D_00529000.out = 0;
-    D_00529000.arg = kbdNo;
+    libusbkb_state.cmd = 5;
+    libusbkb_state.out = 0;
+    libusbkb_state.arg = kbdNo;
     return 0;
 }
 #endif
@@ -11927,11 +11927,11 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetCodeType);
  */
 int sceUsbKbSetCodeType(int kbIndex, unsigned codeType) {
 
-    if (kbIndex >= D_00529000.n)
+    if (kbIndex >= libusbkb_state.n)
         return -11;
     if (codeType >= 2)
         return -12;
-    D_00529000.port[kbIndex].f04 = codeType;
+    libusbkb_state.port[kbIndex].f04 = codeType;
     return 0;
 }
 #endif
@@ -11949,11 +11949,11 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetArrangement);
  * @return 0, -11 for a bad keyboard or -12 for a bad layout
  */
 int sceUsbKbSetArrangement(int kbIndex, unsigned layout) {
-    if (kbIndex >= D_00529000.n)
+    if (kbIndex >= libusbkb_state.n)
         return -11;
     if (layout >= 3)
         return -12;
-    D_00529000.port[kbIndex].f08 = layout;
+    libusbkb_state.port[kbIndex].f08 = layout;
     return 0;
 }
 #endif
@@ -11966,7 +11966,7 @@ extern int libusbkb_finishPendingCall(void);
 /**
  * Waits for or polls the pending USB keyboard call and finishes it.
  *
- * Mode 0 waits on the semaphore D_00453438 (signalled by libusbkb_onRpcDone when the call ends), stores libusbkb_finishPendingCall's
+ * Mode 0 waits on the semaphore libusbkb_rpcSema (signalled by libusbkb_onRpcDone when the call ends), stores libusbkb_finishPendingCall's
  * result in *@p out and releases the semaphore. Mode 1 checks the RPC (sceSifCheckStatRpc) and, when it is done, stores
  * libusbkb_finishPendingCall's result in *@p out.
  *
@@ -11975,16 +11975,16 @@ extern int libusbkb_finishPendingCall(void);
  * @return 0 when finished, 1 while busy (mode 1), -11 for another mode, -1 before initialisation
  */
 int sceUsbKbSync(int mode, int *out) {
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
     switch (mode) {
     case 0:
-        WaitSema(D_00453438);
+        WaitSema(libusbkb_rpcSema);
         *out = libusbkb_finishPendingCall();
-        kb_signal4(D_00453438);
+        kb_signal4(libusbkb_rpcSema);
         return 0;
     case 1:
-        if (sceSifCheckStatRpc(&D_005290A0) == 0) {
+        if (sceSifCheckStatRpc(&libusbkb_client) == 0) {
             *out = libusbkb_finishPendingCall();
             return 0;
         }
@@ -12000,12 +12000,12 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onRpcDone);
 #ifdef SKIP_ASM
 extern void iSignalSema(int);
 /**
- * End callback of every USB keyboard RPC: signals the semaphore D_00453438 from interrupt context.
+ * End callback of every USB keyboard RPC: signals the semaphore libusbkb_rpcSema from interrupt context.
  *
  * @param callbackArg  the end-function argument (always 0, unused)
  */
 void libusbkb_onRpcDone(void *callbackArg) {
-    iSignalSema(D_00453438);
+    iSignalSema(libusbkb_rpcSema);
 }
 #endif
 
@@ -12016,18 +12016,18 @@ extern int (*D_00453420[])(void);
 /**
  * Finishes the pending USB keyboard call by running its result handler.
  *
- * For call codes 1..5 (D_00529000.cmd) it runs the handler D_00453420[code]; then clears the pending call and its
+ * For call codes 1..5 (libusbkb_state.cmd) it runs the handler D_00453420[code]; then clears the pending call and its
  * output pointer.
  *
  * @return the handler's result, or 0
  */
 int libusbkb_finishPendingCall(void) {
     int handlerResult = 0;
-    unsigned pendingCmd = D_00529000.cmd;
+    unsigned pendingCmd = libusbkb_state.cmd;
     if (pendingCmd - 1 < 5)
         handlerResult = D_00453420[pendingCmd]();
-    D_00529000.cmd = 0;
-    D_00529000.out = 0;
+    libusbkb_state.cmd = 0;
+    libusbkb_state.out = 0;
     return handlerResult;
 }
 #endif
@@ -12039,15 +12039,15 @@ struct S40C928 { int n; int m; unsigned char d[1]; };
 /**
  * Result handler of call 1 (keyboard information): copies the reply into the caller's block.
  *
- * From the receive buffer D_00529140 it stores the maximum count (byte 0) and the connected count (byte 1) in the
- * caller's block (D_00529000.out) and copies one status byte per possible keyboard from byte 2 on. Handler 1 of
+ * From the receive buffer libusbkb_recvBuffer it stores the maximum count (byte 0) and the connected count (byte 1) in the
+ * caller's block (libusbkb_state.out) and copies one status byte per possible keyboard from byte 2 on. Handler 1 of
  * D_00453420.
  *
  * @return 0
  */
 int libusbkb_onGetInfoResult(void) {
     struct S40C928 *infoOut = (struct S40C928 *)D_00529098;
-    unsigned char *recvBytes = D_00529140;
+    unsigned char *recvBytes = libusbkb_recvBuffer;
     int i = 0;
     int n = recvBytes[0];
     infoOut->n = n;
@@ -12091,9 +12091,9 @@ int libusbkb_onReadResult(void) {
     sKbData cur;
     unsigned short heldKeys[64];
     unsigned short key;
-    unsigned char *recvBytes = D_00529140;
-    sKbData *out = D_00529000.out;
-    sKbPort *kbPort = &D_00529000.port[D_00529000.arg];
+    unsigned char *recvBytes = libusbkb_recvBuffer;
+    sKbData *out = libusbkb_state.out;
+    sKbPort *kbPort = &libusbkb_state.port[libusbkb_state.arg];
     sKbRepeat *repeat = &kbPort->rep;
     int i, j, k;
     if (recvBytes[1] == 0xFF)
@@ -12114,39 +12114,39 @@ int libusbkb_onReadResult(void) {
             out->keys[0] = 0;
             out->n = 1;
         }
-        libusbkb_copyKeyCodes(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
+        libusbkb_copyKeyCodes(libusbkb_state.arg, out->mod, out->led, out->n, out->keys, out->keys);
         return 0;
     }
     switch (repeat->state) {
     case 1:
         if (repeat->count >= repeat->delay) {
             repeat->count = 0;
-            libusbkb_clearKeyRing(D_00529000.arg);
+            libusbkb_clearKeyRing(libusbkb_state.arg);
             if (repeat->delay >= 2)
-                libusbkb_pushKey(D_00529000.arg, 0);
-            libusbkb_pushKey(D_00529000.arg, repeat->last);
+                libusbkb_pushKey(libusbkb_state.arg, 0);
+            libusbkb_pushKey(libusbkb_state.arg, repeat->last);
             if (repeat->rate >= 2)
-                libusbkb_pushKey(D_00529000.arg, 0);
+                libusbkb_pushKey(libusbkb_state.arg, 0);
             repeat->state = 2;
         }
         break;
     case 2:
         if (repeat->count >= repeat->rate) {
             repeat->count = 0;
-            libusbkb_pushKey(D_00529000.arg, repeat->last);
+            libusbkb_pushKey(libusbkb_state.arg, repeat->last);
             if (repeat->rate >= 2)
-                libusbkb_pushKey(D_00529000.arg, 0);
+                libusbkb_pushKey(libusbkb_state.arg, 0);
         }
         break;
     case 0:
         break;
     }
     if (recvBytes[1] == 0) {
-        if (libusbkb_popKey(D_00529000.arg, &key) == 0) {
+        if (libusbkb_popKey(libusbkb_state.arg, &key) == 0) {
             out->n = 1;
             out->keys[0] = key;
-            out->led = D_00529000.prev.led;
-            out->mod = D_00529000.prev.mod;
+            out->led = libusbkb_state.prev.led;
+            out->mod = libusbkb_state.prev.mod;
         } else {
             out->n = 0;
         }
@@ -12166,8 +12166,8 @@ int libusbkb_onReadResult(void) {
             cur.keys[j++] = recvBytes[4 + i];
     }
     cur.n = j;
-    libusbkb_clearKeyRing(D_00529000.arg);
-    if (cur.keys[0] == 0 || cur.mod != D_00529000.prev.mod) {
+    libusbkb_clearKeyRing(libusbkb_state.arg);
+    if (cur.keys[0] == 0 || cur.mod != libusbkb_state.prev.mod) {
         out->keys[0] = 0;
         out->n = 1;
         repeat->last = 0;
@@ -12175,12 +12175,12 @@ int libusbkb_onReadResult(void) {
         out->mod = cur.mod;
         repeat->state = 0;
     } else {
-        if (D_00529000.prev.keys[0] != 0) {
+        if (libusbkb_state.prev.keys[0] != 0) {
             k = 0;
             for (i = 0; i < cur.n; i++) {
-                for (j = 0; j < D_00529000.prev.n && cur.keys[i] != D_00529000.prev.keys[j]; j++)
+                for (j = 0; j < libusbkb_state.prev.n && cur.keys[i] != libusbkb_state.prev.keys[j]; j++)
                     ;
-                if (j == D_00529000.prev.n)
+                if (j == libusbkb_state.prev.n)
                     out->keys[k++] = cur.keys[i];
             }
             out->n = k;
@@ -12191,13 +12191,13 @@ int libusbkb_onReadResult(void) {
         }
         out->led = cur.led;
         out->mod = cur.mod;
-        libusbkb_copyKeyCodes(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
+        libusbkb_copyKeyCodes(libusbkb_state.arg, out->mod, out->led, out->n, out->keys, out->keys);
         if (out->n > 0) {
             repeat->last = out->keys[out->n - 1];
             if (repeat->delay > 0 && repeat->rate > 0)
                 repeat->state = 1;
         } else {
-            libusbkb_copyKeyCodes(D_00529000.arg, cur.mod, cur.led, cur.n, cur.keys, heldKeys);
+            libusbkb_copyKeyCodes(libusbkb_state.arg, cur.mod, cur.led, cur.n, cur.keys, heldKeys);
             for (i = 0; i < cur.n && heldKeys[i] != repeat->last; i++)
                 ;
             if (i == cur.n) {
@@ -12225,13 +12225,13 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onGetLocationResult);
 /**
  * Result handler of call 3 (location): copies the 7-byte reply into the caller's buffer.
  *
- * Fails when byte 6 of the receive buffer D_00529140 is not 0; otherwise copies bytes 0..6 to D_00529000.out. Handler 3
+ * Fails when byte 6 of the receive buffer libusbkb_recvBuffer is not 0; otherwise copies bytes 0..6 to libusbkb_state.out. Handler 3
  * of D_00453420.
  *
  * @return 0, or -1 when the reply reports an error
  */
 int libusbkb_onGetLocationResult(void) {
-    unsigned char *recvBytes = D_00529140;
+    unsigned char *recvBytes = libusbkb_recvBuffer;
     unsigned char *locationOut = D_00529098;
     int i;
     if (recvBytes[6])
@@ -12288,8 +12288,8 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onVblank);
 int libusbkb_onVblank(void) {
     int i;
 
-    for (i = 0; i < D_00529000.n; i++) {
-        sKbRepeat *repeat = &D_00529000.port[i].rep;
+    for (i = 0; i < libusbkb_state.n; i++) {
+        sKbRepeat *repeat = &libusbkb_state.port[i].rep;
         if (repeat->delay > 0 && repeat->rate > 0 && repeat->state != 0 && repeat->state >= 0 && repeat->state < 3)
             repeat->count++;
     }
@@ -12478,11 +12478,11 @@ unsigned short sceUsbKbCnvRawCode(int mode, int modKeys, int ledState, unsigned 
 INCLUDE_ASM("seg/seg_2FE810", libusbkb_convertKeypadCode);
 #ifdef SKIP_ASM
 struct K_D3C0 { unsigned char k; unsigned char p; unsigned short v; };
-extern struct K_D3C0 D_00498FC8[2][21];
+extern struct K_D3C0 libusbkb_keypadCodeTable[2][21];
 /**
  * Converts a keypad key's raw code for the Num Lock state.
  *
- * Looks the code up in the 21-entry table D_00498FC8[@p ledState & 1] (Num Lock is LED bit 0) and returns the matching code
+ * Looks the code up in the 21-entry table libusbkb_keypadCodeTable[@p ledState & 1] (Num Lock is LED bit 0) and returns the matching code
  * with bit 0x4000 set; codes not in the table come back unchanged.
  *
  * @param ledState  the LED state
@@ -12493,8 +12493,8 @@ unsigned short libusbkb_convertKeypadCode(int ledState, unsigned char rawCode) {
     unsigned i;
     int keyCode = rawCode;
     for (i = 0; i < 21; i++) {
-        if (rawCode == D_00498FC8[ledState & 1][i].k) {
-            keyCode = D_00498FC8[ledState & 1][i].v | 0x4000;
+        if (rawCode == libusbkb_keypadCodeTable[ledState & 1][i].k) {
+            keyCode = libusbkb_keypadCodeTable[ledState & 1][i].v | 0x4000;
             break;
         }
     }
@@ -12512,7 +12512,7 @@ static inline void kbPortSetReadMode(sKbPort *kbPort, unsigned readMode) {
         kbPort->rep.count = 0;
         kbPort->rep.wr = 0;
         kbPort->rep.rd = 0;
-        D_00529000.prev.n = 0;
+        libusbkb_state.prev.n = 0;
         kbPort->rep.last = 0;
     }
     kbPort->f0C = readMode;
@@ -12529,11 +12529,11 @@ static inline void kbPortSetReadMode(sKbPort *kbPort, unsigned readMode) {
  * @return 0, -11 for a bad keyboard or -12 for a bad mode
  */
 int sceUsbKbSetReadMode(int kbIndex, unsigned readMode) {
-    if (kbIndex >= D_00529000.n)
+    if (kbIndex >= libusbkb_state.n)
         return -11;
     if (readMode >= 2)
         return -12;
-    kbPortSetReadMode(&D_00529000.port[kbIndex], readMode);
+    kbPortSetReadMode(&libusbkb_state.port[kbIndex], readMode);
     return 0;
 }
 #endif
@@ -12545,7 +12545,7 @@ extern void q_00425C60(char *, int) __asm__("scePrintf");
 /**
  * Clears a keyboard's input buffer on the IOP side and its key ring and repeat state here.
  *
- * Takes the semaphore D_00453438 and sends RPC 6 with the keyboard number asynchronously (libusbkb_onRpcDone releases the
+ * Takes the semaphore libusbkb_rpcSema and sends RPC 6 with the keyboard number asynchronously (libusbkb_onRpcDone releases the
  * semaphore when it ends), then resets the keyboard's repeat state, repeated key and ring.
  *
  * Quirks: a failed call prints the message of the read call (D_004982F8) and returns with the semaphore still taken.
@@ -12556,18 +12556,18 @@ extern void q_00425C60(char *, int) __asm__("scePrintf");
 int sceUsbKbClearRbuf(unsigned kbIndex) {
     int rpcResult;
     sKbPort *kbPort;
-    if (D_00453438 == -1)
+    if (libusbkb_rpcSema == -1)
         return -1;
-    if (kbIndex >= D_00529000.n)
+    if (kbIndex >= libusbkb_state.n)
         return -11;
-    D_00529100[0] = kbIndex;
-    WaitSema(D_00453438);
-    rpcResult = sceSifCallRpc(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, libusbkb_onRpcDone, 0);
+    libusbkb_sendBuffer[0] = kbIndex;
+    WaitSema(libusbkb_rpcSema);
+    rpcResult = sceSifCallRpc(&libusbkb_client, 6, 1, libusbkb_sendBuffer, 16, libusbkb_recvBuffer, 0, libusbkb_onRpcDone, 0);
     if (rpcResult != 0) {
         q_00425C60(D_004982F8, rpcResult);
         return -2;
     }
-    kbPort = &D_00529000.port[kbIndex];
+    kbPort = &libusbkb_state.port[kbIndex];
     kbPort->rep.state = 0;
     kbPort->rep.count = 0;
     kbPort->rep.last = 0;
@@ -12618,7 +12618,7 @@ INCLUDE_ASM("seg/seg_2FE810", log);
 struct E40D610 { int type; char *name; double arg1; double arg2; double retval; int err; };
 extern const int D_00499688[]; /* fdlibm _LIB_VERSION (newlib: _CONST) */
 extern char D_00499070[];
-extern double D_00499680[];
+extern double __infinity[];
 extern double core_40D610(double) __asm__("__ieee754_log");
 extern int isn_40D610(double) __asm__("isnan");
 extern int cmp_40D610(double, double) __asm__("dpcmp");
@@ -12630,7 +12630,7 @@ extern int *__errno(void);
  *
  * Computes it with __ieee754_log. Unless the library mode D_00499688 is -1 (IEEE), @p x is NaN (isnan) or
  * positive, it fills an error record (name D_00499070, both arguments @p x, result -3.4e38 in SVID mode 0 or 0 -
- * D_00499680 otherwise). For 0 the type is 2 (singularity) and errno (__errno) becomes 34 in POSIX mode 2, else
+ * __infinity otherwise). For 0 the type is 2 (singularity) and errno (__errno) becomes 34 in POSIX mode 2, else
  * 33 when matherr returns 0; below 0 the type is 1 (domain) with errno 33. A non-zero err field overrides errno.
  * The double arithmetic runs through the soft-float routines (dpcmp, dpsub). cPS2GraphicsMan_AddTexture uses it to pick
  * a texture's mip level.
@@ -12651,7 +12651,7 @@ double log(double x) {
     if (ver == 0)
         mathErr.retval = -3.4028234663852886e+38;
     else
-        mathErr.retval = dpsub(zero, D_00499680[0]);
+        mathErr.retval = dpsub(zero, __infinity[0]);
     if (cmp_40D610(x, 0.0) == 0) {
         mathErr.type = 2;
         if (D_00499688[0] == 2)
@@ -12685,7 +12685,7 @@ extern const enum fdlibm_version_D758 fdlib_version_D758 __asm__("D_00499688");
 #define _LIB_VERSION_D758 fdlib_version_D758
 #define errno_D758 (*__errno())
 #define HUGE_D758 ((float)3.40282346638528860e+38)
-#define HUGE_VAL_D758 (D_00499680[0])
+#define HUGE_VAL_D758 (__infinity[0])
 static const float
 o_threshold_D758=  8.8721679688e+01,  /* 0x42b17180 */
 u_threshold_D758= -1.0397208405e+02;  /* 0xc2cff1b5 */
@@ -12819,7 +12819,7 @@ extern int matherr_DA10(struct exception_DA10 *) __asm__("matherr");
 #define _LIB_VERSION_DA10 fdlib_version_DA10
 #define errno_DA10 (*__errno())
 #define HUGE_DA10 ((float)3.40282346638528860e+38)
-#define HUGE_VAL_DA10 (D_00499680[0])
+#define HUGE_VAL_DA10 (__infinity[0])
 
 	/**
 	 * Returns the natural logarithm of a float, with the math library's error handling.
@@ -13116,14 +13116,14 @@ do {								\
 } while (0)
 
 static const float one_E300 = 1.0;
-extern const float D_004991F0[];	/* Zero[] = {0.0, -0.0} */
-#define Zero_E300 D_004991F0
+extern const float ef_fmod_Zero[];	/* Zero[] = {0.0, -0.0} */
+#define Zero_E300 ef_fmod_Zero
 
 	/**
 	 * Computes the float remainder of x / y with the sign of x, without error handling.
 	 *
 	 * Works on the integer bits: y = 0, infinite x or NaN y give NaN; |x| < |y| returns x; |x| = |y| a signed zero from
-	 * D_004991F0. Otherwise it aligns both mantissas (subnormals included), subtracts by shift and compare one bit at a
+	 * ef_fmod_Zero. Otherwise it aligns both mantissas (subnormals included), subtracts by shift and compare one bit at a
 	 * time and rebuilds the result.
 	 *
 	 * @param x  the dividend
@@ -14004,9 +14004,9 @@ float copysignf(float x, float y) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", __do_global_dtors);
 #ifdef SKIP_ASM
-extern void (**D_0045343C[])(void);
+extern void (**__do_global_dtors_p[])(void);
 /**
- * Runs the static destructors that the list pointer D_0045343C walks, in order, once each.
+ * Runs the static destructors that the list pointer __do_global_dtors_p walks, in order, once each.
  *
  * The pointer walks a null-terminated list and is advanced before each call, so a destructor that ends the program does
  * not run twice. exit calls it first, passing its status, which is ignored.
@@ -14015,10 +14015,10 @@ extern void (**D_0045343C[])(void);
  */
 void __do_global_dtors(int exitStatus) {
     void (**dtorSlot)(void);
-    while (*D_0045343C[0]) {
-        dtorSlot = D_0045343C[0];
+    while (*__do_global_dtors_p[0]) {
+        dtorSlot = __do_global_dtors_p[0];
         dtorSlot++;
-        D_0045343C[0] = dtorSlot;
+        __do_global_dtors_p[0] = dtorSlot;
         dtorSlot[-1]();
     }
 }
@@ -14058,16 +14058,16 @@ void __do_global_ctors(void)
 //100%
 INCLUDE_ASM("seg/seg_2FE810", __main);
 #ifdef SKIP_ASM
-extern int D_0052AD98[];
+extern int __main_initialized[];
 extern void __do_global_ctors(void);
 /**
- * Runs the static constructors once (__do_global_ctors), guarded by the flag D_0052AD98.
+ * Runs the static constructors once (__do_global_ctors), guarded by the flag __main_initialized.
  *
  * main (main_impl) calls it first; g++ inserts this call at the start of main.
  */
 void __main(void) {
-    if (D_0052AD98[0] == 0) {
-        D_0052AD98[0] = 1;
+    if (__main_initialized[0] == 0) {
+        __main_initialized[0] = 1;
         __do_global_ctors();
     }
 }

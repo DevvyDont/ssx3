@@ -389,16 +389,16 @@ struct sEconPrize_151040
     int key;
     int prize[4];
 };
-extern sEconPrize_151040 D_004405A0[];
+extern sEconPrize_151040 cBELibrary_cashPrizeTable[];
 
 /**
  * Returns the prize money for medal @p medal.
  *
  * For @p place 6-11: cBENewRaceInterface_getPeakRewardAmount(race, @p place, tier) with tier 2 for medals 0-1, 1 for medal 2 and 0 for medal 3.
- * Otherwise the D_004405A0 row (17 rows) whose key is @p key, column @p medal, times 100. 0 when nothing matches.
+ * Otherwise the cBELibrary_cashPrizeTable row (17 rows) whose key is @p key, column @p medal, times 100. 0 when nothing matches.
  *
  * @param medal  the medal (eBEMedalID), 0-3
- * @param key  the track key matched against D_004405A0
+ * @param key  the track key matched against cBELibrary_cashPrizeTable
  * @param place  the event (6-11 are the peak events)
  * @return the money
  */
@@ -426,20 +426,20 @@ int cBEEconInterface::getCashReward(int medal, int key, int place)
     {
         for (int i = 0; i < 17; i++)
         {
-            if (D_004405A0[i].key != key) continue;
+            if (cBELibrary_cashPrizeTable[i].key != key) continue;
             switch (medal)
             {
             case kMEDAL_PLATINUM:
-                reward = D_004405A0[i].prize[0] * 100;
+                reward = cBELibrary_cashPrizeTable[i].prize[0] * 100;
                 break;
             case kMEDAL_GOLD:
-                reward = D_004405A0[i].prize[1] * 100;
+                reward = cBELibrary_cashPrizeTable[i].prize[1] * 100;
                 break;
             case kMEDAL_SILVER:
-                reward = D_004405A0[i].prize[2] * 100;
+                reward = cBELibrary_cashPrizeTable[i].prize[2] * 100;
                 break;
             case kMEDAL_BRONZE:
-                reward = D_004405A0[i].prize[3] * 100;
+                reward = cBELibrary_cashPrizeTable[i].prize[3] * 100;
                 break;
             }
         }
@@ -575,7 +575,7 @@ extern "C" void* cBEBoltDB_getCharGroups(void* self, int kind);
 int cBEBoltDB_getNumCharBolts(void* self, int i);
 extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
 extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* self, int id, int on);
-extern char D_004A6750[];
+extern char cBELibrary_boltDB[];
 
 
 
@@ -616,7 +616,7 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  * Applies a character profile's starting item ownership: grants each group prize, marks owned items, and marks free
  * or built-in items.
  *
- * For the character kind (+0xBC0) from the item database D_004A6750: owns each group's prize item (cBECharProfileDB_setBoltVisible);
+ * For the character kind (+0xBC0) from the item database cBELibrary_boltDB: owns each group's prize item (cBECharProfileDB_setBoltVisible);
  * owned items (flag 0x10) get flags 0x26; items priced 0 get flag 2, and items priced kBoltPriceBuiltIn (-1) also
  * become owned. If any did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and cBECharProfileDB_buildBoltList
  * call it.
@@ -625,7 +625,7 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
 void cBECharProfileDB::applyStartingBolts()
 {
     cBECharProfileDB* self = this;
-    void* db = D_004A6750;
+    void* db = cBELibrary_boltDB;
     int n = cBEBoltDB_getNumCharGroups(db, self->mCharacterID);
     sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)cBEBoltDB_getCharGroups(db, self->mCharacterID);
     for (int i = 0; i < n; i++, prizeGroup++)
@@ -968,7 +968,7 @@ extern "C" void cBECharProfileDB_applyStartingBolts(cBECharProfileDB* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern int kBolt_Num;
 extern const char str_Profile_Bolts_Map[];
-extern char D_004A6750[];
+extern char cBELibrary_boltDB[];
 
 struct sEconDef_151A88
 {
@@ -992,7 +992,7 @@ struct sEconItems_151A88
  * Rebuilds a character profile's item list for character @p k from the item database and applies the starting
  * ownership.
  *
- * Sets the kind (+0xBC0) and count (+0x28C) from D_004A6750; allocates the id-to-slot lookup (+0x288, kBolt_Num
+ * Sets the kind (+0xBC0) and count (+0x28C) from cBELibrary_boltDB; allocates the id-to-slot lookup (+0x288, kBolt_Num
  * shorts, "Profile_Bolts_Map") on first use and fills it with -1; gives each item a slot with flags 0 and clears the
  * rest of the 525 slots to id -1. Ends with cBECharProfileDB_applyStartingBolts.
  *
@@ -1000,7 +1000,7 @@ struct sEconItems_151A88
  */
 void cBECharProfileDB::buildBoltList(int k)
 {
-    void* db = D_004A6750;
+    void* db = cBELibrary_boltDB;
     sEconDef_151A88* itemDef = (sEconDef_151A88*)cBEBoltDB_getCharBolts(db, k);
     int n = cBEBoltDB_getNumCharBolts(db, k);
     mCharacterID = k;

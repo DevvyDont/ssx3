@@ -662,12 +662,12 @@ struct sGifQuad {
     unsigned int w[4];
 } __attribute__((aligned(16)));
 
-extern sGifQuad D_0044B430;
+extern sGifQuad dma_vifUnmaskPath3Quad;
 
 /**
  * Starts a normal-mode GIF DMA (D2) of @p qwc quadwords from @p madr.
  *
- * Writes the quadword D_0044B430 to the VIF1 FIFO (0x10005000) and 4 (intermittent mode) to GIF_MODE first. An address
+ * Writes the quadword dma_vifUnmaskPath3Quad to the VIF1 FIFO (0x10005000) and 4 (intermittent mode) to GIF_MODE first. An address
  * above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad form. CHCR
  * 0x101 (start, from memory). @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the
  * transfer to finish. Callers: cPS2GraphicsMan_flipDisplayBuffers and cPS2LensFxMan_sampleZBuffer.
@@ -683,7 +683,7 @@ extern "C" void dma_sendGifNormal(unsigned int madr, int qwc, int flags)
         while (*(volatile int*)0x1000A000 & 0x100) {
         }
     }
-    *(sGifQuad*)0x10005000 = D_0044B430;
+    *(sGifQuad*)0x10005000 = dma_vifUnmaskPath3Quad;
     *(volatile int*)0x10003010 = 4;
     if (madr > 0x6FFFFFFF) {
         *(volatile unsigned int*)0x1000A010 = (madr & 0x3FF0) | 0x80000000;
@@ -2972,7 +2972,7 @@ extern "C" void DeleteSema(int);
 extern "C" void cTextureMan_purgeAll(void*);
 void* tIntcHandlerTable_shutdown(void* self);
 void operator_delete(int* ptr);
-extern char D_005059D8[];
+extern char cPS2GraphicsMan_intcHandlerTable[];
 
 /**
  * Shuts the PS2 renderer down, undoing cPS2GraphicsMan_Init.
@@ -2980,7 +2980,7 @@ extern char D_005059D8[];
  * Calls DisableIntc(2) and removes the INTC 2 handler (mIntcHandlerId), calls DisableDmac(1) and removes the DMAC 0
  * handler (mDmacHandlerId), terminates and deletes the kick thread (mKickThreadId), deletes mKickSema and mQueueMutex,
  * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (cTextureMan_purgeAll, mTexMan), and
- * finally calls tIntcHandlerTable_shutdown on the render queue D_005059D8.
+ * finally calls tIntcHandlerTable_shutdown on the render queue cPS2GraphicsMan_intcHandlerTable.
  */
 void cPS2GraphicsMan::Purge()
 {
@@ -2995,7 +2995,7 @@ void cPS2GraphicsMan::Purge()
     operator_delete((int*)mpDeferMan);
     cTextureMan_purgeAll(mTexMan);
     operator_delete((int*)mTexMan);
-    tIntcHandlerTable_shutdown(D_005059D8);
+    tIntcHandlerTable_shutdown(cPS2GraphicsMan_intcHandlerTable);
 }
 #endif
 
@@ -4094,7 +4094,7 @@ struct sRect_7A10 {
 
 
 extern sDrawState sDrawState_s_defaultDrawState_rs7A10 __asm__("sDrawState_s_defaultDrawState");
-extern char D_005059D8[];
+extern char cPS2GraphicsMan_intcHandlerTable[];
 extern "C" void cPS2DeferManager_buildDmaChains(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
 extern "C" void* WaitSema(int sema);  // WaitSema (returns in $2: the call clobbers v0)
 extern "C" void SignalSema(int sema);
@@ -4221,7 +4221,7 @@ void cGfx_7A10::EndFrame_impl()
     cPS2DeferManager_resetFrame(gfxBase->mpDeferMan);
     func_003673D0(gfxBase->mTexMan);
     ResetViewport();
-    func_00361F90(D_005059D8);
+    func_00361F90(cPS2GraphicsMan_intcHandlerTable);
 }
 #endif
 
@@ -4809,7 +4809,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawString3D1);
 
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
-extern int D_004A4474;
+extern int SPRMan;
 typedef int cQuad128_CF0 __attribute__((mode(TI)));
 
 // PORT: PS2-only VU0 inline asm (vector subtract); the PC port needs a C fallback.
@@ -4896,7 +4896,7 @@ void cPS2GraphicsMan::DrawString3D1(cFont& font, float x, float y, const unsigne
         computeMatrices();
     }
     unsigned int buf = mVifCursor;
-    unsigned long* packetHead = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    unsigned long* packetHead = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     unsigned long* packetCursor = packetHead + 10;
     int nloop = 0;
     if (((&mViewportStack[0]))[mViewportDepth].mProjectionType != 0) {
@@ -4970,7 +4970,7 @@ void cPS2GraphicsMan::DrawString3D1(cFont& font, float x, float y, const unsigne
            ((long)Bits_CF0(1.0f) << 32);
     packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
     packetHead[9] = 21074;
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packetCursor, 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, packetCursor, 4);
     cPS2DeferManager* ring = mpDeferMan;
     sPtRenderState* rs = ((sPtRenderState*)m_pCurrentDrawState);
     mVifCursor = next + 0x10;
@@ -5005,7 +5005,7 @@ struct sPtEnt_9860 {
 
 
 extern int D_004A4380;
-extern int D_004A4474;
+extern int SPRMan;
 extern char D_12B0[];
 extern char D_12B8[];
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
@@ -5063,7 +5063,7 @@ void cPS2GraphicsMan::RenderTriStrip(int numVerts, tBxVertex* src, int)
         prim = 76;
         regs = 1055;
     }
-    int dma = D_004A4474;
+    int dma = SPRMan;
     unsigned int buf = mVifCursor;
     unsigned long* packet = cPS2ScratchPad_claimBuffer(dma, buf, -1, 0);
     int qwc = ((cPS2ScratchPad*)dma)->mBlockSize;
@@ -5131,7 +5131,7 @@ struct sPtVtVP_A260 {
 
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 
-extern int D_004A4474;
+extern int SPRMan;
 
 extern int D_004A4380;
 extern char D_12B0[];
@@ -5178,7 +5178,7 @@ unsigned long* cPS2GraphicsMan::beginTriStripPacket(int n)
     }
     unsigned int buf = mVifCursor;
     mStripPacketStart = buf;
-    (*(unsigned long**)&mStripCursor) = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    (*(unsigned long**)&mStripCursor) = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     ((unsigned long*)mStripCursor)[0] = (n * 3 + 4) | 0x10000000;
     ((unsigned long*)mStripCursor)[1] = 0;
     ((unsigned long*)mStripCursor)[2] = 0;
@@ -5212,13 +5212,13 @@ struct sPtEnt_A430 {
 
 
 
-extern int D_004A4474;
+extern int SPRMan;
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
 
 /**
  * Closes the packet opened by cPS2GraphicsMan_beginTriStripPacket and queues it in the deferred draw list.
  *
- * Ends the packet at mStripCursor with cPS2ScratchPad_flushBufferTo (DMA channel D_004A4474) and moves mVifCursor there. While
+ * Ends the packet at mStripCursor with cPS2ScratchPad_flushBufferTo (DMA channel SPRMan) and moves mVifCursor there. While
  * mpDeferMan holds fewer than 2600 entries it appends a 0x80-byte entry with the current draw state (low 5 bits of its
  * third word from the manager's mActivePortIndex), the packet's start (mStripPacketStart) and end and the view index
  * mActiveViewIndex. Then mVifCursor skips 0x10 bytes, bits 6-9 of the draw state's first word and the low 30 bits of
@@ -5228,7 +5228,7 @@ extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, 
 // PORT: uncached (0x30000000) pointers held in int.
 void cPS2GraphicsMan::endTriStripPacket()
 {
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, ((unsigned long*)mStripCursor), 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, ((unsigned long*)mStripCursor), 4);
     mVifCursor = next;
     unsigned int buf = mStripPacketStart;
     cPS2DeferManager* ring = mpDeferMan;
@@ -6719,7 +6719,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_TakeScreenGrab);
 
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
-extern int D_004A4474;
+extern int SPRMan;
 typedef int cQuad128_CC98 __attribute__((mode(TI)));
 
 struct sPtTex_CC98 {
@@ -6778,7 +6778,7 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     int dispBlock = self->mDisplayBufferAddress << 5;
     int dispBufferWidth = self->mDisplayBufferWidth;
     unsigned int zbufPage = self->mCurrentZBufferPage;
-    unsigned long* packet = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    unsigned long* packet = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     *(cQuad128_CC98*)packet = 0x10000013;
     packet[2] = 0;
     packet[3] = 0x5000001200000000UL;
@@ -6826,7 +6826,7 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     packet[2] = (unsigned long)self->vx | (unsigned long)(self->vx + (self->vw - 1)) << 16 | (unsigned long)self->vy << 32 | (unsigned long)(self->vy + (self->vh - 1)) << 48;
     packet[3] = 0x40;
     packet += 4;
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packet, 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, packet, 4);
     self->bufAddr = next;
     cPS2DeferManager* ring = self->ring;
     sPtRenderState* rs = self->top;
@@ -7979,7 +7979,7 @@ struct sPtGfx_0518 {
 };
 
 extern int cRenderToggles_m_DisableStaticEmitters;
-extern int D_004A4474;
+extern int SPRMan;
 extern char D_0[];
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
@@ -8017,7 +8017,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
     self->top->m_bitGroups[2] &= 0xE00003FF;
     self->top->m_bitGroups[2] = (self->top->m_bitGroups[2] & ~0x3E0) | 0xE0;
     unsigned int buf = self->bufAddr;
-    unsigned long* packet = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    unsigned long* packet = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     packet[0] = 0x10000017;
     packet[1] = 0;
     packet[2] = 0;
@@ -8027,7 +8027,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
     packet[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
     packet[1] = (unsigned long)34816 << 45;
     packet += 2;
-    self->bufAddr = cPS2ScratchPad_flushBufferTo(D_004A4474, packet, 4);
+    self->bufAddr = cPS2ScratchPad_flushBufferTo(SPRMan, packet, 4);
     if (self->texReady == 0) {
         ((cPS2GraphicsMan*)self)->computeMatrices();
     }
@@ -8077,7 +8077,7 @@ struct sHdr_07A0 {
 } __attribute__((aligned(16)));
 
 extern int cRenderToggles_m_DisableDynamicEmitters;
-extern int D_004A4474;
+extern int SPRMan;
 extern char D_510[];
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
@@ -8136,7 +8136,7 @@ void cPS2GraphicsMan::RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
     int nb = n / 64 + 1;
     for (int i = 0; i < nb; i++) {
         unsigned int buf = mVifCursor;
-        unsigned long* writePtr = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+        unsigned long* writePtr = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
         writePtr[0] = 0x1000009A;
         writePtr[1] = 0;
         writePtr[2] = 0;
@@ -8184,7 +8184,7 @@ void cPS2GraphicsMan::RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
         writePtr[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
         writePtr[1] = (unsigned long)34816 << 45;
         writePtr += 2;
-        unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, writePtr, 4);
+        unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, writePtr, 4);
         mVifCursor = next;
         cPS2DeferManager* ring = mpDeferMan;
         sDrawState* rs = m_pCurrentDrawState;
@@ -8258,7 +8258,7 @@ struct sPtSegHdr {
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern int D_004A4474;
+extern int SPRMan;
 extern int cRenderToggles_m_DisableDynamicEmitters;
 struct sPS2GfxView_0CE0 {  // PORT: a view of cPS2GraphicsMan (render/ps2graphicsman.h); the typed members schedule cPS2GraphicsMan_RenderDynamicParticleEmitter1 differently
     char pad_0x0[0xE84];
@@ -8379,7 +8379,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
     unsigned int prog = (unsigned int)(obj->alt != 0 ? D_F10 : D_A00) >> 3;
     for (int i = 0; i < nb; i++) {
         unsigned int buf = self->bufAddr;
-        unsigned long* writePtr = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+        unsigned long* writePtr = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
         writePtr[0] = 0x1000007C;
         writePtr[1] = 0;
         writePtr[2] = 0;
@@ -8439,7 +8439,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
         writePtr[0] = (unsigned long)(prog | 0x14000000) << 32;
         writePtr[1] = (unsigned long)34816 << 45;
         writePtr += 2;
-        unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, writePtr, 4);
+        unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, writePtr, 4);
         self->bufAddr = next;
         cPS2DeferManager* ring = self->ring;
         sPtRenderState* rs = self->top;
@@ -8503,7 +8503,7 @@ struct sMat_1310 {
 
 
 
-extern int D_004A4474;
+extern int SPRMan;
 extern char D_0[];
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
@@ -8579,7 +8579,7 @@ void cPS2GraphicsMan::RenderSnowBoxFlakes(const tSnowBoxData& obj)
     }
     sMat_1310 xform = MulMat_1310(*(sMat_1310*)&mViewProj, (*(sMat_1310*)&obj.mSnowBoxToWorldMatrix));
     unsigned int buf = mVifCursor;
-    unsigned long* packet = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    unsigned long* packet = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     packet[0] = 0x1000000D;
     packet[1] = 0;
     packet[2] = 0;
@@ -8602,7 +8602,7 @@ void cPS2GraphicsMan::RenderSnowBoxFlakes(const tSnowBoxData& obj)
     packet[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
     packet[1] = (unsigned long)34816 << 45;
     packet += 2;
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packet, 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, packet, 4);
     mVifCursor = next;
     cPS2DeferManager* ring = mpDeferMan;
     sDrawState* rs = m_pCurrentDrawState;
@@ -8666,7 +8666,7 @@ struct sMat_16F0 {
 
 
 
-extern int D_004A4474;
+extern int SPRMan;
 extern char D_408[];
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
@@ -8742,7 +8742,7 @@ void cPS2GraphicsMan::RenderSnowBoxFluffs(const tSnowBoxData& obj)
     }
     sMat_16F0 xform = MulMat_16F0(*(sMat_16F0*)&mViewProj, (*(sMat_16F0*)&obj.mSnowBoxToWorldMatrix));
     unsigned int buf = mVifCursor;
-    unsigned long* packet = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    unsigned long* packet = cPS2ScratchPad_claimBuffer(SPRMan, buf, -1, 0);
     packet[0] = 0x1000000D;
     packet[1] = 0;
     packet[2] = 0;
@@ -8765,7 +8765,7 @@ void cPS2GraphicsMan::RenderSnowBoxFluffs(const tSnowBoxData& obj)
     packet[0] = (unsigned long)(((unsigned int)D_408 >> 3) | 0x14000000) << 32;
     packet[1] = (unsigned long)34816 << 45;
     packet += 2;
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packet, 4);
+    unsigned int next = cPS2ScratchPad_flushBufferTo(SPRMan, packet, 4);
     mVifCursor = next;
     cPS2DeferManager* ring = mpDeferMan;
     sDrawState* rs = m_pCurrentDrawState;
@@ -9403,7 +9403,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_runDmaKickThread);
 #ifdef SKIP_ASM
 
 
-extern t4Vector D_0044B9C0;
+extern t4Vector cPS2GraphicsMan_vifMaskPath3Quad;
 extern "C" void* WaitSema(int sema);
 extern "C" void SignalSema(int sema);
 extern "C" void FlushCache(int);
@@ -9417,7 +9417,7 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* self, int a,
  * it frees the in-flight buffer (mBufState[mInFlightIndex] = 0), sets the state to 0 and flips with cPS2GraphicsMan_flipDisplayBuffers(self,
  * 1, 0). When idle and the queued buffer is ready (mBufState[mQueuedIndex] == 2) it waits for the VIF1 and GIF
  * channels, VIF1 and the GS FIFO to go idle, makes that buffer the in-flight one (state 3), copies its second-phase
- * addresses (mInFlightVif2, mInFlightGif2), sets mKickState to 1, flushes the cache, pushes the quadword D_0044B9C0
+ * addresses (mInFlightVif2, mInFlightGif2), sets mKickState to 1, flushes the cache, pushes the quadword cPS2GraphicsMan_vifMaskPath3Quad
  * into the VIF1 FIFO, sets GIF_MODE to 4 and starts the GIF (mQueuedGif1) and VIF1 (mQueuedVif1) chain DMAs. When
  * mKickState is 2 (first phase done) it calls mPhase2Callback(mPhase2CallbackArg) if set, does the same FIFO/GIF_MODE
  * setup, starts the second-phase chains and sets the state to 3. Then releases mQueueMutex. The interrupt handlers
@@ -9457,7 +9457,7 @@ void* cPS2GraphicsMan::runDmaKickThread()
             FlushCache(0);
             while (*(volatile int*)0x1000D000 & 0x100) {
             }
-            *(t4Vector*)0x10005000 = D_0044B9C0;
+            *(t4Vector*)0x10005000 = cPS2GraphicsMan_vifMaskPath3Quad;
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
@@ -9471,7 +9471,7 @@ void* cPS2GraphicsMan::runDmaKickThread()
             if (self->mPhase2Callback) {
                 self->mPhase2Callback(self->mPhase2CallbackArg);
             }
-            *(t4Vector*)0x10005000 = D_0044B9C0;
+            *(t4Vector*)0x10005000 = cPS2GraphicsMan_vifMaskPath3Quad;
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
@@ -9502,7 +9502,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_flipDisplayBuffers);
 // 0x5A80 zbp, 0x5A84 drawFbp, 0x5A88 dispFbp.
 extern "C" void dma_sendGifNormal(unsigned int madr, int qwc, int flags);
 
-extern ulong D_004FFCC0[];
+extern ulong cPS2GraphicsMan_flipPacketBuffer[];
 
 static inline int clamp_382AF0(int v, int lo, int hi)
 {
@@ -9527,7 +9527,7 @@ static inline int gsCoord_382AF0(int v)
  * the magnification fits the display width into 1550 clocks, else MAGH mMagH, MAGV mMagV and a height doubled in
  * interlaced field mode) and BGCOLOR 0.
  *
- * Then builds a GS packet in D_004FFCC0 (uncached accelerated): when mFilterEnabled is set, a pass that copies the draw
+ * Then builds a GS packet in cPS2GraphicsMan_flipPacketBuffer (uncached accelerated): when mFilterEnabled is set, a pass that copies the draw
  * buffer into the display buffer as 32-pixel-wide textured sprite strips coloured by the brightness mBrightnessColour
  * times mScreenBrightness and alpha mScreenAlpha (blended when not 128); the draw context (FRAME_1/2, ZBUF_1/2,
  * XYOFFSET_1/2, FBA, TEXA, PRMODECONT, COLCLAMP, DTHE from mDither, DIMX from mDitherMatrix, PABE, SCANMSK, TEXFLUSH);
@@ -9610,7 +9610,7 @@ void cPS2GraphicsMan::flipDisplayBuffers(int en1, int waitVsync)
     // BGCOLOR
     *(volatile ulong*)0x120000E0 = 0;
 
-    gsPacket = (ulong*)((unsigned int)D_004FFCC0 | 0x30000000);
+    gsPacket = (ulong*)((unsigned int)cPS2GraphicsMan_flipPacketBuffer | 0x30000000);
 
     if (mFilterEnabled != 0) {
         // Copy the draw buffer into the display buffer: GIFtag (11 x A+D)
@@ -9807,9 +9807,9 @@ void cPS2GraphicsMan::flipDisplayBuffers(int en1, int waitVsync)
     gsPacket[5] = 65;
     gsPacket += 6;
     {
-        unsigned int size = ((unsigned int)gsPacket & 0x0FFFFFFF) - (unsigned int)D_004FFCC0;
+        unsigned int size = ((unsigned int)gsPacket & 0x0FFFFFFF) - (unsigned int)cPS2GraphicsMan_flipPacketBuffer;
         __asm__ __volatile__("sync.l"); // PORT: EE memory barrier before the DMA kick
-        dma_sendGifNormal((unsigned int)D_004FFCC0, size >> 4, 6);
+        dma_sendGifNormal((unsigned int)cPS2GraphicsMan_flipPacketBuffer, size >> 4, 6);
     }
 }
 #endif
@@ -10880,7 +10880,7 @@ static inline sMat_5C10 ScaleMat_5C10(const sMat_5C10& m, const t4Vector& v)
     return d;
 }
 
-extern int D_004A4474;
+extern int SPRMan;
 extern "C" unsigned long* cPS2ScratchPad_claimBuffer(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, int a2);
 extern "C" void cPS2GraphicsMan_computeMatrices(cPS2GraphicsMan* self);
@@ -10892,7 +10892,7 @@ extern "C" void vif_appendObjectConstants_5C10(sPtGfx_5C10* gfx, sMat_5C10* m, s
  * When the mesh was updated since the last draw (+0x1A4) it clears the flag and swaps the buffer index (+0x1A0).
  * Recomputes the matrices (cPS2GraphicsMan_computeMatrices) when mMatricesValid is 0. Sets the current draw state's (m_pCurrentDrawState)
  * bits 6-9 of word 0 to 3, clears the low 30 bits of word +0xC and sets its texture to @p tex. Opens a packet at
- * mVifCursor (cPS2ScratchPad_claimBuffer on D_004A4474) and writes vif_appendObjectConstants's VU constants: *@p mat scaled by the mesh range
+ * mVifCursor (cPS2ScratchPad_claimBuffer on SPRMan) and writes vif_appendObjectConstants's VU constants: *@p mat scaled by the mesh range
  * (+0x194) in x, y and z, the unscaled matrix, @p flag as the extra matrix, and flags 34 when @p flag is set else 32;
  * then a DMA call to the current buffer (+0x1AC or +0x1B0). Closes the packet (cPS2ScratchPad_flushBufferTo), adds a 0x80-byte defer
  * manager entry as lineStripPacket_close does (when fewer than 2600) and moves mVifCursor past it. Slot 8 of the grid-mesh
@@ -10924,12 +10924,12 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
     sc.z = meshRange;
     sc.w = 1.0f;
     sMat_5C10 scaledMatrix = ScaleMat_5C10(*mat, sc);
-    char* packetCursor = (char*)cPS2ScratchPad_claimBuffer(D_004A4474, addr, -1, 0);
+    char* packetCursor = (char*)cPS2ScratchPad_claimBuffer(SPRMan, addr, -1, 0);
     vif_appendObjectConstants_5C10(self->gfx, &scaledMatrix, &baseMatrix, &sc, flag, 0, flag ? 34 : 0x20, &packetCursor);
     *(ulong*)packetCursor = ((ulong)self->tags[self->buf] << 32) | 0x50000000;
     *(ulong*)(packetCursor + 8) = 0;
     packetCursor += 0x10;
-    addr = cPS2ScratchPad_flushBufferTo(D_004A4474, (unsigned long*)packetCursor, 4);
+    addr = cPS2ScratchPad_flushBufferTo(SPRMan, (unsigned long*)packetCursor, 4);
     cPS2DeferManager* ring = self->gfx->ring;
     sPtRS_5C10* rs = self->gfx->top;
     unsigned int cur = self->gfx->bufAddr;
@@ -11568,8 +11568,8 @@ extern sShadowCfg_6E78 D_004A45D4;
 struct sShadowOpt_6E78 {
     int fba;
 };
-extern sShadowOpt_6E78 D_004A45CC;
-extern int D_004A5B84;
+extern sShadowOpt_6E78 cBoardTrail_m_DrawFixupLayer;
+extern int cPS2ScratchPad_freeSpace;
 extern sRS_6E78 sDrawState_s_defaultDrawState_rs6E78 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void DmaBegin_6E78(sPkt_6E78* pkt, unsigned int addr)
@@ -11662,12 +11662,12 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, cPS2GraphicsMan* self)
  *
  * Resets the current draw state (m_pCurrentDrawState) to sDrawState_s_defaultDrawState, sets its layer and blend bits
  * and its texture to _EffectTexMap[D_004A45D4], recomputes the matrices (cPS2GraphicsMan_computeMatrices) when mMatricesValid is 0 and
- * reads the screen width (virtual slot 10). Each pass is a DMA packet at mVifCursor built through D_004A5B84 (VIF
+ * reads the screen width (virtual slot 10). Each pass is a DMA packet at mVifCursor built through cPS2ScratchPad_freeSpace (VIF
  * FLUSH, A+D GS registers, optionally mGuardScale / mGuardOffset unpacked to the VU), followed by trail draws: 1) FRAME
  * writing alpha only, z writes masked, z test always, guard band, ribbon 0-1 untextured (cPS2GraphicsMan_drawTrailRibbons); 2) z test
  * GEQUAL with FBA_1 on, ribbon 0-1 again; 3) z writes on, destination alpha test, FBA_1 off, guard band with z = 0,
- * ribbon 0-1 again; 4) full FRAME, z GEQUAL, FBA_1 when D_004A45CC is set, guard band, then the textured ribbons 2-0,
- * 0-3, 3-4, 4-1 and 1-5 with each trail's alpha (cPS2GraphicsMan_drawTrailRibbonsOwnAlpha). When D_004A45CC is set a last pass (destination alpha
+ * ribbon 0-1 again; 4) full FRAME, z GEQUAL, FBA_1 when cBoardTrail_m_DrawFixupLayer is set, guard band, then the textured ribbons 2-0,
+ * 0-3, 3-4, 4-1 and 1-5 with each trail's alpha (cPS2GraphicsMan_drawTrailRibbonsOwnAlpha). When cBoardTrail_m_DrawFixupLayer is set a last pass (destination alpha
  * test with z GEQUAL, FBA_1 off) draws ribbon 0-1 textured and then restores the z GEQUAL test. Adds one defer manager
  * entry for all of it (when fewer than 2600), moves mVifCursor on and restores the default draw state.
  * cPS2GraphicsMan_vtbl slot 89.
@@ -11698,7 +11698,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     ((sRS_6E78*)m_pCurrentDrawState)->tex = tex;
 
     int width = GetScreenWidth();
-    sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
+    sPkt_6E78* pkt = (sPkt_6E78*)cPS2ScratchPad_freeSpace;
     unsigned int fbp = ((unsigned int)mCurrentFrameBufferPage);
     unsigned int zbp = ((unsigned int)mCurrentZBufferPage);
     unsigned int start = mVifCursor;
@@ -11772,7 +11772,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, (ulong)fbp | ((ulong)(width / 64) << 16), 76);
     AddReg_6E78(pkt, 0x50000, 71);
-    if (D_004A45CC.fba) {
+    if (cBoardTrail_m_DrawFixupLayer.fba) {
         AddReg_6E78(pkt, 1, 74);
     }
     GifEnd_6E78(pkt);
@@ -11788,7 +11788,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     cPS2GraphicsMan_drawTrailRibbonsOwnAlpha((void*)this, (sPartStrip_6DD0*)strips, n, (void*)4, (void*)1, (void*)1);
     cPS2GraphicsMan_drawTrailRibbonsOwnAlpha((void*)this, (sPartStrip_6DD0*)strips, n, (void*)1, (void*)5, (void*)1);
 
-    if (D_004A45CC.fba) {
+    if (cBoardTrail_m_DrawFixupLayer.fba) {
         DmaBegin_6E78(pkt, mVifCursor);
         Flush_6E78(pkt);
         GifBegin_6E78(pkt);
@@ -12019,7 +12019,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderBoardWake);
 
 
 
-extern int D_004A5B84;
+extern int cPS2ScratchPad_freeSpace;
 extern sDrawState sDrawState_s_defaultDrawState_rs __asm__("sDrawState_s_defaultDrawState");
 
 extern "C" void cPS2GraphicsMan_computeMatrices(cPS2GraphicsMan* self);
@@ -12029,7 +12029,7 @@ extern "C" void cPS2GraphicsMan_sendWakeRibbon(cPS2GraphicsMan* self, tBoardWake
 /**
  * Draws a board's snow wake.
  *
- * Sets the wake render mode, clears the 0x30-byte scratch at D_004A5B84 and calls cPS2GraphicsMan_sendWakeRibbon for each pair of
+ * Sets the wake render mode, clears the 0x30-byte scratch at cPS2ScratchPad_freeSpace and calls cPS2GraphicsMan_sendWakeRibbon for each pair of
  * adjacent segments (0-1, 1-2, ...), then queues the packet on the render ring.
  *
  * @param verts  the wake vertices, one array per segment
@@ -12050,7 +12050,7 @@ void cPS2GraphicsMan::RenderBoardWake(tBoardWakeVertex** verts, int numSegmentsW
         computeMatrices();
     }
     unsigned int buf = mVifCursor;
-    MEM_fill((void*)D_004A5B84, 0, 0x30);
+    MEM_fill((void*)cPS2ScratchPad_freeSpace, 0, 0x30);
     int i;
     for (i = 0; i < numSegmentsWide - 1; i++) {
         cPS2GraphicsMan_sendWakeRibbon(this, verts, startIndex, numIndices, stripLength, i, i + 1, alphaMultiplier, alphaDelta);
@@ -12080,7 +12080,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_sendWakeRibbon);
 #ifdef SKIP_ASM
 
 
-extern int D_004A43B0;
+extern int cPS2GraphicsMan_wakeRibbonFirstFlag;
 extern char D_3A00[];
 extern char D_3A08[];
 
@@ -12101,7 +12101,7 @@ extern "C" void cPS2GraphicsMan_sendWakeRibbon_impl(cPS2GraphicsMan* self, tBxVe
  * Per batch it writes at mVifCursor: a header unpacked to the VU (a GIF tag for 2 * n vertices with PRIM 0x5C and
  * registers ST, RGBAQ, XYZ2; the counts; @p dt and @p alphaStart); for row @p firstRow then row @p secondRow one vertex copied inline, then
  * DMA ref UNPACKs of the vertices from @p start up to the ring end and of any that wrap round to index 0; then a VIF
- * MSCAL of the VU1 program at D_3A00 when D_004A43B0 was set (it is cleared) or D_3A08 otherwise. The inline vertex is
+ * MSCAL of the VU1 program at D_3A00 when cPS2GraphicsMan_wakeRibbonFirstFlag was set (it is cleared) or D_3A08 otherwise. The inline vertex is
  * vertex @p start on the first batch (which then starts one later) but always vertex 1 on later batches, so those send
  * one vertex more than the header counts; the k >= 0 tests guarding it are always true (looks unintended). Batches
  * overlap by one vertex and @p alphaStart grows by @p dt per vertex. The cursor is stored back to mVifCursor.
@@ -12120,12 +12120,12 @@ extern "C" void cPS2GraphicsMan_sendWakeRibbon_impl(cPS2GraphicsMan* self, tBxVe
 void cPS2GraphicsMan::sendWakeRibbon(tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow,
                                      float alphaStart, float dt)
 {
-    unsigned int prog = (unsigned int)(D_004A43B0 ? D_3A00 : D_3A08) >> 3;
+    unsigned int prog = (unsigned int)(cPS2GraphicsMan_wakeRibbonFirstFlag ? D_3A00 : D_3A08) >> 3;
     int prim = 92;
     unsigned long regs = 1042;
     int first = 1;
     unsigned long* packetCursor = (unsigned long*)(mVifCursor | 0x30000000);
-    D_004A43B0 = 0;
+    cPS2GraphicsMan_wakeRibbonFirstFlag = 0;
     while (count != 0) {
         int n = count < 37 ? count : 36;
         int headCount = ring - start;

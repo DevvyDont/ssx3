@@ -929,7 +929,7 @@ struct cBoardTrailMenu {
     cIntMenuItem NumFadeSegmentsItem;        // 0x53C [O] (On Tour 0x674; placed by the caption and On Tour's order);
                                              //       [R] ctor (19, "Num Fade Segments", &cBoardTrail_m_NumFadeSegments, 0..64)
     cIntMenuItem DrawFixupLayerItem;         // 0x56C [O] (On Tour 0x6A4; placed by the caption and On Tour's order);
-                                             //       [R] ctor (20, "Draw Fixup Layer", &D_004A45CC, 0..1)
+                                             //       [R] ctor (20, "Draw Fixup Layer", &cBoardTrail_m_DrawFixupLayer, 0..1)
     cIntMenuItem UseSliceCapsItem;           // 0x59C [O] (On Tour 0x6D4; placed by the caption and On Tour's order);
                                              //       [R] ctor (21, "Use Slice Caps", &cBoardTrail_m_UseSliceCaps, 0..1)
 

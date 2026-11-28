@@ -605,7 +605,7 @@ extern char str_badversion[];
 extern char str_broadcast[];
 extern void* D_004807E8[];
 extern void* D_004A2F50[];
-extern void* D_004807F8[];
+extern void* str_abortChal_b[];
 
 struct sMsgListNode9B10 {
     sMsgListNode9B10* next;
@@ -725,7 +725,7 @@ void LobbyMan::onchatmsg(LobbyApiMsgT* msg)
             } else if (*(int*)this == 23) {
                 this->sendGuestChallenge(name);
             } else {
-                this->sendPrivateMessage((int)name, D_004807F8);
+                this->sendPrivateMessage((int)name, str_abortChal_b);
             }
         } else if (strcmp(cmd, str_decline) == 0) {
             if (*(int*)this == 22)
@@ -1266,7 +1266,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_postChatEvent);
 #ifdef SKIP_ASM
 extern char str_ChatEvent[];
 extern char str_StlBlock_b[];
-extern void* D_00481230[];
+extern void* online_ChatEvent_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
@@ -1306,7 +1306,7 @@ struct cBXStrAB40 {
 /**
  * Posts a chat event carrying a sender and a text on mEventList.
  *
- * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p sender
+ * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable online_ChatEvent_vtbl, cBXString copies of @p sender
  * at +0x8 and @p text at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
  *
  * @param sender  the sender's name
@@ -1320,7 +1320,7 @@ void LobbyMan::postChatEvent(const char* sender, const char* text)
     cBXStrAB40 sb;
     cBXString_cBXString2(&sb, text);
     event[0] = 222;
-    *(void***)((char*)event + 0x4) = D_00481230;
+    *(void***)((char*)event + 0x4) = online_ChatEvent_vtbl;
     cBXString_cBXString1((char*)event + 0x8, &sa);
     cBXString_cBXString1((char*)event + 0xC, &sb);
     cBXString__cBXString(&sa, 2);
@@ -1341,9 +1341,9 @@ extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
 extern void* online_BuddyErrorEvent_vtbl[];
-extern void* D_004811B0[];
-extern int D_004A3018;
-extern float D_004A5154;
+extern void* online_ServerDownEvent_vtbl[];
+extern int LobbyMan_cachedServerAddr;
+extern float LobbyMan_challengeCountdown;
 extern "C" void LobbyApi_update(void* p);
 extern "C" int LobbyApi_takeEvent(void* p);
 extern "C" void LobbyMan_createConfig(LobbyMan* self);
@@ -1467,16 +1467,16 @@ static inline void closeConn_AC50(char* self)
  * With a LobbyApi: calls LobbyApi_update() on it, reads its status with LobbyApi_takeEvent() and creates mpConfig when ready
  * (LobbyMan_createConfig). If mDisconnected is set it clears it, disconnects (LobbyMan_disconnect) and posts type 277. Otherwise, by
  * mState:
- * - 2 (host lookup): polls mpHostLookup; on success stores the address in mServerAddr and D_004A3018, enters mState 3
+ * - 2 (host lookup): polls mpHostLookup; on success stores the address in mServerAddr and LobbyMan_cachedServerAddr, enters mState 3
  *   with a 30-second mTimeout and connects to port 11000 (LobbyApi_connect, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke); on failure
  *   disconnects and posts an error event (vtable online_ErrorEvent_vtbl, type 258) with 'dnsf'; either way releases the
  * lookup.
- * - 3 (connecting): status 0x400 posts an error event (vtable D_004811B0) with 'down' and the server's 'down' text and
+ * - 3 (connecting): status 0x400 posts an error event (vtable online_ServerDownEvent_vtbl) with 'down' and the server's 'down' text and
  *   disconnects; a timeout disconnects with error 'time' and releases the lookup.
  * - 26: a BuddyMan miError calls BuddyMan_disconnect() and posts it in an event (vtable online_BuddyErrorEvent_vtbl, type
  * 259); a connected
  *   BuddyMan (BuddyMan_isLoggedIn) sets mState 1 and posts type 218.
- * - 23 and 24 (challenge waits): lower D_004A5154 to mTimeout whenever it falls more than 1 below it; on timeout post
+ * - 23 and 24 (challenge waits): lower LobbyMan_challengeCountdown to mTimeout whenever it falls more than 1 below it; on timeout post
  *   type 274, then 23 removes mOpponent's pending challenge from BuddyMan and returns to mState 1, 24 calls
  *   LobbyMan_cancelChallenge(self, 0, 1).
  * - 20: on timeout posts type 230 and calls LobbyMan_cancelQuickMatch().
@@ -1510,7 +1510,7 @@ void LobbyMan::update()
                     LobbyMan* sess = this;
                     int serverAddr = ((sDsCallbackAC50*)sess->mpHostLookup)->value;
                     sess->mServerAddr = serverAddr;
-                    D_004A3018 = serverAddr;
+                    LobbyMan_cachedServerAddr = serverAddr;
                     sess->mState = 3;
                     sess->mTimeout = 30.0f;
                     // PORT: function pointer passed as a callback argument.
@@ -1531,7 +1531,7 @@ void LobbyMan::update()
                     int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     event[2] = 'down';
-                    *(void***)((char*)event + 0x4) = D_004811B0;
+                    *(void***)((char*)event + 0x4) = online_ServerDownEvent_vtbl;
                     cBXString_cBXString2((char*)event + 0xC, downReason);
                     post_AC50(((char*)this), event);
                     disconnect();
@@ -1563,8 +1563,8 @@ void LobbyMan::update()
             } else if (state == 22) {
             } else if (state == 23) {
                 float timeout = mTimeout;
-                if (timeout < D_004A5154 - 1.0f)
-                    D_004A5154 = timeout;
+                if (timeout < LobbyMan_challengeCountdown - 1.0f)
+                    LobbyMan_challengeCountdown = timeout;
                 if (isNeg_AC50(timeout)) {
                     if (((BuddyMan*)Mgr_AC50())->hasChallengeFrom(mOpponent) != 0)
                         ((BuddyMan*)Mgr_AC50())->declineChallenge(mOpponent);
@@ -1577,8 +1577,8 @@ void LobbyMan::update()
                 }
             } else if (state == 0x18) {
                 float timeout = mTimeout;
-                if (timeout < D_004A5154 - 1.0f)
-                    D_004A5154 = timeout;
+                if (timeout < LobbyMan_challengeCountdown - 1.0f)
+                    LobbyMan_challengeCountdown = timeout;
                 if (isNeg_AC50(timeout)) {
                     int type = 274;
                     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -1716,7 +1716,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_connect);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-extern int D_004A3018;
+extern int LobbyMan_cachedServerAddr;
 extern "C" void LobbyMan_createLobbyApi(LobbyMan* self);
 extern "C" void LobbyApi_connect(void* p, int a, int timeout, void* cb, void* user);
 extern "C" int SocketLookup(void* p, int a);
@@ -1751,7 +1751,7 @@ static inline sMsgListIterB6D8 sMsgListB6D8_insert(sMsgListIterB6D8 pos, void* c
  * Starts connecting the lobby manager to the lobby server.
  *
  * Creates the LobbyApi first if needed (LobbyMan_createLobbyApi) and stores @p conn in mbUseCachedAddr. With @p conn set it
- * reuses the address cached in D_004A3018: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects
+ * reuses the address cached in LobbyMan_cachedServerAddr: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects
  * on port 11000 (LobbyApi_connect, reply thunk LobbyMan_LobbyFunctor_onlobbyconnect_invoke). Otherwise it enters mState 2 and starts a host lookup of
  * mServerName with SocketLookup() into mpHostLookup (LobbyMan_update() polls it). Either way posts a type-200 event.
  *
@@ -1763,7 +1763,7 @@ void LobbyMan::connect(int conn)
         createLobbyApi();
     mbUseCachedAddr = conn;
     if (conn != 0) {
-        int serverAddr = D_004A3018;
+        int serverAddr = LobbyMan_cachedServerAddr;
         *(int*)this = 3;
         mTimeout = 30.0f;
         mServerAddr = serverAddr;
@@ -2969,7 +2969,7 @@ extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* us
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_STAT[];
-extern char D_004A3130[];
+extern char str_R[];
 extern char str_empty_i[];
 extern char str_l[];
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
@@ -3032,7 +3032,7 @@ void LobbyMan::handleStatsReply(LobbyApiMsgT* msg)
         mStats.mGamesPlayed = st[2] + st[3] + st[4];
         mStats.mDisconnects = st[6];
         mStats.mRank =
-            cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
+            cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_R), 0);
         mStats.mPing = -1;
         requestNews(0);
     } else {
@@ -4103,7 +4103,7 @@ extern "C" void* LobbyApi_openList(void* mgr, int idx, void* cb, void* user);
 extern "C" void LobbyApi_cancelCallbacks(void* p, int a);
 extern "C" void LobbyMan_LobbyFunctor_onranklistupdate_invoke(void* self, void* a1, int a2);
 extern "C" void LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke(void* self, void* a1, int a2);
-extern int D_004A3180;
+extern int LobbyMan_rankChannelBase;
 extern char str_INDEX[];
 extern char str_CHAN[];
 extern char str_START[];
@@ -4129,7 +4129,7 @@ struct sDsSlotSessE420 {
  * Requests a range of rows of the selected rank list ('snap').
  *
  * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (LobbyApi_openList, callback thunk
- * LobbyMan_LobbyFunctor_onranklistupdate_invoke), builds INDEX = mRankSlot, CHAN = D_004A3180 + 4 (D_004A3180 is zero and only read here), START = @p
+ * LobbyMan_LobbyFunctor_onranklistupdate_invoke), builds INDEX = mRankSlot, CHAN = LobbyMan_rankChannelBase + 4 (LobbyMan_rankChannelBase is zero and only read here), START = @p
  * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (LobbyApi_cancelCallbacks) and sends
  * 'snap' with LobbyMan_sendRequest(), keeping the current mState (20 s timeout, reply through LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke to
  * LobbyMan_onRanklistRetrieved()). The new request id goes into mRankRequest[mRankSlot].
@@ -4148,7 +4148,7 @@ void LobbyMan::requestRankRows(int start, int range, int prevSlot)
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_INDEX, self->slot);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_CHAN, D_004A3180 + 4);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_CHAN, LobbyMan_rankChannelBase + 4);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_START, start);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_RANGE, range);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_SEQN, self->slot);
@@ -4444,9 +4444,9 @@ extern char D_004A2F38[];
 extern char D_004A31E0[];
 extern char D_004A31E8[];
 extern char D_004A31F0[];
-extern char D_004A31F8[];
-extern char D_004A3130[];
-extern void* D_00481110[];
+extern char str_S[];
+extern char str_R[];
+extern void* online_PlayerInfoEvent_vtbl[];
 
 struct sMsgListNode_25EB00 {
     sMsgListNode_25EB00* next;
@@ -4494,7 +4494,7 @@ struct sUserMsg_25EB00 {
  * Handles the reply to another player's 'onln' info request.
  *
  * On success it reads "M", "N" and "A" (strings), "F" and "P" (numbers, default -1), "S" (stats, decoded with the "l*"
- * template) and "R" (number, default 0), and pushes a 356-byte event: type 269, vtable D_00481110, M, N and A strcpy'd
+ * template) and "R" (number, default 0), and pushes a 356-byte event: type 269, vtable online_PlayerInfoEvent_vtbl, M, N and A strcpy'd
  * to +0x8 (0x20 bytes), +0x28 (0x20 bytes) and +0x48 (0x100 bytes), P at +0x148, F at +0x14C, and at +0x150 a stats
  * block (R, item 2, items 2 + 3 + 4, item 6, F). Likely bug: M and N are read into 0x100-byte buffers and strcpy'd into
  * 0x20-byte fields with no length check. Status 'uusr' posts nothing; other statuses push a type-258 error event
@@ -4519,9 +4519,9 @@ void LobbyMan::handlePlayerInfoReply(LobbyApiMsgT* msg)
                                           str_empty_i);
         int tagF = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31E8), -1);
         int tagP = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31F0), -1);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A31F8), raw, 20,
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_S), raw, 20,
                                           str_empty_i);
-        int rank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
+        int rank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_R), 0);
         cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, str_l);
         sUserStats_25EB00 info;
         info.a = rank;
@@ -4531,7 +4531,7 @@ void LobbyMan::handlePlayerInfoReply(LobbyApiMsgT* msg)
         info.e = tagF;
         sUserMsg_25EB00* netEvent = (sUserMsg_25EB00*)operator new(356, str_NetEvent, 0x20000000, 0);
         netEvent->kind = 269;
-        netEvent->vt = D_00481110;
+        netEvent->vt = online_PlayerInfoEvent_vtbl;
         netEvent->n2 = tagP;
         netEvent->n1 = tagF;
         strcpy(netEvent->name, name);
@@ -5319,7 +5319,7 @@ extern char str_MODE[];
 extern char str_chal[];
 extern char str_idle[];
 extern char str_play[];
-extern float D_004A5154;
+extern float LobbyMan_challengeCountdown;
 // PORT: TagFieldGetString really takes a 4th (default value) argument; the unit declares 3.
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 void* LobbyMan_sendAbortChallenge(void* self);
@@ -5358,7 +5358,7 @@ static inline sMsgListIterF8A0 sMsgListF8A0_insert(sMsgListIterF8A0 pos, void* c
  * field (up to 15 characters, default ""). A reply with an error code (mStatus of @p msg) in state 21 sets
  * mState to 1, sends "abortChal" to mOpponent (LobbyMan_sendAbortChallenge) and posts an online error event of type 258 (vtable
  * online_ErrorEvent_vtbl) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and
- * enters state 24 (LobbyMan_sendLockChallenge); "play" sets mState to 24 and mTimeout and the countdown D_004A5154 to 20.0; "idle"
+ * enters state 24 (LobbyMan_sendLockChallenge); "play" sets mState to 24 and mTimeout and the countdown LobbyMan_challengeCountdown to 20.0; "idle"
  * does nothing.
  *
  * @param msg   the LobbyApi reply: error code mStatus, tag record pointer mpTagText
@@ -5386,7 +5386,7 @@ void LobbyMan::onchallengeresponse(LobbyApiMsgT* msg)
         if (*(int*)this == 21) {
             *(int*)this = 0x18;
             mTimeout = 20.0f;
-            D_004A5154 = 20.0f;
+            LobbyMan_challengeCountdown = 20.0f;
         }
     }
 }
@@ -5397,13 +5397,13 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendHostChallenge);
 #ifdef SKIP_ASM
 extern char str_PERS[];
 extern char str_HOST[];
-extern char D_004A3240[];
+extern char str_1_d[];
 extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, void* a1, int a2);
 
 /**
  * Sends a "chal" challenge request for the given persona as the host side and enters state 21.
  *
- * The record holds PERS = @p name and HOST="1" (D_004A3240). It sets mState to 1, then LobbyMan_sendRequest sends the request
+ * The record holds PERS = @p name and HOST="1" (str_1_d). It sets mState to 1, then LobbyMan_sendRequest sends the request
  * with the reply callback LobbyMan_LobbyFunctor_onchallengeresponse_invoke (which runs LobbyMan_onchallengeresponse), sets mState to 21 and mTimeout to
  * 20.0 and stores mRequestId. Called from LobbyMan_onchatmsg.
  *
@@ -5414,7 +5414,7 @@ void LobbyMan::sendHostChallenge(const char* name)
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3240);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, str_1_d);
     *(int*)this = 1;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
     sendRequest(21, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
@@ -5426,13 +5426,13 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendGuestChallenge);
 #ifdef SKIP_ASM
 extern char str_PERS[];
 extern char str_HOST[];
-extern char D_004A3250[];
+extern char str_0_c[];
 extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, void* a1, int a2);
 
 /**
  * Sends a "chal" challenge request for the given persona as the non-host side and enters state 24.
  *
- * Like LobbyMan_sendHostChallenge(), but sends HOST="0" (D_004A3250) and the new state is 24.
+ * Like LobbyMan_sendHostChallenge(), but sends HOST="0" (str_0_c) and the new state is 24.
  *
  * @param name  persona name sent as PERS
  */
@@ -5441,7 +5441,7 @@ void LobbyMan::sendGuestChallenge(const char* name)
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3250);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, str_0_c);
     *(int*)this = 1;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
     sendRequest(0x18, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
@@ -5516,7 +5516,7 @@ void func_0025FC20(void* self)
 }
 #endif
 
-extern void* D_004A3270[];
+extern void* str_decline_b[];
 extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan*, int, void*);
 
 //100%
@@ -5530,11 +5530,11 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendDecline__FPvi);
  */
 void* LobbyMan::sendDecline(int playerName)
 {
-    return ((LobbyMan*)this)->sendPrivateMessage(playerName, (void*)D_004A3270);
+    return ((LobbyMan*)this)->sendPrivateMessage(playerName, (void*)str_decline_b);
 }
 #endif
 
-extern void* D_004807F8[];
+extern void* str_abortChal_b[];
 extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan*, int, void*);
 
 //100%
@@ -5547,7 +5547,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendAbortChallenge__FPv);
  */
 void* LobbyMan::sendAbortChallenge()
 {
-    return sendPrivateMessage((int)mOpponent, (void*)D_004807F8);
+    return sendPrivateMessage((int)mOpponent, (void*)str_abortChal_b);
 }
 #endif
 
@@ -5561,7 +5561,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern char str_lockChal_b[];
-extern float D_004A5154;
+extern float LobbyMan_challengeCountdown;
 
 struct sMsgListNode_0025FC70 {
     sMsgListNode_0025FC70* next;
@@ -5592,7 +5592,7 @@ static inline sMsgListIter_0025FC70 sMsgList_0025FC70_insert(sMsgListIter_0025FC
  * Sends "lockChal" to a player, switches to the given challenge state and restarts the challenge timer.
  *
  * After the private message (LobbyMan_sendPrivateMessage) it stores @p newState in mState, posts an online::Event of type 272 (vtable
- * online_Event_vtbl) on mEventList, sets mTimeout to 20.0 and the countdown D_004A5154 to 21.0.
+ * online_Event_vtbl) on mEventList, sets mTimeout to 20.0 and the countdown LobbyMan_challengeCountdown to 21.0.
  *
  * @param playerName    name of the player (a string pointer passed as an int)
  * @param newState    the new mState (23 from LobbyMan_lockChallenge, 24 from LobbyMan_onchallengeresponse)
@@ -5608,7 +5608,7 @@ void LobbyMan::sendLockChallenge(int playerName, int newState)
     void* mp = netEvent;
     sMsgList_0025FC70_insert((sMsgListNode_0025FC70*)mEventList.mpHead, mp);
     mTimeout = 20.0f;
-    D_004A5154 = 21.0f;
+    LobbyMan_challengeCountdown = 21.0f;
 }
 #endif
 
@@ -7707,7 +7707,7 @@ extern char str_TYPE[];
 extern char str_USER[];
 extern char str_SUBJ[];
 extern char str_BODY[];
-extern char D_004A3390[];
+extern char str_C[];
 extern char str_SECS[];
 extern "C" void BuddyMan_BuddyFunctor_onBuddySend_invoke(void* self, void* a1, int a2);
 extern "C" void BuddyApi_sendMessage(void* ctx, char* buf, void* cb, void* user, int a4);
@@ -7726,7 +7726,7 @@ void BuddyMan::sendMessage(const char* name, const char* messageText)
 {
     char buf[0x1000];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_TYPE, D_004A3390);
+    cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_TYPE, str_C);
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_SUBJ, str_empty_i);
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_USER, name);
     cDirtysock_tag_TagFieldSetUnk(buf, 0x1000, str_BODY, messageText);
@@ -7745,7 +7745,7 @@ extern "C" void BuddyApi_clearPresenceTexts(void* p);
 extern "C" void BuddyApi_setProductText(void* p, char* buf);
 extern "C" void BuddyApi_setStatusText(void* p, const char* a, const char* b);
 extern "C" void BuddyApi_setPresence(void* p, const char* name, int a2, int a3);
-extern char D_004A31F8[];
+extern char str_S[];
 extern char str_SSXID[];
 extern char str_LOCID_b[];
 extern char str_SZ1_b[];
@@ -7778,7 +7778,7 @@ void BuddyMan::setPresence(int presenceState, int locationId, int detail1, int d
         return;
     char buf[80];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 80, D_004A31F8, (const char*)mResource);
+    cDirtysock_tag_TagFieldSetString(buf, 80, str_S, (const char*)mResource);
     cDirtysock_tag_TagFieldSetNumber(buf, 80, str_SSXID, 3);
     cDirtysock_tag_TagFieldSetNumber(buf, 80, str_LOCID_b, locationId);
     if (detail1 != 0)
@@ -8469,7 +8469,7 @@ extern "C" int func_002633C8(BuddyMan* self, int name)
 INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_isInSameGame);
 #ifdef SKIP_ASM
 extern char str_empty_i[];
-extern char D_004A31F8[];
+extern char str_S[];
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 // PORT: the target calls BuddyMan_getNumRosterEntries without setting $4 (self is still there from entry);
 // bound here with a no-arg prototype.
@@ -8480,7 +8480,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int
 /**
  * Tells whether a buddy is running the same game resource as this player.
  *
- * Reads the "S" field (D_004A31F8; BuddyMan_setPresence() publishes mResource there) from the entry's presence record at +0x54
+ * Reads the "S" field (str_S; BuddyMan_setPresence() publishes mResource there) from the entry's presence record at +0x54
  * into a 16-byte buffer and compares it with mResource (strcmp, strcmp). The count check calls BuddyMan_getNumRosterEntries()
  * with this BuddyMan still in the first argument register and lets idx == count through.
  *
@@ -8500,7 +8500,7 @@ bool BuddyMan::isInSameGame(int idx)
         return false;
     }
     char buf[16];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(rosterEntry + 0x54, D_004A31F8), buf, 0x10,
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(rosterEntry + 0x54, str_S), buf, 0x10,
                                       str_empty_i);
     return strcmp(mResource, buf) == 0;
 }
@@ -8953,7 +8953,7 @@ extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsign
 extern "C" void cVoipMan_connect(cVoipMan* self, void* ip);
 extern "C" void cVoipMan_turnVoiceOn(cVoipMan* self);
 extern void* VoipMan;
-extern float D_004A2F14;
+extern float cGameConnMan_connectTimeout;
 extern int cBEOptionInterface_mOption[];
 extern char str_pct_d_pct_d_pct_d_pct_d_b[];
 
@@ -9010,7 +9010,7 @@ extern "C" void cGameConnMan_connect(int* self, unsigned int ip, int isHost, int
         ((cVoipMan*)VoipMan)->connect((void*)ip);
         ((cVoipMan*)VoipMan)->turnVoiceOn();
     }
-    *(float*)&self[4] = D_004A2F14;
+    *(float*)&self[4] = cGameConnMan_connectTimeout;
     self[0] = one;
 }
 #endif
@@ -10320,7 +10320,7 @@ extern char str_StlBlock_b[];
 extern char str_cSetupMan_Update[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cSetupMan_sendMessage(void* self, void* msg, int size);
-extern void* D_00481150[];
+extern void* online_SetupRowEvent_vtbl[];
 
 struct sMsgListNode5458 {
     sMsgListNode5458* next;
@@ -10367,7 +10367,7 @@ struct sNetMsg5458 {
  *
  * Does nothing in state 12. On the host (+0x124 set, cSetupMan::cSetupMan's isHost) the state word moves from 5 or 6 to
  * 7 and the message type is 6; a client sends type 7. The {type, id, state} message goes out through cSetupMan_sendMessage, and
- * a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update") carrying @p id is pushed onto LobbyMan's
+ * a 0x10-byte event of kind 251 (vtable online_SetupRowEvent_vtbl, tag "cSetupMan::Update") carrying @p id is pushed onto LobbyMan's
  * mEventList. cFEStateBraggingRights_onWidgetMenu calls it with the menu's current row.
  *
  * @param id  the highlighted row (the menu's byte at +0x95)
@@ -10392,7 +10392,7 @@ void cSetupMan::sendBraggingSelection(int id)
         cSetupMan_sendMessage(this, &msg, sizeof(msg));
         sNetMsg5458* updateEvent = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 251;
-        updateEvent->vt = D_00481150;
+        updateEvent->vt = online_SetupRowEvent_vtbl;
         updateEvent->index = id;
         updateEvent->flag = 0;
         void* mp = updateEvent;
@@ -10408,7 +10408,7 @@ extern char str_StlBlock_b[];
 extern char str_cSetupMan_Update[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cSetupMan_sendMessage(void* self, void* msg, int size);
-extern void* D_00481130[];
+extern void* online_SetupRuleEvent_vtbl[];
 
 struct sMsgListNode5568 {
     sMsgListNode5568* next;
@@ -10455,7 +10455,7 @@ struct sNetMsg5568 {
  *
  * Does nothing in state 12. On the host (+0x124 set) the state word moves from 5 or 6 to 7 and the message type is 8; a
  * client sends type 9. The {type, a, b} message goes out through cSetupMan_sendMessage, and a 0x14-byte event of kind 252
- * (vtable D_00481130, tag "cSetupMan::Update") carrying both values is pushed onto LobbyMan's mEventList.
+ * (vtable online_SetupRuleEvent_vtbl, tag "cSetupMan::Update") carrying both values is pushed onto LobbyMan's mEventList.
  * cFEStateBraggingRights_onWidgetEvent calls it with the rule slot and the list box's new value.
  *
  * @param ruleSlot  the rule slot
@@ -10481,7 +10481,7 @@ void cSetupMan::sendBraggingRule(int ruleSlot, int newValue)
         cSetupMan_sendMessage(this, &msg, sizeof(msg));
         sNetMsg5568* updateEvent = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 0xFC;
-        updateEvent->vt = D_00481130;
+        updateEvent->vt = online_SetupRuleEvent_vtbl;
         updateEvent->index = ruleSlot;
         updateEvent->value = newValue;
         updateEvent->flag = 0;
@@ -10693,15 +10693,15 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern int MemCardDevice;
-extern int D_004A33E0;
-extern int D_004A33E4;
+extern int sharedlogin_cardCheckedFlag;
+extern int sharedlogin_cardCheckRetryCount;
 struct sDsInit265950 { void* buf; int len; };
 extern sDsInit265950 D_004A5B48_s __asm__("D_004A5B48");
 extern char D_00442A18[];
-extern char D_00537190[];
+extern char sharedlogin_dirEntryName[];
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" void slogin_init(void* p);
 extern "C" void* cMemCard_CreateInstance();
@@ -10709,10 +10709,10 @@ extern "C" void* cMemCard_CreateInstance();
 /**
  * Initializes the shared-login manager and the network-account library it serves.
  *
- * Sets the state word (+0x0) to 1 and the result word (+0x4) to 0, clears the card globals D_004A33D4 (current card
- * operation), MemCardDevice (port), D_004A33E0 (card-checked flag) and D_004A33E4 (retry count), hands the 17-entry
+ * Sets the state word (+0x0) to 1 and the result word (+0x4) to 0, clears the card globals sharedlogin_cardOp (current card
+ * operation), MemCardDevice (port), sharedlogin_cardCheckedFlag (card-checked flag) and sharedlogin_cardCheckRetryCount (retry count), hands the 17-entry
  * memory-card callback table D_00442A18 (sharedlogin_cardGetDir .. sharedlogin_cardGetFoundName) to the library through slogin_init
- * (D_004A5B48 = {table, 0}), clears the 0x40-byte name buffer D_00537190 and creates the memory-card object D_004A33D8
+ * (D_004A5B48 = {table, 0}), clears the 0x40-byte name buffer sharedlogin_dirEntryName and creates the memory-card object sharedlogin_memCard
  * with cMemCard_CreateInstance (a cPS2MemCard).
  *
  * @param vself  the shared-login manager
@@ -10722,56 +10722,56 @@ void cSharedLoginMan::init()
 {
     int* self = (int*)this;
     self[0] = 1;
-    D_004A33D4 = 0;
+    sharedlogin_cardOp = 0;
     self[1] = 0;
     D_004A5B48_s.buf = D_00442A18;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     MemCardDevice = 0;
-    D_004A33E4 = 0;
+    sharedlogin_cardCheckRetryCount = 0;
     D_004A5B48_s.len = 0;
     slogin_init(&D_004A5B48_s);
-    MEM_fill(D_00537190, 0, 0x40);
-    D_004A33D8 = cMemCard_CreateInstance();
+    MEM_fill(sharedlogin_dirEntryName, 0, 0x40);
+    sharedlogin_memCard = cMemCard_CreateInstance();
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_shutdown);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 extern "C" void slogin_shutdown();
 extern "C" void cMemCard_DeleteInstance(void* h);
 
 /**
  * Shuts the shared-login manager down: clears its state word, closes the network-account library and frees the card.
  *
- * Calls slogin_shutdown (the library shutdown) and cMemCard_DeleteInstance(D_004A33D8).
+ * Calls slogin_shutdown (the library shutdown) and cMemCard_DeleteInstance(sharedlogin_memCard).
  */
 void cSharedLoginMan::shutdown()
 {
     *(int*)this = 0;
     slogin_shutdown();
-    cMemCard_DeleteInstance(D_004A33D8);
+    cMemCard_DeleteInstance(sharedlogin_memCard);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_recheckCard);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 extern int MemCardDevice;
 
 /**
  * Restarts the card check on the account's port once the memory card is idle.
  *
- * When the card D_004A33D8 is not busy (virtual slot 11, cPS2MemCard_IsBusy) it calls slot 5 (cPS2MemCard_CheckDevice)
+ * When the card sharedlogin_memCard is not busy (virtual slot 11, cPS2MemCard_IsBusy) it calls slot 5 (cPS2MemCard_CheckDevice)
  * with the port MemCardDevice that sharedlogin_cardCheckPort recorded. cFEStateNetAccountMem_onUpdate calls it in its popup-wait
  * states 7, 13, 21 and 25.
  */
 void cSharedLoginMan::recheckCard()
 {
-    if (((cMemCard*)D_004A33D8)->IsBusy() == 0) {
-        ((cMemCard*)D_004A33D8)->CheckDevice(MemCardDevice);
+    if (((cMemCard*)sharedlogin_memCard)->IsBusy() == 0) {
+        ((cMemCard*)sharedlogin_memCard)->CheckDevice(MemCardDevice);
     }
 }
 #endif
@@ -10779,7 +10779,7 @@ void cSharedLoginMan::recheckCard()
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_getCardFreeSpace);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 
 /**
  * Returns the free space on the memory card, through the card's virtual slot 20 (cPS2MemCard_GetFreeSpace).
@@ -10790,7 +10790,7 @@ extern void* D_004A33D8;
  */
 int cSharedLoginMan::getCardFreeSpace()
 {
-    return ((cMemCard*)D_004A33D8)->GetFreeSpace();
+    return ((cMemCard*)sharedlogin_memCard)->GetFreeSpace();
 }
 #endif
 
@@ -10798,7 +10798,7 @@ int cSharedLoginMan::getCardFreeSpace()
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A3940;
+extern int cPS2MemCard_mcResult;
 extern "C" void cSharedLoginMan_startReadAccount(cSharedLoginMan* state);
 extern "C" void cSharedLoginMan_startSaveAccount(cSharedLoginMan* state);
 extern "C" void cSharedLoginMan_startCreateAccount(cSharedLoginMan* state);
@@ -10809,46 +10809,46 @@ extern "C" int slogin_update(int* status);
 /**
  * Updates the shared-login manager's card state machine one step.
  *
- * First runs the card's Update (virtual slot 3 of D_004A33D8). Then by the state word: 2, 6, 10 and 14 wait for the
+ * First runs the card's Update (virtual slot 3 of sharedlogin_memCard). Then by the state word: 2, 6, 10 and 14 wait for the
  * card to be idle (slot 11, cPS2MemCard_IsBusy) and start their account operation (cSharedLoginMan_startReadAccount, cSharedLoginMan_startSaveAccount,
  * cSharedLoginMan_startCreateAccount, func_00265EC8); 3, 7, 11 and 15 poll it with slogin_update, store the error in the result word (+0x4)
  * and step to the next state when it finished (status 2) or two states on when it failed; 4, 8, 12, 16 and 21 restart
  * the card check on port 0 (slot 5) whenever the card is idle; 18 waits idle and starts the format setup
  * (cSharedLoginMan_startFormat); 19 formats the card (slot 8, cPS2MemCard_Format) and goes to 20; 20 waits idle and goes to 22 when
- * the last libmc result D_004A3940 is non-zero, else 21. cFEStateNetAccountMem_onUpdate calls it every frame.
+ * the last libmc result cPS2MemCard_mcResult is non-zero, else 21. cFEStateNetAccountMem_onUpdate calls it every frame.
  *
  * @param state  the shared-login manager (its state word is the first field)
  */
 // Advances the DirtySock login state machine one step; each "wait" state checks that the socket is idle.
 extern "C" void cSharedLoginMan_update(int* state)
 {
-    ((cMemCard*)D_004A33D8)->Update();
+    ((cMemCard*)sharedlogin_memCard)->Update();
     int status = 0;
     switch (*state) {
     case 0:
         break;
     case 2:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
             ((cSharedLoginMan*)state)->startReadAccount();
         }
         break;
     case 6:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
             ((cSharedLoginMan*)state)->startSaveAccount();
         }
         break;
     case 10:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
             ((cSharedLoginMan*)state)->startCreateAccount();
         }
         break;
     case 14:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
             func_00265EC8((cSharedLoginMan*)state);
         }
         break;
     case 18:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
             ((cSharedLoginMan*)state)->startFormat();
         }
         break;
@@ -10872,19 +10872,19 @@ extern "C" void cSharedLoginMan_update(int* state)
     case 12:
     case 16:
     case 21:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            ((cMemCard*)D_004A33D8)->CheckDevice(0);
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
+            ((cMemCard*)sharedlogin_memCard)->CheckDevice(0);
         }
         break;
     case 19:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            ((cMemCard*)D_004A33D8)->Format();
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
+            ((cMemCard*)sharedlogin_memCard)->Format();
             *state = 20;
         }
         break;
     case 20:
-        if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            if (D_004A3940 != 0) {
+        if (!((cMemCard*)sharedlogin_memCard)->IsBusy()) {
+            if (cPS2MemCard_mcResult != 0) {
                 *state = 22;
             } else {
                 *state = 21;
@@ -10900,7 +10900,7 @@ extern "C" void cSharedLoginMan_update(int* state)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_isCardUnformatted);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 
 /**
  * Tells whether the memory card is present but unformatted.
@@ -10912,8 +10912,8 @@ extern void* D_004A33D8;
  */
 bool cSharedLoginMan::isCardUnformatted()
 {
-    if (((cMemCard*)D_004A33D8)->IsAvailable1() != 0) {
-        return !((cMemCard*)D_004A33D8)->IsFormatted();
+    if (((cMemCard*)sharedlogin_memCard)->IsAvailable1() != 0) {
+        return !((cMemCard*)sharedlogin_memCard)->IsFormatted();
     }
     return false;
 }
@@ -10922,7 +10922,7 @@ bool cSharedLoginMan::isCardUnformatted()
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_clearCardChanged);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 
 /**
  * Clears the memory card's changed flag for the current port, through the card's virtual slot 47
@@ -10932,14 +10932,14 @@ extern void* D_004A33D8;
  */
 void cSharedLoginMan::clearCardChanged()
 {
-    ((cMemCard*)D_004A33D8)->ClearCardChanged();
+    ((cMemCard*)sharedlogin_memCard)->ClearCardChanged();
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_hasCardChanged);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 
 /**
  * Tells whether the memory card in the current port was changed, through the card's virtual slot 63
@@ -10949,14 +10949,14 @@ extern void* D_004A33D8;
  */
 int cSharedLoginMan::hasCardChanged()
 {
-    return ((cMemCard*)D_004A33D8)->CardChanged();
+    return ((cMemCard*)sharedlogin_memCard)->CardChanged();
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_isCardMissing);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
+extern void* sharedlogin_memCard;
 
 /**
  * Tells whether there is no usable memory card, by negating the card's virtual slot 53 (cPS2MemCard_IsAvailable1,
@@ -10966,7 +10966,7 @@ extern void* D_004A33D8;
  */
 bool cSharedLoginMan::isCardMissing()
 {
-    return !((cMemCard*)D_004A33D8)->IsAvailable1();
+    return !((cMemCard*)sharedlogin_memCard)->IsAvailable1();
 }
 #endif
 
@@ -10974,21 +10974,21 @@ bool cSharedLoginMan::isCardMissing()
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_startReadAccount);
 #ifdef SKIP_ASM
 extern char AccountData[0x11];
-extern int D_004A33E0;
+extern int sharedlogin_cardCheckedFlag;
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" int slogin_startReadAccount(void* p);
 
 /**
  * Starts reading the saved account from the card: the shared-login manager's step for state 2.
  *
- * Clears the result word (+0x4) and D_004A33E0, zeroes the 36-byte account buffer AccountData (user name at +0,
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag, zeroes the 36-byte account buffer AccountData (user name at +0,
  * password at +0x11), starts slogin_startReadAccount(AccountData) and sets the state word to 3. cFEStateNetAccountMem_updateDeleteReadStep later compares the
  * buffer with the typed user name and password.
  */
 void cSharedLoginMan::startReadAccount()
 {
     mError = 0;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     MEM_fill(AccountData, 0, 36);
     slogin_startReadAccount(AccountData);
     *(int*)this = 3;
@@ -11070,19 +11070,19 @@ void cSharedLoginMan::requestFormat()
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_startSaveAccount);
 #ifdef SKIP_ASM
 extern char AccountData[0x11];
-extern int D_004A33E0;
+extern int sharedlogin_cardCheckedFlag;
 extern "C" int slogin_startSaveAccount(void* p);
 
 /**
  * Starts saving the account to the card: the shared-login manager's step for state 6.
  *
- * Clears the result word (+0x4) and D_004A33E0, starts slogin_startSaveAccount(AccountData) (which copies the user name and
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag, starts slogin_startSaveAccount(AccountData) (which copies the user name and
  * password from the buffer into the library session) and sets the state word to 7.
  */
 void cSharedLoginMan::startSaveAccount()
 {
     mError = 0;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     slogin_startSaveAccount(AccountData);
     *(int*)this = 7;
 }
@@ -11093,19 +11093,19 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_startCreateAccount);
 #ifdef SKIP_ASM
 extern char AccountData[0x11];
 extern char D_00442A60[];
-extern int D_004A33E0;
+extern int sharedlogin_cardCheckedFlag;
 extern "C" int slogin_startCreateAccount(void* a, void* b);
 
 /**
  * Starts creating the account save: the shared-login manager's step for state 10.
  *
- * Clears the result word (+0x4) and D_004A33E0, starts slogin_startCreateAccount(D_00442A60, AccountData) (which also copies the
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag, starts slogin_startCreateAccount(D_00442A60, AccountData) (which also copies the
  * user name and password from the buffer) and sets the state word to 11.
  */
 void cSharedLoginMan::startCreateAccount()
 {
     mError = 0;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     slogin_startCreateAccount(D_00442A60, AccountData);
     *(int*)this = 11;
 }
@@ -11114,18 +11114,18 @@ void cSharedLoginMan::startCreateAccount()
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265EC8);
 #ifdef SKIP_ASM
-extern int D_004A33E0;
+extern int sharedlogin_cardCheckedFlag;
 extern "C" int slogin_startDeleteAccount();
 
 /**
  * Starts the network-account library's operation 3 (slogin_startDeleteAccount): the shared-login manager's step for state 14.
  *
- * Clears the result word (+0x4) and D_004A33E0 and sets the state word to 15.
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag and sets the state word to 15.
  */
 extern "C" void func_00265EC8(cSharedLoginMan* self)
 {
     self->mError = 0;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     slogin_startDeleteAccount();
     *(int*)self = 0xF;
 }
@@ -11134,17 +11134,17 @@ extern "C" void func_00265EC8(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_startFormat);
 #ifdef SKIP_ASM
-extern int D_004A33E0;
+extern int sharedlogin_cardCheckedFlag;
 
 /**
  * Prepares a card format: the shared-login manager's step for state 18.
  *
- * Clears the result word (+0x4) and D_004A33E0 and sets the state word to 19, where cSharedLoginMan_update formats the card.
+ * Clears the result word (+0x4) and sharedlogin_cardCheckedFlag and sets the state word to 19, where cSharedLoginMan_update formats the card.
  */
 void cSharedLoginMan::startFormat()
 {
     mError = 0;
-    D_004A33E0 = 0;
+    sharedlogin_cardCheckedFlag = 0;
     *(int*)this = 19;
 }
 #endif
@@ -11194,9 +11194,9 @@ extern "C" void sharedlogin_setAccountPassword(const char* name)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardGetDir);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
-extern char D_00537190[];
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
+extern char sharedlogin_dirEntryName[];
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" int mcReq_getPortSlot(int code, void* out);
 extern "C" void cPS2MemCard_startListDir(void* obj, void* a1);
@@ -11205,8 +11205,8 @@ extern "C" void cPS2MemCard_startListDir(void* obj, void* a1);
  * Memory-card callback 0 of the network-account library: starts a directory search on the card.
  *
  * Decodes @p code into a port/slot pair (mcReq_getPortSlot; the result is not used), clears the 0x40-byte name buffer
- * D_00537190 and starts a sceMcGetDir with @p pattern as the pattern (cPS2MemCard_startListDir on the card D_004A33D8). Sets the
- * card operation D_004A33D4 to 2; sharedlogin_cardPollStatus then looks for a matching entry. Entry 0 of D_00442A18.
+ * sharedlogin_dirEntryName and starts a sceMcGetDir with @p pattern as the pattern (cPS2MemCard_startListDir on the card sharedlogin_memCard). Sets the
+ * card operation sharedlogin_cardOp to 2; sharedlogin_cardPollStatus then looks for a matching entry. Entry 0 of D_00442A18.
  *
  * @param pattern   the directory pattern
  * @param code  the library's card unit code
@@ -11215,22 +11215,22 @@ extern "C" void sharedlogin_cardGetDir(void* pattern, int code)
 {
     unsigned char portSlot[2];
     mcReq_getPortSlot(code, portSlot);
-    MEM_fill(D_00537190, 0, 0x40);
-    cPS2MemCard_startListDir(D_004A33D8, pattern);
-    D_004A33D4 = 2;
+    MEM_fill(sharedlogin_dirEntryName, 0, 0x40);
+    cPS2MemCard_startListDir(sharedlogin_memCard, pattern);
+    sharedlogin_cardOp = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardGetFreeSpace);
 #ifdef SKIP_ASM
-extern int D_004A33D4;
+extern int sharedlogin_cardOp;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 
 /**
  * Memory-card callback 1 of the network-account library: asks for the card's free space.
  *
- * Decodes @p code (mcReq_getPortSlot) and sets the card operation D_004A33D4 to 9; sharedlogin_cardPollStatus then reports the free
+ * Decodes @p code (mcReq_getPortSlot) and sets the card operation sharedlogin_cardOp to 9; sharedlogin_cardPollStatus then reports the free
  * space in bytes. Entry 1 of D_00442A18.
  *
  * @param code  the library's card unit code
@@ -11239,20 +11239,20 @@ extern "C" void sharedlogin_cardGetFreeSpace(int code)
 {
     unsigned char portSlot[2];
     mcReq_getPortSlot(code, portSlot);
-    D_004A33D4 = 9;
+    sharedlogin_cardOp = 9;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266038);
 #ifdef SKIP_ASM
-extern int D_004A33D4;
+extern int sharedlogin_cardOp;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 
 /**
  * Memory-card callback 2 of the network-account library: sets up a query that sharedlogin_cardPollStatus answers with 0x800.
  *
- * Decodes @p code (mcReq_getPortSlot) and sets the card operation D_004A33D4 to 10. Entry 2 of D_00442A18.
+ * Decodes @p code (mcReq_getPortSlot) and sets the card operation sharedlogin_cardOp to 10. Entry 2 of D_00442A18.
  *
  * @param code  the library's card unit code
  */
@@ -11260,17 +11260,17 @@ extern "C" void func_00266038(int code)
 {
     unsigned char portSlot[2];
     mcReq_getPortSlot(code, portSlot);
-    D_004A33D4 = 10;
+    sharedlogin_cardOp = 10;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardCheckPort);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern int MemCardDevice;
-extern int D_004A33E4;
+extern int sharedlogin_cardCheckRetryCount;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 void cPS2MemCard_selectDevice(void* self, int a1);
 
@@ -11278,8 +11278,8 @@ void cPS2MemCard_selectDevice(void* self, int a1);
  * Memory-card callback 3 of the network-account library: starts checking the card in a port.
  *
  * Decodes @p code into a port/slot pair (mcReq_getPortSlot), stores the port in MemCardDevice, sets the retry count
- * D_004A33E4 to 9, starts a card check on that port (cPS2MemCard_selectDevice: sceMcGetInfo) and sets the card operation
- * D_004A33D4 to 1. sharedlogin_cardPollStatus repeats the check until the retries run out. Entry 3 of D_00442A18.
+ * sharedlogin_cardCheckRetryCount to 9, starts a card check on that port (cPS2MemCard_selectDevice: sceMcGetInfo) and sets the card operation
+ * sharedlogin_cardOp to 1. sharedlogin_cardPollStatus repeats the check until the retries run out. Entry 3 of D_00442A18.
  *
  * @param code  the library's card unit code (port in the high bits, slot in the low two)
  */
@@ -11288,22 +11288,22 @@ extern "C" void sharedlogin_cardCheckPort(int code)
     unsigned char portSlot[2];
     mcReq_getPortSlot(code, portSlot);
     MemCardDevice = portSlot[0];
-    D_004A33E4 = 9;
-    cPS2MemCard_selectDevice(D_004A33D8, MemCardDevice);
-    D_004A33D4 = 1;
+    sharedlogin_cardCheckRetryCount = 9;
+    cPS2MemCard_selectDevice(sharedlogin_memCard, MemCardDevice);
+    sharedlogin_cardOp = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002660A0);
 #ifdef SKIP_ASM
-extern int D_004A33D4;
+extern int sharedlogin_cardOp;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 
 /**
  * Memory-card callback 4 of the network-account library: does no card work and reports success.
  *
- * Decodes @p code (mcReq_getPortSlot) and sets the card operation D_004A33D4 to 3, which sharedlogin_cardPollStatus reports as done at
+ * Decodes @p code (mcReq_getPortSlot) and sets the card operation sharedlogin_cardOp to 3, which sharedlogin_cardPollStatus reports as done at
  * once. Entry 4 of D_00442A18.
  *
  * @param code  the library's card unit code
@@ -11312,15 +11312,15 @@ extern "C" void func_002660A0(int code)
 {
     unsigned char portSlot[2];
     mcReq_getPortSlot(code, portSlot);
-    D_004A33D4 = 0x3;
+    sharedlogin_cardOp = 0x3;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardOpenFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern char str_pct_s_pct_s_g[];
 extern "C" int mcReq_getPortSlot(int code, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -11330,7 +11330,7 @@ extern "C" void cPS2MemCard_startOpenFile(void* obj, char* str, int a2);
  * Memory-card callback 5 of the network-account library: opens a file on the card.
  *
  * Decodes @p code (mcReq_getPortSlot), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no
- * length check), starts a sceMcOpen of it with mode @p openMode (cPS2MemCard_startOpenFile) and sets the card operation D_004A33D4
+ * length check), starts a sceMcOpen of it with mode @p openMode (cPS2MemCard_startOpenFile) and sets the card operation sharedlogin_cardOp
  * to 4. Entry 5 of D_00442A18.
  *
  * @param dirName    the directory name
@@ -11344,35 +11344,35 @@ extern "C" void sharedlogin_cardOpenFile(const char* dirName, const char* fileNa
     char buf[80];
     mcReq_getPortSlot(code, portSlot);
     sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
-    cPS2MemCard_startOpenFile(D_004A33D8, buf, openMode);
-    D_004A33D4 = 4;
+    cPS2MemCard_startOpenFile(sharedlogin_memCard, buf, openMode);
+    sharedlogin_cardOp = 4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardCloseFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 void cPS2MemCard_startCloseFile(void* obj);
 
 /**
  * Memory-card callback 6 of the network-account library: closes the open card file (cPS2MemCard_startCloseFile, sceMcClose).
  *
- * Sets the card operation D_004A33D4 to 8. Entry 6 of D_00442A18.
+ * Sets the card operation sharedlogin_cardOp to 8. Entry 6 of D_00442A18.
  */
 extern "C" void sharedlogin_cardCloseFile(void)
 {
-    cPS2MemCard_startCloseFile(D_004A33D8);
-    D_004A33D4 = 8;
+    cPS2MemCard_startCloseFile(sharedlogin_memCard);
+    sharedlogin_cardOp = 8;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardMakeDir);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cPS2MemCard_startMakeDir(void* obj, char* str, int a2);
@@ -11381,7 +11381,7 @@ extern "C" void cPS2MemCard_startMakeDir(void* obj, char* str, int a2);
  * Memory-card callback 7 of the network-account library: creates a directory on the card.
  *
  * Decodes @p code (mcReq_getPortSlot), copies @p name into an 80-byte stack buffer (no length check), starts a sceMcMkdir
- * of it (cPS2MemCard_startMakeDir, which also stores @p requestValue in the card's unk_020) and sets the card operation D_004A33D4
+ * of it (cPS2MemCard_startMakeDir, which also stores @p requestValue in the card's unk_020) and sets the card operation sharedlogin_cardOp
  * to 11. Entry 7 of D_00442A18.
  *
  * @param name  the directory name
@@ -11394,16 +11394,16 @@ extern "C" void sharedlogin_cardMakeDir(const char* name, int requestValue, int 
     char buf[80];
     mcReq_getPortSlot(code, portSlot);
     strcpy(buf, name);
-    cPS2MemCard_startMakeDir(D_004A33D8, buf, requestValue);
-    D_004A33D4 = 11;
+    cPS2MemCard_startMakeDir(sharedlogin_memCard, buf, requestValue);
+    sharedlogin_cardOp = 11;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardDeleteFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern char str_pct_s_pct_s_g[];
 extern "C" int mcReq_getPortSlot(int code, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -11413,7 +11413,7 @@ extern "C" void cPS2MemCard_startDeletePath(void* obj, char* str);
  * Memory-card callback 8 of the network-account library: deletes a file on the card.
  *
  * Decodes @p code (mcReq_getPortSlot), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no
- * length check), starts a sceMcDelete of it (cPS2MemCard_startDeletePath) and sets the card operation D_004A33D4 to 12. Entry 8 of
+ * length check), starts a sceMcDelete of it (cPS2MemCard_startDeletePath) and sets the card operation sharedlogin_cardOp to 12. Entry 8 of
  * D_00442A18.
  *
  * @param dirName    the directory name
@@ -11426,16 +11426,16 @@ extern "C" void sharedlogin_cardDeleteFile(const char* dirName, const char* file
     char buf[80];
     mcReq_getPortSlot(code, portSlot);
     sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
-    cPS2MemCard_startDeletePath(D_004A33D8, buf);
-    D_004A33D4 = 0xC;
+    cPS2MemCard_startDeletePath(sharedlogin_memCard, buf);
+    sharedlogin_cardOp = 0xC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardDeleteDir);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 extern "C" int mcReq_getPortSlot(int code, void* out);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cPS2MemCard_startDeletePath(void* obj, char* str);
@@ -11444,7 +11444,7 @@ extern "C" void cPS2MemCard_startDeletePath(void* obj, char* str);
  * Memory-card callback 9 of the network-account library: deletes a directory on the card.
  *
  * Decodes @p code (mcReq_getPortSlot), copies @p name into an 80-byte stack buffer (no length check), starts a sceMcDelete
- * of it (cPS2MemCard_startDeletePath) and sets the card operation D_004A33D4 to 13. Entry 9 of D_00442A18.
+ * of it (cPS2MemCard_startDeletePath) and sets the card operation sharedlogin_cardOp to 13. Entry 9 of D_00442A18.
  *
  * @param name  the directory name
  * @param code  the library's card unit code
@@ -11455,22 +11455,22 @@ extern "C" void sharedlogin_cardDeleteDir(const char* name, int code)
     char buf[80];
     mcReq_getPortSlot(code, portSlot);
     strcpy(buf, name);
-    cPS2MemCard_startDeletePath(D_004A33D8, buf);
-    D_004A33D4 = 13;
+    cPS2MemCard_startDeletePath(sharedlogin_memCard, buf);
+    sharedlogin_cardOp = 13;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardReadFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 void cPS2MemCard_startReadFile(void* obj, int a1, int a2);
 
 /**
  * Memory-card callback 10 of the network-account library: reads from the open card file.
  *
- * Starts a sceMcRead into @p dest of @p byteCount bytes (cPS2MemCard_startReadFile) and sets the card operation D_004A33D4 to 6;
+ * Starts a sceMcRead into @p dest of @p byteCount bytes (cPS2MemCard_startReadFile) and sets the card operation sharedlogin_cardOp to 6;
  * sharedlogin_cardPollStatus reports the libmc result (bytes read). Entry 10 of D_00442A18.
  *
  * @param fileHandle  not read (the library's file handle)
@@ -11479,22 +11479,22 @@ void cPS2MemCard_startReadFile(void* obj, int a1, int a2);
  */
 extern "C" void sharedlogin_cardReadFile(int fileHandle, int dest, int byteCount)
 {
-    cPS2MemCard_startReadFile(D_004A33D8, dest, byteCount);
-    D_004A33D4 = 6;
+    cPS2MemCard_startReadFile(sharedlogin_memCard, dest, byteCount);
+    sharedlogin_cardOp = 6;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardWriteFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 void cPS2MemCard_startWriteFile(void* obj, int a1, int a2);
 
 /**
  * Memory-card callback 11 of the network-account library: writes to the open card file.
  *
- * Starts a sceMcWrite from @p source of @p byteCount bytes (cPS2MemCard_startWriteFile) and sets the card operation D_004A33D4 to
+ * Starts a sceMcWrite from @p source of @p byteCount bytes (cPS2MemCard_startWriteFile) and sets the card operation sharedlogin_cardOp to
  * 14; sharedlogin_cardPollStatus reports the libmc result (bytes written). Entry 11 of D_00442A18.
  *
  * @param fileHandle  not read (the library's file handle)
@@ -11503,22 +11503,22 @@ void cPS2MemCard_startWriteFile(void* obj, int a1, int a2);
  */
 extern "C" void sharedlogin_cardWriteFile(int fileHandle, int source, int byteCount)
 {
-    cPS2MemCard_startWriteFile(D_004A33D8, source, byteCount);
-    D_004A33D4 = 0xE;
+    cPS2MemCard_startWriteFile(sharedlogin_memCard, source, byteCount);
+    sharedlogin_cardOp = 0xE;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardSeekFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 void cPS2MemCard_startSeekFile(void* obj, int a1, int a2);
 
 /**
  * Memory-card callback 12 of the network-account library: seeks in the open card file.
  *
- * Starts a sceMcSeek to @p offset (cPS2MemCard_startSeekFile) and sets the card operation D_004A33D4 to 5. The origin passed on is
+ * Starts a sceMcSeek to @p offset (cPS2MemCard_startSeekFile) and sets the card operation sharedlogin_cardOp to 5. The origin passed on is
  * 1 when @p origin is 1 and 0 otherwise. Quirk: an origin of 2 (from the end) becomes 0 (from the start). Entry 12 of
  * D_00442A18.
  *
@@ -11532,42 +11532,42 @@ extern "C" void sharedlogin_cardSeekFile(int fileHandle, int offset, int origin)
     if (origin != 0) {
         mcOrigin = (origin == 1);
     }
-    cPS2MemCard_startSeekFile(D_004A33D8, offset, mcOrigin);
-    D_004A33D4 = 5;
+    cPS2MemCard_startSeekFile(sharedlogin_memCard, offset, mcOrigin);
+    sharedlogin_cardOp = 5;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardFlushFile);
 #ifdef SKIP_ASM
-extern void* D_004A33D8;
-extern int D_004A33D4;
+extern void* sharedlogin_memCard;
+extern int sharedlogin_cardOp;
 void cPS2MemCard_startFlushFile(void* obj);
 
 /**
  * Memory-card callback 13 of the network-account library: flushes the open card file (cPS2MemCard_startFlushFile, sceMcFlush).
  *
- * Sets the card operation D_004A33D4 to 7. Entry 13 of D_00442A18.
+ * Sets the card operation sharedlogin_cardOp to 7. Entry 13 of D_00442A18.
  */
 extern "C" void sharedlogin_cardFlushFile(void)
 {
-    cPS2MemCard_startFlushFile(D_004A33D8);
-    D_004A33D4 = 7;
+    cPS2MemCard_startFlushFile(sharedlogin_memCard);
+    sharedlogin_cardOp = 7;
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266348);
 #ifdef SKIP_ASM
-extern int D_004A33D4;
+extern int sharedlogin_cardOp;
 
 /**
- * Memory-card callback 14 of the network-account library: does no card work, setting the card operation D_004A33D4 to
+ * Memory-card callback 14 of the network-account library: does no card work, setting the card operation sharedlogin_cardOp to
  * 15, which sharedlogin_cardPollStatus reports as done at once.
  */
 extern "C" void func_00266348(void)
 {
-    D_004A33D4 = 0xF;
+    sharedlogin_cardOp = 0xF;
 }
 #endif
 
@@ -11576,7 +11576,7 @@ INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardPollStatus);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sharedlogin_cardMapError(int err);
-extern int D_004A3940;
+extern int cPS2MemCard_mcResult;
 extern "C" int cPS2MemCard_GetLastError(void* self, int id);
 void cPS2MemCard_selectDevice(void* self, int a1);
 extern "C" void cPS2MemCard_getDirEntryName(void* self, int i, char* out);
@@ -11586,11 +11586,11 @@ extern "C" int mcReq_filterDirEntry(char* name);
  * Memory-card callback 15 of the network-account library: polls the card operation started by the other callbacks.
  *
  * Operations 3, 15 and 16 report done (status 2) at once, operation 10 reports done with 0x800. Otherwise, while the
- * card D_004A33D8 is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error
- * (cPS2MemCard_GetLastError for the current port) is returned through sharedlogin_cardMapError. Per operation D_004A33D4: 1
- * re-runs the card check while the retry count D_004A33E4 lasts (status stays 1), then sets D_004A33E0; 2 copies each
- * directory entry (mNumDirTable at +0x54, cPS2MemCard_getDirEntryName) into D_00537190 and reports 1 for the first one mcReq_filterDirEntry
- * accepts; 5, 6 and 14 report the last libmc result D_004A3940; 9 reports the free space (slot 20) times 1024.
+ * card sharedlogin_memCard is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error
+ * (cPS2MemCard_GetLastError for the current port) is returned through sharedlogin_cardMapError. Per operation sharedlogin_cardOp: 1
+ * re-runs the card check while the retry count sharedlogin_cardCheckRetryCount lasts (status stays 1), then sets sharedlogin_cardCheckedFlag; 2 copies each
+ * directory entry (mNumDirTable at +0x54, cPS2MemCard_getDirEntryName) into sharedlogin_dirEntryName and reports 1 for the first one mcReq_filterDirEntry
+ * accepts; 5, 6 and 14 report the last libmc result cPS2MemCard_mcResult; 9 reports the free space (slot 20) times 1024.
  *
  * @param status  receives 1 while busy, 2 when finished
  * @param out     receives the operation's result (0 when there is none)
@@ -11600,7 +11600,7 @@ extern "C" int mcReq_filterDirEntry(char* name);
 extern "C" int sharedlogin_cardPollStatus(int* status, int* out)
 {
     *out = 0;
-    switch (D_004A33D4) {
+    switch (sharedlogin_cardOp) {
     case 3:
     case 15:
     case 16:
@@ -11611,34 +11611,34 @@ extern "C" int sharedlogin_cardPollStatus(int* status, int* out)
         *out = 0x800;
         return 0;
     }
-    if (((cMemCard*)D_004A33D8)->IsBusy()) {
+    if (((cMemCard*)sharedlogin_memCard)->IsBusy()) {
         *status = 1;
         return 0;
     }
     *status = 2;
-    if (cPS2MemCard_GetLastError(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC))) {
-        return sharedlogin_cardMapError(cPS2MemCard_GetLastError(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)));
+    if (cPS2MemCard_GetLastError(sharedlogin_memCard, *(int*)((char*)sharedlogin_memCard + 0xC))) {
+        return sharedlogin_cardMapError(cPS2MemCard_GetLastError(sharedlogin_memCard, *(int*)((char*)sharedlogin_memCard + 0xC)));
     }
-    switch (D_004A33D4) {
+    switch (sharedlogin_cardOp) {
     case 0:
         break;
     case 1:
-        if (D_004A33E4 > 0) {
+        if (sharedlogin_cardCheckRetryCount > 0) {
             *status = 1;
-            D_004A33E4--;
-            cPS2MemCard_selectDevice(D_004A33D8, MemCardDevice);
+            sharedlogin_cardCheckRetryCount--;
+            cPS2MemCard_selectDevice(sharedlogin_memCard, MemCardDevice);
             return 0;
         }
-        D_004A33E0 = 1;
+        sharedlogin_cardCheckedFlag = 1;
         break;
     case 2:
-        if (*(int*)((char*)D_004A33D8 + 0x54) <= 0) {
+        if (*(int*)((char*)sharedlogin_memCard + 0x54) <= 0) {
             *out = 0;
             break;
         }
-        for (int i = 0; i < *(int*)((char*)D_004A33D8 + 0x54); i++) {
-            cPS2MemCard_getDirEntryName(D_004A33D8, i, D_00537190);
-            if (mcReq_filterDirEntry(D_00537190)) {
+        for (int i = 0; i < *(int*)((char*)sharedlogin_memCard + 0x54); i++) {
+            cPS2MemCard_getDirEntryName(sharedlogin_memCard, i, sharedlogin_dirEntryName);
+            if (mcReq_filterDirEntry(sharedlogin_dirEntryName)) {
                 *out = 1;
                 return 0;
             }
@@ -11646,16 +11646,16 @@ extern "C" int sharedlogin_cardPollStatus(int* status, int* out)
         *out = 0;
         break;
     case 5:
-        *out = D_004A3940;
+        *out = cPS2MemCard_mcResult;
         break;
     case 6:
-        *out = D_004A3940;
+        *out = cPS2MemCard_mcResult;
         break;
     case 14:
-        *out = D_004A3940;
+        *out = cPS2MemCard_mcResult;
         break;
     case 9:
-        *out = ((cMemCard*)D_004A33D8)->GetFreeSpace() << 10;
+        *out = ((cMemCard*)sharedlogin_memCard)->GetFreeSpace() << 10;
         break;
     }
     return 0;
@@ -11665,22 +11665,22 @@ extern "C" int sharedlogin_cardPollStatus(int* status, int* out)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardGetFoundName);
 #ifdef SKIP_ASM
-extern int D_004A33D4;
-extern char D_00537190[];
+extern int sharedlogin_cardOp;
+extern char sharedlogin_dirEntryName[];
 extern "C" char* strcpy(char* dst, const char* src);
 
 /**
  * Memory-card callback 16 of the network-account library: copies the name found by the directory search.
  *
- * Copies D_00537190 (the entry sharedlogin_cardPollStatus accepted) into @p dst and sets the card operation D_004A33D4 to 16. Entry
+ * Copies sharedlogin_dirEntryName (the entry sharedlogin_cardPollStatus accepted) into @p dst and sets the card operation sharedlogin_cardOp to 16. Entry
  * 16 of D_00442A18.
  *
  * @param dst  receives the file name
  */
 extern "C" void sharedlogin_cardGetFoundName(char* dst)
 {
-    strcpy(dst, D_00537190);
-    D_004A33D4 = 0x10;
+    strcpy(dst, sharedlogin_dirEntryName);
+    sharedlogin_cardOp = 0x10;
 }
 #endif
 
@@ -11688,10 +11688,10 @@ extern "C" void sharedlogin_cardGetFoundName(char* dst)
 INCLUDE_ASM("dirtysock/tagsunk", sharedlogin_cardMapError);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A33D4;
+extern int sharedlogin_cardOp;
 
 /**
- * Maps a memory-card error to a network-account library error code for the current card operation D_004A33D4.
+ * Maps a memory-card error to a network-account library error code for the current card operation sharedlogin_cardOp.
  *
  * -2 gives 9 and -4 gives 4 for the search (2), open (4), seek (5), read (6), flush (7), close (8), write (14) and the
  * deletes (12, 13); -3, -5, -7 and -8 give 13 where open, seek, read and write list them, except that -3 gives 14 for
@@ -11705,7 +11705,7 @@ extern int D_004A33D4;
 // Maps a network error code to a front-end message id depending on the current connection stage.
 extern "C" int sharedlogin_cardMapError(int err)
 {
-    switch (D_004A33D4) {
+    switch (sharedlogin_cardOp) {
     case 1:
         break;
     case 2:
@@ -11873,7 +11873,7 @@ extern "C" void cUsbKeyboard_destroyInstance(void) {
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", __12cUsbKeyboard);
 #ifdef SKIP_ASM
-extern char D_005371D0[];
+extern char cUsbKeyboard_readerBuffers[];
 extern "C" void usbkeyboard_setupKeyboard(void* self);
 extern "C" int kbReader_init(int a0, int a1, void* name, void* cb, int a4);
 extern "C" void* MEM_fill(void* dst, int value, int size);
@@ -11881,14 +11881,14 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 /**
  * Constructs the USB keyboard reader: starts the keyboard library and clears the 8 key rings.
  *
- * Calls kbReader_init(0, 0, D_005371D0, usbkeyboard_setupKeyboard, 0) (D_005371D0 the library's read buffers, usbkeyboard_setupKeyboard its
+ * Calls kbReader_init(0, 0, cUsbKeyboard_readerBuffers, usbkeyboard_setupKeyboard, 0) (cUsbKeyboard_readerBuffers the library's read buffers, usbkeyboard_setupKeyboard its
  * keyboard-connect callback) and sets the enabled word (+0x460) only when it succeeds, then zeroes the 0x460 bytes of
  * rings (8 x 0x8C).
  */
 cUsbKeyboard::cUsbKeyboard()
 {
     mEnabled = 0;
-    if (kbReader_init(0, 0, D_005371D0, (void*)usbkeyboard_setupKeyboard, 0) >= 0) {
+    if (kbReader_init(0, 0, cUsbKeyboard_readerBuffers, (void*)usbkeyboard_setupKeyboard, 0) >= 0) {
         mEnabled = 1;
     }
     MEM_fill(this, 0, 1120);
@@ -12180,7 +12180,7 @@ cVoipMan::~cVoipMan()
 INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_connect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A33F8;
+extern int cVoipMan_voiceLevel;
 extern int cBEOptionInterface_mOption[];
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -12193,7 +12193,7 @@ extern "C" void cVoipMan_turnVoiceOn(cVoipMan* self);
  * Connects voice chat to a peer and turns the voice on or off from the settings.
  *
  * Only when not yet connected: connects the voice module to @p peerAddr on ports 6000/6000 (voipRpc_connect), sets the
- * connected word (+0x0) and applies the voice level D_004A33F8 (voipRpc_setVoiceLevel with 85). A level below 10 turns the
+ * connected word (+0x0) and applies the voice level cVoipMan_voiceLevel (voipRpc_setVoiceLevel with 85). A level below 10 turns the
  * voice off (cVoipMan_turnVoiceOff); otherwise it is turned on (cVoipMan_turnVoiceOn) when bit 18 of the option word
  * cBEOptionInterface_mOption is set. cGameConnMan_connect and the debug front end call it.
  *
@@ -12203,10 +12203,10 @@ void cVoipMan::connect(void* peerAddr)
 {
     if (*(int*)this == 0) {
         voipRpc_connect(peerAddr, 6000, 6000);
-        int n = D_004A33F8;
+        int n = cVoipMan_voiceLevel;
         *(int*)this = 1;
         voipRpc_setVoiceLevel(n, 85);
-        if (D_004A33F8 < 10) {
+        if (cVoipMan_voiceLevel < 10) {
             turnVoiceOff();
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -12238,17 +12238,17 @@ void cVoipMan::disconnect()
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_turnVoiceOn);
 #ifdef SKIP_ASM
-extern int D_004A33F8;
+extern int cVoipMan_voiceLevel;
 extern "C" void voipRpc_turnVoiceOn();
 
 /**
- * Turns the voice on (voipRpc_turnVoiceOn) when connected, not already on and the voice level D_004A33F8 is at least 10.
+ * Turns the voice on (voipRpc_turnVoiceOn) when connected, not already on and the voice level cVoipMan_voiceLevel is at least 10.
  *
  * Sets the voice-on word (+0x4).
  */
 void cVoipMan::turnVoiceOn()
 {
-    if (*(int*)this != 0 && mVoiceOn == 0 && D_004A33F8 >= 10) {
+    if (*(int*)this != 0 && mVoiceOn == 0 && cVoipMan_voiceLevel >= 10) {
         voipRpc_turnVoiceOn();
         mVoiceOn = 1;
     }
@@ -12324,12 +12324,12 @@ void* cVoipMan::getVoiceStatus()
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_setVoiceLevel);
 #ifdef SKIP_ASM
-extern int D_004A33F8;
+extern int cVoipMan_voiceLevel;
 extern "C" void voipRpc_setVoiceLevel(int a0, int a1);
 
 /**
  * Sets the voice level: sends @p level and @p maxLevel to the voice module (voipRpc_setVoiceLevel) when connected, and always
- * stores @p a1 in D_004A33F8.
+ * stores @p a1 in cVoipMan_voiceLevel.
  *
  * cOVState_PAUSE_OPTIONS_onWidgetEvent passes the voice slider value times 10 and the maximum cVoipMan_getVoiceLevel read.
  *
@@ -12341,7 +12341,7 @@ void cVoipMan::setVoiceLevel(int level, int maxLevel)
     if (*(int*)this != 0) {
         voipRpc_setVoiceLevel(level, maxLevel);
     }
-    D_004A33F8 = level;
+    cVoipMan_voiceLevel = level;
 }
 #endif
 
@@ -13214,10 +13214,10 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 /**
- * Destroys a chat event (vtable D_00481230): destroys its two cBXStrings (mText, then mSender), restores the base
+ * Destroys a chat event (vtable online_ChatEvent_vtbl): destroys its two cBXStrings (mText, then mSender), restores the base
  * event vtable online_Event_vtbl in mVtbl and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of D_00481230; LobbyMan_postChatEvent builds these 0x10-byte kind-222 events (tag "ChatEvent").
+ * Slot 1 of online_ChatEvent_vtbl; LobbyMan_postChatEvent builds these 0x10-byte kind-222 events (tag "ChatEvent").
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -13238,7 +13238,7 @@ INCLUDE_ASM("dirtysock/tagsunk", online_ChatEvent_clone);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern char str_ChatEvent[];
-extern void* D_00481230[];
+extern void* online_ChatEvent_vtbl[];
 
 // Stand-in for cBXString (defined elsewhere): a class with a non-trivial copy constructor,
 // which g++ keeps in memory (BLKmode, 16-byte stack slots).
@@ -13249,11 +13249,11 @@ struct sBXStrK2 {
 };
 
 /**
- * Copies a chat event: allocates 0x10 bytes tagged "ChatEvent" with kind 222, vtable D_00481230 and copies of both
+ * Copies a chat event: allocates 0x10 bytes tagged "ChatEvent" with kind 222, vtable online_ChatEvent_vtbl and copies of both
  * cBXStrings (+0x8, +0xC).
  *
  * Copies each string into a stack temporary first (cBXString_cBXString1) and destroys the temporaries after. Slot 2 of
- * D_00481230.
+ * online_ChatEvent_vtbl.
  *
  * @return the new event
  */
@@ -13265,7 +13265,7 @@ void* online_ChatEvent::clone()
     sBXStrK2 text;
     cBXString_cBXString1(&sender, &mSender);
     cBXString_cBXString1(&text, &mText);
-    *(void***)(eventCopy + 0x4) = D_00481230;
+    *(void***)(eventCopy + 0x4) = online_ChatEvent_vtbl;
     *(int*)eventCopy = 222;
     cBXString_cBXString1(eventCopy + 0x8, &sender);
     cBXString_cBXString1(eventCopy + 0xC, &text);
@@ -13472,12 +13472,12 @@ extern "C" void func_00268398(void* self, int flags)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002683F0);
 #ifdef SKIP_ASM
-extern void* D_004811B0[];
+extern void* online_ServerDownEvent_vtbl[];
 
 /**
  * Returns a heap copy of this server-down error event (type 258, code 'down').
  *
- * Allocates 0x10 bytes with the "NetEvent" tag, stores type 258, code 'down' (0x646F776E) at +0x8 and vtable D_004811B0
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 258, code 'down' (0x646F776E) at +0x8 and vtable online_ServerDownEvent_vtbl
  * at +0x4, and copies the message string at +0xC with cBXString_cBXString2.
  *
  * @return the new event
@@ -13487,7 +13487,7 @@ extern "C" void* func_002683F0(void* self)
     int* eventCopy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     const char* message = *(const char**)((char*)self + 0xC);
     eventCopy[2] = 'down';
-    *(void***)((char*)eventCopy + 0x4) = D_004811B0;
+    *(void***)((char*)eventCopy + 0x4) = online_ServerDownEvent_vtbl;
     eventCopy[0] = 258;
     cBXString_cBXString2((char*)eventCopy + 0xC, message);
     return eventCopy;
@@ -13622,7 +13622,7 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a race-setup update event (an online::Event of type 251, vtable D_00481150).
+ * Destroys a race-setup update event (an online::Event of type 251, vtable online_SetupRowEvent_vtbl).
  *
  * The event holds no strings, so this only restores the online::Event base vtable online_Event_vtbl at +0x4 and calls
  * operator_delete when bit 0 of flags is set. The setup manager posts these events with two words at +0x8/+0xC
@@ -13644,13 +13644,13 @@ extern "C" void func_00268658(online_Event* self, int flags)
 INCLUDE_ASM("dirtysock/tagsunk", func_00268688);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481150[];
+extern void* online_SetupRowEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
  * Returns a heap copy of this race-setup update event (type 251).
  *
- * Allocates 0x10 bytes with the "NetEvent" tag, stores type 251 and vtable D_00481150 and copies the two words at +0x8
+ * Allocates 0x10 bytes with the "NetEvent" tag, stores type 251 and vtable online_SetupRowEvent_vtbl and copies the two words at +0x8
  * and +0xC.
  *
  * @return the new event
@@ -13661,7 +13661,7 @@ extern "C" void* func_00268688(void* self)
     int rowId = *(int*)((char*)self + 0x8);
     int flagWord = *(int*)((char*)self + 0xC);
     eventCopy[0] = 251;
-    *(void***)((char*)eventCopy + 0x4) = D_00481150;
+    *(void***)((char*)eventCopy + 0x4) = online_SetupRowEvent_vtbl;
     eventCopy[2] = rowId;
     eventCopy[3] = flagWord;
     return eventCopy;
@@ -13675,7 +13675,7 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a race-setup update event with three values (an online::Event of type 252, vtable D_00481130).
+ * Destroys a race-setup update event with three values (an online::Event of type 252, vtable online_SetupRuleEvent_vtbl).
  *
  * The event holds no strings, so this only restores the online::Event base vtable online_Event_vtbl at +0x4 and calls
  * operator_delete when bit 0 of flags is set. The setup manager's cSetupMan_sendBraggingRule and the bx/bxstringctor.cpp senders
@@ -13696,12 +13696,12 @@ extern "C" void func_002686F0(online_Event* self, int flags)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268720);
 #ifdef SKIP_ASM
-extern void* D_00481130[];
+extern void* online_SetupRuleEvent_vtbl[];
 
 /**
  * Returns a heap copy of this three-value race-setup update event (type 252).
  *
- * Allocates 20 bytes with the "NetEvent" tag, stores type 0xFC and vtable D_00481130 and copies the words at +0x8, +0xC
+ * Allocates 20 bytes with the "NetEvent" tag, stores type 0xFC and vtable online_SetupRuleEvent_vtbl and copies the words at +0x8, +0xC
  * and +0x10.
  *
  * @return the new event
@@ -13713,7 +13713,7 @@ extern "C" void* func_00268720(void* self)
     int ruleValue = *(int*)((char*)self + 0xC);
     int flagWord = *(int*)((char*)self + 0x10);
     eventCopy[0] = 0xFC;
-    *(void***)((char*)eventCopy + 0x4) = D_00481130;
+    *(void***)((char*)eventCopy + 0x4) = online_SetupRuleEvent_vtbl;
     eventCopy[2] = ruleSlot;
     eventCopy[3] = ruleValue;
     eventCopy[4] = flagWord;
@@ -13728,7 +13728,7 @@ extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the user-record event (an online::Event of type 269, vtable D_00481110).
+ * Destroys the user-record event (an online::Event of type 269, vtable online_PlayerInfoEvent_vtbl).
  *
  * Its names are inline char arrays, not cBXStrings, so this only restores the online::Event base vtable
  * online_Event_vtbl at +0x4 and calls operator_delete when bit 0 of flags is set. LobbyMan's reply handler
@@ -13750,7 +13750,7 @@ extern "C" void func_00268790(online_Event* self, int flags)
 INCLUDE_ASM("dirtysock/tagsunk", func_002687C0);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481110[];
+extern void* online_PlayerInfoEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -13761,7 +13761,7 @@ struct sDsBlob14K2b {
 /**
  * Returns a heap copy of this user-record event (type 269, 356 bytes).
  *
- * Allocates 356 bytes with the "NetEvent" tag, stores type 269 and vtable D_00481110, strcpy's the three name fields
+ * Allocates 356 bytes with the "NetEvent" tag, stores type 269 and vtable online_PlayerInfoEvent_vtbl, strcpy's the three name fields
  * (+0x8 and +0x28, 0x20 bytes each; +0x48, 0x100 bytes: the reply's "M", "N" and "A" tags in LobbyMan_handlePlayerInfoReply), copies the
  * numbers at +0x148/+0x14C and the 20-byte stats record at +0x150.
  *
@@ -13775,7 +13775,7 @@ extern "C" void* func_002687C0(char* self)
     int x = *(int*)(self + 0x148);
     int y = *(int*)(self + 0x14C);
     const char* tagA;
-    *(void***)(eventCopy + 0x4) = D_00481110;
+    *(void***)(eventCopy + 0x4) = online_PlayerInfoEvent_vtbl;
     *(int*)eventCopy = 269;
     tagA = self + 0x48;
     *(int*)(eventCopy + 0x148) = x;

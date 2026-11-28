@@ -722,7 +722,7 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueDepthFogPass);
 #ifdef SKIP_ASM
 extern int cDepthFog_m_Enable;
 extern int cDepthFog_m_OverrideWP;
-extern void* D_004A4474;
+extern void* SPRMan;
 extern char D_00507B80[];
 extern "C" void cPS2GraphicsMan_copyDepthFog(void* self, int idx);
 extern "C" void func_0036A428(void* self, void* mat, int idx);
@@ -756,7 +756,7 @@ struct sGmOwner_AC00 {
  * the 1 KB table at D_00507B80 + @p idx * 0x400; vramHeap_allocBlock on mTexMan + 0x1F60 reserves 0x400 bytes of GS
  * memory, whose address is the record word at *(mTexMan + 0x3F50) + slot * 0x1C, shifted right 8.
  *
- * Three packets then go out through D_004A4474 (each opened with cPS2ScratchPad_claimBuffer and closed with cPS2ScratchPad_flushBufferTo, which
+ * Three packets then go out through SPRMan (each opened with cPS2ScratchPad_claimBuffer and closed with cPS2ScratchPad_flushBufferTo, which
  * updates *@p handle): cPS2GraphicsMan_writeImageUpload16x16 uploads the table, cPS2GraphicsMan_writeZToFrameCopy runs over mCurrentZBufferPage and
  * mCurrentFrameBufferPage with twice the slot 11 GetScreenHeight value, and func_0036B158 finishes with the uploaded
  * table. Finally vramHeap_freeBlock releases the GS slot and cTextureMan_appendFixedPacketRef(mTexMan, @p pkt2) runs. Caller:
@@ -780,7 +780,7 @@ void cPS2GraphicsMan::queueDepthFogPass(int idx, void* pkt2, int* handle)
     }
     char* mat = D_00507B80 + (idx << 10);
     func_0036A428(((char*)this), mat, idx);
-    void* dma = D_004A4474;
+    void* dma = SPRMan;
     char* pkt = cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
     int slot = vramHeap_allocBlock(mTexMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
     int* rec = (int*)(*(char**)((char*)mTexMan + 0x3F50) + slot * 0x1C);
@@ -1059,7 +1059,7 @@ void cPS2GraphicsMan::queueOffsetBlur(int tbp, int tw, int srcU, int srcV, int u
     int vStart = (srcV << 4) + 8 + off;
     int vEnd = ((srcV + vh) << 4) + 8 - off;
     int cols = w / 32;
-    void* dma = D_004A4474;
+    void* dma = SPRMan;
     int zbp = mCurrentZBufferPage;
     int w16 = w << 4;
     int x0;
@@ -1224,7 +1224,7 @@ void cPS2GraphicsMan::queueGreySubtract(int x, int w, int y, int grey, int alpha
 {
     int cols = w / 32;
     int step = (w / cols) << 4;
-    void* dma = D_004A4474;
+    void* dma = SPRMan;
     ulong* gsPacket = (ulong*)cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
     int fbw = w / 64;
     if (fbw <= 0) fbw = 1;
@@ -1293,7 +1293,7 @@ void cPS2GraphicsMan::queueTextureAdd(int tbp, int tw, int th, int fbp, int x, i
 {
     int cols = w / 32;
     int step = (tw / cols) << 4;
-    void* dma = D_004A4474;
+    void* dma = SPRMan;
     int zbp = mCurrentZBufferPage;
     ulong* gsPacket = (ulong*)cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
     gsPacket[0] = (cols * 4 + 13) | 0x10000000;

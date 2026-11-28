@@ -11,7 +11,7 @@
 //
 // Size 0x3C: one per rider info of cOVStateHUD1P (fe/ovstatehud.h: char unk_08[0x3C] at +0x8 of each tHUDRiderInfo,
 // built by the constructor cHUDRadar_cHUDRadar, which stores the vptr at +0x38 - the last word - and counts live instances
-// in D_004A276C; the destructor cHUDRadar__cHUDRadar undoes both). No allocation of its own. No base class; the class
+// in cHUDRadar_instanceCount; the destructor cHUDRadar__cHUDRadar undoes both). No allocation of its own. No base class; the class
 // declares a virtual destructor, so g++ 2.95 puts the vptr after its data (0x38).
 // Methods: ctor cHUDRadar_cHUDRadar, dtor cHUDRadar__cHUDRadar (vtable slot 1, the only slot), init/layout cHUDRadar_init (loads
 // the shared icons and font, then cHUDRadar_calcLayout lays it out), 1-player render cHUDRadar_renderTracker, split-screen render

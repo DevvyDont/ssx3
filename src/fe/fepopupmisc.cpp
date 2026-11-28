@@ -74,7 +74,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_156thx[];
-extern char* D_004A1540;
+extern char* cFEPopupVideoCalibration_widgetNames;
 extern char str_Text0000[];
 extern char str_kT_THXBrightness[];
 
@@ -91,7 +91,7 @@ void cFEPopupVideoCalibration::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIThing* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A1540));
+    cUIThing* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(cFEPopupVideoCalibration_widgetNames));
     if (obj != 0) {
         obj->setVisible(1);
     }
@@ -108,8 +108,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupVideoCalibration_onInputBegin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// D_004A1540 is an 8-byte string table; this reads its second entry.
-extern char* D_004A1540_DEC68[2] __asm__("D_004A1540");
+// cFEPopupVideoCalibration_widgetNames is an 8-byte string table; this reads its second entry.
+extern char* cFEPopupVideoCalibration_widgetNames_DEC68[2] __asm__("cFEPopupVideoCalibration_widgetNames");
 extern char str_kT_THXBars[];
 extern char str_Text0001[];
 
@@ -155,11 +155,11 @@ bool cFEPopupVideoCalibration::onInputBegin(cUIInput* in)
 {
     if (in->isNext() != 0) {
         if (mImage == 0) {
-            cUIThing* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A1540));
+            cUIThing* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(cFEPopupVideoCalibration_widgetNames));
             if (obj != 0) {
                 obj->setVisible(0);
             }
-            obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(D_004A1540_DEC68[1]));
+            obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(cFEPopupVideoCalibration_widgetNames_DEC68[1]));
             if (obj != 0) {
                 obj->setVisible(1);
             }
@@ -2624,8 +2624,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetCreate);
 int GetHashValue32(char* str);
 extern "C" void cUIMenu_setScrollableMenu(void* self, int a1);
 extern char str_menu0000[];
-extern char D_004A13A0[];
-extern char D_004A14F8[];
+extern char str_0[];
+extern char str_1_c[];
 
 /**
  * Sets up the multiplayer-mode popup's widgets: menu0000 becomes a wrapping two-item menu (mAttr bits 0 and 7),
@@ -2643,12 +2643,12 @@ void cFEPopupSelectMultiplayerMode::onWidgetCreate(cUIThing* item)
         return;
     }
     int itemHash2 = item->mHashName;
-    if (itemHash2 == GetHashValue32(D_004A13A0)) {
+    if (itemHash2 == GetHashValue32(str_0)) {
         item->mMiscData = 0;
         return;
     }
     int itemHash3 = item->mHashName;
-    if (itemHash3 == GetHashValue32(D_004A14F8)) {
+    if (itemHash3 == GetHashValue32(str_1_c)) {
         item->mMiscData = 1;
     }
 }
@@ -2657,13 +2657,13 @@ void cFEPopupSelectMultiplayerMode::onWidgetCreate(cUIThing* item)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetEvent);
 #ifdef SKIP_ASM
-extern int D_004A19D4;
+extern int cFEPopupSelectMultiplayerMode_selectedMode;
 extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Closes the multiplayer-mode popup: select (kONNEXT) records the chosen mode, back (kONPREV) cancels.
  *
- * Select stores whether item 1 was chosen in D_004A19D4, which the front end checks when it starts the next
+ * Select stores whether item 1 was chosen in cFEPopupSelectMultiplayerMode_selectedMode, which the front end checks when it starts the next
  * multiplayer state.
  *
  * @param pWidget  the widget that sent the event
@@ -2675,7 +2675,7 @@ void cFEPopupSelectMultiplayerMode::onWidgetEvent(cUIThing* pWidget, unsigned in
     case cUIState::kONNEXT: {
         cUIEngine* engine = mpEngine;
         mMultiMode = 1;
-        D_004A19D4 = pWidget->mMiscData != 0;
+        cFEPopupSelectMultiplayerMode_selectedMode = pWidget->mMiscData != 0;
         cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
@@ -3371,11 +3371,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup_cFEStateChallengePopup1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengePopup_vtbl[];
-extern int D_00441268[];
+extern int cFEStateChallengePopup_defaultEventOptions[];
 
 /**
  * Constructs the challenge popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
- * cFEStateChallengePopup_vtbl, points mpEventOptions at the default table D_00441268 and clears mbChallengeSent.
+ * cFEStateChallengePopup_vtbl, points mpEventOptions at the default table cFEStateChallengePopup_defaultEventOptions and clears mbChallengeSent.
  *
  * @return @p self
  */
@@ -3383,7 +3383,7 @@ void* cFEStateChallengePopup::cFEStateChallengePopup1()
 {
     cFEStateNet_cFEStateNet(this, 0, 0);
     VPTR_OF(cListNode, this) = cFEStateChallengePopup_vtbl;
-    mpEventOptions = D_00441268;
+    mpEventOptions = cFEStateChallengePopup_defaultEventOptions;
     mbChallengeSent = 0;
     return ((void*)this);
 }
@@ -5103,7 +5103,7 @@ INCLUDE_ASM("fe/fepopupmisc", initMessageGroups);
 #include "ui/uitext.h"
 // sPopupEntry14 (0x14 bytes: +0x4 start, +0x8 count) is defined later in the unit.
 struct sPopupEntry14;
-extern sPopupEntry14 D_00441630[];
+extern sPopupEntry14 messageCenter_groupTable[];
 
 struct sCount_12F0 {
     int f0;
@@ -5122,7 +5122,7 @@ struct sRun_12F0 {
 };
 
 /**
- * Fills in the message-group table D_00441630: how many messages each of its 61 groups holds and where each group
+ * Fills in the message-group table messageCenter_groupTable: how many messages each of its 61 groups holds and where each group
  * starts.
  *
  * Each 0x14-byte group gets its message count (+0x8): 0 for group 0, 6 for groups 1-6, 11, 17, 7, 6 and 8 for groups
@@ -5137,7 +5137,7 @@ struct sRun_12F0 {
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" void initMessageGroups(void)
 {
-    sCount_12F0* groupTable = (sCount_12F0*)D_00441630;
+    sCount_12F0* groupTable = (sCount_12F0*)messageCenter_groupTable;
     int i;
     int n;
 
@@ -5240,7 +5240,7 @@ extern "C" void func_001E1450(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopupmisc", updateTimedMessages);
 #ifdef SKIP_ASM
-extern int D_004A20C0;
+extern int cOVState_MESSAGECENTER_openFlag;
 extern int D_004A20C8;
 extern int D_004A20BC;
 extern "C" void initMessageGroups(void);
@@ -5249,13 +5249,13 @@ extern "C" void runTimedMessageHooks(int type);
 /**
  * Runs the message system's periodic check (called every frame by cGame_update).
  *
- * Skipped while the message center is open (D_004A20C0 set). The first call fills in the message-group table
+ * Skipped while the message center is open (cOVState_MESSAGECENTER_openFlag set). The first call fills in the message-group table
  * (initMessageGroups, guarded by D_004A20C8). Whenever the app manager's counter at +0x1C has moved more than 600 past
  * D_004A20BC, calls runTimedMessageHooks(1) and stores the counter in D_004A20BC.
  */
 extern "C" void updateTimedMessages(void)
 {
-    if (D_004A20C0 == 0) {
+    if (cOVState_MESSAGECENTER_openFlag == 0) {
         if (D_004A20C8 == 0) {
             D_004A20C8 = 1;
             initMessageGroups();
@@ -5280,13 +5280,13 @@ struct sEntry14_14C0 {
     int type;
     char pad_0x4[0x14 - 0x4];
 };
-extern sEntry14_14C0 D_00441630_14C0[] __asm__("D_00441630");
+extern sEntry14_14C0 messageCenter_groupTable_14C0[] __asm__("messageCenter_groupTable");
 
 /**
  * Runs the timed-delivery hook for every message group of a given type that has not been flagged yet.
  *
  * Calls func_001E1548 with the group index for each of the 61 groups whose message flag is clear (isMessageFlagSet) and
- * whose type (+0x0 of D_00441630) is @p type or 5. func_001E1548 is empty, so this has no effect (and no group has type
+ * whose type (+0x0 of messageCenter_groupTable) is @p type or 5. func_001E1548 is empty, so this has no effect (and no group has type
  * 5).
  *
  * @param type  the group type to deliver (updateTimedMessages passes 1)
@@ -5296,7 +5296,7 @@ extern "C" void runTimedMessageHooks(int type)
     int i;
     for (i = 0; i < 61; i++) {
         if (isMessageFlagSet(i) == 0) {
-            int groupType = D_00441630_14C0[i].type;
+            int groupType = messageCenter_groupTable_14C0[i].type;
             if (groupType == type || groupType == 5) {
                 func_001E1548(i);
             }
@@ -5459,7 +5459,7 @@ struct sPopupEntry18_1AD0 {
     int f10;
     int f14;
 };
-extern sPopupEntry18_1AD0 D_004C6C08_1AD0[] __asm__("D_004C6C08");
+extern sPopupEntry18_1AD0 messageCenter_messageTable_1AD0[] __asm__("messageCenter_messageTable");
 
 struct sRangeK1E1AD0 {
     int f0;
@@ -5471,11 +5471,11 @@ struct sRangeK1E1AD0 {
  * Picks a random message from a message group that is not about a given character and not already queued.
  *
  * Allocates a list (operator new, tag "AddForeshadowMessage"), collects the group's message indices i (from its first
- * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p skipCharId (isSameCharacterId) and that are not
+ * message for its count) whose character (+0xC of messageCenter_messageTable[i]) does not match @p skipCharId (isSameCharacterId) and that are not
  * in the message list (findMessage returns -1), returns one of them at random (BXrand) and frees the list. Likely
  * bug: when nothing qualifies it returns 0x100 without freeing the list.
  *
- * @param messageGroup    the message group (a D_00441630 entry: +0x4 first message, +0x8 count)
+ * @param messageGroup    the message group (a messageCenter_groupTable entry: +0x4 first message, +0x8 count)
  * @param skipCharId  the character whose messages are skipped
  * @return a message index, or 0x100 when none qualifies
  */
@@ -5485,7 +5485,7 @@ extern "C" int pickForeshadowMessage(sRangeK1E1AD0* messageGroup, int skipCharId
     int n = 0;
     int i;
     for (i = messageGroup->start; i < messageGroup->count + messageGroup->start; i++) {
-        if (isSameCharacterId(D_004C6C08_1AD0[i].fC, skipCharId) == 0 && findMessage(i) == -1) {
+        if (isSameCharacterId(messageCenter_messageTable_1AD0[i].fC, skipCharId) == 0 && findMessage(i) == -1) {
             list[n++] = i;
         }
     }
@@ -5514,7 +5514,7 @@ struct sEntry14_1C10 {
     int f4;
     char pad_0x8[0x14 - 0x8];
 };
-extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
+extern sEntry14_1C10 messageCenter_groupTable_1C10[] __asm__("messageCenter_groupTable");
 
 
 
@@ -5547,10 +5547,10 @@ extern "C" void queueForeshadowMessage(int which)
             }
             sEntry14_1C10* foreshadowGroup;
             if (ch != 3) {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[0x1C];
             } else {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[29];
             }
             id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
@@ -5568,10 +5568,10 @@ extern "C" void queueForeshadowMessage(int which)
             }
             sEntry14_1C10* foreshadowGroup;
             if (ch != 7) {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[0x1E];
             } else {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[0x1F];
             }
             id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
@@ -5589,10 +5589,10 @@ extern "C" void queueForeshadowMessage(int which)
             }
             sEntry14_1C10* foreshadowGroup;
             if (ch != 8) {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[0x20];
             } else {
-                sEntry14_1C10* tbl = D_00441630_1C10;
+                sEntry14_1C10* tbl = messageCenter_groupTable_1C10;
                 foreshadowGroup = &tbl[33];
             }
             id = pickForeshadowMessage((sRangeK1E1AD0*)foreshadowGroup, ch);
@@ -5722,17 +5722,17 @@ extern "C" bool isMessageFlagSet(int group);
 extern "C" void setMessageFlag(int a, int b);
 extern "C" void queueMessage(int a, unsigned char b);
 
-struct sEntry14_20D0 {   // a D_00441630 message group (names ours)
+struct sEntry14_20D0 {   // a messageCenter_groupTable message group (names ours)
     int type;
     int start;
     char pad_0x8[0x14 - 0x8];
 };
-extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
+extern sEntry14_20D0 messageCenter_groupTable_20D0[] __asm__("messageCenter_groupTable");
 
 /**
  * Queues the message of group 35, 37 or 39 for peak @p which unless that group's flag is set.
  *
- * Skipped during replay playback. Queues the group's first message (+0x4 of D_00441630), or, when @p flag is set, sets
+ * Skipped during replay playback. Queues the group's first message (+0x4 of messageCenter_groupTable), or, when @p flag is set, sets
  * the group's flag and queues its second message.
  *
  * @param which  the peak (0-2; others do nothing)
@@ -5746,7 +5746,7 @@ extern "C" void queuePointsChallengeMessage(int which, int flag)
         switch (which) {
         case 0:
             if (isMessageFlagSet(35) == 0) {
-                sEntry14_20D0* tbl = D_00441630_20D0;
+                sEntry14_20D0* tbl = messageCenter_groupTable_20D0;
                 if (flag) {
                     setMessageFlag(35, 1);
                     queueMessage(tbl[35].start + 1, 0);
@@ -5757,7 +5757,7 @@ extern "C" void queuePointsChallengeMessage(int which, int flag)
             break;
         case 1:
             if (isMessageFlagSet(37) == 0) {
-                sEntry14_20D0* tbl = D_00441630_20D0;
+                sEntry14_20D0* tbl = messageCenter_groupTable_20D0;
                 if (flag) {
                     setMessageFlag(37, 1);
                     queueMessage(tbl[37].start + 1, 0);
@@ -5768,7 +5768,7 @@ extern "C" void queuePointsChallengeMessage(int which, int flag)
             break;
         case 2:
             if (isMessageFlagSet(39) == 0) {
-                sEntry14_20D0* tbl = D_00441630_20D0;
+                sEntry14_20D0* tbl = messageCenter_groupTable_20D0;
                 if (flag) {
                     setMessageFlag(39, 1);
                     queueMessage(tbl[39].start + 1, 0);
@@ -5790,17 +5790,17 @@ extern "C" bool isMessageFlagSet(int group);
 extern "C" void setMessageFlag(int a, int b);
 extern "C" void queueMessage(int a, unsigned char b);
 
-struct sEntry14_2220 {   // a D_00441630 message group (names ours)
+struct sEntry14_2220 {   // a messageCenter_groupTable message group (names ours)
     int type;
     int start;
     char pad_0x8[0x14 - 0x8];
 };
-extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
+extern sEntry14_2220 messageCenter_groupTable_2220[] __asm__("messageCenter_groupTable");
 
 /**
  * Queues the message of group 34, 36 or 38 for peak @p which unless that group's flag is set.
  *
- * Skipped during replay playback. Queues the group's first message (+0x4 of D_00441630), or, when @p flag is set, sets
+ * Skipped during replay playback. Queues the group's first message (+0x4 of messageCenter_groupTable), or, when @p flag is set, sets
  * the group's flag and queues its second message.
  *
  * @param which  the peak (0-2; others do nothing)
@@ -5814,7 +5814,7 @@ extern "C" void queueTimeChallengeMessage(int which, int flag)
         switch (which) {
         case 0:
             if (isMessageFlagSet(34) == 0) {
-                sEntry14_2220* tbl = D_00441630_2220;
+                sEntry14_2220* tbl = messageCenter_groupTable_2220;
                 if (flag) {
                     setMessageFlag(34, 1);
                     queueMessage(tbl[34].start + 1, 0);
@@ -5825,7 +5825,7 @@ extern "C" void queueTimeChallengeMessage(int which, int flag)
             break;
         case 1:
             if (isMessageFlagSet(36) == 0) {
-                sEntry14_2220* tbl = D_00441630_2220;
+                sEntry14_2220* tbl = messageCenter_groupTable_2220;
                 if (flag) {
                     setMessageFlag(36, 1);
                     queueMessage(tbl[36].start + 1, 0);
@@ -5836,7 +5836,7 @@ extern "C" void queueTimeChallengeMessage(int which, int flag)
             break;
         case 2:
             if (isMessageFlagSet(38) == 0) {
-                sEntry14_2220* tbl = D_00441630_2220;
+                sEntry14_2220* tbl = messageCenter_groupTable_2220;
                 if (flag) {
                     setMessageFlag(38, 1);
                     queueMessage(tbl[38].start + 1, 0);
@@ -6230,7 +6230,7 @@ struct sEntry14_2A08 {
     int count;   // 0x8
     char pad_0xC[0x14 - 0xC];
 };
-extern sEntry14_2A08 D_00441630_2A08[] __asm__("D_00441630");
+extern sEntry14_2A08 messageCenter_groupTable_2A08[] __asm__("messageCenter_groupTable");
 
 /**
  * Queues an aggression message about another character when the human rider's grudge against it runs high.
@@ -6253,7 +6253,7 @@ extern "C" void queueAggressionMessage(int charID, int level)
     if (cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0)) == charID)
         return;
     int id = getAggressionGroup(charID);
-    sEntry14_2A08* aggressionGroup = &D_00441630_2A08[id];
+    sEntry14_2A08* aggressionGroup = &messageCenter_groupTable_2A08[id];
     if (isMessageFlagSet(id)) {
         if (level < 5)
             setMessageFlag(id, 0);
@@ -6300,14 +6300,14 @@ INCLUDE_ASM("fe/fepopupmisc", countMessageRows);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool isMessageFlagSet(int group);
 
-struct sEntry14_2BB8 {   // a D_00441630 message group (names ours)
+struct sEntry14_2BB8 {   // a messageCenter_groupTable message group (names ours)
     int type;
     int start;
     int count;
     int category;
     int isFolder;
 };
-extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
+extern sEntry14_2BB8 messageCenter_groupTable_2BB8[] __asm__("messageCenter_groupTable");
 
 /**
  * Counts the message-center rows taken by all message groups of one type.
@@ -6315,7 +6315,7 @@ extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
  * A group of that type counts all its messages when @p all is set or when it is a folder (+0x10 set) whose flag is set
  * (expanded), else one row.
  *
- * @param type  the group type (+0x0 of D_00441630; the message center uses 4, the FAQ groups 7-11)
+ * @param type  the group type (+0x0 of messageCenter_groupTable; the message center uses 4, the FAQ groups 7-11)
  * @param all   nonzero to count every message
  * @return the number of rows
  */
@@ -6324,7 +6324,7 @@ extern "C" int countMessageRows(int type, int all)
     int total = 0;
     int i;
     for (i = 0; i < 61; i++) {
-        sEntry14_2BB8* groupEntry = &D_00441630_2BB8[i];
+        sEntry14_2BB8* groupEntry = &messageCenter_groupTable_2BB8[i];
         if (groupEntry->type == type) {
             if (all != 0 || (groupEntry->isFolder != 0 && isMessageFlagSet(i) != 0)) {
                 total += groupEntry->count;
@@ -6348,17 +6348,17 @@ struct sEntry14_2C60 {
     int fC;
     int f10;
 };
-extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+extern sEntry14_2C60 messageCenter_groupTable_2C60[] __asm__("messageCenter_groupTable");
 
 /**
- * Returns the number of messages in message group @p i (+0x8 of D_00441630).
+ * Returns the number of messages in message group @p i (+0x8 of messageCenter_groupTable).
  *
  * @param i  the group index
  * @return its message count
  */
 extern "C" int getMessageGroupCount(int i)
 {
-    return D_00441630_2C60[i].count;
+    return messageCenter_groupTable_2C60[i].count;
 }
 #endif
 
@@ -6368,14 +6368,14 @@ INCLUDE_ASM("fe/fepopupmisc", getMessageForRow);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" bool isMessageFlagSet(int group);
 
-struct sEntry14_2C80 {   // a D_00441630 message group (names ours)
+struct sEntry14_2C80 {   // a messageCenter_groupTable message group (names ours)
     int type;
     int first;
     int count;
     int category;
     int isFolder;
 };
-extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
+extern sEntry14_2C80 messageCenter_groupTable_2C80[] __asm__("messageCenter_groupTable");
 
 /**
  * Returns the message shown in row @p idx of the rows built from the message groups of one type.
@@ -6384,7 +6384,7 @@ extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
  * or when its flag is set, else one row (its first message). Note that countMessageRows counts a non-folder group as one
  * row in its non-full mode; the two agree for type 4, whose groups (7-11) are all folders.
  *
- * @param type  the group type (+0x0 of D_00441630)
+ * @param type  the group type (+0x0 of messageCenter_groupTable)
  * @param idx   the row
  * @param mode  0 to list every message
  * @return the message index, or -1 past the last row
@@ -6395,7 +6395,7 @@ extern "C" int getMessageForRow(int type, int idx, int mode)
     int result = -1;
     int i;
     for (i = 0; i < 61; i++) {
-        sEntry14_2C80* groupEntry = &D_00441630_2C80[i];
+        sEntry14_2C80* groupEntry = &messageCenter_groupTable_2C80[i];
         if (groupEntry->type == type) {
             int n;
             if (mode == 0 || groupEntry->isFolder == 0 || isMessageFlagSet(i) != 0) {
@@ -6424,7 +6424,7 @@ struct sPopupEntry18 {
     int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
-extern sPopupEntry18 D_004C6C08[];
+extern sPopupEntry18 messageCenter_messageTable[];
 
 struct sPopupEntry14 {
     int type;
@@ -6433,10 +6433,10 @@ struct sPopupEntry14 {
     int category;   // 0xC: the category isMessageInCategory tests
     int isFolder;   // 0x10
 };
-extern sPopupEntry14 D_00441630[];
+extern sPopupEntry14 messageCenter_groupTable[];
 
 /**
- * Reports whether message @p i belongs to a group of category @p category (+0xC of its D_00441630 group).
+ * Reports whether message @p i belongs to a group of category @p category (+0xC of its messageCenter_groupTable group).
  *
  * @param category  the category (3 back-country result, 4 foreshadow, 5 aggression, 8 peak awards, as the subject strings name
  *           them)
@@ -6445,8 +6445,8 @@ extern sPopupEntry14 D_00441630[];
  */
 extern "C" bool isMessageInCategory(int category, int i)
 {
-    sPopupEntry18* messageEntry = &D_004C6C08[i];
-    sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
+    sPopupEntry18* messageEntry = &messageCenter_messageTable[i];
+    sPopupEntry14* groupEntry = &messageCenter_groupTable[messageEntry->groupIndex];
     return groupEntry->category == category;
 }
 #endif
@@ -6455,10 +6455,10 @@ extern "C" bool isMessageInCategory(int category, int i)
 INCLUDE_ASM("fe/fepopupmisc", isMessageGroupInCategory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+extern sEntry14_2C60 messageCenter_groupTable_2C60[] __asm__("messageCenter_groupTable");
 
 /**
- * Reports whether message group @p i has category @p category (+0xC of D_00441630).
+ * Reports whether message group @p i has category @p category (+0xC of messageCenter_groupTable).
  *
  * @param category  the category
  * @param i  the group index
@@ -6466,7 +6466,7 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  */
 extern "C" bool isMessageGroupInCategory(int category, int i)
 {
-    int* groupWords = (int*)&D_00441630_2C60[0] + i * 5;
+    int* groupWords = (int*)&messageCenter_groupTable_2C60[0] + i * 5;
     return groupWords[3] == category;
 }
 #endif
@@ -6485,13 +6485,13 @@ INCLUDE_ASM("fe/fepopupmisc", getMessagePositionInCategory);
  */
 extern "C" int getMessagePositionInCategory(int idx)
 {
-    sPopupEntry18* ta = &D_004C6C08[idx];
-    sPopupEntry14* target = &D_00441630[ta->groupIndex];
+    sPopupEntry18* ta = &messageCenter_messageTable[idx];
+    sPopupEntry14* target = &messageCenter_groupTable[ta->groupIndex];
     int position = 0;
     int i = 0;
     while (i <= idx) {
-        sPopupEntry18* messageEntry = &D_004C6C08[i];
-        sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
+        sPopupEntry18* messageEntry = &messageCenter_messageTable[i];
+        sPopupEntry14* groupEntry = &messageCenter_groupTable[messageEntry->groupIndex];
         int start = groupEntry->start;
         int count = groupEntry->count;
         if (start + count - 1 < idx) {
@@ -6510,7 +6510,7 @@ extern "C" int getMessagePositionInCategory(int idx)
 INCLUDE_ASM("fe/fepopupmisc", getGroupMessageIndex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+extern sEntry14_2C60 messageCenter_groupTable_2C60[] __asm__("messageCenter_groupTable");
 
 /**
  * Returns the index of message @p n of message group @p i (the group's first message, +0x4, plus @p n).
@@ -6521,7 +6521,7 @@ extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
  */
 extern "C" int getGroupMessageIndex(int i, int n)
 {
-    return D_00441630_2C60[i].start + n;
+    return messageCenter_groupTable_2C60[i].start + n;
 }
 #endif
 
@@ -6550,7 +6550,7 @@ extern char str_kT_FAQFolder[];
  * Kinds 0-9 are the characters (kT_CHARMoby, Kaori, Allegra, Mac, Zoe, Griff, Elise, Nate, Psymon, Viggo), 10 the game
  * title (kT_CMNGameTitle), 11 DJ Atomica (kT_CMNDJAtomica) and 12 the FAQ folder (kT_FAQFolder).
  *
- * @param kind  the sender (+0xC of the D_004C6C08 message)
+ * @param kind  the sender (+0xC of the messageCenter_messageTable message)
  * @return GetHashValue32 of the name's string id, or 0 for other kinds
  */
 extern "C" int getMessageSenderName(int kind)
@@ -6609,24 +6609,24 @@ struct sPopupList_2FE0 {
 // PORT: unit declares getMessageList(void*), but its body takes no arguments
 extern "C" sPopupList_2FE0* getMessageList_list2FE0() __asm__("getMessageList");
 
-struct sPopupEntry18_2FE0 {   // a D_004C6C08 message (names ours)
+struct sPopupEntry18_2FE0 {   // a messageCenter_messageTable message (names ours)
     int field_0x0;
     int groupIndex;
     int kind;
     char pad_0xC[0x18 - 0xC];
 };
-extern sPopupEntry18_2FE0 D_004C6C08_2FE0[] __asm__("D_004C6C08");
+extern sPopupEntry18_2FE0 messageCenter_messageTable_2FE0[] __asm__("messageCenter_messageTable");
 
 
 /**
  * Adds a message to the human rider's message list as unread and notifies the HUD.
  *
  * The list (getMessageList) holds up to 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at
- * +0xCC. When it is full the oldest entry is dropped first (removeMessageAt(0)). A message whose D_004C6C08 kind (+0x8)
+ * +0xCC. When it is full the oldest entry is dropped first (removeMessageAt(0)). A message whose messageCenter_messageTable kind (+0x8)
  * is 1 gets a random variant from pickMessageVariant instead of @p flag. The new entry's read bit is cleared; then, when the
  * game has a UI, the "hud_b" state found on its state stack gets handleEvent (vtable entry 24) with event 8.
  *
- * @param id    the message index (D_004C6C08)
+ * @param id    the message index (messageCenter_messageTable)
  * @param flag  the variant byte stored with it
  */
 extern "C" void queueMessage(int id, unsigned char flag)
@@ -6634,7 +6634,7 @@ extern "C" void queueMessage(int id, unsigned char flag)
     sPopupList_2FE0* messageList = getMessageList_list2FE0();
     if (messageList->count == 25)
         removeMessageAt(0);
-    if (D_004C6C08_2FE0[id].kind == 1)
+    if (messageCenter_messageTable_2FE0[id].kind == 1)
         flag = pickMessageVariant(id);
     messageList->entries[messageList->count].id = id;
     messageList->entries[messageList->count].flag = flag;
@@ -6763,7 +6763,7 @@ struct sPopupEntry18_32C8 {
     int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
-extern sPopupEntry18_32C8 D_004C6C08_32C8[] __asm__("D_004C6C08");
+extern sPopupEntry18_32C8 messageCenter_messageTable_32C8[] __asm__("messageCenter_messageTable");
 struct sPopupListEntry_32C8 {
     int id;
     unsigned char field_0x4;
@@ -6784,7 +6784,7 @@ extern "C" void removeMessageAt(int idx);
  * Likely bug: the loop compares an iteration count with the shrinking list count, so after each removal one entry at
  * the end of the list is never examined.
  *
- * @param type  the message group (D_00441630 index) whose messages are removed
+ * @param type  the message group (messageCenter_groupTable index) whose messages are removed
  */
 extern "C" void removeGroupMessages(int type)
 {
@@ -6792,7 +6792,7 @@ extern "C" void removeGroupMessages(int type)
     int j = 0;
     sPopupList_32C8* messageList = getMessageList_list32C8();
     for (; n < messageList->count; n++) {
-        sPopupEntry18_32C8* messageEntry = &D_004C6C08_32C8[messageList->entries[j].id];
+        sPopupEntry18_32C8* messageEntry = &messageCenter_messageTable_32C8[messageList->entries[j].id];
         if (type == messageEntry->groupIndex) {
             removeMessageAt(j);
         } else {
@@ -6910,9 +6910,9 @@ INCLUDE_ASM("fe/fepopupmisc", getNextMessageInGroup);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" int getNextMessageInGroup(int i)
 {
-    sPopupEntry18* currentEntry = &D_004C6C08[i];
+    sPopupEntry18* currentEntry = &messageCenter_messageTable[i];
     int n = i + 1;
-    sPopupEntry18* followingEntry = &D_004C6C08[n];
+    sPopupEntry18* followingEntry = &messageCenter_messageTable[n];
     if (followingEntry->groupIndex == currentEntry->groupIndex)
         return n;
     return -1;
@@ -6926,12 +6926,12 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setHelpDone(void* iface, int a1, int a2);
-extern int D_004A20CC;
+extern int cOVState_MESSAGECENTER_openRequest;
 
 /**
  * Asks for the message center to open, from a world script (MessageCenterFunc, when not in a network game).
  *
- * When the new race's cGamePath (newRace.cGamePath) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
+ * When the new race's cGamePath (newRace.cGamePath) is 0, sets cOVState_MESSAGECENTER_openRequest to 0, so the game update triggers overlay 0x22 (the
  * message center) on its next pass, and sets player 0's flag through cBENewPlayerInterface_setHelpDone(player interface, 0, 1); otherwise
  * does nothing.
  */
@@ -6939,7 +6939,7 @@ extern "C" void requestMessageCenter(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
-        D_004A20CC = 0;
+        cOVState_MESSAGECENTER_openRequest = 0;
         cBENewPlayerInterface_setHelpDone(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1);
     }
 }
@@ -7011,7 +7011,7 @@ extern "C" sPopupTable8* getMessageList_get() __asm__("getMessageList");
  * Returns the message index stored in message-list entry @p idx.
  *
  * @param idx  the list position
- * @return the message index (D_004C6C08)
+ * @return the message index (messageCenter_messageTable)
  */
 extern "C" int getListMessageId(int idx)
 {
@@ -7042,20 +7042,20 @@ INCLUDE_ASM("fe/fepopupmisc", getMessageRow);
 #ifdef SKIP_ASM
 // PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
 unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 
 /**
  * Returns the message-center row that shows message @p id.
  *
  * The rows list the queued messages newest first, then the FAQ rows (type 4, built by getMessageForRow with collapsed
- * folders as one row). Returns @p id unchanged when D_004A20C4 is set.
+ * folders as one row). Returns @p id unchanged when cOVState_MESSAGECENTER_expandFoldersFlag is set.
  *
  * @param id  the message index
  * @return the row, or 0xFF when the message is not shown
  */
 extern "C" unsigned char getMessageRow(int id)
 {
-    if (D_004A20C4 != 0) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag != 0) {
         return id;
     }
     int faqRowCount = countMessageRows(4, 0);
@@ -7295,7 +7295,7 @@ extern unsigned short str_sp_b[];
 extern char str_folder[];
 extern char str_minus_folder[];
 extern char str_questmark_b[];
-extern int D_004A20CC;
+extern int cOVState_MESSAGECENTER_openRequest;
 
 struct sObj_3C00 {
     char pad_0x0[0x9C];
@@ -7317,7 +7317,7 @@ struct sObj_3C00 {
  * mDoneTransition, mAllowPauseMenu and mRemovePDA 0, chat buffer " "), stores cOVState_MESSAGECENTER_vtbl, zeroes the eight-row
  * widget tables (unread mail, FAQ icon, from, subject, number) and the labels, menu, buttons and arrows (not
  * mpNoMessage), and looks up the "folder", "minus folder" and "questmark" textures in the engine's texture bank
- * (+0x58, cUITextureBank_getElementByHashname). miMiscData becomes the opening mode: 2 when D_004A20CC is -1, else 0 or 1 by whether
+ * (+0x58, cUITextureBank_getElementByHashname). miMiscData becomes the opening mode: 2 when cOVState_MESSAGECENTER_openRequest is -1, else 0 or 1 by whether
  * new-player hint 7 is set (isMessageFlagSet), which it then sets (setMessageFlag(7, 1)).
  *
  * @param engine  the UI engine (On Tour pEngine)
@@ -7367,7 +7367,7 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
         int nameHash = GetHashValue32(str_questmark_b);
         stateView->miQuestionMarkTex = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
-    if (~D_004A20CC != 0) {
+    if (~cOVState_MESSAGECENTER_openRequest != 0) {
         if (isMessageFlagSet(7) != 0)
             self->miMiscData = 0;
         else
@@ -7399,7 +7399,7 @@ extern char str_112messagecenter[];
  * Adds the "112messagecenter" screen (cUIEngine_addScreenByHashName), keeps it in mpMessageScreen and plays its first
  * frame, runs cOVState_onCreateScreen, adds the PDA template in opening modes 0 and 1 (miMiscData), zeroes
  * mScrollOffset, sizes the menu to the queued messages plus every FAQ row (cUIMenu_setScrollableMenu), refreshes the
- * rows, labels, buttons and arrows (cOVState_MESSAGECENTER_fillRows, cOVState_MESSAGECENTER_showMessageCounts, cOVState_MESSAGECENTER_updateButtons, cOVState_MESSAGECENTER_updateScrollArrows) and sets D_004A20C0
+ * rows, labels, buttons and arrows (cOVState_MESSAGECENTER_fillRows, cOVState_MESSAGECENTER_showMessageCounts, cOVState_MESSAGECENTER_updateButtons, cOVState_MESSAGECENTER_updateScrollArrows) and sets cOVState_MESSAGECENTER_openFlag
  * (message center open).
  */
 void cOVState_MESSAGECENTER::onCreateScreen()
@@ -7427,7 +7427,7 @@ void cOVState_MESSAGECENTER::onCreateScreen()
     this->showMessageCounts();
     this->updateButtons();
     this->updateScrollArrows();
-    D_004A20C0 = 1;
+    cOVState_MESSAGECENTER_openFlag = 1;
 }
 #endif
 
@@ -7469,7 +7469,7 @@ void cOVState_MESSAGECENTER::onDestroyScreen()
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_004A20A8;
+extern char* cOVState_MESSAGECENTER_squareButtonName;
 extern char* D_004A2098;
 extern char str_btext3_b[];
 extern char str_btext1[];
@@ -7501,7 +7501,7 @@ void cOVState_MESSAGECENTER::onWidgetCreate(cUIThing* w)
 {
     char buf[32];
     int widgetHash = w->mHashName;
-    if (widgetHash == GetHashValue32(D_004A20A8))
+    if (widgetHash == GetHashValue32(cOVState_MESSAGECENTER_squareButtonName))
         mpButtonSquare = w;
     else if (widgetHash == GetHashValue32(str_btext3_b))
         mpButtonText3 = w;
@@ -7615,7 +7615,7 @@ struct sPopupEntry18_4200 {
     int id;                         // 0x4
     char pad_0x8[0x10];
 };
-extern sPopupEntry18_4200 D_004C6C08_4200[] __asm__("D_004C6C08");
+extern sPopupEntry18_4200 messageCenter_messageTable_4200[] __asm__("messageCenter_messageTable");
 
 struct sPopupEntry14_4200 {
     int type;
@@ -7624,7 +7624,7 @@ struct sPopupEntry14_4200 {
     int field_0xC;
     int enabled;                    // 0x10
 };
-extern sPopupEntry14_4200 D_00441630_4200[] __asm__("D_00441630");
+extern sPopupEntry14_4200 messageCenter_groupTable_4200[] __asm__("messageCenter_groupTable");
 
 struct sVEntry001E4200 {
     short delta;
@@ -7635,7 +7635,7 @@ struct sVEntry001E4200 {
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern char str_TransitionOut_b[];
-extern int D_004A20C0;
+extern int cOVState_MESSAGECENTER_openFlag;
 
 // PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
 unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
@@ -7656,7 +7656,7 @@ extern "C" void cOVState_MESSAGECENTER_deleteMessage(cOVState_MESSAGECENTER* sel
  * on a FAQ row either toggles the folder (when the row is a folder's first message: flips the group's message flag and
  * refreshes rows, arrows and buttons) or opens the view popup. kONOPTION: clears mbMessageDeleted and, on a queued row,
  * deletes that message (cOVState_MESSAGECENTER_deleteMessage) and sets mbMessageDeleted, then refreshes the buttons. kONPREV: plays the
- * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. kONGAINFOCUS:
+ * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears cOVState_MESSAGECENTER_openFlag. kONGAINFOCUS:
  * calls vtable entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
  *
  * @param widget  the widget (a row's From text holds its message index in mMiscData)
@@ -7681,8 +7681,8 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
                 this->openViewPopup(id, k + 1);
             } else if (idx + faqRowCount >= 0) {
                 int w = widget->mMiscData;
-                sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
-                sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
+                sPopupEntry18_4200* messageEntry = &messageCenter_messageTable_4200[w];
+                sPopupEntry14_4200* groupEntry = &messageCenter_groupTable_4200[messageEntry->id];
                 if (groupEntry->enabled != 0 && w == groupEntry->start) {
                     setMessageFlag(messageEntry->id, !isMessageFlagSet_b(messageEntry->id));
                     this->fillRows();
@@ -7711,7 +7711,7 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
             cUIScreen_playFrame(mpMessageScreen, outFrame, 1);
         }
         cUIStateStack_pop(&mpEngine->mStateStack, 1);
-        D_004A20C0 = 0;
+        cOVState_MESSAGECENTER_openFlag = 0;
         break;
     }
     case cUIState::kONGAINFOCUS: {
@@ -7743,18 +7743,18 @@ extern char str_kT_BTNView[];
 extern char str_kT_BTNCollapse[];
 extern char str_kT_BTNExpand[];
 
-struct sEntry18_4458 {   // a D_004C6C08 message (names ours)
+struct sEntry18_4458 {   // a messageCenter_messageTable message (names ours)
     int field_0x0;
     int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
-extern sEntry18_4458 D_004C6C08_4458[] __asm__("D_004C6C08");
-struct sEntry14_4458 {   // a D_00441630 message group (names ours)
+extern sEntry18_4458 messageCenter_messageTable_4458[] __asm__("messageCenter_messageTable");
+struct sEntry14_4458 {   // a messageCenter_groupTable message group (names ours)
     int type;
     int start;
     char pad_0x8[0x14 - 0x8];
 };
-extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
+extern sEntry14_4458 messageCenter_groupTable_4458[] __asm__("messageCenter_groupTable");
 
 /**
  * Updates the message center's buttons for the selected row.
@@ -7777,9 +7777,9 @@ void cOVState_MESSAGECENTER::updateButtons()
         hideWidget(mpButtonText3);
         if (mpButtonText1 != 0) {
             int id = getMessageForRow(4, -diff, 1);
-            sEntry18_4458* messageEntry = &D_004C6C08_4458[id];
+            sEntry18_4458* messageEntry = &messageCenter_messageTable_4458[id];
             int groupIndex = messageEntry->groupIndex;
-            sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
+            sEntry14_4458* groupEntry = &messageCenter_groupTable_4458[groupIndex];
             if (id == groupEntry->start) {
                 if (isMessageFlagSet(groupIndex))
                     cUIText_setUnicodeStringByID(mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
@@ -7867,14 +7867,14 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_updateScrollArrows);
 // PORT: getMessageCount is declared (void*) but never reads its argument; called here with none
 unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 extern "C" int countMessageRows(int type, int all);
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 
 
 /**
  * Shows or hides the message center's scroll arrows.
  *
  * mpArrowUp is shown while mScrollOffset is not 0; mpArrowDown while mScrollOffset + 8 is below the row count (the
- * queued messages plus the FAQ rows, every FAQ row when D_004A20C4 is set).
+ * queued messages plus the FAQ rows, every FAQ row when cOVState_MESSAGECENTER_expandFoldersFlag is set).
  */
 void cOVState_MESSAGECENTER::updateScrollArrows()
 {
@@ -7886,7 +7886,7 @@ void cOVState_MESSAGECENTER::updateScrollArrows()
         arrowWidget->setVisible(1);
     }
     int n;
-    if (D_004A20C4 != 0) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag != 0) {
         n = getMessageCount_noarg();
         n += countMessageRows(4, 1);
     } else {
@@ -7991,7 +7991,7 @@ extern "C" void cOVState_MESSAGECENTER_fillRow_48B0(void* self, int idx, int row
 extern "C" int getMessageForRow_48B0(int kind, int idx, int local) __asm__("getMessageForRow");
 extern "C" int cOVState_MESSAGECENTER_getFAQSubjectVariant_48B0(void* self, int entry) __asm__("cOVState_MESSAGECENTER_getFAQSubjectVariant");
 extern "C" void cUIMenu_setScrollableMenu_48B0(void* menu, unsigned char n) __asm__("cUIMenu_setScrollableMenu");
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 extern char str_MessageNumbers[];
 extern char str_MessageFroms[];
 extern char str_MessageSubjects[];
@@ -8032,7 +8032,7 @@ void cOVState_MESSAGECENTER::fillRows()
 {
     sList_48B0* self = (sList_48B0*)this;
     int online;
-    if (D_004A20C4) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag) {
         online = countMessageRows_48B0(4, 1);
     } else {
         online = countMessageRows_48B0(4, 0);
@@ -8070,7 +8070,7 @@ void cOVState_MESSAGECENTER::fillRows()
             } else if (k + online >= 0) {
                 int nk = ~k;
                 int faqMessage;
-                if (D_004A20C4) {
+                if (cOVState_MESSAGECENTER_expandFoldersFlag) {
                     faqMessage = getMessageForRow_48B0(4, nk, 0);
                 } else {
                     faqMessage = getMessageForRow_48B0(4, nk, 1);
@@ -8097,37 +8097,37 @@ void cOVState_MESSAGECENTER::fillRows()
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_getFAQSubjectVariant);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 extern "C" int getMessagePositionInCategory(int idx);
 
-struct sPopupEntry18_4B80 {   // a D_004C6C08 message (names ours)
+struct sPopupEntry18_4B80 {   // a messageCenter_messageTable message (names ours)
     int field_0x0;
     int groupIndex;
     int kind;
     char pad_0xC[0x18 - 0xC];
 };
-extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
+extern sPopupEntry18_4B80 messageCenter_messageTable_4B80[] __asm__("messageCenter_messageTable");
 
 /**
- * Returns the subject variant of a FAQ-row message when D_004A20C4 is set.
+ * Returns the subject variant of a FAQ-row message when cOVState_MESSAGECENTER_expandFoldersFlag is set.
  *
  * For a message of kind 1 (+0x8) takes its position in its category (getMessagePositionInCategory) and reduces it by the group's
  * category: 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0. Same rule as cOVState_ViewPopup_getSubjectVariant.
  *
  * @param idx  the message index
- * @return the variant, or 0xFF when D_004A20C4 is clear or the message is not of kind 1
+ * @return the variant, or 0xFF when cOVState_MESSAGECENTER_expandFoldersFlag is clear or the message is not of kind 1
  */
 unsigned char cOVState_MESSAGECENTER::getFAQSubjectVariant(int idx)
 {
     unsigned char variant = 0xFF;
-    if (D_004A20C4 == 0) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag == 0) {
         return 0xFF;
     }
-    sPopupEntry18_4B80* messageEntry = &D_004C6C08_4B80[idx];
+    sPopupEntry18_4B80* messageEntry = &messageCenter_messageTable_4B80[idx];
     if (messageEntry->kind == 1) {
         int position = getMessagePositionInCategory(idx);
         int div = 1;
-        sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
+        sPopupEntry14* groupEntry = &messageCenter_groupTable[messageEntry->groupIndex];
         switch (groupEntry->category) {
         case 3:
             div = 10;
@@ -8163,7 +8163,7 @@ extern char str_dash[];
 extern char str_sp_gt[];
 extern char str_pct_d_d[];
 
-// a D_004C6C08 message (names ours, from use: its group, kind, sender and subject string)
+// a messageCenter_messageTable message (names ours, from use: its group, kind, sender and subject string)
 struct sEnt18_4C78 {
     int f0;
     int groupIndex;
@@ -8172,9 +8172,9 @@ struct sEnt18_4C78 {
     int subject;
     int f14;
 };
-extern sEnt18_4C78 D_004C6C08_4C78[] __asm__("D_004C6C08");
+extern sEnt18_4C78 messageCenter_messageTable_4C78[] __asm__("messageCenter_messageTable");
 
-// a D_00441630 message group (names ours)
+// a messageCenter_groupTable message group (names ours)
 struct sEnt14_4C78 {
     int type;
     int start;
@@ -8182,7 +8182,7 @@ struct sEnt14_4C78 {
     int category;
     int isFolder;
 };
-extern sEnt14_4C78 D_00441630_4C78[] __asm__("D_00441630");
+extern sEnt14_4C78 messageCenter_groupTable_4C78[] __asm__("messageCenter_groupTable");
 
 struct sVEntry_4C78 {
     short delta;
@@ -8239,15 +8239,15 @@ static inline void show_4C78(sObj_4C78* o)
  *
  * @param idx    the message-list position, or -1 for a FAQ row
  * @param slot   the row (0-7)
- * @param id     the message index (D_004C6C08)
+ * @param id     the message index (messageCenter_messageTable)
  * @param sub    the subject variant
  */
 void cOVState_MESSAGECENTER::fillRow(int idx, int slot, int id, unsigned char sub)
 {
     sPopup_4C78* self = (sPopup_4C78*)this;
     char buf[16];
-    sEnt18_4C78* messageEntry = &D_004C6C08_4C78[id];
-    sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->groupIndex];
+    sEnt18_4C78* messageEntry = &messageCenter_messageTable_4C78[id];
+    sEnt14_4C78* groupEntry = &messageCenter_groupTable_4C78[messageEntry->groupIndex];
     char* messageList = (char*)getMessageList(self);
     if (idx == -1) {
         if (groupEntry->isFolder != 0) {
@@ -8314,7 +8314,7 @@ extern "C" int findMessage(int id);
 extern "C" unsigned char getListMessageVariant(int idx);
 extern "C" bool isMessageInCategory(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
 extern char str_kT_MSGSubjectBCFinishWinpct_d[];
 extern char str_kT_MSGSubjectAggressionpct_d[];
@@ -8440,7 +8440,7 @@ extern void* cOVState_ViewPopup_vtbl[];
  *
  * @param engine  the UI engine (the message center's mpEngine)
  * @param owner  the parent state (the cOVState_MESSAGECENTER)
- * @param message  the message's index in the saved list D_004C6C08 (miMessage)
+ * @param message  the message's index in the saved list messageCenter_messageTable (miMessage)
  * @param number  the number shown for it (miNumber)
  * @return @p self
  */
@@ -8529,7 +8529,7 @@ extern char str_Subject[];
 extern char str_NumberLabel[];
 extern char str_Number[];
 extern char str_MV_KeepMessage[];
-extern char* D_004A20A8;
+extern char* cOVState_MESSAGECENTER_squareButtonName;
 extern char str_MV_DeleteMessage[];
 extern char str_MessageLine0[];
 extern char str_MenuDummy[];
@@ -8539,7 +8539,7 @@ extern char str_MenuDummy[];
  * Shows each of the message view's widgets as it is created and binds the ones it fills.
  *
  * Every widget is shown (setVisible, slot 9). "From", "Subject", "NumberLabel", "Number", "MV_KeepMessage", the square
- * button (D_004A20A8), "MV_DeleteMessage" and "MessageLine0" are stored in their members; the menu "MenuDummy" gets
+ * button (cOVState_MESSAGECENTER_squareButtonName), "MV_DeleteMessage" and "MessageLine0" are stored in their members; the menu "MenuDummy" gets
  * mAttrMenu.mDisableDirSound (bit 3 of the word at 0x90).
  *
  * @param widget  the widget being created (On Tour pWidget)
@@ -8558,7 +8558,7 @@ void cOVState_ViewPopup::onWidgetCreate(cUIThing* widget)
         mpNumber = (cUIText*)widget;
     } else if (nameHash == GetHashValue32(str_MV_KeepMessage)) {
         mpKeepMessage = (cUIText*)widget;
-    } else if (nameHash == GetHashValue32(D_004A20A8)) {
+    } else if (nameHash == GetHashValue32(cOVState_MESSAGECENTER_squareButtonName)) {
         mpButtonSquare = widget;
     } else if (nameHash == GetHashValue32(str_MV_DeleteMessage)) {
         mpDeleteMessage = widget;
@@ -8574,20 +8574,20 @@ void cOVState_ViewPopup::onWidgetCreate(cUIThing* widget)
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_fillMessage);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sPopupEntry18_5428 {   // a D_004C6C08 message (names ours)
+struct sPopupEntry18_5428 {   // a messageCenter_messageTable message (names ours)
     int field_0x0;
     int groupIndex;
     char pad_0x8[0x4];
     int sender;
     char pad_0x10[0x8];
 };
-extern sPopupEntry18_5428 D_004C6C08_5428[] __asm__("D_004C6C08");
+extern sPopupEntry18_5428 messageCenter_messageTable_5428[] __asm__("messageCenter_messageTable");
 
 struct sPopupEntry14_5428 {
     int type;
     char pad_0x4[0x10];
 };
-extern sPopupEntry14_5428 D_00441630_5428[] __asm__("D_00441630");
+extern sPopupEntry14_5428 messageCenter_groupTable_5428[] __asm__("messageCenter_groupTable");
 
 
 struct sVEntryS1E5428 {
@@ -8598,7 +8598,7 @@ struct sVEntryS1E5428 {
 
 extern char str_kT_BTNKeepMsg[];
 extern char str_kT_MSGFAQNumber[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int getMessageSenderName(int id);
@@ -8616,8 +8616,8 @@ extern "C" void cOVState_ViewPopup_setBody(cOVState_ViewPopup* self, int idx);
  */
 void cOVState_ViewPopup::fillMessage()
 {
-    sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[miMessage];
-    sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
+    sPopupEntry18_5428* messageEntry = &messageCenter_messageTable_5428[miMessage];
+    sPopupEntry14_5428* groupEntry = &messageCenter_groupTable_5428[messageEntry->groupIndex];
     if (groupEntry->type == kMessageGroupFAQ) {
         cUIThing* buttonWidget = mpButtonSquare;
         if (buttonWidget != 0) {
@@ -8641,7 +8641,7 @@ void cOVState_ViewPopup::fillMessage()
             cUIText_setUnicodeString(mpNumber, buf);
         } else {
             char buf[0x30];
-            sprintf(buf, D_004A2138, miNumber);
+            sprintf(buf, str_pct_d_j, miNumber);
             cUIText_setAsciiString(mpNumber, buf);
         }
     }
@@ -8667,7 +8667,7 @@ extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, i
  */
 void cOVState_ViewPopup::setSubject(int idx)
 {
-    char* messageEntry = (char*)&D_004C6C08[idx];
+    char* messageEntry = (char*)&messageCenter_messageTable[idx];
     if (*(int*)(messageEntry + 0x8) == 1) {
         setVariantSubject(idx);
     } else {
@@ -8691,7 +8691,7 @@ extern "C" int findMessage(int id);
 extern "C" unsigned char getListMessageVariant(int idx);
 extern "C" bool isMessageInCategory(int v, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 extern char str_kT_MSGSubjectBCFinishLosspct_d[];
 extern char str_kT_MSGSubjectBCFinishWinpct_d[];
 extern char str_kT_MSGSubjectAggressionpct_d[];
@@ -8701,7 +8701,7 @@ extern char str_kT_MSGSubjectBeatThePeakpct_d[];
 /**
  * Sets the view popup's subject to the text for a message's variant.
  *
- * The variant is cOVState_ViewPopup_getSubjectVariant's when D_004A20C4 is set, else the one stored with the queued message (getListMessageVariant of
+ * The variant is cOVState_ViewPopup_getSubjectVariant's when cOVState_MESSAGECENTER_expandFoldersFlag is set, else the one stored with the queued message (getListMessageVariant of
  * its list position). The string id is built as in cOVState_MESSAGECENTER_setRowSubject (BCFinishLoss / Win, Aggression, Foreshadow,
  * BeatThePeak) and set on mpSubject.
  *
@@ -8711,7 +8711,7 @@ void cOVState_ViewPopup::setVariantSubject(int id)
 {
     char buf[32];
     unsigned char lvl;
-    if (D_004A20C4 != 0) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag != 0) {
         lvl = getSubjectVariant(id);
     } else {
         lvl = getListMessageVariant(findMessage(id));
@@ -8752,7 +8752,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_setBody);
  */
 void cOVState_ViewPopup::setBody(int idx)
 {
-    char* messageEntry = (char*)&D_004C6C08[idx];
+    char* messageEntry = (char*)&messageCenter_messageTable[idx];
     int kind = *(int*)(messageEntry + 0x8);
     if (kind < 2) {
         if (kind >= 0) {
@@ -8775,18 +8775,18 @@ struct sPopupEntry18_5800 {
     int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
-extern sPopupEntry18_5800 D_004C6C08_5800[] __asm__("D_004C6C08");
+extern sPopupEntry18_5800 messageCenter_messageTable_5800[] __asm__("messageCenter_messageTable");
 struct sEntry14_5800 {
     int type;
     char pad_0x4[0x14 - 0x4];
 };
-extern sEntry14_5800 D_00441630_5800[] __asm__("D_00441630");
+extern sEntry14_5800 messageCenter_groupTable_5800[] __asm__("messageCenter_groupTable");
 extern "C" void removeMessage(int id);
 
 /**
  * Handles the message view's widget events: delete the message, or close the popup.
  *
- * kONOPTION deletes the shown message from the saved list (removeMessage) unless its type (D_00441630[entry +0x4])
+ * kONOPTION deletes the shown message from the saved list (removeMessage) unless its type (messageCenter_groupTable[entry +0x4])
  * is kMessageGroupFAQ, in which case nothing happens; it then falls through to close. kONNEXT and kONPREV (and a
  * delete) tell the parent state's onPopupEvent (slot 17) kONSCREENPOPUPPREV (back) from this popup.
  *
@@ -8798,8 +8798,8 @@ void cOVState_ViewPopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
     switch (msg) {
     case cUIState::kONOPTION: {
         int id = miMessage;
-        sPopupEntry18_5800* popupEntry = &D_004C6C08_5800[id];
-        sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->groupIndex];
+        sPopupEntry18_5800* popupEntry = &messageCenter_messageTable_5800[id];
+        sEntry14_5800* typeEntry = &messageCenter_groupTable_5800[popupEntry->groupIndex];
         if (typeEntry->type == kMessageGroupFAQ) {
             return;
         }
@@ -8841,8 +8841,8 @@ unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
 void cOVState_ViewPopup::showNextMessage()
 {
     int id = miMessage;
-    sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
-    sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->groupIndex];
+    sPopupEntry18_5800* messageEntry = &messageCenter_messageTable_5800[id];
+    sEntry14_5800* groupEntry = &messageCenter_groupTable_5800[messageEntry->groupIndex];
     if (groupEntry->type == kMessageGroupFAQ) {
         int n = getNextMessageInGroup(id);
         if (n == -1) {
@@ -8887,8 +8887,8 @@ int cOVState_ViewPopup::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigne
     case cUIMenu::kONMISC:
         return 0;
     case cUIMenu::kONOPTION: {
-        sPopupEntry18* popupEntry = &D_004C6C08[miMessage];
-        sPopupEntry14* typeEntry = &D_00441630[popupEntry->groupIndex];
+        sPopupEntry18* popupEntry = &messageCenter_messageTable[miMessage];
+        sPopupEntry14* typeEntry = &messageCenter_groupTable[popupEntry->groupIndex];
         return typeEntry->type != kMessageGroupFAQ;
     }
     }
@@ -8899,25 +8899,25 @@ int cOVState_ViewPopup::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigne
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_getSubjectVariant);
 #ifdef SKIP_ASM
-extern int D_004A20C4;
+extern int cOVState_MESSAGECENTER_expandFoldersFlag;
 
 /**
- * Returns a message's subject variant from its position in its category, when D_004A20C4 is set.
+ * Returns a message's subject variant from its position in its category, when cOVState_MESSAGECENTER_expandFoldersFlag is set.
  *
  * Category 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0 (position from getMessagePositionInCategory).
  *
  * @param idx  the message index
- * @return the variant, or 0xFF when D_004A20C4 is clear
+ * @return the variant, or 0xFF when cOVState_MESSAGECENTER_expandFoldersFlag is clear
  */
 unsigned char cOVState_ViewPopup::getSubjectVariant(int idx)
 {
-    if (D_004A20C4 == 0) {
+    if (cOVState_MESSAGECENTER_expandFoldersFlag == 0) {
         return 0xFF;
     }
     int position = getMessagePositionInCategory(idx);
     int div = 1;
-    sPopupEntry18* messageEntry = &D_004C6C08[idx];
-    sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
+    sPopupEntry18* messageEntry = &messageCenter_messageTable[idx];
+    sPopupEntry14* groupEntry = &messageCenter_groupTable[messageEntry->groupIndex];
     switch (groupEntry->category) {
     case 3:
         div = 10;
@@ -8951,8 +8951,8 @@ extern "C" int cGameModeMan_getHeatScore(cGameModeMan* info, int idx, int which)
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
 extern int cGameModeMan_iCharRank[];
-extern char* D_00441D10[];
-extern unsigned short D_004A2140_5B80[] __asm__("D_004A2140");
+extern char* cOVState_overlayOptionTextIDs[];
+extern unsigned short str_pct_s_pct_s_k_5B80[] __asm__("str_pct_s_pct_s_k");
 extern char str_42freestyle_standings[];
 extern char str_OV_darkblue[];
 extern char str_track_event[];
@@ -8995,7 +8995,7 @@ extern sIdx5_5B80 D_0046E488;
  * run 1 and run 2 scores and the total (cGameModeMan_getHeatScore) or DNF for a human rider who gave up
  * (cGameModeMan_bGiveUp); the player's help_current0N marker shows in heat 1 (kT_CMNHELPEarnedEnoughPoints in a final
  * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
- * D_0046E488 (names D_00441D10, kT_OVRCMNFinalRound for a final round), stored at +0x18.
+ * D_0046E488 (names cOVState_overlayOptionTextIDs, kT_OVRCMNFinalRound for a final round), stored at +0x18.
  */
 void cOVState_HEAT_STANDINGS::onCreateScreen()
 {
@@ -9042,7 +9042,7 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
         break;
     }
     }
-    sprintf2_5B80(line, D_004A2140_5B80, title, fmt);
+    sprintf2_5B80(line, str_pct_s_pct_s_k_5B80, title, fmt);
     cUIText_setUnicodeString(uiText, line);
     uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_b));
     switch (kind) {
@@ -9090,7 +9090,7 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
                 cUIText_setAsciiString(uiText, str_DNF);
                 any = 1;
             } else {
-                sprintf(num, D_004A2138, cGameModeMan_getHeatScore(info, idx, 0));
+                sprintf(num, str_pct_d_j, cGameModeMan_getHeatScore(info, idx, 0));
                 cUIText_setAsciiString(uiText, num);
             }
             sprintf(name, str_run_2_pct_d, i);
@@ -9158,7 +9158,7 @@ void cOVState_HEAT_STANDINGS::onCreateScreen()
                     GetHashValue32(name)));
             if (((cUIThing*)object) != 0) {
                 if (i < 5) {
-                    cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
+                    cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(cOVState_overlayOptionTextIDs[ids.v[i]]));
                     if (i == 0 && ids.v[0] == 1 && info->iNextHeat == 3) {
                         cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(str_kT_OVRCMNFinalRound));
                     }
@@ -9364,7 +9364,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 
 extern int cGameModeMan_iRanking[];
 
@@ -9390,7 +9390,7 @@ extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern int cGameModeMan_iCharRank[];
 extern int D_005366A8[];
-extern char* D_00441D10[];
+extern char* cOVState_overlayOptionTextIDs[];
 extern int D_004A213C;
 struct sIdx5_6718 {
     int v[5];
@@ -9402,8 +9402,8 @@ extern char str_kT_cmnRaceCaps_b[];
 extern char str_kT_cmnSlopeCaps[];
 extern char str_kT_cmnBigAirCaps[];
 extern char str_kT_cmnPipeCaps[];
-extern char D_0046E558[];
-extern char D_004A2140[];
+extern char str_pct_s_Jam_b[];
+extern char str_pct_s_pct_s_k[];
 extern char str_title_b[];
 extern char str_kT_OVRCMNMultiPlayResults[];
 extern char str_kT_OVRCMNQuickPlayResults[];
@@ -9500,9 +9500,9 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
         unsigned short title[104];
         // titleFmt ("%s - %s") is a variable: the target loads its %hi before the track test, which a literal
         // argument (loaded in the else arm only) does not.
-        char* titleFmt = D_004A2140;
+        char* titleFmt = str_pct_s_pct_s_k;
         if (track == 6) {
-            sprintf2(title, D_0046E558, name);
+            sprintf2(title, str_pct_s_Jam_b, name);
         } else {
             sprintf2(title, titleFmt, name, str);
         }
@@ -9584,7 +9584,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                     cUIText_setAsciiString(uiText, formatMinutesSeconds(fptoui(D_00536640[idx] * 0.01666666753590107f)));
                 } else {
                     unsigned int time = D_00536640[idx];
-                    sprintf(text, D_004A2138, time);
+                    sprintf(text, str_pct_d_j, time);
                     cUIText_setAsciiString(uiText, text);
                 }
             } else {
@@ -9710,7 +9710,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 cBE_getInterface_Fv(SSXApp->BE, 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     if (i < 1) {
-                        cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[netIds[i]]));
+                        cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(cOVState_overlayOptionTextIDs[netIds[i]]));
                         button->mMiscData = netIds[i];
                     } else {
                         button->setVisible(0);
@@ -9718,7 +9718,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                     }
                 } else {
                     if (i < 5) {
-                        cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[ids.v[i]]));
+                        cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(cOVState_overlayOptionTextIDs[ids.v[i]]));
                         if (i == 0 && ids.v[0] == 1 && raceSetup->iNextHeat == 3) {
                             cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(str_kT_OVRCMNFinalRound));
                         }
@@ -9791,7 +9791,7 @@ extern char str_kT_POPUP235Chat_b[];
 extern char str_helptexts[];
 extern char str_textScrollChat_b[];
 
-extern tARGB D_004C8408;
+extern tARGB cOVState_FINAL_STANDINGS_chatSelectedColour;
 
 /**
  * Highlights the players' rows and sets up online chat when the final standings overlay gains focus (vtable entry 6).
@@ -9799,7 +9799,7 @@ extern tARGB D_004C8408;
  * Runs cUIState_onGainFocus, fades the human riders' "rider%d" and "timePoints%d" entries with "@TextPulseWhiteOrange"
  * (player 1, and player 2 online; neither online in freestyle or challenge modes). In a connected network game shows
  * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (chat window mode,
- * selected colour D_004C8408, input map 1, hidden). Plays menu sound 0xE.
+ * selected colour cOVState_FINAL_STANDINGS_chatSelectedColour, input map 1, hidden). Plays menu sound 0xE.
  */
 void cOVState_FINAL_STANDINGS::onGainFocus(cUIState*)
 {
@@ -9847,7 +9847,7 @@ void cOVState_FINAL_STANDINGS::onGainFocus(cUIState*)
         cUITextScroll* chatScroll =
             (cUITextScroll*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_textScrollChat_b));
         chatScroll->mAttrTextScroll.mMode = 1;
-        chatScroll->mSelectedColour = D_004C8408;
+        chatScroll->mSelectedColour = cOVState_FINAL_STANDINGS_chatSelectedColour;
         cUITextScroll_setInputMap(chatScroll, 1);
         chatScroll->setVisible(0);
     }
@@ -10523,7 +10523,7 @@ extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
 extern unsigned int D_00536640[];
-extern char* D_00441D10[];
+extern char* cOVState_overlayOptionTextIDs[];
 struct sIdx3_8920 {
     int v[3];
 };
@@ -10541,7 +10541,7 @@ extern char str_kT_OVRCMNTimeToBeatColon[];
 extern char str_kT_OVRCMNYourTimeColon[];
 extern char str_kT_OVRCMNScoreToBeatColon[];
 extern char str_kT_CMNYourScore[];
-extern char D_004A2138[];
+extern char str_pct_d_j[];
 extern char str_DNF[];
 extern char str_helptext_b[];
 extern char str_kT_HELPCongratWonChal[];
@@ -10550,7 +10550,7 @@ extern char str_kT_HELPSorryBeatScore[];
 extern char str_overlayOptpct_d[];
 
 /**
- * Builds the peak challenge results overlay (overlay 22, vtable D_00473ED8, entry 4 onCreateScreen).
+ * Builds the peak challenge results overlay (overlay 22, vtable cOVState_PEAKCHAL_RESULTS_vtbl, entry 4 onCreateScreen).
  *
  * Adds "70peakchal_results" (kept at +0x40) over "OV_darkblue" and runs cOVState_onCreateScreen. "title1" reads
  * kT_TITLERivalChallenge and "title2" getPeakChallengeEventName's name for game events 6-11. For events 6-8 the labels read
@@ -10603,12 +10603,12 @@ void cOVState::PEAKCHAL_RESULTS_onCreateScreen()
         char buf[32];
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNScoreToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_CMNYourScore));
-        sprintf(buf, D_004A2138, (int)modeData->uiPointTarget);
+        sprintf(buf, str_pct_d_j, (int)modeData->uiPointTarget);
         cUIText_setAsciiString(targetValue, buf);
         if (D_005366A8[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            sprintf(buf, D_004A2138, D_00536640[0]);
+            sprintf(buf, str_pct_d_j, D_00536640[0]);
             cUIText_setAsciiString(resultValue, buf);
         }
     }
@@ -10640,7 +10640,7 @@ done:
             screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             if (screenWidget != 0) {
                 if (i < 3) {
-                    cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(D_00441D10[ids.v[i]]));
+                    cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(cOVState_overlayOptionTextIDs[ids.v[i]]));
                     screenWidget->mMiscData = ids.v[i];
                 } else {
                     screenWidget->setVisible(0);

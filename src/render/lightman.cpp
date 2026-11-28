@@ -1004,8 +1004,8 @@ INCLUDE_ASM("render/lightman", cPS2ScratchPad_setLayout);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void dma_waitFromScratchpadIdle(void);
 extern "C" void dma_waitToScratchpadIdle(void);
-// PORT: the unit declares D_004A5B84 as int further down; bind a pointer view by asm label
-extern char* D_004A5B84_F300 __asm__("D_004A5B84");
+// PORT: the unit declares cPS2ScratchPad_freeSpace as int further down; bind a pointer view by asm label
+extern char* cPS2ScratchPad_freeSpace_F300 __asm__("cPS2ScratchPad_freeSpace");
 
 
 /**
@@ -1013,8 +1013,8 @@ extern char* D_004A5B84_F300 __asm__("D_004A5B84");
  *
  * Does nothing when the mode is unchanged. Modes kLayout_1x1024 to kLayout_3x256 give 1, 2, 2, 2, 2, 3, 3 buffers of
  * 0x400, 0x200, 0x1C0, 0x180, 0x100, 320, 0x100 qwords at 0x70000000 + i * size * 16; both indices and all addresses
- * and sizes are reset. D_004A5B84 gets the scratchpad space after the buffers, or 0 when none is left. Then it waits
- * for both scratchpad DMA channels (dma_waitFromScratchpadIdle, dma_waitToScratchpadIdle). The ring object (D_004A4474): mode +0, buffer count
+ * and sizes are reset. cPS2ScratchPad_freeSpace gets the scratchpad space after the buffers, or 0 when none is left. Then it waits
+ * for both scratchpad DMA channels (dma_waitFromScratchpadIdle, dma_waitToScratchpadIdle). The ring object (SPRMan): mode +0, buffer count
  * +4, next buffer +8, current buffer +0xC, default size in qwords +0x10, scratchpad buffers +0x14[3], main-memory
  * addresses +0x20[3], sizes +0x2C[3].
  *
@@ -1062,9 +1062,9 @@ void cPS2ScratchPad::setLayout(int mode)
     }
     int total = mBlockSize * mNumBlocks;
     if (total < 0x400) {
-        D_004A5B84_F300 = (char*)0x70000000 + total * 16;
+        cPS2ScratchPad_freeSpace_F300 = (char*)0x70000000 + total * 16;
     } else {
-        D_004A5B84_F300 = 0;
+        cPS2ScratchPad_freeSpace_F300 = 0;
     }
     dma_waitFromScratchpadIdle();
     dma_waitToScratchpadIdle();
@@ -1275,36 +1275,36 @@ extern "C" unsigned int cPS2ScratchPad_mapToMainAddress(sLightDma_F6D0* self, in
 //100%
 INCLUDE_ASM("render/lightman", scratchpad_loadSpareArea);
 #ifdef SKIP_ASM
-extern int D_004A5B84;
+extern int cPS2ScratchPad_freeSpace;
 extern "C" void dma_copyToScratchpad(unsigned int madr, int sadr, int qwc, int flags);
 
 /**
- * Copies @p size bytes from main memory into the spare scratchpad area D_004A5B84 by toSPR DMA.
+ * Copies @p size bytes from main memory into the spare scratchpad area cPS2ScratchPad_freeSpace by toSPR DMA.
  *
- * dma_copyToScratchpad(@p madr, D_004A5B84, @p size >> 4, @p flags).
+ * dma_copyToScratchpad(@p madr, cPS2ScratchPad_freeSpace, @p size >> 4, @p flags).
  *
  * @param madr  the main-memory source
  * @param size  the byte count
  * @param flags  dma_copyToScratchpad's wait flags
- * @return D_004A5B84
+ * @return cPS2ScratchPad_freeSpace
  */
 extern "C" int scratchpad_loadSpareArea(unsigned int madr, int size, int flags)
 {
-    dma_copyToScratchpad(madr, D_004A5B84, size >> 4, flags);
-    return D_004A5B84;
+    dma_copyToScratchpad(madr, cPS2ScratchPad_freeSpace, size >> 4, flags);
+    return cPS2ScratchPad_freeSpace;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/lightman", scratchpad_storeSpareArea);
 #ifdef SKIP_ASM
-extern int D_004A5B84;
+extern int cPS2ScratchPad_freeSpace;
 extern "C" void dma_copyFromScratchpad(int sadr, unsigned int madr, int qwc, int flags);
 
 /**
- * Copies @p size bytes from the spare scratchpad area D_004A5B84 to main memory by fromSPR DMA.
+ * Copies @p size bytes from the spare scratchpad area cPS2ScratchPad_freeSpace to main memory by fromSPR DMA.
  *
- * dma_copyFromScratchpad(D_004A5B84, @p madr, @p size >> 4, @p flags).
+ * dma_copyFromScratchpad(cPS2ScratchPad_freeSpace, @p madr, @p size >> 4, @p flags).
  *
  * @param madr  the main-memory destination
  * @param size  the byte count
@@ -1312,7 +1312,7 @@ extern "C" void dma_copyFromScratchpad(int sadr, unsigned int madr, int qwc, int
  */
 extern "C" void scratchpad_storeSpareArea(unsigned int madr, int size, int flags)
 {
-    dma_copyFromScratchpad(D_004A5B84, madr, size >> 4, flags);
+    dma_copyFromScratchpad(cPS2ScratchPad_freeSpace, madr, size >> 4, flags);
 }
 #endif
 
@@ -1380,10 +1380,10 @@ INCLUDE_ASM("render/lightman", tex_reorder4BitBlock);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 #include "render/graphicsman.h"
-extern unsigned int D_0044B9E0[];
+extern unsigned int tex_reorder4BitTable[];
 
 /**
- * Reorders one 256-byte block of 4-bit texels by the nibble table D_0044B9E0.
+ * Reorders one 256-byte block of 4-bit texels by the nibble table tex_reorder4BitTable.
  *
  * Four passes of 64 source bytes; each output byte packs two nibbles picked by table entries (bit 0 = which nibble, the
  * rest = byte index), and odd passes use the table's second half. @p self is unused. Caller: tex_rearrange4BitTile.
@@ -1406,7 +1406,7 @@ extern "C" int tex_reorder4BitBlock(void* self, unsigned char* src, unsigned cha
         unsigned int k = (i & 1) << 7;
         unsigned int j;
         for (j = 0; j < 16; j++) {
-            unsigned int* tablePtr = &D_0044B9E0[k];
+            unsigned int* tablePtr = &tex_reorder4BitTable[k];
             unsigned int column;
             for (column = 0; column < 4; column++) {
                 unsigned int entry = *tablePtr++;
@@ -1432,10 +1432,10 @@ extern "C" int tex_reorder4BitBlock(void* self, unsigned char* src, unsigned cha
 //100%
 INCLUDE_ASM("render/lightman", tex_reorder8BitBlock);
 #ifdef SKIP_ASM
-extern int D_0044BDE0[];
+extern int tex_reorder8BitTable[];
 
 /**
- * Reorders one 256-byte block of 8-bit texels by the index table D_0044BDE0.
+ * Reorders one 256-byte block of 8-bit texels by the index table tex_reorder8BitTable.
  *
  * Four passes of 64 source bytes, odd passes using the table's second half. @p self is unused. Caller: tex_rearrange8BitTile.
  *
@@ -1453,7 +1453,7 @@ extern "C" int tex_reorder8BitBlock(void* self, unsigned char* src, unsigned cha
         for (j = 0; j < 16; j++) {
             unsigned int column;
             for (column = 0; column < 4; column++) {
-                dst[n] = src[D_0044BDE0[k]];
+                dst[n] = src[tex_reorder8BitTable[k]];
                 k++;
                 n++;
             }
@@ -1828,7 +1828,7 @@ INCLUDE_ASM("render/lightman", cPS2GraphicsMan_queueScreenTintPass);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_Enable;
 extern int cScreenTint_m_OverrideWP;
-extern void* D_004A4474;
+extern void* SPRMan;
 
 extern "C" void func_003905E8(void* self, int idx, int* mark);
 // PORT: cPS2ScratchPad_flushBufferTo is declared void in this unit, but it returns its tail call's
@@ -1860,7 +1860,7 @@ void cPS2GraphicsMan::queueScreenTintPass(int idx, void* pkt, int* addr)
     if (tint[0] == 1.0f && tint[1] == 1.0f && tint[2] == 1.0f && tint[3] == 0.0f && tint[4] == 0.0f && tint[5] == 0.0f) {
         return;
     }
-    void* ring = D_004A4474;
+    void* ring = SPRMan;
     int mark = cPS2ScratchPad_claimBuffer(ring, *addr, -1, 0);
     func_003905E8(this, idx, &mark);
     *addr = cPS2ScratchPad_flushBufferTo_r(ring, mark, 4);
@@ -2226,13 +2226,13 @@ extern "C" void cScreenTint_render()
 //100%
 INCLUDE_ASM("render/lightman", vu0_uploadProgramChainA);
 #ifdef SKIP_ASM
-extern char D_0043BD00[];
+extern char vu0_programChainA[];
 extern "C" void FlushCache(int);
 
 /**
- * Uploads the VU0 microprogram chain at D_0043BD00 through the VIF0 DMA channel and waits for it.
+ * Uploads the VU0 microprogram chain at vu0_programChainA through the VIF0 DMA channel and waits for it.
  *
- * Waits for VIF0 DMA (0x10008000) to be idle, starts it in chain mode from D_0043BD00 (CHCR 260), waits again and calls
+ * Waits for VIF0 DMA (0x10008000) to be idle, starts it in chain mode from vu0_programChainA (CHCR 260), waits again and calls
  * FlushCache(0). Caller: cPS2GraphicsMan_Init.
  */
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
@@ -2243,7 +2243,7 @@ extern "C" void vu0_uploadProgramChainA(void)
     }
     // ORIGINAL-PTR: the DMA tag address register (D0_TADR) takes the chain's address as a 32-bit word (Sony SDK
     // eeregs.h, DPUT_D0_TADR(u_int)).
-    *(volatile int*)0x10008030 = (int)D_0043BD00;
+    *(volatile int*)0x10008030 = (int)vu0_programChainA;
     *(volatile int*)0x10008020 = 0;
     *(volatile int*)0x10008000 = 260;
     while (*(volatile int*)0x10008000 & 0x100) {
@@ -2255,13 +2255,13 @@ extern "C" void vu0_uploadProgramChainA(void)
 //100%
 INCLUDE_ASM("render/lightman", vu0_uploadProgramChainB);
 #ifdef SKIP_ASM
-extern char D_0043CCA0[];
+extern char vu0_programChainB[];
 extern "C" void FlushCache(int);
 
 /**
- * Uploads the VU0 microprogram chain at D_0043CCA0 through the VIF0 DMA channel and waits for it.
+ * Uploads the VU0 microprogram chain at vu0_programChainB through the VIF0 DMA channel and waits for it.
  *
- * Same sequence as vu0_uploadProgramChainA with the chain at D_0043CCA0. Caller: cPS2GraphicsMan_Init.
+ * Same sequence as vu0_uploadProgramChainA with the chain at vu0_programChainB. Caller: cPS2GraphicsMan_Init.
  */
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
 // 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
@@ -2271,7 +2271,7 @@ extern "C" void vu0_uploadProgramChainB(void)
     }
     // ORIGINAL-PTR: the DMA tag address register (D0_TADR) takes the chain's address as a 32-bit word (Sony SDK
     // eeregs.h, DPUT_D0_TADR(u_int)).
-    *(volatile int*)0x10008030 = (int)D_0043CCA0;
+    *(volatile int*)0x10008030 = (int)vu0_programChainB;
     *(volatile int*)0x10008020 = 0;
     *(volatile int*)0x10008000 = 260;
     while (*(volatile int*)0x10008000 & 0x100) {

@@ -169,9 +169,9 @@ extern char str_125mountainroom[];
 extern char str_Numb_1[];
 extern char str_Numb_2[];
 extern char str_Numb_3[];
-extern char D_004A14F8[];
-extern char D_004A1500[];
-extern char D_004A1508[];
+extern char str_1_c[];
+extern char str_2[];
+extern char str_3[];
 
 /**
  * Creates the mountain room screen ("125mountainroom"), labels the peak numbers 1-3, and calls
@@ -187,15 +187,15 @@ void cFEStateMountainRoom::onCreateScreen()
     }
     cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_1));
     if (textObj1 != 0) {
-        cUIText_setAsciiString(textObj1, D_004A14F8);
+        cUIText_setAsciiString(textObj1, str_1_c);
     }
     cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_2));
     if (textObj2 != 0) {
-        cUIText_setAsciiString(textObj2, D_004A1500);
+        cUIText_setAsciiString(textObj2, str_2);
     }
     cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Numb_3));
     if (textObj3 != 0) {
-        cUIText_setAsciiString(textObj3, D_004A1508);
+        cUIText_setAsciiString(textObj3, str_3);
     }
     cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 7);
 }

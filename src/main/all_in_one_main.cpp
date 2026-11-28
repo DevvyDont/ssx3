@@ -110,7 +110,7 @@ INCLUDE_ASM("main/all_in_one_main", AbortMenu_AbortMenu);
 void cMenu_cMenu(void*);
 extern "C" void cCommandMenuItem_cCommandMenuItem2(char*, int, int *, int);
 extern "C" void cMenu_addItem(void *, char*, int);
-extern int D_00467DE0[];
+extern int str_Abort[];
 extern int AbortMenu_vtbl[];
 
 /**
@@ -129,7 +129,7 @@ extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, cDebugLobbyScreen* const* 
     char *abortItem = (char*)&menu->mAbortItem;
     menu->mVtbl = (void**)AbortMenu_vtbl;
     menu->mScreen = *owner;
-    cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
+    cCommandMenuItem_cCommandMenuItem2(abortItem, 0, str_Abort, 0);
     cMenu_addItem(menu, abortItem, -1);
     return ((char*)menu);
 }
@@ -576,7 +576,7 @@ extern "C" void cDebugLobbyScreen_sendChatLine(cDebugLobbyScreen* screen, const 
  * Handles the debug "Chat Menu" command: sends the chosen line as a lobby chat message.
  *
  * It is the onCommand slot of the chat menu's vtable ChatMenu_vtbl (built by ChatMenu_ChatMenu). It passes the item's caption
- * (+0x14, one of the canned lines in D_00467D70) to cDebugLobbyScreen_sendChatLine with the debug front end at +0x130, which returns to
+ * (+0x14, one of the canned lines in ChatMenu_cannedLines) to cDebugLobbyScreen_sendChatLine with the debug front end at +0x130, which returns to
  * the Room Occupants menu and sends the text with LobbyMan_sendChatMessage ("mesg").
  *
  * @param item  the chosen command item
@@ -787,7 +787,7 @@ extern sE D_004A4E70;
 extern sE D_004A4E78;
 extern char gFlowState;
 extern int D_004A4E84;
-extern int D_004A4E88_v[2] __asm__("D_004A4E88"); // {int, int} pair (feasyncfile names it the same way)
+extern int cFEStateChallengePopup_raceSetup_v[2] __asm__("cFEStateChallengePopup_raceSetup"); // {int, int} pair (feasyncfile names it the same way)
 extern "C" void cFEFlowState_purge(void*);
 extern float D_004C6328[4];
 extern float D_004C6338[4];
@@ -1183,8 +1183,8 @@ void sti_001DBC98(int init, int prio)
             D_004C6768[3] = 1.0f;
             gFlowState = 0;
             D_004A4E84 = 0;
-            D_004A4E88_v[0] = 0;
-            D_004A4E88_v[1] = 0;
+            cFEStateChallengePopup_raceSetup_v[0] = 0;
+            cFEStateChallengePopup_raceSetup_v[1] = 0;
             D_004C6778[0] = 1.0f;
             D_004C6778[1] = D_004C6338[3];
             D_004C6778[2] = 0.100000001f;
@@ -5435,30 +5435,30 @@ extern "C" int func_001DE870(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateNet_getFEPath);
 #ifdef SKIP_ASM
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 
 /**
- * Returns the front end's path, the global D_004A1A70.
+ * Returns the front end's path, the global cFEStateNet_fePath.
  *
- * @return D_004A1A70
+ * @return cFEStateNet_fePath
  */
 extern "C" int cFEStateNet_getFEPath(void) {
-    return D_004A1A70;
+    return cFEStateNet_fePath;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateNet_fePathIsOnline);
 #ifdef SKIP_ASM
-extern int D_004A1A70;
+extern int cFEStateNet_fePath;
 
 /**
- * Tells whether the front end is on the online path: returns D_004A1A70 == cFEStateNet::kFEPathOnline.
+ * Tells whether the front end is on the online path: returns cFEStateNet_fePath == cFEStateNet::kFEPathOnline.
  *
- * @return true when D_004A1A70 is cFEStateNet::kFEPathOnline, otherwise false
+ * @return true when cFEStateNet_fePath is cFEStateNet::kFEPathOnline, otherwise false
  */
 extern "C" bool cFEStateNet_fePathIsOnline(void) {
-    return D_004A1A70 == cFEStateNet::kFEPathOnline;
+    return cFEStateNet_fePath == cFEStateNet::kFEPathOnline;
 }
 #endif
 

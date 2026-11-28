@@ -398,13 +398,13 @@ CHECK_SIZE(cGameLoadStateOutLodge, 0x48);
 //
 // Size 0x48: [R] cGameLoadScreen_load: operator new(0x48, "cGameLoadStateConquer") + cUIState_cUIState(mem, mpUI) +
 // vtable (no own members, like cGameLoadStateOutLodge).
-// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C7A8 (24 slots: 1 dtor cGameLoadStateConquer__cGameLoadStateConquer,
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cGameLoadStateConquer_vtbl (24 slots: 1 dtor cGameLoadStateConquer__cGameLoadStateConquer,
 // 4 onCreateScreen cGameLoadStateConquer_onCreateScreen, 7 onGainTransition cGameLoadStateConquer_onGainTransition, 18 onWidgetCreate cGameLoadStateConquer_onWidgetCreate; builds/x/vtables).
 // Derives from cUIState (ui/uistate.h). Evidence tags as for cGameLoadState.
 
 struct cGameLoadStateConquer : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
-    //   [R] D_0047C7A8 (cGameLoadScreen_load, dtor cGameLoadStateConquer__cGameLoadStateConquer)
+    //   [R] cGameLoadStateConquer_vtbl (cGameLoadScreen_load, dtor cGameLoadStateConquer__cGameLoadStateConquer)
     // cGameLoadStateConquer's notes on cUIState's fields:
     //   mpScreen: [U] onGainTransition (cGameLoadStateConquer_onGainTransition) looks "%" up on it
 

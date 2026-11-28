@@ -684,7 +684,7 @@ extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseOr(cInputMapParser* self);
-extern char D_0048DFA8[];
+extern char str_Expected_in_expression_d[];
 
 struct sExprNode_00323268 {
     int type;
@@ -717,7 +717,7 @@ void* cInputMapParser::parseExpression()
         return 0;
     }
     if (CurrentToken != kTokenColon) {
-        cInputMapParser_error(this, D_0048DFA8);
+        cInputMapParser_error(this, str_Expected_in_expression_d);
         cInputMapParser_freeParseNode(this, cond);
         cInputMapParser_freeParseNode(this, thenExpr);
         return 0;
@@ -1538,7 +1538,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 #ifdef SKIP_ASM
 extern "C" tIdentifier* cInputMapParser_lookupIdentifierName_K(void* self, const char* name) __asm__("cInputMapParser_lookupIdentifierName");
 extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* src, void* code, int cap, int a5);
-extern char D_0048E208[];
+extern char str_unknown_identifier_pct_s[];
 extern char str_opcode_buffer_overflow[];
 
 /**
@@ -1555,7 +1555,7 @@ int cInputMapParser::compileStatement(const char* name, int* out, int max, int d
 {
     tIdentifier* ident = cInputMapParser_lookupIdentifierName_K(this, name);
     if (ident == 0) {
-        cInputMapParser_error(this, D_0048E208, name);
+        cInputMapParser_error(this, str_unknown_identifier_pct_s, name);
         return -1;
     }
     int sep = ' ';
@@ -2344,7 +2344,7 @@ extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, tInputSour
 extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int a1, int a2);
 extern "C" bool cInputPreProcessor_copyLine(cInputPreProcessor* self, tInputSource* s, int a2, int a3);
 extern "C" unsigned char* FILE_loadsize(const char* name, int* size, int flags);
-extern char D_004A3FA0[];
+extern char str_pct_spct_s_d[];
 
 
 /**
@@ -2357,7 +2357,7 @@ void cInputPreProcessor::readFile(int path, int fn)
 {
     char name[160];
     tInputSource st;
-    sprintf(name, D_004A3FA0, path, fn);
+    sprintf(name, str_pct_spct_s_d, path, fn);
     unsigned char* fileData = FILE_loadsize(name, &st.DataLen, 0);
     (*(unsigned char**)&st.ReadPtr) = (*(unsigned char**)&st.Data) = fileData;
     st.LineNumber = 1;
@@ -2499,7 +2499,7 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_writeTagLine);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cInputPreProcessor_writeString(cInputPreProcessor* self, char* msg);
-extern char D_0048E3C8[];
+extern char str_pct_d_pct_s_b[];
 
 /**
  * Writes a "# <line> "<name>"" tag line so the parser can report the right file and line.
@@ -2510,7 +2510,7 @@ extern char D_0048E3C8[];
 void cInputPreProcessor::writeTagLine(int line, int name)
 {
     char buf[176];
-    sprintf(buf, D_0048E3C8, line, name);
+    sprintf(buf, str_pct_d_pct_s_b, line, name);
     writeString(buf);
 }
 #endif
@@ -3066,7 +3066,7 @@ extern "C" int scePadSetActDirect(int port, int slot, unsigned char* data);
 extern "C" int scePadSetActAlign(int port, int slot, unsigned char* data);
 extern "C" int scePadInfoPressMode(int port, int slot);
 extern "C" int scePadEnterPressMode(int port, int slot);
-extern unsigned char D_004A3FB8;
+extern unsigned char cPS2PadDevice_actAlign;
 
 
 static inline float Analog_326EB0(int v)
@@ -3188,7 +3188,7 @@ int cPS2PadDevice::sampleButtons(float* out)
             mPhase = cPS2PadDevice::kPhaseRead;
         break;
     case cPS2PadDevice::kPhaseAlignActuators:
-        if (scePadSetActAlign(mPort, mSlot, &D_004A3FB8) == kPadCallOk) {
+        if (scePadSetActAlign(mPort, mSlot, &cPS2PadDevice_actAlign) == kPadCallOk) {
             mRetry = 0;
             mPhase = cPS2PadDevice::kPhaseWaitActuators;
         }

@@ -196,11 +196,11 @@ INCLUDE_ASM("mem/memstd", MEM_largestunused);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: an empty ASSERT macro (`ASSERT_1AC0(best != 0)`, `do { } while (0)`) before the return, perhaps EA's compiled-out assert but unconfirmed; its loop notes give retail's extra no-op before `jr ra`; plain form 97.22%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern int D_004A2E78_1AC0 __asm__("D_004A2E78");
+extern int MEM_defaultClass_1AC0 __asm__("MEM_defaultClass");
 // Release-build assert (compiled out); EA code asserts its pointers
 #define ASSERT_1AC0(cond) do { } while (0)
 /**
- * Returns the size of the largest free block of memory class @p id (0 means the default class D_004A2E78).
+ * Returns the size of the largest free block of memory class @p id (0 means the default class MEM_defaultClass).
  *
  * Walks the free list from the class head, keeping the block with the largest size - 16, until it meets the sentinel
  * (tag 0x4253). Returns that block's size field, header included, or 0 when there is none.
@@ -211,7 +211,7 @@ extern int D_004A2E78_1AC0 __asm__("D_004A2E78");
 extern "C" int MEM_largestunused(int id)
 {
     if (id == 0) {
-        id = D_004A2E78_1AC0;
+        id = MEM_defaultClass_1AC0;
     }
     MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     FREEBLOCK* n = (*(&cls->freehead)).nextfree;
@@ -240,12 +240,12 @@ INCLUDE_ASM("mem/memstd", MEM_totalunused);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern void* memclass[];
 
-extern int D_004A2E78_1B50 __asm__("D_004A2E78");
+extern int MEM_defaultClass_1B50 __asm__("MEM_defaultClass");
 
 // Release-build assert (compiled out); EA code asserts its pointers
 #define ASSERT_1B50(cond) do { } while (0)
 /**
- * Returns the total free memory of memory class @p id (0 means the default class D_004A2E78): the sum of size - 16 over
+ * Returns the total free memory of memory class @p id (0 means the default class MEM_defaultClass): the sum of size - 16 over
  * its free list up to the sentinel (tag 0x4253).
  *
  * @param id  memory class id, or 0
@@ -254,7 +254,7 @@ extern int D_004A2E78_1B50 __asm__("D_004A2E78");
 extern "C" int MEM_totalunused(int id)
 {
     if (id == 0) {
-        id = D_004A2E78_1B50;
+        id = MEM_defaultClass_1B50;
     }
     MEMCLASS* cls = (MEMCLASS*)memclass[id & 0x3F];
     int total = 0;
@@ -520,17 +520,17 @@ void MEM_printclass(void* thing)
 }
 #endif
 
-extern void* D_004A2E78;
+extern void* MEM_defaultClass;
 
 //99.25%
 INCLUDE_ASM("mem/memstd", MEM_print__Fv);
 #ifdef SKIP_ASM
 /**
- * Prints a report of the default memory class (D_004A2E78) through MEM_printclass().
+ * Prints a report of the default memory class (MEM_defaultClass) through MEM_printclass().
  */
 void MEM_print()
 {
-    MEM_printclass(D_004A2E78);
+    MEM_printclass(MEM_defaultClass);
 }
 #endif
 
@@ -615,14 +615,14 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
 //100%
 INCLUDE_ASM("mem/memstd", checkfree);
 #ifdef SKIP_ASM
-extern int D_004A2E74;
+extern int MEM_errorCode;
 extern "C" int MEMSYS_validaddress(void* p, int size, int flags);
 
 /**
  * Checks a free-list link: it must point at a readable 0x18-byte block (MEMSYS_validaddress) tagged as free
  * (kMemSigFree) or as a sentinel (kMemSigSentinel).
  *
- * On failure sets the memory error code D_004A2E74 to 1.
+ * On failure sets the memory error code MEM_errorCode to 1.
  *
  * @return 1 when the link is valid, else 0
  */
@@ -634,10 +634,10 @@ extern "C" int checkfree(FREEBLOCK* self)
         if (blockTag == kMemSigFree || blockTag == kMemSigSentinel) {
             ok = 1;
         } else {
-            D_004A2E74 = 1;
+            MEM_errorCode = 1;
         }
     } else {
-        D_004A2E74 = 1;
+        MEM_errorCode = 1;
     }
     return ok;
 }
@@ -653,7 +653,7 @@ static inline unsigned int readBE32_002522B0(unsigned char* p)
 }
 
 /**
- * Checks one heap block's integrity by its tag and records the failure kind in D_004A2E74.
+ * Checks one heap block's integrity by its tag and records the failure kind in MEM_errorCode.
  *
  * A sentinel (kMemSigSentinel) needs flag 0x8000 (else error 2); a free block (kMemSigFree) with flag 0x4000 needs
  * valid next and previous links (checkfree); an allocated block (kMemSigAlloc) with flag 0x2000 needs the big-endian
@@ -673,7 +673,7 @@ extern "C" int checksentinel(MEMBLOCK* blk)
         if (blk->type & 0x8000) {
             ok = 1;
         } else {
-            D_004A2E74 = 2;
+            MEM_errorCode = 2;
         }
     } else if (tag == kMemSigFree) {
         if (blk->type & 0x4000) {
@@ -687,10 +687,10 @@ extern "C" int checksentinel(MEMBLOCK* blk)
             || readBE32_002522B0((unsigned char*)(blk + 1) + blk->size) == kMemEndMarker) {
             ok = 1;
         } else {
-            D_004A2E74 = 3;
+            MEM_errorCode = 3;
         }
     } else {
-        D_004A2E74 = 4;
+        MEM_errorCode = 4;
     }
     return ok;
 }
@@ -1174,7 +1174,7 @@ struct sMemHdr_2A10 {
 };
 
 
-extern int D_004A2E78_2A10 __asm__("D_004A2E78");
+extern int MEM_defaultClass_2A10 __asm__("MEM_defaultClass");
 extern int (*D_004A2E7C_2A10)(int, int, int) __asm__("D_004A2E7C");
 
 // First free block of at least size bytes (same body as FREE_find).
@@ -1273,7 +1273,7 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
 /**
  * Allocates @p size bytes from the EA heap class @p flags selects, aligned so that data + @p offset is aligned.
  *
- * Flags 0 means the default class D_004A2E78; bit 0x200 picks the largest fitting free block (FREE_findlargest style)
+ * Flags 0 means the default class MEM_defaultClass; bit 0x200 picks the largest fitting free block (FREE_findlargest style)
  * instead of the first (FREE_find style), bit 0x100 searches and places from the top, bit 0x400 uses the class's
  * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (MEM_tailsize), 8 at least. The chosen
  * free block is unlinked, the data placed at its aligned start (or end, from the top), a remainder of more than
@@ -1295,7 +1295,7 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
     char* allocation = 0;
     int retry;
     if (flags == 0)
-        flags = D_004A2E78_2A10;
+        flags = MEM_defaultClass_2A10;
     MEMCLASS* cls = (MEMCLASS*)memclass[flags & 0x3F];
     if (size < 0)
         return 0;
@@ -2423,7 +2423,7 @@ struct sMemAlloc_4410 {
     int flags;
 };
 extern sMemAlloc_4410 RCMP_rcmp_sys_4410 __asm__("RCMP_rcmp_sys");
-extern void* D_00480270[];
+extern void* SSX_VD_PS2_SINGLE_BUFFERD_vtbl[];
 extern char str_VD_VD_TEXTURE_POINTER[];
 extern char str_empty_h[];
 extern char D_004A2EA8[];
@@ -2486,7 +2486,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
 /**
  * Constructs the movie's tiled-texture video driver over the first frame and uploads the frame as textures.
  *
- * Stores the decoder (+0x0), the vtable D_00480270 and the graphics manager (+0x8), reads the frame image header
+ * Stores the decoder (+0x0), the vtable SSX_VD_PS2_SINGLE_BUFFERD_vtbl and the graphics manager (+0x8), reads the frame image header
  * (@p res + 4; data at header + 0x10, or at its offset +0x10 when flag 0x1000 is set). The image is cut into 16-pixel
  * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, SSX_VD_floorLog2); each tile (12 bytes from the movie
  * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and cPS2GraphicsMan_setTextureFilter. The tile table (+0x14,
@@ -2503,7 +2503,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
 extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD_PS2_SINGLE_BUFFERD* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
 {
     (*(void**)&self->m_pdecoder) = owner;
-    self->mVtbl = D_00480270;
+    self->mVtbl = SSX_VD_PS2_SINGLE_BUFFERD_vtbl;
     (*(cRend_4410**)&self->m_pGrMan) = rend;
     char* hdr = *(char**)(res + 0x4);
     self->mpImageHeader = (SHAPE*)hdr;
@@ -2554,7 +2554,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
 INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_00480270[];
+extern void* SSX_VD_PS2_SINGLE_BUFFERD_vtbl[];
 extern void* RCMP_VIDEO_DRIVER_vtbl[];
 
 struct sRVEntry_2547B8 {
@@ -2574,13 +2574,13 @@ struct sRCtx_2547B8 {
  * (cMemMan_free), returns a held frame (+0xC) to the decoder (RCMP_DECODER_ReleaseFrame), installs the base vtable
  * RCMP_VIDEO_DRIVER_vtbl and, when @p flags bit 0 is set, frees the object through the movie free hook.
  *
- * Vtable slot 1 of D_00480270.
+ * Vtable slot 1 of SSX_VD_PS2_SINGLE_BUFFERD_vtbl.
  *
  * @param flags  bit 0 frees the memory
  */
 extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_SINGLE_BUFFERD* self, int flags)
 {
-    self->mVtbl = D_00480270;
+    self->mVtbl = SSX_VD_PS2_SINGLE_BUFFERD_vtbl;
     for (int i = 0; i < self->mNumTiles; i++) {
         int* tileEntry = self->mppTiles[i];
         if (tileEntry != 0) {
@@ -2813,7 +2813,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(void* self);
  * cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles).
  *
  * Remembers @p frame in mpCurrentFrame when it is non-null, though it then reads it unconditionally. Vtable slot 4 of
- * D_00480270.
+ * SSX_VD_PS2_SINGLE_BUFFERD_vtbl.
  *
  * @param frame  the frame
  */
@@ -2853,7 +2853,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_drawTiles(void* self);
 INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv);
 #ifdef SKIP_ASM
 /**
- * Redraws the last frame's tiles (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles). Vtable slot 5 of D_00480270.
+ * Redraws the last frame's tiles (SSX_VD_PS2_SINGLE_BUFFERD_drawTiles). Vtable slot 5 of SSX_VD_PS2_SINGLE_BUFFERD_vtbl.
  *
  * @return whatever SSX_VD_PS2_SINGLE_BUFFERD_drawTiles left in the return register
  */
@@ -2872,7 +2872,7 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
  * Finishes the frame: waits until the renderer is idle (graphics manager slot 18, cPS2GraphicsMan_IsRenderIdle), then
  * hands the held frame (+0xC) back to the decoder (+0x0, RCMP_DECODER_ReleaseFrame) and clears it.
  *
- * Vtable slot 6 of D_00480270.
+ * Vtable slot 6 of SSX_VD_PS2_SINGLE_BUFFERD_vtbl.
  */
 void SSX_VD_PS2_SINGLE_BUFFERD::CompleteDraw()
 {

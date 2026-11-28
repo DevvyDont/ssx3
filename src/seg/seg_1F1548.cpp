@@ -156,7 +156,7 @@ struct sMgr_0A98 {
     cObj_0A98* objs[17];
 };
 
-extern int D_004A3BA8;
+extern int cPS2VisualEffectsMan_viewQueryIds;
 extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
 
 /**
@@ -164,7 +164,7 @@ extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
  *
  * Calls each of the 17 components' vtable slot +0x10 (their update; the view names it Reset). Then, for each view
  * (SSXApp->Game->ViewMan +0x10), runs cVisualEffectsMan_commonUpdate (On Tour's commonUpdate) with that view's render-state query ID
- * from D_004A3BA8 and a virtual of GrMan (the cPS2GraphicsMan) with the view index. On Tour passes the query ID as view
+ * from cPS2VisualEffectsMan_viewQueryIds and a virtual of GrMan (the cPS2GraphicsMan) with the view index. On Tour passes the query ID as view
  * + 6.
  */
 void cPS2VisualEffectsMan::update()
@@ -187,7 +187,7 @@ void cPS2VisualEffectsMan::update()
     ((cObj_0A98*)(&m_RenderToggles)[15])->Reset();
     ((cObj_0A98*)(&m_RenderToggles)[16])->Reset();
     for (int i = 0; i < (int)SSXApp->Game->ViewMan->m_uiNumView; i++) {
-        cVisualEffectsMan_commonUpdate(this, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
+        cVisualEffectsMan_commonUpdate(this, (&cPS2VisualEffectsMan_viewQueryIds)[i]); // PORT: cPS2VisualEffectsMan_viewQueryIds is an int array ($gp-addressed)
         GrMan->UpdateFullScreenEffects(i);
     }
 }
@@ -259,7 +259,7 @@ __asm__(".globl cPunchFX_cPunchFX\n.type cPunchFX_cPunchFX,@function\ncPunchFX_c
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("__12cRiderVb_s1f = cRider_cRider\n"
         "_vt$11cSeg_2F0E88$13cRiderVbC_s1f = D_004887D8\n"
-        "_vt$11cSeg_2F0E88$14cRiderVbBC_s1f = D_00459B90\n"
+        "_vt$11cSeg_2F0E88$14cRiderVbBC_s1f = cRider_cScriptObjRider_vtbl\n"
         "_vt$11cSeg_2F0E88$12cRiderVb_s1f = D_00488820\n");
 #endif
 
@@ -284,7 +284,7 @@ __asm__(".globl cPunchFX__cPunchFX\n.type cPunchFX__cPunchFX,@function\ncPunchFX
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
-        "_vt$15cVbDtor002F0FE8$14cRiderVbBC_s1f = D_00459B90\n"
+        "_vt$15cVbDtor002F0FE8$14cRiderVbBC_s1f = cRider_cScriptObjRider_vtbl\n"
         "_vt$15cVbDtor002F0FE8$12cRiderVb_s1f = D_00488820\n"
         "_$_12cRiderVb_s1f = cRider__cRider\n");
 #endif
@@ -684,21 +684,21 @@ extern "C" void *cAttachedEmitterFX_cAttachedEmitterFX1(cAttachedEmitterFX* emit
 INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_init);
 #ifdef SKIP_ASM
 extern "C" void cAttachedEmitterFX_loadEmitterTypes();
-extern int D_004A3BB4;
+extern int cAttachedEmitterFX_mInstanceCount;
 
 /**
  * Sets up an attached-emitter FX object: counts it in and empties its 10 emitter slots (mEmitters).
  *
- * The first instance (the count D_004A3BB4 still 0) loads the shared type table with cAttachedEmitterFX_loadEmitterTypes; the count then goes
+ * The first instance (the count cAttachedEmitterFX_mInstanceCount still 0) loads the shared type table with cAttachedEmitterFX_loadEmitterTypes; the count then goes
  * up by one.
  *
  */
 void cAttachedEmitterFX::init()
 {
-    if (D_004A3BB4 == 0) {
+    if (cAttachedEmitterFX_mInstanceCount == 0) {
         cAttachedEmitterFX_loadEmitterTypes();
     }
-    D_004A3BB4 += 1;
+    cAttachedEmitterFX_mInstanceCount += 1;
     for (int i = 9; i >= 0; i--)
         mEmitters[i] = 0;
 }
@@ -710,7 +710,7 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX__cAttachedEmitterFX);
 extern "C" void cAttachedEmitterFX_freeEmitterTypes();
 void operator_delete(int *);
 extern char cAttachedEmitterFX_vtbl[];
-extern int D_004A3BB4;
+extern int cAttachedEmitterFX_mInstanceCount;
 struct Base1940 { char pad[0x1F8]; };
 struct Obj1940 : Base1940 {
     virtual void v0();
@@ -722,7 +722,7 @@ struct Obj1940 : Base1940 {
 /**
  * Destroys an attached-emitter FX object: deletes its emitters and, with the last instance, the type table.
  *
- * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored in mVtbl first). Drops the instance count D_004A3BB4 and
+ * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored in mVtbl first). Drops the instance count cAttachedEmitterFX_mInstanceCount and
  * calls cAttachedEmitterFX_freeEmitterTypes when it reaches 0, then deletes every emitter in mEmitters through its virtual destructor
  * and clears the slot. Frees the object when bit 0 of @p flags is set.
  *
@@ -730,9 +730,9 @@ struct Obj1940 : Base1940 {
  * @param flags  the g++ destructor flags (bit 0: free the memory)
  */
 extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(cAttachedEmitterFX* emitterFx, int flags) {
-    int remaining = D_004A3BB4 - 1;
+    int remaining = cAttachedEmitterFX_mInstanceCount - 1;
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
-    D_004A3BB4 = remaining;
+    cAttachedEmitterFX_mInstanceCount = remaining;
     if (remaining == 0) {
         cAttachedEmitterFX_freeEmitterTypes();
     }
