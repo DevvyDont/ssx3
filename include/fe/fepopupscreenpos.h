@@ -1,5 +1,6 @@
 #ifndef FE_FEPOPUPSCREENPOS_H
 #define FE_FEPOPUPSCREENPOS_H
+#pragma interface
 
 // cFEPopupScreenPos: a front-end state (a cUIState), 3 methods; allocated with cMemMan_alloc(84, "cFEPopupScreenPos").
 // Size 0x54 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
@@ -24,9 +25,7 @@ struct cFEPopupScreenPos : public cUIState {
     char unk_051[0x3];              // 0x051 padding
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEPopupScreenPos__cFEPopupScreenPos stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEPopupScreenPos();
+    virtual ~cFEPopupScreenPos();   // g++'s own symbol _$_17cFEPopupScreenPos (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEPopupScreenPos_onCreateScreen");
     virtual void onUpdate() __asm__("cFEPopupScreenPos_onUpdate");
     virtual bool onLoseTransition() __asm__("cFEPopupScreenPos_onLoseTransition__FPv");
@@ -36,5 +35,6 @@ CHECK_OFFSET(cFEPopupScreenPos, mX, 0x048);
 CHECK_OFFSET(cFEPopupScreenPos, mY, 0x04C);
 CHECK_OFFSET(cFEPopupScreenPos, mAccept, 0x050);
 CHECK_SIZE(cFEPopupScreenPos, 0x54);
+__asm__("_vt$17cFEPopupScreenPos = cFEPopupScreenPos_vtbl");   // g++'s name for the retail vtable
 
 #endif

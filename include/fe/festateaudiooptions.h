@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEAUDIOOPTIONS_H
 #define FE_FESTATEAUDIOOPTIONS_H
+#pragma interface
 
 // cFEStateAudioOptions: the front end's audio / radio-mode screen ("140audio", or "142audio_pda" in game): four music
 // modes with check boxes (the selected one shows the "checkbox" texture, the others "empty box"), plus the request-line
@@ -79,9 +80,7 @@ struct cFEStateAudioOptions : public cFEState {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAudioOptions1() __asm__("cFEStateAudioOptions_cFEStateAudioOptions1");
     int isInStore() __asm__("cFEStateAudioOptions_isInStore");
-    // retail's destructor cFEStateAudioOptions__cFEStateAudioOptions stays a C function (g++ 2.95 takes no asm label on
-    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateAudioOptions();
+    virtual ~cFEStateAudioOptions();   // g++'s own symbol _$_20cFEStateAudioOptions (the retail label renamed)
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateAudioOptions_onWidgetCreate");
     virtual void onCreateScreen() __asm__("cFEStateAudioOptions_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateAudioOptions_onDestroyScreen");
@@ -103,5 +102,6 @@ CHECK_OFFSET(cFEStateAudioOptions, mInStore, 0x074);
 CHECK_OFFSET(cFEStateAudioOptions, mRadioMode, 0x078);
 CHECK_OFFSET(cFEStateAudioOptions, mCreatedRequestList, 0x07C);
 CHECK_SIZE(cFEStateAudioOptions, 0x80);
+__asm__("_vt$20cFEStateAudioOptions = cFEStateAudioOptions_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEAUDIOOPTIONS_H */

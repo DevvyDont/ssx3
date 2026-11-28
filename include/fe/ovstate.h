@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATE_H
 #define FE_OVSTATE_H
+#pragma interface
 
 // cOVState: the base of the in-game overlay states (pause menu, map, replay, autosave, big-challenge screens ...;
 // cOVState_MAP, cOVState_REPLAY, ... derive from it). It is a cUIState with a few flags, a chat buffer and its
@@ -61,6 +62,9 @@ struct cOVState : public cUIState {
     //   mpScreen: [R] ctor zeroes it; [U] cUIScreen_getObjectByHashName(mpScreen, ...)
     // --- cOVState
     // cOVState's own slots ([R] cOVState_vtbl; types [O] On Tour's class cOVState):
+    // inline and empty: every overlay's destructor inlines it; retail's out-of-line copy cOVState__cOVState stays a
+    // C function
+    virtual ~cOVState() {}
     virtual bool allowPauseMenu();                              // 25
     int mDoneTransition;        // 0x048 [O] (On Tour: bool at 0x48); [R] cOVState_cOVState zeroes it
     int mAllowPauseMenu;        // 0x04C [P] allowPauseMenu (preview 0x48); [R] cOVState_cOVState zeroes it;
@@ -137,5 +141,6 @@ CHECK_OFFSET(cOVState, mRemovePDA, 0x54);
 CHECK_OFFSET(cOVState, mszChatBuff, 0x58);
 CHECK_OFFSET(cOVState, mOVID, 0x98);
 CHECK_SIZE(cOVState, 0x9C);
+__asm__("_vt$8cOVState = cOVState_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATE_H */

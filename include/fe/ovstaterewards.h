@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEREWARDS_H
 #define FE_OVSTATEREWARDS_H
+#pragma interface
 
 // cOVState_REWARDS: the in-game rewards list overlay (screen "62reward_list", a scrollable "Menu0000" with
 // up/down arrows). Retail code in the decomp's unit fe/ovstatepause.cpp, constructor/destructor in
@@ -42,9 +43,7 @@ struct cOVState_REWARDS : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void updateMenu(int base) __asm__("cOVState_REWARDS_updateMenu");
-    // retail's destructor cOVState_REWARDS__cOVState_REWARDS stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_REWARDS();
+    virtual ~cOVState_REWARDS();   // g++'s own symbol _$_16cOVState_REWARDS (the retail label renamed)
     virtual void onGainFocus(cUIState*) __asm__("cOVState_REWARDS_onGainFocus");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int key) __asm__("cOVState_REWARDS_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* id, unsigned int event, unsigned int index)
@@ -55,5 +54,6 @@ struct cOVState_REWARDS : public cOVState {
 
 CHECK_OFFSET(cOVState_REWARDS, mItemSize, 0x9C);
 CHECK_SIZE(cOVState_REWARDS, 0xA0);
+__asm__("_vt$16cOVState_REWARDS = cOVState_REWARDS_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEREWARDS_H */

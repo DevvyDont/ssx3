@@ -1,5 +1,6 @@
 #ifndef VISUALFX_VISUALEFFECTSMAN_H
 #define VISUALFX_VISUALEFFECTSMAN_H
+#pragma interface
 
 // cVisualEffectsMan: the manager of the screen / world visual effects. It holds one small cVisualEffect object per
 // effect system (render toggles, light glow, plants, depth and height fog, detail textures, screen tint, shadow, snow
@@ -31,46 +32,71 @@
 //   [O] SSX On Tour's DWARF (class cVisualEffectsMan 0x48: m_RenderToggles .. m_PathArrow; cPSPVisualEffectsMan).
 
 #include "layout.h"
+#include "bx/memman.h"
 
 // The base of the 17 effect objects: [O] On Tour class cVisualEffect (size 0x4, the vptr only; ~cVisualEffect,
 // update, render). [R] every effect's destructor stores cVisualEffect_vtbl before freeing (render/font.cpp) and the
 // effects are 4-byte allocations holding their own vtable (the cPS2VisualEffectsMan ctor); the manager's dtor, update
-// and render call their slots 1, 2 and 3. Only declared: no vtable or method is emitted from these declarations.
+// and render call their slots 1, 2 and 3. The destructor is inline (every effect's destructor inlines it); retail's
+// out-of-line copies cVisualEffect__cVisualEffect and cVisualEffect__cVisualEffect_2 stay C functions.
 struct cVisualEffect {
-    virtual ~cVisualEffect();   // 1 [O]; [U] the manager's dtor deletes each effect through it
+    virtual ~cVisualEffect() {}   // 1 [O]; [U] the manager's dtor deletes each effect through it
     virtual void update() __asm__("cVisualEffect_update__FPv");      // 2 [O]; [U] cPS2VisualEffectsMan_update
     virtual void render() __asm__("cVisualEffect_render__FPv");      // 3 [O]; [U] cPS2VisualEffectsMan_render
     void deferredRender() __asm__("cVisualEffect_deferredRender__FPv");
 };
 
 CHECK_SIZE(cVisualEffect, 0x4);
+__asm__("_vt$13cVisualEffect = cVisualEffect_vtbl");   // g++'s name for the retail vtable
 
 // The effects ([O] On Tour's classes of these names, 0x4 each: their tweak values are statics; [R] their own vtables
 // cRenderToggles_vtbl .. cTube_vtbl, cDetailSystem_cDetailSystem / cPathArrow_cPathArrow; dtors in render/font.cpp).
 struct cRenderToggles : cVisualEffect { virtual ~cRenderToggles(); };
+__asm__("_vt$14cRenderToggles = cRenderToggles_vtbl");   // g++'s name for the retail vtable
 struct cVisualEffectsTest : cVisualEffect { virtual ~cVisualEffectsTest(); };
+__asm__("_vt$18cVisualEffectsTest = cVisualEffectsTest_vtbl");   // g++'s name for the retail vtable
 struct cLightGlow : cVisualEffect { virtual ~cLightGlow(); };
+__asm__("_vt$10cLightGlow = cLightGlow_vtbl");   // g++'s name for the retail vtable
 struct cPlants : cVisualEffect { virtual ~cPlants(); };
+__asm__("_vt$7cPlants = cPlants_vtbl");   // g++'s name for the retail vtable
 struct cDepthFog : cVisualEffect { virtual ~cDepthFog(); };
+__asm__("_vt$9cDepthFog = cDepthFog_vtbl");   // g++'s name for the retail vtable
 struct cHeightFog : cVisualEffect { virtual ~cHeightFog(); };
-struct cDetailSystem : cVisualEffect { virtual ~cDetailSystem(); };
+__asm__("_vt$10cHeightFog = cHeightFog_vtbl");   // g++'s name for the retail vtable
+struct cDetailSystem : cVisualEffect {
+    cDetailSystem() __asm__("cDetailSystem_cDetailSystem__FPv");
+    virtual ~cDetailSystem();
+};
+__asm__("_vt$13cDetailSystem = cDetailSystem_vtbl");   // g++'s name for the retail vtable
 struct cScreenTint : cVisualEffect { virtual ~cScreenTint(); };
+__asm__("_vt$11cScreenTint = cScreenTint_vtbl");   // g++'s name for the retail vtable
 struct cShadow : cVisualEffect { virtual ~cShadow(); };
+__asm__("_vt$7cShadow = cShadow_vtbl");   // g++'s name for the retail vtable
 struct cSnowSurface : cVisualEffect { virtual ~cSnowSurface(); };
+__asm__("_vt$12cSnowSurface = cSnowSurface_vtbl");   // g++'s name for the retail vtable
 struct cBoardTrail : cVisualEffect { virtual ~cBoardTrail(); };
+__asm__("_vt$11cBoardTrail = cBoardTrail_vtbl");   // g++'s name for the retail vtable
 struct cFlags : cVisualEffect { virtual ~cFlags(); };
+__asm__("_vt$6cFlags = cFlags_vtbl");   // g++'s name for the retail vtable
 struct cPowerUpFXToggles : cVisualEffect { virtual ~cPowerUpFXToggles(); };
+__asm__("_vt$17cPowerUpFXToggles = cPowerUpFXToggles_vtbl");   // g++'s name for the retail vtable
 struct cSnowfallToggles : cVisualEffect { virtual ~cSnowfallToggles(); };
+__asm__("_vt$16cSnowfallToggles = cSnowfallToggles_vtbl");   // g++'s name for the retail vtable
 struct cSplashToggles : cVisualEffect { virtual ~cSplashToggles(); };
+__asm__("_vt$14cSplashToggles = cSplashToggles_vtbl");   // g++'s name for the retail vtable
 struct cTube : cVisualEffect {
+    cTube() __asm__("cTube_cTube");
     virtual ~cTube();
     virtual void render() __asm__("cTube_render__FPv");
 };
+__asm__("_vt$5cTube = cTube_vtbl");   // g++'s name for the retail vtable
 struct cPathArrow : cVisualEffect {
+    cPathArrow() __asm__("cPathArrow_cPathArrow");
     virtual ~cPathArrow();
     virtual void update() __asm__("cPathArrow_update__FPv");
     virtual void render() __asm__("cPathArrow_render__FPv");
 };
+__asm__("_vt$10cPathArrow = cPathArrow_vtbl");   // g++'s name for the retail vtable
 
 struct cVisualEffectsMan {
     cRenderToggles* m_RenderToggles;        // 0x00 [O]; [R] ctor 0; PS2 ctor "RenderToggles" (cRenderToggles_vtbl)

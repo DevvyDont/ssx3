@@ -2655,7 +2655,7 @@ extern "C" void* cFEState_cFEState2(cFEState* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEState__cFEState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD750(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DD750(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -2724,7 +2724,7 @@ void cFEState::setControllerMask(signed char userNum, signed char controllerNum)
 INCLUDE_ASM("main/all_in_one_main", cFEStateCharSelect__cFEStateCharSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD840(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DD840(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -2741,22 +2741,16 @@ extern "C" void cFEStateCharSelect__cFEStateCharSelect(cFEStateCharSelect* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect__cFEStateCheatCharSelect);
+INCLUDE_ASM("main/all_in_one_main", _$_23cFEStateCheatCharSelect);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD868(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the cheat character select front-end state: restores cFEState's vtable (cFEState_vtbl) and runs
- * cUIState's destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the cheat character select front-end state; it owns nothing of its own, so its cFEState and cUIState parts
+ * do the work and free it when asked.
  */
-extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(cFEStateCheatCharSelect* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DD868(self);
+cFEStateCheatCharSelect::~cFEStateCheatCharSelect()
+{
 }
 #endif
 
@@ -2789,42 +2783,30 @@ int cFEStateCheatCharSelect::getCheatCharID()
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateCharSetup__cFEStateCharSetup);
+INCLUDE_ASM("main/all_in_one_main", _$_17cFEStateCharSetup);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD8A0(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the character setup front-end state: restores cFEState's vtable (cFEState_vtbl) and runs cUIState's
- * destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the character setup front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the
+ * work and free it when asked.
  */
-extern "C" void cFEStateCharSetup__cFEStateCharSetup(cFEStateCharSetup* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DD8A0(self);
+cFEStateCharSetup::~cFEStateCharSetup()
+{
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateRiderDetail__cFEStateRiderDetail);
+INCLUDE_ASM("main/all_in_one_main", _$_19cFEStateRiderDetail);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD8C8(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the rider detail front-end state: restores cFEState's vtable (cFEState_vtbl) and runs cUIState's
- * destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the rider detail front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(cFEStateRiderDetail* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DD8C8(self);
+cFEStateRiderDetail::~cFEStateRiderDetail()
+{
 }
 #endif
 
@@ -2832,7 +2814,7 @@ extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(cFEStateRiderDetail* se
 INCLUDE_ASM("main/all_in_one_main", cFEStateUberTrick__cFEStateUberTrick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DD8F0(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DD8F0(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -3721,7 +3703,7 @@ void * cUIStateBuyPopup::cUIStateBuyPopup1()
 INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup__cUIStateBuyPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DDC90(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DDC90(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -4196,22 +4178,16 @@ extern "C" void* cFEStateOptions_cFEStateOptions(cFEStateOptions* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateOptions__cFEStateOptions);
+INCLUDE_ASM("main/all_in_one_main", _$_15cFEStateOptions);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DDF20(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the options front-end state: restores cFEState's vtable (cFEState_vtbl) and runs cUIState's
- * destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the options front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work and
+ * free it when asked.
  */
-extern "C" void cFEStateOptions__cFEStateOptions(cFEStateOptions* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DDF20(self);
+cFEStateOptions::~cFEStateOptions()
+{
 }
 #endif
 
@@ -4239,7 +4215,7 @@ extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(cFEStateOptionsGame* se
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsGame__cFEStateOptionsGame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DDF80(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DDF80(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -4285,7 +4261,7 @@ extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(cFEStateOptionsSound*
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSound__cFEStateOptionsSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DDFE8(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DDFE8(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -4333,7 +4309,7 @@ extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(cFEStateOptionsHUD* self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsHUD__cFEStateOptionsHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DE050(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_DE050(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -4378,22 +4354,16 @@ extern "C" void *cFEStateOptionsController_cFEStateOptionsController(cFEStateOpt
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsController__cFEStateOptionsController);
+INCLUDE_ASM("main/all_in_one_main", _$_25cFEStateOptionsController);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DE0C0(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the controller options front-end state: restores cFEState's vtable (cFEState_vtbl) and runs
- * cUIState's destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the controller options front-end state; it owns nothing of its own, so its cFEState and cUIState parts do
+ * the work and free it when asked.
  */
-extern "C" void cFEStateOptionsController__cFEStateOptionsController(cFEStateOptionsController* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DE0C0(self);
+cFEStateOptionsController::~cFEStateOptionsController()
+{
 }
 #endif
 
@@ -4424,22 +4394,16 @@ extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(cFEStateOptions
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad);
+INCLUDE_ASM("main/all_in_one_main", _$_23cFEStateOptionsSaveLoad);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_DE128(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the save/load options front-end state: restores cFEState's vtable (cFEState_vtbl) and runs cUIState's
- * destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
+ * Destroys the save/load options front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the
+ * work and free it when asked.
  */
-extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(cFEStateOptionsSaveLoad* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_DE128(self);
+cFEStateOptionsSaveLoad::~cFEStateOptionsSaveLoad()
+{
 }
 #endif
 
@@ -4508,7 +4472,7 @@ extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(cFEStateProfileSele
 INCLUDE_ASM("main/all_in_one_main", cFEStateProfileSelect__cFEStateProfileSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E1F0(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_E1F0(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -5056,24 +5020,16 @@ extern "C" void *cFEStateEventSelect_cFEStateEventSelect(cFEStateEventSelect* se
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect__cFEStateEventSelect);
+INCLUDE_ASM("main/all_in_one_main", _$_19cFEStateEventSelect);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E528(void*) __asm__("cUIState__cUIState");
 extern void* cFEState_vtbl[];
 
 /**
- * Destroys the event select front-end state: restores cFEState's vtable (cFEState_vtbl) and runs cUIState's
- * destructor.
- *
- * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
- * (bit 0 frees).
- *
- * @return nothing meaningful (whatever cUIState__cUIState leaves)
+ * Destroys the event select front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-extern "C" void* cFEStateEventSelect__cFEStateEventSelect(cFEStateEventSelect* self) {
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState_E528(self);
+cFEStateEventSelect::~cFEStateEventSelect()
+{
 }
 #endif
 
@@ -5126,23 +5082,14 @@ extern "C" void* cFEStateBackground_cFEStateBackground(cFEStateBackground* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateBackground__cFEStateBackground);
+INCLUDE_ASM("main/all_in_one_main", _$_18cFEStateBackground);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E5C8(void*) __asm__("cUIState__cUIState");
-extern void* cFEStateBackground_vtbl[];
-
 /**
- * Destroys the front-end background state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the front-end background state; it owns nothing of its own, so its cUIState part does the work and frees it
+ * when asked.
  */
-extern "C" void* cFEStateBackground__cFEStateBackground(cFEStateBackground* self) {
-    VPTR_OF(cListNode, self) = cFEStateBackground_vtbl;
-    return cUIState__cUIState_E5C8(self);
+cFEStateBackground::~cFEStateBackground()
+{
 }
 #endif
 
@@ -5193,23 +5140,14 @@ extern "C" void *cFEStateTransition_cFEStateTransition(cFEStateTransition* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateTransition__cFEStateTransition);
+INCLUDE_ASM("main/all_in_one_main", _$_18cFEStateTransition);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E668(void*) __asm__("cUIState__cUIState");
-extern void* cFEStateTransition_vtbl[];
-
 /**
- * Destroys the front-end transition state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the front-end transition state; it owns nothing of its own, so its cUIState part does the work and frees it
+ * when asked.
  */
-extern "C" void* cFEStateTransition__cFEStateTransition(cFEStateTransition* self) {
-    VPTR_OF(cListNode, self) = cFEStateTransition_vtbl;
-    return cUIState__cUIState_E668(self);
+cFEStateTransition::~cFEStateTransition()
+{
 }
 #endif
 
@@ -5237,7 +5175,7 @@ extern "C" void *cFEStateTitle_cFEStateTitle(cFEStateTitle* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateTitle__cFEStateTitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E6C8(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_E6C8(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -5278,7 +5216,7 @@ extern "C" void *cFEStateMainMenu_cFEStateMainMenu(cFEStateMainMenu* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateMainMenu__cFEStateMainMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E728(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_E728(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -5320,7 +5258,7 @@ extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(cFEStateBonusMateri
 INCLUDE_ASM("main/all_in_one_main", cFEStateBonusMaterial__cFEStateBonusMaterial);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E788(void*) __asm__("cUIState__cUIState");
+extern "C" void* cUIState__cUIState_E788(void*) __asm__("_$_8cUIState");
 extern void* cFEState_vtbl[];
 
 /**
@@ -5628,23 +5566,14 @@ extern "C" void *cFEStateLegal_cFEStateLegal(cFEStateLegal* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEStateLegal__cFEStateLegal);
+INCLUDE_ASM("main/all_in_one_main", _$_13cFEStateLegal);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E9C8(void*) __asm__("cUIState__cUIState");
-extern void* cFEStateLegal_vtbl[];
-
 /**
- * Destroys the legal-screen state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the legal-screen state; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-extern "C" void* cFEStateLegal__cFEStateLegal(cFEStateLegal* self) {
-    VPTR_OF(cListNode, self) = cFEStateLegal_vtbl;
-    return cUIState__cUIState_E9C8(self);
+cFEStateLegal::~cFEStateLegal()
+{
 }
 #endif
 
@@ -5665,24 +5594,16 @@ extern "C" int cFEStateLegal_onGainTransition(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset__cFEPopupOptionReset);
+INCLUDE_ASM("main/all_in_one_main", _$_19cFEPopupOptionReset);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_E9F8(void*) __asm__("cUIState__cUIState");
 extern void* cFEPopupOptionReset_vtbl[];
 
 /**
- * Destroys the options-reset popup (vtable cFEPopupOptionReset_vtbl): stores cFEPopupOptionReset_vtbl at +0x8 and runs cUIState's destructor
- * (cUIState__cUIState).
- *
- * cFEPopupOptionReset_vtbl is the vtable festateoptions.cpp stores in the popup it allocates as "cFEPopupOptionReset". The g++ delete
- * flags pass through in the second argument register.
- *
- * @return the result of cUIState__cUIState
+ * Destroys the options-reset popup; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-extern "C" void* cFEPopupOptionReset__cFEPopupOptionReset(cFEPopupOptionReset* self) {
-    VPTR_OF(cListNode, self) = cFEPopupOptionReset_vtbl;
-    return cUIState__cUIState_E9F8(self);
+cFEPopupOptionReset::~cFEPopupOptionReset()
+{
 }
 #endif
 
@@ -5793,23 +5714,14 @@ extern "C" signed char cFEPopupOptionReset_getData(cFEPopupOptionReset* resetPop
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration__cFEPopupVideoCalibration);
+INCLUDE_ASM("main/all_in_one_main", _$_24cFEPopupVideoCalibration);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_EB58(void*) __asm__("cUIState__cUIState");
-extern void* cFEPopupVideoCalibration_vtbl[];
-
 /**
- * Destroys the video calibration popup: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the video calibration popup; it owns nothing of its own, so its cUIState part does the work and frees it
+ * when asked.
  */
-extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(cFEPopupVideoCalibration* self) {
-    VPTR_OF(cListNode, self) = cFEPopupVideoCalibration_vtbl;
-    return cUIState__cUIState_EB58(self);
+cFEPopupVideoCalibration::~cFEPopupVideoCalibration()
+{
 }
 #endif
 

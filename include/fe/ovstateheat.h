@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEHEAT_H
 #define FE_OVSTATEHEAT_H
+#pragma interface
 
 // cOVState_HEAT_PREEVENT: the pre-event overlay of a heat event (its strings: "title", "track_event",
 // "rider%d", the Multi Play / Quick Play state text). Retail code in the decomp's unit fe/ovstatepause.cpp
@@ -40,13 +41,12 @@ struct cOVState_HEAT_PREEVENT : public cOVState {
     // --- cOVTemplate_Simple (vtable 0x474D30; On Tour 0x90): no members
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_HEAT_PREEVENT();
+    virtual ~cOVState_HEAT_PREEVENT();   // g++'s own symbol _$_22cOVState_HEAT_PREEVENT (the retail label renamed)
     virtual void onUpdate() __asm__("cOVState_HEAT_PREEVENT_onUpdate");
     virtual void onGainFocus(cUIState*) __asm__("cOVState_HEAT_PREEVENT_onGainFocus");
 };
 
 CHECK_SIZE(cOVState_HEAT_PREEVENT, 0x9C);
+__asm__("_vt$22cOVState_HEAT_PREEVENT = cOVState_HEAT_PREEVENT_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEHEAT_H */

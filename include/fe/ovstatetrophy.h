@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATETROPHY_H
 #define FE_OVSTATETROPHY_H
+#pragma interface
 
 // cOVStateTrophy: the in-game trophy overlay ("34trophy"): widget events 5 / 6 ask the custom interface (the
 // engine's first word) for the next / previous state and push it.
@@ -36,13 +37,12 @@ struct cOVStateTrophy : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVStateTrophy__cOVStateTrophy stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVStateTrophy();
+    virtual ~cOVStateTrophy();   // g++'s own symbol _$_14cOVStateTrophy (the retail label renamed)
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVStateTrophy_onWidgetEvent");
     virtual void onCreateScreen() __asm__("cOVStateTrophy_onCreateScreen");
 };
 
 CHECK_SIZE(cOVStateTrophy, 0x9C);
+__asm__("_vt$14cOVStateTrophy = cOVStateTrophy_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATETROPHY_H */

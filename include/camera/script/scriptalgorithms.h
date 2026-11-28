@@ -1,5 +1,6 @@
 #ifndef CAMERA_SCRIPT_SCRIPTALGORITHMS_H
 #define CAMERA_SCRIPT_SCRIPTALGORITHMS_H
+#pragma interface
 
 // The script (cut-scene) camera algorithms (EA: d:/ssx/code/source/camera/script/scriptalgorithms.cpp, from the July
 // 2003 preview's assert strings). cScriptCameraController_addCamera (camera/script/scriptcontroller.h) creates one per
@@ -162,6 +163,7 @@ struct cScriptAlgorithm : public cCameraAlgorithm {
     t4Vector Target;            // 0x20 [O]; [R] = t4vect_Origin (sq); [U] cScriptAlgorithm_getTargetPos (lq; this in a1),
                                 //      the updates store the look-at point (sq) and read it back (lqc2)
 
+    cScriptAlgorithm() __asm__("cScriptAlgorithm_cScriptAlgorithm");
     // Methods bound to their retail symbols by asm labels.
     void setScriptObj(int val) __asm__("cScriptAlgorithm_setScriptObj__FPvi");
     cScriptObjCamera* getScriptObj() __asm__("cScriptAlgorithm_getScriptObj__FPv"); // [O] returns cScriptObjCamera*
@@ -172,6 +174,7 @@ CHECK_OFFSET(cScriptAlgorithm, Controller, 0x18);
 CHECK_OFFSET(cScriptAlgorithm, unk_1C, 0x1C);
 CHECK_OFFSET(cScriptAlgorithm, Target, 0x20);
 CHECK_SIZE(cScriptAlgorithm, 0x30);
+__asm__("_vt$16cScriptAlgorithm = cScriptAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cScriptManualAlgorithm (retail and On Tour 0xB0): base cScriptAlgorithm <- cCameraAlgorithm. Position and look-at
 // point come straight from the script. [R] cMemMan_alloc(0xB0, "Manual Script Camera Algo") + ctor (type 86).
@@ -190,6 +193,8 @@ struct cScriptManualAlgorithm : public cScriptAlgorithm {
                                 //      pass +0x74 to the jitterer's methods
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
 
+    cScriptManualAlgorithm() __asm__("cScriptManualAlgorithm_cScriptManualAlgorithm");
+    virtual ~cScriptManualAlgorithm();   // g++'s own symbol _$_22cScriptManualAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptManualAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptManualAlgorithm_update");
@@ -204,6 +209,7 @@ CHECK_OFFSET(cScriptManualAlgorithm, FrameInfo, 0x4C);
 CHECK_OFFSET(cScriptManualAlgorithm, Jitterer, 0x74);
 CHECK_OFFSET(cScriptManualAlgorithm, unk_A4, 0xA4);
 CHECK_SIZE(cScriptManualAlgorithm, 0xB0);
+__asm__("_vt$22cScriptManualAlgorithm = cScriptManualAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cScriptPointAlgorithm (retail and On Tour 0xB0): base cScriptAlgorithm. Orbits a scripted point at a distance,
 // heading and pitch. [R] cMemMan_alloc(0xB0, "Target Script Camera Algo") + ctor (type 87).
@@ -221,6 +227,8 @@ struct cScriptPointAlgorithm : public cScriptAlgorithm {
     cCameraJitterer Jitterer;   // 0x74 [O]; [R] cCameraJitterer::cCameraJitterer(this + 0x74); [U] update / getPose
     char unk_A4[0xC];           // 0xA4 padding to the 16-byte class alignment (alloc 0xB0)
 
+    cScriptPointAlgorithm() __asm__("cScriptPointAlgorithm_cScriptPointAlgorithm");
+    virtual ~cScriptPointAlgorithm();   // g++'s own symbol _$_21cScriptPointAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptPointAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptPointAlgorithm_update");
@@ -235,6 +243,7 @@ CHECK_OFFSET(cScriptPointAlgorithm, FrameInfo, 0x4C);
 CHECK_OFFSET(cScriptPointAlgorithm, Jitterer, 0x74);
 CHECK_OFFSET(cScriptPointAlgorithm, unk_A4, 0xA4);
 CHECK_SIZE(cScriptPointAlgorithm, 0xB0);
+__asm__("_vt$21cScriptPointAlgorithm = cScriptPointAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cScriptTargetAlgorithm (retail and On Tour 0xA0): base cScriptAlgorithm. A scripted position looking at the subject
 // rider. [R] cMemMan_alloc(0xA0, "Subject Script Camera Algo") + ctor (type 88).
@@ -251,6 +260,8 @@ struct cScriptTargetAlgorithm : public cScriptAlgorithm {
     tSSXFrameCameraSubject FrameInfo; // 0x4C [O]; [U] update: GetSSXCameraSubjectFrame(&FrameInfo), reads 0x4C..0x6C
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer::cCameraJitterer(this + 0x70); [U] update / getPose
 
+    cScriptTargetAlgorithm() __asm__("cScriptTargetAlgorithm_cScriptTargetAlgorithm");
+    virtual ~cScriptTargetAlgorithm();   // g++'s own symbol _$_22cScriptTargetAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptTargetAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptTargetAlgorithm_update");
@@ -264,6 +275,7 @@ CHECK_OFFSET(cScriptTargetAlgorithm, Pitch, 0x48);
 CHECK_OFFSET(cScriptTargetAlgorithm, FrameInfo, 0x4C);
 CHECK_OFFSET(cScriptTargetAlgorithm, Jitterer, 0x70);
 CHECK_SIZE(cScriptTargetAlgorithm, 0xA0);
+__asm__("_vt$22cScriptTargetAlgorithm = cScriptTargetAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cScriptRelativeAlgorithm (retail and On Tour 0xA0): base cScriptAlgorithm. A camera placed at an optimal distance,
 // pitch and heading around the subject rider, chasing that place at a capped speed. [R] cMemMan_alloc(0xA0,
@@ -282,6 +294,8 @@ struct cScriptRelativeAlgorithm : public cScriptAlgorithm {
                                 //      read 0x4C..0x6C
     cCameraJitterer Jitterer;   // 0x70 [O]; [R] cCameraJitterer::cCameraJitterer(this + 0x70); [U] snap / update / getPose
 
+    cScriptRelativeAlgorithm() __asm__("cScriptRelativeAlgorithm_cScriptRelativeAlgorithm");
+    virtual ~cScriptRelativeAlgorithm();   // g++'s own symbol _$_24cScriptRelativeAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void snapCurrent() __asm__("cScriptRelativeAlgorithm_snapCurrent");
     virtual void update() __asm__("cScriptRelativeAlgorithm_update");
@@ -295,5 +309,6 @@ CHECK_OFFSET(cScriptRelativeAlgorithm, Pitch, 0x48);
 CHECK_OFFSET(cScriptRelativeAlgorithm, FrameInfo, 0x4C);
 CHECK_OFFSET(cScriptRelativeAlgorithm, Jitterer, 0x70);
 CHECK_SIZE(cScriptRelativeAlgorithm, 0xA0);
+__asm__("_vt$24cScriptRelativeAlgorithm = cScriptRelativeAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_SCRIPT_SCRIPTALGORITHMS_H */

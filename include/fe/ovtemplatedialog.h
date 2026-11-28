@@ -1,5 +1,6 @@
 #ifndef FE_OVTEMPLATEDIALOG_H
 #define FE_OVTEMPLATEDIALOG_H
+#pragma interface
 
 // cOVTemplate_Dialog: the in-game yes/no dialog template (quit, restart, give up ...), and cOVState_QUIT, the quit
 // dialog built on it. Retail code in the decomp's unit fe/ovtemplatedialog.cpp, constructors/destructors in
@@ -70,9 +71,7 @@ struct cOVTemplate_Dialog : public cOVState {
     };
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVTemplate_Dialog__cOVTemplate_Dialog stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVTemplate_Dialog();
+    virtual ~cOVTemplate_Dialog();   // g++'s own symbol _$_18cOVTemplate_Dialog (the retail label renamed)
     virtual void onWidgetCreate(cUIThing* item) __asm__("cOVTemplate_Dialog_onWidgetCreate");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cOVTemplate_Dialog_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* w, unsigned int ev) __asm__("cOVTemplate_Dialog_onWidgetEvent");
@@ -81,6 +80,7 @@ struct cOVTemplate_Dialog : public cOVState {
 
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
 CHECK_SIZE(cOVTemplate_Dialog, 0xA0);
+__asm__("_vt$18cOVTemplate_Dialog = cOVTemplate_Dialog_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -144,9 +144,7 @@ struct cOVTemplate_Simple : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVTemplate_Simple__cOVTemplate_Simple stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVTemplate_Simple();
+    virtual ~cOVTemplate_Simple();   // g++'s own symbol _$_18cOVTemplate_Simple (the retail label renamed)
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
         __asm__("cOVTemplate_Simple_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int key) __asm__("cOVTemplate_Simple_onWidgetEvent");
@@ -154,5 +152,6 @@ struct cOVTemplate_Simple : public cOVState {
 };
 
 CHECK_SIZE(cOVTemplate_Simple, 0x9C);
+__asm__("_vt$18cOVTemplate_Simple = cOVTemplate_Simple_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVTEMPLATEDIALOG_H */

@@ -2209,90 +2209,48 @@ void cGameModeHandler::readFromReplayFrame(cReplayFramePtr*)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMBigAirHandler__cGMBigAirHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_16cGMBigAirHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the scored three-heat event handler (handler 0, vtable cGMBigAirHandler_vtbl): resets the vtable to the base handler
- * vtable cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the scored three-heat event handler (handler 0); it owns nothing, so this only frees the object when
+ * asked.
  */
-extern "C" void cGMBigAirHandler__cGMBigAirHandler(cGMBigAirHandler* self, int flags)
+cGMBigAirHandler::~cGMBigAirHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMRaceHandler__cGMRaceHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_14cGMRaceHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the timed three-heat event handler (handler 1, vtable cGMRaceHandler_vtbl): resets the vtable to the base handler
- * vtable cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the three-heat race event handler (handler 1); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMRaceHandler__cGMRaceHandler(cGMRaceHandler* self, int flags)
+cGMRaceHandler::~cGMRaceHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMMPRaceHandler__cGMMPRaceHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_16cGMMPRaceHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the online race handler (handler 8, vtable cGMMPRaceHandler_vtbl): resets the vtable to the base handler vtable
- * cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the multiplayer race handler (handler 8); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMMPRaceHandler__cGMMPRaceHandler(cGMMPRaceHandler* self, int flags)
+cGMMPRaceHandler::~cGMMPRaceHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler__cGMMPSlopeHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_17cGMMPSlopeHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the two-player online event handler (handler 9, vtable cGMMPSlopeHandler_vtbl): resets the vtable to the base handler
- * vtable cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the multiplayer slope-style handler (handler 9); it owns nothing, so this only frees the object when
+ * asked.
  */
-extern "C" void cGMMPSlopeHandler__cGMMPSlopeHandler(cGMMPSlopeHandler* self, int flags)
+cGMMPSlopeHandler::~cGMMPSlopeHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -2323,112 +2281,58 @@ void cGMMPSlopeHandler::readFromReplayFrame(cReplayFramePtr*)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMFreerideHandler__cGMFreerideHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_18cGMFreerideHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the freeride handler (handler 2, vtable cGMFreerideHandler_vtbl): resets the vtable to the base handler vtable cGameModeHandler_vtbl
- * and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the freeride handler (handler 2); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMFreerideHandler__cGMFreerideHandler(int* self, int flags)
+cGMFreerideHandler::~cGMFreerideHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMTimeHandler__cGMTimeHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_14cGMTimeHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the located timed-event handler (handler 4, vtable cGMTimeHandler_vtbl): resets the vtable to the base handler vtable
- * cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the time peak challenge handler (handler 4); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMTimeHandler__cGMTimeHandler(cGMTimeHandler* self, int flags)
+cGMTimeHandler::~cGMTimeHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMRivalTimeHandler__cGMRivalTimeHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_19cGMRivalTimeHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the head-to-head event handler (handler 5, vtable cGMRivalTimeHandler_vtbl): resets the vtable to the base handler vtable
- * cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the head-to-head event handler (handler 5); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMRivalTimeHandler__cGMRivalTimeHandler(int* self, int flags)
+cGMRivalTimeHandler::~cGMRivalTimeHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMRivalPointHandler__cGMRivalPointHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_20cGMRivalPointHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the head-to-head scored event handler (handler 6, vtable cGMRivalPointHandler_vtbl): resets the vtable to the base handler
- * vtable cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the head-to-head scored event handler (handler 6); it owns nothing, so this only frees the object when
+ * asked.
  */
-extern "C" void cGMRivalPointHandler__cGMRivalPointHandler(int* self, int flags)
+cGMRivalPointHandler::~cGMRivalPointHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGMPointHandler__cGMPointHandler);
+INCLUDE_ASM("main/ssxappdtor", _$_15cGMPointHandler);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cGameModeHandler_vtbl[];
-
 /**
- * Destroys the point-target event handler (handler 7, vtable cGMPointHandler_vtbl): resets the vtable to the base handler vtable
- * cGameModeHandler_vtbl and frees the object when asked.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ * Destroys the points peak challenge handler (handler 7); it owns nothing, so this only frees the object when asked.
  */
-extern "C" void cGMPointHandler__cGMPointHandler(cGMPointHandler* self, int flags)
+cGMPointHandler::~cGMPointHandler()
 {
-    *(void**)self = cGameModeHandler_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -2930,7 +2834,7 @@ void cSSXStatsObjNode::render()
 }
 #endif
 
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244A38);
@@ -3502,23 +3406,17 @@ extern "C" int cFEStateProgressive_onWidgetMenu(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGameLoadState__cGameLoadState);
+INCLUDE_ASM("main/ssxappdtor", _$_14cGameLoadState);
 #ifdef SKIP_ASM
 extern void* cGameLoadState_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 /**
- * Destroys the match / event loading state: installs its vtable cGameLoadState_vtbl at +0x8 and runs the UI-state base
- * destructor cUIState__cUIState.
- *
- * The destructor flags pass through in the second argument register.
- *
- * @return cUIState__cUIState's result, passed through
+ * Destroys the match / event loading state; it owns nothing of its own, so its cUIState part does the work and frees it
+ * when asked.
  */
-extern "C" void* cGameLoadState__cGameLoadState(cGameLoadState* self)
+cGameLoadState::~cGameLoadState()
 {
-    VPTR_OF(cListNode, self) = (void**)cGameLoadState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3630,23 +3528,17 @@ void cGameLoadState::onWidgetCreate(cUIThing* widget)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge__cGameLoadStateOutLodge);
+INCLUDE_ASM("main/ssxappdtor", _$_22cGameLoadStateOutLodge);
 #ifdef SKIP_ASM
 extern void* cGameLoadStateOutLodge_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 /**
- * Destroys the leaving-the-lodge loading state: installs its vtable cGameLoadStateOutLodge_vtbl at +0x8 and runs the UI-state base
- * destructor cUIState__cUIState.
- *
- * The destructor flags pass through in the second argument register.
- *
- * @return cUIState__cUIState's result, passed through
+ * Destroys the leaving-the-lodge loading state; it owns nothing of its own, so its cUIState part does the work and
+ * frees it when asked.
  */
-extern "C" void* cGameLoadStateOutLodge__cGameLoadStateOutLodge(cGameLoadStateOutLodge* self)
+cGameLoadStateOutLodge::~cGameLoadStateOutLodge()
 {
-    VPTR_OF(cListNode, self) = (void**)cGameLoadStateOutLodge_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3714,23 +3606,17 @@ bool cGameLoadStateOutLodge::onGainTransition(int)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer__cGameLoadStateConquer);
+INCLUDE_ASM("main/ssxappdtor", _$_21cGameLoadStateConquer);
 #ifdef SKIP_ASM
 extern void* cGameLoadStateConquer_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 /**
- * Destroys the controller-layout loading state: installs its vtable cGameLoadStateConquer_vtbl at +0x8 and runs the UI-state base
- * destructor cUIState__cUIState.
- *
- * The destructor flags pass through in the second argument register.
- *
- * @return cUIState__cUIState's result, passed through
+ * Destroys the controller-layout loading state; it owns nothing of its own, so its cUIState part does the work and
+ * frees it when asked.
  */
-extern "C" void* cGameLoadStateConquer__cGameLoadStateConquer(cGameLoadStateConquer* self)
+cGameLoadStateConquer::~cGameLoadStateConquer()
 {
-    VPTR_OF(cListNode, self) = (void**)cGameLoadStateConquer_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3842,23 +3728,14 @@ bool cGameLoadStateConquer::onGainTransition(int)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cFELoadHintState__cFELoadHintState);
+INCLUDE_ASM("main/ssxappdtor", _$_16cFELoadHintState);
 #ifdef SKIP_ASM
-extern void* cFELoadHintState_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
-
 /**
- * Destroys the front-end load-hint state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the front-end load-hint state; it owns nothing of its own, so its cUIState part does the work and frees it
+ * when asked.
  */
-extern "C" void* cFELoadHintState__cFELoadHintState(cFELoadHintState* self)
+cFELoadHintState::~cFELoadHintState()
 {
-    VPTR_OF(cListNode, self) = (void**)cFELoadHintState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 

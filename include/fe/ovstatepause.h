@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEPAUSE_H
 #define FE_OVSTATEPAUSE_H
+#pragma interface
 
 // The in-game pause menus (EA's d:/ssx/code/source/fe/ovstatepause.h: the preview's assert strings name it next to
 // "cOVTemplate_PauseMenu"; retail code in the decomp's units fe/ovtemplatepausemenu.cpp and fe/ovstatepause.cpp,
@@ -83,9 +84,7 @@ struct cOVTemplate_PauseMenu : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void setPDAIconColor(int idx, int on) __asm__("cOVTemplate_PauseMenu_setPDAIconColor");
-    // retail's destructor cOVTemplate_PauseMenu__cOVTemplate_PauseMenu stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVTemplate_PauseMenu();
+    virtual ~cOVTemplate_PauseMenu();   // g++'s own symbol _$_21cOVTemplate_PauseMenu (the retail label renamed)
     virtual bool onGainTransition(int) __asm__("cOVTemplate_PauseMenu_onGainTransition");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
         __asm__("cOVTemplate_PauseMenu_onWidgetMenu");
@@ -109,6 +108,7 @@ CHECK_OFFSET(cOVTemplate_PauseMenu, mMoveIcons, 0xD4);
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseOptionUnlocked, 0xD8);
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuType, 0x110);
 CHECK_SIZE(cOVTemplate_PauseMenu, 0x114);
+__asm__("_vt$21cOVTemplate_PauseMenu = cOVTemplate_PauseMenu_vtbl");   // g++'s name for the retail vtable
 
 // cOVState_PAUSE_OPTIONS: cOVState with no members of its own.
 struct cOVState_PAUSE_OPTIONS : public cOVState {
@@ -120,9 +120,7 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_PAUSE_OPTIONS();
+    virtual ~cOVState_PAUSE_OPTIONS();   // g++'s own symbol _$_22cOVState_PAUSE_OPTIONS (the retail label renamed)
     virtual void onPreRender2D() __asm__("cOVState_PAUSE_OPTIONS_onPreRender2D");
     virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cOVState_PAUSE_OPTIONS_onWidgetEvent");
     virtual void onUpdate() __asm__("cOVState_PAUSE_OPTIONS_onUpdate");
@@ -135,6 +133,7 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
 };
 
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
+__asm__("_vt$22cOVState_PAUSE_OPTIONS = cOVState_PAUSE_OPTIONS_vtbl");   // g++'s name for the retail vtable
 
 struct cUIThing;
 
@@ -166,8 +165,7 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     void setContinueOptionVisible(int visible) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible");
     void setContinueHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight");
     void setCancelHighLight(int on) __asm__("cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight");
-    // retail's destructor cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR stays a C function (g++ 2.95 takes
-    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_27cOVState_PAUSE_ONLINE_ERROR (the retail label renamed)
     virtual ~cOVState_PAUSE_ONLINE_ERROR();
     virtual void onUpdate() __asm__("cOVState_PAUSE_ONLINE_ERROR_onUpdate");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent");
@@ -177,5 +175,6 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, mbShouldDisplayAuxInfo, 0xA0);
 CHECK_SIZE(cOVState_PAUSE_ONLINE_ERROR, 0xA4);
+__asm__("_vt$27cOVState_PAUSE_ONLINE_ERROR = cOVState_PAUSE_ONLINE_ERROR_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEPAUSE_H */

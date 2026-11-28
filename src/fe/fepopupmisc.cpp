@@ -185,28 +185,21 @@ bool cFEPopupVideoCalibration::onInputBegin(cUIInput* in)
 }
 
 extern void* cFEPopupScreenPos_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 #endif
 
 extern void* cFEPopupScreenPos_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_17cFEPopupScreenPos);
 #ifdef SKIP_ASM
 /**
- * Destroys the screen-position popup through the UI-state destructor cUIState__cUIState().
- *
- * Restores cFEPopupScreenPos_vtbl first. Only @p self is declared: the destructor flags the caller passed in the
- * second argument register reach cUIState__cUIState() unchanged.
- *
- * @return no meaningful value (cUIState__cUIState() returns nothing)
+ * Destroys the screen-position popup; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-void* cFEPopupScreenPos__cFEPopupScreenPos(void* vself)
+cFEPopupScreenPos::~cFEPopupScreenPos()
 {
-    cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
-    VPTR_OF(cListNode, self) = cFEPopupScreenPos_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -392,7 +385,7 @@ bool cFEPopupScreenPos::onLoseTransition()
 #endif
 
 extern void* cFEState_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio_cFEStateRiderBio1);
@@ -436,7 +429,7 @@ void* cFEStateRiderBio__cFEStateRiderBio(void* vself)
 }
 #endif
 
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect_cFEStateRuleSelect1);
@@ -935,7 +928,7 @@ bool cFEStateNetCreateRoomPopup::onLoseTransition()
 #endif
 
 extern void* cFEStateNetHelpPopup_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
@@ -1007,21 +1000,14 @@ void* cFEStateNetHelpPopup::cFEStateNetHelpPopup1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_20cFEStateNetHelpPopup);
 #ifdef SKIP_ASM
 /**
- * Destroys the network help popup through the UI-state destructor cUIState__cUIState().
- *
- * Restores cFEStateNetHelpPopup_vtbl first. Only @p self is declared: the destructor flags the caller passed in
- * the second argument register reach cUIState__cUIState() unchanged.
- *
- * @return no meaningful value (cUIState__cUIState() returns nothing)
+ * Destroys the network help popup; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* vself)
+cFEStateNetHelpPopup::~cFEStateNetHelpPopup()
 {
-    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
-    VPTR_OF(cListNode, self) = cFEStateNetHelpPopup_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -1196,7 +1182,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys a reward-gallery state through the base classes.
@@ -1445,7 +1431,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the posters gallery state through the gallery base and its bases.
@@ -1569,7 +1555,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the trading-card gallery state through the gallery base and its bases.
@@ -1693,7 +1679,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the concept-art gallery state through the gallery base and its bases.
@@ -1817,7 +1803,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the video gallery state through the gallery base and its bases.
@@ -1941,7 +1927,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the toy gallery state through the gallery base and its bases.
@@ -2065,7 +2051,7 @@ extern void* cFEState_vtbl[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the cheat-character gallery state through the gallery base and its bases.
@@ -2498,7 +2484,7 @@ extern void* cFEStateTrophyRoom_vtbl[];
 extern void* cFEState_vtbl[];
 extern "C" void cFEStateTrophyRoom_purgeTextures(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the trophy-room front-end state: releases its five loaded images (cFEStateTrophyRoom_purgeTextures), then the base
@@ -2558,7 +2544,7 @@ void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* vself)
 #endif
 
 extern void* cFEPopupSelectMultiplayerMode_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_isInStore);
@@ -2577,21 +2563,14 @@ int cFEStateRewardsRoom::isInStore()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_29cFEPopupSelectMultiplayerMode);
 #ifdef SKIP_ASM
 /**
- * Destroys the multiplayer-mode selection popup through the UI-state destructor cUIState__cUIState().
- *
- * Restores cFEPopupSelectMultiplayerMode_vtbl first. Only @p self is declared: the destructor flags the caller
- * passed in the second argument register reach cUIState__cUIState() unchanged.
- *
- * @return no meaningful value (cUIState__cUIState() returns nothing)
+ * Destroys the multiplayer-mode selection popup; it owns nothing of its own, so its cUIState part does the work and
+ * frees it when asked.
  */
-void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* vself)
+cFEPopupSelectMultiplayerMode::~cFEPopupSelectMultiplayerMode()
 {
-    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
-    VPTR_OF(cListNode, self) = cFEPopupSelectMultiplayerMode_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -2799,22 +2778,14 @@ void* cFEStateAudioOptions::cFEStateAudioOptions1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_20cFEStateAudioOptions);
 #ifdef SKIP_ASM
 /**
- * Destroys the audio-options front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the audio-options front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the
+ * work and free it when asked.
  */
-void* cFEStateAudioOptions__cFEStateAudioOptions(void* vself)
+cFEStateAudioOptions::~cFEStateAudioOptions()
 {
-    cFEStateAudioOptions* self = (cFEStateAudioOptions*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -2855,22 +2826,14 @@ void* cFEStateRequestLine::cFEStateRequestLine1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_19cFEStateRequestLine);
 #ifdef SKIP_ASM
 /**
- * Destroys the request-line front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the request-line front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-void* cFEStateRequestLine__cFEStateRequestLine(void* vself)
+cFEStateRequestLine::~cFEStateRequestLine()
 {
-    cFEStateRequestLine* self = (cFEStateRequestLine*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 

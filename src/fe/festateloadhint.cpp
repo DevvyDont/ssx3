@@ -120,23 +120,16 @@ void cFELoadHintState::onWidgetCreate(cUIThing*)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadState__cFELoadState);
+INCLUDE_ASM("fe/festateloadhint", _$_12cFELoadState);
 #ifdef SKIP_ASM
-extern void* cFELoadState_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 /**
- * Destroys the front-end load state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the front-end load state; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-extern "C" void* cFELoadState__cFELoadState(cFELoadState* self)
+cFELoadState::~cFELoadState()
 {
-    VPTR_OF(cListNode, self) = (void**)cFELoadState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -237,23 +230,16 @@ void cFELoadState::onWidgetCreate(cUIThing* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge__cFELoadStateInLodge);
+INCLUDE_ASM("fe/festateloadhint", _$_19cFELoadStateInLodge);
 #ifdef SKIP_ASM
-extern void* cFELoadStateInLodge_vtbl[];
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 /**
- * Destroys the in-lodge load state: stores its vtable at +0x8, then runs the cUIState destructor.
- *
- * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
- * untouched.
- *
- * @return no meaningful value (cUIState__cUIState returns nothing)
+ * Destroys the in-lodge load state; it owns nothing of its own, so its cUIState part does the work and frees it when
+ * asked.
  */
-extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(cFELoadStateInLodge* self)
+cFELoadStateInLodge::~cFELoadStateInLodge()
 {
-    VPTR_OF(cListNode, self) = (void**)cFELoadStateInLodge_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -418,7 +404,7 @@ extern "C" void cStreamPause__cStreamPause(void* self, int flags)
 }
 #endif
 
-extern "C" void* cUIState__cUIState(void* self);
+extern "C" void* cUIState__cUIState(void* self) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", cUIStateDisplayModePopup__cUIStateDisplayModePopup__FPv);

@@ -2822,26 +2822,14 @@ extern "C" void cDynamicSprayFX_readFromReplayFrame(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cPowerUpFXToggles__cPowerUpFXToggles);
+INCLUDE_ASM("visualfx/worldlightman", _$_17cPowerUpFXToggles);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "PowerUpFXToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
- * 0 of @p flags is set.
- *
- * It is the destructor slot of cPowerUpFXToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "PowerUpFXToggles".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "PowerUpFXToggles" visual effect (slot 1 of cPowerUpFXToggles_vtbl); it owns nothing (its tweak values
+ * are statics), so this only frees the object when asked.
  */
-extern "C" void cPowerUpFXToggles__cPowerUpFXToggles(void* self, int flags)
+cPowerUpFXToggles::~cPowerUpFXToggles()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -2891,26 +2879,14 @@ extern "C" void cPS2FogParticleMan__cPS2FogParticleMan(cPS2FogParticleMan* self,
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cSplashToggles__cSplashToggles);
+INCLUDE_ASM("visualfx/worldlightman", _$_14cSplashToggles);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "SplashToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0
- * of @p flags is set.
- *
- * It is the destructor slot of cSplashToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "SplashToggles".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "SplashToggles" visual effect (slot 1 of cSplashToggles_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cSplashToggles__cSplashToggles(void* self, int flags)
+cSplashToggles::~cSplashToggles()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3153,26 +3129,14 @@ extern "C" void cCircle_TObj__cCircle_TObj(cCircle_TObj* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cSnowfallToggles__cSnowfallToggles);
+INCLUDE_ASM("visualfx/worldlightman", _$_16cSnowfallToggles);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "SnowfallToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
- * 0 of @p flags is set.
- *
- * It is the destructor slot of cSnowfallToggles_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "SnowfallToggles".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "SnowfallToggles" visual effect (slot 1 of cSnowfallToggles_vtbl); it owns nothing (its tweak values
+ * are statics), so this only frees the object when asked.
  */
-extern "C" void cSnowfallToggles__cSnowfallToggles(void* self, int flags)
+cSnowfallToggles::~cSnowfallToggles()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3208,26 +3172,14 @@ extern "C" bool testBit64(unsigned long* bits, int n)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cBoardTrail__cBoardTrail);
+INCLUDE_ASM("visualfx/worldlightman", _$_11cBoardTrail);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "BoardTrail" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
- * @p flags is set.
- *
- * It is the destructor slot of cBoardTrail_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "BoardTrail".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "BoardTrail" visual effect (slot 1 of cBoardTrail_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cBoardTrail__cBoardTrail(void* self, int flags)
+cBoardTrail::~cBoardTrail()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3283,146 +3235,74 @@ extern "C" void cBoltOnFXInterface_BoltOnsHaveBeenUpdated(int *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cLightGlow__cLightGlow);
+INCLUDE_ASM("visualfx/worldlightman", _$_10cLightGlow);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "LightGlow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
- * @p flags is set.
- *
- * It is the destructor slot of cLightGlow_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "LightGlow".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "LightGlow" visual effect (slot 1 of cLightGlow_vtbl); it owns nothing (its tweak values are statics),
+ * so this only frees the object when asked.
  */
-extern "C" void cLightGlow__cLightGlow(void* self, int flags)
+cLightGlow::~cLightGlow()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cDepthFog__cDepthFog);
+INCLUDE_ASM("visualfx/worldlightman", _$_9cDepthFog);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "DepthFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
- * flags is set.
- *
- * It is the destructor slot of cDepthFog_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "DepthFog".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "DepthFog" visual effect (slot 1 of cDepthFog_vtbl); it owns nothing (its tweak values are statics),
+ * so this only frees the object when asked.
  */
-extern "C" void cDepthFog__cDepthFog(void* self, int flags)
+cDepthFog::~cDepthFog()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cHeightFog__cHeightFog);
+INCLUDE_ASM("visualfx/worldlightman", _$_10cHeightFog);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "HeightFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
- * @p flags is set.
- *
- * It is the destructor slot of cHeightFog_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "HeightFog".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "HeightFog" visual effect (slot 1 of cHeightFog_vtbl); it owns nothing (its tweak values are statics),
+ * so this only frees the object when asked.
  */
-extern "C" void cHeightFog__cHeightFog(void* self, int flags)
+cHeightFog::~cHeightFog()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cShadow__cShadow);
+INCLUDE_ASM("visualfx/worldlightman", _$_7cShadow);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "Shadow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
- * flags is set.
- *
- * It is the destructor slot of cShadow_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "Shadow".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "Shadow" visual effect (slot 1 of cShadow_vtbl); it owns nothing (its tweak values are statics), so
+ * this only frees the object when asked.
  */
-extern "C" void cShadow__cShadow(void* self, int flags)
+cShadow::~cShadow()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cSnowSurface__cSnowSurface);
+INCLUDE_ASM("visualfx/worldlightman", _$_12cSnowSurface);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "SnowSurface" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
- * @p flags is set.
- *
- * It is the destructor slot of cSnowSurface_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "SnowSurface".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "SnowSurface" visual effect (slot 1 of cSnowSurface_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cSnowSurface__cSnowSurface(void* self, int flags)
+cSnowSurface::~cSnowSurface()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cFlags__cFlags);
+INCLUDE_ASM("visualfx/worldlightman", _$_6cFlags);
 #ifdef SKIP_ASM
-extern void* cVisualEffect_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys the "Flags" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
- * flags is set.
- *
- * It is the destructor slot of cFlags_vtbl, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
- * effect it allocates as "Flags".
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the "Flags" visual effect (slot 1 of cFlags_vtbl); it owns nothing (its tweak values are statics), so this
+ * only frees the object when asked.
  */
-extern "C" void cFlags__cFlags(void* self, int flags)
+cFlags::~cFlags()
 {
-    *(void***)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

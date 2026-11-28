@@ -1,5 +1,6 @@
 #ifndef FE_FESTATECHARSETUP_H
 #define FE_FESTATECHARSETUP_H
+#pragma interface
 
 // cFEStateCharSetup: the front end's character setup screen ("09set_char"): continue / equip / rider / radio options
 // around the user's 3D front-end rider (cFERiderManager at RealFE + 0xB0, fe/ferider.h). cFEStateRiderDetail (0x54,
@@ -54,9 +55,7 @@ struct cFEStateCharSetup : public cFEState {
     void updateWidget() __asm__("cFEStateCharSetup_updateWidget");
     void updateCharacter3DPos() __asm__("cFEStateCharSetup_updateCharacter3DPos");
     void show3DCharacter(int on) __asm__("cFEStateCharSetup_show3DCharacter");
-    // retail's destructor cFEStateCharSetup__cFEStateCharSetup stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCharSetup();
+    virtual ~cFEStateCharSetup();   // g++'s own symbol _$_17cFEStateCharSetup (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCharSetup_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateCharSetup_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateCharSetup_onUpdate");
@@ -67,5 +66,6 @@ struct cFEStateCharSetup : public cFEState {
 CHECK_OFFSET(cFEStateCharSetup, mbIsFirst, 0x048);
 CHECK_OFFSET(cFEStateCharSetup, mbDraw3D, 0x04C);
 CHECK_SIZE(cFEStateCharSetup, 0x50);
+__asm__("_vt$17cFEStateCharSetup = cFEStateCharSetup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATECHARSETUP_H */

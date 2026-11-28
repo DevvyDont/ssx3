@@ -5239,26 +5239,14 @@ extern "C" void cVisualEffect_deferredRender_2(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cRenderToggles__cRenderToggles);
+INCLUDE_ASM("render/font", _$_14cRenderToggles);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "RenderToggles": stores the cVisualEffect base vtable cVisualEffect_vtbl
- * and frees the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cRenderToggles_vtbl (slot 2 is cRenderToggles_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "RenderToggles" visual effect (slot 1 of cRenderToggles_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cRenderToggles__cRenderToggles(int* self, int flags)
+cRenderToggles::~cRenderToggles()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -6061,27 +6049,14 @@ extern "C" int *cRenderToggles_ShowSurfaceTypes(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cPlants__cPlants);
+INCLUDE_ASM("render/font", _$_7cPlants);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "Plants": stores the cVisualEffect base vtable cVisualEffect_vtbl and
- * frees the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cPlants_vtbl (slot 2 is cPlants_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs in
- * the object it allocates as "Plants".
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "Plants" visual effect (slot 1 of cPlants_vtbl); it owns nothing (its tweak values are statics), so
+ * this only frees the object when asked.
  */
-extern "C" void cPlants__cPlants(int* self, int flags)
+cPlants::~cPlants()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -6615,44 +6590,25 @@ tPackedRGBA cDynamicColourEmitter::getSubEmitterColour(int idx)
 //100%
 INCLUDE_ASM("render/font", cTube_cTube);
 #ifdef SKIP_ASM
-extern char cTube_vtbl[];
-
 /**
- * Stores vtable cTube_vtbl in @p self and returns it.
+ * Constructs the tube visual effect; it has no data of its own.
  *
- * No caller: cPS2VisualEffectsMan_cPS2VisualEffectsMan writes the same vtable inline into the object it allocates as
- * "Tube".
- *
- * @return @p self
+ * No caller: cPS2VisualEffectsMan_cPS2VisualEffectsMan builds the effect it allocates as "Tube" inline.
  */
-extern "C" void* cTube_cTube(void** self)
+cTube::cTube()
 {
-    *self = cTube_vtbl;
-    return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cTube__cTube);
+INCLUDE_ASM("render/font", _$_5cTube);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable cVisualEffect_vtbl and frees
- * the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cTube_vtbl (slot 2 cTube_update, slot 3 the empty cTube_render).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "Tube" visual effect (slot 1 of cTube_vtbl); it owns nothing (its tweak values are statics), so this
+ * only frees the object when asked.
  */
-extern "C" void cTube__cTube(int* self, int flags)
+cTube::~cTube()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -6789,27 +6745,14 @@ void cSimpleTube::setPosition(int index, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cPathArrow__cPathArrow);
+INCLUDE_ASM("render/font", _$_10cPathArrow);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable cVisualEffect_vtbl and
- * frees the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cPathArrow_vtbl, which cPathArrow_cPathArrow installs (slots 2 and 3 are the empty cPathArrow_update and
- * cPathArrow_render).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "PathArrow" visual effect (slot 1 of cPathArrow_vtbl); it owns nothing (its tweak values are statics),
+ * so this only frees the object when asked.
  */
-extern "C" void cPathArrow__cPathArrow(int* self, int flags)
+cPathArrow::~cPathArrow()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -6840,26 +6783,14 @@ void cPathArrow::render()
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cDetailSystem__cDetailSystem);
+INCLUDE_ASM("render/font", _$_13cDetailSystem);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable cVisualEffect_vtbl
- * and frees the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cDetailSystem_vtbl, which cDetailSystem_cDetailSystem installs (slot 2 cDetailSystem_update, slot 5 the empty cDetailSystem_addPatch).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "DetailSystem" visual effect (slot 1 of cDetailSystem_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cDetailSystem__cDetailSystem(int* self, int flags)
+cDetailSystem::~cDetailSystem()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -7056,27 +6987,14 @@ extern "C" int *cDetailSystem_XBoxMaxSize(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cVisualEffectsTest__cVisualEffectsTest);
+INCLUDE_ASM("render/font", _$_18cVisualEffectsTest);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destroys the visual-effects test object: restores the base vtable and frees it if asked.
- *
- * Stores the cVisualEffect base vtable (cVisualEffect_vtbl; the derived vtable store is dead and dropped) and calls
- * operator_delete on @p flags bit 0. Slot 1 of vt_00492FD0, the cVisualEffectsTest vtable whose slots 2/3 are
- * cVisualEffectsTest_update and cVisualEffectsTest_render.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the "VisualEffectsTest" visual effect (slot 1 of cVisualEffectsTest_vtbl); it owns nothing (its tweak
+ * values are statics), so this only frees the object when asked.
  */
-extern "C" void cVisualEffectsTest__cVisualEffectsTest(int* self, int flags)
+cVisualEffectsTest::~cVisualEffectsTest()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 
@@ -7476,27 +7394,14 @@ extern "C" void cPS2GraphicsMan_SetBlendMatrices(cPS2GraphicsMan* self, sMtxList
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cScreenTint__cScreenTint);
+INCLUDE_ASM("render/font", _$_11cScreenTint);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cVisualEffect_vtbl[];
-
 /**
- * Destructor body for the visual effect allocated as "ScreenTint": stores the cVisualEffect base vtable cVisualEffect_vtbl and
- * frees the object when bit 0 of @p flags is set.
- *
- * Slot 1 of vtable cScreenTint_vtbl (slot 2 cScreenTint_update, slot 3 cScreenTint_render), which
- * cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys the "ScreenTint" visual effect (slot 1 of cScreenTint_vtbl); it owns nothing (its tweak values are
+ * statics), so this only frees the object when asked.
  */
-extern "C" void cScreenTint__cScreenTint(int* self, int flags)
+cScreenTint::~cScreenTint()
 {
-    *(void**)self = cVisualEffect_vtbl;
-    if (flags & 1) {
-        operator_delete(self);
-    }
 }
 #endif
 

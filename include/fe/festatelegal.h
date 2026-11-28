@@ -1,5 +1,6 @@
 #ifndef FE_FESTATELEGAL_H
 #define FE_FESTATELEGAL_H
+#pragma interface
 
 // cFEStateLegal: the front end's legal screen: shows the screen hashed from "122bAutosave" for 240 frames, then plays
 // its "TransitionOut" and pops itself. Retail never constructs it (no caller of either ctor).
@@ -41,14 +42,13 @@ struct cFEStateLegal : public cUIState {
     enum { kDisplayTicks = 240 };
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateLegal__cFEStateLegal stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateLegal();
+    virtual ~cFEStateLegal();   // g++'s own symbol _$_13cFEStateLegal (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateLegal_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateLegal_onUpdate");
 };
 
 CHECK_OFFSET(cFEStateLegal, mDisplayTicks, 0x048);
 CHECK_SIZE(cFEStateLegal, 0x4C);
+__asm__("_vt$13cFEStateLegal = cFEStateLegal_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATELEGAL_H */

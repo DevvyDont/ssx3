@@ -64,20 +64,13 @@ cCubicSplineInterpolant::cCubicSplineInterpolant()
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21E5A8", cCubicSplineInterpolant__cCubicSplineInterpolant);
+INCLUDE_ASM("seg/seg_21E5A8", _$_23cCubicSplineInterpolant);
 #ifdef SKIP_ASM
-void cCubicSplineInterpolant_purge(void *);
-void operator_delete(int *);
 /**
- * Destroys a cubic-spline interpolant: frees its segments and, when asked, the object.
- *
- * Calls cCubicSplineInterpolant_purge and, when bit 0 of @p flags is set, operator delete on @p self (the g++
- * deleting-destructor flag).
- *
- * @param flags  bit 0 set: also free the object
+ * Destroys a cubic-spline interpolant: frees its segments (purge).
  */
-extern "C" void cCubicSplineInterpolant__cCubicSplineInterpolant(cCubicSplineInterpolant* self, int flags) {
-    cCubicSplineInterpolant_purge(self);
-    if (flags & 1) operator_delete(((int*)self));
+cCubicSplineInterpolant::~cCubicSplineInterpolant()
+{
+    purge();
 }
 #endif

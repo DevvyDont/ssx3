@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEENTERLODGE_H
 #define FE_OVSTATEENTERLODGE_H
+#pragma interface
 
 // cOVState_ENTERLODGE: the "enter the lodge?" prompt (Yes leaves the race for the lodge, No / Triangle closes it).
 // Retail code in the decomp's unit fe/ovstateenterlodge.cpp, constructor/destructor in fe/all_in_one_fe.cpp; EA's
@@ -38,9 +39,7 @@ struct cOVState_ENTERLODGE : public cOVState {
     //   mRemovePDA: [U] onWidgetEvent sets it on No / Triangle
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_ENTERLODGE__cOVState_ENTERLODGE stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_ENTERLODGE();
+    virtual ~cOVState_ENTERLODGE();   // g++'s own symbol _$_19cOVState_ENTERLODGE (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_ENTERLODGE_onCreateScreen");
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_ENTERLODGE_onGainFocus");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
@@ -50,5 +49,6 @@ struct cOVState_ENTERLODGE : public cOVState {
 };
 
 CHECK_SIZE(cOVState_ENTERLODGE, 0x9C);
+__asm__("_vt$19cOVState_ENTERLODGE = cOVState_ENTERLODGE_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEENTERLODGE_H */

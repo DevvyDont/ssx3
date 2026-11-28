@@ -3502,7 +3502,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet__cFEStateNet);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void tLobbyEventList_clear(void* self);
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 void operator_delete(int*);
 
 struct cObj_1A85D0 {

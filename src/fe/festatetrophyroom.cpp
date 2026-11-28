@@ -962,13 +962,13 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard__cFEMemCard);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_vtbl[];
 extern void* cOVState_vtbl[];
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys a memory-card state.
  *
  * Stores cFEMemCard's vtable cFEMemCard_vtbl, clears cFEMemCard_mInstance, stores cOVState's vtable cOVState_vtbl and runs
- * cUIState's destructor (cUIState__cUIState) with @p flags. Destructor slot (+0xC) of cFEMemCard_vtbl; the destructors of
+ * cUIState's destructor (_$_8cUIState) with @p flags. Destructor slot (+0xC) of cFEMemCard_vtbl; the destructors of
  * cFEStateMemCard, cOVState_PROFILE, cOVState_AUTOSAVE, cFEStateProfileLoad and cFEStateOptionsDeviceSelect end in it.
  *
  * @param flags  the g++ delete flags, passed on to cUIState__cUIState

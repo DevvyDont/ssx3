@@ -1,5 +1,6 @@
 #ifndef CAMERA_CAMERAALGORITHMS_H
 #define CAMERA_CAMERAALGORITHMS_H
+#pragma interface
 
 // The camera algorithm classes (EA: d:/ssx/code/source/camera/CameraAlgorithms.h, from the July 2003 preview's
 // assert strings). A camera algorithm computes a pose each frame; cameras blend the poses of a list of them.
@@ -32,6 +33,7 @@
 #include "layout.h"
 #include "bx/math3d.h"
 #include "bx/cubicspline.h"
+#include "bx/memman.h"
 
 struct cRiderCameraTarget;
 
@@ -190,7 +192,16 @@ struct cCameraAlgorithm {
     // Slots: names [R] the vtables (cCameraAlgorithm_vtbl; getPose is pure there, cBasicCameraAlgorithm_getPose and
     // cLookAtChaseAlgorithm_getPose fill it), types [O] On Tour's cCameraAlgorithm / cBasicCameraAlgorithm::getPose
     // (retail has getPose at 2 and no renderDebugInfo; the rest keep On Tour's order).
-    virtual ~cCameraAlgorithm();                                                    // 1
+    // The constructor and destructor are inline: retail inlines them into the subclasses' (the destructor's
+    // out-of-line copies cCameraAlgorithm__cCameraAlgorithm / cCameraAlgorithm__cCameraAlgorithm1 stay C functions).
+    cCameraAlgorithm()
+    {
+        View = getDefaultView();
+        AlgorithmType = CAMERA_ALGORITHM_GENERIC;
+        Near = 10.0f;
+        Far = 30000.0f;
+    }
+    virtual ~cCameraAlgorithm() {}                                                  // 1
     virtual tPose getPose() = 0;                                                    // 2
     virtual void snap(int subjectID)
         __asm__("cCameraAlgorithm_snap__FPv");                                               // 3
@@ -221,6 +232,7 @@ CHECK_OFFSET(cCameraAlgorithm, Near, 0x04);
 CHECK_OFFSET(cCameraAlgorithm, Far, 0x08);
 CHECK_OFFSET(cCameraAlgorithm, AlgorithmType, 0x0C);
 CHECK_SIZE(cCameraAlgorithm, 0x14);
+__asm__("_vt$16cCameraAlgorithm = cCameraAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cBasicCameraAlgorithm (On Tour: 0x40): a camera at a position with a pitch and heading.
 struct cBasicCameraAlgorithm : public cCameraAlgorithm {
@@ -237,6 +249,7 @@ struct cBasicCameraAlgorithm : public cCameraAlgorithm {
                                 //      cBasicCameraAlgorithm_getHeading
     char unk_38[0x8];           // 0x38 padding to the 16-byte class alignment
 
+    cBasicCameraAlgorithm() __asm__("cBasicCameraAlgorithm_cBasicCameraAlgorithm");
     // Methods bound to their retail symbols by asm labels.
     void setPosition(const t4Vector* position) __asm__("cBasicCameraAlgorithm_setPosition");
     void setPitch(float fparg0) __asm__("cBasicCameraAlgorithm_setPitch");
@@ -249,6 +262,7 @@ CHECK_OFFSET(cBasicCameraAlgorithm, Position, 0x20);
 CHECK_OFFSET(cBasicCameraAlgorithm, Pitch, 0x30);
 CHECK_OFFSET(cBasicCameraAlgorithm, Heading, 0x34);
 CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
+__asm__("_vt$21cBasicCameraAlgorithm = cBasicCameraAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cManualCameraAlgorithm / cEditorCameraAlgorithm: the two free cameras a cManualCameraController owns
 // (camera/cameracontroller.h ManualAlgo / EditorAlgo). Both add no fields to cBasicCameraAlgorithm: [R]
@@ -257,16 +271,20 @@ CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
 // cEditorCameraAlgorithm_cEditorCameraAlgorithm (vtables D_0045BD10 / D_0045BCA8); [U] the controller's dtor deletes
 // them (slot 1), snap / snapCurrent call slots 3 / 4.
 struct cManualCameraAlgorithm : public cBasicCameraAlgorithm {
-
-    // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cManualCameraAlgorithm__cManualCameraAlgorithm stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    cManualCameraAlgorithm() __asm__("cManualCameraAlgorithm_cManualCameraAlgorithm");
+    // the destructor is g++'s own symbol _$_22cManualCameraAlgorithm (g++ 2.95 takes no asm label on a destructor,
+    // so the retail label was renamed)
     virtual ~cManualCameraAlgorithm();
+    // Methods bound to their retail symbols by asm labels.
     virtual void snap(int) __asm__("cManualCameraAlgorithm_snap__FPv");
 };
+__asm__("_vt$22cManualCameraAlgorithm = cManualCameraAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 struct cEditorCameraAlgorithm : public cBasicCameraAlgorithm {
+    cEditorCameraAlgorithm() __asm__("cEditorCameraAlgorithm_cEditorCameraAlgorithm");
+    virtual ~cEditorCameraAlgorithm();   // g++'s own symbol _$_22cEditorCameraAlgorithm (the retail label renamed)
 };
+__asm__("_vt$22cEditorCameraAlgorithm = cEditorCameraAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 CHECK_SIZE(cManualCameraAlgorithm, 0x40);
 CHECK_SIZE(cEditorCameraAlgorithm, 0x40);
@@ -284,11 +302,14 @@ struct cChaseAlgorithm : public cCameraAlgorithm {
     cRiderCameraTarget* Target; // 0x30 [O]; [P] (preview verify reads 0x30); [U] cChaseAlgorithm_setTarget setTarget (sw; cCamera_init
                                 //      passes the "RiderCameraTarget"); the algorithms call its virtuals
     char unk_34[0xC];           // 0x34 padding to the 16-byte class alignment
+
+    cChaseAlgorithm() __asm__("cChaseAlgorithm_cChaseAlgorithm");
 };
 
 CHECK_OFFSET(cChaseAlgorithm, CamTargetPos, 0x20);
 CHECK_OFFSET(cChaseAlgorithm, Target, 0x30);
 CHECK_SIZE(cChaseAlgorithm, 0x40);
+__asm__("_vt$15cChaseAlgorithm = cChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cLookAtChaseAlgorithm (retail 0x390: the 0x390-byte allocations of its field-less subclasses, and cCamera's
 // embedded cDEFAULT_3ChaseAlgorithm spanning 0xC0..0x450).
@@ -422,6 +443,8 @@ struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
                                     //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
 
+    cLookAtChaseAlgorithm() __asm__("cLookAtChaseAlgorithm_cLookAtChaseAlgorithm");
+    virtual ~cLookAtChaseAlgorithm();   // g++'s own symbol _$_21cLookAtChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     void setupHandplantBlend(cChaseSetup* obj) __asm__("cLookAtChaseAlgorithm_setupHandplantBlend");
     void setupHalfPipeCam(cChaseSetup* trig) __asm__("cLookAtChaseAlgorithm_setupHalfPipeCam");
@@ -442,7 +465,7 @@ struct cLookAtChaseAlgorithm : public cChaseAlgorithm {
     void setupChaseData(cChaseSetup* out, float normalVelMinSmoothness, float normalVelMaxSmoothness,
                         float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness,
                         float powderVelMaxSmoothness, float powderVelStartSlope, float powderVelEndSlope)
-        __asm__("cLookAtChaseAlgorithm_setupChaseData");
+                            __asm__("cLookAtChaseAlgorithm_setupChaseData");
     void updateLateralShift(cChaseSetup* info, float proportion, float targetProportion)
         __asm__("cLookAtChaseAlgorithm_updateLateralShift");
     void updateViewCam(float side, float back, float up, float ease) __asm__("cLookAtChaseAlgorithm_updateViewCam");
@@ -574,5 +597,6 @@ CHECK_OFFSET(cLookAtChaseAlgorithm, FullAirPositionSpline, 0x328);
 CHECK_OFFSET(cLookAtChaseAlgorithm, HalfPipeAngleSpline, 0x334);
 CHECK_OFFSET(cLookAtChaseAlgorithm, TurningPIDFilter, 0x340);
 CHECK_SIZE(cLookAtChaseAlgorithm, 0x390);
+__asm__("_vt$21cLookAtChaseAlgorithm = cLookAtChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_CAMERAALGORITHMS_H */

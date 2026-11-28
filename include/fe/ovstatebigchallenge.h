@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEBIGCHALLENGE_H
 #define FE_OVSTATEBIGCHALLENGE_H
+#pragma interface
 
 // The Big Challenge overlays (retail code in the decomp's unit fe/ovstateenterlodge.cpp; constructors/destructors in
 // fe/all_in_one_fe.cpp; EA's source file is not known: the preview's linkonce sections name the classes
@@ -51,8 +52,7 @@ struct cOVState_BIGCHALLENGE_START : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void getChallengeData() __asm__("cOVState_BIGCHALLENGE_START_getChallengeData");
-    // retail's destructor cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START stays a C function (g++ 2.95 takes
-    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_27cOVState_BIGCHALLENGE_START (the retail label renamed)
     virtual ~cOVState_BIGCHALLENGE_START();
     virtual void onCreateScreen() __asm__("cOVState_BIGCHALLENGE_START_onCreateScreen");
     virtual bool onGainTransition(int gained) __asm__("cOVState_BIGCHALLENGE_START_onGainTransition");
@@ -64,6 +64,7 @@ struct cOVState_BIGCHALLENGE_START : public cOVState {
 
 CHECK_OFFSET(cOVState_BIGCHALLENGE_START, mMissionId, 0x9C);
 CHECK_SIZE(cOVState_BIGCHALLENGE_START, 0xA0);
+__asm__("_vt$27cOVState_BIGCHALLENGE_START = cOVState_BIGCHALLENGE_START_vtbl");   // g++'s name for the retail vtable
 
 struct cOVState_BIGCHALLENGE_FAIL : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -85,8 +86,7 @@ struct cOVState_BIGCHALLENGE_FAIL : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void getChallengeData() __asm__("cOVState_BIGCHALLENGE_FAIL_getChallengeData");
-    // retail's destructor cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL stays a C function (g++ 2.95 takes no
-    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_26cOVState_BIGCHALLENGE_FAIL (the retail label renamed)
     virtual ~cOVState_BIGCHALLENGE_FAIL();
     virtual void onCreateScreen() __asm__("cOVState_BIGCHALLENGE_FAIL_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cOVState_BIGCHALLENGE_FAIL_onWidgetCreate");
@@ -98,5 +98,6 @@ struct cOVState_BIGCHALLENGE_FAIL : public cOVState {
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mMissionId, 0x9C);
 CHECK_OFFSET(cOVState_BIGCHALLENGE_FAIL, mRider, 0xA0);
 CHECK_SIZE(cOVState_BIGCHALLENGE_FAIL, 0xA4);
+__asm__("_vt$26cOVState_BIGCHALLENGE_FAIL = cOVState_BIGCHALLENGE_FAIL_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEBIGCHALLENGE_H */

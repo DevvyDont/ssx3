@@ -1,5 +1,6 @@
 #ifndef FE_MESSAGECENTER_H
 #define FE_MESSAGECENTER_H
+#pragma interface
 
 // The in-game message center (EA's d:/ssx/code/source/fe/messagecenter.cpp, preview assert strings; retail keeps its
 // code in fe/fepopupmisc 0x1E12F0-0x1E5AA0). Two UI states live here:
@@ -99,9 +100,7 @@ struct cOVState_MESSAGECENTER : public cOVState {
                                     //       plays its "TransitionOut" frame
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_MESSAGECENTER__cOVState_MESSAGECENTER stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_MESSAGECENTER();
+    virtual ~cOVState_MESSAGECENTER();   // g++'s own symbol _$_22cOVState_MESSAGECENTER (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_MESSAGECENTER_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cOVState_MESSAGECENTER_onDestroyScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_MESSAGECENTER_onWidgetCreate");
@@ -146,6 +145,7 @@ CHECK_OFFSET(cOVState_MESSAGECENTER, mScrollOffset, 0x174);
 CHECK_OFFSET(cOVState_MESSAGECENTER, unk_178, 0x178);
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpMessageScreen, 0x17C);
 CHECK_SIZE(cOVState_MESSAGECENTER, 0x180);
+__asm__("_vt$22cOVState_MESSAGECENTER = cOVState_MESSAGECENTER_vtbl");   // g++'s name for the retail vtable
 
 struct cOVState_ViewPopup : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -172,9 +172,7 @@ struct cOVState_ViewPopup : public cUIState {
                                     //       (str_pct_d_j); cOVState_ViewPopup_showNextMessage increments / recomputes it
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_ViewPopup__cOVState_ViewPopup stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_ViewPopup();
+    virtual ~cOVState_ViewPopup();   // g++'s own symbol _$_18cOVState_ViewPopup (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_ViewPopup_onCreateScreen");
     virtual bool onGainTransition(int on) __asm__("cOVState_ViewPopup_onGainTransition");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cOVState_ViewPopup_onWidgetCreate");
@@ -200,5 +198,6 @@ CHECK_OFFSET(cOVState_ViewPopup, mpKeepMessage, 0x64);
 CHECK_OFFSET(cOVState_ViewPopup, miMessage, 0x68);
 CHECK_OFFSET(cOVState_ViewPopup, miNumber, 0x6C);
 CHECK_SIZE(cOVState_ViewPopup, 0x70);
+__asm__("_vt$18cOVState_ViewPopup = cOVState_ViewPopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_MESSAGECENTER_H */

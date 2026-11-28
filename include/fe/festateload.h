@@ -1,5 +1,6 @@
 #ifndef FE_FESTATELOAD_H
 #define FE_FESTATELOAD_H
+#pragma interface
 
 // cFEStateEventSelect: the front end's event-select map (screens "Map" and "femap_template"): a cFEState around an
 // embedded mountain-map template (cUITemplate_MAP, fe/uitemplatemap.h) that does all the work. Every virtual except
@@ -52,9 +53,7 @@ struct cFEStateEventSelect : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateEventSelect1() __asm__("cFEStateEventSelect_cFEStateEventSelect1");
-    // retail's destructor cFEStateEventSelect__cFEStateEventSelect stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateEventSelect();
+    virtual ~cFEStateEventSelect();   // g++'s own symbol _$_19cFEStateEventSelect (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateEventSelect_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateEventSelect_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateEventSelect_onUpdate");
@@ -69,5 +68,6 @@ struct cFEStateEventSelect : public cFEState {
 
 CHECK_OFFSET(cFEStateEventSelect, mMap, 0x048);
 CHECK_SIZE(cFEStateEventSelect, 0x33C);
+__asm__("_vt$19cFEStateEventSelect = cFEStateEventSelect_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATELOAD_H */

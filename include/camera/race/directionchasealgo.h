@@ -1,5 +1,6 @@
 #ifndef CAMERA_RACE_DIRECTIONCHASEALGO_H
 #define CAMERA_RACE_DIRECTIONCHASEALGO_H
+#pragma interface
 
 // The DEFAULT_2/3/4 and Direction chase-camera algorithms: subclasses of cLookAtChaseAlgorithm
 // (camera/cameraalgorithms.h, 0x390). EA file [P]: d:/ssx/code/source/camera/race/directionchasealgo.cpp, whose assert
@@ -37,6 +38,8 @@ struct cDEFAULT_2ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_2ChaseAlgorithm_vtbl: cDEFAULT_2ChaseAlgorithm_getRestDrop)
 
+    cDEFAULT_2ChaseAlgorithm() __asm__("cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm");
+    virtual ~cDEFAULT_2ChaseAlgorithm();   // g++'s own symbol _$_24cDEFAULT_2ChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -45,6 +48,7 @@ struct cDEFAULT_2ChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
+__asm__("_vt$24cDEFAULT_2ChaseAlgorithm = cDEFAULT_2ChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cDEFAULT_3ChaseAlgorithm (0x390: no fields of its own) - the default chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "DEFAULT_3 Chase Camera Algorithm") then the ctor cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm,
@@ -61,6 +65,8 @@ struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_3ChaseAlgorithm_vtbl: cDEFAULT_3ChaseAlgorithm_getRestDrop)
 
+    cDEFAULT_3ChaseAlgorithm() __asm__("cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm");
+    virtual ~cDEFAULT_3ChaseAlgorithm();   // g++'s own symbol _$_24cDEFAULT_3ChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -69,6 +75,7 @@ struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cDEFAULT_3ChaseAlgorithm, 0x390);
+__asm__("_vt$24cDEFAULT_3ChaseAlgorithm = cDEFAULT_3ChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cDEFAULT_4ChaseAlgorithm (0x390: no fields of its own) - a tuned default chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "DEFAULT_4 Chase Camera Algorithm") then the ctor cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm,
@@ -82,6 +89,8 @@ struct cDEFAULT_4ChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cDEFAULT_4ChaseAlgorithm_vtbl: cDEFAULT_4ChaseAlgorithm_getRestDrop)
 
+    cDEFAULT_4ChaseAlgorithm() __asm__("cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm");
+    virtual ~cDEFAULT_4ChaseAlgorithm();   // g++'s own symbol _$_24cDEFAULT_4ChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -90,6 +99,7 @@ struct cDEFAULT_4ChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cDEFAULT_4ChaseAlgorithm, 0x390);
+__asm__("_vt$24cDEFAULT_4ChaseAlgorithm = cDEFAULT_4ChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cDirectionChaseAlgorithm (0x3A0; On Tour 0x390) - a chase camera looking along a fixed compass direction.
 // [R] createChaseAlgorithmBlend cases 18..25: cMemMan_alloc(0x3A0, "Direction N/NW/W/SW/S/SE/E/NE Chase Camera
@@ -103,6 +113,8 @@ struct cDirectionChaseAlgorithm : public cLookAtChaseAlgorithm {
                                     //       cDirectionChaseAlgorithm_update passes it to cLookAtChaseAlgorithm_updateRotation (lwc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
 
+    cDirectionChaseAlgorithm(int n) __asm__("cDirectionChaseAlgorithm_cDirectionChaseAlgorithm");
+    virtual ~cDirectionChaseAlgorithm();   // g++'s own symbol _$_24cDirectionChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cDirectionChaseAlgorithm_update");
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
@@ -113,5 +125,6 @@ struct cDirectionChaseAlgorithm : public cLookAtChaseAlgorithm {
 CHECK_OFFSET(cDirectionChaseAlgorithm, Angle, 0x390);
 CHECK_OFFSET(cDirectionChaseAlgorithm, unk_394, 0x394);
 CHECK_SIZE(cDirectionChaseAlgorithm, 0x3A0);
+__asm__("_vt$24cDirectionChaseAlgorithm = cDirectionChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_RACE_DIRECTIONCHASEALGO_H */

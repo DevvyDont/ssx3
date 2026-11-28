@@ -100,27 +100,27 @@ INCLUDE_ASM("main/ssxapp2", cGameModeHandler_writeToReplayFrame);
 
 INCLUDE_ASM("main/ssxapp2", cGameModeHandler_readFromReplayFrame);
 
-INCLUDE_ASM("main/ssxapp2", cGMBigAirHandler__cGMBigAirHandler);
+INCLUDE_ASM("main/ssxapp2", _$_16cGMBigAirHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMRaceHandler__cGMRaceHandler);
+INCLUDE_ASM("main/ssxapp2", _$_14cGMRaceHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMMPRaceHandler__cGMMPRaceHandler);
+INCLUDE_ASM("main/ssxapp2", _$_16cGMMPRaceHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler__cGMMPSlopeHandler);
+INCLUDE_ASM("main/ssxapp2", _$_17cGMMPSlopeHandler);
 
 INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_writeToReplayFrame);
 
 INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_readFromReplayFrame);
 
-INCLUDE_ASM("main/ssxapp2", cGMFreerideHandler__cGMFreerideHandler);
+INCLUDE_ASM("main/ssxapp2", _$_18cGMFreerideHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMTimeHandler__cGMTimeHandler);
+INCLUDE_ASM("main/ssxapp2", _$_14cGMTimeHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMRivalTimeHandler__cGMRivalTimeHandler);
+INCLUDE_ASM("main/ssxapp2", _$_19cGMRivalTimeHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMRivalPointHandler__cGMRivalPointHandler);
+INCLUDE_ASM("main/ssxapp2", _$_20cGMRivalPointHandler);
 
-INCLUDE_ASM("main/ssxapp2", cGMPointHandler__cGMPointHandler);
+INCLUDE_ASM("main/ssxapp2", _$_15cGMPointHandler);
 
 INCLUDE_ASM("main/ssxapp2", cGMDebugHandler__cGMDebugHandler);
 
@@ -154,7 +154,7 @@ INCLUDE_ASM("main/ssxapp2", cFEStateProgressive_onWidgetEvent);
 
 INCLUDE_ASM("main/ssxapp2", cFEStateProgressive_onWidgetMenu);
 
-INCLUDE_ASM("main/ssxapp2", cGameLoadState__cGameLoadState);
+INCLUDE_ASM("main/ssxapp2", _$_14cGameLoadState);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadState_onCreateScreen);
 
@@ -162,7 +162,7 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadState_onGainTransition);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadState_onWidgetCreate);
 
-INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge__cGameLoadStateOutLodge);
+INCLUDE_ASM("main/ssxapp2", _$_22cGameLoadStateOutLodge);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onCreateScreen);
 
@@ -170,7 +170,7 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onWidgetCreate);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onGainTransition);
 
-INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer__cGameLoadStateConquer);
+INCLUDE_ASM("main/ssxapp2", _$_21cGameLoadStateConquer);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onCreateScreen);
 
@@ -178,5 +178,5 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onWidgetCreate);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateConquer_onGainTransition);
 
-INCLUDE_ASM("main/ssxapp2", cFELoadHintState__cFELoadHintState);
+INCLUDE_ASM("main/ssxapp2", _$_16cFELoadHintState);
 

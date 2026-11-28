@@ -865,7 +865,7 @@ void* cFEStateCredits::cFEStateCredits1()
 #endif
 
 extern void* cFEState_vtbl[];
-extern "C" void* cUIState__cUIState(void*);
+extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
 
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);

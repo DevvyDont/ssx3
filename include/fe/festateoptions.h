@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEOPTIONS_H
 #define FE_FESTATEOPTIONS_H
+#pragma interface
 
 // This header: cFEStateOptionsController, cFEStateOptionsDeviceSelect, cFEStateOptions and cFEStateOptionsSaveLoad
 // (the last two below).
@@ -58,8 +59,7 @@ struct cFEStateOptionsController : public cFEState {
     void updateWidget() __asm__("cFEStateOptionsController_updateWidget");
     void displayPadConfig(int on) __asm__("cFEStateOptionsController_displayPadConfig");
     void vibratePad(int idx, float x, float y) __asm__("cFEStateOptionsController_vibratePad");
-    // retail's destructor cFEStateOptionsController__cFEStateOptionsController stays a C function (g++ 2.95 takes no
-    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_25cFEStateOptionsController (the retail label renamed)
     virtual ~cFEStateOptionsController();
     virtual void onCreateScreen() __asm__("cFEStateOptionsController_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptionsController_onWidgetEvent");
@@ -75,6 +75,7 @@ CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
 CHECK_OFFSET(cFEStateOptionsController, mVibrateOn, 0x050);
 CHECK_OFFSET(cFEStateOptionsController, unk_051, 0x051);
 CHECK_SIZE(cFEStateOptionsController, 0x54);
+__asm__("_vt$25cFEStateOptionsController = cFEStateOptionsController_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFEStateOptionsDeviceSelect: the memory-card device select screen (state id 33) for loading or saving the options /
@@ -210,9 +211,7 @@ struct cFEStateOptions : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void saveOptionPrompt() __asm__("cFEStateOptions_saveOptionPrompt");
-    // retail's destructor cFEStateOptions__cFEStateOptions stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateOptions();
+    virtual ~cFEStateOptions();   // g++'s own symbol _$_15cFEStateOptions (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateOptions_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOptions_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEStateOptions_onWidgetEvent");
@@ -226,6 +225,7 @@ CHECK_OFFSET(cFEStateOptions, mbToSaveOptionScreen, 0x048);
 CHECK_OFFSET(cFEStateOptions, mbLetFrameGo, 0x04C);
 CHECK_OFFSET(cFEStateOptions, mpKeyboard, 0x050);
 CHECK_SIZE(cFEStateOptions, 0x54);
+__asm__("_vt$15cFEStateOptions = cFEStateOptions_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFEStateOptionsSaveLoad: the options' save/load menu ("25saveload", state id 0x20): save options, load options, load
@@ -265,9 +265,7 @@ struct cFEStateOptionsSaveLoad : public cFEState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateOptionsSaveLoad1() __asm__("cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1");
-    // retail's destructor cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateOptionsSaveLoad();
+    virtual ~cFEStateOptionsSaveLoad();   // g++'s own symbol _$_23cFEStateOptionsSaveLoad (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateOptionsSaveLoad_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateOptionsSaveLoad_onWidgetCreate");
     virtual void onPreRender2D() __asm__("cFEStateOptionsSaveLoad_onPreRender2D");
@@ -280,5 +278,6 @@ struct cFEStateOptionsSaveLoad : public cFEState {
 CHECK_OFFSET(cFEStateOptionsSaveLoad, mSaveLoadCurrentCtrl, 0x048);
 CHECK_OFFSET(cFEStateOptionsSaveLoad, unk_049, 0x049);
 CHECK_SIZE(cFEStateOptionsSaveLoad, 0x4C);
+__asm__("_vt$23cFEStateOptionsSaveLoad = cFEStateOptionsSaveLoad_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEOPTIONS_H */

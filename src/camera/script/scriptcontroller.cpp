@@ -266,38 +266,24 @@ void cScriptCameraController::update()
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_cScriptAlgorithm);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* cCameraAlgorithm_vtbl[];
-extern void* cScriptAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
-extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
 /**
  * Constructs the generic script camera algorithm base: default view, script controller of the first view.
  *
- * Installs the cCameraAlgorithm vtable (cCameraAlgorithm_vtbl) to read cCameraAlgorithm_getDefaultView, then the
- * cScriptAlgorithm vtable (cScriptAlgorithm_vtbl) at +0x10; sets the type (+0xC) to 0x55 (On Tour SCRIPT_GENERIC), view,
- * near 10 and far 30000, clears the script object (+0x14), takes the controller (+0x18) from the first view
- * camera's script controller (+0xAC) and sets the target (+0x20) to t4vect_Origin.
- *
- * @param object  the object being constructed (this)
- * @return the object
+ * The cCameraAlgorithm part takes the default view (cCameraAlgorithm_getDefaultView), near 10 and far 30000; then the
+ * type (+0xC) CAMERA_ALGORITHM_SCRIPT_GENERIC (0x55), no script object (+0x14), the controller (+0x18) from the first
+ * view camera's script controller (+0xAC) and the target (+0x20) t4vect_Origin.
  */
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* object)
+cScriptAlgorithm::cScriptAlgorithm()
 {
-    VPTR_OF(cCameraAlgorithm, object) = cCameraAlgorithm_vtbl;
-    float fov = cCameraAlgorithm_getDefaultView(object);
-    object->AlgorithmType = 85;
-    VPTR_OF(cCameraAlgorithm, object) = cScriptAlgorithm_vtbl;
-    object->View = fov;
-    object->Near = 10.0f;
-    object->Far = 30000.0f;
-    object->ScriptObj = 0;
+    AlgorithmType = CAMERA_ALGORITHM_SCRIPT_GENERIC;
+    ScriptObj = 0;
     cGame* game = SSXApp->Game;
     cGameViewMan* viewMan = game->ViewMan;
     cCamera* camera = viewMan->PlayerCamera[0];
-    object->Controller = camera->ScriptController;
-    object->Target = t4vect_Origin;
-    return object;
+    Controller = camera->ScriptController;
+    Target = t4vect_Origin;
 }
 #endif
 
@@ -335,31 +321,20 @@ cScriptObjCamera* cScriptAlgorithm::getScriptObj()
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_cScriptManualAlgorithm);
 #ifdef SKIP_ASM
 
-extern void* cScriptManualAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* __15cCameraJitterer(void* self);
 
 /**
- * Constructs a manual script camera algorithm (camera at a scripted position and orientation).
- *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptManualAlgorithm_vtbl at +0x10, constructs the jitterer at +0x74 with
- * cCameraJitterer::cCameraJitterer, sets the position (+0x30) to t4vect_Origin and the type (+0xC) to 0x56
- * (On Tour SCRIPT_MANUAL), and zeroes roll, heading and pitch (+0x40..+0x48).
- *
- * @return @p self
+ * Constructs a manual script camera algorithm (camera at a scripted position and orientation): on top of the
+ * cScriptAlgorithm part and the jitterer, the position (+0x30) t4vect_Origin, the type (+0xC)
+ * CAMERA_ALGORITHM_SCRIPT_MANUAL (0x56) and zero roll, heading and pitch.
  */
-extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgorithm* self)
+cScriptManualAlgorithm::cScriptManualAlgorithm()
 {
-    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    VPTR_OF(cCameraAlgorithm, self) = cScriptManualAlgorithm_vtbl;
-    __15cCameraJitterer(&self->Jitterer);
-    self->Position = t4vect_Origin;
-    self->AlgorithmType = 86;
-    self->Heading = 0.0f;
-    self->Pitch = 0.0f;
-    self->Roll = 0.0f;
-    return ((void*)self);
+    Position = t4vect_Origin;
+    AlgorithmType = CAMERA_ALGORITHM_SCRIPT_MANUAL;
+    Heading = 0.0f;
+    Pitch = 0.0f;
+    Roll = 0.0f;
 }
 #endif
 
@@ -708,30 +683,20 @@ extern "C" tPose cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorith
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPointAlgorithm);
 #ifdef SKIP_ASM
-extern void* cScriptPointAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* __15cCameraJitterer(void* self);
 
 /**
- * Constructs a point script camera algorithm (camera at a scripted point).
- *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptPointAlgorithm_vtbl at +0x10, constructs the jitterer at +0x74, sets the position (+0x30)
- * to t4vect_Origin and the type (+0xC) to 0x57 (On Tour SCRIPT_POINT), and zeroes roll, heading and pitch.
- *
- * @return @p self
+ * Constructs a point script camera algorithm (camera at a scripted point): on top of the cScriptAlgorithm part and the
+ * jitterer, the position (+0x30) t4vect_Origin, the type (+0xC) CAMERA_ALGORITHM_SCRIPT_POINT (0x57) and zero roll,
+ * heading and pitch.
  */
-extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorithm* self)
+cScriptPointAlgorithm::cScriptPointAlgorithm()
 {
-    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    VPTR_OF(cCameraAlgorithm, self) = cScriptPointAlgorithm_vtbl;
-    __15cCameraJitterer(&self->Jitterer);
-    self->Position = t4vect_Origin;
-    self->AlgorithmType = 87;
-    self->Roll = 0.0f;
-    self->Heading = 0.0f;
-    self->Pitch = 0.0f;
-    return ((void*)self);
+    Position = t4vect_Origin;
+    AlgorithmType = CAMERA_ALGORITHM_SCRIPT_POINT;
+    Roll = 0.0f;
+    Heading = 0.0f;
+    Pitch = 0.0f;
 }
 #endif
 
@@ -1050,30 +1015,20 @@ extern "C" tPose cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
-extern void* cScriptTargetAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* __15cCameraJitterer(void* self);
 
 /**
- * Constructs a target script camera algorithm (camera looking at a scripted subject).
- *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptTargetAlgorithm_vtbl at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
- * to t4vect_Origin and the type (+0xC) to 0x58 (On Tour SCRIPT_TARGET), and zeroes roll, heading and pitch.
- *
- * @return @p self
+ * Constructs a target script camera algorithm (camera looking at a scripted subject): on top of the cScriptAlgorithm
+ * part and the jitterer, the position (+0x30) t4vect_Origin, the type (+0xC) CAMERA_ALGORITHM_SCRIPT_TARGET (0x58) and
+ * zero roll, heading and pitch.
  */
-extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgorithm* self)
+cScriptTargetAlgorithm::cScriptTargetAlgorithm()
 {
-    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    VPTR_OF(cCameraAlgorithm, self) = cScriptTargetAlgorithm_vtbl;
-    __15cCameraJitterer(&self->Jitterer);
-    self->Position = t4vect_Origin;
-    self->AlgorithmType = 88;
-    self->Roll = 0.0f;
-    self->Heading = 0.0f;
-    self->Pitch = 0.0f;
-    return ((void*)self);
+    Position = t4vect_Origin;
+    AlgorithmType = CAMERA_ALGORITHM_SCRIPT_TARGET;
+    Roll = 0.0f;
+    Heading = 0.0f;
+    Pitch = 0.0f;
 }
 #endif
 
@@ -1468,30 +1423,20 @@ extern "C" tPose cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorith
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
-extern void* cScriptRelativeAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* __15cCameraJitterer(void* self);
 
 /**
- * Constructs a relative script camera algorithm (camera placed relative to an algorithmic subject).
- *
- * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptRelativeAlgorithm_vtbl at +0x10, constructs the jitterer at +0x70, sets the position (+0x30)
- * to t4vect_Origin and the type (+0xC) to 0x59 (On Tour SCRIPT_RELATIVE), and zeroes roll, heading and pitch.
- *
- * @return @p self
+ * Constructs a relative script camera algorithm (camera placed relative to an algorithmic subject): on top of the
+ * cScriptAlgorithm part and the jitterer, the position (+0x30) t4vect_Origin, the type (+0xC)
+ * CAMERA_ALGORITHM_SCRIPT_RELATIVE (0x59) and zero roll, heading and pitch.
  */
-extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self)
+cScriptRelativeAlgorithm::cScriptRelativeAlgorithm()
 {
-    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
-    VPTR_OF(cCameraAlgorithm, self) = cScriptRelativeAlgorithm_vtbl;
-    __15cCameraJitterer(&self->Jitterer);
-    self->Position = t4vect_Origin;
-    self->AlgorithmType = 89;
-    self->Roll = 0.0f;
-    self->Heading = 0.0f;
-    self->Pitch = 0.0f;
-    return ((void*)self);
+    Position = t4vect_Origin;
+    AlgorithmType = CAMERA_ALGORITHM_SCRIPT_RELATIVE;
+    Roll = 0.0f;
+    Heading = 0.0f;
+    Pitch = 0.0f;
 }
 #endif
 

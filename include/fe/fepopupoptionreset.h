@@ -1,5 +1,6 @@
 #ifndef FE_FEPOPUPOPTIONRESET_H
 #define FE_FEPOPUPOPTIONRESET_H
+#pragma interface
 
 // cFEPopupOptionReset: the options screens' yes / no popup ("111resetopts": save or reset the changed options?). The
 // options states allocate it, construct it inline and push it as a popup; their onPopupEvent then read the answer
@@ -42,9 +43,7 @@ struct cFEPopupOptionReset : public cUIState {
     char unk_049[0x3];              // 0x049 padding
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEPopupOptionReset__cFEPopupOptionReset stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEPopupOptionReset();
+    virtual ~cFEPopupOptionReset();   // g++'s own symbol _$_19cFEPopupOptionReset (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEPopupOptionReset_onCreateScreen");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cFEPopupOptionReset_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event) __asm__("cFEPopupOptionReset_onWidgetEvent");
@@ -53,5 +52,6 @@ struct cFEPopupOptionReset : public cUIState {
 CHECK_OFFSET(cFEPopupOptionReset, mAccept, 0x048);
 CHECK_OFFSET(cFEPopupOptionReset, unk_049, 0x049);
 CHECK_SIZE(cFEPopupOptionReset, 0x4C);
+__asm__("_vt$19cFEPopupOptionReset = cFEPopupOptionReset_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FEPOPUPOPTIONRESET_H */

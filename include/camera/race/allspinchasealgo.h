@@ -1,5 +1,6 @@
 #ifndef CAMERA_RACE_ALLSPINCHASEALGO_H
 #define CAMERA_RACE_ALLSPINCHASEALGO_H
+#pragma interface
 
 // The SPOKE, SUPERPIPE and POST_RACE_1 chase-camera algorithms: subclasses of cLookAtChaseAlgorithm
 // (camera/cameraalgorithms.h, 0x390). EA file [P]: d:/ssx/code/source/camera/race/allspinchasealgo.cpp, whose assert
@@ -36,6 +37,8 @@ struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
     t4Vector LastLookDir;           // 0x390 [O] (On Tour 0x380); [U] snap cSPOKEChaseAlgorithm_snap (sq), getDesiredPosition
                                     //       cSPOKEChaseAlgorithm_getDesiredPosition (lqc2, sq)
 
+    cSPOKEChaseAlgorithm() __asm__("cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm");
+    virtual ~cSPOKEChaseAlgorithm();   // g++'s own symbol _$_20cSPOKEChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -47,6 +50,7 @@ struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
 
 CHECK_OFFSET(cSPOKEChaseAlgorithm, LastLookDir, 0x390);
 CHECK_SIZE(cSPOKEChaseAlgorithm, 0x3A0);
+__asm__("_vt$20cSPOKEChaseAlgorithm = cSPOKEChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cSUPERPIPEChaseAlgorithm (0x3B0; On Tour 0x3A0). [R] cMemMan_alloc(0x3B0, "SUPERPIPE Chase Camera Algorithm") then
 // the ctor cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(this, point1, point2) (type 0x43 = CAMERA_ALGORITHM_CHASE_SUPERPIPE = 67, vtable cSUPERPIPEChaseAlgorithm_vtbl);
@@ -60,6 +64,9 @@ struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
                                     //       cSUPERPIPEChaseAlgorithm_getIdealPosition (lqc2)
     t4Vector Point2;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = *point2 (lq/sq); [U] getIdealPosition (lqc2)
 
+    cSUPERPIPEChaseAlgorithm(t4Vector* point1, t4Vector* point2)
+        __asm__("cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm");
+    virtual ~cSUPERPIPEChaseAlgorithm();   // g++'s own symbol _$_24cSUPERPIPEChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -70,6 +77,7 @@ struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
 CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point1, 0x390);
 CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point2, 0x3A0);
 CHECK_SIZE(cSUPERPIPEChaseAlgorithm, 0x3B0);
+__asm__("_vt$24cSUPERPIPEChaseAlgorithm = cSUPERPIPEChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cPOST_RACE_1ChaseAlgorithm (0x3B0; On Tour 0x3A0). [R] cMemMan_alloc(0x3B0, "POST_RACE_1 Chase Camera Algorithm")
 // then the ctor cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(this, target) (type 0x44 = CAMERA_ALGORITHM_CHASE_POST_RACE_1 = 68, vtable cPOST_RACE_1ChaseAlgorithm_vtbl).
@@ -83,6 +91,10 @@ struct cPOST_RACE_1ChaseAlgorithm : public cLookAtChaseAlgorithm {
     int AgeInFrames;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = 0 (sw); [U] update cPOST_RACE_1ChaseAlgorithm_update (lw/sw)
     char unk_3A4[0xC];              // 0x3A4 padding to the 16-byte class alignment (alloc 0x3B0)
 
+    cPOST_RACE_1ChaseAlgorithm(cRiderCameraTarget* src)
+        __asm__("cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm");
+    // g++'s own symbol _$_26cPOST_RACE_1ChaseAlgorithm (the retail label renamed)
+    virtual ~cPOST_RACE_1ChaseAlgorithm();
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cPOST_RACE_1ChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cPOST_RACE_1ChaseAlgorithm_snap");
@@ -94,5 +106,6 @@ CHECK_OFFSET(cPOST_RACE_1ChaseAlgorithm, StartDir, 0x390);
 CHECK_OFFSET(cPOST_RACE_1ChaseAlgorithm, AgeInFrames, 0x3A0);
 CHECK_OFFSET(cPOST_RACE_1ChaseAlgorithm, unk_3A4, 0x3A4);
 CHECK_SIZE(cPOST_RACE_1ChaseAlgorithm, 0x3B0);
+__asm__("_vt$26cPOST_RACE_1ChaseAlgorithm = cPOST_RACE_1ChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_RACE_ALLSPINCHASEALGO_H */

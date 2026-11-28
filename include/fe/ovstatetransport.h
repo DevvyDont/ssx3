@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATETRANSPORT_H
 #define FE_OVSTATETRANSPORT_H
+#pragma interface
 
 // cOVState_TRANSPORT: the in-game transport (mountain map / travel) overlay, overlay id 33 (screen "Map"). It is a thin
 // cOVState around an embedded cUITemplate_MAP (the same map template the FE's event select and credits use at +0x48):
@@ -54,9 +55,7 @@ struct cOVState_TRANSPORT : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void * cOVState_TRANSPORT_2(int engine, int overlayId) __asm__("cOVState_TRANSPORT_cOVState_TRANSPORT_2");
-    // retail's destructor cOVState_TRANSPORT__cOVState_TRANSPORT stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_TRANSPORT();
+    virtual ~cOVState_TRANSPORT();   // g++'s own symbol _$_18cOVState_TRANSPORT (the retail label renamed)
     virtual void onWidgetCreate(cUIThing*) __asm__("cOVState_TRANSPORT_onWidgetCreate__FPv");
     virtual void onGainFocus(cUIState*) __asm__("cOVState_TRANSPORT_onGainFocus");
     virtual void onWidgetEvent(cUIThing*, unsigned int) __asm__("cOVState_TRANSPORT_onWidgetEvent");
@@ -71,5 +70,6 @@ struct cOVState_TRANSPORT : public cOVState {
 
 CHECK_OFFSET(cOVState_TRANSPORT, mMap, 0x9C);
 CHECK_SIZE(cOVState_TRANSPORT, 0x390);
+__asm__("_vt$18cOVState_TRANSPORT = cOVState_TRANSPORT_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATETRANSPORT_H */

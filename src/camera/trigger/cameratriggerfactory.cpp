@@ -1494,72 +1494,44 @@ extern "C" float GetMaxElement(float* halfExtents)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_cTriggerAlgorithm);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cChaseAlgorithm_cChaseAlgorithm(void* self);
-extern void* cTriggerAlgorithm_vtbl[];
-
 extern t4Vector t4vect_Origin_00173208 __asm__("t4vect_Origin");
 
 /**
  * Constructs a trigger camera algorithm: a chase camera that follows the rider from a configurable distance and angle.
  *
- * Runs the cChaseAlgorithm_cChaseAlgorithm base constructor, installs the vtable cTriggerAlgorithm_vtbl and sets AlgorithmType
- * (+0xC) to 90 (On Tour CAMERA_ALGORITHM_TRIGGER_GENERIC). The On Tour cTriggerAlgorithm members get their defaults:
- * Position (+0x40) = t4vect_Origin, Heading (+0x50) and Pitch (+0x54) 0, PitchMultiplier (+0x58) 0.8, HeadingAdjustRate
- * (+0x5C) 10.3, PitchAdjustRate (+0x60) 1.1, HeadingLookRate (+0x64) 5, PitchLookRate (+0x68) 10, HeightOffset (+0x6C)
- * 70, IdealDist (+0x70) 400, LeadDistance (+0x74) 0 and PitchOffset (+0x78) 20 (degrees).
- *
- * The bounded-camera constructor cBoundedAlgorithm_cBoundedAlgorithm builds on it.
- *
- * @return @p self
+ * On top of the cChaseAlgorithm part: AlgorithmType (+0xC) CAMERA_ALGORITHM_TRIGGER_GENERIC (90) and the On Tour
+ * cTriggerAlgorithm members' defaults: Position (+0x40) = t4vect_Origin, Heading (+0x50) and Pitch (+0x54) 0,
+ * PitchMultiplier (+0x58) 0.8, HeadingAdjustRate (+0x5C) 10.3, PitchAdjustRate (+0x60) 1.1, HeadingLookRate (+0x64) 5,
+ * PitchLookRate (+0x68) 10, HeightOffset (+0x6C) 70, IdealDist (+0x70) 400, LeadDistance (+0x74) 0 and PitchOffset
+ * (+0x78) 20 (degrees). The bounded camera (cBoundedAlgorithm) builds on it.
  */
-extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
+cTriggerAlgorithm::cTriggerAlgorithm()
 {
-    cChaseAlgorithm_cChaseAlgorithm(self);
-    VPTR_OF(cCameraAlgorithm, self) = cTriggerAlgorithm_vtbl;
-    self->PitchMultiplier = 0.800000011920929f;
-    self->HeadingAdjustRate = 10.300000190734863f;
-    self->PitchAdjustRate = 1.100000023841858f;
-    self->HeadingLookRate = 5.0f;
-    self->PitchLookRate = 10.0f;
-    self->HeightOffset = 70.0f;
-    self->IdealDist = 400.0f;
-    self->LeadDistance = 0.0f;
-    self->PitchOffset = 20.0f;
-    *(&self->Position) = t4vect_Origin_00173208;
-    self->AlgorithmType = 90;
-    self->Pitch = 0.0f;
-    self->Heading = 0.0f;
-    return ((void*)self);
+    PitchMultiplier = 0.800000011920929f;
+    HeadingAdjustRate = 10.300000190734863f;
+    PitchAdjustRate = 1.100000023841858f;
+    HeadingLookRate = 5.0f;
+    PitchLookRate = 10.0f;
+    HeightOffset = 70.0f;
+    IdealDist = 400.0f;
+    LeadDistance = 0.0f;
+    PitchOffset = 20.0f;
+    Position = t4vect_Origin_00173208;
+    AlgorithmType = CAMERA_ALGORITHM_TRIGGER_GENERIC;
+    Pitch = 0.0f;
+    Heading = 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm__cTriggerAlgorithm);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_17cTriggerAlgorithm);
 #ifdef SKIP_ASM
-extern void* cCameraAlgorithm_vtbl[];
-void operator_delete(int* ptr);
-
-// PORT: the unit declares cTriggerAlgorithm__cTriggerAlgorithm as `void* (void*)` (callers pass the
-// flags through in $a1); the real body takes (self, flags). Bound by asm label.
-void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("cTriggerAlgorithm__cTriggerAlgorithm");
-
 /**
- * Destroys a trigger camera algorithm: puts back the base camera-algorithm vtable and frees the object when asked.
- *
- * Stores cCameraAlgorithm's vtable cCameraAlgorithm_vtbl at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1
- * of the trigger algorithm vtable cTriggerAlgorithm_vtbl; the bounded algorithm's destructor cBoundedAlgorithm__cBoundedAlgorithm chains to it.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Destroys a trigger camera algorithm (it owns nothing); the cCameraAlgorithm part frees it when asked. The bounded
+ * camera's destructor chains to it.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* vself, int flags)
+cTriggerAlgorithm::~cTriggerAlgorithm()
 {
-    cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -2128,36 +2100,27 @@ extern "C" tPose cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_cBoundedAlgorithm);
 #ifdef SKIP_ASM
-extern void* cBoundedAlgorithm_vtbl[];
-extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self);
-
 /**
  * Constructs a bounded trigger camera: a trigger camera whose position is kept inside a bound object.
  *
- * Runs the trigger algorithm constructor cTriggerAlgorithm_cTriggerAlgorithm, then sets AlgorithmType (+0xC) to 91 (On Tour
- * CAMERA_ALGORITHM_TRIGGER_BOUNDED), installs the vtable cBoundedAlgorithm_vtbl and zeroes BoundAction (+0x80) and LeadDistance
- * (+0x74). cChaseCameraController_createChaseAlgorithmBlend allocates it (0x90 bytes) for a camera type 91 action and
- * stores the action in BoundAction.
- *
- * @return @p self
+ * On top of the trigger algorithm part: AlgorithmType (+0xC) CAMERA_ALGORITHM_TRIGGER_BOUNDED (91), BoundAction (+0x80)
+ * and LeadDistance (+0x74) cleared. cChaseCameraController_createChaseAlgorithmBlend allocates it (0x90 bytes) for a
+ * camera type 91 action and stores the action in BoundAction.
  */
-extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(cBoundedAlgorithm* self)
+cBoundedAlgorithm::cBoundedAlgorithm()
 {
-    cTriggerAlgorithm_cTriggerAlgorithm((cTriggerAlgorithm*)self);
-    self->AlgorithmType = 91;
-    VPTR_OF(cCameraAlgorithm, self) = cBoundedAlgorithm_vtbl;
-    self->BoundAction = 0;
-    self->LeadDistance = 0.0f;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_TRIGGER_BOUNDED;
+    BoundAction = 0;
+    LeadDistance = 0.0f;
 }
 #endif
-
-extern void* cBoundedAlgorithm_vtbl[];
-extern "C" void* cTriggerAlgorithm__cTriggerAlgorithm(void*);
 
 //99.5%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAlgorithm__FPv);
 #ifdef SKIP_ASM
+extern void* cBoundedAlgorithm_vtbl[];
+extern "C" void* cTriggerAlgorithm__cTriggerAlgorithm(void*) __asm__("_$_17cTriggerAlgorithm");
+
 /**
  * Destroys a bounded trigger camera: re-installs its vtable cBoundedAlgorithm_vtbl and chains to the trigger algorithm destructor.
  *
@@ -3305,98 +3268,46 @@ extern "C" t4Vector* cScriptAlgorithm_getTargetPos(t4Vector* self, cScriptAlgori
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptManualAlgorithm__cScriptManualAlgorithm);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_22cScriptManualAlgorithm);
 #ifdef SKIP_ASM
-extern void* cCameraAlgorithm_vtbl[];
-void operator_delete(int* ptr);
-
 /**
- * Destroys a manual script camera algorithm, freeing it when asked to.
- *
- * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
- * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a manual script camera algorithm (it owns nothing); the cCameraAlgorithm part frees it when asked.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(cScriptManualAlgorithm* self, int flags)
+cScriptManualAlgorithm::~cScriptManualAlgorithm()
 {
-    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptPointAlgorithm__cScriptPointAlgorithm);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_21cScriptPointAlgorithm);
 #ifdef SKIP_ASM
-extern void* cCameraAlgorithm_vtbl[];
-void operator_delete(int* ptr);
-
 /**
- * Destroys a point script camera algorithm, freeing it when asked to.
- *
- * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
- * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a point script camera algorithm (it owns nothing); the cCameraAlgorithm part frees it when asked.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(cScriptPointAlgorithm* self, int flags)
+cScriptPointAlgorithm::~cScriptPointAlgorithm()
 {
-    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptTargetAlgorithm__cScriptTargetAlgorithm);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_22cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
-extern void* cCameraAlgorithm_vtbl[];
-void operator_delete(int* ptr);
-
 /**
- * Destroys a target script camera algorithm, freeing it when asked to.
- *
- * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
- * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a target script camera algorithm (it owns nothing); the cCameraAlgorithm part frees it when asked.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(cScriptTargetAlgorithm* self, int flags)
+cScriptTargetAlgorithm::~cScriptTargetAlgorithm()
 {
-    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptRelativeAlgorithm__cScriptRelativeAlgorithm);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
-extern void* cCameraAlgorithm_vtbl[];
-void operator_delete(int* ptr);
-
 /**
- * Destroys a relative script camera algorithm, freeing it when asked to.
- *
- * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
- * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a relative script camera algorithm (it owns nothing); the cCameraAlgorithm part frees it when asked.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self, int flags)
+cScriptRelativeAlgorithm::~cScriptRelativeAlgorithm()
 {
-    VPTR_OF(cCameraAlgorithm, self) = cCameraAlgorithm_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3832,46 +3743,25 @@ void* func_00176A48(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-extern void* cDEFAULT_2ChaseAlgorithm_vtbl[];
-
 /**
- * Constructs the DEFAULT_2 chase camera algorithm (the near chase camera).
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x3C (On Tour CAMERA_ALGORITHM_CHASE_DEFAULT_2 = 60)
- * and cDEFAULT_2ChaseAlgorithm_vtbl.
- *
- * @return @p self
+ * Constructs the DEFAULT_2 chase camera algorithm (the near chase camera) on top of the look-at chase one:
+ * AlgorithmType CAMERA_ALGORITHM_CHASE_DEFAULT_2 (0x3C).
  */
-extern "C" void* cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cDEFAULT_2ChaseAlgorithm* self)
+cDEFAULT_2ChaseAlgorithm::cDEFAULT_2ChaseAlgorithm()
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 0x3C;
-    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_2ChaseAlgorithm_vtbl;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_DEFAULT_2;
 }
 #endif
 
-extern void* cDEFAULT_2ChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_2ChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a DEFAULT_2 chase camera algorithm: stores cDEFAULT_2ChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a DEFAULT_2 chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm(void* vself)
+cDEFAULT_2ChaseAlgorithm::~cDEFAULT_2ChaseAlgorithm()
 {
-    cDEFAULT_2ChaseAlgorithm* self = (cDEFAULT_2ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_2ChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -4002,45 +3892,25 @@ void cDEFAULT_2ChaseAlgorithm::snap(int id)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-extern void* cDEFAULT_3ChaseAlgorithm_vtbl[];
-
 /**
- * Constructs the DEFAULT_3 chase camera algorithm (the default race camera; cCamera embeds one at +0xC0).
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x3D (61) and cDEFAULT_3ChaseAlgorithm_vtbl.
- *
- * @return @p self
+ * Constructs the DEFAULT_3 chase camera algorithm (the default race camera; cCamera embeds one at +0xC0) on top of the
+ * look-at chase one: AlgorithmType CAMERA_ALGORITHM_CHASE_DEFAULT_3 (0x3D).
  */
-extern "C" void* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cDEFAULT_3ChaseAlgorithm* self)
+cDEFAULT_3ChaseAlgorithm::cDEFAULT_3ChaseAlgorithm()
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 61;
-    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_3ChaseAlgorithm_vtbl;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_DEFAULT_3;
 }
 #endif
 
-extern void* cDEFAULT_3ChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_3ChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a DEFAULT_3 chase camera algorithm: stores cDEFAULT_3ChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a DEFAULT_3 chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm(void* vself)
+cDEFAULT_3ChaseAlgorithm::~cDEFAULT_3ChaseAlgorithm()
 {
-    cDEFAULT_3ChaseAlgorithm* self = (cDEFAULT_3ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_3ChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -4169,45 +4039,25 @@ void cDEFAULT_3ChaseAlgorithm::snap(int id)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-extern void* cDEFAULT_4ChaseAlgorithm_vtbl[];
-
 /**
- * Constructs the DEFAULT_4 chase camera algorithm (the far chase camera).
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x3E (62) and cDEFAULT_4ChaseAlgorithm_vtbl.
- *
- * @return @p self
+ * Constructs the DEFAULT_4 chase camera algorithm (the far chase camera) on top of the look-at chase one: AlgorithmType
+ * CAMERA_ALGORITHM_CHASE_DEFAULT_4 (0x3E).
  */
-extern "C" void* cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cDEFAULT_4ChaseAlgorithm* self)
+cDEFAULT_4ChaseAlgorithm::cDEFAULT_4ChaseAlgorithm()
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 0x3E;
-    VPTR_OF(cCameraAlgorithm, self) = cDEFAULT_4ChaseAlgorithm_vtbl;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_DEFAULT_4;
 }
 #endif
 
-extern void* cDEFAULT_4ChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_4ChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a DEFAULT_4 chase camera algorithm: stores cDEFAULT_4ChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a DEFAULT_4 chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm(void* vself)
+cDEFAULT_4ChaseAlgorithm::~cDEFAULT_4ChaseAlgorithm()
 {
-    cDEFAULT_4ChaseAlgorithm* self = (cDEFAULT_4ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cDEFAULT_4ChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -4393,48 +4243,28 @@ void cDirectionChaseAlgorithm::update()
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_cDirectionChaseAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-extern void* cDirectionChaseAlgorithm_vtbl[];
-
 /**
- * Constructs a direction chase camera for compass direction @p n.
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 18 + n (On Tour CAMERA_ALGORITHM_CHASE_DIRECTION_N ..
- * _NE), cDirectionChaseAlgorithm_vtbl and Angle = n * pi/4.
+ * Constructs a direction chase camera for compass direction @p n on top of the look-at chase one: AlgorithmType
+ * CAMERA_ALGORITHM_CHASE_DIRECTION_N + n and Angle = n * pi/4.
  *
  * @param n  the direction index 0..7: N, NW, W, SW, S, SE, E, NE by On Tour's enum (On Tour eCamDirection dir)
- * @return @p self
  */
-extern "C" void* cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cDirectionChaseAlgorithm* self, int n)
+cDirectionChaseAlgorithm::cDirectionChaseAlgorithm(int n)
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = n + 18;
-    VPTR_OF(cCameraAlgorithm, self) = cDirectionChaseAlgorithm_vtbl;
-    self->Angle = (float)n * 0.7853981852531433f;
-    return ((void*)self);
+    AlgorithmType = n + CAMERA_ALGORITHM_CHASE_DIRECTION_N;
+    Angle = (float)n * 0.7853981852531433f;
 }
 #endif
 
-extern void* cDirectionChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm__cDirectionChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDirectionChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a direction chase camera algorithm: stores cDirectionChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a direction chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cDirectionChaseAlgorithm__cDirectionChaseAlgorithm(void* vself)
+cDirectionChaseAlgorithm::~cDirectionChaseAlgorithm()
 {
-    cDirectionChaseAlgorithm* self = (cDirectionChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cDirectionChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -4689,45 +4519,25 @@ void* func_00177E30(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-extern void* cSPOKEChaseAlgorithm_vtbl[];
-
 /**
- * Constructs the SPOKE chase camera algorithm.
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x42 (On Tour CAMERA_ALGORITHM_CHASE_SPOKE = 66) and
- * cSPOKEChaseAlgorithm_vtbl. LastLookDir is left for snap to set.
- *
- * @return @p self
+ * Constructs the SPOKE chase camera algorithm on top of the look-at chase one: AlgorithmType
+ * CAMERA_ALGORITHM_CHASE_SPOKE (0x42); LastLookDir is left for snap to set.
  */
-extern "C" void* cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cSPOKEChaseAlgorithm* self)
+cSPOKEChaseAlgorithm::cSPOKEChaseAlgorithm()
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 66;
-    VPTR_OF(cCameraAlgorithm, self) = cSPOKEChaseAlgorithm_vtbl;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_SPOKE;
 }
 #endif
 
-extern void* cSPOKEChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_20cSPOKEChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a SPOKE chase camera algorithm: stores cSPOKEChaseAlgorithm_vtbl and chains to the chase destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a SPOKE chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cSPOKEChaseAlgorithm__cSPOKEChaseAlgorithm(void* vself)
+cSPOKEChaseAlgorithm::~cSPOKEChaseAlgorithm()
 {
-    cSPOKEChaseAlgorithm* self = (cSPOKEChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cSPOKEChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -5277,50 +5087,30 @@ void cSPOKEChaseAlgorithm::snap(int id)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm);
 #ifdef SKIP_ASM
-extern void* cSUPERPIPEChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
-
 /**
- * Constructs the SUPERPIPE chase camera for one superpipe, given two points on its axis.
- *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x43 (On Tour CAMERA_ALGORITHM_CHASE_SUPERPIPE = 67),
- * cSUPERPIPEChaseAlgorithm_vtbl, Point1 and Point2.
+ * Constructs the SUPERPIPE chase camera for one superpipe, given two points on its axis, on top of the look-at chase
+ * one: AlgorithmType CAMERA_ALGORITHM_CHASE_SUPERPIPE (0x43), Point1 and Point2.
  *
  * @param point1  the first axis point, copied into Point1 (On Tour const t4Vector&)
  * @param point2  the second axis point, copied into Point2
- * @return @p self
  */
-extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPEChaseAlgorithm* self, t4Vector* point1, t4Vector* point2)
+cSUPERPIPEChaseAlgorithm::cSUPERPIPEChaseAlgorithm(t4Vector* point1, t4Vector* point2)
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 67;
-    VPTR_OF(cCameraAlgorithm, self) = cSUPERPIPEChaseAlgorithm_vtbl;
-    self->Point1 = *point1;
-    self->Point2 = *point2;
-    return ((void*)self);
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_SUPERPIPE;
+    Point1 = *point1;
+    Point2 = *point2;
 }
 #endif
 
-extern void* cSUPERPIPEChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cSUPERPIPEChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a SUPERPIPE chase camera algorithm: stores cSUPERPIPEChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a SUPERPIPE chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm(void* vself)
+cSUPERPIPEChaseAlgorithm::~cSUPERPIPEChaseAlgorithm()
 {
-    cSUPERPIPEChaseAlgorithm* self = (cSUPERPIPEChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cSUPERPIPEChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 
@@ -5824,8 +5614,6 @@ static inline float Dot_1789E8(const t4Vector& a, const t4Vector& b)
 }
 
 extern t4Vector t4vect_XAxis_v1789E8 __asm__("t4vect_XAxis");
-extern void* cPOST_RACE_1ChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
 static inline t4Vector Get_1789E8(char* o, int slot)
 {
@@ -5836,53 +5624,38 @@ static inline t4Vector Get_1789E8(char* o, int slot)
 /**
  * Constructs the post-race chase camera, fixing its start direction from the rider's motion.
  *
- * Runs the look-at chase constructor, then sets AlgorithmType 0x44 (On Tour CAMERA_ALGORITHM_CHASE_POST_RACE_1 = 68),
- * cPOST_RACE_1ChaseAlgorithm_vtbl and AgeInFrames 0. StartDir is the target's velocity (slot 3) normalised when
- * longer than 1, else its front (slot 4); z is then cleared and it is renormalised, or set to the X axis (t4vect_XAxis)
- * when under 0.01.
+ * On top of the look-at chase part: AlgorithmType CAMERA_ALGORITHM_CHASE_POST_RACE_1 (0x44) and AgeInFrames 0.
+ * StartDir is the target's velocity (slot 3) normalised when longer than 1, else its front (slot 4); z is then
+ * cleared and it is renormalised, or set to the X axis (t4vect_XAxis) when under 0.01.
  *
  * @param src  the rider camera target (On Tour cRiderCameraTarget* target)
- * @return @p self
  */
-extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, cRiderCameraTarget* src)
+cPOST_RACE_1ChaseAlgorithm::cPOST_RACE_1ChaseAlgorithm(cRiderCameraTarget* src)
 {
-    cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
-    t4Vector* startDir = ((&self->StartDir));
-    self->AlgorithmType = 68;
-    VPTR_OF(cCameraAlgorithm, self) = cPOST_RACE_1ChaseAlgorithm_vtbl;
-    self->AgeInFrames = 0;
-    t4Vector dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3)) : Get_1789E8(((char*)src), 4);
+    t4Vector* startDir = ((&StartDir));
+    AlgorithmType = CAMERA_ALGORITHM_CHASE_POST_RACE_1;
+    AgeInFrames = 0;
+    t4Vector dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3))
+                                                                        : Get_1789E8(((char*)src), 4);
     *startDir = dir;
-    self->StartDir.z = 0.0f;
-    float len = Length_1789E8(*(&self->StartDir));
+    StartDir.z = 0.0f;
+    float len = Length_1789E8(*(&StartDir));
     if (len > 0.009999999776482582f)
-        DivEq_1789E8(*(&self->StartDir), len);
+        DivEq_1789E8(*(&StartDir), len);
     else
-        *(&self->StartDir) = t4vect_XAxis_v1789E8;
-    return ((char*)self);
+        *(&StartDir) = t4vect_XAxis_v1789E8;
 }
 #endif
 
-extern void* cPOST_RACE_1ChaseAlgorithm_vtbl[];
-extern "C" void* cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(void*);
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_26cPOST_RACE_1ChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
- * Destroys a post-race chase camera algorithm: stores cPOST_RACE_1ChaseAlgorithm_vtbl and chains to the look-at chase
- * destructor.
- *
- * Declared with only the this pointer: the caller's destructor flags stay untouched in $a1 and so reach
- * cLookAtChaseAlgorithm__cLookAtChaseAlgorithm, which frees the object when bit 0 is set.
- *
- * @return the base destructor's result (declared void*)
+ * Destroys a post-race chase camera algorithm; the look-at chase part destroys the rest and frees it when asked.
  */
-void* cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm(void* vself)
+cPOST_RACE_1ChaseAlgorithm::~cPOST_RACE_1ChaseAlgorithm()
 {
-    cPOST_RACE_1ChaseAlgorithm* self = (cPOST_RACE_1ChaseAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cPOST_RACE_1ChaseAlgorithm_vtbl;
-    return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
 

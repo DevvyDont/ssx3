@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEHUD_H
 #define FE_OVSTATEHUD_H
+#pragma interface
 
 // cOVStateHUD1P: the in-game HUD overlay state (both players' HUDs in one state): place, time, trick/boost meter,
 // wipeout meter, "Now Playing" big-radio popup, slope-style places, countdown, message and skip lines.
@@ -252,7 +253,7 @@ struct cOVStateHUD1P : public cUIState {
         __asm__("cOVStateHUD1P_renderExplodeText");
     void renderTime1(int hour, int minute, int sec, int secFrac, int timeRenderFlags, tHUDDef* defs, int idx,
                      int reflect, float* scaleMul, float* posOff, tARGB* color)
-        __asm__("cOVStateHUD1P_renderTime1");
+                         __asm__("cOVStateHUD1P_renderTime1");
     void renderTime(int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale,
                     tARGB* color, int align, int flags, int reflect)
         __asm__("cOVStateHUD1P_renderTime");
@@ -261,13 +262,13 @@ struct cOVStateHUD1P : public cUIState {
         __asm__("cOVStateHUD1P_renderText");
     void renderText1(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const char* str, int reflect,
                      float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
-        __asm__("cOVStateHUD1P_renderText1");
+                         __asm__("cOVStateHUD1P_renderText1");
     void renderText2(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int reflect, float* scaleMul,
                      float* posOff, tARGB* color, float* rect, int align, int flags)
-        __asm__("cOVStateHUD1P_renderText2");
+                         __asm__("cOVStateHUD1P_renderText2");
     void renderText3(float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str,
                      int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
-        __asm__("cOVStateHUD1P_renderText3");
+                         __asm__("cOVStateHUD1P_renderText3");
     void renderMultiText(cFont* font, tHUDDef* defs, int idx, const char* str, int flags, float* rect)
         __asm__("cOVStateHUD1P_renderMultiText");
     void renderMultiText1(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
@@ -427,13 +428,12 @@ struct cOVStateHiScoreList : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVStateHiScoreList__cOVStateHiScoreList stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVStateHiScoreList();
+    virtual ~cOVStateHiScoreList();   // g++'s own symbol _$_19cOVStateHiScoreList (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVStateHiScoreList_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* item, unsigned int Event) __asm__("cOVStateHiScoreList_onWidgetEvent");
 };
 
 CHECK_SIZE(cOVStateHiScoreList, 0x9C);
+__asm__("_vt$19cOVStateHiScoreList = cOVStateHiScoreList_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEHUD_H */

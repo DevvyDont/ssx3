@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEBIGRADIO_H
 #define FE_FESTATEBIGRADIO_H
+#pragma interface
 
 // cFEStateRequestLine: the "request line" (radio playlist) screen: eight visible song rows with check boxes, the
 // current song / artist, and in the store (opened from the shop) the song prices, the free-song markers and the
@@ -121,9 +122,7 @@ struct cFEStateRequestLine : public cFEState {
     void showBuyPopup(int idx) __asm__("cFEStateRequestLine_showBuyPopup");
     void* getSongTitle(int i) __asm__("cFEStateRequestLine_getSongTitle");
     void* getSongArtist(int i) __asm__("cFEStateRequestLine_getSongArtist");
-    // retail's destructor cFEStateRequestLine__cFEStateRequestLine stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateRequestLine();
+    virtual ~cFEStateRequestLine();   // g++'s own symbol _$_19cFEStateRequestLine (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateRequestLine_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateRequestLine_onDestroyScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateRequestLine_onGainTransition");
@@ -162,5 +161,6 @@ CHECK_OFFSET(cFEStateRequestLine, mpCheckBox, 0x204);
 CHECK_OFFSET(cFEStateRequestLine, mpEmptyBox, 0x208);
 CHECK_OFFSET(cFEStateRequestLine, mpDollarSign, 0x20C);
 CHECK_SIZE(cFEStateRequestLine, 0x210);
+__asm__("_vt$19cFEStateRequestLine = cFEStateRequestLine_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEBIGRADIO_H */

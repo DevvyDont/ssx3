@@ -6,7 +6,7 @@ INCLUDE_ASM("fe/festateload4", cFELoadHintState_onGainTransition);
 
 INCLUDE_ASM("fe/festateload4", cFELoadHintState_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateload4", cFELoadState__cFELoadState);
+INCLUDE_ASM("fe/festateload4", _$_12cFELoadState);
 
 INCLUDE_ASM("fe/festateload4", cFELoadState_onCreateScreen);
 
@@ -14,7 +14,7 @@ INCLUDE_ASM("fe/festateload4", cFELoadState_onGainTransition);
 
 INCLUDE_ASM("fe/festateload4", cFELoadState_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge__cFELoadStateInLodge);
+INCLUDE_ASM("fe/festateload4", _$_19cFELoadStateInLodge);
 
 INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onCreateScreen);
 

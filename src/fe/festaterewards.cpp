@@ -2201,7 +2201,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward__cFEStatePreviewReward);
 extern void* cFEStatePreviewReward_vtbl[];
 extern void* cFEState_vtbl[];
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys a reward preview: frees its texture and releases its file slot (cFEBoltFileManager_releaseFile), then the base
@@ -2681,7 +2681,7 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vs
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer__cFEStateVideoPlayer);
 #ifdef SKIP_ASM
 extern "C" void _$_12cMoviePlayer(void* p, int a1);
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 extern void* cFEStateVideoPlayer_vtbl[];
 extern void* cFEState_vtbl[];
 

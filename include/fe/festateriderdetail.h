@@ -1,5 +1,6 @@
 #ifndef FE_FESTATERIDERDETAIL_H
 #define FE_FESTATERIDERDETAIL_H
+#pragma interface
 
 // cFEStateRiderDetail: the front end's rider details screen ("154rider_details"): the user's 3D front-end rider with
 // five options (Option_1 .. Option_5: edit the name in an 8-character keyboard popup, pick a cheat character in
@@ -64,9 +65,7 @@ struct cFEStateRiderDetail : public cFEState {
                                     //       not set by the ctor
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateRiderDetail__cFEStateRiderDetail stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateRiderDetail();
+    virtual ~cFEStateRiderDetail();   // g++'s own symbol _$_19cFEStateRiderDetail (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateRiderDetail_onCreateScreen");
     virtual void onPreRender2D() __asm__("cFEStateRiderDetail_onPreRender2D");
     virtual void onUpdate() __asm__("cFEStateRiderDetail_onUpdate");
@@ -80,5 +79,6 @@ CHECK_OFFSET(cFEStateRiderDetail, mbIsFirst, 0x048);
 CHECK_OFFSET(cFEStateRiderDetail, mbDraw3D, 0x04C);
 CHECK_OFFSET(cFEStateRiderDetail, mbCheatCharEnable, 0x050);
 CHECK_SIZE(cFEStateRiderDetail, 0x54);
+__asm__("_vt$19cFEStateRiderDetail = cFEStateRiderDetail_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATERIDERDETAIL_H */

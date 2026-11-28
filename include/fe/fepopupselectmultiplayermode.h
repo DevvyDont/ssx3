@@ -1,5 +1,6 @@
 #ifndef FE_FEPOPUPSELECTMULTIPLAYERMODE_H
 #define FE_FEPOPUPSELECTMULTIPLAYERMODE_H
+#pragma interface
 
 // cFEPopupSelectMultiplayerMode: a front-end state (a cUIState), 4 methods; allocated with cMemMan_alloc(76, "cFEPopupSelectMultiplayerMode").
 // Size 0x4C [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
@@ -22,8 +23,7 @@ struct cFEPopupSelectMultiplayerMode : public cUIState {
     char unk_049[0x3];              // 0x049 padding
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_29cFEPopupSelectMultiplayerMode (the retail label renamed)
     virtual ~cFEPopupSelectMultiplayerMode();
     virtual void onCreateScreen() __asm__("cFEPopupSelectMultiplayerMode_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEPopupSelectMultiplayerMode_onWidgetCreate");
@@ -37,5 +37,7 @@ struct cFEPopupSelectMultiplayerMode : public cUIState {
 
 CHECK_OFFSET(cFEPopupSelectMultiplayerMode, mMultiMode, 0x048);
 CHECK_SIZE(cFEPopupSelectMultiplayerMode, 0x4C);
+// g++'s name for the retail vtable
+__asm__("_vt$29cFEPopupSelectMultiplayerMode = cFEPopupSelectMultiplayerMode_vtbl");
 
 #endif

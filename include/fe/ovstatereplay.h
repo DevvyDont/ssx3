@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEREPLAY_H
 #define FE_OVSTATEREPLAY_H
+#pragma interface
 
 // cOVState_REPLAY: the replay viewer overlay (screen "64replay": the timeline panel sliding at the bottom, the
 // camera name, the progress ticker and the Start menu Save / Exit / Continue). EA's source
@@ -57,9 +58,7 @@ struct cOVState_REPLAY : public cOVState {
     // Methods bound to their retail symbols by asm labels.
     void setupCameraName() __asm__("cOVState_REPLAY_setupCameraName");
     void setupTicker() __asm__("cOVState_REPLAY_setupTicker");
-    // retail's destructor cOVState_REPLAY__cOVState_REPLAY stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_REPLAY();
+    virtual ~cOVState_REPLAY();   // g++'s own symbol _$_15cOVState_REPLAY (the retail label renamed)
     virtual void onUpdate() __asm__("cOVState_REPLAY_onUpdate");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_REPLAY_onWidgetCreate");
     virtual void onCreateScreen() __asm__("cOVState_REPLAY_onCreateScreen");
@@ -74,5 +73,6 @@ CHECK_OFFSET(cOVState_REPLAY, mMinBottom_y, 0xAC);
 CHECK_OFFSET(cOVState_REPLAY, mMaxBottom_y, 0xB0);
 CHECK_OFFSET(cOVState_REPLAY, mLoaded, 0xB4);
 CHECK_SIZE(cOVState_REPLAY, 0xB8);
+__asm__("_vt$15cOVState_REPLAY = cOVState_REPLAY_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEREPLAY_H */

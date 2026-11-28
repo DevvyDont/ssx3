@@ -1,5 +1,6 @@
 #ifndef FE_FESTATECHARSELECT_H
 #define FE_FESTATECHARSELECT_H
+#pragma interface
 
 // This header: cFEStateCharSelect and cFEStateCheatCharSelect (below).
 // cFEStateCharSelect: the character select screen (a cUIState); cFEReal creates it with cMemMan_alloc(144, "cFEStateCharSelect").
@@ -118,9 +119,7 @@ struct cFEStateCheatCharSelect : public cFEState {
     void updateCharWidgets() __asm__("cFEStateCheatCharSelect_updateCharWidgets");
     int isDone() __asm__("cFEStateCheatCharSelect_isDone");
     int getCheatCharID() __asm__("cFEStateCheatCharSelect_getCheatCharID");
-    // retail's destructor cFEStateCheatCharSelect__cFEStateCheatCharSelect stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCheatCharSelect();
+    virtual ~cFEStateCheatCharSelect();   // g++'s own symbol _$_23cFEStateCheatCharSelect (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCheatCharSelect_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* menu, unsigned int msg) __asm__("cFEStateCheatCharSelect_onWidgetEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCheatCharSelect_onWidgetCreate");
@@ -140,5 +139,6 @@ CHECK_OFFSET(cFEStateCheatCharSelect, mCharIDs, 0x07C);
 CHECK_OFFSET(cFEStateCheatCharSelect, mpCharElem, 0x0F4);
 CHECK_OFFSET(cFEStateCheatCharSelect, mpCharNames, 0x16C);
 CHECK_SIZE(cFEStateCheatCharSelect, 0x1E4);
+__asm__("_vt$23cFEStateCheatCharSelect = cFEStateCheatCharSelect_vtbl");   // g++'s name for the retail vtable
 
 #endif

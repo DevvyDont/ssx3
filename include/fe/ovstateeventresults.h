@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEEVENTRESULTS_H
 #define FE_OVSTATEEVENTRESULTS_H
+#pragma interface
 
 // The event-result overlays of EA's fe/ovstateeventresults.cpp (path from the July 2003 preview's assert strings in
 // cOVState_RACE_FINISHOV / cOVState_TOURNAMENT_STANDINGS code): cOVState subclasses created by
@@ -48,9 +49,7 @@ struct cOVState_HEAT_STANDINGS : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_HEAT_STANDINGS();
+    virtual ~cOVState_HEAT_STANDINGS();   // g++'s own symbol _$_23cOVState_HEAT_STANDINGS (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_HEAT_STANDINGS_onCreateScreen");
     virtual bool onInputBegin(cUIInput* input) __asm__("cOVState_HEAT_STANDINGS_onInputBegin");
     virtual void onGainFocus(cUIState*) __asm__("cOVState_HEAT_STANDINGS_onGainFocus");
@@ -61,6 +60,7 @@ struct cOVState_HEAT_STANDINGS : public cOVState {
 };
 
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
+__asm__("_vt$23cOVState_HEAT_STANDINGS = cOVState_HEAT_STANDINGS_vtbl");   // g++'s name for the retail vtable
 
 // cOVState_FINAL_STANDINGS (0xA0: cMemMan size for type 11). Slots: 4 onCreateScreen cOVState_FINAL_STANDINGS_onCreateScreen, 6 onGainFocus
 // cOVState_FINAL_STANDINGS_onGainFocus, 7 onGainTransition cOVState_FINAL_STANDINGS_onGainTransition, 8 onInputBegin cOVState_FINAL_STANDINGS_onInputBegin, 11 onLoseFocus cOVState_FINAL_STANDINGS_onLoseFocus, 12
@@ -79,9 +79,7 @@ struct cOVState_FINAL_STANDINGS : public cOVState {
                                      //       (lw/sw: a word, as retail bools are)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_FINAL_STANDINGS();
+    virtual ~cOVState_FINAL_STANDINGS();   // g++'s own symbol _$_24cOVState_FINAL_STANDINGS (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_FINAL_STANDINGS_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* menu) __asm__("cOVState_FINAL_STANDINGS_onWidgetCreate");
     virtual void onUpdate() __asm__("cOVState_FINAL_STANDINGS_onUpdate");
@@ -96,6 +94,7 @@ struct cOVState_FINAL_STANDINGS : public cOVState {
 
 CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
 CHECK_SIZE(cOVState_FINAL_STANDINGS, 0xA0);
+__asm__("_vt$24cOVState_FINAL_STANDINGS = cOVState_FINAL_STANDINGS_vtbl");   // g++'s name for the retail vtable
 
 // cOVState_RACE_FINISHOV (0xA4: cMemMan size for type 12). The ctor also sets mHashName = GetHashValue32("finishov").
 // Slots: 4 onCreateScreen cOVState_RACE_FINISHOV_onCreateScreen, 12 onUpdate cOVState_RACE_FINISHOV_onUpdate, 19 onWidgetEvent cOVState_RACE_FINISHOV_onWidgetEvent, 20 onWidgetMenu
@@ -117,9 +116,7 @@ struct cOVState_RACE_FINISHOV : public cOVState {
                                      //       same store of 1 in its ctor and the same handleEvent
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_RACE_FINISHOV();
+    virtual ~cOVState_RACE_FINISHOV();   // g++'s own symbol _$_22cOVState_RACE_FINISHOV (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_RACE_FINISHOV_onCreateScreen");
     virtual void onUpdate() __asm__("cOVState_RACE_FINISHOV_onUpdate");
     virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_RACE_FINISHOV_onWidgetEvent");
@@ -131,6 +128,7 @@ struct cOVState_RACE_FINISHOV : public cOVState {
 CHECK_OFFSET(cOVState_RACE_FINISHOV, mElapsedTime, 0x09C);
 CHECK_OFFSET(cOVState_RACE_FINISHOV, mCanContinue, 0x0A0);
 CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
+__asm__("_vt$22cOVState_RACE_FINISHOV = cOVState_RACE_FINISHOV_vtbl");   // g++'s name for the retail vtable
 
 // cOVState_BASSSP_QUAL_FINISHOV (0xA4: cMemMan size for type 13; same members as RACE_FINISHOV, both written by the
 // same ctor pattern). Slots: 4 onCreateScreen cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, 12 onUpdate cOVState_BASSSP_QUAL_FINISHOV_onUpdate, 19 onWidgetEvent cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent,
@@ -153,8 +151,7 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
                                      //       same store of 1 in its ctor and the same handleEvent
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_29cOVState_BASSSP_QUAL_FINISHOV (the retail label renamed)
     virtual ~cOVState_BASSSP_QUAL_FINISHOV();
     virtual void onCreateScreen() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen");
     virtual void onUpdate() __asm__("cOVState_BASSSP_QUAL_FINISHOV_onUpdate");
@@ -168,6 +165,8 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mElapsedTime, 0x09C);
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mCanContinue, 0x0A0);
 CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
+// g++'s name for the retail vtable
+__asm__("_vt$29cOVState_BASSSP_QUAL_FINISHOV = cOVState_BASSSP_QUAL_FINISHOV_vtbl");
 
 // cOVState_TOURNAMENT_STANDINGS (0x9C, no own members). Slots: 4 onCreateScreen cOVState_TOURNAMENT_STANDINGS_onCreateScreen, 19 onWidgetEvent
 // cOVState_TOURNAMENT_STANDINGS_onWidgetEvent. Preview: _vt$29cOVState_TOURNAMENT_STANDINGS overrides the same two slots, screen
@@ -181,8 +180,7 @@ struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
     // cOVState (fe/ovstate.h, 0x9C)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_29cOVState_TOURNAMENT_STANDINGS (the retail label renamed)
     virtual ~cOVState_TOURNAMENT_STANDINGS();
     virtual void onCreateScreen() __asm__("cOVState_TOURNAMENT_STANDINGS_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* popup, unsigned int event)
@@ -190,5 +188,7 @@ struct cOVState_TOURNAMENT_STANDINGS : public cOVState {
 };
 
 CHECK_SIZE(cOVState_TOURNAMENT_STANDINGS, 0x9C);
+// g++'s name for the retail vtable
+__asm__("_vt$29cOVState_TOURNAMENT_STANDINGS = cOVState_TOURNAMENT_STANDINGS_vtbl");
 
 #endif /* FE_OVSTATEEVENTRESULTS_H */

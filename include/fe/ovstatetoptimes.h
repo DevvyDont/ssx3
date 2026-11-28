@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATETOPTIMES_H
 #define FE_OVSTATETOPTIMES_H
+#pragma interface
 
 // cOVState_TOPTIMES: the post-event top-times / top-scores overlay (screen "61toptimes"; Cross continues or saves).
 // Retail code in the decomp's unit fe/ovstateenterlodge.cpp, constructor/destructor in fe/all_in_one_fe.cpp;
@@ -47,9 +48,7 @@ struct cOVState_TOPTIMES : public cOVState {
 
     // Methods bound to their retail symbols by asm labels.
     void handleNext(cUIThing* pWidget) __asm__("cOVState_TOPTIMES_handleNext");
-    // retail's destructor cOVState_TOPTIMES__cOVState_TOPTIMES stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_TOPTIMES();
+    virtual ~cOVState_TOPTIMES();   // g++'s own symbol _$_17cOVState_TOPTIMES (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVState_TOPTIMES_onCreateScreen");
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_TOPTIMES_onGainFocus");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
@@ -61,5 +60,6 @@ struct cOVState_TOPTIMES : public cOVState {
 CHECK_OFFSET(cOVState_TOPTIMES, mTopTimesFlow, 0x9C);
 CHECK_OFFSET(cOVState_TOPTIMES, mIsNextScreenPending, 0xA0);
 CHECK_SIZE(cOVState_TOPTIMES, 0xA4);
+__asm__("_vt$17cOVState_TOPTIMES = cOVState_TOPTIMES_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATETOPTIMES_H */

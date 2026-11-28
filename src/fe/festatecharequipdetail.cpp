@@ -263,7 +263,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 #ifdef SKIP_ASM
 extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self);
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 extern void* cFEStateCharEquip_vtbl[];
 extern void* cFEState_vtbl[];
 

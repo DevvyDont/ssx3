@@ -1628,7 +1628,7 @@ void* cUIState::cUIState1(int engine, int parentState)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIState__cUIState);
+INCLUDE_ASM("ui/uiscreen", _$_8cUIState);
 #ifdef SKIP_ASM
 // PORT: unit declares cList_destroyList as returning void*; called here as void (bound by asm label).
 extern "C" void cList_destroyList_v(void*) __asm__("cList_destroyList");
@@ -1637,11 +1637,14 @@ void operator_delete(int*);
 extern void* cUIState_vtbl[];
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
+extern "C" void cUIState__cUIState(cUIState* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys a UI state: destroys its screen list and list nodes, then frees it when bit 0 of @p flags is set.
  *
- * It is a slot of the cUIState vtable cUIState_vtbl.
+ * It is a slot of the cUIState vtable cUIState_vtbl and the base destructor the state classes' destructors call. It
+ * stays a C function under g++'s name: as ~cUIState() with inline ~cList() / ~cListNode() g++ keeps the screen
+ * list's address in a register for the inlined member destructors, where retail addresses them from the state.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */

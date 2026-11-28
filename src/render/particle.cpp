@@ -10,6 +10,7 @@
 #include "render/bxps2deferman.h"
 #include "ealib/shape.h"
 #include "visualfx/worldlightman.h"
+#include "visualfx/visualeffectsman.h"
 #include "world/instancerecord.h"
 #include "world/worldrecords.h"
 #include "visualfx/transitionman.h"
@@ -1496,7 +1497,6 @@ extern int cPathArrow_m_R;
 extern int cPathArrow_m_G;
 extern int cPathArrow_m_B;
 extern int cPathArrow_m_A;
-extern void* cPathArrow_vtbl[];
 
 struct sPtVert_2AA0 {
     float x;        // 0x0
@@ -1511,23 +1511,16 @@ struct sPtVert_2AA0 {
 };
 extern sPtVert_2AA0 cPathArrow_m_vertices[];
 
-struct sPtObj_2AA0 {
-    void** vt;      // 0x0
-};
-
 /**
  * Constructs the path-arrow visual effect and, the first time, fills its 8 shared vertices.
  *
- * Stores the vtable cPathArrow_vtbl. While the flag cPathArrow_m_initialized is clear it sets each of the 8 vertices of cPathArrow_m_vertices to
- * red/green/blue/alpha cPathArrow_m_R, cPathArrow_m_G, cPathArrow_m_B and cPathArrow_m_A, z 1 and x, y, w 0, then sets the flag.
- * cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "PathArrow") as its object 16.
- *
- * @return @p self
+ * While the flag cPathArrow_m_initialized is clear it sets each of the 8 vertices of cPathArrow_m_vertices to
+ * red/green/blue/alpha cPathArrow_m_R, cPathArrow_m_G, cPathArrow_m_B and cPathArrow_m_A, z 1 and x, y, w 0, then sets
+ * the flag. cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "PathArrow") as its object 16.
  */
-extern "C" void* cPathArrow_cPathArrow(sPtObj_2AA0* self)
+cPathArrow::cPathArrow()
 {
     int i;
-    self->vt = cPathArrow_vtbl;
     if (cPathArrow_m_initialized == 0) {
         for (i = 0; i < 8; i++) {
             cPathArrow_m_vertices[i].a = cPathArrow_m_A;
@@ -1541,7 +1534,6 @@ extern "C" void* cPathArrow_cPathArrow(sPtObj_2AA0* self)
         }
         cPathArrow_m_initialized = 1;
     }
-    return self;
 }
 #endif
 
@@ -2903,16 +2895,12 @@ extern void* cDetailSystem_vtbl[];
 INCLUDE_ASM("render/particle", cDetailSystem_cDetailSystem__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the detail-system visual effect (the terrain sparkle effect): stores its vtable cDetailSystem_vtbl.
+ * Constructs the detail-system visual effect (the terrain sparkle effect); it has no data of its own.
  *
  * cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "DetailSystem") as its object 6.
- *
- * @return @p self
  */
-void* cDetailSystem_cDetailSystem(void* self)
+cDetailSystem::cDetailSystem()
 {
-    *(int*)self = (int)(void*)cDetailSystem_vtbl;
-    return self;
 }
 #endif
 

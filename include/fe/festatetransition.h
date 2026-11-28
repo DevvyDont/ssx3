@@ -1,5 +1,6 @@
 #ifndef FE_FESTATETRANSITION_H
 #define FE_FESTATETRANSITION_H
+#pragma interface
 
 // cFEStateTransition: a front-end state (a cUIState), 3 methods; allocated with cMemMan_alloc(80, "cFEStateTransition").
 // Size 0x50 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
@@ -22,9 +23,7 @@ struct cFEStateTransition : public cUIState {
     cUIScreen* mpWhite;             // 0x04C [O]
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateTransition__cFEStateTransition stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateTransition();
+    virtual ~cFEStateTransition();   // g++'s own symbol _$_18cFEStateTransition (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateTransition_onCreateScreen");
     virtual bool onScreenEvent(cUIScreen* screen, unsigned int id) __asm__("cFEStateTransition_onScreenEvent");
     virtual int handleEvent(int which, void*) __asm__("cFEStateTransition_handleEvent");
@@ -33,6 +32,7 @@ struct cFEStateTransition : public cUIState {
 CHECK_OFFSET(cFEStateTransition, mpSnow, 0x048);
 CHECK_OFFSET(cFEStateTransition, mpWhite, 0x04C);
 CHECK_SIZE(cFEStateTransition, 0x50);
+__asm__("_vt$18cFEStateTransition = cFEStateTransition_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -57,12 +57,11 @@ struct cFEStateBackground : public cUIState {
     //   mpEngine: [U] onCreateScreen adds "snowanim" through it and plays it (mpScreen is not set)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateBackground__cFEStateBackground stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateBackground();
+    virtual ~cFEStateBackground();   // g++'s own symbol _$_18cFEStateBackground (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateBackground_onCreateScreen");
 };
 
 CHECK_SIZE(cFEStateBackground, 0x48);
+__asm__("_vt$18cFEStateBackground = cFEStateBackground_vtbl");   // g++'s name for the retail vtable
 
 #endif

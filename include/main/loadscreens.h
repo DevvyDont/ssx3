@@ -1,5 +1,6 @@
 #ifndef MAIN_LOADSCREENS_H
 #define MAIN_LOADSCREENS_H
+#pragma interface
 
 // The load screens cSSXApp shows while it boots and loads: cInitLoadScreen (the first, with the progressive-scan
 // prompt), cPreStartScreen / cPreGameLoadScreen / cPreFELoadScreen (short hand-overs that wait for the previous screen
@@ -231,9 +232,7 @@ struct cFELoadState : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void widgetCreateQP(cUIThing* widget) __asm__("cFELoadState_widgetCreateQP");
-    // retail's destructor cFELoadState__cFELoadState stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFELoadState();
+    virtual ~cFELoadState();   // g++'s own symbol _$_12cFELoadState (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFELoadState_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFELoadState_onWidgetCreate");
     void InitwidgetMultiP(char player) __asm__("cFELoadState_InitwidgetMultiP");
@@ -242,6 +241,7 @@ struct cFELoadState : public cUIState {
 
 CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);
 CHECK_SIZE(cFELoadState, 0x4C);
+__asm__("_vt$12cFELoadState = cFELoadState_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFELoadHintState: cFELoadScreen's hint load state ("101QPMPHints": a hint title and body, and the rider's picture
@@ -269,9 +269,7 @@ struct cFELoadHintState : public cUIState {
                                     //       are set
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFELoadHintState__cFELoadHintState stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFELoadHintState();
+    virtual ~cFELoadHintState();   // g++'s own symbol _$_16cFELoadHintState (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFELoadHintState_onCreateScreen");
     virtual bool onGainTransition(int) __asm__("cFELoadHintState_onGainTransition");
     virtual void onWidgetCreate(cUIThing*) __asm__("cFELoadHintState_onWidgetCreate__FPv");
@@ -279,6 +277,7 @@ struct cFELoadHintState : public cUIState {
 
 CHECK_OFFSET(cFELoadHintState, mpParentModule, 0x048);
 CHECK_SIZE(cFELoadHintState, 0x4C);
+__asm__("_vt$16cFELoadHintState = cFELoadHintState_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFELoadStateInLodge: cFELoadScreen's load state when the front end starts in the lodge (cRealFE_mStartState 39):
@@ -301,15 +300,14 @@ struct cFELoadStateInLodge : public cUIState {
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFELoadStateInLodge__cFELoadStateInLodge stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFELoadStateInLodge();
+    virtual ~cFELoadStateInLodge();   // g++'s own symbol _$_19cFELoadStateInLodge (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFELoadStateInLodge_onCreateScreen");
     virtual void onWidgetCreate(cUIThing*) __asm__("cFELoadStateInLodge_onWidgetCreate__FPv");
     virtual bool onGainTransition(int) __asm__("cFELoadStateInLodge_onGainTransition");
 };
 
 CHECK_SIZE(cFELoadStateInLodge, 0x48);
+__asm__("_vt$19cFELoadStateInLodge = cFELoadStateInLodge_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cGameLoadState: cGameLoadScreen's load state for a race / event: "102MPMatch" on the online game path (cGamePath 2,
@@ -344,9 +342,7 @@ struct cGameLoadState : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void widgetCreateMultiP(char* obj) __asm__("cGameLoadState_widgetCreateMultiP");
     void widgetCreateQP(char* obj) __asm__("cGameLoadState_widgetCreateQP");
-    // retail's destructor cGameLoadState__cGameLoadState stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGameLoadState();
+    virtual ~cGameLoadState();   // g++'s own symbol _$_14cGameLoadState (the retail label renamed)
     virtual void onCreateScreen() __asm__("cGameLoadState_onCreateScreen");
     virtual bool onGainTransition(int refresh) __asm__("cGameLoadState_onGainTransition");
     void showPlayerStats(char player) __asm__("cGameLoadState_showPlayerStats");
@@ -355,6 +351,7 @@ struct cGameLoadState : public cUIState {
 
 CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);
 CHECK_SIZE(cGameLoadState, 0x4C);
+__asm__("_vt$14cGameLoadState = cGameLoadState_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cGameLoadStateOutLodge: cGameLoadScreen's load state when the game leaves the lodge (no race pending:
@@ -378,15 +375,14 @@ struct cGameLoadStateOutLodge : public cUIState {
     //   mpScreen: [U] onCreateScreen stores the screen; onGainTransition looks "%" up on it
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGameLoadStateOutLodge__cGameLoadStateOutLodge stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGameLoadStateOutLodge();
+    virtual ~cGameLoadStateOutLodge();   // g++'s own symbol _$_22cGameLoadStateOutLodge (the retail label renamed)
     virtual void onCreateScreen() __asm__("cGameLoadStateOutLodge_onCreateScreen");
     virtual void onWidgetCreate(cUIThing*) __asm__("cGameLoadStateOutLodge_onWidgetCreate__FPv");
     virtual bool onGainTransition(int) __asm__("cGameLoadStateOutLodge_onGainTransition");
 };
 
 CHECK_SIZE(cGameLoadStateOutLodge, 0x48);
+__asm__("_vt$22cGameLoadStateOutLodge = cGameLoadStateOutLodge_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cGameLoadStateConquer: cGameLoadScreen's load state on the career (Conquer the Mountain) path: cGameLoadScreen_load
@@ -409,13 +405,12 @@ struct cGameLoadStateConquer : public cUIState {
     //   mpScreen: [U] onGainTransition (cGameLoadStateConquer_onGainTransition) looks "%" up on it
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGameLoadStateConquer__cGameLoadStateConquer stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGameLoadStateConquer();
+    virtual ~cGameLoadStateConquer();   // g++'s own symbol _$_21cGameLoadStateConquer (the retail label renamed)
     virtual void onWidgetCreate(cUIThing*) __asm__("cGameLoadStateConquer_onWidgetCreate__FPv");
     virtual bool onGainTransition(int) __asm__("cGameLoadStateConquer_onGainTransition");
 };
 
 CHECK_SIZE(cGameLoadStateConquer, 0x48);
+__asm__("_vt$21cGameLoadStateConquer = cGameLoadStateConquer_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MAIN_LOADSCREENS_H */

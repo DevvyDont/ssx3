@@ -26,6 +26,7 @@
 //       NumSplines : 8, LastEvaluatedIndex : 8, MaxX 0x4, CubicSplines 0x8).
 
 #include "layout.h"
+#include "bx/memman.h"     // the global operator delete (the destructor's flags & 1 tail)
 
 // cCSICubicSpline: one segment of the interpolant, y = A t^3 + B t^2 + C t + D with t = x - X0 (0x14).
 // [O] On Tour struct cCSICubicSpline {float A, B, C, D, X0} (0x14) with evaluate(float x); [R] the retail array is
@@ -80,6 +81,7 @@ struct cCubicSplineInterpolant {
 
     // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
     cCubicSplineInterpolant();
+    ~cCubicSplineInterpolant();
 };
 
 CHECK_OFFSET(cCubicSplineInterpolant, MaxX, 0x004);

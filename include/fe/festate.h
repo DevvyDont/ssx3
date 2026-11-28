@@ -1,5 +1,6 @@
 #ifndef FE_FESTATE_H
 #define FE_FESTATE_H
+#pragma interface
 
 // cFEState: the base of most front-end menu states (cFEStateOptions*, cFEStateCharSelect, cFEStateProfileSelect,
 // cFEStateSelectMultiplayerMode, ...): a cUIState that keeps each menu's selected entry in the front end's flow state
@@ -46,13 +47,14 @@ struct cFEState : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void setControllerFilter(signed char n) __asm__("cFEState_setControllerFilter");
     void setControllerMask(signed char userNum, signed char controllerNum) __asm__("cFEState_setControllerMask");
-    // retail's destructor cFEState__cFEState stays a C function (g++ 2.95 takes no asm label on a destructor); declared
-    // first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEState();
+    // inline and empty: every front-end state's destructor inlines it; retail's out-of-line copy cFEState__cFEState
+    // stays a C function
+    virtual ~cFEState() {}
     virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEState_onGainFocus");
     virtual void onLoseFocus(cUIState*) __asm__("cFEState_onLoseFocus");
 };
 
 CHECK_SIZE(cFEState, 0x48);
+__asm__("_vt$8cFEState = cFEState_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATE_H */

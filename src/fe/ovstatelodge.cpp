@@ -128,7 +128,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom__cFEStateMountainRoom);
 extern void* cFEStateMountainRoom_vtbl[];
 extern void* cFEState_vtbl[];
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern "C" void cUIState__cUIState(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
  * Destroys the mountain room: releases a pending pass-image load and frees the pass texture, then the base

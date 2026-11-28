@@ -1,5 +1,6 @@
 #ifndef CAMERA_RACE_RACEALGORITHMS_H
 #define CAMERA_RACE_RACEALGORITHMS_H
+#pragma interface
 
 // The race chase-camera algorithms that add members to cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390):
 //   cMatrixChaseAlgorithm   (0x3A0)  "Matrix Chase Camera Algorithm"   camera type 41
@@ -51,6 +52,8 @@ struct cMatrixChaseAlgorithm : public cLookAtChaseAlgorithm {
     float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] cMatrixChaseAlgorithm_update update (lwc1/swc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
 
+    cMatrixChaseAlgorithm() __asm__("cMatrixChaseAlgorithm_cMatrixChaseAlgorithm");
+    virtual ~cMatrixChaseAlgorithm();   // g++'s own symbol _$_21cMatrixChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cMatrixChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cMatrixChaseAlgorithm_snap");
@@ -61,6 +64,7 @@ struct cMatrixChaseAlgorithm : public cLookAtChaseAlgorithm {
 CHECK_OFFSET(cMatrixChaseAlgorithm, LastAngle, 0x390);
 CHECK_OFFSET(cMatrixChaseAlgorithm, unk_394, 0x394);
 CHECK_SIZE(cMatrixChaseAlgorithm, 0x3A0);
+__asm__("_vt$21cMatrixChaseAlgorithm = cMatrixChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable cRelativeChaseAlgorithm_vtbl; the factory
 // then stores the camera type into AlgorithmType), dtor cRelativeChaseAlgorithm__cRelativeChaseAlgorithm, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
@@ -82,6 +86,8 @@ struct cRelativeChaseAlgorithm : public cLookAtChaseAlgorithm {
     t4Vector LastLook;              // 0x3A0 [O] (On Tour 0x390); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
     t4Vector LastCamTargetPos;      // 0x3B0 [O] (On Tour 0x3A0); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
 
+    cRelativeChaseAlgorithm(float angle) __asm__("cRelativeChaseAlgorithm_cRelativeChaseAlgorithm");
+    virtual ~cRelativeChaseAlgorithm();   // g++'s own symbol _$_23cRelativeChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cRelativeChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cRelativeChaseAlgorithm_snap");
@@ -95,6 +101,7 @@ CHECK_OFFSET(cRelativeChaseAlgorithm, unk_398, 0x398);
 CHECK_OFFSET(cRelativeChaseAlgorithm, LastLook, 0x3A0);
 CHECK_OFFSET(cRelativeChaseAlgorithm, LastCamTargetPos, 0x3B0);
 CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
+__asm__("_vt$23cRelativeChaseAlgorithm = cRelativeChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor cSplineCamAlgorithm_cSplineCamAlgorithm(this, point1..point4, time, leadDistance,
 // heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with cCubicSplineInterpolant::cCubicSplineInterpolant / cCubicSplineInterpolant_initAsNatural /
@@ -111,10 +118,10 @@ struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
     //   Target: [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     // --- cSplineCamAlgorithm
     virtual float getRestDrop();                                                    // 13 ([R] cSplineCamAlgorithm_vtbl: cSplineCamAlgorithm_getRestDrop__FPv)
-    char XOfT[0xC];                 // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] ctor passes this+0x390
-                                    //       to cCubicSplineInterpolant::cCubicSplineInterpolant/cCubicSplineInterpolant_evaluate, dtor to cCubicSplineInterpolant__cCubicSplineInterpolant
-    char YOfT[0xC];                 // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
-    char ZOfT[0xC];                 // 0x3A8 [O] cCubicSplineInterpolant; [R] ditto (this+0x3A8)
+    cCubicSplineInterpolant XOfT;   // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] the ctor constructs it
+                                    //       (this+0x390), update evaluates it, the dtor destroys it
+    cCubicSplineInterpolant YOfT;   // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
+    cCubicSplineInterpolant ZOfT;   // 0x3A8 [O] cCubicSplineInterpolant; [R] ditto (this+0x3A8)
     float TotalTime;                // 0x3B4 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1)
     float LastEvaluatedTime;        // 0x3B8 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1/swc1)
     float Speed;                    // 0x3BC [O]; [R] swc1; [U] cSplineCamAlgorithm_update
@@ -122,6 +129,9 @@ struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
     float HeightOffset;             // 0x3C4 [O]; [R] = heightOffset; [U] cSplineCamAlgorithm_update
     char unk_3C8[0x8];              // 0x3C8 padding to the 16-byte class alignment (alloc 0x3D0)
 
+    cSplineCamAlgorithm(float* point1, float* point2, float* point3, float* point4, float dur, float leadDistance,
+                        float heightOffset, float fov) __asm__("cSplineCamAlgorithm_cSplineCamAlgorithm");
+    virtual ~cSplineCamAlgorithm();   // g++'s own symbol _$_19cSplineCamAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cSplineCamAlgorithm_update");
     virtual void snap(int id) __asm__("cSplineCamAlgorithm_snap");
@@ -139,6 +149,7 @@ CHECK_OFFSET(cSplineCamAlgorithm, LeadDistance, 0x3C0);
 CHECK_OFFSET(cSplineCamAlgorithm, HeightOffset, 0x3C4);
 CHECK_OFFSET(cSplineCamAlgorithm, unk_3C8, 0x3C8);
 CHECK_SIZE(cSplineCamAlgorithm, 0x3D0);
+__asm__("_vt$19cSplineCamAlgorithm = cSplineCamAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------
 // The field-less subclasses. All six live in retail camera/camera (0x160438-0x168F60) among cMatrix/cRelative-
@@ -159,6 +170,8 @@ struct cManualChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cManualChaseAlgorithm_vtbl: cManualChaseAlgorithm_getRestDrop__FPv)
 
+    cManualChaseAlgorithm() __asm__("cManualChaseAlgorithm_cManualChaseAlgorithm");
+    virtual ~cManualChaseAlgorithm();   // g++'s own symbol _$_21cManualChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cManualChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cManualChaseAlgorithm_snap");
@@ -167,6 +180,7 @@ struct cManualChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cManualChaseAlgorithm, 0x390);
+__asm__("_vt$21cManualChaseAlgorithm = cManualChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cIdleChaseAlgorithm (0x390: no fields of its own) - the idle chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Idle Chase Camera Algorithm") then the ctor cIdleChaseAlgorithm_cIdleChaseAlgorithm,
@@ -181,6 +195,8 @@ struct cIdleChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cIdleChaseAlgorithm_vtbl: cIdleChaseAlgorithm_getRestDrop__FPv)
 
+    cIdleChaseAlgorithm() __asm__("cIdleChaseAlgorithm_cIdleChaseAlgorithm");
+    virtual ~cIdleChaseAlgorithm();   // g++'s own symbol _$_19cIdleChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
         __asm__("cIdleChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
@@ -191,6 +207,7 @@ struct cIdleChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cIdleChaseAlgorithm, 0x390);
+__asm__("_vt$19cIdleChaseAlgorithm = cIdleChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cLazyChaseAlgorithm (0x390: no fields of its own) - the lazy chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Lazy Chase Camera Algorithm") then the ctor cLazyChaseAlgorithm_cLazyChaseAlgorithm,
@@ -205,6 +222,8 @@ struct cLazyChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cLazyChaseAlgorithm_vtbl: cLazyChaseAlgorithm_getRestDrop__FPv)
 
+    cLazyChaseAlgorithm() __asm__("cLazyChaseAlgorithm_cLazyChaseAlgorithm");
+    virtual ~cLazyChaseAlgorithm();   // g++'s own symbol _$_19cLazyChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* other)
         __asm__("cLazyChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0");
@@ -215,6 +234,7 @@ struct cLazyChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cLazyChaseAlgorithm, 0x390);
+__asm__("_vt$19cLazyChaseAlgorithm = cLazyChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cLookBackChaseAlgorithm (0x390: no fields of its own) - the look-back chase camera.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Look Back Chase Camera Algorithm") then the ctor cLookBackChaseAlgorithm_cLookBackChaseAlgorithm,
@@ -229,6 +249,8 @@ struct cLookBackChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cLookBackChaseAlgorithm_vtbl: cLookBackChaseAlgorithm_getRestDrop__FPv)
 
+    cLookBackChaseAlgorithm() __asm__("cLookBackChaseAlgorithm_cLookBackChaseAlgorithm");
+    virtual ~cLookBackChaseAlgorithm();   // g++'s own symbol _$_23cLookBackChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cLookBackChaseAlgorithm_update");
     virtual void snap(int id) __asm__("cLookBackChaseAlgorithm_snap");
@@ -237,6 +259,7 @@ struct cLookBackChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cLookBackChaseAlgorithm, 0x390);
+__asm__("_vt$23cLookBackChaseAlgorithm = cLookBackChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cMidRightChaseAlgorithm (0x390: no fields of its own) - the mid-distance chase camera shifted to the rider's right.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Mid Right Chase Camera Algorithm") then the ctor cMidRightChaseAlgorithm_cMidRightChaseAlgorithm,
@@ -255,6 +278,8 @@ struct cMidRightChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cMidRightChaseAlgorithm_vtbl: cMidRightChaseAlgorithm_getRestDrop)
 
+    cMidRightChaseAlgorithm() __asm__("cMidRightChaseAlgorithm_cMidRightChaseAlgorithm");
+    virtual ~cMidRightChaseAlgorithm();   // g++'s own symbol _$_23cMidRightChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cMidRightChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -263,6 +288,7 @@ struct cMidRightChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cMidRightChaseAlgorithm, 0x390);
+__asm__("_vt$23cMidRightChaseAlgorithm = cMidRightChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cMidLeftChaseAlgorithm (0x390: no fields of its own) - the mid-distance chase camera shifted to the rider's left.
 // [R] cChaseCameraController_createChaseAlgorithmBlend: cMemMan_alloc(0x390, "Mid Left Chase Camera Algorithm") then the ctor cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm,
@@ -279,6 +305,8 @@ struct cMidLeftChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
     virtual float getRestDrop();                                                    // 13 ([R] cMidLeftChaseAlgorithm_vtbl: cMidLeftChaseAlgorithm_getRestDrop)
 
+    cMidLeftChaseAlgorithm() __asm__("cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm");
+    virtual ~cMidLeftChaseAlgorithm();   // g++'s own symbol _$_22cMidLeftChaseAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* out)
         __asm__("cMidLeftChaseAlgorithm_getRaceCamFinalPhaseData");
@@ -287,6 +315,7 @@ struct cMidLeftChaseAlgorithm : public cLookAtChaseAlgorithm {
 };
 
 CHECK_SIZE(cMidLeftChaseAlgorithm, 0x390);
+__asm__("_vt$22cMidLeftChaseAlgorithm = cMidLeftChaseAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 
 #endif /* CAMERA_RACE_RACEALGORITHMS_H */

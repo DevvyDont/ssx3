@@ -1,5 +1,6 @@
 #ifndef MAIN_GAMEMODEHANDLER_H
 #define MAIN_GAMEMODEHANDLER_H
+#pragma interface
 
 // The game-mode handlers: the subclasses of cGameModeHandler that cGameModeMan::getGM (cGameModeMan_getGM) creates into
 // the static table aHandler[10] (cGameModeMan_aHandler, "GM Handler" allocations) and cGameModeMan dispatches to by
@@ -19,8 +20,9 @@
 // one for one: the preview pairing tool (builds/x/v2) maps the init / dtor slots of 0x0047CFA0 (cGMBigAirHandler),
 // 0x0047CF38 (cGMRaceHandler), 0x0047CED0 (cGMMPRaceHandler), 0x0047CE00 (cGMFreerideHandler) and 0x0047CBF8
 // (cGMDebugHandler) to those classes. The remaining ones are placed by that order and confirmed by On Tour's DWARF
-// (members and overridden methods, below). The vptr-only subclasses (cGMFreerideHandler, cGMRivalTimeHandler, cGMRivalPointHandler,
-// cGMDebugHandler: 4 bytes) get no struct here.
+// (members and overridden methods, below). The vptr-only subclasses cGMFreerideHandler, cGMRivalTimeHandler and
+// cGMRivalPointHandler (4 bytes) are declared for their destructors only; cGMDebugHandler (4 bytes, its vtable inside
+// the cMCOverlayManager_vtbl label) gets no struct here.
 //
 // Sizes: [R] cGameModeMan_getGM's allocations (cMemMan_alloc(size, "GM Handler")): aHandler[0] cGMBigAirHandler 0x7C,
 // [1] cGMRaceHandler 0xD0, [2] cGMFreerideHandler 4, [4] cGMTimeHandler 0xC, [5] cGMRivalTimeHandler 4,
@@ -33,6 +35,7 @@
 // cGMPointHandler, cGMMPSlopeHandler, cGMMPRaceHandler, cGMRaceHandler: names, types and order).
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cReplayFramePtr;
 
@@ -44,7 +47,9 @@ public:
     // 0x00: the vptr. [R] _vt$16cGameModeHandler (0x0047D008), stored back by every subclass dtor; [P] the preview's
     // _vt$16cGameModeHandler. Slots [R] that table (11, names from its retail entries cGameModeHandler_*); types [O]
     // (class cGameModeHandler) where On Tour has the method (purge and the two cleanRiderRanks* are retail's only).
-    virtual ~cGameModeHandler();                                          // 1
+    // inline: every handler's destructor inlines it; retail's out-of-line copy cGameModeHandler__cGameModeHandler
+    // stays a C function
+    virtual ~cGameModeHandler() {}                                        // 1
     virtual void init() __asm__("cGameModeHandler_init__FPv");                                                  // 2
     virtual void purge() __asm__("cGameModeHandler_purge");                                                 // 3
     virtual void cleanRiderRanksPoints();                                 // 4
@@ -64,6 +69,7 @@ public:
 };
 
 CHECK_SIZE(cGameModeHandler, 0x4);
+__asm__("_vt$16cGameModeHandler = cGameModeHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMBigAirHandler: the scored event (big air; heats scored by points). Vtable 0x0047CFA0 (cGMBigAirHandler_vtbl): init
 // cGMBigAirHandler_init, riderCheckpointHit cGMBigAirHandler_riderCheckpointHit, raceFinish cGMBigAirHandler_raceFinish, getHeatScore cGMBigAirHandler_getHeatScore,
@@ -76,9 +82,7 @@ struct cGMBigAirHandler : public cGameModeHandler {
                                     //      slots 10 / 11 write and read 0xA0 bytes from 0x04, 0x28 past the object
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMBigAirHandler__cGMBigAirHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMBigAirHandler();
+    virtual ~cGMBigAirHandler();   // g++'s own symbol _$_16cGMBigAirHandler (the retail label renamed)
     virtual void init() __asm__("cGMBigAirHandler_init");
     virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMBigAirHandler_riderCheckpointHit");
     virtual unsigned int getHeatScore(int col, int row) __asm__("cGMBigAirHandler_getHeatScore");
@@ -90,6 +94,7 @@ struct cGMBigAirHandler : public cGameModeHandler {
 
 CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
 CHECK_SIZE(cGMBigAirHandler, 0x7C);
+__asm__("_vt$16cGMBigAirHandler = cGMBigAirHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMRaceHandler: the three-heat race event (offline event 0). Vtable 0x0047CF38 (cGMRaceHandler_vtbl): init cGMRaceHandler_init,
 // riderGateHit cGMRaceHandler_riderGateHit, raceFinish cGMRaceHandler_raceFinish, writeToReplayFrame cGMRaceHandler_writeToReplayFrame /
@@ -109,9 +114,7 @@ struct cGMRaceHandler : public cGameModeHandler {
                                     //      init fills rows with 9s, raceFinish stores tbl[heat][rider] (360000 = DNF)
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMRaceHandler__cGMRaceHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMRaceHandler();
+    virtual ~cGMRaceHandler();   // g++'s own symbol _$_14cGMRaceHandler (the retail label renamed)
     virtual void init() __asm__("cGMRaceHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMRaceHandler_raceFinish");
     virtual void riderGateHit(int, int) __asm__("cGMRaceHandler_riderGateHit__FPv");
@@ -127,6 +130,7 @@ CHECK_OFFSET(cGMRaceHandler, mHeat3Ready, 0x0C);
 CHECK_OFFSET(cGMRaceHandler, mLineup, 0x10);
 CHECK_OFFSET(cGMRaceHandler, uiTime, 0x58);
 CHECK_SIZE(cGMRaceHandler, 0xD0);
+__asm__("_vt$14cGMRaceHandler = cGMRaceHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMMPRaceHandler: the multiplayer race. Vtable 0x0047CED0 (cGMMPRaceHandler_vtbl): init cGMMPRaceHandler_init, raceFinish
 // cGMMPRaceHandler_raceFinish, writeToReplayFrame cGMMPRaceHandler_writeToReplayFrame / readFromReplayFrame cGMMPRaceHandler_readFromReplayFrame (the whole 0x2C bytes);
@@ -137,9 +141,7 @@ struct cGMMPRaceHandler : public cGameModeHandler {
                                     //      each rider's finish tick (360000 = DNF) and copies it to cGameModeMan_uiFinalScores
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMMPRaceHandler__cGMMPRaceHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMMPRaceHandler();
+    virtual ~cGMMPRaceHandler();   // g++'s own symbol _$_16cGMMPRaceHandler (the retail label renamed)
     virtual void init() __asm__("cGMMPRaceHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMMPRaceHandler_raceFinish");
     virtual void writeToReplayFrame(cReplayFramePtr* stream) __asm__("cGMMPRaceHandler_writeToReplayFrame");
@@ -148,6 +150,7 @@ struct cGMMPRaceHandler : public cGameModeHandler {
 
 CHECK_OFFSET(cGMMPRaceHandler, uiTime, 0x04);
 CHECK_SIZE(cGMMPRaceHandler, 0x2C);
+__asm__("_vt$16cGMMPRaceHandler = cGMMPRaceHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMMPSlopeHandler: the two-player online event (online events 1-3; On Tour: the multiplayer slope event). Vtable
 // 0x0047CE68 (cGMMPSlopeHandler_vtbl): init cGMMPSlopeHandler_init, riderCheckpointHit cGMMPSlopeHandler_riderCheckpointHit, raceFinish cGMMPSlopeHandler_raceFinish,
@@ -159,9 +162,7 @@ struct cGMMPSlopeHandler : public cGameModeHandler {
                                     //      [U] riderCheckpointHit counts per player and compares with the other
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMMPSlopeHandler__cGMMPSlopeHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMMPSlopeHandler();
+    virtual ~cGMMPSlopeHandler();   // g++'s own symbol _$_17cGMMPSlopeHandler (the retail label renamed)
     virtual void init() __asm__("cGMMPSlopeHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMMPSlopeHandler_raceFinish");
     virtual bool riderCheckpointHit(int player, int secs) __asm__("cGMMPSlopeHandler_riderCheckpointHit");
@@ -171,6 +172,7 @@ struct cGMMPSlopeHandler : public cGameModeHandler {
 
 CHECK_OFFSET(cGMMPSlopeHandler, LastCheckpointHit, 0x04);
 CHECK_SIZE(cGMMPSlopeHandler, 0x8);
+__asm__("_vt$17cGMMPSlopeHandler = cGMMPSlopeHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMTimeHandler: the timed peak challenge (events 6-8). Vtable 0x0047CD98 (cGMTimeHandler_vtbl): init cGMTimeHandler_init,
 // riderCheckpointHit cGMTimeHandler_riderCheckpointHit, raceFinish cGMTimeHandler_raceFinish; dtor cGMTimeHandler__cGMTimeHandler. On Tour's class overrides exactly
@@ -185,9 +187,7 @@ struct cGMTimeHandler : public cGameModeHandler {
                                     //      [U] riderCheckpointHit
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMTimeHandler__cGMTimeHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMTimeHandler();
+    virtual ~cGMTimeHandler();   // g++'s own symbol _$_14cGMTimeHandler (the retail label renamed)
     virtual void init() __asm__("cGMTimeHandler_init");
     virtual void raceFinish(int riderIndex) __asm__("cGMTimeHandler_raceFinish");
     virtual bool riderCheckpointHit(int, int) __asm__("cGMTimeHandler_riderCheckpointHit");
@@ -197,6 +197,7 @@ CHECK_OFFSET(cGMTimeHandler, uiTimeToBeat, 0x04);
 CHECK_OFFSET(cGMTimeHandler, uiTrackProgress, 0x08);
 CHECK_OFFSET(cGMTimeHandler, mCurrentDifficulty, 0x0A);
 CHECK_SIZE(cGMTimeHandler, 0xC);
+__asm__("_vt$14cGMTimeHandler = cGMTimeHandler_vtbl");   // g++'s name for the retail vtable
 
 // cGMPointHandler: the points peak challenge (events 9-11). Vtable 0x0047CC60 (cGMPointHandler_vtbl): init cGMPointHandler_init,
 // riderCheckpointHit cGMPointHandler_riderCheckpointHit, raceFinish cGMPointHandler_raceFinish; dtor cGMPointHandler__cGMPointHandler. On Tour's class overrides exactly
@@ -209,9 +210,7 @@ struct cGMPointHandler : public cGameModeHandler {
     short mCurrentDifficulty;       // 0x0A [O]; [R] init: the goal tier from the best medal; [U] riderCheckpointHit
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cGMPointHandler__cGMPointHandler stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cGMPointHandler();
+    virtual ~cGMPointHandler();   // g++'s own symbol _$_15cGMPointHandler (the retail label renamed)
     virtual void init() __asm__("cGMPointHandler_init");
     virtual void raceFinish(int idx) __asm__("cGMPointHandler_raceFinish");
     virtual bool riderCheckpointHit(int, int) __asm__("cGMPointHandler_riderCheckpointHit");
@@ -221,5 +220,33 @@ CHECK_OFFSET(cGMPointHandler, uiScoreToBeat, 0x04);
 CHECK_OFFSET(cGMPointHandler, uiTrackProgress, 0x08);
 CHECK_OFFSET(cGMPointHandler, mCurrentDifficulty, 0x0A);
 CHECK_SIZE(cGMPointHandler, 0xC);
+__asm__("_vt$15cGMPointHandler = cGMPointHandler_vtbl");   // g++'s name for the retail vtable
+
+// cGMFreerideHandler: the freeride handler (vptr only; [R] getGM's 4-byte allocation; vtable
+// cGMFreerideHandler_vtbl).
+struct cGMFreerideHandler : public cGameModeHandler {
+    virtual ~cGMFreerideHandler();   // g++'s own symbol _$_18cGMFreerideHandler (the retail label renamed)
+};
+
+CHECK_SIZE(cGMFreerideHandler, 0x4);
+__asm__("_vt$18cGMFreerideHandler = cGMFreerideHandler_vtbl");   // g++'s name for the retail vtable
+
+// cGMRivalTimeHandler: the head-to-head event handler (vptr only; [R] getGM's 4-byte allocation; vtable
+// cGMRivalTimeHandler_vtbl).
+struct cGMRivalTimeHandler : public cGameModeHandler {
+    virtual ~cGMRivalTimeHandler();   // g++'s own symbol _$_19cGMRivalTimeHandler (the retail label renamed)
+};
+
+CHECK_SIZE(cGMRivalTimeHandler, 0x4);
+__asm__("_vt$19cGMRivalTimeHandler = cGMRivalTimeHandler_vtbl");   // g++'s name for the retail vtable
+
+// cGMRivalPointHandler: the head-to-head scored event handler (vptr only; [R] getGM's 4-byte allocation; vtable
+// cGMRivalPointHandler_vtbl).
+struct cGMRivalPointHandler : public cGameModeHandler {
+    virtual ~cGMRivalPointHandler();   // g++'s own symbol _$_20cGMRivalPointHandler (the retail label renamed)
+};
+
+CHECK_SIZE(cGMRivalPointHandler, 0x4);
+__asm__("_vt$20cGMRivalPointHandler = cGMRivalPointHandler_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MAIN_GAMEMODEHANDLER_H */

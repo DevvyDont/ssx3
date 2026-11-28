@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEMAP_H
 #define FE_OVSTATEMAP_H
+#pragma interface
 
 // cOVState_MAP: the in-game session-point map overlay (screen "38session": the mountain picture loaded through the FE
 // async manager, a player indicator, up to 8 session points with pulsing highlights and a "$500" confirm popup).
@@ -98,9 +99,7 @@ struct cOVState_MAP : public cOVState {
     void showIndicators() __asm__("cOVState_MAP_showIndicators");
     void hideIndicators() __asm__("cOVState_MAP_hideIndicators");
     void cleanupIndicators() __asm__("cOVState_MAP_cleanupIndicators");
-    // retail's destructor cOVState_MAP__cOVState_MAP stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_MAP();
+    virtual ~cOVState_MAP();   // g++'s own symbol _$_12cOVState_MAP (the retail label renamed)
     virtual bool onGainTransition(int on) __asm__("cOVState_MAP_onGainTransition");
     virtual void onDestroyScreen() __asm__("cOVState_MAP_onDestroyScreen");
     virtual void onUpdate() __asm__("cOVState_MAP_onUpdate");
@@ -131,5 +130,6 @@ CHECK_OFFSET(cOVState_MAP, mHighlightDiff, 0x1C8);
 CHECK_OFFSET(cOVState_MAP, mIndicatorSize, 0x1CC);
 CHECK_OFFSET(cOVState_MAP, mIndicatorSizeDiff, 0x1D0);
 CHECK_SIZE(cOVState_MAP, 0x1D4);
+__asm__("_vt$12cOVState_MAP = cOVState_MAP_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEMAP_H */

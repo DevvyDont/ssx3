@@ -81,7 +81,7 @@ struct cUIState : public cListNode {
     cUIState* mpParentState;         // 0x020 [P] getParentState (retail cUIState_getParentState; setter cUIState_setParentState); [R] = pParentState
                                      //       (cUIState_cUIState1), 0 (cUIState_cUIState)
     cList mScreens;                  // 0x024 [O] cList mScreens, the state's cUIScreens (util/list.h: mStart 0x24, mEnd 0x30, vptr 0x3C);
-                                     //       [R] the ctors cList_cList(&mScreens); the destructor cUIState__cUIState restores
+                                     //       [R] the ctors cList_cList(&mScreens); the destructor _$_8cUIState restores
                                      //       mScreens.mVtbl (0x3C, cList_vtbl), mEnd.mVtbl (0x38) and mStart.mVtbl (0x2C, cListNode_vtbl);
                                      //       [U] cUIState_addScreen appends (cList_addToEnd), cUIState_updateScreens / cUIState_onUpdate
                                      //       walk it (cList_first), cUIState_onDestroyScreen destroys it
@@ -140,7 +140,7 @@ struct cUIState : public cListNode {
 
     // Virtuals. Slots [R] cUIState_vtbl (2-3 are cListNode's traverseFlat / traverseRecurse), names, order and types
     // [O] (On Tour class cUIState: the same 21 in the same order); bool parameters are words.
-    virtual ~cUIState();                                                              // 1
+    virtual ~cUIState();   // 1; g++'s own symbol _$_8cUIState (the retail label renamed; still a C function)
     virtual void onCreateScreen()
         __asm__("cUIState_onCreateScreen__FPv");                                                    // 4
     virtual void onDestroyScreen()

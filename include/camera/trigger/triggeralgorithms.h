@@ -1,5 +1,6 @@
 #ifndef CAMERA_TRIGGER_TRIGGERALGORITHMS_H
 #define CAMERA_TRIGGER_TRIGGERALGORITHMS_H
+#pragma interface
 
 // The camera-trigger algorithms (EA: d:/ssx/code/source/camera/trigger/triggeralgorithms.cpp, from the July 2003
 // preview's assert strings). A camera-trigger volume (camera/trigger/cameratriggerman) switches the chase camera to
@@ -70,6 +71,8 @@ struct cTriggerAlgorithm : public cChaseAlgorithm {
                                 //      copies the action's PitchOffset (+0x1C)
     char unk_7C[0x4];           // 0x7C padding to the 16-byte class alignment
 
+    cTriggerAlgorithm() __asm__("cTriggerAlgorithm_cTriggerAlgorithm");
+    virtual ~cTriggerAlgorithm();   // g++'s own symbol _$_17cTriggerAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     virtual void update() __asm__("cTriggerAlgorithm_update");
     virtual void snapCurrent() __asm__("cTriggerAlgorithm_snapCurrent");
@@ -90,6 +93,7 @@ CHECK_OFFSET(cTriggerAlgorithm, LeadDistance, 0x74);
 CHECK_OFFSET(cTriggerAlgorithm, PitchOffset, 0x78);
 CHECK_OFFSET(cTriggerAlgorithm, unk_7C, 0x7C);
 CHECK_SIZE(cTriggerAlgorithm, 0x80);
+__asm__("_vt$17cTriggerAlgorithm = cTriggerAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 // cBoundedAlgorithm (retail and On Tour: 0x90): base cTriggerAlgorithm <- cChaseAlgorithm <- cCameraAlgorithm.
 struct cBoundedAlgorithm : public cTriggerAlgorithm {
@@ -102,6 +106,9 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
                                 //      cBoundedAlgorithm_getBoundAction (lw)
     char unk_84[0xC];           // 0x84 padding to the 16-byte class alignment
 
+    cBoundedAlgorithm() __asm__("cBoundedAlgorithm_cBoundedAlgorithm");
+    // retail's destructor cBoundedAlgorithm__cBoundedAlgorithm stays a C function (its C does not match yet)
+    virtual ~cBoundedAlgorithm();
     // Methods bound to their retail symbols by asm labels.
     void setBoundAction(cCTActionBoundedCam* boundAction) __asm__("cBoundedAlgorithm_setBoundAction");
     cCTActionBoundedCam* getBoundAction() __asm__("cBoundedAlgorithm_getBoundAction");
@@ -114,5 +121,6 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
 CHECK_OFFSET(cBoundedAlgorithm, BoundAction, 0x80);
 CHECK_OFFSET(cBoundedAlgorithm, unk_84, 0x84);
 CHECK_SIZE(cBoundedAlgorithm, 0x90);
+__asm__("_vt$17cBoundedAlgorithm = cBoundedAlgorithm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_TRIGGER_TRIGGERALGORITHMS_H */

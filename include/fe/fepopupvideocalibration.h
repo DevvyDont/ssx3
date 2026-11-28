@@ -1,5 +1,6 @@
 #ifndef FE_FEPOPUPVIDEOCALIBRATION_H
 #define FE_FEPOPUPVIDEOCALIBRATION_H
+#pragma interface
 
 // cFEPopupVideoCalibration: a front-end state (a cUIState), 2 methods; allocated with cMemMan_alloc(76, "cFEPopupVideoCalibration").
 // Size 0x4C [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
@@ -26,14 +27,13 @@ struct cFEPopupVideoCalibration : public cUIState {
     enum { kStateID = 27 };
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEPopupVideoCalibration__cFEPopupVideoCalibration stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEPopupVideoCalibration();
+    virtual ~cFEPopupVideoCalibration();   // g++'s own symbol _$_24cFEPopupVideoCalibration (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEPopupVideoCalibration_onCreateScreen");
     virtual bool onInputBegin(cUIInput* in) __asm__("cFEPopupVideoCalibration_onInputBegin");
 };
 
 CHECK_OFFSET(cFEPopupVideoCalibration, mImage, 0x048);
 CHECK_SIZE(cFEPopupVideoCalibration, 0x4C);
+__asm__("_vt$24cFEPopupVideoCalibration = cFEPopupVideoCalibration_vtbl");   // g++'s name for the retail vtable
 
 #endif
