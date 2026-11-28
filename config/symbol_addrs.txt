@@ -21532,3 +21532,7 @@ sifcmd_dmacHandlerId = 0x0052BCD4;
 fileio_serverVersion = 0x0052EE28;
 fileio_userCallback = 0x0052EE80;
 libkernl_iopHeapLoadArgs = 0x0052EF80;
+
+// Global names, round globals5h (source and evidence of each in docs/ontour_globals.tsv)
+cGameModeMan_uiFinalScores = 0x00536640;
+cGameModeMan_bDidNotFinish = 0x005366A8;

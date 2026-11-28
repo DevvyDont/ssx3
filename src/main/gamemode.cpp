@@ -312,7 +312,6 @@ int cGameModeMan::restorePreviousHeat()
 INCLUDE_ASM("main/gamemode", cGameModeMan_raceFinish);
 #ifdef SKIP_ASM
 extern cGameModeHandler* cGameModeMan_aHandler[];
-extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -331,7 +330,7 @@ signed char cBELibrary_getCharacterID(int index);
  * Handles a rider finishing the race: tells the current mode handler, then records the result in the back
  * end.
  *
- * The result (with the rider's time or score, D_00536640) is only recorded at locations below 17 and when the
+ * The result (with the rider's time or score, cGameModeMan::uiFinalScores) is only recorded at locations below 17 and when the
  * replay state is not 1-9. For rider 0, a conquered mountain leads to cBERewardInterface_awardUser() when
  * cBERewardInterface_isAwardReceived returns 0 (probably: not yet awarded). Locked results also record the rider's place
  * (cGameModeMan_iRanking).
@@ -348,7 +347,7 @@ void cGameModeMan::raceFinish(int idx, int pRiderStats)
         int ok = n != 0 && n < 10;
         if (!ok) {
             void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
-            unsigned int riderScore = D_00536640[idx];
+            unsigned int riderScore = uiFinalScores[idx];
             cBEScoreInterface_processEventRiderStats(score, idx, pRiderStats, riderScore);
             if (idx == 0) {
                 int prof = cBELibrary_getProfileIndex(0);
@@ -439,7 +438,7 @@ extern int cGameModeMan_iCharRank[];
  * Saves the game-mode manager to a replay frame, then lets the current handler save itself (writeToReplayFrame).
  *
  * Writes iCurrModeHandler, iHeatNum, iCurrentGameEvent, iNumberAI, iSimAI, iCharacters, iLocation, iNextLocation,
- * iNextHeat, the score tables cGameModeMan_iRanking and cGameModeMan_iCharRank, uiTimeLimit, uiPointTarget, unk_80, the table D_00536640,
+ * iNextHeat, the score tables cGameModeMan_iRanking and cGameModeMan_iCharRank, uiTimeLimit, uiPointTarget, unk_80, the table cGameModeMan::uiFinalScores,
  * then bIsEventDone through bAreResultsLocked. iCurrentGamePath, iCheatCharacters and iRestoreHeat are not saved.
  *
  * @param data  the replay frame written to (On Tour cReplayFramePtr* data)
@@ -460,7 +459,7 @@ void cGameModeMan::writeToReplayFrame(cBxReplayFrame* data)
     data->write((const char*)&uiTimeLimit, 4);
     data->write((const char*)&uiPointTarget, 4);
     data->write((const char*)&unk_80, 4);
-    data->write((const char*)D_00536640, 40);
+    data->write((const char*)uiFinalScores, 40);
     data->write((const char*)&bIsEventDone, 4);
     data->write((const char*)&bIsTimedEvent, 4);
     data->write((const char*)&bHasPointTarget, 4);
@@ -498,7 +497,7 @@ void cGameModeMan::readFromReplayFrame(cBxReplayFrame* data)
     data->read((char*)&uiTimeLimit, 4);
     data->read((char*)&uiPointTarget, 4);
     data->read((char*)&unk_80, 4);
-    data->read((char*)D_00536640, 40);
+    data->read((char*)uiFinalScores, 40);
     data->read((char*)&bIsEventDone, 4);
     data->read((char*)&bIsTimedEvent, 4);
     data->read((char*)&bHasPointTarget, 4);
@@ -523,7 +522,7 @@ extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const
  * Ranks the first @p n riders by score, highest first, into the rank tables.
  *
  * Resets cGameModeMan_iRanking and cGameModeMan_iCharRank to 0..9, then sorts cGameModeMan_iCharRank with qsort (qsort) and cGameModeMan_cmpScores, and
- * cGameModeMan_iRanking with cGameModeMan_cmpRanks, both over the scores in D_00536640. The game-mode handlers call it after every heat.
+ * cGameModeMan_iRanking with cGameModeMan_cmpRanks, both over the scores in cGameModeMan::uiFinalScores. The game-mode handlers call it after every heat.
  *
  * @param n  number of riders to rank
  */
@@ -552,7 +551,7 @@ extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const
  * Ranks the first @p n riders by time, lowest first, into the rank tables.
  *
  * Same as cGameModeMan_sortScores except that cGameModeMan_iCharRank is sorted with cGameModeMan_cmpTimes (ascending), so the smallest values in
- * D_00536640 come first.
+ * cGameModeMan::uiFinalScores come first.
  *
  * @param n  number of riders to rank
  */
@@ -639,22 +638,20 @@ INCLUDE_ASM("main/gamemode", cGameModeHandler_cleanRiderRanksPoints);
 extern "C" void* memset(void* dst, int c, int n);
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_iCharRank[];
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_bGiveUp[];
 
 /**
  * Clears the rank and score tables for a scored event.
  *
- * Fills cGameModeMan_iRanking with the byte 9, and cGameModeMan_iCharRank, the score table D_00536640, D_005366A8 and cGameModeMan_bGiveUp
+ * Fills cGameModeMan_iRanking with the byte 9, and cGameModeMan_iCharRank, the score table cGameModeMan::uiFinalScores, cGameModeMan::bDidNotFinish and cGameModeMan_bGiveUp
  * with 0. It is slot +0x24 of every handler vtable. Quirk: memset with 9 makes each rank word 0x09090909, not 9.
  */
 extern "C" void cGameModeHandler_cleanRiderRanksPoints(void)
 {
     memset(cGameModeMan_iRanking, 9, 40);
     memset(cGameModeMan_iCharRank, 0, 40);
-    memset(D_00536640, 0, 40);
-    memset(D_005366A8, 0, 40);
+    memset(cGameModeMan::uiFinalScores, 0, 40);
+    memset(cGameModeMan::bDidNotFinish, 0, 40);
     memset(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
@@ -665,22 +662,20 @@ INCLUDE_ASM("main/gamemode", cGameModeHandler_cleanRiderRanksTime);
 extern "C" void* memset(void* dst, int c, int n);
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_iCharRank[];
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_bGiveUp[];
 
 /**
  * Clears the rank and score tables for a timed event.
  *
- * Fills cGameModeMan_iRanking and the time table D_00536640 with the byte 9 (0x09090909 per word, a large time), and cGameModeMan_iCharRank,
- * D_005366A8 and cGameModeMan_bGiveUp with 0. It is slot +0x2C of every handler vtable; cGameModeHandler_purge calls it.
+ * Fills cGameModeMan_iRanking and the time table cGameModeMan::uiFinalScores with the byte 9 (0x09090909 per word, a large time), and cGameModeMan_iCharRank,
+ * cGameModeMan::bDidNotFinish and cGameModeMan_bGiveUp with 0. It is slot +0x2C of every handler vtable; cGameModeHandler_purge calls it.
  */
 extern "C" void cGameModeHandler_cleanRiderRanksTime(void)
 {
     memset(cGameModeMan_iRanking, 9, 40);
     memset(cGameModeMan_iCharRank, 0, 40);
-    memset(D_00536640, 9, 40);
-    memset(D_005366A8, 0, 40);
+    memset(cGameModeMan::uiFinalScores, 9, 40);
+    memset(cGameModeMan::bDidNotFinish, 0, 40);
     memset(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
@@ -697,7 +692,6 @@ extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
 extern "C" void buildRaceCharacterLineup_self(void* self) __asm__("buildRaceCharacterLineup");
 extern "C" void cGMBigAirHandler_fillScoreTable(cGMBigAirHandler* self);
 extern "C" void* memset(void* dst, int c, int n);
-extern unsigned int D_00536640[];
 extern int cGameModeMan_iCharRank[];
 
 struct sGM_238E20 {
@@ -809,9 +803,9 @@ void cGMBigAirHandler::init()
             buildRaceCharacterLineup_self(this);
             this->fillScoreTable();
         }
-        D_00536640[0] = 0;
+        cGameModeMan::uiFinalScores[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = uiScore[2][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[2][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         {
@@ -819,7 +813,7 @@ void cGMBigAirHandler::init()
             race_238E20()->PodiumActorList[0] = pManager->iCharacters[cGameModeMan_iCharRank[0]];
             race_238E20()->PodiumActorList[1] = pManager->iCharacters[cGameModeMan_iCharRank[1]];
             for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-                D_00536640[i] = firstHeatScores[i];
+                cGameModeMan::uiFinalScores[i] = firstHeatScores[i];
             }
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
@@ -831,9 +825,9 @@ void cGMBigAirHandler::init()
         manager->iNextHeat = 1;
         manager->iRestoreHeat = 1;
         manager->bIsLastHeat = 0;
-        D_00536640[0] = 0;
+        cGameModeMan::uiFinalScores[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = uiScore[1][i] + uiScore[0][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[1][i] + uiScore[0][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         break;
@@ -844,9 +838,9 @@ void cGMBigAirHandler::init()
         manager->bIsTimedEvent = 1;
         manager->bAreResultsLocked = 0;
         manager->bIsEventDone = 0;
-        D_00536640[0] = 0;
+        cGameModeMan::uiFinalScores[0] = 0;
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
-            D_00536640[i] = uiScore[2][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[2][i];
         }
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         break;
@@ -866,8 +860,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cBENewPlayerInterface_recordDifficultyWin(void* iface, int a1);
 extern "C" void cBENewPlayerInterface_recordDifficultyLoss(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
@@ -886,7 +878,7 @@ static inline cRider* Rider_239230(int i)
 /**
  * Records a rider's heat score in the scored three-heat event and, when the race is over, decides the next heat.
  *
- * Stores the rider's score (its metrics block + 0xFC + 0x9C) or 0 when it did not finish (D_005366A8 marks that) in the
+ * Stores the rider's score (its metrics block + 0xFC + 0x9C) or 0 when it did not finish (cGameModeMan::bDidNotFinish marks that) in the
  * heat's column. Once cAI_isRaceFinished: heat 1 ranks on heats 1 + 2 and sends a top-3 rider to heat 3; heat 2 also
  * reports the result to the player interface (cBENewPlayerInterface_recordDifficultyWin for a win, cBENewPlayerInterface_recordDifficultyLoss for a loss, career only); heat 3
  * estimates unfinished riders' scores (cRider_estimateFinishScore), locks the results and ranks. Finally sets the human
@@ -903,10 +895,10 @@ void cGMBigAirHandler::raceFinish(int idx)
     tRiderStats st = *(&Rider_239230(idx)->mMetrix->Totals);
     if (Rider_239230(idx)->mDidNotFinish != 0) {
         uiScore[cGameModeHandler_pManager->iHeatNum - 1][idx] = 0;
-        D_005366A8[idx] = 1;
+        cGameModeMan::bDidNotFinish[idx] = 1;
     } else {
         uiScore[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.TotalPoints;
-        D_005366A8[idx] = 0;
+        cGameModeMan::bDidNotFinish[idx] = 0;
     }
     if (cAI_isRaceFinished(Race_239230()) == 0)
         return;
@@ -915,14 +907,14 @@ void cGMBigAirHandler::raceFinish(int idx)
     case cGameModeMan::kHeat1:
         gm->iRestoreHeat = gm->iNextHeat;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = uiScore[0][i] + uiScore[1][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[0][i] + uiScore[1][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         if (cGameModeMan_iRanking[idx] < 3)
             cGameModeHandler_pManager->iNextHeat = 3;
         else
             cGameModeHandler_pManager->iNextHeat = cGameModeHandler_pManager->iHeatNum + 1;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = uiScore[0][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[0][i];
         if (cGameModeMan_iRanking[idx] >= 3) {
             cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
             if (cGameModeMan_iRanking[idx] >= 3) {
@@ -934,10 +926,10 @@ void cGMBigAirHandler::raceFinish(int idx)
         break;
     case cGameModeMan::kHeat2:
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = uiScore[0][i] + uiScore[1][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[0][i] + uiScore[1][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = uiScore[1][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[1][i];
         gm = cGameModeHandler_pManager;
         gm->iRestoreHeat = gm->iNextHeat;
         if (cGameModeMan_iRanking[idx] < 3) {
@@ -962,7 +954,7 @@ void cGMBigAirHandler::raceFinish(int idx)
                 uiScore[2][i] = cRider_estimateFinishScore(rider);
         }
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
-            D_00536640[i] = uiScore[2][i];
+            cGameModeMan::uiFinalScores[i] = uiScore[2][i];
         cGameModeHandler_pManager->sortScores(cGameModeHandler_pManager->iNumberAI + 1);
         gm = cGameModeHandler_pManager;
         gm->iRestoreHeat = gm->iNextHeat;
@@ -1096,7 +1088,6 @@ extern "C" void* cBE_getBE();
 extern "C" short cBENewPlayerInterface_getDifficultyLevel(void* self, int which);
 extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int place, int mode);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
-extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 
 
@@ -1124,7 +1115,7 @@ void cGMBigAirHandler::fillScoreTable()
         for (int j = 0; j < 3; j++) {
             uiScore[j][i] = 0;
         }
-        D_00536640[i] = uiScore[0][i];
+        cGameModeMan::uiFinalScores[i] = uiScore[0][i];
         k++;
     }
     int nA = numNonSimulated + 1;
@@ -1141,7 +1132,7 @@ void cGMBigAirHandler::fillScoreTable()
                         cBENewPlayerInterface_getDifficultyLevel(player, 0));
             }
         }
-        D_00536640[k] = uiScore[0][k];
+        cGameModeMan::uiFinalScores[k] = uiScore[0][k];
         cGameModeMan_iRanking[k] = simRider;
         k++;
     }
@@ -1288,7 +1279,7 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_raceFinish);
 /**
  * Records a rider's finish in the two-player online event of handler 9 and locks the results when the race is over.
  *
- * Stores the rider's score (or 0 and a did-not-finish mark in D_005366A8); when cAI_isRaceFinished, sets the event
+ * Stores the rider's score (or 0 and a did-not-finish mark in cGameModeMan::bDidNotFinish); when cAI_isRaceFinished, sets the event
  * done, locks the results, ranks the two riders with sortScores and clears +0x100 of a rider who did not win. Slot
  * +0x44 (raceFinish) of cGMMPSlopeHandler_vtbl.
  *
@@ -1300,11 +1291,11 @@ void cGMMPSlopeHandler::raceFinish(int idx)
     tRiderStats st = *(&race->Riders[idx]->mMetrix->Totals);
     bool dnf = Rider_239230(idx)->mDidNotFinish != 0;
     if (dnf) {
-        D_00536640[idx] = 0;
-        D_005366A8[idx] = 1;
+        cGameModeMan::uiFinalScores[idx] = 0;
+        cGameModeMan::bDidNotFinish[idx] = 1;
     } else {
-        D_00536640[idx] = st.TotalPoints;
-        D_005366A8[idx] = 0;
+        cGameModeMan::uiFinalScores[idx] = st.TotalPoints;
+        cGameModeMan::bDidNotFinish[idx] = 0;
     }
     bool over = cAI_isRaceFinished(race) != 0;
     if (over) {
@@ -1372,7 +1363,6 @@ extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" void cGMRaceHandler_buildHeatLineups(cGMRaceHandler* self);
 extern "C" void cGMRaceHandler_applyHeatLineup(void* self);
-extern unsigned int D_00536640[];
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_iCharRank[];
 
@@ -1487,7 +1477,7 @@ void cGMRaceHandler::init()
             manager->iNextHeat = 2;
             manager->iRestoreHeat = 2;
         }
-        memset(D_00536640, 9, 40);
+        memset(cGameModeMan::uiFinalScores, 9, 40);
         memset(cGameModeMan_iRanking, 0, 40);
         memset(uiTime[1], 9, 40);
         {
@@ -1528,7 +1518,7 @@ void cGMRaceHandler::init()
             manager->iNextHeat = 3;
             manager->iRestoreHeat = 3;
         }
-        memset(D_00536640, 9, 40);
+        memset(cGameModeMan::uiFinalScores, 9, 40);
         memset(cGameModeMan_iRanking, 9, 40);
         memset(uiTime[2], 9, 40);
         {
@@ -1725,9 +1715,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 
 extern int cGameModeMan_iRanking[];
 
-extern unsigned int D_00536640[];
 
-extern int D_005366A8[];
 
 extern "C" int cAI_isRaceFinished(void* race);
 
@@ -1770,10 +1758,10 @@ void cGMRaceHandler::raceFinish(int idx)
         int tick = rc->riders[idx]->mFinishTick;
         if (GetRace()->riders[idx]->mDidNotFinish) {
             uiTime[heat][idx] = 360000;
-            D_005366A8[idx] = 1;
+            cGameModeMan::bDidNotFinish[idx] = 1;
         } else {
             uiTime[heat][idx] = tick;
-            D_005366A8[idx] = 0;
+            cGameModeMan::bDidNotFinish[idx] = 0;
         }
     }
     if (cAI_isRaceFinished(rc) == 0) {
@@ -1786,7 +1774,7 @@ void cGMRaceHandler::raceFinish(int idx)
         if (!Finished(rc->riders[i])) {
             uiTime[heat][i] = cRider_estimateFinishTick(rc->riders[i]);
         }
-        D_00536640[i] = uiTime[heat][i];
+        cGameModeMan::uiFinalScores[i] = uiTime[heat][i];
     }
     cGameModeMan_sortTimes_A760(cGameModeHandler_pManager, 10);
     cGameModeMan* gm = cGameModeHandler_pManager;
@@ -1801,11 +1789,11 @@ void cGMRaceHandler::raceFinish(int idx)
         if (cBENewRaceInterface_newRace.cGamePath == 0) {
             if (cGameModeMan_iRanking[n] == cGameModeMan::kFirstPlace) {
                 if ((cGameModeHandler_pManager->iHeatNum < cGameModeMan::kHeat2
-                     && D_00536640[1] - D_00536640[0] > 600) ||
+                     && cGameModeMan::uiFinalScores[1] - cGameModeMan::uiFinalScores[0] > 600) ||
                     (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kHeat2
-                     && D_00536640[1] - D_00536640[0] > 300) ||
+                     && cGameModeMan::uiFinalScores[1] - cGameModeMan::uiFinalScores[0] > 300) ||
                     (cGameModeHandler_pManager->iHeatNum == cGameModeMan::kFinalHeat
-                     && D_00536640[1] - D_00536640[0] > 180)) {
+                     && cGameModeMan::uiFinalScores[1] - cGameModeMan::uiFinalScores[0] > 180)) {
                     cBENewPlayerInterface_recordDifficultyWin(player, 1);
                 }
             }
@@ -1974,8 +1962,6 @@ void cGMMPRaceHandler::init()
 //100%
 INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_raceFinish);
 #ifdef SKIP_ASM
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cRider_estimateFinishTick(void* self);
@@ -1985,7 +1971,7 @@ extern "C" void cGameModeMan_sortTimes(cGameModeMan* self, int n);
  * Records a rider's time in the online race of handler 8 and ranks the riders when the race is over.
  *
  * While the race runs or for a human rider (not isComputer()), stores the rider's time (360000 for did-not-finish) in
- * uiTime and D_00536640. Once cAI_isRaceFinished, estimates the unfinished riders (cRider_estimateFinishTick), ranks
+ * uiTime and cGameModeMan::uiFinalScores. Once cAI_isRaceFinished, estimates the unfinished riders (cRider_estimateFinishTick), ranks
  * with sortTimes (cGameModeMan_sortTimes), clears ShouldCelebrateAtFinish of a rider placed 4th or worse and locks the
  * results. Slot +0x44 (raceFinish) of cGMMPRaceHandler_vtbl.
  *
@@ -1996,13 +1982,13 @@ void cGMMPRaceHandler::raceFinish(int idx)
     cAI* rc = SSXApp->Game->AI;
     if (cAI_isRaceFinished(rc) == 0 || !rc->Riders[idx]->isComputer()) {
         if (SSXApp->Game->AI->Riders[idx]->mDidNotFinish) {
-            D_00536640[idx] = uiTime[idx] = 360000;
-            D_005366A8[idx] = 1;
+            cGameModeMan::uiFinalScores[idx] = uiTime[idx] = 360000;
+            cGameModeMan::bDidNotFinish[idx] = 1;
         } else {
             int finishTick = rc->Riders[idx]->mFinishTick;
             uiTime[idx] = finishTick;
-            D_00536640[idx] = finishTick;
-            D_005366A8[idx] = 0;
+            cGameModeMan::uiFinalScores[idx] = finishTick;
+            cGameModeMan::bDidNotFinish[idx] = 0;
         }
     }
     if (cAI_isRaceFinished(rc)) {
@@ -2011,7 +1997,7 @@ void cGMMPRaceHandler::raceFinish(int idx)
             if (!finished && i != idx) {
                 uiTime[i] = cRider_estimateFinishTick(rc->Riders[i]);
             }
-            D_00536640[i] = uiTime[i];
+            cGameModeMan::uiFinalScores[i] = uiTime[i];
         }
         cGameModeHandler_pManager->sortTimes(10);
         if (cGameModeMan_iRanking[idx] >= 3) {
@@ -2254,8 +2240,6 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern int cGameModeMan_iRanking[];
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 
 struct sGM_23B468 {
     int f0;
@@ -2285,7 +2269,7 @@ struct sGM_23B468 {
 /**
  * Records the rider's time in the timed event of handler 4 and awards a place by the medal times.
  *
- * Copies the rider's finish tick (+0x478) to D_00536640; did-not-finish stores 0x57E40 and retries the heat. A time
+ * Copies the rider's finish tick (+0x478) to cGameModeMan::uiFinalScores; did-not-finish stores 0x57E40 and retries the heat. A time
  * above the limit (+0x4) also retries; otherwise the event is done and the rank is 0, 1 or 2 against the tier-2 and
  * tier-1 times (cBENewRaceInterface_getPeakGoal * 60). Always locks the results. Slot +0x44 (raceFinish) of cGMTimeHandler_vtbl.
  *
@@ -2297,7 +2281,7 @@ void cGMTimeHandler::raceFinish(int riderIndex)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cSSXApp* ssxApp = SSXApp;
     cGameModeMan* gm = cGameModeHandler_pManager;
-    unsigned int* timeSlot = &D_00536640[riderIndex];
+    unsigned int* timeSlot = &cGameModeMan::uiFinalScores[riderIndex];
     *timeSlot = ssxApp->Game->AI->Riders[riderIndex]->mFinishTick;
     gm->bAreResultsLocked = one;
     cRider* rider = ssxApp->Game->AI->Riders[riderIndex];
@@ -2305,11 +2289,11 @@ void cGMTimeHandler::raceFinish(int riderIndex)
         *timeSlot = 0x57E40;
         ssxApp->Game->AI->Riders[riderIndex]->ShouldCelebrateAtFinish = 0;
         gm->iNextHeat = one;
-        D_005366A8[riderIndex] = one;
+        cGameModeMan::bDidNotFinish[riderIndex] = one;
     } else if (uiTimeToBeat < *timeSlot) {
         rider->ShouldCelebrateAtFinish = 0;
         gm->iNextHeat = one;
-        D_005366A8[riderIndex] = 0;
+        cGameModeMan::bDidNotFinish[riderIndex] = 0;
     } else {
         rider->ShouldCelebrateAtFinish = one;
         gm->bIsEventDone = one;
@@ -2468,8 +2452,6 @@ extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cGameModeMan_sortTimes(cGameModeMan* self, int n);
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
@@ -2491,11 +2473,11 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
         !SSXApp->Game->AI->Riders[idx]->isComputer()) {
         cRider* rider = SSXApp->Game->AI->Riders[idx];
         if (rider->mDidNotFinish != 0) {
-            D_00536640[idx] = 0x57E40;
-            D_005366A8[idx] = 1;
+            cGameModeMan::uiFinalScores[idx] = 0x57E40;
+            cGameModeMan::bDidNotFinish[idx] = 1;
         } else {
-            D_00536640[idx] = rider->mFinishTick;
-            D_005366A8[idx] = 0;
+            cGameModeMan::uiFinalScores[idx] = rider->mFinishTick;
+            cGameModeMan::bDidNotFinish[idx] = 0;
         }
     }
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
@@ -2509,7 +2491,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
         cGameModeHandler_pManager->sortTimes(10);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
-        if (D_00536640[0] < D_00536640[1]) {
+        if (cGameModeMan::uiFinalScores[0] < cGameModeMan::uiFinalScores[1]) {
             w = 0;
         }
         if (idx == w) {
@@ -2520,7 +2502,7 @@ extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
             cRider* rider = SSXApp->Game->AI->Riders[i];
             int done = rider->mFinishTime >= 0.0f;
             if (!done) {
-                D_00536640[i] = cRider_estimateFinishTick(rider);
+                cGameModeMan::uiFinalScores[i] = cRider_estimateFinishTick(rider);
             }
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2641,8 +2623,6 @@ extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(cGameModeMan* self, int n);
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
@@ -2662,12 +2642,12 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
 {
     cRider* rider = SSXApp->Game->AI->Riders[idx];
     if (rider->mDidNotFinish != 0) {
-        D_00536640[idx] = 0;
-        D_005366A8[idx] = 1;
+        cGameModeMan::uiFinalScores[idx] = 0;
+        cGameModeMan::bDidNotFinish[idx] = 1;
     } else {
         tRiderStats st = *(&rider->mMetrix->Totals);
-        D_005366A8[idx] = 0;
-        D_00536640[idx] = st.TotalPoints;
+        cGameModeMan::bDidNotFinish[idx] = 0;
+        cGameModeMan::uiFinalScores[idx] = st.TotalPoints;
     }
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
         return;
@@ -2677,7 +2657,7 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
         cGameModeHandler_pManager->sortScores(2);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
-        if (D_00536640[0] > D_00536640[1]) {
+        if (cGameModeMan::uiFinalScores[0] > cGameModeMan::uiFinalScores[1]) {
             w = 0;
         }
         if (idx == w) {
@@ -2689,7 +2669,7 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
             cRider* rider = SSXApp->Game->AI->Riders[i];
             int done = rider->mFinishTime >= 0.0f;
             if (!done) {
-                D_00536640[i] = cRider_estimateFinishScore(rider);
+                cGameModeMan::uiFinalScores[i] = cRider_estimateFinishScore(rider);
             }
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2824,8 +2804,6 @@ INCLUDE_ASM("main/gamemode", cGMPointHandler_raceFinish);
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
-extern unsigned int D_00536640[];
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 struct sGM_23C2D8 {
@@ -2870,23 +2848,23 @@ void cGMPointHandler::raceFinish(int idx)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cRider* rider = SSXApp->Game->AI->Riders[idx];
     if (rider->mDidNotFinish != 0) {
-        D_00536640[idx] = 0;
+        cGameModeMan::uiFinalScores[idx] = 0;
         cGameModeHandler_pManager->iNextHeat = 1;
         SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 0;
-        D_005366A8[idx] = 1;
+        cGameModeMan::bDidNotFinish[idx] = 1;
     } else {
         cGameModeMan* gm = cGameModeHandler_pManager;
         if (st.TotalPoints < (int)gm->uiPointTarget) {
             rider->ShouldCelebrateAtFinish = 0;
-            D_00536640[idx] = st.TotalPoints;
+            cGameModeMan::uiFinalScores[idx] = st.TotalPoints;
             gm->iNextHeat = 1;
-            D_005366A8[idx] = 0;
+            cGameModeMan::bDidNotFinish[idx] = 0;
         } else {
             int tier2Target = cBENewRaceInterface_getPeakGoal(race, gm->iCurrentGameEvent, 2) * 100;
             int tier1Target = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
             SSXApp->Game->AI->Riders[idx]->ShouldCelebrateAtFinish = 1;
-            D_00536640[idx] = st.TotalPoints;
+            cGameModeMan::uiFinalScores[idx] = st.TotalPoints;
             gm2->bIsEventDone = 1;
             if (st.TotalPoints >= tier2Target) {
                 cGameModeMan_iRanking[idx] = 0;

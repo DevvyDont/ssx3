@@ -592,7 +592,6 @@ extern "C" int cSSXScriptEngine_GetNISListState(void* self, int i);
 extern "C" int cSSXScriptEngine_GetNISListLength(void* self, int i);
 extern "C" void cSSXScriptEngine_AppendEndEventSequence(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-extern int D_005366A8[];
 // PORT: function-local `static const float` with a dynamic initializer (guard D_004A4F64),
 // spelled with splat's globals; the const object's loads are loop-invariant (RTX_UNCHANGING).
 extern const float D_004A4F60;
@@ -682,7 +681,7 @@ public:
  *
  * When the delay (+0x14) reaches 0 and no replay is running (the Replay's first word is 0 or 10 or more), it calls
  * cOVStateManager_triggerFinishOverlay() and, unless the sub-state (+0x10) is already 2, handleEvent (slot 24) with (0, 0) on the "finishov"
- * UI state. Sub-state 0: unless D_005366A8[0] is set, waits while any AI rider's vector from slot 2 of its +0x6C0
+ * UI state. Sub-state 0: unless cGameModeMan::bDidNotFinish[0] is set, waits while any AI rider's vector from slot 2 of its +0x6C0
  * object is longer than 277.78 (a function-local static float); also waits while the race mode is not 4 and the game
  * mode manager has +0x98 set and +0x9C clear. Then it builds and readies NIS list 0 with the end-event sequence
  * (cSSXScriptEngine_AppendEndEventSequence()), sets mNextState (+0x0) to 12 when the list is not empty, calls
@@ -716,7 +715,7 @@ void cGFFinishlineState::update()
         cGameModeMan* x = ssxApp->GameModeMan;
         cAI* gameAI = ssxApp->Game->AI;
         int cnt = gameAI->NumberOfPlayersAllocated;
-        if (D_005366A8[0] == 0) {
+        if (cGameModeMan::bDidNotFinish[0] == 0) {
             for (int i = 0; i < cnt; i++) {
                 if (D_004A4F64 == 0) {
                     *(float*)&D_004A4F60 = 277.77777099609375f;

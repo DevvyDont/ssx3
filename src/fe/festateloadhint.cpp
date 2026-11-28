@@ -322,10 +322,10 @@ bool cFELoadStateInLodge::onGainTransition(int)
 //100%
 INCLUDE_ASM("fe/festateloadhint", cGameModeMan_cmpScores);
 #ifdef SKIP_ASM
-extern unsigned int D_00536640[];
+extern unsigned int cGameModeMan_uiFinalScores[];
 
 /**
- * Compares two rider indices by their scores in D_00536640, higher score first (qsort comparator).
+ * Compares two rider indices by their scores in cGameModeMan_uiFinalScores, higher score first (qsort comparator).
  *
  * cGameModeMan_sortScores() passes it to qsort() to sort cGameModeMan_iCharRank. The scores are compared unsigned.
  *
@@ -335,8 +335,8 @@ extern unsigned int D_00536640[];
  */
 extern "C" int cGameModeMan_cmpScores(int* firstRider, int* secondRider)
 {
-    unsigned int va = D_00536640[*firstRider];
-    unsigned int vb = D_00536640[*secondRider];
+    unsigned int va = cGameModeMan_uiFinalScores[*firstRider];
+    unsigned int vb = cGameModeMan_uiFinalScores[*secondRider];
     if (vb < va) {
         return -1;
     }
@@ -347,10 +347,10 @@ extern "C" int cGameModeMan_cmpScores(int* firstRider, int* secondRider)
 //100%
 INCLUDE_ASM("fe/festateloadhint", cGameModeMan_cmpTimes);
 #ifdef SKIP_ASM
-extern unsigned int D_00536640[];
+extern unsigned int cGameModeMan_uiFinalScores[];
 
 /**
- * Compares two rider indices by their values in D_00536640, lower value first (qsort comparator).
+ * Compares two rider indices by their values in cGameModeMan_uiFinalScores, lower value first (qsort comparator).
  *
  * cGameModeMan_sortTimes() passes it to qsort() to sort cGameModeMan_iCharRank. The values are compared unsigned.
  *
@@ -360,8 +360,8 @@ extern unsigned int D_00536640[];
  */
 extern "C" int cGameModeMan_cmpTimes(int* firstRider, int* secondRider)
 {
-    unsigned int va = D_00536640[*firstRider];
-    unsigned int vb = D_00536640[*secondRider];
+    unsigned int va = cGameModeMan_uiFinalScores[*firstRider];
+    unsigned int vb = cGameModeMan_uiFinalScores[*secondRider];
     if (va < vb) {
         return -1;
     }
@@ -1144,7 +1144,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern unsigned int D_00536640[];
+extern unsigned int cGameModeMan_uiFinalScores[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
@@ -1266,7 +1266,7 @@ void cFELoadState::InitwidgetMultiP(char player)
         if (cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_RACE
         || cBENewRaceInterface_newRace.cGameMode == kGAMEMODE_TIMECHALLENGE) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
-            unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
+            unsigned int seconds = fptoui((float)cGameModeMan_uiFinalScores[i] * (1.0f / 60.0f));
             cUIThing* o = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Time));
             if (o != 0) {
                 o->setVisible(1);
@@ -1274,7 +1274,7 @@ void cFELoadState::InitwidgetMultiP(char player)
             strcpy(buf, formatMinutesSeconds(seconds));
         } else {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
-            unsigned int score = D_00536640[i];
+            unsigned int score = cGameModeMan_uiFinalScores[i];
             cUIThing* o = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Score));
             if (o != 0) {
                 o->setVisible(1);

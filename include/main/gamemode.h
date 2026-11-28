@@ -13,7 +13,7 @@
 // Statics (not in the object; [O] names, retail sizes): aHandler[10] = cGameModeMan_aHandler (the cGameModeHandler subclass
 // instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = cGameModeMan_bGiveUp
 // (restartHeat
-// clears 6 words), and the 10-entry score / rank tables D_00536640, cGameModeMan_iCharRank, cGameModeMan_iRanking that sortScores /
+// clears 6 words), and the 10-entry score / rank tables cGameModeMan_uiFinalScores, cGameModeMan_iCharRank, cGameModeMan_iRanking that sortScores /
 // sortTimes (cGameModeMan_sortScores / cGameModeMan_sortTimes) fill and writeToReplayFrame saves.
 //
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cGameModeMan, 0x22C:
@@ -97,6 +97,10 @@ struct cGameModeMan {
     void sortScores(int n) __asm__("cGameModeMan_sortScores");
     void sortTimes(int n) __asm__("cGameModeMan_sortTimes");
     void clearRanking(int i) __asm__("cGameModeMan_clearRanking");
+
+    // statics ([O] On Tour; retail 10 entries)
+    static unsigned int uiFinalScores[] __asm__("cGameModeMan_uiFinalScores");
+    static int bDidNotFinish[] __asm__("cGameModeMan_bDidNotFinish");
 };
 
 CHECK_OFFSET(cGameModeMan, iHeatNum, 0x00);

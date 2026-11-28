@@ -5728,8 +5728,8 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 // PORT: fptoui is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
 extern "C" unsigned int fptoui(float f);
 extern "C" void LobbyMan_LobbyFunctor_onresultsreportresponse_invoke(void* self, void* a1, int a2);
-extern int D_005366A8[];
-extern int D_00536640[];
+extern int cGameModeMan_bDidNotFinish[];
+extern int cGameModeMan_uiFinalScores[];
 extern char str_WHEN[];
 extern char str_AUTH[];
 extern char str_REPT[];
@@ -5861,18 +5861,18 @@ static inline int RaceTime(int end)
  * mLocalEndTime, mCheating[0], @p statsA, @p idxA) or the peer's side B (the remote flags, mRemoteEndTime,
  * mCheating[1], @p statsB, @p idxB).
  * Fields: WHEN (mWhen), REPT (the reporter: mHostName on the host, else mOppoName), AUTH (mAuth, only with @p
- * sendName), COMMERR, SCOMERR, PINGRSLT, STALLCNT, CERRSTAT, CERRFLGS, DIDQUIT0/1, FINISH0/1, DNF0/1 (D_005366A8),
+ * sendName), COMMERR, SCOMERR, PINGRSLT, STALLCNT, CERRSTAT, CERRFLGS, DIDQUIT0/1, FINISH0/1, DNF0/1 (cGameModeMan_bDidNotFinish),
  * RSLTSLCK (game-mode manager +0x9C), RACETRA0 (the location id), RACEEVE0 (cBENewRaceInterface_newRace.cGameEvent; for
  * locations 14..16 it becomes 0 when that is 4, else 1), DESYNC, then per rider NAME (mHostName / mOppoName), QUIT
  * (race time from mRaceStartTime to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time
- * when a significant comm error is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is
+ * when a significant comm error is put on that side), CHARACTER, RACETIM or SCORE (cGameModeMan_uiFinalScores; SCORE when RACEEVE0 is
  * nonzero) and the trick and speed totals (SPINDEG .. PLOSTRE, floats converted with fptoui). It sends the record with
  * LobbyMan_sendRequest (state unchanged, callback LobbyMan_LobbyFunctor_onresultsreportresponse_invoke, which runs LobbyMan_onresultsreportresponse, timeout 20.0)
  * and posts an online::Event of type 0x100 on mEventList. Likely bug: CHARACTER0 is always MyCharacterID, so on the
  * non-host side both CHARACTER0 and CHARACTER1 are this player's character.
  *
  * @param sendName  nonzero to include the AUTH field (the trophy-room caller passes bIsRankedGame)
- * @param idxA      this machine's rider index into D_005366A8 / D_00536640 (the caller passes !bIsHost)
+ * @param idxA      this machine's rider index into cGameModeMan_bDidNotFinish / cGameModeMan_uiFinalScores (the caller passes !bIsHost)
  * @param idxB      the peer's rider index (the caller passes bIsHost != 0)
  * @param statsA    this machine's race statistics (networkOpt MyStats)
  * @param statsB    the peer's race statistics (networkOpt OpponentStats)
@@ -5982,8 +5982,8 @@ extern "C" void LobbyMan_reportRaceResult(char* const self, int sendName, int id
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DIDQUIT1, oppDone);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FINISH0, myOut);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FINISH1, oppOut);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DNF0, IsSet(D_005366A8[myIdx]));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DNF1, IsSet(D_005366A8[oppIdx]));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DNF0, IsSet(cGameModeMan_bDidNotFinish[myIdx]));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DNF1, IsSet(cGameModeMan_bDidNotFinish[oppIdx]));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RSLTSLCK, IsSet(*(int*)(prof + 0x9C)));
     int mode = cBENewRaceInterface_getLocationID(iface);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETRA0, mode);
@@ -6002,9 +6002,9 @@ extern "C" void LobbyMan_reportRaceResult(char* const self, int sendName, int id
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_DISC0, myQuitTime);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CHARACTER0, cBENetworkInterface_networkOpt.MyCharacterID);
     if (ranked == 0)
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM0, D_00536640[myIdx]);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM0, cGameModeMan_uiFinalScores[myIdx]);
     else
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCORE0, D_00536640[myIdx]);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCORE0, cGameModeMan_uiFinalScores[myIdx]);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SPINDEG0, mine->SpinDegs);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_FLIPDEG0, mine->FlipDegs);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMGRAB0, mine->NumGrabs);
@@ -6041,9 +6041,9 @@ extern "C" void LobbyMan_reportRaceResult(char* const self, int sendName, int id
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE0, mine->TotalPointsLostToResets);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CHARACTER1, oppChar);
     if (ranked == 0)
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM1, D_00536640[oppIdx]);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETIM1, cGameModeMan_uiFinalScores[oppIdx]);
     else
-        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCORE1, D_00536640[oppIdx]);
+        cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SCORE1, cGameModeMan_uiFinalScores[oppIdx]);
     cDirtysock_tag_TagFieldSetString(buf, 0x800, str_NAME1, *(const char**)(self + 0x94));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_QUIT1, oppTime);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_CHEAT1, oppScore);

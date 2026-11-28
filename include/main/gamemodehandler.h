@@ -134,7 +134,7 @@ CHECK_SIZE(cGMRaceHandler, 0xD0);
 struct cGMMPRaceHandler : public cGameModeHandler {
     // 0x00: the vptr: [R] cGMMPRaceHandler_vtbl
     unsigned int uiTime[10];        // 0x04 [O] uiTime (On Tour [62]); [U] init fills 9s (40 bytes), raceFinish stores
-                                    //      each rider's finish tick (360000 = DNF) and copies it to D_00536640
+                                    //      each rider's finish tick (360000 = DNF) and copies it to cGameModeMan_uiFinalScores
 
     // Methods bound to their retail symbols by asm labels.
     // retail's destructor cGMMPRaceHandler__cGMMPRaceHandler stays a C function (g++ 2.95 takes no asm label on a

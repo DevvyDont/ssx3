@@ -9375,7 +9375,6 @@ extern "C" int fptoui(float f);
 
 extern "C" char* formatMinutesSeconds(int v);
 
-extern unsigned int D_00536640[];
 
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 
@@ -9389,7 +9388,6 @@ extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int 
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern int cGameModeMan_iCharRank[];
-extern int D_005366A8[];
 extern char* cOVState_overlayOptionTextIDs[];
 extern int cOVState_platinumMedalFlag;
 struct sIdx5_6718 {
@@ -9556,12 +9554,12 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                 int finished = 0;
                 uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
                 if (i == cGameModeMan_iRanking[pl0]) {
-                    if (D_005366A8[pl0] != 0) {
+                    if (cGameModeMan::bDidNotFinish[pl0] != 0) {
                         finished = 1;
                     }
                 } else if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER
                     && i == cGameModeMan_iRanking[pl1]) {
-                    if (D_005366A8[pl1] != 0) {
+                    if (cGameModeMan::bDidNotFinish[pl1] != 0) {
                         finished = 1;
                     }
                 }
@@ -9581,9 +9579,9 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
                     cUIText_setAsciiString(uiText, str_DNF);
                     done = 1;
                 } else if (track == 0 || track == 5) {
-                    cUIText_setAsciiString(uiText, formatMinutesSeconds(fptoui(D_00536640[idx] * 0.01666666753590107f)));
+                    cUIText_setAsciiString(uiText, formatMinutesSeconds(fptoui(cGameModeMan::uiFinalScores[idx] * 0.01666666753590107f)));
                 } else {
-                    unsigned int time = D_00536640[idx];
+                    unsigned int time = cGameModeMan::uiFinalScores[idx];
                     sprintf(text, str_pct_d_j, time);
                     cUIText_setAsciiString(uiText, text);
                 }
@@ -9599,7 +9597,7 @@ bool cOVState_FINAL_STANDINGS::onGainTransition(int)
         sIdx5_6718 ids = D_0046E648;
         int same = 0;
         if (players == 2 && track != 0 && track != 5) {
-            same = D_00536640[pl0] == D_00536640[pl1];
+            same = cGameModeMan::uiFinalScores[pl0] == cGameModeMan::uiFinalScores[pl1];
         }
         uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_b));
         if (players != 2) {
@@ -10016,7 +10014,6 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern int cOVState_platinumMedalFlag;
 extern int cGameModeMan_iRanking[];
-extern unsigned int D_00536640[];
 extern char str_finishov[];
 extern char str_Menu0000_b[];
 extern char str_firstrun[];
@@ -10086,7 +10083,7 @@ void cOVState_RACE_FINISHOV::onCreateScreen()
     cUIState_hideObjSafe(this, str_thirdrun);
     cUIState_hideObjSafe(this, str_finalrun);
     cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pointstotal));
-    cUIText_setAsciiString((cUIText*)screenWidget, formatMinutesSeconds(fptoui(D_00536640[pl] * 0.01666666753590107f)));
+    cUIText_setAsciiString((cUIText*)screenWidget, formatMinutesSeconds(fptoui(cGameModeMan::uiFinalScores[pl] * 0.01666666753590107f)));
     int off = pl * 4;
     int i;
     for (i = 1; i < 7; i++) {
@@ -10366,7 +10363,7 @@ void cOVState_BASSSP_QUAL_FINISHOV::onCreateScreen()
     cFELocale* loc = SSXApp->FELocale;
     sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, loc);
     strcpy1(fmt, vt[4].fn(vthis(loc, vt[4]), GetHashValue32(str_kT_OVRCMNPointstotal)));
-    sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
+    sprintf1(text, fmt, *(unsigned int*)((char*)cGameModeMan::uiFinalScores + off));
     cUIText_setUnicodeString(screenWidget, text);
     screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
@@ -10519,10 +10516,8 @@ extern "C" char* formatMinutesSeconds(int v);
 extern "C" void* getPeakChallengeEventName(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
-extern unsigned int D_00536640[];
 extern char* cOVState_overlayOptionTextIDs[];
 struct sIdx3_8920 {
     int v[3];
@@ -10594,10 +10589,10 @@ void cOVState::PEAKCHAL_RESULTS_onCreateScreen()
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
         cUIText_setAsciiString(targetValue, formatMinutesSeconds(fptoui(modeData->uiTimeLimit * 0.01666666753590107f)));
-        if (D_005366A8[0] != 0) {
+        if (cGameModeMan::bDidNotFinish[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            cUIText_setAsciiString(resultValue, formatMinutesSeconds(fptoui(D_00536640[0] * 0.01666666753590107f)));
+            cUIText_setAsciiString(resultValue, formatMinutesSeconds(fptoui(cGameModeMan::uiFinalScores[0] * 0.01666666753590107f)));
         }
     } else {
         char buf[32];
@@ -10605,10 +10600,10 @@ void cOVState::PEAKCHAL_RESULTS_onCreateScreen()
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_CMNYourScore));
         sprintf(buf, str_pct_d_j, (int)modeData->uiPointTarget);
         cUIText_setAsciiString(targetValue, buf);
-        if (D_005366A8[0] != 0) {
+        if (cGameModeMan::bDidNotFinish[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            sprintf(buf, str_pct_d_j, D_00536640[0]);
+            sprintf(buf, str_pct_d_j, cGameModeMan::uiFinalScores[0]);
             cUIText_setAsciiString(resultValue, buf);
         }
     }

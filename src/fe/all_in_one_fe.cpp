@@ -2427,7 +2427,7 @@ struct Obj_F660 {
     virtual void v06();
     virtual int getAIIndex();
 };
-extern int D_00536640[];
+extern int cGameModeMan_uiFinalScores[];
 extern char str_pct_02d_pct_02d_pct_02d_b[];
 extern char str_pct_d_j[];
 extern tARGB D_004C8808;
@@ -2449,7 +2449,7 @@ extern "C" void cFont_centertext(void*, float, float, char*);
  * The rider is AI->Riders[aiIndex] (SSXApp->Game->AI; aiIndex from @p rider). The banner is element 66 of @p elems with
  * the "fini" texture icons[8] (+0x4B4), or with @p flag element 27 with the "timeup" texture icons[2] (+0x49C): its
  * size (fallback: the texture's) times its scale, placed by cOVStateHUD1P_calcElemPos with the element's alignment and @p x, drawn
- * in the element's colour on its layer. Only under "fini": the value is D_00536640[i] (the cGameModeMan score / time
+ * in the element's colour on its layer. Only under "fini": the value is cGameModeMan_uiFinalScores[i] (the cGameModeMan score / time
  * table), i being the rider's AI index from its cBeing interface (+0x6C0, virtual getAIIndex). In game modes 0 and 5
  * (cBENewRaceInterface_newRace.cGameMode) it is a time in 1/60 s ticks, printed as "%02d:%02d:%02d" hours, minutes and
  * seconds; otherwise it is printed "%d" after adding the panel's f7C (+0x7C; On Tour pointOffset). The text is drawn
@@ -2496,7 +2496,7 @@ void cOVStateHUD1P::renderFinishMessage(int elems, int* rider, int x, int flag)
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
         Obj_F660* being = (Obj_F660*)(&VPTR_AT(panelRider, sizeof(cRiderState)));
         int k = being->getAIIndex();
-        int val = D_00536640[k];
+        int val = cGameModeMan_uiFinalScores[k];
         if (mode == 0 || mode == 5) {
             int t = (int)((float)val * 0.01666666753590107f);
             int rem = t % 3600;
