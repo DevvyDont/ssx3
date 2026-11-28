@@ -35,8 +35,7 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_Init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag_AF30(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void cBezierCache_allocateCaches(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-struct cBezierVirt;
-extern "C" void cPS2BezierMan_invokeClearPatches(cBezierVirt* self);
+extern "C" void cPS2BezierMan_invokeClearPatches(cPS2BezierMan* self);
 extern const char str_4x4VifCache[];
 extern const char str_6x6VifCache[];
 extern const char str_8x8VifCache[];
@@ -79,7 +78,7 @@ void cPS2BezierMan::Init()
     unk_0358 = 8.0f;
     mNearLODcm = 3000.0f;
     mFarLODcm = 15000.0f;
-    cPS2BezierMan_invokeClearPatches((cBezierVirt*)this);
+    cPS2BezierMan_invokeClearPatches(this);
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
             sUV_AF30 gridUV;
@@ -1621,38 +1620,15 @@ void cPS2BezierMan::addProjectorPasses(int kind, void* tbl, void* patch, int mas
 //100%
 INCLUDE_ASM("render/bezierman", cPS2BezierMan_invokeClearPatches);
 #ifdef SKIP_ASM
-class cBezierVirt {
-public:
-    int field_0x0;
-    // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
-    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void ClearPatches();
-};
-
 /**
  * Calls virtual slot 17 of the patch manager (cPS2BezierMan_ClearPatches, which empties the patch queues).
  *
  * cPS2BezierMan_Init calls it after setting up the caches.
  */
-extern "C" void cPS2BezierMan_invokeClearPatches(cBezierVirt* self)
+extern "C" void cPS2BezierMan_invokeClearPatches(cPS2BezierMan* self)
 {
-    self->ClearPatches();
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
+    vt[kBezierManVt_ClearPatches].fn(vthis(self, vt[kBezierManVt_ClearPatches]));
 }
 #endif
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/bestate.h"
+#include "be/beintbolt.h"
 #include "be/beintsavefile.h"
 #include "be/beintaggression.h"
 #include "be/beintscore.h"
@@ -109,8 +110,6 @@ void* cBERaceState::getInterface(int kind)
 //100%
 INCLUDE_ASM("be/bestate", cBERaceState_onExit);
 #ifdef SKIP_ASM
-extern cBEInterface* cBEBoltInterface_instance;
-
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
  *
@@ -135,8 +134,6 @@ extern "C" void cBERaceState_onExit(void) {
 //100%
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
-extern cBEInterface* cBEBoltInterface_instance;
-
 /**
  * Enters the race back-end state: marks its interfaces active.
  *

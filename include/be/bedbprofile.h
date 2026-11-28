@@ -59,13 +59,25 @@ enum { kNoBoltGroup = -1 };
 // and every walker steps 0x38. Laid out through the members the matched code reads; belibrary, beintecon,
 // beintreward, feridermanager and lensfx still read the record through their own views.
 struct tBEBoltDef {
-    char unk_00[0x2];               // 0x00
+    signed char charID;             // 0x00 [P] the preview asserts "mpCharBolts[index].getCharID() == charID"
+                                    //      (be/bedbbolt.h); [U] the group the bolt database sorts and counts the
+                                    //      definitions by (cBEBoltDB_indexCharBolts, cBEBoltDB_buildChildTables)
+    signed char variant;            // 0x01 (ours) [U] cFERider::updateAnimModelParts sets the model part's variant
+                                    //      to it; func_0014C590 sets it; func_0014B2F8 / func_0014B378 take the
+                                    //      definitions where it is 0
     signed char storeNum;           // 0x02 [U] the store that sells it: cFEStateCharEquip's store lists an item only
                                     //      when this equals its mStoreNum (cFEStateCharEquip_isStoreCategoryEmpty, cFEStateCharEquip_buildItemList)
-    char unk_03[0x1];               // 0x03
+    signed char modelGroup;         // 0x03 (ours) [U] cBEBoltInterface_buildBoltModelFileName builds no file name
+                                    //      for kNoBoltGroup and fills '$' wildcards from the same group's bolts
     short id;                       // 0x04 [U] the item id: the index into cBECharProfileDB::mpBoltsMap (cRider_collectWornParts,
                                     //      cRider_OnStartObjectUse / OnEndObjectUse, beintecon, beintreward)
-    char unk_06[0x8];               // 0x06
+    short parentId;                 // 0x06 (ours) [U] the parent bolt's id, kNoBoltID at the top level:
+                                    //      cBEBoltDB_countChildBolts / getFirstChildBolt / collectChildBolts find a
+                                    //      bolt's children by it, cBEBoltDB_isBoltAncestor walks up
+    short categoryId;               // 0x08 (ours) [U] cBEBoltDB_collectCategoryBolts collects a category's bolts by it
+    char unk_0A[0x2];               // 0x0A
+    short equipPoints;              // 0x0C (ours) [U] cBEBoltDB_setBoltEquipPoints sets it;
+                                    //      cBEBoltInterface_getUsedEquipPoints sums it over the equipped bolts
     short price;                    // 0x0E [U] the price in tens of dollars (kBoltPriceBuiltIn below; the equip
                                     //      screen shows and charges it x 10 when positive)
     signed char modelPart;          // 0x10 [U] the rider model part it replaces: cRider_OnStartObjectUse hides it at
@@ -76,18 +88,31 @@ struct tBEBoltDef {
                                     //      cBuyPopupInfo::initBuyBolt(const char* boltName, ...)); the bolts file
                                     //      loader relocates it (cBEBoltDB_loadFile)
     const char* lodPartNames[4];    // 0x18 [U] cRider_parsePartsFromBuf: the MDF archive part per LOD (0: none)
-    char unk_28[0x8];               // 0x28
+    char* modelPartFile;            // 0x28 (ours) [U] cFERider::loadModels requests it as the bolt's model part
+                                    //      file; func_0014BC18 lists the equipped bolts' distinct ones; the bolts
+                                    //      file loader relocates it (cBEBoltDB_loadFile)
+    char* modelFileName;            // 0x2C (ours) [U] cBEBoltInterface_buildBoltModelFileName fills its '$'
+                                    //      wildcards; cBEBoltInterface_getVisibleModelFiles skips bolts without one;
+                                    //      the bolts file loader relocates it
     char* pictureName;              // 0x30 [U] the item's picture: cFEStateCharEquip_getIconID looks its icon up by it
                                     //      and startLargePreviewLoad builds the preview file name from it
     int flags;                      // 0x34 [U] 0x40 hidden in NIS sequences (cRider_OnStartObjectUse / OnEndObjectUse);
                                     //      0x100 / 0x200 / 0x400 the item kind (beintreward)
 };
+CHECK_OFFSET(tBEBoltDef, charID, 0x00);
+CHECK_OFFSET(tBEBoltDef, variant, 0x01);
+CHECK_OFFSET(tBEBoltDef, modelGroup, 0x03);
 CHECK_OFFSET(tBEBoltDef, storeNum, 0x02);
 CHECK_OFFSET(tBEBoltDef, id, 0x04);
+CHECK_OFFSET(tBEBoltDef, parentId, 0x06);
+CHECK_OFFSET(tBEBoltDef, categoryId, 0x08);
+CHECK_OFFSET(tBEBoltDef, equipPoints, 0x0C);
 CHECK_OFFSET(tBEBoltDef, price, 0x0E);
 CHECK_OFFSET(tBEBoltDef, modelPart, 0x10);
 CHECK_OFFSET(tBEBoltDef, name, 0x14);
 CHECK_OFFSET(tBEBoltDef, lodPartNames, 0x18);
+CHECK_OFFSET(tBEBoltDef, modelPartFile, 0x28);
+CHECK_OFFSET(tBEBoltDef, modelFileName, 0x2C);
 CHECK_OFFSET(tBEBoltDef, pictureName, 0x30);
 CHECK_OFFSET(tBEBoltDef, flags, 0x34);
 CHECK_SIZE(tBEBoltDef, 0x38);

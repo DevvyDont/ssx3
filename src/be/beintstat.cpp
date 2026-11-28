@@ -10,6 +10,8 @@
 #include "be/beintoption.h"
 #include "be/beintecon.h"
 #include "be/beintstat.h"
+#include "be/beintbolt.h"
+#include "be/bedbbolt.h"
 #include "be/beintplayer.h"
 #include "be/beintnetwork.h"
 #include "be/beintreward.h"
@@ -499,7 +501,6 @@ INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cBESaveInterface_purgeInterface(void);
-extern int* cBEBoltInterface_instance;
 
 /**
  * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
@@ -528,7 +529,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     cBENetworkInterface_instance = 0;
     operator_delete((int*)cBEScoreInterface_instance);
     cBEScoreInterface_instance = 0;
-    operator_delete(cBEBoltInterface_instance);
+    operator_delete((int*)cBEBoltInterface_instance);
     cBEBoltInterface_instance = 0;
     operator_delete((int*)cBEMissionInterface_instance);
     cBEMissionInterface_instance = 0;
@@ -605,7 +606,7 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
 INCLUDE_ASM("be/beintstat", cBELibrary_loadData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cBEBoltDB_load(void*);
+extern "C" void cBEBoltDB_load(cBEBoltDB* db);
 extern "C" void cBERewardDB_init(void*, int);
 extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* FILE_load(const char* name, int flags);
@@ -625,7 +626,6 @@ struct sCharSrc_149BB8
     unsigned char v[7];
 };
 
-extern char cBELibrary_boltDB[];
 extern char cBELibrary_rewardDB[];
 extern cBERaceDB cBELibrary_raceDB;
 extern const char str_data_be_charDB_dbl[];
@@ -651,7 +651,7 @@ extern "C" void cBELibrary_loadData(void)
     void* buf;
     int* grabPoints;
 
-    cBEBoltDB_load(cBELibrary_boltDB);
+    cBEBoltDB_load(&cBELibrary_boltDB);
     cBERewardDB_init(cBELibrary_rewardDB, 0);
     memset(&cBELibrary_raceDB, 0, 76);
     for (i = 0; i < 6; i++) {

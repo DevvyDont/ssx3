@@ -9197,7 +9197,6 @@ extern char D_00439A40[];
 extern char D_0043B3F0[];
 extern char D_0044B080[];
 extern char D_0044B140[];
-extern char* cBezierMan_TheBezierMan;
 extern int D_004A5990;
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).

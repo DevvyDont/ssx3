@@ -3,6 +3,7 @@
 #include "be/beinterface.h"
 #include "animation/mdfarchive.h"
 #include "be/bedbprofile.h"
+#include "be/bedbbolt.h"
 #include "ealib/shape.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
@@ -993,23 +994,12 @@ extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
 extern "C" void cAnimModel_disableAllParts(void* model);
 extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
-struct sBoneEntF780 {
-    char f0;
-    char variant;
-    char pad_0x2[0xE];
-    char partID;
-    char pad_0x11[0x38 - 0x11];
-};
-struct sBoneDbF780 {
-    int f0;
-    sBoneEntF780* entries;  // 0x4
-};
 
-static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
+static inline tBEBoltDef* getEntK19F780(cBEBoltDB* db, int i)
 {
     if (i < 0)
         return 0;
-    return &db->entries[i];
+    return &db->mpCharBolts[i];
 }
 
 /**
@@ -1022,7 +1012,7 @@ static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
 void cFERider::updateAnimModelParts()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sBoneDbF780* db = (sBoneDbF780*)cBEBoltInterface_getBoltDB_noarg();
+    cBEBoltDB* db = (cBEBoltDB*)cBEBoltInterface_getBoltDB_noarg();
     cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, ((int*)this)[1], ((int*)this)[0]);
     int n = list->mNumBolts;
     tBEProfileBolt* it = ((&list->mBolts[0]));
@@ -1030,9 +1020,9 @@ void cFERider::updateAnimModelParts()
     int i;
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {
-            sBoneEntF780* partEntry = getEntK19F780(db, cBEBoltDB_findBoltIndex(db, ((int*)this)[0], it[i].id));
-            if (partEntry->partID >= 0)
-                cAnimModel_setModelPartVariant(mpAnimModel, partEntry->partID, partEntry->variant);
+            tBEBoltDef* partEntry = getEntK19F780(db, db->findBoltIndex(((int*)this)[0], it[i].id));
+            if (partEntry->modelPart >= 0)
+                cAnimModel_setModelPartVariant(mpAnimModel, partEntry->modelPart, partEntry->variant);
         }
     }
     *(int*)mpBoltOnFX = 1;
@@ -1338,21 +1328,12 @@ extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
 extern "C" void cFEBoltFileManager_startDeferredModelPartLoads(void* mgr, int bank);
 extern void* cBoltFileIndexManager_instance;
 
-struct sBoneEntFF00 {
-    char pad_0x0[0x28];
-    char* file;             // 0x28
-    char pad_0x2C[0x38 - 0x2C];
-};
-struct sBoneDbFF00 {
-    int f0;
-    sBoneEntFF00* entries;  // 0x4
-};
 
-static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
+static inline tBEBoltDef* getEntK19FF00(cBEBoltDB* db, int i)
 {
     if (i < 0)
         return 0;
-    return &db->entries[i];
+    return &db->mpCharBolts[i];
 }
 
 /**
@@ -1371,7 +1352,7 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
 void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int force, int keepLoaded)
 {
     int n = list->mNumBolts;
-    sBoneDbFF00* db = (sBoneDbFF00*)cBEBoltInterface_getBoltDB_noarg();
+    cBEBoltDB* db = (cBEBoltDB*)cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         tBEProfileBolt* it = &list->mBolts[i];
@@ -1386,9 +1367,10 @@ void cFERider::loadModels(cBECharProfileDB* list, tBEProfileBolt* prev, int forc
         tBEProfileBolt* it = &list->mBolts[i];
         if (cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
-                sBoneEntFF00* partEntry = getEntK19FF00(db, cBEBoltDB_findBoltIndex(db, mCharID, it->id));
-                if (partEntry->file) {
-                    int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, partEntry->file, 8, keepLoaded, 1);
+                tBEBoltDef* partEntry = getEntK19FF00(db, db->findBoltIndex(mCharID, it->id));
+                if (partEntry->modelPartFile) {
+                    int fileSlot = cFEBoltFileManager_requestFile(mgr, mCharID, partEntry->modelPartFile, 8,
+                                                                  keepLoaded, 1);
                     cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager_instance, mProfileIndex, it->id, fileSlot);
                     mDoneLoadingModels = 0;
                     mCompiledModel = 0;

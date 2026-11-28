@@ -1,6 +1,7 @@
 #include "common.h"
 #include "be/beprofilelib.h"
 #include "be/bestate.h"
+#include "be/beintbolt.h"
 #include "be/beintsavefile.h"
 #include "be/beintaggression.h"
 #include "be/beintnewrace.h"
@@ -112,9 +113,6 @@ void* cBEPostRaceState::getInterface(int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBEBoltInterface_instance;
-
-
 /**
  * Leaves the post-race back-end state: marks its interfaces inactive.
  *
@@ -129,7 +127,7 @@ extern "C" void cBEPostRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 0;
+    cBEBoltInterface_instance->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
@@ -140,9 +138,6 @@ extern "C" void cBEPostRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBEBoltInterface_instance;
-
-
 /**
  * Enters the post-race back-end state: marks its interfaces active.
  *
@@ -157,7 +152,7 @@ extern "C" void cBEPostRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 1;
+    cBEBoltInterface_instance->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;
@@ -258,9 +253,6 @@ void* cBEPreRaceState::getInterface(int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBEBoltInterface_instance;
-
-
 /**
  * Leaves the pre-race back-end state: marks its interfaces inactive.
  *
@@ -276,7 +268,7 @@ extern "C" void cBEPreRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 0;
+    cBEBoltInterface_instance->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
@@ -287,9 +279,6 @@ extern "C" void cBEPreRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBEBoltInterface_instance;
-
-
 /**
  * Enters the pre-race back-end state: marks its interfaces active.
  *
@@ -306,7 +295,7 @@ extern "C" void cBEPreRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 1;
+    cBEBoltInterface_instance->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;

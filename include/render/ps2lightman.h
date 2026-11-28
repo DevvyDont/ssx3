@@ -19,8 +19,7 @@
 // placed by [R] Init (cPS2LightMan_Init) and [U] the accessors.
 
 #include "layout.h"
-
-struct cLightInst;
+#include "render/lightman.h"
 
 struct tLightRecord;
 
@@ -36,14 +35,15 @@ struct cPS2LightMan {
     // --- cLightMan
     void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), cPS2LightMan_vtbl (cLightMan_construct)
     // --- cPSPLightMan
-    cLightInst** m_pLights;          // 0x04 [O]; [R] Init: = new((n + 50) * 4); [U] GetLightObj returns &m_pLights[i];
-                                     //      Purge frees it; CreateLights / Create* index it
+    cLightInst* m_pLights;           // 0x04 [O] (the lights themselves, 4 bytes each); [R] Init: = new((n + 50) * 4);
+                                     //      [U] GetLightObj returns &m_pLights[i]; Purge frees it; CreateLights /
+                                     //      Create* index it
     int m_iStartDynLight;            // 0x08 [O]; [R] Init: = n (the static light count); [U] GetDynamicLight adds it
     int m_iDynLight;                 // 0x0C [O]; [R] Init: = 0; [U] ResetDynamicLights = 0, GetDynamicLight post-increments it
     int m_iMaxLights;                // 0x10 [O]; [R] Init: = n + 50
 
     // Methods bound to their retail symbols by asm labels.
-    void* GetLightObj(int index) __asm__("cPS2LightMan_GetLightObj__FPvi");
+    cLightInst* GetLightObj(int index) __asm__("cPS2LightMan_GetLightObj__FPvi");
     void Init(int numLights) __asm__("cPS2LightMan_Init");
     void Purge() __asm__("cPS2LightMan_Purge");
     void ResetDynamicLights() __asm__("cPS2LightMan_ResetDynamicLights__FPv");

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/be.h"
 #include "be/bestate.h"
 #include "be/bedbprofile.h"
 #include "be/beintnewrace.h"
@@ -358,31 +359,23 @@ void cBEAggressionInterface::readFromReplayFrame(cBxReplayFrame* stream)
 //100%
 INCLUDE_ASM("be/beintaggression", cBEState_gotoNextState);
 #ifdef SKIP_ASM
-extern int cBE_currentState;
-extern char* cBE_aBEState[];
 
 /**
- * Moves the back end to the next state: calls the current state's onExit, makes @p self's nextState current and calls
- * the new state's onEnter.
+ * Moves the back end to the next state: calls the current state's onExit, makes this state's nextState current
+ * and calls the new state's onEnter.
  *
  * The states are cBE_aBEState[cBE_currentState]; onExit and onEnter are vtable slots 3 and 4 (vtable pointer at +0x4
  * of each state).
  */
 void cBEState::gotoNextState()
 {
-    char* obj;
-    char* vtbl;
-    char* obj2;
-    char* vtbl2;
-    int next;
-
-    obj = cBE_aBEState[cBE_currentState];
-    vtbl = *(char**)(obj + 4);
-    (*(void (**)(void*))(vtbl + 0x1C))(obj + *(short*)(vtbl + 0x18));
-    next = *((int*)this);
+    cBEState* from = cBE_aBEState[cBE_currentState];
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)from->mVtbl;
+    vt[kBEStateVt_onExit].fn(vthis(from, vt[kBEStateVt_onExit]));
+    int next = nextState;
     cBE_currentState = next;
-    obj2 = cBE_aBEState[next];
-    vtbl2 = *(char**)(obj2 + 4);
-    (*(void (**)(void*))(vtbl2 + 0x24))(obj2 + *(short*)(vtbl2 + 0x20));
+    cBEState* to = cBE_aBEState[next];
+    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)to->mVtbl;
+    vt2[kBEStateVt_onEnter].fn(vthis(to, vt2[kBEStateVt_onEnter]));
 }
 #endif

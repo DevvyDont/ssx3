@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/bezierman.h"
 #include "world/patchrecord.h"
 #include "render/beziercache.h"
 #include "visualfx/snowbox.h"
@@ -2722,7 +2723,6 @@ extern "C" void cBezierCache_ageRecords(sPartLists* self)
 //100%
 INCLUDE_ASM("render/particle", cBezierMan_cBezierMan);
 #ifdef SKIP_ASM
-extern void* cBezierMan_TheBezierMan;
 extern void* cBezierMan_vtbl[];
 
 /**
@@ -2733,18 +2733,17 @@ extern void* cBezierMan_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBezierMan_cBezierMan(cPS2BezierMan* self)
+extern "C" cBezierMan* cBezierMan_cBezierMan(cBezierMan* self)
 {
     self->mVtbl = cBezierMan_vtbl;
-    cBezierMan_TheBezierMan = ((void*)self);
-    return ((void*)self);
+    cBezierMan_TheBezierMan = self;
+    return self;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cBezierMan__cBezierMan);
 #ifdef SKIP_ASM
-extern void* cBezierMan_TheBezierMan;
 extern void* cBezierMan_vtbl[];
 void operator_delete(int* ptr);
 
@@ -2756,7 +2755,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cBezierMan__cBezierMan(cPS2BezierMan* self, int flags)
+extern "C" void cBezierMan__cBezierMan(cBezierMan* self, int flags)
 {
     self->mVtbl = cBezierMan_vtbl;
     cBezierMan_TheBezierMan = 0;

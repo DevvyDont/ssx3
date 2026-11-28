@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/bezierman.h"
 #include "visualfx/visualeffectsman.h"
 #include "render/garbageman.h"
 #include "render/bxps2deferman.h"
@@ -3012,14 +3013,12 @@ void cGridMesh::SetScale()
 //100%
 INCLUDE_ASM("render/font", cBezierMan_getBezierMan);
 #ifdef SKIP_ASM
-extern int cBezierMan_TheBezierMan;
-
 /**
  * Returns the Bezier patch manager singleton (cBezierMan_TheBezierMan).
  *
  * @return cBezierMan_TheBezierMan
  */
-extern "C" int cBezierMan_getBezierMan(void) {
+extern "C" cBezierMan* cBezierMan_getBezierMan(void) {
     return cBezierMan_TheBezierMan;
 }
 #endif
@@ -3032,9 +3031,8 @@ INCLUDE_ASM("render/font", cBezierMan_Reset__FPv);
  *
  * cPS2BezierMan overrides the slot with cPS2BezierMan_Reset__FPv.
  */
-void cBezierMan_Reset(void* vself)
+void cBezierMan::Reset()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
 }
 #endif
 
@@ -3046,9 +3044,8 @@ INCLUDE_ASM("render/font", cBezierMan_UpdatePatchesCache__FPv);
  *
  * cPS2BezierMan keeps it.
  */
-void cBezierMan_UpdatePatchesCache(void* vself)
+void cBezierMan::UpdatePatchesCache()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
 }
 #endif
 
@@ -3062,10 +3059,9 @@ INCLUDE_ASM("render/font", cBezierMan_SetPatchDist__FPvf);
  *
  * @param val  the patch distance
  */
-void cBezierMan_SetPatchDist(void* vself, float val)
+void cBezierMan::SetPatchDist(float val)
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    self->m_currPatchDist = val;
+    m_currPatchDist = val;
 }
 #endif
 
@@ -3079,45 +3075,15 @@ INCLUDE_ASM("render/font", cBezierMan_GetPatchDist__FPv);
  *
  * @return m_currPatchDist
  */
-float cBezierMan_GetPatchDist(void* vself)
+float cBezierMan::GetPatchDist()
 {
-    cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return self->m_currPatchDist;
+    return m_currPatchDist;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/font", cBezierMan_AddPatch);
 #ifdef SKIP_ASM
-class cFontVirt {
-public:
-    int field_0x0;
-    // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
-    // slot N lives at vtable offset N*8 (delta at +0, function at +4)
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22(int, int, int, int, int);
-};
-
 /**
  * Forwards all five arguments to the virtual in vtable entry 22 (offset 0xB0) of the Bezier manager.
  *
@@ -3130,9 +3096,11 @@ public:
  * @param clip  the clip flag (On Tour clip)
  * @param lightMats  the light matrices (preview tLightMats*)
  */
-extern "C" void cBezierMan_AddPatch(cPS2BezierMan* self, int patchRecord, int edgeLods, int textureIds, int clip, int lightMats)
+void cBezierMan::AddPatch(int patchRecord, int edgeLods, int textureIds, int clip, int lightMats)
 {
-    ((cFontVirt*)self)->v22(patchRecord, edgeLods, textureIds, clip, lightMats);
+    sVEntry<void(void*, int, int, int, int, int)>* vt = (sVEntry<void(void*, int, int, int, int, int)>*)mVtbl;
+    vt[kBezierManVt_AddPatch2].fn(vthis(this, vt[kBezierManVt_AddPatch2]), patchRecord, edgeLods, textureIds, clip,
+                                  lightMats);
 }
 #endif
 
@@ -3356,14 +3324,12 @@ int cPS2BezierMan::GetBezdST()
 //100%
 INCLUDE_ASM("render/font", cLightMan_getTheLightMan);
 #ifdef SKIP_ASM
-extern int cLightMan_TheLightMan;
-
 /**
  * Returns the light manager singleton (cLightMan_TheLightMan).
  *
  * @return cLightMan_TheLightMan
  */
-extern "C" int cLightMan_getTheLightMan(void) {
+extern "C" cLightMan* cLightMan_getTheLightMan(void) {
     return cLightMan_TheLightMan;
 }
 #endif
@@ -3374,7 +3340,7 @@ INCLUDE_ASM("render/font", cLightMan_CreateAmbient__FPv);
 /**
  * Does nothing: cLightMan's CreateAmbient has an empty body.
  */
-void cLightMan_CreateAmbient(void* self)
+void cLightMan::CreateAmbient()
 {
 }
 #endif
@@ -3387,7 +3353,7 @@ INCLUDE_ASM("render/font", cLightMan_LoadLight__FPv);
  *
  * cLightMan vtable slot 13; cPS2LightMan overrides it.
  */
-void cLightMan_LoadLight(void* self)
+void cLightMan::LoadLight()
 {
 }
 #endif
@@ -3400,7 +3366,7 @@ INCLUDE_ASM("render/font", cLightMan_SetChannel__FPv);
  *
  * cLightMan vtable slot 14; cPS2LightMan overrides it.
  */
-void cLightMan_SetChannel(void* self)
+void cLightMan::SetChannel()
 {
 }
 #endif
@@ -3413,7 +3379,7 @@ INCLUDE_ASM("render/font", cLightMan_ClearChannel__FPv);
  *
  * cLightMan vtable slot 15; cPS2LightMan overrides it.
  */
-void cLightMan_ClearChannel(void* self)
+void cLightMan::ClearChannel()
 {
 }
 #endif
@@ -3449,7 +3415,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetLightObj__FPvi);
  * @param index  the light index
  * @return a pointer to m_pLights[@p index]
  */
-void* cPS2LightMan::GetLightObj(int index)
+cLightInst* cPS2LightMan::GetLightObj(int index)
 {
     return &m_pLights[index];
 }
@@ -3466,7 +3432,7 @@ extern const char str_LightInst[];
  * Sets up the light manager for a number of static lights plus 50 dynamic ones.
  *
  * Stores @p numLights as m_iStartDynLight (the first dynamic light index), clears m_iDynLight, sets m_iMaxLights to @p numLights + 50
- * and allocates that many cLightInst pointers (operator_new_tag, tag str_LightInst) into m_pLights.
+ * and allocates that many cLightInst objects (4 bytes each; operator_new_tag, tag str_LightInst) into m_pLights.
  *
  * @param numLights  the number of static lights
  */
@@ -3475,7 +3441,7 @@ void cPS2LightMan::Init(int numLights)
     m_iStartDynLight = numLights;
     m_iDynLight = 0;
     m_iMaxLights = numLights + 50;
-    m_pLights = (cLightInst**)operator_new_tag((numLights + 50) * 4, str_LightInst, 0, 0);
+    m_pLights = (cLightInst*)operator_new_tag((numLights + 50) * 4, str_LightInst, 0, 0);
 }
 #endif
 

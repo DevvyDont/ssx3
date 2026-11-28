@@ -1,5 +1,7 @@
 #include "common.h"
 #include "be/bedbprofile.h"
+#include "be/bedbbolt.h"
+#include "be/beintbolt.h"
 #include "vtable.h"
 #include "be/beintreward.h"
 #include "be/beprofilelib.h"
@@ -306,7 +308,6 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getThis);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEBoltInt[];
 extern void* cBEInterface_vtbl[16];
-extern void* cBEBoltInterface_instance;
 
 
 /**
@@ -318,12 +319,12 @@ extern void* cBEBoltInterface_instance;
  *
  * @return the interface
  */
-extern "C" void* cBEBoltInterface_getThis(void)
+extern "C" cBEBoltInterface* cBEBoltInterface_getThis(void)
 {
     if (cBEBoltInterface_instance == 0) {
-        cBEInterface* mem = (cBEInterface*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
+        cBEBoltInterface* mem = (cBEBoltInterface*)cMemMan_alloc(sizeof(cBEBoltInterface), str_BEBoltInt, 0, 0);
         mem->bIsActive = 0;
-        VPTR_OF(cBEInterface, mem) = (void**)cBEInterface_vtbl;
+        mem->mVtbl = (void**)cBEInterface_vtbl;
         cBEBoltInterface_instance = mem;
     }
     return cBEBoltInterface_instance;
@@ -371,7 +372,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getProfileAndCharacter);
  * @param outChar  receives the character ID
  * @return the profile index
  */
-extern "C" int cBEBoltInterface_getProfileAndCharacter(void* self, int rider, int* outChar)
+int cBEBoltInterface::getProfileAndCharacter(int rider, int* outChar)
 {
     *outChar = cBELibrary_getCharacterID(rider);
     return cBELibrary_getProfileIndex(rider);
@@ -394,7 +395,7 @@ extern "C" void* MEM_copy(void* dst, void* src, int n);
  * @param characterId  character ID
  * @param src  the saved entries
  */
-extern "C" void cBEBoltInterface_restoreBolts(void* self, int profileIndex, int characterId, void* src)
+void cBEBoltInterface::restoreBolts(int profileIndex, int characterId, void* src)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     MEM_copy(&charRecord->mBolts[0], src, 2100);
@@ -404,7 +405,7 @@ extern "C" void cBEBoltInterface_restoreBolts(void* self, int profileIndex, int 
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_buildBoltList);
 #ifdef SKIP_ASM
-extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
+extern "C" void* cBEBoltInterface_getCharProfile(cBEBoltInterface* self, int a1, int a2);
 extern "C" void cBECharProfileDB_buildBoltList(void*, int);
 
 /**
@@ -415,9 +416,9 @@ extern "C" void cBECharProfileDB_buildBoltList(void*, int);
  * @param profileIndex  profile index
  * @param characterId  character ID
  */
-extern "C" void cBEBoltInterface_buildBoltList(void* self, int profileIndex, int characterId)
+void cBEBoltInterface::buildBoltList(int profileIndex, int characterId)
 {
-    cBECharProfileDB_buildBoltList(cBEBoltInterface_getCharProfile(self, profileIndex, characterId), characterId);
+    cBECharProfileDB_buildBoltList(getCharProfile(profileIndex, characterId), characterId);
 }
 #endif
 
@@ -433,7 +434,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param characterId  character ID
  * @return the 0xF88-byte character record
  */
-extern "C" void* cBEBoltInterface_getCharProfile(void* self, int profileIndex, int characterId)
+void* cBEBoltInterface::getCharProfile(int profileIndex, int characterId)
 {
     return (char*)&cBELibrary_profileLib[profileIndex][characterId];
 }
@@ -448,10 +449,10 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getRiderCharProfile);
  * @param rider  race rider slot
  * @return the character record
  */
-extern "C" void* cBEBoltInterface_getRiderCharProfile(void* self, int rider)
+void* cBEBoltInterface::getRiderCharProfile(int rider)
 {
     int profile = cBEBoltInterface_getProfileIndex(rider);
-    return cBEBoltInterface_getCharProfile(self, profile, cBEBoltInterface_getCharacterID(rider));
+    return getCharProfile(profile, cBEBoltInterface_getCharacterID(rider));
 }
 #endif
 
@@ -467,7 +468,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getBoltEntry);
  * @param slot  entry index
  * @return the entry
  */
-extern "C" void* cBEBoltInterface_getBoltEntry(void* self, int profileIndex, int characterId, int slot)
+void* cBEBoltInterface::getBoltEntry(int profileIndex, int characterId, int slot)
 {
     int off = profileIndex * 39760 + characterId * 3976;
     char* charRecord = (char*)cBELibrary_profileLib + off;
@@ -477,8 +478,8 @@ extern "C" void* cBEBoltInterface_getBoltEntry(void* self, int profileIndex, int
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getRiderBoltEntry);
 #ifdef SKIP_ASM
-extern "C" int cBEBoltInterface_getProfileAndCharacter(void* self, int rider, int* outChar);
-extern "C" void* cBEBoltInterface_getBoltEntry(void* self, int a1, int a2, int a3);
+extern "C" int cBEBoltInterface_getProfileAndCharacter(cBEBoltInterface* self, int rider, int* outChar);
+extern "C" void* cBEBoltInterface_getBoltEntry(cBEBoltInterface* self, int a1, int a2, int a3);
 
 /**
  * Returns the address of bolt entry @p slot of a race rider's character (cBEBoltInterface_getProfileAndCharacter, then cBEBoltInterface_getBoltEntry).
@@ -489,11 +490,11 @@ extern "C" void* cBEBoltInterface_getBoltEntry(void* self, int a1, int a2, int a
  * @param slot  entry index
  * @return the entry
  */
-extern "C" void* cBEBoltInterface_getRiderBoltEntry(void* self, int rider, int slot)
+void* cBEBoltInterface::getRiderBoltEntry(int rider, int slot)
 {
     int ch = 0;
-    int profile = cBEBoltInterface_getProfileAndCharacter(self, rider, &ch);
-    return cBEBoltInterface_getBoltEntry(self, profile, ch, slot);
+    int profile = getProfileAndCharacter(rider, &ch);
+    return getBoltEntry(profile, ch, slot);
 }
 #endif
 //100%
@@ -530,7 +531,7 @@ extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profile
  * @param out  receives the number of entries
  * @return the first entry
  */
-extern "C" void* cBEBoltInterface_getBolts(void* self, int profileIndex, int characterId, int* out)
+void* cBEBoltInterface::getBolts(int profileIndex, int characterId, int* out)
 {
     *out = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
     return cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
@@ -539,8 +540,8 @@ extern "C" void* cBEBoltInterface_getBolts(void* self, int profileIndex, int cha
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getRiderBolts);
 #ifdef SKIP_ASM
-extern "C" int cBEBoltInterface_getProfileAndCharacter(void* self, int rider, int* outChar);
-extern "C" void* cBEBoltInterface_getBolts(void* self, int a1, int a2, int* out);
+extern "C" int cBEBoltInterface_getProfileAndCharacter(cBEBoltInterface* self, int rider, int* outChar);
+extern "C" void* cBEBoltInterface_getBolts(cBEBoltInterface* self, int a1, int a2, int* out);
 
 /**
  * Returns a race rider's bolt entries and stores their count through @p out (cBEBoltInterface_getProfileAndCharacter, then cBEBoltInterface_getBolts).
@@ -551,11 +552,11 @@ extern "C" void* cBEBoltInterface_getBolts(void* self, int a1, int a2, int* out)
  * @param out  receives the number of entries
  * @return the first entry
  */
-extern "C" void* cBEBoltInterface_getRiderBolts(void* self, int rider, int* out)
+void* cBEBoltInterface::getRiderBolts(int rider, int* out)
 {
     int ch;
-    int profile = cBEBoltInterface_getProfileAndCharacter(self, rider, &ch);
-    return cBEBoltInterface_getBolts(self, profile, ch, out);
+    int profile = getProfileAndCharacter(rider, &ch);
+    return getBolts(profile, ch, out);
 }
 #endif
 
@@ -579,7 +580,7 @@ struct sBEFlagEntry {
  * @param profileIndex  profile index
  * @param characterId  character ID
  */
-extern "C" void cBEBoltInterface_storeVisibleFlags(void* self, int profileIndex, int characterId)
+void cBEBoltInterface::storeVisibleFlags(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int count = charRecord->mNumBolts;
@@ -657,7 +658,7 @@ static inline tBEProfileBolt* getEntry_14AFB0(cBECharProfileDB* p, int idx)
  * @param on  1 to equip, 0 to take off
  * @return true when the change was kept
  */
-extern "C" bool cBEBoltInterface_trySetBoltVisible(void* self, int profileIndex, int characterId, int idx, int on)
+bool cBEBoltInterface::trySetBoltVisible(int profileIndex, int characterId, int idx, int on)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     tBEProfileBolt save[525];
@@ -694,13 +695,13 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_toggleBoltVisible);
  * @param characterId  character ID
  * @param idx  the bolt id
  */
-extern "C" void cBEBoltInterface_toggleBoltVisible(void* self, int profileIndex, int characterId, int idx)
+void cBEBoltInterface::toggleBoltVisible(int profileIndex, int characterId, int idx)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     tBEProfileBolt* flagEntry = getEntry_14AFB0(charRecord, idx);
     int on = 1;
     if (flagEntry->flags & 0x10) on = 0;
-    cBEBoltInterface_trySetBoltVisible(self, profileIndex, characterId, idx, on);
+    trySetBoltVisible(profileIndex, characterId, idx, on);
 }
 #endif
 //100%
@@ -720,7 +721,7 @@ extern "C" void cBECharProfileDB_hasBoltFlags(void*, int, int);
  * @param boltId  the bolt id
  * @param flagMask  the flag mask
  */
-extern "C" void cBEBoltInterface_hasBoltFlags(void* self, int profileIndex, int characterId, int boltId, int flagMask)
+void cBEBoltInterface::hasBoltFlags(int profileIndex, int characterId, int boltId, int flagMask)
 {
     cBECharProfileDB_hasBoltFlags((char*)&cBELibrary_profileLib[profileIndex][characterId], boltId, flagMask);
 }
@@ -728,7 +729,7 @@ extern "C" void cBEBoltInterface_hasBoltFlags(void* self, int profileIndex, int 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_riderHasBoltFlags);
 #ifdef SKIP_ASM
-extern "C" int cBEBoltInterface_getProfileAndCharacter(void* self, int rider, int* outChar);
+extern "C" int cBEBoltInterface_getProfileAndCharacter(cBEBoltInterface* self, int rider, int* outChar);
 extern "C" void cBECharProfileDB_hasBoltFlags(void*, int, int);
 
 /**
@@ -741,10 +742,10 @@ extern "C" void cBECharProfileDB_hasBoltFlags(void*, int, int);
  * @param boltId  the bolt id
  * @param flagMask  the flag mask
  */
-extern "C" void cBEBoltInterface_riderHasBoltFlags(void* self, int rider, int boltId, int flagMask)
+void cBEBoltInterface::riderHasBoltFlags(int rider, int boltId, int flagMask)
 {
     int ch = 0;
-    int profile = cBEBoltInterface_getProfileAndCharacter(self, rider, &ch);
+    int profile = getProfileAndCharacter(rider, &ch);
     cBECharProfileDB_hasBoltFlags((char*)&cBELibrary_profileLib[profile][ch], boltId, flagMask);
 }
 #endif
@@ -769,7 +770,8 @@ extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profile
  * @param out  receives the matching 4-byte entries
  * @return the number of entries copied
  */
-extern "C" int cBEBoltInterface_getBoltsWithFlags(void* self, int profileIndex, int characterId, unsigned int mask, sBEFlagEntryPC* out)
+extern "C" int cBEBoltInterface_getBoltsWithFlags(cBEBoltInterface* self, int profileIndex, int characterId,
+                                                  unsigned int mask, sBEFlagEntryPC* out)
 {
     int count = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
     sBEFlagEntryPC* flagEntry = cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
@@ -804,7 +806,7 @@ extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profile
  * @param mask  flags an entry must have
  * @return the number of matching entries
  */
-extern "C" int cBEBoltInterface_countBoltsWithFlags(void* self, int profileIndex, int characterId, unsigned int mask)
+int cBEBoltInterface::countBoltsWithFlags(int profileIndex, int characterId, unsigned int mask)
 {
     int count = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
     sBEFlagEntryPC* flagEntry = cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
@@ -821,10 +823,8 @@ extern "C" int cBEBoltInterface_countBoltsWithFlags(void* self, int profileIndex
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B2F8);
 #ifdef SKIP_ASM
-extern void* cBELibrary_boltDB[];
-struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
-extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
+extern "C" tBEBoltDef* cBEBoltDB_getCharBolts(cBEBoltDB* self, int i);
 
 struct sBEEntry38_B2F8 {
     char pad_0x00;
@@ -841,10 +841,10 @@ struct sBEEntry38_B2F8 {
  * @param characterId  character ID (the bolt database group)
  * @return the number of definitions with byte +0x1 == 0
  */
-extern "C" int func_0014B2F8(void* self, int characterId)
+extern "C" int func_0014B2F8(cBEBoltInterface* self, int characterId)
 {
-    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
-    sBEEntry38_B2F8* boltDef = (sBEEntry38_B2F8*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
+    int count = cBELibrary_boltDB.getNumCharBolts(characterId);
+    sBEEntry38_B2F8* boltDef = (sBEEntry38_B2F8*)cBELibrary_boltDB.getCharBolts(characterId);
     int n = 0;
     int i;
     for (i = 0; i < count; i++, boltDef++) {
@@ -857,10 +857,8 @@ extern "C" int func_0014B2F8(void* self, int characterId)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B378);
 #ifdef SKIP_ASM
-extern void* cBELibrary_boltDB[];
-struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
-extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
+extern "C" tBEBoltDef* cBEBoltDB_getCharBolts(cBEBoltDB* self, int i);
 
 struct sBEEntry38_B378 {
     char pad_0x00;
@@ -878,10 +876,10 @@ struct sBEEntry38_B378 {
  * @param out  receives the 0x38-byte definitions
  * @return the number of definitions copied
  */
-extern "C" int func_0014B378(void* self, int characterId, sBEEntry38_B378* out)
+extern "C" int func_0014B378(cBEBoltInterface* self, int characterId, sBEEntry38_B378* out)
 {
-    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
-    sBEEntry38_B378* boltDef = (sBEEntry38_B378*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
+    int count = cBELibrary_boltDB.getNumCharBolts(characterId);
+    sBEEntry38_B378* boltDef = (sBEEntry38_B378*)cBELibrary_boltDB.getCharBolts(characterId);
     int n = 0;
     int i;
     for (i = 0; i < count; i++, boltDef++) {
@@ -898,10 +896,8 @@ extern "C" int func_0014B378(void* self, int characterId, sBEEntry38_B378* out)
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getUsedEquipPoints);
 #ifdef SKIP_ASM
 extern cBECharProfileDB cBELibrary_profileLib[][10];
-extern void* cBELibrary_boltDB[];
-struct sBELibTables;
 int cBEBoltDB_getNumCharBolts(void* self, int i);
-extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i);
+extern "C" tBEBoltDef* cBEBoltDB_getCharBolts(cBEBoltDB* self, int i);
 
 struct sBEFlagEntryB {
     unsigned short field_0x0;
@@ -930,12 +926,12 @@ struct sBEEntry38B {
  * @param characterId  character ID
  * @return the total equip points
  */
-extern "C" int cBEBoltInterface_getUsedEquipPoints(void* self, int profileIndex, int characterId)
+int cBEBoltInterface::getUsedEquipPoints(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int sum = 0;
-    int count = cBEBoltDB_getNumCharBolts(cBELibrary_boltDB, characterId);
-    sBEEntry38B* boltDef = (sBEEntry38B*)cBEBoltDB_getCharBolts((sBELibTables*)cBELibrary_boltDB, characterId);
+    int count = cBELibrary_boltDB.getNumCharBolts(characterId);
+    sBEEntry38B* boltDef = (sBEEntry38B*)cBELibrary_boltDB.getCharBolts(characterId);
     int i;
     for (i = 0; i < count; i++, boltDef++) {
         short entryIndex = (charRecord->mpBoltsMap)[boltDef->id];
@@ -958,32 +954,17 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cBEBoltInterface_getBoltDB__FPv ignores its argument; callers pass none.
-void* cBEBoltInterface_getBoltDB_0() __asm__("cBEBoltInterface_getBoltDB__FPv");
-struct sBEGroupTable;
-extern "C" int cBEBoltDB_findBoltIndex(sBEGroupTable* self, int g, int key);
+cBEBoltDB* cBEBoltInterface_getBoltDB_0() __asm__("cBEBoltInterface_getBoltDB__FPv");
+extern "C" int cBEBoltDB_findBoltIndex(cBEBoltDB* self, int g, int key);
 extern "C" void cBECharProfileDB_setBoltBought(void* prof, int idx, int on);
 extern "C" void cBEEconInterface_reduceMoney(void* iface, int a, int b, int v);
 extern "C" void cBEEconInterface_getMoney(void* iface, int a, int b);
 
-struct sBEEntry38_14B560 {
-    signed char group;  // 0x0
-    char pad_0x01[3];
-    short id;           // 0x4 (tBEBoltDef's names; parentId ours, from use)
-    short parentId;     // 0x6
-    char pad_0x08[6];
-    short price;        // 0xE
-    char pad_0x10[0x28];
-};
-struct sBETbl_14B560 {
-    char pad_0x00[4];
-    sBEEntry38_14B560* entries;   // 0x4
-};
-
-static inline sBEEntry38_14B560* entry_14B560(sBETbl_14B560* t, int i)
+static inline tBEBoltDef* entry_14B560(cBEBoltDB* t, int i)
 {
     if (i < 0)
         return 0;
-    return &t->entries[i];
+    return &t->mpCharBolts[i];
 }
 
 static inline int scale10_14B560(int v)
@@ -1006,20 +987,20 @@ static inline int scale10_14B560(int v)
  * @param key  the bolt id
  * @param flag  non-zero to charge the price
  */
-extern "C" void cBEBoltInterface_buyBolt(void* self, int profileIndex, int characterId, int key, int flag)
+void cBEBoltInterface::buyBolt(int profileIndex, int characterId, int key, int flag)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     char* charRecord = (char*)&cBELibrary_profileLib[profileIndex][characterId];
     cBECharProfileDB_setBoltBought(charRecord, key, 1);
-    sBEEntry38_14B560* boltDef = (sBEEntry38_14B560*)cBEBoltDB_getCharBolts((sBELibTables*)cBEBoltInterface_getBoltDB_0(), characterId);
-    int n = cBEBoltDB_getNumCharBolts(cBEBoltInterface_getBoltDB_0(), characterId);
+    tBEBoltDef* boltDef = cBEBoltInterface_getBoltDB_0()->getCharBolts(characterId);
+    int n = cBEBoltInterface_getBoltDB_0()->getNumCharBolts(characterId);
     for (int j = 0; j < n; j++, boltDef++) {
         if (scale10_14B560(boltDef->price) == -key) {
             cBECharProfileDB_setBoltBought(charRecord, boltDef->id, 1);
         }
     }
-    sBETbl_14B560* tbl = (sBETbl_14B560*)cBEBoltInterface_getBoltDB_0();
-    boltDef = entry_14B560(tbl, cBEBoltDB_findBoltIndex((sBEGroupTable*)tbl, characterId, key));
+    cBEBoltDB* boltDB = cBEBoltInterface_getBoltDB_0();
+    boltDef = entry_14B560(boltDB, boltDB->findBoltIndex(characterId, key));
     if (flag) {
         cBEEconInterface_reduceMoney(iface, profileIndex, characterId, scale10_14B560(boltDef->price));
     } else {
@@ -1051,7 +1032,7 @@ extern char str_data_char_viggotxp_big_deiter_icons_ssh[];
  * @param x  character ID (eBECharacters), 0 to 9
  * @return the file name, or null for other IDs
  */
-extern "C" char* cBEBoltInterface_getBigIconFileName(void* self, unsigned int x)
+char* cBEBoltInterface::getBigIconFileName(unsigned int x)
 {
     switch (x) {
     case kCHAR_MOBY: return str_data_char_mobytxp_big_moby_icons_ssh;
@@ -1073,16 +1054,7 @@ extern "C" char* cBEBoltInterface_getBigIconFileName(void* self, unsigned int x)
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getVisibleModelFiles);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cBEBoltInterface_buildBoltModelFileName_B7A8(void* self, int profile, int ch, void* e, void* out) __asm__("cBEBoltInterface_buildBoltModelFileName");
 extern "C" int strcmp(void* a, void* b);
-
-struct sBEEntry38_B7A8 {
-    char pad_0x00[4];
-    short slot;         // 0x4
-    char pad_0x06[0x26];
-    int active;         // 0x2C
-    char pad_0x30[8];
-};
 
 /**
  * Lists the distinct model file names of a character's equipped bolts, 256 bytes per name, and returns how many.
@@ -1095,20 +1067,20 @@ struct sBEEntry38_B7A8 {
  * @param out  receives the names, 256 bytes each
  * @return the number of names
  */
-extern "C" int cBEBoltInterface_getVisibleModelFiles(void* self, int profile, int ch, char* out)
+int cBEBoltInterface::getVisibleModelFiles(int profile, int ch, char* out)
 {
     int cnt = 0;
-    void* tables = cBEBoltInterface_getBoltDB_0();
-    cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(self, profile, ch);
-    sBEEntry38_B7A8* def = (sBEEntry38_B7A8*)cBEBoltDB_getCharBolts((sBELibTables*)tables, ch);
-    int n = cBEBoltDB_getNumCharBolts(tables, ch);
+    cBEBoltDB* tables = cBEBoltInterface_getBoltDB_0();
+    cBECharProfileDB* prof = (cBECharProfileDB*)getCharProfile(profile, ch);
+    tBEBoltDef* def = tables->getCharBolts(ch);
+    int n = tables->getNumCharBolts(ch);
     int i;
     for (i = 0; i < n; i++, def++) {
-        if (def->active != 0) {
-            tBEProfileBolt* flagEntry = getEntry_14AFB0(prof, def->slot);
+        if (def->modelFileName != 0) {
+            tBEProfileBolt* flagEntry = getEntry_14AFB0(prof, def->id);
             if (flagEntry->flags & 0x10) {
                 char* dst = out + (cnt << 8);
-                if (cBEBoltInterface_buildBoltModelFileName_B7A8(self, profile, ch, def, dst)) {
+                if (buildBoltModelFileName(profile, ch, def, dst)) {
                     int prev = cnt - 1;
                     int k;
                     for (k = prev; k >= 0; k--) {
@@ -1128,7 +1100,7 @@ extern "C" int cBEBoltInterface_getVisibleModelFiles(void* self, int profile, in
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_getRiderVisibleModelFiles);
 #ifdef SKIP_ASM
-extern "C" int cBEBoltInterface_getVisibleModelFiles(void* self, int profile, int ch, char* out);
+extern "C" int cBEBoltInterface_getVisibleModelFiles(cBEBoltInterface* self, int profile, int ch, char* out);
 
 /**
  * Lists the distinct model file names of a race rider's equipped bolts (cBEBoltInterface_getVisibleModelFiles for its profile and character).
@@ -1139,10 +1111,10 @@ extern "C" int cBEBoltInterface_getVisibleModelFiles(void* self, int profile, in
  * @param out  receives the names, 256 bytes each
  * @return the number of names
  */
-extern "C" int cBEBoltInterface_getRiderVisibleModelFiles(void* self, int rider, char* out)
+int cBEBoltInterface::getRiderVisibleModelFiles(int rider, char* out)
 {
     int profile = cBEBoltInterface_getProfileIndex(rider);
-    return cBEBoltInterface_getVisibleModelFiles(self, profile, cBEBoltInterface_getCharacterID(rider), out);
+    return getVisibleModelFiles(profile, cBEBoltInterface_getCharacterID(rider), out);
 }
 #endif
 
@@ -1154,15 +1126,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strchr(const char* s, int c);
-
-struct sBEEntry38_14B988 {
-    char pad_0x00[3];
-    signed char group;  // 0x3
-    short key;          // 0x4
-    char pad_0x06[0x26];
-    char* name;         // 0x2C
-    char pad_0x30[8];
-};
 
 /**
  * Builds the file name of one bolt for a character, filling its '$' wildcards from the other equipped bolts of the same
@@ -1180,26 +1143,27 @@ struct sBEEntry38_14B988 {
  * @param out  receives the file name
  * @return true when a name was written
  */
-extern "C" bool cBEBoltInterface_buildBoltModelFileName(void* self, int profileIndex, int characterId, sBEEntry38_14B988* boltDef, char* out)
+bool cBEBoltInterface::buildBoltModelFileName(int profileIndex, int characterId, tBEBoltDef* boltDef, char* out)
 {
-    signed char grp = boltDef->group;
-    if (grp == kNoBoltGroup || boltDef->name == 0) {
+    signed char grp = boltDef->modelGroup;
+    if (grp == kNoBoltGroup || boltDef->modelFileName == 0) {
         *out = 0;
         return false;
     }
-    sBELibTables* tbl = (sBELibTables*)cBELibrary_boltDB;
-    cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(cBE_getInterface_Fv(cBE_getBE(), 9), profileIndex, characterId);
-    strcpy(out, boltDef->name);
+    cBEBoltDB* tbl = &cBELibrary_boltDB;
+    cBEBoltInterface* boltInterface = (cBEBoltInterface*)cBE_getInterface_Fv(cBE_getBE(), kInt_Bolt);
+    cBECharProfileDB* prof = (cBECharProfileDB*)boltInterface->getCharProfile(profileIndex, characterId);
+    strcpy(out, boltDef->modelFileName);
     char* wildcard = strchr(out, '$');
     if (wildcard == 0) return true;
-    int n = cBEBoltDB_getNumCharBolts(tbl, characterId);
-    sBEEntry38_14B988* otherDef = (sBEEntry38_14B988*)cBEBoltDB_getCharBolts(tbl, characterId);
+    int n = tbl->getNumCharBolts(characterId);
+    tBEBoltDef* otherDef = tbl->getCharBolts(characterId);
     for (int i = 0; i < n; i++, otherDef++) {
-        if (otherDef->group != grp) continue;
-        char* otherName = otherDef->name;
+        if (otherDef->modelGroup != grp) continue;
+        char* otherName = otherDef->modelFileName;
         if (otherName == 0) continue;
-        if (otherDef->key == boltDef->key) continue;
-        if (!(getEntry_14AFB0(prof, otherDef->key)->flags & 0x10)) continue;
+        if (otherDef->id == boltDef->id) continue;
+        if (!(getEntry_14AFB0(prof, otherDef->id)->flags & 0x10)) continue;
         char* cursor = wildcard;
         int k = wildcard - out;
         while (*cursor != 0 && *cursor != '.') {
@@ -1214,8 +1178,7 @@ extern "C" bool cBEBoltInterface_buildBoltModelFileName(void* self, int profileI
 }
 #endif
 
-extern void* cBELibrary_boltDB[];
-extern "C" void* cBEBoltDB_load(void*);
+extern "C" void* cBEBoltDB_load(cBEBoltDB*);
 
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_buildRiderBoltModelFileName);
@@ -1230,10 +1193,10 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_buildRiderBoltModelFileName);
  * @param out  receives the file name
  * @return 1 when a name was written, 0 for none
  */
-extern "C" int cBEBoltInterface_buildRiderBoltModelFileName(void* self, int rider, sBEEntry38_14B988* def, char* out)
+int cBEBoltInterface::buildRiderBoltModelFileName(int rider, tBEBoltDef* def, char* out)
 {
     int profile = cBEBoltInterface_getProfileIndex(rider);
-    return cBEBoltInterface_buildBoltModelFileName(self, profile, cBEBoltInterface_getCharacterID(rider), def, out);
+    return buildBoltModelFileName(profile, cBEBoltInterface_getCharacterID(rider), def, out);
 }
 #endif
 //100%
@@ -1261,13 +1224,13 @@ struct sBEEntry38_BC18 {
  * @param out  receives the names, 256 bytes each
  * @return the number of names
  */
-extern "C" int func_0014BC18(void* self, int profile, int ch, char* out)
+extern "C" int func_0014BC18(cBEBoltInterface* self, int profile, int ch, char* out)
 {
     int cnt = 0;
-    void* tables = cBEBoltInterface_getBoltDB_0();
-    cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(self, profile, ch);
-    int n = cBEBoltDB_getNumCharBolts(tables, ch);
-    sBEEntry38_BC18* def = (sBEEntry38_BC18*)cBEBoltDB_getCharBolts((sBELibTables*)tables, ch);
+    cBEBoltDB* tables = cBEBoltInterface_getBoltDB_0();
+    cBECharProfileDB* prof = (cBECharProfileDB*)self->getCharProfile(profile, ch);
+    int n = tables->getNumCharBolts(ch);
+    sBEEntry38_BC18* def = (sBEEntry38_BC18*)tables->getCharBolts(ch);
     int i;
     for (i = 0; i < n; i++, def++) {
         char* name = def->name;
@@ -1300,9 +1263,9 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_loadBoltDB__FPv);
  *
  * @return no meaningful value (cBEBoltDB_load sets none)
  */
-void* cBEBoltInterface_loadBoltDB(void* self)
+void* cBEBoltInterface::loadBoltDB()
 {
-    return cBEBoltDB_load((void*)cBELibrary_boltDB);
+    return cBELibrary_boltDB.load();
 }
 #endif
 
@@ -1319,9 +1282,9 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_refreshVisibleBolts__FPv);
  *
  * @return no meaningful value (cBEBoltDB_refreshVisibleBolts returns nothing)
  */
-void* cBEBoltInterface_refreshVisibleBolts(void* self)
+void* cBEBoltInterface::refreshVisibleBolts()
 {
-    return cBEBoltDB_refreshVisibleBolts((void*)cBELibrary_boltDB);
+    return cBEBoltDB_refreshVisibleBolts(&cBELibrary_boltDB);
 }
 #endif
 
@@ -1338,14 +1301,14 @@ INCLUDE_ASM("be/belibrary", cBEBoltInterface_getBoltDB__FPv);
  */
 void* cBEBoltInterface_getBoltDB(void* self)
 {
-    return (void*)cBELibrary_boltDB;
+    return &cBELibrary_boltDB;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_setBoltModelPart);
 #ifdef SKIP_ASM
-extern "C" void cBEBoltDB_setBoltModelPart(void **, int, int, int);
+extern "C" void cBEBoltDB_setBoltModelPart(cBEBoltDB* db, int groupId, int boltId, int value);
 
 /**
  * Sets byte +0x10 of a bolt definition in the bolt database cBELibrary_boltDB (cBEBoltDB_setBoltModelPart).
@@ -1357,13 +1320,13 @@ extern "C" void cBEBoltDB_setBoltModelPart(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void cBEBoltInterface_setBoltModelPart(int groupId, int boltId, int value) {
-    cBEBoltDB_setBoltModelPart(cBELibrary_boltDB, groupId, boltId, value);
+    cBELibrary_boltDB.setBoltModelPart(groupId, boltId, value);
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BE00);
 #ifdef SKIP_ASM
-extern "C" void func_0014C590(void **, int, int, int);
+extern "C" void func_0014C590(cBEBoltDB* db, int groupId, int boltId, int value);
 
 /**
  * Sets byte +0x1 of a bolt definition in the bolt database cBELibrary_boltDB (func_0014C590).
@@ -1375,13 +1338,13 @@ extern "C" void func_0014C590(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void func_0014BE00(int groupId, int boltId, int value) {
-    func_0014C590(cBELibrary_boltDB, groupId, boltId, value);
+    func_0014C590(&cBELibrary_boltDB, groupId, boltId, value);
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltInterface_setBoltEquipPoints);
 #ifdef SKIP_ASM
-extern "C" void cBEBoltDB_setBoltEquipPoints(void **, int, int, int);
+extern "C" void cBEBoltDB_setBoltEquipPoints(cBEBoltDB* db, int groupId, int boltId, int value);
 
 /**
  * Sets short +0xC (equip points) of a bolt definition in the bolt database cBELibrary_boltDB (cBEBoltDB_setBoltEquipPoints).
@@ -1393,7 +1356,7 @@ extern "C" void cBEBoltDB_setBoltEquipPoints(void **, int, int, int);
  * @param value  the new value
  */
 extern "C" void cBEBoltInterface_setBoltEquipPoints(int groupId, int boltId, int value) {
-    cBEBoltDB_setBoltEquipPoints(cBELibrary_boltDB, groupId, boltId, value);
+    cBELibrary_boltDB.setBoltEquipPoints(groupId, boltId, value);
 }
 #endif
 
@@ -1408,31 +1371,6 @@ extern const char* cBEBoltDB_fileName;
 extern int kBolt_Num;
 extern const char str_BoltsFile[];
 
-struct sBEEnt_14BE70 {
-    char pad0[0x14];
-    char* name;         // 0x14
-    char* lodPartNames[4];  // 0x18 (tBEBoltDef's names)
-    char* extraStrings[2];  // 0x28 (name ours) two more pool strings; no reader found
-    char* pictureName;      // 0x30
-    int flags;
-};
-struct sBELib_14BE70 {
-    char* buf;                  // 0x0
-    sBEEnt_14BE70* entries;     // 0x4
-    // The tables after the definitions (names ours, from the loader's counts: the 12-byte records, the (bolt, bolt)
-    // pairs cBEBoltDB_refreshVisibleBolts reads and the item groups beintecon reads).
-    char* links;                // 0x8
-    char* pairs;                // 0xC
-    char* groups;               // 0x10
-    char* strings;              // 0x14
-    int childTables;            // 0x18 cBEBoltDB_buildChildTables's block
-    int numBolts;               // 0x1C
-    int numLinks;               // 0x20
-    int numPairs;               // 0x24
-    int numGroups;              // 0x28
-};
-
-
 /**
  * Loads the bolts file and sets up the bolt database's tables and string pointers.
  *
@@ -1444,50 +1382,48 @@ struct sBELib_14BE70 {
  * Every non-zero string field of a definition (+0x14, the four at +0x18, +0x28, +0x2C, +0x30) is an offset + 1 into the
  * pool and becomes a pointer. cBEBoltDB_load calls it.
  *
- * @param vself  the bolt database
  */
-extern "C" void cBEBoltDB_loadFile(void* vself)
+void cBEBoltDB::loadFile()
 {
-    sBELib_14BE70* self = (sBELib_14BE70*)vself;
     int size = BXFILE_sizez(cBEBoltDB_fileName);
     char* buf = new (str_BoltsFile, 0, 0) char[size];
-    self->buf = buf;
+    mpBoltsFile = buf;
     FILE_loadatz(cBEBoltDB_fileName, buf, size);
-    char* fileData = self->buf;
+    char* fileData = mpBoltsFile;
     kBolt_Num = *(int*)fileData;
     int numBolts = *(int*)(fileData + 4);
-    self->entries = (sBEEnt_14BE70*)(fileData + 8);
-    self->numBolts = numBolts;
+    mpCharBolts = (tBEBoltDef*)(fileData + 8);
+    mTotalNumCharBolts = numBolts;
     int off = 8 + numBolts * 0x38;
     int numLinks = *(int*)(fileData + off);
     off += 4;
-    self->links = fileData + off;
-    self->numLinks = numLinks;
+    mpCharRules = (tBEBoltRule*)(fileData + off);
+    mTotalNumCharRules = numLinks;
     off += numLinks * 0xC;
     int numPairs = *(int*)(fileData + off);
     off += 4;
-    self->pairs = fileData + off;
-    self->numPairs = numPairs;
+    mpCharPairs = (tBEBoltPair*)(fileData + off);
+    mTotalNumCharPairs = numPairs;
     off += numPairs * 8;
     int numGroups = *(int*)(fileData + off);
     off += 4;
-    self->groups = fileData + off;
-    self->numGroups = numGroups;
+    mpCharGroups = (tBEBoltGroup*)(fileData + off);
+    mTotalNumCharGroups = numGroups;
     off += numGroups * 8;
     off += 4;
-    self->strings = fileData + off;
+    mpStringPool = fileData + off;
     if (kBolt_Num & 1) kBolt_Num++;
-    for (int i = 0; i < self->numBolts; i++) {
-        if (self->entries[i].name) self->entries[i].name = self->strings + ((int)self->entries[i].name - 1);
-        if (self->entries[i].extraStrings[0])
-            self->entries[i].extraStrings[0] = self->strings + ((int)self->entries[i].extraStrings[0] - 1);
-        if (self->entries[i].extraStrings[1])
-            self->entries[i].extraStrings[1] = self->strings + ((int)self->entries[i].extraStrings[1] - 1);
-        if (self->entries[i].pictureName)
-            self->entries[i].pictureName = self->strings + ((int)self->entries[i].pictureName - 1);
+    for (int i = 0; i < mTotalNumCharBolts; i++) {
+        if (mpCharBolts[i].name) mpCharBolts[i].name = mpStringPool + ((int)mpCharBolts[i].name - 1);
+        if (mpCharBolts[i].modelPartFile)
+            mpCharBolts[i].modelPartFile = mpStringPool + ((int)mpCharBolts[i].modelPartFile - 1);
+        if (mpCharBolts[i].modelFileName)
+            mpCharBolts[i].modelFileName = mpStringPool + ((int)mpCharBolts[i].modelFileName - 1);
+        if (mpCharBolts[i].pictureName)
+            mpCharBolts[i].pictureName = mpStringPool + ((int)mpCharBolts[i].pictureName - 1);
         for (int j = 0; j < 4; j++) {
-            if (self->entries[i].lodPartNames[j])
-                self->entries[i].lodPartNames[j] = self->strings + ((int)self->entries[i].lodPartNames[j] - 1);
+            if (mpCharBolts[i].lodPartNames[j])
+                mpCharBolts[i].lodPartNames[j] = mpStringPool + ((int)mpCharBolts[i].lodPartNames[j] - 1);
         }
     }
 }
@@ -1499,27 +1435,6 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_buildChildTables);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_child_bolts_data[];
 
-struct sBEEnt_14C068 {     // a bolt definition (sBEEntry38's names)
-    signed char group;      // 0x0
-    char pad1[3];
-    short id;               // 0x4
-    short parentId;         // 0x6
-    char pad8[0x38 - 0x8];
-};
-
-struct sBELib_14C068 {
-    char* buf;                      // 0x0
-    sBEEnt_14C068* entries;         // 0x4
-    char pad8[0x18 - 0x8];
-    unsigned short* table;          // 0x18
-    int numBolts;                   // 0x1C
-    char pad20[0x11C - 0x20];
-    unsigned short* count[30];      // 0x11C
-    unsigned short* first[30];      // 0x194
-    char pad20C[0x4DC - 0x20C];
-    unsigned short* index[30];      // 0x4DC
-};
-
 /**
  * Builds the bolt database's per-group child tables: id to definition index, and each parent's child count and first
  * child.
@@ -1530,41 +1445,41 @@ struct sBELib_14C068 {
  * (+0x6, kNoBoltID for none). The run tracker that sets the first child starts at kBolt_Num instead of -1 and is shared
  * across groups. Nothing in the C calls it.
  */
-extern "C" void cBEBoltDB_buildChildTables(sBELib_14C068* self)
+void cBEBoltDB::buildChildTables()
 {
     int last = kBolt_Num;
-    unsigned short* cursor;
+    short* cursor;
 
-    self->table = new (str_child_bolts_data, 0, 0) unsigned short[last * 90];
-    cursor = self->table;
+    mpChildBoltsData = new (str_child_bolts_data, 0, 0) short[last * 90];
+    cursor = mpChildBoltsData;
     for (int i = 0; i < 30; i++) {
-        self->count[i] = cursor;
+        mpNumChildBolts[i] = cursor;
         cursor += kBolt_Num;
     }
     for (int i = 0; i < 30; i++) {
-        self->first[i] = cursor;
+        mpFirstChildBolt[i] = cursor;
         cursor += kBolt_Num;
     }
     for (int i = 0; i < 30; i++) {
-        self->index[i] = cursor;
+        mpBoltIndex[i] = cursor;
         cursor += kBolt_Num;
-        MEM_fill(self->index[i], 0, kBolt_Num * 2);
+        MEM_fill(mpBoltIndex[i], 0, kBolt_Num * 2);
     }
-    for (int i = 0; i < self->numBolts; i++) {
-        self->index[self->entries[i].group][self->entries[i].id] = i;
+    for (int i = 0; i < mTotalNumCharBolts; i++) {
+        mpBoltIndex[mpCharBolts[i].charID][mpCharBolts[i].id] = i;
     }
     for (int i = 0; i < 30; i++) {
-        MEM_fill(self->first[i], 0, kBolt_Num * 2);
-        MEM_fill(self->count[i], 0, kBolt_Num * 2);
+        MEM_fill(mpFirstChildBolt[i], 0, kBolt_Num * 2);
+        MEM_fill(mpNumChildBolts[i], 0, kBolt_Num * 2);
     }
-    for (int i = 0; i < self->numBolts; i++) {
-        int parentId = self->entries[i].parentId;
-        int charGroup = self->entries[i].group;
+    for (int i = 0; i < mTotalNumCharBolts; i++) {
+        int parentId = mpCharBolts[i].parentId;
+        int charGroup = mpCharBolts[i].charID;
         if (parentId != kNoBoltID) {
-            self->count[charGroup][parentId]++;
+            mpNumChildBolts[charGroup][parentId]++;
             if (last != parentId) {
                 last = parentId;
-                self->first[charGroup][parentId] = i;
+                mpFirstChildBolt[charGroup][parentId] = i;
             }
         }
     }
@@ -1574,50 +1489,22 @@ extern "C" void cBEBoltDB_buildChildTables(sBELib_14C068* self)
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltDB_indexCharBolts);
 #ifdef SKIP_ASM
-struct sBEEntry38 {
-    signed char group; // 0x0
-    signed char used;  // 0x1 [U] func_0014C590 sets it; the views' `used` (func_0014B2F8 / func_0014B378 take the
-                       //     definitions where it is 0)
-    char pad_0x02[2];
-    short id;          // 0x4 [U] the bolt id (tBEBoltDef::id); cBEBoltDB_findBoltIndex looks a definition up by it
-    short parentId;    // 0x6 (name ours) [U] the parent bolt's id, kNoBoltID at the top level: cBEBoltDB_countChildBolts /
-                       //     cBEBoltDB_getFirstChildBolt / cBEBoltDB_collectChildBolts find a bolt's children by it, cBEBoltDB_isBoltAncestor walks up
-    char pad_0x08[4];
-    short equipPoints; // 0xC [U] cBEBoltDB_setBoltEquipPoints sets it; the equipped bolts' equip points are the sum of it
-    char pad_0x0E[0x26];
-    int flags;         // 0x34 [U] cBEBoltDB_collectChildBolts does not descend into a bolt's children when flag 0x20 is set
-};
-
-struct sBEGroupTable {
-    char pad_0x00[4];
-    sBEEntry38* entries; // 0x4
-    char pad_0x08[0x14];
-    int count; // 0x1C
-    char pad_0x20[0xC];
-    int groupCount[30]; // 0x2C
-    int groupFirst[30]; // 0xA4
-    short* childCount[30]; // 0x11C (name ours) [U] cBEBoltDB_countChildBolts: per group, a parent bolt id's child count
-    short* firstChildIndex[30]; // 0x194 [U] cBEBoltDB_getFirstChildBolt: per group, a parent bolt id's first child definition
-    char pad_0x20C[0x4DC - 0x20C];
-    short* idToIndex[30]; // 0x4DC (name ours) [U] cBEBoltDB_findBoltIndex: per group, a bolt id's definition index
-};
-
 /**
  * Counts the bolt definitions per group and records each group's first index (+0x2C and +0xA4, by byte +0x0).
  *
  * Assumes the definitions are sorted by group. Unlike its three siblings it does not clear the counts first;
  * cBEBoltDB_freeData clears them before the first load.
  */
-extern "C" void cBEBoltDB_indexCharBolts(sBEGroupTable* self)
+void cBEBoltDB::indexCharBolts()
 {
     int last = -1;
     int i;
-    for (i = 0; i < self->count; i++) {
-        int groupId = self->entries[i].group;
-        self->groupCount[groupId]++;
+    for (i = 0; i < mTotalNumCharBolts; i++) {
+        int groupId = mpCharBolts[i].charID;
+        mNumCharBolts[groupId]++;
         if (last != groupId) {
             last = groupId;
-            self->groupFirst[groupId] = i;
+            mCharBoltsStart[groupId] = i;
         }
     }
 }
@@ -1628,38 +1515,23 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_indexRules);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-struct sBEEntryC_G {
-    signed char group; // 0x0
-    char pad_0x01[0xB];
-};
-
-struct sBEKeyTableG {
-    char pad_0x00[8];
-    sBEEntryC_G* entries; // 0x8
-    char pad_0x0C[0x14];
-    int count; // 0x20
-    char pad_0x24[0x20C - 0x24];
-    int groupCount[30]; // 0x20C
-    int groupFirst[30]; // 0x284
-};
-
 /**
  * Counts the bolt database's 12-byte records (+0x8, count +0x20) per group and records each group's first index (+0x20C
  * and +0x284, by byte +0x0).
  *
  * Clears the counts first; assumes the records are sorted by group.
  */
-extern "C" void cBEBoltDB_indexRules(sBEKeyTableG* self)
+void cBEBoltDB::indexRules()
 {
     int last = 30;
     int i;
-    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
-    for (i = 0; i < self->count; i++) {
-        int groupId = self->entries[i].group;
-        self->groupCount[groupId]++;
+    MEM_fill(mNumCharRules, 0, sizeof(mNumCharRules));
+    for (i = 0; i < mTotalNumCharRules; i++) {
+        int groupId = mpCharRules[i].group;
+        mNumCharRules[groupId]++;
         if (last != groupId) {
             last = groupId;
-            self->groupFirst[groupId] = i;
+            mCharRulesStart[groupId] = i;
         }
     }
 }
@@ -1670,39 +1542,24 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_indexPairs);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-struct sBEEntry8G {
-    signed char group; // 0x0
-    char pad_0x01[7];
-};
-
-struct sBEKeyTableG1 {
-    char pad_0x00[0xC];
-    sBEEntry8G* entries; // 0xC
-    char pad_0x10[0x14];
-    int count; // 0x24
-    char pad_0x28[0x2FC - 0x28];
-    int groupCount[30]; // 0x2FC
-    int groupFirst[30]; // 0x374
-};
-
 /**
  * Counts the bolt database's 8-byte records at +0xC (count +0x24) per group and records each group's first index
  * (+0x2FC and +0x374, by byte +0x0).
  *
  * Clears both tables first; assumes the records are sorted by group.
  */
-extern "C" void cBEBoltDB_indexPairs(sBEKeyTableG1* self)
+void cBEBoltDB::indexPairs()
 {
     int last = -1;
     int i;
-    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
-    MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
-    for (i = 0; i < self->count; i++) {
-        int groupId = self->entries[i].group;
-        self->groupCount[groupId]++;
+    MEM_fill(mNumCharPairs, 0, sizeof(mNumCharPairs));
+    MEM_fill(mCharPairsStart, 0, sizeof(mCharPairsStart));
+    for (i = 0; i < mTotalNumCharPairs; i++) {
+        int groupId = mpCharPairs[i].group;
+        mNumCharPairs[groupId]++;
         if (last != groupId) {
             last = groupId;
-            self->groupFirst[groupId] = i;
+            mCharPairsStart[groupId] = i;
         }
     }
 }
@@ -1713,39 +1570,24 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_indexGroups);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-struct sBEEntry8G2 {
-    signed char group; // 0x0
-    char pad_0x01[7];
-};
-
-struct sBEKeyTableG2 {
-    char pad_0x00[0x10];
-    sBEEntry8G2* entries; // 0x10
-    char pad_0x14[0x14];
-    int count; // 0x28
-    char pad_0x2C[0x3EC - 0x2C];
-    int groupCount[30]; // 0x3EC
-    int groupFirst[30]; // 0x464
-};
-
 /**
  * Counts the bolt database's 8-byte records at +0x10 (count +0x28) per group and records each group's first index
  * (+0x3EC and +0x464, by byte +0x0).
  *
  * Clears both tables first; assumes the records are sorted by group.
  */
-extern "C" void cBEBoltDB_indexGroups(sBEKeyTableG2* self)
+void cBEBoltDB::indexGroups()
 {
     int last = -1;
     int i;
-    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
-    MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
-    for (i = 0; i < self->count; i++) {
-        int groupId = self->entries[i].group;
-        self->groupCount[groupId]++;
+    MEM_fill(mNumCharGroups, 0, sizeof(mNumCharGroups));
+    MEM_fill(mCharGroupsStart, 0, sizeof(mCharGroupsStart));
+    for (i = 0; i < mTotalNumCharGroups; i++) {
+        int groupId = mpCharGroups[i].group;
+        mNumCharGroups[groupId]++;
         if (last != groupId) {
             last = groupId;
-            self->groupFirst[groupId] = i;
+            mCharGroupsStart[groupId] = i;
         }
     }
 }
@@ -1759,15 +1601,13 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_setBoltModelPart);
  *
  * No check for a missing bolt. Only cBEBoltInterface_setBoltModelPart calls it.
  *
- * @param vself  the bolt database
  * @param groupId  the group (a character ID)
  * @param key  the bolt id
  * @param value  the new value
  */
-extern "C" void cBEBoltDB_setBoltModelPart(void** vself, int groupId, int key, int value)
+void cBEBoltDB::setBoltModelPart(int groupId, int key, int value)
 {
-    sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(char*)((char*)&self->entries[cBEBoltDB_findBoltIndex(self, groupId, key)] + 0x10) = value;
+    mpCharBolts[findBoltIndex(groupId, key)].modelPart = value;
 }
 #endif
 //100%
@@ -1778,15 +1618,13 @@ INCLUDE_ASM("be/belibrary", func_0014C590);
  *
  * No check for a missing bolt. Only func_0014BE00 calls it.
  *
- * @param vself  the bolt database
  * @param groupId  the group (a character ID)
  * @param key  the bolt id
  * @param value  the new value
  */
-extern "C" void func_0014C590(void** vself, int groupId, int key, int value)
+extern "C" void func_0014C590(cBEBoltDB* self, int groupId, int key, int value)
 {
-    sBEGroupTable* self = (sBEGroupTable*)vself;
-    self->entries[cBEBoltDB_findBoltIndex(self, groupId, key)].used = value;
+    self->mpCharBolts[self->findBoltIndex(groupId, key)].variant = value;
 }
 #endif
 //100%
@@ -1797,15 +1635,13 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_setBoltEquipPoints);
  *
  * No check for a missing bolt. Only cBEBoltInterface_setBoltEquipPoints calls it.
  *
- * @param vself  the bolt database
  * @param groupId  the group (a character ID)
  * @param key  the bolt id
  * @param value  the new value
  */
-extern "C" void cBEBoltDB_setBoltEquipPoints(void** vself, int groupId, int key, int value)
+void cBEBoltDB::setBoltEquipPoints(int groupId, int key, int value)
 {
-    sBEGroupTable* self = (sBEGroupTable*)vself;
-    self->entries[cBEBoltDB_findBoltIndex(self, groupId, key)].equipPoints = value;
+    mpCharBolts[findBoltIndex(groupId, key)].equipPoints = value;
 }
 #endif
 
@@ -1813,26 +1649,25 @@ extern "C" void cBEBoltDB_setBoltEquipPoints(void** vself, int groupId, int key,
 INCLUDE_ASM("be/belibrary", cBEBoltDB_cBEBoltDB);
 #ifdef SKIP_ASM
 /**
- * Constructs an empty bolt database: zeroes its first eleven words (+0x0 to +0x28).
+ * Constructs an empty bolt database: clears its pointers and counts (+0x0 to +0x28).
  *
  * Nothing calls it.
  *
  * @return @p self
  */
-extern "C" void* cBEBoltDB_cBEBoltDB(void* self)
+extern "C" cBEBoltDB* cBEBoltDB_cBEBoltDB(cBEBoltDB* self)
 {
-    int* words = (int*)self;
-    words[0] = 0;
-    words[1] = 0;
-    words[2] = 0;
-    words[3] = 0;
-    words[4] = 0;
-    words[5] = 0;
-    words[6] = 0;
-    words[7] = 0;
-    words[8] = 0;
-    words[9] = 0;
-    words[10] = 0;
+    self->mpBoltsFile = 0;
+    self->mpCharBolts = 0;
+    self->mpCharRules = 0;
+    self->mpCharPairs = 0;
+    self->mpCharGroups = 0;
+    self->mpStringPool = 0;
+    self->mpChildBoltsData = 0;
+    self->mTotalNumCharBolts = 0;
+    self->mTotalNumCharRules = 0;
+    self->mTotalNumCharPairs = 0;
+    self->mTotalNumCharGroups = 0;
     return self;
 }
 #endif
@@ -1841,7 +1676,7 @@ extern "C" void* cBEBoltDB_cBEBoltDB(void* self)
 INCLUDE_ASM("be/belibrary", cBEBoltDB__cBEBoltDB);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void cBEBoltDB_freeData(void* self);
+extern "C" void cBEBoltDB_freeData(cBEBoltDB* self);
 
 /**
  * Destroys a bolt database: frees its data with cBEBoltDB_freeData and deletes the object when bit 0 of @p flags is set.
@@ -1850,12 +1685,12 @@ extern "C" void cBEBoltDB_freeData(void* self);
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
-extern "C" void cBEBoltDB__cBEBoltDB(int* self, int flags)
+extern "C" void cBEBoltDB__cBEBoltDB(cBEBoltDB* self, int flags)
 {
-    cBEBoltDB_freeData(self);
+    self->freeData();
     if (flags & 1)
     {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1863,7 +1698,7 @@ extern "C" void cBEBoltDB__cBEBoltDB(int* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", cBEBoltDB_load);
 #ifdef SKIP_ASM
-extern "C" void cBEBoltDB_loadFile(void* self);
+extern "C" void cBEBoltDB_loadFile(cBEBoltDB* self);
 
 /**
  * Loads the bolt database unless it is already loaded (+0x10 set), then rebuilds its group indexes.
@@ -1875,16 +1710,16 @@ extern "C" void cBEBoltDB_loadFile(void* self);
  *
  * @return no meaningful value; the body sets none
  */
-extern "C" void* cBEBoltDB_load(void* self)
+void* cBEBoltDB::load()
 {
-    if (((sBEKeyTableG2*)self)->entries == 0) {
-        int none = ((sBEGroupTable*)self)->entries == 0;
-        cBEBoltDB_freeData(self);
-        cBEBoltDB_loadFile(self);
-        cBEBoltDB_indexCharBolts((sBEGroupTable*)self);
-        cBEBoltDB_indexRules((sBEKeyTableG*)self);
-        cBEBoltDB_indexPairs((sBEKeyTableG1*)self);
-        cBEBoltDB_indexGroups((sBEKeyTableG2*)self);
+    if (mpCharGroups == 0) {
+        int none = mpCharBolts == 0;
+        freeData();
+        loadFile();
+        indexCharBolts();
+        indexRules();
+        indexPairs();
+        indexGroups();
         if (!none) {
             int profileIndex;
             int characterId;
@@ -1916,16 +1751,8 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_refreshVisibleBolts);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0014C7A0(void* self);
 int cBEBoltDB_getNumCharPairs(void* self, int i);
-extern "C" void* cBEBoltDB_getCharPairs(sBELibTables* self, int i);
+extern "C" tBEBoltPair* cBEBoltDB_getCharPairs(cBEBoltDB* self, int i);
 
-struct sBEReq_14D068 {
-    char pad_0x0[4];
-    short a;    // 0x4
-    short b;    // 0x6
-};
-
-// The unit declares cBEBoltDB_refreshVisibleBolts as returning void*; the body returns nothing.
-extern "C" void cBEBoltDB_refreshVisibleBolts_impl(void* self) __asm__("cBEBoltDB_refreshVisibleBolts");
 
 /**
  * Re-derives the equipped flags of every character's bolts and rebuilds the bolt database's indexes.
@@ -1936,14 +1763,14 @@ extern "C" void cBEBoltDB_refreshVisibleBolts_impl(void* self) __asm__("cBEBoltD
  * func_0014C7A0 and the four group builders (cBEBoltDB_indexCharBolts, cBEBoltDB_indexRules, cBEBoltDB_indexPairs, cBEBoltDB_indexGroups). The game
  * loader calls it through cBEBoltInterface_refreshVisibleBolts.
  */
-extern "C" void cBEBoltDB_refreshVisibleBolts_impl(void* self)
+void cBEBoltDB::refreshVisibleBolts()
 {
     int profileIndex;
     int characterId;
     for (profileIndex = 0; profileIndex < 3; profileIndex++) {
         for (characterId = 0; characterId < 10; characterId++) {
-            sBEReq_14D068* req = (sBEReq_14D068*)cBEBoltDB_getCharPairs((sBELibTables*)self, characterId);
-            int n = cBEBoltDB_getNumCharPairs(self, characterId);
+            tBEBoltPair* req = getCharPairs(characterId);
+            int n = getNumCharPairs(characterId);
             cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
             int i;
             int count = charRecord->mNumBolts;
@@ -1953,21 +1780,21 @@ extern "C" void cBEBoltDB_refreshVisibleBolts_impl(void* self)
                     flagEntry->flags |= 0x10;
             }
             for (i = 0; i < n; i++, req++) {
-                flagEntry = getEntry_14AFB0(charRecord, req->a);
+                flagEntry = getEntry_14AFB0(charRecord, req->bolts[0]);
                 if (flagEntry->flags & 4) {
-                    if (req->b >= 0)
-                        getEntry_14AFB0(charRecord, req->b)->flags |= 0x10;
+                    if (req->bolts[1] >= 0)
+                        getEntry_14AFB0(charRecord, req->bolts[1])->flags |= 0x10;
                 }
             }
             flagEntry = getEntry_14AFB0(charRecord, 4);
             flagEntry->flags |= 0x10;
         }
     }
-    func_0014C7A0(self);
-    cBEBoltDB_indexCharBolts((sBEGroupTable*)self);
-    cBEBoltDB_indexRules((sBEKeyTableG*)self);
-    cBEBoltDB_indexPairs((sBEKeyTableG1*)self);
-    cBEBoltDB_indexGroups((sBEKeyTableG2*)self);
+    func_0014C7A0(this);
+    indexCharBolts();
+    indexRules();
+    indexPairs();
+    indexGroups();
 }
 #endif
 
@@ -1976,57 +1803,40 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_freeData);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
-struct sBELibData_14D240
-{
-    void* buf;          // 0x0
-    int boltDefs;       // 0x4 (cBEBoltDB_loadFile's names)
-    int links;          // 0x8
-    int pairs;          // 0xC
-    int groups;         // 0x10
-    int strings;        // 0x14
-    void* childTables;  // 0x18
-    int numBolts;       // 0x1C
-    int numLinks;       // 0x20
-    int numPairs;       // 0x24
-    int numGroups;      // 0x28
-    int tab[11][30];    // 0x2C
-};
-
 /**
  * Frees the bolt database's data and clears its tables.
  *
  * Frees the file block (+0x0) and the child table block (+0x18) with cMemMan_free, zeroes the pointers and counts at
  * +0x4 to +0x28 and the eleven 30-word tables from +0x2C.
  */
-extern "C" void cBEBoltDB_freeData(void* self)
+void cBEBoltDB::freeData()
 {
-    sBELibData_14D240* boltDB = (sBELibData_14D240*)self;
-    if (boltDB->buf)
-        cMemMan_free(boltDB->buf);
-    boltDB->buf = 0;
-    boltDB->boltDefs = 0;
-    boltDB->links = 0;
-    boltDB->pairs = 0;
-    boltDB->groups = 0;
-    boltDB->strings = 0;
-    boltDB->numBolts = 0;
-    boltDB->numLinks = 0;
-    boltDB->numPairs = 0;
-    boltDB->numGroups = 0;
-    MEM_fill(boltDB->tab[0], 0, sizeof(boltDB->tab[0]));
-    MEM_fill(boltDB->tab[1], 0, sizeof(boltDB->tab[1]));
-    MEM_fill(boltDB->tab[2], 0, sizeof(boltDB->tab[2]));
-    MEM_fill(boltDB->tab[3], 0, sizeof(boltDB->tab[3]));
-    MEM_fill(boltDB->tab[4], 0, sizeof(boltDB->tab[4]));
-    MEM_fill(boltDB->tab[5], 0, sizeof(boltDB->tab[5]));
-    MEM_fill(boltDB->tab[6], 0, sizeof(boltDB->tab[6]));
-    MEM_fill(boltDB->tab[7], 0, sizeof(boltDB->tab[7]));
-    MEM_fill(boltDB->tab[8], 0, sizeof(boltDB->tab[8]));
-    MEM_fill(boltDB->tab[9], 0, sizeof(boltDB->tab[9]));
-    MEM_fill(boltDB->tab[10], 0, sizeof(boltDB->tab[10]));
-    if (boltDB->childTables)
-        cMemMan_free(boltDB->childTables);
-    boltDB->childTables = 0;
+    if (mpBoltsFile)
+        cMemMan_free(mpBoltsFile);
+    mpBoltsFile = 0;
+    mpCharBolts = 0;
+    mpCharRules = 0;
+    mpCharPairs = 0;
+    mpCharGroups = 0;
+    mpStringPool = 0;
+    mTotalNumCharBolts = 0;
+    mTotalNumCharRules = 0;
+    mTotalNumCharPairs = 0;
+    mTotalNumCharGroups = 0;
+    MEM_fill(mNumCharBolts, 0, sizeof(mNumCharBolts));
+    MEM_fill(mCharBoltsStart, 0, sizeof(mCharBoltsStart));
+    MEM_fill(mpNumChildBolts, 0, sizeof(mpNumChildBolts));
+    MEM_fill(mpFirstChildBolt, 0, sizeof(mpFirstChildBolt));
+    MEM_fill(mNumCharRules, 0, sizeof(mNumCharRules));
+    MEM_fill(mCharRulesStart, 0, sizeof(mCharRulesStart));
+    MEM_fill(mNumCharPairs, 0, sizeof(mNumCharPairs));
+    MEM_fill(mCharPairsStart, 0, sizeof(mCharPairsStart));
+    MEM_fill(mNumCharGroups, 0, sizeof(mNumCharGroups));
+    MEM_fill(mCharGroupsStart, 0, sizeof(mCharGroupsStart));
+    MEM_fill(mpBoltIndex, 0, sizeof(mpBoltIndex));
+    if (mpChildBoltsData)
+        cMemMan_free(mpChildBoltsData);
+    mpChildBoltsData = 0;
 }
 #endif
 
@@ -2034,29 +1844,6 @@ extern "C" void cBEBoltDB_freeData(void* self)
 INCLUDE_ASM("be/belibrary", cBEBoltDB_getBoltDefIndex);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sLibItem_0014D368 {
-    signed char category; // 0x00
-    signed char sub;      // 0x01
-    short pad_0x02;
-    short id;             // 0x04
-    char pad_0x06[0x12];
-    int key18;            // 0x18
-    char pad_0x1C[0xC];
-    int key28;            // 0x28
-    int key2C;            // 0x2C
-    char pad_0x30[0x8];
-};
-
-struct sLib_0014D368 {
-    int field_0x0;
-    sLibItem_0014D368* items; // 0x04
-    char pad_0x08[0x14];
-    int itemCount;            // 0x1C
-    char pad_0x20[0xC];
-    int catCount[30];         // 0x2C
-    int catStart[30];         // 0xA4
-};
-
 /**
  * Returns the index of a bolt definition in the bolt database.
  *
@@ -2066,19 +1853,21 @@ struct sLib_0014D368 {
  * @param item  the bolt definition (0x38 bytes)
  * @return the index, or -1 when not found
  */
-extern "C" int cBEBoltDB_getBoltDefIndex(sLib_0014D368* self, sLibItem_0014D368* item)
+int cBEBoltDB::getBoltDefIndex(tBEBoltDef* item)
 {
-    sLibItem_0014D368* items = self->items;
+    tBEBoltDef* items = mpCharBolts;
     int idx = item - items;
-    if (idx < 0 || idx >= self->itemCount) {
-        int start = self->catStart[item->category];
-        int end = start + self->catCount[item->category];
+    if (idx < 0 || idx >= mTotalNumCharBolts) {
+        int start = mCharBoltsStart[item->charID];
+        int end = start + mNumCharBolts[item->charID];
         int i = start;
         if (i < end) {
-            sLibItem_0014D368* candidate = &items[start];
+            tBEBoltDef* candidate = &items[start];
             do {
-                if (candidate->id == item->id && candidate->sub == item->sub && candidate->key28 == item->key28 &&
-                    candidate->key18 == item->key18 && candidate->key2C == item->key2C) {
+                if (candidate->id == item->id && candidate->variant == item->variant &&
+                    candidate->modelPartFile == item->modelPartFile &&
+                    candidate->lodPartNames[0] == item->lodPartNames[0] &&
+                    candidate->modelFileName == item->modelFileName) {
                     idx = i;
                     goto done;
                 }
@@ -2106,13 +1895,13 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_findBoltIndex);
  * @param key  the bolt id
  * @return the index, or -1 when the search finds none
  */
-extern "C" int cBEBoltDB_findBoltIndex(sBEGroupTable* self, int groupId, int key)
+int cBEBoltDB::findBoltIndex(int groupId, int key)
 {
-    short* lookup = self->idToIndex[groupId];
+    short* lookup = mpBoltIndex[groupId];
     if (lookup == 0) {
-        int i = self->groupFirst[groupId];
-        int end = i + self->groupCount[groupId];
-        sBEEntry38* boltDef = &self->entries[i];
+        int i = mCharBoltsStart[groupId];
+        int end = i + mNumCharBolts[groupId];
+        tBEBoltDef* boltDef = &mpCharBolts[i];
         for (; i < end; i++, boltDef++) {
             if (boltDef->id == key) {
                 return i;
@@ -2137,14 +1926,14 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_countChildBolts);
  * @param key  the parent bolt id
  * @return the number of children
  */
-extern "C" int cBEBoltDB_countChildBolts(sBEGroupTable* self, int groupId, int key)
+int cBEBoltDB::countChildBolts(int groupId, int key)
 {
-    short* lookup = self->childCount[groupId];
+    short* lookup = mpNumChildBolts[groupId];
     if (lookup == 0) {
         int n = 0;
-        int i = self->groupFirst[groupId];
-        int end = i + self->groupCount[groupId];
-        sBEEntry38* boltDef = &self->entries[i];
+        int i = mCharBoltsStart[groupId];
+        int end = i + mNumCharBolts[groupId];
+        tBEBoltDef* boltDef = &mpCharBolts[i];
         for (; i < end; boltDef++, i++) {
             if (boltDef->parentId == key) {
                 n++;
@@ -2171,13 +1960,13 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getFirstChildBolt);
  * @param key  the parent bolt id, or kNoBoltID
  * @return the definition, or null
  */
-extern "C" sBEEntry38* cBEBoltDB_getFirstChildBolt(sBEGroupTable* self, int groupId, int key)
+tBEBoltDef* cBEBoltDB::getFirstChildBolt(int groupId, int key)
 {
     short* lookup;
-    if (key == kNoBoltID || (lookup = self->firstChildIndex[groupId]) == 0) {
-        int i = self->groupFirst[groupId];
-        int end = i + self->groupCount[groupId];
-        sBEEntry38* boltDef = &self->entries[i];
+    if (key == kNoBoltID || (lookup = mpFirstChildBolt[groupId]) == 0) {
+        int i = mCharBoltsStart[groupId];
+        int end = i + mNumCharBolts[groupId];
+        tBEBoltDef* boltDef = &mpCharBolts[i];
         for (; i < end; i++, boltDef++) {
             if (boltDef->parentId == key) {
                 return boltDef;
@@ -2185,10 +1974,10 @@ extern "C" sBEEntry38* cBEBoltDB_getFirstChildBolt(sBEGroupTable* self, int grou
         }
         return 0;
     }
-    if (self->childCount[groupId][key] <= 0) {
+    if (mpNumChildBolts[groupId][key] <= 0) {
         return 0;
     }
-    return &self->entries[lookup[key]];
+    return &mpCharBolts[lookup[key]];
 }
 #endif
 
@@ -2210,20 +1999,20 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_collectChildBolts);
  * @param all  non-zero to descend into flag-0x20 definitions too
  * @return the number of pointers written
  */
-extern "C" int cBEBoltDB_collectChildBolts(sBEGroupTable* self, int groupId, int key, sBEEntry38** out, int depth, int all)
+int cBEBoltDB::collectChildBolts(int groupId, int key, tBEBoltDef** out, int depth, int all)
 {
     int count = 0;
-    if (key == kNoBoltID || self->childCount[groupId] == 0) {
-        int i = self->groupFirst[groupId];
-        int end = i + self->groupCount[groupId];
-        sBEEntry38* boltDef = &self->entries[i];
+    if (key == kNoBoltID || mpNumChildBolts[groupId] == 0) {
+        int i = mCharBoltsStart[groupId];
+        int end = i + mNumCharBolts[groupId];
+        tBEBoltDef* boltDef = &mpCharBolts[i];
         for (; i < end; i++, boltDef++) {
             if (boltDef->parentId == key) {
                 *out++ = boltDef;
                 count++;
                 if (depth != 0) {
                     if (!(boltDef->flags & 0x20) || all) {
-                        int childCount = cBEBoltDB_collectChildBolts(self, groupId, boltDef->id, out, depth - 1, all);
+                        int childCount = collectChildBolts(groupId, boltDef->id, out, depth - 1, all);
                         count += childCount;
                         out += childCount;
                     }
@@ -2233,14 +2022,14 @@ extern "C" int cBEBoltDB_collectChildBolts(sBEGroupTable* self, int groupId, int
             }
         }
     } else {
-        sBEEntry38* boltDef = cBEBoltDB_getFirstChildBolt(self, groupId, key);
-        int n = self->childCount[groupId][key];
+        tBEBoltDef* boltDef = getFirstChildBolt(groupId, key);
+        int n = mpNumChildBolts[groupId][key];
         for (int j = 0; j < n; j++, boltDef++) {
             *out++ = boltDef;
             count++;
             if (depth != 0) {
                 if (!(boltDef->flags & 0x20) || all) {
-                    int childCount = cBEBoltDB_collectChildBolts(self, groupId, boltDef->id, out, depth - 1, all);
+                    int childCount = collectChildBolts(groupId, boltDef->id, out, depth - 1, all);
                     count += childCount;
                     out += childCount;
                 }
@@ -2254,26 +2043,6 @@ extern "C" int cBEBoltDB_collectChildBolts(sBEGroupTable* self, int groupId, int
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltDB_collectCategoryBolts);
 #ifdef SKIP_ASM
-struct sBENode_14D7E8
-{
-    signed char group;  // 0x0
-    char pad_0x01[3];
-    short child;        // 0x4
-    short field_0x6;
-    short parent;       // 0x8
-    char pad_0x0A[0x2A];
-    int flags;          // 0x34
-};
-
-struct sBENodeTable_14D7E8
-{
-    char pad_0x00[4];
-    sBENode_14D7E8* entries; // 0x4
-    char pad_0x08[0x24];
-    int groupCount[30]; // 0x2C
-    int groupFirst[30]; // 0xA4
-};
-
 /**
  * Collects the bolt definitions under @p key in group @p groupId by the short at +0x8 into @p out and returns how many.
  *
@@ -2288,18 +2057,18 @@ struct sBENodeTable_14D7E8
  * @param all  non-zero to descend into flag-0x20 definitions too
  * @return the number of pointers written
  */
-extern "C" int cBEBoltDB_collectCategoryBolts(sBENodeTable_14D7E8* self, int groupId, int key, sBENode_14D7E8** out, int depth, int all)
+int cBEBoltDB::collectCategoryBolts(int groupId, int key, tBEBoltDef** out, int depth, int all)
 {
     int n = 0;
-    int i = self->groupFirst[groupId];
-    int end = i + self->groupCount[groupId];
-    sBENode_14D7E8* node = &self->entries[i];
+    int i = mCharBoltsStart[groupId];
+    int end = i + mNumCharBolts[groupId];
+    tBEBoltDef* node = &mpCharBolts[i];
     for (; i < end; i++, node++) {
-        if (node->parent == key) {
+        if (node->categoryId == key) {
             *out++ = node;
             n++;
             if (depth != 0 && (!(node->flags & 0x20) || all)) {
-                int k = cBEBoltDB_collectCategoryBolts(self, groupId, node->child, out, depth - 1, all);
+                int k = collectCategoryBolts(groupId, node->id, out, depth - 1, all);
                 n += k;
                 out += k;
             }
@@ -2322,7 +2091,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_isBoltAncestor);
  * @param key  the bolt id to look for
  * @return 1 when found, else 0
  */
-extern "C" int cBEBoltDB_isBoltAncestor(sBEGroupTable* self, sBEEntry38* boltDef, int key)
+int cBEBoltDB::isBoltAncestor(tBEBoltDef* boltDef, int key)
 {
     if (boltDef == 0)
         return 0;
@@ -2330,13 +2099,13 @@ extern "C" int cBEBoltDB_isBoltAncestor(sBEGroupTable* self, sBEEntry38* boltDef
         return 1;
     if (boltDef->parentId == kNoBoltID)
         return 0;
-    int i = cBEBoltDB_findBoltIndex(self, boltDef->group, boltDef->parentId);
-    sBEEntry38* parent;
+    int i = findBoltIndex(boltDef->charID, boltDef->parentId);
+    tBEBoltDef* parent;
     if (i < 0)
         parent = 0;
     else
-        parent = &self->entries[i];
-    return cBEBoltDB_isBoltAncestor(self, parent, key);
+        parent = &mpCharBolts[i];
+    return isBoltAncestor(parent, key);
 }
 #endif
 
@@ -2349,31 +2118,15 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getNumCharBolts__FPvi);
  * @param i  the group (a character ID)
  * @return the count
  */
-int cBEBoltDB_getNumCharBolts(void* self, int i)
+int cBEBoltDB::getNumCharBolts(int i)
 {
-    return ((sBEGroupTable*)self)->groupCount[i];
+    return mNumCharBolts[i];
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltDB_getCharBolts);
 #ifdef SKIP_ASM
-struct sBELibTables {
-    char pad_0x00[4];
-    char* boltDefs;     // 0x4 (cBEBoltDB_loadFile's names)
-    char* links;        // 0x8
-    char* pairs;        // 0xC
-    char* groups;       // 0x10
-    char pad_0x14[0x2C - 0x14];
-    int count0[30]; // 0x2C
-    int index0[30]; // 0xA4
-    char pad_0x11C[0x2FC - 0x11C];
-    int count1[30]; // 0x2FC
-    int index1[30]; // 0x374
-    int count2[30]; // 0x3EC
-    int index2[30]; // 0x464
-};
-
 /**
  * Returns the first bolt definition of group @p i, or null when the group is empty.
  *
@@ -2382,12 +2135,12 @@ struct sBELibTables {
  * @param i  the group (a character ID)
  * @return the first definition, or null
  */
-extern "C" void* cBEBoltDB_getCharBolts(sBELibTables* self, int i)
+tBEBoltDef* cBEBoltDB::getCharBolts(int i)
 {
-    if (self->count0[i] <= 0) {
+    if (mNumCharBolts[i] <= 0) {
         return 0;
     }
-    return self->boltDefs + self->index0[i] * 0x38;
+    return &mpCharBolts[mCharBoltsStart[i]];
 }
 #endif
 
@@ -2402,12 +2155,12 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getCharBolts1);
  * @param i  the group (a character ID)
  * @return the first definition, or null
  */
-extern "C" void* cBEBoltDB_getCharBolts1(sBELibTables* self, int i)
+tBEBoltDef* cBEBoltDB::getCharBolts1(int i)
 {
-    if (self->count0[i] <= 0) {
+    if (mNumCharBolts[i] <= 0) {
         return 0;
     }
-    return self->boltDefs + self->index0[i] * 0x38;
+    return &mpCharBolts[mCharBoltsStart[i]];
 }
 #endif
 
@@ -2419,12 +2172,12 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getCharBoltsStart);
  *
  * Nothing calls it.
  *
- * @param tables  the bolt database
  * @param groupId  the group (a character ID)
  * @return the index
  */
-extern "C" int cBEBoltDB_getCharBoltsStart(sBEGroupTable* tables, int groupId) {
-    return tables->groupFirst[groupId];
+int cBEBoltDB::getCharBoltsStart(int groupId)
+{
+    return mCharBoltsStart[groupId];
 }
 #endif
 //100%
@@ -2436,57 +2189,40 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getNumCharRules);
  *
  * Nothing calls it.
  *
- * @param tables  the bolt database
  * @param groupId  the group (a character ID)
  * @return the count
  */
-extern "C" int cBEBoltDB_getNumCharRules(sBEKeyTableG* tables, int groupId) {
-    return tables->groupCount[groupId];
+int cBEBoltDB::getNumCharRules(int groupId)
+{
+    return mNumCharRules[groupId];
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltDB_countBoltRules);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sBEEntry_DA28 {
-    char field_0x0;
-    signed char flag; // 0x1
-    short key; // 0x2
-    char pad_0x4[8];
-};
-
-struct sBEKeyTable_DA28 {
-    char pad_0x00[8];
-    sBEEntry_DA28* entries; // 0x8
-    char pad_0x0C[0x20C - 0xC];
-    int count[30]; // 0x20C
-    int first[30]; // 0x284
-};
-
 /**
  * Counts group @p groupId's 12-byte records (the table at +0x8) whose key (short +0x2) is @p key.
  *
  * The records are sorted by key within the group; the count stops at the first larger key. Nothing calls it.
  *
- * @param self_  the bolt database
  * @param groupId  the group (a character ID)
  * @param key  the key (a bolt id)
  * @return the number of matching records
  */
-extern "C" int cBEBoltDB_countBoltRules(void* self_, int groupId, int key)
+int cBEBoltDB::countBoltRules(int groupId, int key)
 {
-    sBEKeyTable_DA28* self = (sBEKeyTable_DA28*)self_;
     int n;
     int i;
-    if (self->count[groupId] <= 0) {
+    if (mNumCharRules[groupId] <= 0) {
         return 0;
     }
     n = 0;
-    int end = self->first[groupId] + self->count[groupId];
-    for (i = self->first[groupId]; i < end; i++) {
-        if (self->entries[i].key == key) {
+    int end = mCharRulesStart[groupId] + mNumCharRules[groupId];
+    for (i = mCharRulesStart[groupId]; i < end; i++) {
+        if (mpCharRules[i].boltId == key) {
             n++;
-        } else if (key < self->entries[i].key) {
+        } else if (key < mpCharRules[i].boltId) {
             break;
         }
     }
@@ -2507,10 +2243,10 @@ extern "C" void* cBEBoltDB_findBoltRules(void*, int, int, int*);
  * @param key  the key (a bolt id)
  * @return the record, or null
  */
-extern "C" void* cBEBoltDB_findBoltRule(void* self, int groupId, int key)
+void* cBEBoltDB::findBoltRule(int groupId, int key)
 {
     int count;
-    return cBEBoltDB_findBoltRules(self, groupId, key, &count);
+    return cBEBoltDB_findBoltRules(this, groupId, key, &count);
 }
 #endif
 //100%
@@ -2518,24 +2254,7 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_findBoltRules);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sLibEntry_0014DAC0 {
-    short field_0x0;
-    short key;      // 0x2
-    int field_0x4;
-    int field_0x8;
-};
-
-struct sLib_0014DAC0 {
-    int field_0x0;
-    int field_0x4;
-    sLibEntry_0014DAC0* entries; // 0x8
-    char pad_0xC[0x200];
-    int count[30];               // 0x20C
-    int start[30];               // 0x284
-};
-
 // Finds the first entry with this key in a sorted bucket; also counts matches.
-extern "C" int cBEBoltDB_findBoltRules_impl(void* self, int a, int b, int* out) __asm__("cBEBoltDB_findBoltRules");
 /**
  * Returns group @p groupId's first 12-byte record (the table at +0x8) whose key (short +0x2) is @p wantKey, and counts
  * the matches.
@@ -2547,28 +2266,27 @@ extern "C" int cBEBoltDB_findBoltRules_impl(void* self, int a, int b, int* out) 
  * @param out  receives the number of matching records
  * @return the first matching record, or 0
  */
-extern "C" int cBEBoltDB_findBoltRules_impl(void* self, int groupId, int wantKey, int* out)
+int cBEBoltDB::findBoltRules(int groupId, int wantKey, int* out)
 {
-    sLib_0014DAC0* lib = (sLib_0014DAC0*)self;
     *out = 0;
-    int n = lib->count[groupId];
+    int n = mNumCharRules[groupId];
     if (n <= 0) {
         return 0;
     }
-    int start = lib->start[groupId];
+    int start = mCharRulesStart[groupId];
     int end = start + n;
     int i = start;
-    sLibEntry_0014DAC0* found = 0;
+    tBEBoltRule* found = 0;
     if (i < end) {
         do {
             int off = i * 12;
-            sLibEntry_0014DAC0* entry = (sLibEntry_0014DAC0*)(off + (int)lib->entries);
-            if (entry->key == wantKey) {
+            tBEBoltRule* entry = (tBEBoltRule*)(off + (int)mpCharRules);
+            if (entry->boltId == wantKey) {
                 if (found == 0) {
                     found = entry;
                 }
                 (*out)++;
-            } else if (wantKey < entry->key) {
+            } else if (wantKey < entry->boltId) {
                 break;
             }
             i++;
@@ -2581,21 +2299,6 @@ extern "C" int cBEBoltDB_findBoltRules_impl(void* self, int groupId, int wantKey
 //100%
 INCLUDE_ASM("be/belibrary", cBEBoltDB_getBoltRules);
 #ifdef SKIP_ASM
-struct sBEEntryC {
-    char field_0x0;
-    signed char flag; // 0x1
-    short key; // 0x2
-    char pad_0x4[8];
-};
-
-struct sBEKeyTable {
-    char pad_0x00[8];
-    sBEEntryC* entries; // 0x8
-    char pad_0x0C[0x20C - 0xC];
-    int count[30]; // 0x20C
-    int first[30]; // 0x284
-};
-
 /**
  * Returns group @p groupId's first 12-byte record with key @p key whose flag byte (+0x1) is set or clear as @p want
  * asks, and counts the run.
@@ -2609,26 +2312,26 @@ struct sBEKeyTable {
  * @param out  receives the number of matching records
  * @return the first matching record, or null
  */
-extern "C" sBEEntryC* cBEBoltDB_getBoltRules(sBEKeyTable* self, int groupId, int key, int want, int* out)
+tBEBoltRule* cBEBoltDB::getBoltRules(int groupId, int key, int want, int* out)
 {
-    sBEEntryC* result;
+    tBEBoltRule* result;
     int i;
     *out = 0;
-    if (self->count[groupId] <= 0) {
+    if (mNumCharRules[groupId] <= 0) {
         return 0;
     }
     result = 0;
-    for (i = self->first[groupId]; i < self->first[groupId] + self->count[groupId]; i++) {
-        if (self->entries[i].key == key) {
-            if ((self->entries[i].flag != 0) == want) {
+    for (i = mCharRulesStart[groupId]; i < mCharRulesStart[groupId] + mNumCharRules[groupId]; i++) {
+        if (mpCharRules[i].boltId == key) {
+            if ((mpCharRules[i].on != 0) == want) {
                 if (result == 0) {
-                    result = &self->entries[i];
+                    result = &mpCharRules[i];
                 }
                 (*out)++;
             } else if (result != 0) {
                 break;
             }
-        } else if (key < self->entries[i].key) {
+        } else if (key < mpCharRules[i].boltId) {
             break;
         }
     }
@@ -2645,9 +2348,9 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getNumCharPairs__FPvi);
  * @param i  the group (a character ID)
  * @return the count
  */
-int cBEBoltDB_getNumCharPairs(void* self, int i)
+int cBEBoltDB::getNumCharPairs(int i)
 {
-    return ((sBEKeyTableG1*)self)->groupCount[i];
+    return mNumCharPairs[i];
 }
 #endif
 
@@ -2662,10 +2365,10 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getCharPairs);
  * @param i  the group (a character ID)
  * @return the first record, or null
  */
-extern "C" void* cBEBoltDB_getCharPairs(sBELibTables* self, int i)
+tBEBoltPair* cBEBoltDB::getCharPairs(int i)
 {
-    if (self->count1[i] > 0) {
-        return self->pairs + self->index1[i] * 8;
+    if (mNumCharPairs[i] > 0) {
+        return &mpCharPairs[mCharPairsStart[i]];
     }
     return 0;
 }
@@ -2680,9 +2383,9 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getNumCharGroups__FPvi);
  * @param i  the group (a character ID)
  * @return the count
  */
-int cBEBoltDB_getNumCharGroups(void* self, int i)
+int cBEBoltDB::getNumCharGroups(int i)
 {
-    return ((sBEKeyTableG2*)self)->groupCount[i];
+    return mNumCharGroups[i];
 }
 #endif
 
@@ -2697,10 +2400,10 @@ INCLUDE_ASM("be/belibrary", cBEBoltDB_getCharGroups);
  * @param i  the group (a character ID)
  * @return the first record, or null
  */
-extern "C" void* cBEBoltDB_getCharGroups(sBELibTables* self, int i)
+tBEBoltGroup* cBEBoltDB::getCharGroups(int i)
 {
-    if (self->count2[i] > 0) {
-        return self->groups + self->index2[i] * 8;
+    if (mNumCharGroups[i] > 0) {
+        return &mpCharGroups[mCharGroupsStart[i]];
     }
     return 0;
 }

@@ -26,6 +26,7 @@
 // patch cache at 0x10 and the tail from 0x5364 (used by DrawPatches) are not laid out yet.
 
 #include "layout.h"
+#include "render/bezierman.h"
 #include "render/beziercache.h"
 
 // A patch's tessellation (names ours, after the lists m4x4Patches / m6x6Patches / m8x8Patches): the n x n grid named by

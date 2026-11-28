@@ -1,11 +1,12 @@
 #include "common.h"
+#include "render/lightman.h"
 #include "render/ps2lightman.h"
 
 extern void* cLightMan_vtbl[16];
-extern void* cLightMan_TheLightMan;
 
-struct cPSPLightMan {
-    void* vtable;
+// On Tour's intermediate class between cLightMan and cPS2LightMan (render/ps2lightman.h); retail keeps its name only
+// in the constructor's symbol. No members of its own here.
+struct cPSPLightMan : cLightMan {
 };
 
 //99.83%
@@ -20,7 +21,7 @@ INCLUDE_ASM("render/ps2lightman", cLightMan_cLightMan__FP12cPSPLightMan);
  */
 cPSPLightMan* cLightMan_cLightMan(cPSPLightMan* self)
 {
-    self->vtable = cLightMan_vtbl;
+    self->mVtbl = cLightMan_vtbl;
     cLightMan_TheLightMan = self;
     return self;
 }
@@ -29,8 +30,6 @@ cPSPLightMan* cLightMan_cLightMan(cPSPLightMan* self)
 //100%
 INCLUDE_ASM("render/ps2lightman", cLightMan__cLightMan);
 #ifdef SKIP_ASM
-extern void* cLightMan_TheLightMan;
-extern void* cLightMan_vtbl[];
 void operator_delete(int* ptr);
 
 /**
@@ -41,9 +40,9 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cLightMan__cLightMan(cPS2LightMan* self, int flags)
+extern "C" void cLightMan__cLightMan(cLightMan* self, int flags)
 {
-    *(void***)self = cLightMan_vtbl;
+    self->mVtbl = cLightMan_vtbl;
     cLightMan_TheLightMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);

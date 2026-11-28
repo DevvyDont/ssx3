@@ -70,7 +70,6 @@ void cGame::renderModels(FrustumIntersector* world)
 //100%
 INCLUDE_ASM("main/game", patchLodContext_begin);
 #ifdef SKIP_ASM
-extern void* cBezierMan_TheBezierMan;
 
 struct sVec_C1B0 {
     float x, y, z, w;
@@ -312,7 +311,6 @@ INCLUDE_ASM("main/game", cGame_renderPatches);
 extern "C" void patchLodContext_begin(void* ctx);
 extern "C" void patchLodContext_submitPatch(void* ctx, int patch, int flag);
 extern "C" void patchLodContext_end(void* self, int flags);
-extern void* cBezierMan_TheBezierMan;
 
 
 /**

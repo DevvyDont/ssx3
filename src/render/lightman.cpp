@@ -86,7 +86,7 @@ INCLUDE_ASM("render/lightman", cLightInst_CreateAmbient__FPv);
  *
  * No caller.
  */
-void cLightInst_CreateAmbient(void* self)
+void cLightInst::CreateAmbient()
 {
 }
 #endif
@@ -99,7 +99,7 @@ INCLUDE_ASM("render/lightman", cLightInst_CreateDirectional__FPv);
  *
  * No caller.
  */
-void cLightInst_CreateDirectional(void* self)
+void cLightInst::CreateDirectional()
 {
 }
 #endif
@@ -112,7 +112,7 @@ INCLUDE_ASM("render/lightman", cLightInst_CreatePoint__FPv);
  *
  * No caller.
  */
-void cLightInst_CreatePoint(void* self)
+void cLightInst::CreatePoint()
 {
 }
 #endif
@@ -125,7 +125,7 @@ INCLUDE_ASM("render/lightman", cLightInst_CreateSpot__FPv);
  *
  * No caller.
  */
-void cLightInst_CreateSpot(void* self)
+void cLightInst::CreateSpot()
 {
 }
 #endif
@@ -142,14 +142,6 @@ struct sV3_DC70 {
 
 struct sCol_DC70 {
     float a, r, g, b;
-};
-
-
-class cLightSrc_DC70 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void* v01(int a);
-    virtual void* GetLightObj(int a);
 };
 
 extern "C" float func_0031C128(float x);
@@ -191,8 +183,9 @@ void cPS2LightMan::CreateLights(tLightRecord* lights, int n, int base)
 {
     int i;
     for (i = 0; i < n; i++) {
-        void** obj = (void**)((cLightSrc_DC70*)this)->GetLightObj(base + i);
-        obj[0] = &lights[i];
+        sVEntry<cLightInst*(void*, int)>* vt = (sVEntry<cLightInst*(void*, int)>*)mVtbl;
+        cLightInst* obj = vt[kLightManVt_GetLightObj].fn(vthis(this, vt[kLightManVt_GetLightObj]), base + i);
+        obj->mpRecord = &lights[i];
         sCol_DC70 col;
         col.a = 1.0f;
         col.r = lights[i].m_fvColor[0];
@@ -244,8 +237,9 @@ void cLightInst_CreateAmbient_3(void* p, int b, float f) __asm__("cLightInst_Cre
  */
 void cPS2LightMan::CreateAmbient(int light, int colour, float intensity)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateAmbient_3(vt[2].fn(vthis(this, vt[2]), light), colour, intensity);
+    sVEntry<cLightInst*(void*, int)>* vt = (sVEntry<cLightInst*(void*, int)>*)mVtbl;
+    cLightInst* obj = vt[kLightManVt_GetLightObj].fn(vthis(this, vt[kLightManVt_GetLightObj]), light);
+    cLightInst_CreateAmbient_3(obj, colour, intensity);
 }
 #endif
 
@@ -269,8 +263,9 @@ void cLightInst_CreateDirectional_4(void* p, int b, int c, float f) __asm__("cLi
  */
 void cPS2LightMan::CreateDirectional(int light, int colour, int dir, float intensity)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateDirectional_4(vt[2].fn(vthis(this, vt[2]), light), colour, dir, intensity);
+    sVEntry<cLightInst*(void*, int)>* vt = (sVEntry<cLightInst*(void*, int)>*)mVtbl;
+    cLightInst* obj = vt[kLightManVt_GetLightObj].fn(vthis(this, vt[kLightManVt_GetLightObj]), light);
+    cLightInst_CreateDirectional_4(obj, colour, dir, intensity);
 }
 #endif
 
@@ -295,8 +290,9 @@ void cLightInst_CreatePoint_5(void* p, int b, int c, float f, int d) __asm__("cL
  */
 void cPS2LightMan::CreatePoint(int light, int colour, int pos, float intensity, int decay)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreatePoint_5(vt[2].fn(vthis(this, vt[2]), light), colour, pos, intensity, decay);
+    sVEntry<cLightInst*(void*, int)>* vt = (sVEntry<cLightInst*(void*, int)>*)mVtbl;
+    cLightInst* obj = vt[kLightManVt_GetLightObj].fn(vthis(this, vt[kLightManVt_GetLightObj]), light);
+    cLightInst_CreatePoint_5(obj, colour, pos, intensity, decay);
 }
 #endif
 
@@ -324,8 +320,9 @@ void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int
  */
 void cPS2LightMan::CreateSpot(int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)mVtbl;  // slot 2: GetLightObj
-    cLightInst_CreateSpot_8(vt[2].fn(vthis(this, vt[2]), light), colour, pos, dir, x, y, decay, z);
+    sVEntry<cLightInst*(void*, int)>* vt = (sVEntry<cLightInst*(void*, int)>*)mVtbl;
+    cLightInst* obj = vt[kLightManVt_GetLightObj].fn(vthis(this, vt[kLightManVt_GetLightObj]), light);
+    cLightInst_CreateSpot_8(obj, colour, pos, dir, x, y, decay, z);
 }
 #endif
 

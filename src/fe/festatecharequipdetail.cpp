@@ -3,6 +3,7 @@
 #include "be/beintnewrace.h"
 #include "vtable.h"
 #include "be/bedbprofile.h"
+#include "be/bedbbolt.h"
 #include "fe/feboltfilemanager.h"
 #include "ealib/hlafile.h"
 #include "ui/uiicon.h"
@@ -2230,23 +2231,14 @@ extern "C" int cBEBoltDB_findBoltIndex(void* self, int g, int key);
 extern int kBolt_None;
 extern char str_kT_FECategories[];
 
-struct sBEEntry38K19BBE0 {
-    char pad_0x00[0x14];
-    char* name;    // 0x14
-    char pad_0x18[0x38 - 0x18];
-};
-struct sBETableK19BBE0 {
-    char pad_0x00[4];
-    sBEEntry38K19BBE0* entries; // 0x4
-};
 
-static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int key)
+static inline tBEBoltDef* findEntryK19BBE0(cBEBoltDB* t, int g, int key)
 {
-    int idx = cBEBoltDB_findBoltIndex(t, g, key);
+    int idx = t->findBoltIndex(g, key);
     if (idx < 0) {
         return 0;
     }
-    return &t->entries[idx];
+    return &t->mpCharBolts[idx];
 }
 
 /**
@@ -2264,7 +2256,7 @@ void cFEStateCharEquip::updateHeading(int id)
         if (id == kBolt_None) {
             cUIText_setUnicodeStringByID(mpHeading, GetHashValue32(str_kT_FECategories));
         } else {
-            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)cBEBoltInterface_getBoltDB_noarg(), mCharID, id);
+            tBEBoltDef* entry = findEntryK19BBE0((cBEBoltDB*)cBEBoltInterface_getBoltDB_noarg(), mCharID, id);
             cUIText_setUnicodeStringByID(mpHeading, GetHashValue32(entry->name));
         }
     }
